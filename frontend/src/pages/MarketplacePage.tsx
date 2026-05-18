@@ -4173,22 +4173,22 @@ export function MarketplacePage() {
         style={{ transform: isBottomNavVisible && !condominiumPickerOpen ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
-          <div className="grid min-h-[4.75rem] grid-cols-4 items-center gap-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
+          <div className="grid min-h-[4.65rem] grid-cols-5 items-center gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
           <button
             type="button"
             onClick={handleHomeHubNavigation}
-            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
+            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
               quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium
                 ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
               quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium
                 ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
                 : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
             }`}>
-              <House size={18} weight={quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium ? 'fill' : 'duotone'} />
+              <House size={16} weight={quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium ? 'fill' : 'duotone'} />
             </span>
             <span>Início</span>
                   <span className="h-[3px] w-4 rounded-full bg-[#336886]" />
@@ -4196,38 +4196,48 @@ export function MarketplacePage() {
           <button
             type="button"
             onClick={handleOpenPedidos}
-            className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
-              <Receipt size={18} weight="duotone" />
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+              <Receipt size={16} weight="duotone" />
             </span>
             <span>Pedidos</span>
           </button>
           <button
             type="button"
             onClick={() => setCondominiumPickerOpen(true)}
-            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
+            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
               selectedCondominium || condominiumPickerOpen
                 ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
               selectedCondominium || condominiumPickerOpen
                 ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
                 : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
             }`}>
-              <Buildings size={18} weight={selectedCondominium || condominiumPickerOpen ? 'fill' : 'duotone'} />
+              <Buildings size={16} weight={selectedCondominium || condominiumPickerOpen ? 'fill' : 'duotone'} />
             </span>
             <span>Agenda</span>
           </button>
           <button
             type="button"
-            onClick={() => setProfileDrawerOpen(true)}
-            className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+            onClick={() => navigate('/destinos')}
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
-              <UserCircle size={18} weight="duotone" />
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+              <Mountains size={16} weight="duotone" />
+            </span>
+            <span>Destinos</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setProfileDrawerOpen(true)}
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+          >
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+              <UserCircle size={16} weight="duotone" />
             </span>
             <span>Perfil</span>
           </button>
@@ -4609,17 +4619,17 @@ export function MarketplacePage() {
 
             <nav className="fixed bottom-0 left-0 right-0 z-[230] px-0 pb-0 lg:hidden">
               <div className="mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
-                <div className="grid min-h-[4.75rem] max-w-[760px] grid-cols-4 items-center gap-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
+                <div className="grid min-h-[4.65rem] max-w-[760px] grid-cols-5 items-center gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
                 <button
                   type="button"
                   onClick={() => {
                     setCondominiumPickerOpen(false);
                     handleHomeHubNavigation();
                   }}
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
                 >
-                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
-                    <House size={18} weight="duotone" />
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+                    <House size={16} weight="duotone" />
                   </span>
                   <span>Início</span>
                   <span className="h-[3px] w-4 rounded-full bg-[#336886]" />
@@ -4630,19 +4640,19 @@ export function MarketplacePage() {
                     setCondominiumPickerOpen(false);
                     handleOpenPedidos();
                   }}
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
                 >
-                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
-                    <Receipt size={18} weight="duotone" />
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+                    <Receipt size={16} weight="duotone" />
                   </span>
                   <span>Pedidos</span>
                 </button>
                 <button
                   type="button"
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03]"
                 >
-                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]">
-                    <Buildings size={18} weight="fill" />
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]">
+                    <Buildings size={16} weight="fill" />
                   </span>
                   <span>Agenda</span>
                 </button>
@@ -4650,12 +4660,25 @@ export function MarketplacePage() {
                   type="button"
                   onClick={() => {
                     setCondominiumPickerOpen(false);
+                    navigate('/destinos');
+                  }}
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+                >
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+                    <Mountains size={16} weight="duotone" />
+                  </span>
+                  <span>Destinos</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCondominiumPickerOpen(false);
                     setProfileDrawerOpen(true);
                   }}
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.3rem] py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
                 >
-                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
-                    <UserCircle size={18} weight="duotone" />
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+                    <UserCircle size={16} weight="duotone" />
                   </span>
                   <span>Perfil</span>
                 </button>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { Buildings, House, Receipt, UserCircle } from '@phosphor-icons/react';
+import { Buildings, House, Mountains, Receipt, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { nativeBiometricService } from '../../services/nativeBiometricService';
 
@@ -173,11 +173,12 @@ export function NativeAppNavigator() {
     location.pathname.startsWith('/cliente/pedidos') ||
     location.pathname.startsWith('/pedido/');
   const isCondominium = location.pathname === '/hub' && location.search.includes('panel=condominios');
+  const isDestinations = location.pathname.startsWith('/destinos');
 
-  const isHome = !isOrders && !isCondominium;
+  const isHome = !isOrders && !isCondominium && !isDestinations;
 
   const itemBaseClass =
-    'group flex min-h-[4.15rem] flex-col items-center justify-center gap-1 rounded-[1.3rem] px-1 py-2 text-[9px] font-bold uppercase tracking-[0.12em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03]';
+    'group flex min-h-[4rem] flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03]';
   const activeItemClass =
     'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12';
   const inactiveItemClass =
@@ -186,18 +187,18 @@ export function NativeAppNavigator() {
   return (
     <nav ref={navRef} className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] px-0 pb-0 transition-transform duration-300 ease-in-out lg:hidden">
       <div className="pointer-events-auto mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
-        <div className="grid grid-cols-4 gap-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
+        <div className="grid grid-cols-5 gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
         <button
           type="button"
           onClick={handleHome}
           className={`${itemBaseClass} ${isHome ? activeItemClass : inactiveItemClass}`}
         >
-          <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
             isHome
               ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
               : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
           }`}>
-            <House size={18} weight={isHome ? 'fill' : 'duotone'} />
+            <House size={16} weight={isHome ? 'fill' : 'duotone'} />
           </span>
           Início
         </button>
@@ -206,12 +207,12 @@ export function NativeAppNavigator() {
           onClick={handleOrders}
           className={`${itemBaseClass} ${isOrders ? activeItemClass : inactiveItemClass}`}
         >
-          <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
             isOrders
               ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
               : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
           }`}>
-            <Receipt size={18} weight={isOrders ? 'fill' : 'duotone'} />
+            <Receipt size={16} weight={isOrders ? 'fill' : 'duotone'} />
           </span>
           Pedidos
         </button>
@@ -220,22 +221,36 @@ export function NativeAppNavigator() {
           onClick={() => navigate('/hub?panel=condominios')}
           className={`${itemBaseClass} ${isCondominium ? activeItemClass : inactiveItemClass}`}
         >
-          <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
             isCondominium
               ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
               : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
           }`}>
-            <Buildings size={18} weight={isCondominium ? 'fill' : 'duotone'} />
+            <Buildings size={16} weight={isCondominium ? 'fill' : 'duotone'} />
           </span>
           Agenda
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/destinos')}
+          className={`${itemBaseClass} ${isDestinations ? activeItemClass : inactiveItemClass}`}
+        >
+          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
+            isDestinations
+              ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
+              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+          }`}>
+            <Mountains size={16} weight={isDestinations ? 'fill' : 'duotone'} />
+          </span>
+          Destinos
         </button>
         <button
           type="button"
           onClick={() => navigate('/hub?profile=1')}
           className={`${itemBaseClass} ${inactiveItemClass}`}
         >
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
-            <UserCircle size={18} weight="duotone" />
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+            <UserCircle size={16} weight="duotone" />
           </span>
           Perfil
         </button>
