@@ -114,6 +114,14 @@ const getCustomerToken = (): string | null => {
   }
 };
 
+const getSuperAdminToken = (): string | null => {
+  try {
+    return localStorage.getItem('superAdminToken');
+  } catch {
+    return null;
+  }
+};
+
 const getAdminRole = (): string =>
 {
   try
@@ -130,7 +138,7 @@ const getAdminRole = (): string =>
 
 const resolveAuthToken = (
   path: string,
-  authMode: 'auto' | 'none' | 'admin' | 'customer' | 'motoboy' = 'auto'
+  authMode: 'auto' | 'none' | 'admin' | 'customer' | 'motoboy' | 'superadmin' = 'auto'
 ) => {
   const isMotoboyRoute = path.startsWith('/motoboy') || path.startsWith('motoboy');
   const isCustomerRoute = path.startsWith('/customer') || path.startsWith('customer');
@@ -143,6 +151,7 @@ const resolveAuthToken = (
   if (authMode === 'admin') return adminToken;
   if (authMode === 'customer') return customerToken;
   if (authMode === 'motoboy') return motoboyToken;
+  if (authMode === 'superadmin') return getSuperAdminToken();
 
   let token = adminToken || customerToken;
   if (isMotoboyRoute) {
@@ -175,7 +184,8 @@ const request = async (path: string, options: any = {}) =>
     | 'none'
     | 'admin'
     | 'customer'
-    | 'motoboy';
+    | 'motoboy'
+    | 'superadmin';
   const token = resolveAuthToken(path, authMode);
 
   const finalOptions: any = {
@@ -248,7 +258,8 @@ const rawRequest = async (path: string, options: any = {}) =>
     | 'none'
     | 'admin'
     | 'customer'
-    | 'motoboy';
+    | 'motoboy'
+    | 'superadmin';
   const token = resolveAuthToken(path, authMode);
 
   const finalOptions: any = {

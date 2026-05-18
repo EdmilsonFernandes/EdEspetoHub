@@ -8,6 +8,13 @@ export class AuthLib {
     public async adminLogin(body: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'adminLogin' }, { data: { body } }); }
     public async superAdminLogin(body: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'superAdminLogin' }, { data: { body } }); }
     public async condominiumLogin(body: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'condominiumLogin' }, { data: { body } }); }
+    public async verifyMfaChallenge(body: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'verifyMfaChallenge' }, { data: { body } }); }
+    public async mfaStatus(token: string): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'mfaStatus' }, { data: {}, accessToken: token }); }
+    public async startMfaSetup(token: string): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'startMfaSetup' }, { data: {}, accessToken: token }); }
+    public async confirmMfaSetup(body: unknown, token: string): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'confirmMfaSetup' }, { data: { body }, accessToken: token }); }
+    public async disableMfa(body: unknown, token: string): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'disableMfa' }, { data: { body }, accessToken: token }); }
+    public async listTrustedDevices(token: string): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'listTrustedDevices' }, { data: {}, accessToken: token }); }
+    public async revokeTrustedDevice(deviceId: string, token: string): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'revokeTrustedDevice' }, { data: { deviceId }, accessToken: token }); }
     public async forgotPassword(body: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'forgotPassword' }, { data: { body } }); }
     public async resetPassword(body: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'resetPassword' }, { data: { body } }); }
     public async verifyEmail(body: unknown, query: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'verifyEmail' }, { data: { body, query } }); }

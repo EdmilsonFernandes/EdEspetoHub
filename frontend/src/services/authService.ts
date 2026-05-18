@@ -1,4 +1,5 @@
 import { apiClient } from "../config/apiClient";
+import { getMfaDeviceContext } from "../utils/mfaDevice";
 
 export const authService = {
     async login(identifier: string, password: string) {
@@ -6,6 +7,7 @@ export const authService = {
         const response = await apiClient.post("/auth/login", {
             email: normalizedIdentifier,
             password,
+            ...getMfaDeviceContext(),
         });
         return response;
     },
@@ -14,6 +16,7 @@ export const authService = {
         const response = await apiClient.post("/auth/admin-login", {
             identifier: normalizedIdentifier,
             password,
+            ...getMfaDeviceContext(),
         });
         return response;
     },
@@ -21,8 +24,34 @@ export const authService = {
         const response = await apiClient.post("/auth/condominium-login", {
             email: String(identifier || "").trim().toLowerCase(),
             password,
+            ...getMfaDeviceContext(),
         });
         return response;
+    },
+    async verifyMfaChallenge(payload: { challengeToken: string; code: string; trustDevice?: boolean }) {
+        const response = await apiClient.post("/auth/mfa/challenge/verify", {
+            ...payload,
+            ...getMfaDeviceContext(),
+        });
+        return response;
+    },
+    async getMfaStatus(options?: { authMode?: 'admin' | 'customer' | 'motoboy' | 'superadmin' }) {
+        return apiClient.get("/auth/mfa/status", { authMode: options?.authMode || 'admin' });
+    },
+    async startMfaSetup(options?: { authMode?: 'admin' | 'customer' | 'motoboy' | 'superadmin' }) {
+        return apiClient.post("/auth/mfa/setup/start", {}, { authMode: options?.authMode || 'admin' });
+    },
+    async confirmMfaSetup(code: string, options?: { authMode?: 'admin' | 'customer' | 'motoboy' | 'superadmin' }) {
+        return apiClient.post("/auth/mfa/setup/confirm", { code }, { authMode: options?.authMode || 'admin' });
+    },
+    async disableMfa(code: string, options?: { authMode?: 'admin' | 'customer' | 'motoboy' | 'superadmin' }) {
+        return apiClient.post("/auth/mfa/disable", { code }, { authMode: options?.authMode || 'admin' });
+    },
+    async listTrustedDevices(options?: { authMode?: 'admin' | 'customer' | 'motoboy' | 'superadmin' }) {
+        return apiClient.get("/auth/mfa/trusted-devices", { authMode: options?.authMode || 'admin' });
+    },
+    async revokeTrustedDevice(deviceId: string, options?: { authMode?: 'admin' | 'customer' | 'motoboy' | 'superadmin' }) {
+        return apiClient.delete(`/auth/mfa/trusted-devices/${deviceId}`, { authMode: options?.authMode || 'admin' });
     },
     async forgotPassword(email: string) {
         const response = await apiClient.post("/auth/forgot-password", {

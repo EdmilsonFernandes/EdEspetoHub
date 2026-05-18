@@ -12,6 +12,8 @@ import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { ArrowLeft, Check, Eye, EyeSlash, LockKey, ShieldCheck, WarningCircle } from '@phosphor-icons/react';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
+import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
+import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 
 const ADMIN_REMEMBER_IDENTIFIER_KEY = 'auth:last-admin-identifier';
 
@@ -34,6 +36,9 @@ export function AdminLogin() {
   const [autoBiometricTried, setAutoBiometricTried] = useState(false);
   const [enrollmentPromptOpen, setEnrollmentPromptOpen] = useState(false);
   const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
+  const [mfaChallenge, setMfaChallenge] = useState<any | null>(null);
+  const [mfaError, setMfaError] = useState('');
+  const [mfaLoading, setMfaLoading] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(() => {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('auth:remember-admin') !== 'false';
@@ -251,6 +256,52 @@ export function AdminLogin() {
     }
   };
 
+  const completeAdminLoginFlow = async (session: any) => {
+    const redirectTab = sessionStorage.getItem('admin:redirectTab');
+    const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
+    try {
+      await runClientFreshStart({
+        maxAgeMs: 8 * 60 * 60 * 1000,
+        currentBuildId: APP_BUILD_INFO.buildId,
+      });
+    } catch {
+      // no-op: login must continue even if client cleanup fails
+    }
+    if (redirectTab) sessionStorage.setItem('admin:redirectTab', redirectTab);
+    if (redirectSlug) sessionStorage.setItem('admin:redirectSlug', redirectSlug);
+    const sessionData = { token: session.token, user: session.user, store: session.store };
+    nativeBiometricService.syncAdminSession(sessionData);
+    if (nativeBiometricService.shouldOfferAdminEnrollment(sessionData)) {
+      setPendingBiometricSession(sessionData);
+      setEnrollmentPromptOpen(true);
+      return;
+    }
+    if (nativeBiometricService.hasStoredAdminProfile()) {
+      nativeBiometricService.enableAdmin(sessionData);
+    }
+    finishAdminLogin(sessionData);
+  };
+
+  const handleMfaVerify = async ({ code, trustDevice }: { code: string; trustDevice: boolean }) => {
+    if (!mfaChallenge?.challengeToken || mfaLoading) return;
+    setMfaLoading(true);
+    setMfaError('');
+    try {
+      const session = await authService.verifyMfaChallenge({
+        challengeToken: mfaChallenge.challengeToken,
+        code,
+        trustDevice,
+      });
+      persistTrustedMfaDevice(session?.trustedDevice);
+      setMfaChallenge(null);
+      await completeAdminLoginFlow(session);
+    } catch (error: any) {
+      setMfaError(error?.message || 'Codigo invalido. Tente novamente.');
+    } finally {
+      setMfaLoading(false);
+    }
+  };
+
   const handleLogin = async event => {
     event?.preventDefault();
     setLoginError('');
@@ -259,29 +310,11 @@ export function AdminLogin() {
 
     try {
       const session = await authService.adminLogin(loginForm.identifier, loginForm.password);
-      const redirectTab = sessionStorage.getItem('admin:redirectTab');
-      const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
-      try {
-        await runClientFreshStart({
-          maxAgeMs: 8 * 60 * 60 * 1000,
-          currentBuildId: APP_BUILD_INFO.buildId,
-        });
-      } catch {
-        // no-op: login must continue even if client cleanup fails
-      }
-      if (redirectTab) sessionStorage.setItem('admin:redirectTab', redirectTab);
-      if (redirectSlug) sessionStorage.setItem('admin:redirectSlug', redirectSlug);
-      const sessionData = { token: session.token, user: session.user, store: session.store };
-      nativeBiometricService.syncAdminSession(sessionData);
-      if (nativeBiometricService.shouldOfferAdminEnrollment(sessionData)) {
-        setPendingBiometricSession(sessionData);
-        setEnrollmentPromptOpen(true);
+      if (session?.mfaRequired) {
+        setMfaChallenge(session);
         return;
       }
-      if (nativeBiometricService.hasStoredAdminProfile()) {
-        nativeBiometricService.enableAdmin(sessionData);
-      }
-      finishAdminLogin(sessionData);
+      await completeAdminLoginFlow(session);
     } catch (error: any) {
       const message = error.message || 'Não foi possível autenticar agora.';
       if (error?.code === 'PAY-010') {
@@ -569,6 +602,14 @@ export function AdminLogin() {
         cancelLabel="Agora não"
         variant="info"
         icon={<LockKey size={32} weight="duotone" />}
+      />
+      <MfaChallengeModal
+        open={Boolean(mfaChallenge)}
+        challenge={mfaChallenge}
+        loading={mfaLoading}
+        error={mfaError}
+        onCancel={() => setMfaChallenge(null)}
+        onVerify={handleMfaVerify}
       />
     </AuthLayout>
   );

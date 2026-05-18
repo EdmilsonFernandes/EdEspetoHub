@@ -9,6 +9,13 @@ export class AuthController {
     public async adminLogin(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.adminLogin(req.body)); } catch (e) { next(e); } }
     public async superAdminLogin(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.superAdminLogin(req.body)); } catch (e) { next(e); } }
     public async condominiumLogin(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.condominiumLogin(req.body)); } catch (e) { next(e); } }
+    public async verifyMfaChallenge(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.verifyMfaChallenge(req.body)); } catch (e) { next(e); } }
+    public async mfaStatus(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.mfaStatus(req.token!)); } catch (e) { next(e); } }
+    public async startMfaSetup(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.startMfaSetup(req.token!)); } catch (e) { next(e); } }
+    public async confirmMfaSetup(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.confirmMfaSetup(req.body, req.token!)); } catch (e) { next(e); } }
+    public async disableMfa(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.disableMfa(req.body, req.token!)); } catch (e) { next(e); } }
+    public async listTrustedDevices(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.listTrustedDevices(req.token!)); } catch (e) { next(e); } }
+    public async revokeTrustedDevice(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.revokeTrustedDevice(String(req.params.deviceId || ''), req.token!)); } catch (e) { next(e); } }
     public async forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.forgotPassword(req.body)); } catch (e) { next(e); } }
     public async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.resetPassword(req.body)); } catch (e) { next(e); } }
     public async verifyEmail(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.verifyEmail(req.body, req.query)); } catch (e) { next(e); } }

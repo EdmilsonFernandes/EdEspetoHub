@@ -2,285 +2,285 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "2a04058b",
-  "versionLabel": "v0.1.9.2a04058b",
-  "versionInternal": "0.1.9+20260511.192035.2a04058b",
-  "buildId": "0.1.9+20260511.192035.2a04058b-20260511.192035-2a04058b",
-  "builtAt": "2026-05-11T19:20:35.664Z",
-  "commitHash": "2a04058bc3924324db77533bd5b009198eec40bc",
-  "shortHash": "2a04058b",
+  "versionDisplaySuffix": "073618d5",
+  "versionLabel": "v0.1.9.073618d5",
+  "versionInternal": "0.1.9+20260518.130304.073618d5",
+  "buildId": "0.1.9+20260518.130304.073618d5-20260518.130304-073618d5",
+  "builtAt": "2026-05-18T13:03:04.616Z",
+  "commitHash": "073618d52c504aca17e65aba036f23280690ca0e",
+  "shortHash": "073618d5",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
     {
-      "hash": "2a04058bc3924324db77533bd5b009198eec40bc",
-      "shortHash": "2a04058b",
-      "dateIso": "2026-05-11T16:14:46-03:00",
+      "hash": "073618d52c504aca17e65aba036f23280690ca0e",
+      "shortHash": "073618d5",
+      "dateIso": "2026-05-18T09:33:31-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: require admin validation for destination claims",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2a04058bc3924324db77533bd5b009198eec40bc"
+      "subject": "Refine marketplace home hierarchy",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/073618d52c504aca17e65aba036f23280690ca0e"
     },
     {
-      "hash": "4d48066474b208201435c7ae4b40c2ce7ab69486",
-      "shortHash": "4d480664",
-      "dateIso": "2026-05-11T16:00:46-03:00",
+      "hash": "cb853d8356d572847434d450acf0b8aa90daeffa",
+      "shortHash": "cb853d83",
+      "dateIso": "2026-05-18T09:14:13-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: link destination listings to claimed stores",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4d48066474b208201435c7ae4b40c2ce7ab69486"
+      "subject": "Fix public cart stock validation",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cb853d8356d572847434d450acf0b8aa90daeffa"
     },
     {
-      "hash": "d54aaf6a4e668df1e519e6ab99af1305f819fefa",
-      "shortHash": "d54aaf6a",
-      "dateIso": "2026-05-11T14:56:39-03:00",
+      "hash": "9ef93d6a5805c55e751c32110af93404b87901f1",
+      "shortHash": "9ef93d6a",
+      "dateIso": "2026-05-18T08:42:03-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine destination travel UI",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d54aaf6a4e668df1e519e6ab99af1305f819fefa"
+      "subject": "Add destinations to client bottom nav",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9ef93d6a5805c55e751c32110af93404b87901f1"
     },
     {
-      "hash": "18e86f72e4d26fd479d4ff5261d4f6bd2ce0fcc3",
-      "shortHash": "18e86f72",
-      "dateIso": "2026-05-11T14:39:02-03:00",
+      "hash": "4a13c63b3a8b433f46370e062e494668460eb53a",
+      "shortHash": "4a13c63b",
+      "dateIso": "2026-05-17T22:09:41-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish destination discovery UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/18e86f72e4d26fd479d4ff5261d4f6bd2ce0fcc3"
+      "subject": "Compact marketplace store badges",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4a13c63b3a8b433f46370e062e494668460eb53a"
     },
     {
-      "hash": "9fb75843e850e9660d33e33fe6322dadcee3bdfe",
-      "shortHash": "9fb75843",
-      "dateIso": "2026-05-11T14:31:17-03:00",
+      "hash": "80907f138c83a69c58060a189667447da72e4795",
+      "shortHash": "80907f13",
+      "dateIso": "2026-05-17T22:03:57-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix destination distance estimates",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9fb75843e850e9660d33e33fe6322dadcee3bdfe"
+      "subject": "Polish marketplace hub section styling",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/80907f138c83a69c58060a189667447da72e4795"
     },
     {
-      "hash": "463a3648d18f997150c471790e11958e972a712f",
-      "shortHash": "463a3648",
-      "dateIso": "2026-05-11T13:16:25-03:00",
+      "hash": "71e17140e0a10559d50bfee1ea5a673a0336214c",
+      "shortHash": "71e17140",
+      "dateIso": "2026-05-17T21:53:34-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix destination upload picker",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/463a3648d18f997150c471790e11958e972a712f"
+      "subject": "Update plan prices and queue loading branding",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/71e17140e0a10559d50bfee1ea5a673a0336214c"
     },
     {
-      "hash": "b8ec8bd4589dc1636195f3108dfe0a601ac077dd",
-      "shortHash": "b8ec8bd4",
-      "dateIso": "2026-05-11T13:05:57-03:00",
+      "hash": "46b57b48e5398ee86234910d894d0e6bf64faf4f",
+      "shortHash": "46b57b48",
+      "dateIso": "2026-05-17T21:35:29-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish destination mobile experience",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b8ec8bd4589dc1636195f3108dfe0a601ac077dd"
+      "subject": "Add loading feedback to admin queue",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/46b57b48e5398ee86234910d894d0e6bf64faf4f"
     },
     {
-      "hash": "1ee5cc10b98d2bbb5d1a65c9e5076be78bb35c8b",
-      "shortHash": "1ee5cc10",
-      "dateIso": "2026-05-11T12:55:43-03:00",
+      "hash": "6a457dca691d66b9dd8aeb6b5ac202c199dda5e1",
+      "shortHash": "6a457dca",
+      "dateIso": "2026-05-17T21:17:10-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: refine destination admin experience",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1ee5cc10b98d2bbb5d1a65c9e5076be78bb35c8b"
+      "subject": "Refactor admin highlights UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6a457dca691d66b9dd8aeb6b5ac202c199dda5e1"
     },
     {
-      "hash": "5e9f0fda72466a7818e3a7a890d1f81796ebf48a",
-      "shortHash": "5e9f0fda",
-      "dateIso": "2026-05-11T11:35:40-03:00",
+      "hash": "686d286db4dbb9254d435949a48274ab94497a81",
+      "shortHash": "686d286d",
+      "dateIso": "2026-05-17T20:53:09-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: polish destination admin media workflow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e9f0fda72466a7818e3a7a890d1f81796ebf48a"
+      "subject": "Remove blue hub background wash",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/686d286db4dbb9254d435949a48274ab94497a81"
     },
     {
-      "hash": "e081232643edc05593c23a3201be98c9cc838744",
-      "shortHash": "e0812326",
-      "dateIso": "2026-05-11T10:07:52-03:00",
+      "hash": "460f5018c09a3fe5da500ca50451a35cf1921e98",
+      "shortHash": "460f5018",
+      "dateIso": "2026-05-17T20:42:54-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: improve destination detail usability",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e081232643edc05593c23a3201be98c9cc838744"
+      "subject": "Fix Mercado Pago pending webhook handling",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/460f5018c09a3fe5da500ca50451a35cf1921e98"
     },
     {
-      "hash": "2d7274f819c396df3a809bf859f3c6cf0bc47f42",
-      "shortHash": "2d7274f8",
-      "dateIso": "2026-05-11T09:47:59-03:00",
+      "hash": "a68731f7248912f1232571c7093cc8d41b39d58b",
+      "shortHash": "a68731f7",
+      "dateIso": "2026-05-17T20:33:02-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs: add production sao bento seed command",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2d7274f819c396df3a809bf859f3c6cf0bc47f42"
+      "subject": "Soften app glass headers",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a68731f7248912f1232571c7093cc8d41b39d58b"
     },
     {
-      "hash": "339000ae6972aca8854debf8f24d6250fce0116b",
-      "shortHash": "339000ae",
-      "dateIso": "2026-05-11T09:43:45-03:00",
+      "hash": "19011016e0d84e5b3b79b1ad9cf25bbfcb7ce60d",
+      "shortHash": "19011016",
+      "dateIso": "2026-05-17T20:25:09-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: seed sao bento tourism destination",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/339000ae6972aca8854debf8f24d6250fce0116b"
+      "subject": "Fix featured payment modal status UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/19011016e0d84e5b3b79b1ad9cf25bbfcb7ce60d"
     },
     {
-      "hash": "c3246762963db22efdc935f994f0cfa3da8bb111",
-      "shortHash": "c3246762",
-      "dateIso": "2026-05-11T09:28:58-03:00",
+      "hash": "b61ad808cdcfa23211ff5f43c34b72de2033b168",
+      "shortHash": "b61ad808",
+      "dateIso": "2026-05-17T20:07:53-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: organize destination hub management",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c3246762963db22efdc935f994f0cfa3da8bb111"
+      "subject": "Refine glass header and destination UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b61ad808cdcfa23211ff5f43c34b72de2033b168"
     },
     {
-      "hash": "c5fb708d492ac22d400c0044f5fff62bd2e4a557",
-      "shortHash": "c5fb708d",
-      "dateIso": "2026-05-11T09:00:40-03:00",
+      "hash": "b5932e255a6892d0a34ed32ea50e2893f2b50934",
+      "shortHash": "b5932e25",
+      "dateIso": "2026-05-17T12:52:59-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: add destination whatsapp context",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c5fb708d492ac22d400c0044f5fff62bd2e4a557"
+      "subject": "Add shared glass header for app subpages",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b5932e255a6892d0a34ed32ea50e2893f2b50934"
     },
     {
-      "hash": "2fce485176de84e5701649a48fb1448ba4ae95a3",
-      "shortHash": "2fce4851",
-      "dateIso": "2026-05-11T08:45:26-03:00",
+      "hash": "6a240f99a079aaeace42cd0a24c74bcd2577a8ec",
+      "shortHash": "6a240f99",
+      "dateIso": "2026-05-17T09:03:58-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: refine destination hub presentation",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2fce485176de84e5701649a48fb1448ba4ae95a3"
+      "subject": "Polish hub discovery and destination navigation",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6a240f99a079aaeace42cd0a24c74bcd2577a8ec"
     },
     {
-      "hash": "8286425f1472dcbfb8be9929e54d72dc4369f26d",
-      "shortHash": "8286425f",
-      "dateIso": "2026-05-11T08:37:54-03:00",
+      "hash": "e66590f31db3df268b7270f6584448ea6ecec18f",
+      "shortHash": "e66590f3",
+      "dateIso": "2026-05-17T08:45:07-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs: explain destination hub flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8286425f1472dcbfb8be9929e54d72dc4369f26d"
+      "subject": "Refine destination city header UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e66590f31db3df268b7270f6584448ea6ecec18f"
     },
     {
-      "hash": "288ce4fb701eaa0f58f40c1cba0ab6abfcdf0315",
-      "shortHash": "288ce4fb",
-      "dateIso": "2026-05-11T08:29:12-03:00",
+      "hash": "58e8245eea79e5db8510861302987fcfb28c4852",
+      "shortHash": "58e8245e",
+      "dateIso": "2026-05-17T08:31:31-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: add destination hub for hospitality partners",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/288ce4fb701eaa0f58f40c1cba0ab6abfcdf0315"
+      "subject": "Streamline destination city detail",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/58e8245eea79e5db8510861302987fcfb28c4852"
     },
     {
-      "hash": "5985b4bd783808828970613b2bf98d359f0c9997",
-      "shortHash": "5985b4bd",
-      "dateIso": "2026-05-10T23:35:08-03:00",
+      "hash": "11c3e7c8965fa035bd50f882339a9367866ef760",
+      "shortHash": "11c3e7c8",
+      "dateIso": "2026-05-17T08:17:11-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: add audit emails and motoboy delivery safeguards",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5985b4bd783808828970613b2bf98d359f0c9997"
+      "subject": "Polish destination mobile discovery UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/11c3e7c8965fa035bd50f882339a9367866ef760"
     },
     {
-      "hash": "239f50f7fb2aabfc3251a57d7b601e39ea0e5d17",
-      "shortHash": "239f50f7",
-      "dateIso": "2026-05-10T23:26:13-03:00",
+      "hash": "f7f7fcf467e091e654bf9a33e4fbcb2aad5490d7",
+      "shortHash": "f7f7fcf4",
+      "dateIso": "2026-05-16T08:38:43-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ui): complete premium UX/UI enhancements for marketplace hub",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/239f50f7fb2aabfc3251a57d7b601e39ea0e5d17"
+      "subject": "Refine mobile destinations and city selection",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f7f7fcf467e091e654bf9a33e4fbcb2aad5490d7"
     },
     {
-      "hash": "665497e27b96ce6af3e117e9639b285a98adacfd",
-      "shortHash": "665497e2",
-      "dateIso": "2026-05-10T23:04:40-03:00",
+      "hash": "e7ddb225963f1824520cf6504b927552c655c393",
+      "shortHash": "e7ddb225",
+      "dateIso": "2026-05-15T13:22:59-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ui): finalize and push premium marketplace UI improvements",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/665497e27b96ce6af3e117e9639b285a98adacfd"
+      "subject": "Improve destination city selection UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e7ddb225963f1824520cf6504b927552c655c393"
     },
     {
-      "hash": "1bb5b57d1ba82fab2c2834402c107c3f21ed4011",
-      "shortHash": "1bb5b57d",
-      "dateIso": "2026-05-10T22:57:03-03:00",
+      "hash": "53a4d30181d7e70642b8f26062de3238bff0a2dd",
+      "shortHash": "53a4d301",
+      "dateIso": "2026-05-15T13:01:55-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(motoboy): add store-managed courier onboarding",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1bb5b57d1ba82fab2c2834402c107c3f21ed4011"
+      "subject": "Unify public destinations branding",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/53a4d30181d7e70642b8f26062de3238bff0a2dd"
     },
     {
-      "hash": "49c8be5a940ecd2587de1ec1dfc29ac40081fe4e",
-      "shortHash": "49c8be5a",
-      "dateIso": "2026-05-10T22:42:13-03:00",
+      "hash": "0f900a2421b3387494037488f2b4e56b00f6189a",
+      "shortHash": "0f900a24",
+      "dateIso": "2026-05-15T12:37:32-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "test: cover store-managed motoboy flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/49c8be5a940ecd2587de1ec1dfc29ac40081fe4e"
+      "subject": "Add hospitality solution to landing",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0f900a2421b3387494037488f2b4e56b00f6189a"
     },
     {
-      "hash": "cd2d88cae6ee8b1eb322ccfc34ee53ecdd5f4008",
-      "shortHash": "cd2d88ca",
-      "dateIso": "2026-05-10T22:00:24-03:00",
+      "hash": "75220e6c1a27498a744ef53bdf703b7b43a61144",
+      "shortHash": "75220e6c",
+      "dateIso": "2026-05-13T13:16:07-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ui): add 'A' prefix to distance label in store card",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cd2d88cae6ee8b1eb322ccfc34ee53ecdd5f4008"
+      "subject": "feat: route hospitality QR by device",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/75220e6c1a27498a744ef53bdf703b7b43a61144"
     },
     {
-      "hash": "d812a602bda3cd34e43cea44f914da6f7a2703df",
-      "shortHash": "d812a602",
-      "dateIso": "2026-05-10T21:44:17-03:00",
+      "hash": "0a4b4284911d6210eb696f087369d29642a29f19",
+      "shortHash": "0a4b4284",
+      "dateIso": "2026-05-13T13:09:24-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ui): implement premium vitrine style for featured products carousel",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d812a602bda3cd34e43cea44f914da6f7a2703df"
+      "subject": "style: refine hospitality QR poster print design",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0a4b4284911d6210eb696f087369d29642a29f19"
     },
     {
-      "hash": "a28ab30b5b555a4e4138defe1ed4449dd915a385",
-      "shortHash": "a28ab30b",
-      "dateIso": "2026-05-10T21:08:14-03:00",
+      "hash": "9936a8ff55f3f7da3f575e9c86cc942d253a83e7",
+      "shortHash": "9936a8ff",
+      "dateIso": "2026-05-13T13:02:37-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ui): refine promotional marketing popup for a premium aesthetic",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a28ab30b5b555a4e4138defe1ed4449dd915a385"
+      "subject": "fix: point hospitality QR poster to Play Store",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9936a8ff55f3f7da3f575e9c86cc942d253a83e7"
     },
     {
-      "hash": "a5c46c35255cef2f6e23bb062476cc886f278653",
-      "shortHash": "a5c46c35",
-      "dateIso": "2026-05-10T20:57:32-03:00",
+      "hash": "9395bd889783d44557dc8494f38ee88530ca69ff",
+      "shortHash": "9395bd88",
+      "dateIso": "2026-05-13T12:40:15-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ui): improve store card visual hierarchy and status indicators",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a5c46c35255cef2f6e23bb062476cc886f278653"
+      "subject": "feat: add hospitality QR poster generation",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9395bd889783d44557dc8494f38ee88530ca69ff"
     },
     {
-      "hash": "e2f08af7eb71a6d891f02139888f0c57e6bb4ea1",
-      "shortHash": "e2f08af7",
-      "dateIso": "2026-05-10T20:11:26-03:00",
+      "hash": "a74bd3279ab8264f254859ddc5d778c0105e037a",
+      "shortHash": "a74bd327",
+      "dateIso": "2026-05-13T12:13:22-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(frontend): replace playstore banner image in landing page",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e2f08af7eb71a6d891f02139888f0c57e6bb4ea1"
+      "subject": "Improve pre-store close button contrast",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a74bd3279ab8264f254859ddc5d778c0105e037a"
     },
     {
-      "hash": "0fa00bd342a58b5fc9020a0988c0f7ac290b3ac4",
-      "shortHash": "0fa00bd3",
-      "dateIso": "2026-05-10T18:00:31-03:00",
+      "hash": "e5250634a17c90709ce3fc51b6c1ed17342194d5",
+      "shortHash": "e5250634",
+      "dateIso": "2026-05-13T11:39:56-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refine landing visual presentation",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0fa00bd342a58b5fc9020a0988c0f7ac290b3ac4"
+      "subject": "Fix destination mobile overflow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e5250634a17c90709ce3fc51b6c1ed17342194d5"
     },
     {
-      "hash": "61e3fae64c6972693686f5d46811420dea6548ff",
-      "shortHash": "61e3fae6",
-      "dateIso": "2026-05-10T17:51:41-03:00",
+      "hash": "c7f7e291007754a75918813ec395e9ed6a6dc221",
+      "shortHash": "c7f7e291",
+      "dateIso": "2026-05-13T10:11:44-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Revert \"refine hub hero visual language\"",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/61e3fae64c6972693686f5d46811420dea6548ff"
+      "subject": "Improve destination pre-store conversion flow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c7f7e291007754a75918813ec395e9ed6a6dc221"
     },
     {
-      "hash": "4dcb66d217acba457ccedc0db31842ba40aebd36",
-      "shortHash": "4dcb66d2",
-      "dateIso": "2026-05-10T17:45:29-03:00",
+      "hash": "d62f3f66809540d8e0e51b9ff851bd370f0f04b9",
+      "shortHash": "d62f3f66",
+      "dateIso": "2026-05-13T09:51:48-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refine hub hero visual language",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4dcb66d217acba457ccedc0db31842ba40aebd36"
+      "subject": "Fix destination inactive catalog and mobile uploads",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d62f3f66809540d8e0e51b9ff851bd370f0f04b9"
     }
   ]
 }

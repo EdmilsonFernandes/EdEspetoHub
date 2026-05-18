@@ -9,6 +9,8 @@ import { AuthLayout } from '../layouts/AuthLayout';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
+import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
+import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 
 export function MotoboyLogin() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -23,6 +25,9 @@ export function MotoboyLogin() {
   const [autoBiometricTried, setAutoBiometricTried] = useState(false);
   const [enrollmentPromptOpen, setEnrollmentPromptOpen] = useState(false);
   const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
+  const [mfaChallenge, setMfaChallenge] = useState<any | null>(null);
+  const [mfaError, setMfaError] = useState('');
+  const [mfaLoading, setMfaLoading] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(() => {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('auth:remember-motoboy') !== 'false';
@@ -142,6 +147,57 @@ export function MotoboyLogin() {
     }
   };
 
+  const completeMotoboyLoginFlow = async (session: any) => {
+    const role = String(session?.user?.role || '').toUpperCase();
+    if (role !== 'MOTOBOY') {
+      setError('Esta conta não é de entregador.');
+      return;
+    }
+    try {
+      await runClientFreshStart({
+        maxAgeMs: 8 * 60 * 60 * 1000,
+        currentBuildId: APP_BUILD_INFO.buildId,
+      });
+    } catch {
+      // no-op: login must continue even if client cleanup fails
+    }
+    const sessionData = { token: session.token, user: session.user, store: session.store };
+    if (Boolean(session?.user?.mustChangePassword)) {
+      finishMotoboyLogin(sessionData);
+      return;
+    }
+    nativeBiometricService.syncMotoboySession(sessionData);
+    if (nativeBiometricService.shouldOfferMotoboyEnrollment(sessionData)) {
+      setPendingBiometricSession(sessionData);
+      setEnrollmentPromptOpen(true);
+      return;
+    }
+    if (nativeBiometricService.hasStoredMotoboyProfile()) {
+      nativeBiometricService.enableMotoboy(sessionData);
+    }
+    finishMotoboyLogin(sessionData);
+  };
+
+  const handleMfaVerify = async ({ code, trustDevice }: { code: string; trustDevice: boolean }) => {
+    if (!mfaChallenge?.challengeToken || mfaLoading) return;
+    setMfaLoading(true);
+    setMfaError('');
+    try {
+      const session = await authService.verifyMfaChallenge({
+        challengeToken: mfaChallenge.challengeToken,
+        code,
+        trustDevice,
+      });
+      persistTrustedMfaDevice(session?.trustedDevice);
+      setMfaChallenge(null);
+      await completeMotoboyLoginFlow(session);
+    } catch (err: any) {
+      setMfaError(err?.message || 'Codigo invalido. Tente novamente.');
+    } finally {
+      setMfaLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!biometricAvailable || biometricLoading || autoBiometricTried || alreadyLoggedIn) return;
     const hasTypedCredentials = !forceBiometric && (Boolean(String(form.email || '').trim()) || Boolean(String(form.password || '').trim()));
@@ -163,34 +219,11 @@ export function MotoboyLogin() {
     setLoading(true);
     try {
       const session = await authService.login(form.email, form.password);
-      const role = String(session?.user?.role || '').toUpperCase();
-      if (role !== 'MOTOBOY') {
-        setError('Esta conta não é de entregador.');
+      if (session?.mfaRequired) {
+        setMfaChallenge(session);
         return;
       }
-      try {
-        await runClientFreshStart({
-          maxAgeMs: 8 * 60 * 60 * 1000,
-          currentBuildId: APP_BUILD_INFO.buildId,
-        });
-      } catch {
-        // no-op: login must continue even if client cleanup fails
-      }
-      const sessionData = { token: session.token, user: session.user, store: session.store };
-      if (Boolean(session?.user?.mustChangePassword)) {
-        finishMotoboyLogin(sessionData);
-        return;
-      }
-      nativeBiometricService.syncMotoboySession(sessionData);
-      if (nativeBiometricService.shouldOfferMotoboyEnrollment(sessionData)) {
-        setPendingBiometricSession(sessionData);
-        setEnrollmentPromptOpen(true);
-        return;
-      }
-      if (nativeBiometricService.hasStoredMotoboyProfile()) {
-        nativeBiometricService.enableMotoboy(sessionData);
-      }
-      finishMotoboyLogin(sessionData);
+      await completeMotoboyLoginFlow(session);
     } catch (err: any) {
       if (err?.code === 'AUTH-005') {
         const targetEmail = err?.details?.email || form.email;
@@ -529,6 +562,14 @@ export function MotoboyLogin() {
         cancelLabel="Agora não"
         variant="info"
         icon={<LockKey size={32} weight="duotone" />}
+      />
+      <MfaChallengeModal
+        open={Boolean(mfaChallenge)}
+        challenge={mfaChallenge}
+        loading={mfaLoading}
+        error={mfaError}
+        onCancel={() => setMfaChallenge(null)}
+        onVerify={handleMfaVerify}
       />
     </AuthLayout>
   );

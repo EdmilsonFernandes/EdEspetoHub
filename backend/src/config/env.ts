@@ -210,6 +210,15 @@ export const env = {
       Boolean(process.env.SSM_PARAMETER_NAME) ||
       /^https:\/\//i.test(appUrl),
   },
+  mfa: {
+    enabled: process.env.MFA_ENABLED === 'true',
+    requiredForSuperAdmin: process.env.MFA_REQUIRED_FOR_SUPER_ADMIN === 'true',
+    requiredForStoreAdmin: process.env.MFA_REQUIRED_FOR_STORE_ADMIN === 'true',
+    trustedDeviceEnabled: process.env.TRUSTED_DEVICE_ENABLED !== 'false',
+    trustedDeviceExpirationDays: numberEnv('TRUSTED_DEVICE_EXPIRATION_DAYS', 30, 1),
+    challengeTtlMinutes: numberEnv('MFA_CHALLENGE_TTL_MINUTES', 5, 1),
+    secretEncryptionKey: process.env.MFA_SECRET_ENCRYPTION_KEY || '',
+  },
   storage: {
     publicUploadsMode: normalizeEnum(process.env.PUBLIC_UPLOADS_STORAGE_MODE, ['local', 'hybrid', 's3'], 'local'),
     publicUploadsS3Bucket: process.env.PUBLIC_UPLOADS_S3_BUCKET || '',

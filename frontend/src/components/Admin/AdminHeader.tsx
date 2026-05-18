@@ -7,6 +7,7 @@ import {
   KeyRound,
   LogOut,
   MapPin,
+  ShieldCheck,
   Store as StoreIcon,
   Target,
 } from 'lucide-react';
@@ -18,6 +19,7 @@ import { storeService } from '../../services/storeService';
 import { authService } from '../../services/authService';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import { markManualLogoutRedirect } from '../../utils/sessionRedirect';
+import { AccountMfaPanel } from '../Auth/AccountMfaPanel';
 
 export interface Store {
   logoUrl?: string;
@@ -84,6 +86,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   const [openPlanMenu, setOpenPlanMenu] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [mfaPanelOpen, setMfaPanelOpen] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [mobileCollapsed, setMobileCollapsed] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -584,6 +587,17 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                 type="button"
                 onClick={() => {
                   setOpenUserMenu(false);
+                  setMfaPanelOpen(true);
+                }}
+                className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                <ShieldCheck size={14} />
+                MFA e dispositivos
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpenUserMenu(false);
                   markManualLogoutRedirect('admin', '/hub');
                   logout();
                   navigate('/hub', { replace: true });
@@ -667,6 +681,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
           </div>
         </div>
       )}
+      <AccountMfaPanel open={mfaPanelOpen} authMode="admin" onClose={() => setMfaPanelOpen(false)} />
     </header>
   );
 }

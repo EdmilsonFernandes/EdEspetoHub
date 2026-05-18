@@ -20,6 +20,14 @@ import { respondWithSuccess } from '../errors/respondWithSuccess';
 
 const authService = new AuthService();
 const log = logger.child({ scope: 'AuthController' });
+
+const buildMfaLoginOptions = (req: Request) => ({
+  deviceId: req.body?.deviceId || req.body?.mfaDeviceId || null,
+  trustedDeviceToken: req.body?.trustedDeviceToken || req.body?.mfaTrustedDeviceToken || null,
+  deviceLabel: req.body?.deviceLabel || null,
+  userAgent: req.headers['user-agent'] || null,
+  ipAddress: req.ip,
+});
 /**
  * Provides AuthController functionality.
  *
@@ -81,8 +89,8 @@ export class AuthController
     try
     {
       log.info('Login request', { email });
-      const result = await authService.login(email, password);
-      log.info('Login success', { userId: result.user?.id, storeId: result.store?.id });
+      const result: any = await authService.login(email, password, buildMfaLoginOptions(req));
+      log.info('Login success', { userId: result.user?.id, storeId: result.store?.id, mfaRequired: Boolean(result.mfaRequired) });
       return res.json(result);
     } catch (error: any)
     {
@@ -108,8 +116,8 @@ export class AuthController
     try
     {
       log.info('Admin login request', { identifier });
-      const result = await authService.adminLogin(identifier, password);
-      log.info('Admin login success', { storeId: result.store?.id, identifier });
+      const result: any = await authService.adminLogin(identifier, password, buildMfaLoginOptions(req));
+      log.info('Admin login success', { storeId: result.store?.id, identifier, mfaRequired: Boolean(result.mfaRequired) });
       return res.json(result);
     } catch (error: any)
     {
@@ -133,8 +141,8 @@ export class AuthController
     try
     {
       log.info('Super admin login request', { email });
-      const result = await authService.superAdminLogin(email, password);
-      log.info('Super admin login success', { email });
+      const result: any = await authService.superAdminLogin(email, password, buildMfaLoginOptions(req));
+      log.info('Super admin login success', { email, mfaRequired: Boolean(result.mfaRequired) });
       return res.json(result);
     } catch (error: any)
     {
@@ -149,8 +157,8 @@ export class AuthController
     try
     {
       log.info('Condominium login request', { email });
-      const result = await authService.condominiumLogin(email, password);
-      log.info('Condominium login success', { condominiumId: result.condominium?.id, email });
+      const result: any = await authService.condominiumLogin(email, password, buildMfaLoginOptions(req));
+      log.info('Condominium login success', { condominiumId: result.condominium?.id, email, mfaRequired: Boolean(result.mfaRequired) });
       return res.json(result);
     } catch (error: any)
     {
@@ -279,6 +287,76 @@ static async changePassword(req: Request, res: Response) {
       return respondWithSuccess(req, res, code, data);
     } catch (error: any) {
       log.warn('Change password failed', { userId: req.auth?.sub, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async verifyMfaChallenge(req: Request, res: Response) {
+    try {
+      const result = await authService.verifyMfaLoginChallenge(req.body || {}, buildMfaLoginOptions(req));
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('MFA challenge failed', { error });
+      return respondWithError(req, res, error, 401);
+    }
+  }
+
+  static async mfaStatus(req: Request, res: Response) {
+    try {
+      const result = await authService.getMfaStatus(req.auth);
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('MFA status failed', { userId: req.auth?.sub, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async startMfaSetup(req: Request, res: Response) {
+    try {
+      const result = await authService.startMfaSetup(req.auth);
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('MFA setup start failed', { userId: req.auth?.sub, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async confirmMfaSetup(req: Request, res: Response) {
+    try {
+      const result = await authService.confirmMfaSetup(req.auth, String(req.body?.code || ''));
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('MFA setup confirm failed', { userId: req.auth?.sub, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async disableMfa(req: Request, res: Response) {
+    try {
+      const result = await authService.disableMfa(req.auth, String(req.body?.code || ''));
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('MFA disable failed', { userId: req.auth?.sub, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async listTrustedDevices(req: Request, res: Response) {
+    try {
+      const result = await authService.listTrustedDevices(req.auth);
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('MFA trusted devices list failed', { userId: req.auth?.sub, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async revokeTrustedDevice(req: Request, res: Response) {
+    try {
+      const result = await authService.revokeTrustedDevice(req.auth, String(req.params.deviceId || ''));
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('MFA trusted device revoke failed', { userId: req.auth?.sub, error });
       return respondWithError(req, res, error, 400);
     }
   }

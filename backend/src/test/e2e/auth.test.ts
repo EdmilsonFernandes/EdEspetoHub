@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { api, testEmail, registerStore, loginAdmin, registerCustomer, loginCustomer, verifyEmailDirectly } from '../helpers';
+import { env } from '../../config/env';
+import { generateTotpCode } from '../../utils/totp';
 
 describe('Auth — Registro e Login', () => {
   // ─── Registro de Lojista (Store Owner) ───
@@ -126,6 +128,117 @@ describe('Auth — Registro e Login', () => {
     it('endpoint protegido rejeita sem token', async () => {
       const res = await api.get('/api/motoboy/orders/available');
       expect(res.status).toBeGreaterThanOrEqual(401);
+    });
+  });
+
+  describe('MFA TOTP', () => {
+    it('ativa TOTP, exige desafio no login e libera dispositivo confiável', async () => {
+      const previous = { ...env.mfa };
+      env.mfa.enabled = true;
+      env.mfa.requiredForStoreAdmin = false;
+      env.mfa.trustedDeviceEnabled = true;
+      env.mfa.trustedDeviceExpirationDays = 30;
+
+      try {
+        const { email, password } = await registerStore();
+        await verifyEmailDirectly(email);
+
+        const login = await api.post('/api/auth/admin-login').send({ identifier: email, password });
+        expect(login.status).toBe(200);
+        expect(login.body?.token).toBeTruthy();
+
+        const setup = await api
+          .post('/api/auth/mfa/setup/start')
+          .set('Authorization', `Bearer ${login.body.token}`)
+          .send({});
+        expect(setup.status).toBe(200);
+        expect(setup.body?.secret).toBeTruthy();
+        expect(setup.body?.qrCodeDataUrl).toContain('data:image/');
+
+        const setupCode = generateTotpCode(setup.body.secret);
+        const confirm = await api
+          .post('/api/auth/mfa/setup/confirm')
+          .set('Authorization', `Bearer ${login.body.token}`)
+          .send({ code: setupCode });
+        expect(confirm.status).toBe(200);
+        expect(confirm.body?.enabled).toBe(true);
+
+        const challenged = await api.post('/api/auth/admin-login').send({
+          identifier: email,
+          password,
+          deviceId: 'device-a',
+        });
+        expect(challenged.status).toBe(200);
+        expect(challenged.body?.mfaRequired).toBe(true);
+        expect(challenged.body?.token).toBeFalsy();
+
+        const verified = await api.post('/api/auth/mfa/challenge/verify').send({
+          challengeToken: challenged.body.challengeToken,
+          code: generateTotpCode(setup.body.secret),
+          trustDevice: true,
+          deviceId: 'device-a',
+          deviceLabel: 'Vitest',
+        });
+        expect(verified.status).toBe(200);
+        expect(verified.body?.token).toBeTruthy();
+        expect(verified.body?.trustedDevice?.token).toBeTruthy();
+
+        const trusted = await api.post('/api/auth/admin-login').send({
+          identifier: email,
+          password,
+          deviceId: 'device-a',
+          trustedDeviceToken: verified.body.trustedDevice.token,
+        });
+        expect(trusted.status).toBe(200);
+        expect(trusted.body?.token).toBeTruthy();
+        expect(trusted.body?.mfaRequired).toBeFalsy();
+      } finally {
+        Object.assign(env.mfa, previous);
+      }
+    });
+
+    it('bloqueia o desafio depois de muitas tentativas inválidas', async () => {
+      const previous = { ...env.mfa };
+      env.mfa.enabled = true;
+      env.mfa.requiredForStoreAdmin = false;
+      env.mfa.trustedDeviceEnabled = true;
+
+      try {
+        const { email, password } = await registerStore();
+        await verifyEmailDirectly(email);
+        const login = await api.post('/api/auth/admin-login').send({ identifier: email, password });
+        const setup = await api
+          .post('/api/auth/mfa/setup/start')
+          .set('Authorization', `Bearer ${login.body.token}`)
+          .send({});
+        await api
+          .post('/api/auth/mfa/setup/confirm')
+          .set('Authorization', `Bearer ${login.body.token}`)
+          .send({ code: generateTotpCode(setup.body.secret) });
+
+        const challenged = await api.post('/api/auth/admin-login').send({ identifier: email, password });
+        for (let attempt = 0; attempt < 4; attempt += 1) {
+          const invalid = await api.post('/api/auth/mfa/challenge/verify').send({
+            challengeToken: challenged.body.challengeToken,
+            code: '000000',
+          });
+          expect(invalid.status).toBe(401);
+        }
+
+        const blocked = await api.post('/api/auth/mfa/challenge/verify').send({
+          challengeToken: challenged.body.challengeToken,
+          code: '000000',
+        });
+        expect(blocked.status).toBe(401);
+
+        const locked = await api.post('/api/auth/mfa/challenge/verify').send({
+          challengeToken: challenged.body.challengeToken,
+          code: generateTotpCode(setup.body.secret),
+        });
+        expect(locked.status).toBe(429);
+      } finally {
+        Object.assign(env.mfa, previous);
+      }
     });
   });
 });

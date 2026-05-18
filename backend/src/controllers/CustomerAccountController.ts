@@ -32,7 +32,10 @@ static async register(req: Request, res: Response) {
    */
 static async login(req: Request, res: Response) {
     try {
-      const result = await service.login(req.body || {}, { ipAddress: req.ip });
+      const result = await service.login(req.body || {}, {
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'] || null,
+      });
       return res.json(result);
     } catch (error: any) {
       log.warn('Customer login failed', { error });

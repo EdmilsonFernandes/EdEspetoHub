@@ -2335,6 +2335,74 @@ export async function runMigrations() {
     ON destination_store_requests(hospitality_place_id, status);
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS mfa_settings (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      owner_type VARCHAR NOT NULL,
+      owner_id UUID NOT NULL,
+      method VARCHAR NOT NULL DEFAULT 'TOTP',
+      secret_encrypted TEXT NOT NULL,
+      secret_iv TEXT NOT NULL,
+      secret_auth_tag TEXT NOT NULL,
+      enabled BOOLEAN NOT NULL DEFAULT FALSE,
+      confirmed_at TIMESTAMPTZ,
+      last_used_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_mfa_settings_owner_method
+    ON mfa_settings(owner_type, owner_id, method);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS mfa_challenges (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      challenge_token_hash TEXT NOT NULL,
+      owner_type VARCHAR NOT NULL,
+      owner_id UUID NOT NULL,
+      purpose VARCHAR NOT NULL DEFAULT 'LOGIN',
+      session_payload JSONB NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      consumed_at TIMESTAMPTZ,
+      attempts_count INT NOT NULL DEFAULT 0,
+      last_attempt_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_mfa_challenges_token_hash
+    ON mfa_challenges(challenge_token_hash);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_mfa_challenges_owner_created
+    ON mfa_challenges(owner_type, owner_id, created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS trusted_devices (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      owner_type VARCHAR NOT NULL,
+      owner_id UUID NOT NULL,
+      device_id_hash TEXT NOT NULL,
+      trust_token_hash TEXT NOT NULL,
+      label VARCHAR,
+      user_agent TEXT,
+      ip_address TEXT,
+      trusted_at TIMESTAMPTZ NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      last_used_at TIMESTAMPTZ,
+      revoked_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_trusted_devices_owner_active
+    ON trusted_devices(owner_type, owner_id, revoked_at, expires_at);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_trusted_devices_lookup
+    ON trusted_devices(owner_type, owner_id, device_id_hash, trust_token_hash);
+  `);
+  await AppDataSource.query(`
     INSERT INTO travel_destinations (
       name,
       slug,

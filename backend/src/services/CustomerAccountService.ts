@@ -20,6 +20,15 @@ import { CustomerSecurityService } from './CustomerSecurityService';
 import { GeoLocationService } from './GeoLocationService';
 import { buildOrderTimelineJson } from '../utils/orderTimeline';
 import { AuditNotificationService } from './AuditNotificationService';
+import { MfaService } from './MfaService';
+
+type CustomerMfaLoginOptions = {
+  deviceId?: string | null;
+  trustedDeviceToken?: string | null;
+  deviceLabel?: string | null;
+  userAgent?: string | null;
+  ipAddress?: string | null;
+};
 
 type AddressInput = {
   label?: string;
@@ -46,6 +55,7 @@ export class CustomerAccountService {
   private securityService = new CustomerSecurityService();
   private geoLocationService = new GeoLocationService();
   private auditNotificationService = new AuditNotificationService();
+  private mfaService = new MfaService();
   private log = logger.child({ scope: 'CustomerAccountService' });
     /**
    * Executes normalize email business logic.
@@ -497,7 +507,7 @@ async register(
    *
    * @author Edmilson Lopes
    */
-async login(input: { email: string; password: string }, meta?: { ipAddress?: string | null }) {
+async login(input: { email: string; password: string; deviceId?: string | null; trustedDeviceToken?: string | null; deviceLabel?: string | null }, meta?: CustomerMfaLoginOptions) {
     const email = this.normalizeEmail(input?.email || '');
     const password = String(input?.password || '');
     if (!email || !password) throw new AppError('AUTH-004', 401);
@@ -524,12 +534,22 @@ async login(input: { email: string; password: string }, meta?: { ipAddress?: str
       });
     }
 
-    const token = this.createCustomerToken(user.id);
-
-    return {
-      user: this.sanitizeUser(user),
-      token,
-    };
+    return this.mfaService.evaluateLogin({
+      ownerType: 'USER',
+      ownerId: user.id,
+      role: 'CUSTOMER',
+      accountLabel: user.email,
+      deviceId: input.deviceId || meta?.deviceId,
+      trustedDeviceToken: input.trustedDeviceToken || meta?.trustedDeviceToken,
+      deviceLabel: input.deviceLabel || meta?.deviceLabel,
+      userAgent: meta?.userAgent,
+      ipAddress: meta?.ipAddress,
+      response: {
+        user: this.sanitizeUser(user),
+      },
+      tokenPayload: { sub: user.id, role: 'CUSTOMER' as const },
+      tokenExpiresIn: '30d',
+    });
   }
 
     /**

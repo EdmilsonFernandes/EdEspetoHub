@@ -45,6 +45,15 @@ import { StoreUserRepository } from '../repositories/StoreUserRepository';
 import { isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
 import { CustomerSecurityService } from './CustomerSecurityService';
 import { AuditNotificationService } from './AuditNotificationService';
+import { MfaService } from './MfaService';
+
+type MfaLoginOptions = {
+  deviceId?: string | null;
+  trustedDeviceToken?: string | null;
+  deviceLabel?: string | null;
+  userAgent?: string | null;
+  ipAddress?: string | null;
+};
 /**
  * Provides AuthService functionality.
  *
@@ -64,6 +73,7 @@ export class AuthService
   private storeUserRepository = new StoreUserRepository();
   private securityService = new CustomerSecurityService();
   private auditNotificationService = new AuditNotificationService();
+  private mfaService = new MfaService();
 
     /**
    * Executes normalize phone business logic.
@@ -346,7 +356,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
-  async superAdminLogin(username: string, password: string)
+  async superAdminLogin(username: string, password: string, mfaOptions?: MfaLoginOptions)
   {
     const normalized = (username || '').trim().toLowerCase();
     if (!normalized || !password)
@@ -368,16 +378,19 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       throw new AppError('AUTH-021', 401);
     }
 
-    const token = jwt.sign(
-      { sub: admin.id, role: 'SUPER_ADMIN' },
-      env.jwtSecret,
-      { expiresIn: '30d' }
-    );
-
-    return { token };
+    return this.mfaService.evaluateLogin({
+      ownerType: 'PLATFORM_ADMIN',
+      ownerId: admin.id,
+      role: 'SUPER_ADMIN',
+      accountLabel: admin.username,
+      ...mfaOptions,
+      response: {},
+      tokenPayload: { sub: admin.id, role: 'SUPER_ADMIN' },
+      tokenExpiresIn: '30d',
+    });
   }
 
-  async condominiumLogin(email: string, password: string) {
+  async condominiumLogin(email: string, password: string, mfaOptions?: MfaLoginOptions) {
     const normalized = String(email || '').trim().toLowerCase();
     if (!normalized || !password) {
       throw new AppError('AUTH-004', 401);
@@ -401,18 +414,13 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     user.lastLoginAt = new Date();
     await repo.save(user);
 
-    const token = jwt.sign(
-      {
-        sub: user.id,
-        role: 'CONDOMINIUM_ADMIN',
-        condominiumId: user.condominiumId,
-      },
-      env.jwtSecret,
-      { expiresIn: '30d' }
-    );
-
-    return {
-      token,
+    return this.mfaService.evaluateLogin({
+      ownerType: 'CONDOMINIUM_USER',
+      ownerId: user.id,
+      role: 'CONDOMINIUM_ADMIN',
+      accountLabel: user.email,
+      ...mfaOptions,
+      response: {
       user: {
         id: user.id,
         name: user.name,
@@ -426,7 +434,72 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         logoUrl: user.condominium.logoUrl || null,
         bannerUrl: user.condominium.bannerUrl || null,
       },
-    };
+      },
+      tokenPayload: {
+        sub: user.id,
+        role: 'CONDOMINIUM_ADMIN',
+        condominiumId: user.condominiumId,
+      },
+      tokenExpiresIn: '30d',
+    });
+  }
+
+  async verifyMfaLoginChallenge(input: any, meta?: MfaLoginOptions) {
+    return this.mfaService.verifyLoginChallenge({
+      challengeToken: input?.challengeToken,
+      code: input?.code,
+      trustDevice: Boolean(input?.trustDevice),
+      deviceId: input?.deviceId || input?.mfaDeviceId,
+      deviceLabel: input?.deviceLabel,
+      userAgent: meta?.userAgent,
+      ipAddress: meta?.ipAddress,
+    });
+  }
+
+  async getMfaStatus(auth: any) {
+    const owner = this.mfaService.resolveOwnerFromAuth(auth);
+    return this.mfaService.getStatus(owner);
+  }
+
+  async startMfaSetup(auth: any) {
+    const owner = this.mfaService.resolveOwnerFromAuth(auth);
+    return this.mfaService.startSetup({
+      ...owner,
+      accountLabel: await this.getMfaAccountLabel(owner.ownerType, owner.ownerId),
+    });
+  }
+
+  async confirmMfaSetup(auth: any, code: string) {
+    const owner = this.mfaService.resolveOwnerFromAuth(auth);
+    return this.mfaService.confirmSetup(owner, code);
+  }
+
+  async disableMfa(auth: any, code: string) {
+    const owner = this.mfaService.resolveOwnerFromAuth(auth);
+    return this.mfaService.disable(owner, code);
+  }
+
+  async listTrustedDevices(auth: any) {
+    const owner = this.mfaService.resolveOwnerFromAuth(auth);
+    return this.mfaService.listTrustedDevices(owner);
+  }
+
+  async revokeTrustedDevice(auth: any, deviceId: string) {
+    const owner = this.mfaService.resolveOwnerFromAuth(auth);
+    return this.mfaService.revokeTrustedDevice(owner, deviceId);
+  }
+
+  private async getMfaAccountLabel(ownerType: string, ownerId: string) {
+    if (ownerType === 'PLATFORM_ADMIN') {
+      const admin = await AppDataSource.getRepository(PlatformAdmin).findOne({ where: { id: ownerId } });
+      return admin?.username || ownerId;
+    }
+    if (ownerType === 'CONDOMINIUM_USER') {
+      const user = await AppDataSource.getRepository(CondominiumUser).findOne({ where: { id: ownerId } });
+      return user?.email || ownerId;
+    }
+    const user = await this.userRepository.findById(ownerId);
+    return user?.email || ownerId;
   }
 
 
@@ -772,7 +845,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
-  async login(identifier: string, password: string)
+  async login(identifier: string, password: string, mfaOptions?: MfaLoginOptions)
   {
     const normalizedIdentifier = this.normalizeUsername(identifier);
     if (!normalizedIdentifier) throw new AppError('AUTH-004', 401);
@@ -792,7 +865,6 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     }
 
     const firstStore = user.stores?.[ 0 ];
-    const token = this.generateToken(user.id, firstStore?.id);
     const sanitizedUser = this.sanitizeSessionUser(user);
 
     const sanitizedStore = firstStore
@@ -826,10 +898,9 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       subscriptionStatus: currentSubscription?.status,
     });
 
-    return {
+    const response = {
       user: sanitizedUser,
       store: sanitizedStore,
-      token,
       mustChangePassword: sanitizedUser.mustChangePassword,
       subscription: currentSubscription
         ? {
@@ -843,6 +914,17 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       planTier,
       features,
     };
+
+    return this.mfaService.evaluateLogin({
+      ownerType: 'USER',
+      ownerId: user.id,
+      role: sanitizedUser.role,
+      accountLabel: user.email,
+      ...mfaOptions,
+      response,
+      tokenPayload: { sub: user.id, storeId: firstStore?.id },
+      tokenExpiresIn: '30d',
+    });
   }
 
 
@@ -854,7 +936,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
-  async adminLogin(identifier: string, password: string)
+  async adminLogin(identifier: string, password: string, mfaOptions?: MfaLoginOptions)
   {
     const normalizedIdentifier = String(identifier || '').trim().toLowerCase();
     if (!normalizedIdentifier) throw new AppError('GEN-002', 400);
@@ -939,12 +1021,6 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       await this.storeRepository.save(store);
     }
 
-    const token = jwt.sign(
-      { sub: loginUser.id, storeId: store.id, role: loginRole },
-      env.jwtSecret,
-      { expiresIn: '7d' }
-    );
-
     const sanitizedOwner = this.sanitizeSessionUser(loginUser, loginRole);
 
     const sanitizedStore = {
@@ -968,8 +1044,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       subscriptionStatus: currentSubscription?.status,
     });
 
-    return {
-      token,
+    const response = {
       user: sanitizedOwner,
       store: sanitizedStore,
       mustChangePassword: sanitizedOwner.mustChangePassword,
@@ -985,6 +1060,17 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       planTier,
       features,
     };
+
+    return this.mfaService.evaluateLogin({
+      ownerType: 'USER',
+      ownerId: loginUser.id,
+      role: loginRole,
+      accountLabel: loginUser.email,
+      ...mfaOptions,
+      response,
+      tokenPayload: { sub: loginUser.id, storeId: store.id, role: loginRole },
+      tokenExpiresIn: '7d',
+    });
   }
 
 

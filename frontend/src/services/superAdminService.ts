@@ -1,4 +1,5 @@
 import { forceLogoutAndRedirect, isSessionAuthError } from '../utils/sessionRedirect';
+import { getMfaDeviceContext } from '../utils/mfaDevice';
 
 const resolveBaseUrl = () => {
   return import.meta.env.VITE_API_BASE_URL || '/api';
@@ -41,9 +42,17 @@ export const superAdminService = {
     const response = await fetch(buildUrl('/auth/super-login'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, ...getMfaDeviceContext() }),
     });
     return handleResponse(response);
+  },
+  async verifyMfaChallenge(payload: { challengeToken: string; code: string; trustDevice?: boolean }) {
+    const response = await fetch(buildUrl('/auth/mfa/challenge/verify'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...payload, ...getMfaDeviceContext() }),
+    });
+    return handleResponse(response, false);
   },
   async fetchOverview(token: string) {
     const response = await fetch(buildUrl('/admin/overview'), {

@@ -1,4 +1,5 @@
 import { apiClient } from '../config/apiClient';
+import { getMfaDeviceContext } from '../utils/mfaDevice';
 
 export const customerAccountService = {
   register(payload: { fullName: string; email: string; password: string; phone?: string; termsAccepted?: boolean; lgpdAccepted?: boolean }) {
@@ -6,7 +7,10 @@ export const customerAccountService = {
   },
 
   login(payload: { email: string; password: string }) {
-    return apiClient.post('/customer/auth/login', payload);
+    return apiClient.post('/customer/auth/login', {
+      ...payload,
+      ...getMfaDeviceContext(),
+    });
   },
 
   verifyEmailCode(payload: { email: string; code: string }) {

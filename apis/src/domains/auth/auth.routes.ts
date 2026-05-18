@@ -13,6 +13,13 @@ export function createAuthRoutes(producer: CommandProducer): Router {
     r.post('/admin-login', ctrl.adminLogin.bind(ctrl));
     r.post('/super-login', ctrl.superAdminLogin.bind(ctrl));
     r.post('/condominium-login', ctrl.condominiumLogin.bind(ctrl));
+    r.post('/mfa/challenge/verify', ctrl.verifyMfaChallenge.bind(ctrl));
+    r.get('/mfa/status', authRequired, ctrl.mfaStatus.bind(ctrl));
+    r.post('/mfa/setup/start', authRequired, ctrl.startMfaSetup.bind(ctrl));
+    r.post('/mfa/setup/confirm', authRequired, ctrl.confirmMfaSetup.bind(ctrl));
+    r.post('/mfa/disable', authRequired, ctrl.disableMfa.bind(ctrl));
+    r.get('/mfa/trusted-devices', authRequired, ctrl.listTrustedDevices.bind(ctrl));
+    r.delete('/mfa/trusted-devices/:deviceId', authRequired, ctrl.revokeTrustedDevice.bind(ctrl));
     r.post('/forgot-password', ctrl.forgotPassword.bind(ctrl));
     r.post('/reset-password', ctrl.resetPassword.bind(ctrl));
     r.post('/verify-email', ctrl.verifyEmail.bind(ctrl));

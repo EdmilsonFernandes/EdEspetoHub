@@ -3,9 +3,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { UserCircle, Eye, EyeSlash, LockKey, WarningCircle, SealCheck, EnvelopeSimple, Phone } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
+import { authService } from '../services/authService';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
+import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
+import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 
 const formatPhoneBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
@@ -67,6 +70,9 @@ export function ClientAuth() {
   const [autoBiometricTried, setAutoBiometricTried] = useState(false);
   const [enrollmentPromptOpen, setEnrollmentPromptOpen] = useState(false);
   const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
+  const [mfaChallenge, setMfaChallenge] = useState<any | null>(null);
+  const [mfaError, setMfaError] = useState('');
+  const [mfaLoading, setMfaLoading] = useState(false);
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -230,6 +236,26 @@ export function ClientAuth() {
     }
   };
 
+  const handleMfaVerify = async ({ code, trustDevice }: { code: string; trustDevice: boolean }) => {
+    if (!mfaChallenge?.challengeToken || mfaLoading) return;
+    setMfaLoading(true);
+    setMfaError('');
+    try {
+      const result = await authService.verifyMfaChallenge({
+        challengeToken: mfaChallenge.challengeToken,
+        code,
+        trustDevice,
+      });
+      persistTrustedMfaDevice(result?.trustedDevice);
+      setMfaChallenge(null);
+      finishAuthenticatedCustomerSession(result);
+    } catch (e: any) {
+      setMfaError(e?.message || 'Codigo invalido. Tente novamente.');
+    } finally {
+      setMfaLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (mode !== 'login') return;
     if (!biometricAvailable || biometricLoading || loading || autoBiometricTried) return;
@@ -294,6 +320,10 @@ export function ClientAuth() {
         email: String(form.email || '').trim(),
         password: String(form.password || ''),
       });
+      if (result?.mfaRequired) {
+        setMfaChallenge(result);
+        return;
+      }
       finishAuthenticatedCustomerSession(result);
     } catch (e: any) {
       if (e?.code === 'AUTH-005') {
@@ -811,6 +841,14 @@ export function ClientAuth() {
           </div>
         </div>
       ) : null}
+      <MfaChallengeModal
+        open={Boolean(mfaChallenge)}
+        challenge={mfaChallenge}
+        loading={mfaLoading}
+        error={mfaError}
+        onCancel={() => setMfaChallenge(null)}
+        onVerify={handleMfaVerify}
+      />
     </AuthLayout>
   );
 }

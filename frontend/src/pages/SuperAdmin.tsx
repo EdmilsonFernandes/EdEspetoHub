@@ -49,6 +49,9 @@ import { PremiumTabs } from '../components/common/PremiumTabs';
 import { FormSection } from '../components/common/FormSection';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { CustomerSecuritySection } from '../components/Admin/CustomerSecuritySection';
+import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
+import { AccountMfaPanel } from '../components/Auth/AccountMfaPanel';
+import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 
 const STORAGE_KEY = 'superAdminToken';
 const STORAGE_USER_KEY = 'superAdminUser';
@@ -246,6 +249,10 @@ export function SuperAdmin() {
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [mfaChallenge, setMfaChallenge] = useState<any | null>(null);
+  const [mfaError, setMfaError] = useState('');
+  const [mfaLoading, setMfaLoading] = useState(false);
+  const [mfaPanelOpen, setMfaPanelOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(() => {
     if (typeof window === 'undefined') return true;
@@ -609,6 +616,10 @@ export function SuperAdmin() {
     setLoading(true);
     try {
       const data = await superAdminService.login(loginForm.email, loginForm.password);
+      if (data?.mfaRequired) {
+        setMfaChallenge(data);
+        return;
+      }
       const nextToken = data.token;
       localStorage.setItem(STORAGE_KEY, nextToken);
       localStorage.setItem(STORAGE_USER_KEY, loginForm.email);
@@ -621,6 +632,33 @@ export function SuperAdmin() {
       showToast(message, 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMfaVerify = async ({ code, trustDevice }: { code: string; trustDevice: boolean }) => {
+    if (!mfaChallenge?.challengeToken || mfaLoading) return;
+    setMfaLoading(true);
+    setMfaError('');
+    try {
+      const data = await superAdminService.verifyMfaChallenge({
+        challengeToken: mfaChallenge.challengeToken,
+        code,
+        trustDevice,
+      });
+      persistTrustedMfaDevice(data?.trustedDevice);
+      const nextToken = data.token;
+      localStorage.setItem(STORAGE_KEY, nextToken);
+      localStorage.setItem(STORAGE_USER_KEY, loginForm.email);
+      setToken(nextToken);
+      setSuperAdminUser(loginForm.email);
+      setMfaChallenge(null);
+      showToast('Login realizado com sucesso.', 'success');
+    } catch (err: any) {
+      const message = err.message || 'Codigo invalido. Tente novamente.';
+      setMfaError(message);
+      showToast(message, 'error');
+    } finally {
+      setMfaLoading(false);
     }
   };
 
@@ -1207,6 +1245,14 @@ export function SuperAdmin() {
             </button>
           </form>
         </div>
+        <MfaChallengeModal
+          open={Boolean(mfaChallenge)}
+          challenge={mfaChallenge}
+          loading={mfaLoading}
+          error={mfaError}
+          onCancel={() => setMfaChallenge(null)}
+          onVerify={handleMfaVerify}
+        />
       </AuthLayout>
     );
   }
@@ -1334,6 +1380,17 @@ export function SuperAdmin() {
               >
                 <ArrowClockwise size={16} weight="duotone" />
                 Atualizar dados
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileMenuOpen(false);
+                  setMfaPanelOpen(true);
+                }}
+                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              >
+                <ShieldCheck size={16} weight="duotone" />
+                MFA e dispositivos
               </button>
               <button
                 type="button"
@@ -3519,6 +3576,7 @@ export function SuperAdmin() {
           </div>
         </div>
       )}
+      <AccountMfaPanel open={mfaPanelOpen} authMode="superadmin" onClose={() => setMfaPanelOpen(false)} />
     </AdminLayout>
   );
 }
