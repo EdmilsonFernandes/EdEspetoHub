@@ -42,7 +42,7 @@ export function VerifyEmail() {
     const currentToken = String(rawToken || token || '').trim();
     const currentEmail = String(targetEmail || email || '').trim();
     if (!currentToken) {
-      setError('Cole o código/token para ativar sua conta.');
+      setError('Cole o código de ativação para ativar sua conta.');
       return;
     }
     setVerifying(true);
@@ -131,11 +131,11 @@ export function VerifyEmail() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-600">Código/token de ativação</label>
+            <label className="text-xs font-semibold text-slate-600">Código de ativação</label>
             <textarea
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              placeholder="Cole o código/token recebido no e-mail"
+              placeholder="Cole o código recebido no e-mail"
               rows={4}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-brand-primary focus:outline-none resize-none"
             />

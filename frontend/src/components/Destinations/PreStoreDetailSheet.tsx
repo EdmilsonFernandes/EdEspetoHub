@@ -150,7 +150,7 @@ export function PreStoreDetailSheet({
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#edf5fa] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#336886]">
                   <ShoppingBagOpen size={14} weight="duotone" />
-                  Pré-loja
+                  Contato direto
                 </span>
                 {placeName ? (
                   <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-[11px] font-bold text-amber-800">
@@ -194,7 +194,7 @@ export function PreStoreDetailSheet({
                 {[
                   { icon: ForkKnife, title: 'Produtos', text: 'Itens, fotos e preços.' },
                   { icon: CreditCard, title: 'Pagamento', text: 'Pedido e pagamento online.' },
-                  { icon: ShoppingBagOpen, title: 'Pedidos', text: 'Hospede compra no app.' },
+                  { icon: ShoppingBagOpen, title: 'Pedidos', text: 'Hóspede compra no app.' },
                 ].map((item: any) => {
                   const Icon = item.icon;
                   return (

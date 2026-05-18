@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "1bda5340",
-  "versionLabel": "v0.1.9.1bda5340",
-  "versionInternal": "0.1.9+20260518.175229.1bda5340",
-  "buildId": "0.1.9+20260518.175229.1bda5340-20260518.175229-1bda5340",
-  "builtAt": "2026-05-18T17:52:29.420Z",
-  "commitHash": "1bda53409b673412d0e3ca1fdc56a79c3dc98706",
-  "shortHash": "1bda5340",
+  "versionDisplaySuffix": "39518c34",
+  "versionLabel": "v0.1.9.39518c34",
+  "versionInternal": "0.1.9+20260518.180658.39518c34",
+  "buildId": "0.1.9+20260518.180658.39518c34-20260518.180658-39518c34",
+  "builtAt": "2026-05-18T18:06:58.100Z",
+  "commitHash": "39518c347ca2825996ce07e1612e7256b0fc9216",
+  "shortHash": "39518c34",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "39518c347ca2825996ce07e1612e7256b0fc9216",
+      "shortHash": "39518c34",
+      "dateIso": "2026-05-18T14:55:59-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Refine landing conversion copy and motoboy logo",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/39518c347ca2825996ce07e1612e7256b0fc9216"
+    },
     {
       "hash": "1bda53409b673412d0e3ca1fdc56a79c3dc98706",
       "shortHash": "1bda5340",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Unify public destinations branding",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/53a4d30181d7e70642b8f26062de3238bff0a2dd"
-    },
-    {
-      "hash": "0f900a2421b3387494037488f2b4e56b00f6189a",
-      "shortHash": "0f900a24",
-      "dateIso": "2026-05-15T12:37:32-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Add hospitality solution to landing",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0f900a2421b3387494037488f2b4e56b00f6189a"
     }
   ]
 }

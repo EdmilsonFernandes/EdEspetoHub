@@ -580,7 +580,7 @@ export function AdminLogin() {
               className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               <ArrowLeft size={18} weight="duotone" />
-              {hubMode ? 'Voltar ao hub' : 'Voltar ao início'}
+              {hubMode ? 'Voltar para o app' : 'Voltar ao início'}
             </button>
           </div>
         </form>

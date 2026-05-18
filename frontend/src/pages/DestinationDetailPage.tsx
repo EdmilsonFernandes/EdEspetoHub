@@ -526,7 +526,7 @@ export function DestinationDetailPage() {
                             {hasLinkedStore ? (
                               <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">Loja oficial</span>
                             ) : (
-                              <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-800">Pré-loja</span>
+                              <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-800">Contato direto</span>
                             )}
                           </div>
                           <h3 className="mt-1 line-clamp-1 text-base font-extrabold tracking-[-0.02em] text-slate-950">{listing.title}</h3>

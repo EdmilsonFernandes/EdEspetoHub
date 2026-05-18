@@ -779,7 +779,7 @@ export function ProfileDrawer({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-black text-emerald-950">Criar loja</p>
-                      <p className="mt-0.5 text-[11px] font-semibold text-emerald-700/80">Para vender no hub e operar seus pedidos.</p>
+                      <p className="mt-0.5 text-[11px] font-semibold text-emerald-700/80">Para vender no app e operar seus pedidos.</p>
                     </div>
                     <CaretRight size={16} weight="bold" className="shrink-0 text-emerald-300 transition-transform group-active:translate-x-0.5" />
                   </button>

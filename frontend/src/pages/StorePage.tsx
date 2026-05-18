@@ -2800,7 +2800,7 @@ export function StorePage() {
           section: 'Loja',
           id: 'highlights',
           label: 'Destaques',
-          description: 'Solicite e acompanhe visibilidade da loja no hub.',
+          description: 'Solicite e acompanhe a visibilidade da loja no app.',
           icon: <Star size={22} weight="duotone" />,
           onClick: () => navigate('/admin/highlights'),
         }]
@@ -3495,7 +3495,7 @@ export function StorePage() {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Navegação</span>
-                  <span className="block text-sm font-black leading-tight text-slate-800">Voltar ao hub</span>
+                  <span className="block text-sm font-black leading-tight text-slate-800">Voltar para o app</span>
                 </span>
               </button>
 

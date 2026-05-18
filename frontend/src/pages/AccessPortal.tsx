@@ -157,7 +157,7 @@ export function AccessPortal() {
               className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-600 transition hover:bg-slate-50"
             >
               <ArrowLeft size={16} weight="bold" />
-              {hubMode ? 'Voltar ao hub' : 'Voltar ao inicio'}
+              {hubMode ? 'Voltar para o app' : 'Voltar ao início'}
             </button>
           </div>
         </div>

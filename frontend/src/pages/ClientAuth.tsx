@@ -502,7 +502,7 @@ export function ClientAuth() {
             <p className="mx-auto max-w-md text-sm font-semibold leading-6 text-slate-500">
               {mode === 'register'
                 ? 'Cadastre seu acesso para acompanhar pedidos, salvar endereços e voltar com tudo pronto no próximo pedido.'
-                : 'Entre para acompanhar pedidos, revisar compras e continuar direto pelo hub do cliente.'}
+                : 'Entre para acompanhar pedidos, revisar compras e continuar direto pelo app do cliente.'}
             </p>
           </div>
         </div>
@@ -524,7 +524,7 @@ export function ClientAuth() {
                 Conta do cliente
               </span>
               <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/82 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-slate-500">
-                Hub, pedidos e endereços
+                App, pedidos e endereços
               </span>
             </div>
             <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">

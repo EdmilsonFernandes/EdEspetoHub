@@ -155,11 +155,11 @@ const guideSections = [
   {
     id: 'pagamentos',
     title: 'Pagamentos e Mercado Pago',
-    description: 'Cobrança online via Pix, crédito e débito com integração OAuth por loja.',
+    description: 'Cobrança online via Pix, crédito e débito com conexão segura por loja.',
     icon: CreditCard,
     points: [
       'A plataforma usa Mercado Pago em duas camadas: conta da plataforma (planos) e conta do lojista (pedidos).',
-      'O lojista conecta sua própria conta Mercado Pago via OAuth em Financeiro > Pagamentos.',
+      'O lojista conecta sua própria conta Mercado Pago em Financeiro > Pagamentos.',
       'Com a conta conectada, pedidos com Pix, crédito ou débito geram cobrança automática no Mercado Pago do lojista.',
       'Sem conta conectada, o checkout funciona no modo convencional: registra a forma de pagamento, mas a cobrança é feita fora do sistema.',
       'Webhook automático confirma pagamentos aprovados e atualiza o status do pedido.',
@@ -257,7 +257,7 @@ const guideSections = [
     icon: ShieldCheck,
     points: [
       'Aceite obrigatório de Termos de Uso e Política de Privacidade (LGPD) no cadastro.',
-      'Dados sensíveis armazenados com criptografia (tokens OAuth, senhas com hash).',
+      'Dados sensíveis armazenados com criptografia, incluindo credenciais de pagamento e senhas protegidas.',
       'Verificação de e-mail obrigatória para ativar conta.',
       'KYC do motoboy com verificação facial assistida por IA para segurança da operação.',
       'Consentimento de cookies com banner configurável.',

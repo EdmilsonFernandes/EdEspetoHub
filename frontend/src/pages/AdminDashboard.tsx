@@ -1119,7 +1119,7 @@ const GatewayView = ({ storeId }) => {
                         : gatewayState === 'error'
                           ? 'Validação automática indisponível'
                           : oauthMissing
-                            ? 'OAuth Mercado Pago pendente'
+                            ? 'Conexão Mercado Pago pendente'
                             : 'Pronto para conectar'}
                   </p>
                   <p className={`mt-1 text-xs leading-relaxed ${stateTone.body}`}>

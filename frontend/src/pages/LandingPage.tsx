@@ -707,7 +707,7 @@ export function LandingPage() {
             Sem comissão. Sem repasse.<br className="hidden sm:block" /> Dinheiro direto na sua conta.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-sm font-medium leading-7 text-slate-500 sm:text-base">
-            O lojista conecta a própria conta Mercado Pago via OAuth e libera Pix, crédito e débito no fluxo do pedido. Quem preferir manter atendimento presencial continua operando normalmente.
+            O lojista conecta a própria conta Mercado Pago com segurança e libera Pix, crédito e débito no fluxo do pedido. Quem preferir manter atendimento presencial continua operando normalmente.
           </p>
 
           {/* Logo + badges */}
@@ -736,7 +736,7 @@ export function LandingPage() {
               <Lock size={16} weight="duotone" />
             </div>
             <p className="text-left text-xs font-semibold leading-5 text-slate-600">
-              Autorização OAuth segura — o dinheiro cai direto na conta do lojista, sem repasse manual.
+              Conexão segura com Mercado Pago — o dinheiro cai direto na conta do lojista, sem repasse manual.
             </p>
           </div>
 
@@ -939,7 +939,7 @@ export function LandingPage() {
               {
                 icon: Storefront,
                 title: 'Comida e serviços que chegam aqui',
-                desc: 'Pré-lojas e lojas oficiais mostram ao hóspede quem atende aquela hospedagem antes da parceria completa.',
+                desc: 'Negócios locais e lojas oficiais mostram ao hóspede quem atende aquela hospedagem antes da parceria completa.',
               },
               {
                 icon: CheckCircle,
@@ -1026,9 +1026,9 @@ export function LandingPage() {
 
           {/* Header */}
           <div className="mb-12 max-w-3xl space-y-3">
-            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[#336886]">App + web hub</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[#336886]">App + vitrine web</p>
             <h2 className="text-3xl font-black leading-tight text-slate-950 sm:text-5xl">
-              O Já no Caminho funciona como app, hub e vitrine online.
+              O Já no Caminho funciona como app, vitrine online e guia local.
             </h2>
             <p className="text-sm font-medium leading-7 text-slate-600 sm:text-base">
               No Android, baixe direto pela Google Play. No iPhone, a experiência segue pelo navegador com acesso rápido ao app web enquanto a versão iOS não chega.

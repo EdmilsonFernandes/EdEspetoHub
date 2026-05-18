@@ -618,7 +618,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 </p>
                 <div className="mt-3 flex items-center gap-2 text-[11px] text-emerald-300 font-bold uppercase tracking-[0.12em]">
                   <ShieldCheck size={14} weight="duotone" />
-                  OAuth seguro
+                  Conexão segura
                 </div>
               </div>
             </div>

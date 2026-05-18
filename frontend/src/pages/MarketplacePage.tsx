@@ -991,7 +991,7 @@ export function MarketplacePage() {
   }, [hubDebugEnabled]);
 
   useEffect(() => {
-    document.title = 'Hub Já no Caminho';
+    document.title = 'Já no Caminho | App local';
   }, []);
 
   useEffect(() => {
@@ -1355,7 +1355,7 @@ export function MarketplacePage() {
     try {
       await loadPortfolio();
     } catch (err: any) {
-      setError(err?.message || 'Não foi possível atualizar o Hub agora.');
+      setError(err?.message || 'Não foi possível atualizar o app agora.');
     } finally {
       setIsRefreshing(false);
     }
@@ -1367,7 +1367,7 @@ export function MarketplacePage() {
     loadPortfolio()
       .catch((err: any) => {
         if (!active) return;
-        setError(err?.message || 'Não foi possível carregar o Hub de lojas agora.');
+        setError(err?.message || 'Não foi possível carregar as lojas agora.');
       })
       .finally(() => {
         if (!active) return;
@@ -3205,7 +3205,7 @@ export function MarketplacePage() {
                     ? `${placesCount} hospedagem${placesCount === 1 ? '' : 's'}`
                     : listingsCount > 0
                       ? (listingsCount === 1 ? '1 local' : `${listingsCount} locais`)
-                      : 'Curadoria local';
+                      : 'Destaque local';
                   return (
                     <Link
                       key={destination.id || destination.slug}
@@ -3300,7 +3300,7 @@ export function MarketplacePage() {
                         onClick={() => { clearCondominiumSelection(); }}
                         className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-rose-200/80 bg-white/88 text-rose-500 shadow-[0_12px_24px_-20px_rgba(225,29,72,0.18)] transition hover:bg-rose-50 hover:border-rose-300 active:scale-95"
                         aria-label="Sair do condomínio"
-                        title="Voltar ao hub principal"
+                        title="Voltar para o início"
                       >
                         <X size={14} weight="bold" />
                       </button>
