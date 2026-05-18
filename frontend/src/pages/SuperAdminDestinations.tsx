@@ -8,6 +8,7 @@ import { addressLookupService } from '../services/addressLookupService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../utils/nativeImagePicker';
+import { BRAZIL_STATES, loadBrazilCitiesByState } from '../utils/brazilLocations';
 import {
   buildHospitalityPlaceSmartQrUrl,
   buildHospitalityPlacePosterFileName,
@@ -165,6 +166,15 @@ const formatCepBr = (value: string) => {
   if (digits.length <= 5) return digits;
   return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 };
+
+const slugifyDestinationName = (value = '') =>
+  String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
 
 const formatPhoneBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
@@ -412,6 +422,12 @@ export function SuperAdminDestinations() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [destinationCityOptions, setDestinationCityOptions] = useState<string[]>([]);
+  const [destinationCitiesLoading, setDestinationCitiesLoading] = useState(false);
+  const [destinationCitiesError, setDestinationCitiesError] = useState('');
+  const [destinationZipCode, setDestinationZipCode] = useState('');
+  const [destinationZipLookupLoading, setDestinationZipLookupLoading] = useState(false);
+  const [destinationZipLookupError, setDestinationZipLookupError] = useState('');
   const [placeZipLookupLoading, setPlaceZipLookupLoading] = useState(false);
   const [placeZipLookupError, setPlaceZipLookupError] = useState('');
 
@@ -531,6 +547,79 @@ export function SuperAdminDestinations() {
   }, [selectedDestinationId, placesPage, listingsPage, detailSearch, statusFilter, listingCategoryFilter]);
 
   useEffect(() => {
+    const uf = String(destinationForm.state || '').toUpperCase().slice(0, 2);
+    if (!uf) {
+      setDestinationCityOptions([]);
+      setDestinationCitiesError('');
+      return;
+    }
+
+    let active = true;
+    setDestinationCitiesLoading(true);
+    setDestinationCitiesError('');
+    loadBrazilCitiesByState(uf)
+      .then((cities) => {
+        if (!active) return;
+        setDestinationCityOptions(cities);
+        if (!cities.length) setDestinationCitiesError('Não encontramos cidades oficiais para esta UF agora.');
+      })
+      .catch(() => {
+        if (active) {
+          setDestinationCityOptions([]);
+          setDestinationCitiesError('Não conseguimos carregar as cidades desta UF agora.');
+        }
+      })
+      .finally(() => {
+        if (active) setDestinationCitiesLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [destinationForm.state]);
+
+  useEffect(() => {
+    const cleanedCep = String(destinationZipCode || '').replace(/\D/g, '');
+    if (cleanedCep.length !== 8) {
+      setDestinationZipLookupError('');
+      return;
+    }
+
+    let active = true;
+    const timer = window.setTimeout(async () => {
+      setDestinationZipLookupLoading(true);
+      setDestinationZipLookupError('');
+      try {
+        const response = await fetch(`https://cep.awesomeapi.com.br/json/${cleanedCep}`);
+        if (!response.ok) throw new Error('cep_lookup_failed');
+        const data = await response.json();
+        if (!active) return;
+        const lat = String(data?.lat || '').trim();
+        const lng = String(data?.lng || '').trim();
+        if (!lat || !lng) throw new Error('missing_coordinates');
+        const city = String(data?.city || '').trim();
+        const state = String(data?.state || '').toUpperCase().slice(0, 2);
+        setDestinationForm((current) => ({
+          ...current,
+          ...(state ? { state } : {}),
+          ...(city ? { city, name: city, slug: slugifyDestinationName(city) } : {}),
+          lat,
+          lng,
+        }));
+      } catch {
+        if (active) setDestinationZipLookupError('Não conseguimos buscar as coordenadas deste CEP.');
+      } finally {
+        if (active) setDestinationZipLookupLoading(false);
+      }
+    }, 450);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [destinationZipCode]);
+
+  useEffect(() => {
     const cleanedCep = String(placeForm.zipCode || '').replace(/\D/g, '');
     if (cleanedCep.length !== 8) {
       setPlaceZipLookupError('');
@@ -608,7 +697,32 @@ export function SuperAdminDestinations() {
     return [{ id: 'all', label: 'Todas categorias', count: metrics.listings }];
   }, [catalog?.categories, metrics.listings]);
 
+  const destinationCitySelectOptions = useMemo(() => {
+    const currentCity = String(destinationForm.city || '').trim();
+    if (!currentCity || destinationCityOptions.includes(currentCity)) return destinationCityOptions;
+    return [currentCity, ...destinationCityOptions];
+  }, [destinationCityOptions, destinationForm.city]);
+
   const updateDestination = (key: string, value: any) => setDestinationForm((current) => ({ ...current, [key]: value }));
+  const selectDestinationState = (value: string) => {
+    const state = String(value || '').toUpperCase().slice(0, 2);
+    setDestinationForm((current) => ({
+      ...current,
+      state,
+      city: '',
+      name: '',
+      slug: '',
+    }));
+  };
+  const selectDestinationCity = (value: string) => {
+    const city = String(value || '').trim();
+    setDestinationForm((current) => ({
+      ...current,
+      city,
+      name: city,
+      slug: slugifyDestinationName(city),
+    }));
+  };
   const updatePlace = (key: string, value: any) => setPlaceForm((current) => ({ ...current, [key]: value }));
   const updateListing = (key: string, value: any) => setListingForm((current) => ({ ...current, [key]: value }));
   const updateStoreLink = (key: string, value: any) => setStoreLinkForm((current) => ({ ...current, [key]: value }));
@@ -688,6 +802,8 @@ export function SuperAdminDestinations() {
     setEditingPlaceId('');
     setEditingListingId('');
     setCadastroMode('destination');
+    setDestinationZipCode('');
+    setDestinationZipLookupError('');
     setDestinationForm({
       ...createEmptyDestinationForm(),
       ...Object.fromEntries(Object.entries(destination).map(([key, value]) => [key, toFormValue(value)])),
@@ -745,6 +861,8 @@ export function SuperAdminDestinations() {
 
   const cancelDestinationEdit = () => {
     setEditingDestinationId('');
+    setDestinationZipCode('');
+    setDestinationZipLookupError('');
     setDestinationForm(createEmptyDestinationForm());
     setActiveTab('dashboard');
   };
@@ -820,6 +938,8 @@ export function SuperAdminDestinations() {
       );
       await syncDestinationGallery(savedDestination, syncedSlots);
       setEditingDestinationId('');
+      setDestinationZipCode('');
+      setDestinationZipLookupError('');
       setDestinationForm(createEmptyDestinationForm());
       setSelectedDestinationId(savedDestination?.id || editingDestinationId || selectedDestinationId);
       await refreshAdminData(savedDestination?.id || editingDestinationId || selectedDestinationId);
@@ -1895,12 +2015,55 @@ export function SuperAdminDestinations() {
                 ) : null}
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <input required value={destinationForm.name} onChange={(event) => updateDestination('name', event.target.value)} placeholder="Nome" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <input value={destinationForm.slug} onChange={(event) => updateDestination('slug', event.target.value)} placeholder="Slug" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <input value={destinationForm.city} onChange={(event) => updateDestination('city', event.target.value)} placeholder="Cidade" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <input value={destinationForm.state} onChange={(event) => updateDestination('state', event.target.value.toUpperCase().slice(0, 2))} placeholder="UF" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <input value={destinationForm.heroTitle} onChange={(event) => updateDestination('heroTitle', event.target.value)} placeholder="Título hero" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
-                <input value={destinationForm.heroSubtitle} onChange={(event) => updateDestination('heroSubtitle', event.target.value)} placeholder="Subtítulo hero" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
+                <div className="sm:col-span-2 rounded-[1.5rem] border border-[#336886]/15 bg-[linear-gradient(180deg,#f8fbfa,#ffffff)] p-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-black text-slate-950">Cidade do destino</p>
+                      <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Selecione UF e cidade. O nome público e o link são gerados automaticamente.</p>
+                    </div>
+                    <span className="rounded-full bg-[#edf5fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                      sem digitação duplicada
+                    </span>
+                  </div>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="grid gap-1.5">
+                      <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Estado</span>
+                      <select required value={destinationForm.state} onChange={(event) => selectDestinationState(event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold text-slate-900 outline-none">
+                        {BRAZIL_STATES.map((state) => (
+                          <option key={state.value} value={state.value}>{state.value} - {state.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="grid gap-1.5">
+                      <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Cidade</span>
+                      <select
+                        required
+                        value={destinationForm.city}
+                        onChange={(event) => selectDestinationCity(event.target.value)}
+                        disabled={destinationCitiesLoading || !destinationForm.state}
+                        className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold text-slate-900 outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <option value="">{destinationCitiesLoading ? 'Carregando cidades...' : 'Selecione a cidade'}</option>
+                        {destinationCitySelectOptions.map((city) => (
+                          <option key={city} value={city}>{city}</option>
+                        ))}
+                      </select>
+                      {destinationCitiesError ? <span className="px-1 text-[11px] font-bold text-rose-600">{destinationCitiesError}</span> : null}
+                    </label>
+                  </div>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="grid gap-1.5">
+                      <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Nome público</span>
+                      <input value={destinationForm.name} readOnly placeholder="Gerado após escolher a cidade" className="rounded-2xl border border-slate-200 bg-slate-100 px-3 py-3 text-sm font-bold text-slate-600 outline-none" />
+                    </label>
+                    <label className="grid gap-1.5">
+                      <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Link público</span>
+                      <input value={destinationForm.slug} readOnly placeholder="gerado-automaticamente" className="rounded-2xl border border-slate-200 bg-slate-100 px-3 py-3 text-sm font-bold text-slate-600 outline-none" />
+                    </label>
+                  </div>
+                </div>
+                <input value={destinationForm.heroTitle} onChange={(event) => updateDestination('heroTitle', event.target.value)} placeholder="Título de destaque da página" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
+                <input value={destinationForm.heroSubtitle} onChange={(event) => updateDestination('heroSubtitle', event.target.value)} placeholder="Texto de apoio do banner" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <div className="sm:col-span-2 rounded-[1.5rem] border border-[#336886]/15 bg-[linear-gradient(180deg,#f8fbfa,#ffffff)] p-3">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -1967,8 +2130,22 @@ export function SuperAdminDestinations() {
                   onError={setError}
                   maxEdge={900}
                 />
-                <input value={destinationForm.lat} onChange={(event) => updateDestination('lat', event.target.value)} placeholder="Latitude" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <input value={destinationForm.lng} onChange={(event) => updateDestination('lng', event.target.value)} placeholder="Longitude" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                <div className="sm:col-span-2 grid gap-3 sm:grid-cols-[180px_1fr_1fr]">
+                  <label className="grid gap-1.5">
+                    <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">CEP de referência</span>
+                    <input value={destinationZipCode} onChange={(event) => setDestinationZipCode(formatCepBr(event.target.value))} placeholder="00000-000" inputMode="numeric" autoComplete="postal-code" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                    {destinationZipLookupLoading ? <span className="px-1 text-[11px] font-bold text-[#336886]">Buscando coordenadas...</span> : null}
+                    {destinationZipLookupError ? <span className="px-1 text-[11px] font-bold text-rose-600">{destinationZipLookupError}</span> : null}
+                  </label>
+                  <label className="grid gap-1.5">
+                    <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Latitude</span>
+                    <input value={destinationForm.lat} readOnly placeholder="Preenchida pelo CEP" className="rounded-2xl border border-slate-200 bg-slate-100 px-3 py-3 text-sm font-bold text-slate-600 outline-none" />
+                  </label>
+                  <label className="grid gap-1.5">
+                    <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Longitude</span>
+                    <input value={destinationForm.lng} readOnly placeholder="Preenchida pelo CEP" className="rounded-2xl border border-slate-200 bg-slate-100 px-3 py-3 text-sm font-bold text-slate-600 outline-none" />
+                  </label>
+                </div>
                 <input value={destinationForm.sortOrder} onChange={(event) => updateDestination('sortOrder', event.target.value)} placeholder="Ordem" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <select value={String(destinationForm.active !== false)} onChange={(event) => updateDestination('active', event.target.value === 'true')} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
                   <option value="true">Ativo no público</option>

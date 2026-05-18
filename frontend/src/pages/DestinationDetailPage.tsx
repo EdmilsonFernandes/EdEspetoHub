@@ -589,7 +589,7 @@ export function DestinationDetailPage() {
               </div>
             </div>
 
-            <Link to="/destinos/cadastrar#dados-parceiro" className="group relative block overflow-hidden rounded-[2rem] border border-[#153A4C]/10 bg-[radial-gradient(circle_at_18%_12%,rgba(132,204,22,0.18),transparent_30%),linear-gradient(145deg,#153A4C_0%,#214f5f_54%,#f5ead7_54%,#fffaf2_100%)] p-5 text-white shadow-[0_22px_58px_-36px_rgba(21,58,76,0.82)] transition hover:-translate-y-0.5">
+            <Link to="/destinos/cadastrar#dados-parceiro" className="group relative block overflow-hidden rounded-[2rem] border border-[#153A4C]/10 bg-[radial-gradient(circle_at_18%_12%,rgba(132,204,22,0.2),transparent_30%),radial-gradient(circle_at_92%_18%,rgba(255,255,255,0.12),transparent_28%),linear-gradient(145deg,#153A4C_0%,#214f5f_54%,#0f2f3f_100%)] p-5 text-white shadow-[0_22px_58px_-36px_rgba(21,58,76,0.82)] transition hover:-translate-y-0.5">
               <div className="pointer-events-none absolute -right-8 top-0 h-24 w-24 rounded-full bg-white/20 blur-3xl" />
               <div className="relative max-w-[16rem]">
                 <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-white">
@@ -616,7 +616,7 @@ export function DestinationDetailPage() {
 
           {!showListingsSection ? (
             <aside className="space-y-4">
-              <Link to="/destinos/cadastrar#dados-parceiro" className="group relative block overflow-hidden rounded-[2rem] border border-[#153A4C]/10 bg-[radial-gradient(circle_at_18%_12%,rgba(132,204,22,0.18),transparent_30%),linear-gradient(145deg,#153A4C_0%,#214f5f_54%,#f5ead7_54%,#fffaf2_100%)] p-5 text-white shadow-[0_22px_58px_-36px_rgba(21,58,76,0.82)] transition hover:-translate-y-0.5">
+              <Link to="/destinos/cadastrar#dados-parceiro" className="group relative block overflow-hidden rounded-[2rem] border border-[#153A4C]/10 bg-[radial-gradient(circle_at_18%_12%,rgba(132,204,22,0.2),transparent_30%),radial-gradient(circle_at_92%_18%,rgba(255,255,255,0.12),transparent_28%),linear-gradient(145deg,#153A4C_0%,#214f5f_54%,#0f2f3f_100%)] p-5 text-white shadow-[0_22px_58px_-36px_rgba(21,58,76,0.82)] transition hover:-translate-y-0.5">
                 <div className="pointer-events-none absolute -right-8 top-0 h-24 w-24 rounded-full bg-white/20 blur-3xl" />
                 <div className="relative max-w-[16rem]">
                   <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-white">

@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "95375f0b",
-  "versionLabel": "v0.1.9.95375f0b",
-  "versionInternal": "0.1.9+20260518.181813.95375f0b",
-  "buildId": "0.1.9+20260518.181813.95375f0b-20260518.181813-95375f0b",
-  "builtAt": "2026-05-18T18:18:13.880Z",
-  "commitHash": "95375f0b174d67ad8642321fca3c74dea6275659",
-  "shortHash": "95375f0b",
+  "versionDisplaySuffix": "0c903565",
+  "versionLabel": "v0.1.9.0c903565",
+  "versionInternal": "0.1.9+20260518.190057.0c903565",
+  "buildId": "0.1.9+20260518.190057.0c903565-20260518.190057-0c903565",
+  "builtAt": "2026-05-18T19:00:57.069Z",
+  "commitHash": "0c903565df250c5a8fe1163a7f0e095735091037",
+  "shortHash": "0c903565",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "0c903565df250c5a8fe1163a7f0e095735091037",
+      "shortHash": "0c903565",
+      "dateIso": "2026-05-18T15:30:14-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Harden MFA SSM configuration",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0c903565df250c5a8fe1163a7f0e095735091037"
+    },
+    {
+      "hash": "58eb0667949325addce7c82f20538e0a9402bf98",
+      "shortHash": "58eb0667",
+      "dateIso": "2026-05-18T15:20:23-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Refine marketplace conversion CTAs",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/58eb0667949325addce7c82f20538e0a9402bf98"
+    },
     {
       "hash": "95375f0b174d67ad8642321fca3c74dea6275659",
       "shortHash": "95375f0b",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Polish destination mobile discovery UX",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/11c3e7c8965fa035bd50f882339a9367866ef760"
-    },
-    {
-      "hash": "f7f7fcf467e091e654bf9a33e4fbcb2aad5490d7",
-      "shortHash": "f7f7fcf4",
-      "dateIso": "2026-05-16T08:38:43-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine mobile destinations and city selection",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f7f7fcf467e091e654bf9a33e4fbcb2aad5490d7"
-    },
-    {
-      "hash": "e7ddb225963f1824520cf6504b927552c655c393",
-      "shortHash": "e7ddb225",
-      "dateIso": "2026-05-15T13:22:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve destination city selection UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e7ddb225963f1824520cf6504b927552c655c393"
     }
   ]
 }
