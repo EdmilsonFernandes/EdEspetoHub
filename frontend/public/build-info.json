@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "1458423d",
-  "versionLabel": "v0.1.9.1458423d",
-  "versionInternal": "0.1.9+20260518.165625.1458423d",
-  "buildId": "0.1.9+20260518.165625.1458423d-20260518.165625-1458423d",
-  "builtAt": "2026-05-18T16:56:25.030Z",
-  "commitHash": "1458423df7625aeb5747ba8309ebb0628b36134f",
-  "shortHash": "1458423d",
+  "versionDisplaySuffix": "f0456e01",
+  "versionLabel": "v0.1.9.f0456e01",
+  "versionInternal": "0.1.9+20260518.172544.f0456e01",
+  "buildId": "0.1.9+20260518.172544.f0456e01-20260518.172544-f0456e01",
+  "builtAt": "2026-05-18T17:25:44.591Z",
+  "commitHash": "f0456e013b30c6d0bb20275b5a0f815ae35af37d",
+  "shortHash": "f0456e01",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "f0456e013b30c6d0bb20275b5a0f815ae35af37d",
+      "shortHash": "f0456e01",
+      "dateIso": "2026-05-18T13:58:39-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Improve customer MFA settings card",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f0456e013b30c6d0bb20275b5a0f815ae35af37d"
+    },
     {
       "hash": "1458423df7625aeb5747ba8309ebb0628b36134f",
       "shortHash": "1458423d",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style: refine hospitality QR poster print design",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0a4b4284911d6210eb696f087369d29642a29f19"
-    },
-    {
-      "hash": "9936a8ff55f3f7da3f575e9c86cc942d253a83e7",
-      "shortHash": "9936a8ff",
-      "dateIso": "2026-05-13T13:02:37-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: point hospitality QR poster to Play Store",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9936a8ff55f3f7da3f575e9c86cc942d253a83e7"
     }
   ]
 }

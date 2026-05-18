@@ -8,8 +8,11 @@ import './index.css';
 import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
 import { bootstrapNativeApp } from './mobile/nativeAppBootstrap';
+import { installStaleBuildRecovery } from './utils/staleBuildRecovery';
 
 const isNativePlatform = Capacitor.isNativePlatform();
+
+installStaleBuildRecovery();
 
 const unregisterServiceWorkersOnNative = async () => {
   if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;

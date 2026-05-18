@@ -642,12 +642,29 @@ public class MainActivity extends BridgeActivity {
             retryUrl = HUB_URL;
         }
 
+        retryUrl = appendReloadNonce(retryUrl);
         showLaunchOverlayLoading(getString(R.string.launch_retrying_message));
         scheduleLaunchOverlayTimeout();
         cancelResumeWebViewHealthCheck();
         mainFrameLoadInProgress = true;
-        bridge.getWebView().stopLoading();
-        bridge.getWebView().loadUrl(retryUrl);
+        WebView webView = bridge.getWebView();
+        webView.stopLoading();
+        webView.clearCache(false);
+        webView.loadUrl(retryUrl);
+    }
+
+    private String appendReloadNonce(String value) {
+        String trustedUrl = normalizeTrustedWebUrl(value);
+        if (trustedUrl == null) trustedUrl = HUB_URL;
+        try {
+            Uri uri = Uri.parse(trustedUrl);
+            return uri.buildUpon()
+                .appendQueryParameter("_native_retry", String.valueOf(System.currentTimeMillis()))
+                .build()
+                .toString();
+        } catch (Exception ignored) {
+            return HUB_URL + "?_native_retry=" + System.currentTimeMillis();
+        }
     }
 
     private void scheduleResumeWebViewHealthCheck() {
@@ -671,6 +688,11 @@ public class MainActivity extends BridgeActivity {
             if (pageFailedToLoad || missingUrl || noVisibleContent) {
                 launchOverlayDismissed = false;
                 retryInitialPageLoad();
+                return;
+            }
+
+            if (!launchOverlayDismissed) {
+                dismissLaunchOverlay();
             }
         };
         launchOverlayHandler.postDelayed(
