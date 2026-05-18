@@ -583,10 +583,19 @@ export function HospitalityPlacePage() {
                 <p className="mt-2 text-sm font-bold leading-relaxed text-slate-700">{place.deliveryInstructions}</p>
               </div>
             ) : null}
-            <Link to="/destinos/cadastrar#dados-parceiro" className="block rounded-[1.5rem] bg-[#153A4C] p-4 text-white">
-              <ForkKnife size={22} weight="duotone" />
-              <h3 className="mt-3 text-lg font-bold">Quer aparecer neste chalé?</h3>
-              <p className="mt-1 text-sm font-semibold text-white/72">Cadastre sua loja ou serviço para atender hóspedes pelo app ou WhatsApp.</p>
+            <Link to="/destinos/cadastrar#dados-parceiro" className="group relative block overflow-hidden rounded-[1.65rem] border border-[#153A4C]/10 bg-[radial-gradient(circle_at_14%_12%,rgba(132,204,22,0.18),transparent_32%),linear-gradient(135deg,#153A4C_0%,#24576a_58%,#f7ead6_58%,#fffaf2_100%)] p-4 text-white shadow-[0_18px_46px_-30px_rgba(21,58,76,0.82)] transition hover:-translate-y-0.5">
+              <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/20 blur-3xl" />
+              <div className="relative max-w-[17rem]">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12 ring-1 ring-white/14">
+                  <ForkKnife size={22} weight="duotone" />
+                </span>
+                <h3 className="mt-3 text-lg font-black leading-tight tracking-[-0.03em]">Quer aparecer neste chalé?</h3>
+                <p className="mt-1.5 text-sm font-semibold leading-6 text-white/76">Cadastre sua loja ou serviço para atender hóspedes pelo app ou WhatsApp.</p>
+                <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-black text-[#153A4C] shadow-[0_14px_28px_-20px_rgba(255,255,255,0.55)] transition group-hover:translate-x-0.5">
+                  Quero participar
+                  <ArrowRight size={12} weight="bold" />
+                </span>
+              </div>
             </Link>
           </aside>
         </section>

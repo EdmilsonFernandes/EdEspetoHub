@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "39518c34",
-  "versionLabel": "v0.1.9.39518c34",
-  "versionInternal": "0.1.9+20260518.180658.39518c34",
-  "buildId": "0.1.9+20260518.180658.39518c34-20260518.180658-39518c34",
-  "builtAt": "2026-05-18T18:06:58.100Z",
-  "commitHash": "39518c347ca2825996ce07e1612e7256b0fc9216",
-  "shortHash": "39518c34",
+  "versionDisplaySuffix": "95375f0b",
+  "versionLabel": "v0.1.9.95375f0b",
+  "versionInternal": "0.1.9+20260518.181813.95375f0b",
+  "buildId": "0.1.9+20260518.181813.95375f0b-20260518.181813-95375f0b",
+  "builtAt": "2026-05-18T18:18:13.880Z",
+  "commitHash": "95375f0b174d67ad8642321fca3c74dea6275659",
+  "shortHash": "95375f0b",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "95375f0b174d67ad8642321fca3c74dea6275659",
+      "shortHash": "95375f0b",
+      "dateIso": "2026-05-18T15:10:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Remove user-facing technical wording",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/95375f0b174d67ad8642321fca3c74dea6275659"
+    },
     {
       "hash": "39518c347ca2825996ce07e1612e7256b0fc9216",
       "shortHash": "39518c34",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Improve destination city selection UX",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e7ddb225963f1824520cf6504b927552c655c393"
-    },
-    {
-      "hash": "53a4d30181d7e70642b8f26062de3238bff0a2dd",
-      "shortHash": "53a4d301",
-      "dateIso": "2026-05-15T13:01:55-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Unify public destinations branding",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/53a4d30181d7e70642b8f26062de3238bff0a2dd"
     }
   ]
 }

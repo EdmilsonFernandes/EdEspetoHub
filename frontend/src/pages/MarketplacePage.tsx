@@ -4170,18 +4170,28 @@ export function MarketplacePage() {
             <button
               type="button"
               onClick={() => navigate('/create?plan=trial')}
-              className="group w-full overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#0d1e2e_0%,#1a3347_100%)] p-4 text-left shadow-[0_8px_24px_-12px_rgba(15,23,42,0.4)] transition-all active:scale-[0.99] hover:shadow-[0_12px_32px_-12px_rgba(15,23,42,0.55)]"
+              className="group relative w-full overflow-hidden rounded-[1.65rem] border border-white/10 bg-[radial-gradient(circle_at_12%_18%,rgba(132,204,22,0.22),transparent_26%),linear-gradient(135deg,#102b3a_0%,#153A4C_46%,#081520_100%)] p-4 text-left shadow-[0_22px_54px_-34px_rgba(21,58,76,0.78)] ring-1 ring-[#336886]/12 transition-all hover:-translate-y-0.5 hover:shadow-[0_28px_64px_-34px_rgba(21,58,76,0.88)] active:scale-[0.99]"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#336886]/25">
-                  <Storefront size={22} weight="duotone" className="text-sky-300" />
+              <div className="pointer-events-none absolute -right-10 -top-12 h-28 w-28 rounded-full bg-sky-300/18 blur-3xl" />
+              <div className="pointer-events-none absolute bottom-0 right-0 h-20 w-36 bg-[radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.14),transparent_70%)]" />
+              <div className="relative flex items-center gap-3.5">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-white/10 text-white shadow-[0_16px_32px_-24px_rgba(2,6,23,0.95)] backdrop-blur-xl">
+                  <Storefront size={24} weight="duotone" className="text-lime-200" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-black leading-tight text-white">Tem um negócio? Abra sua loja aqui.</p>
-                  <p className="mt-0.5 text-[11px] font-medium text-slate-400">Pedidos, produção e entrega em um só lugar.</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-lime-200/90">Para lojistas</p>
+                  <p className="mt-0.5 text-base font-black leading-tight tracking-[-0.03em] text-white">Venda pelo Já no Caminho</p>
+                  <p className="mt-1 text-[11px] font-semibold leading-5 text-sky-50/76">Receba pedidos online, organize a produção e conecte entregadores quando precisar.</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {['7 dias grátis', 'sem comissão', 'pedido online'].map((label) => (
+                      <span key={label} className="rounded-full border border-white/10 bg-white/[0.08] px-2 py-1 text-[9px] font-black uppercase tracking-[0.11em] text-white/86">
+                        {label}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div className="shrink-0 flex items-center gap-1 rounded-xl bg-white/10 px-3 py-1.5 text-[11px] font-black text-sky-200 transition-colors group-hover:bg-white/15">
-                  Começar
+                <div className="shrink-0 flex items-center gap-1 rounded-full bg-white px-3 py-2 text-[11px] font-black text-[#153A4C] shadow-[0_14px_30px_-20px_rgba(255,255,255,0.6)] transition group-hover:translate-x-0.5">
+                  Criar
                   <CaretRight size={11} weight="bold" />
                 </div>
               </div>

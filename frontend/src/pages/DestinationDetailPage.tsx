@@ -589,26 +589,54 @@ export function DestinationDetailPage() {
               </div>
             </div>
 
-            <Link to="/destinos/cadastrar#dados-parceiro" className="block rounded-[2rem] border border-[#153A4C]/10 bg-[#153A4C] p-5 text-white shadow-[0_18px_50px_-34px_rgba(21,58,76,0.75)]">
-              <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]">
-                <ForkKnife size={14} weight="duotone" />
-                Participar
-              </p>
-              <h3 className="mt-4 text-xl font-black tracking-[-0.03em]">Tem chalé, pousada ou serviço?</h3>
-              <p className="mt-2 text-sm font-semibold text-white/72">Apareça para turistas da cidade e receba pedidos de hóspedes pelo app ou contato direto.</p>
+            <Link to="/destinos/cadastrar#dados-parceiro" className="group relative block overflow-hidden rounded-[2rem] border border-[#153A4C]/10 bg-[radial-gradient(circle_at_18%_12%,rgba(132,204,22,0.18),transparent_30%),linear-gradient(145deg,#153A4C_0%,#214f5f_54%,#f5ead7_54%,#fffaf2_100%)] p-5 text-white shadow-[0_22px_58px_-36px_rgba(21,58,76,0.82)] transition hover:-translate-y-0.5">
+              <div className="pointer-events-none absolute -right-8 top-0 h-24 w-24 rounded-full bg-white/20 blur-3xl" />
+              <div className="relative max-w-[16rem]">
+                <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-white">
+                  <Sparkle size={14} weight="duotone" />
+                  Guia local
+                </p>
+                <h3 className="mt-4 text-xl font-black leading-tight tracking-[-0.03em]">Tem chalé, pousada ou serviço local?</h3>
+                <p className="mt-2 text-sm font-semibold leading-6 text-white/76">Apareça no guia da cidade e seja encontrado por hóspedes e turistas.</p>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {['Hospedagem', 'Passeios', 'Serviços'].map((label) => (
+                    <span key={label} className="rounded-full bg-white/12 px-2.5 py-1 text-[10px] font-black text-white/86 ring-1 ring-white/10">
+                      {label}
+                    </span>
+                  ))}
+                </div>
+                <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-black text-[#153A4C] shadow-[0_14px_28px_-20px_rgba(255,255,255,0.55)] transition group-hover:translate-x-0.5">
+                  Quero participar
+                  <ArrowRight size={12} weight="bold" />
+                </span>
+              </div>
             </Link>
           </aside>
           ) : null}
 
           {!showListingsSection ? (
             <aside className="space-y-4">
-              <Link to="/destinos/cadastrar#dados-parceiro" className="block rounded-[2rem] border border-[#153A4C]/10 bg-[#153A4C] p-5 text-white shadow-[0_18px_50px_-34px_rgba(21,58,76,0.75)]">
-                <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]">
-                  <ForkKnife size={14} weight="duotone" />
-                  Participar
-                </p>
-                <h3 className="mt-4 text-xl font-black tracking-[-0.03em]">Tem chalé, pousada ou serviço?</h3>
-                <p className="mt-2 text-sm font-semibold text-white/72">Apareça para turistas da cidade e receba pedidos de hóspedes pelo app ou contato direto.</p>
+              <Link to="/destinos/cadastrar#dados-parceiro" className="group relative block overflow-hidden rounded-[2rem] border border-[#153A4C]/10 bg-[radial-gradient(circle_at_18%_12%,rgba(132,204,22,0.18),transparent_30%),linear-gradient(145deg,#153A4C_0%,#214f5f_54%,#f5ead7_54%,#fffaf2_100%)] p-5 text-white shadow-[0_22px_58px_-36px_rgba(21,58,76,0.82)] transition hover:-translate-y-0.5">
+                <div className="pointer-events-none absolute -right-8 top-0 h-24 w-24 rounded-full bg-white/20 blur-3xl" />
+                <div className="relative max-w-[16rem]">
+                  <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-white">
+                    <Sparkle size={14} weight="duotone" />
+                    Guia local
+                  </p>
+                  <h3 className="mt-4 text-xl font-black leading-tight tracking-[-0.03em]">Tem chalé, pousada ou serviço local?</h3>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-white/76">Apareça no guia da cidade e seja encontrado por hóspedes e turistas.</p>
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {['Hospedagem', 'Passeios', 'Serviços'].map((label) => (
+                      <span key={label} className="rounded-full bg-white/12 px-2.5 py-1 text-[10px] font-black text-white/86 ring-1 ring-white/10">
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                  <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-black text-[#153A4C] shadow-[0_14px_28px_-20px_rgba(255,255,255,0.55)] transition group-hover:translate-x-0.5">
+                    Quero participar
+                    <ArrowRight size={12} weight="bold" />
+                  </span>
+                </div>
               </Link>
             </aside>
           ) : null}
