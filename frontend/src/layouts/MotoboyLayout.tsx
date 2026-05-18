@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { House, IdentificationCard, ListChecks, Motorcycle, SignOut, Truck, Wallet } from '@phosphor-icons/react';
+import { House, IdentificationCard, ListChecks, Motorcycle, ShieldCheck, SignOut, Truck, Wallet } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { motoboyService } from '../services/motoboyService';
 import { nativeBiometricService } from '../services/nativeBiometricService';
@@ -9,6 +9,7 @@ import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { useToast } from '../contexts/ToastContext';
+import { AccountMfaPanel } from '../components/Auth/AccountMfaPanel';
 
 const MOTOBOY_QUEUE_BADGE_EVENT = 'jnc:motoboy-queue-badge';
 
@@ -29,6 +30,7 @@ export function MotoboyLayout() {
   const [showInstall, setShowInstall] = useState(false);
   const [queueBadge, setQueueBadge] = useState(false);
   const [accountDrawerOpen, setAccountDrawerOpen] = useState(false);
+  const [mfaPanelOpen, setMfaPanelOpen] = useState(false);
   const [sessionRefreshKey, setSessionRefreshKey] = useState(0);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
@@ -256,6 +258,17 @@ export function MotoboyLayout() {
       onClick: () => navigate('/motoboy/profile'),
     },
     {
+      id: 'security',
+      section: 'Conta',
+      label: 'Segurança da conta',
+      description: 'MFA, Authenticator e dispositivos confiáveis.',
+      icon: <ShieldCheck size={22} weight="duotone" />,
+      onClick: () => {
+        setAccountDrawerOpen(false);
+        setMfaPanelOpen(true);
+      },
+    },
+    {
       id: 'logout',
       section: 'Sessao',
       label: 'Sair das entregas',
@@ -446,6 +459,7 @@ export function MotoboyLayout() {
           footer={<PlatformTrustFooter compact mode="default" align="left" />}
         />
       )}
+      <AccountMfaPanel open={mfaPanelOpen} authMode="motoboy" onClose={() => setMfaPanelOpen(false)} />
     </div>
   );
 }

@@ -37,6 +37,7 @@ import { PremiumSelect } from '../components/common/PremiumSelect';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
 import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
+import { AccountMfaPanel } from '../components/Auth/AccountMfaPanel';
 import mercadoPagoLogo from '../assets/mercado-pago-logo.svg';
 
 const formatPlanCycle = (days: number) => {
@@ -1731,6 +1732,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [commandQuery, setCommandQuery] = useState('');
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [notificationCriticalOnly, setNotificationCriticalOnly] = useState(false);
+  const [mfaPanelOpen, setMfaPanelOpen] = useState(false);
   const [pendingMotoboyRequests, setPendingMotoboyRequests] = useState(0);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsSummary, setReviewsSummary] = useState<any | null>(null);
@@ -3070,6 +3072,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       tone: brandingDraft.isOrderingEnabled !== false ? 'success' : 'neutral',
       action: () => setConfigSection('operation'),
     },
+    {
+      id: 'security',
+      title: 'Segurança da conta',
+      description: 'MFA, Authenticator, biometria e dispositivos confiáveis.',
+      icon: SealCheck,
+      badge: 'Gerenciar',
+      tone: 'neutral',
+      action: () => setMfaPanelOpen(true),
+    },
   ];
   const activeConfigMeta = activeTab === 'config' && configSection !== 'hub'
     ? configSectionMeta[configSection] || tabMeta.config
@@ -3896,6 +3907,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           </div>,
           document.body
         )}
+
+      <AccountMfaPanel open={mfaPanelOpen} authMode="admin" onClose={() => setMfaPanelOpen(false)} />
 
     </AdminLayout>
   );

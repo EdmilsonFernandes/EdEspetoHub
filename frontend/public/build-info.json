@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "073618d5",
-  "versionLabel": "v0.1.9.073618d5",
-  "versionInternal": "0.1.9+20260518.130304.073618d5",
-  "buildId": "0.1.9+20260518.130304.073618d5-20260518.130304-073618d5",
-  "builtAt": "2026-05-18T13:03:04.616Z",
-  "commitHash": "073618d52c504aca17e65aba036f23280690ca0e",
-  "shortHash": "073618d5",
+  "versionDisplaySuffix": "17a1c1f8",
+  "versionLabel": "v0.1.9.17a1c1f8",
+  "versionInternal": "0.1.9+20260518.150727.17a1c1f8",
+  "buildId": "0.1.9+20260518.150727.17a1c1f8-20260518.150727-17a1c1f8",
+  "builtAt": "2026-05-18T15:07:27.429Z",
+  "commitHash": "17a1c1f89f983ef2e449337e21a0cd32e08cb114",
+  "shortHash": "17a1c1f8",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "17a1c1f89f983ef2e449337e21a0cd32e08cb114",
+      "shortHash": "17a1c1f8",
+      "dateIso": "2026-05-18T10:13:55-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Add incremental MFA authentication",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/17a1c1f89f983ef2e449337e21a0cd32e08cb114"
+    },
     {
       "hash": "073618d52c504aca17e65aba036f23280690ca0e",
       "shortHash": "073618d5",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Improve destination pre-store conversion flow",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c7f7e291007754a75918813ec395e9ed6a6dc221"
-    },
-    {
-      "hash": "d62f3f66809540d8e0e51b9ff851bd370f0f04b9",
-      "shortHash": "d62f3f66",
-      "dateIso": "2026-05-13T09:51:48-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix destination inactive catalog and mobile uploads",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d62f3f66809540d8e0e51b9ff851bd370f0f04b9"
     }
   ]
 }

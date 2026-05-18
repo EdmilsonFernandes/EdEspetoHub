@@ -27,6 +27,7 @@ import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
+import { AccountMfaPanel } from '../components/Auth/AccountMfaPanel';
 
 // Componente Switch Simples
 function Switch({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
@@ -70,6 +71,7 @@ export function ClientAccount() {
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometricBusy, setBiometricBusy] = useState(false);
   const [biometricMessage, setBiometricMessage] = useState('');
+  const [mfaPanelOpen, setMfaPanelOpen] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [phoneDraft, setPhoneDraft] = useState('');
   const settingsSectionRef = useRef<HTMLElement | null>(null);
@@ -844,6 +846,27 @@ export function ClientAccount() {
             </div>
 
             <div className="relative mt-5 grid gap-3">
+              <div className="flex flex-col gap-3 rounded-[1.45rem] border border-[#336886]/15 bg-[#336886]/[0.06] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#336886] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
+                    <ShieldCheck size={18} weight="duotone" className="text-[#336886]" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-black uppercase tracking-[0.14em] text-slate-800">MFA e dispositivos</p>
+                    <p className="mt-0.5 text-[10px] font-bold leading-tight text-slate-500">
+                      Proteja a conta com Authenticator e gerencie aparelhos confiáveis.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMfaPanelOpen(true)}
+                  className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-[#153A4C] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-[0_16px_32px_-24px_rgba(21,58,76,0.75)] transition active:scale-95"
+                >
+                  Gerenciar
+                </button>
+              </div>
+
               {biometricSupported ? (
                 <div className={`flex flex-col gap-3 rounded-[1.45rem] border px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between ${
                   biometricEnabled ? 'bg-[#336886]/[0.07] border-[#336886]/15' : 'bg-[#EEF2F7] border-slate-100'
@@ -950,6 +973,7 @@ export function ClientAccount() {
         cancelLabel="Não, manter conta"
         variant="danger"
       />
+      <AccountMfaPanel open={mfaPanelOpen} authMode="customer" onClose={() => setMfaPanelOpen(false)} />
     </main>
   );
 }
