@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "f0456e01",
-  "versionLabel": "v0.1.9.f0456e01",
-  "versionInternal": "0.1.9+20260518.172544.f0456e01",
-  "buildId": "0.1.9+20260518.172544.f0456e01-20260518.172544-f0456e01",
-  "builtAt": "2026-05-18T17:25:44.591Z",
-  "commitHash": "f0456e013b30c6d0bb20275b5a0f815ae35af37d",
-  "shortHash": "f0456e01",
+  "versionDisplaySuffix": "43b2d26e",
+  "versionLabel": "v0.1.9.43b2d26e",
+  "versionInternal": "0.1.9+20260518.173950.43b2d26e",
+  "buildId": "0.1.9+20260518.173950.43b2d26e-20260518.173950-43b2d26e",
+  "builtAt": "2026-05-18T17:39:50.775Z",
+  "commitHash": "43b2d26e2a5f2812e74c42a5527edcc4ebda4157",
+  "shortHash": "43b2d26e",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "43b2d26e2a5f2812e74c42a5527edcc4ebda4157",
+      "shortHash": "43b2d26e",
+      "dateIso": "2026-05-18T14:33:07-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Fix app startup after frontend deploy",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/43b2d26e2a5f2812e74c42a5527edcc4ebda4157"
+    },
     {
       "hash": "f0456e013b30c6d0bb20275b5a0f815ae35af37d",
       "shortHash": "f0456e01",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat: route hospitality QR by device",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/75220e6c1a27498a744ef53bdf703b7b43a61144"
-    },
-    {
-      "hash": "0a4b4284911d6210eb696f087369d29642a29f19",
-      "shortHash": "0a4b4284",
-      "dateIso": "2026-05-13T13:09:24-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style: refine hospitality QR poster print design",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0a4b4284911d6210eb696f087369d29642a29f19"
     }
   ]
 }
