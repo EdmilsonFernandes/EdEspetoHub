@@ -3825,6 +3825,20 @@ export function MarketplacePage() {
                         }
                       )
                     : null;
+                  const compactDeliveryMetaBadge = store.isOpen && primaryBadge?.key === 'delivery'
+                    ? {
+                        label: store.freeShipping ? 'Frete grátis' : 'Entrega',
+                        className: store.freeShipping
+                          ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
+                          : 'bg-sky-50 text-[#336886] ring-1 ring-sky-100',
+                      }
+                    : null;
+                  const visiblePrimaryBadge = primaryBadge?.key === 'delivery' ? null : primaryBadge;
+                  const visibleSecondaryBadge =
+                    secondaryBadge?.key === 'favorite_hint' ||
+                    (primaryBadge?.key === 'delivery' && secondaryBadge?.key === 'free_shipping')
+                      ? null
+                      : secondaryBadge;
 
                   if (selectedCondominium) {
                     return (
@@ -4013,6 +4027,15 @@ export function MarketplacePage() {
                           ) : null}
                           {store.rating > 0 ? <span className="text-slate-200">·</span> : null}
                           <span>{store.etaMin}–{store.etaMax} min</span>
+                          {compactDeliveryMetaBadge ? (
+                            <>
+                              <span className="text-slate-200">·</span>
+                              <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${compactDeliveryMetaBadge.className}`}>
+                                <PaperPlaneTilt size={9} weight="fill" />
+                                {compactDeliveryMetaBadge.label}
+                              </span>
+                            </>
+                          ) : null}
                           {!isCondominiumScope && (
                             <>
                               <span className="text-slate-200">·</span>
@@ -4020,31 +4043,28 @@ export function MarketplacePage() {
                             </>
                           )}
                         </div>
-                        {/* SEÇÃO REESTRUTURADA DE BADGES */}
-                        {store.isOpen && (
-                          <div className="mt-2.5 flex flex-col gap-1.5">
-                            {/* Selo Primário */}
-                            {primaryBadge && (
+                        {store.isOpen && (visiblePrimaryBadge || visibleSecondaryBadge) && (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {visiblePrimaryBadge && (
                               <span
-                                key={`${store.id}-${primaryBadge.key}`}
-                                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${primaryBadge.className} ${primaryBadge.key === 'open_now' ? 'animate-pulse' : ''}`}
+                                key={`${store.id}-${visiblePrimaryBadge.key}`}
+                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] ${visiblePrimaryBadge.className} ${visiblePrimaryBadge.key === 'open_now' ? 'animate-pulse' : ''}`}
                               >
-                                {primaryBadge.icon ? (
-                                  <primaryBadge.icon size={11} weight="duotone" className={primaryBadge.iconClassName || 'text-sky-700'} />
+                                {visiblePrimaryBadge.icon ? (
+                                  <visiblePrimaryBadge.icon size={10} weight="duotone" className={visiblePrimaryBadge.iconClassName || 'text-sky-700'} />
                                 ) : null}
-                                {primaryBadge.label}
+                                {visiblePrimaryBadge.label}
                               </span>
                             )}
-                            {/* Selo Secundário (se existir) */}
-                            {secondaryBadge && (
+                            {visibleSecondaryBadge && (
                               <span
-                                key={`${store.id}-${secondaryBadge.key}`}
-                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-semibold ${secondaryBadge.className.replace('border-emerald-100 bg-emerald-50 text-emerald-700', 'border-emerald-200 bg-emerald-50/80 text-emerald-700').replace('border-slate-800/85 bg-[linear-gradient(135deg,#0f172a_0%,#1e293b_100%)] text-white ring-1 ring-white/10', 'border-slate-700/85 bg-[linear-gradient(135deg,#1f2a3c_0%,#2e3a4c_100%)] text-white ring-1 ring-white/15')} ${secondaryBadge.key === 'favorite_hint' ? 'animate-bounce' : ''}`}
+                                key={`${store.id}-${visibleSecondaryBadge.key}`}
+                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-semibold ${visibleSecondaryBadge.className.replace('border-emerald-100 bg-emerald-50 text-emerald-700', 'border-emerald-200 bg-emerald-50/80 text-emerald-700').replace('border-slate-800/85 bg-[linear-gradient(135deg,#0f172a_0%,#1e293b_100%)] text-white ring-1 ring-white/10', 'border-slate-700/85 bg-[linear-gradient(135deg,#1f2a3c_0%,#2e3a4c_100%)] text-white ring-1 ring-white/15')}`}
                               >
-                                {secondaryBadge.icon ? (
-                                  <secondaryBadge.icon size={9} weight="fill" className={secondaryBadge.iconClassName || 'text-sky-700'} />
+                                {visibleSecondaryBadge.icon ? (
+                                  <visibleSecondaryBadge.icon size={9} weight="fill" className={visibleSecondaryBadge.iconClassName || 'text-sky-700'} />
                                 ) : null}
-                                {secondaryBadge.label}
+                                {visibleSecondaryBadge.label}
                               </span>
                             )}
                           </div>
