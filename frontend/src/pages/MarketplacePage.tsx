@@ -2284,6 +2284,7 @@ export function MarketplacePage() {
     }
     return [...fixedSponsored, ...rotatedOrganic];
   }, [featuredProducts, featuredOffset]);
+  const hasFeaturedCarouselOverflow = displayedFeaturedProducts.length > 3;
 
   const isCustomerLogged = Boolean(customerSession?.token);
   const customerDisplayName = String(
@@ -3493,26 +3494,36 @@ export function MarketplacePage() {
               style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               <div className="flex items-center justify-between gap-3 px-1">
-                <h2 className="text-[14px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
-                <div className="flex gap-1 pt-2">
-                  <div className="h-1 w-4 rounded-full bg-[#336886]" />
-                  <div className="h-1 w-1 rounded-full bg-sky-200" />
-                  <div className="h-1 w-1 rounded-full bg-slate-300" />
+                <div className="min-w-0">
+                  <h2 className="text-[14px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
+                  <p className="mt-0.5 line-clamp-1 text-[10px] font-bold text-slate-500">
+                    {hasFeaturedCarouselOverflow ? 'Arraste para o lado e veja mais ofertas.' : 'Seleção rápida para pedir agora.'}
+                  </p>
                 </div>
+                {hasFeaturedCarouselOverflow ? (
+                  <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-[#edf5fa] px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                    Mais
+                    <CaretRight size={11} weight="bold" className="animate-pulse" />
+                  </div>
+                ) : null}
               </div>
               
-              <div className="mt-2.5 flex snap-x snap-mandatory gap-2 overflow-x-auto no-scrollbar px-1 pb-1">
-                {featuredLoading ? (
-                  Array.from({ length: 3 }).map((_, idx) => (
-                    <div key={idx} className="h-[142px] min-w-[154px] animate-pulse rounded-[1.3rem] border border-white/90 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)]" />
-                  ))
-                ) : (
-                  displayedFeaturedProducts.map((item, index) => (
-                    (() => {
-                      const featuredStorePath = selectedCondominiumSlug
-                        ? `/${item.storeSlug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
-                        : `/${item.storeSlug}`;
-                      return (
+              <div className="relative mt-2.5">
+                {hasFeaturedCarouselOverflow ? (
+                  <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 rounded-r-[1.45rem] bg-[linear-gradient(90deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0.86)_62%,rgba(255,255,255,0.98)_100%)]" />
+                ) : null}
+                <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto no-scrollbar px-1 pb-1 pr-7">
+                  {featuredLoading ? (
+                    Array.from({ length: 3 }).map((_, idx) => (
+                      <div key={idx} className="h-[142px] min-w-[154px] animate-pulse rounded-[1.3rem] border border-white/90 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)]" />
+                    ))
+                  ) : (
+                    displayedFeaturedProducts.map((item, index) => (
+                      (() => {
+                        const featuredStorePath = selectedCondominiumSlug
+                          ? `/${item.storeSlug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
+                          : `/${item.storeSlug}`;
+                        return (
                     <Link
                       key={`${item.storeSlug}-${item.id}`}
                       to={featuredStorePath}
@@ -3567,10 +3578,11 @@ export function MarketplacePage() {
                         </div>
                       </div>
                     </Link>
-                      );
-                    })()
-                  ))
-                )}
+                        );
+                      })()
+                    ))
+                  )}
+                </div>
               </div>
             </section>
           )}

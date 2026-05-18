@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "0c903565",
-  "versionLabel": "v0.1.9.0c903565",
-  "versionInternal": "0.1.9+20260518.190057.0c903565",
-  "buildId": "0.1.9+20260518.190057.0c903565-20260518.190057-0c903565",
-  "builtAt": "2026-05-18T19:00:57.069Z",
-  "commitHash": "0c903565df250c5a8fe1163a7f0e095735091037",
-  "shortHash": "0c903565",
+  "versionDisplaySuffix": "b01e3e7c",
+  "versionLabel": "v0.1.9.b01e3e7c",
+  "versionInternal": "0.1.9+20260518.235031.b01e3e7c",
+  "buildId": "0.1.9+20260518.235031.b01e3e7c-20260518.235031-b01e3e7c",
+  "builtAt": "2026-05-18T23:50:31.317Z",
+  "commitHash": "b01e3e7c5243b86bfe34c1fbf80b38d1dcd9f7d4",
+  "shortHash": "b01e3e7c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "b01e3e7c5243b86bfe34c1fbf80b38d1dcd9f7d4",
+      "shortHash": "b01e3e7c",
+      "dateIso": "2026-05-18T16:03:31-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Improve destination admin form UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b01e3e7c5243b86bfe34c1fbf80b38d1dcd9f7d4"
+    },
     {
       "hash": "0c903565df250c5a8fe1163a7f0e095735091037",
       "shortHash": "0c903565",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Streamline destination city detail",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/58e8245eea79e5db8510861302987fcfb28c4852"
-    },
-    {
-      "hash": "11c3e7c8965fa035bd50f882339a9367866ef760",
-      "shortHash": "11c3e7c8",
-      "dateIso": "2026-05-17T08:17:11-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish destination mobile discovery UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/11c3e7c8965fa035bd50f882339a9367866ef760"
     }
   ]
 }
