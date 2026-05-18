@@ -46,6 +46,10 @@ export const validateCriticalRuntimeConfig = () => {
     }
   }
 
+  if (env.mfa.enabled && String(env.mfa.secretEncryptionKey || '').trim().length < 32) {
+    issues.push('MFA_SECRET_ENCRYPTION_KEY ausente ou curta demais para MFA_ENABLED=true');
+  }
+
   if (issues.length > 0) {
     throw new Error(`Invalid runtime configuration: ${issues.join('; ')}`);
   }

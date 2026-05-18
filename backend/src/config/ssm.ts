@@ -26,6 +26,33 @@ const parseJson = (raw: string) => {
     return null;
   }
 };
+
+type ApplySsmEnvOptions = {
+  shouldOverride?: boolean;
+  targetEnv?: NodeJS.ProcessEnv;
+};
+
+/**
+ * Applies parsed SSM JSON values to the target environment.
+ * Keys missing from SSM are intentionally left untouched so local/env fallback keeps working.
+ */
+export const applySsmEnvObject = (
+  parsed: Record<string, unknown>,
+  options: ApplySsmEnvOptions = {}
+) => {
+  const shouldOverride = options.shouldOverride ?? true;
+  const targetEnv = options.targetEnv || process.env;
+  const appliedKeys: string[] = [];
+
+  Object.entries(parsed).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    if (!shouldOverride && targetEnv[key]) return;
+    targetEnv[key] = String(value);
+    appliedKeys.push(key);
+  });
+
+  return appliedKeys;
+};
 /**
  * Loads ssm env.
  *
@@ -60,14 +87,8 @@ export const loadSsmEnv = async () => {
   }
 
   const shouldOverride = process.env.SSM_OVERRIDE !== 'false';
-  const appliedKeys: string[] = [];
   const overrides: Record<string, string> = {};
-  Object.entries(parsed).forEach(([key, value]) => {
-    if (value === undefined || value === null) return;
-    if (!shouldOverride && process.env[key]) return;
-    process.env[key] = String(value);
-    appliedKeys.push(key);
-  });
+  const appliedKeys = applySsmEnvObject(parsed, { shouldOverride });
 
   const runningInDocker = fs.existsSync('/.dockerenv') || process.env.DOCKER === 'true';
   if (!runningInDocker) {
