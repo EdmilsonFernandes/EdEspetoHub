@@ -72,7 +72,7 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
       <div className="motoboy-header-grid">
         <div className="flex items-center gap-3 min-w-0">
           <div className="grid h-11 w-11 sm:h-12 sm:w-12 rounded-[1.2rem] overflow-hidden shadow-[0_16px_28px_-22px_rgba(15,23,42,0.45)] shrink-0 bg-white border border-slate-200/80">
-            <img src="/logo.svg" alt="Já no Caminho" className="h-full w-full object-cover" />
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
           </div>
           <div className="min-w-0">
             <h1 className="premium-title text-lg sm:text-xl leading-tight break-words">{title}</h1>

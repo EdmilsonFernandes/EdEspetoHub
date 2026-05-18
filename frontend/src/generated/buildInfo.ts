@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "43b2d26e",
-  "versionLabel": "v0.1.9.43b2d26e",
-  "versionInternal": "0.1.9+20260518.173950.43b2d26e",
-  "buildId": "0.1.9+20260518.173950.43b2d26e-20260518.173950-43b2d26e",
-  "builtAt": "2026-05-18T17:39:50.775Z",
-  "commitHash": "43b2d26e2a5f2812e74c42a5527edcc4ebda4157",
-  "shortHash": "43b2d26e",
+  "versionDisplaySuffix": "1bda5340",
+  "versionLabel": "v0.1.9.1bda5340",
+  "versionInternal": "0.1.9+20260518.175229.1bda5340",
+  "buildId": "0.1.9+20260518.175229.1bda5340-20260518.175229-1bda5340",
+  "builtAt": "2026-05-18T17:52:29.420Z",
+  "commitHash": "1bda53409b673412d0e3ca1fdc56a79c3dc98706",
+  "shortHash": "1bda5340",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "1bda53409b673412d0e3ca1fdc56a79c3dc98706",
+      "shortHash": "1bda5340",
+      "dateIso": "2026-05-18T14:42:05-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Refine safe area glass brand color",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1bda53409b673412d0e3ca1fdc56a79c3dc98706"
+    },
     {
       "hash": "43b2d26e2a5f2812e74c42a5527edcc4ebda4157",
       "shortHash": "43b2d26e",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Add hospitality solution to landing",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0f900a2421b3387494037488f2b4e56b00f6189a"
-    },
-    {
-      "hash": "75220e6c1a27498a744ef53bdf703b7b43a61144",
-      "shortHash": "75220e6c",
-      "dateIso": "2026-05-13T13:16:07-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: route hospitality QR by device",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/75220e6c1a27498a744ef53bdf703b7b43a61144"
     }
   ]
 } as const;

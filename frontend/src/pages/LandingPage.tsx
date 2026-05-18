@@ -25,13 +25,11 @@ import {
   QrCode,
   Rocket,
   ShieldCheck,
-  Star,
   Storefront,
   TrendUp,
   User,
   UserCircle,
   UserPlus,
-  UsersThree,
   X,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
@@ -84,11 +82,11 @@ export function LandingPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    document.title = 'Já no Caminho | Sistema premium para vender, operar e entregar';
+    document.title = 'Já no Caminho | Venda online, organize pedidos e entregue melhor';
     const description =
-      'Plataforma premium para lojistas e destinos: cardápio online, pedidos em tempo real, entregas, pagamentos, condomínios, chalés, pousadas e hub de vendas.';
+      'Sistema para lojistas venderem online sem comissão por pedido: cardápio digital, pedidos em tempo real, entregadores, pagamentos, condomínios, chalés e turismo local.';
     upsertMeta('description', description, 'name');
-    upsertMeta('og:title', 'Já no Caminho | Sistema premium para vender, operar e entregar', 'property');
+    upsertMeta('og:title', 'Já no Caminho | Venda online, organize pedidos e entregue melhor', 'property');
     upsertMeta('og:description', description, 'property');
     upsertMeta('og:image', 'https://www.janocaminho.com.br/janocaminho.jpg', 'property');
     upsertMeta('og:type', 'website', 'property');
@@ -210,20 +208,14 @@ export function LandingPage() {
   const ctaPrimaryHref = 'mailto:contato@janocaminho.com.br';
 
   const features = [
-    { icon: ListChecks,    title: 'Pedidos em tempo real',   desc: 'Novos pedidos chegam na hora, atualizados em todos os dispositivos.', accent: 'sky' },
-    { icon: Package,       title: 'Fila de produção',        desc: 'Pendente, produzindo, pronto — controle visual de cada etapa.', accent: 'amber' },
-    { icon: Motorcycle,    title: 'Entregadores integrados', desc: 'Vincule entregadores à loja, ofereça corridas e acompanhe aceite, retirada e entrega.', accent: 'violet' },
-    { icon: CurrencyDollar,title: 'Pagamento online',        desc: 'Pix, crédito e débito com Mercado Pago da própria loja.', accent: 'emerald' },
-    { icon: ChartLine,     title: 'Dashboard analítico',     desc: 'Faturamento, ticket médio e comparativos por período.', accent: 'sky' },
-    { icon: MapPin,        title: 'Rastreamento',            desc: 'Clientes acompanham o pedido do preparo até a porta.', accent: 'rose' },
-    { icon: ShieldCheck,   title: 'Código de confirmação',  desc: 'Entrega validada com código de 4 dígitos. O cliente confirma o recebimento — sem contestação.', accent: 'emerald' },
-    { icon: Buildings,     title: 'Hub de condomínios',      desc: 'Vitrine própria em feiras e condomínios. Retirada ou entrega.', accent: 'indigo' },
-    { icon: QrCode,        title: 'QR para chalés e pousadas', desc: 'Hóspedes escaneiam e encontram delivery, serviços, passeios e lugares próximos.', accent: 'emerald' },
-    { icon: Desktop,       title: 'Multi-dispositivo',       desc: 'Admin no PC, app mobile para o time, PWA instalável.', accent: 'sky' },
-    { icon: Bell,          title: 'Notificações push',       desc: 'Lojista, entregador e cliente recebem o alerta certo em cada etapa do pedido.', accent: 'amber' },
-    { icon: UsersThree,    title: 'Multi-usuário',           desc: 'Admin, operador e lojista com acessos distintos.', accent: 'violet' },
-    { icon: Star,          title: 'Destaque na plataforma',  desc: 'Promova sua loja com destaque pago no marketplace.', accent: 'amber' },
-    { icon: TrendUp,       title: 'Marketplace público',     desc: 'Sua loja visível para todos os clientes da plataforma.', accent: 'emerald' },
+    { icon: ListChecks, title: 'Pedido online sem improviso', desc: 'O cliente pede pelo link ou app e a loja acompanha tudo em tempo real.', accent: 'sky' },
+    { icon: Package, title: 'Produção e impressão organizadas', desc: 'Fila visual para preparar, imprimir, separar e finalizar sem perder pedido.', accent: 'amber' },
+    { icon: Motorcycle, title: 'Entregadores no fluxo', desc: 'Vincule entregadores, ofereça corridas e acompanhe aceite, retirada e entrega.', accent: 'violet' },
+    { icon: CurrencyDollar, title: 'Pagamento flexível', desc: 'Pix, crédito, débito ou pagamento presencial, com Mercado Pago da própria loja.', accent: 'emerald' },
+    { icon: Bell, title: 'Push para quem precisa agir', desc: 'Lojista, cliente e entregador recebem o aviso certo em cada etapa.', accent: 'amber' },
+    { icon: ShieldCheck, title: 'Entrega com confirmação', desc: 'Código de 4 dígitos reduz confusão e confirma que o pedido chegou ao cliente.', accent: 'emerald' },
+    { icon: Buildings, title: 'Condomínios e feiras', desc: 'Vitrine local para eventos, retirada, barracas e entrega em condomínios.', accent: 'indigo' },
+    { icon: QrCode, title: 'Chalés, pousadas e turismo', desc: 'QR no chalé mostra delivery, serviços, passeios e lojas que atendem a região.', accent: 'emerald' },
   ];
 
   const notificationFlow = [
@@ -271,8 +263,8 @@ export function LandingPage() {
   };
   const heroHighlights = [
     { icon: ShieldCheck, title: '0% comissão por pedido', desc: 'Mensalidade fixa e previsível para a operação.' },
-    { icon: CurrencyDollar, title: 'Dinheiro direto na sua conta', desc: 'Pix, crédito e débito no fluxo do pedido.' },
-    { icon: Bell, title: 'Loja, cliente e entrega sincronizados', desc: 'Alertas e status em tempo real para cada etapa.' },
+    { icon: Package, title: 'Pedido pronto para produzir', desc: 'Cardápio, checkout e impressão no mesmo fluxo.' },
+    { icon: Motorcycle, title: 'Entrega conectada à loja', desc: 'Entregador recebe oferta, aceita e atualiza o cliente.' },
   ];
 
   return (
@@ -297,20 +289,20 @@ export function LandingPage() {
               <div className="animate-in fade-in slide-in-from-top-3 duration-700">
                 <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/24 bg-white/[0.04] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-sky-200 backdrop-blur-md shadow-[0_14px_30px_-20px_rgba(14,165,233,0.28)]">
                   <Rocket size={12} weight="duotone" className="animate-pulse" />
-                  Plataforma premium para vender, operar e entregar
+                  Venda online, operação e entrega em um só lugar
                 </span>
               </div>
 
               {/* Headline */}
               <div className="animate-in fade-in slide-in-from-top-5 duration-700 delay-100 space-y-5">
                 <h1 className="mx-auto max-w-4xl text-[2.75rem] font-black leading-[1.03] tracking-[-0.045em] text-white sm:text-[4.25rem] lg:mx-0 lg:max-w-[48rem] xl:text-[5.85rem]">
-                  Venda online sem pagar<br />
+                  Venda online, organize pedidos<br />
                   <span className="animate-text-gradient bg-gradient-to-r from-emerald-400 via-sky-400 to-emerald-400 bg-clip-text text-transparent">
-                    comissão por pedido.
+                    e entregue melhor.
                   </span>
                 </h1>
                 <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-300 lg:mx-0 sm:text-[1.15rem] sm:leading-8">
-                  Cardápio online, pedidos ao vivo, entrega com código de confirmação e pagamento direto na sua conta, com uma operação clara do primeiro clique ao pós-entrega.
+                  O cliente compra pelo app ou link, a loja recebe o pedido no painel, o entregador é acionado e tudo fica rastreável do preparo até a confirmação final.
                 </p>
               </div>
 
@@ -330,7 +322,7 @@ export function LandingPage() {
                   className="inline-flex items-center justify-center gap-2 rounded-[1.35rem] border border-white/12 bg-white/[0.05] px-8 py-4 text-base font-black text-white backdrop-blur-md transition-all hover:bg-white/[0.1] active:scale-[0.98]"
                 >
                   <EnvelopeSimple size={17} weight="duotone" className="text-sky-300" />
-                  Fale por e-mail
+                  Quero ajuda para ativar
                 </a>
               </div>
 
@@ -780,10 +772,10 @@ export function LandingPage() {
           <div className="mb-16 text-center space-y-4">
             <p className="text-[11px] font-black uppercase tracking-[0.4em] text-sky-400">Tudo incluso</p>
             <h2 className="text-3xl font-black leading-tight text-white sm:text-5xl">
-              Não é só um cardápio online.<br className="hidden sm:block" /> É uma operação completa.
+              O essencial para vender,<br className="hidden sm:block" /> operar e entregar.
             </h2>
             <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-400 sm:text-lg">
-              De pedidos a entregas, de pagamentos a análises — cada recurso foi pensado para o comerciante brasileiro.
+              Menos módulos soltos, mais fluxo prático: pedido entra, a loja produz, o entregador recebe e o cliente acompanha.
             </p>
           </div>
 
@@ -813,7 +805,7 @@ export function LandingPage() {
               onClick={() => navigate('/create?plan=trial')}
               className="inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-sm font-black text-slate-950 shadow-[0_20px_40px_-15px_rgba(255,255,255,0.18)] transition-all hover:scale-[1.01] active:scale-[0.98]"
             >
-              Experimente tudo por 7 dias
+              Começar com 7 dias grátis
               <ArrowRight size={16} weight="bold" />
             </button>
             <a
@@ -843,7 +835,7 @@ export function LandingPage() {
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-600">Comércio hiperlocal</p>
                 <h3 className="mt-1 text-lg font-black leading-tight text-slate-950 sm:text-xl">Sua loja também vende dentro de condomínios.</h3>
                 <p className="mt-1.5 max-w-lg text-sm font-medium leading-relaxed text-slate-600">
-                  Feiras, eventos e comércios de bairro ganham vitrine própria no Hub. Cliente escolhe o condomínio e faz o pedido pelo mesmo fluxo.
+                  Feiras, eventos e comércios de bairro ganham vitrine própria no app. Cliente escolhe o condomínio e faz o pedido pelo mesmo fluxo.
                 </p>
                 <p className="mt-2 text-xs font-semibold text-slate-500">
                   Já é responsável por um condomínio? Use o login do condomínio para entrar no painel. Se ainda não recebeu acesso, faça a solicitação.
@@ -879,7 +871,7 @@ export function LandingPage() {
                 onClick={() => navigate('/hub')}
                 className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
               >
-                Ver Hub
+                Ver app
               </button>
             </div>
           </div>
@@ -1039,7 +1031,7 @@ export function LandingPage() {
               O Já no Caminho funciona como app, hub e vitrine online.
             </h2>
             <p className="text-sm font-medium leading-7 text-slate-600 sm:text-base">
-              No Android, baixe direto pela Google Play. No iPhone, a experiência segue pelo navegador com acesso rápido ao Hub enquanto a versão iOS não chega.
+              No Android, baixe direto pela Google Play. No iPhone, a experiência segue pelo navegador com acesso rápido ao app web enquanto a versão iOS não chega.
             </p>
           </div>
 
@@ -1104,7 +1096,7 @@ export function LandingPage() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-800 transition-colors hover:bg-slate-50"
                 >
                   <Storefront size={16} weight="duotone" />
-                  Acessar Hub web
+                  Acessar app web
                 </button>
               </div>
 
@@ -1146,7 +1138,7 @@ export function LandingPage() {
               <ol className="mt-5 space-y-3 text-sm text-slate-600">
                 {[
                   <span>Android: baixe pelo botão acima ou escaneie o QR code.</span>,
-                  <span>iPhone: acesse pelo Safari e adicione o Hub à tela inicial.</span>,
+                  <span>iPhone: acesse pelo Safari e adicione o app web à tela inicial.</span>,
                   <span>Lojista e cliente entram pelo mesmo app, cada um com sua área.</span>,
                 ].map((text, i) => (
                   <li key={i} className="flex items-start gap-2.5">

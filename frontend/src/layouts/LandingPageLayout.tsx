@@ -158,11 +158,11 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   };
 
   const solutionsLinks = [
-    { id: 'marketplace', label: 'Hub', helper: 'Cliente, lojista e entregador no mesmo fluxo', onClick: () => navigate('/hub') },
-    { id: 'condominiums', label: 'Condomínios', helper: 'Área para condomínios, feiras e operação local', onClick: goToCondominiumRequest },
+    { id: 'marketplace', label: 'App do cliente', helper: 'Cliente compra, loja recebe e entregador acompanha no mesmo fluxo', onClick: () => navigate('/hub') },
+    { id: 'condominiums', label: 'Condomínios e feiras', helper: 'Vitrine local para eventos, barracas, retirada e entrega', onClick: goToCondominiumRequest },
     { id: 'hospitality', label: 'Chalés e pousadas', helper: 'QR para hóspedes encontrarem delivery, serviços e turismo local', onClick: goToHospitalitySolution },
-    { id: 'guide', label: 'Guia', helper: 'Fluxos, recursos e visão operacional da plataforma', onClick: () => navigate('/guia') },
-    { id: 'architecture', label: 'Arquitetura', helper: 'Base técnica, produto e evolução da solução', onClick: () => navigate('/arquitetura') },
+    { id: 'guide', label: 'Como funciona', helper: 'Fluxos principais para vender, operar e entregar', onClick: () => navigate('/guia') },
+    { id: 'architecture', label: 'Tecnologia', helper: 'Base técnica, segurança e evolução da plataforma', onClick: () => navigate('/arquitetura') },
   ];
 
   const goHome = () => {
@@ -178,7 +178,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       { id: 'home', label: 'Início', icon: House, onClick: () => navigate('/'), active: location.pathname === '/' },
       {
         id: 'hub',
-        label: 'Hub',
+        label: 'App',
         icon: MagnifyingGlass,
         onClick: () => navigate('/hub'),
         active: location.pathname === '/hub' || location.pathname === '/marketplace' || location.pathname === '/descobrir' || location.pathname === '/praca',
@@ -257,8 +257,8 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                     <div className="absolute left-1/2 top-full z-[90] w-[24rem] -translate-x-1/2 pt-3">
                       <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(10,16,29,0.98)_0%,rgba(7,12,24,0.98)_100%)] p-2.5 shadow-[0_32px_70px_-32px_rgba(2,6,23,0.92)] backdrop-blur-xl">
                         <div className="border-b border-white/6 px-3.5 pb-3 pt-1">
-                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Plataforma</p>
-                          <p className="mt-1 text-sm font-semibold text-white">Entradas organizadas para operação, expansão e aquisição.</p>
+                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Soluções</p>
+                          <p className="mt-1 text-sm font-semibold text-white">Comece vendendo e expanda para entrega, condomínio e turismo local.</p>
                         </div>
                         <div className="mt-2 space-y-1">
                           {solutionsLinks.map((item) => (
@@ -389,7 +389,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               onClick={() => navigate('/hub')}
               className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
             >
-              Hub Já no Caminho
+              Abrir app do cliente
               <MagnifyingGlass size={18} weight="duotone" />
             </button>
             <button
