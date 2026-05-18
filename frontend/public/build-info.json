@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "17a1c1f8",
-  "versionLabel": "v0.1.9.17a1c1f8",
-  "versionInternal": "0.1.9+20260518.150727.17a1c1f8",
-  "buildId": "0.1.9+20260518.150727.17a1c1f8-20260518.150727-17a1c1f8",
-  "builtAt": "2026-05-18T15:07:27.429Z",
-  "commitHash": "17a1c1f89f983ef2e449337e21a0cd32e08cb114",
-  "shortHash": "17a1c1f8",
+  "versionDisplaySuffix": "43d72817",
+  "versionLabel": "v0.1.9.43d72817",
+  "versionInternal": "0.1.9+20260518.153045.43d72817",
+  "buildId": "0.1.9+20260518.153045.43d72817-20260518.153045-43d72817",
+  "builtAt": "2026-05-18T15:30:45.867Z",
+  "commitHash": "43d728175e14874b0d7931e1fe4fa7c916d07918",
+  "shortHash": "43d72817",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "43d728175e14874b0d7931e1fe4fa7c916d07918",
+      "shortHash": "43d72817",
+      "dateIso": "2026-05-18T12:14:59-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Expose MFA in account settings",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/43d728175e14874b0d7931e1fe4fa7c916d07918"
+    },
     {
       "hash": "17a1c1f89f983ef2e449337e21a0cd32e08cb114",
       "shortHash": "17a1c1f8",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Fix destination mobile overflow",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e5250634a17c90709ce3fc51b6c1ed17342194d5"
-    },
-    {
-      "hash": "c7f7e291007754a75918813ec395e9ed6a6dc221",
-      "shortHash": "c7f7e291",
-      "dateIso": "2026-05-13T10:11:44-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve destination pre-store conversion flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c7f7e291007754a75918813ec395e9ed6a6dc221"
     }
   ]
 }

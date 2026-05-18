@@ -3030,7 +3030,7 @@ export function MarketplacePage() {
           </div>
         </header>
 
-        <main className={`mx-auto flex max-w-[1200px] flex-col gap-6 px-4 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
+        <main className={`mx-auto flex max-w-[1200px] flex-col gap-4 px-4 sm:gap-5 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
           {/* Acompanhamento anonimo salvo neste navegador */}
           {!isCustomerLogged && visibleActiveAnonymousOrders.length > 0 && (
             <div className="order-1 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -3184,7 +3184,7 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
-            <section className="order-9 mb-5 overflow-hidden rounded-[1.85rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(248,250,252,0.9)_100%)] p-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] ring-1 ring-white/80 backdrop-blur-xl">
+            <section className="order-8 overflow-hidden rounded-[1.85rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(248,250,252,0.9)_100%)] p-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] ring-1 ring-white/80 backdrop-blur-xl">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-500">
@@ -3234,7 +3234,7 @@ export function MarketplacePage() {
           {debouncedQuery.length < 2 && condominiums.length > 0 && (
             <>
             <section
-              className={selectedCondominium ? 'order-2 sticky top-[max(env(safe-area-inset-top),0.65rem)] z-30 mb-4' : 'order-8 mb-6'}
+              className={selectedCondominium ? 'order-2 sticky top-[max(env(safe-area-inset-top),0.65rem)] z-30 mb-4' : 'order-9'}
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               {selectedCondominium ? (
@@ -3435,9 +3435,9 @@ export function MarketplacePage() {
           )}
 
           {/* Seção Categorias Premium Squircle */}
-          <section className="order-4 relative mb-6" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+          <section className="order-4 relative" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Categorias</p>
-            <div className="-mx-4 mb-6 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 py-1.5">
+            <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 py-1.5">
               <button
                 type="button"
                 className="group flex min-w-[58px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
@@ -3489,7 +3489,7 @@ export function MarketplacePage() {
           {/* Banner de Destaques Premium - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && (
             <section
-              className="order-7 mb-6 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-3 py-2.5 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl"
+              className="order-7 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-3 py-2.5 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl"
               style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               <div className="flex items-center justify-between gap-3 px-1">
@@ -3576,7 +3576,7 @@ export function MarketplacePage() {
           )}
 
           {favoriteStores.length > 0 && debouncedQuery.length < 2 && (
-            <section className="order-5 mb-8 space-y-3" style={{ transition: 'all .45s ease', transitionDelay: '300ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+            <section className="order-5 space-y-3" style={{ transition: 'all .45s ease', transitionDelay: '300ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
               <div className="flex items-center justify-between">
                 <h2 className="text-base sm:text-lg font-black text-slate-900">Minhas favoritas</h2>
                 <button
@@ -3614,7 +3614,7 @@ export function MarketplacePage() {
             </section>
           )}
 
-          <section ref={storesSectionRef} className="order-6 mb-8 space-y-4" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+          <section ref={storesSectionRef} className="order-6 space-y-3.5" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <div className="flex items-center justify-between gap-2">
               <div>
                 <div className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-500">
@@ -4099,7 +4099,7 @@ export function MarketplacePage() {
                 <button
                   type="button"
                   onClick={enableAllStoresView}
-                  className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] bg-[#153A4C] px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-[0_16px_32px_-22px_rgba(21,58,76,0.7)] transition active:scale-[0.98]"
+                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] bg-[#153A4C] px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-[0_16px_32px_-22px_rgba(21,58,76,0.7)] transition active:scale-[0.98]"
                 >
                   Ver todas as lojas
                   <span className="rounded-full bg-white/14 px-2 py-0.5 text-[10px]">{hiddenHomeStoreCount}+</span>
@@ -4111,7 +4111,7 @@ export function MarketplacePage() {
 
           {/* Nova Seção: Itens encontrados na busca */}
           {debouncedQuery.length >= 2 && searchedProducts.length > 0 && (
-            <section className="order-10 mb-8 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <section className="order-10 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-[15px] font-black tracking-tight text-slate-950">
                   Itens encontrados que você busca
@@ -4166,7 +4166,7 @@ export function MarketplacePage() {
           )}
 
           {/* Banner: convite para lojistas */}
-          <section className="order-11 px-3 pb-3 pt-1">
+          <section className="order-11 px-3 pb-2 pt-0">
             <button
               type="button"
               onClick={() => navigate('/create?plan=trial')}
