@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "5499e29a",
-  "versionLabel": "v0.1.9.5499e29a",
-  "versionInternal": "0.1.9+20260518.164442.5499e29a",
-  "buildId": "0.1.9+20260518.164442.5499e29a-20260518.164442-5499e29a",
-  "builtAt": "2026-05-18T16:44:42.328Z",
-  "commitHash": "5499e29ad5e62c3b3bfa12608658b50bd804939a",
-  "shortHash": "5499e29a",
+  "versionDisplaySuffix": "1458423d",
+  "versionLabel": "v0.1.9.1458423d",
+  "versionInternal": "0.1.9+20260518.165625.1458423d",
+  "buildId": "0.1.9+20260518.165625.1458423d-20260518.165625-1458423d",
+  "builtAt": "2026-05-18T16:56:25.030Z",
+  "commitHash": "1458423df7625aeb5747ba8309ebb0628b36134f",
+  "shortHash": "1458423d",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "1458423df7625aeb5747ba8309ebb0628b36134f",
+      "shortHash": "1458423d",
+      "dateIso": "2026-05-18T13:48:18-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Refine native safe area glass styling",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1458423df7625aeb5747ba8309ebb0628b36134f"
+    },
     {
       "hash": "5499e29ad5e62c3b3bfa12608658b50bd804939a",
       "shortHash": "5499e29a",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: point hospitality QR poster to Play Store",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9936a8ff55f3f7da3f575e9c86cc942d253a83e7"
-    },
-    {
-      "hash": "9395bd889783d44557dc8494f38ee88530ca69ff",
-      "shortHash": "9395bd88",
-      "dateIso": "2026-05-13T12:40:15-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: add hospitality QR poster generation",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9395bd889783d44557dc8494f38ee88530ca69ff"
     }
   ]
 }

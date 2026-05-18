@@ -97,4 +97,22 @@ describe('AccountMfaPanel', () => {
       expect(authServiceMock.confirmMfaSetup).toHaveBeenCalledWith('654321', { authMode: 'admin' });
     });
   });
+
+  it('opens directly in setup when the caller requests activation for a disabled account', async () => {
+    const onStatusChange = vi.fn();
+
+    render(<AccountMfaPanel open authMode="customer" initialIntent="setup" onStatusChange={onStatusChange} onClose={vi.fn()} />);
+
+    expect(await screen.findByAltText(/QR Code para ativar/i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(authServiceMock.startMfaSetup).toHaveBeenCalledWith({ authMode: 'customer' });
+      expect(onStatusChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          enabled: false,
+          featureEnabled: true,
+        }),
+      );
+    });
+  });
 });

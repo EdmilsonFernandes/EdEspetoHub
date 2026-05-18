@@ -28,6 +28,7 @@ import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AccountMfaPanel } from '../components/Auth/AccountMfaPanel';
+import { authService } from '../services/authService';
 
 // Componente Switch Simples
 function Switch({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
@@ -72,6 +73,9 @@ export function ClientAccount() {
   const [biometricBusy, setBiometricBusy] = useState(false);
   const [biometricMessage, setBiometricMessage] = useState('');
   const [mfaPanelOpen, setMfaPanelOpen] = useState(false);
+  const [mfaPanelIntent, setMfaPanelIntent] = useState<'overview' | 'setup' | 'disable'>('overview');
+  const [mfaStatus, setMfaStatus] = useState<any | null>(null);
+  const [mfaStatusLoading, setMfaStatusLoading] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [phoneDraft, setPhoneDraft] = useState('');
   const settingsSectionRef = useRef<HTMLElement | null>(null);
@@ -197,6 +201,29 @@ export function ClientAccount() {
       settingsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 120);
   }, [loading, searchParams]);
+
+  useEffect(() => {
+    if (loading || !settingsOnly) return;
+    let mounted = true;
+    setMfaStatusLoading(true);
+    authService
+      .getMfaStatus({ authMode: 'customer' })
+      .then((nextStatus) => {
+        if (!mounted) return;
+        setMfaStatus(nextStatus || null);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setMfaStatus(null);
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setMfaStatusLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [loading, settingsOnly]);
 
   const logout = () => {
     const token = String(localStorage.getItem('jnk_mobile_push_token') || '').trim();
@@ -515,6 +542,37 @@ export function ClientAccount() {
     : '';
   const normalizedPhoneLabel = String(formatPhoneInput(phoneDraft || me?.phone || '') || '').trim();
   const memberSinceLabel = me?.createdAt ? formatDate(me.createdAt) : '';
+  const mfaFeatureDisabled = mfaStatus?.featureEnabled === false;
+  const mfaEnabled = Boolean(mfaStatus?.enabled);
+  const mfaStatusLabel = mfaStatusLoading
+    ? 'Verificando'
+    : mfaFeatureDisabled
+      ? 'Indisponível'
+      : mfaEnabled
+        ? 'Ativado'
+        : 'Desativado';
+  const mfaStatusTone = mfaStatusLoading
+    ? 'border-slate-200 bg-white/80 text-slate-500'
+    : mfaFeatureDisabled
+      ? 'border-slate-200 bg-slate-100 text-slate-500'
+      : mfaEnabled
+        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+        : 'border-[#BFDDEB] bg-white/80 text-[#153A4C]';
+  const mfaCardTone = mfaEnabled
+    ? 'border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.86),rgba(255,255,255,0.97))]'
+    : mfaFeatureDisabled
+      ? 'border-slate-100 bg-slate-50'
+      : 'border-[#D8EAF2] bg-[linear-gradient(135deg,rgba(234,246,251,0.88),rgba(255,255,255,0.98))]';
+  const mfaDescription = mfaEnabled
+    ? 'Proteção ativa para novos aparelhos. Toque para ver aparelhos confiáveis e opções de segurança.'
+    : mfaFeatureDisabled
+      ? 'A equipe Já no Caminho ainda não liberou essa proteção para sua conta.'
+      : 'Ative um código no app autenticador e proteja seu login em aparelhos novos.';
+  const openMfaFromSettings = () => {
+    if (mfaStatusLoading || mfaFeatureDisabled) return;
+    setMfaPanelIntent(mfaEnabled ? 'overview' : 'setup');
+    setMfaPanelOpen(true);
+  };
   const accountOverviewCards = [
     {
       id: 'orders',
@@ -846,26 +904,33 @@ export function ClientAccount() {
             </div>
 
             <div className="relative mt-5 grid gap-3">
-              <div className="flex flex-col gap-3 rounded-[1.45rem] border border-[#336886]/15 bg-[#336886]/[0.06] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+              <button
+                type="button"
+                onClick={openMfaFromSettings}
+                disabled={mfaStatusLoading || mfaFeatureDisabled}
+                className={`group flex w-full flex-col gap-3 rounded-[1.45rem] border px-4 py-3.5 text-left shadow-[0_18px_42px_-34px_rgba(15,23,42,0.42)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-80 sm:flex-row sm:items-center sm:justify-between ${mfaCardTone}`}
+              >
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#336886] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-[#336886] shadow-[0_12px_28px_-20px_rgba(15,23,42,0.34)]">
                     <ShieldCheck size={18} weight="duotone" className="text-[#336886]" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-[12px] font-black uppercase tracking-[0.14em] text-slate-800">Segurança da conta</p>
-                    <p className="mt-0.5 text-[10px] font-bold leading-tight text-slate-500">
-                      Verificação em duas etapas e aparelhos confiáveis.
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-[12px] font-black uppercase tracking-[0.14em] text-slate-800">Segurança da conta</p>
+                      <span className={`inline-flex rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] ${mfaStatusTone}`}>
+                        {mfaStatusLabel}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[10px] font-bold leading-snug text-slate-500">
+                      {mfaDescription}
                     </p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setMfaPanelOpen(true)}
-                  className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-[#153A4C] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-[0_16px_32px_-24px_rgba(21,58,76,0.75)] transition active:scale-95"
-                >
-                  Gerenciar
-                </button>
-              </div>
+                <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-2xl bg-[#153A4C] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-[0_16px_32px_-24px_rgba(21,58,76,0.75)] transition group-disabled:bg-slate-300 group-disabled:text-slate-600">
+                  {mfaStatusLoading ? 'Aguarde' : mfaEnabled ? 'Gerenciar' : 'Ativar'}
+                  {!mfaStatusLoading && !mfaFeatureDisabled ? <CaretRight size={12} weight="bold" /> : null}
+                </span>
+              </button>
 
               {biometricSupported ? (
                 <div className={`flex flex-col gap-3 rounded-[1.45rem] border px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between ${
@@ -973,7 +1038,13 @@ export function ClientAccount() {
         cancelLabel="Não, manter conta"
         variant="danger"
       />
-      <AccountMfaPanel open={mfaPanelOpen} authMode="customer" onClose={() => setMfaPanelOpen(false)} />
+      <AccountMfaPanel
+        open={mfaPanelOpen}
+        authMode="customer"
+        initialIntent={mfaPanelIntent}
+        onStatusChange={setMfaStatus}
+        onClose={() => setMfaPanelOpen(false)}
+      />
     </main>
   );
 }

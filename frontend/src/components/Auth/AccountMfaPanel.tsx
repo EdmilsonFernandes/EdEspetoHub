@@ -1,17 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Copy, DeviceMobile, LockKey, QrCode, ShieldCheck, Trash, WarningCircle, X } from '@phosphor-icons/react';
 import { authService } from '../../services/authService';
 import { forgetTrustedMfaDevice } from '../../utils/mfaDevice';
 
+type PanelMode = 'overview' | 'setup' | 'disable';
+
 type Props = {
   open: boolean;
   authMode?: 'admin' | 'customer' | 'motoboy' | 'superadmin';
+  initialIntent?: PanelMode;
+  onStatusChange?: (status: any) => void;
   onClose: () => void;
 };
 
-type PanelMode = 'overview' | 'setup' | 'disable';
-
-export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
+export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'overview', onStatusChange, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<any | null>(null);
   const [devices, setDevices] = useState<any[]>([]);
@@ -23,38 +25,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  const load = async () => {
-    if (!open) return;
-    setLoading(true);
-    setError('');
-    try {
-      const [nextStatus, nextDevices] = await Promise.all([
-        authService.getMfaStatus({ authMode }),
-        authService.listTrustedDevices({ authMode }),
-      ]);
-      setStatus(nextStatus);
-      setDevices(Array.isArray(nextDevices) ? nextDevices : []);
-    } catch (err: any) {
-      setError(err?.message || 'Nao foi possivel carregar a seguranca da conta.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!open) return;
-    setMode('overview');
-    setSetup(null);
-    setSetupCode('');
-    setDisableCode('');
-    setCopiedSecret(false);
-    void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, authMode]);
-
-  if (!open) return null;
-
-  const startSetup = async () => {
+  const startSetup = useCallback(async () => {
     setLoading(true);
     setError('');
     setMessage('');
@@ -69,7 +40,56 @@ export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authMode]);
+
+  const load = useCallback(async () => {
+    if (!open) return null;
+    setLoading(true);
+    setError('');
+    try {
+      const [nextStatus, nextDevices] = await Promise.all([
+        authService.getMfaStatus({ authMode }),
+        authService.listTrustedDevices({ authMode }),
+      ]);
+      setStatus(nextStatus);
+      onStatusChange?.(nextStatus);
+      setDevices(Array.isArray(nextDevices) ? nextDevices : []);
+      return nextStatus;
+    } catch (err: any) {
+      setError(err?.message || 'Nao foi possivel carregar a seguranca da conta.');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [authMode, onStatusChange, open]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    setMode('overview');
+    setSetup(null);
+    setSetupCode('');
+    setDisableCode('');
+    setCopiedSecret(false);
+    setMessage('');
+    setError('');
+    void (async () => {
+      const nextStatus = await load();
+      if (cancelled || !nextStatus) return;
+      if (initialIntent === 'setup' && nextStatus.featureEnabled !== false && !nextStatus.enabled) {
+        await startSetup();
+        return;
+      }
+      if (initialIntent === 'disable' && nextStatus.enabled) {
+        setMode('disable');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [initialIntent, load, open, startSetup]);
+
+  if (!open) return null;
 
   const confirmSetup = async () => {
     const cleanCode = setupCode.replace(/\D/g, '');
@@ -79,6 +99,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
     try {
       const nextStatus = await authService.confirmMfaSetup(cleanCode, { authMode });
       setStatus(nextStatus);
+      onStatusChange?.(nextStatus);
       setSetup(null);
       setSetupCode('');
       setMode('overview');
@@ -99,6 +120,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', onClose }: Props) {
     try {
       const nextStatus = await authService.disableMfa(cleanCode, { authMode });
       setStatus(nextStatus);
+      onStatusChange?.(nextStatus);
       setDisableCode('');
       setMode('overview');
       setMessage('Verificacao em duas etapas desativada para esta conta.');
