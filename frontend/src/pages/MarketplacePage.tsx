@@ -3173,14 +3173,14 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
-            <section className="mb-5 overflow-hidden rounded-[1.85rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(248,250,252,0.9)_100%)] p-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.38)] ring-1 ring-white/70 backdrop-blur-xl">
+            <section className="mb-5 overflow-hidden rounded-[1.85rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(248,250,252,0.9)_100%)] p-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] ring-1 ring-white/80 backdrop-blur-xl">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="inline-flex items-center gap-1.5 rounded-full bg-[#153A4C]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#153A4C]">
+                  <p className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-500">
                     <Mountains size={12} weight="duotone" />
                     Destinos
                   </p>
-                  <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Cidades para explorar</h2>
+                  <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-[#0F172A]">Cidades para explorar</h2>
                 </div>
                 <Link to={destinationListHref} className="shrink-0 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white">
                   Ver todos
@@ -3199,16 +3199,16 @@ export function MarketplacePage() {
                     <Link
                       key={destination.id || destination.slug}
                       to={`/destinos/${destination.slug}`}
-                      className={`group flex shrink-0 flex-col overflow-hidden rounded-[1.35rem] border border-white/80 bg-white text-left shadow-[0_16px_34px_-28px_rgba(15,23,42,0.45)] ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-[0_22px_44px_-30px_rgba(15,23,42,0.5)] active:scale-[0.99] ${index === 0 ? 'w-[16.5rem]' : 'w-[14.25rem]'}`}
+                      className={`group flex shrink-0 flex-col overflow-hidden rounded-[1.35rem] bg-white text-left shadow-[0_4px_20px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(15,23,42,0.08)] active:scale-[0.99] ${index === 0 ? 'w-[16.5rem]' : 'w-[14.25rem]'}`}
                     >
                       <div className={`relative overflow-hidden bg-slate-100 ${index === 0 ? 'h-20' : 'h-16'}`}>
                         <img src={resolveDestinationAssetUrl(destination)} alt={String(destination.name || 'Destino')} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.02)_0%,rgba(15,23,42,0.22)_100%)]" />
                       </div>
-                      <div className="min-w-0 p-2.5">
-                        <p className="line-clamp-1 text-sm font-black tracking-[-0.02em] text-slate-950">{destination.name}</p>
+                      <div className="min-w-0 p-3">
+                        <p className="line-clamp-1 text-sm font-black tracking-[-0.02em] text-[#0F172A]">{destination.name}</p>
                         <p className="mt-0.5 line-clamp-1 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">{formatDestinationMatchLabel(destination)}</p>
-                        <p className="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-[#153A4C]/7 px-2 py-1 text-[10px] font-black text-[#153A4C]">
+                        <p className="mt-1.5 inline-flex max-w-full items-center gap-1 text-[10px] font-bold text-slate-500">
                           <Sparkle size={10} weight="fill" />
                           <span className="truncate">{countLabel}</span>
                         </p>
@@ -3319,7 +3319,7 @@ export function MarketplacePage() {
                   </div>
                 </div>
               ) : (
-                <section className="overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white/88 p-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.34)] ring-1 ring-white/70 backdrop-blur-xl">
+                <section className="overflow-hidden rounded-[1.7rem] bg-white/92 p-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] ring-1 ring-white/80 backdrop-blur-xl">
                   {(() => {
                     const liveCount = condominiums.filter(c => c.eventSummary?.state === 'live').length;
                     return (
@@ -3327,7 +3327,7 @@ export function MarketplacePage() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                              <p className="inline-flex items-center gap-1.5 rounded-full bg-[#153A4C]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#153A4C]">
+                              <p className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-500">
                                 <CalendarBlank size={12} weight="duotone" />
                                 Feiras e eventos
                               </p>
@@ -3341,7 +3341,7 @@ export function MarketplacePage() {
                                 </span>
                               ) : null}
                             </div>
-                            <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-slate-950">Agenda em condomínios</h2>
+                            <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-[#0F172A]">Agenda em condomínios</h2>
                           </div>
                           <button
                             type="button"
@@ -3372,11 +3372,11 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleCondominiumSelection(slug, name, event)}
-                                className="group relative min-w-[16.25rem] overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(135deg,rgba(248,250,252,0.96)_0%,rgba(255,255,255,0.98)_58%,rgba(240,249,255,0.82)_100%)] p-3 text-left shadow-[0_14px_30px_-26px_rgba(15,23,42,0.32)] transition hover:border-[#153A4C]/18 hover:bg-white active:scale-[0.99]"
+                                className="group relative min-w-[16.25rem] overflow-hidden rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(248,250,252,0.98)_0%,rgba(255,255,255,0.99)_58%,rgba(240,249,255,0.78)_100%)] p-3.5 text-left shadow-[0_4px_20px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(15,23,42,0.08)] active:scale-[0.99]"
                               >
                                 <div className="pointer-events-none absolute -right-5 -top-6 h-16 w-16 rounded-full bg-[#336886]/10 blur-2xl transition group-hover:bg-[#336886]/16" />
                                 <div className="relative flex items-start gap-2.5">
-                                  <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-[1rem] bg-white shadow-sm ring-1 ring-slate-100">
+                                  <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-[1rem] bg-white shadow-[0_4px_14px_rgba(15,23,42,0.06)] ring-1 ring-white/80">
                                     <img
                                       src={logoUrl || bannerUrl}
                                       alt={name}
@@ -3402,8 +3402,8 @@ export function MarketplacePage() {
                                       </span>
                                       <span className="min-w-0 truncate text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">{region || 'Operação local'}</span>
                                     </div>
-                                    <p className="mt-1 line-clamp-1 text-sm font-black text-slate-950">{name}</p>
-                                    <p className="mt-0.5 inline-flex max-w-full items-center gap-1 text-[10px] font-black text-[#153A4C]">
+                                    <p className="mt-1 line-clamp-1 text-sm font-black text-[#0F172A]">{name}</p>
+                                    <p className="mt-0.5 inline-flex max-w-full items-center gap-1 text-[10px] font-bold text-slate-500">
                                       {eventState === 'live' ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" /> : <Clock size={10} weight="bold" className="shrink-0" />}
                                       <span className="truncate">{agendaLine}</span>
                                       <CaretRight size={10} weight="bold" className="shrink-0" />
