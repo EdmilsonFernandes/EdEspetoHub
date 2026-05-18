@@ -127,7 +127,7 @@ export function SegmentPromoCarousel({
 
   const content = (
     <>
-      <div className={`relative ${compact ? 'aspect-[16/7.8]' : 'aspect-[16/6.8] sm:aspect-[16/6.6]'}`}>
+      <div className={`relative ${compact ? 'aspect-[16/6.4]' : 'aspect-[16/6.8] sm:aspect-[16/6.6]'}`}>
         {activeSlides.map((slide, index) => (
           <div
             key={slide.id}

@@ -123,6 +123,7 @@ const HUB_DEBUG_QUERY_PARAM = 'hubDebug';
 const HUB_DEBUG_STORAGE_KEY = 'jnc:hub-debug-enabled';
 const HUB_DEBUG_TRACE_KEY = 'jnc:hub-debug-trace';
 const HUB_DEBUG_TRACE_LIMIT = 80;
+const HOME_STORE_PREVIEW_LIMIT = 8;
 
 const HUB_DISTANCE_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
@@ -1310,7 +1311,7 @@ export function MarketplacePage() {
     }
     portfolioLoadInFlightRef.current = true;
     try {
-      const locationQuery = selectedCondominiumSlug
+      const locationQuery = selectedCondominiumSlug || hubScopeOverride === 'all_stores'
         ? { lat: null, lng: null, city: null, state: null }
         : {
             lat: savedAddressLocation?.lat ?? userLocation?.lat ?? null,
@@ -1346,7 +1347,7 @@ export function MarketplacePage() {
         }, 0);
       }
     }
-  }, [activeRegion?.city, activeRegion?.state, hubDebug, preferredDiscoveryAddress?.city, preferredDiscoveryAddress?.state, savedAddressLocation?.lat, savedAddressLocation?.lng, selectedCondominiumSlug, userLocation?.lat, userLocation?.lng]);
+  }, [activeRegion?.city, activeRegion?.state, hubDebug, hubScopeOverride, preferredDiscoveryAddress?.city, preferredDiscoveryAddress?.state, savedAddressLocation?.lat, savedAddressLocation?.lng, selectedCondominiumSlug, userLocation?.lat, userLocation?.lng]);
 
   const refreshHub = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) return;
@@ -2004,6 +2005,16 @@ export function MarketplacePage() {
         return b.rating - a.rating;
       });
   }, [scopedEnrichedStores, debouncedQuery, segmentFilter, quickFilter, favoriteStoreSlugs, distanceByStore, isCondominiumScope, selectedCondominiumSlug]);
+  const isHomeStorePreview =
+    debouncedQuery.length < 2 &&
+    !selectedCondominium &&
+    !isShowingAllStores &&
+    quickFilter === 'all' &&
+    segmentFilter === 'all';
+  const visibleStoreCards = isHomeStorePreview
+    ? filteredStores.slice(0, HOME_STORE_PREVIEW_LIMIT)
+    : filteredStores;
+  const hiddenHomeStoreCount = Math.max(0, filteredStores.length - visibleStoreCards.length);
 
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { icon: Storefront, label: segment });
@@ -3019,10 +3030,10 @@ export function MarketplacePage() {
           </div>
         </header>
 
-        <main className={`mx-auto max-w-[1200px] space-y-6 px-4 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
+        <main className={`mx-auto flex max-w-[1200px] flex-col gap-6 px-4 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
           {/* Acompanhamento anonimo salvo neste navegador */}
           {!isCustomerLogged && visibleActiveAnonymousOrders.length > 0 && (
-            <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="order-1 animate-in fade-in slide-in-from-top-4 duration-500">
               <div className="relative overflow-hidden rounded-[2.5rem] border border-amber-200/50 bg-amber-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(245,158,11,0.15)]">
                 <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-amber-200/20 blur-2xl" />
                 <button
@@ -3104,7 +3115,7 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && (homeDestinationHighlights.length > 0 || condominiums.length > 0 || scopedEnrichedStores.length > 0) && (
-            <section className="-mx-0.5 overflow-hidden">
+            <section className="order-2 -mx-0.5 overflow-hidden">
               <div className="flex gap-2 overflow-x-auto pb-1 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <button
                   type="button"
@@ -3154,7 +3165,7 @@ export function MarketplacePage() {
 
           {/* Carrossel de Banners - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && !selectedCondominium && homePromoSlides.length > 0 && (
-            <div className="animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
+            <div className="order-3 animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
               <section className="relative overflow-hidden rounded-[2.15rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(248,250,252,0.86)_100%)] p-2.5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.38)] ring-1 ring-slate-200/60 backdrop-blur-xl">
                 <div className="pointer-events-none absolute -left-10 -top-12 h-32 w-32 rounded-full bg-[#336886]/10 blur-3xl" />
                 <div className="pointer-events-none absolute -right-8 bottom-0 h-28 w-28 rounded-full bg-emerald-200/35 blur-3xl" />
@@ -3173,7 +3184,7 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
-            <section className="mb-5 overflow-hidden rounded-[1.85rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(248,250,252,0.9)_100%)] p-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] ring-1 ring-white/80 backdrop-blur-xl">
+            <section className="order-9 mb-5 overflow-hidden rounded-[1.85rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(248,250,252,0.9)_100%)] p-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] ring-1 ring-white/80 backdrop-blur-xl">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-500">
@@ -3223,7 +3234,7 @@ export function MarketplacePage() {
           {debouncedQuery.length < 2 && condominiums.length > 0 && (
             <>
             <section
-              className={selectedCondominium ? 'sticky top-[max(env(safe-area-inset-top),0.65rem)] z-30 mb-4' : 'mb-6'}
+              className={selectedCondominium ? 'order-2 sticky top-[max(env(safe-area-inset-top),0.65rem)] z-30 mb-4' : 'order-8 mb-6'}
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               {selectedCondominium ? (
@@ -3424,7 +3435,7 @@ export function MarketplacePage() {
           )}
 
           {/* Seção Categorias Premium Squircle */}
-          <section className="relative mb-6" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+          <section className="order-4 relative mb-6" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Categorias</p>
             <div className="-mx-4 mb-6 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 py-1.5">
               <button
@@ -3478,7 +3489,7 @@ export function MarketplacePage() {
           {/* Banner de Destaques Premium - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && (
             <section
-              className="mb-6 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-3 py-2.5 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl"
+              className="order-7 mb-6 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-3 py-2.5 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl"
               style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               <div className="flex items-center justify-between gap-3 px-1">
@@ -3565,7 +3576,7 @@ export function MarketplacePage() {
           )}
 
           {favoriteStores.length > 0 && debouncedQuery.length < 2 && (
-            <section className="space-y-3 mb-8" style={{ transition: 'all .45s ease', transitionDelay: '300ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+            <section className="order-5 mb-8 space-y-3" style={{ transition: 'all .45s ease', transitionDelay: '300ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
               <div className="flex items-center justify-between">
                 <h2 className="text-base sm:text-lg font-black text-slate-900">Minhas favoritas</h2>
                 <button
@@ -3603,18 +3614,22 @@ export function MarketplacePage() {
             </section>
           )}
 
-          <section ref={storesSectionRef} className="mb-8 space-y-4" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+          <section ref={storesSectionRef} className="order-6 mb-8 space-y-4" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <div className="flex items-center justify-between gap-2">
               <div>
-                <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-slate-500">
+                <div className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-500">
                   <Storefront size={10} weight="fill" />
                   Lojas
                 </div>
-                <h2 className="mt-2 text-base font-black text-slate-950 sm:text-lg">Escolha a loja para pedir</h2>
+                <h2 className="mt-1 text-base font-black text-slate-950 sm:text-lg">
+                  {isHomeStorePreview ? 'Lojas próximas para pedir agora' : 'Escolha a loja para pedir'}
+                </h2>
                 {!loading && !error && filteredStores.length > 0 ? (
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
                     {productSearchLoading && debouncedQuery
                       ? 'Buscando também nos cardápios...'
+                      : isHomeStorePreview
+                        ? `${visibleStoreCards.length} de ${filteredStores.length} opções em destaque`
                       : isShowingAllStores
                         ? `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} em outras regiões`
                         : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} ${selectedCondominium ? 'no condomínio' : geoDiscovery ? 'priorizados para sua região' : 'disponíveis no app'}`}
@@ -3787,8 +3802,9 @@ export function MarketplacePage() {
             )}
 
             {!loading && !error && filteredStores.length > 0 && (
-              <div className={selectedCondominium ? 'grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'}>
-                {filteredStores.map((store, index) => {
+              <>
+              <div className={selectedCondominium || isHomeStorePreview ? 'grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'}>
+                {visibleStoreCards.map((store, index) => {
                   const storePath = selectedCondominiumSlug
                     ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
                     : `/${store.slug}`;
@@ -4079,12 +4095,23 @@ export function MarketplacePage() {
                   );
                 })}
               </div>
+              {isHomeStorePreview && hiddenHomeStoreCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={enableAllStoresView}
+                  className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] bg-[#153A4C] px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-[0_16px_32px_-22px_rgba(21,58,76,0.7)] transition active:scale-[0.98]"
+                >
+                  Ver todas as lojas
+                  <span className="rounded-full bg-white/14 px-2 py-0.5 text-[10px]">{hiddenHomeStoreCount}+</span>
+                </button>
+              ) : null}
+              </>
             )}
           </section>
 
           {/* Nova Seção: Itens encontrados na busca */}
           {debouncedQuery.length >= 2 && searchedProducts.length > 0 && (
-            <section className="mb-8 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <section className="order-10 mb-8 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-[15px] font-black tracking-tight text-slate-950">
                   Itens encontrados que você busca
@@ -4139,7 +4166,7 @@ export function MarketplacePage() {
           )}
 
           {/* Banner: convite para lojistas */}
-          <section className="px-3 pb-3 pt-1">
+          <section className="order-11 px-3 pb-3 pt-1">
             <button
               type="button"
               onClick={() => navigate('/create?plan=trial')}
@@ -4161,7 +4188,7 @@ export function MarketplacePage() {
             </button>
           </section>
 
-          <section className="pb-2 space-y-2 sm:pb-4">
+          <section className="order-12 space-y-2 pb-2 sm:pb-4">
             <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas do app.</p>
             <PlatformTrustFooter mode="minimal" align="center" compact />
           </section>
