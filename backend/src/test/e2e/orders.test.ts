@@ -49,6 +49,42 @@ describe('Pedido — Jornada E2E (cliente)', () => {
     }
   });
 
+  it('rejeita pedido quando a quantidade ultrapassa o estoque', async () => {
+    const prod = await api
+      .post(`/api/stores/${storeId}/products`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        name: 'Batata Frita Meia',
+        price: 23,
+        category: 'Porções',
+        available: true,
+        manageStock: true,
+        stockQuantity: 1,
+      });
+    const managedProductId = prod.body?.id;
+    expect(managedProductId).toBeTruthy();
+
+    const res = await api
+      .post(`/api/stores/${storeId}/orders`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        customerName: 'Estoque Teste',
+        type: 'pickup',
+        items: [{ productId: managedProductId, quantity: 2 }],
+        paymentMethod: 'pix',
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe('ORDER-005');
+    expect(res.body.details?.message || res.body.message).toMatch(/estoque/i);
+
+    const products = await api
+      .get(`/api/stores/${storeId}/products`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    const freshProduct = products.body.find((item: any) => item.id === managedProductId);
+    expect(freshProduct?.stockQuantity).toBe(1);
+  });
+
   it('admin vê pedido na fila', async () => {
     // Cria pedido
     if (!productId) return;

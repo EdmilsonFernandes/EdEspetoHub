@@ -61,6 +61,7 @@
   "ORDER-002": "Tipo de pedido não permitido para esta loja.",
   "ORDER-003": "Mesa já está ocupada. Finalize o pedido atual antes de criar outro.",
   "ORDER-004": "Transição de status inválida para este pedido.",
+  "ORDER-005": "Produto sem estoque suficiente. Revise o carrinho e tente novamente.",
   "DELIV-001": "Você já possui uma entrega ativa. Finalize a entrega atual antes de aceitar outra.",
   "DELIV-002": "Transição inválida do status da entrega.",
   "DELIV-003": "Este pedido não é de entrega.",

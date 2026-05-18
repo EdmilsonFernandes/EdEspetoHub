@@ -71,11 +71,12 @@ const handleResponse = async (
       const text = await response.text().catch(() => '');
       payload = text ? { message: text } : null;
     }
-    const message = payload?.message || response.statusText;
+    const nestedError = payload?.error && typeof payload.error === 'object' ? payload.error : null;
+    const message = payload?.message || nestedError?.message || response.statusText;
     const error: any = new Error(message);
     error.status = response.status;
-    if (payload?.code) error.code = payload.code;
-    if (payload?.details) error.details = payload.details;
+    if (payload?.code || nestedError?.code) error.code = payload?.code || nestedError?.code;
+    if (payload?.details || nestedError?.details) error.details = payload?.details || nestedError?.details;
 
     const messageToCheck = payload?.message || message || '';
     if (canAutoLogout && isSessionAuthError(response.status, messageToCheck, payload?.code || '')) {

@@ -61,6 +61,7 @@
   "ORDER-002": "Order type not allowed for this store.",
   "ORDER-003": "Table is already occupied. Finish the current order before creating a new one.",
   "ORDER-004": "Invalid order status transition.",
+  "ORDER-005": "Product has insufficient stock. Review the cart and try again.",
   "DELIV-001": "You already have an active delivery. Finish it before accepting another one.",
   "DELIV-002": "Invalid delivery status transition.",
   "DELIV-003": "This order is not a delivery order.",

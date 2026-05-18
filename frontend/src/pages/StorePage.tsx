@@ -48,6 +48,7 @@ import { ADMIN_SESSION_EVENT, nativeBiometricService } from '../services/nativeB
 import { navigateBackOrFallback } from '../utils/navigation';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { buildDestinationInquiryMessage, prettifyDestinationLabel } from '../utils/destinationWhatsApp';
+import { reconcileCartStock } from '../utils/cartStock';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
@@ -1272,23 +1273,9 @@ export function StorePage() {
     };
 
     const PRODUCTS_CACHE_KEY = `products_cache:${storeSlug}`;
-    const PRODUCTS_CACHE_TTL = 60 * 60 * 1000; // 1h
-
     const loadProducts = async () => {
-      // Serve cache imediatamente se existir (stale-while-revalidate)
-      let cacheExpired = true;
       try {
-        const raw = localStorage.getItem(PRODUCTS_CACHE_KEY);
-        if (raw) {
-          const { data, ts } = JSON.parse(raw);
-          if (Array.isArray(data) && data.length > 0) setProducts(data);
-          cacheExpired = Date.now() - ts >= PRODUCTS_CACHE_TTL;
-          if (!cacheExpired) return; // cache fresco, não precisa buscar
-        }
-      } catch { /* no-op */ }
-
-      try {
-        const list = (await productService.listPublicBySlug(storeSlug)) || [];
+        const list = (await productService.listPublicBySlug(storeSlug, { forceRefresh: true })) || [];
         setProducts(list);
         try { localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify({ data: list, ts: Date.now() })); } catch { /* storage cheio */ }
       } catch (error) {
@@ -1299,7 +1286,13 @@ export function StorePage() {
           hasAdminSession: Boolean(user?.token),
           hasCustomerSession: Boolean(customerSession?.token),
         });
-        /* offline — mantém o que foi setado do cache acima */
+        try {
+          const raw = localStorage.getItem(PRODUCTS_CACHE_KEY);
+          if (raw) {
+            const { data } = JSON.parse(raw);
+            if (Array.isArray(data) && data.length > 0) setProducts(data);
+          }
+        } catch { /* no-op */ }
       }
     };
 
@@ -2059,6 +2052,7 @@ export function StorePage() {
   };
 
   const updateCart = (item, qty, options) => {
+    const catalogItem = products.find((product: any) => String(product?.id || '') === String(item?.id || '')) || item;
     const cookingPoint = options?.cookingPoint ?? item?.cookingPoint;
     const passSkewer = Boolean(options?.passSkewer ?? item?.passSkewer);
     const selectedModifiers = normalizeSelectedModifiers(
@@ -2067,8 +2061,8 @@ export function StorePage() {
     );
     const cartKey = `${item.id}:${cookingPoint || ''}:${passSkewer ? '1' : '0'}:${getModifiersSignature(selectedModifiers)}`;
     setCart((previous) => {
-      const manageStock = Boolean(item?.manageStock);
-      const stockQuantityRaw = Number(item?.stockQuantity ?? 0);
+      const manageStock = Boolean(catalogItem?.manageStock ?? item?.manageStock);
+      const stockQuantityRaw = Number(catalogItem?.stockQuantity ?? item?.stockQuantity ?? 0);
       const stockQuantity = Number.isFinite(stockQuantityRaw) ? Math.max(0, Math.floor(stockQuantityRaw)) : 0;
       const totalForProduct = Object.values(previous || {}).reduce((acc: number, entry: any) => {
         if (!entry || String(entry?.id) !== String(item?.id)) return acc;
@@ -2111,6 +2105,9 @@ export function StorePage() {
         [cartKey]: {
           ...item,
           key: cartKey,
+          manageStock,
+          stockQuantity,
+          lowStockAlert: catalogItem?.lowStockAlert ?? item?.lowStockAlert,
           price: unitPrice,
           originalPrice: item?.price,
           qty: nextQty,
@@ -2179,6 +2176,33 @@ export function StorePage() {
     if (!message) return;
     setTableNotice({ message, tone: 'error' });
     window.setTimeout(() => setTableNotice(null), 4000);
+  };
+
+  const validateCartStockBeforeCheckout = async () => {
+    if (!storeSlug || isDemo) return true;
+
+    try {
+      const freshProducts = (await productService.listPublicBySlug(storeSlug, { forceRefresh: true })) || [];
+      if (Array.isArray(freshProducts)) {
+        setProducts(freshProducts);
+        try {
+          localStorage.setItem(`products_cache:${storeSlug}`, JSON.stringify({ data: freshProducts, ts: Date.now() }));
+        } catch {
+          // ignore storage limits
+        }
+        const result = reconcileCartStock(cart, freshProducts);
+        if (!result.ok) {
+          setCart(result.nextCart);
+          showErrorNotice(result.message || 'Revise o carrinho: um item não possui estoque suficiente.');
+          return false;
+        }
+      }
+      return true;
+    } catch (error) {
+      console.error('Falha ao validar estoque antes do checkout', { error, storeSlug });
+      showErrorNotice('Não foi possível validar o estoque agora. Tente novamente.');
+      return false;
+    }
   };
 
   const checkout = async (extra?: { cashTendered?: number | null; condominiumOrder?: any } | null) => {
@@ -2285,6 +2309,10 @@ export function StorePage() {
         showErrorNotice('Não foi possível validar a entrega. Revise o endereço.');
         return;
       }
+    }
+
+    if (!(await validateCartStockBeforeCheckout())) {
+      return;
     }
 
     const payment = resolveOrderPaymentMethodForCheckout(paymentMethod, isProfessionalCheckoutUser);
@@ -2477,11 +2505,23 @@ export function StorePage() {
         error?.error?.details?.message ||
         error?.error?.message ||
         error?.message;
-      if (error?.code === 'ORDER-005') {
-        showErrorNotice(backendMessage || 'Adicione ao menos 1 item válido para finalizar o pedido.');
+      const backendCode = String(error?.code || error?.error?.code || '').trim().toUpperCase();
+      if (backendCode === 'ORDER-005' || String(backendMessage || '').toLowerCase().includes('estoque')) {
+        showErrorNotice(backendMessage || 'Produto sem estoque suficiente. Revise o carrinho e tente novamente.');
+        if (storeSlug) {
+          productService
+            .listPublicBySlug(storeSlug, { forceRefresh: true })
+            .then((freshProducts) => {
+              if (!Array.isArray(freshProducts)) return;
+              setProducts(freshProducts);
+              const result = reconcileCartStock(cart, freshProducts);
+              if (!result.ok) setCart(result.nextCart);
+            })
+            .catch(() => {});
+        }
         return;
       }
-      if (error?.code === 'ORDER-003') {
+      if (backendCode === 'ORDER-003') {
         showTableNotice(backendMessage || 'Mesa já está ocupada. Finalize o pedido atual antes de criar outro.');
         return;
       }
@@ -2554,7 +2594,7 @@ export function StorePage() {
 
     if (storeSlug) {
       productService
-        .listPublicBySlug(storeSlug)
+        .listPublicBySlug(storeSlug, { forceRefresh: true })
         .then((freshProducts) => {
           if (Array.isArray(freshProducts)) setProducts(freshProducts);
         })

@@ -18,7 +18,8 @@ async function forward(req: Request, res: Response, _next: NextFunction): Promis
         res.status(req.method === 'POST' ? 201 : 200).json(data);
     } catch (err) {
         const e = fromAxiosError(err);
-        res.status(e.statusCode).json({ data: null, error: { code: e.code, message: e.message } });
+        const errorPayload = { code: e.code, message: e.message, details: e.details };
+        res.status(e.statusCode).json({ ...errorPayload, data: null, error: errorPayload });
     }
 }
 

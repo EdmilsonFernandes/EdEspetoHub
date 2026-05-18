@@ -244,11 +244,15 @@ export const productService = {
     return data.map(normalizeProduct);
   },
 
-  async listPublicBySlug(slug: string)
+  async listPublicBySlug(slug: string, options?: { forceRefresh?: boolean })
   {
-    const cached = readPublicProductCache(slug);
+    const cached = options?.forceRefresh ? null : readPublicProductCache(slug);
     if (cached) return cached;
-    const data = await apiClient.get(`/public/stores/slug/${slug}/products`, { authMode: 'none' });
+    const suffix = options?.forceRefresh ? `?t=${Date.now()}` : '';
+    const data = await apiClient.get(`/public/stores/slug/${slug}/products${suffix}`, {
+      authMode: 'none',
+      ...(options?.forceRefresh ? { headers: { 'Cache-Control': 'no-cache' } } : {}),
+    });
     const normalized = data.map(normalizeProduct);
     return writePublicProductCache(slug, normalized);
   },
