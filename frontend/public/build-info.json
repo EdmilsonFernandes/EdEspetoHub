@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "7200a94f",
-  "versionLabel": "v0.1.9.7200a94f",
-  "versionInternal": "0.1.9+20260518.162656.7200a94f",
-  "buildId": "0.1.9+20260518.162656.7200a94f-20260518.162656-7200a94f",
-  "builtAt": "2026-05-18T16:26:56.721Z",
-  "commitHash": "7200a94f1c528c9ea44861702ef651e25c329e1e",
-  "shortHash": "7200a94f",
+  "versionDisplaySuffix": "5499e29a",
+  "versionLabel": "v0.1.9.5499e29a",
+  "versionInternal": "0.1.9+20260518.164442.5499e29a",
+  "buildId": "0.1.9+20260518.164442.5499e29a-20260518.164442-5499e29a",
+  "builtAt": "2026-05-18T16:44:42.328Z",
+  "commitHash": "5499e29ad5e62c3b3bfa12608658b50bd804939a",
+  "shortHash": "5499e29a",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "5499e29ad5e62c3b3bfa12608658b50bd804939a",
+      "shortHash": "5499e29a",
+      "dateIso": "2026-05-18T13:30:35-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Improve account MFA settings UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5499e29ad5e62c3b3bfa12608658b50bd804939a"
+    },
     {
       "hash": "7200a94f1c528c9ea44861702ef651e25c329e1e",
       "shortHash": "7200a94f",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat: add hospitality QR poster generation",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9395bd889783d44557dc8494f38ee88530ca69ff"
-    },
-    {
-      "hash": "a74bd3279ab8264f254859ddc5d778c0105e037a",
-      "shortHash": "a74bd327",
-      "dateIso": "2026-05-13T12:13:22-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve pre-store close button contrast",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a74bd3279ab8264f254859ddc5d778c0105e037a"
     }
   ]
 }

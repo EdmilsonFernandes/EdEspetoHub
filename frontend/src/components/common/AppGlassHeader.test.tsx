@@ -14,6 +14,7 @@ describe('AppGlassHeader', () => {
     );
 
     expect(screen.getByRole('heading', { name: 'Meus Pedidos' })).toBeInTheDocument();
+    expect(screen.getByRole('banner')).toHaveClass('jnc-app-glass-header');
     expect(screen.getByText('Histórico')).toBeInTheDocument();
     expect(screen.getByText('2 em andamento')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Todos' })).toBeInTheDocument();

@@ -47,7 +47,7 @@ export function AppGlassHeader({
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-[80] border-b border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(248,250,252,0.72)_58%,rgba(255,255,255,0.56)_100%)] pt-[env(safe-area-inset-top)] text-[#153A4C] shadow-[0_18px_44px_-34px_rgba(21,58,76,0.30)] backdrop-blur-2xl supports-[backdrop-filter]:bg-white/68 ${className}`}
+      className={`jnc-app-glass-header fixed inset-x-0 top-0 z-[80] border-b border-white/80 pt-[env(safe-area-inset-top)] text-[#153A4C] shadow-[0_18px_44px_-34px_rgba(21,58,76,0.30)] ${className}`}
     >
       {topSlot}
       <div className={`mx-auto ${maxWidthClassName} px-4`}>
