@@ -14,8 +14,8 @@
 import { PlanRepository } from '../repositories/PlanRepository';
 import { Plan, PlanName } from '../entities/Plan';
 
-const BASIC_MONTHLY_DEFAULT = 49.9;
-const PRO_MONTHLY_DEFAULT = 79.9;
+const BASIC_MONTHLY_DEFAULT = 69.9;
+const PRO_MONTHLY_DEFAULT = 119.9;
 const YEARLY_DISCOUNT = 0.15;
 
 const round2 = (value: number) => Math.round(value * 100) / 100;

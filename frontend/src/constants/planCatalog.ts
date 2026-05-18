@@ -6,7 +6,8 @@ export const PLAN_TIERS = [
       'Site e vitrine online',
       'Pedidos ilimitados',
       'Retirada no balcão',
-      'Sem entregas e gorjetas',
+      'Sem entregador próprio',
+      'Sem push promocional e destaques',
       'Suporte padrão',
     ],
   },
@@ -17,6 +18,8 @@ export const PLAN_TIERS = [
       'Tudo do Basic',
       'Retirada no balcão',
       'Gestão de entregadores',
+      'Push promocional',
+      'Destaques de produtos',
       'Repasse de gorjetas',
       'Suporte prioritário',
     ],
@@ -29,8 +32,8 @@ export const BILLING_OPTIONS = {
     label: 'Mensal',
     period: '/mês',
     priceByTier: {
-      basic: 49.9,
-      pro: 79.9,
+      basic: 69.9,
+      pro: 119.9,
     },
   },
   yearly: {
@@ -38,8 +41,8 @@ export const BILLING_OPTIONS = {
     period: '/ano',
     savings: 'Economize 15%',
     priceByTier: {
-      basic: 598.8,
-      pro: 958.8,
+      basic: 838.8,
+      pro: 1438.8,
     },
   },
 };

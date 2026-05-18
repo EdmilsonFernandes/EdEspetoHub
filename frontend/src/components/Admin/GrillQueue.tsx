@@ -63,11 +63,36 @@ const formatTableIdentifier = (value: any) => {
   return /^\d+$/.test(normalized) ? normalized.padStart(2, "0") : normalized.toUpperCase();
 };
 
+const SYSTEM_LOGO_SRC = "/janocaminho-logov1.svg";
+
 const QueueLoadingSkeleton = ({ variant = "queue" }: { variant?: "queue" | "sales" | "route" }) => {
   const isSales = variant === "sales";
   const rows = isSales ? 6 : 4;
+  const title =
+    variant === "sales"
+      ? "Carregando vendas"
+      : variant === "route"
+        ? "Carregando entregas"
+        : "Carregando pedidos";
   return (
     <div className="space-y-3">
+      <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm">
+        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F28C28]/15 via-white to-[#336886]/10 ring-1 ring-slate-100">
+          <span className="absolute inset-0 rounded-2xl bg-[#F28C28]/10 animate-ping" />
+          <img
+            src={SYSTEM_LOGO_SRC}
+            alt="Já no Caminho"
+            className="relative h-8 w-8 rounded-xl object-contain"
+            loading="eager"
+          />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-black text-slate-900">{title}</p>
+          <p className="text-xs font-semibold text-slate-500">
+            O Já no Caminho está buscando os dados atualizados da loja.
+          </p>
+        </div>
+      </div>
       {isSales ? (
         <div className="grid gap-2.5 grid-cols-2">
           {[0, 1, 2, 3].map((item) => (
@@ -3136,6 +3161,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       {!tvMode && activeDataLoading && (
         <div className="mt-2 rounded-2xl border border-sky-100 bg-sky-50/90 px-3 py-2 text-xs font-bold text-sky-800 shadow-sm">
           <span className="inline-flex items-center gap-2">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white ring-1 ring-sky-100">
+              <img src={SYSTEM_LOGO_SRC} alt="Já no Caminho" className="h-4 w-4 object-contain" loading="eager" />
+            </span>
             <ArrowsClockwise size={14} weight="duotone" className="animate-spin" />
             {activeLoadingLabel}
           </span>

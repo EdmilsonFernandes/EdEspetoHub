@@ -643,18 +643,18 @@ export async function runMigrations() {
   await AppDataSource.query(`
     INSERT INTO plans (name, display_name, price, promo_price, duration_days, enabled)
     VALUES
-      ('basic_monthly', 'Basic Mensal', 49.90, NULL, 30, true),
-      ('pro_monthly', 'Pro Mensal', 79.90, NULL, 30, true),
-      ('basic_yearly', 'Basic Anual', 598.80, 509.98, 365, true),
-      ('pro_yearly', 'Pro Anual', 958.80, 815.98, 365, true)
+      ('basic_monthly', 'Basic Mensal', 69.90, NULL, 30, true),
+      ('pro_monthly', 'Pro Mensal', 119.90, NULL, 30, true),
+      ('basic_yearly', 'Basic Anual', 838.80, 712.98, 365, true),
+      ('pro_yearly', 'Pro Anual', 1438.80, 1222.98, 365, true)
     ON CONFLICT (name) DO UPDATE
     SET display_name = EXCLUDED.display_name,
         price = CASE
-          WHEN EXCLUDED.name IN ('basic_monthly', 'pro_monthly') THEN EXCLUDED.price
+          WHEN EXCLUDED.name IN ('basic_monthly', 'pro_monthly', 'basic_yearly', 'pro_yearly') THEN EXCLUDED.price
           ELSE plans.price
         END,
         promo_price = CASE
-          WHEN EXCLUDED.name IN ('basic_monthly', 'pro_monthly') THEN EXCLUDED.promo_price
+          WHEN EXCLUDED.name IN ('basic_monthly', 'pro_monthly', 'basic_yearly', 'pro_yearly') THEN EXCLUDED.promo_price
           ELSE plans.promo_price
         END,
         duration_days = EXCLUDED.duration_days,

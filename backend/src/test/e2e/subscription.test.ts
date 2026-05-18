@@ -47,6 +47,13 @@ describe('Subscription — Expiração de plano', () => {
     const res = await api.get('/api/plans');
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+    const byName = new Map(res.body.map((plan: any) => [plan.name, plan]));
+    expect(Number((byName.get('basic_monthly') as any)?.price)).toBe(69.9);
+    expect(Number((byName.get('pro_monthly') as any)?.price)).toBe(119.9);
+    expect(Number((byName.get('basic_yearly') as any)?.price)).toBe(838.8);
+    expect(Number((byName.get('basic_yearly') as any)?.promoPrice)).toBe(712.98);
+    expect(Number((byName.get('pro_yearly') as any)?.price)).toBe(1438.8);
+    expect(Number((byName.get('pro_yearly') as any)?.promoPrice)).toBe(1222.98);
   });
 
   it('GET /api/stores/:storeId/subscription retorna status', async () => {
