@@ -1,6 +1,24 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, ChartBar, CheckCircle, CheckSquare, ClipboardText, CreditCard, Gear, Package, PlugsConnected, Plus, Scooter, Star, UsersThree } from '@phosphor-icons/react';
+import {
+  ArrowClockwise,
+  BellRinging,
+  BookOpen,
+  ChartBar,
+  CheckCircle,
+  CheckSquare,
+  ClipboardText,
+  CreditCard,
+  Gear,
+  MagnifyingGlass,
+  Package,
+  PaperPlaneTilt,
+  PlugsConnected,
+  Plus,
+  Scooter,
+  Star,
+  UsersThree,
+} from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
@@ -14,7 +32,6 @@ import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
 import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
 import { promoPushService } from '../services/promoPushService';
-import { BellRinging, PaperPlaneTilt } from '@phosphor-icons/react';
 import {
   getFeaturedPaymentRemainingMs,
   getFeaturedPaymentStatusLabel,
@@ -69,6 +86,731 @@ const paymentMethodLabel = (value: string) => {
   return 'PIX';
 };
 
+const PAGE_SIZE = 10;
+
+const normalizeDateTime = (value: any) => {
+  const time = new Date(value || 0).getTime();
+  return Number.isFinite(time) ? time : 0;
+};
+
+const pageItems = (items: any[], page: number, pageSize = PAGE_SIZE) => {
+  const start = Math.max(0, (page - 1) * pageSize);
+  return items.slice(start, start + pageSize);
+};
+
+const getPushStatusMeta = (statusRaw: string) => {
+  const status = String(statusRaw || '').toUpperCase();
+  if (status === 'SENT') return { label: 'Enviado', tone: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+  if (status === 'PENDING_APPROVAL') return { label: 'Aguardando aprovação', tone: 'bg-sky-50 text-sky-700 border-sky-200' };
+  if (status === 'PENDING_PAYMENT') return { label: 'Aguardando pagamento', tone: 'bg-amber-50 text-amber-700 border-amber-200' };
+  if (status === 'REJECTED') return { label: 'Rejeitado', tone: 'bg-rose-50 text-rose-700 border-rose-200' };
+  if (status === 'CANCELLED') return { label: 'Cancelado', tone: 'bg-slate-100 text-slate-600 border-slate-200' };
+  return { label: status || 'Pendente', tone: 'bg-slate-100 text-slate-600 border-slate-200' };
+};
+
+const filterFeaturedRequest = (request: any, filter: string) => {
+  const status = String(request?.status || '').toUpperCase();
+  const paymentStatus = String(request?.paymentStatus || '').toUpperCase();
+  if (filter === 'active') return status === 'APPROVED' && paymentStatus === 'PAID';
+  if (filter === 'payment') return status === 'PENDING_PAYMENT';
+  if (filter === 'waiting_slot') return status === 'PAID_WAITING_SLOT';
+  if (filter === 'problem') return ['PAYMENT_FAILED', 'REJECTED'].includes(status) || ['FAILED', 'PAYMENT_FAILED'].includes(paymentStatus);
+  if (filter === 'closed') return ['CANCELLED', 'EXPIRED'].includes(status);
+  return true;
+};
+
+const filterPush = (push: any, filter: string) => {
+  const status = String(push?.status || '').toUpperCase();
+  if (filter === 'sent') return status === 'SENT';
+  if (filter === 'pending') return status === 'PENDING_APPROVAL';
+  if (filter === 'payment') return status === 'PENDING_PAYMENT';
+  if (filter === 'problem') return ['REJECTED', 'CANCELLED'].includes(status);
+  return true;
+};
+
+function MetricCard({ label, value, description, tone = 'slate', icon: Icon }: any) {
+  const toneClass =
+    tone === 'green'
+      ? 'border-emerald-100 bg-emerald-50/75 text-emerald-700'
+      : tone === 'amber'
+      ? 'border-amber-100 bg-amber-50/75 text-amber-700'
+      : tone === 'blue'
+      ? 'border-sky-100 bg-sky-50/75 text-sky-700'
+      : 'border-slate-200 bg-slate-50 text-slate-600';
+  return (
+    <div className={`rounded-3xl border px-4 py-3 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.5)] ${toneClass}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] opacity-80">{label}</p>
+          <p className="mt-1 text-2xl font-black tracking-tight text-slate-950">{value}</p>
+        </div>
+        {Icon ? (
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 text-current shadow-sm">
+            <Icon size={19} weight="bold" />
+          </span>
+        ) : null}
+      </div>
+      {description ? <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{description}</p> : null}
+    </div>
+  );
+}
+
+function DataTablePagination({ page, totalItems, pageSize = PAGE_SIZE, onPageChange, label }: any) {
+  const totalPages = Math.max(1, Math.ceil(Number(totalItems || 0) / pageSize));
+  const start = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
+  const end = Math.min(totalItems, page * pageSize);
+  return (
+    <div className="flex flex-col gap-2 border-t border-slate-100 px-1 pt-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+      <span className="font-semibold">
+        {label}: {start}-{end} de {totalItems}
+      </span>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          disabled={page <= 1}
+          onClick={() => onPageChange(Math.max(1, page - 1))}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-45"
+        >
+          Anterior
+        </button>
+        <span className="rounded-xl bg-slate-100 px-3 py-2 font-black text-slate-700">
+          {page}/{totalPages}
+        </span>
+        <button
+          type="button"
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-45"
+        >
+          Próxima
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function FilterPill({ active, children, onClick }: any) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`shrink-0 rounded-full border px-3 py-2 text-xs font-black transition active:scale-[0.98] ${
+        active
+          ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_16px_28px_-20px_rgba(21,58,76,0.65)]'
+          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SearchAndFilters({ query, onQueryChange, sortOrder, onSortOrderChange, children, placeholder }: any) {
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+        <label className="relative min-w-0 flex-1">
+          <MagnifyingGlass size={16} weight="bold" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+            placeholder={placeholder}
+            className="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-9 pr-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886]/40 focus:ring-4 focus:ring-[#336886]/10"
+          />
+        </label>
+        <select
+          value={sortOrder}
+          onChange={(event) => onSortOrderChange(event.target.value)}
+          className="h-11 rounded-2xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none"
+        >
+          <option value="newest">Mais recentes</option>
+          <option value="oldest">Mais antigos</option>
+        </select>
+      </div>
+      <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function LoadingRows({ rows = 4 }: any) {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: rows }).map((_, index) => (
+        <div key={index} className="animate-pulse rounded-3xl border border-slate-100 bg-white p-4">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-2xl bg-slate-100" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="h-3 w-2/5 rounded-full bg-slate-100" />
+              <div className="h-3 w-4/5 rounded-full bg-slate-100" />
+            </div>
+            <div className="hidden h-8 w-24 rounded-full bg-slate-100 sm:block" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function VisibilityShell({ activeTab, onTabChange, children, activeCount, pushCount }: any) {
+  return (
+    <div className="min-w-0 space-y-4 px-0 sm:px-1">
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 p-4 shadow-[0_20px_70px_-48px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:p-5">
+        <div className="pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full bg-[#336886]/10 blur-3xl" />
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Já no Caminho</p>
+            <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Visibilidade da loja</h1>
+            <p className="mt-1 max-w-2xl text-sm font-medium leading-6 text-slate-600">
+              Controle vitrines pagas e notificações sem misturar contextos. Cada aba tem criação, busca, filtros e histórico próprio.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 rounded-3xl border border-slate-100 bg-slate-50/80 p-1.5">
+            <button
+              type="button"
+              onClick={() => onTabChange('highlights')}
+              className={`rounded-2xl px-4 py-3 text-left transition ${
+                activeTab === 'highlights' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <span className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em]">
+                <Star size={15} weight={activeTab === 'highlights' ? 'fill' : 'bold'} />
+                Destaques
+              </span>
+              <span className="mt-1 block text-[11px] font-bold">{activeCount} ativo(s)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onTabChange('push')}
+              className={`rounded-2xl px-4 py-3 text-left transition ${
+                activeTab === 'push' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <span className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em]">
+                <BellRinging size={15} weight={activeTab === 'push' ? 'fill' : 'bold'} />
+                Push
+              </span>
+              <span className="mt-1 block text-[11px] font-bold">{pushCount} registro(s)</span>
+            </button>
+          </div>
+        </div>
+      </section>
+      {children}
+    </div>
+  );
+}
+
+function HighlightsTab({
+  requests,
+  pricing,
+  productOptions,
+  form,
+  setForm,
+  loading,
+  submitting,
+  selectedPrice,
+  selectedDays,
+  onCreate,
+  onRefresh,
+  onOpenPayment,
+  onCancel,
+}: any) {
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [sortOrder, setSortOrder] = useState('newest');
+  const [page, setPage] = useState(1);
+
+  const activeCount = (requests || []).filter((request: any) => String(request?.status || '').toUpperCase() === 'APPROVED' && String(request?.paymentStatus || '').toUpperCase() === 'PAID').length;
+  const pendingPaymentCount = (requests || []).filter((request: any) => String(request?.status || '').toUpperCase() === 'PENDING_PAYMENT').length;
+  const availableSlots = Number(pricing?.availableSlots ?? Math.max(0, Number(pricing?.maxActiveSlots || 0) - Number(pricing?.activeSlots || 0)));
+
+  const filtered = useMemo(() => {
+    const needle = String(query || '').trim().toLowerCase();
+    return (requests || [])
+      .filter((request: any) => filterFeaturedRequest(request, filter))
+      .filter((request: any) => {
+        if (!needle) return true;
+        const text = [
+          request?.product?.name,
+          request?.publicNote,
+          request?.status,
+          request?.paymentStatus,
+          request?.paymentMethod,
+          request?.priceAmount,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return text.includes(needle);
+      })
+      .sort((a: any, b: any) => {
+        const diff = normalizeDateTime(b?.createdAt || b?.updatedAt) - normalizeDateTime(a?.createdAt || a?.updatedAt);
+        return sortOrder === 'oldest' ? -diff : diff;
+      });
+  }, [requests, query, filter, sortOrder]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, filter, sortOrder, requests?.length]);
+
+  const visibleRows = pageItems(filtered, page);
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 md:grid-cols-3">
+        <MetricCard label="Destaques ativos" value={activeCount} description="Produtos aparecendo na vitrine pública." tone="green" icon={Star} />
+        <MetricCard label="Espaços disponíveis" value={availableSlots} description={`${Number(pricing?.activeSlots || 0)} de ${Number(pricing?.maxActiveSlots || 50)} vagas ocupadas.`} tone="blue" icon={ChartBar} />
+        <MetricCard label="Aguardando pagamento" value={pendingPaymentCount} description={`Diária a partir de ${formatCurrency(Number(pricing?.prices?.DAY || 0))}.`} tone="amber" icon={CreditCard} />
+      </div>
+
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
+          <div className="xl:w-[34%]">
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Criar destaque</p>
+            <h2 className="mt-1 text-lg font-black text-slate-950">Produto na vitrine</h2>
+            <p className="mt-1 text-sm font-medium leading-6 text-slate-600">
+              Escolha o produto, a duração e gere a cobrança sem sair desta aba.
+            </p>
+          </div>
+          <form onSubmit={onCreate} className="grid min-w-0 flex-1 gap-3 lg:grid-cols-[minmax(220px,1fr)_minmax(220px,0.9fr)_minmax(150px,0.55fr)_auto] lg:items-end">
+            <label className="block space-y-1">
+              <span className="text-xs font-bold text-slate-600">Produto</span>
+              <select
+                value={form.productId}
+                onChange={(event) => setForm((prev: any) => ({ ...prev, productId: event.target.value }))}
+                className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]/40 focus:ring-4 focus:ring-[#336886]/10"
+              >
+                <option value="">Selecione um produto</option>
+                {productOptions.map((product: any) => (
+                  <option key={product.id} value={product.id}>
+                    {product.name} • {formatCurrency(Number(product?.promoActive ? product?.promoPrice : product?.price || 0))}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="space-y-1">
+              <span className="text-xs font-bold text-slate-600">Duração</span>
+              <div className="grid grid-cols-3 gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1">
+                {(['DAY', 'WEEK', 'MONTH'] as DurationUnit[]).map((unit) => {
+                  const active = form.durationUnit === unit;
+                  return (
+                    <button
+                      key={unit}
+                      type="button"
+                      onClick={() => setForm((prev: any) => ({ ...prev, durationUnit: unit }))}
+                      className={`rounded-xl px-2 py-2 text-center text-[11px] font-black transition ${
+                        active ? 'bg-[#153A4C] text-white shadow-sm' : 'text-slate-600 hover:bg-white'
+                      }`}
+                    >
+                      {unit === 'DAY' ? '1 dia' : unit === 'WEEK' ? '7 dias' : '30 dias'}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Total</p>
+              <p className="text-lg font-black text-slate-950">{formatCurrency(selectedPrice)}</p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting || !form.productId || productOptions.length === 0}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-4 text-sm font-black text-white shadow-[0_18px_30px_-22px_rgba(21,58,76,0.75)] transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55"
+            >
+              <Plus size={15} weight="bold" />
+              {submitting ? 'Gerando...' : 'Gerar cobrança'}
+            </button>
+          </form>
+        </div>
+        <p className="mt-3 text-xs font-medium text-slate-500">
+          Pagamento via {paymentMethodLabel(form.paymentMethod)}. Após aprovação, o destaque dura {selectedDays} dia(s) e encerra automaticamente.
+        </p>
+        {productOptions.length === 0 && !loading ? (
+          <p className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700">
+            Cadastre pelo menos um produto com preço para liberar a vitrine.
+          </p>
+        ) : null}
+      </section>
+
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Tabela de controle</p>
+            <h2 className="mt-1 text-lg font-black text-slate-950">Meus destaques</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onRefresh}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50 active:scale-[0.98]"
+          >
+            <ArrowClockwise size={14} weight="bold" />
+            Atualizar
+          </button>
+        </div>
+
+        <SearchAndFilters
+          query={query}
+          onQueryChange={setQuery}
+          sortOrder={sortOrder}
+          onSortOrderChange={setSortOrder}
+          placeholder="Buscar produto, status, pagamento..."
+        >
+          {[
+            ['all', 'Todos'],
+            ['active', 'Ativos'],
+            ['payment', 'Pagamento'],
+            ['waiting_slot', 'Aguardando vaga'],
+            ['problem', 'Falhas'],
+            ['closed', 'Encerrados'],
+          ].map(([value, label]) => (
+            <FilterPill key={value} active={filter === value} onClick={() => setFilter(value)}>
+              {label}
+            </FilterPill>
+          ))}
+        </SearchAndFilters>
+
+        <div className="mt-4">
+          {loading ? (
+            <LoadingRows />
+          ) : filtered.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
+              <p className="text-sm font-black text-slate-800">Nenhum destaque encontrado</p>
+              <p className="mt-1 text-xs font-medium text-slate-500">Ajuste os filtros ou crie uma nova cobrança acima.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="hidden overflow-x-auto rounded-3xl border border-slate-100 md:block">
+                <div className="grid min-w-[835px] grid-cols-[minmax(240px,1.5fr)_150px_150px_145px_150px] gap-3 bg-slate-50 px-4 py-3 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
+                  <span>Produto</span>
+                  <span>Status</span>
+                  <span>Pagamento</span>
+                  <span>Valor</span>
+                  <span className="text-right">Ações</span>
+                </div>
+                {visibleRows.map((request: any) => {
+                  const status = String(request?.status || '').toUpperCase();
+                  const canCancel = status === 'PENDING_PAYMENT' || status === 'PAYMENT_FAILED' || status === 'REJECTED';
+                  const canPay = status === 'PENDING_PAYMENT' && String(request?.paymentStatus || '').toUpperCase() !== 'PAID';
+                  return (
+                    <div key={request.id} className="grid min-w-[835px] grid-cols-[minmax(240px,1.5fr)_150px_150px_145px_150px] gap-3 border-t border-slate-100 px-4 py-3 text-sm">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <img
+                          src={resolveAssetUrl(request?.product?.imageUrl || undefined) || '/janocaminho.jpg'}
+                          alt={request?.product?.name || 'Produto'}
+                          className="h-12 w-12 shrink-0 rounded-2xl border border-slate-200 bg-white object-cover"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate font-black text-slate-950">{request?.product?.name || 'Produto'}</p>
+                          <p className="mt-0.5 text-xs font-medium text-slate-500">
+                            {formatDateTime(request?.createdAt)} • {DURATION_META[String(request?.durationUnit || 'DAY').toUpperCase() as DurationUnit]?.label || `${Number(request?.durationDays || 1)} dia(s)`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-black ${statusTone(status)}`}>{statusLabel(status)}</span>
+                      </div>
+                      <div className="flex items-center text-xs font-bold text-slate-600">{getFeaturedPaymentStatusLabel(request?.paymentStatus)}</div>
+                      <div className="flex items-center font-black text-slate-900">{request?.priceAmount != null ? formatCurrency(Number(request.priceAmount || 0)) : '-'}</div>
+                      <div className="flex items-center justify-end gap-2">
+                        {(request?.paymentQrCodeBase64 || request?.paymentLink || request?.paymentQrCodeText || String(request?.paymentStatus || '').toUpperCase() === 'PAID') && (
+                          <button type="button" onClick={() => onOpenPayment(request)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700">
+                            {canPay ? 'Pagar' : 'Pagamento'}
+                          </button>
+                        )}
+                        {canCancel && (
+                          <button type="button" onClick={() => onCancel(String(request.id))} className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-black text-rose-700">
+                            Cancelar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="space-y-3 md:hidden">
+                {visibleRows.map((request: any) => {
+                  const status = String(request?.status || '').toUpperCase();
+                  const canCancel = status === 'PENDING_PAYMENT' || status === 'PAYMENT_FAILED' || status === 'REJECTED';
+                  const canPay = status === 'PENDING_PAYMENT' && String(request?.paymentStatus || '').toUpperCase() !== 'PAID';
+                  return (
+                    <article key={request.id} className={`rounded-3xl border border-l-4 ${statusBorderAccent(status)} bg-white p-3 shadow-sm`}>
+                      <div className="flex items-start gap-3">
+                        <img
+                          src={resolveAssetUrl(request?.product?.imageUrl || undefined) || '/janocaminho.jpg'}
+                          alt={request?.product?.name || 'Produto'}
+                          className="h-14 w-14 shrink-0 rounded-2xl border border-slate-200 bg-white object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="min-w-0 text-sm font-black text-slate-950">{request?.product?.name || 'Produto'}</p>
+                            <span className={`inline-flex shrink-0 rounded-full border px-2 py-1 text-[10px] font-black ${statusTone(status)}`}>{statusLabel(status)}</span>
+                          </div>
+                          <p className="mt-1 text-xs font-medium text-slate-500">{formatDateTime(request?.createdAt)}</p>
+                          <p className="mt-1 text-xs font-bold text-slate-600">
+                            {getFeaturedPaymentStatusLabel(request?.paymentStatus)} • {request?.priceAmount != null ? formatCurrency(Number(request.priceAmount || 0)) : '-'}
+                          </p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {(request?.paymentQrCodeBase64 || request?.paymentLink || request?.paymentQrCodeText || String(request?.paymentStatus || '').toUpperCase() === 'PAID') && (
+                              <button type="button" onClick={() => onOpenPayment(request)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700">
+                                {canPay ? 'Pagar agora' : 'Ver pagamento'}
+                              </button>
+                            )}
+                            {canCancel && (
+                              <button type="button" onClick={() => onCancel(String(request.id))} className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-black text-rose-700">
+                                Cancelar
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <DataTablePagination page={page} totalItems={filtered.length} onPageChange={setPage} label="Destaques" />
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function PushTab({ auth, pushes, loading, pushForm, setPushForm, pushSubmitting, onCreatePush, onRefresh, onOpenPayment }: any) {
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [sortOrder, setSortOrder] = useState('newest');
+  const [page, setPage] = useState(1);
+  const storeLogo = resolveAssetUrl(auth?.store?.settings?.logoUrl || '');
+  const storeName = String(auth?.store?.name || 'Loja');
+
+  const sentCount = (pushes || []).filter((push: any) => String(push?.status || '').toUpperCase() === 'SENT').length;
+  const pendingApprovalCount = (pushes || []).filter((push: any) => String(push?.status || '').toUpperCase() === 'PENDING_APPROVAL').length;
+  const pendingPaymentCount = (pushes || []).filter((push: any) => String(push?.status || '').toUpperCase() === 'PENDING_PAYMENT').length;
+
+  const filtered = useMemo(() => {
+    const needle = String(query || '').trim().toLowerCase();
+    return (pushes || [])
+      .filter((push: any) => filterPush(push, filter))
+      .filter((push: any) => {
+        if (!needle) return true;
+        const text = [push?.title, push?.body, push?.message, push?.status, push?.rejectionReason].filter(Boolean).join(' ').toLowerCase();
+        return text.includes(needle);
+      })
+      .sort((a: any, b: any) => {
+        const diff = normalizeDateTime(b?.createdAt || b?.updatedAt || b?.sentAt) - normalizeDateTime(a?.createdAt || a?.updatedAt || a?.sentAt);
+        return sortOrder === 'oldest' ? -diff : diff;
+      });
+  }, [pushes, query, filter, sortOrder]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, filter, sortOrder, pushes?.length]);
+
+  const visibleRows = pageItems(filtered, page);
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 md:grid-cols-3">
+        <MetricCard label="Pushes enviados" value={sentCount} description="Histórico aprovado e disparado." tone="green" icon={PaperPlaneTilt} />
+        <MetricCard label="Em aprovação" value={pendingApprovalCount} description="Pagos e aguardando revisão." tone="blue" icon={CheckCircle} />
+        <MetricCard label="Aguardando PIX" value={pendingPaymentCount} description="Cobranças ainda pendentes." tone="amber" icon={CreditCard} />
+      </div>
+
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 xl:flex-row">
+          <div className="xl:w-[34%]">
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Novo push</p>
+            <h2 className="mt-1 text-lg font-black text-slate-950">Campanha rápida</h2>
+            <p className="mt-1 text-sm font-medium leading-6 text-slate-600">
+              O push gera cobrança de R$ 4,90 e entra em revisão antes do envio para os usuários do app.
+            </p>
+            <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">Agendamento</p>
+              <p className="mt-1 text-sm font-black text-slate-800">Enviar após pagamento e aprovação</p>
+            </div>
+          </div>
+          <form onSubmit={onCreatePush} className="grid min-w-0 flex-1 gap-3 lg:grid-cols-2">
+            <label className="block space-y-1">
+              <span className="text-xs font-bold text-slate-600">Título ({pushForm.title.length}/80)</span>
+              <input
+                type="text"
+                maxLength={80}
+                value={pushForm.title}
+                onChange={(event) => setPushForm((prev: any) => ({ ...prev, title: event.target.value }))}
+                placeholder={`Ex: ${storeName} — promoção especial`}
+                className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]/40 focus:ring-4 focus:ring-[#336886]/10"
+              />
+            </label>
+            <label className="block space-y-1 lg:row-span-2">
+              <span className="text-xs font-bold text-slate-600">Mensagem ({pushForm.message.length}/160)</span>
+              <textarea
+                maxLength={160}
+                rows={4}
+                value={pushForm.message}
+                onChange={(event) => setPushForm((prev: any) => ({ ...prev, message: event.target.value }))}
+                placeholder="Ex: Estamos abertos hoje com promoção especial. Toque para conferir."
+                className="min-h-[112px] w-full resize-none rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]/40 focus:ring-4 focus:ring-[#336886]/10"
+              />
+            </label>
+            <div className="flex flex-col justify-between gap-3 rounded-2xl border border-amber-100 bg-amber-50/75 px-3 py-2">
+              <p className="text-xs font-bold leading-5 text-amber-800">Conteúdo passa por revisão. Evite spam, caixa alta exagerada e promessa que não será cumprida.</p>
+              <button
+                type="submit"
+                disabled={pushSubmitting || !pushForm.title.trim() || !pushForm.message.trim()}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-4 text-sm font-black text-white shadow-[0_18px_30px_-22px_rgba(21,58,76,0.75)] transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55"
+              >
+                <BellRinging size={15} weight="bold" />
+                {pushSubmitting ? 'Criando...' : 'Gerar cobrança - R$ 4,90'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Histórico paginado</p>
+            <h2 className="mt-1 text-lg font-black text-slate-950">Notificações push</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onRefresh}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50 active:scale-[0.98]"
+          >
+            <ArrowClockwise size={14} weight="bold" />
+            Atualizar
+          </button>
+        </div>
+
+        <SearchAndFilters query={query} onQueryChange={setQuery} sortOrder={sortOrder} onSortOrderChange={setSortOrder} placeholder="Buscar título, mensagem, status...">
+          {[
+            ['all', 'Todos'],
+            ['sent', 'Enviados'],
+            ['pending', 'Em aprovação'],
+            ['payment', 'Pagamento'],
+            ['problem', 'Falhas/cancelados'],
+          ].map(([value, label]) => (
+            <FilterPill key={value} active={filter === value} onClick={() => setFilter(value)}>
+              {label}
+            </FilterPill>
+          ))}
+        </SearchAndFilters>
+
+        <div className="mt-4">
+          {loading ? (
+            <LoadingRows />
+          ) : filtered.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
+              <p className="text-sm font-black text-slate-800">Nenhum push encontrado</p>
+              <p className="mt-1 text-xs font-medium text-slate-500">Crie uma campanha ou ajuste a busca acima.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="hidden overflow-x-auto rounded-3xl border border-slate-100 md:block">
+                <div className="grid min-w-[900px] grid-cols-[minmax(260px,1.5fr)_165px_130px_130px_145px] gap-3 bg-slate-50 px-4 py-3 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
+                  <span>Campanha</span>
+                  <span>Status</span>
+                  <span>Alcance</span>
+                  <span>Data</span>
+                  <span className="text-right">Ações</span>
+                </div>
+                {visibleRows.map((push: any) => {
+                  const status = String(push?.status || '').toUpperCase();
+                  const isPendingPayment = status === 'PENDING_PAYMENT';
+                  const meta = getPushStatusMeta(status);
+                  return (
+                    <div key={push.id} className="grid min-w-[900px] grid-cols-[minmax(260px,1.5fr)_165px_130px_130px_145px] gap-3 border-t border-slate-100 px-4 py-3 text-sm">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-slate-100 bg-slate-100 shadow-sm">
+                          {storeLogo ? (
+                            <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-xs font-black text-white">
+                              {storeName.slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate font-black text-slate-950">{push.title}</p>
+                          <p className="mt-0.5 line-clamp-1 text-xs font-medium text-slate-500">{push.body}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${meta.tone}`}>{meta.label}</span>
+                      </div>
+                      <div className="flex items-center text-xs font-bold text-slate-600">{push.sentCount != null ? `${push.sentCount} usuários` : '-'}</div>
+                      <div className="flex items-center text-xs font-bold text-slate-500">{formatDateTime(push.sentAt || push.createdAt)}</div>
+                      <div className="flex items-center justify-end">
+                        {isPendingPayment ? (
+                          <button type="button" onClick={() => onOpenPayment(push)} className="rounded-xl bg-amber-500 px-3 py-2 text-xs font-black text-white shadow-[0_12px_20px_-16px_rgba(245,158,11,0.8)]">
+                            Pagar
+                          </button>
+                        ) : (
+                          <span className="text-xs font-bold text-slate-400">Sem ação</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="space-y-3 md:hidden">
+                {visibleRows.map((push: any) => {
+                  const status = String(push?.status || '').toUpperCase();
+                  const isPendingPayment = status === 'PENDING_PAYMENT';
+                  const meta = getPushStatusMeta(status);
+                  return (
+                    <article key={push.id} className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-slate-100 bg-slate-100 shadow-sm">
+                          {storeLogo ? (
+                            <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-xs font-black text-white">
+                              {storeName.slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="min-w-0 text-sm font-black text-slate-950">{push.title}</p>
+                            <span className={`inline-flex shrink-0 rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-[0.08em] ${meta.tone}`}>{meta.label}</span>
+                          </div>
+                          <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-slate-500">{push.body}</p>
+                          <p className="mt-2 text-xs font-bold text-slate-400">{formatDateTime(push.sentAt || push.createdAt)}</p>
+                          {push.rejectionReason ? (
+                            <p className="mt-2 rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">Motivo: {push.rejectionReason}</p>
+                          ) : null}
+                          {isPendingPayment ? (
+                            <button type="button" onClick={() => onOpenPayment(push)} className="mt-3 rounded-xl bg-amber-500 px-3 py-2 text-xs font-black text-white shadow-[0_12px_20px_-16px_rgba(245,158,11,0.8)]">
+                              Pagar agora
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <DataTablePagination page={page} totalItems={filtered.length} onPageChange={setPage} label="Pushes" />
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export function AdminHighlights() {
   const navigate = useNavigate();
   const { auth, logout } = useAuth();
@@ -108,12 +850,15 @@ export function AdminHighlights() {
     availableSlots: 50,
   });
 
-  const [createOpen, setCreateOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [activeVisibilityTab, setActiveVisibilityTab] = useState<'highlights' | 'push'>(() => {
+    if (typeof window === 'undefined') return 'highlights';
+    return sessionStorage.getItem('adminHighlights:tab') === 'push' ? 'push' : 'highlights';
+  });
 
   // Push promocional
   const [pushes, setPushes] = useState<any[]>([]);
-  const [pushFormOpen, setPushFormOpen] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
   const [pushPaymentOpen, setPushPaymentOpen] = useState(false);
   const [activePush, setActivePush] = useState<any | null>(null);
   const [pushForm, setPushForm] = useState({ title: '', message: '' });
@@ -182,10 +927,15 @@ export function AdminHighlights() {
 
   const loadPushes = async () => {
     if (!storeId) return;
+    setPushLoading(true);
     try {
       const data = await promoPushService.listByStore(storeId);
       setPushes(Array.isArray(data) ? data : []);
-    } catch { /* silencioso */ }
+    } catch {
+      showToast('Não foi possível carregar o histórico de push agora.', 'warning');
+    } finally {
+      setPushLoading(false);
+    }
   };
 
   const loadAll = async () => {
@@ -243,14 +993,6 @@ export function AdminHighlights() {
     }
   };
 
-  const openCreate = () => {
-    if (!form.productId && productOptions.length > 0) {
-      setForm((prev) => ({ ...prev, productId: String(productOptions[0]?.id || '') }));
-    }
-    setCreateOpen(true);
-  };
-
-  const closeCreate = () => setCreateOpen(false);
   const closePayment = () => {
     setPaymentOpen(false);
     setSelectedRequest(null);
@@ -407,7 +1149,6 @@ export function AdminHighlights() {
         storeId
       );
       showToast('Solicitação criada. Faça o pagamento para ativar o destaque.', 'success');
-      setCreateOpen(false);
       setForm((prev) => ({ ...prev, publicNote: '' }));
       await loadAll();
       openPayment(created);
@@ -425,6 +1166,43 @@ export function AdminHighlights() {
       await loadAll();
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível cancelar a solicitação.', 'error');
+    }
+  };
+
+  const handleVisibilityTabChange = (tab: 'highlights' | 'push') => {
+    setActiveVisibilityTab(tab);
+    if (typeof window !== 'undefined') sessionStorage.setItem('adminHighlights:tab', tab);
+  };
+
+  const openPushPayment = (push: any) => {
+    setActivePush(push);
+    setPushPaymentOpen(true);
+    if (push?.paymentExpiresAt) {
+      const remaining = Math.max(0, new Date(push.paymentExpiresAt).getTime() - Date.now());
+      setPushCountdownMs(remaining);
+    } else {
+      setPushCountdownMs(0);
+    }
+  };
+
+  const handleCreatePush = async (event?: React.FormEvent) => {
+    event?.preventDefault?.();
+    if (!storeId) return;
+    if (!pushForm.title.trim() || !pushForm.message.trim()) {
+      showToast('Informe título e mensagem do push.', 'warning');
+      return;
+    }
+    setPushSubmitting(true);
+    try {
+      const created = await promoPushService.create(storeId, { title: pushForm.title.trim(), message: pushForm.message.trim() });
+      showToast('Push criado. Faça o pagamento para enviar à aprovação.', 'success');
+      setPushForm({ title: '', message: '' });
+      setPushes((prev) => [created, ...prev]);
+      openPushPayment(created);
+    } catch (err: any) {
+      showToast(err?.message || 'Erro ao criar push.', 'error');
+    } finally {
+      setPushSubmitting(false);
     }
   };
 
@@ -488,350 +1266,43 @@ export function AdminHighlights() {
           }}
         />
 
-        <div className="space-y-4">
-          <section className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Já no Caminho</p>
-                <h1 className="text-xl font-black text-slate-900">Visibilidade</h1>
-                <p className="text-sm text-slate-600 mt-1">Destaque produtos no Hub e envie push para todos os usuários do app.</p>
-              </div>
-              <button
-                type="button"
-                onClick={openCreate}
-                className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white active:scale-[0.97] transition"
-              >
-                <Plus size={14} weight="bold" />
-                Novo destaque
-              </button>
-            </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-sky-200 bg-sky-50/60 px-3 py-2.5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-600">Vagas ativas</p>
-                <p className="mt-1 text-xl font-black text-slate-900">{Number(pricing?.activeSlots || 0)} / {Number(pricing?.maxActiveSlots || 50)}</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Preço diário</p>
-                <p className="mt-1 text-xl font-black text-slate-900">{formatCurrency(Number(pricing?.prices?.DAY || 0))}</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Preço mensal</p>
-                <p className="mt-1 text-xl font-black text-slate-900">{formatCurrency(Number(pricing?.prices?.MONTH || 0))}</p>
-              </div>
-            </div>
-          </section>
-
-          <section className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="text-base font-black text-slate-900">Meus destaques</h2>
-              <button
-                type="button"
-                onClick={loadAll}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700"
-              >
-                Atualizar
-              </button>
-            </div>
-
-            {loading ? (
-              <p className="text-sm text-slate-500">Carregando...</p>
-            ) : requests.length === 0 ? (
-              <p className="text-sm text-slate-500">Nenhum destaque solicitado ainda.</p>
-            ) : (
-              <div className="space-y-2">
-                {requests.map((request: any) => {
-                  const status = String(request?.status || '').toUpperCase();
-                  const canCancel = status === 'PENDING_PAYMENT' || status === 'PAYMENT_FAILED' || status === 'REJECTED';
-                  const canPay = status === 'PENDING_PAYMENT' && String(request?.paymentStatus || '').toUpperCase() !== 'PAID';
-                  const isActive = status === 'APPROVED' && String(request?.paymentStatus || '').toUpperCase() === 'PAID';
-                  return (
-                    <div key={request.id} className={`rounded-2xl border border-l-4 ${statusBorderAccent(status)} bg-slate-50/60 p-3`}>
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div className="flex items-start gap-2.5 min-w-0">
-                          <img
-                            src={resolveAssetUrl(request?.product?.imageUrl || undefined) || '/janocaminho.jpg'}
-                            alt={request?.product?.name || 'Produto'}
-                            className="h-11 w-11 rounded-xl object-cover border border-slate-200 bg-white"
-                          />
-                          <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-900">{request?.product?.name || 'Produto'}</p>
-                            <p className="text-xs text-slate-500">
-                              Criado em {formatDateTime(request?.createdAt)} • {DURATION_META[String(request?.durationUnit || 'DAY').toUpperCase() as DurationUnit]?.label || `${Number(request?.durationDays || 1)} dia(s)`}
-                            </p>
-                            <p className="text-xs text-slate-600 mt-1">
-                              Pagamento: <strong>{getFeaturedPaymentStatusLabel(request?.paymentStatus)}</strong>
-                              {` • Método: ${paymentMethodLabel(request?.paymentMethod)}`}
-                              {request?.priceAmount != null ? ` • ${formatCurrency(Number(request.priceAmount || 0))}` : ''}
-                            </p>
-                            {request?.paymentPaidAt && (
-                              <p className="text-xs text-slate-600 mt-1">Pagamento confirmado em {formatDateTime(request.paymentPaidAt)}</p>
-                            )}
-                            {isActive && request?.endsAt && (
-                              <p className="text-xs font-semibold text-emerald-700 mt-1">
-                                Em destaque até {formatDateTime(request.endsAt)}
-                              </p>
-                            )}
-                            {status === 'PAID_WAITING_SLOT' && (
-                              <p className="text-xs font-semibold text-indigo-700 mt-1">Pagamento confirmado. Entrará no Hub assim que abrir uma vaga.</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold ${statusTone(status)}`}>
-                            {statusLabel(status)}
-                          </span>
-                          {(request?.paymentQrCodeBase64 || request?.paymentLink || request?.paymentQrCodeText || String(request?.paymentStatus || '').toUpperCase() === 'PAID') && (
-                            <button
-                              type="button"
-                              onClick={() => openPayment(request)}
-                              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700"
-                            >
-                              {canPay ? 'Pagar agora' : 'Ver pagamento'}
-                            </button>
-                          )}
-                          {canCancel && (
-                            <button
-                              type="button"
-                              onClick={() => handleCancel(String(request.id))}
-                              className="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700"
-                            >
-                              Cancelar
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          {/* Seção Push Promocional */}
-          <section className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-            <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Visibilidade</p>
-                <h2 className="text-xl font-black text-slate-900">Push Promocional</h2>
-                <p className="text-sm text-slate-600 mt-1">Envie uma notificação para todos os usuários do app. R$ 4,90 por envio.</p>
-              </div>
-              <button type="button" onClick={() => setPushFormOpen(true)} className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white active:scale-[0.97] transition">
-                <BellRinging size={14} weight="bold" />
-                Novo push
-              </button>
-            </div>
-            {pushes.length === 0 ? (
-              <p className="text-sm text-slate-500">Nenhum push enviado ainda.</p>
-            ) : (
-              <div className="space-y-3">
-                {pushes.map((push: any) => {
-                  const isSent = push.status === 'SENT';
-                  const isPendingPayment = push.status === 'PENDING_PAYMENT';
-                  const isPendingApproval = push.status === 'PENDING_APPROVAL';
-                  const isRejected = push.status === 'REJECTED';
-                  const statusLabel = isPendingPayment ? 'Aguardando pagamento' : isPendingApproval ? 'Aguardando aprovação' : isSent ? 'Enviado' : isRejected ? 'Rejeitado' : push.status === 'CANCELLED' ? 'Cancelado' : push.status;
-                  const statusColor = isSent
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    : isPendingApproval
-                    ? 'bg-sky-50 text-sky-700 border-sky-200'
-                    : isRejected
-                    ? 'bg-rose-50 text-rose-700 border-rose-200'
-                    : 'bg-slate-100 text-slate-600 border-slate-200';
-                  const storeLogo = resolveAssetUrl(auth?.store?.settings?.logoUrl || '');
-                  const storeName = String(auth?.store?.name || 'Loja');
-                  return (
-                    <div
-                      key={push.id}
-                      className={`relative overflow-hidden rounded-2xl border bg-white shadow-[0_4px_20px_-8px_rgba(15,23,42,0.12)] transition-shadow hover:shadow-[0_8px_28px_-10px_rgba(15,23,42,0.18)] ${
-                        isSent ? 'border-emerald-100' : isPendingPayment ? 'border-amber-100' : 'border-slate-100'
-                      }`}
-                    >
-                      {/* Barra de status no topo */}
-                      <div className={`h-[3px] w-full ${isSent ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' : isPendingApproval ? 'bg-gradient-to-r from-sky-400 to-sky-500' : isPendingPayment ? 'bg-gradient-to-r from-amber-400 to-amber-500' : isRejected ? 'bg-rose-400' : 'bg-slate-200'}`} />
-
-                      <div className="p-4">
-                        <div className="flex items-start gap-3">
-                          {/* Logo da loja */}
-                          <div className="relative shrink-0">
-                            <div className="h-11 w-11 overflow-hidden rounded-2xl border border-slate-100 bg-slate-100 shadow-sm">
-                              {storeLogo ? (
-                                <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
-                              ) : (
-                                <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-xs font-black text-white">
-                                  {storeName.slice(0, 2).toUpperCase()}
-                                </div>
-                              )}
-                            </div>
-                            {isSent && (
-                              <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-emerald-500">
-                                <CheckCircle size={9} weight="fill" className="text-white" />
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Conteúdo */}
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-black text-slate-900">{push.title}</p>
-                                <p className="mt-0.5 line-clamp-2 text-xs font-medium leading-5 text-slate-500">{push.body}</p>
-                              </div>
-                              <span className={`shrink-0 inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] ${statusColor}`}>
-                                {statusLabel}
-                              </span>
-                            </div>
-
-                            <div className="mt-2.5 flex flex-wrap items-center gap-3">
-                              {isSent && push.sentCount != null && (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-black text-emerald-700">
-                                  <UsersThree size={12} weight="fill" />
-                                  {push.sentCount} usuários alcançados
-                                </span>
-                              )}
-                              <span className="text-[11px] font-medium text-slate-400">
-                                {new Date(push.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                            </div>
-
-                            {isRejected && push.rejectionReason && (
-                              <div className="mt-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-700">
-                                Motivo: {push.rejectionReason}
-                              </div>
-                            )}
-
-                            {isPendingPayment && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setActivePush(push);
-                                  setPushPaymentOpen(true);
-                                  if (push.paymentExpiresAt) {
-                                    const remaining = Math.max(0, new Date(push.paymentExpiresAt).getTime() - Date.now());
-                                    setPushCountdownMs(remaining);
-                                  }
-                                }}
-                                className="mt-2.5 inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3 py-1.5 text-[12px] font-black text-white shadow-[0_6px_16px_-8px_rgba(245,158,11,0.6)] transition hover:bg-amber-600 active:scale-[0.97]"
-                              >
-                                Pagar agora
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-        </div>
+        <VisibilityShell
+          activeTab={activeVisibilityTab}
+          onTabChange={handleVisibilityTabChange}
+          activeCount={(requests || []).filter((request: any) => String(request?.status || '').toUpperCase() === 'APPROVED' && String(request?.paymentStatus || '').toUpperCase() === 'PAID').length}
+          pushCount={(pushes || []).length}
+        >
+          {activeVisibilityTab === 'highlights' ? (
+            <HighlightsTab
+              requests={requests}
+              pricing={pricing}
+              productOptions={productOptions}
+              form={form}
+              setForm={setForm}
+              loading={loading}
+              submitting={submitting}
+              selectedPrice={selectedPrice}
+              selectedDays={selectedDays}
+              onCreate={handleCreate}
+              onRefresh={loadAll}
+              onOpenPayment={openPayment}
+              onCancel={handleCancel}
+            />
+          ) : (
+            <PushTab
+              auth={auth}
+              pushes={pushes}
+              loading={pushLoading}
+              pushForm={pushForm}
+              setPushForm={setPushForm}
+              pushSubmitting={pushSubmitting}
+              onCreatePush={handleCreatePush}
+              onRefresh={loadPushes}
+              onOpenPayment={openPushPayment}
+            />
+          )}
+        </VisibilityShell>
       </div>
-
-      {createOpen && (
-        <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
-          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xl">
-            <div className="mb-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Novo destaque</p>
-              <h3 className="text-lg font-black text-slate-900">Escolha produto e duração</h3>
-            </div>
-
-            <form onSubmit={handleCreate} className="space-y-3">
-              <label className="space-y-1 block">
-                <span className="text-xs font-semibold text-slate-600">Produto</span>
-                <select
-                  value={form.productId}
-                  onChange={(event) => setForm((prev) => ({ ...prev, productId: event.target.value }))}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                >
-                  <option value="">Selecione um produto</option>
-                  {productOptions.map((product: any) => (
-                    <option key={product.id} value={product.id}>
-                      {product.name} • {formatCurrency(Number(product?.promoActive ? product?.promoPrice : product?.price || 0))}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <div className="space-y-1.5">
-                <span className="text-xs font-semibold text-slate-600">Duração</span>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  {(['DAY', 'WEEK', 'MONTH'] as DurationUnit[]).map((unit) => {
-                    const active = form.durationUnit === unit;
-                    return (
-                      <button
-                        key={unit}
-                        type="button"
-                        onClick={() => setForm((prev) => ({ ...prev, durationUnit: unit }))}
-                        className={`rounded-xl border px-3 py-2 text-left ${active ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700'}`}
-                      >
-                        <p className="text-xs font-black uppercase tracking-[0.1em]">{DURATION_META[unit].label}</p>
-                        <p className="text-sm font-bold mt-1">{formatCurrency(Number(pricing?.prices?.[unit] || 0))}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-                <p className="text-xs text-slate-500">
-                  Após pagamento aprovado, o destaque inicia na hora e dura {selectedDays} dia(s), encerrando automaticamente.
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <span className="text-xs font-semibold text-slate-600">Forma de pagamento</span>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setForm((prev) => ({ ...prev, paymentMethod: 'PIX' }))}
-                    className={`rounded-xl border px-3 py-2 text-sm font-bold ${form.paymentMethod === 'PIX' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700'}`}
-                  >
-                    PIX
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setForm((prev) => ({ ...prev, paymentMethod: 'CREDIT_CARD' }))}
-                    className={`rounded-xl border px-3 py-2 text-sm font-bold ${form.paymentMethod === 'CREDIT_CARD' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700'}`}
-                  >
-                    Cartão
-                  </button>
-                </div>
-              </div>
-
-              <label className="space-y-1 block">
-                <span className="text-xs font-semibold text-slate-600">Observação (opcional)</span>
-                <textarea
-                  value={form.publicNote}
-                  onChange={(event) => setForm((prev) => ({ ...prev, publicNote: event.target.value }))}
-                  rows={2}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm resize-none"
-                  placeholder="Ex: campanha de fim de semana."
-                />
-              </label>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                <p className="text-xs text-slate-600">Total a pagar</p>
-                <p className="text-lg font-black text-slate-900">{formatCurrency(selectedPrice)}</p>
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={closeCreate}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
-                >
-                  Fechar
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
-                >
-                  {submitting ? 'Gerando pagamento...' : 'Gerar cobrança'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {paymentOpen && selectedRequest && (
         <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
@@ -926,77 +1397,10 @@ export function AdminHighlights() {
         onClose={() => setPaymentTechnicalOpen(false)}
       />
 
-      {/* Modal criar push */}
-      {pushFormOpen && (
-        <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xl">
-            <div className="mb-4">
-              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Push Promocional</p>
-              <h3 className="text-lg font-black text-slate-900">Criar notificação</h3>
-              <p className="text-xs text-slate-500 mt-1">Enviado para todos os usuários do app após aprovação. Valor: <strong>R$ 4,90</strong></p>
-            </div>
-            <div className="space-y-3">
-              <label className="block space-y-1">
-                <span className="text-xs font-semibold text-slate-600">Título <span className="text-slate-400">({pushForm.title.length}/80)</span></span>
-                <input
-                  type="text"
-                  maxLength={80}
-                  value={pushForm.title}
-                  onChange={(e) => setPushForm((p) => ({ ...p, title: e.target.value }))}
-                  placeholder={`Ex: ${auth?.store?.name || 'Sua Loja'} — Promoção especial!`}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
-                />
-              </label>
-              <label className="block space-y-1">
-                <span className="text-xs font-semibold text-slate-600">Mensagem <span className="text-slate-400">({pushForm.message.length}/160)</span></span>
-                <textarea
-                  maxLength={160}
-                  rows={3}
-                  value={pushForm.message}
-                  onChange={(e) => setPushForm((p) => ({ ...p, message: e.target.value }))}
-                  placeholder="Ex: Estamos abertos hoje com promoção especial. Venha conferir!"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm resize-none outline-none focus:border-slate-400"
-                />
-              </label>
-              <div className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                ⚠️ O push será revisado antes do envio. Conteúdo ofensivo ou spam será rejeitado sem reembolso.
-              </div>
-            </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <button type="button" onClick={() => setPushFormOpen(false)} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Cancelar</button>
-              <button
-                type="button"
-                disabled={pushSubmitting || !pushForm.title.trim() || !pushForm.message.trim()}
-                onClick={async () => {
-                  if (!storeId) return;
-                  setPushSubmitting(true);
-                  try {
-                    const created = await promoPushService.create(storeId, { title: pushForm.title.trim(), message: pushForm.message.trim() });
-                    showToast('Push criado! Faça o pagamento para enviar à aprovação.', 'success');
-                    setPushFormOpen(false);
-                    setPushForm({ title: '', message: '' });
-                    setPushes((prev) => [created, ...prev]);
-                    setActivePush(created);
-                    setPushPaymentOpen(true);
-                  } catch (err: any) {
-                    showToast(err?.message || 'Erro ao criar push.', 'error');
-                  } finally {
-                    setPushSubmitting(false);
-                  }
-                }}
-                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-              >
-                {pushSubmitting ? 'Criando...' : 'Gerar cobrança — R$ 4,90'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Modal pagamento push */}
       {pushPaymentOpen && activePush && (
         <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xl">
+          <div className="max-h-[calc(100dvh_-_1.5rem_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl sm:p-5">
             <div className="mb-3">
               <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Pagamento do Push</p>
               <h3 className="text-base font-black text-slate-900 truncate">{activePush.title}</h3>
