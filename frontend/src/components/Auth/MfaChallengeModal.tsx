@@ -123,10 +123,15 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
   };
 
   const codeDigits = Array.from({ length: 6 }, (_, index) => code[index] || '0');
+  const trustedDeviceDays = Number(challenge.trustedDeviceExpirationDays);
+  const trustedDeviceLabel =
+    Number.isFinite(trustedDeviceDays) && trustedDeviceDays > 0
+      ? `Salvar acesso neste aparelho por ${trustedDeviceDays} dias.`
+      : 'Salvar acesso neste aparelho.';
 
   return (
-    <div className="fixed inset-0 z-[1200] flex items-center justify-center overflow-x-hidden overflow-y-auto bg-[radial-gradient(circle_at_20%_0%,rgba(51,104,134,0.34),transparent_34%),linear-gradient(180deg,rgba(2,6,23,0.72),rgba(15,23,42,0.86))] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
-      <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-[430px] overflow-y-auto rounded-[1.75rem] border border-white/55 bg-white/95 shadow-[0_34px_100px_-28px_rgba(2,6,23,0.85)] ring-1 ring-[#336886]/10">
+    <div className="fixed inset-0 z-[1200] flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_20%_0%,rgba(51,104,134,0.34),transparent_34%),linear-gradient(180deg,rgba(2,6,23,0.72),rgba(15,23,42,0.86))] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
+      <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-[430px] overflow-y-auto overscroll-contain rounded-[1.75rem] border border-white/55 bg-white/95 shadow-[0_34px_100px_-28px_rgba(2,6,23,0.85)] ring-1 ring-[#336886]/10">
         <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-sky-300/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 left-4 h-36 w-36 rounded-full bg-emerald-300/18 blur-3xl" />
         <div className="relative overflow-hidden bg-[radial-gradient(circle_at_16%_12%,rgba(255,255,255,0.18),transparent_30%),radial-gradient(circle_at_82%_0%,rgba(132,204,22,0.18),transparent_28%),linear-gradient(135deg,#081520_0%,#153A4C_52%,#336886_100%)] px-5 pb-5 pt-5 text-white">
@@ -180,7 +185,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
                 onChange={(event) => setTrustDevice(event.target.checked)}
                 className="mt-1 h-4 w-4 rounded border-slate-300 text-[#336886] focus:ring-[#336886]"
               />
-              <span className="text-sm font-semibold leading-relaxed text-slate-600">Confiar neste aparelho por {challenge.trustedDeviceExpirationDays || 30} dias.</span>
+              <span className="text-sm font-semibold leading-relaxed text-slate-600">{trustedDeviceLabel}</span>
             </label>
           ) : null}
 
@@ -228,7 +233,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
               type="button"
               onClick={pasteCode}
               disabled={loading}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-[#336886]/10 bg-white px-4 text-sm font-black text-[#153A4C] shadow-[0_18px_36px_-30px_rgba(15,23,42,0.55)] transition active:scale-[0.98] disabled:opacity-50"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/10 bg-white px-4 text-sm font-black text-[#153A4C] shadow-[0_18px_36px_-30px_rgba(15,23,42,0.55)] transition active:scale-[0.98] disabled:opacity-50"
               aria-label="Colar Código"
             >
               <Copy size={16} weight="duotone" />

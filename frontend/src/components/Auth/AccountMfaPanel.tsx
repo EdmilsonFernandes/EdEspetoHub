@@ -303,7 +303,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
   };
 
   return (
-    <div className="fixed inset-0 z-[1300] flex items-center justify-center overflow-x-hidden overflow-y-auto bg-slate-950/45 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-sm">
+    <div className="fixed inset-0 z-[1300] flex items-center justify-center overflow-hidden bg-slate-950/45 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-sm">
       <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-[520px] overflow-hidden rounded-[1.75rem] border border-white/50 bg-white shadow-[0_32px_90px_-30px_rgba(15,23,42,0.75)]">
         <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-100 bg-white/94 px-4 py-3 backdrop-blur-xl">
           <div className="flex items-start gap-3">
@@ -324,7 +324,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
           </button>
         </div>
 
-        <div className="max-h-[calc(100dvh-6rem)] space-y-3 overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
+        <div className="max-h-[calc(100dvh-6rem)] space-y-3 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
           {error ? <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</div> : null}
           {message ? <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">{message}</div> : null}
 
@@ -448,7 +448,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                       type="button"
                       onClick={() => pasteMfaCode('setup')}
                       disabled={loading}
-                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-[#153A4C]/10 bg-white px-4 text-xs font-black text-[#153A4C] shadow-sm transition active:scale-[0.98] disabled:opacity-50"
+                      className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-2xl border border-[#153A4C]/10 bg-white px-4 text-xs font-black text-[#153A4C] shadow-sm transition active:scale-[0.98] disabled:opacity-50"
                       aria-label="Colar Código de ativação"
                     >
                       <Copy size={14} weight="duotone" />
@@ -512,7 +512,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                   type="button"
                   onClick={() => pasteMfaCode('disable')}
                   disabled={loading}
-                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-white px-4 text-xs font-black text-rose-700 shadow-sm transition active:scale-[0.98] disabled:opacity-50"
+                  className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-white px-4 text-xs font-black text-rose-700 shadow-sm transition active:scale-[0.98] disabled:opacity-50"
                   aria-label="Colar Código para desativar"
                 >
                   <Copy size={14} weight="duotone" />

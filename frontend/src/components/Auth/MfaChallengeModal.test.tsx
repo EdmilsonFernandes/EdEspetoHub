@@ -11,12 +11,20 @@ describe('MfaChallengeModal', () => {
     });
   });
 
-  const renderModal = (onVerify = vi.fn()) => {
+  const renderModal = (
+    onVerify = vi.fn(),
+    challengeOverrides: Partial<{
+      challengeToken: string;
+      account: string;
+      trustDeviceAvailable: boolean;
+      trustedDeviceExpirationDays: number;
+    }> = {},
+  ) => {
     render(
       <MfaChallengeModal
         open
         audience="customer"
-        challenge={{ challengeToken: 'challenge-1', account: 'cliente@teste.com', trustDeviceAvailable: true }}
+        challenge={{ challengeToken: 'challenge-1', account: 'cliente@teste.com', trustDeviceAvailable: true, ...challengeOverrides }}
         onCancel={vi.fn()}
         onVerify={onVerify}
       />,
@@ -43,6 +51,12 @@ describe('MfaChallengeModal', () => {
       expect(window.navigator.clipboard.readText).toHaveBeenCalled();
       expect(onVerify).toHaveBeenCalledWith({ code: '123456', trustDevice: false });
     });
+  });
+
+  it('shows the trusted device duration returned by the backend', () => {
+    renderModal(vi.fn(), { trustedDeviceExpirationDays: 180 });
+
+    expect(screen.getByText(/Salvar acesso neste aparelho por 180 dias/i)).toBeInTheDocument();
   });
 
   it('falls back to focused manual paste instructions when clipboard read is blocked', async () => {
