@@ -7,6 +7,7 @@ import { storeService } from '../services/storeService';
 import { addressLookupService } from '../services/addressLookupService';
 import { authService } from '../services/authService';
 import { planService } from '../services/planService';
+import { destinationService } from '../services/destinationService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatPhoneInput } from '../utils/format';
@@ -154,6 +155,12 @@ const resolveClaimSegment = (value = '') => {
   return STORE_SEGMENT_PRESETS[normalized] ? normalized : 'outros';
 };
 
+const normalizeClaimPlaceIds = (value = '') =>
+  String(value || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+
 export function CreateStore() {
   const ATTRIBUTION_KEY = 'jnk_attribution_v1';
   const isNativePlatform = Capacitor.isNativePlatform();
@@ -181,6 +188,10 @@ export function CreateStore() {
       state: read('state').toUpperCase(),
       phone: read('phone'),
       segment: resolveClaimSegment(read('segment')),
+      deliveryMode: ['all', 'selected', 'none'].includes(read('deliveryMode').toLowerCase())
+        ? read('deliveryMode').toLowerCase()
+        : 'selected',
+      placeIds: normalizeClaimPlaceIds(read('placeIds')),
     };
   }, [searchParams]);
   const [storeError, setStoreError] = useState('');
@@ -218,6 +229,12 @@ export function CreateStore() {
   const [cepAutofilled, setCepAutofilled] = useState(false);
   const [cityOptions, setCityOptions] = useState<string[]>([]);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
+  const [destinationClaimPlaces, setDestinationClaimPlaces] = useState<any[]>([]);
+  const [destinationClaimPlacesLoading, setDestinationClaimPlacesLoading] = useState(false);
+  const [destinationClaimPlacesError, setDestinationClaimPlacesError] = useState('');
+  const [destinationClaimPlaceSearch, setDestinationClaimPlaceSearch] = useState('');
+  const [destinationClaimDeliveryMode, setDestinationClaimDeliveryMode] = useState<'selected' | 'all' | 'none'>('selected');
+  const [selectedDestinationClaimPlaceIds, setSelectedDestinationClaimPlaceIds] = useState<string[]>([]);
   const [cityLookupError, setCityLookupError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({
     email: '',
@@ -449,6 +466,42 @@ export function CreateStore() {
   }, [destinationClaim]);
 
   useEffect(() => {
+    if (!destinationClaim?.destinationListingId) {
+      setDestinationClaimDeliveryMode('selected');
+      setSelectedDestinationClaimPlaceIds([]);
+      setDestinationClaimPlaces([]);
+      setDestinationClaimPlacesError('');
+      return;
+    }
+    setDestinationClaimDeliveryMode(destinationClaim.deliveryMode || 'selected');
+    setSelectedDestinationClaimPlaceIds(destinationClaim.placeIds || []);
+  }, [destinationClaim?.destinationListingId]);
+
+  useEffect(() => {
+    if (!destinationClaim?.destinationSlug) return;
+
+    let active = true;
+    setDestinationClaimPlacesLoading(true);
+    setDestinationClaimPlacesError('');
+    destinationService
+      .getPublic(destinationClaim.destinationSlug)
+      .then((payload: any) => {
+        if (!active) return;
+        setDestinationClaimPlaces(Array.isArray(payload?.places) ? payload.places : []);
+      })
+      .catch(() => {
+        if (active) setDestinationClaimPlacesError('Não conseguimos carregar os chalés deste destino agora. Você pode concluir o cadastro mesmo assim.');
+      })
+      .finally(() => {
+        if (active) setDestinationClaimPlacesLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [destinationClaim?.destinationSlug]);
+
+  useEffect(() => {
     if (!destinationClaim?.destinationListingId) return;
 
     setCurrentStep(1);
@@ -488,6 +541,35 @@ export function CreateStore() {
   );
 
   const isSocialSelected = (type: string) => socialLinksMap.has(normalizeSocialNetworkType(type));
+
+  const filteredDestinationClaimPlaces = React.useMemo(() => {
+    const query = String(destinationClaimPlaceSearch || '').trim().toLowerCase();
+    const places = Array.isArray(destinationClaimPlaces) ? destinationClaimPlaces : [];
+    if (!query) return places;
+    return places.filter((place: any) =>
+      [
+        place?.name,
+        place?.address,
+        place?.city,
+        place?.type,
+      ].filter(Boolean).join(' ').toLowerCase().includes(query)
+    );
+  }, [destinationClaimPlaceSearch, destinationClaimPlaces]);
+
+  const selectedDestinationClaimPlaces = React.useMemo(() => {
+    const selected = new Set(selectedDestinationClaimPlaceIds.map(String));
+    return (destinationClaimPlaces || []).filter((place: any) => selected.has(String(place.id)));
+  }, [destinationClaimPlaces, selectedDestinationClaimPlaceIds]);
+
+  const toggleDestinationClaimPlace = (placeId: string) => {
+    setSelectedDestinationClaimPlaceIds((current) => {
+      const normalized = String(placeId || '').trim();
+      if (!normalized) return current;
+      return current.includes(normalized)
+        ? current.filter((id) => id !== normalized)
+        : [...current, normalized];
+    });
+  };
   const getSocialValue = (type: string) => socialLinksMap.get(normalizeSocialNetworkType(type)) || '';
 
   const toggleSocialLink = (type: string, selected: boolean) => {
@@ -735,16 +817,31 @@ export function CreateStore() {
         acquisitionAttribution = null;
       }
       const destinationClaimAttribution = destinationClaim
-        ? {
+        ? (() => {
+            const selectedPlaces = destinationClaimDeliveryMode === 'all'
+              ? destinationClaimPlaces
+              : destinationClaimDeliveryMode === 'selected'
+                ? selectedDestinationClaimPlaces
+                : [];
+            const selectedPlaceIds = destinationClaimDeliveryMode === 'all'
+              ? destinationClaimPlaces.map((place: any) => String(place.id || '')).filter(Boolean)
+              : destinationClaimDeliveryMode === 'selected'
+                ? selectedDestinationClaimPlaceIds
+                : [];
+            return {
             source: 'destination_listing_claim',
             destinationListingId: destinationClaim.destinationListingId,
             destinationId: destinationClaim.destinationId || null,
             destinationSlug: destinationClaim.destinationSlug || null,
             destinationName: destinationClaim.destinationName || null,
             listingTitle: destinationClaim.listingTitle || destinationClaim.storeName || null,
+            destinationDeliveryMode: destinationClaimDeliveryMode,
+            destinationHospitalityPlaceIds: selectedPlaceIds,
+            destinationHospitalityPlaceNames: selectedPlaces.map((place: any) => String(place.name || '')).filter(Boolean),
             landingPath: `${window.location.pathname}${window.location.search}`,
             ts: Date.now(),
-          }
+          };
+          })()
         : null;
       const resolvedAcquisitionAttribution = (acquisitionAttribution || destinationClaimAttribution)
         ? { ...(acquisitionAttribution || {}), ...(destinationClaimAttribution || {}) }
@@ -1544,6 +1641,90 @@ export function CreateStore() {
                 <span className="inline-flex shrink-0 items-center justify-center rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-emerald-700">
                   Validação obrigatória
                 </span>
+              </div>
+              <div className="mt-4 rounded-[1.35rem] border border-white/70 bg-white/72 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Atendimento em chalés</p>
+                    <h3 className="mt-1 text-sm font-black text-slate-950">Informe onde você consegue atender</h3>
+                    <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
+                      Isso ajuda o time Já no Caminho a validar sua loja e conectar você aos hóspedes certos.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: 'all', label: 'Atendo todos' },
+                      { id: 'selected', label: 'Escolher chalés' },
+                      { id: 'none', label: 'Só recebo visita' },
+                    ].map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => setDestinationClaimDeliveryMode(option.id as any)}
+                        className={`rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition ${
+                          destinationClaimDeliveryMode === option.id
+                            ? 'bg-[#153A4C] text-white shadow-[0_14px_24px_-18px_rgba(21,58,76,0.8)]'
+                            : 'border border-slate-200 bg-white text-slate-600'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {destinationClaimDeliveryMode === 'selected' ? (
+                  <div className="mt-3">
+                    <input
+                      value={destinationClaimPlaceSearch}
+                      onChange={(event) => setDestinationClaimPlaceSearch(event.target.value)}
+                      placeholder="Buscar chalé ou pousada"
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
+                    />
+                    {destinationClaimPlacesLoading ? (
+                      <p className="mt-2 rounded-2xl bg-[#edf5fa] px-3 py-2 text-xs font-bold text-[#336886]">Carregando chalés do destino...</p>
+                    ) : null}
+                    {destinationClaimPlacesError ? (
+                      <p className="mt-2 rounded-2xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700">{destinationClaimPlacesError}</p>
+                    ) : null}
+                    <div className="mt-2 max-h-52 space-y-2 overflow-y-auto pr-1">
+                      {filteredDestinationClaimPlaces.slice(0, 80).map((place: any) => {
+                        const checked = selectedDestinationClaimPlaceIds.includes(String(place.id));
+                        return (
+                          <button
+                            key={place.id}
+                            type="button"
+                            onClick={() => toggleDestinationClaimPlace(String(place.id))}
+                            className={`flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition ${
+                              checked
+                                ? 'border-[#153A4C]/30 bg-[#eef5f7]'
+                                : 'border-slate-200 bg-white hover:border-slate-300'
+                            }`}
+                          >
+                            <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border ${checked ? 'border-[#153A4C] bg-[#153A4C] text-white' : 'border-slate-300 bg-white text-transparent'}`}>
+                              <CheckCircle size={14} weight="fill" />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block text-sm font-black leading-tight text-slate-950">{place.name}</span>
+                              <span className="mt-0.5 line-clamp-1 block text-xs font-semibold text-slate-500">{place.address || place.type || 'Hospedagem do destino'}</span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {!destinationClaimPlacesLoading && !filteredDestinationClaimPlaces.length ? (
+                      <p className="mt-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-3 text-xs font-bold text-slate-500">
+                        Nenhum chalé encontrado nesta busca. Você pode continuar e o time ajusta depois.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className="mt-3 rounded-2xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">
+                    {destinationClaimDeliveryMode === 'all'
+                      ? 'Você informou que consegue atender todas as hospedagens cadastradas neste destino.'
+                      : 'Você informou que o foco é receber visitantes no local, sem entrega nos chalés.'}
+                  </p>
+                )}
               </div>
             </div>
           ) : null}

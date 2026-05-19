@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bed, Buildings, CheckCircle, Compass, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, PencilSimple, Plus, QrCode, Sparkle, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { Bed, Buildings, ChatCircleText, CheckCircle, Compass, CopySimple, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, PaperPlaneTilt, PencilSimple, Plus, QrCode, Sparkle, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
@@ -14,6 +14,11 @@ import {
   buildHospitalityPlacePosterFileName,
   escapePosterHtml,
 } from '../utils/destinationQrPoster';
+import {
+  buildListingClaimUrl,
+  buildListingInviteMessage,
+  buildListingInviteWhatsAppUrl,
+} from '../utils/destinationListingClaim';
 
 const DESTINATION_GALLERY_SLOTS = 4;
 
@@ -430,6 +435,8 @@ export function SuperAdminDestinations() {
   const [destinationZipLookupError, setDestinationZipLookupError] = useState('');
   const [placeZipLookupLoading, setPlaceZipLookupLoading] = useState(false);
   const [placeZipLookupError, setPlaceZipLookupError] = useState('');
+  const [inviteListing, setInviteListing] = useState<any | null>(null);
+  const [inviteFeedback, setInviteFeedback] = useState('');
 
   const load = async () => {
     if (!localStorage.getItem('superAdminToken')) {
@@ -1077,6 +1084,67 @@ export function SuperAdminDestinations() {
     }
   };
 
+  const getDestinationForListing = (listing: any) =>
+    listing?.destination ||
+    selectedDestination ||
+    (catalog.destinations || []).find((item: any) => String(item.id) === String(listing?.destinationId)) ||
+    {};
+
+  const getPublicBaseUrl = () => {
+    if (typeof window === 'undefined') return 'https://janocaminho.com.br';
+    return window.location.origin || 'https://janocaminho.com.br';
+  };
+
+  const buildInvitePayload = (listing: any) => {
+    const destination = getDestinationForListing(listing);
+    const claimUrl = buildListingClaimUrl(destination, listing, { baseUrl: getPublicBaseUrl() });
+    const message = buildListingInviteMessage(destination, listing, claimUrl);
+    const rawContact = listing?.whatsapp || listing?.phone || (/^https?:\/\//i.test(String(listing?.ctaUrl || '')) ? '' : listing?.ctaUrl);
+    return {
+      destination,
+      claimUrl,
+      message,
+      whatsappUrl: buildListingInviteWhatsAppUrl(rawContact, message),
+    };
+  };
+
+  const copyTextToClipboard = async (text: string, feedback: string) => {
+    if (!text) return;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setInviteFeedback(feedback);
+      window.setTimeout(() => setInviteFeedback(''), 2600);
+    } catch {
+      setError('Não foi possível copiar agora. Copie manualmente pelo painel de convite.');
+    }
+  };
+
+  const copyListingInvite = (listing: any) => {
+    const payload = buildInvitePayload(listing);
+    return copyTextToClipboard(payload.message, `Convite de ${listing.title} copiado.`);
+  };
+
+  const copyVisibleListingInvites = () => {
+    const listings = (listingsResult.items || []).filter((listing: any) => !listing.storeId && !listing.store);
+    if (!listings.length) {
+      setError('Nenhuma pré-loja sem vínculo visível nesta página para convidar.');
+      return;
+    }
+    const batch = listings.map((listing: any) => buildInvitePayload(listing).message).join('\n\n---\n\n');
+    return copyTextToClipboard(batch, `${listings.length} convite(s) copiado(s) desta página.`);
+  };
+
   const handleGeneratePlaceQrPoster = (place: any) => {
     if (typeof window === 'undefined') return;
 
@@ -1571,6 +1639,7 @@ export function SuperAdminDestinations() {
     { id: 'storeLink', label: 'Vínculo loja', description: 'Loja que entrega em uma hospedagem.', icon: Buildings },
   ];
   const selectedDestination = (catalog.destinations || []).find((destination: any) => String(destination.id) === String(selectedDestinationId)) || null;
+  const invitePayload = inviteListing ? buildInvitePayload(inviteListing) : null;
   const pageButtonClass = 'rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700 disabled:cursor-not-allowed disabled:opacity-40';
   const renderPagination = (pagination: any, onPageChange: (page: number) => void, label = 'itens') => (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
@@ -1913,7 +1982,16 @@ export function SuperAdminDestinations() {
                           <h4 className="text-lg font-black text-slate-950">Curadoria local e pré-lojas</h4>
                           <p className="mt-0.5 text-xs font-bold text-slate-500">{listingsResult.pagination?.total || 0} serviço(s) nesta cidade</p>
                         </div>
-                        <Sparkle size={24} weight="duotone" className="text-amber-700" />
+                        <div className="flex flex-wrap items-center gap-2">
+                          {inviteFeedback ? (
+                            <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-black text-emerald-700">{inviteFeedback}</span>
+                          ) : null}
+                          <button type="button" onClick={copyVisibleListingInvites} className={actionButtonClass('amber')}>
+                            <CopySimple size={13} weight="bold" />
+                            Copiar convites
+                          </button>
+                          <Sparkle size={24} weight="duotone" className="text-amber-700" />
+                        </div>
                       </div>
                       <div className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
                         {(listingsResult.items || []).map((listing: any) => (
@@ -1940,6 +2018,18 @@ export function SuperAdminDestinations() {
                                 <PencilSimple size={13} weight="bold" />
                                 Editar
                               </button>
+                              {!listing.storeId && !listing.store ? (
+                                <>
+                                  <button type="button" onClick={() => setInviteListing(listing)} className={actionButtonClass('primary')}>
+                                    <ChatCircleText size={13} weight="bold" />
+                                    Convite
+                                  </button>
+                                  <button type="button" onClick={() => copyListingInvite(listing)} className={actionButtonClass('neutral')}>
+                                    <CopySimple size={13} weight="bold" />
+                                    Copiar
+                                  </button>
+                                </>
+                              ) : null}
                               <button type="button" disabled={saving} onClick={() => toggleListingActive(listing)} className={actionButtonClass(listing.active === false ? 'success' : 'muted')}>
                                 {listing.active === false ? 'Ativar' : 'Desativar'}
                               </button>
@@ -2392,6 +2482,68 @@ export function SuperAdminDestinations() {
           </div>
         ) : null}
       </div>
+
+      {inviteListing && invitePayload ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-3 py-4 backdrop-blur-sm sm:items-center">
+          <div className="w-full max-w-2xl overflow-hidden rounded-[2rem] bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.75)]">
+            <div className="border-b border-slate-100 bg-[radial-gradient(circle_at_0%_0%,rgba(51,104,134,0.18),transparent_34%),linear-gradient(135deg,#ffffff,#f8fafc)] p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Convite para pré-loja</p>
+                  <h3 className="mt-1 break-words text-xl font-black tracking-[-0.03em] text-slate-950">{inviteListing.title}</h3>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">
+                    Copie a mensagem ou abra direto no WhatsApp. O link leva para o cadastro com dados pré-preenchidos.
+                  </p>
+                </div>
+                <button type="button" onClick={() => setInviteListing(null)} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-600">
+                  Fechar
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4 p-5">
+              <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50 p-3">
+                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Link de ativação</p>
+                <p className="mt-2 break-all rounded-2xl bg-white px-3 py-2 text-xs font-bold text-[#153A4C] ring-1 ring-slate-200">{invitePayload.claimUrl}</p>
+              </div>
+
+              <div className="rounded-[1.35rem] border border-slate-200 bg-white p-3">
+                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Mensagem pronta</p>
+                <textarea
+                  readOnly
+                  value={invitePayload.message}
+                  rows={10}
+                  className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold leading-relaxed text-slate-700 outline-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                <button type="button" onClick={() => copyTextToClipboard(invitePayload.message, `Convite de ${inviteListing.title} copiado.`)} className={actionButtonClass('primary')}>
+                  <CopySimple size={14} weight="bold" />
+                  Copiar mensagem
+                </button>
+                <button type="button" onClick={() => copyTextToClipboard(invitePayload.claimUrl, 'Link de ativação copiado.')} className={actionButtonClass('neutral')}>
+                  <LinkSimpleHorizontal size={14} weight="bold" />
+                  Copiar link
+                </button>
+                {invitePayload.whatsappUrl ? (
+                  <a href={invitePayload.whatsappUrl} target="_blank" rel="noreferrer" className={actionButtonClass('success')}>
+                    <PaperPlaneTilt size={14} weight="bold" />
+                    Abrir WhatsApp
+                  </a>
+                ) : (
+                  <span className="rounded-full bg-amber-50 px-3 py-2 text-xs font-black text-amber-700">
+                    Sem WhatsApp válido cadastrado
+                  </span>
+                )}
+                <a href={invitePayload.claimUrl} target="_blank" rel="noreferrer" className={actionButtonClass('amber')}>
+                  Ver cadastro
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </AdminLayout>
   );
 }

@@ -54,6 +54,25 @@ type MfaLoginOptions = {
   userAgent?: string | null;
   ipAddress?: string | null;
 };
+
+const sanitizeAttributionStringArray = (value: unknown, limit = 80) => {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item || '').trim())
+      .filter(Boolean)
+      .slice(0, limit);
+  }
+  return String(value || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, limit);
+};
+
+const sanitizeDestinationDeliveryMode = (value: unknown) => {
+  const normalized = String(value || '').trim().toLowerCase();
+  return [ 'all', 'selected', 'none' ].includes(normalized) ? normalized : null;
+};
 /**
  * Provides AuthService functionality.
  *
@@ -333,8 +352,15 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       destinationSlug: String(raw.destinationSlug || '').trim() || null,
       destinationName: String(raw.destinationName || '').trim() || null,
       listingTitle: String(raw.listingTitle || raw.storeName || '').trim() || null,
+      destinationDeliveryMode: sanitizeDestinationDeliveryMode(raw.destinationDeliveryMode || raw.deliveryMode),
+      destinationHospitalityPlaceIds: sanitizeAttributionStringArray(raw.destinationHospitalityPlaceIds || raw.placeIds),
+      destinationHospitalityPlaceNames: sanitizeAttributionStringArray(raw.destinationHospitalityPlaceNames || raw.placeNames),
     };
-    const hasUsefulData = Object.entries(normalized).some(([key, value]) => key !== 'ts' && Boolean(value));
+    const hasUsefulData = Object.entries(normalized).some(([key, value]) => {
+      if (key === 'ts') return false;
+      if (Array.isArray(value)) return value.length > 0;
+      return Boolean(value);
+    });
     return hasUsefulData ? normalized : null;
   }
 

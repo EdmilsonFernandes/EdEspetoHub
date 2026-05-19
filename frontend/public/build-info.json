@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "4b27cd5a",
-  "versionLabel": "v0.1.9.4b27cd5a",
-  "versionInternal": "0.1.9+20260519.005715.4b27cd5a",
-  "buildId": "0.1.9+20260519.005715.4b27cd5a-20260519.005715-4b27cd5a",
-  "builtAt": "2026-05-19T00:57:15.042Z",
-  "commitHash": "4b27cd5a1202fdf5e2f02a239e780edc6adedc91",
-  "shortHash": "4b27cd5a",
+  "versionDisplaySuffix": "2ab0f766",
+  "versionLabel": "v0.1.9.2ab0f766",
+  "versionInternal": "0.1.9+20260519.015456.2ab0f766",
+  "buildId": "0.1.9+20260519.015456.2ab0f766-20260519.015456-2ab0f766",
+  "builtAt": "2026-05-19T01:54:56.954Z",
+  "commitHash": "2ab0f7663d7e00c276fd50edf439ba4805a90b1d",
+  "shortHash": "2ab0f766",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "2ab0f7663d7e00c276fd50edf439ba4805a90b1d",
+      "shortHash": "2ab0f766",
+      "dateIso": "2026-05-18T22:17:18-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Add Goncalves tourism seed",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2ab0f7663d7e00c276fd50edf439ba4805a90b1d"
+    },
+    {
+      "hash": "6e96937d93ff8e91f9bff58804d198c0ae155acd",
+      "shortHash": "6e96937d",
+      "dateIso": "2026-05-18T22:01:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Polish MFA challenge branding",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6e96937d93ff8e91f9bff58804d198c0ae155acd"
+    },
     {
       "hash": "4b27cd5a1202fdf5e2f02a239e780edc6adedc91",
       "shortHash": "4b27cd5a",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Fix featured payment modal status UX",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/19011016e0d84e5b3b79b1ad9cf25bbfcb7ce60d"
-    },
-    {
-      "hash": "b61ad808cdcfa23211ff5f43c34b72de2033b168",
-      "shortHash": "b61ad808",
-      "dateIso": "2026-05-17T20:07:53-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine glass header and destination UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b61ad808cdcfa23211ff5f43c34b72de2033b168"
-    },
-    {
-      "hash": "b5932e255a6892d0a34ed32ea50e2893f2b50934",
-      "shortHash": "b5932e25",
-      "dateIso": "2026-05-17T12:52:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Add shared glass header for app subpages",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b5932e255a6892d0a34ed32ea50e2893f2b50934"
     }
   ]
 }

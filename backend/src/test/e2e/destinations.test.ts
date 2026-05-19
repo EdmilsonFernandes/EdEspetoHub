@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { env } from '../../config/env';
+import { AppDataSource } from '../../config/database';
 import { activateSubscription, api, loginAdmin, registerStore, testEmail, verifyEmailDirectly } from '../helpers';
 
 const superAdminToken = () => jwt.sign({ sub: '00000000-0000-0000-0000-000000000001', role: 'SUPER_ADMIN' }, env.jwtSecret);
@@ -369,6 +370,19 @@ describe('Destination Hub', () => {
 
     expect(destinationRes.status).toBe(201);
 
+    const placeRes = await api
+      .post('/api/admin/hospitality-places')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        name: `Chalé Captado ${suffix}`,
+        slug: `chale-captado-${suffix}`,
+        type: 'CHALE',
+        address: 'Estrada do convite, 10',
+      });
+
+    expect(placeRes.status).toBe(201);
+
     const listingRes = await api
       .post('/api/admin/destination-listings')
       .set('Authorization', `Bearer ${platformToken}`)
@@ -395,10 +409,24 @@ describe('Destination Hub', () => {
         destinationSlug: destinationRes.body.slug,
         destinationName: destinationRes.body.name,
         listingTitle: listingRes.body.title,
+        destinationDeliveryMode: 'selected',
+        destinationHospitalityPlaceIds: [placeRes.body.id],
+        destinationHospitalityPlaceNames: [placeRes.body.name],
       },
     });
 
     expect(claimedStore.res.status).toBe(201);
+    const attributionRows = await AppDataSource.query(
+      `SELECT acquisition_attribution FROM store_settings WHERE store_id = $1`,
+      [claimedStore.body.store.id]
+    );
+    expect(attributionRows[0]?.acquisition_attribution).toEqual(expect.objectContaining({
+      source: 'destination_listing_claim',
+      destinationListingId: listingRes.body.id,
+      destinationDeliveryMode: 'selected',
+      destinationHospitalityPlaceIds: [placeRes.body.id],
+      destinationHospitalityPlaceNames: [placeRes.body.name],
+    }));
 
     const publicRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}`);
     expect(publicRes.status).toBe(200);
