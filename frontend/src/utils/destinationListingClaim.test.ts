@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildHospitalityPlaceInviteMessage,
+  buildHospitalityPlacePublicInviteUrl,
   buildListingClaimUrl,
   buildListingInviteMessage,
   buildListingInviteWhatsAppUrl,
+  buildListingPublicInviteUrl,
 } from './destinationListingClaim';
 
 describe('destinationListingClaim', () => {
@@ -52,16 +55,45 @@ describe('destinationListingClaim', () => {
   });
 
   it('builds a human WhatsApp invite message and contact URL', () => {
+    const inviteUrl = buildListingPublicInviteUrl(
+      { slug: 'goncalves', name: 'Gonçalves' },
+      { id: 'listing-1', title: 'Restaurante Sauá' },
+      { baseUrl: 'https://janocaminho.com.br' }
+    );
     const message = buildListingInviteMessage(
       { name: 'Gonçalves' },
       { title: 'Restaurante Sauá' },
-      'https://janocaminho.com.br/create?source=destination_listing_claim'
+      inviteUrl
     );
     const whatsappUrl = buildListingInviteWhatsAppUrl('(35) 99976-9970', message);
 
+    expect(inviteUrl).toBe('https://janocaminho.com.br/convite/loja/goncalves/listing-1');
     expect(message).toContain('Restaurante Sauá');
     expect(message).toContain('Gonçalves');
+    expect(message).toContain('guias turísticos da cidade');
+    expect(message).toContain('play.google.com/store/apps/details');
+    expect(message).toContain('/hub');
     expect(message).toContain('REMOVER');
     expect(whatsappUrl.startsWith('https://wa.me/5535999769970?text=')).toBe(true);
+  });
+
+  it('builds a hospitality place invite with a short safe link', () => {
+    const inviteUrl = buildHospitalityPlacePublicInviteUrl(
+      { slug: 'goncalves', name: 'Gonçalves' },
+      { slug: 'pousada-vista', name: 'Pousada Vista' },
+      { baseUrl: 'https://janocaminho.com.br/' }
+    );
+    const message = buildHospitalityPlaceInviteMessage(
+      { name: 'Gonçalves' },
+      { name: 'Pousada Vista' },
+      inviteUrl
+    );
+
+    expect(inviteUrl).toBe('https://janocaminho.com.br/convite/chale/goncalves/pousada-vista');
+    expect(message).toContain('Pousada Vista');
+    expect(message).toContain('QR Code');
+    expect(message).toContain('guias turísticos da cidade');
+    expect(message).toContain('janocaminho.com.br');
+    expect(message).toContain('REMOVER');
   });
 });

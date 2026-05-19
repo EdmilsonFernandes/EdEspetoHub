@@ -15,9 +15,11 @@ import {
   escapePosterHtml,
 } from '../utils/destinationQrPoster';
 import {
-  buildListingClaimUrl,
+  buildHospitalityPlaceInviteMessage,
+  buildHospitalityPlacePublicInviteUrl,
   buildListingInviteMessage,
   buildListingInviteWhatsAppUrl,
+  buildListingPublicInviteUrl,
 } from '../utils/destinationListingClaim';
 
 const DESTINATION_GALLERY_SLOTS = 4;
@@ -436,6 +438,7 @@ export function SuperAdminDestinations() {
   const [placeZipLookupLoading, setPlaceZipLookupLoading] = useState(false);
   const [placeZipLookupError, setPlaceZipLookupError] = useState('');
   const [inviteListing, setInviteListing] = useState<any | null>(null);
+  const [invitePlace, setInvitePlace] = useState<any | null>(null);
   const [inviteFeedback, setInviteFeedback] = useState('');
 
   const load = async () => {
@@ -1090,6 +1093,12 @@ export function SuperAdminDestinations() {
     (catalog.destinations || []).find((item: any) => String(item.id) === String(listing?.destinationId)) ||
     {};
 
+  const getDestinationForPlace = (place: any) =>
+    place?.destination ||
+    selectedDestination ||
+    (catalog.destinations || []).find((item: any) => String(item.id) === String(place?.destinationId)) ||
+    {};
+
   const getPublicBaseUrl = () => {
     if (typeof window === 'undefined') return 'https://janocaminho.com.br';
     return window.location.origin || 'https://janocaminho.com.br';
@@ -1097,12 +1106,27 @@ export function SuperAdminDestinations() {
 
   const buildInvitePayload = (listing: any) => {
     const destination = getDestinationForListing(listing);
-    const claimUrl = buildListingClaimUrl(destination, listing, { baseUrl: getPublicBaseUrl() });
-    const message = buildListingInviteMessage(destination, listing, claimUrl);
+    const publicInviteUrl = buildListingPublicInviteUrl(destination, listing, { baseUrl: getPublicBaseUrl() });
+    const message = buildListingInviteMessage(destination, listing, publicInviteUrl);
     const rawContact = listing?.whatsapp || listing?.phone || (/^https?:\/\//i.test(String(listing?.ctaUrl || '')) ? '' : listing?.ctaUrl);
     return {
       destination,
+      claimUrl: publicInviteUrl,
+      publicInviteUrl,
+      message,
+      whatsappUrl: buildListingInviteWhatsAppUrl(rawContact, message),
+    };
+  };
+
+  const buildPlaceInvitePayload = (place: any) => {
+    const destination = getDestinationForPlace(place);
+    const claimUrl = buildHospitalityPlacePublicInviteUrl(destination, place, { baseUrl: getPublicBaseUrl() });
+    const message = buildHospitalityPlaceInviteMessage(destination, place, claimUrl);
+    const rawContact = place?.whatsapp || place?.phone;
+    return {
+      destination,
       claimUrl,
+      publicInviteUrl: claimUrl,
       message,
       whatsappUrl: buildListingInviteWhatsAppUrl(rawContact, message),
     };
@@ -1133,6 +1157,21 @@ export function SuperAdminDestinations() {
   const copyListingInvite = (listing: any) => {
     const payload = buildInvitePayload(listing);
     return copyTextToClipboard(payload.message, `Convite de ${listing.title} copiado.`);
+  };
+
+  const copyPlaceInvite = (place: any) => {
+    const payload = buildPlaceInvitePayload(place);
+    return copyTextToClipboard(payload.message, `Convite de ${place.name} copiado.`);
+  };
+
+  const copyVisiblePlaceInvites = () => {
+    const places = placesResult.items || [];
+    if (!places.length) {
+      setError('Nenhuma hospedagem visível nesta página para convidar.');
+      return;
+    }
+    const batch = places.map((place: any) => buildPlaceInvitePayload(place).message).join('\n\n---\n\n');
+    return copyTextToClipboard(batch, `${places.length} convite(s) de hospedagem copiado(s) desta página.`);
   };
 
   const copyVisibleListingInvites = () => {
@@ -1640,6 +1679,11 @@ export function SuperAdminDestinations() {
   ];
   const selectedDestination = (catalog.destinations || []).find((destination: any) => String(destination.id) === String(selectedDestinationId)) || null;
   const invitePayload = inviteListing ? buildInvitePayload(inviteListing) : null;
+  const placeInvitePayload = invitePlace ? buildPlaceInvitePayload(invitePlace) : null;
+  const activeInviteItem = invitePlace || inviteListing;
+  const activeInvitePayload = placeInvitePayload || invitePayload;
+  const activeInviteTitle = invitePlace?.name || inviteListing?.title || 'Parceiro';
+  const activeInviteKindLabel = invitePlace ? 'Convite para hospedagem' : 'Convite para pré-loja';
   const pageButtonClass = 'rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700 disabled:cursor-not-allowed disabled:opacity-40';
   const renderPagination = (pagination: any, onPageChange: (page: number) => void, label = 'itens') => (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
@@ -1932,7 +1976,16 @@ export function SuperAdminDestinations() {
                           <h4 className="text-lg font-black text-slate-950">Chalés e pousadas da cidade</h4>
                           <p className="mt-0.5 text-xs font-bold text-slate-500">{placesResult.pagination?.total || 0} hospedagem(ns) nesta cidade</p>
                         </div>
-                        <Bed size={24} weight="duotone" className="text-[#336886]" />
+                        <div className="flex flex-wrap items-center gap-2">
+                          {inviteFeedback ? (
+                            <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-black text-emerald-700">{inviteFeedback}</span>
+                          ) : null}
+                          <button type="button" onClick={copyVisiblePlaceInvites} className={actionButtonClass('primary')}>
+                            <CopySimple size={13} weight="bold" />
+                            Copiar convites
+                          </button>
+                          <Bed size={24} weight="duotone" className="text-[#336886]" />
+                        </div>
                       </div>
                       <div className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
                         {(placesResult.items || []).map((place: any) => {
@@ -1960,6 +2013,14 @@ export function SuperAdminDestinations() {
                                 <button type="button" onClick={() => handleGeneratePlaceQrPoster(place)} className={actionButtonClass('amber')}>
                                   <QrCode size={13} weight="bold" />
                                   QR/PDF
+                                </button>
+                                <button type="button" onClick={() => setInvitePlace(place)} className={actionButtonClass('primary')}>
+                                  <ChatCircleText size={13} weight="bold" />
+                                  Convite
+                                </button>
+                                <button type="button" onClick={() => copyPlaceInvite(place)} className={actionButtonClass('neutral')}>
+                                  <CopySimple size={13} weight="bold" />
+                                  Copiar
                                 </button>
                                 <button type="button" disabled={saving} onClick={() => togglePlaceActive(place)} className={actionButtonClass(place.active === false ? 'success' : 'muted')}>
                                   {place.active === false ? 'Ativar' : 'Desativar'}
@@ -2483,19 +2544,19 @@ export function SuperAdminDestinations() {
         ) : null}
       </div>
 
-      {inviteListing && invitePayload ? (
+      {activeInviteItem && activeInvitePayload ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-3 py-4 backdrop-blur-sm sm:items-center">
           <div className="w-full max-w-2xl overflow-hidden rounded-[2rem] bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.75)]">
             <div className="border-b border-slate-100 bg-[radial-gradient(circle_at_0%_0%,rgba(51,104,134,0.18),transparent_34%),linear-gradient(135deg,#ffffff,#f8fafc)] p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Convite para pré-loja</p>
-                  <h3 className="mt-1 break-words text-xl font-black tracking-[-0.03em] text-slate-950">{inviteListing.title}</h3>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">{activeInviteKindLabel}</p>
+                  <h3 className="mt-1 break-words text-xl font-black tracking-[-0.03em] text-slate-950">{activeInviteTitle}</h3>
                   <p className="mt-1 text-sm font-semibold text-slate-500">
-                    Copie a mensagem ou abra direto no WhatsApp. O link leva para o cadastro com dados pré-preenchidos.
+                    Copie a mensagem ou abra direto no WhatsApp. O link curto abre o cadastro oficial com dados pré-preenchidos.
                   </p>
                 </div>
-                <button type="button" onClick={() => setInviteListing(null)} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-600">
+                <button type="button" onClick={() => { setInviteListing(null); setInvitePlace(null); }} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-600">
                   Fechar
                 </button>
               </div>
@@ -2503,31 +2564,31 @@ export function SuperAdminDestinations() {
 
             <div className="space-y-4 p-5">
               <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50 p-3">
-                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Link de ativação</p>
-                <p className="mt-2 break-all rounded-2xl bg-white px-3 py-2 text-xs font-bold text-[#153A4C] ring-1 ring-slate-200">{invitePayload.claimUrl}</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Link curto oficial</p>
+                <p className="mt-2 break-all rounded-2xl bg-white px-3 py-2 text-xs font-bold text-[#153A4C] ring-1 ring-slate-200">{activeInvitePayload.claimUrl}</p>
               </div>
 
               <div className="rounded-[1.35rem] border border-slate-200 bg-white p-3">
                 <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Mensagem pronta</p>
                 <textarea
                   readOnly
-                  value={invitePayload.message}
+                  value={activeInvitePayload.message}
                   rows={10}
                   className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold leading-relaxed text-slate-700 outline-none"
                 />
               </div>
 
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                <button type="button" onClick={() => copyTextToClipboard(invitePayload.message, `Convite de ${inviteListing.title} copiado.`)} className={actionButtonClass('primary')}>
+                <button type="button" onClick={() => copyTextToClipboard(activeInvitePayload.message, `Convite de ${activeInviteTitle} copiado.`)} className={actionButtonClass('primary')}>
                   <CopySimple size={14} weight="bold" />
                   Copiar mensagem
                 </button>
-                <button type="button" onClick={() => copyTextToClipboard(invitePayload.claimUrl, 'Link de ativação copiado.')} className={actionButtonClass('neutral')}>
+                <button type="button" onClick={() => copyTextToClipboard(activeInvitePayload.claimUrl, 'Link curto copiado.')} className={actionButtonClass('neutral')}>
                   <LinkSimpleHorizontal size={14} weight="bold" />
                   Copiar link
                 </button>
-                {invitePayload.whatsappUrl ? (
-                  <a href={invitePayload.whatsappUrl} target="_blank" rel="noreferrer" className={actionButtonClass('success')}>
+                {activeInvitePayload.whatsappUrl ? (
+                  <a href={activeInvitePayload.whatsappUrl} target="_blank" rel="noreferrer" className={actionButtonClass('success')}>
                     <PaperPlaneTilt size={14} weight="bold" />
                     Abrir WhatsApp
                   </a>
@@ -2536,7 +2597,7 @@ export function SuperAdminDestinations() {
                     Sem WhatsApp válido cadastrado
                   </span>
                 )}
-                <a href={invitePayload.claimUrl} target="_blank" rel="noreferrer" className={actionButtonClass('amber')}>
+                <a href={activeInvitePayload.claimUrl} target="_blank" rel="noreferrer" className={actionButtonClass('amber')}>
                   Ver cadastro
                 </a>
               </div>

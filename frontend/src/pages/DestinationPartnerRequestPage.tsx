@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Bed, CheckCircle, Compass, Handshake, ImageSquare, LinkSimpleHorizontal, Sparkle, UploadSimple } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { destinationService } from '../services/destinationService';
@@ -197,6 +198,32 @@ export function DestinationPartnerRequestPage() {
   const formStartRef = useRef<HTMLFormElement | null>(null);
   const firstPartnerControlRef = useRef<HTMLSelectElement | null>(null);
   const initialFocusAppliedRef = useRef(false);
+  const [searchParams] = useSearchParams();
+  const hospitalityClaimKey = searchParams.toString();
+  const hospitalityClaim = useMemo(() => {
+    if (String(searchParams.get('source') || '').trim() !== 'hospitality_place_claim') return null;
+    const read = (key: string) => String(searchParams.get(key) || '').trim();
+    return {
+      destinationId: read('destinationId'),
+      destinationSlug: read('destinationSlug'),
+      destinationCity: read('destinationCity'),
+      destinationState: read('destinationState').toUpperCase().slice(0, 2),
+      partnerType: 'HOSPITALITY',
+      placeType: read('placeType') || 'CHALE',
+      name: read('name'),
+      description: read('description'),
+      zipCode: read('zipCode'),
+      address: read('address'),
+      city: read('city'),
+      state: read('state').toUpperCase().slice(0, 2),
+      whatsapp: read('whatsapp'),
+      instagramUrl: read('instagramUrl'),
+      websiteUrl: read('websiteUrl'),
+      logoUrl: read('logoUrl'),
+      bannerUrl: read('bannerUrl'),
+      message: read('message'),
+    };
+  }, [hospitalityClaimKey]);
   const [destinations, setDestinations] = useState<any[]>([]);
   const [form, setForm] = useState(initialForm);
   const [destinationMode, setDestinationMode] = useState<'existing' | 'new'>('existing');
@@ -218,17 +245,36 @@ export function DestinationPartnerRequestPage() {
       .then((payload) => {
         if (!active) return;
         const rows = Array.isArray(payload) ? payload : [];
-        const firstDestination = rows[0] || null;
+        const claimDestination = hospitalityClaim
+          ? rows.find((destination: any) => {
+              const sameId = hospitalityClaim.destinationId && String(destination.id) === String(hospitalityClaim.destinationId);
+              const sameSlug = hospitalityClaim.destinationSlug && String(destination.slug) === String(hospitalityClaim.destinationSlug);
+              return sameId || sameSlug;
+            })
+          : null;
+        const firstDestination = claimDestination || rows[0] || null;
         setDestinations(rows);
-        setSelectedDestinationState((current) => current || String(firstDestination?.state || '').toUpperCase().slice(0, 2));
-        if (!rows.length) setDestinationMode('new');
+        setSelectedDestinationState((current) => current || String(firstDestination?.state || hospitalityClaim?.destinationState || '').toUpperCase().slice(0, 2));
+        if (!rows.length || (hospitalityClaim && !claimDestination)) setDestinationMode(hospitalityClaim ? 'new' : 'existing');
         setForm((current) => ({
           ...current,
-          destinationId: current.destinationId || firstDestination?.id || '',
-          destinationCity: current.destinationCity || firstDestination?.city || firstDestination?.name || '',
-          destinationState: current.destinationState || String(firstDestination?.state || '').toUpperCase().slice(0, 2),
-          city: current.city || firstDestination?.city || firstDestination?.name || '',
-          state: current.state || String(firstDestination?.state || '').toUpperCase().slice(0, 2),
+          destinationId: hospitalityClaim ? claimDestination?.id || '' : current.destinationId || firstDestination?.id || '',
+          destinationCity: hospitalityClaim?.destinationCity || current.destinationCity || firstDestination?.city || firstDestination?.name || '',
+          destinationState: hospitalityClaim?.destinationState || current.destinationState || String(firstDestination?.state || '').toUpperCase().slice(0, 2),
+          partnerType: hospitalityClaim?.partnerType || current.partnerType,
+          placeType: hospitalityClaim?.placeType || current.placeType,
+          name: hospitalityClaim?.name || current.name,
+          description: hospitalityClaim?.description || current.description,
+          zipCode: hospitalityClaim?.zipCode || current.zipCode,
+          address: hospitalityClaim?.address || current.address,
+          city: hospitalityClaim?.city || current.city || firstDestination?.city || firstDestination?.name || '',
+          state: hospitalityClaim?.state || current.state || String(firstDestination?.state || '').toUpperCase().slice(0, 2),
+          whatsapp: hospitalityClaim?.whatsapp || current.whatsapp,
+          instagramUrl: hospitalityClaim?.instagramUrl || current.instagramUrl,
+          websiteUrl: hospitalityClaim?.websiteUrl || current.websiteUrl,
+          logoUrl: hospitalityClaim?.logoUrl || current.logoUrl,
+          bannerUrl: hospitalityClaim?.bannerUrl || current.bannerUrl,
+          message: hospitalityClaim?.message || current.message,
         }));
       })
       .catch((err) => {
@@ -240,7 +286,7 @@ export function DestinationPartnerRequestPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [hospitalityClaim]);
 
   useEffect(() => {
     if (loading || initialFocusAppliedRef.current) return;

@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "2ab0f766",
-  "versionLabel": "v0.1.9.2ab0f766",
-  "versionInternal": "0.1.9+20260519.015456.2ab0f766",
-  "buildId": "0.1.9+20260519.015456.2ab0f766-20260519.015456-2ab0f766",
-  "builtAt": "2026-05-19T01:54:56.954Z",
-  "commitHash": "2ab0f7663d7e00c276fd50edf439ba4805a90b1d",
-  "shortHash": "2ab0f766",
+  "versionDisplaySuffix": "3da85ccf",
+  "versionLabel": "v0.1.9.3da85ccf",
+  "versionInternal": "0.1.9+20260519.022650.3da85ccf",
+  "buildId": "0.1.9+20260519.022650.3da85ccf-20260519.022650-3da85ccf",
+  "builtAt": "2026-05-19T02:26:50.268Z",
+  "commitHash": "3da85ccffdea8a0ebb98b4ce4cc6db5d6cf193d1",
+  "shortHash": "3da85ccf",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "3da85ccffdea8a0ebb98b4ce4cc6db5d6cf193d1",
+      "shortHash": "3da85ccf",
+      "dateIso": "2026-05-18T22:59:53-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Add destination listing invite flow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3da85ccffdea8a0ebb98b4ce4cc6db5d6cf193d1"
+    },
     {
       "hash": "2ab0f7663d7e00c276fd50edf439ba4805a90b1d",
       "shortHash": "2ab0f766",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Soften app glass headers",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a68731f7248912f1232571c7093cc8d41b39d58b"
-    },
-    {
-      "hash": "19011016e0d84e5b3b79b1ad9cf25bbfcb7ce60d",
-      "shortHash": "19011016",
-      "dateIso": "2026-05-17T20:25:09-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix featured payment modal status UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/19011016e0d84e5b3b79b1ad9cf25bbfcb7ce60d"
     }
   ]
 } as const;

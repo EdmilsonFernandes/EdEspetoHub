@@ -1,3 +1,5 @@
+import { JNC_GOOGLE_PLAY_URL, JNC_IOS_HUB_URL } from './destinationQrPoster';
+
 const categoryToStoreSegment = (category?: string | null) => {
   const key = String(category || '').toUpperCase();
   if (key.includes('RESTAURANTE') || key === 'NOITE') return 'restaurante';
@@ -6,6 +8,7 @@ const categoryToStoreSegment = (category?: string | null) => {
 };
 
 const normalizeBaseUrl = (value?: string | null) => String(value || '').trim().replace(/\/+$/, '');
+const cleanPathSegment = (value?: string | null) => encodeURIComponent(String(value || '').trim());
 
 const normalizeWhatsappPhone = (value?: string | null) => {
   let digits = String(value || '').replace(/\D/g, '');
@@ -41,7 +44,25 @@ export const buildListingClaimUrl = (destination: any, listing: any, options: an
   return baseUrl ? `${baseUrl}${path}` : path;
 };
 
-export const buildListingInviteMessage = (destination: any, listing: any, claimUrl: string) => {
+export const buildListingPublicInviteUrl = (destination: any, listing: any, options: any = {}) => {
+  const destinationSlug = cleanPathSegment(destination?.slug || destination?.destinationSlug);
+  const listingId = cleanPathSegment(listing?.id);
+  if (!destinationSlug || !listingId) return buildListingClaimUrl(destination, listing, options);
+  const path = `/convite/loja/${destinationSlug}/${listingId}`;
+  const baseUrl = normalizeBaseUrl(options?.baseUrl);
+  return baseUrl ? `${baseUrl}${path}` : path;
+};
+
+export const buildHospitalityPlacePublicInviteUrl = (destination: any, place: any, options: any = {}) => {
+  const destinationSlug = cleanPathSegment(destination?.slug || place?.destination?.slug);
+  const placeSlug = cleanPathSegment(place?.slug);
+  if (!destinationSlug || !placeSlug) return '';
+  const path = `/convite/chale/${destinationSlug}/${placeSlug}`;
+  const baseUrl = normalizeBaseUrl(options?.baseUrl);
+  return baseUrl ? `${baseUrl}${path}` : path;
+};
+
+export const buildListingInviteMessage = (destination: any, listing: any, inviteUrl: string) => {
   const destinationName = String(destination?.name || destination?.city || 'sua cidade').trim();
   const listingName = String(listing?.title || 'seu negócio').trim();
   return [
@@ -49,10 +70,43 @@ export const buildListingInviteMessage = (destination: any, listing: any, claimU
     '',
     `Estou montando um guia digital de ${destinationName} para hóspedes de chalés e pousadas encontrarem restaurantes, cafés, empórios e serviços locais.`,
     '',
-    `O negócio ${listingName} aparece como curadoria inicial da cidade. Quero te convidar para assumir gratuitamente esse perfil, atualizar fotos, cardápio e informar quais chalés/pousadas vocês atendem.`,
+    `O negócio ${listingName} aparece como curadoria inicial a partir de informações públicas e guias turísticos da cidade. Não é cobrança e não é link estranho: é um convite para você revisar/assumir o perfil no domínio oficial janocaminho.com.br.`,
     '',
-    `Link seguro para ativar:`,
-    claimUrl,
+    `Você pode atualizar fotos, WhatsApp, cardápio/serviços e informar quais chalés ou pousadas atende.`,
+    '',
+    `Link curto e seguro para assumir o perfil:`,
+    inviteUrl,
+    '',
+    `Importante: não envio APK nem arquivo para instalar. O app é pela Google Play e o link acima fica no domínio oficial janocaminho.com.br.`,
+    '',
+    `Para ver como o hóspede encontra seu negócio no app:`,
+    `Android: ${JNC_GOOGLE_PLAY_URL}`,
+    `iPhone ou web: ${JNC_IOS_HUB_URL}`,
+    '',
+    `Se preferir não aparecer no guia, me responda REMOVER que eu retiro sem problema.`,
+  ].join('\n');
+};
+
+export const buildHospitalityPlaceInviteMessage = (destination: any, place: any, inviteUrl: string) => {
+  const destinationName = String(destination?.name || destination?.city || place?.city || 'sua cidade').trim();
+  const placeName = String(place?.name || 'sua hospedagem').trim();
+  return [
+    `Olá, tudo bem? Sou o Edmilson, do Já no Caminho.`,
+    '',
+    `Estou organizando um guia digital de ${destinationName} para hóspedes encontrarem delivery, mercados, restaurantes, passeios e serviços próximos aos chalés e pousadas.`,
+    '',
+    `${placeName} aparece como curadoria inicial a partir de informações públicas e guias turísticos da cidade. Não é cobrança e não é link estranho: é um convite para você assumir gratuitamente o perfil no domínio oficial janocaminho.com.br.`,
+    '',
+    `Assumindo o perfil, você pode revisar fotos, WhatsApp, endereço, Instagram, link de reserva e gerar o QR Code para colocar na hospedagem.`,
+    '',
+    `Link curto e seguro para assumir/atualizar o perfil:`,
+    inviteUrl,
+    '',
+    `Importante: não envio APK nem arquivo para instalar. O app é pela Google Play e o link acima fica no domínio oficial janocaminho.com.br.`,
+    '',
+    `Para ver a experiência do hóspede:`,
+    `Android: ${JNC_GOOGLE_PLAY_URL}`,
+    `iPhone ou web: ${JNC_IOS_HUB_URL}`,
     '',
     `Se preferir não aparecer no guia, me responda REMOVER que eu retiro sem problema.`,
   ].join('\n');
