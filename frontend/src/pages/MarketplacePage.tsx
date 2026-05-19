@@ -638,6 +638,7 @@ type FeaturedProduct = {
   imageUrl: string;
   price: number;
   sponsored?: boolean;
+  badge?: string;
 };
 
 const readCustomerSession = () => {
@@ -2172,7 +2173,7 @@ export function MarketplacePage() {
       }
       setFeaturedLoading(true);
       try {
-        const sponsored = await featuredService.listPublicFeatured(10).catch(() => []);
+        const sponsored = await featuredService.listPublicFeatured(18).catch(() => []);
         const sponsoredEntries = (Array.isArray(sponsored) ? sponsored : [])
           .filter((item: any) => String(item?.storeSlug || '').trim())
           .map((item: any) => ({
@@ -2188,6 +2189,7 @@ export function MarketplacePage() {
               getStoreAvatarUrl(item?.storeSlug, item?.storeName),
             price: Number(item?.price || 0),
             sponsored: true,
+            badge: String(item?.badge || 'Patrocinado'),
           }))
           .filter((item: any) => item.storeSlug && item.price > 0);
 
@@ -2271,7 +2273,7 @@ export function MarketplacePage() {
     const sponsored = items.filter((item) => item.sponsored);
     const organic = items.filter((item) => !item.sponsored);
     const windowSize = 8;
-    if (items.length <= windowSize) return items;
+    if (items.length <= windowSize) return [...sponsored, ...organic];
     if (organic.length === 0) return sponsored.slice(0, windowSize);
 
     const fixedSponsored = sponsored.slice(0, Math.min(windowSize, sponsored.length));
@@ -2284,6 +2286,7 @@ export function MarketplacePage() {
     }
     return [...fixedSponsored, ...rotatedOrganic];
   }, [featuredProducts, featuredOffset]);
+  const hasSponsoredFeaturedProducts = displayedFeaturedProducts.some((item) => item.sponsored);
   const hasFeaturedCarouselOverflow = displayedFeaturedProducts.length > 3;
 
   const isCustomerLogged = Boolean(customerSession?.token);
@@ -3497,7 +3500,13 @@ export function MarketplacePage() {
                 <div className="min-w-0">
                   <h2 className="text-[14px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
                   <p className="mt-0.5 line-clamp-1 text-[10px] font-bold text-slate-500">
-                    {hasFeaturedCarouselOverflow ? 'Arraste para o lado e veja mais ofertas.' : 'Seleção rápida para pedir agora.'}
+                    {hasFeaturedCarouselOverflow
+                      ? hasSponsoredFeaturedProducts
+                        ? 'Patrocinados aparecem primeiro. Arraste para ver mais.'
+                        : 'Arraste para o lado e veja mais ofertas.'
+                      : hasSponsoredFeaturedProducts
+                        ? 'Destaque pago ativo agora.'
+                        : 'Seleção rápida para pedir agora.'}
                   </p>
                 </div>
                 {hasFeaturedCarouselOverflow ? (
@@ -3543,7 +3552,7 @@ export function MarketplacePage() {
                         <div className="absolute left-3 top-3">
                           {item.sponsored ? (
                             <span className="flex items-center gap-1 rounded-full border border-white/60 bg-amber-400/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md">
-                              <Star size={10} weight="fill" /> Promo
+                              <Star size={10} weight="fill" /> {item.badge || 'Patrocinado'}
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 rounded-full border border-white/60 bg-white/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
@@ -3815,7 +3824,7 @@ export function MarketplacePage() {
 
             {!loading && !error && filteredStores.length > 0 && (
               <>
-              <div className={selectedCondominium || isHomeStorePreview ? 'grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'}>
+              <div className={selectedCondominium || isHomeStorePreview ? 'grid grid-cols-2 gap-2.5 min-[390px]:gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'}>
                 {visibleStoreCards.map((store, index) => {
                   const storePath = selectedCondominiumSlug
                     ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
@@ -3926,7 +3935,7 @@ export function MarketplacePage() {
                           />
                         </div>
                         <div className="px-3 pb-3 pt-6">
-                          <h3 className={`line-clamp-1 text-sm font-black leading-tight ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
+                          <h3 className={`min-h-[2rem] line-clamp-2 text-[13px] font-black leading-4 [overflow-wrap:anywhere] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
                             {store.name}
                           </h3>
                           <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] font-bold text-slate-500">
@@ -4034,18 +4043,19 @@ export function MarketplacePage() {
 
                       {/* Content */}
                       <div className="px-3.5 pb-3.5 pt-[1.65rem]">
-                        <h3 className={`truncate text-[14.5px] font-black leading-tight ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
-                          {/* Adicionando o ponto de status */}
-                          {!isCondominiumScope && ( // Exibir ponto de status apenas se não estiver em modo condomínio
+                        <div className="flex min-w-0 items-start gap-1.5">
+                          {!isCondominiumScope && (
                             <span
-                              className={`inline-block w-2 h-2 rounded-full mr-1 ${store.isOpen ? 'bg-green-500' : 'bg-red-500'}`}
+                              className={`mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full ${store.isOpen ? 'bg-green-500' : 'bg-red-500'}`}
                               style={{
                                 boxShadow: store.isOpen ? '0 0 6px 1px rgba(34, 197, 94, 0.4)' : '0 0 6px 1px rgba(239, 68, 68, 0.4)',
                               }}
                             />
                           )}
-                          {store.name}
-                        </h3>
+                          <h3 className={`min-h-[2.05rem] min-w-0 flex-1 line-clamp-2 text-[13.5px] font-black leading-4 [overflow-wrap:anywhere] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
+                            {store.name}
+                          </h3>
+                        </div>
                         <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10.5px] font-medium text-slate-500">
                           {store.rating > 0 ? (
                             <span className="inline-flex items-center gap-0.5">

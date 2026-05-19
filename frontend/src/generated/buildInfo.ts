@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "5377f166",
-  "versionLabel": "v0.1.9.5377f166",
-  "versionInternal": "0.1.9+20260519.000521.5377f166",
-  "buildId": "0.1.9+20260519.000521.5377f166-20260519.000521-5377f166",
-  "builtAt": "2026-05-19T00:05:21.552Z",
-  "commitHash": "5377f1660d39fa513506e303ee2b341e61df6c21",
-  "shortHash": "5377f166",
+  "versionDisplaySuffix": "e7a93313",
+  "versionLabel": "v0.1.9.e7a93313",
+  "versionInternal": "0.1.9+20260519.001419.e7a93313",
+  "buildId": "0.1.9+20260519.001419.e7a93313-20260519.001419-e7a93313",
+  "builtAt": "2026-05-19T00:14:19.590Z",
+  "commitHash": "e7a9331300da5bb57d64b1fc23e80030c5471b61",
+  "shortHash": "e7a93313",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "e7a9331300da5bb57d64b1fc23e80030c5471b61",
+      "shortHash": "e7a93313",
+      "dateIso": "2026-05-18T21:07:56-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Improve condominium admin responsive layout",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e7a9331300da5bb57d64b1fc23e80030c5471b61"
+    },
     {
       "hash": "5377f1660d39fa513506e303ee2b341e61df6c21",
       "shortHash": "5377f166",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Polish hub discovery and destination navigation",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6a240f99a079aaeace42cd0a24c74bcd2577a8ec"
-    },
-    {
-      "hash": "e66590f31db3df268b7270f6584448ea6ecec18f",
-      "shortHash": "e66590f3",
-      "dateIso": "2026-05-17T08:45:07-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine destination city header UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e66590f31db3df268b7270f6584448ea6ecec18f"
     }
   ]
 } as const;
