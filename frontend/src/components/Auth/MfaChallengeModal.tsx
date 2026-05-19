@@ -68,6 +68,12 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
   if (!open || !challenge) return null;
 
   const sanitizeCode = (value: string) => value.replace(/\D/g, '').slice(0, 6);
+  const manualPasteHint = 'Nao consegui ler automaticamente. O campo esta focado: no celular toque e segure e escolha Colar; no computador use Ctrl+V.';
+
+  const focusCodeInput = () => {
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  };
 
   const verifyCode = async (nextCode: string, options?: { force?: boolean }) => {
     const cleanCode = sanitizeCode(nextCode);
@@ -100,17 +106,24 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
   const pasteCode = async () => {
     if (loading) return;
     setPasteHint('');
+    if (!navigator.clipboard?.readText) {
+      focusCodeInput();
+      setPasteHint(manualPasteHint);
+      return;
+    }
     try {
-      const clipboardText = await navigator.clipboard?.readText?.();
+      const clipboardText = await navigator.clipboard.readText();
       const cleanCode = sanitizeCode(String(clipboardText || ''));
       if (!cleanCode) {
+        focusCodeInput();
         setPasteHint('Copie o codigo do autenticador e toque em Colar.');
         return;
       }
       updateCode(cleanCode);
-      inputRef.current?.focus();
+      focusCodeInput();
     } catch {
-      setPasteHint('Nao foi possivel ler a area de transferencia. Toque no campo e cole manualmente.');
+      focusCodeInput();
+      setPasteHint(manualPasteHint);
     }
   };
 
@@ -210,7 +223,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
                 autoCorrect="off"
                 autoCapitalize="none"
                 spellCheck={false}
-                className="w-full rounded-3xl border border-[#336886]/15 bg-white px-5 py-4 pr-24 text-center text-3xl font-black tracking-[0.35em] text-slate-900 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.6)] outline-none transition focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/12"
+                className="w-full rounded-3xl border border-[#336886]/15 bg-white px-5 py-4 pr-28 text-center text-3xl font-black tracking-[0.35em] text-slate-900 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.6)] outline-none transition focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/12"
                 placeholder="000000"
                 autoComplete="one-time-code"
               />
@@ -218,7 +231,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
                 type="button"
                 onClick={pasteCode}
                 disabled={loading}
-                className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-1.5 rounded-2xl border border-[#336886]/10 bg-[linear-gradient(135deg,#ffffff_0%,#eef6fa_100%)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.8)] transition active:scale-[0.97] disabled:opacity-50"
+                className="absolute right-2 top-1/2 inline-flex min-w-[76px] -translate-y-1/2 items-center justify-center gap-1.5 rounded-2xl border border-[#336886]/10 bg-[linear-gradient(135deg,#ffffff_0%,#eef6fa_100%)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.8)] transition active:scale-[0.97] disabled:opacity-50"
                 aria-label="Colar codigo do app autenticador"
               >
                 <Copy size={14} weight="duotone" />

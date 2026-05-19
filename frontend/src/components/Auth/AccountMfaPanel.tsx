@@ -26,10 +26,15 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
   const [copiedSecret, setCopiedSecret] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [setupPasteHint, setSetupPasteHint] = useState('');
+  const [disablePasteHint, setDisablePasteHint] = useState('');
+  const setupInputRef = useRef<HTMLInputElement | null>(null);
+  const disableInputRef = useRef<HTMLInputElement | null>(null);
   const setupSubmittedCodeRef = useRef('');
   const disableSubmittedCodeRef = useRef('');
   const setupSubmittingRef = useRef(false);
   const disableSubmittingRef = useRef(false);
+  const manualPasteHint = 'Nao consegui ler automaticamente. O campo esta focado: no celular toque e segure e escolha Colar; no computador use Ctrl+V.';
 
   const startSetup = useCallback(async () => {
     setLoading(true);
@@ -37,6 +42,8 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
     setMessage('');
     setSetupCode('');
     setDisableCode('');
+    setSetupPasteHint('');
+    setDisablePasteHint('');
     setupSubmittedCodeRef.current = '';
     disableSubmittedCodeRef.current = '';
     setupSubmittingRef.current = false;
@@ -80,6 +87,8 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
     setSetup(null);
     setSetupCode('');
     setDisableCode('');
+    setSetupPasteHint('');
+    setDisablePasteHint('');
     setupSubmittedCodeRef.current = '';
     disableSubmittedCodeRef.current = '';
     setupSubmittingRef.current = false;
@@ -162,6 +171,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
   const updateSetupCode = (value: string) => {
     const cleanCode = sanitizeMfaCode(value);
     setSetupCode(cleanCode);
+    setSetupPasteHint('');
     setError('');
     if (cleanCode.length < 6) {
       setupSubmittedCodeRef.current = '';
@@ -173,6 +183,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
   const updateDisableCode = (value: string) => {
     const cleanCode = sanitizeMfaCode(value);
     setDisableCode(cleanCode);
+    setDisablePasteHint('');
     setError('');
     if (cleanCode.length < 6) {
       disableSubmittedCodeRef.current = '';
@@ -181,14 +192,36 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
     void disable(cleanCode);
   };
 
+  const focusMfaInput = (target: 'setup' | 'disable') => {
+    const input = target === 'setup' ? setupInputRef.current : disableInputRef.current;
+    input?.focus();
+    input?.select();
+  };
+
+  const setPasteHintForTarget = (target: 'setup' | 'disable', hint: string) => {
+    if (target === 'setup') {
+      setSetupPasteHint(hint);
+      return;
+    }
+    setDisablePasteHint(hint);
+  };
+
   const pasteMfaCode = async (target: 'setup' | 'disable') => {
     if (loading) return;
     setError('');
+    setMessage('');
+    setPasteHintForTarget(target, '');
+    if (!navigator.clipboard?.readText) {
+      focusMfaInput(target);
+      setPasteHintForTarget(target, manualPasteHint);
+      return;
+    }
     try {
-      const clipboardText = await navigator.clipboard?.readText?.();
+      const clipboardText = await navigator.clipboard.readText();
       const cleanCode = sanitizeMfaCode(String(clipboardText || ''));
       if (!cleanCode) {
-        setError('Copie o codigo do app autenticador e toque em Colar.');
+        focusMfaInput(target);
+        setPasteHintForTarget(target, 'Copie o codigo do app autenticador e toque em Colar.');
         return;
       }
       if (target === 'setup') {
@@ -196,8 +229,10 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
       } else {
         updateDisableCode(cleanCode);
       }
+      focusMfaInput(target);
     } catch {
-      setError('Nao foi possivel ler a area de transferencia. Toque no campo e cole manualmente.');
+      focusMfaInput(target);
+      setPasteHintForTarget(target, manualPasteHint);
     }
   };
 
@@ -385,6 +420,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                     <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Codigo de 6 digitos</span>
                     <div className="relative">
                       <input
+                        ref={setupInputRef}
                         value={setupCode}
                         onChange={(event) => updateSetupCode(event.target.value)}
                         onPaste={(event) => {
@@ -400,14 +436,14 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                         autoCapitalize="none"
                         spellCheck={false}
                         aria-label="Codigo de ativacao do app autenticador"
-                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 pr-24 text-center text-xl font-black tracking-[0.28em] outline-none focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/10"
+                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 pr-28 text-center text-xl font-black tracking-[0.28em] outline-none focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/10"
                         placeholder="000000"
                       />
                       <button
                         type="button"
                         onClick={() => pasteMfaCode('setup')}
                         disabled={loading}
-                        className="absolute right-1.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-xl bg-[#153A4C]/8 px-2.5 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#153A4C] transition active:scale-[0.97] disabled:opacity-50"
+                        className="absolute right-1.5 top-1/2 inline-flex min-w-[68px] -translate-y-1/2 items-center justify-center gap-1 rounded-xl border border-[#153A4C]/10 bg-white px-2.5 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm transition active:scale-[0.97] disabled:opacity-50"
                         aria-label="Colar codigo de ativacao"
                       >
                         <Copy size={13} weight="duotone" />
@@ -415,7 +451,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                       </button>
                     </div>
                     <span className="block text-[11px] font-bold text-slate-400">
-                      {loading ? 'Validando automaticamente...' : setupCode.length === 6 ? 'Codigo completo. Use o botao se precisar tentar de novo.' : 'Cole ou digite os 6 digitos para validar automaticamente.'}
+                      {setupPasteHint || (loading ? 'Validando automaticamente...' : setupCode.length === 6 ? 'Codigo completo. Use o botao se precisar tentar de novo.' : 'Cole ou digite os 6 digitos para validar automaticamente.')}
                     </span>
                   </label>
                   <button
@@ -448,6 +484,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                 <span className="text-[11px] font-black uppercase tracking-[0.14em] text-rose-800">Codigo do app autenticador</span>
                 <div className="relative">
                   <input
+                    ref={disableInputRef}
                     value={disableCode}
                     onChange={(event) => updateDisableCode(event.target.value)}
                     onPaste={(event) => {
@@ -463,14 +500,14 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                     autoCapitalize="none"
                     spellCheck={false}
                     aria-label="Codigo do app autenticador para desativar"
-                    className="w-full rounded-2xl border border-rose-100 bg-white px-4 py-3 pr-24 text-center text-xl font-black tracking-[0.28em] text-slate-950 outline-none focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
+                    className="w-full rounded-2xl border border-rose-100 bg-white px-4 py-3 pr-28 text-center text-xl font-black tracking-[0.28em] text-slate-950 outline-none focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
                     placeholder="000000"
                   />
                   <button
                     type="button"
                     onClick={() => pasteMfaCode('disable')}
                     disabled={loading}
-                    className="absolute right-1.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-xl bg-rose-50 px-2.5 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-rose-700 transition active:scale-[0.97] disabled:opacity-50"
+                    className="absolute right-1.5 top-1/2 inline-flex min-w-[68px] -translate-y-1/2 items-center justify-center gap-1 rounded-xl border border-rose-100 bg-white px-2.5 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-rose-700 shadow-sm transition active:scale-[0.97] disabled:opacity-50"
                     aria-label="Colar codigo para desativar"
                   >
                     <Copy size={13} weight="duotone" />
@@ -478,7 +515,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                   </button>
                 </div>
                 <span className="block text-[11px] font-bold text-rose-700/70">
-                  {loading ? 'Validando automaticamente...' : disableCode.length === 6 ? 'Codigo completo. Use o botao se precisar tentar de novo.' : 'Cole ou digite os 6 digitos para validar automaticamente.'}
+                  {disablePasteHint || (loading ? 'Validando automaticamente...' : disableCode.length === 6 ? 'Codigo completo. Use o botao se precisar tentar de novo.' : 'Cole ou digite os 6 digitos para validar automaticamente.')}
                 </span>
               </label>
               <div className="mt-3 grid grid-cols-2 gap-2">

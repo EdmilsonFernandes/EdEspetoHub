@@ -39,7 +39,7 @@ describe('AccountMfaPanel', () => {
     authServiceMock.disableMfa.mockResolvedValue({ enabled: false, featureEnabled: true });
 
     Object.defineProperty(window.navigator, 'clipboard', {
-      value: { writeText: vi.fn().mockResolvedValue(undefined) },
+      value: { writeText: vi.fn().mockResolvedValue(undefined), readText: vi.fn().mockResolvedValue('789 012') },
       configurable: true,
     });
   });
@@ -114,5 +114,36 @@ describe('AccountMfaPanel', () => {
         }),
       );
     });
+  });
+
+  it('pastes a setup code from the explicit clipboard action and validates automatically', async () => {
+    render(<AccountMfaPanel open authMode="customer" initialIntent="setup" onClose={vi.fn()} />);
+
+    expect(await screen.findByAltText(/QR Code para ativar/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Colar codigo de ativacao/i }));
+
+    await waitFor(() => {
+      expect(window.navigator.clipboard.readText).toHaveBeenCalled();
+      expect(authServiceMock.confirmMfaSetup).toHaveBeenCalledWith('789012', { authMode: 'customer' });
+    });
+  });
+
+  it('shows focused manual paste instructions when clipboard read is blocked', async () => {
+    Object.defineProperty(window.navigator, 'clipboard', {
+      value: { writeText: vi.fn().mockResolvedValue(undefined), readText: vi.fn().mockRejectedValue(new Error('blocked')) },
+      configurable: true,
+    });
+
+    render(<AccountMfaPanel open authMode="customer" initialIntent="setup" onClose={vi.fn()} />);
+
+    expect(await screen.findByAltText(/QR Code para ativar/i)).toBeInTheDocument();
+    const input = screen.getByLabelText(/Codigo de ativacao do app autenticador/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /Colar codigo de ativacao/i }));
+
+    expect(await screen.findByText(/Nao consegui ler automaticamente/i)).toBeInTheDocument();
+    expect(input).toHaveFocus();
+    expect(authServiceMock.confirmMfaSetup).not.toHaveBeenCalled();
   });
 });

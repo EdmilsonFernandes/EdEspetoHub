@@ -44,4 +44,17 @@ describe('MfaChallengeModal', () => {
       expect(onVerify).toHaveBeenCalledWith({ code: '123456', trustDevice: false });
     });
   });
+
+  it('falls back to focused manual paste instructions when clipboard read is blocked', async () => {
+    Object.defineProperty(window.navigator, 'clipboard', {
+      value: { readText: vi.fn().mockRejectedValue(new Error('blocked')) },
+      configurable: true,
+    });
+    renderModal();
+
+    fireEvent.click(screen.getByRole('button', { name: /Colar codigo do app autenticador/i }));
+
+    expect(await screen.findByText(/Nao consegui ler automaticamente/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('000000')).toHaveFocus();
+  });
 });
