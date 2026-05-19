@@ -42,7 +42,7 @@ export const superAdminService = {
     const response = await fetch(buildUrl('/auth/super-login'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, ...getMfaDeviceContext() }),
+      body: JSON.stringify({ email, password, ...getMfaDeviceContext({ authMode: 'superadmin' }) }),
     });
     return handleResponse(response);
   },
@@ -50,7 +50,7 @@ export const superAdminService = {
     const response = await fetch(buildUrl('/auth/mfa/challenge/verify'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...payload, ...getMfaDeviceContext() }),
+      body: JSON.stringify({ ...payload, ...getMfaDeviceContext({ authMode: 'superadmin' }) }),
     });
     return handleResponse(response, false);
   },

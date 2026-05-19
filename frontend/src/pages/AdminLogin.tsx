@@ -291,7 +291,7 @@ export function AdminLogin() {
         challengeToken: mfaChallenge.challengeToken,
         code,
         trustDevice,
-      });
+      }, { authMode: 'admin' });
       persistTrustedMfaDevice(session?.trustedDevice);
       setMfaChallenge(null);
       await completeAdminLoginFlow(session);

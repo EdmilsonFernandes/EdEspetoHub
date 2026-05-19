@@ -187,7 +187,7 @@ export function MotoboyLogin() {
         challengeToken: mfaChallenge.challengeToken,
         code,
         trustDevice,
-      });
+      }, { authMode: 'motoboy' });
       persistTrustedMfaDevice(session?.trustedDevice);
       setMfaChallenge(null);
       await completeMotoboyLoginFlow(session);
@@ -218,7 +218,7 @@ export function MotoboyLogin() {
     setVerifyPrompt(null);
     setLoading(true);
     try {
-      const session = await authService.login(form.email, form.password);
+      const session = await authService.login(form.email, form.password, { authMode: 'motoboy' });
       if (session?.mfaRequired) {
         setMfaChallenge(session);
         return;

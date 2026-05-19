@@ -29,6 +29,7 @@ import { nativeBiometricService } from '../services/nativeBiometricService';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AccountMfaPanel } from '../components/Auth/AccountMfaPanel';
 import { authService } from '../services/authService';
+import { forgetTrustedMfaDevice } from '../utils/mfaDevice';
 
 // Componente Switch Simples
 function Switch({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
@@ -241,6 +242,7 @@ export function ClientAccount() {
     try {
       if (biometricEnabled) {
         nativeBiometricService.disableCustomer();
+        forgetTrustedMfaDevice();
         setBiometricEnabled(false);
         setBiometricMessage('Biometria desativada neste aparelho.');
         return;
@@ -514,6 +516,7 @@ export function ClientAccount() {
     try {
       await customerAccountService.deactivate();
       nativeBiometricService.disableCustomer();
+      forgetTrustedMfaDevice();
       setShowDeactivateModal(false);
       logout();
     } catch (e: any) {

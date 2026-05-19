@@ -1,6 +1,11 @@
+import { Capacitor } from '@capacitor/core';
+import { nativeBiometricService } from '../services/nativeBiometricService';
+
 const DEVICE_ID_KEY = 'jnc:mfa:device-id';
 const TRUSTED_TOKEN_KEY = 'jnc:mfa:trusted-token';
 const TRUSTED_LABEL_KEY = 'jnc:mfa:trusted-label';
+
+export type MfaAuthMode = 'admin' | 'customer' | 'motoboy' | 'superadmin' | 'condominium';
 
 const createId = () => {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -9,7 +14,24 @@ const createId = () => {
   return `jnc-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
 
-export const getMfaDeviceContext = () => {
+const canSendTrustedToken = (authMode?: MfaAuthMode) => {
+  if (typeof window === 'undefined') return false;
+  if (!Capacitor.isNativePlatform()) return true;
+
+  if (authMode === 'customer') {
+    return nativeBiometricService.hasValidStoredCustomerEnrollment();
+  }
+  if (authMode === 'motoboy') {
+    return nativeBiometricService.hasValidStoredMotoboyEnrollment();
+  }
+  if (authMode === 'admin') {
+    return nativeBiometricService.hasValidStoredAdminEnrollment();
+  }
+
+  return false;
+};
+
+export const getMfaDeviceContext = (options?: { authMode?: MfaAuthMode }) => {
   if (typeof window === 'undefined') {
     return { deviceId: '', trustedDeviceToken: '', deviceLabel: 'Web' };
   }
@@ -20,7 +42,9 @@ export const getMfaDeviceContext = () => {
     localStorage.setItem(DEVICE_ID_KEY, deviceId);
   }
 
-  const trustedDeviceToken = localStorage.getItem(TRUSTED_TOKEN_KEY) || '';
+  const trustedDeviceToken = canSendTrustedToken(options?.authMode)
+    ? localStorage.getItem(TRUSTED_TOKEN_KEY) || ''
+    : '';
   const deviceLabel =
     localStorage.getItem(TRUSTED_LABEL_KEY) ||
     (navigator.userAgent.includes('Android') ? 'Android' : navigator.userAgent.includes('iPhone') ? 'iPhone' : 'Navegador');

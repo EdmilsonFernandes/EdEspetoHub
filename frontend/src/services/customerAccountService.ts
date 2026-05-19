@@ -9,7 +9,7 @@ export const customerAccountService = {
   login(payload: { email: string; password: string }) {
     return apiClient.post('/customer/auth/login', {
       ...payload,
-      ...getMfaDeviceContext(),
+      ...getMfaDeviceContext({ authMode: 'customer' }),
     });
   },
 

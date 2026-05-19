@@ -245,7 +245,7 @@ export function ClientAuth() {
         challengeToken: mfaChallenge.challengeToken,
         code,
         trustDevice,
-      });
+      }, { authMode: 'customer' });
       persistTrustedMfaDevice(result?.trustedDevice);
       setMfaChallenge(null);
       finishAuthenticatedCustomerSession(result);

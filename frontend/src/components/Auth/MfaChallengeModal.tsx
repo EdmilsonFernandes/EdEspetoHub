@@ -47,14 +47,14 @@ const audienceCopy: Record<NonNullable<Props['audience']>, { eyebrow: string; ti
 
 export function MfaChallengeModal({ open, challenge, audience = 'admin', loading, error, onCancel, onVerify }: Props) {
   const [code, setCode] = useState('');
-  const [trustDevice, setTrustDevice] = useState(true);
+  const [trustDevice, setTrustDevice] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const copy = audienceCopy[audience] || audienceCopy.admin;
 
   useEffect(() => {
     if (!open) return;
     setCode('');
-    setTrustDevice(true);
+    setTrustDevice(false);
     const timer = window.setTimeout(() => inputRef.current?.focus(), 120);
     return () => window.clearTimeout(timer);
   }, [open, challenge?.challengeToken]);

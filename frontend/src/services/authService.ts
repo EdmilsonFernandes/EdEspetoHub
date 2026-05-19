@@ -1,13 +1,13 @@
 import { apiClient } from "../config/apiClient";
-import { getMfaDeviceContext } from "../utils/mfaDevice";
+import { getMfaDeviceContext, type MfaAuthMode } from "../utils/mfaDevice";
 
 export const authService = {
-    async login(identifier: string, password: string) {
+    async login(identifier: string, password: string, options?: { authMode?: MfaAuthMode }) {
         const normalizedIdentifier = String(identifier || "").trim();
         const response = await apiClient.post("/auth/login", {
             email: normalizedIdentifier,
             password,
-            ...getMfaDeviceContext(),
+            ...getMfaDeviceContext({ authMode: options?.authMode || 'admin' }),
         });
         return response;
     },
@@ -16,7 +16,7 @@ export const authService = {
         const response = await apiClient.post("/auth/admin-login", {
             identifier: normalizedIdentifier,
             password,
-            ...getMfaDeviceContext(),
+            ...getMfaDeviceContext({ authMode: 'admin' }),
         });
         return response;
     },
@@ -24,14 +24,14 @@ export const authService = {
         const response = await apiClient.post("/auth/condominium-login", {
             email: String(identifier || "").trim().toLowerCase(),
             password,
-            ...getMfaDeviceContext(),
+            ...getMfaDeviceContext({ authMode: 'condominium' }),
         });
         return response;
     },
-    async verifyMfaChallenge(payload: { challengeToken: string; code: string; trustDevice?: boolean }) {
+    async verifyMfaChallenge(payload: { challengeToken: string; code: string; trustDevice?: boolean }, options?: { authMode?: MfaAuthMode }) {
         const response = await apiClient.post("/auth/mfa/challenge/verify", {
             ...payload,
-            ...getMfaDeviceContext(),
+            ...getMfaDeviceContext({ authMode: options?.authMode }),
         });
         return response;
     },
