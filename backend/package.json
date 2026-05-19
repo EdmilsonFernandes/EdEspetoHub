@@ -14,6 +14,8 @@
     "seed:condominium:azuli": "ts-node src/scripts/seedCondominiumAzuli.ts",
     "seed:destination:sao-bento": "ts-node src/scripts/seedSaoBentoTourismMap.ts",
     "seed:destination:sao-bento:dist": "node dist/scripts/seedSaoBentoTourismMap.js",
+    "seed:destination:goncalves": "ts-node src/scripts/seedGoncalvesTourismPdf.ts",
+    "seed:destination:goncalves:dist": "node dist/scripts/seedGoncalvesTourismPdf.js",
     "seed:condominium-users": "ts-node src/scripts/seedCondominiumUsers.ts",
     "test": "node node_modules/vitest/vitest.mjs run --config vitest.config.unit.ts && node node_modules/vitest/vitest.mjs run --config vitest.config.ts",
     "test:watch": "node node_modules/vitest/vitest.mjs --config vitest.config.unit.ts",
