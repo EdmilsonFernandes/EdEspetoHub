@@ -27,7 +27,7 @@ describe('MfaChallengeModal', () => {
   it('validates automatically when the user completes six digits', async () => {
     const onVerify = renderModal();
 
-    fireEvent.change(screen.getByPlaceholderText('000000'), { target: { value: '654321' } });
+    fireEvent.change(screen.getByLabelText(/Código do app autenticador/i), { target: { value: '654321' } });
 
     await waitFor(() => {
       expect(onVerify).toHaveBeenCalledWith({ code: '654321', trustDevice: false });
@@ -37,7 +37,7 @@ describe('MfaChallengeModal', () => {
   it('pastes a copied authenticator code and validates it automatically', async () => {
     const onVerify = renderModal();
 
-    fireEvent.click(screen.getByRole('button', { name: /Colar codigo do app autenticador/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Colar Código/i }));
 
     await waitFor(() => {
       expect(window.navigator.clipboard.readText).toHaveBeenCalled();
@@ -52,9 +52,9 @@ describe('MfaChallengeModal', () => {
     });
     renderModal();
 
-    fireEvent.click(screen.getByRole('button', { name: /Colar codigo do app autenticador/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Colar Código/i }));
 
-    expect(await screen.findByText(/Nao deu para ler automaticamente/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('000000')).toHaveFocus();
+    expect(await screen.findByText(/Não deu para ler automaticamente/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Código do app autenticador/i)).toHaveFocus();
   });
 });

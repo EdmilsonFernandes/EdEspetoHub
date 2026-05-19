@@ -57,12 +57,12 @@ describe('AccountMfaPanel', () => {
 
     render(<AccountMfaPanel open authMode="customer" onClose={vi.fn()} />);
 
-    expect(await screen.findByText('Protecao ativa')).toBeInTheDocument();
-    expect(screen.queryByLabelText(/Codigo do app autenticador para desativar/i)).not.toBeInTheDocument();
+    expect(await screen.findByText('Proteção ativa')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Código do app autenticador para desativar/i)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /Desativar protecao/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Desativar proteção/i }));
 
-    const input = await screen.findByLabelText(/Codigo do app autenticador para desativar/i);
+    const input = await screen.findByLabelText(/Código do app autenticador para desativar/i);
     fireEvent.change(input, { target: { value: '123456' } });
     fireEvent.click(screen.getByRole('button', { name: /^Desativar$/i }));
 
@@ -74,7 +74,7 @@ describe('AccountMfaPanel', () => {
   it('shows QR setup, manual key copy and confirmation only after activation starts', async () => {
     render(<AccountMfaPanel open authMode="admin" onClose={vi.fn()} />);
 
-    expect(await screen.findByText('Protecao desativada')).toBeInTheDocument();
+    expect(await screen.findByText('Proteção desativada')).toBeInTheDocument();
     expect(screen.queryByText('Chave manual')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Ativar agora/i }));
@@ -88,10 +88,10 @@ describe('AccountMfaPanel', () => {
       expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith('ABCDEF123456');
     });
 
-    fireEvent.change(screen.getByLabelText(/Codigo de ativacao do app autenticador/i), {
+    fireEvent.change(screen.getByLabelText(/Código de ativação do app autenticador/i), {
       target: { value: '654321' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /Ativar protecao/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Ativar proteção/i }));
 
     await waitFor(() => {
       expect(authServiceMock.confirmMfaSetup).toHaveBeenCalledWith('654321', { authMode: 'admin' });
@@ -121,7 +121,7 @@ describe('AccountMfaPanel', () => {
 
     expect(await screen.findByAltText(/QR Code para ativar/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /Colar codigo de ativacao/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Colar Código de ativação/i }));
 
     await waitFor(() => {
       expect(window.navigator.clipboard.readText).toHaveBeenCalled();
@@ -138,11 +138,11 @@ describe('AccountMfaPanel', () => {
     render(<AccountMfaPanel open authMode="customer" initialIntent="setup" onClose={vi.fn()} />);
 
     expect(await screen.findByAltText(/QR Code para ativar/i)).toBeInTheDocument();
-    const input = screen.getByLabelText(/Codigo de ativacao do app autenticador/i);
+    const input = screen.getByLabelText(/Código de ativação do app autenticador/i);
 
-    fireEvent.click(screen.getByRole('button', { name: /Colar codigo de ativacao/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Colar Código de ativação/i }));
 
-    expect(await screen.findByText(/Nao deu para ler automaticamente/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Não deu para ler automaticamente/i)).toBeInTheDocument();
     expect(input).toHaveFocus();
     expect(authServiceMock.confirmMfaSetup).not.toHaveBeenCalled();
   });

@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { CheckCircle, Copy, DeviceMobile, LockKey, ShieldCheck, X } from '@phosphor-icons/react';
+import { Copy, DeviceMobile, ShieldCheck, X } from '@phosphor-icons/react';
 import { readMfaClipboardText } from '../../utils/mfaClipboard';
 
 type MfaChallenge = {
@@ -23,22 +23,22 @@ const audienceCopy: Record<NonNullable<Props['audience']>, { eyebrow: string; ti
   admin: {
     eyebrow: 'Painel da loja',
     title: 'Acesso seguro da loja',
-    helper: 'Informe o codigo de 6 digitos do autenticador.',
+    helper: 'Informe o código de 6 dígitos do autenticador.',
   },
   customer: {
     eyebrow: 'Conta do cliente',
-    title: 'Protecao do seu pedido',
-    helper: 'Informe o codigo de 6 digitos do autenticador.',
+    title: 'Proteção do seu pedido',
+    helper: 'Informe o código de 6 dígitos do autenticador.',
   },
   motoboy: {
-    eyebrow: 'Area do entregador',
+    eyebrow: 'Área do entregador',
     title: 'Rota protegida',
-    helper: 'Informe o codigo de 6 digitos do autenticador.',
+    helper: 'Informe o código de 6 dígitos do autenticador.',
   },
   superadmin: {
     eyebrow: 'Controle da plataforma',
     title: 'Acesso protegido',
-    helper: 'Informe o codigo de 6 digitos do autenticador.',
+    helper: 'Informe o código de 6 dígitos do autenticador.',
   },
 };
 
@@ -65,7 +65,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
   if (!open || !challenge) return null;
 
   const sanitizeCode = (value: string) => value.replace(/\D/g, '').slice(0, 6);
-  const manualPasteHint = 'Nao deu para ler automaticamente. Toque no campo e use Colar do teclado.';
+  const manualPasteHint = 'Não deu para ler automaticamente. Toque no campo e use Colar do teclado.';
 
   const focusCodeInput = () => {
     inputRef.current?.focus();
@@ -103,12 +103,12 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
   const pasteCode = async () => {
     if (loading) return;
     focusCodeInput();
-    setPasteHint('Tentando colar o codigo...');
+    setPasteHint('Tentando colar o código...');
     try {
       const clipboardText = await readMfaClipboardText();
       const cleanCode = sanitizeCode(String(clipboardText || ''));
       if (!cleanCode) {
-        setPasteHint('Copie o codigo do autenticador e toque em Colar codigo.');
+        setPasteHint('Copie o código do autenticador e toque em Colar Código.');
         return;
       }
       updateCode(cleanCode);
@@ -122,18 +122,20 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
     await verifyCode(code, { force: true });
   };
 
+  const codeDigits = Array.from({ length: 6 }, (_, index) => code[index] || '0');
+
   return (
-    <div className="fixed inset-0 z-[1200] flex items-end justify-center bg-[radial-gradient(circle_at_20%_0%,rgba(51,104,134,0.32),transparent_34%),linear-gradient(180deg,rgba(2,6,23,0.58),rgba(15,23,42,0.72))] px-3 py-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:items-center">
+    <div className="fixed inset-0 z-[1200] flex items-end justify-center bg-[radial-gradient(circle_at_20%_0%,rgba(51,104,134,0.34),transparent_34%),linear-gradient(180deg,rgba(2,6,23,0.72),rgba(15,23,42,0.86))] px-3 py-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:items-center">
       <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-[430px] overflow-y-auto rounded-[1.75rem] border border-white/55 bg-white/95 shadow-[0_34px_100px_-28px_rgba(2,6,23,0.85)] ring-1 ring-[#336886]/10">
         <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-sky-300/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 left-4 h-36 w-36 rounded-full bg-emerald-300/18 blur-3xl" />
-        <div className="relative overflow-hidden bg-[radial-gradient(circle_at_16%_12%,rgba(255,255,255,0.18),transparent_30%),radial-gradient(circle_at_82%_0%,rgba(132,204,22,0.18),transparent_28%),linear-gradient(135deg,#081520_0%,#153A4C_52%,#336886_100%)] px-4 pb-4 pt-4 text-white">
+        <div className="relative overflow-hidden bg-[radial-gradient(circle_at_16%_12%,rgba(255,255,255,0.18),transparent_30%),radial-gradient(circle_at_82%_0%,rgba(132,204,22,0.18),transparent_28%),linear-gradient(135deg,#081520_0%,#153A4C_52%,#336886_100%)] px-5 pb-5 pt-5 text-white">
           <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
           <button
             type="button"
             onClick={onCancel}
             className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/12 text-white/75 shadow-[0_14px_30px_-24px_rgba(2,6,23,0.95)] backdrop-blur transition hover:bg-white/20 hover:text-white"
-            aria-label="Fechar verificacao em duas etapas"
+            aria-label="Fechar verificação em duas etapas"
           >
             <X size={18} weight="bold" />
           </button>
@@ -141,7 +143,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
             <div className="relative shrink-0">
               <div className="absolute inset-0 rounded-[1.65rem] bg-white/35 blur-xl" />
               <div className="relative grid h-14 w-14 place-items-center overflow-hidden rounded-[1.25rem] border border-white/35 bg-white shadow-[0_24px_48px_-26px_rgba(2,6,23,0.95)]">
-                <img src="/janocaminho.jpg" alt="Ja no Caminho" className="h-full w-full object-cover" />
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
               </div>
               <span className="absolute -bottom-1.5 -right-1.5 grid h-7 w-7 place-items-center rounded-full border-2 border-[#153A4C] bg-lime-300 text-[#153A4C] shadow-lg">
                 <ShieldCheck size={15} weight="fill" />
@@ -157,7 +159,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
           </div>
         </div>
 
-        <form onSubmit={submit} className="relative space-y-3 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
+        <form onSubmit={submit} className="relative space-y-4 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-5">
           {challenge.account ? (
             <div className="flex items-center gap-3 rounded-2xl border border-[#336886]/10 bg-[linear-gradient(135deg,#f8fafc_0%,#eef6fa_100%)] px-4 py-3 shadow-inner shadow-white">
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#336886] shadow-sm ring-1 ring-slate-100">
@@ -183,8 +185,24 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
           ) : null}
 
           <label className="block space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Codigo do app autenticador</span>
-            <div className="grid grid-cols-[1fr_auto] gap-2">
+            <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Código do app autenticador</span>
+            <div className="relative" onClick={focusCodeInput}>
+              <div className="grid grid-cols-6 gap-1.5 sm:gap-2" aria-hidden="true">
+                {codeDigits.map((digit, index) => (
+                  <div
+                    key={`mfa-digit-${index}`}
+                    className={`grid aspect-square min-h-[3.2rem] place-items-center rounded-2xl border bg-white text-2xl font-black shadow-[0_16px_34px_-30px_rgba(15,23,42,0.7)] transition sm:min-h-[3.6rem] ${
+                      code.length === index
+                        ? 'border-[#336886] text-slate-900 ring-4 ring-[#336886]/10'
+                        : code.length > index
+                          ? 'border-[#336886]/25 text-slate-900'
+                          : 'border-slate-200 text-slate-400'
+                    }`}
+                  >
+                    {digit}
+                  </div>
+                ))}
+              </div>
               <input
                 ref={inputRef}
                 value={code}
@@ -201,23 +219,23 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
                 autoCorrect="off"
                 autoCapitalize="none"
                 spellCheck={false}
-                className="min-w-0 rounded-3xl border border-[#336886]/15 bg-white px-4 py-4 text-center text-3xl font-black tracking-[0.32em] text-slate-900 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.6)] outline-none transition focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/12"
-                placeholder="000000"
+                className="absolute inset-0 h-full w-full cursor-text opacity-0"
+                aria-label="Código do app autenticador"
                 autoComplete="one-time-code"
               />
-              <button
-                type="button"
-                onClick={pasteCode}
-                disabled={loading}
-                className="inline-flex min-w-[84px] items-center justify-center gap-1.5 rounded-3xl border border-[#336886]/10 bg-[linear-gradient(135deg,#ffffff_0%,#eef6fa_100%)] px-3 text-[11px] font-black uppercase tracking-[0.1em] text-[#336886] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.8)] transition active:scale-[0.97] disabled:opacity-50"
-                aria-label="Colar codigo do app autenticador"
-              >
-                <Copy size={14} weight="duotone" />
-                Colar codigo
-              </button>
             </div>
-            <span className={`block rounded-2xl px-3 py-2 text-[11px] font-bold ${pasteHint ? 'bg-[#336886]/8 text-[#153A4C]' : 'bg-slate-50 text-slate-400'}`}>
-              {pasteHint || (loading ? 'Validando automaticamente...' : code.length === 6 ? 'Codigo completo. Use o botao se precisar tentar de novo.' : 'Ao completar 6 digitos, validamos automaticamente.')}
+            <button
+              type="button"
+              onClick={pasteCode}
+              disabled={loading}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-[#336886]/10 bg-white px-4 text-sm font-black text-[#153A4C] shadow-[0_18px_36px_-30px_rgba(15,23,42,0.55)] transition active:scale-[0.98] disabled:opacity-50"
+              aria-label="Colar Código"
+            >
+              <Copy size={16} weight="duotone" />
+              Colar Código
+            </button>
+            <span className={`block text-left text-[11px] font-bold leading-relaxed ${pasteHint ? 'text-[#153A4C]' : 'text-slate-400'}`}>
+              {pasteHint || (loading ? 'Validando automaticamente...' : code.length === 6 ? 'Código completo. Use o botão se precisar tentar de novo.' : 'Ao completar 6 dígitos, validamos automaticamente.')}
             </span>
           </label>
 
@@ -230,9 +248,8 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
           <button
             type="submit"
             disabled={loading || code.length !== 6}
-            className="flex w-full items-center justify-center gap-2 rounded-3xl bg-[linear-gradient(135deg,#102b3a_0%,#153A4C_48%,#336886_100%)] px-5 py-4 text-sm font-black uppercase tracking-[0.16em] text-white shadow-[0_22px_44px_-26px_rgba(21,58,76,0.95)] transition hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55"
+            className="flex w-full items-center justify-center rounded-[1.35rem] bg-[#179C84] px-5 py-4 text-sm font-black uppercase tracking-[0.16em] text-white shadow-[0_22px_44px_-26px_rgba(23,156,132,0.95)] transition hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
           >
-            {loading ? <LockKey size={18} weight="duotone" /> : <CheckCircle size={18} weight="duotone" />}
             {loading ? 'Validando...' : 'Confirmar acesso'}
           </button>
         </form>

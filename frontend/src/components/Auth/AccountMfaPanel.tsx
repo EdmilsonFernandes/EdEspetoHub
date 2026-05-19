@@ -35,7 +35,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
   const disableSubmittedCodeRef = useRef('');
   const setupSubmittingRef = useRef(false);
   const disableSubmittingRef = useRef(false);
-  const manualPasteHint = 'Nao deu para ler automaticamente. Toque no campo e use Colar do teclado.';
+  const manualPasteHint = 'Não deu para ler automaticamente. Toque no campo e use Colar do teclado.';
 
   const startSetup = useCallback(async () => {
     setLoading(true);
@@ -54,7 +54,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
       setSetup(await authService.startMfaSetup({ authMode }));
       setMode('setup');
     } catch (err: any) {
-      setError(err?.message || 'Nao foi possivel iniciar a verificacao em duas etapas.');
+      setError(err?.message || 'Não foi possível iniciar a verificação em duas etapas.');
     } finally {
       setLoading(false);
     }
@@ -74,7 +74,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
       setDevices(Array.isArray(nextDevices) ? nextDevices : []);
       return nextStatus;
     } catch (err: any) {
-      setError(err?.message || 'Nao foi possivel carregar a seguranca da conta.');
+      setError(err?.message || 'Não foi possível carregar a segurança da conta.');
       return null;
     } finally {
       setLoading(false);
@@ -131,10 +131,10 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
       setSetupCode('');
       setupSubmittedCodeRef.current = '';
       setMode('overview');
-      setMessage('Verificacao em duas etapas ativada com sucesso.');
+      setMessage('Verificação em duas etapas ativada com sucesso.');
       await load();
     } catch (err: any) {
-      setError(err?.message || 'Codigo invalido.');
+      setError(err?.message || 'Código inválido.');
     } finally {
       setupSubmittingRef.current = false;
       setLoading(false);
@@ -158,11 +158,11 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
       setDisableCode('');
       disableSubmittedCodeRef.current = '';
       setMode('overview');
-      setMessage('Verificacao em duas etapas desativada para esta conta.');
+      setMessage('Verificação em duas etapas desativada para esta conta.');
       forgetTrustedMfaDevice();
       await load();
     } catch (err: any) {
-      setError(err?.message || 'Codigo invalido.');
+      setError(err?.message || 'Código inválido.');
     } finally {
       disableSubmittingRef.current = false;
       setLoading(false);
@@ -213,12 +213,12 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
     setMessage('');
     setPasteHintForTarget(target, '');
     focusMfaInput(target);
-    setPasteHintForTarget(target, 'Tentando colar o codigo...');
+    setPasteHintForTarget(target, 'Tentando colar o código...');
     try {
       const clipboardText = await readMfaClipboardText();
       const cleanCode = sanitizeMfaCode(String(clipboardText || ''));
       if (!cleanCode) {
-        setPasteHintForTarget(target, 'Copie o codigo do app autenticador e toque em Colar codigo.');
+        setPasteHintForTarget(target, 'Copie o código do app autenticador e toque em Colar Código.');
         return;
       }
       if (target === 'setup') {
@@ -251,9 +251,9 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
         document.body.removeChild(input);
       }
       setCopiedSecret(true);
-      setMessage('Chave copiada. Cole no seu app autenticador se nao conseguir escanear o QR Code.');
+      setMessage('Chave copiada. Cole no seu app autenticador se não conseguir escanear o QR Code.');
     } catch {
-      setError('Nao foi possivel copiar a chave. Toque e segure para copiar manualmente.');
+      setError('Não foi possível copiar a chave. Toque e segure para copiar manualmente.');
     }
   };
 
@@ -265,7 +265,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
       forgetTrustedMfaDevice();
       await load();
     } catch (err: any) {
-      setError(err?.message || 'Nao foi possivel remover o dispositivo.');
+      setError(err?.message || 'Não foi possível remover o dispositivo.');
     } finally {
       setLoading(false);
     }
@@ -274,12 +274,33 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
   const featureDisabled = status?.featureEnabled === false;
   const isEnabled = Boolean(status?.enabled);
   const isRequired = Boolean(status?.required);
-  const statusLabel = featureDisabled ? 'Indisponivel' : isEnabled ? 'Ativado' : 'Desativado';
+  const statusLabel = featureDisabled ? 'Indisponível' : isEnabled ? 'Ativado' : 'Desativado';
   const statusTone = isEnabled
     ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
     : featureDisabled
       ? 'border-slate-200 bg-slate-100 text-slate-500'
       : 'border-amber-200 bg-amber-50 text-amber-700';
+  const renderCodeBoxes = (value: string, tone: 'default' | 'danger' = 'default') => {
+    const digits = Array.from({ length: 6 }, (_, index) => value[index] || '0');
+    const activeClass = tone === 'danger' ? 'border-rose-400 ring-rose-100' : 'border-[#336886] ring-[#336886]/10';
+    const filledClass = tone === 'danger' ? 'border-rose-200 text-slate-900' : 'border-[#336886]/25 text-slate-900';
+    const emptyClass = tone === 'danger' ? 'border-rose-100 text-rose-300' : 'border-slate-200 text-slate-400';
+
+    return (
+      <div className="grid grid-cols-6 gap-1.5 sm:gap-2" aria-hidden="true">
+        {digits.map((digit, index) => (
+          <div
+            key={`${tone}-mfa-digit-${index}`}
+            className={`grid aspect-square min-h-[2.95rem] place-items-center rounded-2xl border bg-white text-xl font-black shadow-[0_16px_34px_-30px_rgba(15,23,42,0.65)] transition sm:min-h-[3.25rem] ${
+              value.length === index ? `${activeClass} ring-4` : value.length > index ? filledClass : emptyClass
+            }`}
+          >
+            {digit}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="fixed inset-0 z-[1300] flex items-end justify-center bg-slate-950/45 px-3 py-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center">
@@ -287,15 +308,15 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
         <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-100 bg-white/94 px-4 py-3 backdrop-blur-xl">
           <div className="flex items-start gap-3">
             <div className="relative h-11 w-11 shrink-0">
-              <img src="/janocaminho.jpg" alt="Ja no Caminho" className="h-11 w-11 rounded-2xl object-cover shadow-[0_18px_38px_-26px_rgba(15,23,42,0.9)] ring-1 ring-white" />
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-11 w-11 rounded-2xl object-cover shadow-[0_18px_38px_-26px_rgba(15,23,42,0.9)] ring-1 ring-white" />
               <span className="absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full bg-[#153A4C] text-white ring-2 ring-white">
                 <ShieldCheck size={14} weight="duotone" />
               </span>
             </div>
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]">Ja no Caminho</p>
-              <h2 className="text-lg font-black tracking-[-0.03em] text-slate-900">Seguranca da conta</h2>
-              <p className="mt-0.5 text-xs font-semibold text-slate-500">Codigo autenticador e aparelhos confiaveis.</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]">Já no Caminho</p>
+              <h2 className="text-lg font-black tracking-[-0.03em] text-slate-900">Segurança da conta</h2>
+              <p className="mt-0.5 text-xs font-semibold text-slate-500">Código autenticador e aparelhos confiáveis.</p>
             </div>
           </div>
           <button type="button" onClick={onClose} className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 text-slate-500">
@@ -310,17 +331,17 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
           <div className="overflow-hidden rounded-3xl border border-slate-100 bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.12),transparent_36%),linear-gradient(135deg,#ffffff,#f8fafc)] p-4 shadow-[0_24px_56px_-42px_rgba(15,23,42,0.5)]">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Verificacao em duas etapas</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Verificação em duas etapas</p>
                 <p className="mt-1 text-lg font-black tracking-[-0.03em] text-slate-950">
-                  {isEnabled ? 'Protecao ativa' : featureDisabled ? 'Protecao indisponivel' : 'Protecao desativada'}
+                  {isEnabled ? 'Proteção ativa' : featureDisabled ? 'Proteção indisponível' : 'Proteção desativada'}
                 </p>
                 <p className="mt-1 max-w-[390px] text-xs font-semibold leading-relaxed text-slate-500">
                   {isEnabled
-                    ? 'Em aparelho novo, o login pede o codigo de 6 digitos.'
+                    ? 'Em aparelho novo, o login pede o código de 6 dígitos.'
                     : featureDisabled
-                      ? 'Esta protecao ainda nao esta liberada para sua conta.'
+                      ? 'Esta proteção ainda não está liberada para sua conta.'
                       : isRequired
-                        ? 'Obrigatoria para esta conta. Ative para continuar seguro.'
+                        ? 'Obrigatória para esta conta. Ative para continuar seguro.'
                         : 'Camada extra para proteger o login.'}
                 </p>
               </div>
@@ -353,7 +374,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-white px-4 py-3 text-sm font-black text-rose-700 shadow-sm transition active:scale-[0.99]"
               >
                 <LockKey size={18} weight="duotone" />
-                Desativar protecao
+                Desativar proteção
               </button>
             )}
           </div>
@@ -382,7 +403,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
               </div>
               <div className="grid gap-4 sm:grid-cols-[150px_1fr]">
                 <div className="rounded-3xl bg-white p-3 shadow-inner ring-1 ring-slate-100">
-                  <img src={setup.qrCodeDataUrl} alt="QR Code para ativar a seguranca da conta" className="h-full w-full rounded-2xl object-contain" />
+                  <img src={setup.qrCodeDataUrl} alt="QR Code para ativar a segurança da conta" className="h-full w-full rounded-2xl object-contain" />
                 </div>
                 <div className="space-y-3">
                   <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3">
@@ -400,8 +421,9 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                     <p className="break-all text-xs font-black leading-relaxed text-slate-700">{setup.secret}</p>
                   </div>
                   <label className="block space-y-2">
-                    <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Codigo de 6 digitos</span>
-                    <div className="grid grid-cols-[1fr_auto] gap-2">
+                    <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Código de 6 dígitos</span>
+                    <div className="relative" onClick={() => focusMfaInput('setup')}>
+                      {renderCodeBoxes(setupCode)}
                       <input
                         ref={setupInputRef}
                         value={setupCode}
@@ -418,23 +440,22 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                         autoCorrect="off"
                         autoCapitalize="none"
                         spellCheck={false}
-                        aria-label="Codigo de ativacao do app autenticador"
-                        className="min-w-0 rounded-2xl border border-slate-200 px-4 py-3 text-center text-xl font-black tracking-[0.24em] outline-none focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/10"
-                        placeholder="000000"
+                    aria-label="Código de ativação do app autenticador"
+                        className="absolute inset-0 h-full w-full cursor-text opacity-0"
                       />
-                      <button
-                        type="button"
-                        onClick={() => pasteMfaCode('setup')}
-                        disabled={loading}
-                        className="inline-flex min-w-[76px] items-center justify-center gap-1 rounded-2xl border border-[#153A4C]/10 bg-white px-2.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#153A4C] shadow-sm transition active:scale-[0.97] disabled:opacity-50"
-                        aria-label="Colar codigo de ativacao"
-                      >
-                        <Copy size={13} weight="duotone" />
-                        Colar codigo
-                      </button>
                     </div>
-                    <span className={`block rounded-2xl px-3 py-2 text-[11px] font-bold ${setupPasteHint ? 'bg-[#336886]/8 text-[#153A4C]' : 'bg-slate-50 text-slate-400'}`}>
-                      {setupPasteHint || (loading ? 'Validando automaticamente...' : setupCode.length === 6 ? 'Codigo completo. Use o botao se precisar tentar de novo.' : 'Cole ou digite os 6 digitos para validar automaticamente.')}
+                    <button
+                      type="button"
+                      onClick={() => pasteMfaCode('setup')}
+                      disabled={loading}
+                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-[#153A4C]/10 bg-white px-4 text-xs font-black text-[#153A4C] shadow-sm transition active:scale-[0.98] disabled:opacity-50"
+                      aria-label="Colar Código de ativação"
+                    >
+                      <Copy size={14} weight="duotone" />
+                      Colar Código
+                    </button>
+                    <span className={`block text-left text-[11px] font-bold leading-relaxed ${setupPasteHint ? 'text-[#153A4C]' : 'text-slate-400'}`}>
+                      {setupPasteHint || (loading ? 'Validando automaticamente...' : setupCode.length === 6 ? 'Código completo. Use o botão se precisar tentar de novo.' : 'Cole ou digite os 6 dígitos para validar automaticamente.')}
                     </span>
                   </label>
                   <button
@@ -443,7 +464,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                     disabled={loading || setupCode.length !== 6}
                     className="w-full rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50"
                   >
-                    Ativar protecao
+                    Ativar proteção
                   </button>
                 </div>
               </div>
@@ -457,15 +478,16 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                   <WarningCircle size={22} weight="duotone" />
                 </span>
                 <div>
-                  <p className="text-sm font-black text-rose-900">Confirmar desativacao</p>
+                  <p className="text-sm font-black text-rose-900">Confirmar desativação</p>
                   <p className="mt-1 text-xs font-semibold leading-relaxed text-rose-700/80">
-                    Para sua seguranca, digite o codigo de 6 digitos do seu app autenticador antes de desligar esta protecao.
+                    Para sua segurança, digite o código de 6 dígitos do seu app autenticador antes de desligar esta proteção.
                   </p>
                 </div>
               </div>
               <label className="mt-4 block space-y-2">
-                <span className="text-[11px] font-black uppercase tracking-[0.14em] text-rose-800">Codigo do app autenticador</span>
-                <div className="grid grid-cols-[1fr_auto] gap-2">
+                <span className="text-[11px] font-black uppercase tracking-[0.14em] text-rose-800">Código do app autenticador</span>
+                <div className="relative" onClick={() => focusMfaInput('disable')}>
+                  {renderCodeBoxes(disableCode, 'danger')}
                   <input
                     ref={disableInputRef}
                     value={disableCode}
@@ -482,23 +504,22 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                     autoCorrect="off"
                     autoCapitalize="none"
                     spellCheck={false}
-                    aria-label="Codigo do app autenticador para desativar"
-                    className="min-w-0 rounded-2xl border border-rose-100 bg-white px-4 py-3 text-center text-xl font-black tracking-[0.24em] text-slate-950 outline-none focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
-                    placeholder="000000"
+                    aria-label="Código do app autenticador para desativar"
+                    className="absolute inset-0 h-full w-full cursor-text opacity-0"
                   />
-                  <button
-                    type="button"
-                    onClick={() => pasteMfaCode('disable')}
-                    disabled={loading}
-                    className="inline-flex min-w-[76px] items-center justify-center gap-1 rounded-2xl border border-rose-100 bg-white px-2.5 text-[10px] font-black uppercase tracking-[0.1em] text-rose-700 shadow-sm transition active:scale-[0.97] disabled:opacity-50"
-                    aria-label="Colar codigo para desativar"
-                  >
-                    <Copy size={13} weight="duotone" />
-                    Colar codigo
-                  </button>
                 </div>
-                <span className={`block rounded-2xl px-3 py-2 text-[11px] font-bold ${disablePasteHint ? 'bg-rose-100 text-rose-800' : 'bg-white/65 text-rose-700/70'}`}>
-                  {disablePasteHint || (loading ? 'Validando automaticamente...' : disableCode.length === 6 ? 'Codigo completo. Use o botao se precisar tentar de novo.' : 'Cole ou digite os 6 digitos para validar automaticamente.')}
+                <button
+                  type="button"
+                  onClick={() => pasteMfaCode('disable')}
+                  disabled={loading}
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-white px-4 text-xs font-black text-rose-700 shadow-sm transition active:scale-[0.98] disabled:opacity-50"
+                  aria-label="Colar Código para desativar"
+                >
+                  <Copy size={14} weight="duotone" />
+                  Colar Código
+                </button>
+                <span className={`block text-left text-[11px] font-bold leading-relaxed ${disablePasteHint ? 'text-rose-800' : 'text-rose-700/70'}`}>
+                  {disablePasteHint || (loading ? 'Validando automaticamente...' : disableCode.length === 6 ? 'Código completo. Use o botão se precisar tentar de novo.' : 'Cole ou digite os 6 dígitos para validar automaticamente.')}
                 </span>
               </label>
               <div className="mt-3 grid grid-cols-2 gap-2">
@@ -531,9 +552,9 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
             <div className="mb-3 flex items-center gap-2">
               <DeviceMobile size={18} weight="duotone" className="text-[#336886]" />
               <div>
-                <p className="text-sm font-black text-slate-900">Aparelhos confiaveis</p>
+                <p className="text-sm font-black text-slate-900">Aparelhos confiáveis</p>
                 <p className="text-[11px] font-semibold text-slate-500">
-                  Depois de validar o codigo uma vez, este aparelho pode entrar com biometria local.
+                  Depois de validar o código uma vez, este aparelho pode entrar com biometria local.
                 </p>
               </div>
             </div>
@@ -560,7 +581,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
               </div>
             ) : (
               <p className="rounded-2xl bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-500">
-                Nenhum aparelho confiavel cadastrado.
+                Nenhum aparelho confiável cadastrado.
               </p>
             )}
           </div>
