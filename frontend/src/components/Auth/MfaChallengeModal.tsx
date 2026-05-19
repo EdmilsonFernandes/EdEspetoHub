@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { CheckCircle, DeviceMobile, Fingerprint, LockKey, ShieldCheck, Sparkle, X } from '@phosphor-icons/react';
+import { CheckCircle, Copy, DeviceMobile, Fingerprint, LockKey, ShieldCheck, Sparkle, X } from '@phosphor-icons/react';
 
 type MfaChallenge = {
   challengeToken: string;
@@ -48,23 +48,75 @@ const audienceCopy: Record<NonNullable<Props['audience']>, { eyebrow: string; ti
 export function MfaChallengeModal({ open, challenge, audience = 'admin', loading, error, onCancel, onVerify }: Props) {
   const [code, setCode] = useState('');
   const [trustDevice, setTrustDevice] = useState(false);
+  const [pasteHint, setPasteHint] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const submittedCodeRef = useRef('');
+  const submittingRef = useRef(false);
   const copy = audienceCopy[audience] || audienceCopy.admin;
 
   useEffect(() => {
     if (!open) return;
     setCode('');
     setTrustDevice(false);
+    setPasteHint('');
+    submittedCodeRef.current = '';
+    submittingRef.current = false;
     const timer = window.setTimeout(() => inputRef.current?.focus(), 120);
     return () => window.clearTimeout(timer);
   }, [open, challenge?.challengeToken]);
 
   if (!open || !challenge) return null;
 
+  const sanitizeCode = (value: string) => value.replace(/\D/g, '').slice(0, 6);
+
+  const verifyCode = async (nextCode: string, options?: { force?: boolean }) => {
+    const cleanCode = sanitizeCode(nextCode);
+    if (cleanCode.length !== 6 || loading) return;
+    if (submittingRef.current) return;
+    if (!options?.force && submittedCodeRef.current === cleanCode) return;
+    submittedCodeRef.current = cleanCode;
+    submittingRef.current = true;
+    setPasteHint('');
+    try {
+      await onVerify({ code: cleanCode, trustDevice });
+    } finally {
+      submittingRef.current = false;
+    }
+  };
+
+  const updateCode = (value: string, options?: { autoVerify?: boolean }) => {
+    const cleanCode = sanitizeCode(value);
+    setCode(cleanCode);
+    setPasteHint('');
+    if (cleanCode.length < 6) {
+      submittedCodeRef.current = '';
+      return;
+    }
+    if (options?.autoVerify !== false) {
+      void verifyCode(cleanCode);
+    }
+  };
+
+  const pasteCode = async () => {
+    if (loading) return;
+    setPasteHint('');
+    try {
+      const clipboardText = await navigator.clipboard?.readText?.();
+      const cleanCode = sanitizeCode(String(clipboardText || ''));
+      if (!cleanCode) {
+        setPasteHint('Copie o codigo do autenticador e toque em Colar.');
+        return;
+      }
+      updateCode(cleanCode);
+      inputRef.current?.focus();
+    } catch {
+      setPasteHint('Nao foi possivel ler a area de transferencia. Toque no campo e cole manualmente.');
+    }
+  };
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (code.replace(/\D/g, '').length !== 6 || loading) return;
-    await onVerify({ code: code.replace(/\D/g, ''), trustDevice });
+    await verifyCode(code, { force: true });
   };
 
   return (
@@ -125,21 +177,6 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
             </div>
           ) : null}
 
-          <label className="block space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Codigo do app autenticador</span>
-            <input
-              ref={inputRef}
-              value={code}
-              onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              className="w-full rounded-3xl border border-[#336886]/15 bg-white px-5 py-4 text-center text-3xl font-black tracking-[0.35em] text-slate-900 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.6)] outline-none transition focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/12"
-              placeholder="000000"
-              autoComplete="one-time-code"
-            />
-          </label>
-
           {challenge.trustDeviceAvailable ? (
             <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#336886]/10 bg-[#336886]/5 px-4 py-3 shadow-inner shadow-white">
               <input
@@ -153,6 +190,42 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
               </span>
             </label>
           ) : null}
+
+          <label className="block space-y-2">
+            <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Codigo do app autenticador</span>
+            <div className="relative">
+              <input
+                ref={inputRef}
+                value={code}
+                onChange={(event) => updateCode(event.target.value)}
+                onPaste={(event) => {
+                  const pasted = event.clipboardData?.getData('text') || '';
+                  if (!pasted) return;
+                  event.preventDefault();
+                  updateCode(pasted);
+                }}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                className="w-full rounded-3xl border border-[#336886]/15 bg-white px-5 py-4 pr-24 text-center text-3xl font-black tracking-[0.35em] text-slate-900 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.6)] outline-none transition focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/12"
+                placeholder="000000"
+                autoComplete="one-time-code"
+              />
+              <button
+                type="button"
+                onClick={pasteCode}
+                disabled={loading}
+                className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-1.5 rounded-2xl border border-[#336886]/10 bg-[linear-gradient(135deg,#ffffff_0%,#eef6fa_100%)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.8)] transition active:scale-[0.97] disabled:opacity-50"
+                aria-label="Colar codigo do app autenticador"
+              >
+                <Copy size={14} weight="duotone" />
+                Colar
+              </button>
+            </div>
+            <span className="block text-[11px] font-bold text-slate-400">
+              {pasteHint || (loading ? 'Validando automaticamente...' : code.length === 6 ? 'Codigo completo. Use o botao se precisar tentar de novo.' : 'Ao completar 6 digitos, validamos automaticamente.')}
+            </span>
+          </label>
 
           {error ? (
             <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">

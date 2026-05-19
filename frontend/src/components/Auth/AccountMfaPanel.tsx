@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Copy, DeviceMobile, LockKey, QrCode, ShieldCheck, Trash, WarningCircle, X } from '@phosphor-icons/react';
 import { authService } from '../../services/authService';
 import { forgetTrustedMfaDevice } from '../../utils/mfaDevice';
@@ -13,6 +13,8 @@ type Props = {
   onClose: () => void;
 };
 
+const sanitizeMfaCode = (value: string) => value.replace(/\D/g, '').slice(0, 6);
+
 export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'overview', onStatusChange, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<any | null>(null);
@@ -24,6 +26,10 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
   const [copiedSecret, setCopiedSecret] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const setupSubmittedCodeRef = useRef('');
+  const disableSubmittedCodeRef = useRef('');
+  const setupSubmittingRef = useRef(false);
+  const disableSubmittingRef = useRef(false);
 
   const startSetup = useCallback(async () => {
     setLoading(true);
@@ -31,6 +37,10 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
     setMessage('');
     setSetupCode('');
     setDisableCode('');
+    setupSubmittedCodeRef.current = '';
+    disableSubmittedCodeRef.current = '';
+    setupSubmittingRef.current = false;
+    disableSubmittingRef.current = false;
     setCopiedSecret(false);
     try {
       setSetup(await authService.startMfaSetup({ authMode }));
@@ -70,6 +80,10 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
     setSetup(null);
     setSetupCode('');
     setDisableCode('');
+    setupSubmittedCodeRef.current = '';
+    disableSubmittedCodeRef.current = '';
+    setupSubmittingRef.current = false;
+    disableSubmittingRef.current = false;
     setCopiedSecret(false);
     setMessage('');
     setError('');
@@ -89,39 +103,50 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
     };
   }, [initialIntent, load, open, startSetup]);
 
-  if (!open) return null;
-
-  const confirmSetup = async () => {
-    const cleanCode = setupCode.replace(/\D/g, '');
-    if (cleanCode.length !== 6) return;
+  const confirmSetup = async (rawCode = setupCode, options?: { force?: boolean }) => {
+    const cleanCode = sanitizeMfaCode(rawCode);
+    if (cleanCode.length !== 6 || loading) return;
+    if (setupSubmittingRef.current) return;
+    if (!options?.force && setupSubmittedCodeRef.current === cleanCode) return;
+    setupSubmittedCodeRef.current = cleanCode;
+    setupSubmittingRef.current = true;
     setLoading(true);
     setError('');
+    setMessage('');
     try {
       const nextStatus = await authService.confirmMfaSetup(cleanCode, { authMode });
       setStatus(nextStatus);
       onStatusChange?.(nextStatus);
       setSetup(null);
       setSetupCode('');
+      setupSubmittedCodeRef.current = '';
       setMode('overview');
       setMessage('Verificacao em duas etapas ativada com sucesso.');
       await load();
     } catch (err: any) {
       setError(err?.message || 'Codigo invalido.');
     } finally {
+      setupSubmittingRef.current = false;
       setLoading(false);
     }
   };
 
-  const disable = async () => {
-    const cleanCode = disableCode.replace(/\D/g, '');
-    if (cleanCode.length !== 6) return;
+  const disable = async (rawCode = disableCode, options?: { force?: boolean }) => {
+    const cleanCode = sanitizeMfaCode(rawCode);
+    if (cleanCode.length !== 6 || loading) return;
+    if (disableSubmittingRef.current) return;
+    if (!options?.force && disableSubmittedCodeRef.current === cleanCode) return;
+    disableSubmittedCodeRef.current = cleanCode;
+    disableSubmittingRef.current = true;
     setLoading(true);
     setError('');
+    setMessage('');
     try {
       const nextStatus = await authService.disableMfa(cleanCode, { authMode });
       setStatus(nextStatus);
       onStatusChange?.(nextStatus);
       setDisableCode('');
+      disableSubmittedCodeRef.current = '';
       setMode('overview');
       setMessage('Verificacao em duas etapas desativada para esta conta.');
       forgetTrustedMfaDevice();
@@ -129,9 +154,54 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
     } catch (err: any) {
       setError(err?.message || 'Codigo invalido.');
     } finally {
+      disableSubmittingRef.current = false;
       setLoading(false);
     }
   };
+
+  const updateSetupCode = (value: string) => {
+    const cleanCode = sanitizeMfaCode(value);
+    setSetupCode(cleanCode);
+    setError('');
+    if (cleanCode.length < 6) {
+      setupSubmittedCodeRef.current = '';
+      return;
+    }
+    void confirmSetup(cleanCode);
+  };
+
+  const updateDisableCode = (value: string) => {
+    const cleanCode = sanitizeMfaCode(value);
+    setDisableCode(cleanCode);
+    setError('');
+    if (cleanCode.length < 6) {
+      disableSubmittedCodeRef.current = '';
+      return;
+    }
+    void disable(cleanCode);
+  };
+
+  const pasteMfaCode = async (target: 'setup' | 'disable') => {
+    if (loading) return;
+    setError('');
+    try {
+      const clipboardText = await navigator.clipboard?.readText?.();
+      const cleanCode = sanitizeMfaCode(String(clipboardText || ''));
+      if (!cleanCode) {
+        setError('Copie o codigo do app autenticador e toque em Colar.');
+        return;
+      }
+      if (target === 'setup') {
+        updateSetupCode(cleanCode);
+      } else {
+        updateDisableCode(cleanCode);
+      }
+    } catch {
+      setError('Nao foi possivel ler a area de transferencia. Toque no campo e cole manualmente.');
+    }
+  };
+
+  if (!open) return null;
 
   const copySecret = async () => {
     if (!setup?.secret) return;
@@ -247,6 +317,8 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                 onClick={() => {
                   setMode('disable');
                   setDisableCode('');
+                  disableSubmittedCodeRef.current = '';
+                  disableSubmittingRef.current = false;
                   setError('');
                   setMessage('');
                 }}
@@ -274,6 +346,8 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                     setMode('overview');
                     setSetup(null);
                     setSetupCode('');
+                    setupSubmittedCodeRef.current = '';
+                    setupSubmittingRef.current = false;
                   }}
                   className="rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500"
                 >
@@ -309,20 +383,41 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                   </div>
                   <label className="block space-y-2">
                     <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Codigo de 6 digitos</span>
-                    <input
-                      value={setupCode}
-                      onChange={(event) => setSetupCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      autoComplete="one-time-code"
-                      aria-label="Codigo de ativacao do app autenticador"
-                      className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-center text-xl font-black tracking-[0.28em] outline-none focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/10"
-                      placeholder="000000"
-                    />
+                    <div className="relative">
+                      <input
+                        value={setupCode}
+                        onChange={(event) => updateSetupCode(event.target.value)}
+                        onPaste={(event) => {
+                          const pasted = event.clipboardData?.getData('text') || '';
+                          if (!pasted) return;
+                          event.preventDefault();
+                          updateSetupCode(pasted);
+                        }}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        autoComplete="one-time-code"
+                        aria-label="Codigo de ativacao do app autenticador"
+                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 pr-24 text-center text-xl font-black tracking-[0.28em] outline-none focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/10"
+                        placeholder="000000"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => pasteMfaCode('setup')}
+                        disabled={loading}
+                        className="absolute right-1.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-xl bg-[#153A4C]/8 px-2.5 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#153A4C] transition active:scale-[0.97] disabled:opacity-50"
+                        aria-label="Colar codigo de ativacao"
+                      >
+                        <Copy size={13} weight="duotone" />
+                        Colar
+                      </button>
+                    </div>
+                    <span className="block text-[11px] font-bold text-slate-400">
+                      {loading ? 'Validando automaticamente...' : setupCode.length === 6 ? 'Codigo completo. Use o botao se precisar tentar de novo.' : 'Cole ou digite os 6 digitos para validar automaticamente.'}
+                    </span>
                   </label>
                   <button
                     type="button"
-                    onClick={confirmSetup}
+                    onClick={() => confirmSetup(setupCode, { force: true })}
                     disabled={loading || setupCode.length !== 6}
                     className="w-full rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50"
                   >
@@ -348,16 +443,37 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
               </div>
               <label className="mt-4 block space-y-2">
                 <span className="text-[11px] font-black uppercase tracking-[0.14em] text-rose-800">Codigo do app autenticador</span>
-                <input
-                  value={disableCode}
-                  onChange={(event) => setDisableCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  autoComplete="one-time-code"
-                  aria-label="Codigo do app autenticador para desativar"
-                  className="w-full rounded-2xl border border-rose-100 bg-white px-4 py-3 text-center text-xl font-black tracking-[0.28em] text-slate-950 outline-none focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
-                  placeholder="000000"
-                />
+                <div className="relative">
+                  <input
+                    value={disableCode}
+                    onChange={(event) => updateDisableCode(event.target.value)}
+                    onPaste={(event) => {
+                      const pasted = event.clipboardData?.getData('text') || '';
+                      if (!pasted) return;
+                      event.preventDefault();
+                      updateDisableCode(pasted);
+                    }}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="one-time-code"
+                    aria-label="Codigo do app autenticador para desativar"
+                    className="w-full rounded-2xl border border-rose-100 bg-white px-4 py-3 pr-24 text-center text-xl font-black tracking-[0.28em] text-slate-950 outline-none focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
+                    placeholder="000000"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => pasteMfaCode('disable')}
+                    disabled={loading}
+                    className="absolute right-1.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-xl bg-rose-50 px-2.5 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-rose-700 transition active:scale-[0.97] disabled:opacity-50"
+                    aria-label="Colar codigo para desativar"
+                  >
+                    <Copy size={13} weight="duotone" />
+                    Colar
+                  </button>
+                </div>
+                <span className="block text-[11px] font-bold text-rose-700/70">
+                  {loading ? 'Validando automaticamente...' : disableCode.length === 6 ? 'Codigo completo. Use o botao se precisar tentar de novo.' : 'Cole ou digite os 6 digitos para validar automaticamente.'}
+                </span>
               </label>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <button
@@ -365,6 +481,8 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                   onClick={() => {
                     setMode('overview');
                     setDisableCode('');
+                    disableSubmittedCodeRef.current = '';
+                    disableSubmittingRef.current = false;
                   }}
                   className="rounded-2xl bg-white px-4 py-3 text-sm font-black text-slate-600 shadow-sm"
                 >
@@ -372,7 +490,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                 </button>
                 <button
                   type="button"
-                  onClick={disable}
+                  onClick={() => disable(disableCode, { force: true })}
                   disabled={loading || disableCode.length !== 6}
                   className="rounded-2xl bg-rose-600 px-4 py-3 text-sm font-black text-white shadow-[0_18px_36px_-26px_rgba(225,29,72,0.85)] disabled:opacity-50"
                 >
