@@ -49,6 +49,7 @@ import { navigateBackOrFallback } from '../utils/navigation';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { buildDestinationInquiryMessage, prettifyDestinationLabel } from '../utils/destinationWhatsApp';
 import { reconcileCartStock } from '../utils/cartStock';
+import { inputAssistProps } from '../utils/inputAssist';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
@@ -3964,6 +3965,9 @@ export function StorePage() {
                       placeholder="0000"
                       inputMode="numeric"
                       autoComplete="one-time-code"
+                      autoCorrect="off"
+                      autoCapitalize="none"
+                      spellCheck={false}
                       className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-2xl font-black tracking-[0.35em] text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-slate-900/15"
                     />
                     {customerAccountError ? (
@@ -4025,52 +4029,43 @@ export function StorePage() {
                 </div>
                 {customerAuthMode === 'register' && (
                   <input
+                    {...inputAssistProps.name}
                     name="fullName"
                     value={customerAuthForm.fullName}
                     onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, fullName: e.target.value }))}
                     placeholder="Nome completo"
-                    autoComplete={isNativeRuntime ? 'off' : 'name'}
-                    autoCapitalize="words"
                     enterKeyHint="next"
                     className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                   />
                 )}
                 {customerAuthMode === 'register' && (
                   <input
+                    {...inputAssistProps.phoneNational}
                     name="phone"
                     value={customerAuthForm.phone}
                     onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: formatPhoneBr(e.target.value) }))}
                     placeholder="Telefone (opcional)"
-                    autoComplete={isNativeRuntime ? 'off' : 'tel-national'}
-                    inputMode="tel"
                     enterKeyHint="next"
                     className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                   />
                 )}
                 <input
+                  {...inputAssistProps.email}
                   name="email"
                   value={customerAuthForm.email}
                   onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, email: e.target.value }))}
                   placeholder="E-mail"
-                  autoComplete={isNativeRuntime ? 'off' : 'email'}
-                  inputMode="email"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck={false}
                   enterKeyHint="next"
                   className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                 />
                 <div className="relative">
                   <input
+                    {...(customerAuthMode === 'register' ? inputAssistProps.newPassword : inputAssistProps.currentPassword)}
                     name="password"
                     type={showCustomerPassword ? 'text' : 'password'}
                     value={customerAuthForm.password}
                     onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, password: e.target.value }))}
                     placeholder="Senha"
-                    autoComplete={isNativeRuntime ? 'off' : customerAuthMode === 'register' ? 'new-password' : 'current-password'}
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck={false}
                     enterKeyHint="done"
                     className="w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                   />
@@ -4220,21 +4215,21 @@ export function StorePage() {
                   {showNewAddressForm && (
                     <div className="space-y-2">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                        <input name="addressLabel" value={newAddressForm.label} onChange={(e) => setNewAddressForm((p) => ({ ...p, label: e.target.value }))} placeholder="Apelido" autoCapitalize="words" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                        <input name="recipientName" value={newAddressForm.recipientName} onChange={(e) => setNewAddressForm((p) => ({ ...p, recipientName: e.target.value }))} placeholder="Nome do recebedor" autoComplete="name" autoCapitalize="words" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                        <input name="recipientPhone" value={newAddressForm.phone} onChange={(e) => setNewAddressForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))} placeholder="Telefone" autoComplete="tel-national" inputMode="tel" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input {...inputAssistProps.addressLine2} name="addressLabel" value={newAddressForm.label} onChange={(e) => setNewAddressForm((p) => ({ ...p, label: e.target.value }))} placeholder="Apelido" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input {...inputAssistProps.name} name="recipientName" value={newAddressForm.recipientName} onChange={(e) => setNewAddressForm((p) => ({ ...p, recipientName: e.target.value }))} placeholder="Nome do recebedor" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input {...inputAssistProps.phoneNational} name="recipientPhone" value={newAddressForm.phone} onChange={(e) => setNewAddressForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))} placeholder="Telefone" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
                         <div className="flex gap-2">
-                          <input name="postalCode" value={newAddressForm.cep} onBlur={handleNewAddressCepLookup} onChange={(e) => setNewAddressForm((p) => ({ ...p, cep: formatCepBr(e.target.value) }))} placeholder="CEP" autoComplete="postal-code" inputMode="numeric" enterKeyHint="next" className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                          <input {...inputAssistProps.postalCode} name="postalCode" value={newAddressForm.cep} onBlur={handleNewAddressCepLookup} onChange={(e) => setNewAddressForm((p) => ({ ...p, cep: formatCepBr(e.target.value) }))} placeholder="CEP" enterKeyHint="next" className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
                           <button type="button" onClick={handleNewAddressCepLookup} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700">
                             Buscar CEP
                           </button>
                         </div>
-                        <input name="addressLine1" value={newAddressForm.street} onChange={(e) => setNewAddressForm((p) => ({ ...p, street: e.target.value }))} placeholder="Rua" autoComplete="address-line1" autoCapitalize="words" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm sm:col-span-2 focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                        <input name="addressNumber" value={newAddressForm.number} onChange={(e) => setNewAddressForm((p) => ({ ...p, number: e.target.value }))} placeholder="Número" autoComplete="address-line2" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                        <input name="addressComplement" value={newAddressForm.complement} onChange={(e) => setNewAddressForm((p) => ({ ...p, complement: e.target.value }))} placeholder="Complemento" autoComplete="address-line3" autoCapitalize="words" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                        <input name="addressNeighborhood" value={newAddressForm.neighborhood} onChange={(e) => setNewAddressForm((p) => ({ ...p, neighborhood: e.target.value }))} placeholder="Bairro" autoComplete="address-level3" autoCapitalize="words" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                        <input name="addressCity" value={newAddressForm.city} onChange={(e) => setNewAddressForm((p) => ({ ...p, city: e.target.value }))} placeholder="Cidade" autoComplete="address-level2" autoCapitalize="words" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
-                        <input name="addressState" value={newAddressForm.state} onChange={(e) => setNewAddressForm((p) => ({ ...p, state: e.target.value.toUpperCase().slice(0, 2) }))} placeholder="UF" autoComplete="address-level1" autoCapitalize="characters" enterKeyHint="done" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input {...inputAssistProps.addressLine1} name="addressLine1" value={newAddressForm.street} onChange={(e) => setNewAddressForm((p) => ({ ...p, street: e.target.value }))} placeholder="Rua" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm sm:col-span-2 focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input {...inputAssistProps.addressLine2} name="addressNumber" value={newAddressForm.number} onChange={(e) => setNewAddressForm((p) => ({ ...p, number: e.target.value }))} placeholder="Número" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input {...inputAssistProps.addressLine3} name="addressComplement" value={newAddressForm.complement} onChange={(e) => setNewAddressForm((p) => ({ ...p, complement: e.target.value }))} placeholder="Complemento" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input {...inputAssistProps.neighborhood} name="addressNeighborhood" value={newAddressForm.neighborhood} onChange={(e) => setNewAddressForm((p) => ({ ...p, neighborhood: e.target.value }))} placeholder="Bairro" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input {...inputAssistProps.city} name="addressCity" value={newAddressForm.city} onChange={(e) => setNewAddressForm((p) => ({ ...p, city: e.target.value }))} placeholder="Cidade" enterKeyHint="next" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
+                        <input {...inputAssistProps.state} name="addressState" value={newAddressForm.state} onChange={(e) => setNewAddressForm((p) => ({ ...p, state: e.target.value.toUpperCase().slice(0, 2) }))} placeholder="UF" enterKeyHint="done" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15" />
                       </div>
                       <button
                         type="button"

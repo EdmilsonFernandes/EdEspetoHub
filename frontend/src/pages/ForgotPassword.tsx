@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { AuthLayout } from '../layouts/AuthLayout';
+import { inputAssistProps } from '../utils/inputAssist';
 
 import { ArrowLeft, EnvelopeSimple, ShieldCheck, WarningCircle } from '@phosphor-icons/react';
 
@@ -62,8 +63,8 @@ export function ForgotPassword() {
 
           <div className="floating-field">
             <input
+              {...inputAssistProps.email}
               id="reset-email"
-              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="floating-input"

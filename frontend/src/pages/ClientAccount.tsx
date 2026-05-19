@@ -30,6 +30,7 @@ import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AccountMfaPanel } from '../components/Auth/AccountMfaPanel';
 import { authService } from '../services/authService';
 import { forgetTrustedMfaDevice } from '../utils/mfaDevice';
+import { inputAssistProps } from '../utils/inputAssist';
 
 // Componente Switch Simples
 function Switch({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
@@ -742,6 +743,7 @@ export function ClientAccount() {
                     <div className="relative">
                       <UserCircle size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
+                        {...inputAssistProps.name}
                         value={nameDraft}
                         onChange={e => setNameDraft(e.target.value)}
                         className="w-full rounded-2xl border border-slate-100 bg-[#EEF2F7] py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
@@ -765,6 +767,7 @@ export function ClientAccount() {
                       <div className="relative">
                         <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
+                          {...inputAssistProps.phoneNational}
                           value={phoneDraft}
                           onChange={e => setPhoneDraft(e.target.value)}
                           className="w-full rounded-2xl border border-slate-100 bg-[#EEF2F7] py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"

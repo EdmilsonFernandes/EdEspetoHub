@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Buildings, CheckCircle, ImageSquare, PaperPlaneTilt, UploadSimple } from '@phosphor-icons/react';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { condominiumService } from '../services/condominiumService';
+import { inputAssistProps, textareaAssistProps } from '../utils/inputAssist';
 
 const readFileAsDataUrl = (file: File) =>
   new Promise<string>((resolve, reject) => {
@@ -138,13 +139,13 @@ export function CondominiumAccessRequest() {
             <div className="md:col-span-2">
               <p className="mb-1 text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Dados do condomínio</p>
               <p className="mb-3 text-xs font-semibold leading-5 text-slate-500">Nome, localização e contexto básico para análise da operação.</p>
-              <input value={form.condominiumName} onChange={(event) => update('condominiumName', event.target.value)} placeholder="Nome do condomínio" className={fieldClass} />
+              <input autoComplete="organization" autoCorrect="on" autoCapitalize="words" spellCheck={true} value={form.condominiumName} onChange={(event) => update('condominiumName', event.target.value)} placeholder="Nome do condomínio" className={fieldClass} />
             </div>
-            <input value={form.city} onChange={(event) => update('city', event.target.value)} placeholder="Cidade" className={fieldClass} />
-            <input value={form.state} onChange={(event) => update('state', event.target.value)} placeholder="UF" maxLength={2} className={fieldClass} />
-            <input value={form.address} onChange={(event) => update('address', event.target.value)} placeholder="Endereço" className={`${fieldClass} md:col-span-2`} />
-            <input value={form.zipCode} onChange={(event) => update('zipCode', event.target.value)} placeholder="CEP" className={fieldClass} />
-            <textarea value={form.description} onChange={(event) => update('description', event.target.value)} placeholder="Breve descrição do condomínio" className={`${fieldClass} min-h-[96px] md:col-span-2`} />
+            <input {...inputAssistProps.city} value={form.city} onChange={(event) => update('city', event.target.value)} placeholder="Cidade" className={fieldClass} />
+            <input {...inputAssistProps.state} value={form.state} onChange={(event) => update('state', event.target.value)} placeholder="UF" maxLength={2} className={fieldClass} />
+            <input {...inputAssistProps.addressLine1} value={form.address} onChange={(event) => update('address', event.target.value)} placeholder="Endereço" className={`${fieldClass} md:col-span-2`} />
+            <input {...inputAssistProps.postalCode} value={form.zipCode} onChange={(event) => update('zipCode', event.target.value)} placeholder="CEP" className={fieldClass} />
+            <textarea {...textareaAssistProps.description} value={form.description} onChange={(event) => update('description', event.target.value)} placeholder="Breve descrição do condomínio" className={`${fieldClass} min-h-[96px] md:col-span-2`} />
           </section>
 
           <section className="grid gap-3 rounded-[1.75rem] border border-slate-200/80 bg-[#f8fbfd]/90 p-4 md:grid-cols-2">
@@ -182,11 +183,11 @@ export function CondominiumAccessRequest() {
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Responsável</p>
               <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">Esse será o ponto de contato para aprovação, retorno comercial e liberação do acesso.</p>
             </div>
-            <input value={form.responsibleName} onChange={(event) => update('responsibleName', event.target.value)} placeholder="Nome do responsável" className={fieldClass} />
-            <input value={form.responsibleRole} onChange={(event) => update('responsibleRole', event.target.value)} placeholder="Cargo: síndico, administradora..." className={fieldClass} />
-            <input type="email" value={form.responsibleEmail} onChange={(event) => update('responsibleEmail', event.target.value)} placeholder="E-mail" className={fieldClass} />
-            <input value={form.responsiblePhone} onChange={(event) => update('responsiblePhone', event.target.value)} placeholder="WhatsApp" className={fieldClass} />
-            <textarea value={form.message} onChange={(event) => update('message', event.target.value)} placeholder="Mensagem opcional" className={`${fieldClass} min-h-[96px] md:col-span-2`} />
+            <input {...inputAssistProps.name} value={form.responsibleName} onChange={(event) => update('responsibleName', event.target.value)} placeholder="Nome do responsável" className={fieldClass} />
+            <input autoComplete="organization-title" autoCorrect="on" autoCapitalize="words" spellCheck={true} value={form.responsibleRole} onChange={(event) => update('responsibleRole', event.target.value)} placeholder="Cargo: síndico, administradora..." className={fieldClass} />
+            <input {...inputAssistProps.email} value={form.responsibleEmail} onChange={(event) => update('responsibleEmail', event.target.value)} placeholder="E-mail" className={fieldClass} />
+            <input {...inputAssistProps.phone} value={form.responsiblePhone} onChange={(event) => update('responsiblePhone', event.target.value)} placeholder="WhatsApp" className={fieldClass} />
+            <textarea {...textareaAssistProps.notes} value={form.message} onChange={(event) => update('message', event.target.value)} placeholder="Mensagem opcional" className={`${fieldClass} min-h-[96px] md:col-span-2`} />
           </section>
 
           {error ? <p className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}

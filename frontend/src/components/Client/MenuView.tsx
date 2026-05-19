@@ -29,6 +29,7 @@ import {
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
+import { inputAssistProps } from "../../utils/inputAssist";
 import { ProductModal } from "../Cart/ProductModal";
 import { StoreMapView } from "../StoreMapView";
 import { PlatformTrustFooter } from "../common/PlatformTrustFooter";
@@ -1103,6 +1104,7 @@ export const MenuView = ({
               <MagnifyingGlass className="w-3.5 h-3.5" weight="bold" />
             </span>
             <input
+              {...inputAssistProps.search}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               className="min-h-[42px] flex-1 bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"

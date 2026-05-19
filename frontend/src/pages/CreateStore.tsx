@@ -13,6 +13,7 @@ import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAs
 import { formatPhoneInput } from '../utils/format';
 import { normalizePixCode } from '../utils/pixPayload';
 import { BRAZIL_STATES, loadBrazilCitiesByState } from '../utils/brazilLocations';
+import { inputAssistProps, textareaAssistProps } from '../utils/inputAssist';
 import { FormSection } from '../components/common/FormSection';
 import { Buildings, CheckCircle, CopySimple, CreditCard, EnvelopeSimple, GlobeHemisphereWest, MapPinLine, RocketLaunch, Storefront, UserCircle, WarningCircle } from '@phosphor-icons/react';
 
@@ -1676,6 +1677,7 @@ export function CreateStore() {
                 {destinationClaimDeliveryMode === 'selected' ? (
                   <div className="mt-3">
                     <input
+                      {...inputAssistProps.search}
                       value={destinationClaimPlaceSearch}
                       onChange={(event) => setDestinationClaimPlaceSearch(event.target.value)}
                       placeholder="Buscar chalé ou pousada"
@@ -1807,6 +1809,7 @@ export function CreateStore() {
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Nome completo</label>
                   <input
+                    {...inputAssistProps.name}
                     required
                     data-create-field="fullName"
                     value={registerForm.fullName}
@@ -1823,8 +1826,8 @@ export function CreateStore() {
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Email</label>
                     <input
+                      {...inputAssistProps.email}
                       required
-                      type="email"
                       data-create-field="email"
                       value={registerForm.email}
                       onChange={(e) => {
@@ -1872,6 +1875,7 @@ export function CreateStore() {
                         ))}
                       </select>
                       <input
+                        {...inputAssistProps.phoneNational}
                         value={formatLocalPhoneNumber(storePhoneParts.localNumber)}
                         onChange={(e) => {
                           clearMissingField('phone');
@@ -1909,6 +1913,7 @@ export function CreateStore() {
                         <option value="CNPJ">CNPJ</option>
                       </select>
                       <input
+                        {...inputAssistProps.document}
                         required
                         data-create-field="document"
                         value={registerForm.document}
@@ -1938,6 +1943,7 @@ export function CreateStore() {
                     <label className="text-sm font-semibold text-gray-700">Senha</label>
                     <div className="relative">
                       <input
+                        {...inputAssistProps.newPassword}
                         required
                         data-create-field="password"
                         type={showPassword ? 'text' : 'password'}
@@ -1976,6 +1982,7 @@ export function CreateStore() {
                       <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">CEP</label>
                         <input
+                          {...inputAssistProps.postalCode}
                           required
                           data-create-field="cep"
                           value={registerForm.cep}
@@ -2042,6 +2049,7 @@ export function CreateStore() {
                           )}
                         </div>
                         <input
+                          {...inputAssistProps.city}
                           required
                           data-create-field="city"
                           list={registerForm.state ? `cities-${registerForm.state}` : undefined}
@@ -2076,6 +2084,7 @@ export function CreateStore() {
                       <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">Rua / Avenida</label>
                         <input
+                          {...inputAssistProps.addressLine1}
                           required
                           data-create-field="street"
                           value={registerForm.street}
@@ -2092,6 +2101,7 @@ export function CreateStore() {
                       <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">Bairro</label>
                         <input
+                          {...inputAssistProps.neighborhood}
                           required
                           data-create-field="neighborhood"
                           value={registerForm.neighborhood}
@@ -2111,6 +2121,7 @@ export function CreateStore() {
                       <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">Número</label>
                         <input
+                          {...inputAssistProps.addressLine2}
                           required
                           data-create-field="number"
                           value={registerForm.number}
@@ -2126,6 +2137,7 @@ export function CreateStore() {
                       <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">Complemento</label>
                         <input
+                          {...inputAssistProps.addressLine3}
                           value={registerForm.complement}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, complement: e.target.value }))}
                           disabled={isCepLoading}
@@ -2150,6 +2162,10 @@ export function CreateStore() {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
               <input
+                autoComplete="organization"
+                autoCorrect="on"
+                autoCapitalize="words"
+                spellCheck={true}
                 required
                 data-create-field="storeName"
                 value={registerForm.storeName}
@@ -2192,6 +2208,7 @@ export function CreateStore() {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Descrição curta da loja</label>
               <textarea
+                {...textareaAssistProps.description}
                 value={registerForm.storeDescription}
                 onChange={(e) => setRegisterForm((prev) => ({ ...prev, storeDescription: e.target.value }))}
                 className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-h-[110px]"
@@ -2858,6 +2875,9 @@ export function CreateStore() {
                       inputMode="numeric"
                       pattern="[0-9]*"
                       autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                      autoCorrect="off"
+                      autoCapitalize="none"
+                      spellCheck={false}
                       value={digit}
                       onChange={(e) => handleStoreCodeDigitChange(index, e.target.value)}
                       onKeyDown={(e) => handleStoreCodeKeyDown(index, e)}

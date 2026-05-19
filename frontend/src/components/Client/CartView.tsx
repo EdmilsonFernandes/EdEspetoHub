@@ -28,6 +28,7 @@ import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productM
 import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderPricing";
 import { DddSelect } from "../common/DddSelect";
 import { addressLookupService } from "../../services/addressLookupService";
+import { inputAssistProps } from "../../utils/inputAssist";
 
 const BRAZIL_DDDS = [
   "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -943,6 +944,7 @@ export const CartView = ({
             </label>
               <div className="relative mt-2">
                 <input
+                  {...inputAssistProps.name}
                   ref={nameInputRef}
                   name="customerName"
                   value={customer.name}
@@ -956,8 +958,6 @@ export const CartView = ({
                     allowCustomerAutocomplete && setTimeout(() => setSuggestionsOpen(false), 150)
                   }
                   placeholder="Nome completo"
-                  autoComplete="name"
-                  autoCapitalize="words"
                   enterKeyHint="next"
                   className={`w-full rounded-2xl bg-slate-100 py-3 pl-10 pr-4 text-base sm:text-lg text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all ${isProfessionalUser ? 'uppercase' : ''}`}
                 />
@@ -1020,10 +1020,10 @@ export const CartView = ({
                 <div>
                   <span className="text-[11px] font-semibold text-slate-500">Número</span>
                   <input
+                    {...inputAssistProps.phoneNational}
                     name="customerPhone"
                     type="tel"
                     inputMode="numeric"
-                    autoComplete="tel-national"
                     enterKeyHint="next"
                     value={formatLocalPhoneNumber(localPhoneDigits)}
                     onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
@@ -1075,10 +1075,10 @@ export const CartView = ({
                 <div>
                   <span className="text-[11px] font-semibold text-slate-500">Número</span>
                   <input
+                    {...inputAssistProps.phoneNational}
                     name="customerPhone"
                     type="tel"
                     inputMode="numeric"
-                    autoComplete="tel-national"
                     enterKeyHint="next"
                     value={formatLocalPhoneNumber(localPhoneDigits)}
                     onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
@@ -1376,6 +1376,7 @@ export const CartView = ({
                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">CEP</label>
                       <div className="relative mt-1">
                         <input
+                          {...inputAssistProps.postalCode}
                           ref={cepInputRef}
                           name="postalCode"
                           value={customer.cep || ""}
@@ -1383,8 +1384,6 @@ export const CartView = ({
                           onBlur={handleCepLookup}
                           disabled={cepLoading}
                           placeholder="00000-000"
-                          autoComplete="postal-code"
-                          inputMode="numeric"
                           enterKeyHint="next"
                           className={`${premiumInputClass} pr-12 disabled:opacity-60`}
                         />
@@ -1420,12 +1419,11 @@ export const CartView = ({
                         <div>
                           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Rua / Avenida</label>
                           <input
+                            {...inputAssistProps.addressLine1}
                             name="addressLine1"
                             value={customer.street || ""}
                             onChange={(e) => updateDeliveryField("street", e.target.value)}
                             placeholder="Rua, avenida"
-                            autoComplete="address-line1"
-                            autoCapitalize="words"
                             enterKeyHint="next"
                             className={premiumInputClass}
                           />
@@ -1433,11 +1431,11 @@ export const CartView = ({
                         <div>
                           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Numero</label>
                           <input
+                            {...inputAssistProps.addressLine2}
                             name="addressNumber"
                             value={customer.number || ""}
                             onChange={(e) => updateDeliveryField("number", e.target.value)}
                             placeholder="Numero"
-                            autoComplete="address-line2"
                             inputMode="text"
                             enterKeyHint="next"
                             className={premiumInputClass}
@@ -1448,12 +1446,11 @@ export const CartView = ({
                         <div>
                           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bairro</label>
                           <input
+                            {...inputAssistProps.neighborhood}
                             name="addressNeighborhood"
                             value={customer.neighborhood || ""}
                             onChange={(e) => updateDeliveryField("neighborhood", e.target.value)}
                             placeholder="Bairro"
-                            autoComplete="address-level3"
-                            autoCapitalize="words"
                             enterKeyHint="next"
                             className={premiumInputClass}
                           />
@@ -1461,12 +1458,11 @@ export const CartView = ({
                         <div>
                           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Complemento</label>
                           <input
+                            {...inputAssistProps.addressLine3}
                             name="addressComplement"
                             value={customer.complement || ""}
                             onChange={(e) => updateDeliveryField("complement", e.target.value)}
                             placeholder="Apto, bloco, referencia"
-                            autoComplete="address-line3"
-                            autoCapitalize="words"
                             enterKeyHint="next"
                             className={premiumInputClass}
                           />
@@ -1476,12 +1472,11 @@ export const CartView = ({
                         <div className="sm:col-span-2">
                           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cidade</label>
                           <input
+                            {...inputAssistProps.city}
                             name="addressCity"
                             value={customer.city || ""}
                             onChange={(e) => updateDeliveryField("city", e.target.value)}
                             placeholder="Cidade"
-                            autoComplete="address-level2"
-                            autoCapitalize="words"
                             enterKeyHint="next"
                             className={premiumInputClass}
                           />
@@ -1489,12 +1484,11 @@ export const CartView = ({
                         <div>
                           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">UF</label>
                           <input
+                            {...inputAssistProps.state}
                             name="addressState"
                             value={customer.state || ""}
                             onChange={(e) => updateDeliveryField("state", e.target.value)}
                             placeholder="UF"
-                            autoComplete="address-level1"
-                            autoCapitalize="characters"
                             enterKeyHint="done"
                             className={premiumInputClass}
                           />

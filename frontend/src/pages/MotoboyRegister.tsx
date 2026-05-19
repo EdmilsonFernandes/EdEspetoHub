@@ -5,6 +5,7 @@ import { authService } from '../services/authService';
 import { useToast } from '../contexts/ToastContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { formatPhoneInput } from '../utils/format';
+import { inputAssistProps } from '../utils/inputAssist';
 
 const BRAZIL_DDDS = [
   '11', '12', '13', '14', '15', '16', '17', '18', '19',
@@ -227,14 +228,14 @@ export function MotoboyRegister() {
             </div>
 
             <input
-              type="text"
+              {...inputAssistProps.name}
               placeholder="Nome completo"
               value={form.fullName}
               onChange={(e) => setForm({ ...form, fullName: e.target.value })}
               className="input-premium w-full px-3 py-2.5 text-sm"
             />
             <input
-              type="email"
+              {...inputAssistProps.email}
               placeholder="Seu e-mail"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -256,6 +257,7 @@ export function MotoboyRegister() {
                 ))}
               </select>
               <input
+                {...inputAssistProps.phoneNational}
                 type="tel"
                 inputMode="numeric"
                 placeholder={phoneParts.ddd ? '99999-9999' : 'Selecione o DDD'}
@@ -266,20 +268,21 @@ export function MotoboyRegister() {
               />
             </div>
             <input
-              type="text"
+              {...inputAssistProps.document}
               placeholder="CPF"
               value={form.cpf}
               onChange={(e) => setForm({ ...form, cpf: formatCpfInput(e.target.value) })}
               className="input-premium w-full px-3 py-2.5 text-sm"
             />
             <input
-              type="text"
+              {...inputAssistProps.addressLine1}
               placeholder="Endereço"
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
               className="input-premium w-full px-3 py-2.5 text-sm"
             />
             <input
+              {...inputAssistProps.newPassword}
               type="password"
               placeholder="Senha"
               value={form.password}

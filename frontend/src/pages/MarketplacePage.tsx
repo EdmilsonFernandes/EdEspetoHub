@@ -38,6 +38,7 @@ import { destinationService } from '../services/destinationService';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerAccountService } from '../services/customerAccountService';
+import { inputAssistProps } from '../utils/inputAssist';
 import { featuredService } from '../services/featuredService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -2925,15 +2926,13 @@ export function MarketplacePage() {
                 </div>
                 <div className="relative min-w-0 flex-1">
                   <input
+                    {...inputAssistProps.search}
                     ref={searchInputRef}
-                    type="text"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     onFocus={() => setIsSearchEditing(true)}
                     onBlur={() => setIsSearchEditing(false)}
                     placeholder={isSearchEditing ? 'Buscar loja, categoria ou produto' : SEARCH_PLACEHOLDERS[searchPlaceholderIndex]}
-                    autoComplete="off"
-                    inputMode="search"
                     enterKeyHint="search"
                     className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-slate-950 outline-none transition-opacity duration-300 ${searchPlaceholderVisible || isSearchEditing ? 'placeholder:opacity-100' : 'placeholder:opacity-0'} placeholder:text-slate-400 placeholder:transition-opacity placeholder:duration-300 ${isNativePlatform ? 'min-h-[48px] text-[15px]' : 'min-h-[52px] text-[14px]'}`}
                     style={{
@@ -4347,12 +4346,11 @@ export function MarketplacePage() {
                   <div className="flex items-center gap-3 rounded-[1.25rem] bg-white/90 px-4 py-3">
                     <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
                     <input
+                      {...inputAssistProps.search}
                       ref={condominiumSearchInputRef}
-                      type="text"
                       value={condominiumSearch}
                       onChange={(ev) => setCondominiumSearch(ev.target.value)}
                       placeholder="Buscar por nome do condomínio ou cidade..."
-                      autoComplete="off"
                       className="min-h-0 min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
                     />
                     {condominiumSearch ? (

@@ -396,6 +396,9 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                         inputMode="numeric"
                         pattern="[0-9]*"
                         autoComplete="one-time-code"
+                        autoCorrect="off"
+                        autoCapitalize="none"
+                        spellCheck={false}
                         aria-label="Codigo de ativacao do app autenticador"
                         className="w-full rounded-2xl border border-slate-200 px-4 py-3 pr-24 text-center text-xl font-black tracking-[0.28em] outline-none focus:border-[#336886] focus:ring-4 focus:ring-[#336886]/10"
                         placeholder="000000"
@@ -456,6 +459,9 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                     inputMode="numeric"
                     pattern="[0-9]*"
                     autoComplete="one-time-code"
+                    autoCorrect="off"
+                    autoCapitalize="none"
+                    spellCheck={false}
                     aria-label="Codigo do app autenticador para desativar"
                     className="w-full rounded-2xl border border-rose-100 bg-white px-4 py-3 pr-24 text-center text-xl font-black tracking-[0.28em] text-slate-950 outline-none focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
                     placeholder="000000"

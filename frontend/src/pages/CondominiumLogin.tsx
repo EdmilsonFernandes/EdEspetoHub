@@ -5,6 +5,7 @@ import { Capacitor } from '@capacitor/core';
 import { ArrowLeft, Buildings, Eye, EyeSlash, LockKey, ShieldCheck } from '@phosphor-icons/react';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { authService } from '../services/authService';
+import { inputAssistProps } from '../utils/inputAssist';
 
 export function CondominiumLogin() {
   const isNativePlatform = Capacitor.isNativePlatform();
@@ -74,10 +75,10 @@ export function CondominiumLogin() {
           <label className="block">
             <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Usuário ou e-mail</span>
             <input
+              {...inputAssistProps.username}
               type="text"
               value={form.email}
               onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-              autoComplete="username"
               placeholder="spazio.azuli"
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white"
             />
@@ -87,10 +88,10 @@ export function CondominiumLogin() {
             <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Senha</span>
             <div className="relative">
               <input
+                {...inputAssistProps.currentPassword}
                 type={showPassword ? 'text' : 'password'}
                 value={form.password}
                 onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-                autoComplete="current-password"
                 placeholder="Sua senha"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 pr-12 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white"
               />

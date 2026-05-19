@@ -9,6 +9,7 @@ import { nativeBiometricService } from '../services/nativeBiometricService';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
+import { inputAssistProps } from '../utils/inputAssist';
 
 const formatPhoneBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
@@ -572,9 +573,8 @@ export function ClientAuth() {
               <div className="relative">
                 <UserCircle size={18} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
+                  {...inputAssistProps.name}
                   name="fullName"
-                  autoComplete="name"
-                  autoCapitalize="words"
                   value={form.fullName}
                   onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
                   placeholder="Nome completo"
@@ -586,9 +586,8 @@ export function ClientAuth() {
               <div className="relative">
                 <Phone size={18} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
+                  {...inputAssistProps.phone}
                   name="phone"
-                  autoComplete="tel"
-                  inputMode="tel"
                   value={form.phone}
                   onChange={(e) => setForm((p) => ({ ...p, phone: formatPhoneBr(e.target.value) }))}
                   placeholder="Telefone (opcional)"
@@ -599,17 +598,12 @@ export function ClientAuth() {
             <div className="relative">
               <EnvelopeSimple size={18} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
+                {...inputAssistProps.email}
                 id="email"
                 name="email"
-                autoComplete="email"
-                type="email"
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                 placeholder="E-mail"
-                inputMode="email"
-                autoCapitalize="none"
-                autoCorrect="off"
-                spellCheck={false}
                 enterKeyHint={mode === 'register' ? 'next' : 'done'}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
               />
@@ -617,16 +611,13 @@ export function ClientAuth() {
             <div className="relative">
               <LockKey size={18} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
+                {...(mode === 'register' ? inputAssistProps.newPassword : inputAssistProps.currentPassword)}
                 id="password"
                 name="password"
-                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
                 type={showPassword ? 'text' : 'password'}
                 value={form.password}
                 onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                 placeholder="Senha"
-                autoCapitalize="none"
-                autoCorrect="off"
-                spellCheck={false}
                 enterKeyHint="done"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-12 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
               />
@@ -794,6 +785,9 @@ export function ClientAuth() {
                       inputMode="numeric"
                       pattern="[0-9]*"
                       autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                      autoCorrect="off"
+                      autoCapitalize="none"
+                      spellCheck={false}
                       value={digit}
                       onChange={(e) => handleCodeDigitChange(index, e.target.value)}
                       onKeyDown={(e) => handleCodeKeyDown(index, e)}

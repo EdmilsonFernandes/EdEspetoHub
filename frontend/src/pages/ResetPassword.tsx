@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { AuthLayout } from '../layouts/AuthLayout';
+import { inputAssistProps } from '../utils/inputAssist';
 
 import { ArrowLeft, Check, Eye, EyeSlash, LockSimple, WarningCircle } from '@phosphor-icons/react';
 
@@ -90,6 +91,7 @@ export function ResetPassword() {
           <div className="space-y-4">
             <div className="floating-field">
               <input
+                {...inputAssistProps.newPassword}
                 id="new-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
@@ -112,6 +114,7 @@ export function ResetPassword() {
 
             <div className="floating-field">
               <input
+                {...inputAssistProps.newPassword}
                 id="confirm-password"
                 type={showConfirm ? 'text' : 'password'}
                 value={confirm}

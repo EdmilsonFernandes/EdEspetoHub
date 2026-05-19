@@ -37,6 +37,7 @@ import { getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
+import { textareaAssistProps } from '../utils/inputAssist';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
 const ACTIVE_REFRESH_MS = 10_000;
@@ -1641,6 +1642,7 @@ export function ClientOrders() {
             </div>
 
             <textarea
+              {...textareaAssistProps.notes}
               value={cancelModal.reason}
               onChange={(event) => setCancelModal((prev) => ({ ...prev, reason: event.target.value }))}
               rows={4}
