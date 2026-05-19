@@ -566,6 +566,7 @@ export function MotoboyLogin() {
       <MfaChallengeModal
         open={Boolean(mfaChallenge)}
         challenge={mfaChallenge}
+        audience="motoboy"
         loading={mfaLoading}
         error={mfaError}
         onCancel={() => setMfaChallenge(null)}

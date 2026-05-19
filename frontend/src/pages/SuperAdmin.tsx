@@ -1248,6 +1248,7 @@ export function SuperAdmin() {
         <MfaChallengeModal
           open={Boolean(mfaChallenge)}
           challenge={mfaChallenge}
+          audience="superadmin"
           loading={mfaLoading}
           error={mfaError}
           onCancel={() => setMfaChallenge(null)}

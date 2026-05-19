@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "e7a93313",
-  "versionLabel": "v0.1.9.e7a93313",
-  "versionInternal": "0.1.9+20260519.001419.e7a93313",
-  "buildId": "0.1.9+20260519.001419.e7a93313-20260519.001419-e7a93313",
-  "builtAt": "2026-05-19T00:14:19.590Z",
-  "commitHash": "e7a9331300da5bb57d64b1fc23e80030c5471b61",
-  "shortHash": "e7a93313",
+  "versionDisplaySuffix": "4b27cd5a",
+  "versionLabel": "v0.1.9.4b27cd5a",
+  "versionInternal": "0.1.9+20260519.005715.4b27cd5a",
+  "buildId": "0.1.9+20260519.005715.4b27cd5a-20260519.005715-4b27cd5a",
+  "builtAt": "2026-05-19T00:57:15.042Z",
+  "commitHash": "4b27cd5a1202fdf5e2f02a239e780edc6adedc91",
+  "shortHash": "4b27cd5a",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "4b27cd5a1202fdf5e2f02a239e780edc6adedc91",
+      "shortHash": "4b27cd5a",
+      "dateIso": "2026-05-18T21:18:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Harden marketplace highlights and store cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4b27cd5a1202fdf5e2f02a239e780edc6adedc91"
+    },
     {
       "hash": "e7a9331300da5bb57d64b1fc23e80030c5471b61",
       "shortHash": "e7a93313",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Add shared glass header for app subpages",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b5932e255a6892d0a34ed32ea50e2893f2b50934"
-    },
-    {
-      "hash": "6a240f99a079aaeace42cd0a24c74bcd2577a8ec",
-      "shortHash": "6a240f99",
-      "dateIso": "2026-05-17T09:03:58-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish hub discovery and destination navigation",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6a240f99a079aaeace42cd0a24c74bcd2577a8ec"
     }
   ]
 } as const;

@@ -844,6 +844,7 @@ export function ClientAuth() {
       <MfaChallengeModal
         open={Boolean(mfaChallenge)}
         challenge={mfaChallenge}
+        audience="customer"
         loading={mfaLoading}
         error={mfaError}
         onCancel={() => setMfaChallenge(null)}

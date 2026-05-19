@@ -606,6 +606,7 @@ export function AdminLogin() {
       <MfaChallengeModal
         open={Boolean(mfaChallenge)}
         challenge={mfaChallenge}
+        audience="admin"
         loading={mfaLoading}
         error={mfaError}
         onCancel={() => setMfaChallenge(null)}
