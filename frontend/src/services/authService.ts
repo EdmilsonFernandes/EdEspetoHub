@@ -32,7 +32,7 @@ export const authService = {
         const response = await apiClient.post("/auth/mfa/challenge/verify", {
             ...payload,
             ...getMfaDeviceContext({ authMode: options?.authMode }),
-        });
+        }, { authMode: options?.authMode || 'admin', skipAutoLogout: true });
         return response;
     },
     async getMfaStatus(options?: { authMode?: 'admin' | 'customer' | 'motoboy' | 'superadmin' }) {

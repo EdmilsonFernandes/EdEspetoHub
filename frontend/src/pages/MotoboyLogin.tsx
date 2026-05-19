@@ -11,6 +11,7 @@ import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
+import { MFA_CHALLENGE_EXPIRED_MESSAGE, isMfaChallengeExpiredError } from '../utils/mfaErrors';
 
 export function MotoboyLogin() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -192,7 +193,13 @@ export function MotoboyLogin() {
       setMfaChallenge(null);
       await completeMotoboyLoginFlow(session);
     } catch (err: any) {
-      setMfaError(err?.message || 'Codigo invalido. Tente novamente.');
+      if (isMfaChallengeExpiredError(err)) {
+        setError('');
+        setMfaError(MFA_CHALLENGE_EXPIRED_MESSAGE);
+        setMfaChallenge((current: any) => (current ? { ...current, expired: true } : current));
+        return;
+      }
+      setMfaError(err?.message || 'Código inválido. Tente novamente.');
     } finally {
       setMfaLoading(false);
     }
@@ -220,6 +227,7 @@ export function MotoboyLogin() {
     try {
       const session = await authService.login(form.email, form.password, { authMode: 'motoboy' });
       if (session?.mfaRequired) {
+        setMfaError('');
         setMfaChallenge(session);
         return;
       }
@@ -569,7 +577,13 @@ export function MotoboyLogin() {
         audience="motoboy"
         loading={mfaLoading}
         error={mfaError}
+        expired={Boolean(mfaChallenge?.expired)}
         onCancel={() => setMfaChallenge(null)}
+        onRestart={() => {
+          setMfaChallenge(null);
+          setMfaError('');
+          setError('');
+        }}
         onVerify={handleMfaVerify}
       />
     </AuthLayout>

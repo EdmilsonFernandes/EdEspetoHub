@@ -6,7 +6,10 @@ import { backendClient } from '../lib/backend-client';
 import { fromAxiosError } from '../lib/errors';
 type Req = ServiceRequest<unknown>; type Res = ServiceResponse<unknown>;
 function ok(data: unknown, httpCode = 200): Res { return { status: ServiceProcessStatus.Success, message: 'ok', data, httpCode }; }
-function fail(err: unknown): Res { const e = fromAxiosError(err); return { status: ServiceProcessStatus.Fail, message: e.message, data: null, httpCode: e.statusCode }; }
+function fail(err: unknown): Res {
+    const e = fromAxiosError(err);
+    return { status: ServiceProcessStatus.Fail, message: e.message, data: null, httpCode: e.statusCode, code: e.code, details: e.details } as Res;
+}
 export function registerAuthProcessors(t: Transporter): void {
     t.register({ service: 'auth', action: 'register' }, async (r: Req): Promise<Res> => { const { body } = r.data as { body: unknown }; try { return ok(await backendClient.post('/auth/register', body), 201); } catch (e) { return fail(e); } });
     t.register({ service: 'auth', action: 'preflight' }, async (r: Req): Promise<Res> => { const { body } = r.data as { body: unknown }; try { return ok(await backendClient.post('/auth/register/preflight', body)); } catch (e) { return fail(e); } });

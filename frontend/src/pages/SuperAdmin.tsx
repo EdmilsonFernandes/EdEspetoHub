@@ -52,6 +52,7 @@ import { CustomerSecuritySection } from '../components/Admin/CustomerSecuritySec
 import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
 import { AccountMfaPanel } from '../components/Auth/AccountMfaPanel';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
+import { MFA_CHALLENGE_EXPIRED_MESSAGE, isMfaChallengeExpiredError } from '../utils/mfaErrors';
 
 const STORAGE_KEY = 'superAdminToken';
 const STORAGE_USER_KEY = 'superAdminUser';
@@ -617,6 +618,7 @@ export function SuperAdmin() {
     try {
       const data = await superAdminService.login(loginForm.email, loginForm.password);
       if (data?.mfaRequired) {
+        setMfaError('');
         setMfaChallenge(data);
         return;
       }
@@ -654,6 +656,12 @@ export function SuperAdmin() {
       setMfaChallenge(null);
       showToast('Login realizado com sucesso.', 'success');
     } catch (err: any) {
+      if (isMfaChallengeExpiredError(err)) {
+        setError('');
+        setMfaError(MFA_CHALLENGE_EXPIRED_MESSAGE);
+        setMfaChallenge((current: any) => (current ? { ...current, expired: true } : current));
+        return;
+      }
       const message = err.message || 'Codigo invalido. Tente novamente.';
       setMfaError(message);
       showToast(message, 'error');
@@ -1251,7 +1259,13 @@ export function SuperAdmin() {
           audience="superadmin"
           loading={mfaLoading}
           error={mfaError}
+          expired={Boolean(mfaChallenge?.expired)}
           onCancel={() => setMfaChallenge(null)}
+          onRestart={() => {
+            setMfaChallenge(null);
+            setMfaError('');
+            setError('');
+          }}
           onVerify={handleMfaVerify}
         />
       </AuthLayout>

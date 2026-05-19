@@ -186,6 +186,7 @@ const request = async (path: string, options: any = {}) =>
     | 'customer'
     | 'motoboy'
     | 'superadmin';
+  const skipAutoLogout = Boolean(options?.skipAutoLogout);
   const token = resolveAuthToken(path, authMode);
 
   const finalOptions: any = {
@@ -200,6 +201,7 @@ const request = async (path: string, options: any = {}) =>
   };
   delete finalOptions.timeoutMs;
   delete finalOptions.authMode;
+  delete finalOptions.skipAutoLogout;
 
   if (finalOptions.body && typeof finalOptions.body === 'object')
   {
@@ -225,7 +227,7 @@ const request = async (path: string, options: any = {}) =>
     return handleResponse(
       response,
       routeScope,
-      isCustomerRoute ? Boolean(customerToken) : canAutoLogout,
+      skipAutoLogout ? false : isCustomerRoute ? Boolean(customerToken) : canAutoLogout,
       customerAuthRecovery
     );
   } catch (error: any) {

@@ -38,6 +38,12 @@ const normalizeEnum = <T extends string>(value: string | undefined, allowed: rea
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
 
+const mfaTrustedDeviceExpirationDays = numberEnv(
+  'TRUSTED_DEVICE_EXPIRATION_DAYS',
+  numberEnv('MFA_TRUSTED_DEVICE_EXPIRATION_DAYS', 30, 1),
+  1
+);
+
 const expandWebOrigins = (origin: string) => {
   const normalized = String(origin || '').trim();
   if (!normalized) return [] as string[];
@@ -215,7 +221,7 @@ export const env = {
     requiredForSuperAdmin: process.env.MFA_REQUIRED_FOR_SUPER_ADMIN === 'true',
     requiredForStoreAdmin: process.env.MFA_REQUIRED_FOR_STORE_ADMIN === 'true',
     trustedDeviceEnabled: process.env.TRUSTED_DEVICE_ENABLED !== 'false',
-    trustedDeviceExpirationDays: numberEnv('TRUSTED_DEVICE_EXPIRATION_DAYS', 30, 1),
+    trustedDeviceExpirationDays: mfaTrustedDeviceExpirationDays,
     challengeTtlMinutes: numberEnv('MFA_CHALLENGE_TTL_MINUTES', 5, 1),
     secretEncryptionKey: process.env.MFA_SECRET_ENCRYPTION_KEY || '',
   },

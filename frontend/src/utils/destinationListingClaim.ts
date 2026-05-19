@@ -1,5 +1,3 @@
-import { JNC_GOOGLE_PLAY_URL, JNC_IOS_HUB_URL } from './destinationQrPoster';
-
 const categoryToStoreSegment = (category?: string | null) => {
   const key = String(category || '').toUpperCase();
   if (key.includes('RESTAURANTE') || key === 'NOITE') return 'restaurante';
@@ -66,24 +64,18 @@ export const buildListingInviteMessage = (destination: any, listing: any, invite
   const destinationName = String(destination?.name || destination?.city || 'sua cidade').trim();
   const listingName = String(listing?.title || 'seu negócio').trim();
   return [
-    `Olá, tudo bem? Sou o Edmilson, do Já no Caminho.`,
+    `Olá, tudo bem? Sou o Edmilson, criador do Já no Caminho.`,
     '',
-    `Estou montando um guia digital de ${destinationName} para hóspedes de chalés e pousadas encontrarem restaurantes, cafés, empórios e serviços locais.`,
+    `Estou montando uma página simples de ${destinationName} para hóspedes e visitantes encontrarem restaurantes, cafés, empórios, passeios e serviços locais com mais facilidade.`,
     '',
-    `O negócio ${listingName} aparece como curadoria inicial a partir de informações públicas e guias turísticos da cidade. Não é cobrança e não é link estranho: é um convite para você revisar/assumir o perfil no domínio oficial janocaminho.com.br.`,
+    `Incluí ${listingName} como sugestão inicial usando informações públicas. Não tem cobrança e não precisa instalar arquivo: é só um convite para você conferir, corrigir ou assumir o perfil no site oficial janocaminho.com.br.`,
     '',
-    `Você pode atualizar fotos, WhatsApp, cardápio/serviços e informar quais chalés ou pousadas atende.`,
+    `Você pode atualizar fotos, WhatsApp, cardápio ou serviços, endereço e informar quais hospedagens atende.`,
     '',
-    `Link curto e seguro para assumir o perfil:`,
+    `Link seguro para revisar o perfil:`,
     inviteUrl,
     '',
-    `Importante: não envio APK nem arquivo para instalar. O app é pela Google Play e o link acima fica no domínio oficial janocaminho.com.br.`,
-    '',
-    `Para ver como o hóspede encontra seu negócio no app:`,
-    `Android: ${JNC_GOOGLE_PLAY_URL}`,
-    `iPhone ou web: ${JNC_IOS_HUB_URL}`,
-    '',
-    `Se preferir não aparecer no guia, me responda REMOVER que eu retiro sem problema.`,
+    `Se preferir não aparecer na página, me responda REMOVER que eu retiro sem problema.`,
   ].join('\n');
 };
 
@@ -91,24 +83,18 @@ export const buildHospitalityPlaceInviteMessage = (destination: any, place: any,
   const destinationName = String(destination?.name || destination?.city || place?.city || 'sua cidade').trim();
   const placeName = String(place?.name || 'sua hospedagem').trim();
   return [
-    `Olá, tudo bem? Sou o Edmilson, do Já no Caminho.`,
+    `Olá, tudo bem? Sou o Edmilson, criador do Já no Caminho.`,
     '',
-    `Estou organizando um guia digital de ${destinationName} para hóspedes encontrarem delivery, mercados, restaurantes, passeios e serviços próximos aos chalés e pousadas.`,
+    `Estou organizando uma página de ${destinationName} para hóspedes encontrarem delivery, mercados, restaurantes, passeios e serviços próximos das hospedagens.`,
     '',
-    `${placeName} aparece como curadoria inicial a partir de informações públicas e guias turísticos da cidade. Não é cobrança e não é link estranho: é um convite para você assumir gratuitamente o perfil no domínio oficial janocaminho.com.br.`,
+    `${placeName} foi incluída como sugestão inicial usando informações públicas. Não tem cobrança e não precisa instalar arquivo: é só um convite para você conferir, corrigir ou assumir gratuitamente o perfil no site oficial janocaminho.com.br.`,
     '',
-    `Assumindo o perfil, você pode revisar fotos, WhatsApp, endereço, Instagram, link de reserva e gerar o QR Code para colocar na hospedagem.`,
+    `Assumindo o perfil, você pode revisar fotos, WhatsApp, endereço, Instagram, link de reserva e gerar um QR Code para deixar no quarto, recepção ou área comum.`,
     '',
-    `Link curto e seguro para assumir/atualizar o perfil:`,
+    `Link seguro para revisar o perfil:`,
     inviteUrl,
     '',
-    `Importante: não envio APK nem arquivo para instalar. O app é pela Google Play e o link acima fica no domínio oficial janocaminho.com.br.`,
-    '',
-    `Para ver a experiência do hóspede:`,
-    `Android: ${JNC_GOOGLE_PLAY_URL}`,
-    `iPhone ou web: ${JNC_IOS_HUB_URL}`,
-    '',
-    `Se preferir não aparecer no guia, me responda REMOVER que eu retiro sem problema.`,
+    `Se preferir não aparecer na página, me responda REMOVER que eu retiro sem problema.`,
   ].join('\n');
 };
 

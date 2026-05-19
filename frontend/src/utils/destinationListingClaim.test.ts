@@ -70,9 +70,12 @@ describe('destinationListingClaim', () => {
     expect(inviteUrl).toBe('https://janocaminho.com.br/convite/loja/goncalves/listing-1');
     expect(message).toContain('Restaurante Sauá');
     expect(message).toContain('Gonçalves');
-    expect(message).toContain('guias turísticos da cidade');
-    expect(message).toContain('play.google.com/store/apps/details');
-    expect(message).toContain('/hub');
+    expect(message).toContain('criador do Já no Caminho');
+    expect(message).toContain('Não tem cobrança');
+    expect(message).not.toContain('curadoria');
+    expect(message).not.toContain('APK');
+    expect(message).not.toContain('play.google.com/store/apps/details');
+    expect(message).not.toContain('/hub');
     expect(message).toContain('REMOVER');
     expect(whatsappUrl.startsWith('https://wa.me/5535999769970?text=')).toBe(true);
   });
@@ -92,7 +95,9 @@ describe('destinationListingClaim', () => {
     expect(inviteUrl).toBe('https://janocaminho.com.br/convite/chale/goncalves/pousada-vista');
     expect(message).toContain('Pousada Vista');
     expect(message).toContain('QR Code');
-    expect(message).toContain('guias turísticos da cidade');
+    expect(message).toContain('Não tem cobrança');
+    expect(message).not.toContain('curadoria');
+    expect(message).not.toContain('APK');
     expect(message).toContain('janocaminho.com.br');
     expect(message).toContain('REMOVER');
   });

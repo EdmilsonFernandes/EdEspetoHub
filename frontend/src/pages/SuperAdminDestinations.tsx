@@ -440,6 +440,7 @@ export function SuperAdminDestinations() {
   const [inviteListing, setInviteListing] = useState<any | null>(null);
   const [invitePlace, setInvitePlace] = useState<any | null>(null);
   const [inviteFeedback, setInviteFeedback] = useState('');
+  const [inviteBatchLoading, setInviteBatchLoading] = useState('');
 
   const load = async () => {
     if (!localStorage.getItem('superAdminToken')) {
@@ -1104,11 +1105,16 @@ export function SuperAdminDestinations() {
     return window.location.origin || 'https://janocaminho.com.br';
   };
 
+  const getListingInviteContact = (listing: any) =>
+    listing?.whatsapp || listing?.phone || (/^https?:\/\//i.test(String(listing?.ctaUrl || '')) ? '' : listing?.ctaUrl);
+
+  const getPlaceInviteContact = (place: any) => place?.whatsapp || place?.phone;
+
   const buildInvitePayload = (listing: any) => {
     const destination = getDestinationForListing(listing);
     const publicInviteUrl = buildListingPublicInviteUrl(destination, listing, { baseUrl: getPublicBaseUrl() });
     const message = buildListingInviteMessage(destination, listing, publicInviteUrl);
-    const rawContact = listing?.whatsapp || listing?.phone || (/^https?:\/\//i.test(String(listing?.ctaUrl || '')) ? '' : listing?.ctaUrl);
+    const rawContact = getListingInviteContact(listing);
     return {
       destination,
       claimUrl: publicInviteUrl,
@@ -1122,7 +1128,7 @@ export function SuperAdminDestinations() {
     const destination = getDestinationForPlace(place);
     const claimUrl = buildHospitalityPlacePublicInviteUrl(destination, place, { baseUrl: getPublicBaseUrl() });
     const message = buildHospitalityPlaceInviteMessage(destination, place, claimUrl);
-    const rawContact = place?.whatsapp || place?.phone;
+    const rawContact = getPlaceInviteContact(place);
     return {
       destination,
       claimUrl,
@@ -1130,6 +1136,62 @@ export function SuperAdminDestinations() {
       message,
       whatsappUrl: buildListingInviteWhatsAppUrl(rawContact, message),
     };
+  };
+
+  const buildInviteBatchEntry = (title: string, payload: any) => [
+    `[${title}]`,
+    payload.whatsappUrl ? `Enviar pelo WhatsApp: ${payload.whatsappUrl}` : 'WhatsApp: sem número válido cadastrado.',
+    '',
+    payload.message,
+  ].join('\n');
+
+  const getPaginationTotalPages = (pagination: any, fallbackItemsLength = 0) => {
+    const total = Number(pagination?.total || fallbackItemsLength || 0);
+    const pageSize = Math.max(1, Number(pagination?.pageSize || 50));
+    return Math.max(1, Math.ceil(total / pageSize));
+  };
+
+  const fetchAllDestinationPlacesForInvite = async () => {
+    if (!selectedDestinationId) return [];
+    const pageSize = 50;
+    let page = 1;
+    let totalPages = 1;
+    const allItems: any[] = [];
+    while (page <= totalPages && page <= 100) {
+      const payload = await destinationService.adminDestinationPlaces(selectedDestinationId, {
+        page,
+        pageSize,
+        search: detailSearch,
+        status: statusFilter,
+      });
+      const items = Array.isArray(payload?.items) ? payload.items : [];
+      allItems.push(...items);
+      totalPages = getPaginationTotalPages(payload?.pagination, items.length);
+      page += 1;
+    }
+    return allItems;
+  };
+
+  const fetchAllDestinationListingsForInvite = async () => {
+    if (!selectedDestinationId) return [];
+    const pageSize = 50;
+    let page = 1;
+    let totalPages = 1;
+    const allItems: any[] = [];
+    while (page <= totalPages && page <= 100) {
+      const payload = await destinationService.adminDestinationListings(selectedDestinationId, {
+        page,
+        pageSize,
+        search: detailSearch,
+        status: statusFilter,
+        listingCategory: listingCategoryFilter,
+      });
+      const items = Array.isArray(payload?.items) ? payload.items : [];
+      allItems.push(...items);
+      totalPages = getPaginationTotalPages(payload?.pagination, items.length);
+      page += 1;
+    }
+    return allItems.filter((listing: any) => !listing.storeId && !listing.store);
   };
 
   const copyTextToClipboard = async (text: string, feedback: string) => {
@@ -1164,24 +1226,46 @@ export function SuperAdminDestinations() {
     return copyTextToClipboard(payload.message, `Convite de ${place.name} copiado.`);
   };
 
-  const copyVisiblePlaceInvites = () => {
-    const places = placesResult.items || [];
-    if (!places.length) {
-      setError('Nenhuma hospedagem visível nesta página para convidar.');
+  const copyAllPlaceInvites = async () => {
+    if (!selectedDestinationId) {
+      setError('Selecione uma cidade antes de copiar convites.');
       return;
     }
-    const batch = places.map((place: any) => buildPlaceInvitePayload(place).message).join('\n\n---\n\n');
-    return copyTextToClipboard(batch, `${places.length} convite(s) de hospedagem copiado(s) desta página.`);
+    setInviteBatchLoading('places');
+    try {
+      const places = await fetchAllDestinationPlacesForInvite();
+      if (!places.length) {
+        setError('Nenhuma hospedagem encontrada nesta cidade/filtro para convidar.');
+        return;
+      }
+      const batch = places
+        .map((place: any) => buildInviteBatchEntry(place?.name || 'Hospedagem', buildPlaceInvitePayload(place)))
+        .join('\n\n---\n\n');
+      return copyTextToClipboard(batch, `${places.length} convite(s) de hospedagem copiado(s) da cidade.`);
+    } finally {
+      setInviteBatchLoading('');
+    }
   };
 
-  const copyVisibleListingInvites = () => {
-    const listings = (listingsResult.items || []).filter((listing: any) => !listing.storeId && !listing.store);
-    if (!listings.length) {
-      setError('Nenhuma pré-loja sem vínculo visível nesta página para convidar.');
+  const copyAllListingInvites = async () => {
+    if (!selectedDestinationId) {
+      setError('Selecione uma cidade antes de copiar convites.');
       return;
     }
-    const batch = listings.map((listing: any) => buildInvitePayload(listing).message).join('\n\n---\n\n');
-    return copyTextToClipboard(batch, `${listings.length} convite(s) copiado(s) desta página.`);
+    setInviteBatchLoading('listings');
+    try {
+      const listings = await fetchAllDestinationListingsForInvite();
+      if (!listings.length) {
+        setError('Nenhum serviço sem loja vinculada encontrado nesta cidade/filtro para convidar.');
+        return;
+      }
+      const batch = listings
+        .map((listing: any) => buildInviteBatchEntry(listing?.title || 'Serviço local', buildInvitePayload(listing)))
+        .join('\n\n---\n\n');
+      return copyTextToClipboard(batch, `${listings.length} convite(s) de serviço copiado(s) da cidade.`);
+    } finally {
+      setInviteBatchLoading('');
+    }
   };
 
   const handleGeneratePlaceQrPoster = (place: any) => {
@@ -1599,7 +1683,7 @@ export function SuperAdminDestinations() {
                     <div class="benefit-icon">3</div>
                     <div>
                       <strong>Tudo organizado por cidade</strong>
-                      <span>Abra Destinos no app, escolha a cidade e toque no chalé para ver a curadoria certa.</span>
+                      <span>Abra Destinos no app, escolha a cidade e toque no chalé para ver os serviços certos.</span>
                     </div>
                   </div>
                 </div>
@@ -1683,7 +1767,7 @@ export function SuperAdminDestinations() {
   const activeInviteItem = invitePlace || inviteListing;
   const activeInvitePayload = placeInvitePayload || invitePayload;
   const activeInviteTitle = invitePlace?.name || inviteListing?.title || 'Parceiro';
-  const activeInviteKindLabel = invitePlace ? 'Convite para hospedagem' : 'Convite para pré-loja';
+  const activeInviteKindLabel = invitePlace ? 'Convite para hospedagem' : 'Convite para serviço';
   const pageButtonClass = 'rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700 disabled:cursor-not-allowed disabled:opacity-40';
   const renderPagination = (pagination: any, onPageChange: (page: number) => void, label = 'itens') => (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
@@ -1980,9 +2064,15 @@ export function SuperAdminDestinations() {
                           {inviteFeedback ? (
                             <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-black text-emerald-700">{inviteFeedback}</span>
                           ) : null}
-                          <button type="button" onClick={copyVisiblePlaceInvites} className={actionButtonClass('primary')}>
+                          <button
+                            type="button"
+                            onClick={copyAllPlaceInvites}
+                            disabled={inviteBatchLoading === 'places'}
+                            title="Copia todos os convites desta cidade usando os filtros atuais, não só a página visível."
+                            className={actionButtonClass('primary')}
+                          >
                             <CopySimple size={13} weight="bold" />
-                            Copiar convites
+                            {inviteBatchLoading === 'places' ? 'Copiando...' : 'Copiar todos'}
                           </button>
                           <Bed size={24} weight="duotone" className="text-[#336886]" />
                         </div>
@@ -2040,16 +2130,22 @@ export function SuperAdminDestinations() {
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Serviços e lugares</p>
-                          <h4 className="text-lg font-black text-slate-950">Curadoria local e pré-lojas</h4>
+                          <h4 className="text-lg font-black text-slate-950">Serviços locais e convites</h4>
                           <p className="mt-0.5 text-xs font-bold text-slate-500">{listingsResult.pagination?.total || 0} serviço(s) nesta cidade</p>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           {inviteFeedback ? (
                             <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-black text-emerald-700">{inviteFeedback}</span>
                           ) : null}
-                          <button type="button" onClick={copyVisibleListingInvites} className={actionButtonClass('amber')}>
+                          <button
+                            type="button"
+                            onClick={copyAllListingInvites}
+                            disabled={inviteBatchLoading === 'listings'}
+                            title="Copia todos os convites de serviços desta cidade usando os filtros atuais, não só a página visível."
+                            className={actionButtonClass('amber')}
+                          >
                             <CopySimple size={13} weight="bold" />
-                            Copiar convites
+                            {inviteBatchLoading === 'listings' ? 'Copiando...' : 'Copiar todos'}
                           </button>
                           <Sparkle size={24} weight="duotone" className="text-amber-700" />
                         </div>
@@ -2406,7 +2502,7 @@ export function SuperAdminDestinations() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-black">{editingListingId ? 'Editar serviço/atração' : 'Cadastrar serviço/atração'}</h2>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">Serviço é curadoria local. Se selecionar uma hospedagem, ele aparece dentro do chalé como atendimento por WhatsApp.</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Serviço é uma indicação local. Se selecionar uma hospedagem, ele aparece dentro do chalé como atendimento por WhatsApp.</p>
                 </div>
                 {editingListingId ? (
                   <button type="button" onClick={cancelListingEdit} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-600">

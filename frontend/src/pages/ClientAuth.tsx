@@ -10,6 +10,7 @@ import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 import { inputAssistProps } from '../utils/inputAssist';
+import { MFA_CHALLENGE_EXPIRED_MESSAGE, isMfaChallengeExpiredError } from '../utils/mfaErrors';
 
 const formatPhoneBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
@@ -119,7 +120,8 @@ export function ClientAuth() {
       setMessage('Conta ativada com sucesso. Agora é só entrar.');
     }
     if (params.get('reason') === 'session_expired') {
-      setMessage('Seu acesso expirou ou foi atualizado. Entre novamente para continuar. Se usava biometria, ative de novo após o login.');
+      setMessage('');
+      setError('Seu acesso expirou ou foi atualizado. Entre novamente para continuar. Se usava biometria, ative de novo após o login.');
     }
   }, [location.search]);
 
@@ -251,7 +253,14 @@ export function ClientAuth() {
       setMfaChallenge(null);
       finishAuthenticatedCustomerSession(result);
     } catch (e: any) {
-      setMfaError(e?.message || 'Codigo invalido. Tente novamente.');
+      if (isMfaChallengeExpiredError(e)) {
+        setMessage('');
+        setError('');
+        setMfaError(MFA_CHALLENGE_EXPIRED_MESSAGE);
+        setMfaChallenge((current: any) => (current ? { ...current, expired: true } : current));
+        return;
+      }
+      setMfaError(e?.message || 'Código inválido. Tente novamente.');
     } finally {
       setMfaLoading(false);
     }
@@ -322,6 +331,7 @@ export function ClientAuth() {
         password: String(form.password || ''),
       });
       if (result?.mfaRequired) {
+        setMfaError('');
         setMfaChallenge(result);
         return;
       }
@@ -841,7 +851,14 @@ export function ClientAuth() {
         audience="customer"
         loading={mfaLoading}
         error={mfaError}
+        expired={Boolean(mfaChallenge?.expired)}
         onCancel={() => setMfaChallenge(null)}
+        onRestart={() => {
+          setMfaChallenge(null);
+          setMfaError('');
+          setMessage('');
+          setError('');
+        }}
         onVerify={handleMfaVerify}
       />
     </AuthLayout>

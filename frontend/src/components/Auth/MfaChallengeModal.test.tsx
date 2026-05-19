@@ -59,6 +59,29 @@ describe('MfaChallengeModal', () => {
     expect(screen.getByText(/Salvar acesso neste aparelho por 180 dias/i)).toBeInTheDocument();
   });
 
+  it('shows a clear expired state without the code input', () => {
+    const onRestart = vi.fn();
+    render(
+      <MfaChallengeModal
+        open
+        audience="customer"
+        challenge={{ challengeToken: 'challenge-1', account: 'cliente@teste.com', trustDeviceAvailable: true }}
+        error="Este código de segurança expirou. Faça login novamente para gerar um novo código."
+        expired
+        onCancel={vi.fn()}
+        onRestart={onRestart}
+        onVerify={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/Código expirado/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Código do app autenticador/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Refazer login/i }));
+
+    expect(onRestart).toHaveBeenCalledTimes(1);
+  });
+
   it('falls back to focused manual paste instructions when clipboard read is blocked', async () => {
     Object.defineProperty(window.navigator, 'clipboard', {
       value: { readText: vi.fn().mockRejectedValue(new Error('blocked')) },

@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { Copy, DeviceMobile, ShieldCheck, X } from '@phosphor-icons/react';
+import { Copy, DeviceMobile, ShieldCheck, WarningCircle, X } from '@phosphor-icons/react';
 import { readMfaClipboardText } from '../../utils/mfaClipboard';
 
 type MfaChallenge = {
@@ -15,7 +15,9 @@ type Props = {
   audience?: 'admin' | 'customer' | 'motoboy' | 'superadmin';
   loading?: boolean;
   error?: string;
+  expired?: boolean;
   onCancel: () => void;
+  onRestart?: () => void;
   onVerify: (payload: { code: string; trustDevice: boolean }) => Promise<void> | void;
 };
 
@@ -42,7 +44,17 @@ const audienceCopy: Record<NonNullable<Props['audience']>, { eyebrow: string; ti
   },
 };
 
-export function MfaChallengeModal({ open, challenge, audience = 'admin', loading, error, onCancel, onVerify }: Props) {
+export function MfaChallengeModal({
+  open,
+  challenge,
+  audience = 'admin',
+  loading,
+  error,
+  expired = false,
+  onCancel,
+  onRestart,
+  onVerify,
+}: Props) {
   const [code, setCode] = useState('');
   const [trustDevice, setTrustDevice] = useState(false);
   const [pasteHint, setPasteHint] = useState('');
@@ -58,9 +70,10 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
     setPasteHint('');
     submittedCodeRef.current = '';
     submittingRef.current = false;
+    if (expired) return undefined;
     const timer = window.setTimeout(() => inputRef.current?.focus(), 120);
     return () => window.clearTimeout(timer);
-  }, [open, challenge?.challengeToken]);
+  }, [open, challenge?.challengeToken, expired]);
 
   if (!open || !challenge) return null;
 
@@ -73,6 +86,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
   };
 
   const verifyCode = async (nextCode: string, options?: { force?: boolean }) => {
+    if (expired) return;
     const cleanCode = sanitizeCode(nextCode);
     if (cleanCode.length !== 6 || loading) return;
     if (submittingRef.current) return;
@@ -101,7 +115,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
   };
 
   const pasteCode = async () => {
-    if (loading) return;
+    if (loading || expired) return;
     focusCodeInput();
     setPasteHint('Tentando colar o código...');
     try {
@@ -119,6 +133,10 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (expired) {
+      (onRestart || onCancel)();
+      return;
+    }
     await verifyCode(code, { force: true });
   };
 
@@ -177,7 +195,30 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
             </div>
           ) : null}
 
-          {challenge.trustDeviceAvailable ? (
+          {expired ? (
+            <div className="rounded-[1.35rem] border border-amber-200 bg-amber-50 px-4 py-4 text-left shadow-[0_18px_42px_-34px_rgba(146,64,14,0.8)]">
+              <div className="flex gap-3">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-amber-700 shadow-sm ring-1 ring-amber-100">
+                  <WarningCircle size={22} weight="duotone" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-black text-amber-950">Código expirado</p>
+                  <p className="mt-1 text-sm font-semibold leading-relaxed text-amber-900">
+                    {error || 'Por segurança, este código venceu. Faça login novamente para gerar um novo código.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onRestart || onCancel}
+                className="mt-4 flex w-full items-center justify-center rounded-[1.15rem] bg-[#153A4C] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_36px_-28px_rgba(21,58,76,0.95)] transition active:scale-[0.98]"
+              >
+                Refazer login
+              </button>
+            </div>
+          ) : null}
+
+          {!expired && challenge.trustDeviceAvailable ? (
             <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#336886]/10 bg-[#336886]/5 px-3 py-3 shadow-inner shadow-white">
               <input
                 type="checkbox"
@@ -189,6 +230,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
             </label>
           ) : null}
 
+          {!expired ? (
           <label className="block space-y-2">
             <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Código do app autenticador</span>
             <div className="relative" onClick={focusCodeInput}>
@@ -243,13 +285,15 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
               {pasteHint || (loading ? 'Validando automaticamente...' : code.length === 6 ? 'Código completo. Use o botão se precisar tentar de novo.' : 'Ao completar 6 dígitos, validamos automaticamente.')}
             </span>
           </label>
+          ) : null}
 
-          {error ? (
+          {!expired && error ? (
             <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">
               {error}
             </div>
           ) : null}
 
+          {!expired ? (
           <button
             type="submit"
             disabled={loading || code.length !== 6}
@@ -257,6 +301,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
           >
             {loading ? 'Validando...' : 'Confirmar acesso'}
           </button>
+          ) : null}
         </form>
       </div>
     </div>

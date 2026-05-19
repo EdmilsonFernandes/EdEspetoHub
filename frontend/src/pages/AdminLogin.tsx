@@ -14,6 +14,7 @@ import { nativeBiometricService } from '../services/nativeBiometricService';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
+import { MFA_CHALLENGE_EXPIRED_MESSAGE, isMfaChallengeExpiredError } from '../utils/mfaErrors';
 
 const ADMIN_REMEMBER_IDENTIFIER_KEY = 'auth:last-admin-identifier';
 
@@ -296,7 +297,13 @@ export function AdminLogin() {
       setMfaChallenge(null);
       await completeAdminLoginFlow(session);
     } catch (error: any) {
-      setMfaError(error?.message || 'Codigo invalido. Tente novamente.');
+      if (isMfaChallengeExpiredError(error)) {
+        setLoginError('');
+        setMfaError(MFA_CHALLENGE_EXPIRED_MESSAGE);
+        setMfaChallenge((current: any) => (current ? { ...current, expired: true } : current));
+        return;
+      }
+      setMfaError(error?.message || 'Código inválido. Tente novamente.');
     } finally {
       setMfaLoading(false);
     }
@@ -311,6 +318,7 @@ export function AdminLogin() {
     try {
       const session = await authService.adminLogin(loginForm.identifier, loginForm.password);
       if (session?.mfaRequired) {
+        setMfaError('');
         setMfaChallenge(session);
         return;
       }
@@ -609,7 +617,13 @@ export function AdminLogin() {
         audience="admin"
         loading={mfaLoading}
         error={mfaError}
+        expired={Boolean(mfaChallenge?.expired)}
         onCancel={() => setMfaChallenge(null)}
+        onRestart={() => {
+          setMfaChallenge(null);
+          setMfaError('');
+          setLoginError('');
+        }}
         onVerify={handleMfaVerify}
       />
     </AuthLayout>
