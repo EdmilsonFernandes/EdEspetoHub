@@ -22,9 +22,20 @@ import { VerifyEmail } from './pages/VerifyEmail';
 import './index.css';
 import { MotoboyLayout } from './layouts/MotoboyLayout';
 import { loadOrderTrackingPage } from './utils/orderTrackingPrefetch';
+import { isStaleBuildErrorMessage, recoverFromStaleBuild } from './utils/staleBuildRecovery';
 
 const lazyPage = (loader: () => Promise<any>, exportName: string) =>
-  React.lazy(() => loader().then((module) => ({ default: module[exportName] })));
+  React.lazy(() =>
+    loader()
+      .then((module) => ({ default: module[exportName] }))
+      .catch((error) => {
+        const message = error instanceof Error ? `${error.name} ${error.message}` : String(error || '');
+        if (isStaleBuildErrorMessage(message)) {
+          void recoverFromStaleBuild();
+        }
+        throw error;
+      })
+  );
 
 const LandingPage = lazyPage(() => import('./pages/LandingPage'), 'LandingPage');
 const CreateStore = lazyPage(() => import('./pages/CreateStore'), 'CreateStore');

@@ -11,10 +11,21 @@ const STALE_BUILD_ERROR_PATTERNS = [
   /\.js\b.*(?:404|net::err_|failed)/i,
 ];
 
+const VERSIONED_ASSET_URL_PATTERNS = [
+  /\/assets\/[^\s?#]+\.(?:js|css)(?:[?#].*)?$/i,
+  /\/(?:\.\/)?[A-Za-z][A-Za-z0-9_-]*-[A-Za-z0-9_-]{6,}\.js(?:[?#].*)?$/i,
+];
+
 export const isStaleBuildErrorMessage = (value: unknown) => {
   const message = String(value || '').trim();
   if (!message) return false;
   return STALE_BUILD_ERROR_PATTERNS.some((pattern) => pattern.test(message));
+};
+
+export const isVersionedAssetUrl = (value: unknown) => {
+  const url = String(value || '').trim();
+  if (!url) return false;
+  return VERSIONED_ASSET_URL_PATTERNS.some((pattern) => pattern.test(url));
 };
 
 const clearRuntimeCaches = async () => {
@@ -60,7 +71,7 @@ const reloadWithCacheBust = () => {
   window.location.replace(nextUrl.toString());
 };
 
-const recoverFromStaleBuild = async () => {
+export const recoverFromStaleBuild = async () => {
   if (typeof window === 'undefined') return;
   if (wasRecentlyRecovered()) return;
   markRecovered();
@@ -76,9 +87,11 @@ export const installStaleBuildRecovery = () => {
     const sourceUrl =
       target && 'src' in target
         ? String((target as HTMLScriptElement).src || '')
+        : target && 'href' in target
+          ? String((target as HTMLLinkElement).href || '')
         : String(event.filename || '');
     const message = [event.message, sourceUrl].filter(Boolean).join(' ');
-    if (isStaleBuildErrorMessage(message)) {
+    if (isVersionedAssetUrl(sourceUrl) || isStaleBuildErrorMessage(message)) {
       void recoverFromStaleBuild();
     }
   });
