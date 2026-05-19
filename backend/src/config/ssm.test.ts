@@ -42,4 +42,23 @@ describe('SSM env helpers', () => {
     expect(targetEnv.TRUSTED_DEVICE_ENABLED).toBe('false');
     expect(targetEnv.MFA_CHALLENGE_TTL_MINUTES).toBe('10');
   });
+
+  it('mantem o SSM como fonte preferencial para dias de dispositivo confiavel', () => {
+    const targetEnv: NodeJS.ProcessEnv = {
+      TRUSTED_DEVICE_EXPIRATION_DAYS: '30',
+      MFA_TRUSTED_DEVICE_EXPIRATION_DAYS: '30',
+    };
+
+    const applied = applySsmEnvObject(
+      {
+        TRUSTED_DEVICE_EXPIRATION_DAYS: 180,
+        MFA_TRUSTED_DEVICE_EXPIRATION_DAYS: 180,
+      },
+      { targetEnv, shouldOverride: false }
+    );
+
+    expect(applied).toEqual(['TRUSTED_DEVICE_EXPIRATION_DAYS', 'MFA_TRUSTED_DEVICE_EXPIRATION_DAYS']);
+    expect(targetEnv.TRUSTED_DEVICE_EXPIRATION_DAYS).toBe('180');
+    expect(targetEnv.MFA_TRUSTED_DEVICE_EXPIRATION_DAYS).toBe('180');
+  });
 });

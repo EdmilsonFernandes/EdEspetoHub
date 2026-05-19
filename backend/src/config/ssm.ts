@@ -32,6 +32,11 @@ type ApplySsmEnvOptions = {
   targetEnv?: NodeJS.ProcessEnv;
 };
 
+const ssmPreferredKeys = new Set([
+  'TRUSTED_DEVICE_EXPIRATION_DAYS',
+  'MFA_TRUSTED_DEVICE_EXPIRATION_DAYS',
+]);
+
 /**
  * Applies parsed SSM JSON values to the target environment.
  * Keys missing from SSM are intentionally left untouched so local/env fallback keeps working.
@@ -46,7 +51,7 @@ export const applySsmEnvObject = (
 
   Object.entries(parsed).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
-    if (!shouldOverride && targetEnv[key]) return;
+    if (!shouldOverride && targetEnv[key] && !ssmPreferredKeys.has(key)) return;
     targetEnv[key] = String(value);
     appliedKeys.push(key);
   });
