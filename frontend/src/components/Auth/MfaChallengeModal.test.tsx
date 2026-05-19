@@ -54,7 +54,7 @@ describe('MfaChallengeModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Colar codigo do app autenticador/i }));
 
-    expect(await screen.findByText(/Nao consegui ler automaticamente/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Nao deu para ler automaticamente/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText('000000')).toHaveFocus();
   });
 });

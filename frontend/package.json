@@ -20,6 +20,7 @@
     "@capacitor/app": "^7.0.0",
     "@capacitor/browser": "^7.0.5",
     "@capacitor/camera": "^7.0.0",
+    "@capacitor/clipboard": "^7.0.4",
     "@capacitor/core": "^7.4.3",
     "@capacitor/filesystem": "^7.1.8",
     "@capacitor/push-notifications": "^7.0.0",

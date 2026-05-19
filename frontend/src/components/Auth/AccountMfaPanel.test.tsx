@@ -142,7 +142,7 @@ describe('AccountMfaPanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Colar codigo de ativacao/i }));
 
-    expect(await screen.findByText(/Nao consegui ler automaticamente/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Nao deu para ler automaticamente/i)).toBeInTheDocument();
     expect(input).toHaveFocus();
     expect(authServiceMock.confirmMfaSetup).not.toHaveBeenCalled();
   });
