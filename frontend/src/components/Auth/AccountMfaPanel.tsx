@@ -287,11 +287,11 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
     const emptyClass = tone === 'danger' ? 'border-rose-100 text-rose-300' : 'border-slate-200 text-slate-400';
 
     return (
-      <div className="grid grid-cols-6 gap-1.5 sm:gap-2" aria-hidden="true">
+      <div className="grid min-w-0 grid-cols-6 gap-1.5 sm:gap-2" aria-hidden="true">
         {digits.map((digit, index) => (
           <div
             key={`${tone}-mfa-digit-${index}`}
-            className={`grid aspect-square min-h-[2.95rem] place-items-center rounded-2xl border bg-white text-xl font-black shadow-[0_16px_34px_-30px_rgba(15,23,42,0.65)] transition sm:min-h-[3.25rem] ${
+            className={`grid aspect-square min-w-0 place-items-center rounded-2xl border bg-white text-[clamp(1.05rem,5.2vw,1.25rem)] font-black shadow-[0_16px_34px_-30px_rgba(15,23,42,0.65)] transition ${
               value.length === index ? `${activeClass} ring-4` : value.length > index ? filledClass : emptyClass
             }`}
           >
@@ -303,7 +303,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
   };
 
   return (
-    <div className="fixed inset-0 z-[1300] flex items-end justify-center bg-slate-950/45 px-3 py-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center">
+    <div className="fixed inset-0 z-[1300] flex items-center justify-center overflow-x-hidden overflow-y-auto bg-slate-950/45 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-sm">
       <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-[520px] overflow-hidden rounded-[1.75rem] border border-white/50 bg-white shadow-[0_32px_90px_-30px_rgba(15,23,42,0.75)]">
         <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-100 bg-white/94 px-4 py-3 backdrop-blur-xl">
           <div className="flex items-start gap-3">

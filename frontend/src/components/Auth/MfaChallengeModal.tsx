@@ -125,7 +125,7 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
   const codeDigits = Array.from({ length: 6 }, (_, index) => code[index] || '0');
 
   return (
-    <div className="fixed inset-0 z-[1200] flex items-end justify-center bg-[radial-gradient(circle_at_20%_0%,rgba(51,104,134,0.34),transparent_34%),linear-gradient(180deg,rgba(2,6,23,0.72),rgba(15,23,42,0.86))] px-3 py-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:items-center">
+    <div className="fixed inset-0 z-[1200] flex items-center justify-center overflow-x-hidden overflow-y-auto bg-[radial-gradient(circle_at_20%_0%,rgba(51,104,134,0.34),transparent_34%),linear-gradient(180deg,rgba(2,6,23,0.72),rgba(15,23,42,0.86))] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
       <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-[430px] overflow-y-auto rounded-[1.75rem] border border-white/55 bg-white/95 shadow-[0_34px_100px_-28px_rgba(2,6,23,0.85)] ring-1 ring-[#336886]/10">
         <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-sky-300/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 left-4 h-36 w-36 rounded-full bg-emerald-300/18 blur-3xl" />
@@ -187,11 +187,11 @@ export function MfaChallengeModal({ open, challenge, audience = 'admin', loading
           <label className="block space-y-2">
             <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Código do app autenticador</span>
             <div className="relative" onClick={focusCodeInput}>
-              <div className="grid grid-cols-6 gap-1.5 sm:gap-2" aria-hidden="true">
+              <div className="grid min-w-0 grid-cols-6 gap-1.5 sm:gap-2" aria-hidden="true">
                 {codeDigits.map((digit, index) => (
                   <div
                     key={`mfa-digit-${index}`}
-                    className={`grid aspect-square min-h-[3.2rem] place-items-center rounded-2xl border bg-white text-2xl font-black shadow-[0_16px_34px_-30px_rgba(15,23,42,0.7)] transition sm:min-h-[3.6rem] ${
+                    className={`grid aspect-square min-w-0 place-items-center rounded-2xl border bg-white text-[clamp(1.15rem,5.8vw,1.5rem)] font-black shadow-[0_16px_34px_-30px_rgba(15,23,42,0.7)] transition ${
                       code.length === index
                         ? 'border-[#336886] text-slate-900 ring-4 ring-[#336886]/10'
                         : code.length > index
