@@ -42,6 +42,7 @@ import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
 import { exportToCsv } from "../../utils/export";
 import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from "../../utils/orderNotificationSound";
+import { filterAdminQueueProducts, getAdminQueueLoadingState } from "../../utils/adminQueueUx";
 
 const normalizeSearchText = (value: any) =>
   String(value || "")
@@ -305,6 +306,24 @@ const PremiumDropdown = ({
   );
 };
 
+const ProductThumb = ({ product, className = "h-9 w-9" }: any) => {
+  const imageSrc = resolveAssetUrl(product?.imageUrl || product?.image_url || "");
+  return (
+    <span className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 text-slate-400 ${className}`}>
+      {imageSrc ? (
+        <img
+          src={imageSrc}
+          alt={product?.name || "Produto"}
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
+      ) : (
+        <Package size={16} weight="duotone" />
+      )}
+    </span>
+  );
+};
+
 const ProductQuickPicker = ({
   products = [],
   value,
@@ -326,10 +345,7 @@ const ProductQuickPicker = ({
 
   const filteredOptions = useMemo(() => {
     const list = Array.isArray(products) ? products : [];
-    if (!query.trim()) return list.slice(0, 40);
-    return list.filter((product: any) =>
-      fuzzyIncludes(product?.name || "", query)
-    );
+    return filterAdminQueueProducts(list, query, 40);
   }, [products, query]);
 
   useEffect(() => {
@@ -358,12 +374,21 @@ const ProductQuickPicker = ({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
+        data-testid="admin-product-picker-button"
         className="w-full inline-flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-xs text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-200"
       >
-        <span className="truncate">
-          {selectedOption
-            ? `${selectedOption.name} - ${formatCurrency(selectedOption.price)}`
-            : placeholder}
+        <span className="flex min-w-0 items-center gap-2">
+          {selectedOption ? <ProductThumb product={selectedOption} className="h-8 w-8 rounded-lg" /> : null}
+          <span className="min-w-0">
+            <span className="block truncate font-semibold">
+              {selectedOption ? selectedOption.name : placeholder}
+            </span>
+            {selectedOption ? (
+              <span className="block truncate text-[11px] font-bold text-amber-700">
+                {formatCurrency(selectedOption.price)}
+              </span>
+            ) : null}
+          </span>
         </span>
         <CaretDown size={14} className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
@@ -375,6 +400,7 @@ const ProductQuickPicker = ({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Buscar item..."
+            data-testid="admin-product-picker-search"
             className="mb-2 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-200"
           />
 
@@ -386,6 +412,7 @@ const ProductQuickPicker = ({
                   <button
                     key={String(product.id)}
                     type="button"
+                    data-testid="admin-product-option"
                     onClick={() => {
                       onChange?.(product.id);
                       setOpen(false);
@@ -396,7 +423,15 @@ const ProductQuickPicker = ({
                         : "text-slate-700 hover:bg-slate-50"
                     }`}
                   >
-                    <span className="truncate">{product.name}</span>
+                    <span className="flex min-w-0 items-center gap-2">
+                      <ProductThumb product={product} className="h-10 w-10 rounded-lg" />
+                      <span className="min-w-0">
+                        <span className="block truncate font-semibold">{product.name}</span>
+                        {product.category ? (
+                          <span className="block truncate text-[10px] font-medium text-slate-400">{product.category}</span>
+                        ) : null}
+                      </span>
+                    </span>
                     <span className="shrink-0 font-semibold">{formatCurrency(product.price)}</span>
                   </button>
                 );
@@ -404,30 +439,33 @@ const ProductQuickPicker = ({
             ) : (
               <div className="p-3 space-y-2">
                 <p className="text-[11px] text-slate-500">Nenhum item encontrado.</p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOpen(false);
-                      onOpenCatalog?.();
-                    }}
-                    className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    Visualizar Catálogo Completo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOpen(false);
-                      onOpenManual?.(query);
-                    }}
-                    className="inline-flex items-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold text-amber-700 hover:bg-amber-100"
-                  >
-                    Adicionar item não cadastrado
-                  </button>
-                </div>
+                <p className="text-[10px] font-semibold text-slate-400">
+                  Abra o catálogo completo ou cadastre um item avulso para este pedido.
+                </p>
               </div>
             )}
+          </div>
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onOpenCatalog?.(query);
+              }}
+              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Catálogo com fotos
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onOpenManual?.(query);
+              }}
+              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold text-amber-700 hover:bg-amber-100"
+            >
+              Item avulso
+            </button>
           </div>
         </div>
       )}
@@ -535,6 +573,7 @@ const OrderSummaryCard = ({
   <div
     role="button"
     tabIndex={0}
+    data-testid="admin-order-card"
     onClick={onClick}
     onKeyDown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
@@ -3019,14 +3058,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   );
   };
 
-  const showInitialHistoryLoading = historyLoading && historyOrders.length === 0;
-  const activeDataLoading = activeTab === 'completed' ? historyLoading : loading;
-  const activeLoadingLabel =
-    activeTab === 'completed'
-      ? 'Carregando dados de vendas...'
-      : activeTab === 'inroute'
-        ? 'Carregando pedidos em rota...'
-        : 'Carregando pedidos da fila...';
+  const queueLoadingState = getAdminQueueLoadingState({
+    activeTab,
+    loading,
+    historyLoading,
+    queueCount: filteredProductionQueue.length,
+    inRouteCount: inRouteQueue.length,
+    historyCount: historyOrders.length,
+  });
 
   return (
     <>
@@ -3158,14 +3197,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         </div>
       </div>
 
-      {!tvMode && activeDataLoading && (
+      {!tvMode && queueLoadingState.showRefreshBanner && (
         <div className="mt-2 rounded-2xl border border-sky-100 bg-sky-50/90 px-3 py-2 text-xs font-bold text-sky-800 shadow-sm">
           <span className="inline-flex items-center gap-2">
             <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white ring-1 ring-sky-100">
               <img src={SYSTEM_LOGO_SRC} alt="Já no Caminho" className="h-4 w-4 object-contain" loading="eager" />
             </span>
             <ArrowsClockwise size={14} weight="duotone" className="animate-spin" />
-            {activeLoadingLabel}
+            {queueLoadingState.label}
           </span>
           <p className="mt-0.5 text-[11px] font-semibold text-sky-700/80">
             Buscando informações atualizadas da loja. Você pode continuar navegando.
@@ -3175,7 +3214,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
       {activeTab === 'queue' && (
         <div className="space-y-2 mt-2">
-          {loading && filteredProductionQueue.length === 0 ? (
+          {queueLoadingState.showQueueSkeleton ? (
             <QueueLoadingSkeleton variant="queue" />
           ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 px-1 sm:px-0">
@@ -3271,12 +3310,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             </div>
           )}
           {isDrawerOpen && createPortal(
-            <div className="fixed inset-0 z-[9999] overflow-hidden">
+            <div className="fixed inset-0 z-[9999] overflow-hidden md:flex md:items-center md:justify-center md:px-6 md:py-6">
               <div
                 className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onClick={closeOrderOverlays}
               />
-              <div className="fixed right-0 top-0 h-full w-full md:w-[450px] z-[10000] bg-white shadow-2xl flex flex-col animate-[drawerIn_220ms_ease-out]">
+              <div
+                data-testid="admin-order-detail"
+                className="fixed inset-0 z-[10000] bg-white shadow-2xl flex flex-col animate-[drawerIn_220ms_ease-out] md:relative md:inset-auto md:h-[min(92vh,900px)] md:w-full md:max-w-[760px] md:overflow-hidden md:rounded-[2rem] md:border md:border-white/80 md:shadow-[0_34px_90px_-44px_rgba(15,23,42,0.9)] md:animate-[satinPop_180ms_ease-out]"
+              >
                 <div className="shrink-0 flex justify-between items-start gap-3 px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-4 border-b border-slate-200 bg-white shadow-sm">
                   <p className="min-w-0 flex-1 text-sm font-black leading-snug text-slate-900 tracking-tight [overflow-wrap:anywhere]" title={resolveLocationIdentifier(selectedOrder || {}) || 'Detalhes do pedido'}>
                     {(() => {
@@ -3613,7 +3655,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     }))
                   }
                   products={products}
-                  onOpenCatalog={() => openCatalogPicker(String(order.id))}
+                  onOpenCatalog={(query: string) => openCatalogPicker(String(order.id), query)}
                   onOpenManual={(query: string) => openManualItemModal(String(order.id), query)}
                   className="min-w-0 flex-1"
                 />
@@ -3639,7 +3681,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
                   </div>
                 </div>
-                <div className="shrink-0 p-4 border-t border-slate-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                <div className="shrink-0 p-4 pb-[max(env(safe-area-inset-bottom),1rem)] border-t border-slate-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:pb-4">
                   {selectedOrder ? renderOrderFooterActions(selectedOrder) : null}
                 </div>
               </div>
@@ -3650,7 +3692,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       )}
 
       {isPaymentModalOpen && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 px-4">
+        <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-slate-900/50 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
             {(() => {
               const normalizedPayment = (confirmModal.payment || '').toString().trim().toLowerCase();
@@ -3889,7 +3931,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
             Pedidos em deslocamento e postagens despachadas.
           </div>
-          {loading && inRouteQueue.length === 0 ? (
+          {queueLoadingState.showInRouteSkeleton ? (
             <QueueLoadingSkeleton variant="route" />
           ) : inRouteQueue.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
@@ -4039,7 +4081,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             )}
           </div>
 
-          {showInitialHistoryLoading ? (
+          {queueLoadingState.showSalesSkeleton ? (
             <QueueLoadingSkeleton variant="sales" />
           ) : (
             <>
@@ -4407,16 +4449,23 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       <button
                         key={String(product.id)}
                         type="button"
+                        data-testid="admin-catalog-product"
                         onClick={() => {
                           if (!catalogPickerModal.orderId) return;
                           setSelectedProducts((prev: any) => ({ ...prev, [catalogPickerModal.orderId as string]: product.id }));
                           handleAddItem(catalogPickerModal.orderId, product.id);
                           setCatalogPickerModal({ open: false, orderId: null, query: "" });
                         }}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-left hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                        className="inline-flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left hover:bg-slate-50 hover:border-slate-300 transition-colors"
                       >
-                        <p className="text-sm font-semibold text-slate-800 line-clamp-1">{product.name}</p>
-                        <p className="text-xs font-bold text-amber-700 mt-0.5">{formatCurrency(product.price)}</p>
+                        <ProductThumb product={product} className="h-14 w-14 rounded-xl" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold text-slate-800">{product.name}</span>
+                          {product.category ? (
+                            <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-400">{product.category}</span>
+                          ) : null}
+                          <span className="mt-1 block text-xs font-bold text-amber-700">{formatCurrency(product.price)}</span>
+                        </span>
                       </button>
                     ))}
                   </div>
