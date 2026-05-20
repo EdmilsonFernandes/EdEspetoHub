@@ -44,6 +44,51 @@ export const prettifyDestinationLabel = (value?: string | null) => {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 };
 
+const normalizeCoordinate = (value?: string | number | null) => {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(String(value).replace(',', '.'));
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+export const buildDestinationMapUrl = ({
+  address,
+  lat,
+  lng,
+}: {
+  address?: string | null;
+  lat?: string | number | null;
+  lng?: string | number | null;
+}) => {
+  const latitude = normalizeCoordinate(lat);
+  const longitude = normalizeCoordinate(lng);
+  const query = latitude !== null && longitude !== null
+    ? `${latitude},${longitude}`
+    : String(address || '').trim();
+
+  return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : '';
+};
+
+const buildLocationMessageLines = ({
+  label,
+  address,
+  lat,
+  lng,
+}: {
+  label: string;
+  address?: string | null;
+  lat?: string | number | null;
+  lng?: string | number | null;
+}) => {
+  const safeAddress = String(address || '').trim();
+  const mapUrl = buildDestinationMapUrl({ address: safeAddress, lat, lng });
+  if (!safeAddress && !mapUrl) return [];
+
+  return [
+    safeAddress ? `Local ${label}: ${safeAddress}` : '',
+    mapUrl ? `Mapa ${label.toLowerCase()}: ${mapUrl}` : '',
+  ].filter(Boolean);
+};
+
 export const buildDestinationInquiryMessage = ({
   destinationName,
   city,
@@ -51,6 +96,15 @@ export const buildDestinationInquiryMessage = ({
   itemName,
   itemType,
   placeName,
+  placeAddress,
+  placeLat,
+  placeLng,
+  itemAddress,
+  itemLat,
+  itemLng,
+  address,
+  lat,
+  lng,
   storeName,
 }: {
   destinationName?: string | null;
@@ -59,16 +113,45 @@ export const buildDestinationInquiryMessage = ({
   itemName?: string | null;
   itemType?: string | null;
   placeName?: string | null;
+  placeAddress?: string | null;
+  placeLat?: string | number | null;
+  placeLng?: string | number | null;
+  itemAddress?: string | null;
+  itemLat?: string | number | null;
+  itemLng?: string | number | null;
+  address?: string | null;
+  lat?: string | number | null;
+  lng?: string | number | null;
   storeName?: string | null;
 }) => {
   const location = [city || destinationName, state].filter(Boolean).join(' - ');
   const subject = String(itemName || storeName || 'esse atendimento').trim();
   const typeLabel = String(itemType || 'serviço').trim().toLowerCase();
   const context = placeName ? ` enquanto estou vendo opções para ${placeName}` : '';
+  const resolvedItemAddress = itemAddress ?? address;
+  const resolvedItemLat = itemLat ?? lat;
+  const resolvedItemLng = itemLng ?? lng;
+  const placeLocationLines = buildLocationMessageLines({
+    label: 'da hospedagem',
+    address: placeAddress,
+    lat: placeLat,
+    lng: placeLng,
+  });
+  const itemLocationLines = buildLocationMessageLines({
+    label: typeLabel.includes('hospedagem') ? 'da hospedagem' : 'do atendimento',
+    address: resolvedItemAddress,
+    lat: resolvedItemLat,
+    lng: resolvedItemLng,
+  });
+  const placeAddressKey = String(placeAddress || '').trim().toLowerCase();
+  const itemAddressKey = String(resolvedItemAddress || '').trim().toLowerCase();
+  const shouldIncludeItemLocation = Boolean(itemLocationLines.length) && (!placeLocationLines.length || placeAddressKey !== itemAddressKey);
 
   return [
     `Olá! Encontrei ${subject} pelo Já no Caminho.`,
     location ? `Estou visitando ${location}${context}.` : context ? `Estou visitando a região${context}.` : '',
+    ...placeLocationLines,
+    ...(shouldIncludeItemLocation ? itemLocationLines : []),
     `Gostaria de saber mais sobre ${typeLabel}: disponibilidade, valores e como funciona o atendimento.`,
     'Pode me passar os detalhes, por favor?',
   ].filter(Boolean).join('\n');

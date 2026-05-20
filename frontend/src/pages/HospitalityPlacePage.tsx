@@ -174,6 +174,12 @@ const buildListingAction = ({ listing, destination, place, isNativePlatform }: a
     itemName: listing.title,
     itemType: String(listing.category || 'serviço').replace('_', ' '),
     placeName: place.name,
+    placeAddress: place.address,
+    placeLat: place.lat,
+    placeLng: place.lng,
+    itemAddress: listing.address,
+    itemLat: listing.lat,
+    itemLng: listing.lng,
   });
   const phoneAction = buildPhoneContactAction({ phone: listing.whatsapp, message, isNativePlatform });
   if (phoneAction) return phoneAction;
@@ -258,6 +264,9 @@ export function HospitalityPlacePage() {
     state: destination.state,
     itemName: place.name,
     itemType: 'hospedagem',
+    placeAddress: place.address,
+    placeLat: place.lat,
+    placeLng: place.lng,
   });
   const placeWhatsAppUrl = buildWhatsAppUrl(place.whatsapp, placeContactMessage, isNativePlatform);
   const placePhoneUrl = placeWhatsAppUrl ? '' : buildPhoneCallUrl(place.whatsapp);
@@ -437,10 +446,19 @@ export function HospitalityPlacePage() {
                 const store = entry.store || {};
                 const link = entry || {};
                 const mediaUrl = cardMediaFor(store);
+                const storeParams = new URLSearchParams({
+                  destino: String(destination.slug || destinationSlug || ''),
+                  destino_nome: String(destination.name || destination.city || destinationSlug || ''),
+                  hospedagem: String(place.slug || placeSlug || ''),
+                  hospedagem_nome: String(place.name || placeSlug || ''),
+                });
+                if (place.address) storeParams.set('hospedagem_endereco', String(place.address));
+                if (place.lat) storeParams.set('hospedagem_lat', String(place.lat));
+                if (place.lng) storeParams.set('hospedagem_lng', String(place.lng));
                 return (
                   <Link
                     key={`${entry.id}-${store.id}`}
-                    to={`/${store.slug}?destino=${encodeURIComponent(destination.slug || destinationSlug)}&destino_nome=${encodeURIComponent(destination.name || destination.city || destinationSlug)}&hospedagem=${encodeURIComponent(place.slug || placeSlug)}&hospedagem_nome=${encodeURIComponent(place.name || placeSlug)}`}
+                    to={`/${store.slug}?${storeParams.toString()}`}
                     className={`group overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition hover:-translate-y-1 hover:border-[#336886]/30 ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
                     {mediaUrl ? (

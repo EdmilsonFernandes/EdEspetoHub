@@ -89,13 +89,13 @@ test.describe('Admin queue UX', () => {
       localStorage.setItem('adminSidebar:compact', 'false');
     }, adminSession);
 
-    await page.route(`**/api/stores/${storeId}/orders/queue`, async (route) => {
+    await page.route(`**/api/stores/${storeId}/orders/queue**`, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(queueOrders) });
     });
-    await page.route(`**/api/stores/${storeId}/orders`, async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    await page.route(`**/api/stores/${storeId}/orders**`, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(queueOrders) });
     });
-    await page.route(`**/api/stores/${storeId}/products`, async (route) => {
+    await page.route(`**/api/stores/${storeId}/products**`, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(products) });
     });
     await page.route('**/api/stores/slug/e2e-store', async (route) => {

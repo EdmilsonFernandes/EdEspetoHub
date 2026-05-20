@@ -42,11 +42,29 @@ describe('destinationWhatsApp', () => {
       itemName: 'Massagem relaxante',
       itemType: 'massagem',
       placeName: 'Chale Vista da Pedra',
+      placeAddress: 'Estrada do Bau, km 7',
+      placeLat: -22.6901,
+      placeLng: -45.7321,
     });
 
     expect(message).toContain('Encontrei Massagem relaxante pelo J\u00e1 no Caminho');
     expect(message).toContain('Estou visitando Sao Bento Sapucai - SP enquanto estou vendo op\u00e7\u00f5es para Chale Vista da Pedra.');
+    expect(message).toContain('Local da hospedagem: Estrada do Bau, km 7');
+    expect(message).toContain('Mapa da hospedagem: https://www.google.com/maps/search/?api=1&query=-22.6901%2C-45.7321');
     expect(message).toContain('Gostaria de saber mais sobre massagem');
+  });
+
+  it('adds an item address and map when no hospitality place is present', () => {
+    const message = buildDestinationInquiryMessage({
+      destinationName: 'Monte Verde',
+      state: 'MG',
+      itemName: 'Passeio de quadriciclo',
+      itemType: 'serviço',
+      itemAddress: 'Av. Monte Verde, 100',
+    });
+
+    expect(message).toContain('Local do atendimento: Av. Monte Verde, 100');
+    expect(message).toContain('Mapa do atendimento: https://www.google.com/maps/search/?api=1&query=Av.%20Monte%20Verde%2C%20100');
   });
 
   it('prettifies slugs used as fallback labels', () => {

@@ -477,7 +477,10 @@ export function StorePage() {
     const params = new URLSearchParams(location.search || '');
     const destinationName = String(params.get('destino_nome') || prettifyDestinationLabel(params.get('destino')) || '').trim();
     const placeName = String(params.get('hospedagem_nome') || prettifyDestinationLabel(params.get('hospedagem')) || '').trim();
-    return { destinationName, placeName };
+    const placeAddress = String(params.get('hospedagem_endereco') || '').trim();
+    const placeLat = String(params.get('hospedagem_lat') || '').trim();
+    const placeLng = String(params.get('hospedagem_lng') || '').trim();
+    return { destinationName, placeName, placeAddress, placeLat, placeLng };
   }, [location.search]);
   const destinationStoreWhatsAppMessage = useMemo(() => {
     if (!destinationContextFromQuery.destinationName && !destinationContextFromQuery.placeName) return '';
@@ -486,9 +489,20 @@ export function StorePage() {
       itemName: storeName || branding?.brandName || 'esta loja',
       itemType: 'loja/restaurante',
       placeName: destinationContextFromQuery.placeName,
+      placeAddress: destinationContextFromQuery.placeAddress,
+      placeLat: destinationContextFromQuery.placeLat,
+      placeLng: destinationContextFromQuery.placeLng,
       storeName: storeName || branding?.brandName || '',
     });
-  }, [branding?.brandName, destinationContextFromQuery.destinationName, destinationContextFromQuery.placeName, storeName]);
+  }, [
+    branding?.brandName,
+    destinationContextFromQuery.destinationName,
+    destinationContextFromQuery.placeAddress,
+    destinationContextFromQuery.placeLat,
+    destinationContextFromQuery.placeLng,
+    destinationContextFromQuery.placeName,
+    storeName,
+  ]);
   const resolvedWhatsApp = useMemo(() => {
     const raw = storePhone || WHATSAPP_NUMBER;
     const digits = (raw || '').toString().replace(/\D/g, '');

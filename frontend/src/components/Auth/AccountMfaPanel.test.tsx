@@ -77,7 +77,11 @@ describe('AccountMfaPanel', () => {
     expect(await screen.findByText('Proteção desativada')).toBeInTheDocument();
     expect(screen.queryByText('Chave manual')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /Ativar agora/i }));
+    const activateButton = screen.getByRole('button', { name: /Ativar agora/i });
+    await waitFor(() => {
+      expect(activateButton).toBeEnabled();
+    });
+    fireEvent.click(activateButton);
 
     expect(await screen.findByAltText(/QR Code para ativar/i)).toBeInTheDocument();
     expect(screen.getByText('Chave manual')).toBeInTheDocument();
