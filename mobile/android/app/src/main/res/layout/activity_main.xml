@@ -22,6 +22,7 @@
         android:focusable="true">
 
         <LinearLayout
+            android:id="@+id/launch_scene_panel"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
@@ -31,18 +32,91 @@
             android:paddingRight="32dp"
             android:paddingBottom="48dp">
 
-            <ImageView
-                android:id="@+id/launch_logo"
-                android:layout_width="112dp"
-                android:layout_height="112dp"
-                android:adjustViewBounds="true"
-                android:contentDescription="@string/app_name"
-                android:src="@mipmap/ic_launcher_round" />
+            <LinearLayout
+                android:id="@+id/launch_feature_strip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="22dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/launch_feature_chip"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="Lojas"
+                    android:textColor="#DCEBF2"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginRight="3dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/launch_feature_chip"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="Destinos"
+                    android:textColor="#B8F7B4"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginRight="3dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/launch_feature_chip"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="Condomínios"
+                    android:textColor="#DCEBF2"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/launch_feature_chip"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="Entregas"
+                    android:textColor="#B8F7B4"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="132dp"
+                android:layout_height="132dp"
+                android:background="@drawable/launch_logo_panel"
+                android:elevation="8dp"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/launch_logo"
+                    android:layout_width="86dp"
+                    android:layout_height="86dp"
+                    android:layout_gravity="center"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@string/app_name"
+                    android:src="@mipmap/ic_launcher_round" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="22dp"
+                android:layout_marginTop="24dp"
+                android:letterSpacing="0.08"
                 android:text="@string/app_name"
                 android:textColor="#F8FAFC"
                 android:textSize="26sp"
@@ -50,19 +124,33 @@
 
             <TextView
                 android:id="@+id/launch_subtitle_text"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:gravity="center"
                 android:text="@string/launch_subtitle"
                 android:textColor="#A5B4CF"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/launch_status_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/launch_glass_card"
+                android:letterSpacing="0.06"
+                android:text="@string/launch_status"
+                android:textColor="#DCEBF2"
+                android:textSize="11sp"
+                android:textStyle="bold" />
 
             <ProgressBar
                 android:id="@+id/launch_progress"
                 style="?android:attr/progressBarStyleLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="26dp"
+                android:layout_marginTop="22dp"
                 android:indeterminate="true"
                 android:indeterminateTint="#7DD3FC" />
 
@@ -71,7 +159,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:backgroundTint="#336886"
+                android:background="@drawable/launch_retry_button_background"
                 android:minWidth="160dp"
                 android:paddingLeft="24dp"
                 android:paddingTop="12dp"

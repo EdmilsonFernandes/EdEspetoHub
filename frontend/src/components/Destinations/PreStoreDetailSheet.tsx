@@ -113,7 +113,7 @@ export function PreStoreDetailSheet({
   ].filter(Boolean);
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-end bg-slate-950/38 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Detalhes de ${listing.title || 'serviço'}`}>
+    <div className="fixed inset-0 z-[240] flex items-end bg-slate-950/38 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Detalhes de ${listing.title || 'serviço'}`}>
       <button type="button" aria-label="Fechar detalhes" className="absolute inset-0 cursor-default" onClick={onClose} />
       <section className="relative w-full max-w-2xl overflow-hidden rounded-t-[2rem] bg-[#f7f1e8] shadow-[0_30px_90px_-42px_rgba(15,23,42,0.7)] sm:max-h-[92dvh] sm:rounded-[2rem]">
         <div className="max-h-[92dvh] overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))]">

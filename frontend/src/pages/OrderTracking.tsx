@@ -16,6 +16,7 @@ import { formatSelectedModifiers } from '../utils/productModifiers';
 import { getOrderItemLineTotal, getOrderItemOriginalLineTotal, getOrderItemQuantity } from '../utils/orderItems';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
+import { ClientBottomNav } from '../components/common/ClientBottomNav';
 
 const statusLabels: Record<string, string> = {
   awaiting_payment: 'Aguardando pagamento',
@@ -1417,7 +1418,7 @@ export function OrderTracking() {
   const [itemsExpanded, setItemsExpanded] = useState(itemsToRender.length <= 3);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f4f8fb_0%,#ebf2f7_100%)] pt-[calc(env(safe-area-inset-top)+4.55rem)]">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f4f8fb_0%,#ebf2f7_100%)] pb-[var(--jnk-client-bottom-nav-height,0px)] pt-[calc(env(safe-area-inset-top)+4.55rem)]">
       <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[42%] w-[50%] rounded-full bg-[#336886]/14 blur-[120px] -z-10" />
       <div className="pointer-events-none fixed bottom-[10%] left-[-6%] h-[28%] w-[36%] rounded-full bg-sky-300/16 blur-[100px] -z-10" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
@@ -2545,6 +2546,7 @@ export function OrderTracking() {
         </div>
       </main>
 
+      <ClientBottomNav active="orders" />
     </div>
   );
 }

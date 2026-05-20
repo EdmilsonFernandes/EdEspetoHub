@@ -14,6 +14,7 @@ vi.mock('@phosphor-icons/react', () => {
   return {
     __esModule: true,
     ArrowLeft: Icon,
+    Buildings: Icon,
     CheckCircle: Icon,
     ClockCounterClockwise: Icon,
     Code: Icon,
@@ -21,11 +22,15 @@ vi.mock('@phosphor-icons/react', () => {
     CreditCard: Icon,
     DeviceMobile: Icon,
     Fingerprint: Icon,
+    House: Icon,
     LockKey: Icon,
+    Mountains: Icon,
     QrCode: Icon,
+    Receipt: Icon,
     ShieldCheck: Icon,
     Sparkle: Icon,
     Trash: Icon,
+    UserCircle: Icon,
     WarningCircle: Icon,
     X: Icon,
   };

@@ -407,7 +407,7 @@ export function HospitalityPlacePage() {
                     Toque em um card para pedir pelo app ou chamar o atendimento direto no WhatsApp.
                   </p>
                 </div>
-                <p className="hidden max-w-[13rem] text-right text-xs font-medium leading-relaxed text-slate-500 sm:block">
+                <p className="hidden min-w-0 max-w-[18rem] whitespace-normal break-words text-right text-xs font-medium leading-relaxed text-slate-500 sm:block">
                   {deliveryOptionLabel} a {place.name}.
                 </p>
               </div>

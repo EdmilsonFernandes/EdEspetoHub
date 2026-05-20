@@ -79,7 +79,7 @@ public class MainActivity extends BridgeActivity {
     private static final String BIOMETRIC_RESULT_EVENT = "jnc:android-biometric-result";
     private static final long NAV_ANIM_DURATION_MS = 220L;
     private static final long LAUNCH_OVERLAY_FADE_MS = 260L;
-    private static final long LAUNCH_OVERLAY_NETWORK_TIMEOUT_MS = 9000L;
+    private static final long LAUNCH_OVERLAY_NETWORK_TIMEOUT_MS = 6500L;
     private static final long RESUME_WEBVIEW_HEALTH_CHECK_DELAY_MS = 1800L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
     private static final int APP_UPDATE_REQUEST_CODE = 4403;
@@ -88,9 +88,12 @@ public class MainActivity extends BridgeActivity {
     private GeolocationPermissions.Callback pendingGeoCallback = null;
     private String pendingGeoOrigin = null;
     private View launchOverlay;
+    private View launchScenePanel;
+    private View launchFeatureStrip;
     private ImageView launchLogo;
     private ProgressBar launchProgress;
     private TextView launchSubtitleText;
+    private TextView launchStatusText;
     private Button launchRetryButton;
     private boolean launchOverlayDismissed = false;
     private boolean pageFailedToLoad = false;
@@ -411,9 +414,12 @@ public class MainActivity extends BridgeActivity {
 
     private void initializeLaunchOverlay() {
         launchOverlay = findViewById(R.id.launch_overlay);
+        launchScenePanel = findViewById(R.id.launch_scene_panel);
+        launchFeatureStrip = findViewById(R.id.launch_feature_strip);
         launchLogo = findViewById(R.id.launch_logo);
         launchProgress = findViewById(R.id.launch_progress);
         launchSubtitleText = findViewById(R.id.launch_subtitle_text);
+        launchStatusText = findViewById(R.id.launch_status_text);
         launchRetryButton = findViewById(R.id.launch_retry_button);
 
         View root = findViewById(R.id.main_root);
@@ -432,6 +438,30 @@ public class MainActivity extends BridgeActivity {
         }
         if (launchSubtitleText != null) {
             launchSubtitleText.setText(getString(R.string.launch_subtitle));
+        }
+        if (launchStatusText != null) {
+            launchStatusText.setText(getString(R.string.launch_status));
+        }
+        if (launchScenePanel != null) {
+            launchScenePanel.setAlpha(0f);
+            launchScenePanel.setTranslationY(18f);
+            launchScenePanel.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(460L)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
+        }
+        if (launchFeatureStrip != null) {
+            launchFeatureStrip.setAlpha(0f);
+            launchFeatureStrip.setTranslationY(-10f);
+            launchFeatureStrip.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setStartDelay(120L)
+                .setDuration(420L)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
         }
         if (launchLogo != null) {
             launchLogo.setScaleX(0.92f);
@@ -586,6 +616,10 @@ public class MainActivity extends BridgeActivity {
             launchProgress.setAlpha(1f);
         }
 
+        if (launchStatusText != null) {
+            launchStatusText.setText(getString(R.string.launch_status));
+        }
+
         if (launchRetryButton != null) {
             launchRetryButton.setVisibility(View.GONE);
         }
@@ -611,6 +645,10 @@ public class MainActivity extends BridgeActivity {
             launchProgress.setVisibility(View.GONE);
         }
 
+        if (launchStatusText != null) {
+            launchStatusText.setText("Aguardando conexão");
+        }
+
         if (launchRetryButton != null) {
             launchRetryButton.setVisibility(View.VISIBLE);
         }
@@ -622,6 +660,8 @@ public class MainActivity extends BridgeActivity {
         cancelLaunchOverlayTimeout();
         launchOverlayTimeoutRunnable = () -> {
             if (!launchOverlayDismissed) {
+                mainFrameLoadInProgress = false;
+                pageFailedToLoad = true;
                 showLaunchOverlayRecovery(getString(R.string.launch_timeout_message));
             }
         };

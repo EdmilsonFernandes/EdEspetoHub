@@ -290,14 +290,14 @@ export function DestinationDetailPage() {
                     {destination.heroSubtitle || destination.description || 'Hospedagens, lojas e experiências cadastradas neste destino.'}
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-2 sm:min-w-[18rem]">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/78 px-3 py-1.5 text-[11px] font-black text-[#153A4C] shadow-sm backdrop-blur">
-                    <Bed size={17} weight="duotone" />
-                    {places.length} hospedagens
+                <div className="grid min-w-0 grid-cols-2 gap-2 sm:min-w-[18rem]">
+                  <span className="inline-flex min-w-0 flex-wrap items-center justify-center gap-1.5 rounded-full border border-white/80 bg-white/78 px-3 py-1.5 text-center text-[11px] font-black leading-tight text-[#153A4C] shadow-sm backdrop-blur">
+                    <Bed size={17} weight="duotone" className="shrink-0" />
+                    <span className="whitespace-normal break-words">{places.length} hospedagens</span>
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/78 px-3 py-1.5 text-[11px] font-black text-[#153A4C] shadow-sm backdrop-blur">
-                    <ForkKnife size={17} weight="duotone" />
-                    {listings.length} serviços
+                  <span className="inline-flex min-w-0 flex-wrap items-center justify-center gap-1.5 rounded-full border border-white/80 bg-white/78 px-3 py-1.5 text-center text-[11px] font-black leading-tight text-[#153A4C] shadow-sm backdrop-blur">
+                    <ForkKnife size={17} weight="duotone" className="shrink-0" />
+                    <span className="whitespace-normal break-words">{listings.length} serviços</span>
                   </span>
                 </div>
               </div>
