@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { nativeBiometricService } from '../../services/nativeBiometricService';
 
 const STACK_KEY = 'jnk_native_route_stack_v1';
-const HIDDEN_KEY = 'jnk_native_nav_hidden_v1';
+const LEGACY_HIDDEN_KEY = 'jnk_native_nav_hidden_v1';
 const MAX_STACK = 24;
 
 const getCurrentPath = (location: ReturnType<typeof useLocation>) =>
@@ -84,30 +84,31 @@ export function NativeAppNavigator() {
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
-    const syncHiddenState = () => {
-      try {
-        setIsHidden(sessionStorage.getItem(HIDDEN_KEY) === '1');
-      } catch {
-        setIsHidden(false);
-      }
-    };
-    syncHiddenState();
+    try {
+      sessionStorage.removeItem(LEGACY_HIDDEN_KEY);
+    } catch {
+      // no-op
+    }
     const handleVisibility = (event: Event) => {
       const hidden = Boolean((event as CustomEvent<{ hidden?: boolean }>).detail?.hidden);
-      try {
-        sessionStorage.setItem(HIDDEN_KEY, hidden ? '1' : '0');
-      } catch {
-        // no-op
-      }
       setIsHidden(hidden);
     };
     window.addEventListener('jnc:native-nav-visibility', handleVisibility as EventListener);
-    window.addEventListener('storage', syncHiddenState);
     return () => {
       window.removeEventListener('jnc:native-nav-visibility', handleVisibility as EventListener);
-      window.removeEventListener('storage', syncHiddenState);
     };
   }, []);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    if (
+      location.pathname.startsWith('/destinos') ||
+      location.pathname.startsWith('/pedido/') ||
+      location.pathname.startsWith('/cliente/pedidos')
+    ) {
+      setIsHidden(false);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
