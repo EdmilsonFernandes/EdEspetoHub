@@ -18,6 +18,7 @@ import {
   Clock,
   Trash,
   ShieldCheck,
+  NotePencil,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { getPaymentMethodMeta, getPaymentProviderMeta } from "../../utils/paymentAssets";
@@ -28,7 +29,8 @@ import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productM
 import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderPricing";
 import { DddSelect } from "../common/DddSelect";
 import { addressLookupService } from "../../services/addressLookupService";
-import { inputAssistProps } from "../../utils/inputAssist";
+import { inputAssistProps, textareaAssistProps } from "../../utils/inputAssist";
+import { CUSTOMER_ORDER_NOTE_MAX_LENGTH, limitCustomerOrderNoteInput } from "../../utils/customerOrderNote";
 
 const BRAZIL_DDDS = [
   "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -825,6 +827,45 @@ export const CartView = ({
     }
     await proceedCheckout();
   };
+
+  const customerOrderNoteValue = limitCustomerOrderNoteInput(customer.customerNote || "");
+  const handleCustomerOrderNoteChange = (value: string) => {
+    onChangeCustomer({ ...customer, customerNote: limitCustomerOrderNoteInput(value) });
+  };
+  const renderCustomerOrderNoteCard = () => (
+    <div
+      className="rounded-[1.75rem] border border-amber-100 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(255,251,235,0.78))] p-4 shadow-[0_22px_44px_-36px_rgba(245,158,11,0.35)]"
+      data-testid="customer-order-note-card"
+    >
+      <div className="flex items-start gap-3">
+        <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
+          <NotePencil size={19} weight="duotone" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-700">
+            Observação para a loja
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-slate-500">
+            Opcional. Use para avisos simples, como sem ketchup, interfone ou como chamar no portão.
+          </p>
+        </div>
+      </div>
+      <textarea
+        {...textareaAssistProps.notes}
+        value={customerOrderNoteValue}
+        onChange={(event) => handleCustomerOrderNoteChange(event.target.value)}
+        maxLength={CUSTOMER_ORDER_NOTE_MAX_LENGTH}
+        rows={3}
+        placeholder="Ex: sem ketchup. Quando estiver chegando, chamar no WhatsApp."
+        className="mt-3 min-h-[88px] w-full resize-none rounded-2xl border border-amber-100 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-amber-300 focus:bg-white focus:ring-2 focus:ring-amber-100"
+        data-testid="customer-order-note-input"
+      />
+      <div className="mt-2 flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-500">
+        <span>Essa mensagem vai junto com o pedido para a operação.</span>
+        <span className="shrink-0 tabular-nums">{customerOrderNoteValue.length}/{CUSTOMER_ORDER_NOTE_MAX_LENGTH}</span>
+      </div>
+    </div>
+  );
 
   return (
     <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
@@ -2183,6 +2224,12 @@ export const CartView = ({
         </div>
       )}
 
+      {!useMultiStepFlow && (
+        <div className="mb-4 sm:mb-6">
+          {renderCustomerOrderNoteCard()}
+        </div>
+      )}
+
       {/* Step 4: Confirmação do pedido */}
       {useMultiStepFlow && checkoutStep === 4 && (
         <div className="space-y-3 mb-4">
@@ -2249,6 +2296,8 @@ export const CartView = ({
               <span className="text-base font-black text-slate-900">{formatCurrency(totalWithFee)}</span>
             </div>
           </div>
+
+          {renderCustomerOrderNoteCard()}
 
           {/* Entrega / Retirada */}
           {showCustomerFulfillmentInsights && (

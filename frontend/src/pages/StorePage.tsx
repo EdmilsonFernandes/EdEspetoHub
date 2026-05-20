@@ -49,6 +49,7 @@ import { navigateBackOrFallback } from '../utils/navigation';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { buildDestinationInquiryMessage, prettifyDestinationLabel } from '../utils/destinationWhatsApp';
 import { reconcileCartStock } from '../utils/cartStock';
+import { normalizeCustomerOrderNote } from '../utils/customerOrderNote';
 import { inputAssistProps } from '../utils/inputAssist';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
@@ -2325,6 +2326,7 @@ export function StorePage() {
     const sanitizedPhone = customer.phone.replace(/\D/g, '');
     const sanitizedPhoneKey = sanitizedPhone.length >= 10 ? `+55${sanitizedPhone}` : '';
     const pixKey = payment === 'pix_loja' ? storePixKey : '';
+    const customerNote = normalizeCustomerOrderNote(customer.customerNote);
     const condominiumMode = String(condominiumOrderPayload?.fulfillmentMode || 'pickup_at_stall').toLowerCase();
     const isApartmentCondominiumDelivery = isCondominiumOrder && condominiumMode === 'apartment_delivery';
     const condominiumAddress = isCondominiumOrder
@@ -2342,6 +2344,7 @@ export function StorePage() {
 
     const order = {
       customerName: effectiveCustomerName,
+      customerNote: customerNote || undefined,
       guestPushId: getOrCreateGuestPushId(),
       phone: customer.phone,
       address: isCondominiumOrder ? condominiumAddress : (deliveryAddress || customer.address),
@@ -2426,6 +2429,7 @@ export function StorePage() {
         pixKey,
         table: customer.table,
         customerName: effectiveCustomerName,
+        customerNote,
         address: deliveryAddress || customer.address,
         total: orderTotal,
         items: printableItems,
@@ -2462,6 +2466,7 @@ export function StorePage() {
           type: customer.type,
           table: customer.table,
           customerName: effectiveCustomerName,
+          customerNote,
           paymentMethod: payment,
           cashTendered: cashTendered !== null ? cashTendered : null,
           items: validCartItems.map((item: any) => ({
@@ -2573,6 +2578,7 @@ export function StorePage() {
         customer.table ? `🪑 Mesa: ${customer.table}` : '',
         payment ? `💳 Pagamento: ${formatPaymentMethod(payment)}` : '',
         customer.address ? `📌 Endereço do cliente: ${customer.address}` : '',
+        customerNote ? `📝 Observação: ${customerNote}` : '',
         '',
         '*Itens do pedido:*',
         itemsList,
@@ -2618,6 +2624,7 @@ export function StorePage() {
         paymentStatus: String(createdOrder?.paymentStatus || 'PENDING').toUpperCase(),
         table: customer.table,
         customerName: effectiveCustomerName,
+        customerNote,
         address: deliveryAddress || customer.address,
       total: orderTotal,
       items: printableItems,
@@ -3196,6 +3203,7 @@ export function StorePage() {
       orderDisplayId: formatOrderDisplayId(lastOrder.id, storeSlug),
       createdAt: (lastOrder?.createdAt ? new Date(lastOrder.createdAt) : new Date()).toLocaleString('pt-BR'),
       customerName: lastOrder?.customerName || 'Cliente',
+      customerNote: lastOrder?.customerNote || '',
       table: lastOrder?.table || '',
       type: formatOrderType(lastOrder?.type),
       queueRank: Number(lastOrder?.queueRank ?? 0) || null,
@@ -3237,6 +3245,7 @@ export function StorePage() {
         queueLabel: queueText,
         orderLabel: `#${payload.orderDisplayId}`,
         customerLabel: payload.customerName,
+        customerNote: payload.customerNote,
         locationLabel: locationIdentifier,
         tableLabel: payload.table ? String(payload.table) : '',
         dateLabel: payload.createdAt,

@@ -34,6 +34,7 @@ const queueOrders = [
   {
     id: 'order-e2e-1',
     customerName: 'Cliente E2E',
+    customerNote: 'Sem ketchup e avisar no WhatsApp.',
     name: 'Cliente E2E',
     phone: '(11) 99999-0000',
     status: 'pending',
@@ -113,8 +114,10 @@ test.describe('Admin queue UX', () => {
     await expect(page.getByText('Cliente E2E')).toBeVisible();
 
     await page.getByText('Cliente E2E').first().click();
-    await expect(page.getByTestId('admin-order-detail')).toBeVisible();
+    const detail = page.getByTestId('admin-order-detail');
+    await expect(detail).toBeVisible();
     await expect(page.getByText('Medalhao de Palmito').first()).toBeVisible();
+    await expect(detail.getByText('Sem ketchup e avisar no WhatsApp.')).toBeVisible();
 
     await page.getByTestId('admin-product-picker-button').click();
     await page.getByTestId('admin-product-picker-search').fill('palmito');

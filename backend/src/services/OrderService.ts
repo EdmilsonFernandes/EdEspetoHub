@@ -39,6 +39,7 @@ import { CustomerSecurityService } from './CustomerSecurityService';
 import { resolveMercadoPagoStatusDetailLabel, resolveMercadoPagoStatusLabel } from '../utils/paymentAudit';
 import { logger } from '../utils/logger';
 import { appendOrderTimelineEntry, buildOrderTimelineJson } from '../utils/orderTimeline';
+import { normalizeCustomerOrderNote } from '../utils/orderCustomerNote';
 /**
  * Provides OrderService functionality.
  *
@@ -1229,6 +1230,7 @@ private async seedPostalShipmentFromCheckoutTx(
   {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new AppError('STORE-001', 404);
+    const customerNote = normalizeCustomerOrderNote((input as any).customerNote);
     await this.customerSecurityService.assertCustomerAllowed(input.customerUserId, 'order');
     await this.ensureAnonymousOrderPolicy(input, store.id);
     await this.ensureFarPickupPolicy(input, store);
@@ -1262,6 +1264,7 @@ private async seedPostalShipmentFromCheckoutTx(
       }
       return saved;
     });
+    (saved as any).customerNote = customerNote;
     await this.registerAnonymousOrderAttempt(input, store.id);
       if (!this.isStaffActor(input?.actorRole)) {
         this.dispatchStoreNewOnlineOrderPush({
@@ -1299,6 +1302,7 @@ private async seedPostalShipmentFromCheckoutTx(
   {
     const store = await this.storeRepository.findBySlugWithOwner(input.storeSlug);
     if (!store) throw new AppError('STORE-001', 404);
+    const customerNote = normalizeCustomerOrderNote((input as any).customerNote);
     await this.customerSecurityService.assertCustomerAllowed(input.customerUserId, 'order');
     await this.ensureAnonymousOrderPolicy({ ...input, storeId: store.id }, store.id);
     await this.ensureFarPickupPolicy({ ...input, storeId: store.id } as CreateOrderDto, store);
@@ -1342,6 +1346,7 @@ private async seedPostalShipmentFromCheckoutTx(
       }
       return saved;
     });
+    (saved as any).customerNote = customerNote;
     await this.registerAnonymousOrderAttempt({ ...input, storeId: store.id }, store.id);
       if (!this.isStaffActor(input?.actorRole)) {
         this.dispatchStoreNewOnlineOrderPush({
@@ -2059,10 +2064,12 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       : input.type === 'delivery' && String((input as any).fulfillmentMode || '').toLowerCase() === 'postal'
         ? 'postal'
         : 'distance';
+    const customerNote = normalizeCustomerOrderNote((input as any).customerNote);
 
     return this.orderRepository.create({
       id: orderRefId as any,
       customerName: input.customerName,
+      customerNote,
       customerUserId: input.customerUserId || null,
       guestPushId: input.guestPushId || null,
       phone: input.phone,

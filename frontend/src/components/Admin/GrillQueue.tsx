@@ -19,7 +19,8 @@ import {
   Check,
   Package,
   Buildings,
-  Phone
+  Phone,
+  NotePencil
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { storeService } from "../../services/storeService";
@@ -49,6 +50,12 @@ const normalizeSearchText = (value: any) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
+    .trim();
+
+const resolveCustomerOrderNote = (order: any) =>
+  String(order?.customerNote || order?.customer_note || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
     .trim();
 
 const fuzzyIncludes = (text: string, query: string) => {
@@ -526,6 +533,7 @@ const OrderSummaryCard = ({
       new Set(orderItems.map((item: any) => String(item?.name || '').trim()).filter(Boolean))
     );
     const itemsSummary = itemNames.slice(0, 2).join(' • ');
+    const customerNote = resolveCustomerOrderNote(order);
     const timerToneClass = isLate
       ? 'text-red-600'
       : isTimerWarning
@@ -692,6 +700,12 @@ const OrderSummaryCard = ({
                 </>
               )}
             </div>
+            {customerNote ? (
+              <div className="mt-2 inline-flex max-w-full items-start gap-1.5 rounded-2xl border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold text-amber-800 shadow-sm">
+                <NotePencil size={13} weight="duotone" className="mt-0.5 shrink-0" />
+                <span className="line-clamp-2 [overflow-wrap:anywhere]">{customerNote}</span>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -1098,6 +1112,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         queueLabel: `#${String(payload.queueRank || 1).padStart(2, '0')}`,
         orderLabel: `#${payload.orderDisplayId}`,
         customerLabel: payload.order?.customerName || payload.order?.name || 'Cliente',
+        customerNote: resolveCustomerOrderNote(payload.order),
         locationLabel: payload.locationIdentifier || '',
         tableLabel: payload.table ? String(payload.table) : '',
         dateLabel: payload.createdAt,
@@ -3540,6 +3555,21 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         ) : (
                           <p className="mt-0.5 font-semibold text-slate-500">Sem troco</p>
                         )}
+                      </div>
+                    ) : null}
+                    {resolveCustomerOrderNote(order) ? (
+                      <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50/80 px-3 py-2.5 text-[12px] shadow-sm">
+                        <div className="flex items-start gap-2">
+                          <NotePencil size={15} weight="duotone" className="mt-0.5 shrink-0 text-amber-700" />
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-700">
+                              Observação do cliente
+                            </p>
+                            <p className="mt-1 whitespace-pre-wrap font-semibold leading-relaxed text-slate-800 [overflow-wrap:anywhere]">
+                              {resolveCustomerOrderNote(order)}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     ) : null}
                   </div>

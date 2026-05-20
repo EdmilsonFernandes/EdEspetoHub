@@ -42,6 +42,9 @@ export class Order {
   @Column({ name: 'customer_name' })
   customerName!: string;
 
+  @Column({ name: 'customer_note', type: 'text', nullable: true })
+  customerNote?: string | null;
+
   @Column({ nullable: true })
   phone?: string;
 

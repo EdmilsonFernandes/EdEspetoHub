@@ -19,6 +19,8 @@ import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productModifiers";
 import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderPricing";
 import { DddSelect } from "../common/DddSelect";
+import { textareaAssistProps } from "../../utils/inputAssist";
+import { CUSTOMER_ORDER_NOTE_MAX_LENGTH, limitCustomerOrderNoteInput } from "../../utils/customerOrderNote";
 
 const BRAZIL_DDDS = [
   "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -212,6 +214,10 @@ export const CartViewCondominium = ({
   };
 
   const validationError = validateFields();
+  const customerOrderNoteValue = limitCustomerOrderNoteInput(customer.customerNote || "");
+  const handleCustomerOrderNoteChange = (value: string) => {
+    onChangeCustomer({ ...customer, customerNote: limitCustomerOrderNoteInput(value) });
+  };
 
   return (
     <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
@@ -394,6 +400,27 @@ export const CartViewCondominium = ({
               )}
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="mb-4 rounded-[2rem] border border-amber-100 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(255,251,235,0.78))] p-4 shadow-[0_20px_40px_-34px_rgba(245,158,11,0.3)] sm:p-6">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-700">Observação para a loja</p>
+        <p className="mt-1 text-xs leading-relaxed text-slate-500">
+          Opcional. Avise algo simples sobre preparo, retirada ou entrega no apartamento.
+        </p>
+        <textarea
+          {...textareaAssistProps.notes}
+          value={customerOrderNoteValue}
+          onChange={(event) => handleCustomerOrderNoteChange(event.target.value)}
+          maxLength={CUSTOMER_ORDER_NOTE_MAX_LENGTH}
+          rows={3}
+          placeholder="Ex: sem ketchup. Chamar no interfone quando chegar."
+          className="mt-3 min-h-[88px] w-full resize-none rounded-2xl border border-amber-100 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-amber-300 focus:bg-white focus:ring-2 focus:ring-amber-100"
+          data-testid="customer-order-note-input"
+        />
+        <div className="mt-2 flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-500">
+          <span>Essa mensagem vai junto com o pedido.</span>
+          <span className="shrink-0 tabular-nums">{customerOrderNoteValue.length}/{CUSTOMER_ORDER_NOTE_MAX_LENGTH}</span>
         </div>
       </div>
 

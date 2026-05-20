@@ -34,6 +34,7 @@ export interface CreateOrderDto {
   actorRole?: string | null;
   clientIp?: string | null;
   phone?: string;
+  customerNote?: string | null;
   address?: string;
   table?: string;
   type: string;

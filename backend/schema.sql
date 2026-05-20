@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
   customer_name TEXT NOT NULL,
+  customer_note TEXT,
   phone TEXT,
   address TEXT,
   table_number TEXT,
@@ -163,6 +164,8 @@ CREATE TABLE IF NOT EXISTS orders (
 
 ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS table_number TEXT;
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS customer_note TEXT;
 ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS cash_tendered NUMERIC(10,2);
 ALTER TABLE orders

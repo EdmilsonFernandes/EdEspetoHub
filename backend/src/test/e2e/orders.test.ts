@@ -102,6 +102,34 @@ describe('Pedido — Jornada E2E (cliente)', () => {
     expect(Array.isArray(res.body.orders || res.body)).toBe(true);
   });
 
+  it('salva observação do cliente e exibe na fila operacional', async () => {
+    if (!productId) return;
+
+    const note = 'Sem ketchup e avisar quando estiver chegando.';
+    const created = await api
+      .post(`/api/stores/${storeId}/orders`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        customerName: 'Cliente Observacao',
+        customerNote: `  ${note}  `,
+        type: 'pickup',
+        items: [{ productId, quantity: 1 }],
+        paymentMethod: 'pix',
+      });
+
+    expect(created.status).toBe(201);
+    expect(created.body.customerNote).toBe(note);
+
+    const queue = await api
+      .get(`/api/stores/${storeId}/orders/queue`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(queue.status).toBe(200);
+
+    const orders = Array.isArray(queue.body) ? queue.body : queue.body.orders || [];
+    const queuedOrder = orders.find((order: any) => order.id === created.body.id);
+    expect(queuedOrder?.customerNote).toBe(note);
+  });
+
   it('admin atualiza status do pedido (pending → preparing)', async () => {
     if (!productId) return;
     const order = await api.post(`/api/stores/${storeId}/orders`).send({

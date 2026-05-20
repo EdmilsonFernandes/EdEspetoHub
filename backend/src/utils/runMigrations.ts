@@ -1117,6 +1117,10 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS customer_note TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
     ADD COLUMN IF NOT EXISTS customer_received_at TIMESTAMPTZ;
   `);
   await AppDataSource.query(`

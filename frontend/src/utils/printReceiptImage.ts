@@ -11,6 +11,7 @@ type PrintReceiptRawBtInput = {
   queueLabel?: string;
   orderLabel: string;
   customerLabel: string;
+  customerNote?: string;
   locationLabel?: string;
   tableLabel?: string;
   dateLabel: string;
@@ -23,6 +24,18 @@ const sanitizeText = (value: unknown) =>
     .replace(/\r/g, " ")
     .replace(/\n/g, " ")
     .trim();
+
+const escapeHtml = (value: unknown) =>
+  sanitizeText(value).replace(/[&<>"']/g, (char) => {
+    const entities: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    };
+    return entities[char] || char;
+  });
 
 // Conservative width for mobile + mixed RawBT profiles (58mm/80mm).
 const LINE_WIDTH = 32;
@@ -139,8 +152,17 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
       .map(
         (line) =>
           `${ESC_POS.boldOn}${ESC_POS.textDoubleHeightOn}${line}${ESC_POS.textSizeReset}${ESC_POS.boldOff}`
-      );
+    );
     return [strongSeparator(), ...lines, strongSeparator()];
+  })();
+  const customerNoteBlock = (() => {
+    const note = sanitizeText(payload.customerNote || "");
+    if (!note) return [];
+    return [
+      separator(),
+      `${ESC_POS.boldOn}OBS CLIENTE${ESC_POS.boldOff}`,
+      ...wrapWords(note, LINE_WIDTH),
+    ];
   })();
 
   const chunks = [
@@ -152,6 +174,7 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     ...wrapWords(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, LINE_WIDTH),
     ...locationBlock,
     ...customerBlock,
+    ...customerNoteBlock,
     ...wrapWords(`Data: ${sanitizeText(payload.dateLabel || "")}`, LINE_WIDTH),
     separator(),
     `${ESC_POS.boldOn}ITENS${ESC_POS.boldOff}`,
@@ -192,6 +215,10 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
   const customerHtml = `<div class="customer-block">CLIENTE: ${sanitizeText(
     payload.customerLabel || "Cliente"
   )}</div>`;
+  const customerNote = sanitizeText(payload.customerNote || "");
+  const customerNoteHtml = customerNote
+    ? `<div class="sep"></div><div class="note-title">OBS CLIENTE</div><div class="customer-note">${escapeHtml(customerNote)}</div>`
+    : '';
 
   return `<!DOCTYPE html>
 <html>
@@ -238,6 +265,8 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
     .item-name { flex: 1; padding-right: 6px; font-weight: 800; }
     .item-price { white-space: nowrap; font-weight: 800; }
     .item-note { font-size: 10px; margin-left: 8px; margin-bottom: 3px; line-height: 1.4; }
+    .note-title { font-size: 11px; font-weight: 900; margin: 5px 0 2px; text-transform: uppercase; }
+    .customer-note { font-size: 12px; font-weight: 700; line-height: 1.25; margin-bottom: 4px; word-break: break-word; }
     .total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 900; margin-top: 8px; }
     .spacer { height: 16px; }
     @media print {
@@ -263,6 +292,7 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
   <div class="subtitle">Plataforma: ${sanitizeText(payload.platformName || "Já no Caminho")}</div>
   ${tableHtml}
   ${customerHtml}
+  ${customerNoteHtml}
   <div class="sep"></div>
   <div class="meta">Fila: ${sanitizeText(payload.queueLabel || "--")}</div>
   <div class="meta">Pedido: ${sanitizeText(payload.orderLabel || "--")}</div>
