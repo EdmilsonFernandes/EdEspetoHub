@@ -280,6 +280,8 @@ BACKUP_DIR=/home/ec2-user/backups/janocaminho MIN_INTERVAL_HOURS=4 KEEP_LATEST=1
 
 ## Documentacao principal
 
+- Orientacao para agentes: `AGENTS.md`
+- Configuracao MCP: `docs/MCP_SETUP.md`
 - Guia SQL: `docs/SQL_CONSULTAS_MANUTENCAO.md`
 - Hub de destinos: `docs/DESTINATION_HUB.md`
 - Entregas: `docs/DELIVERY.md`

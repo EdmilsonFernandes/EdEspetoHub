@@ -702,6 +702,29 @@ WHERE key LIKE 'founder_vip_%'
 ORDER BY key;
 ```
 
+Status operacional da campanha, mostrando limite, lojas existentes e vagas restantes:
+
+```sql
+WITH settings AS (
+  SELECT
+    COALESCE((SELECT value::boolean FROM site_settings WHERE key = 'founder_vip_enabled'), false) AS enabled,
+    COALESCE((SELECT value::int FROM site_settings WHERE key = 'founder_vip_store_limit'), 0) AS store_limit,
+    COALESCE((SELECT value::int FROM site_settings WHERE key = 'founder_vip_days'), 0) AS vip_days,
+    COALESCE((SELECT value FROM site_settings WHERE key = 'founder_vip_label'), '') AS label
+), counts AS (
+  SELECT COUNT(*)::int AS current_store_count FROM stores
+)
+SELECT
+  settings.enabled,
+  settings.store_limit,
+  counts.current_store_count,
+  GREATEST(settings.store_limit - counts.current_store_count, 0) AS remaining_slots,
+  settings.vip_days,
+  settings.label,
+  (settings.enabled AND counts.current_store_count < settings.store_limit) AS next_store_is_eligible
+FROM settings CROSS JOIN counts;
+```
+
 Ativar campanha para 30 primeiras lojas por 90 dias:
 
 ```sql
@@ -722,6 +745,15 @@ WHERE key LIKE 'founder_vip_%'
 ORDER BY key;
 
 COMMIT;
+```
+
+Alterar o limite para 50 primeiras lojas, sem mudar a duracao:
+
+```sql
+UPDATE site_settings
+SET value = '50',
+    updated_at = NOW()
+WHERE key = 'founder_vip_store_limit';
 ```
 
 Lojas que entraram pela campanha:
