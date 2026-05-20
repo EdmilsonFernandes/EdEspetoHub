@@ -72,6 +72,7 @@ describe('destinationListingClaim', () => {
     expect(message).toContain('Gonçalves');
     expect(message).toContain('criador do Já no Caminho');
     expect(message).toContain('Não tem cobrança');
+    expect(message).toContain('3 meses de acesso gratuito');
     expect(message).not.toContain('curadoria');
     expect(message).not.toContain('APK');
     expect(message).not.toContain('play.google.com/store/apps/details');
@@ -96,6 +97,7 @@ describe('destinationListingClaim', () => {
     expect(message).toContain('Pousada Vista');
     expect(message).toContain('QR Code');
     expect(message).toContain('Não tem cobrança');
+    expect(message).toContain('3 meses gratuitos');
     expect(message).not.toContain('curadoria');
     expect(message).not.toContain('APK');
     expect(message).toContain('janocaminho.com.br');

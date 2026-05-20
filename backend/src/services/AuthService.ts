@@ -46,6 +46,7 @@ import { isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk'
 import { CustomerSecurityService } from './CustomerSecurityService';
 import { AuditNotificationService } from './AuditNotificationService';
 import { MfaService } from './MfaService';
+import { resolveFounderVipPromotion } from '../utils/founderVipPromotion';
 
 type MfaLoginOptions = {
   deviceId?: string | null;
@@ -93,6 +94,24 @@ export class AuthService
   private securityService = new CustomerSecurityService();
   private auditNotificationService = new AuditNotificationService();
   private mfaService = new MfaService();
+
+  private async resolveStoreSignupPromotion(existingStoresCount: number, fallbackTrialDays: number) {
+    const [enabledValue, limitValue, daysValue, labelValue] = await Promise.all([
+      this.settingsService.getValue('founder_vip_enabled'),
+      this.settingsService.getValue('founder_vip_store_limit'),
+      this.settingsService.getValue('founder_vip_days'),
+      this.settingsService.getValue('founder_vip_label'),
+    ]);
+
+    return resolveFounderVipPromotion({
+      enabledValue,
+      limitValue,
+      daysValue,
+      labelValue,
+      existingStoresCount,
+      fallbackTrialDays,
+    });
+  }
 
     /**
    * Executes normalize phone business logic.
@@ -767,6 +786,21 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       const trimmedCity = storePayload.city?.toString().trim();
       const trimmedState = storePayload.state?.toString().trim().toUpperCase();
       const trimmedAddress = storePayload.address?.toString().trim() || userPayload.address?.toString().trim();
+      const baseTrialDays = await this.settingsService.getNumber('trial_days', env.trialDays);
+      const existingStoresCount = await storeRepo.count();
+      const signupPromotion = await this.resolveStoreSignupPromotion(existingStoresCount, baseTrialDays);
+      const attributionWithPromotion = signupPromotion.applies
+        ? {
+            ...(acquisitionAttribution || {}),
+            founderVipPromotion: {
+              applied: true,
+              label: signupPromotion.label,
+              days: signupPromotion.promoDays,
+              limit: signupPromotion.limit,
+              position: signupPromotion.position,
+            },
+          }
+        : acquisitionAttribution;
 
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || storePayload.logoUrl,
@@ -782,7 +816,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
         openingHours: storePayload.openingHours ?? [],
         orderTypes: storePayload.orderTypes ?? segmentPreset.orderTypes,
-        acquisitionAttribution,
+        acquisitionAttribution: attributionWithPromotion,
       });
 
       const store = storeRepo.create({
@@ -817,7 +851,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       }
 
       const now = new Date();
-      const trialDays = await this.settingsService.getNumber('trial_days', env.trialDays);
+      const trialDays = signupPromotion.trialDays;
       const trialEnd = this.addDays(now, trialDays);
       const subscription = subscriptionRepo.create({
         store,
@@ -830,11 +864,11 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       });
       await subscriptionRepo.save(subscription);
 
-      return { user, store, subscription };
+      return { user, store, subscription, acquisitionAttribution: attributionWithPromotion };
     });
 
     await this.sendVerificationEmail(result.user, meta?.ipAddress);
-      await this.notifySignup(result.user, result.store, acquisitionAttribution);
+    await this.notifySignup(result.user, result.store, result.acquisitionAttribution);
     this.log.info('Register success', { userId: result.user.id, storeId: result.store.id });
 
     const token = jwt.sign(

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { api, testEmail, registerStore, loginAdmin, registerCustomer, loginCustomer, verifyEmailDirectly } from '../helpers';
 import { env } from '../../config/env';
 import { generateTotpCode } from '../../utils/totp';
+import { AppDataSource } from '../../config/database';
 
 describe('Auth — Registro e Login', () => {
   // ─── Registro de Lojista (Store Owner) ───
@@ -30,6 +31,47 @@ describe('Auth — Registro e Login', () => {
     it('rejeita sem aceite de termos', async () => {
       const { res } = await registerStore({ termsAccepted: false });
       expect(res.status).toBeGreaterThanOrEqual(400);
+    });
+
+    it('aplica campanha fundador com trial estendido quando habilitada', async () => {
+      const keys = ['founder_vip_enabled', 'founder_vip_store_limit', 'founder_vip_days', 'founder_vip_label'];
+      try {
+        await AppDataSource.query(
+          `
+          INSERT INTO site_settings ("key", "value") VALUES
+            ('founder_vip_enabled', 'true'),
+            ('founder_vip_store_limit', '999'),
+            ('founder_vip_days', '90'),
+            ('founder_vip_label', 'Campanha fundador teste')
+          ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", updated_at = NOW()
+          `
+        );
+
+        const { res } = await registerStore();
+        expect(res.status).toBe(201);
+
+        const subscriptions = await AppDataSource.query(
+          `SELECT status, end_date FROM subscriptions WHERE store_id = $1 ORDER BY created_at DESC LIMIT 1`,
+          [res.body.store.id]
+        );
+        const settings = await AppDataSource.query(
+          `SELECT acquisition_attribution FROM store_settings WHERE store_id = $1 LIMIT 1`,
+          [res.body.store.id]
+        );
+        const endDate = new Date(subscriptions[0].end_date);
+        const diffDays = Math.round((endDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+
+        expect(subscriptions[0].status).toBe('TRIAL');
+        expect(diffDays).toBeGreaterThanOrEqual(89);
+        expect(diffDays).toBeLessThanOrEqual(91);
+        expect(settings[0].acquisition_attribution?.founderVipPromotion).toMatchObject({
+          applied: true,
+          label: 'Campanha fundador teste',
+          days: 90,
+        });
+      } finally {
+        await AppDataSource.query(`DELETE FROM site_settings WHERE "key" = ANY($1)`, [keys]);
+      }
     });
   });
 
