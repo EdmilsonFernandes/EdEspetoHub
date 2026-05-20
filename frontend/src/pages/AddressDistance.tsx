@@ -45,7 +45,10 @@ const formatCepBr = (value: string) => {
 };
 
 const formatPhoneBr = (value: string) => {
-  const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
+  const rawDigits = String(value || '').replace(/\D/g, '');
+  const digits = rawDigits.startsWith('55') && rawDigits.length > 11
+    ? rawDigits.slice(2, 13)
+    : rawDigits.slice(0, 11);
   if (digits.length <= 2) return digits;
   if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
   if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
@@ -70,11 +73,11 @@ const normalizeAddressToForm = (address: any) => ({
 const getAddressTone = (label: string, isDefault: boolean) => {
   if (isDefault) {
     return {
-      iconWrap: 'bg-[#edf5fa] text-[#336886]',
+      iconWrap: 'bg-white text-[#336886] shadow-[0_14px_30px_-24px_rgba(51,104,134,0.72)] ring-1 ring-[#cfe0ea]',
       accent: 'from-[#153A4C] via-[#336886] to-sky-300',
-      badge: 'border-[#cfe0ea] bg-[#edf5fa] text-[#336886]',
-      border: 'border-[#d6e3eb]',
-      glow: 'shadow-[0_24px_52px_-38px_rgba(51,104,134,0.28)]',
+      badge: 'border-[#cfe0ea] bg-white text-[#336886]',
+      border: 'border-[#b9d3e2] bg-[linear-gradient(145deg,#ffffff_0%,#f4f9fc_100%)] ring-2 ring-[#336886]/8',
+      glow: 'shadow-[0_28px_60px_-38px_rgba(51,104,134,0.46)]',
     };
   }
 
@@ -416,8 +419,11 @@ export function AddressDistance() {
                   ) : null}
                 </div>
 
-                <div className="relative">
-                  <Phone size={16} weight="duotone" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 transition-all focus-within:border-sky-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-sky-100">
+                  <span className="ml-3 inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-black text-slate-600 shadow-sm">
+                    <Phone size={14} weight="duotone" className="text-slate-400" />
+                    🇧🇷 +55
+                  </span>
                   <input
                     name="recipientPhone"
                     placeholder="Telefone do recebedor"
@@ -426,7 +432,7 @@ export function AddressDistance() {
                     inputMode="tel"
                     autoComplete="tel-national"
                     enterKeyHint="next"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                    className="min-w-0 flex-1 bg-transparent py-3 pl-3 pr-4 outline-none placeholder:text-slate-400"
                   />
                 </div>
 
@@ -549,7 +555,7 @@ export function AddressDistance() {
                         handleEditAddress(addr);
                       }
                     }}
-                    className={`group relative overflow-hidden rounded-[1.9rem] border bg-white p-4 transition-all hover:-translate-y-0.5 ${tone.border} ${tone.glow}`}
+                    className={`group relative overflow-hidden rounded-[1.9rem] border p-4 transition-all hover:-translate-y-0.5 ${addr.isDefault ? '' : 'bg-white'} ${tone.border} ${tone.glow}`}
                   >
                     <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${tone.accent}`} />
 
@@ -562,7 +568,7 @@ export function AddressDistance() {
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="text-sm font-black text-slate-900">{addr.label || 'Endereço'}</h3>
                           {addr.isDefault ? (
-                            <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] ${tone.badge}`}>
+                            <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] shadow-sm ${tone.badge}`}>
                               <Star size={11} weight="fill" />
                               Principal
                             </span>
@@ -587,25 +593,13 @@ export function AddressDistance() {
                             {addr.phone ? (
                               <span className="inline-flex min-w-0 items-center gap-1.5">
                                 <Phone size={13} weight="duotone" className="shrink-0 text-slate-400" />
-                                <span className="truncate">{formatPhoneBr(addr.phone)}</span>
+                                <span className="truncate">🇧🇷 +55 {formatPhoneBr(addr.phone)}</span>
                               </span>
                             ) : null}
                           </div>
                         ) : null}
 
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleEditAddress(addr);
-                            }}
-                            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-700 transition-all active:scale-95"
-                          >
-                            <PencilSimple size={13} weight="bold" />
-                            Editar
-                          </button>
-
+                        <div className="mt-4 grid grid-cols-[minmax(0,1fr)_40px_40px] items-center gap-2">
                           {!addr.isDefault ? (
                             <button
                               type="button"
@@ -613,12 +607,29 @@ export function AddressDistance() {
                                 event.stopPropagation();
                                 void handleSetDefault(addr.id);
                               }}
-                              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700 transition-all active:scale-95"
+                              className="inline-flex min-w-0 items-center justify-center gap-1.5 truncate rounded-2xl border border-[#cfe0ea] bg-[#edf5fa] px-3 py-2.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_14px_28px_-26px_rgba(51,104,134,0.45)] transition-all active:scale-95"
                             >
                               <CheckCircle size={13} weight="fill" />
-                              Tornar principal
+                              <span className="truncate">Definir principal</span>
                             </button>
-                          ) : null}
+                          ) : (
+                            <span className="inline-flex min-w-0 items-center justify-center gap-1.5 truncate rounded-2xl border border-[#cfe0ea] bg-white px-3 py-2.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-sm">
+                              <Star size={13} weight="fill" />
+                              <span className="truncate">Principal ativo</span>
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleEditAddress(addr);
+                            }}
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all active:scale-95"
+                            aria-label="Editar endereço"
+                          >
+                            <PencilSimple size={13} weight="bold" />
+                          </button>
 
                           <button
                             type="button"
@@ -626,10 +637,10 @@ export function AddressDistance() {
                               event.stopPropagation();
                               setDeleteTarget(addr);
                             }}
-                            className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-rose-700 transition-all active:scale-95"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-rose-600 shadow-sm transition-all active:scale-95"
+                            aria-label="Excluir endereço"
                           >
                             <Trash size={13} weight="bold" />
-                            Excluir
                           </button>
                         </div>
                       </div>

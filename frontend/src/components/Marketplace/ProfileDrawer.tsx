@@ -101,6 +101,7 @@ export function ProfileDrawer({
   const [notifBadge, setNotifBadge] = useState(0);
   const [highlightFirstAccess, setHighlightFirstAccess] = useState(false);
   const [accessPickerMode, setAccessPickerMode] = useState<'login' | 'register'>('login');
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [savedAccessProfiles, setSavedAccessProfiles] = useState<{
     customer: { name: string; email: string; biometric: boolean; hasSession: boolean };
     admin: { name: string; email: string; biometric: boolean; hasSession: boolean };
@@ -185,6 +186,7 @@ export function ProfileDrawer({
     } else {
       document.body.style.overflow = '';
       setAccessPickerOpen(false);
+      setAboutOpen(false);
       setHighlightFirstAccess(false);
       setAccessPickerMode('login');
     }
@@ -637,24 +639,89 @@ export function ProfileDrawer({
           </nav>
         </div>
 
-        <div className="border-t border-slate-100/90 bg-white/70 p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-[11px] font-black text-slate-900 tracking-tight">Já no Caminho</p>
-              <p className="text-[8px] font-medium text-slate-400">
+        <div className="border-t border-slate-100/90 bg-white/70 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
+          <button
+            type="button"
+            onClick={() => setAboutOpen(true)}
+            className="group flex w-full items-center gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/86 p-3 text-left shadow-[0_18px_34px_-28px_rgba(15,23,42,0.24)] transition-all active:scale-[0.98]"
+          >
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border border-white bg-white p-0.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.44)] ring-1 ring-slate-100">
+              <img src="/janocaminho.jpg" alt="Logo" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full rounded-[0.85rem] object-cover opacity-95" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[12px] font-black tracking-tight text-slate-950">Sobre o app</span>
+              <span className="mt-0.5 flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
                 {versionLabel || 'v0.0.0'}
-              </p>
-              <p className="flex items-center gap-1 text-[9px] font-semibold text-emerald-600">
-                <ShieldCheckered size={10} weight="fill" />
-                Ambiente seguro
-              </p>
+                <span className="h-1 w-1 rounded-full bg-slate-300" />
+                Seguro
+              </span>
+            </span>
+            <CaretRight size={15} weight="bold" className="shrink-0 text-slate-300 transition-transform group-active:translate-x-0.5" />
+          </button>
+        </div>
+      </aside>
+
+      {aboutOpen && (
+        <div className="absolute inset-0 z-[12] flex items-center justify-center bg-slate-950/45 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-[12px] animate-in fade-in duration-200" onClick={() => setAboutOpen(false)}>
+          <div
+            className="relative w-full max-w-[345px] overflow-hidden rounded-[1.9rem] border border-white/86 bg-[linear-gradient(180deg,rgba(255,255,255,0.985)_0%,rgba(248,250,252,0.98)_100%)] p-5 shadow-[0_30px_76px_-34px_rgba(15,23,42,0.78)] animate-in zoom-in-95 duration-200"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <div className="absolute -left-12 top-2 h-32 w-32 rounded-full bg-[#336886]/10 blur-3xl" />
+              <div className="absolute -right-10 bottom-4 h-32 w-32 rounded-full bg-emerald-200/32 blur-3xl" />
             </div>
-            <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white bg-white p-0.5 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.55)] ring-1 ring-slate-100">
-              <img src="/janocaminho.jpg" alt="Logo" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full rounded-full object-cover opacity-95" />
+            <div className="relative flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="grid h-14 w-14 place-items-center overflow-hidden rounded-[1.35rem] bg-white p-1 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.52)] ring-1 ring-slate-100">
+                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-[1rem] object-cover" />
+                </span>
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-[0.24em] text-[#336886]">Já no Caminho</p>
+                  <h3 className="mt-1 text-lg font-black tracking-[-0.035em] text-slate-950">Sobre o app</h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAboutOpen(false)}
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200/70 bg-white/88 text-slate-400 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.32)] transition-all active:scale-95"
+                aria-label="Fechar sobre o app"
+              >
+                <X size={17} weight="bold" />
+              </button>
+            </div>
+
+            <div className="relative mt-5 space-y-3">
+              <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/82 p-4">
+                <p className="text-sm font-black text-slate-950">Marketplace local, pedidos e entregas em um só lugar.</p>
+                <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-500">
+                  Plataforma desenvolvida para clientes, lojas, entregadores, condomínios e destinos turísticos operarem com uma experiência simples e segura.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-[1.2rem] border border-[#d8e5ee] bg-[#edf5fa] p-3">
+                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#336886]/70">Versão</p>
+                  <p className="mt-1 truncate text-xs font-black text-[#153A4C]">{versionLabel || 'v0.0.0'}</p>
+                </div>
+                <div className="rounded-[1.2rem] border border-emerald-100 bg-emerald-50 p-3">
+                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700/70">Ambiente</p>
+                  <p className="mt-1 flex items-center gap-1 text-xs font-black text-emerald-700">
+                    <ShieldCheckered size={13} weight="fill" />
+                    Seguro
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-[1.35rem] border border-slate-200/80 bg-slate-50/80 p-4">
+                <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Desenvolvimento</p>
+                <p className="mt-1 text-sm font-black text-slate-900">Edmilson Santos</p>
+                <p className="mt-1 text-[11px] font-semibold leading-5 text-slate-500">
+                  Produto oficial do Já no Caminho, com foco em operação local, usabilidade mobile e confiabilidade.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </aside>
+      )}
 
       {accessPickerOpen && (
         <div className="absolute inset-0 z-[10] flex items-center justify-center bg-slate-950/36 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-[10px] animate-in fade-in duration-200" onClick={() => setAccessPickerOpen(false)}>

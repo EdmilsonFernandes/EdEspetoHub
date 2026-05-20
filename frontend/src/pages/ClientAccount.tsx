@@ -53,6 +53,14 @@ function Switch({ checked, onChange, disabled }: { checked: boolean; onChange: (
   );
 }
 
+const getBrazilNationalPhoneDigits = (value = '') => {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (digits.startsWith('55') && digits.length > 11) return digits.slice(2, 13);
+  return digits.slice(0, 11);
+};
+
+const formatBrazilPhoneDraft = (value = '') => formatPhoneInput(getBrazilNationalPhoneDigits(value));
+
 export function ClientAccount() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -130,7 +138,7 @@ export function ClientAccount() {
         if (!mounted) return;
         setMe(meData || null);
         setNameDraft(String(meData?.fullName || ''));
-        setPhoneDraft(String(meData?.phone || ''));
+        setPhoneDraft(formatBrazilPhoneDraft(meData?.phone || ''));
         setAddresses(Array.isArray(addressesData) ? addressesData : []);
         setOrders(Array.isArray(ordersData) ? ordersData : []);
 
@@ -278,7 +286,7 @@ export function ClientAccount() {
     try {
       const updated = await customerAccountService.updateMe({
         fullName: String(nameDraft || '').trim(),
-        phone: String(phoneDraft || '').trim(),
+        phone: getBrazilNationalPhoneDigits(phoneDraft),
       });
       setMe(updated || null);
       syncCustomerSession(updated || null);
@@ -293,7 +301,7 @@ export function ClientAccount() {
 
   const handleCancelProfileEdit = () => {
     setNameDraft(String(me?.fullName || ''));
-    setPhoneDraft(String(me?.phone || ''));
+    setPhoneDraft(formatBrazilPhoneDraft(me?.phone || ''));
     setProfileMessage('');
     setProfileEditing(false);
   };
@@ -553,7 +561,7 @@ export function ClientAccount() {
         .filter(Boolean)
         .join(' • ')
     : '';
-  const normalizedPhoneLabel = String(formatPhoneInput(phoneDraft || me?.phone || '') || '').trim();
+  const normalizedPhoneLabel = String(formatBrazilPhoneDraft(phoneDraft || me?.phone || '') || '').trim();
   const memberSinceLabel = me?.createdAt ? formatDate(me.createdAt) : '';
   const mfaFeatureDisabled = mfaStatus?.featureEnabled === false;
   const mfaEnabled = Boolean(mfaStatus?.enabled);
@@ -715,6 +723,7 @@ export function ClientAccount() {
                       {normalizedPhoneLabel ? (
                         <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
                           <Phone size={11} weight="duotone" />
+                          <span className="tracking-normal">🇧🇷 +55</span>
                           {normalizedPhoneLabel}
                         </span>
                       ) : null}
@@ -821,13 +830,17 @@ export function ClientAccount() {
                     </div>
                     <div className="grid gap-2">
                       <label className="ml-1 text-xs font-semibold text-slate-500">Telefone</label>
-                      <div className="relative">
-                        <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 transition focus-within:border-[#bfd6e4] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#336886]/10">
+                        <span className="ml-3 inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-black text-slate-600 shadow-sm">
+                          <Phone size={14} weight="duotone" className="text-slate-400" />
+                          🇧🇷 +55
+                        </span>
                         <input
                           {...inputAssistProps.phoneNational}
                           value={phoneDraft}
-                          onChange={e => setPhoneDraft(e.target.value)}
-                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition focus:border-[#bfd6e4] focus:bg-white focus:ring-2 focus:ring-[#336886]/10"
+                          onChange={e => setPhoneDraft(formatBrazilPhoneDraft(e.target.value))}
+                          placeholder="(12) 99999-9999"
+                          className="min-w-0 flex-1 bg-transparent py-3 pl-3 pr-4 outline-none placeholder:text-slate-400"
                         />
                       </div>
                     </div>
@@ -943,8 +956,19 @@ export function ClientAccount() {
                   <CaretRight size={16} weight="bold" className="shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-slate-500" />
                 </button>
 
-                <div className="rounded-[1.6rem] border border-slate-200/80 bg-slate-50/80 p-4">
-                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Trocar senha</p>
+                <div className="relative overflow-hidden rounded-[1.6rem] border border-slate-200/80 bg-[linear-gradient(145deg,#f8fafc_0%,#ffffff_100%)] p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.34)]">
+                  <div className="pointer-events-none absolute -right-10 -top-12 h-28 w-28 rounded-full bg-[#336886]/8 blur-3xl" />
+                  <div className="relative mb-3 flex items-start gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-slate-900 text-white shadow-[0_14px_28px_-22px_rgba(15,23,42,0.7)]">
+                      <ShieldCheck size={17} weight="duotone" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Trocar senha</p>
+                      <p className="mt-1 text-[11px] font-semibold leading-5 text-slate-500">
+                        Confirme a senha atual. MFA e biometria protegem o acesso, mas não substituem essa confirmação.
+                      </p>
+                    </div>
+                  </div>
                   <div className="space-y-3">
                     <input
                       {...inputAssistProps.currentPassword}
@@ -962,6 +986,16 @@ export function ClientAccount() {
                       onChange={e => setPwdForm(p => ({...p, newPassword: e.target.value}))}
                       className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#bfd6e4] focus:ring-2 focus:ring-[#336886]/10"
                     />
+                    <div className="flex flex-wrap gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-500">
+                        <CheckCircle size={11} weight="fill" className="text-[#336886]" />
+                        Senha atual obrigatória
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-emerald-700">
+                        <ShieldCheck size={11} weight="fill" />
+                        MFA protege novos acessos
+                      </span>
+                    </div>
                     <button
                       onClick={handleChangePassword}
                       disabled={pwdLoading}
