@@ -552,6 +552,29 @@ const normalizeSearchText = (value?: string | null) =>
     .trim()
     .toLowerCase();
 
+const CONDOMINIUM_DISPLAY_LOWERCASE_WORDS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'di', 'del', 'della']);
+
+const formatCondominiumDisplayName = (value?: string | null) => {
+  const raw = String(value || '').trim().replace(/\s+/g, ' ');
+  if (!raw) return '';
+
+  const letters = raw.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g, '');
+  if (letters.length < 3) return raw;
+
+  const uppercaseLetters = letters.replace(/[^A-ZÀ-ÖØ-Þ]/g, '');
+  const shouldNormalize = uppercaseLetters.length / letters.length > 0.7;
+  if (!shouldNormalize) return raw;
+
+  return raw
+    .toLocaleLowerCase('pt-BR')
+    .split(' ')
+    .map((word, index) => {
+      if (index > 0 && CONDOMINIUM_DISPLAY_LOWERCASE_WORDS.has(word)) return word;
+      return `${word.charAt(0).toLocaleUpperCase('pt-BR')}${word.slice(1)}`;
+    })
+    .join(' ');
+};
+
 const formatCondominiumEventTime = (event?: CondominiumEventSummary | null) => {
   if (!event?.startsAt) return '';
   const startsAt = new Date(event.startsAt);
@@ -4323,7 +4346,7 @@ export function MarketplacePage() {
             <div className="relative overflow-x-hidden px-4 pb-4 pt-3">
               <div className="pointer-events-none absolute -right-12 -top-10 h-56 w-56 rounded-full bg-[#336886]/12 blur-3xl" />
 
-              <div className="relative rounded-[2rem] border border-slate-200/80 bg-white px-4 py-5 shadow-[0_24px_52px_-36px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/55">
+              <div className="relative rounded-[2rem] bg-white/92 px-4 py-5 shadow-[0_24px_52px_-38px_rgba(15,23,42,0.24)] ring-1 ring-white/85 backdrop-blur">
                 <div className="relative mb-4 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="mb-2 flex items-center gap-2">
@@ -4342,8 +4365,7 @@ export function MarketplacePage() {
                   </div>
                 </div>
 
-                <div className="relative overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/68 p-1.5 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.28)] ring-1 ring-white/55 backdrop-blur-xl">
-                  <div className="flex items-center gap-3 rounded-[1.25rem] bg-white/90 px-4 py-3">
+                <div className="relative flex items-center gap-3 rounded-[1.35rem] bg-slate-100/92 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] ring-1 ring-slate-200/75">
                     <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
                     <input
                       {...inputAssistProps.search}
@@ -4362,11 +4384,10 @@ export function MarketplacePage() {
                         <X size={12} weight="bold" />
                       </button>
                     ) : null}
-                  </div>
                 </div>
 
-                <div className="mt-4 rounded-[1.4rem] border border-slate-200/75 bg-slate-50/85 p-1.5 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.16)]">
-                <div className="-mx-0.5 flex gap-2 overflow-x-auto px-0.5 pb-0.5 no-scrollbar">
+                <div className="mt-4">
+                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 no-scrollbar">
                   {([
                     { key: 'all' as const, label: 'Todos', count: condominiumPickerCounts.all, tone: 'slate' as const },
                     { key: 'live' as const, label: 'Ao vivo', count: condominiumPickerCounts.live, tone: 'live' as const },
@@ -4376,27 +4397,27 @@ export function MarketplacePage() {
                     const isActive = condoPickerFilter === key;
                     const activeClasses =
                       tone === 'live'
-                        ? 'border-[#336886]/28 bg-[#336886] text-white shadow-[0_12px_22px_-18px_rgba(51,104,134,0.46)]'
+                        ? 'border-[#336886]/28 bg-[#336886] text-white shadow-[0_14px_24px_-18px_rgba(51,104,134,0.5)]'
                         : tone === 'brand'
-                        ? 'border-[#336886]/28 bg-[#336886] text-white shadow-[0_12px_22px_-18px_rgba(51,104,134,0.46)]'
+                        ? 'border-[#336886]/28 bg-[#336886] text-white shadow-[0_14px_24px_-18px_rgba(51,104,134,0.5)]'
                         : tone === 'muted'
-                        ? 'border-slate-400/24 bg-slate-700 text-white shadow-[0_12px_22px_-18px_rgba(51,65,85,0.42)]'
-                        : 'border-slate-300/24 bg-slate-900 text-white shadow-[0_12px_22px_-18px_rgba(15,23,42,0.46)]';
+                        ? 'border-slate-400/24 bg-slate-700 text-white shadow-[0_14px_24px_-18px_rgba(51,65,85,0.44)]'
+                        : 'border-slate-300/24 bg-slate-900 text-white shadow-[0_14px_24px_-18px_rgba(15,23,42,0.48)]';
                     const idleClasses =
                       tone === 'live'
-                        ? 'border-slate-200 bg-white text-[#336886] hover:border-[#bfd6e4] hover:bg-white'
+                        ? 'border-slate-200/85 bg-white/86 text-[#336886] hover:border-[#bfd6e4] hover:bg-white'
                         : tone === 'brand'
-                        ? 'border-slate-200 bg-white text-[#336886] hover:border-[#336886]/16 hover:bg-white'
+                        ? 'border-slate-200/85 bg-white/86 text-[#336886] hover:border-[#336886]/16 hover:bg-white'
                         : tone === 'muted'
-                        ? 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-white'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-white';
+                        ? 'border-slate-200/85 bg-white/86 text-slate-500 hover:border-slate-300 hover:bg-white'
+                        : 'border-slate-200/85 bg-white/86 text-slate-700 hover:border-slate-300 hover:bg-white';
 
                     return (
                       <button
                         key={key}
                         type="button"
                         onClick={() => setCondoPickerFilter(key)}
-                        className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.25 py-1.75 text-[10px] font-black transition-all duration-200 active:scale-95 ${isActive ? activeClasses : idleClasses}`}
+                        className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.25 py-1.75 text-[10px] font-black tracking-[0.01em] transition-all duration-200 active:scale-95 ${isActive ? activeClasses : idleClasses}`}
                       >
                         {tone === 'live' && (
                           <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-[#009ee3]'}`} />
@@ -4452,7 +4473,7 @@ export function MarketplacePage() {
 
                     {/* ── AO VIVO ── */}
                     {live.length > 0 && (
-                      <section className="rounded-[1.8rem] border border-[#336886]/10 bg-white/78 p-3.5 shadow-[0_24px_46px_-34px_rgba(51,104,134,0.2)] ring-1 ring-white/70 backdrop-blur-sm">
+                      <section className="rounded-[1.8rem] bg-white/76 p-3.5 shadow-[0_24px_46px_-36px_rgba(51,104,134,0.22)] ring-1 ring-white/80 backdrop-blur-sm">
                         <div className="mb-3 flex items-center gap-2">
                           <span className="relative flex h-2.5 w-2.5 shrink-0">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
@@ -4467,6 +4488,7 @@ export function MarketplacePage() {
                         <div className={`${isNativePlatform ? 'flex flex-col gap-2.5' : 'flex flex-col gap-3'}`}>
                           {live.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
+                            const displayName = formatCondominiumDisplayName(name);
                             const logoUrl = resolveCondominiumAssetUrl(condominium, 'logo');
                             const bannerUrl = resolveCondominiumAssetUrl(condominium, 'banner') || logoUrl;
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
@@ -4475,14 +4497,14 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event)}
-                                className={`group relative w-full overflow-hidden rounded-[1.65rem] border p-3 text-left transition-all duration-300 active:scale-[0.985] ${
+                                className={`group relative w-full overflow-hidden rounded-[1.65rem] p-3 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
-                                    ? 'border-[#336886]/24 bg-white shadow-[0_22px_42px_-26px_rgba(51,104,134,0.3)] ring-1 ring-[#336886]/10'
-                                    : 'border-slate-200/85 bg-white shadow-[0_18px_34px_-28px_rgba(15,23,42,0.22)] hover:border-[#336886]/18 hover:shadow-[0_24px_40px_-28px_rgba(51,104,134,0.24)]'
+                                    ? 'bg-white shadow-[0_22px_42px_-27px_rgba(51,104,134,0.34)] ring-1 ring-[#336886]/16'
+                                    : 'bg-white shadow-[0_18px_34px_-29px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/70 hover:shadow-[0_24px_40px_-29px_rgba(51,104,134,0.26)] hover:ring-[#336886]/16'
                                 }`}
                               >
                                 <div className="relative flex items-center gap-3">
-                                  <div className="relative h-[5.25rem] w-[6.8rem] shrink-0 overflow-hidden rounded-[1.3rem] border border-slate-200/80 bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.34)]">
+                                  <div className="relative h-[5.45rem] w-[6.8rem] shrink-0 overflow-hidden rounded-[1.35rem] bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.34)] ring-1 ring-white/80">
                                     <img src={bannerUrl} alt="" aria-hidden loading="lazy" decoding="async" className="h-full w-full object-cover" />
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.24)_100%)]" />
                                     <div className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-[8px] font-black uppercase tracking-[0.09em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(15,23,42,0.32)]">
@@ -4492,8 +4514,8 @@ export function MarketplacePage() {
                                       </span>
                                       Ao vivo
                                     </div>
-                                    <div className="absolute bottom-2 left-2 h-10 w-10 overflow-hidden rounded-[0.95rem] border border-white/90 bg-white/95 p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.52)]">
-                                      <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                    <div className="absolute bottom-2 left-2 h-10 w-10 overflow-hidden rounded-[0.95rem] border-2 border-white bg-white/96 p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.52)]">
+                                      <img src={logoUrl} alt={displayName} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                     </div>
                                     <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white shadow-[0_10px_20px_-12px_rgba(16,185,129,0.88)]">
                                       <Sparkle size={10} weight="fill" />
@@ -4502,8 +4524,13 @@ export function MarketplacePage() {
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-start justify-between gap-2">
                                       <div className="min-w-0">
-                                        <span className="block truncate text-[15px] font-black leading-tight text-slate-900">{name}</span>
-                                        {region ? <span className="mt-1 block truncate text-[11px] font-medium text-slate-500">{region}</span> : null}
+                                        <span className="block truncate text-[16px] font-semibold leading-tight text-slate-900">{displayName}</span>
+                                        {region ? (
+                                          <span className="mt-1 inline-flex max-w-full items-center gap-1 truncate text-[11px] font-medium text-slate-500">
+                                            <MapPinLine size={11} weight="duotone" className="shrink-0 text-slate-400" />
+                                            <span className="truncate">{region}</span>
+                                          </span>
+                                        ) : null}
                                       </div>
                                       {active ? (
                                         <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-[8px] font-black uppercase tracking-[0.1em] text-white">
@@ -4542,7 +4569,7 @@ export function MarketplacePage() {
 
                     {/* ── EM BREVE ── */}
                     {upcoming.length > 0 && (
-                      <section className="rounded-[1.7rem] border border-slate-200/80 bg-white/72 p-3.5 shadow-[0_20px_38px_-32px_rgba(15,23,42,0.16)] ring-1 ring-white/65 backdrop-blur-sm">
+                      <section className="rounded-[1.7rem] bg-white/74 p-3.5 shadow-[0_20px_38px_-34px_rgba(15,23,42,0.18)] ring-1 ring-white/78 backdrop-blur-sm">
                         <div className="mb-3 flex items-center gap-2">
                           <Clock size={13} weight="fill" className="text-[#336886]" />
                           <div>
@@ -4554,6 +4581,7 @@ export function MarketplacePage() {
                         <div className="flex flex-col gap-3">
                           {upcoming.map(({ condominium, slug, name, region, event }) => {
                             const active = selectedCondominiumSlug === slug;
+                            const displayName = formatCondominiumDisplayName(name);
                             const logoUrl = resolveCondominiumAssetUrl(condominium, 'logo');
                             const bannerUrl = resolveCondominiumAssetUrl(condominium, 'banner') || logoUrl;
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
@@ -4562,26 +4590,31 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event)}
-                                className={`group relative w-full overflow-hidden rounded-[1.65rem] border p-3 text-left transition-all duration-300 active:scale-[0.985] ${
+                                className={`group relative w-full overflow-hidden rounded-[1.65rem] p-3 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
-                                    ? 'border-[#336886]/26 bg-white shadow-[0_20px_38px_-26px_rgba(51,104,134,0.32)] ring-1 ring-[#336886]/10'
-                                    : 'border-white/80 bg-white/92 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.25)] hover:border-[#336886]/18 hover:shadow-[0_24px_40px_-28px_rgba(51,104,134,0.22)]'
+                                    ? 'bg-white shadow-[0_20px_38px_-27px_rgba(51,104,134,0.32)] ring-1 ring-[#336886]/16'
+                                    : 'bg-white/94 shadow-[0_18px_34px_-29px_rgba(15,23,42,0.25)] ring-1 ring-slate-200/68 hover:shadow-[0_24px_40px_-29px_rgba(51,104,134,0.23)] hover:ring-[#336886]/16'
                                 }`}
                               >
                                 <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-[radial-gradient(circle_at_center,rgba(51,104,134,0.09),transparent_72%)]" />
                                 <div className="relative flex items-center gap-3">
-                                  <div className="relative h-[4.95rem] w-[6.2rem] shrink-0 overflow-hidden rounded-[1.2rem] border border-slate-200/80 bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.42)]">
+                                  <div className="relative h-[5.15rem] w-[6.35rem] shrink-0 overflow-hidden rounded-[1.3rem] bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.42)] ring-1 ring-white/80">
                                     <img src={bannerUrl} alt="" aria-hidden loading="lazy" decoding="async" className="h-full w-full object-cover" />
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.26)_100%)]" />
-                                    <div className="absolute bottom-2 left-2 h-9 w-9 overflow-hidden rounded-[0.9rem] border border-white/90 bg-white/95 p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.52)]">
-                                      <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                    <div className="absolute bottom-2 left-2 h-9 w-9 overflow-hidden rounded-[0.9rem] border-2 border-white bg-white/96 p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.52)]">
+                                      <img src={logoUrl} alt={displayName} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                     </div>
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-start justify-between gap-2">
                                       <div className="min-w-0">
-                                        <span className="block truncate text-[15px] font-black leading-tight text-slate-900">{name}</span>
-                                        {region ? <span className="mt-1 block truncate text-[11px] font-medium text-slate-500">{region}</span> : null}
+                                        <span className="block truncate text-[16px] font-semibold leading-tight text-slate-900">{displayName}</span>
+                                        {region ? (
+                                          <span className="mt-1 inline-flex max-w-full items-center gap-1 truncate text-[11px] font-medium text-slate-500">
+                                            <MapPinLine size={11} weight="duotone" className="shrink-0 text-slate-400" />
+                                            <span className="truncate">{region}</span>
+                                          </span>
+                                        ) : null}
                                       </div>
                                       {active ? <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-[8px] font-black uppercase tracking-[0.1em] text-white">Atual</span> : null}
                                     </div>
@@ -4612,7 +4645,7 @@ export function MarketplacePage() {
 
                     {/* ── SEM AGENDA ── */}
                     {none.length > 0 && (
-                      <section className="rounded-[1.65rem] border border-slate-200/75 bg-slate-50/76 p-3.5 shadow-[0_18px_34px_-32px_rgba(15,23,42,0.12)] ring-1 ring-white/55">
+                      <section className="rounded-[1.65rem] bg-slate-50/76 p-3.5 shadow-[0_18px_34px_-34px_rgba(15,23,42,0.14)] ring-1 ring-white/70">
                         <div className="mb-3 flex items-center gap-2">
                           <CalendarBlank size={12} weight="duotone" className="text-slate-400" />
                           <div>
@@ -4624,6 +4657,7 @@ export function MarketplacePage() {
                         <div className="flex flex-col gap-2.5">
                           {none.map(({ condominium, slug, name, region }) => {
                             const active = selectedCondominiumSlug === slug;
+                            const displayName = formatCondominiumDisplayName(name);
                             const logoUrl = resolveCondominiumAssetUrl(condominium, 'logo');
                             const bannerUrl = resolveCondominiumAssetUrl(condominium, 'banner') || logoUrl;
                             return (
@@ -4631,23 +4665,28 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, null)}
-                                className={`group relative w-full overflow-hidden rounded-[1.45rem] border p-3 text-left transition-all duration-200 active:scale-[0.99] ${
+                                className={`group relative w-full overflow-hidden rounded-[1.45rem] p-3 text-left transition-all duration-200 active:scale-[0.99] ${
                                   active
-                                    ? 'border-[#336886]/16 bg-white shadow-[0_16px_32px_-26px_rgba(51,104,134,0.22)]'
-                                    : 'border-white/80 bg-white/88 shadow-[0_14px_28px_-26px_rgba(15,23,42,0.22)] hover:border-slate-200 hover:bg-white'
+                                    ? 'bg-white shadow-[0_16px_32px_-27px_rgba(51,104,134,0.24)] ring-1 ring-[#336886]/14'
+                                    : 'bg-white/90 shadow-[0_14px_28px_-27px_rgba(15,23,42,0.23)] ring-1 ring-slate-200/62 hover:bg-white hover:ring-slate-200'
                                 }`}
                               >
                                 <div className="relative flex items-center gap-3">
-                                  <div className="relative h-[4.65rem] w-[5.5rem] shrink-0 overflow-hidden rounded-[1.1rem] border border-slate-200/80 bg-slate-100">
+                                  <div className="relative h-[4.85rem] w-[5.8rem] shrink-0 overflow-hidden rounded-[1.2rem] bg-slate-100 ring-1 ring-white/75">
                                     <img src={bannerUrl} alt="" aria-hidden loading="lazy" decoding="async" className="h-full w-full object-cover opacity-90" />
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.12)_0%,rgba(255,255,255,0.02)_45%,rgba(15,23,42,0.18)_100%)]" />
-                                    <div className="absolute bottom-2 left-2 h-8 w-8 overflow-hidden rounded-[0.8rem] border border-white/90 bg-white/95 p-1 shadow-[0_10px_20px_-16px_rgba(15,23,42,0.55)]">
-                                      <img src={logoUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
+                                    <div className="absolute bottom-2 left-2 h-8 w-8 overflow-hidden rounded-[0.8rem] border-2 border-white bg-white/96 p-1 shadow-[0_10px_20px_-16px_rgba(15,23,42,0.55)]">
+                                      <img src={logoUrl} alt={displayName} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                     </div>
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <span className={`block truncate text-[14px] font-black ${active ? 'text-[#336886]' : 'text-slate-800'}`}>{name}</span>
-                                    {region ? <span className="mt-1 block truncate text-[11px] font-medium text-slate-500">{region}</span> : null}
+                                    <span className={`block truncate text-[15px] font-semibold ${active ? 'text-[#336886]' : 'text-slate-800'}`}>{displayName}</span>
+                                    {region ? (
+                                      <span className="mt-1 inline-flex max-w-full items-center gap-1 truncate text-[11px] font-medium text-slate-500">
+                                        <MapPinLine size={11} weight="duotone" className="shrink-0 text-slate-400" />
+                                        <span className="truncate">{region}</span>
+                                      </span>
+                                    ) : null}
                                     <div className="mt-2 flex flex-wrap items-center gap-2">
                                       <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-slate-500">
                                         Sem agenda
