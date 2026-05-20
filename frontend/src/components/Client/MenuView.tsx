@@ -1428,12 +1428,12 @@ export const MenuView = ({
                 return (
                 <div
                   key={item.id}
-                  className={`group bg-white rounded-[2rem] border border-slate-100/50 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)] p-3.5 sm:p-4 grid grid-cols-[1fr_auto] gap-4 md:hover:scale-[1.015] md:hover:shadow-[0_12px_30px_-10px_rgba(15,23,42,0.12)] active:scale-[0.98] transition-all duration-300 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
+                  className={`group bg-white rounded-[2rem] border border-slate-100/60 shadow-[0_16px_36px_-28px_rgba(15,23,42,0.22)] p-4 pl-[1.125rem] sm:p-5 grid grid-cols-[minmax(0,1fr)_auto] gap-4 sm:gap-5 md:hover:scale-[1.01] md:hover:shadow-[0_22px_44px_-30px_rgba(15,23,42,0.28)] active:scale-[0.98] transition-all duration-300 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
                   }}
                 >
-                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                  <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                     <div>
                       <button
                         type="button"
@@ -1443,16 +1443,16 @@ export const MenuView = ({
                             openProductModal(item);
                           }
                         }}
-                        className={`text-left font-black text-slate-900 text-[15px] sm:text-[17px] leading-tight line-clamp-2 transition-colors ${(!staffView || allowStaffModal) ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
+                        className={`text-left font-black text-slate-950 text-[16px] sm:text-[18px] leading-tight line-clamp-2 transition-colors ${(!staffView || allowStaffModal) ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
                       >
                         {item.name}
                       </button>
                       {item.description && (
-                        <p className="mt-1.5 text-[13px] sm:text-sm text-slate-500 leading-relaxed line-clamp-2 font-medium">{item.description}</p>
+                        <p className="mt-2 text-[13px] sm:text-sm text-slate-500 leading-relaxed line-clamp-2 font-medium">{item.description}</p>
                       )}
                     </div>
 
-                    <div className="mt-3 flex flex-col items-start gap-2.5">
+                    <div className="mt-4 flex flex-col items-start gap-2.5">
                       {(() => {
                         const priceNode = (
                           <div className="flex items-baseline gap-1.5 leading-none">
@@ -1484,7 +1484,14 @@ export const MenuView = ({
                           </span>
                         )}
                         {hasConfigurableOptions && (
-                          <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full">
+                          <span
+                            className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider"
+                            style={{
+                              backgroundColor: `${catalogPrimaryColor}10`,
+                              borderColor: `${catalogPrimaryColor}18`,
+                              color: catalogPrimaryColor,
+                            }}
+                          >
                             Customizável
                           </span>
                         )}
@@ -1497,8 +1504,8 @@ export const MenuView = ({
                     </div>
                   </div>
 
-                  <div className={`flex flex-col items-end justify-center flex-shrink-0 ${staffView ? "min-w-[124px]" : "min-w-[110px]"}`}>
-                    <div data-menu-item-media className="relative h-[110px] w-[110px] sm:h-[124px] sm:w-[124px]">
+                  <div className={`flex flex-col items-end justify-center flex-shrink-0 ${staffView ? "min-w-[124px]" : "min-w-[112px]"}`}>
+                    <div data-menu-item-media className="relative h-[112px] w-[112px] sm:h-[124px] sm:w-[124px]">
                       <button
                         type="button"
                         onClick={(event) => {
@@ -1507,7 +1514,7 @@ export const MenuView = ({
                             openProductModal(item);
                           }
                         }}
-                        className={`h-full w-full rounded-[2rem] overflow-hidden bg-slate-50 border border-slate-100/50 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
+                        className={`h-full w-full rounded-[1.75rem] overflow-hidden bg-slate-50 border border-white shadow-[0_14px_26px_-20px_rgba(15,23,42,0.35)] ring-1 ring-slate-100/75 ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
                       >
                         {item.imageUrl ? (
                           <img
@@ -1525,12 +1532,12 @@ export const MenuView = ({
                       </button>
 
                       {canOrder && !stockState.soldOut && (
-                        <div className="absolute -bottom-1 -right-1">
+                        <div className="absolute -bottom-1.5 -right-1.5">
                           {itemQty <= 0 ? (
                             <button
                               type="button"
                               onClick={handleIncrement}
-                              className="h-10 w-10 rounded-2xl shadow-[0_8px_16px_-4px_rgba(15,23,42,0.25)] border-2 border-white inline-flex items-center justify-center transition-all duration-300 active:scale-90 hover:scale-105"
+                              className="h-11 w-11 rounded-[1.15rem] shadow-[0_16px_30px_-14px_rgba(15,23,42,0.55)] border-[3px] border-white inline-flex items-center justify-center ring-1 ring-black/5 transition-all duration-300 active:scale-90 hover:scale-105"
                               style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
                             >
                               <Plus size={18} weight="bold" />
