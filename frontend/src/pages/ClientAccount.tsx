@@ -68,6 +68,7 @@ export function ClientAccount() {
   const [pwdMessage, setPwdMessage] = useState('');
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState('');
+  const [profileEditing, setProfileEditing] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'unknown'>('unknown');
   const [biometricSupported, setBiometricSupported] = useState(false);
@@ -282,11 +283,19 @@ export function ClientAccount() {
       setMe(updated || null);
       syncCustomerSession(updated || null);
       setProfileMessage('Perfil atualizado com sucesso.');
+      setProfileEditing(false);
     } catch (e: any) {
       setProfileMessage(e?.message || 'Erro ao salvar perfil.');
     } finally {
       setProfileSaving(false);
     }
+  };
+
+  const handleCancelProfileEdit = () => {
+    setNameDraft(String(me?.fullName || ''));
+    setPhoneDraft(String(me?.phone || ''));
+    setProfileMessage('');
+    setProfileEditing(false);
   };
 
   const readFileAsDataUrl = (file: File) =>
@@ -610,20 +619,18 @@ export function ClientAccount() {
     {
       id: 'orders',
       label: 'Meus pedidos',
+      helper: orders.length === 1 ? '1 pedido salvo' : `${orders.length} pedidos salvos`,
       icon: Package,
+      iconTone: 'bg-sky-50 text-sky-700',
       onClick: () => navigate('/cliente/pedidos'),
     },
     {
       id: 'addresses',
       label: 'Meus endereços',
+      helper: addresses.length ? `${addresses.length} endereço${addresses.length === 1 ? '' : 's'}` : 'Cadastre seu principal',
       icon: MapPinLine,
+      iconTone: 'bg-emerald-50 text-emerald-700',
       onClick: () => navigate('/cliente/enderecos'),
-    },
-    {
-      id: 'settings',
-      label: 'Ajustes do app',
-      icon: ShieldCheck,
-      onClick: () => navigate('/cliente/conta?section=settings'),
     },
   ];
 
@@ -720,7 +727,36 @@ export function ClientAccount() {
                     </div>
                   </div>
                 </div>
-                <div className="relative mt-4 grid gap-2 sm:grid-cols-3">
+
+                <div className="relative mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileMessage('');
+                      setProfileEditing(true);
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#bfd6e4] bg-white/80 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-[#153A4C] shadow-[0_12px_28px_-24px_rgba(15,23,42,0.35)] transition hover:bg-white active:scale-[0.98]"
+                  >
+                    <UserCircle size={15} weight="duotone" />
+                    Editar perfil
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/cliente/conta?section=settings')}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/55 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-slate-600 transition hover:bg-white active:scale-[0.98]"
+                  >
+                    <ShieldCheck size={15} weight="duotone" />
+                    Segurança
+                  </button>
+                </div>
+
+                {profileMessage && !profileEditing ? (
+                  <p className="relative mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-center text-[11px] font-bold text-emerald-700">
+                    {profileMessage}
+                  </p>
+                ) : null}
+
+                <div className="relative mt-6 grid grid-cols-2 gap-3">
                   {quickAccountActions.map((action) => {
                     const Icon = action.icon;
                     return (
@@ -728,31 +764,52 @@ export function ClientAccount() {
                         key={action.id}
                         type="button"
                         onClick={action.onClick}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/86 px-4 py-3 text-xs font-black text-slate-700 shadow-[0_12px_26px_-22px_rgba(15,23,42,0.22)] transition hover:bg-white active:scale-[0.99]"
+                        className="group relative flex min-h-[6.25rem] flex-col items-start justify-between rounded-[1.65rem] bg-white/88 p-4 text-left shadow-[0_18px_38px_-30px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/70 transition hover:bg-white active:scale-[0.99]"
                       >
-                        <Icon size={16} weight="duotone" />
-                        {action.label}
+                        <span className={`grid h-10 w-10 place-items-center rounded-2xl ${action.iconTone}`}>
+                          <Icon size={18} weight="duotone" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-[13px] font-black text-slate-900">{action.label}</span>
+                          <span className="mt-1 block text-[10px] font-bold leading-tight text-slate-500">{action.helper}</span>
+                        </span>
+                        <CaretRight size={14} weight="bold" className="absolute right-4 top-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-slate-500" />
                       </button>
                     );
                   })}
                 </div>
 
-                <div className="relative mt-8 space-y-3">
-                  <div className="grid gap-2">
-                    <label className="text-xs font-semibold text-slate-500 ml-1">Nome</label>
-                    <div className="relative">
-                      <UserCircle size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        {...inputAssistProps.name}
-                        value={nameDraft}
-                        onChange={e => setNameDraft(e.target.value)}
-                        className="w-full rounded-2xl border border-slate-100 bg-[#EEF2F7] py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
-                      />
+                {profileEditing ? (
+                  <div className="relative mt-7 space-y-3 rounded-[1.8rem] border border-slate-200/80 bg-white/82 p-4 shadow-[0_18px_38px_-32px_rgba(15,23,42,0.24)]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Editar perfil</p>
+                        <p className="mt-1 text-xs font-semibold text-slate-500">Altere apenas nome e telefone quando precisar.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCancelProfileEdit}
+                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500 active:scale-95"
+                      >
+                        Fechar
+                      </button>
                     </div>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
+
                     <div className="grid gap-2">
-                      <label className="text-xs font-semibold text-slate-500 ml-1">E-mail</label>
+                      <label className="ml-1 text-xs font-semibold text-slate-500">Nome</label>
+                      <div className="relative">
+                        <UserCircle size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          {...inputAssistProps.name}
+                          value={nameDraft}
+                          onChange={e => setNameDraft(e.target.value)}
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition focus:border-[#bfd6e4] focus:bg-white focus:ring-2 focus:ring-[#336886]/10"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-2">
+                      <label className="ml-1 text-xs font-semibold text-slate-500">E-mail</label>
                       <div className="relative">
                         <EnvelopeSimple size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
@@ -763,29 +820,30 @@ export function ClientAccount() {
                       </div>
                     </div>
                     <div className="grid gap-2">
-                      <label className="text-xs font-semibold text-slate-500 ml-1">Telefone</label>
+                      <label className="ml-1 text-xs font-semibold text-slate-500">Telefone</label>
                       <div className="relative">
                         <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
                           {...inputAssistProps.phoneNational}
                           value={phoneDraft}
                           onChange={e => setPhoneDraft(e.target.value)}
-                          className="w-full rounded-2xl border border-slate-100 bg-[#EEF2F7] py-3 pl-11 pr-4 text-sm font-bold text-slate-700 focus:border-slate-900/20 focus:outline-none"
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition focus:border-[#bfd6e4] focus:bg-white focus:ring-2 focus:ring-[#336886]/10"
                         />
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={handleSaveProfile}
-                    disabled={profileSaving}
-                    className="w-full rounded-2xl bg-slate-900 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-white shadow-lg shadow-slate-900/20 active:scale-95 transition-all disabled:opacity-50"
-                  >
-                    {profileSaving ? 'Salvando...' : 'Salvar Alterações'}
-                  </button>
-                  {profileMessage && (
-                    <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-center text-[11px] font-bold text-emerald-600">{profileMessage}</p>
-                  )}
-                </div>
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={profileSaving}
+                      className="w-full rounded-2xl bg-slate-900 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-white shadow-lg shadow-slate-900/20 transition-all active:scale-95 disabled:opacity-50"
+                    >
+                      {profileSaving ? 'Salvando...' : 'Salvar alterações'}
+                    </button>
+                    {profileMessage ? (
+                      <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-center text-[11px] font-bold text-emerald-700">{profileMessage}</p>
+                    ) : null}
+                  </div>
+                ) : null}
               </section>
 
               {/* Seção 2: Endereços */}
@@ -859,27 +917,63 @@ export function ClientAccount() {
               </section>
 
               {/* Seção 3: Segurança */}
-              <section className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm space-y-4">
-                <div className="space-y-4">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+              <section className="space-y-4 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm">
+                <div>
+                  <h3 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
                     <ShieldCheck size={16} weight="duotone" className="text-indigo-500" />
                     Segurança
                   </h3>
-                  <div className="space-y-2">
+                  <p className="mt-1 text-xs font-semibold text-slate-500">Senha, MFA e permissões do aplicativo.</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => navigate('/cliente/conta?section=settings')}
+                  className="group flex w-full items-center justify-between gap-3 rounded-[1.45rem] bg-white px-1 py-1 text-left transition active:scale-[0.99]"
+                >
+                  <span className="flex min-w-0 items-center gap-3">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#edf5fa] text-[#336886]">
+                      <ShieldCheck size={18} weight="duotone" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-black text-slate-900">Configurações de acesso</span>
+                      <span className="mt-0.5 block text-xs font-semibold leading-tight text-slate-500">MFA, biometria, câmera e notificações.</span>
+                    </span>
+                  </span>
+                  <CaretRight size={16} weight="bold" className="shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-slate-500" />
+                </button>
+
+                <div className="rounded-[1.6rem] border border-slate-200/80 bg-slate-50/80 p-4">
+                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Trocar senha</p>
+                  <div className="space-y-3">
                     <input
+                      {...inputAssistProps.currentPassword}
+                      type="password"
+                      placeholder="Senha atual"
+                      value={pwdForm.currentPassword}
+                      onChange={e => setPwdForm(p => ({...p, currentPassword: e.target.value}))}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#bfd6e4] focus:ring-2 focus:ring-[#336886]/10"
+                    />
+                    <input
+                      {...inputAssistProps.newPassword}
                       type="password"
                       placeholder="Nova senha"
                       value={pwdForm.newPassword}
                       onChange={e => setPwdForm(p => ({...p, newPassword: e.target.value}))}
-                      className="w-full rounded-2xl border border-slate-100 bg-[#EEF2F7] px-4 py-3 text-[13px] font-bold focus:outline-none"
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#bfd6e4] focus:ring-2 focus:ring-[#336886]/10"
                     />
                     <button
                       onClick={handleChangePassword}
                       disabled={pwdLoading}
-                      className="w-full rounded-2xl bg-slate-100 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 active:scale-95 transition-all"
+                      className="w-full rounded-2xl border border-[#bfd6e4] bg-white py-3 text-[10px] font-black uppercase tracking-widest text-[#153A4C] transition-all active:scale-95 disabled:opacity-50"
                     >
-                      Trocar Senha
+                      {pwdLoading ? 'Atualizando...' : 'Trocar senha'}
                     </button>
+                    {pwdMessage ? (
+                      <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-center text-[11px] font-bold text-emerald-700">
+                        {pwdMessage}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </section>

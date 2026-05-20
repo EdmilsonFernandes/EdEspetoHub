@@ -286,58 +286,40 @@ export function AddressDistance() {
         />
 
         <div className="space-y-4 p-4">
-          <section className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white px-5 py-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.3)]">
-            <div className="flex items-start gap-4">
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[1.5rem] bg-[#edf5fa] text-[#336886] shadow-inner">
-                <MapPinLine size={26} weight="duotone" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Central de endereços</p>
-                  <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
-                    {addresses.length} {addresses.length === 1 ? 'endereço salvo' : 'endereços salvos'}
-                  </span>
-                </div>
-                <h2 className="mt-1 text-lg font-black text-slate-900">Endereço ativo</h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  {defaultAddress
-                    ? `${defaultAddress.label || 'Endereço principal'} • ${activeAddressTitle}`
-                    : 'Cadastre um endereço principal para acelerar pedidos com entrega.'}
+          <div className="flex flex-col gap-3 rounded-[1.8rem] bg-white/72 p-3 shadow-[0_20px_48px_-40px_rgba(15,23,42,0.28)] ring-1 ring-white/80 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3 px-1">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#edf5fa] text-[#336886]">
+                <MapPinLine size={20} weight="duotone" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">
+                  {addresses.length} {addresses.length === 1 ? 'endereço salvo' : 'endereços salvos'}
                 </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center rounded-full border border-[#d6e3eb] bg-[#f5f9fc] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
-                    Checkout alinhado
-                  </span>
-                  {defaultAddress ? (
-                    <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
-                      Principal definido
-                    </span>
-                  ) : null}
-                </div>
+                <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
+                  {defaultAddress ? `${defaultAddress.label || 'Principal'} • ${activeAddressTitle}` : 'Cadastre seu endereço principal.'}
+                </p>
               </div>
             </div>
-          </section>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
             <button
               type="button"
               onClick={handleOpenNewForm}
-              className="flex w-full items-center justify-center gap-2 rounded-[1.6rem] bg-[linear-gradient(135deg,#153A4C,#336886)] py-4 text-xs font-black uppercase tracking-[0.22em] text-white shadow-[0_20px_45px_-28px_rgba(51,104,134,0.55)] transition-all active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-[1.35rem] bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3.5 text-xs font-black uppercase tracking-[0.18em] text-white shadow-[0_20px_45px_-28px_rgba(51,104,134,0.55)] transition-all active:scale-[0.98] sm:w-auto"
             >
               <Plus size={16} weight="bold" />
               Novo endereço
             </button>
-
-            {showForm ? (
-              <button
-                type="button"
-                onClick={resetFormState}
-                className="rounded-[1.6rem] border border-slate-200 bg-white px-5 py-4 text-xs font-black uppercase tracking-[0.18em] text-slate-500 shadow-sm transition-all active:scale-[0.98]"
-              >
-                Fechar edição
-              </button>
-            ) : null}
           </div>
+
+          {showForm ? (
+            <button
+              type="button"
+              onClick={resetFormState}
+              className="w-full rounded-[1.35rem] border border-slate-200 bg-white px-5 py-3.5 text-xs font-black uppercase tracking-[0.18em] text-slate-500 shadow-sm transition-all active:scale-[0.98]"
+            >
+              Fechar edição
+            </button>
+          ) : null}
 
           {showForm ? (
             <div className="animate-in fade-in slide-in-from-top-4 duration-300 overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_30px_70px_-44px_rgba(15,23,42,0.34)]">
@@ -595,18 +577,18 @@ export function AddressDistance() {
                         <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{buildAddressMeta(addr)}</p>
 
                         {addr.recipientName || addr.phone ? (
-                          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold text-slate-500">
                             {addr.recipientName ? (
-                              <div className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-2">
-                                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Recebedor</p>
-                                <p className="mt-1 text-xs font-bold text-slate-700">{addr.recipientName}</p>
-                              </div>
+                              <span className="inline-flex min-w-0 items-center gap-1.5">
+                                <User size={13} weight="duotone" className="shrink-0 text-slate-400" />
+                                <span className="truncate">{addr.recipientName}</span>
+                              </span>
                             ) : null}
                             {addr.phone ? (
-                              <div className="rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-2">
-                                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Telefone</p>
-                                <p className="mt-1 text-xs font-bold text-slate-700">{formatPhoneBr(addr.phone)}</p>
-                              </div>
+                              <span className="inline-flex min-w-0 items-center gap-1.5">
+                                <Phone size={13} weight="duotone" className="shrink-0 text-slate-400" />
+                                <span className="truncate">{formatPhoneBr(addr.phone)}</span>
+                              </span>
                             ) : null}
                           </div>
                         ) : null}
