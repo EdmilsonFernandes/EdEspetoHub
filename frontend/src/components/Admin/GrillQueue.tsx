@@ -43,7 +43,7 @@ import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
 import { exportToCsv } from "../../utils/export";
 import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from "../../utils/orderNotificationSound";
-import { filterAdminQueueProducts, getAdminQueueLoadingState } from "../../utils/adminQueueUx";
+import { buildAdminTableGroups, filterAdminQueueProducts, getAdminQueueLoadingState } from "../../utils/adminQueueUx";
 
 const normalizeSearchText = (value: any) =>
   String(value || "")
@@ -777,6 +777,107 @@ const OrderSummaryCard = ({
   })()
 );
 
+const getTableStageMeta = (stage: string) => {
+  if (stage === "pending") {
+    return {
+      label: "Aguardando",
+      icon: Clock,
+      className: "border-amber-200 bg-amber-50 text-amber-700",
+    };
+  }
+  if (stage === "preparing") {
+    return {
+      label: "Em preparo",
+      icon: Play,
+      className: "border-sky-200 bg-sky-50 text-sky-700",
+    };
+  }
+  if (stage === "ready") {
+    return {
+      label: "Pronta",
+      icon: Check,
+      className: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    };
+  }
+  return {
+    label: "Em andamento",
+    icon: CheckSquare,
+    className: "border-orange-200 bg-orange-50 text-orange-700",
+  };
+};
+
+const TableSummaryCard = ({ group, elapsedLabel, onClick }: any) => {
+  const stageMeta = getTableStageMeta(group?.stage);
+  const StageIcon = stageMeta.icon;
+  const previewItems = Array.isArray(group?.previewItems) ? group.previewItems : [];
+
+  return (
+    <button
+      type="button"
+      data-testid="admin-table-card"
+      onClick={onClick}
+      className="group relative min-h-[178px] w-full overflow-hidden rounded-[1.75rem] border border-orange-200/80 bg-[linear-gradient(135deg,#fff7ed_0%,#ffffff_48%,#e8f6f3_100%)] p-4 text-left shadow-[0_18px_45px_-34px_rgba(15,23,42,0.38)] transition-all hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-[0_24px_54px_-34px_rgba(230,81,0,0.35)] active:scale-[0.99]"
+    >
+      <span className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#F28C28]/12 blur-2xl transition-transform group-hover:scale-125" />
+      <span className="pointer-events-none absolute -bottom-10 left-4 h-28 w-28 rounded-full bg-[#153A4C]/10 blur-2xl" />
+
+      <div className="relative flex h-full min-h-0 flex-col justify-between gap-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#E65100]">Mesa</p>
+            <div className="mt-1 flex min-w-0 items-center gap-2">
+              <span className="inline-flex h-12 min-w-12 items-center justify-center rounded-2xl bg-[#153A4C] px-3 text-xl font-black leading-none text-white shadow-[0_18px_32px_-24px_rgba(21,58,76,0.75)]">
+                {group?.displayNumber || "--"}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-black text-slate-900">
+                  {group?.ordersCount || 0} pedido{Number(group?.ordersCount || 0) === 1 ? "" : "s"} aberto{Number(group?.ordersCount || 0) === 1 ? "" : "s"}
+                </p>
+                <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                  {group?.itemsCount || 0} {Number(group?.itemsCount || 0) === 1 ? "item" : "itens"} na mesa
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${stageMeta.className}`}>
+            <StageIcon size={12} weight="duotone" />
+            {stageMeta.label}
+          </span>
+        </div>
+
+        <div className="relative rounded-2xl border border-white/70 bg-white/76 p-3 shadow-sm backdrop-blur">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Resumo</p>
+              <p className="mt-1 truncate text-xs font-semibold text-slate-600">
+                {previewItems.length
+                  ? previewItems.map((item: any) => `${item.qty}x ${item.name}`).join(" • ")
+                  : "Sem itens informados"}
+              </p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Total</p>
+              <p className="mt-1 whitespace-nowrap text-base font-black text-slate-900">{formatCurrency(Number(group?.total || 0))}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 border-t border-orange-100/80 pt-3">
+          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-bold text-slate-600 ring-1 ring-slate-200">
+            <Clock size={13} weight="duotone" className="shrink-0 text-[#E65100]" />
+            <span className="truncate">{elapsedLabel || "Agora"}</span>
+          </span>
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-2xl bg-[#E65100] px-3 py-2 text-xs font-black text-white shadow-[0_18px_30px_-24px_rgba(230,81,0,0.8)]">
+            Abrir mesa
+            <Monitor size={14} weight="duotone" />
+          </span>
+        </div>
+      </div>
+    </button>
+  );
+};
+
 export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inroute' | 'completed' }) => {
   const SAO_PAULO_TZ = 'America/Sao_Paulo';
   const QUEUE_POLL_VISIBLE_MS = 1500;
@@ -950,6 +1051,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [pullDistance, setPullDistance] = useState(0);
   const [isPullRefreshing, setIsPullRefreshing] = useState(false);
   const [queueFilter, setQueueFilter] = useState<'all' | 'condominium' | 'pending' | 'preparing' | 'ready' | 'late' | 'cancelled' | 'finalized'>('all');
+  const [queueViewMode, setQueueViewMode] = useState<'orders' | 'tables'>('orders');
+  const [tableSearch, setTableSearch] = useState('');
+  const [selectedTableNumber, setSelectedTableNumber] = useState<string | null>(null);
   const [reportRange, setReportRange] = useState<'today' | 'yesterday' | 'last7' | 'custom'>('today');
   const [reportFrom, setReportFrom] = useState(() => getNowKeyInSaoPaulo());
   const [reportTo, setReportTo] = useState(() => getNowKeyInSaoPaulo());
@@ -1058,6 +1162,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const closeOrderOverlays = () => {
     setConfirmModal(null);
     setSelectedOrder(null);
+    setSelectedTableNumber(null);
     setEditingFinalizedOrder(false);
   };
 
@@ -2647,6 +2752,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       .filter((order) => activeStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }, [queue]);
+  const allTableGroups = useMemo(() => buildAdminTableGroups(allActiveQueue, ''), [allActiveQueue]);
+  const visibleTableGroups = useMemo(() => buildAdminTableGroups(allActiveQueue, tableSearch), [allActiveQueue, tableSearch]);
+  const selectedTableGroup = useMemo(
+    () => allTableGroups.find((group) => group.tableKey === selectedTableNumber) || null,
+    [allTableGroups, selectedTableNumber]
+  );
   const filteredProductionQueue = useMemo(() => {
     if (queueFilter === 'all') return allActiveQueue;
     if (queueFilter === 'pending') return allActiveQueue.filter((order) => normalizeQueueStage(order) === 'pending');
@@ -2694,8 +2805,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const selectedOrderRank = useMemo(() => {
     if (!selectedOrder?.id) return 1;
     const idx = filteredProductionQueue.findIndex((order) => order.id === selectedOrder.id);
-    return idx >= 0 ? idx + 1 : 1;
-  }, [filteredProductionQueue, selectedOrder?.id]);
+    if (idx >= 0) return idx + 1;
+    const activeIdx = allActiveQueue.findIndex((order) => order.id === selectedOrder.id);
+    return activeIdx >= 0 ? activeIdx + 1 : 1;
+  }, [allActiveQueue, filteredProductionQueue, selectedOrder?.id]);
   const drawerOrder = useMemo(() => {
     if (!selectedOrder?.id) return null;
     return queue.find((order) => order.id === selectedOrder.id) || selectedOrder;
@@ -2719,6 +2832,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       setSelectedOrderIds([]);
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (queueViewMode === 'tables') {
+      setSelectedOrderIds([]);
+      return;
+    }
+    setSelectedTableNumber(null);
+  }, [queueViewMode]);
 
   useEffect(() => {
     if (!selectedOrderIds.length) return;
@@ -3152,41 +3273,98 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
 
               {activeTab === 'queue' && (
-                <div className="relative mt-0.5">
-                  <div className="flex flex-nowrap items-center gap-2 overflow-x-auto snap-x snap-mandatory pb-1.5 pr-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
-                  {[
-                    { id: 'all', label: 'Todos', value: allActiveQueue.length, activeClass: 'bg-slate-800 text-white' },
-                    { id: 'condominium', label: 'Condomínio', value: queueMetrics.condominium, activeClass: 'bg-emerald-500 text-white' },
-                    { id: 'pending', label: 'Pendentes', value: queueMetrics.pending, activeClass: 'bg-amber-500 text-white' },
-                    { id: 'preparing', label: 'Em Preparação', value: queueMetrics.preparing, activeClass: 'bg-sky-500 text-white' },
-                    { id: 'ready', label: 'Prontos', value: queueMetrics.ready, activeClass: 'bg-violet-500 text-white' },
-                    { id: 'late', label: 'Atrasados', value: queueMetrics.late, activeClass: 'bg-rose-500 text-white' },
-                    { id: 'cancelled', label: 'Cancelados', value: queueMetrics.cancelled, activeClass: 'bg-slate-500 text-white' },
-                  ].map((kpi) => (
-                    <button
-                      key={kpi.id}
-                      type="button"
-                      onClick={() => setQueueFilter(kpi.id as any)}
-                    className={`flex snap-start shrink-0 items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
-                        queueFilter === kpi.id
-                          ? kpi.activeClass
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
-                      <span>{kpi.label}</span>
-                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
-                        queueFilter === kpi.id
-                          ? 'bg-white/20 text-white'
-                          : Number(kpi.value) === 0
-                            ? 'bg-slate-100 text-slate-400'
-                            : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {kpi.value}
-                      </span>
-                    </button>
-                  ))}
+                <div className="mt-0.5 space-y-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-100 p-1 shadow-sm">
+                      <button
+                        type="button"
+                        data-testid="admin-queue-mode-orders"
+                        onClick={() => setQueueViewMode('orders')}
+                        className={`inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-black transition-all sm:flex-none ${
+                          queueViewMode === 'orders'
+                            ? 'bg-white text-slate-900 shadow-sm'
+                            : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                      >
+                        <CheckSquare size={14} weight="duotone" />
+                        Pedidos
+                        <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">{allActiveQueue.length}</span>
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="admin-queue-mode-tables"
+                        onClick={() => setQueueViewMode('tables')}
+                        className={`inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-black transition-all sm:flex-none ${
+                          queueViewMode === 'tables'
+                            ? 'bg-[#153A4C] text-white shadow-sm'
+                            : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                      >
+                        <Monitor size={14} weight="duotone" />
+                        Mesas
+                        <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${queueViewMode === 'tables' ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                          {allTableGroups.length}
+                        </span>
+                      </button>
+                    </div>
+
+                    {queueViewMode === 'tables' ? (
+                      <label className="relative flex min-h-11 w-full items-center rounded-2xl border border-orange-100 bg-white px-3 shadow-sm sm:max-w-xs">
+                        <Hash size={15} weight="duotone" className="shrink-0 text-[#E65100]" />
+                        <input
+                          data-testid="admin-table-search"
+                          type="search"
+                          value={tableSearch}
+                          onChange={(event) => setTableSearch(event.target.value)}
+                          placeholder="Buscar mesa..."
+                          className="min-w-0 flex-1 border-none bg-transparent px-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
+                        />
+                      </label>
+                    ) : null}
                   </div>
-                  <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white via-white/80 to-transparent" />
+
+                  {queueViewMode === 'orders' ? (
+                    <div className="relative">
+                      <div className="flex flex-nowrap items-center gap-2 overflow-x-auto snap-x snap-mandatory pb-1.5 pr-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+                      {[
+                        { id: 'all', label: 'Todos', value: allActiveQueue.length, activeClass: 'bg-slate-800 text-white' },
+                        { id: 'condominium', label: 'Condomínio', value: queueMetrics.condominium, activeClass: 'bg-emerald-500 text-white' },
+                        { id: 'pending', label: 'Pendentes', value: queueMetrics.pending, activeClass: 'bg-amber-500 text-white' },
+                        { id: 'preparing', label: 'Em Preparação', value: queueMetrics.preparing, activeClass: 'bg-sky-500 text-white' },
+                        { id: 'ready', label: 'Prontos', value: queueMetrics.ready, activeClass: 'bg-violet-500 text-white' },
+                        { id: 'late', label: 'Atrasados', value: queueMetrics.late, activeClass: 'bg-rose-500 text-white' },
+                        { id: 'cancelled', label: 'Cancelados', value: queueMetrics.cancelled, activeClass: 'bg-slate-500 text-white' },
+                      ].map((kpi) => (
+                        <button
+                          key={kpi.id}
+                          type="button"
+                          onClick={() => setQueueFilter(kpi.id as any)}
+                        className={`flex snap-start shrink-0 items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
+                            queueFilter === kpi.id
+                              ? kpi.activeClass
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          <span>{kpi.label}</span>
+                          <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
+                            queueFilter === kpi.id
+                              ? 'bg-white/20 text-white'
+                              : Number(kpi.value) === 0
+                                ? 'bg-slate-100 text-slate-400'
+                                : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {kpi.value}
+                          </span>
+                        </button>
+                      ))}
+                      </div>
+                      <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white via-white/80 to-transparent" />
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-orange-100 bg-orange-50/70 px-3 py-2 text-[11px] font-semibold text-orange-800">
+                      {visibleTableGroups.length} mesa{visibleTableGroups.length === 1 ? '' : 's'} aberta{visibleTableGroups.length === 1 ? '' : 's'} com pedido ativo. Clique na mesa para ver os pedidos e editar itens sem mudar a lógica da fila.
+                    </div>
+                  )}
                 </div>
               )}
             </>
@@ -3232,68 +3410,86 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           {queueLoadingState.showQueueSkeleton ? (
             <QueueLoadingSkeleton variant="queue" />
           ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 px-1 sm:px-0">
-            {filteredProductionQueue.map((order, index) => {
-              const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
-              const isArchived = false;
-              const isLate = orderAgeMs > PREP_SLA_MS;
-              const statusMeta = getStatusStyles(order.status, order.type, order);
-              const typeMeta = orderTypeMeta(order);
-              const paymentLabel = getPaymentMethodMeta(order.payment).label;
-              const totalLabel = formatCurrency(Number(order.total || 0));
-              const itemsCount = (order.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
-              const orderId = String(order.id);
-              const isSelected = selectedOrderIds.includes(orderId);
-              const canQuickStart = String(order?.status || '').toLowerCase() === 'pending';
-              const canQuickFinalize = canQuickFinalizeOrder(order);
-              const isTimerWarning = !isLate && orderAgeMs > PREP_SLA_MS * 0.6;
+            queueViewMode === 'tables' ? (
+              <div className="grid grid-cols-1 gap-2 px-1 sm:grid-cols-2 sm:gap-3 sm:px-0 lg:grid-cols-3 xl:grid-cols-4">
+                {visibleTableGroups.map((group) => (
+                  <TableSummaryCard
+                    key={`table-${group.tableKey}`}
+                    group={group}
+                    elapsedLabel={group.oldestCreatedAt ? formatDuration(Math.max(0, currentTime - group.oldestCreatedAt)) : 'Agora'}
+                    onClick={() => {
+                      setConfirmModal(null);
+                      setEditingFinalizedOrder(false);
+                      setSelectedOrder(null);
+                      setSelectedTableNumber(group.tableKey);
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 px-1 sm:px-0">
+                {filteredProductionQueue.map((order, index) => {
+                  const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
+                  const isArchived = false;
+                  const isLate = orderAgeMs > PREP_SLA_MS;
+                  const statusMeta = getStatusStyles(order.status, order.type, order);
+                  const typeMeta = orderTypeMeta(order);
+                  const paymentLabel = getPaymentMethodMeta(order.payment).label;
+                  const totalLabel = formatCurrency(Number(order.total || 0));
+                  const itemsCount = (order.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
+                  const orderId = String(order.id);
+                  const isSelected = selectedOrderIds.includes(orderId);
+                  const canQuickStart = String(order?.status || '').toLowerCase() === 'pending';
+                  const canQuickFinalize = canQuickFinalizeOrder(order);
+                  const isTimerWarning = !isLate && orderAgeMs > PREP_SLA_MS * 0.6;
 
-              return (
-                <OrderSummaryCard
-                  key={`summary-${order.id}`}
-                  order={order}
-                  queueRank={index + 1}
-                  orderDisplayId={formatOrderDisplayId(order.id, storeSlug)}
-                  isLate={isLate}
-                  elapsedLabel={elapsedTime[order.id] || "0s"}
-                  statusMeta={statusMeta}
-                  typeMeta={typeMeta}
-                  paymentLabel={paymentLabel}
-                  totalLabel={totalLabel}
-                  itemsCount={itemsCount}
-                  printBusy={isGeneratingPrint}
-                  canPrint={hasPrintAccess}
-                  onPrint={() => handlePrintOrder(order, index + 1)}
-                  archived={isArchived}
-                  showSelector={activeTab === 'queue'}
-                  selected={isSelected}
-                  onToggleSelect={() =>
-                    setSelectedOrderIds((prev) =>
-                      prev.includes(orderId) ? prev.filter((id) => id !== orderId) : [ ...prev, orderId ]
-                    )
-                  }
-                  showQuickStart={canQuickStart}
-                  onQuickStart={() => {
-                    pulseCta(order.id + '-quick-start');
-                    void handleAdvance(order.id, 'preparing');
-                  }}
-                  showQuickFinalize={canQuickFinalize}
-                  isTimerWarning={isTimerWarning}
-                  onQuickFinalize={() => {
-                    pulseCta(order.id + '-quick-finalize');
-                    openQuickFinalizeModal(order);
-                  }}
-                  onClick={() => {
-                    setConfirmModal(null);
-                    setEditingFinalizedOrder(false);
-                    setSelectedOrder(order);
-                  }}
-                />
-              );
-            })}
-          </div>
+                  return (
+                    <OrderSummaryCard
+                      key={`summary-${order.id}`}
+                      order={order}
+                      queueRank={index + 1}
+                      orderDisplayId={formatOrderDisplayId(order.id, storeSlug)}
+                      isLate={isLate}
+                      elapsedLabel={elapsedTime[order.id] || "0s"}
+                      statusMeta={statusMeta}
+                      typeMeta={typeMeta}
+                      paymentLabel={paymentLabel}
+                      totalLabel={totalLabel}
+                      itemsCount={itemsCount}
+                      printBusy={isGeneratingPrint}
+                      canPrint={hasPrintAccess}
+                      onPrint={() => handlePrintOrder(order, index + 1)}
+                      archived={isArchived}
+                      showSelector={activeTab === 'queue'}
+                      selected={isSelected}
+                      onToggleSelect={() =>
+                        setSelectedOrderIds((prev) =>
+                          prev.includes(orderId) ? prev.filter((id) => id !== orderId) : [ ...prev, orderId ]
+                        )
+                      }
+                      showQuickStart={canQuickStart}
+                      onQuickStart={() => {
+                        pulseCta(order.id + '-quick-start');
+                        void handleAdvance(order.id, 'preparing');
+                      }}
+                      showQuickFinalize={canQuickFinalize}
+                      isTimerWarning={isTimerWarning}
+                      onQuickFinalize={() => {
+                        pulseCta(order.id + '-quick-finalize');
+                        openQuickFinalizeModal(order);
+                      }}
+                      onClick={() => {
+                        setConfirmModal(null);
+                        setEditingFinalizedOrder(false);
+                        setSelectedOrder(order);
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )
           )}
-          {activeTab === 'queue' && selectedBulkOrders.length > 0 && (
+          {activeTab === 'queue' && queueViewMode === 'orders' && selectedBulkOrders.length > 0 && (
             <div className="fixed inset-x-0 bottom-[76px] sm:bottom-4 z-[120] flex justify-center px-3">
               <div className="w-full max-w-md rounded-2xl border border-emerald-200 bg-white/95 backdrop-blur shadow-lg px-3 py-2.5 flex items-center justify-between gap-2">
                 <span className="text-xs font-semibold text-slate-600">
@@ -3311,18 +3507,142 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
             </div>
           )}
-          {filteredProductionQueue.length === 0 && !loading && (
+          {((queueViewMode === 'tables' ? visibleTableGroups.length : filteredProductionQueue.length) === 0) && !loading && (
             <div className="col-span-full text-center text-gray-500 py-5 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
               <div className="mx-auto max-w-sm space-y-1">
                 <div className="mx-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500">
-                  <CheckSquare size={15} weight="duotone" />
+                  {queueViewMode === 'tables' ? <Monitor size={15} weight="duotone" /> : <CheckSquare size={15} weight="duotone" />}
                 </div>
-                <p className="text-xs font-semibold text-slate-700">Nenhum pedido aguardando.</p>
+                <p className="text-xs font-semibold text-slate-700">
+                  {queueViewMode === 'tables' ? 'Nenhuma mesa aberta.' : 'Nenhum pedido aguardando.'}
+                </p>
                 <p className="text-[11px] text-slate-500">
-                  Assim que chegar um pedido, ele aparece aqui com prioridade.
+                  {queueViewMode === 'tables'
+                    ? 'Quando chegar pedido de mesa, ele aparece agrupado pelo número.'
+                    : 'Assim que chegar um pedido, ele aparece aqui com prioridade.'}
                 </p>
               </div>
             </div>
+          )}
+          {selectedTableGroup && createPortal(
+            <div className="fixed inset-0 z-[9998] overflow-hidden md:flex md:items-center md:justify-center md:px-6 md:py-6">
+              <div
+                className="fixed inset-0 z-[9998] bg-slate-950/45 backdrop-blur-sm"
+                onClick={() => setSelectedTableNumber(null)}
+              />
+              <div
+                data-testid="admin-table-detail"
+                className="fixed inset-0 z-[9999] flex flex-col bg-white shadow-2xl md:relative md:inset-auto md:h-[min(88vh,760px)] md:w-full md:max-w-[720px] md:overflow-hidden md:rounded-[2rem] md:border md:border-white/80 md:shadow-[0_34px_90px_-44px_rgba(15,23,42,0.9)]"
+              >
+                <div className="shrink-0 border-b border-orange-100 bg-[linear-gradient(135deg,#fff7ed_0%,#ffffff_55%,#e8f6f3_100%)] px-4 pb-4 pt-[max(env(safe-area-inset-top),1.25rem)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#E65100]">Atendimento de mesa</p>
+                      <div className="mt-2 flex items-center gap-3">
+                        <span className="inline-flex h-12 min-w-12 items-center justify-center rounded-2xl bg-[#153A4C] px-3 text-xl font-black text-white shadow-[0_18px_32px_-24px_rgba(21,58,76,0.75)]">
+                          {selectedTableGroup.displayNumber}
+                        </span>
+                        <div className="min-w-0">
+                          <h2 className="truncate text-xl font-black leading-tight text-slate-950">
+                            Mesa {selectedTableGroup.displayNumber}
+                          </h2>
+                          <p className="mt-0.5 text-xs font-semibold text-slate-600">
+                            {selectedTableGroup.ordersCount} pedido{selectedTableGroup.ordersCount === 1 ? '' : 's'} aberto{selectedTableGroup.ordersCount === 1 ? '' : 's'} para editar sem sair da fila.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTableNumber(null)}
+                      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm ring-1 ring-slate-200 transition-all hover:text-slate-800 active:scale-95"
+                      aria-label="Fechar mesa"
+                    >
+                      <X size={18} weight="bold" />
+                    </button>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    <div className="rounded-2xl border border-white/70 bg-white/85 px-3 py-2 shadow-sm">
+                      <p className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Pedidos</p>
+                      <p className="mt-1 text-lg font-black text-slate-900">{selectedTableGroup.ordersCount}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/70 bg-white/85 px-3 py-2 shadow-sm">
+                      <p className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Itens</p>
+                      <p className="mt-1 text-lg font-black text-slate-900">{selectedTableGroup.itemsCount}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/70 bg-white/85 px-3 py-2 shadow-sm">
+                      <p className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Total</p>
+                      <p className="mt-1 truncate text-lg font-black text-slate-900">{formatCurrency(selectedTableGroup.total)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 px-4 py-4">
+                  {selectedTableGroup.orders.map((order: any) => {
+                    const statusMeta = getStatusStyles(order.status, order.type, order);
+                    const orderItems = Array.isArray(order?.items) ? order.items : [];
+                    const itemsCount = orderItems.reduce((sum: number, item: any) => sum + Number(item?.qty || item?.quantity || 0), 0);
+                    const itemsPreview = orderItems
+                      .slice(0, 3)
+                      .map((item: any) => `${Number(item?.qty || item?.quantity || 0) || 1}x ${String(item?.name || 'Item')}`)
+                      .join(' • ');
+                    const orderAgeMs = order?.createdAt ? Math.max(0, currentTime - new Date(order.createdAt).getTime()) : 0;
+
+                    return (
+                      <button
+                        key={`table-order-${order.id}`}
+                        type="button"
+                        data-testid="admin-table-order-row"
+                        onClick={() => {
+                          setSelectedTableNumber(null);
+                          setConfirmModal(null);
+                          setEditingFinalizedOrder(false);
+                          setSelectedOrder(order);
+                        }}
+                        className="w-full rounded-3xl border border-slate-200 bg-white p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md active:scale-[0.99]"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-600">
+                                <Hash size={11} weight="duotone" />
+                                {formatOrderDisplayId(order.id, storeSlug)}
+                              </span>
+                              <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${statusMeta.className}`}>
+                                {statusMeta.label}
+                              </span>
+                            </div>
+                            <p className="mt-2 truncate text-sm font-black text-slate-900">
+                              {order.customerName || order.name || `Mesa ${selectedTableGroup.displayNumber}`}
+                            </p>
+                            <p className="mt-1 line-clamp-2 text-xs font-semibold text-slate-500">
+                              {itemsPreview || `${itemsCount} ${itemsCount === 1 ? 'item' : 'itens'}`}
+                            </p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="text-base font-black text-slate-900">{formatCurrency(Number(order.total || 0))}</p>
+                            <p className="mt-1 text-[11px] font-bold text-slate-400">
+                              {orderAgeMs ? formatDuration(orderAgeMs) : 'Agora'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
+                          <span className="text-[11px] font-bold text-slate-500">
+                            {itemsCount} {itemsCount === 1 ? 'item' : 'itens'} neste pedido
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 rounded-2xl bg-[#153A4C] px-3 py-2 text-xs font-black text-white">
+                            Abrir pedido
+                            <Plus size={13} weight="bold" />
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>,
+            document.body
           )}
           {isDrawerOpen && createPortal(
             <div className="fixed inset-0 z-[9999] overflow-hidden md:flex md:items-center md:justify-center md:px-6 md:py-6">

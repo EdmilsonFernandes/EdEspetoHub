@@ -65,3 +65,147 @@ export const filterAdminQueueProducts = <T extends { name?: unknown; category?: 
 
   return filtered.slice(0, Math.max(1, Number(limit || 40)));
 };
+
+type AdminQueueTableOrder = {
+  id?: unknown;
+  table?: unknown;
+  tableNumber?: unknown;
+  table_number?: unknown;
+  type?: unknown;
+  status?: unknown;
+  total?: unknown;
+  createdAt?: unknown;
+  created_at?: unknown;
+  customerName?: unknown;
+  name?: unknown;
+  items?: Array<{
+    name?: unknown;
+    product?: { name?: unknown };
+    qty?: unknown;
+    quantity?: unknown;
+  }>;
+};
+
+export type AdminQueueTableGroup = {
+  tableKey: string;
+  tableNumber: string;
+  displayNumber: string;
+  orders: AdminQueueTableOrder[];
+  ordersCount: number;
+  itemsCount: number;
+  total: number;
+  oldestCreatedAt: number;
+  latestCreatedAt: number;
+  stage: 'pending' | 'preparing' | 'ready' | 'mixed';
+  previewItems: Array<{ name: string; qty: number }>;
+};
+
+const getTableNumber = (order: AdminQueueTableOrder) =>
+  String(order?.table ?? order?.tableNumber ?? order?.table_number ?? '').trim();
+
+const formatTableDisplayNumber = (value: string) => {
+  const normalized = String(value || '').trim();
+  if (!normalized) return 'Sem numero';
+  return /^\d+$/.test(normalized) ? normalized.padStart(2, '0') : normalized.toUpperCase();
+};
+
+const getOrderCreatedAtMs = (order: AdminQueueTableOrder) => {
+  const raw = order?.createdAt ?? order?.created_at;
+  if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
+  const parsed = raw ? new Date(String(raw)).getTime() : 0;
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const resolveTableStage = (orders: AdminQueueTableOrder[]): AdminQueueTableGroup['stage'] => {
+  const statuses = orders.map((order) => String(order?.status || '').toLowerCase());
+  if (statuses.some((status) => status === 'pending')) return 'pending';
+  if (statuses.some((status) => status === 'preparing')) return 'preparing';
+  if (statuses.length && statuses.every((status) => status === 'ready')) return 'ready';
+  if (statuses.some((status) => status === 'ready')) return 'mixed';
+  return 'mixed';
+};
+
+const buildPreviewItems = (orders: AdminQueueTableOrder[]) => {
+  const byName = new Map<string, { name: string; qty: number }>();
+  for (const order of orders) {
+    const items = Array.isArray(order?.items) ? order.items : [];
+    for (const item of items) {
+      const name = String(item?.name || item?.product?.name || 'Item').trim() || 'Item';
+      const qty = Math.max(0, Number(item?.qty ?? item?.quantity ?? 0) || 0);
+      if (!qty) continue;
+      const current = byName.get(name) || { name, qty: 0 };
+      current.qty += qty;
+      byName.set(name, current);
+    }
+  }
+  return Array.from(byName.values())
+    .sort((a, b) => b.qty - a.qty || a.name.localeCompare(b.name, 'pt-BR'))
+    .slice(0, 4);
+};
+
+export const buildAdminTableGroups = (
+  orders: AdminQueueTableOrder[] | null | undefined,
+  query = ''
+): AdminQueueTableGroup[] => {
+  const target = normalizeAdminQueueSearch(query);
+  const activeStatuses = new Set(['pending', 'preparing', 'ready']);
+  const byTable = new Map<string, AdminQueueTableOrder[]>();
+
+  for (const order of Array.isArray(orders) ? orders : []) {
+    if (String(order?.type || '').toLowerCase() !== 'table') continue;
+    if (!activeStatuses.has(String(order?.status || '').toLowerCase())) continue;
+
+    const tableNumber = getTableNumber(order);
+    if (!tableNumber) continue;
+
+    const key = normalizeAdminQueueSearch(tableNumber) || tableNumber;
+    const group = byTable.get(key) || [];
+    group.push(order);
+    byTable.set(key, group);
+  }
+
+  return Array.from(byTable.entries())
+    .map(([tableKey, tableOrders]) => {
+      const sortedOrders = [...tableOrders].sort((a, b) => getOrderCreatedAtMs(a) - getOrderCreatedAtMs(b));
+      const tableNumber = getTableNumber(sortedOrders[0]) || tableKey;
+      const createdTimes = sortedOrders.map(getOrderCreatedAtMs).filter((value) => value > 0);
+      const itemsCount = sortedOrders.reduce(
+        (sum, order) =>
+          sum +
+          (Array.isArray(order?.items)
+            ? order.items.reduce((itemSum, item) => itemSum + Math.max(0, Number(item?.qty ?? item?.quantity ?? 0) || 0), 0)
+            : 0),
+        0
+      );
+
+      return {
+        tableKey,
+        tableNumber,
+        displayNumber: formatTableDisplayNumber(tableNumber),
+        orders: sortedOrders,
+        ordersCount: sortedOrders.length,
+        itemsCount,
+        total: sortedOrders.reduce((sum, order) => sum + (Number(order?.total || 0) || 0), 0),
+        oldestCreatedAt: createdTimes.length ? Math.min(...createdTimes) : 0,
+        latestCreatedAt: createdTimes.length ? Math.max(...createdTimes) : 0,
+        stage: resolveTableStage(sortedOrders),
+        previewItems: buildPreviewItems(sortedOrders),
+      } satisfies AdminQueueTableGroup;
+    })
+    .filter((group) => {
+      if (!target) return true;
+      const searchable = [
+        group.tableNumber,
+        group.displayNumber,
+        `mesa ${group.tableNumber}`,
+        ...group.orders.map((order) => `${String(order?.customerName || order?.name || '')} ${String(order?.id || '')}`),
+      ].join(' ');
+      return normalizeAdminQueueSearch(searchable).includes(target);
+    })
+    .sort((a, b) => {
+      const aNum = Number(a.tableNumber);
+      const bNum = Number(b.tableNumber);
+      if (Number.isFinite(aNum) && Number.isFinite(bNum)) return aNum - bNum;
+      return a.displayNumber.localeCompare(b.displayNumber, 'pt-BR');
+    });
+};

@@ -59,6 +59,39 @@ const queueOrders = [
       },
     ],
   },
+  {
+    id: 'order-table-12',
+    customerName: 'Mesa 12',
+    name: 'Mesa 12',
+    status: 'pending',
+    type: 'table',
+    table: '12',
+    payment: 'dinheiro',
+    paymentStatus: 'PENDING',
+    total: 32,
+    createdAt: new Date(Date.now() - 60_000).toISOString(),
+    updatedAt: new Date().toISOString(),
+    items: [
+      {
+        id: 'item-table-1',
+        productId: 'product-e2e-2',
+        name: 'Suco de Uva',
+        qty: 1,
+        unitPrice: 8,
+        price: 8,
+        isPrinted: false,
+      },
+      {
+        id: 'item-table-2',
+        productId: 'product-e2e-1',
+        name: 'Medalhao de Palmito',
+        qty: 2,
+        unitPrice: 12,
+        price: 24,
+        isPrinted: false,
+      },
+    ],
+  },
 ];
 
 const products = [
@@ -110,7 +143,7 @@ test.describe('Admin queue UX', () => {
   test('abre detalhe do pedido e mostra picker de produto com imagem, categoria e preco', async ({ page }) => {
     await page.goto('/admin/queue');
 
-    await expect(page.getByTestId('admin-order-card').first()).toBeVisible();
+    await expect(page.getByTestId('admin-order-card').first()).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Cliente E2E')).toBeVisible();
 
     await page.getByText('Cliente E2E').first().click();
@@ -145,5 +178,30 @@ test.describe('Admin queue UX', () => {
       expect(box?.width).toBeLessThan(viewportWidth * 0.85);
       expect(Math.abs((box?.x || 0) - expectedLeft)).toBeLessThan(48);
     });
+  });
+
+  test('agrupa pedidos por mesa e abre detalhe editavel do pedido da mesa', async ({ page }) => {
+    await page.goto('/admin/queue');
+
+    await expect(page.getByTestId('admin-queue-mode-tables')).toBeVisible({ timeout: 15000 });
+    await page.getByTestId('admin-queue-mode-tables').click();
+    await page.getByTestId('admin-table-search').fill('12');
+
+    const tableCard = page.getByTestId('admin-table-card').first();
+    await expect(tableCard).toBeVisible();
+    await expect(tableCard).toContainText('Mesa');
+    await expect(tableCard).toContainText('12');
+
+    await tableCard.click();
+    const tableDetail = page.getByTestId('admin-table-detail');
+    await expect(tableDetail).toBeVisible();
+    await expect(tableDetail).toContainText('Mesa 12');
+    await expect(tableDetail).toContainText('Medalhao de Palmito');
+
+    await tableDetail.getByTestId('admin-table-order-row').first().click();
+    const orderDetail = page.getByTestId('admin-order-detail');
+    await expect(orderDetail).toBeVisible();
+    await expect(orderDetail.getByText('Medalhao de Palmito').first()).toBeVisible();
+    await expect(page.getByTestId('admin-product-picker-button')).toBeVisible();
   });
 });
