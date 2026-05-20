@@ -502,6 +502,23 @@ const getStatusMeta = (status: string, orderType?: string) => {
   }
 };
 
+const getOrderStatusBadgeClass = (status: string, isActive?: boolean) => {
+  const normalized = normalizeStatus(status);
+  if (normalized === 'CANCELLED' || normalized === 'REJECTED') {
+    return 'border-rose-100 bg-rose-50/90 text-rose-700 ring-rose-100';
+  }
+  if (normalized === 'DONE' || normalized === 'FINISHED' || normalized === 'DELIVERED') {
+    return 'border-emerald-100 bg-emerald-50/95 text-emerald-700 ring-emerald-100';
+  }
+  if (normalized === 'AWAITING_PAYMENT') {
+    return 'border-sky-100 bg-sky-50/95 text-sky-700 ring-sky-100';
+  }
+  if (isActive) {
+    return 'border-emerald-100 bg-emerald-50/95 text-emerald-700 ring-emerald-100';
+  }
+  return 'border-slate-100 bg-slate-50 text-slate-600 ring-slate-100';
+};
+
 function OrderCard({
   order,
   isActive,
@@ -526,6 +543,7 @@ function OrderCard({
   const statusMeta = getStatusMeta(order.status, order.type);
   const items = Array.isArray(order.items) ? order.items : [];
   const primaryItem = items[0] || null;
+  const primaryItemImageUrl = primaryItem ? getOrderItemImageUrl(primaryItem) : '';
   const extraItems = Math.max(0, items.length - 1);
   const thumbnails = items
     .map((item: any) => resolveAssetUrl(item.imageUrl || ''))
@@ -573,6 +591,15 @@ function OrderCard({
   };
 
   const isCancelled = ['CANCELLED', 'REJECTED'].includes(normalizeStatus(order.status));
+  const cancellationReason = String(order.canceledReason || '').trim();
+  const hasRefundInfo = Boolean(
+    order.refundStatus ||
+    (
+      ["pix","credito","debito","credit_card","debit_card"].includes(String(order.paymentMethod || order.payment || "").toLowerCase()) &&
+      String(order.paymentStatus || "").toUpperCase() === "PAID"
+    )
+  );
+  const statusBadgeClass = getOrderStatusBadgeClass(order.status, isActive);
   const canConfirmReceipt =
     !isActive &&
     normalizeStatus(order.status) === 'DELIVERED' &&
@@ -580,7 +607,7 @@ function OrderCard({
     !order?.customerReceivedAt;
 
   return (
-    <article className={`overflow-hidden rounded-[28px] bg-white shadow-[0_8px_32px_-16px_rgba(15,23,42,0.18)] ${isActive ? 'ring-1 ring-emerald-200' : 'ring-1 ring-slate-100'}`}>
+    <article className={`overflow-hidden rounded-[28px] bg-white shadow-[0_18px_46px_-34px_rgba(15,23,42,0.28)] ${isActive ? 'ring-1 ring-emerald-200/80' : isCancelled ? 'ring-1 ring-rose-100/80' : 'ring-1 ring-slate-100'}`}>
       {/* Header do card */}
       <button
         type="button"
@@ -612,20 +639,16 @@ function OrderCard({
           <div className="flex items-center gap-2">
             <h3 className="truncate text-[14px] font-black text-slate-900">{storeName}</h3>
           </div>
-          <div className="mt-0.5 flex items-center gap-1.5">
-            {isActive ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+          <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-1.5">
+            <span className={`inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-black shadow-sm ring-1 ${statusBadgeClass}`}>
+              {isActive ? (
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 </span>
-                {statusMeta.label}
-              </span>
-            ) : (
-              <span className={`text-[12px] font-semibold ${isCancelled ? 'text-rose-500' : 'text-slate-500'}`}>
-                {statusMeta.label}
-              </span>
-            )}
+              ) : statusMeta.icon}
+              <span className="truncate">{statusMeta.label}</span>
+            </span>
             <span className="text-slate-300">·</span>
             <span className="text-[11px] text-slate-400">{orderMoment || orderDate || formatGroupDate(order.createdAt)}</span>
           </div>
@@ -684,7 +707,7 @@ function OrderCard({
         onTouchStart={() => primeOrderTrackingNavigation(order.id)}
         className="block w-full text-left"
       >
-        <div className="mx-4 mb-3 overflow-hidden rounded-2xl bg-slate-50">
+        <div className="mx-4 mb-3 overflow-hidden rounded-[1.35rem] bg-[linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] ring-1 ring-slate-100">
           {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && (
             <div className="border-b border-slate-100 px-3 py-2">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-600">
@@ -702,13 +725,22 @@ function OrderCard({
             </div>
           )}
           {primaryItem ? (
-            <div className="px-3 py-2.5">
+            <div className="px-3 py-3">
               <div className="flex items-center gap-3">
-                <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[10px] font-black text-slate-600">
-                  {getOrderItemQty(primaryItem)}
-                </span>
+                {primaryItemImageUrl ? (
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-[1rem] bg-white shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] ring-1 ring-white">
+                    <img src={primaryItemImageUrl} alt={primaryItem.name || 'Item do pedido'} className="h-full w-full object-cover" />
+                    <span className="absolute left-1 top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white/92 px-1 text-[10px] font-black text-slate-700 shadow-sm">
+                      {getOrderItemQty(primaryItem)}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-black text-slate-600 shadow-sm ring-1 ring-slate-200">
+                    {getOrderItemQty(primaryItem)}
+                  </span>
+                )}
                 <div className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-semibold text-slate-800">{primaryItem.name || 'Item do pedido'}</span>
+                  <span className="block truncate text-[13px] font-black text-slate-900">{primaryItem.name || 'Item do pedido'}</span>
                   {getOrderItemDetails(primaryItem) ? (
                     <span className="block truncate text-[11px] text-slate-400">{getOrderItemDetails(primaryItem)}</span>
                   ) : null}
@@ -730,15 +762,20 @@ function OrderCard({
                   </>
                 ) : null}
               </div>
+              {isCancelled && cancellationReason ? (
+                <div className="mt-3 rounded-[1rem] border border-white/90 bg-white/72 px-3 py-2 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.28)]">
+                  <p className="text-[11px] font-semibold leading-relaxed text-slate-500">
+                    <span className="text-slate-700">Motivo:</span> {cancellationReason}
+                  </p>
+                </div>
+              ) : null}
             </div>
           ) : null}
-          {isCancelled && (
-            <div className="border-t border-slate-100 px-3 py-2.5 flex flex-wrap items-center gap-2">
-              {String(order.canceledReason || "").trim() ? (
-                <span className="text-[11px] text-slate-500"><span className="font-semibold text-slate-600">Motivo:</span> {order.canceledReason}</span>
-              ) : (
+          {isCancelled && (!cancellationReason || hasRefundInfo) && (
+            <div className="px-3 pb-3 flex flex-wrap items-center gap-2">
+              {!cancellationReason ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">Cancelado</span>
-              )}
+              ) : null}
               {order.refundStatus === "REFUNDED" && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-700">✓ Reembolsado{order.refundAmount ? ` ${formatCurrency(order.refundAmount)}` : ""}</span>
               )}
@@ -772,7 +809,7 @@ function OrderCard({
       </button>
 
       {/* Rodapé com ações */}
-      <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-2.5">
+      <div className="flex items-center gap-2 border-t border-slate-100/80 bg-[linear-gradient(180deg,#ffffff_0%,#fbfdff_100%)] px-4 py-2.5">
         {isActive && isDelayed ? (
           <>
             <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f8fbfd,#e9f3f8)] py-2.5 text-[13px] font-black text-[#153A4C] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.32)] active:scale-[0.98] transition-all hover:-translate-y-0.5">
@@ -832,7 +869,15 @@ function OrderCard({
                 Confirmar recebimento
               </button>
             ) : (
-              <button type="button" onClick={handleRepeatOrder} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-2.5 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] active:scale-[0.98] transition-transform">
+              <button
+                type="button"
+                onClick={handleRepeatOrder}
+                className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl py-2.5 text-[13px] font-bold transition-all active:scale-[0.98] ${
+                  isCancelled
+                    ? 'border border-[#cfe0ea] bg-white text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.34)] hover:-translate-y-0.5'
+                    : 'bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)]'
+                }`}
+              >
                 <ArrowClockwise size={14} weight="bold" />
                 Pedir de novo
               </button>
