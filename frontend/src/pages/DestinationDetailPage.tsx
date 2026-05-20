@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, Mountains, PhoneCall, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, Mountains, PhoneCall, Sparkle, WhatsappLogo } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { destinationService } from '../services/destinationService';
@@ -90,6 +90,10 @@ const openExternal = (url: string) => (event: any) => {
   void openActionTarget({ href: url, external: true });
 };
 
+const stopCardClick = (event: any) => {
+  event.stopPropagation();
+};
+
 const resolveLinkedStoreSlug = (listing: any) => {
   const directSlug = String(listing?.store?.slug || '').trim();
   if (directSlug) return directSlug;
@@ -153,6 +157,7 @@ const buildDestinationListingAction = ({ listing, destination, isNativePlatform 
 
 export function DestinationDetailPage() {
   const { destinationSlug = '' } = useParams();
+  const navigate = useNavigate();
   const [payload, setPayload] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -398,12 +403,21 @@ export function DestinationDetailPage() {
                 const placePhoneHref = placeWhatsAppHref ? '' : buildPhoneCallUrl(place.whatsapp);
                 const placeServiceCount = Number(place.storeCount || place.featuredStores?.length || 0);
                 const placeServiceLabel = placeServiceCount === 1 ? '1 lugar atende aqui' : `${placeServiceCount} lugares atendem aqui`;
+                const placePath = `/destinos/${destination.slug}/chales/${place.slug}`;
                 return (
                 <article
                   key={place.id}
-                  className="group min-w-0 max-w-full overflow-hidden rounded-[1.8rem] border border-[#336886]/15 bg-[linear-gradient(180deg,#fffaf0_0%,#ffffff_52%,#edf7f2_100%)] shadow-[0_18px_46px_-34px_rgba(21,58,76,0.48)] transition hover:-translate-y-1"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(placePath)}
+                  onKeyDown={(event) => {
+                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                    event.preventDefault();
+                    navigate(placePath);
+                  }}
+                  className="group min-w-0 max-w-full cursor-pointer overflow-hidden rounded-[1.85rem] border border-[#336886]/12 bg-[linear-gradient(180deg,rgba(255,250,240,0.92)_0%,#ffffff_52%,rgba(237,247,242,0.88)_100%)] shadow-[0_18px_46px_-36px_rgba(21,58,76,0.42)] outline-none transition duration-200 hover:-translate-y-1 hover:border-[#336886]/24 focus-visible:ring-4 focus-visible:ring-[#336886]/14 active:scale-[0.99]"
                 >
-                  <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="relative block h-44 overflow-hidden bg-slate-100 sm:h-40">
+                  <div className="relative m-2 h-44 overflow-hidden rounded-[1.45rem] bg-slate-100 sm:h-40">
                     {hasConfiguredAsset(place) ? (
                       <img src={asset(place)} alt={place.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                     ) : (
@@ -421,30 +435,31 @@ export function DestinationDetailPage() {
                         {placeServiceLabel}
                       </div>
                     ) : null}
-                  </Link>
-                  <div className="p-3.5">
-                    <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[#153A4C]/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#153A4C]">
+                  </div>
+                  <div className="p-4 pt-2">
+                    <div className="mb-2 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
                       <Bed size={12} weight="duotone" />
                       Hospedagem
                     </div>
-                    <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="line-clamp-1 text-lg font-black tracking-[-0.03em] text-slate-950">
+                    <h3 className="line-clamp-1 text-xl font-semibold tracking-[-0.035em] text-slate-950">
                       {place.name}
-                    </Link>
-                    <p className="mt-1 line-clamp-2 text-sm font-semibold text-slate-500">{place.description || place.address || 'Hospedagem cadastrada.'}</p>
+                    </h3>
+                    <p className="mt-1 line-clamp-2 text-sm font-medium leading-relaxed text-slate-600">{place.description || place.address || 'Hospedagem cadastrada.'}</p>
                     {place.address ? (
-                      <p className="mt-2 inline-flex max-w-full items-center gap-1 rounded-full bg-white/78 px-2.5 py-1 text-[11px] font-black text-slate-600">
+                      <p className="mt-2 inline-flex max-w-full items-center gap-1.5 text-[11px] font-semibold leading-relaxed text-slate-500">
                         <MapPinLine size={12} weight="duotone" className="shrink-0 text-[#336886]" />
                         <span className="truncate">{place.address}</span>
                       </p>
                     ) : null}
                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-800">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
                         <Sparkle size={13} weight="duotone" />
                         Base da viagem
                       </span>
                       {placeWhatsAppHref ? (
                         <a
                           href={placeWhatsAppHref}
+                          onClick={stopCardClick}
                           target={isNativePlatform ? undefined : '_blank'}
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-black text-white"
@@ -454,7 +469,7 @@ export function DestinationDetailPage() {
                         </a>
                       ) : null}
                       {placePhoneHref ? (
-                        <a href={placePhoneHref} className="inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-2.5 py-1 text-[11px] font-black text-white">
+                        <a href={placePhoneHref} onClick={stopCardClick} className="inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-2.5 py-1 text-[11px] font-black text-white">
                           <PhoneCall size={12} weight="duotone" />
                           Ligar
                         </a>
@@ -471,10 +486,9 @@ export function DestinationDetailPage() {
                           {siteLabel(place.websiteUrl)}
                         </a>
                       ) : null}
-                      <Link to={`/destinos/${destination.slug}/chales/${place.slug}`} className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-3 py-1.5 text-xs font-black text-white">
-                        Ver chalé
-                        <ArrowRight size={14} weight="bold" />
-                      </Link>
+                      <span className="ml-auto text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">
+                        Ver opções
+                      </span>
                     </div>
                   </div>
                 </article>
@@ -520,33 +534,30 @@ export function DestinationDetailPage() {
                     <>
                       <div className="flex min-w-0 max-w-full gap-3">
                         {imageIsConfigured ? (
-                          <img src={imageUrl} alt={listing.title} className="h-16 w-16 shrink-0 rounded-[1.15rem] object-cover" />
+                          <img src={imageUrl} alt={listing.title} className="h-[4.6rem] w-[4.6rem] shrink-0 rounded-[1.35rem] object-cover" />
                         ) : (
-                          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.15rem] bg-amber-50">
+                          <div className="flex h-[4.6rem] w-[4.6rem] shrink-0 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,#fff7ed,#f4f1ea)]">
                             <Sparkle size={23} weight="duotone" className="text-amber-700/70" />
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="rounded-full bg-[#edf5fa] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">{categoryLabel(listing.category)}</span>
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#336886]">{categoryLabel(listing.category)}</span>
                             {hasLinkedStore ? (
-                              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">Loja oficial</span>
+                              <span className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#336886]/78">Loja oficial</span>
                             ) : (
-                              <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-800">Contato direto</span>
+                              <span className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#336886]/78">Contato direto</span>
                             )}
                           </div>
-                          <h3 className="mt-1 line-clamp-1 text-base font-extrabold tracking-[-0.02em] text-slate-950">{listing.title}</h3>
-                          <p className="mt-1 line-clamp-2 text-sm font-medium leading-relaxed text-slate-500">{description}</p>
+                          <h3 className="mt-1 line-clamp-1 text-lg font-semibold tracking-[-0.025em] text-slate-950">{listing.title}</h3>
+                          <p className="mt-1 line-clamp-2 text-sm font-medium leading-relaxed text-slate-600">{description}</p>
                         </div>
-                        <span className={`mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${hasLinkedStore ? 'bg-[#153A4C] text-white' : 'bg-white text-[#153A4C] ring-1 ring-slate-200'} transition group-hover:translate-x-0.5`}>
-                          {hasLinkedStore ? <Storefront size={15} weight="duotone" /> : <ArrowRight size={15} weight="bold" />}
-                        </span>
                       </div>
-                      <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
-                        <span className="min-w-0 truncate text-[11px] font-semibold text-slate-400">
+                      <div className="mt-3 flex items-center justify-between gap-3">
+                        <span className="min-w-0 truncate text-[11px] font-semibold text-slate-500">
                           {listing.address || (hasLinkedStore ? 'Pedido online pelo app' : 'Detalhes e contatos no toque')}
                         </span>
-                        <span className="shrink-0 text-[11px] font-black text-[#336886]">
+                        <span className="shrink-0 text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">
                           {hasLinkedStore ? 'Ver cardápio' : 'Ver detalhes'}
                         </span>
                       </div>
@@ -557,7 +568,7 @@ export function DestinationDetailPage() {
                       <Link
                         key={listing.id}
                         to={`/store/${linkedStoreSlug}`}
-                        className="group block min-w-0 max-w-full overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:border-[#336886]/24"
+                        className="group block min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-32px_rgba(15,23,42,0.38)] transition duration-200 hover:-translate-y-0.5 hover:border-[#336886]/24 active:scale-[0.99]"
                       >
                         {cardBody}
                       </Link>
@@ -566,7 +577,7 @@ export function DestinationDetailPage() {
                         key={listing.id}
                         type="button"
                         onClick={() => setSelectedListing(listing)}
-                        className="group block w-full min-w-0 max-w-full overflow-hidden rounded-[1.35rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:border-amber-300/70 active:scale-[0.99]"
+                        className="group block w-full min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-32px_rgba(15,23,42,0.38)] transition duration-200 hover:-translate-y-0.5 hover:border-[#336886]/24 active:scale-[0.99]"
                       >
                         {cardBody}
                       </button>

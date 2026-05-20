@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowRight, ArrowUpRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, MapPinLine, PhoneCall, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, MapPinLine, PhoneCall, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { destinationService } from '../services/destinationService';
@@ -459,14 +459,14 @@ export function HospitalityPlacePage() {
                   <Link
                     key={`${entry.id}-${store.id}`}
                     to={`/${store.slug}?${storeParams.toString()}`}
-                    className={`group overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition hover:-translate-y-1 hover:border-[#336886]/30 ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`group overflow-hidden rounded-[1.55rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-36px_rgba(15,23,42,0.42)] transition duration-200 hover:-translate-y-1 hover:border-[#336886]/30 active:scale-[0.99] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
                     {mediaUrl ? (
                       <SmartCardImage
                         src={mediaUrl}
                         alt={store.name}
                         fit={hasCoverImage(store) ? 'cover' : 'contain'}
-                        className="aspect-square self-start rounded-[1.1rem]"
+                        className="aspect-square self-start rounded-[1.35rem]"
                       >
                         <div className="absolute left-2 top-2 rounded-full bg-white/92 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#153A4C] shadow-sm ring-1 ring-white/80 backdrop-blur">
                           App
@@ -474,20 +474,20 @@ export function HospitalityPlacePage() {
                       </SmartCardImage>
                     ) : null}
                     <div className={`min-w-0 ${mediaUrl ? 'p-2.5' : 'p-3'}`}>
-                      <p className="inline-flex items-center gap-1 rounded-full bg-[#edf5fa] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#336886]">
+                      <p className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
                         <Storefront size={12} weight="duotone" />
                         Pedido pelo app
                       </p>
-                      <h3 className="mt-0.5 line-clamp-2 text-base font-bold leading-snug text-slate-950">{store.name}</h3>
-                      <p className="mt-1 line-clamp-4 text-sm font-medium leading-relaxed text-slate-500">{store.settings?.description || 'Pedido online para esta hospedagem.'}</p>
+                      <h3 className="mt-1 line-clamp-2 text-lg font-semibold leading-snug tracking-[-0.025em] text-slate-950">{store.name}</h3>
+                      <p className="mt-1 line-clamp-4 text-sm font-medium leading-relaxed text-slate-600">{store.settings?.description || 'Pedido online para esta hospedagem.'}</p>
                       <div className="mt-3 flex flex-wrap gap-2">
                         {link.deliveryEnabled ? (
-                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-100">
+                          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
                             Entrega {link.deliveryFee != null ? formatCurrency(link.deliveryFee) : ''}
                           </span>
                         ) : null}
                         {link.estimatedMinutes ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-700">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">
                             <Clock size={13} weight="duotone" />
                             {link.estimatedMinutes} min
                           </span>
@@ -506,35 +506,35 @@ export function HospitalityPlacePage() {
                     tabIndex={0}
                     onClick={() => setSelectedListing(listing)}
                     onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
-                    className={`group cursor-pointer overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.48)] transition hover:-translate-y-1 hover:border-amber-300/70 active:scale-[0.99] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`group cursor-pointer overflow-hidden rounded-[1.55rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-36px_rgba(15,23,42,0.42)] outline-none transition duration-200 hover:-translate-y-1 hover:border-[#336886]/30 focus-visible:ring-4 focus-visible:ring-[#336886]/14 active:scale-[0.99] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
                     {mediaUrl ? (
                       <SmartCardImage
                         src={mediaUrl}
                         alt={listing.title}
                         fit={hasCoverImage(listing) ? 'cover' : 'contain'}
-                        className="aspect-square self-start rounded-[1.1rem]"
+                        className="aspect-square self-start rounded-[1.35rem]"
                       />
                     ) : null}
                     <div className={`min-w-0 ${mediaUrl ? 'p-2.5' : 'p-3'}`}>
-                      <p className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-800">
+                      <p className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
                         <ForkKnife size={12} weight="duotone" />
                         {categoryLabel(listing.category)}
                       </p>
-                      <h3 className="mt-0.5 line-clamp-2 text-base font-bold leading-snug text-slate-950">{listing.title}</h3>
+                      <h3 className="mt-1 line-clamp-2 text-lg font-semibold leading-snug tracking-[-0.025em] text-slate-950">{listing.title}</h3>
                       <ExpandableText
                         value={listing.description || listing.address}
                         fallback={`Atendimento para hóspedes em ${place.name}.`}
-                        className="mt-1 text-sm font-medium leading-relaxed text-slate-500"
+                        className="mt-1 text-sm font-medium leading-relaxed text-slate-600"
                         collapsedClassName="line-clamp-4"
                         threshold={150}
                       />
                       <div className="mt-3 flex items-center justify-between gap-2">
-                        <span className="truncate text-[11px] font-semibold text-slate-400">
+                        <span className="truncate text-[11px] font-semibold text-slate-500">
                           {listing.address || 'Toque para ver detalhes e contatos'}
                         </span>
-                        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#153A4C] text-white shadow-sm transition group-hover:translate-x-0.5">
-                          <ArrowUpRight size={13} weight="bold" />
+                        <span className="shrink-0 text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">
+                          Ver detalhes
                         </span>
                       </div>
                     </div>
@@ -563,7 +563,7 @@ export function HospitalityPlacePage() {
                     tabIndex={0}
                     onClick={() => setSelectedListing(listing)}
                     onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
-                    className="cursor-pointer rounded-[1.15rem] border border-slate-100 bg-slate-50/70 p-2.5 transition hover:border-[#336886]/20 hover:bg-white"
+                    className="cursor-pointer rounded-[1.25rem] border border-slate-100 bg-slate-50/70 p-2.5 outline-none transition hover:border-[#336886]/20 hover:bg-white focus-visible:ring-4 focus-visible:ring-[#336886]/12 active:scale-[0.99]"
                   >
                     <div className="flex gap-3">
                       {mediaUrl ? (
@@ -571,23 +571,20 @@ export function HospitalityPlacePage() {
                           src={mediaUrl}
                           alt={listing.title}
                           fit={hasCoverImage(listing) ? 'cover' : 'contain'}
-                          className="h-12 w-12 shrink-0 rounded-[1rem]"
+                          className="h-12 w-12 shrink-0 rounded-[1.15rem]"
                         />
                       ) : null}
                       <div className="min-w-0 flex-1">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#336886]">{categoryLabel(listing.category)}</p>
-                        <h3 className="mt-0.5 line-clamp-2 text-sm font-bold leading-snug text-slate-950">{listing.title}</h3>
+                        <p className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#336886]">{categoryLabel(listing.category)}</p>
+                        <h3 className="mt-0.5 line-clamp-2 text-[15px] font-semibold leading-snug text-slate-950">{listing.title}</h3>
                         <ExpandableText
                           value={listing.description || listing.address}
                           fallback="Dica da cidade."
-                          className="mt-0.5 text-xs font-medium leading-relaxed text-slate-500"
+                          className="mt-0.5 text-xs font-medium leading-relaxed text-slate-600"
                           collapsedClassName="line-clamp-3"
                           threshold={105}
                         />
                       </div>
-                      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[#153A4C] ring-1 ring-slate-200">
-                        <ArrowUpRight size={13} weight="bold" />
-                      </span>
                     </div>
                   </article>
                   );
