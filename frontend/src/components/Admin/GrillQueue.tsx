@@ -342,8 +342,10 @@ const ProductQuickPicker = ({
 }: any) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [menuBox, setMenuBox] = useState<any | null>(null);
   const rootRef = useRef<any>(null);
   const inputRef = useRef<any>(null);
+  const menuRef = useRef<any>(null);
 
   const selectedOption = useMemo(
     () => (products || []).find((p: any) => String(p.id) === String(value)),
@@ -355,26 +357,66 @@ const ProductQuickPicker = ({
     return filterAdminQueueProducts(list, query, 40);
   }, [products, query]);
 
+  const positionMenu = useCallback(() => {
+    if (typeof window === "undefined" || !rootRef.current) return;
+    const rect = rootRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    const margin = 12;
+    const gap = 6;
+    const spaceBelow = Math.max(0, viewportHeight - rect.bottom - margin - gap);
+    const spaceAbove = Math.max(0, rect.top - margin - gap);
+    const openAbove = spaceBelow < 260 && spaceAbove > spaceBelow;
+    const availableSpace = openAbove ? spaceAbove : spaceBelow;
+    const maxHeight = Math.max(220, Math.min(360, availableSpace || viewportHeight - margin * 2));
+    const width = Math.min(Math.max(rect.width, 260), Math.max(260, viewportWidth - margin * 2));
+    const left = Math.min(Math.max(margin, rect.left), Math.max(margin, viewportWidth - width - margin));
+    const top = openAbove
+      ? Math.max(margin, rect.top - gap - maxHeight)
+      : Math.min(rect.bottom + gap, Math.max(margin, viewportHeight - margin - maxHeight));
+
+    setMenuBox({ top, left, width, maxHeight, openAbove });
+  }, []);
+
   useEffect(() => {
     if (!open) return;
     const handleOutside = (event: any) => {
-      if (!rootRef.current?.contains?.(event?.target)) setOpen(false);
+      const target = event?.target;
+      if (rootRef.current?.contains?.(target) || menuRef.current?.contains?.(target)) return;
+      setOpen(false);
     };
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
     document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside);
     document.addEventListener("keydown", handleEsc);
     return () => {
       document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
       document.removeEventListener("keydown", handleEsc);
     };
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
-    window.setTimeout(() => inputRef.current?.focus?.(), 0);
-  }, [open]);
+    if (!open) {
+      setMenuBox(null);
+      return;
+    }
+    positionMenu();
+    const raf = window.requestAnimationFrame(() => {
+      positionMenu();
+      inputRef.current?.focus?.();
+    });
+    const handleReposition = () => positionMenu();
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, true);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
+    };
+  }, [open, positionMenu]);
 
   return (
     <div ref={rootRef} className={`relative ${className}`}>
@@ -400,8 +442,18 @@ const ProductQuickPicker = ({
         <CaretDown size={14} className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
-      {open && (
-        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-[140] rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+      {open && menuBox && typeof document !== "undefined" && createPortal(
+        <div
+          ref={menuRef}
+          data-testid="admin-product-picker-menu"
+          style={{
+            top: menuBox.top,
+            left: menuBox.left,
+            width: menuBox.width,
+            maxHeight: menuBox.maxHeight,
+          }}
+          className="fixed z-[10045] overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-[0_28px_80px_-32px_rgba(15,23,42,0.55)]"
+        >
           <input
             ref={inputRef}
             value={query}
@@ -411,7 +463,10 @@ const ProductQuickPicker = ({
             className="mb-2 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-200"
           />
 
-          <div className="max-h-64 overflow-auto rounded-lg border border-slate-100">
+          <div
+            style={{ maxHeight: Math.max(120, Number(menuBox.maxHeight || 320) - 118) }}
+            className="overflow-auto rounded-lg border border-slate-100"
+          >
             {filteredOptions.length > 0 ? (
               filteredOptions.map((product: any) => {
                 const isSelected = String(product.id) === String(value);
@@ -474,7 +529,8 @@ const ProductQuickPicker = ({
               Item avulso
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -153,6 +153,11 @@ test.describe('Admin queue UX', () => {
     await expect(detail.getByText('Sem ketchup e avisar no WhatsApp.')).toBeVisible();
 
     await page.getByTestId('admin-product-picker-button').click();
+    const pickerMenu = page.getByTestId('admin-product-picker-menu');
+    await expect(pickerMenu).toBeVisible();
+    await expect(pickerMenu).toHaveCSS('position', 'fixed');
+    const pickerZIndex = await pickerMenu.evaluate((element) => Number(window.getComputedStyle(element).zIndex));
+    expect(pickerZIndex).toBeGreaterThan(10000);
     await page.getByTestId('admin-product-picker-search').fill('palmito');
 
     const option = page.getByTestId('admin-product-option').filter({ hasText: 'Medalhao de Palmito' }).first();
