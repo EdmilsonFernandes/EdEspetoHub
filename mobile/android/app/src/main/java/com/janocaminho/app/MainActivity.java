@@ -246,6 +246,21 @@ public class MainActivity extends BridgeActivity {
             || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
+    private boolean openExternalScheme(String url) {
+        try {
+            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
+            intent.addCategory(android.content.Intent.CATEGORY_BROWSABLE);
+            if (intent.resolveActivity(getPackageManager()) == null) {
+                Toast.makeText(this, "App externo não encontrado para concluir a ação.", Toast.LENGTH_LONG).show();
+                return true;
+            }
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this, "Não foi possível abrir o app externo. Verifique se o RawBT está instalado.", Toast.LENGTH_LONG).show();
+        }
+        return true;
+    }
+
     private void configureNavigationTransitions() {
         if (bridge == null || bridge.getWebView() == null) return;
         
@@ -277,13 +292,7 @@ public class MainActivity extends BridgeActivity {
                     if (url == null) return false;
 
                     if (url.startsWith("mailto:") || url.startsWith("rawbt:") || url.startsWith("tel:") || url.startsWith("whatsapp:")) {
-                        try {
-                            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
-                            startActivity(intent);
-                            return true;
-                        } catch (Exception e) {
-                            return false;
-                        }
+                        return openExternalScheme(url);
                     }
 
                     String trustedUrl = normalizeTrustedWebUrl(url);
