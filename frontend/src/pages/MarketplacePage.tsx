@@ -3546,7 +3546,7 @@ export function MarketplacePage() {
                 <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto no-scrollbar px-1 pb-1 pr-7">
                   {featuredLoading ? (
                     Array.from({ length: 3 }).map((_, idx) => (
-                      <div key={idx} className="h-[142px] min-w-[154px] animate-pulse rounded-[1.3rem] border border-white/90 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)]" />
+                      <div key={idx} className="h-[238px] min-w-[150px] animate-pulse rounded-[1.55rem] border border-white/90 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)] sm:min-w-[168px]" />
                     ))
                   ) : (
                     displayedFeaturedProducts.map((item, index) => (
@@ -3559,9 +3559,9 @@ export function MarketplacePage() {
                       key={`${item.storeSlug}-${item.id}`}
                       to={featuredStorePath}
                       onClick={() => stageFeaturedProductCheckout(item)}
-                      className="group min-w-[165px] snap-start overflow-hidden rounded-[1.8rem] border border-white bg-white shadow-[0_16px_40px_-16px_rgba(15,23,42,0.12)] ring-1 ring-slate-100/80 transition-all duration-300 ease-out hover:scale-[1.03] hover:shadow-[0_20px_48px_-12px_rgba(15,23,42,0.18)] active:scale-[0.96]"
+                      className="group min-w-[150px] snap-start overflow-hidden rounded-[1.55rem] border border-white bg-white shadow-[0_16px_40px_-18px_rgba(15,23,42,0.14)] ring-1 ring-slate-100/80 transition-all duration-300 ease-out hover:scale-[1.025] hover:shadow-[0_20px_48px_-14px_rgba(15,23,42,0.2)] active:scale-[0.96] sm:min-w-[168px]"
                     >
-                      <div className="relative h-[100px] overflow-hidden">
+                      <div className="relative aspect-[4/5] overflow-hidden bg-slate-100">
                         <img
                           src={item.imageUrl}
                           alt={item.name}
@@ -3569,43 +3569,35 @@ export function MarketplacePage() {
                           fetchPriority={index < 2 ? 'high' : 'auto'}
                           decoding="async"
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          onError={(e) => { (e.target as HTMLImageElement).src = item.storeLogo || getStoreAvatarUrl(item.storeSlug, item.storeName); }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
-                        <div className="absolute left-3 top-3">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/24 via-black/3 to-transparent" />
+                        <div className="absolute right-2.5 top-2.5">
                           {item.sponsored ? (
-                            <span className="flex items-center gap-1 rounded-full border border-white/60 bg-amber-400/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md">
-                              <Star size={10} weight="fill" /> {item.badge || 'Patrocinado'}
+                            <span className="inline-flex items-center gap-1 rounded-[0.78rem] border border-amber-200/90 bg-amber-300/90 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.38)] backdrop-blur-md">
+                              <Star size={9} weight="fill" /> {item.badge || 'Patrocinado'}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-white/60 bg-white/95 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md ring-1 ring-black/5">
-                              <Sparkle size={9} weight="fill" className="text-[#336886]" />
+                            <span className="inline-flex items-center gap-1 rounded-[0.78rem] border border-white/70 bg-white/88 px-2 py-1 text-[8px] font-black italic uppercase tracking-[0.18em] text-[#153A4C] shadow-[0_8px_18px_-12px_rgba(15,23,42,0.32)] backdrop-blur-md ring-1 ring-black/5">
+                              <Sparkle size={8} weight="fill" className="text-[#336886]" />
                               Seleção
                             </span>
                           )}
                         </div>
                       </div>
 
-                      <div className="p-3.5">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="line-clamp-2 text-[11px] font-black leading-4 tracking-tight text-slate-950">{item.name}</p>
-                          <span className="shrink-0 rounded-full bg-[#336886]/10 px-1.5 py-0.5 text-[9px] font-black text-[#336886]">
+                      <div className="flex min-h-[92px] flex-col p-3">
+                        <p className="line-clamp-2 text-[12px] font-black leading-[1.15rem] tracking-tight text-slate-950">{item.name}</p>
+                        <p className="mt-1 truncate text-[10px] font-bold text-slate-400">
+                          por {item.storeName}
+                        </p>
+                        <div className="mt-auto flex items-end justify-between gap-2 pt-2">
+                          <span className="text-[18px] font-black leading-none tracking-[-0.04em] text-[#153A4C]">
                             {currency.format(item.price)}
                           </span>
-                        </div>
-                        <div className="mt-1.5 flex items-center justify-between gap-2 rounded-[0.95rem] bg-slate-50 px-2 py-1.5">
-                          <div className="flex min-w-0 items-center gap-2">
-                            <img 
-                              src={item.storeLogo} 
-                              alt={item.storeName} 
-                              loading={index < 2 ? 'eager' : 'lazy'}
-                              fetchPriority={index < 2 ? 'high' : 'auto'}
-                              decoding="async"
-                              className="h-4 w-4 rounded-full border border-white/70 object-cover shadow-sm" 
-                              onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
-                            />
-                            <span className="block max-w-[84px] truncate text-[9px] font-bold text-slate-700">{item.storeName}</span>
-                          </div>
-                          <CaretRight size={12} weight="bold" className="shrink-0 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5" />
+                          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#336886]/10 text-[#336886] transition-transform duration-200 group-hover:translate-x-0.5">
+                            <CaretRight size={13} weight="bold" />
+                          </span>
                         </div>
                       </div>
                     </Link>
