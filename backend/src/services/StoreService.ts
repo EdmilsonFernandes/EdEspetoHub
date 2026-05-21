@@ -152,6 +152,35 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
     return Math.min(15, Math.max(1, Math.round(parsed)));
   }
 
+  private normalizeTableServiceSettings(value?: any) {
+    if (value === undefined) return undefined;
+    const source = value && typeof value === 'object' ? value : {};
+    const text = (raw: any, fallback: string) => {
+      const normalized = String(raw ?? '').trim().replace(/\s+/g, ' ');
+      return normalized || fallback;
+    };
+    const money = (raw: any) => {
+      const parsed = Number(String(raw ?? '').replace(',', '.').trim());
+      if (!Number.isFinite(parsed)) return 0;
+      return Math.max(0, Number(parsed.toFixed(2)));
+    };
+    const percent = (raw: any, fallback = 10) => {
+      if (raw === undefined || raw === null) return fallback;
+      const parsed = Number(String(raw ?? '').replace(',', '.').trim());
+      if (!Number.isFinite(parsed)) return fallback;
+      return Math.min(30, Math.max(0, Number(parsed.toFixed(2))));
+    };
+
+    return {
+      couvertEnabled: Boolean(source.couvertEnabled),
+      couvertLabel: text(source.couvertLabel, 'Couvert artistico'),
+      couvertPrice: money(source.couvertPrice),
+      serviceChargeEnabled: Boolean(source.serviceChargeEnabled),
+      serviceChargeLabel: text(source.serviceChargeLabel, 'Taxa de servico'),
+      serviceChargePercent: percent(source.serviceChargePercent, 10),
+    };
+  }
+
   private normalizeAddressForGeocode(value?: string | null) {
     const raw = String(value || '').trim();
     if (!raw) return '';
@@ -414,6 +443,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
         socialLinks,
         openingHours: input.openingHours ?? [],
         orderTypes: requestedOrderTypes,
+        tableServiceSettings: this.normalizeTableServiceSettings(input.tableServiceSettings) ?? {},
       });
 
       // 4️⃣ Store
@@ -592,6 +622,12 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
         store.settings.orderTypes = nextTypes;
       } else if (!Array.isArray(store.settings.orderTypes) || !store.settings.orderTypes.length) {
         store.settings.orderTypes = segmentPreset.orderTypes;
+      }
+      if (data.tableServiceSettings !== undefined)
+      {
+        store.settings.tableServiceSettings = this.normalizeTableServiceSettings(data.tableServiceSettings) ?? {};
+      } else if (!store.settings.tableServiceSettings || typeof store.settings.tableServiceSettings !== 'object') {
+        store.settings.tableServiceSettings = {};
       }
 
       const effectiveOrderTypes = Array.isArray(store.settings.orderTypes) ? store.settings.orderTypes : [];

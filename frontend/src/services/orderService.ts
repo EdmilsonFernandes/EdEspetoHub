@@ -356,6 +356,12 @@ export const orderService = {
       cookingPoint: item.cookingPoint,
       passSkewer: item.passSkewer,
       selectedModifiers: item.selectedModifiers,
+      unitPriceOverride: Number(
+        item.unitPriceOverride ??
+          item.unitPrice ??
+          (item.price && (item.qty ?? item.quantity) ? Number(item.price) / Number(item.qty ?? item.quantity) : item.price) ??
+          0
+      ),
     }));
     await apiClient.patch(`/orders/${id}`, { items: normalizedItems, total });
   },

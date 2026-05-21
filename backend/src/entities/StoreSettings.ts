@@ -15,6 +15,15 @@ import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'ty
 import { Store } from './Store';
 import { sanitizeSocialLinks, SocialLink } from '../utils/socialLinks';
 
+export type TableServiceSettings = {
+  couvertEnabled?: boolean;
+  couvertLabel?: string;
+  couvertPrice?: number;
+  serviceChargeEnabled?: boolean;
+  serviceChargeLabel?: string;
+  serviceChargePercent?: number;
+};
+
 @Entity({ name: 'store_settings' })
 /**
  * Provides StoreSettings functionality.
@@ -163,6 +172,18 @@ export class StoreSettings
     },
   })
   orderTypes?: string[];
+
+  @Column({
+    name: 'table_service_settings',
+    type: 'jsonb',
+    nullable: true,
+    default: () => "'{}'::jsonb",
+    transformer: {
+      to: (value?: TableServiceSettings | null) => (value && typeof value === 'object' ? value : {}),
+      from: (value: TableServiceSettings | null) => (value && typeof value === 'object' ? value : {}),
+    },
+  })
+  tableServiceSettings?: TableServiceSettings | null;
 
   @Column({
     name: 'acquisition_attribution',

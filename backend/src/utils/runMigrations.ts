@@ -33,6 +33,15 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS table_service_settings JSONB DEFAULT '{}'::jsonb;
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET table_service_settings = '{}'::jsonb
+    WHERE table_service_settings IS NULL OR jsonb_typeof(table_service_settings) <> 'object';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
     ADD COLUMN IF NOT EXISTS description TEXT;
   `);
   await AppDataSource.query(`

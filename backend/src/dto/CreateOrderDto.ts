@@ -25,6 +25,8 @@ export interface CreateOrderItemInput {
   passSkewer?: boolean;
   selectedModifiers?: SelectedModifierInput[];
   isPrinted?: boolean;
+  unitPriceOverride?: number;
+  priceOverride?: number;
 }
 
 export interface CreateOrderDto {

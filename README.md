@@ -75,6 +75,11 @@ Chaves importantes:
 - `founder_vip_label`: texto interno gravado na atribuicao da loja.
 - `legal.terms` e `legal.lgpd`: textos legais exibidos ao usuario.
 
+Configuracoes por loja em `store_settings`:
+
+- `order_types`: tipos de pedido aceitos pela loja (`delivery`, `pickup`, `table`).
+- `table_service_settings`: JSON do atendimento em mesa, com couvert artistico e taxa de servico opcionais. Quando ativo, a fila do lojista mostra botoes para aplicar no pedido e esses valores saem na impressao como itens do pedido.
+
 Guia SQL de manutencao:
 
 - `docs/SQL_CONSULTAS_MANUTENCAO.md`

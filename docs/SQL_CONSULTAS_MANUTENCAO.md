@@ -174,6 +174,7 @@ SELECT
   ss.address,
   ss.is_ordering_enabled,
   ss.order_types,
+  ss.table_service_settings,
   ss.plan_exempt,
   ss.plan_exempt_label,
   s.created_at
@@ -183,6 +184,28 @@ LEFT JOIN store_settings ss ON ss.store_id = s.id
 ORDER BY s.created_at DESC
 LIMIT 100;
 ```
+
+Configuração de atendimento em mesa, couvert e taxa de serviço:
+
+```sql
+\set store_slug 'gustavao-do-espetinho'
+
+SELECT
+  s.name AS loja,
+  s.slug,
+  ss.order_types,
+  ss.table_service_settings->>'couvertEnabled' AS couvert_ativo,
+  ss.table_service_settings->>'couvertLabel' AS couvert_nome,
+  ss.table_service_settings->>'couvertPrice' AS couvert_valor_por_pessoa,
+  ss.table_service_settings->>'serviceChargeEnabled' AS taxa_servico_ativa,
+  ss.table_service_settings->>'serviceChargeLabel' AS taxa_servico_nome,
+  ss.table_service_settings->>'serviceChargePercent' AS taxa_servico_percentual
+FROM stores s
+JOIN store_settings ss ON ss.store_id = s.id
+WHERE s.slug = :'store_slug';
+```
+
+Esta configuração não altera pedidos antigos sozinha. Quando o operador aplica couvert ou taxa na fila, o valor entra como item interno do pedido e aparece na impressão.
 
 Buscar loja por slug/nome:
 

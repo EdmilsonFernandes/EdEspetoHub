@@ -62,7 +62,8 @@ CREATE TABLE IF NOT EXISTS store_settings (
   delivery_radius_km NUMERIC(10,2),
   delivery_fee NUMERIC(10,2),
   social_links JSONB DEFAULT '[]',
-  opening_hours JSONB DEFAULT '[]'
+  opening_hours JSONB DEFAULT '[]',
+  table_service_settings JSONB DEFAULT '{}'::jsonb
 );
 
 ALTER TABLE store_settings
@@ -71,6 +72,11 @@ ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS opening_hours JSONB DEFAULT '[]';
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS order_types JSONB DEFAULT '["delivery","pickup","table"]';
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS table_service_settings JSONB DEFAULT '{}'::jsonb;
+UPDATE store_settings
+SET table_service_settings = '{}'::jsonb
+WHERE table_service_settings IS NULL OR jsonb_typeof(table_service_settings) <> 'object';
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE store_settings

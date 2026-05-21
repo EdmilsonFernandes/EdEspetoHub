@@ -20,7 +20,10 @@ import {
   Package,
   Buildings,
   Phone,
-  NotePencil
+  NotePencil,
+  Percent,
+  Receipt,
+  UsersThree
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { storeService } from "../../services/storeService";
@@ -44,6 +47,13 @@ import { printReceiptAsImage } from "../../utils/printReceiptImage";
 import { exportToCsv } from "../../utils/export";
 import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from "../../utils/orderNotificationSound";
 import { buildAdminTableGroups, filterAdminQueueProducts, getAdminQueueLoadingState } from "../../utils/adminQueueUx";
+import {
+  calculateTableServiceCharge,
+  isTableServiceCategory,
+  normalizeTableServiceSettings,
+  normalizeTableText,
+  TABLE_SERVICE_CATEGORY,
+} from "../../utils/tableServiceSettings";
 
 const normalizeSearchText = (value: any) =>
   String(value || "")
@@ -71,7 +81,7 @@ const formatTableIdentifier = (value: any) => {
   return /^\d+$/.test(normalized) ? normalized.padStart(2, "0") : normalized.toUpperCase();
 };
 
-const SYSTEM_LOGO_SRC = "/janocaminho-logov1.svg";
+const SYSTEM_LOGO_SRC = "/janocaminho.jpg";
 
 const QueueLoadingSkeleton = ({ variant = "queue" }: { variant?: "queue" | "sales" | "route" }) => {
   const isSales = variant === "sales";
@@ -90,7 +100,7 @@ const QueueLoadingSkeleton = ({ variant = "queue" }: { variant?: "queue" | "sale
           <img
             src={SYSTEM_LOGO_SRC}
             alt="Já no Caminho"
-            className="relative h-8 w-8 rounded-xl object-contain"
+            className="relative h-8 w-8 rounded-xl object-cover"
             loading="eager"
           />
         </div>
@@ -187,6 +197,18 @@ const isPostalOrder = (order: any) =>
   String(order?.fulfillmentMode || "").toLowerCase() === "postal";
 
 const isCondominiumOrder = (order: any) => Boolean(order?.condominiumId || order?.condominiumName);
+
+const MANUAL_ITEM_CATEGORY = "Avulsos";
+
+const isTableOrder = (order: any) => String(order?.type || "").toLowerCase() === "table";
+
+const getOrderItemCategory = (item: any, productsById?: Map<any, any>) => {
+  const product = item?.product || productsById?.get?.(item?.productId || item?.id);
+  return String(product?.category || item?.category || "");
+};
+
+const isTableServiceOrderItem = (item: any, productsById?: Map<any, any>) =>
+  isTableServiceCategory(getOrderItemCategory(item, productsById));
 
 const resolveCondominiumCardIdentifier = (order: any) => {
   if (!isCondominiumOrder(order)) return "";
@@ -1013,6 +1035,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       )
   );
   const storeNameForPrint = String(auth?.store?.name || auth?.store?.settings?.name || 'Minha Loja').trim();
+  const tableServiceSettings = useMemo(
+    () => normalizeTableServiceSettings(auth?.store?.settings?.tableServiceSettings),
+    [auth?.store?.settings?.tableServiceSettings]
+  );
   const storeIdentifier = useMemo(
     () => String(auth?.store?.id || auth?.store?.slug || '').trim(),
     [auth?.store?.id, auth?.store?.slug]
@@ -1186,6 +1212,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     orderId: string | null;
     name: string;
     price: string;
+    quantity: string;
+    category: string;
+    title: string;
+    helper: string;
+    quantityLabel: string;
+    ctaLabel: string;
     loading: boolean;
     error: string;
   }>({
@@ -1193,6 +1225,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     orderId: null,
     name: "",
     price: "",
+    quantity: "1",
+    category: MANUAL_ITEM_CATEGORY,
+    title: "Adicionar item avulso",
+    helper: "Use para bala, cobrança extra ou algo fora do cardápio.",
+    quantityLabel: "Quantidade",
+    ctaLabel: "Salvar e incluir",
     loading: false,
     error: "",
   });
@@ -1654,6 +1692,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     (products || []).forEach((product) => map.set(product.id, product));
     return map;
   }, [products]);
+  const visibleQueueProducts = useMemo(
+    () => (products || []).filter((product: any) => !isTableServiceCategory(product?.category)),
+    [products]
+  );
 
   const ensureAudioContext = async () => {
     const context = audioContextRef.current || new AudioContext();
@@ -2386,7 +2428,68 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     );
   };
 
-  const handleAddItem = (orderId, forcedProductId?: string) => {
+  const buildOrderItemFromProduct = (product: any, options: any = {}) => {
+    const quantity = Math.max(1, Math.floor(Number(options.quantity || 1)));
+    const unitPrice = Number(options.unitPriceOverride ?? product?.price ?? 0);
+    return {
+      id: `${product.id}-${Date.now()}`,
+      productId: product.id,
+      product,
+      name: product.name,
+      category: product.category,
+      price: unitPrice,
+      unitPrice,
+      unitPriceOverride: unitPrice,
+      qty: quantity,
+      isPrinted: false,
+    };
+  };
+
+  const findOperationalProduct = (name: string, price: number, category: string, anyPrice = false) => {
+    const normalizedName = normalizeTableText(name);
+    const normalizedCategory = normalizeTableText(category);
+    const targetPrice = Number(price || 0).toFixed(2);
+    return (products || []).find((product: any) => {
+      const sameName = normalizeTableText(product?.name) === normalizedName;
+      const sameCategory = normalizeTableText(product?.category) === normalizedCategory;
+      const samePrice = Number(product?.price || 0).toFixed(2) === targetPrice;
+      return sameName && sameCategory && (anyPrice || samePrice);
+    });
+  };
+
+  const ensureOperationalProduct = async ({
+    name,
+    price,
+    category = MANUAL_ITEM_CATEGORY,
+    description = "Item operacional criado no atendimento",
+    anyPrice = false,
+  }: {
+    name: string;
+    price: number;
+    category?: string;
+    description?: string;
+    anyPrice?: boolean;
+  }) => {
+    const existing = findOperationalProduct(name, price, category, anyPrice);
+    if (existing?.id) return existing;
+
+    const createdProduct = await productService.save({
+      name,
+      price,
+      category,
+      description,
+      active: false,
+    });
+
+    if (!createdProduct?.id) {
+      throw new Error("Não foi possível criar o item operacional.");
+    }
+
+    setProducts((prev: any[]) => [createdProduct, ...prev.filter((p: any) => String(p.id) !== String(createdProduct.id))]);
+    return createdProduct;
+  };
+
+  const handleAddItem = (orderId, forcedProductId?: string, options: any = {}) => {
     const productId = forcedProductId || selectedProducts[orderId];
     const product = products.find((p) => String(p.id) === String(productId));
     if (!product) return;
@@ -2394,15 +2497,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     applyItemsChange(orderId, (items) => {
       return [
         ...items,
-        {
-          id: `${product.id}-${Date.now()}`,
-          productId: product.id,
-          name: product.name,
-          price: product.price,
-          unitPrice: product.price,
-          qty: 1,
-          isPrinted: false,
-        },
+        buildOrderItemFromProduct(product, options),
       ];
     });
   };
@@ -2415,12 +2510,35 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     });
   };
 
-  const openManualItemModal = (orderId: string, initialName = "") => {
+  const closeManualItemModal = () => {
+    setManualItemModal({
+      open: false,
+      orderId: null,
+      name: "",
+      price: "",
+      quantity: "1",
+      category: MANUAL_ITEM_CATEGORY,
+      title: "Adicionar item avulso",
+      helper: "Use para bala, cobrança extra ou algo fora do cardápio.",
+      quantityLabel: "Quantidade",
+      ctaLabel: "Salvar e incluir",
+      loading: false,
+      error: "",
+    });
+  };
+
+  const openManualItemModal = (orderId: string, initialName = "", options: any = {}) => {
     setManualItemModal({
       open: true,
       orderId,
-      name: String(initialName || "").trim(),
-      price: "",
+      name: String(options.name ?? initialName ?? "").trim(),
+      price: options.price !== undefined ? String(options.price) : "",
+      quantity: options.quantity !== undefined ? String(options.quantity) : "1",
+      category: options.category || MANUAL_ITEM_CATEGORY,
+      title: options.title || "Adicionar item avulso",
+      helper: options.helper || "Use para bala, cobrança extra ou algo fora do cardápio.",
+      quantityLabel: options.quantityLabel || "Quantidade",
+      ctaLabel: options.ctaLabel || "Salvar e incluir",
       loading: false,
       error: "",
     });
@@ -2430,6 +2548,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (!manualItemModal.orderId || manualItemModal.loading) return;
     const name = String(manualItemModal.name || "").trim();
     const price = Number(String(manualItemModal.price || "").replace(",", "."));
+    const quantity = Math.max(1, Math.floor(Number(String(manualItemModal.quantity || "1").replace(",", "."))));
+    const category = String(manualItemModal.category || MANUAL_ITEM_CATEGORY).trim() || MANUAL_ITEM_CATEGORY;
 
     if (!name) {
       setManualItemModal((prev) => ({ ...prev, error: "Informe o nome do item." }));
@@ -2439,34 +2559,22 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       setManualItemModal((prev) => ({ ...prev, error: "Informe um valor válido." }));
       return;
     }
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      setManualItemModal((prev) => ({ ...prev, error: "Informe uma quantidade válida." }));
+      return;
+    }
 
     setManualItemModal((prev) => ({ ...prev, loading: true, error: "" }));
     try {
-      const createdProduct = await productService.save({
+      const nextProduct = await ensureOperationalProduct({
         name,
         price,
-        category: "Avulsos",
-        description: "Item avulso criado no atendimento",
-        active: true,
+        category,
+        description:
+          category === TABLE_SERVICE_CATEGORY
+            ? "Item operacional de atendimento na mesa"
+            : "Item avulso criado no atendimento",
       });
-
-      const nextProduct = createdProduct?.id
-        ? createdProduct
-        : { id: `manual-${Date.now()}`, name, price, category: "Avulsos", active: true };
-
-      if (createdProduct?.id) {
-        setProducts((prev: any[]) => [createdProduct, ...prev.filter((p: any) => String(p.id) !== String(createdProduct.id))]);
-      } else {
-        const latestProducts = await productService.list();
-        setProducts(latestProducts);
-        const match = latestProducts.find((p: any) => normalizeSearchText(p?.name) === normalizeSearchText(name) && Number(p?.price) === price);
-        if (match?.id) {
-          setSelectedProducts((prev: any) => ({ ...prev, [manualItemModal.orderId as string]: match.id }));
-          handleAddItem(manualItemModal.orderId, match.id);
-          setManualItemModal({ open: false, orderId: null, name: "", price: "", loading: false, error: "" });
-          return;
-        }
-      }
 
       if (!nextProduct?.id || String(nextProduct.id).startsWith("manual-")) {
         setManualItemModal((prev) => ({
@@ -2478,14 +2586,79 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       }
 
       setSelectedProducts((prev: any) => ({ ...prev, [manualItemModal.orderId as string]: nextProduct.id }));
-      handleAddItem(manualItemModal.orderId, nextProduct.id);
-      setManualItemModal({ open: false, orderId: null, name: "", price: "", loading: false, error: "" });
+      await applyItemsChange(manualItemModal.orderId, (items) => [
+        ...items,
+        buildOrderItemFromProduct(nextProduct, { quantity, unitPriceOverride: price }),
+      ]);
+      closeManualItemModal();
     } catch (err: any) {
       setManualItemModal((prev) => ({
         ...prev,
         loading: false,
         error: String(err?.message || "Falha ao criar item avulso."),
       }));
+    }
+  };
+
+  const openCouvertModal = (order: any) => {
+    if (!isTableOrder(order)) return;
+    const price = Number(tableServiceSettings.couvertPrice || 0);
+    if (!tableServiceSettings.couvertEnabled || price <= 0) {
+      setError("Configure o valor do couvert em Tipos de pedido.");
+      return;
+    }
+    openManualItemModal(String(order.id), tableServiceSettings.couvertLabel, {
+      name: tableServiceSettings.couvertLabel,
+      price,
+      quantity: 1,
+      category: TABLE_SERVICE_CATEGORY,
+      title: "Adicionar couvert",
+      helper: "Informe quantas pessoas estão na mesa. O valor entra como item do pedido e sai na impressão.",
+      quantityLabel: "Pessoas na mesa",
+      ctaLabel: "Adicionar couvert",
+    });
+  };
+
+  const handleApplyServiceCharge = async (order: any) => {
+    if (!isTableOrder(order) || !tableServiceSettings.serviceChargeEnabled) return;
+    if (!order?.id) return;
+    const label = tableServiceSettings.serviceChargeLabel || "Taxa de serviço";
+    const { subtotal, amount } = calculateTableServiceCharge(
+      order?.items || [],
+      tableServiceSettings.serviceChargePercent,
+      (item) => isTableServiceOrderItem(item, productsById)
+    );
+    if (subtotal <= 0 || amount <= 0) {
+      setError("Inclua itens na mesa antes de aplicar a taxa de serviço.");
+      return;
+    }
+
+    setUpdating(order.id);
+    try {
+      const product = await ensureOperationalProduct({
+        name: label,
+        price: amount,
+        category: TABLE_SERVICE_CATEGORY,
+        description: "Item operacional de taxa de serviço",
+        anyPrice: true,
+      });
+      const normalizedLabel = normalizeTableText(label);
+      const nextItem = buildOrderItemFromProduct(product, { quantity: 1, unitPriceOverride: amount });
+
+      await applyItemsChange(order.id, (items) => [
+        ...items.filter((item: any) => {
+          const sameServiceItem =
+            isTableServiceOrderItem(item, productsById) &&
+            normalizeTableText(item?.name || item?.product?.name) === normalizedLabel;
+          return !sameServiceItem;
+        }),
+        nextItem,
+      ]);
+      setError(`Taxa de serviço aplicada sobre ${formatCurrency(subtotal)}.`);
+    } catch (err: any) {
+      setError(String(err?.message || "Não foi possível aplicar a taxa de serviço."));
+    } finally {
+      setUpdating(null);
     }
   };
 
@@ -4051,28 +4224,64 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
 
               {/* ADICIONAR ITEM */}
-              <div className="mt-3 flex w-full min-w-0 flex-row gap-2 items-center bg-white/70 border border-slate-200/70 rounded-2xl p-1.5">
-                <ProductQuickPicker
-                  value={selectedProducts[order.id] || ""}
-                  onChange={(nextValue: string) =>
-                    setSelectedProducts((prev) => ({
-                      ...prev,
-                      [order.id]: nextValue,
-                    }))
-                  }
-                  products={products}
-                  onOpenCatalog={(query: string) => openCatalogPicker(String(order.id), query)}
-                  onOpenManual={(query: string) => openManualItemModal(String(order.id), query)}
-                  className="min-w-0 flex-1"
-                />
+              <div className="mt-3 space-y-2">
+                <div className="flex w-full min-w-0 flex-row gap-2 items-center bg-white/70 border border-slate-200/70 rounded-2xl p-1.5">
+                  <ProductQuickPicker
+                    value={selectedProducts[order.id] || ""}
+                    onChange={(nextValue: string) =>
+                      setSelectedProducts((prev) => ({
+                        ...prev,
+                        [order.id]: nextValue,
+                      }))
+                    }
+                    products={visibleQueueProducts}
+                    onOpenCatalog={(query: string) => openCatalogPicker(String(order.id), query)}
+                    onOpenManual={(query: string) => openManualItemModal(String(order.id), query)}
+                    className="min-w-0 flex-1"
+                  />
 
-                <button
-                  onClick={() => handleAddItem(order.id)}
-                  className="h-10 w-10 flex-shrink-0 sm:w-auto sm:px-3 sm:py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-1 hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
-                >
-                  <Plus size={14} weight="duotone" />
-                  <span className="hidden sm:inline">Incluir</span>
-                </button>
+                  <button
+                    onClick={() => handleAddItem(order.id)}
+                    className="h-10 w-10 flex-shrink-0 sm:w-auto sm:px-3 sm:py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-1 hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
+                  >
+                    <Plus size={14} weight="duotone" />
+                    <span className="hidden sm:inline">Incluir</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={() => openManualItemModal(String(order.id))}
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 active:scale-95"
+                  >
+                    <Receipt size={15} weight="duotone" />
+                    Item avulso
+                  </button>
+
+                  {isTableOrder(order) && tableServiceSettings.couvertEnabled && Number(tableServiceSettings.couvertPrice || 0) > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => openCouvertModal(order)}
+                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-black text-amber-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-amber-100 active:scale-95"
+                    >
+                      <UsersThree size={15} weight="duotone" />
+                      Couvert
+                    </button>
+                  ) : null}
+
+                  {isTableOrder(order) && tableServiceSettings.serviceChargeEnabled && Number(tableServiceSettings.serviceChargePercent || 0) > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => handleApplyServiceCharge(order)}
+                      disabled={updating === order.id}
+                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-black text-sky-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-sky-100 active:scale-95 disabled:opacity-60"
+                    >
+                      <Percent size={15} weight="duotone" />
+                      Taxa {tableServiceSettings.serviceChargePercent || 10}%
+                    </button>
+                  ) : null}
+                </div>
               </div>
 
               {tvMode ? renderTimeline(order.status, order.type, order) : null}
@@ -4839,7 +5048,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {Object.entries(
-                (products || [])
+                (visibleQueueProducts || [])
                   .filter((product: any) => fuzzyIncludes(product?.name || "", catalogPickerModal.query))
                   .reduce((acc: Record<string, any[]>, product: any) => {
                     const category = String(product?.category || "Sem categoria");
@@ -4877,7 +5086,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   </div>
                 </div>
               ))}
-              {products.filter((product: any) => fuzzyIncludes(product?.name || "", catalogPickerModal.query)).length === 0 && (
+              {visibleQueueProducts.filter((product: any) => fuzzyIncludes(product?.name || "", catalogPickerModal.query)).length === 0 && (
                 <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center space-y-2">
                   <p className="text-sm font-semibold text-slate-700">Nenhum item encontrado.</p>
                   <button
@@ -4899,11 +5108,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         <div className="fixed inset-0 z-[10040] bg-slate-900/45 backdrop-blur-sm p-3 sm:p-6">
           <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl">
             <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-              <p className="text-sm font-black text-slate-900">Adicionar item não cadastrado</p>
+              <div>
+                <p className="text-sm font-black text-slate-900">{manualItemModal.title || "Adicionar item avulso"}</p>
+                {manualItemModal.helper ? (
+                  <p className="mt-0.5 text-xs font-semibold text-slate-500">{manualItemModal.helper}</p>
+                ) : null}
+              </div>
               <button
                 type="button"
                 disabled={manualItemModal.loading}
-                onClick={() => setManualItemModal({ open: false, orderId: null, name: "", price: "", loading: false, error: "" })}
+                onClick={closeManualItemModal}
                 className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50"
               >
                 <X size={16} weight="bold" />
@@ -4919,15 +5133,32 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Valor (R$)</label>
-                <input
-                  value={manualItemModal.price}
-                  onChange={(event) => setManualItemModal((prev) => ({ ...prev, price: event.target.value, error: "" }))}
-                  placeholder="0,00"
-                  inputMode="decimal"
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200"
-                />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Valor unitário (R$)</label>
+                  <input
+                    value={manualItemModal.price}
+                    onChange={(event) => setManualItemModal((prev) => ({ ...prev, price: event.target.value, error: "" }))}
+                    placeholder="0,00"
+                    inputMode="decimal"
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    {manualItemModal.quantityLabel || "Quantidade"}
+                  </label>
+                  <input
+                    value={manualItemModal.quantity}
+                    onChange={(event) => setManualItemModal((prev) => ({ ...prev, quantity: event.target.value, error: "" }))}
+                    placeholder="1"
+                    inputMode="numeric"
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200"
+                  />
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
+                O item fica interno da operação e não aparece no cardápio público.
               </div>
               {manualItemModal.error ? (
                 <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
@@ -4938,7 +5169,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <button
                   type="button"
                   disabled={manualItemModal.loading}
-                  onClick={() => setManualItemModal({ open: false, orderId: null, name: "", price: "", loading: false, error: "" })}
+                  onClick={closeManualItemModal}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                 >
                   Cancelar
@@ -4949,7 +5180,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   disabled={manualItemModal.loading}
                   className="rounded-lg border border-amber-300 bg-amber-500 px-3 py-2 text-xs font-bold text-white hover:bg-amber-600 disabled:opacity-60"
                 >
-                  {manualItemModal.loading ? "Salvando..." : "Salvar e incluir"}
+                  {manualItemModal.loading ? "Salvando..." : (manualItemModal.ctaLabel || "Salvar e incluir")}
                 </button>
               </div>
             </div>

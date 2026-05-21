@@ -1,10 +1,11 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
-import { Bicycle, ForkKnife, House } from '@phosphor-icons/react';
+import { Bicycle, ForkKnife, House, Percent, Receipt, UsersThree } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { storeService } from '../../services/storeService';
+import { normalizeTableServiceSettings } from '../../utils/tableServiceSettings';
 
 const DEFAULT_TYPES = [ 'delivery', 'pickup', 'table' ];
 
@@ -28,6 +29,9 @@ export function OrderTypeSettingsCard() {
     ? auth.store.settings.orderTypes
     : DEFAULT_TYPES;
   const [selected, setSelected] = useState(initial);
+  const [tableServiceSettings, setTableServiceSettings] = useState(() =>
+    normalizeTableServiceSettings(auth?.store?.settings?.tableServiceSettings)
+  );
   const [saving, setSaving] = useState(false);
   const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
   const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
@@ -44,7 +48,17 @@ export function OrderTypeSettingsCard() {
       ? auth.store.settings.orderTypes
       : DEFAULT_TYPES;
     setSelected(canUseDelivery ? next : next.filter((type) => type !== 'delivery'));
-  }, [auth?.store?.id, auth?.store?.settings?.orderTypes, canUseDelivery]);
+    setTableServiceSettings(normalizeTableServiceSettings(auth?.store?.settings?.tableServiceSettings));
+  }, [
+    auth?.store?.id,
+    auth?.store?.settings?.orderTypes,
+    auth?.store?.settings?.tableServiceSettings,
+    canUseDelivery,
+  ]);
+
+  const updateTableService = (patch) => {
+    setTableServiceSettings((prev) => ({ ...prev, ...patch }));
+  };
 
   const toggleType = (type) => {
     if (type === 'delivery' && !canUseDelivery) {
@@ -68,7 +82,11 @@ export function OrderTypeSettingsCard() {
     const nextSelected = canUseDelivery ? selected : selected.filter((type) => type !== 'delivery');
     setSaving(true);
     try {
-      const updated = await storeService.update(storeId, { orderTypes: nextSelected });
+      const normalizedTableService = normalizeTableServiceSettings(tableServiceSettings);
+      const updated = await storeService.update(storeId, {
+        orderTypes: nextSelected,
+        tableServiceSettings: normalizedTableService,
+      });
       if (updated?.settings?.orderTypes) {
         setAuth({
           ...auth,
@@ -77,11 +95,13 @@ export function OrderTypeSettingsCard() {
             settings: {
               ...auth.store.settings,
               orderTypes: updated.settings.orderTypes,
+              tableServiceSettings: updated.settings.tableServiceSettings || normalizedTableService,
             },
           },
         });
       } else {
         setSelected(nextSelected);
+        setTableServiceSettings(normalizedTableService);
       }
       showToast('Tipos de pedido atualizados.', 'success');
     } catch (err) {
@@ -148,6 +168,91 @@ export function OrderTypeSettingsCard() {
           >
             Trocar assinatura
           </button>
+        </div>
+      ) : null}
+      {selected.includes('table') ? (
+        <div className="mt-4 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/80 via-white to-slate-50 p-4">
+          <div className="mb-3 flex items-start gap-3">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-sm">
+              <Receipt size={18} weight="duotone" />
+            </span>
+            <div>
+              <p className="text-sm font-black text-slate-900">Atendimento na mesa</p>
+              <p className="text-xs font-semibold leading-5 text-slate-500">
+                Extras aparecem na fila como botões rápidos e só entram no cupom/RawBT quando aplicados no pedido.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+              <label className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={tableServiceSettings.couvertEnabled}
+                  onChange={(event) => updateTableService({ couvertEnabled: event.target.checked })}
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-amber-600 focus:ring-amber-300"
+                />
+                <span>
+                  <span className="flex items-center gap-2 text-sm font-black text-slate-800">
+                    <UsersThree size={16} weight="duotone" /> Couvert artístico
+                  </span>
+                  <span className="block text-[11px] font-semibold leading-4 text-slate-500">
+                    Cobrança por pessoa em mesa, aplicada manualmente pelo operador.
+                  </span>
+                </span>
+              </label>
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_120px]">
+                <input
+                  value={tableServiceSettings.couvertLabel}
+                  onChange={(event) => updateTableService({ couvertLabel: event.target.value })}
+                  placeholder="Couvert artístico"
+                  className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-200"
+                />
+                <input
+                  value={String(tableServiceSettings.couvertPrice || '')}
+                  onChange={(event) => updateTableService({ couvertPrice: event.target.value })}
+                  placeholder="R$ por pessoa"
+                  inputMode="decimal"
+                  className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-200"
+                />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+              <label className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={tableServiceSettings.serviceChargeEnabled}
+                  onChange={(event) => updateTableService({ serviceChargeEnabled: event.target.checked })}
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-300"
+                />
+                <span>
+                  <span className="flex items-center gap-2 text-sm font-black text-slate-800">
+                    <Percent size={16} weight="duotone" /> Taxa de serviço
+                  </span>
+                  <span className="block text-[11px] font-semibold leading-4 text-slate-500">
+                    Opcional por lei: ative apenas se a loja informa essa cobrança ao cliente.
+                  </span>
+                </span>
+              </label>
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_120px]">
+                <input
+                  value={tableServiceSettings.serviceChargeLabel}
+                  onChange={(event) => updateTableService({ serviceChargeLabel: event.target.value })}
+                  placeholder="Taxa de serviço"
+                  className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                />
+                <input
+                  value={String(tableServiceSettings.serviceChargePercent || '')}
+                  onChange={(event) => updateTableService({ serviceChargePercent: event.target.value })}
+                  placeholder="10%"
+                  inputMode="decimal"
+                  className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       ) : null}
       <button

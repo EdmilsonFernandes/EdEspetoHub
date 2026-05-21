@@ -909,6 +909,28 @@ private async attachShipmentSnapshot(orders: any[]) {
     return Number((product as any).price) || 0;
   }
 
+  private isOperationalAdjustmentProduct(product: Awaited<ReturnType<ProductRepository[ 'findById' ]>>) {
+    if (!product) return false;
+    const category = this.normalizeText((product as any).category);
+    const description = this.normalizeText((product as any).description);
+    return (
+      (product as any).active === false &&
+      (
+        category === this.normalizeText('Atendimento na mesa') ||
+        category === this.normalizeText('Avulsos') ||
+        description.includes('item operacional')
+      )
+    );
+  }
+
+  private resolveUnitPriceOverride(item: any) {
+    const raw = item?.unitPriceOverride ?? item?.priceOverride ?? item?.unitPrice;
+    if (raw === undefined || raw === null || raw === '') return null;
+    const parsed = Number(String(raw).replace(',', '.'));
+    if (!Number.isFinite(parsed) || parsed < 0) return null;
+    return Math.min(100000, Number(parsed.toFixed(2)));
+  }
+
     /**
    * Executes resolve bundle discount workflow for OrderService.
    *
@@ -1832,11 +1854,13 @@ async reopenOrder(
         orderItem.product = product;
         orderItem.order = order;
         orderItem.quantity = quantity;
-        const unitPrice = this.resolveItemPrice(product);
+        const customPricing = this.isOperationalAdjustmentProduct(product);
+        const unitPriceOverride = customPricing ? this.resolveUnitPriceOverride(item) : null;
+        const unitPrice = unitPriceOverride !== null ? unitPriceOverride : this.resolveItemPrice(product);
         const selectedModifiers = this.resolveSelectedModifiers(product, (item as any).selectedModifiers);
         orderItem.selectedModifiers = selectedModifiers.items.length ? selectedModifiers.items : null;
         const grossLine = (unitPrice + selectedModifiers.unitExtra) * quantity;
-        const bundleDiscount = this.resolveBundleDiscount(product, quantity);
+        const bundleDiscount = customPricing ? 0 : this.resolveBundleDiscount(product, quantity);
         orderItem.price = Math.max(0, grossLine - bundleDiscount);
         orderItem.cookingPoint = item.cookingPoint;
         orderItem.passSkewer = Boolean(item.passSkewer);
