@@ -56,6 +56,7 @@ const DestinationDetailPage = lazyPage(() => import('./pages/DestinationDetailPa
 const DestinationPartnerRequestPage = lazyPage(() => import('./pages/DestinationPartnerRequestPage'), 'DestinationPartnerRequestPage');
 const DestinationInviteRedirectPage = lazyPage(() => import('./pages/DestinationInviteRedirectPage'), 'DestinationInviteRedirectPage');
 const HospitalityPlacePage = lazyPage(() => import('./pages/HospitalityPlacePage'), 'HospitalityPlacePage');
+const HospitalityServiceRoutePage = lazyPage(() => import('./pages/HospitalityServiceRoutePage'), 'HospitalityServiceRoutePage');
 const TermsOfUse = lazyPage(() => import('./pages/TermsOfUse'), 'TermsOfUse');
 const OrderTracking = lazyPage(loadOrderTrackingPage, 'OrderTracking');
 const AddressDistance = lazyPage(() => import('./pages/AddressDistance'), 'AddressDistance');
@@ -114,6 +115,7 @@ function App() {
               <Route path="/destinos/cadastrar" element={<DestinationPartnerRequestPage />} />
               <Route path="/destinos/:destinationSlug" element={<DestinationDetailPage />} />
               <Route path="/destinos/:destinationSlug/chales/:placeSlug" element={<HospitalityPlacePage />} />
+              <Route path="/destinos/:destinationSlug/chales/:placeSlug/rota" element={<HospitalityServiceRoutePage />} />
               <Route path="/convite/loja/:destinationSlug/:listingId" element={<DestinationInviteRedirectPage kind="listing" />} />
               <Route path="/convite/chale/:destinationSlug/:placeSlug" element={<DestinationInviteRedirectPage kind="hospitality" />} />
               <Route path="/marketplace" element={<Navigate to="/hub" replace />} />

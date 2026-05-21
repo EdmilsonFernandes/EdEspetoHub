@@ -475,12 +475,14 @@ export function StorePage() {
   }, [storeSlug]);
   const destinationContextFromQuery = useMemo(() => {
     const params = new URLSearchParams(location.search || '');
+    const destinationSlug = String(params.get('destino') || '').trim();
+    const placeSlug = String(params.get('hospedagem') || '').trim();
     const destinationName = String(params.get('destino_nome') || prettifyDestinationLabel(params.get('destino')) || '').trim();
     const placeName = String(params.get('hospedagem_nome') || prettifyDestinationLabel(params.get('hospedagem')) || '').trim();
     const placeAddress = String(params.get('hospedagem_endereco') || '').trim();
     const placeLat = String(params.get('hospedagem_lat') || '').trim();
     const placeLng = String(params.get('hospedagem_lng') || '').trim();
-    return { destinationName, placeName, placeAddress, placeLat, placeLng };
+    return { destinationSlug, placeSlug, destinationName, placeName, placeAddress, placeLat, placeLng };
   }, [location.search]);
   const destinationStoreWhatsAppMessage = useMemo(() => {
     if (!destinationContextFromQuery.destinationName && !destinationContextFromQuery.placeName) return '';
@@ -492,15 +494,25 @@ export function StorePage() {
       placeAddress: destinationContextFromQuery.placeAddress,
       placeLat: destinationContextFromQuery.placeLat,
       placeLng: destinationContextFromQuery.placeLng,
+      itemAddress: storeAddress,
+      itemLat: storeCoords?.lat,
+      itemLng: storeCoords?.lng,
       storeName: storeName || branding?.brandName || '',
+      destinationSlug: destinationContextFromQuery.destinationSlug,
+      placeSlug: destinationContextFromQuery.placeSlug,
     });
   }, [
     branding?.brandName,
     destinationContextFromQuery.destinationName,
+    destinationContextFromQuery.destinationSlug,
     destinationContextFromQuery.placeAddress,
     destinationContextFromQuery.placeLat,
     destinationContextFromQuery.placeLng,
     destinationContextFromQuery.placeName,
+    destinationContextFromQuery.placeSlug,
+    storeAddress,
+    storeCoords?.lat,
+    storeCoords?.lng,
     storeName,
   ]);
   const resolvedWhatsApp = useMemo(() => {

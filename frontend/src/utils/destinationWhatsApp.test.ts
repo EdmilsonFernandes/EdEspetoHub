@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildPhoneCallUrl,
   buildDestinationInquiryMessage,
+  buildHospitalityServiceRouteUrl,
   buildWhatsAppUrl,
   normalizeBrazilianContactPhone,
   normalizeWhatsAppPhone,
@@ -45,6 +46,9 @@ describe('destinationWhatsApp', () => {
       placeAddress: 'Estrada do Bau, km 7',
       placeLat: -22.6901,
       placeLng: -45.7321,
+      itemAddress: 'Rua do Centro, 10',
+      itemLat: -22.6888,
+      itemLng: -45.7299,
       destinationSlug: 'sao-bento-sapucai',
       placeSlug: 'chale-vista-da-pedra',
     });
@@ -53,9 +57,27 @@ describe('destinationWhatsApp', () => {
     expect(message).toContain('Estou visitando Sao Bento Sapucai - SP enquanto estou vendo op\u00e7\u00f5es para Chale Vista da Pedra.');
     expect(message).toContain('Local da hospedagem: Estrada do Bau, km 7');
     expect(message).toContain('Mapa da hospedagem: https://www.google.com/maps/search/?api=1&query=-22.6901%2C-45.7321');
-    expect(message).toContain('Link do Já no Caminho para ver a hospedagem e instalar o app: https://janocaminho.com.br/instalar?');
-    expect(message).toContain('next=%2Fdestinos%2Fsao-bento-sapucai%2Fchales%2Fchale-vista-da-pedra');
+    expect(message).toContain('Local do atendimento: Rua do Centro, 10');
+    expect(message).toContain('Rota para entrega/atendimento até a hospedagem: https://janocaminho.com.br/destinos/sao-bento-sapucai/chales/chale-vista-da-pedra/rota?');
+    expect(message).toContain('serviceName=Massagem+relaxante');
+    expect(message).toContain('placeAddress=Estrada+do+Bau%2C+km+7');
     expect(message).toContain('Gostaria de saber mais sobre massagem');
+  });
+
+  it('builds a public service-to-hospitality route URL', () => {
+    const url = buildHospitalityServiceRouteUrl({
+      destinationSlug: 'monte-verde',
+      placeSlug: 'chale-da-serra',
+      serviceName: 'Restaurante da vila',
+      serviceAddress: 'Av. Monte Verde, 100',
+      placeName: 'Chale da Serra',
+      placeAddress: 'Estrada dos Pinheiros, 80',
+    });
+
+    expect(url).toContain('https://janocaminho.com.br/destinos/monte-verde/chales/chale-da-serra/rota?');
+    expect(url).toContain('serviceName=Restaurante+da+vila');
+    expect(url).toContain('serviceAddress=Av.+Monte+Verde%2C+100');
+    expect(url).toContain('placeAddress=Estrada+dos+Pinheiros%2C+80');
   });
 
   it('adds an item address and map when no hospitality place is present', () => {

@@ -10,6 +10,9 @@ type RouteMapViewProps = {
   destination: RouteCoords;
   zoom?: number;
   compact?: boolean;
+  originLabel?: string;
+  destinationLabel?: string;
+  mapActionLabel?: string;
 };
 
 const isValidPoint = (point?: Partial<RouteCoords> | null) =>
@@ -61,7 +64,15 @@ const buildMapLayout = (origin: RouteCoords, destination: RouteCoords) => {
   };
 };
 
-export function RouteMapView({ origin, destination, zoom = 13, compact = false }: RouteMapViewProps) {
+export function RouteMapView({
+  origin,
+  destination,
+  zoom = 13,
+  compact = false,
+  originLabel = 'Loja',
+  destinationLabel = 'Entrega',
+  mapActionLabel = 'Abrir no mapa',
+}: RouteMapViewProps) {
   const isValid = isValidPoint(origin) && isValidPoint(destination);
   const mapLayout = useMemo(
     () => (isValid ? buildMapLayout(origin, destination) : null),
@@ -127,7 +138,7 @@ export function RouteMapView({ origin, destination, zoom = 13, compact = false }
             <span className="h-2.5 w-2.5 rounded-full bg-stone-900" />
             <div className="min-w-0">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Origem</p>
-              <p className="truncate text-xs font-bold text-stone-800">Loja</p>
+              <p className="truncate text-xs font-bold text-stone-800">{originLabel}</p>
             </div>
           </div>
 
@@ -139,14 +150,14 @@ export function RouteMapView({ origin, destination, zoom = 13, compact = false }
             }}
             className="rounded-2xl border border-amber-300/80 bg-[linear-gradient(135deg,#fff7e7,#f7d58d)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-amber-900 shadow-[0_18px_30px_-24px_rgba(180,83,9,0.62)] transition-transform hover:-translate-y-0.5 active:scale-[0.96]"
           >
-            Abrir no mapa
+            {mapActionLabel}
           </button>
 
           <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/70 bg-white/90 px-3 py-2 shadow-[0_18px_30px_-24px_rgba(28,25,23,0.55)] backdrop-blur">
             <span className="h-2.5 w-2.5 rounded-full bg-orange-600" />
             <div className="min-w-0">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Destino</p>
-              <p className="truncate text-xs font-bold text-stone-800">Entrega</p>
+              <p className="truncate text-xs font-bold text-stone-800">{destinationLabel}</p>
             </div>
           </div>
         </div>

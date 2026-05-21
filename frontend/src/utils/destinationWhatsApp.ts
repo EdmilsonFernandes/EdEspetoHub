@@ -1,4 +1,4 @@
-import { buildHospitalityPlaceSmartQrUrl } from './destinationQrPoster';
+import { JNC_PUBLIC_ORIGIN, buildHospitalityPlaceSmartQrUrl } from './destinationQrPoster';
 
 export const normalizeBrazilianContactPhone = (value?: string | null) => {
   const digits = String(value || '').replace(/\D/g, '');
@@ -68,6 +68,57 @@ export const buildDestinationMapUrl = ({
     : String(address || '').trim();
 
   return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : '';
+};
+
+export const buildHospitalityServiceRouteUrl = ({
+  destinationSlug,
+  placeSlug,
+  serviceName,
+  serviceAddress,
+  serviceLat,
+  serviceLng,
+  placeName,
+  placeAddress,
+  placeLat,
+  placeLng,
+}: {
+  destinationSlug?: string | null;
+  placeSlug?: string | null;
+  serviceName?: string | null;
+  serviceAddress?: string | null;
+  serviceLat?: string | number | null;
+  serviceLng?: string | number | null;
+  placeName?: string | null;
+  placeAddress?: string | null;
+  placeLat?: string | number | null;
+  placeLng?: string | number | null;
+}, origin = JNC_PUBLIC_ORIGIN) => {
+  const destination = String(destinationSlug || '').trim();
+  const place = String(placeSlug || '').trim();
+  if (!destination || !place) return '';
+
+  const hasServiceLocation = Boolean(String(serviceAddress || '').trim()) || (normalizeCoordinate(serviceLat) !== null && normalizeCoordinate(serviceLng) !== null);
+  const hasPlaceLocation = Boolean(String(placeAddress || '').trim()) || (normalizeCoordinate(placeLat) !== null && normalizeCoordinate(placeLng) !== null);
+  if (!hasServiceLocation || !hasPlaceLocation) return '';
+
+  const base = String(origin || JNC_PUBLIC_ORIGIN).replace(/\/+$/, '') || JNC_PUBLIC_ORIGIN;
+  const params = new URLSearchParams();
+  const append = (key: string, value?: string | number | null) => {
+    const text = String(value ?? '').trim();
+    if (text) params.set(key, text);
+  };
+
+  append('serviceName', serviceName);
+  append('serviceAddress', serviceAddress);
+  append('serviceLat', serviceLat);
+  append('serviceLng', serviceLng);
+  append('placeName', placeName);
+  append('placeAddress', placeAddress);
+  append('placeLat', placeLat);
+  append('placeLng', placeLng);
+
+  const suffix = params.toString() ? `?${params.toString()}` : '';
+  return `${base}/destinos/${encodeURIComponent(destination)}/chales/${encodeURIComponent(place)}/rota${suffix}`;
 };
 
 const buildLocationMessageLines = ({
@@ -152,6 +203,18 @@ export const buildDestinationInquiryMessage = ({
   const placeAddressKey = String(placeAddress || '').trim().toLowerCase();
   const itemAddressKey = String(resolvedItemAddress || '').trim().toLowerCase();
   const shouldIncludeItemLocation = Boolean(itemLocationLines.length) && (!placeLocationLines.length || placeAddressKey !== itemAddressKey);
+  const routeContextUrl = buildHospitalityServiceRouteUrl({
+    destinationSlug,
+    placeSlug,
+    serviceName: subject,
+    serviceAddress: resolvedItemAddress,
+    serviceLat: resolvedItemLat,
+    serviceLng: resolvedItemLng,
+    placeName,
+    placeAddress,
+    placeLat,
+    placeLng,
+  });
   const appContextUrl = destinationSlug && placeSlug
     ? buildHospitalityPlaceSmartQrUrl({
         destinationSlug,
@@ -166,7 +229,9 @@ export const buildDestinationInquiryMessage = ({
     location ? `Estou visitando ${location}${context}.` : context ? `Estou visitando a região${context}.` : '',
     ...placeLocationLines,
     ...(shouldIncludeItemLocation ? itemLocationLines : []),
-    appContextUrl ? `Link do Já no Caminho para ver a hospedagem e instalar o app: ${appContextUrl}` : '',
+    routeContextUrl
+      ? `Rota para entrega/atendimento até a hospedagem: ${routeContextUrl}`
+      : appContextUrl ? `Link do Já no Caminho para ver a hospedagem e instalar o app: ${appContextUrl}` : '',
     `Gostaria de saber mais sobre ${typeLabel}: disponibilidade, valores e como funciona o atendimento.`,
     'Pode me passar os detalhes, por favor?',
   ].filter(Boolean).join('\n');
