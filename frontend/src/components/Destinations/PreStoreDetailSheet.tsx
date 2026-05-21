@@ -38,6 +38,16 @@ const ContactAction = ({ action }: any) => {
   if (!action?.href) return null;
 
   const handleClick = (event: any) => {
+    if (action.kind === 'whatsapp') {
+      event.preventDefault();
+      if (action.native) {
+        window.location.href = action.href;
+        return;
+      }
+      window.open(action.href, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
     if (!action.external) return;
     event.preventDefault();
     void openActionTarget({ href: action.href, external: true });

@@ -97,9 +97,8 @@ export const buildHospitalityServiceRouteUrl = ({
   const place = String(placeSlug || '').trim();
   if (!destination || !place) return '';
 
-  const hasServiceLocation = Boolean(String(serviceAddress || '').trim()) || (normalizeCoordinate(serviceLat) !== null && normalizeCoordinate(serviceLng) !== null);
   const hasPlaceLocation = Boolean(String(placeAddress || '').trim()) || (normalizeCoordinate(placeLat) !== null && normalizeCoordinate(placeLng) !== null);
-  if (!hasServiceLocation || !hasPlaceLocation) return '';
+  if (!hasPlaceLocation) return '';
 
   const base = String(origin || JNC_PUBLIC_ORIGIN).replace(/\/+$/, '') || JNC_PUBLIC_ORIGIN;
   const params = new URLSearchParams();
@@ -139,6 +138,31 @@ const buildLocationMessageLines = ({
   return [
     safeAddress ? `Local ${label}: ${safeAddress}` : '',
     mapUrl ? `Mapa ${label.toLowerCase()}: ${mapUrl}` : '',
+  ].filter(Boolean);
+};
+
+const buildHospitalityDeliveryReferenceLines = ({
+  placeName,
+  placeAddress,
+  placeLat,
+  placeLng,
+}: {
+  placeName?: string | null;
+  placeAddress?: string | null;
+  placeLat?: string | number | null;
+  placeLng?: string | number | null;
+}) => {
+  const safePlaceName = String(placeName || '').trim();
+  const safeAddress = String(placeAddress || '').trim();
+  const mapUrl = buildDestinationMapUrl({ address: safeAddress, lat: placeLat, lng: placeLng });
+
+  if (!safePlaceName && !safeAddress && !mapUrl) return [];
+
+  return [
+    'Referencia para entrega/atendimento:',
+    safePlaceName ? `Hospedagem: ${safePlaceName}` : '',
+    safeAddress ? `Endereco da hospedagem: ${safeAddress}` : '',
+    mapUrl ? `Mapa da hospedagem: ${mapUrl}` : '',
   ].filter(Boolean);
 };
 
@@ -184,15 +208,15 @@ export const buildDestinationInquiryMessage = ({
   const location = [city || destinationName, state].filter(Boolean).join(' - ');
   const subject = String(itemName || storeName || 'esse atendimento').trim();
   const typeLabel = String(itemType || 'serviço').trim().toLowerCase();
-  const context = placeName ? ` enquanto estou vendo opções para ${placeName}` : '';
   const resolvedItemAddress = itemAddress ?? address;
   const resolvedItemLat = itemLat ?? lat;
   const resolvedItemLng = itemLng ?? lng;
-  const placeLocationLines = buildLocationMessageLines({
-    label: 'da hospedagem',
-    address: placeAddress,
-    lat: placeLat,
-    lng: placeLng,
+  const hasHospitalityContext = Boolean(String(placeName || placeAddress || '').trim());
+  const hospitalityReferenceLines = buildHospitalityDeliveryReferenceLines({
+    placeName,
+    placeAddress,
+    placeLat,
+    placeLng,
   });
   const itemLocationLines = buildLocationMessageLines({
     label: typeLabel.includes('hospedagem') ? 'da hospedagem' : 'do atendimento',
@@ -200,9 +224,7 @@ export const buildDestinationInquiryMessage = ({
     lat: resolvedItemLat,
     lng: resolvedItemLng,
   });
-  const placeAddressKey = String(placeAddress || '').trim().toLowerCase();
-  const itemAddressKey = String(resolvedItemAddress || '').trim().toLowerCase();
-  const shouldIncludeItemLocation = Boolean(itemLocationLines.length) && (!placeLocationLines.length || placeAddressKey !== itemAddressKey);
+  const shouldIncludeItemLocation = Boolean(itemLocationLines.length) && !hasHospitalityContext;
   const routeContextUrl = buildHospitalityServiceRouteUrl({
     destinationSlug,
     placeSlug,
@@ -226,11 +248,13 @@ export const buildDestinationInquiryMessage = ({
 
   return [
     `Olá! Encontrei ${subject} pelo Já no Caminho.`,
-    location ? `Estou visitando ${location}${context}.` : context ? `Estou visitando a região${context}.` : '',
-    ...placeLocationLines,
+    hasHospitalityContext
+      ? `Estou ${location ? `em ${location} e ` : ''}hospedado(a) em ${String(placeName || 'uma hospedagem cadastrada').trim()}.`
+      : location ? `Estou visitando ${location}.` : '',
+    ...hospitalityReferenceLines,
     ...(shouldIncludeItemLocation ? itemLocationLines : []),
     routeContextUrl
-      ? `Rota para entrega/atendimento até a hospedagem: ${routeContextUrl}`
+      ? `Link com rota/referencia para entrega: ${routeContextUrl}`
       : appContextUrl ? `Link do Já no Caminho para ver a hospedagem e instalar o app: ${appContextUrl}` : '',
     `Gostaria de saber mais sobre ${typeLabel}: disponibilidade, valores e como funciona o atendimento.`,
     'Pode me passar os detalhes, por favor?',

@@ -266,6 +266,7 @@ export function HospitalityPlacePage() {
     state: destination.state,
     itemName: place.name,
     itemType: 'hospedagem',
+    placeName: place.name,
     placeAddress: place.address,
     placeLat: place.lat,
     placeLng: place.lng,
