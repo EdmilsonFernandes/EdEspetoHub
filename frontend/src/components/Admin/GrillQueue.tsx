@@ -1,6 +1,8 @@
 // @ts-nocheck
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import "@fortawesome/fontawesome-free/css/fontawesome.min.css";
+import "@fortawesome/fontawesome-free/css/solid.min.css";
 import {
   CheckSquare,
   Clock,
@@ -21,9 +23,6 @@ import {
   Buildings,
   Phone,
   NotePencil,
-  Percent,
-  Receipt,
-  UsersThree
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { storeService } from "../../services/storeService";
@@ -1711,6 +1710,80 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     [products]
   );
 
+  const resolveOrderItemProduct = (item: any) => item?.product || productsById.get(item?.productId || item?.id);
+
+  const resolveOrderItemImageUrl = (item: any) => {
+    const product = resolveOrderItemProduct(item);
+    return item?.imageUrl || item?.image_url || product?.imageUrl || product?.image_url || "";
+  };
+
+  const getVisualOrderItemGroupKey = (item: any) => {
+    const product = resolveOrderItemProduct(item);
+    const promoMeta = resolvePromoMeta(item);
+    const identity = String(item?.productId || product?.id || normalizeTableText(item?.name || product?.name) || item?.id || "").trim();
+    const unitPrice = Number(promoMeta.unitPrice || item?.unitPriceOverride || item?.unitPrice || item?.price || product?.price || 0).toFixed(2);
+    return [
+      identity,
+      normalizeTableText(item?.name || product?.name),
+      normalizeTableText(getOrderItemCategory(item, productsById)),
+      unitPrice,
+      normalizeTableText(item?.cookingPoint),
+      item?.passSkewer ? "1" : "0",
+      getModifiersSignature(item?.selectedModifiers || []),
+    ].join("|");
+  };
+
+  const buildVisualOrderItemGroups = (orderId: any, items: any[] = []) => {
+    const grouped = new Map<string, any>();
+    getOrderedItems(orderId, items).forEach((item: any) => {
+      const groupKey = getVisualOrderItemGroupKey(item);
+      const product = resolveOrderItemProduct(item);
+      const promoMeta = resolvePromoMeta(item);
+      const qty = Math.max(0, Number(item?.qty || 0));
+      const unitPrice = Number(promoMeta.unitPrice || 0);
+      const originalUnitPrice = promoMeta.promoActive && promoMeta.originalPrice ? Number(promoMeta.originalPrice) : 0;
+      const current = grouped.get(groupKey) || {
+        groupKey,
+        primary: item,
+        itemIds: new Set<string>(),
+        name: String(item?.name || product?.name || "Item").trim(),
+        imageUrl: resolveOrderItemImageUrl(item),
+        qty: 0,
+        unitPrice,
+        total: 0,
+        originalTotal: 0,
+        promoActive: false,
+        isNew: false,
+      };
+
+      const itemId = String(item?.id || "").trim();
+      if (itemId) current.itemIds.add(itemId);
+      current.qty += qty;
+      current.total += unitPrice * qty;
+      current.originalTotal += originalUnitPrice * qty;
+      current.promoActive = current.promoActive || Boolean(promoMeta.promoActive);
+      current.isNew = current.isNew || !Boolean(item?.isPrinted);
+      grouped.set(groupKey, current);
+    });
+    return Array.from(grouped.values());
+  };
+
+  const getOrderActiveTableServiceGroups = (order: any, groups?: any[]) => {
+    const visualGroups = groups || buildVisualOrderItemGroups(order?.id, order?.items || []);
+    const normalizedCouvertLabel = normalizeTableText(tableServiceSettings.couvertLabel || "Couvert artistico");
+    const normalizedServiceLabel = normalizeTableText(tableServiceSettings.serviceChargeLabel || "Taxa de servico");
+    const tableServiceGroups = visualGroups.filter((group: any) => isTableServiceOrderItem(group.primary, productsById));
+    return {
+      tableServiceGroups,
+      activeCouvertGroup: tableServiceGroups.find(
+        (group: any) => normalizeTableText(group.name || group.primary?.name || group.primary?.product?.name) === normalizedCouvertLabel
+      ),
+      activeServiceChargeGroup: tableServiceGroups.find(
+        (group: any) => normalizeTableText(group.name || group.primary?.name || group.primary?.product?.name) === normalizedServiceLabel
+      ),
+    };
+  };
+
   const ensureAudioContext = async () => {
     const context = audioContextRef.current || new AudioContext();
     audioContextRef.current = context;
@@ -2439,6 +2512,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             }
           : item
       )
+    );
+  };
+
+  const removeVisualOrderItemGroup = (orderId: any, group: any) => {
+    const itemIds = group?.itemIds || new Set<string>();
+    const groupKey = group?.groupKey;
+    applyItemsChange(orderId, (items: any[]) =>
+      items.filter((item: any) => {
+        const itemId = String(item?.id || "").trim();
+        if (itemId && itemIds.has(itemId)) return false;
+        return groupKey ? getVisualOrderItemGroupKey(item) !== groupKey : true;
+      })
     );
   };
 
@@ -3181,6 +3266,71 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     cancelled: { dot: "bg-rose-500", text: "text-rose-700" },
   };
 
+  const renderFontAwesomeIcon = (iconClass: string) => (
+    <i className={`fa-solid ${iconClass} text-[0.9em] leading-none`} aria-hidden="true" />
+  );
+
+  const renderDrawerFinancialSummary = (order: any) => {
+    const { fee, total, itemsVolume } = calcMoney(order);
+    const { activeCouvertGroup, activeServiceChargeGroup } = getOrderActiveTableServiceGroups(order);
+    const activeAddons = [
+      activeCouvertGroup
+        ? { id: "couvert", label: activeCouvertGroup.name || "Couvert", icon: "fa-music", group: activeCouvertGroup }
+        : null,
+      activeServiceChargeGroup
+        ? { id: "service", label: activeServiceChargeGroup.name || "Taxa de serviço", icon: "fa-bell-concierge", group: activeServiceChargeGroup }
+        : null,
+    ].filter(Boolean);
+
+    return (
+      <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50/85 p-2.5 shadow-[0_12px_34px_-28px_rgba(15,23,42,0.45)]">
+        {activeAddons.length ? (
+          <div className="mb-2 space-y-1.5">
+            {activeAddons.map((addon: any) => (
+              <div
+                key={addon.id}
+                className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/80 bg-white px-3 py-2 text-xs shadow-sm"
+              >
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#FFF3E0] text-[#E65100]">
+                  {renderFontAwesomeIcon(addon.icon)}
+                </span>
+                <span className="min-w-0 flex-1 truncate font-black text-slate-700">
+                  {addon.label}
+                </span>
+                <span className="shrink-0 font-black text-slate-900">
+                  {formatCurrency(Number(addon.group?.total || 0))}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeVisualOrderItemGroup(order.id, addon.group)}
+                  disabled={updating === order.id}
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-rose-50 text-rose-600 transition hover:bg-rose-100 active:scale-95 disabled:opacity-50"
+                  aria-label={`Remover ${addon.label}`}
+                  title={`Remover ${addon.label}`}
+                >
+                  <X size={13} weight="bold" />
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : null}
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-white px-3 py-2.5 shadow-sm">
+          <div className="min-w-0">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+              Total do pedido
+            </p>
+            <p className="mt-0.5 truncate text-[11px] font-bold text-slate-500">
+              {itemsVolume} {itemsVolume === 1 ? "item" : "itens"}{fee > 0 ? ` + frete ${formatCurrency(fee)}` : ""}
+            </p>
+          </div>
+          <strong className="shrink-0 text-lg font-black tracking-[-0.04em] text-emerald-700">
+            {formatCurrency(total)}
+          </strong>
+        </div>
+      </div>
+    );
+  };
+
   const renderOrderFooterActions = (order: any) => {
     const canCancelOrder = [ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ].includes(
       String(order?.status || '').toLowerCase()
@@ -3270,9 +3420,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
       {order.status === "preparing" && order.type !== "pickup" && order.type !== "delivery" && (
         <div className="w-full">
-          <div className="mb-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1">
-            Pedido pronto.
-          </div>
           <button
             onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "ready"); }}
             disabled={updating === order.id}
@@ -3997,6 +4144,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 : 'bg-slate-100 text-slate-900 border-slate-200';
             const drawerShowTypeInMeta = !drawerHasLocationIdentifier && Boolean(drawerTypeMeta?.label);
             const drawerPaymentStatus = String(order.paymentStatus || '').toUpperCase();
+            const drawerItemGroups = buildVisualOrderItemGroups(order.id, order.items || []);
+            const drawerProductItemGroups = drawerItemGroups.filter((group: any) => !isTableServiceOrderItem(group.primary, productsById));
+            const { activeCouvertGroup, activeServiceChargeGroup } = getOrderActiveTableServiceGroups(order, drawerItemGroups);
             return (
             <div
               key={order.id}
@@ -4159,106 +4309,110 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
               {/* LISTA DE ITENS */}
               <div className="mt-3 space-y-2">
-                {getOrderedItems(order.id, order.items || []).map((item, itemIndex) => (
+                {drawerProductItemGroups.map((group: any) => {
+                  const item = group.primary;
+                  const itemImageUrl = group.imageUrl;
+                  return (
                   <div
-                    key={`${item.id || item.productId || item.name}-${itemIndex}`}
-                    className={`flex justify-between text-xs text-gray-700 items-center gap-3 rounded-2xl px-2.5 py-1.5 border ${
-                      item?.isPrinted
-                        ? "bg-slate-50 border-slate-200"
-                        : "bg-amber-50 border-amber-200"
+                    key={group.groupKey}
+                    className={`flex min-w-0 items-start gap-3 rounded-[1.2rem] border px-2.5 py-2 text-xs text-slate-700 ${
+                      group.isNew
+                        ? "bg-amber-50 border-amber-200"
+                        : "bg-slate-50 border-slate-200"
                     }`}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <button
-                          onClick={() => handleQuantityChange(order.id, item.id, -1)}
-                          className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
-                        >
-                          <Minus size={14} weight="duotone" />
-                        </button>
-
-                        <span className="font-bold text-gray-800 w-7 text-center text-[11px]">
-                          {item.qty}
-                        </span>
-
-                        <button
-                          onClick={() => handleQuantityChange(order.id, item.id, 1)}
-                          className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
-                        >
-                          <Plus size={14} weight="duotone" />
-                        </button>
-                      </div>
-
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-9 h-9 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
-                          {item.imageUrl || item.image_url || productsById.get(item.productId || item.id)?.imageUrl ? (
+                    <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                      {itemImageUrl ? (
                             <img
-                              src={resolveAssetUrl(item.imageUrl || item.image_url || productsById.get(item.productId || item.id)?.imageUrl)}
-                              alt={item.name}
+                          src={resolveAssetUrl(itemImageUrl)}
+                          alt={group.name}
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">
+                        <div className="flex h-full w-full items-center justify-center text-[15px] text-slate-400">
                               🍖
                             </div>
                           )}
                         </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="truncate text-[12px]" title={item.name}>
-                            {item.name}
+
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <div className="min-w-0">
+                          <span className="block truncate text-[12px] font-black text-slate-800" title={group.name}>
+                            {group.name}
                           </span>
-                          {!item?.isPrinted && (
-                            <span className="mt-1 inline-flex w-fit items-center rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.14em] text-amber-800">
-                              Novo
-                            </span>
-                          )}
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {item?.cookingPoint && (
-                              <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                                {item.cookingPoint}
-                              </span>
-                            )}
-                            {item?.passSkewer && (
-                              <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                                passar farinha
-                              </span>
-                            )}
-                            {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
-                              <span
-                                key={`${item.id || item.productId}-${modifierName}`}
-                                className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-slate-100 text-slate-700 border border-slate-200"
-                              >
-                                + {modifierName}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
+                          <span className="mt-0.5 block text-[10px] font-bold text-slate-400">
+                            {formatCurrency(group.unitPrice)} un.
+                          </span>
+                      </div>
+
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {group.isNew && (
+                          <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.14em] text-amber-800">
+                            Novo
+                          </span>
+                        )}
+                        {item?.cookingPoint && (
+                          <span className="rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-[9px] font-semibold text-amber-800">
+                            {item.cookingPoint}
+                          </span>
+                        )}
+                        {item?.passSkewer && (
+                          <span className="rounded-full border border-fuchsia-200 bg-fuchsia-100 px-2 py-0.5 text-[9px] font-semibold text-fuchsia-700">
+                            passar farinha
+                          </span>
+                        )}
+                        {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
+                          <span
+                            key={`${group.groupKey}-${modifierName}`}
+                            className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[9px] font-semibold text-slate-600"
+                          >
+                            + {modifierName}
+                          </span>
+                        ))}
                       </div>
                     </div>
 
-                    {(() => {
-                      const promoMeta = resolvePromoMeta(item);
-                      const total = promoMeta.unitPrice * item.qty;
-                      return (
-                        <span className="flex flex-col items-end flex-shrink-0 text-[11px] font-semibold">
-                          {promoMeta.promoActive && promoMeta.originalPrice ? (
-                            <span className="text-[10px] text-slate-400 line-through">
-                              {formatCurrency(promoMeta.originalPrice * item.qty)}
-                            </span>
-                          ) : null}
-                          <span className={promoMeta.promoActive ? 'text-emerald-600' : 'text-slate-700'}>
-                            {formatCurrency(total)}
+                    <div className="flex shrink-0 flex-col items-end gap-1.5">
+                      <span className="text-right text-[12px] font-black text-slate-900">
+                        {group.promoActive && group.originalTotal > 0 ? (
+                          <span className="block text-[10px] font-bold text-slate-400 line-through">
+                            {formatCurrency(group.originalTotal)}
                           </span>
+                        ) : null}
+                        <span className={group.promoActive ? "text-emerald-600" : "text-slate-900"}>
+                          {formatCurrency(group.total)}
                         </span>
-                      );
-                    })()}
+                      </span>
+                      <div className="inline-flex h-9 items-center rounded-full border border-slate-200 bg-white p-0.5 shadow-sm">
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange(order.id, item.id, -1)}
+                          className="grid h-8 w-8 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 active:scale-95"
+                          aria-label={`Diminuir ${group.name}`}
+                        >
+                          <Minus size={14} weight="bold" />
+                        </button>
+                        <span className="min-w-7 px-1 text-center text-[12px] font-black tabular-nums text-slate-800">
+                          {group.qty}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange(order.id, item.id, 1)}
+                          className="grid h-8 w-8 place-items-center rounded-full bg-slate-900 text-white transition hover:bg-slate-700 active:scale-95"
+                          aria-label={`Aumentar ${group.name}`}
+                        >
+                          <Plus size={14} weight="bold" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* ADICIONAR ITEM */}
               <div className="mt-3 space-y-2">
-                <div className="flex w-full min-w-0 flex-row gap-2 items-center bg-white/70 border border-slate-200/70 rounded-2xl p-1.5">
+                <div className="flex w-full min-w-0 flex-row items-stretch gap-2 rounded-2xl border border-slate-200/70 bg-white/70 p-1.5">
                   <ProductQuickPicker
                     value={selectedProducts[order.id] || ""}
                     onChange={(nextValue: string) =>
@@ -4270,58 +4424,55 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     products={visibleQueueProducts}
                     onOpenCatalog={(query: string) => openCatalogPicker(String(order.id), query)}
                     onOpenManual={(query: string) => openManualItemModal(String(order.id), query)}
-                    className="min-w-0 flex-1"
+                    className="min-w-0 flex-1 [&>button]:h-11"
                   />
 
                   <button
+                    type="button"
                     onClick={() => handleAddItem(order.id)}
-                    className="h-10 w-10 flex-shrink-0 sm:w-auto sm:px-3 sm:py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-1 hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
+                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center gap-1 rounded-xl bg-brand-primary text-xs font-bold text-white transition-all hover:-translate-y-0.5 hover:opacity-90 active:scale-95 sm:w-auto sm:px-3"
                   >
                     <Plus size={14} weight="duotone" />
                     <span className="hidden sm:inline">Incluir</span>
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() => openManualItemModal(String(order.id))}
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 active:scale-95"
+                    className="inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 active:scale-95"
                   >
-                    <Receipt size={15} weight="duotone" />
+                    {renderFontAwesomeIcon("fa-asterisk")}
                     Item avulso
                   </button>
 
-                  {isTableOrder(order) && tableServiceSettings.couvertEnabled && Number(tableServiceSettings.couvertPrice || 0) > 0 ? (
+                  {isTableOrder(order) && tableServiceSettings.couvertEnabled && Number(tableServiceSettings.couvertPrice || 0) > 0 && !activeCouvertGroup ? (
                     <button
                       type="button"
                       onClick={() => openCouvertModal(order)}
-                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-black text-amber-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-amber-100 active:scale-95"
+                      className="inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-amber-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-amber-100 active:scale-95"
                     >
-                      <UsersThree size={15} weight="duotone" />
-                      Couvert
+                      {renderFontAwesomeIcon("fa-music")}
+                      + Couvert
                     </button>
                   ) : null}
 
-                  {isTableOrder(order) && tableServiceSettings.serviceChargeEnabled && Number(tableServiceSettings.serviceChargePercent || 0) > 0 ? (
+                  {isTableOrder(order) && tableServiceSettings.serviceChargeEnabled && Number(tableServiceSettings.serviceChargePercent || 0) > 0 && !activeServiceChargeGroup ? (
                     <button
                       type="button"
                       onClick={() => handleApplyServiceCharge(order)}
                       disabled={updating === order.id}
-                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-black text-sky-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-sky-100 active:scale-95 disabled:opacity-60"
+                      className="inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-sky-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-sky-100 active:scale-95 disabled:opacity-60"
                     >
-                      <Percent size={15} weight="duotone" />
-                      Taxa {tableServiceSettings.serviceChargePercent || 10}%
+                      {renderFontAwesomeIcon("fa-bell-concierge")}
+                      + Taxa {tableServiceSettings.serviceChargePercent || 10}%
                     </button>
                   ) : null}
                 </div>
               </div>
 
               {tvMode ? renderTimeline(order.status, order.type, order) : null}
-
-              <div className="mt-3">
-                {renderMoneyBreakdown(order)}
-              </div>
                 </div>
             </div>
                   );
@@ -4329,8 +4480,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
                   </div>
                 </div>
-                <div className="shrink-0 p-4 pb-[max(env(safe-area-inset-bottom),1rem)] border-t border-slate-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:pb-4">
-                  {selectedOrder ? renderOrderFooterActions(selectedOrder) : null}
+                <div className="shrink-0 border-t border-slate-200 bg-white px-3 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:px-4 md:pb-4">
+                  {selectedOrder ? (
+                    <>
+                      {renderDrawerFinancialSummary(selectedOrder)}
+                      <div className="mt-3">
+                        {renderOrderFooterActions(selectedOrder)}
+                      </div>
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>,
