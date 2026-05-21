@@ -538,7 +538,7 @@ export function PortfolioPage() {
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <a
-                href="https://wa.me/5512997822784"
+                href="https://wa.me/551239334979"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center justify-center rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-black text-white"
