@@ -313,6 +313,27 @@ const isMobileUserAgent = () => {
   return /android|iphone|ipad|ipod|mobile/.test(ua);
 };
 
+const openExternalScheme = (url: string) => {
+  if (typeof document === 'undefined') {
+    window.location.href = url;
+    return;
+  }
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.style.display = 'none';
+  link.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(link);
+  link.click();
+  window.setTimeout(() => {
+    try {
+      link.remove();
+    } catch {
+      // no-op
+    }
+  }, 1000);
+};
+
 export const printReceiptAsImage = async (payload: PrintReceiptRawBtInput) => {
   if (!payload?.items?.length) {
     throw new Error("Pedido sem itens para impressão.");
@@ -321,7 +342,7 @@ export const printReceiptAsImage = async (payload: PrintReceiptRawBtInput) => {
   if (isMobileUserAgent()) {
     const rawText = buildRawBtText(payload);
     const base64 = toBase64Utf8(rawText);
-    window.location.href = `rawbt:base64,${base64}`;
+    openExternalScheme(`rawbt:base64,${base64}`);
     return { mode: 'rawbt' as const };
   }
 

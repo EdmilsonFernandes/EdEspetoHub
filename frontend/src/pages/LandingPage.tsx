@@ -30,6 +30,7 @@ import {
   User,
   UserCircle,
   UserPlus,
+  WhatsappLogo,
   X,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
@@ -205,7 +206,8 @@ export function LandingPage() {
     return () => { mounted = false; };
   }, []);
 
-  const ctaPrimaryHref = 'mailto:contato@janocaminho.com.br';
+  const whatsAppBusinessHref = 'https://wa.me/551239334979';
+  const ctaPrimaryHref = whatsAppBusinessHref;
 
   const features = [
     { icon: ListChecks, title: 'Pedido online sem improviso', desc: 'O cliente pede pelo link ou app e a loja acompanha tudo em tempo real.', accent: 'sky' },
@@ -318,11 +320,12 @@ export function LandingPage() {
                 </button>
                 <a
                   href={ctaPrimaryHref}
+                  target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-[1.35rem] border border-white/12 bg-white/[0.05] px-8 py-4 text-base font-black text-white backdrop-blur-md transition-all hover:bg-white/[0.1] active:scale-[0.98]"
                 >
-                  <EnvelopeSimple size={17} weight="duotone" className="text-sky-300" />
-                  Quero ajuda para ativar
+                  <WhatsappLogo size={18} weight="fill" className="text-emerald-300" />
+                  Falar pelo WhatsApp
                 </a>
               </div>
 
@@ -814,8 +817,8 @@ export function LandingPage() {
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-black text-slate-300 backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
             >
-              <EnvelopeSimple size={15} weight="duotone" className="text-sky-300" />
-              Fale por e-mail
+              <WhatsappLogo size={16} weight="fill" className="text-emerald-300" />
+              Falar pelo WhatsApp
             </a>
           </div>
         </div>
@@ -1187,8 +1190,8 @@ export function LandingPage() {
                 rel="noreferrer"
                 className="inline-flex items-center gap-2.5 justify-center rounded-2xl border border-white/15 bg-white/5 px-10 py-5 text-lg font-black text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
               >
-                <EnvelopeSimple size={19} weight="duotone" className="text-sky-300" />
-                Tirar dúvidas por e-mail
+                <WhatsappLogo size={20} weight="fill" className="text-emerald-300" />
+                Tirar dúvidas no WhatsApp
               </a>
             </div>
 

@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Buildings, CaretDown, CreditCard, CurrencyDollar, DownloadSimple, GooglePlayLogo, House, List, MagnifyingGlass, Moon, QrCode, ShieldCheck, SignOut, Storefront, Sun, UserCircle, X } from '@phosphor-icons/react';
+import { Buildings, CaretDown, CreditCard, CurrencyDollar, DownloadSimple, GooglePlayLogo, House, List, MagnifyingGlass, Moon, QrCode, ShieldCheck, SignOut, Storefront, Sun, UserCircle, WhatsappLogo, X } from '@phosphor-icons/react';
 interface LandingPageLayoutProps {
   children: React.ReactNode;
 }
@@ -11,6 +11,7 @@ interface LandingPageLayoutProps {
 export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   const COOKIE_CONSENT_KEY = 'jnk_cookie_consent_v1';
   const ATTRIBUTION_KEY = 'jnk_attribution_v1';
+  const whatsAppBusinessHref = 'https://wa.me/551239334979';
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -534,10 +535,13 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   Começar teste grátis
                 </button>
                 <a
-                  href="mailto:contato@janocaminho.com.br"
+                  href={whatsAppBusinessHref}
+                  target="_blank"
+                  rel="noreferrer"
                   className="inline-flex items-center justify-center rounded-xl border border-slate-600 bg-white/5 px-5 py-3 text-sm font-black text-slate-100 hover:bg-white/10 transition"
                 >
-                  Falar por e-mail
+                  <WhatsappLogo size={16} weight="fill" className="mr-2 text-emerald-300" />
+                  Falar pelo WhatsApp
                 </a>
               </div>
             </div>

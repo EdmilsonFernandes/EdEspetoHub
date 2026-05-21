@@ -1304,8 +1304,23 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     };
     setIsGeneratingPrint(true);
     setError('Gerando cupom...');
+    const applyPrintedState = () => {
+      const printedSet = new Set(printedIds);
+      const nextItems = orderItems.map((item: any) =>
+        printedSet.has(String(item?.id || '').trim()) ? { ...item, isPrinted: true } : item
+      );
+      setQueue((prev) =>
+        prev.map((entry) =>
+          entry.id === order.id ? { ...entry, items: nextItems } : entry
+        )
+      );
+      if (selectedOrder?.id === order.id) {
+        setSelectedOrder((prev: any) => (prev ? { ...prev, items: nextItems } : prev));
+      }
+    };
+    let printMode: 'rawbt' | 'browser' | '' = '';
     try {
-      await printReceiptAsImage({
+      const result = await printReceiptAsImage({
         storeName: (payload.storeName || storeNameForPrint || 'Minha Loja').toUpperCase(),
         platformName: 'Já no Caminho',
         queueLabel: `#${String(payload.queueRank || 1).padStart(2, '0')}`,
@@ -1327,27 +1342,26 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         }),
         totalLabel: formatCurrency(payload.total),
       });
+      printMode = result?.mode || '';
     } catch (printError) {
       console.error('[print] erro ao imprimir', printError);
       setError('Falha ao disparar impressão. Marcando itens como impressos no sistema.');
     } finally {
+      if (printMode === 'rawbt') {
+        applyPrintedState();
+        setError('');
+        setIsGeneratingPrint(false);
+        void orderService.markItemsPrinted(order.id, printedIds).catch((syncError) => {
+          console.error('[print] erro ao sincronizar isPrinted', syncError);
+        });
+        return;
+      }
       try {
         await orderService.markItemsPrinted(order.id, printedIds);
       } catch (syncError) {
         console.error('[print] erro ao sincronizar isPrinted', syncError);
       }
-      const printedSet = new Set(printedIds);
-      const nextItems = orderItems.map((item: any) =>
-        printedSet.has(String(item?.id || '').trim()) ? { ...item, isPrinted: true } : item
-      );
-      setQueue((prev) =>
-        prev.map((entry) =>
-          entry.id === order.id ? { ...entry, items: nextItems } : entry
-        )
-      );
-      if (selectedOrder?.id === order.id) {
-        setSelectedOrder((prev: any) => (prev ? { ...prev, items: nextItems } : prev));
-      }
+      applyPrintedState();
       setError('');
       setIsGeneratingPrint(false);
     }
