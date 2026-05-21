@@ -45,12 +45,16 @@ describe('destinationWhatsApp', () => {
       placeAddress: 'Estrada do Bau, km 7',
       placeLat: -22.6901,
       placeLng: -45.7321,
+      destinationSlug: 'sao-bento-sapucai',
+      placeSlug: 'chale-vista-da-pedra',
     });
 
     expect(message).toContain('Encontrei Massagem relaxante pelo J\u00e1 no Caminho');
     expect(message).toContain('Estou visitando Sao Bento Sapucai - SP enquanto estou vendo op\u00e7\u00f5es para Chale Vista da Pedra.');
     expect(message).toContain('Local da hospedagem: Estrada do Bau, km 7');
     expect(message).toContain('Mapa da hospedagem: https://www.google.com/maps/search/?api=1&query=-22.6901%2C-45.7321');
+    expect(message).toContain('Link do Já no Caminho para ver a hospedagem e instalar o app: https://janocaminho.com.br/instalar?');
+    expect(message).toContain('next=%2Fdestinos%2Fsao-bento-sapucai%2Fchales%2Fchale-vista-da-pedra');
     expect(message).toContain('Gostaria de saber mais sobre massagem');
   });
 

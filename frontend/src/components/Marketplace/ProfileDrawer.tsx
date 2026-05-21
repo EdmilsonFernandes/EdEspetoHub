@@ -91,7 +91,6 @@ export function ProfileDrawer({
   onRegisterClient,
   onRegisterStore,
   onRegisterMotoboy,
-  versionLabel,
 }: ProfileDrawerProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const drawerNavigate = useNavigate();
@@ -303,13 +302,13 @@ export function ProfileDrawer({
     { id: 'settings', label: 'Configurações', icon: <GearSix size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
     { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
     { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
+    { id: 'logout', label: 'Sair', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
   ];
   const storeActions: DrawerAction[] = [
     { id: 'store-panel', label: 'Operação da loja', icon: <CookingPot size={22} weight="duotone" />, onClick: onOpenAdminLogin, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
     { id: 'help-store', label: 'Ajuda operacional', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
     { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'logout-store', label: 'Sair da operação', icon: <SignOut size={22} weight="duotone" />, onClick: onLogoutAdmin || (() => undefined), tone: 'danger' },
+    { id: 'logout-store', label: 'Sair', icon: <SignOut size={22} weight="duotone" />, onClick: onLogoutAdmin || (() => undefined), tone: 'danger' },
   ];
   if (storeSlug) {
     storeActions.splice(1, 0, {
@@ -327,7 +326,7 @@ export function ProfileDrawer({
     { id: 'motoboy-panel', label: 'Painel de entregas', icon: <Motorcycle size={22} weight="duotone" />, onClick: onOpenMotoboyLogin, iconColor: 'text-slate-700', bgColor: 'bg-slate-100' },
     { id: 'help-motoboy', label: 'Ajuda do entregador', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
     { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'logout-motoboy', label: 'Sair das entregas', icon: <SignOut size={22} weight="duotone" />, onClick: onLogoutMotoboy || (() => undefined), tone: 'danger' },
+    { id: 'logout-motoboy', label: 'Sair', icon: <SignOut size={22} weight="duotone" />, onClick: onLogoutMotoboy || (() => undefined), tone: 'danger' },
   ];
   const guestActions: DrawerAction[] = [
     { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
@@ -444,11 +443,9 @@ export function ProfileDrawer({
       case 'help-motoboy':
         return 'Suporte para corridas e coletas';
       case 'logout':
-        return 'Encerra somente a sessão neste aparelho';
       case 'logout-store':
-        return 'Encerra somente a sessão da loja neste aparelho';
       case 'logout-motoboy':
-        return 'Encerra somente a sessão de entregador neste aparelho';
+        return '';
       default:
         return '';
     }
@@ -651,9 +648,7 @@ export function ProfileDrawer({
             <span className="min-w-0 flex-1">
               <span className="block text-[12px] font-black tracking-tight text-slate-950">Sobre o app</span>
               <span className="mt-0.5 flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
-                {versionLabel || 'v0.0.0'}
-                <span className="h-1 w-1 rounded-full bg-slate-300" />
-                Seguro
+                Informações e segurança
               </span>
             </span>
             <CaretRight size={15} weight="bold" className="shrink-0 text-slate-300 transition-transform group-active:translate-x-0.5" />
@@ -700,8 +695,8 @@ export function ProfileDrawer({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-[1.2rem] border border-[#d8e5ee] bg-[#edf5fa] p-3">
-                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#336886]/70">Versão</p>
-                  <p className="mt-1 truncate text-xs font-black text-[#153A4C]">{versionLabel || 'v0.0.0'}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#336886]/70">Produto</p>
+                  <p className="mt-1 truncate text-xs font-black text-[#153A4C]">App oficial</p>
                 </div>
                 <div className="rounded-[1.2rem] border border-emerald-100 bg-emerald-50 p-3">
                   <p className="text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700/70">Ambiente</p>

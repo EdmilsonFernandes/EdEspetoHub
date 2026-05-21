@@ -377,8 +377,8 @@ export function AdminLayout({
     {
       section: 'Conta',
       id: 'logout',
-      label: 'Sair da operação',
-      description: 'Encerra somente este acesso neste aparelho.',
+      label: 'Sair',
+      description: '',
       icon: <SignOut size={22} weight="duotone" />,
       onClick: () => {
         markManualLogoutRedirect('admin', '/hub');
@@ -531,7 +531,7 @@ export function AdminLayout({
               className="mt-3 w-full min-h-11 px-3 py-2.5 rounded-xl border border-rose-500/[0.22] bg-rose-500/[0.1] text-rose-400 text-sm font-semibold flex items-center justify-center gap-2 transition-colors hover:bg-rose-500/[0.16] active:scale-[0.98]"
             >
               <SignOut size={15} weight="bold" />
-              Sair da conta
+              Sair
             </button>
             <PlatformTrustFooter className="mt-3 pt-1 opacity-40" compact mode="minimal" />
           </aside>

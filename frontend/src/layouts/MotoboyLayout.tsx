@@ -271,8 +271,8 @@ export function MotoboyLayout() {
     {
       id: 'logout',
       section: 'Sessao',
-      label: 'Sair das entregas',
-      description: 'Encerra somente este acesso neste aparelho.',
+      label: 'Sair',
+      description: '',
       icon: <SignOut size={22} weight="duotone" />,
       onClick: handleMotoboyLogout,
       tone: 'danger' as const,

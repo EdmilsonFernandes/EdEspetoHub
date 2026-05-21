@@ -1,3 +1,5 @@
+import { buildHospitalityPlaceSmartQrUrl } from './destinationQrPoster';
+
 export const normalizeBrazilianContactPhone = (value?: string | null) => {
   const digits = String(value || '').replace(/\D/g, '');
   if (!digits) return '';
@@ -106,6 +108,8 @@ export const buildDestinationInquiryMessage = ({
   lat,
   lng,
   storeName,
+  destinationSlug,
+  placeSlug,
 }: {
   destinationName?: string | null;
   city?: string | null;
@@ -123,6 +127,8 @@ export const buildDestinationInquiryMessage = ({
   lat?: string | number | null;
   lng?: string | number | null;
   storeName?: string | null;
+  destinationSlug?: string | null;
+  placeSlug?: string | null;
 }) => {
   const location = [city || destinationName, state].filter(Boolean).join(' - ');
   const subject = String(itemName || storeName || 'esse atendimento').trim();
@@ -146,12 +152,21 @@ export const buildDestinationInquiryMessage = ({
   const placeAddressKey = String(placeAddress || '').trim().toLowerCase();
   const itemAddressKey = String(resolvedItemAddress || '').trim().toLowerCase();
   const shouldIncludeItemLocation = Boolean(itemLocationLines.length) && (!placeLocationLines.length || placeAddressKey !== itemAddressKey);
+  const appContextUrl = destinationSlug && placeSlug
+    ? buildHospitalityPlaceSmartQrUrl({
+        destinationSlug,
+        placeSlug,
+        destinationName: city || destinationName,
+        placeName,
+      })
+    : '';
 
   return [
     `Olá! Encontrei ${subject} pelo Já no Caminho.`,
     location ? `Estou visitando ${location}${context}.` : context ? `Estou visitando a região${context}.` : '',
     ...placeLocationLines,
     ...(shouldIncludeItemLocation ? itemLocationLines : []),
+    appContextUrl ? `Link do Já no Caminho para ver a hospedagem e instalar o app: ${appContextUrl}` : '',
     `Gostaria de saber mais sobre ${typeLabel}: disponibilidade, valores e como funciona o atendimento.`,
     'Pode me passar os detalhes, por favor?',
   ].filter(Boolean).join('\n');

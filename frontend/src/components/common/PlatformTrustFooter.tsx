@@ -1,5 +1,4 @@
 import { ArrowSquareOut, ShieldCheck } from '@phosphor-icons/react';
-import { AppVersionBadge } from './AppVersionBadge';
 
 type PlatformTrustFooterProps = {
   className?: string;
@@ -48,7 +47,7 @@ export function PlatformTrustFooter({
               </span>
               <span className={`flex items-center gap-1 text-[9px] font-bold ${isDark ? 'text-slate-400' : 'text-slate-400'}`}>
                 <ShieldCheck size={9} weight="fill" className="shrink-0 text-emerald-500" />
-                <AppVersionBadge />
+                Sobre o app
               </span>
             </span>
           </a>
@@ -98,8 +97,6 @@ export function PlatformTrustFooter({
               <span className={`mt-0.5 inline-flex items-center gap-1.5 ${compact ? 'text-[9px]' : 'text-[9.5px]'} font-semibold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                 <ShieldCheck size={10} weight="fill" className="shrink-0 text-emerald-500" />
                 Plataforma segura
-                <span className={isDark ? 'text-slate-600' : 'text-slate-300'}>·</span>
-                <AppVersionBadge />
               </span>
             </span>
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Buildings, ForkKnife, MapPin, Package, Sparkle, Storefront, Truck, WifiSlash } from '@phosphor-icons/react';
+import { Buildings, ForkKnife, MapPin, Sparkle, Storefront, Truck, WifiSlash } from '@phosphor-icons/react';
 
 const loadingSteps = [
   'Encontrando lojas por perto',
@@ -129,10 +129,14 @@ export function PremiumSplashScreen() {
             />
           </div>
 
-          <div className="absolute bottom-12 left-1/2 h-[38px] w-[286px] -translate-x-1/2 overflow-hidden rounded-[999px] border border-white/10 bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] backdrop-blur">
+          <div className="absolute bottom-12 left-1/2 h-[46px] w-[286px] -translate-x-1/2 overflow-hidden rounded-[999px] border border-white/10 bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] backdrop-blur">
             <div className="splash-route absolute left-0 top-1/2 h-[3px] w-[620px] -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#8EC5DD_0_24px,transparent_24px_46px)] opacity-60" />
-            <div className="splash-route-rider absolute left-[42px] top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-[#5FD35A] text-[#092033] shadow-[0_0_24px_rgba(95,211,90,0.78)]">
-              <Package size={15} weight="fill" />
+            <div className="splash-route-rider absolute left-[42px] top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center overflow-hidden rounded-[0.72rem] bg-white p-0.5 shadow-[0_0_24px_rgba(95,211,90,0.62)] ring-2 ring-[#5FD35A]/55">
+              <img
+                src="/janocaminho.jpg"
+                alt=""
+                className="h-full w-full rounded-[0.55rem] object-cover"
+              />
             </div>
             <div className="splash-pin absolute left-[82px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_20px_rgba(95,211,90,0.9)]" />
             <div className="splash-pin splash-pin-two absolute right-[68px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#8EC5DD] shadow-[0_0_18px_rgba(142,197,221,0.72)]" />

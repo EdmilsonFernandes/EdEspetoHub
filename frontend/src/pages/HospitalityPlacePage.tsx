@@ -180,6 +180,8 @@ const buildListingAction = ({ listing, destination, place, isNativePlatform }: a
     itemAddress: listing.address,
     itemLat: listing.lat,
     itemLng: listing.lng,
+    destinationSlug: destination.slug,
+    placeSlug: place.slug,
   });
   const phoneAction = buildPhoneContactAction({ phone: listing.whatsapp, message, isNativePlatform });
   if (phoneAction) return phoneAction;
@@ -267,6 +269,8 @@ export function HospitalityPlacePage() {
     placeAddress: place.address,
     placeLat: place.lat,
     placeLng: place.lng,
+    destinationSlug: destination.slug,
+    placeSlug: place.slug,
   });
   const placeWhatsAppUrl = buildWhatsAppUrl(place.whatsapp, placeContactMessage, isNativePlatform);
   const placePhoneUrl = placeWhatsAppUrl ? '' : buildPhoneCallUrl(place.whatsapp);

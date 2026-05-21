@@ -137,6 +137,7 @@ const buildDestinationListingAction = ({ listing, destination, isNativePlatform 
     itemAddress: listing.address,
     itemLat: listing.lat,
     itemLng: listing.lng,
+    destinationSlug: destination.slug,
   });
   const whatsappHref = buildWhatsAppUrl(rawContact, message, isNativePlatform);
   if (whatsappHref) return { href: whatsappHref, label: 'WhatsApp', kind: 'whatsapp', external: false, native: isNativePlatform };
@@ -398,6 +399,8 @@ export function DestinationDetailPage() {
                   placeAddress: place.address,
                   placeLat: place.lat,
                   placeLng: place.lng,
+                  destinationSlug: destination.slug,
+                  placeSlug: place.slug,
                 });
                 const placeWhatsAppHref = buildWhatsAppUrl(place.whatsapp, whatsappMessage, isNativePlatform);
                 const placePhoneHref = placeWhatsAppHref ? '' : buildPhoneCallUrl(place.whatsapp);
