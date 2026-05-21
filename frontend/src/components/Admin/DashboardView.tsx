@@ -198,6 +198,8 @@ export const DashboardView = ({
     return window.matchMedia("(max-width: 767px)").matches;
   });
   const [qrCopied, setQrCopied] = useState(false);
+  const [qrExporting, setQrExporting] = useState(false);
+  const [qrExportError, setQrExportError] = useState("");
   const [showUtm, setShowUtm] = useState(false);
   const [showChecklistDetails, setShowChecklistDetails] = useState(false);
   const [showChecklistCard, setShowChecklistCard] = useState(() => {
@@ -1019,11 +1021,124 @@ export const DashboardView = ({
     }
   };
 
-  const handlePrintQr = () => {
+  const handlePrintQr = async () => {
     if (!storeUrl || typeof window === "undefined") return;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=420x420&data=${encodeURIComponent(storeUrl)}`;
+    const fileName = `qr-vitrine-${sanitizeFileSegment(storeName, "loja")}.pdf`;
+    const title = `QR da vitrine - ${storeName}`;
+
+    if (isNativePdfRuntime() || isCompactPdfViewport()) {
+      setQrExporting(true);
+      setQrExportError("");
+      try {
+        const { jsPDF } = await import("jspdf");
+        const [qrDataUrl, logoDataUrl] = await Promise.all([
+          fetchAssetAsDataUrl(qrUrl),
+          fetchAssetAsDataUrl(storeLogo),
+        ]);
+        if (!qrDataUrl) {
+          throw new Error("qr-image-unavailable");
+        }
+
+        const doc = new jsPDF({
+          orientation: "portrait",
+          unit: "pt",
+          format: "a4",
+        });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const marginX = 44;
+        const cardX = marginX;
+        const cardY = 52;
+        const cardWidth = pageWidth - marginX * 2;
+
+        doc.setFillColor(248, 250, 252);
+        doc.rect(0, 0, pageWidth, doc.internal.pageSize.getHeight(), "F");
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(cardX, cardY, cardWidth, 660, 28, 28, "F");
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(cardX, cardY, cardWidth, 660, 28, 28, "S");
+
+        if (logoDataUrl) {
+          doc.addImage(logoDataUrl, resolveImageFormat(logoDataUrl), pageWidth / 2 - 30, cardY + 34, 60, 60);
+        } else {
+          doc.setFillColor(248, 250, 252);
+          doc.roundedRect(pageWidth / 2 - 30, cardY + 34, 60, 60, 18, 18, "F");
+          doc.setDrawColor(226, 232, 240);
+          doc.roundedRect(pageWidth / 2 - 30, cardY + 34, 60, 60, 18, 18, "S");
+        }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(13);
+        doc.setTextColor(51, 104, 134);
+        doc.text("JA NO CAMINHO", pageWidth / 2, cardY + 122, { align: "center" });
+        doc.setFontSize(27);
+        doc.setTextColor(15, 23, 42);
+        doc.text(doc.splitTextToSize(`Vitrine ${storeName}`, cardWidth - 70), pageWidth / 2, cardY + 164, {
+          align: "center",
+          maxWidth: cardWidth - 70,
+        });
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        doc.setTextColor(71, 85, 105);
+        doc.text("Aponte a camera do celular para abrir o cardapio e fazer o pedido.", pageWidth / 2, cardY + 218, {
+          align: "center",
+          maxWidth: cardWidth - 72,
+        });
+
+        const qrSize = 310;
+        const qrX = pageWidth / 2 - qrSize / 2;
+        const qrY = cardY + 250;
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(qrX - 18, qrY - 18, qrSize + 36, qrSize + 36, 26, 26, "F");
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(qrX - 18, qrY - 18, qrSize + 36, qrSize + 36, 26, 26, "S");
+        doc.addImage(qrDataUrl, resolveImageFormat(qrDataUrl), qrX, qrY, qrSize, qrSize);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(15, 23, 42);
+        doc.text("Link da vitrine", pageWidth / 2, qrY + qrSize + 56, { align: "center" });
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text(doc.splitTextToSize(storeUrl, cardWidth - 88), pageWidth / 2, qrY + qrSize + 75, {
+          align: "center",
+          maxWidth: cardWidth - 88,
+        });
+
+        const pdfBlob = doc.output("blob");
+        if (isNativePdfRuntime()) {
+          const shared = await sharePdfWithNativeFile({ blob: pdfBlob, fileName, title });
+          if (shared) return;
+        }
+
+        try {
+          const shared = await sharePdfBlob({ blob: pdfBlob, fileName, title });
+          if (shared) return;
+        } catch (error) {
+          if (error?.name === "AbortError") return;
+          throw error;
+        }
+
+        const saved = await savePdfDocument(doc, fileName);
+        if (saved) return;
+
+        const opened = openPdfBlob({ blob: pdfBlob, fileName });
+        if (opened) return;
+
+        throw new Error("qr-pdf-export-failed");
+      } catch (error) {
+        console.error("qr pdf export failed", error);
+        setQrExportError("Não foi possível gerar o PDF do QR agora. Tente novamente.");
+      } finally {
+        setQrExporting(false);
+      }
+      return;
+    }
+
     const printWindow = window.open("", "_blank", "width=700,height=900");
     if (!printWindow) return;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=420x420&data=${encodeURIComponent(storeUrl)}`;
     const safeStoreName = storeName.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     printWindow.document.write(`
       <!doctype html>
@@ -1284,6 +1399,9 @@ export const DashboardView = ({
               <div className="mt-4 text-xs text-slate-500">
                 Imprima e coloque nas mesas ou copie o link da vitrine.
               </div>
+              {qrExportError ? (
+                <p className="mt-3 text-xs font-semibold text-rose-600">{qrExportError}</p>
+              ) : null}
             </div>
             <div className="flex items-center gap-4">
               <div className="w-24 h-24 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden">
@@ -1308,9 +1426,10 @@ export const DashboardView = ({
                 <button
                   type="button"
                   onClick={handlePrintQr}
+                  disabled={qrExporting}
                   className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
                 >
-                  Gerar PDF
+                  {qrExporting ? "Gerando..." : "Gerar PDF"}
                 </button>
               </div>
             </div>
