@@ -250,15 +250,33 @@ public class MainActivity extends BridgeActivity {
         try {
             android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
             intent.addCategory(android.content.Intent.CATEGORY_BROWSABLE);
-            if (intent.resolveActivity(getPackageManager()) == null) {
-                Toast.makeText(this, "App externo não encontrado para concluir a ação.", Toast.LENGTH_LONG).show();
-                return true;
-            }
             startActivity(intent);
         } catch (Exception e) {
-            Toast.makeText(this, "Não foi possível abrir o app externo. Verifique se o RawBT está instalado.", Toast.LENGTH_LONG).show();
+            if (url != null && url.startsWith("rawbt:")) {
+                Toast.makeText(this, "Não foi possível abrir a impressão. Verifique se o RawBT está instalado.", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Não foi possível abrir o app externo para concluir a ação.", Toast.LENGTH_LONG).show();
+            }
         }
         return true;
+    }
+
+    private boolean isAllowedExternalWebUrl(String value) {
+        if (value == null || value.isEmpty()) return false;
+        try {
+            Uri uri = Uri.parse(value);
+            String scheme = uri.getScheme();
+            String host = uri.getHost();
+            if (!"https".equalsIgnoreCase(scheme) || host == null) return false;
+            return "wa.me".equalsIgnoreCase(host)
+                || "api.whatsapp.com".equalsIgnoreCase(host)
+                || "waze.com".equalsIgnoreCase(host)
+                || "www.google.com".equalsIgnoreCase(host)
+                || "maps.google.com".equalsIgnoreCase(host)
+                || "play.google.com".equalsIgnoreCase(host);
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     private void configureNavigationTransitions() {
@@ -292,6 +310,10 @@ public class MainActivity extends BridgeActivity {
                     if (url == null) return false;
 
                     if (url.startsWith("mailto:") || url.startsWith("rawbt:") || url.startsWith("tel:") || url.startsWith("whatsapp:")) {
+                        return openExternalScheme(url);
+                    }
+
+                    if (isAllowedExternalWebUrl(url)) {
                         return openExternalScheme(url);
                     }
 

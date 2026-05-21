@@ -37,11 +37,16 @@ const actionIcon = (kind?: string) => {
 const ContactAction = ({ action }: any) => {
   if (!action?.href) return null;
 
-  const handleClick = (event: any) => {
+  const handleClick = async (event: any) => {
     if (action.kind === 'whatsapp') {
       event.preventDefault();
       if (action.native) {
-        window.location.href = action.href;
+        try {
+          const { Browser } = await import('@capacitor/browser');
+          await Browser.open({ url: action.href });
+        } catch {
+          window.open(action.href, '_blank', 'noopener,noreferrer');
+        }
         return;
       }
       window.open(action.href, '_blank', 'noopener,noreferrer');

@@ -200,11 +200,7 @@ const buildWhatsAppContactUrl = (phone?: string | null, native = false, message?
     ? encodeURIComponent(String(message || '').trim())
     : '';
 
-  if (native) {
-    return encodedMessage
-      ? `whatsapp://send?phone=55${normalizedPhone}&text=${encodedMessage}`
-      : `whatsapp://send?phone=55${normalizedPhone}`;
-  }
+  void native;
 
   return encodedMessage
     ? `https://wa.me/55${normalizedPhone}?text=${encodedMessage}`
@@ -964,11 +960,12 @@ export function OrderTracking() {
     return null;
   }, [isDelivery, isReady, isPostalDelivery, postalExpectedDeliveryDate, routeEtaRemainingMinutes, remainingEstimateMinutes]);
   const storeWhatsappLink = buildWhatsAppContactUrl(storePhone, false, whatsappReceiptMessage);
-  const storeWhatsappNativeLink = buildWhatsAppContactUrl(storePhone, true, whatsappReceiptMessage);
   const openWhatsApp = () => {
     if (!storeWhatsappLink) return;
-    if (Capacitor.isNativePlatform() && storeWhatsappNativeLink) {
-      window.location.href = storeWhatsappNativeLink;
+    if (Capacitor.isNativePlatform()) {
+      void import('@capacitor/browser')
+        .then(({ Browser }) => Browser.open({ url: storeWhatsappLink }))
+        .catch(() => window.open(storeWhatsappLink, '_blank', 'noopener,noreferrer'));
       return;
     }
     window.open(storeWhatsappLink, '_blank', 'noopener,noreferrer');
@@ -1535,7 +1532,7 @@ export function OrderTracking() {
                       </div>
                     )}
                     {storePhone && (
-                      <a href={storeWhatsappNativeLink || storeWhatsappLink} target="_blank" rel="noopener" className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 active:scale-95 transition-transform">
+                      <a href={storeWhatsappLink} onClick={(event) => { event.preventDefault(); openWhatsApp(); }} target="_blank" rel="noopener" className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 active:scale-95 transition-transform">
                         <WhatsappLogo size={15} weight="fill" />
                         Falar com a loja
                       </a>

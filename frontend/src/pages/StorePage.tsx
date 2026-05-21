@@ -525,15 +525,14 @@ export function StorePage() {
   const openWhatsAppUrl = (phoneValue: string, message?: string) => {
     const phone = String(phoneValue || '').replace(/\D/g, '');
     if (!phone) return;
-    const nativeUrl = message
-      ? `whatsapp://send?phone=${phone}&text=${encodeURIComponent(message)}`
-      : `whatsapp://send?phone=${phone}`;
     const webUrl = message
       ? `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`
       : `https://api.whatsapp.com/send?phone=${phone}`;
 
     if (Capacitor.isNativePlatform()) {
-      window.location.href = nativeUrl;
+      void import('@capacitor/browser')
+        .then(({ Browser }) => Browser.open({ url: webUrl }))
+        .catch(() => window.open(webUrl, '_blank', 'noopener,noreferrer'));
       return;
     }
 

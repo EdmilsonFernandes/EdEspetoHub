@@ -143,7 +143,7 @@ const buildWhatsappLink = (phone?: string | null, native = false, message?: stri
   const normalized = String(phone || '').replace(/\D/g, '').replace(/^55/, '');
   if (!normalized) return '';
   const encodedMessage = String(message || '').trim() ? encodeURIComponent(String(message || '').trim()) : '';
-  if (native) return encodedMessage ? `whatsapp://send?phone=55${normalized}&text=${encodedMessage}` : `whatsapp://send?phone=55${normalized}`;
+  void native;
   return encodedMessage ? `https://wa.me/55${normalized}?text=${encodedMessage}` : `https://wa.me/55${normalized}`;
 };
 
@@ -927,15 +927,16 @@ function OrderHelpScreen({
       topicTitle,
       topicMessage,
     });
-    const nativeUrl = buildWhatsappLink(order?.store?.phone, true, supportMessage);
     const webUrl = buildWhatsappLink(order?.store?.phone, false, supportMessage);
     if (!webUrl) {
       onClose();
       onOpenStore(order?.store?.slug);
       return;
     }
-    if (Capacitor.isNativePlatform() && nativeUrl) {
-      window.location.href = nativeUrl;
+    if (Capacitor.isNativePlatform()) {
+      void import('@capacitor/browser')
+        .then(({ Browser }) => Browser.open({ url: webUrl }))
+        .catch(() => window.open(webUrl, '_blank', 'noopener,noreferrer'));
       return;
     }
     window.open(webUrl, '_blank', 'noopener,noreferrer');

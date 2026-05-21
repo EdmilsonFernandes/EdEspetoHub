@@ -50,15 +50,16 @@ const openWhatsAppContact = (value, event, message = "") => {
   if (!phone) return;
   const encodedMessage = message ? encodeURIComponent(message) : "";
 
-  const nativeUrl = encodedMessage ? `whatsapp://send?phone=${phone}&text=${encodedMessage}` : `whatsapp://send?phone=${phone}`;
-  const webUrl = encodedMessage ? `https://wa.me/${phone}?text=${encodedMessage}` : `https://wa.me/${phone}`;
+  const webUrl = encodedMessage ? `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}` : `https://api.whatsapp.com/send?phone=${phone}`;
 
   if (event) {
     event.preventDefault();
   }
 
   if (Capacitor.isNativePlatform()) {
-    window.location.href = nativeUrl;
+    void import("@capacitor/browser")
+      .then(({ Browser }) => Browser.open({ url: webUrl }))
+      .catch(() => window.open(webUrl, "_blank", "noopener,noreferrer"));
     return;
   }
 

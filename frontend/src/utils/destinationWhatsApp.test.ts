@@ -26,13 +26,13 @@ describe('destinationWhatsApp', () => {
   it('builds WhatsApp URLs with an encoded contextual message', () => {
     const url = buildWhatsAppUrl('12997000000', 'Ola! Quero saber mais.');
 
-    expect(url).toBe('https://wa.me/5512997000000?text=Ola!%20Quero%20saber%20mais.');
+    expect(url).toBe('https://api.whatsapp.com/send?phone=5512997000000&text=Ola!%20Quero%20saber%20mais.');
   });
 
   it('builds native WhatsApp URLs when requested', () => {
     const url = buildWhatsAppUrl('12997000000', 'Pedido pelo app', true);
 
-    expect(url).toBe('whatsapp://send?phone=5512997000000&text=Pedido%20pelo%20app');
+    expect(url).toBe('https://api.whatsapp.com/send?phone=5512997000000&text=Pedido%20pelo%20app');
   });
 
   it('creates a message with destination, place and selected service context', () => {

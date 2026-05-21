@@ -22,14 +22,10 @@ export const buildWhatsAppUrl = (phone?: string | null, message?: string, native
   const normalizedPhone = normalizeWhatsAppPhone(phone);
   if (!normalizedPhone) return '';
   const encodedMessage = message ? encodeURIComponent(message) : '';
-  if (native) {
-    return encodedMessage
-      ? `whatsapp://send?phone=${normalizedPhone}&text=${encodedMessage}`
-      : `whatsapp://send?phone=${normalizedPhone}`;
-  }
+  void native;
   return encodedMessage
-    ? `https://wa.me/${normalizedPhone}?text=${encodedMessage}`
-    : `https://wa.me/${normalizedPhone}`;
+    ? `https://api.whatsapp.com/send?phone=${normalizedPhone}&text=${encodedMessage}`
+    : `https://api.whatsapp.com/send?phone=${normalizedPhone}`;
 };
 
 export const buildPhoneCallUrl = (phone?: string | null) => {
