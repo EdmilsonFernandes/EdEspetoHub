@@ -1332,11 +1332,19 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         items: payload.items.map((item: any) => {
           const qty = Number(item?.qty ?? item?.quantity ?? 0);
           const unit = Number(item?.unitPrice ?? item?.price ?? 0);
+          const couvertDetail =
+            isTableServiceOrderItem(item, productsById) && isCouvertServiceItem(item)
+              ? formatCouvertBreakdown({ qty, unitPrice: unit })
+              : "";
+          const itemNotes = [item?.cookingPoint || item?.options ? String(item?.cookingPoint || item?.options || '') : '', couvertDetail]
+            .map((note) => String(note || '').trim())
+            .filter(Boolean)
+            .join(' | ');
           return {
             quantity: qty,
             name: String(item?.name || 'Item'),
             lineTotal: formatCurrency(qty * unit),
-            notes: item?.cookingPoint || item?.options ? String(item?.cookingPoint || item?.options || '') : '',
+            notes: itemNotes,
           };
         }),
         totalLabel: formatCurrency(payload.total),
@@ -2685,11 +2693,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       }
 
       setSelectedProducts((prev: any) => ({ ...prev, [manualItemModal.orderId as string]: nextProduct.id }));
-      await applyItemsChange(manualItemModal.orderId, (items) => [
+      const updatePromise = applyItemsChange(manualItemModal.orderId, (items) => [
         ...items,
         buildOrderItemFromProduct(nextProduct, { quantity, unitPriceOverride: price }),
       ]);
       closeManualItemModal();
+      await updatePromise;
     } catch (err: any) {
       setManualItemModal((prev) => ({
         ...prev,
@@ -3270,15 +3279,72 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     <i className={`fa-solid ${iconClass} text-[0.9em] leading-none`} aria-hidden="true" />
   );
 
+  const getCouvertBreakdown = (source: any) => {
+    const quantity = Math.max(0, Number(source?.qty ?? source?.quantity ?? 0));
+    const unitPrice = Number(source?.unitPrice ?? source?.unitPriceOverride ?? source?.price ?? 0);
+    const total = Number(source?.total ?? quantity * unitPrice);
+
+    return {
+      quantity,
+      unitPrice: Number.isFinite(unitPrice) ? unitPrice : 0,
+      total: Number.isFinite(total) ? total : 0,
+    };
+  };
+
+  const formatCouvertBreakdown = (source: any) => {
+    const { quantity, unitPrice } = getCouvertBreakdown(source);
+    if (quantity <= 0 || unitPrice <= 0) return "";
+    const peopleLabel = quantity === 1 ? "pessoa" : "pessoas";
+    return `${quantity} ${peopleLabel} x ${formatCurrency(unitPrice)} cada`;
+  };
+
+  const isCouvertServiceItem = (source: any) => {
+    const label = String(source?.name || source?.product?.name || source?.primary?.name || source?.primary?.product?.name || "");
+    return normalizeTableText(label) === normalizeTableText(tableServiceSettings.couvertLabel || "Couvert artístico");
+  };
+
+  const getManualCouvertPreview = () => {
+    const isCouvertModal = isTableServiceCategory(manualItemModal.category) && isCouvertServiceItem(manualItemModal);
+    if (!isCouvertModal) return null;
+
+    const quantity = Math.max(
+      1,
+      Math.floor(Number(String(manualItemModal.quantity || "1").replace(",", ".")) || 1)
+    );
+    const unitPrice = Number(String(manualItemModal.price || "0").replace(",", "."));
+    if (!Number.isFinite(unitPrice) || unitPrice <= 0) return null;
+
+    return {
+      quantity,
+      unitPrice,
+      total: quantity * unitPrice,
+      peopleLabel: quantity === 1 ? "pessoa" : "pessoas",
+    };
+  };
+
   const renderDrawerFinancialSummary = (order: any) => {
     const { fee, total, itemsVolume } = calcMoney(order);
     const { activeCouvertGroup, activeServiceChargeGroup } = getOrderActiveTableServiceGroups(order);
     const activeAddons = [
       activeCouvertGroup
-        ? { id: "couvert", label: activeCouvertGroup.name || "Couvert", icon: "fa-music", group: activeCouvertGroup }
+        ? {
+            id: "couvert",
+            label: activeCouvertGroup.name || "Couvert",
+            detail: formatCouvertBreakdown(activeCouvertGroup),
+            icon: "fa-music",
+            group: activeCouvertGroup,
+          }
         : null,
       activeServiceChargeGroup
-        ? { id: "service", label: activeServiceChargeGroup.name || "Taxa de serviço", icon: "fa-bell-concierge", group: activeServiceChargeGroup }
+        ? {
+            id: "service",
+            label: activeServiceChargeGroup.name || "Taxa de serviço",
+            detail: tableServiceSettings.serviceChargePercent
+              ? `${tableServiceSettings.serviceChargePercent}% sobre os itens da mesa`
+              : "",
+            icon: "fa-bell-concierge",
+            group: activeServiceChargeGroup,
+          }
         : null,
     ].filter(Boolean);
 
@@ -3294,8 +3360,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#FFF3E0] text-[#E65100]">
                   {renderFontAwesomeIcon(addon.icon)}
                 </span>
-                <span className="min-w-0 flex-1 truncate font-black text-slate-700">
-                  {addon.label}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-black text-slate-700">{addon.label}</span>
+                  {addon.detail ? (
+                    <span className="mt-0.5 block text-[10px] font-bold leading-tight text-slate-500">
+                      {addon.detail}
+                    </span>
+                  ) : null}
                 </span>
                 <span className="shrink-0 font-black text-slate-900">
                   {formatCurrency(Number(addon.group?.total || 0))}
@@ -4147,6 +4218,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             const drawerItemGroups = buildVisualOrderItemGroups(order.id, order.items || []);
             const drawerProductItemGroups = drawerItemGroups.filter((group: any) => !isTableServiceOrderItem(group.primary, productsById));
             const { activeCouvertGroup, activeServiceChargeGroup } = getOrderActiveTableServiceGroups(order, drawerItemGroups);
+            const serviceChargeUpdating = updating === order.id && !activeServiceChargeGroup;
             return (
             <div
               key={order.id}
@@ -4465,8 +4537,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       disabled={updating === order.id}
                       className="inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-sky-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-sky-100 active:scale-95 disabled:opacity-60"
                     >
-                      {renderFontAwesomeIcon("fa-bell-concierge")}
-                      + Taxa {tableServiceSettings.serviceChargePercent || 10}%
+                      {serviceChargeUpdating ? (
+                        <ArrowsClockwise size={13} weight="bold" className="animate-spin" />
+                      ) : (
+                        renderFontAwesomeIcon("fa-bell-concierge")
+                      )}
+                      {serviceChargeUpdating ? "Aplicando taxa..." : `+ Taxa ${tableServiceSettings.serviceChargePercent || 10}%`}
                     </button>
                   ) : null}
                 </div>
@@ -5361,6 +5437,26 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   />
                 </div>
               </div>
+              {(() => {
+                const preview = getManualCouvertPreview();
+                if (!preview) return null;
+                return (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50/90 px-3 py-2.5 shadow-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="inline-flex min-w-0 items-center gap-2 text-[11px] font-black uppercase tracking-[0.1em] text-amber-800">
+                        {renderFontAwesomeIcon("fa-music")}
+                        Cobrança do couvert
+                      </span>
+                      <strong className="shrink-0 text-sm font-black text-slate-950">
+                        {formatCurrency(preview.total)}
+                      </strong>
+                    </div>
+                    <p className="mt-1 text-xs font-semibold text-amber-900/80">
+                      {preview.quantity} {preview.peopleLabel} x {formatCurrency(preview.unitPrice)} por pessoa.
+                    </p>
+                  </div>
+                );
+              })()}
               <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
                 O item fica interno da operação e não aparece no cardápio público.
               </div>
