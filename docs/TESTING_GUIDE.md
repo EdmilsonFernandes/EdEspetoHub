@@ -27,6 +27,74 @@ Temos três níveis de testes:
 
 ---
 
+## 2.1. Matriz Atual de Cobertura E2E
+
+Esta matriz descreve os fluxos já cobertos hoje. Use ela antes de criar teste novo para evitar duplicidade e para enxergar lacunas reais.
+
+### Backend API E2E
+
+Os testes ficam em `backend/src/test/e2e` e rodam contra banco de teste local, recriado pelo `globalSetup`.
+
+| Arquivo | Cobertura principal |
+| --- | --- |
+| `auth.test.ts` | Cadastro/login de lojista, cliente e motoboy; validações de registro; aceite de termos; email duplicado; login admin; autorização por role; MFA TOTP com dispositivo confiável; bloqueio por muitas tentativas inválidas. |
+| `products.test.ts` | CRUD de produtos do lojista; validação de campos obrigatórios; preço negativo; listagem por loja; atualização; isolamento entre lojas. |
+| `orders.test.ts` | Jornada do cliente no pedido: consulta de catálogo público, criação de pedido, rejeição por estoque insuficiente, fila da loja, observação do cliente, atualização de status, tracking público e rejeição de pedido sem item. |
+| `operator-orders.test.ts` | Fluxo do lojista/operador: criação de pedido com múltiplos itens, pedido de mesa, fila operacional, transições de status, detalhe público, retirada, edição de itens, item operacional/manual com preço customizado, transição inválida, autenticação e isolamento entre lojas. |
+| `full-order-flow.test.ts` | Fluxo completo ponta a ponta: loja configura horário/tipo de pedido/produto, cliente cria retirada e entrega, motoboy é registrado/vinculado/aprovado, entrega é aceita/retirada/entregue, tracking, histórico e ganhos do motoboy. |
+| `delivery.test.ts` | Área do motoboy: perfil autenticado, fila de pedidos disponíveis, ganhos do dia, histórico e proteção de endpoints por token/role. |
+| `motoboy-delivery-acceptance.test.ts` | Concorrência de entrega: dois motoboys aptos veem o mesmo pedido, o primeiro aceita e o segundo recebe conflito `409 DELIV-006`. |
+| `motoboy-delivery-security.test.ts` | Segurança do fluxo de entrega por motoboy, incluindo regras de acesso e proteção operacional. |
+| `motoboy-store-managed.test.ts` | Motoboy criado/gerenciado pela loja com acesso próprio por username/senha; bloqueio de liberação sem KYC e liberação após documentos aprovados. |
+| `customer-addresses.test.ts` | Endereços do cliente: criação, troca de endereço principal e promoção automática de outro endereço ao excluir o principal. |
+| `subscription.test.ts` | Assinatura/plano: plano ativo permite produto, plano expirado bloqueia pedido, reativação restaura acesso, listagem de planos e status da assinatura da loja. |
+| `destinations.test.ts` | Destinos/chalés/serviços: criação de destino real, hospedagem, listing, vínculo com loja, conflito de slug, destinos inativos no admin, solicitações de parceria e aprovação/link de loja. |
+
+### Frontend Playwright E2E
+
+Os testes ficam em `frontend/tests/e2e`. Eles validam UI e navegação crítica, preferencialmente com APIs mockadas quando o fluxo visual é o foco.
+
+| Arquivo | Cobertura principal |
+| --- | --- |
+| `auth.spec.ts` | Smoke test da tela principal/autenticação em viewport mobile. |
+| `admin-queue-ux.spec.ts` | UX da fila do lojista: abre detalhe do pedido, picker de produto com imagem/categoria/preço, detalhe centralizado no web e agrupamento por mesa. |
+| `destination-whatsapp-location.spec.ts` | Fluxo visual de destinos/chalés: WhatsApp com endereço/mapa da hospedagem e contexto da hospedagem carregado para lojas oficiais. |
+
+### Unitários Relevantes
+
+Além dos E2E, existem unitários cobrindo partes sensíveis que não devem virar Playwright:
+
+| Área | Exemplos de cobertura |
+| --- | --- |
+| Precificação/pedidos | Cálculos de preço, promoções e regras internas de `OrderService`. |
+| Pagamentos/reembolso | Validações do `OrderPaymentService`, especialmente refund e payloads sem cobrar pagamento real. |
+| Segurança/riscos | Email descartável, bloqueios de cliente e regras antifraude. |
+| Turismo/seeds | Massa de dados de turismo para Gonçalves e São Bento. |
+| Upload/storage | Regras de caminho público/privado de imagens. |
+
+### Lacunas Conhecidas
+
+Estas áreas ainda merecem testes adicionais antes de chamar a cobertura de "muito alta":
+
+| Lacuna | Recomendação |
+| --- | --- |
+| Checkout visual completo do cliente em navegador | Criar Playwright com cenário local/mockado: abrir loja, adicionar itens, escolher retirada/entrega, revisar pedido, confirmar e abrir tracking. |
+| Pagamento Mercado Pago real | Não usar pagamento real em E2E comum. Criar sandbox/mock para payload, status `awaiting_payment`, webhook aprovado/expirado e falha. |
+| Push notification ponta a ponta | Testar backend por contrato/payload e mockar provedor. Push real em dispositivo deve ser checklist manual/release, não E2E automático. |
+| Impressão RawBT/Android | Cobrir fallback/intent por unitário ou teste de integração do adaptador. Impressão Bluetooth real deve ficar em checklist manual de release/AAB. |
+| UI completa de minha conta/endereço | Backend já cobre regra de endereço principal; falta Playwright para validar visual e cliques no fluxo mobile/web. |
+| Fluxos financeiros de gorjeta/repasse | Adicionar E2E/API com contas fake/mockadas e unitários para regras de repasse, sem transferir dinheiro real. |
+
+### Critério Prático de Cobertura
+
+Não perseguir 90% apenas com E2E de navegador. Para este projeto, a meta correta é **90% de confiança dos fluxos críticos**, combinando:
+
+- Backend API E2E para regra de negócio, concorrência, banco, autenticação, pedido, entrega, assinatura e destinos.
+- Playwright para navegação e telas críticas onde layout/UX pode quebrar o uso.
+- Unitários para cálculo, payload de pagamento, validações e adaptadores externos.
+
+---
+
 ## 3. Passo a Passo: Como Rodar na sua Máquina
 
 ### Passo 3.1: Subir a Infraestrutura (O Mando de Campo)
