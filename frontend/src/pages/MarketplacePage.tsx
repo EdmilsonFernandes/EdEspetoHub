@@ -3532,10 +3532,13 @@ export function MarketplacePage() {
                   </p>
                 </div>
                 {hasFeaturedCarouselOverflow ? (
-                  <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-[#edf5fa] px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
-                    Mais
-                    <CaretRight size={11} weight="bold" className="animate-pulse" />
-                  </div>
+                  <Link
+                    to="/hub/destaques"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-[#edf5fa] px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition active:scale-95"
+                  >
+                    Ver mais
+                    <CaretRight size={11} weight="bold" />
+                  </Link>
                 ) : null}
               </div>
               
@@ -3586,17 +3589,24 @@ export function MarketplacePage() {
                         </div>
                       </div>
 
-                      <div className="flex min-h-[92px] flex-col p-3">
+                      <div className="flex min-h-[104px] flex-col p-3">
                         <p className="line-clamp-2 text-[12px] font-black leading-[1.15rem] tracking-tight text-slate-950">{item.name}</p>
-                        <p className="mt-1 truncate text-[10px] font-bold text-slate-400">
-                          por {item.storeName}
-                        </p>
-                        <div className="mt-auto flex items-end justify-between gap-2 pt-2">
+                        <div className="mt-1.5 flex min-w-0 items-center gap-1.5">
+                          <img
+                            src={item.storeLogo}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className="h-[18px] w-[18px] shrink-0 rounded-full border border-slate-100 bg-white object-cover shadow-sm"
+                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
+                          />
+                          <span className="truncate text-[10px] font-bold text-slate-400">
+                            por {item.storeName}
+                          </span>
+                        </div>
+                        <div className="mt-auto pt-2">
                           <span className="text-[18px] font-black leading-none tracking-[-0.04em] text-[#153A4C]">
                             {currency.format(item.price)}
-                          </span>
-                          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#336886]/10 text-[#336886] transition-transform duration-200 group-hover:translate-x-0.5">
-                            <CaretRight size={13} weight="bold" />
                           </span>
                         </div>
                       </div>

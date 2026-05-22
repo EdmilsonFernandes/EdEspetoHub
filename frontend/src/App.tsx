@@ -74,6 +74,7 @@ const ClientAccount = lazyPage(() => import('./pages/ClientAccount'), 'ClientAcc
 const ClientOrders = lazyPage(() => import('./pages/ClientOrders'), 'ClientOrders');
 import { NotificationsPage } from './pages/NotificationsPage';
 const MarketplacePage = lazyPage(() => import('./pages/MarketplacePage'), 'MarketplacePage');
+const HubHighlightsPage = lazyPage(() => import('./pages/HubHighlightsPage'), 'HubHighlightsPage');
 const CondominiumAccessRequest = lazyPage(() => import('./pages/CondominiumAccessRequest'), 'CondominiumAccessRequest');
 const CondominiumDashboard = lazyPage(() => import('./pages/CondominiumDashboard'), 'CondominiumDashboard');
 const AdminHighlights = lazyPage(() => import('./pages/AdminHighlights'), 'AdminHighlights');
@@ -111,6 +112,7 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/hub" element={<MarketplacePage />} />
+              <Route path="/hub/destaques" element={<HubHighlightsPage />} />
               <Route path="/destinos" element={<DestinationsPage />} />
               <Route path="/destinos/cadastrar" element={<DestinationPartnerRequestPage />} />
               <Route path="/destinos/:destinationSlug" element={<DestinationDetailPage />} />
