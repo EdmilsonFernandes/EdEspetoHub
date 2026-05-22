@@ -3550,8 +3550,8 @@ export function MarketplacePage() {
                         ? 'Patrocinados aparecem primeiro. Arraste para ver mais.'
                         : 'Arraste para o lado e veja mais ofertas.'
                       : hasSponsoredFeaturedProducts
-                        ? 'Destaque pago ativo agora.'
-                        : 'Seleção rápida para pedir agora.'}
+                        ? 'Ofertas de lojas parceiras para pedir agora.'
+                        : 'Toque no prato e veja a loja que prepara.'}
                   </p>
                 </div>
                 {hasFeaturedCarouselOverflow ? (
@@ -4241,10 +4241,10 @@ export function MarketplacePage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-lime-200/90">Para lojistas</p>
-                  <p className="mt-0.5 text-base font-black leading-tight tracking-[-0.03em] text-white">Venda pelo Já no Caminho</p>
-                  <p className="mt-1 text-[11px] font-semibold leading-5 text-sky-50/76">Receba pedidos online, organize a produção e conecte entregadores quando precisar.</p>
+                  <p className="mt-0.5 text-base font-black leading-tight tracking-[-0.03em] text-white">3 meses VIP para as primeiras lojas</p>
+                  <p className="mt-1 text-[11px] font-semibold leading-5 text-sky-50/76">Receba pedidos online, organize a produção e fale com nosso WhatsApp Business oficial.</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {['7 dias grátis', 'sem comissão', 'pedido online'].map((label) => (
+                    {['50 vagas', '3 meses VIP', 'sem comissão'].map((label) => (
                       <span key={label} className="rounded-full border border-white/10 bg-white/[0.08] px-2 py-1 text-[9px] font-black uppercase tracking-[0.11em] text-white/86">
                         {label}
                       </span>
@@ -4252,7 +4252,7 @@ export function MarketplacePage() {
                   </div>
                 </div>
                 <div className="shrink-0 flex items-center gap-1 rounded-full bg-white px-3 py-2 text-[11px] font-black text-[#153A4C] shadow-[0_14px_30px_-20px_rgba(255,255,255,0.6)] transition group-hover:translate-x-0.5">
-                  Criar
+                  Quero
                   <CaretRight size={11} weight="bold" />
                 </div>
               </div>

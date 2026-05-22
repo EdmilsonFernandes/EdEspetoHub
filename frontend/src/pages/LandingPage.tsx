@@ -206,7 +206,8 @@ export function LandingPage() {
     return () => { mounted = false; };
   }, []);
 
-  const whatsAppBusinessHref = 'https://wa.me/551239334979';
+  const whatsAppBusinessMessage = encodeURIComponent('Olá, quero garantir uma das 50 vagas com 3 meses VIP no Já no Caminho.');
+  const whatsAppBusinessHref = `https://wa.me/551239334979?text=${whatsAppBusinessMessage}`;
   const ctaPrimaryHref = whatsAppBusinessHref;
 
   const features = [
@@ -264,7 +265,7 @@ export function LandingPage() {
     indigo:  { bg: 'bg-indigo-400/10',  icon: 'text-indigo-400' },
   };
   const heroHighlights = [
-    { icon: ShieldCheck, title: '0% comissão por pedido', desc: 'Mensalidade fixa e previsível para a operação.' },
+    { icon: ShieldCheck, title: '3 meses VIP para as 50 primeiras', desc: 'Campanha de lançamento para a loja testar com estrutura real.' },
     { icon: Package, title: 'Pedido pronto para produzir', desc: 'Cardápio, checkout e impressão no mesmo fluxo.' },
     { icon: Motorcycle, title: 'Entrega conectada à loja', desc: 'Entregador recebe oferta, aceita e atualiza o cliente.' },
   ];
@@ -291,7 +292,7 @@ export function LandingPage() {
               <div className="animate-in fade-in slide-in-from-top-3 duration-700">
                 <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/24 bg-white/[0.04] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-sky-200 backdrop-blur-md shadow-[0_14px_30px_-20px_rgba(14,165,233,0.28)]">
                   <Rocket size={12} weight="duotone" className="animate-pulse" />
-                  Venda online, operação e entrega em um só lugar
+                  50 primeiras lojas com 3 meses VIP
                 </span>
               </div>
 
@@ -304,7 +305,7 @@ export function LandingPage() {
                   </span>
                 </h1>
                 <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-300 lg:mx-0 sm:text-[1.15rem] sm:leading-8">
-                  O cliente compra pelo app ou link, a loja recebe o pedido no painel, o entregador é acionado e tudo fica rastreável do preparo até a confirmação final.
+                  Campanha de lançamento para comerciantes locais: sua loja entra com acesso VIP por 3 meses para testar pedidos online, painel, pagamentos, entregas e divulgação sem comissão por pedido.
                 </p>
               </div>
 
@@ -315,7 +316,7 @@ export function LandingPage() {
                   onClick={() => navigate('/create?plan=trial')}
                   className="group inline-flex items-center justify-center gap-2.5 rounded-[1.35rem] bg-[linear-gradient(180deg,#ffffff_0%,#f5f7fb_100%)] px-8 py-4 text-base font-black text-slate-950 shadow-[0_24px_54px_-18px_rgba(255,255,255,0.24)] ring-1 ring-white/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  Criar minha loja grátis
+                  Garantir minha vaga VIP
                   <ArrowRight size={17} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
                 </button>
                 <a
@@ -325,7 +326,7 @@ export function LandingPage() {
                   className="inline-flex items-center justify-center gap-2 rounded-[1.35rem] border border-white/12 bg-white/[0.05] px-8 py-4 text-base font-black text-white backdrop-blur-md transition-all hover:bg-white/[0.1] active:scale-[0.98]"
                 >
                   <WhatsappLogo size={18} weight="fill" className="text-emerald-300" />
-                  Falar pelo WhatsApp
+                  Falar no WhatsApp Business
                 </a>
               </div>
 
@@ -362,9 +363,9 @@ export function LandingPage() {
               {/* Trust strip */}
               <div className="animate-in fade-in duration-700 delay-300 flex flex-wrap justify-center gap-x-6 gap-y-2 opacity-75 lg:justify-start">
                 {[
-                  { icon: ShieldCheck, text: '0% comissão', color: 'text-emerald-400' },
+                  { icon: ShieldCheck, text: '50 vagas VIP', color: 'text-emerald-400' },
                   { icon: CurrencyDollar, text: 'Dinheiro direto na sua conta', color: 'text-sky-400' },
-                  { icon: ArrowsClockwise, text: '7 dias grátis', color: 'text-sky-400' },
+                  { icon: ArrowsClockwise, text: '3 meses para testar', color: 'text-sky-400' },
                   { icon: Desktop, text: 'Sem cartão para começar', color: 'text-indigo-400' },
                 ].map(({ icon: Icon, text, color }) => (
                   <div key={text} className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-300">
@@ -622,6 +623,43 @@ export function LandingPage() {
       {featuredStores.length > 0 && <SocialProofMarquee clients={featuredStores} />}
 
       {/* ══════════════════════════════════════════════════════════════
+          CAMPANHA VIP
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#ecfdf5_0%,#ffffff_48%,#eff6ff_100%)] py-12">
+        <div className="pointer-events-none absolute -left-16 top-0 h-44 w-44 rounded-full bg-emerald-200/45 blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 bottom-0 h-44 w-44 rounded-full bg-sky-200/50 blur-3xl" />
+        <div className="relative mx-auto grid max-w-6xl gap-5 px-4 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+          <div>
+            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 shadow-[0_14px_34px_-28px_rgba(16,185,129,0.55)]">
+              <TrendUp size={13} weight="duotone" />
+              Campanha de lançamento
+            </p>
+            <h2 className="mt-4 max-w-2xl text-2xl font-black leading-tight tracking-[-0.035em] text-slate-950 sm:text-4xl">
+              50 primeiras lojas com 3 meses VIP para vender online com estrutura.
+            </h2>
+            <p className="mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-600 sm:text-base">
+              A proposta é simples: você testa a plataforma em operação real, recebe suporte pelo WhatsApp Business oficial e decide com dados se quer continuar depois.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              { icon: Storefront, title: 'Loja no app', desc: 'Cardápio, vitrine, horários e links prontos para divulgar.' },
+              { icon: WhatsappLogo, title: 'Atendimento oficial', desc: 'Contato direto com o WhatsApp Business da empresa.' },
+              { icon: ShieldCheck, title: 'Sem comissão', desc: 'Teste com previsibilidade e sem taxa por pedido.' },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="rounded-[1.55rem] border border-white/90 bg-white/88 p-4 shadow-[0_22px_46px_-34px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/70 backdrop-blur-xl">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#336886]/8 text-[#336886]">
+                  <Icon size={18} weight="duotone" />
+                </div>
+                <p className="mt-3 text-sm font-black text-slate-950">{title}</p>
+                <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
           COMO FUNCIONA
       ══════════════════════════════════════════════════════════════ */}
       <section className="border-y border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbfd_100%)] py-24 sm:py-32">
@@ -633,7 +671,7 @@ export function LandingPage() {
               Do cadastro ao primeiro pedido<br className="hidden sm:block" /> em menos de 10 minutos.
             </h2>
             <p className="mx-auto max-w-xl text-base font-medium text-slate-500 leading-relaxed">
-              Sem burocracia, sem instalação. Basta criar sua conta e configurar sua loja pelo painel web.
+              As 50 primeiras lojas entram com 3 meses VIP. Sem burocracia, sem instalação e com apoio pelo WhatsApp Business oficial.
             </p>
           </div>
 
@@ -646,7 +684,7 @@ export function LandingPage() {
                 step: '01',
                 icon: UserPlus,
                 title: 'Crie sua conta',
-                desc: 'Abra sua loja com 7 dias grátis e configure o básico em poucos minutos.',
+                desc: 'Garanta uma vaga da campanha e comece com 3 meses VIP se ainda estiver entre as 50 primeiras lojas.',
                 ringColor: 'ring-sky-200',
                 bgColor: 'bg-sky-50',
                 iconColor: 'text-sky-600',
@@ -692,10 +730,10 @@ export function LandingPage() {
               onClick={() => navigate('/create?plan=trial')}
               className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-9 py-4 text-sm font-black text-white shadow-[0_20px_40px_-20px_rgba(15,23,42,0.75)] transition-all hover:scale-[1.01] active:scale-[0.98]"
             >
-              Começar agora — é grátis
+              Garantir vaga VIP
               <ArrowRight size={16} weight="bold" />
             </button>
-            <p className="mt-3 text-xs font-medium text-slate-400">7 dias grátis · Sem cartão · Cancele quando quiser</p>
+            <p className="mt-3 text-xs font-medium text-slate-400">Campanha limitada às 50 primeiras lojas · Sem cartão para começar</p>
           </div>
         </div>
       </section>
@@ -808,7 +846,7 @@ export function LandingPage() {
               onClick={() => navigate('/create?plan=trial')}
               className="inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-sm font-black text-slate-950 shadow-[0_20px_40px_-15px_rgba(255,255,255,0.18)] transition-all hover:scale-[1.01] active:scale-[0.98]"
             >
-              Começar com 7 dias grátis
+              Garantir 3 meses VIP
               <ArrowRight size={16} weight="bold" />
             </button>
             <a
@@ -818,7 +856,7 @@ export function LandingPage() {
               className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-black text-slate-300 backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
             >
               <WhatsappLogo size={16} weight="fill" className="text-emerald-300" />
-              Falar pelo WhatsApp
+              Falar pelo WhatsApp Business
             </a>
           </div>
         </div>
@@ -1168,10 +1206,10 @@ export function LandingPage() {
             <div className="space-y-5">
               <p className="text-[11px] font-black uppercase tracking-[0.4em] text-emerald-400">Vamos escalar?</p>
               <h2 className="text-3xl font-black leading-tight text-white sm:text-6xl">
-                Sua loja pronta para<br /> vender com estrutura.
+                Garanta uma das<br /> 50 vagas VIP.
               </h2>
               <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-400 sm:text-lg">
-                Experimente uma plataforma feita para o comerciante que quer organizar pedidos, atender melhor e crescer sem depender de improviso.
+                Entre agora na campanha de lançamento e use o Já no Caminho por 3 meses com suporte para colocar sua operação para vender.
               </p>
             </div>
 
@@ -1181,7 +1219,7 @@ export function LandingPage() {
                 onClick={() => navigate('/create?plan=trial')}
                 className="inline-flex items-center gap-2.5 rounded-2xl bg-white px-10 py-5 text-lg font-black text-slate-950 shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
-                Iniciar teste grátis
+                Quero 3 meses VIP
                 <ArrowRight size={19} weight="bold" />
               </button>
               <a
@@ -1191,7 +1229,7 @@ export function LandingPage() {
                 className="inline-flex items-center gap-2.5 justify-center rounded-2xl border border-white/15 bg-white/5 px-10 py-5 text-lg font-black text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-[0.98]"
               >
                 <WhatsappLogo size={20} weight="fill" className="text-emerald-300" />
-                Tirar dúvidas no WhatsApp
+                Tirar dúvidas no WhatsApp Business
               </a>
             </div>
 
@@ -1200,7 +1238,7 @@ export function LandingPage() {
                 { icon: ShieldCheck, text: 'Sem cartão', color: 'text-emerald-400' },
                 { icon: CheckCircle, text: 'Setup em 5 min', color: 'text-sky-400' },
                 { icon: Handshake, text: 'Suporte incluído', color: 'text-indigo-400' },
-                { icon: TrendUp, text: '7 dias grátis', color: 'text-amber-400' },
+                { icon: TrendUp, text: '3 meses VIP', color: 'text-amber-400' },
               ].map(({ icon: Icon, text, color }) => (
                 <div key={text} className="flex flex-col items-center gap-2">
                   <Icon size={26} weight="duotone" className={color} />

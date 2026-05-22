@@ -518,7 +518,7 @@ export const CartView = ({
     : "Entrega no endereço selecionado";
   const deliverySummaryDescription = isPostalDelivery
     ? "Confirme o destino e escolha o serviço postal com melhor prazo e valor."
-    : "Revise o endereço, valide a distância e siga com o pedido sem perder contexto.";
+    : "Confira endereço, distância e taxa antes de confirmar seu pedido.";
   const deliveryMetaChips = [
     {
       key: "fee",
