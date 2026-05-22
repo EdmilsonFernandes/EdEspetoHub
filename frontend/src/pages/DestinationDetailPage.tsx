@@ -235,7 +235,6 @@ export function DestinationDetailPage() {
   );
   const visiblePlaces = filteredPlaces.slice(0, placeLimit);
   const visibleListings = filteredListings.slice(0, listingLimit);
-  const activeFilterLabel = filterOptions.find((option: any) => option.value === activeCategory)?.label || 'Todos';
   const showPlacesSection = activeCategory === 'TODOS' || activeCategory === 'HOSPEDAGENS';
   const showListingsSection = activeCategory !== 'HOSPEDAGENS';
   const showcaseSlides = useMemo(() => {
@@ -257,7 +256,6 @@ export function DestinationDetailPage() {
     }] : [];
     return [...bannerSlides, ...fallbackSlides].slice(0, 4);
   }, [banners, destination]);
-  const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
   const selectedListingImageConfigured = hasConfiguredAsset(selectedListing, 'image');
   const selectedListingWebsiteUrl = externalUrl(selectedListing?.websiteUrl);
   const selectedListingInstagramUrl = instagramUrl(selectedListing?.instagramUrl);
@@ -287,75 +285,59 @@ export function DestinationDetailPage() {
           {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
 
           {!loading && !error ? (
-            <div className="rounded-[1.5rem] border border-white/80 bg-white/82 p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.38)] backdrop-blur sm:p-5">
+            <div className="space-y-4 py-2 sm:py-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Explorando agora</p>
-                  <h1 className="mt-1 truncate text-xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
-                    {destination.name}
+                <div className="min-w-0 max-w-3xl">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Explore a região</p>
+                  <h1 className="mt-2 text-2xl font-black leading-[0.98] tracking-[-0.045em] text-slate-950 sm:text-4xl">
+                    O que vamos descobrir em {destination.name}?
                   </h1>
-                  <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs font-bold text-slate-500 sm:text-sm">
-                    <MapPinLine size={14} weight="duotone" className="shrink-0 text-[#336886]" />
-                    <span className="truncate">{destinationLocationLabel}</span>
-                  </p>
-                  <p className="mt-2 hidden max-w-3xl text-sm font-semibold leading-relaxed text-slate-600 sm:line-clamp-2">
-                    {destination.heroSubtitle || destination.description || 'Hospedagens, lojas e experiências cadastradas neste destino.'}
+                  <p className="mt-2 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
+                    {destination.heroSubtitle || destination.description || 'Hospedagens, comida, passeios e serviços perto de você, sem complicar.'}
                   </p>
                 </div>
-                <div className="grid min-w-0 grid-cols-2 gap-2 sm:min-w-[18rem]">
-                  <span className="inline-flex min-w-0 flex-wrap items-center justify-center gap-1.5 rounded-full border border-white/80 bg-white/78 px-3 py-1.5 text-center text-[11px] font-black leading-tight text-[#153A4C] shadow-sm backdrop-blur">
-                    <Bed size={17} weight="duotone" className="shrink-0" />
-                    <span className="whitespace-normal break-words">{places.length} hospedagens</span>
+                <div className="flex min-w-0 flex-wrap gap-2 sm:justify-end">
+                  <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl">
+                    <Bed size={16} weight="duotone" className="shrink-0" />
+                    {places.length} hospedagens
                   </span>
-                  <span className="inline-flex min-w-0 flex-wrap items-center justify-center gap-1.5 rounded-full border border-white/80 bg-white/78 px-3 py-1.5 text-center text-[11px] font-black leading-tight text-[#153A4C] shadow-sm backdrop-blur">
-                    <ForkKnife size={17} weight="duotone" className="shrink-0" />
-                    <span className="whitespace-normal break-words">{listings.length} serviços</span>
+                  <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl">
+                    <ForkKnife size={16} weight="duotone" className="shrink-0" />
+                    {listings.length} serviços
                   </span>
                 </div>
               </div>
-              <div className="mt-4 border-t border-[#336886]/10 pt-4">
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Explore o que você procura</p>
-                    <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-slate-950 sm:text-xl">
-                      Hospedagens, comida, passeios e serviços em um só lugar
-                    </h2>
-                  </div>
-                  <p className="text-xs font-bold text-slate-500">
-                    {activeFilterLabel}: {filteredPlaces.length + filteredListings.length} resultado(s)
-                  </p>
-                </div>
-                <div className="mt-3 grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-                  <label className="group flex min-h-[52px] min-w-0 max-w-full items-center gap-3 rounded-[1.35rem] border border-slate-200 bg-white px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.4)] focus-within:border-[#336886]/40 focus-within:ring-4 focus-within:ring-[#336886]/10">
-                    <MagnifyingGlass size={18} weight="bold" className="text-slate-400" />
-                    <input
-                      value={searchTerm}
-                      onChange={(event) => setSearchTerm(event.target.value)}
-                      placeholder="Buscar hospedagem, comida, passeio ou serviço"
-                      className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
-                    />
-                    {searchTerm ? (
-                      <button type="button" onClick={() => setSearchTerm('')} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-600">
-                        Limpar
-                      </button>
-                    ) : null}
-                  </label>
-                  <div className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1 lg:max-w-[620px]">
-                    {filterOptions.map((category: any) => (
-                      <button
-                        key={category.value}
-                        type="button"
-                        onClick={() => {
-                          setActiveCategory(category.value);
-                          if (category.value === 'TODOS') setSearchTerm('');
-                        }}
-                        className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] shadow-sm transition ${activeCategory === category.value ? 'bg-[#336886] text-white shadow-[0_16px_28px_-20px_rgba(51,104,134,0.62)]' : 'border border-slate-200 bg-white text-slate-600 hover:border-[#336886]/30 hover:text-[#153A4C]'}`}
-                      >
-                        <span className="max-w-[7.25rem] truncate">{category.label}</span>
-                        <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${activeCategory === category.value ? 'bg-white/16 text-white/80' : 'bg-slate-100 text-slate-500'}`}>{category.count}</span>
-                      </button>
-                    ))}
-                  </div>
+
+              <div className="grid min-w-0 gap-3 rounded-[1.7rem] border border-white/55 bg-white/40 p-2.5 shadow-[0_22px_62px_-50px_rgba(15,23,42,0.42)] ring-1 ring-white/35 backdrop-blur-xl lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                <label className="group flex min-h-[54px] min-w-0 max-w-full items-center gap-3 rounded-[1.35rem] bg-white/88 px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition focus-within:bg-white focus-within:ring-4 focus-within:ring-[#336886]/12">
+                  <MagnifyingGlass size={18} weight="bold" className="text-[#336886]" />
+                  <input
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder="Buscar hospedagem, comida, passeio ou serviço"
+                    className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
+                  />
+                  {searchTerm ? (
+                    <button type="button" onClick={() => setSearchTerm('')} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-600">
+                      Limpar
+                    </button>
+                  ) : null}
+                </label>
+                <div className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1 lg:max-w-[650px] lg:pb-0">
+                  {filterOptions.map((category: any) => (
+                    <button
+                      key={category.value}
+                      type="button"
+                      onClick={() => {
+                        setActiveCategory(category.value);
+                        if (category.value === 'TODOS') setSearchTerm('');
+                      }}
+                      className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition ${activeCategory === category.value ? 'bg-[#336886] text-white shadow-[0_16px_30px_-20px_rgba(51,104,134,0.62)]' : 'border border-white/70 bg-white/72 text-slate-600 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.36)] backdrop-blur hover:bg-white hover:text-[#153A4C]'}`}
+                    >
+                      <span className="max-w-[7.25rem] truncate">{category.label}</span>
+                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${activeCategory === category.value ? 'bg-white/16 text-white/80' : 'bg-slate-100 text-slate-500'}`}>{category.count}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -364,7 +346,7 @@ export function DestinationDetailPage() {
       </section>
 
       {!loading && !error ? (
-        <section className="mx-auto grid w-full min-w-0 max-w-6xl gap-6 px-4 pb-10 pt-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <section className="mx-auto grid w-full min-w-0 max-w-6xl gap-7 px-4 pb-10 pt-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
           {showPlacesSection ? (
           <div id="hospedagens" className="min-w-0 max-w-full scroll-mt-28 space-y-5">
             <div className="flex items-center justify-between gap-3">
@@ -430,7 +412,7 @@ export function DestinationDetailPage() {
                     event.preventDefault();
                     navigate(placePath);
                   }}
-                  className="group min-w-0 max-w-full cursor-pointer overflow-hidden rounded-[1.85rem] border border-[#336886]/12 bg-[linear-gradient(180deg,rgba(255,250,240,0.92)_0%,#ffffff_52%,rgba(237,247,242,0.88)_100%)] shadow-[0_18px_46px_-36px_rgba(21,58,76,0.42)] outline-none transition duration-200 hover:-translate-y-1 hover:border-[#336886]/24 focus-visible:ring-4 focus-visible:ring-[#336886]/14 active:scale-[0.99]"
+                  className="group min-w-0 max-w-full cursor-pointer overflow-hidden rounded-[1.85rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,250,240,0.92)_0%,#ffffff_52%,rgba(237,247,242,0.86)_100%)] shadow-[0_22px_58px_-46px_rgba(21,58,76,0.46)] outline-none ring-1 ring-[#336886]/[0.04] transition duration-200 hover:-translate-y-1 hover:border-[#336886]/18 hover:shadow-[0_28px_68px_-48px_rgba(21,58,76,0.52)] focus-visible:ring-4 focus-visible:ring-[#336886]/14 active:scale-[0.99]"
                 >
                   <div className="relative m-2 h-44 overflow-hidden rounded-[1.45rem] bg-slate-100 sm:h-40">
                     {hasConfiguredAsset(place) ? (
@@ -441,12 +423,12 @@ export function DestinationDetailPage() {
                       </div>
                     )}
                     <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/42 to-transparent" />
-                    <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-black text-[#153A4C] shadow-sm">
+                    <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/82 px-2.5 py-1 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-20px_rgba(15,23,42,0.42)] ring-1 ring-white/75 backdrop-blur-xl">
                       <Bed size={12} weight="duotone" />
                       {placeTypeLabel(place.type)}
                     </div>
                     {placeServiceCount > 0 ? (
-                      <div className="absolute right-3 top-3 rounded-full bg-[#153A4C]/92 px-2.5 py-1 text-[10px] font-black text-white shadow-sm">
+                      <div className="absolute right-3 top-3 rounded-full bg-[#153A4C]/72 px-2.5 py-1 text-[10px] font-black text-white shadow-[0_12px_26px_-20px_rgba(15,23,42,0.52)] ring-1 ring-white/18 backdrop-blur-xl">
                         {placeServiceLabel}
                       </div>
                     ) : null}
@@ -477,14 +459,14 @@ export function DestinationDetailPage() {
                           onClick={stopCardClick}
                           target={isNativePlatform ? undefined : '_blank'}
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-black text-white"
+                          className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-black text-white shadow-[0_10px_22px_-17px_rgba(5,150,105,0.65)]"
                         >
                           <WhatsappLogo size={12} weight="fill" />
                           Falar
                         </a>
                       ) : null}
                       {placePhoneHref ? (
-                        <a href={placePhoneHref} onClick={stopCardClick} className="inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-2.5 py-1 text-[11px] font-black text-white">
+                        <a href={placePhoneHref} onClick={stopCardClick} className="inline-flex items-center gap-1 rounded-full border border-[#336886]/14 bg-[#336886] px-2.5 py-1 text-[11px] font-black text-white shadow-[0_10px_22px_-17px_rgba(51,104,134,0.58)]">
                           <PhoneCall size={12} weight="duotone" />
                           Ligar
                         </a>
@@ -501,7 +483,7 @@ export function DestinationDetailPage() {
                           {siteLabel(place.websiteUrl)}
                         </a>
                       ) : null}
-                      <span className="ml-auto text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">
+                      <span className="ml-auto inline-flex min-h-8 items-center rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886] transition group-hover:bg-[#336886] group-hover:text-white">
                         Ver opções
                       </span>
                     </div>
@@ -524,7 +506,7 @@ export function DestinationDetailPage() {
 
           {showListingsSection ? (
           <aside id="servicos-cidade" className={showPlacesSection ? 'min-w-0 max-w-full scroll-mt-28 space-y-4' : 'min-w-0 max-w-full scroll-mt-28 space-y-4 lg:col-span-2'}>
-            <div className="min-w-0 max-w-full overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_18px_50px_-36px_rgba(15,23,42,0.35)] sm:p-5">
+            <div className="min-w-0 max-w-full overflow-hidden rounded-[2rem] border border-white/85 bg-white/94 p-4 shadow-[0_22px_60px_-48px_rgba(15,23,42,0.36)] ring-1 ring-slate-900/[0.025] sm:p-5">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Cidade</p>
@@ -559,9 +541,9 @@ export function DestinationDetailPage() {
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                             <span className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#336886]">{categoryLabel(listing.category)}</span>
                             {hasLinkedStore ? (
-                              <span className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#336886]/78">Loja oficial</span>
+                              <span className="rounded-full bg-[#336886]/8 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-[#336886] ring-1 ring-[#336886]/10">Loja oficial</span>
                             ) : (
-                              <span className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#336886]/78">Contato direto</span>
+                              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-slate-500 ring-1 ring-slate-200/80">Contato direto</span>
                             )}
                           </div>
                           <h3 className="mt-1 line-clamp-1 text-lg font-semibold tracking-[-0.025em] text-slate-950">{listing.title}</h3>
@@ -572,7 +554,7 @@ export function DestinationDetailPage() {
                         <span className="min-w-0 truncate text-[11px] font-semibold text-slate-500">
                           {listing.address || (hasLinkedStore ? 'Pedido online pelo app' : 'Detalhes e contatos no toque')}
                         </span>
-                        <span className="shrink-0 text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">
+                        <span className="shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition group-hover:bg-[#336886] group-hover:text-white">
                           {hasLinkedStore ? 'Ver cardápio' : 'Ver detalhes'}
                         </span>
                       </div>
@@ -583,7 +565,7 @@ export function DestinationDetailPage() {
                       <Link
                         key={listing.id}
                         to={`/store/${linkedStoreSlug}`}
-                        className="group block min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-32px_rgba(15,23,42,0.38)] transition duration-200 hover:-translate-y-0.5 hover:border-[#336886]/24 active:scale-[0.99]"
+                        className="group block min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-white/90 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_18px_46px_-40px_rgba(15,23,42,0.34)] ring-1 ring-slate-900/[0.025] transition duration-200 hover:-translate-y-0.5 hover:border-[#336886]/18 hover:shadow-[0_24px_54px_-42px_rgba(51,104,134,0.4)] active:scale-[0.99]"
                       >
                         {cardBody}
                       </Link>
@@ -592,7 +574,7 @@ export function DestinationDetailPage() {
                         key={listing.id}
                         type="button"
                         onClick={() => setSelectedListing(listing)}
-                        className="group block w-full min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_14px_34px_-32px_rgba(15,23,42,0.38)] transition duration-200 hover:-translate-y-0.5 hover:border-[#336886]/24 active:scale-[0.99]"
+                        className="group block w-full min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-white/90 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_18px_46px_-40px_rgba(15,23,42,0.34)] ring-1 ring-slate-900/[0.025] transition duration-200 hover:-translate-y-0.5 hover:border-[#336886]/18 hover:shadow-[0_24px_54px_-42px_rgba(51,104,134,0.4)] active:scale-[0.99]"
                       >
                         {cardBody}
                       </button>

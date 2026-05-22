@@ -625,12 +625,12 @@ export function SuperAdminDestinations() {
       .then((cities) => {
         if (!active) return;
         setDestinationCityOptions(cities);
-        if (!cities.length) setDestinationCitiesError('Não encontramos cidades oficiais para esta UF agora.');
+        if (!cities.length) setDestinationCitiesError('Não encontramos cidades ou distritos oficiais para esta UF agora.');
       })
       .catch(() => {
         if (active) {
           setDestinationCityOptions([]);
-          setDestinationCitiesError('Não conseguimos carregar as cidades desta UF agora.');
+          setDestinationCitiesError('Não conseguimos carregar as cidades e distritos desta UF agora.');
         }
       })
       .finally(() => {
@@ -2361,7 +2361,7 @@ export function SuperAdminDestinations() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-black text-slate-950">Cidade do destino</p>
-                      <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Selecione UF e cidade. O nome público e o link são gerados automaticamente.</p>
+                      <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Selecione UF e cidade ou distrito turístico. O nome público e o link são gerados automaticamente.</p>
                     </div>
                     <span className="rounded-full bg-[#edf5fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
                       sem digitação duplicada
@@ -2377,7 +2377,7 @@ export function SuperAdminDestinations() {
                       </select>
                     </label>
                     <label className="grid gap-1.5">
-                      <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Cidade</span>
+                      <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Cidade ou distrito</span>
                       <select
                         required
                         value={destinationForm.city}
@@ -2385,7 +2385,7 @@ export function SuperAdminDestinations() {
                         disabled={destinationCitiesLoading || !destinationForm.state}
                         className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold text-slate-900 outline-none disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        <option value="">{destinationCitiesLoading ? 'Carregando cidades...' : 'Selecione a cidade'}</option>
+                        <option value="">{destinationCitiesLoading ? 'Carregando cidades e distritos...' : 'Selecione a cidade ou distrito'}</option>
                         {destinationCitySelectOptions.map((city) => (
                           <option key={city} value={city}>{city}</option>
                         ))}

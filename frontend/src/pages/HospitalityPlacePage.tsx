@@ -377,7 +377,7 @@ export function HospitalityPlacePage() {
                     </>
                   ) : null}
                   <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-white/92 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-700 shadow-sm">
+                    <span className="rounded-full bg-white/82 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-700 shadow-[0_12px_26px_-20px_rgba(15,23,42,0.42)] ring-1 ring-white/75 backdrop-blur-xl">
                       {placeTypeLabel(place.type)}
                     </span>
                   </div>
@@ -467,7 +467,7 @@ export function HospitalityPlacePage() {
                       onClick={() => setServiceFilter(option.id)}
                       className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-[11px] font-bold transition ${
                         active
-                          ? 'bg-[#153A4C] text-white shadow-[0_10px_24px_-18px_rgba(21,58,76,0.85)]'
+                          ? 'bg-[#336886] text-white shadow-[0_12px_26px_-18px_rgba(51,104,134,0.58)]'
                           : 'border border-slate-200 bg-white/70 text-slate-600 hover:bg-white'
                       }`}
                     >
@@ -509,7 +509,7 @@ export function HospitalityPlacePage() {
                   <Link
                     key={`${entry.id}-${store.id}`}
                     to={`/${store.slug}?${storeParams.toString()}`}
-                    className={`group overflow-hidden rounded-[1.55rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-36px_rgba(15,23,42,0.42)] transition duration-200 hover:-translate-y-1 hover:border-[#336886]/30 active:scale-[0.99] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`group overflow-hidden rounded-[1.55rem] border border-white/90 bg-white p-2 shadow-[0_20px_52px_-44px_rgba(15,23,42,0.42)] ring-1 ring-slate-900/[0.025] transition duration-200 hover:-translate-y-1 hover:border-[#336886]/20 hover:shadow-[0_26px_62px_-46px_rgba(51,104,134,0.42)] active:scale-[0.99] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
                     {mediaUrl ? (
                       <SmartCardImage
@@ -518,7 +518,7 @@ export function HospitalityPlacePage() {
                         fit={hasCoverImage(store) ? 'cover' : 'contain'}
                         className="aspect-square self-start rounded-[1.35rem]"
                       >
-                        <div className="absolute left-2 top-2 rounded-full bg-white/92 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#153A4C] shadow-sm ring-1 ring-white/80 backdrop-blur">
+                        <div className="absolute left-2 top-2 rounded-full bg-white/82 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#153A4C] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.44)] ring-1 ring-white/75 backdrop-blur-xl">
                           App
                         </div>
                       </SmartCardImage>
@@ -556,7 +556,7 @@ export function HospitalityPlacePage() {
                     tabIndex={0}
                     onClick={() => setSelectedListing(listing)}
                     onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
-                    className={`group cursor-pointer overflow-hidden rounded-[1.55rem] border border-slate-200/80 bg-white p-2 shadow-[0_16px_40px_-36px_rgba(15,23,42,0.42)] outline-none transition duration-200 hover:-translate-y-1 hover:border-[#336886]/30 focus-visible:ring-4 focus-visible:ring-[#336886]/14 active:scale-[0.99] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`group cursor-pointer overflow-hidden rounded-[1.55rem] border border-white/90 bg-white p-2 shadow-[0_20px_52px_-44px_rgba(15,23,42,0.42)] outline-none ring-1 ring-slate-900/[0.025] transition duration-200 hover:-translate-y-1 hover:border-[#336886]/20 hover:shadow-[0_26px_62px_-46px_rgba(51,104,134,0.42)] focus-visible:ring-4 focus-visible:ring-[#336886]/14 active:scale-[0.99] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
                     {mediaUrl ? (
                       <SmartCardImage
@@ -583,7 +583,7 @@ export function HospitalityPlacePage() {
                         <span className="truncate text-[11px] font-semibold text-slate-500">
                           {listing.address || 'Toque para ver detalhes e contatos'}
                         </span>
-                        <span className="shrink-0 text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">
+                        <span className="shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition group-hover:bg-[#336886] group-hover:text-white">
                           Ver detalhes
                         </span>
                       </div>
@@ -613,7 +613,7 @@ export function HospitalityPlacePage() {
                     tabIndex={0}
                     onClick={() => setSelectedListing(listing)}
                     onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
-                    className="cursor-pointer rounded-[1.25rem] border border-slate-100 bg-slate-50/70 p-2.5 outline-none transition hover:border-[#336886]/20 hover:bg-white focus-visible:ring-4 focus-visible:ring-[#336886]/12 active:scale-[0.99]"
+                    className="cursor-pointer rounded-[1.25rem] border border-white/80 bg-slate-50/70 p-2.5 shadow-[0_14px_34px_-32px_rgba(15,23,42,0.3)] outline-none ring-1 ring-slate-900/[0.02] transition hover:border-[#336886]/16 hover:bg-white hover:shadow-[0_20px_44px_-36px_rgba(51,104,134,0.32)] focus-visible:ring-4 focus-visible:ring-[#336886]/12 active:scale-[0.99]"
                   >
                     <div className="flex gap-3">
                       {mediaUrl ? (

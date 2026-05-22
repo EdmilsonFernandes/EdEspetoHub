@@ -42,7 +42,33 @@ export const normalizeLocationName = (value?: string | null) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const cityCacheKey = (uf: string) => `ibge:cities:${String(uf || '').toUpperCase()}`;
+const TOURISTIC_DISTRICT_FALLBACKS_BY_STATE: Record<string, string[]> = {
+  SP: ['São Francisco Xavier'],
+};
+
+const cityCacheKey = (uf: string) => `ibge:cities-districts:v2:${String(uf || '').toUpperCase()}`;
+
+const uniqueSortedLocationNames = (values: string[]) => {
+  const byNormalizedName = new Map<string, string>();
+  values
+    .map((value) => String(value || '').trim())
+    .filter(Boolean)
+    .forEach((value) => {
+      const key = normalizeLocationName(value);
+      if (key && !byNormalizedName.has(key)) byNormalizedName.set(key, value);
+    });
+
+  return Array.from(byNormalizedName.values()).sort((left, right) => left.localeCompare(right, 'pt-BR'));
+};
+
+const fetchIbgeLocationNames = async (url: string): Promise<string[]> => {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Falha ao carregar localidades.');
+  const data = await response.json();
+  return Array.isArray(data)
+    ? data.map((entry: any) => String(entry?.nome || '').trim()).filter(Boolean)
+    : [];
+};
 
 export const loadBrazilCitiesByState = async (ufValue: string): Promise<string[]> => {
   const uf = String(ufValue || '').toUpperCase().slice(0, 2);
@@ -59,23 +85,28 @@ export const loadBrazilCitiesByState = async (ufValue: string): Promise<string[]
     // Cache quebrado não deve impedir o cadastro.
   }
 
-  const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${encodeURIComponent(uf)}/municipios?orderBy=nome`);
-  if (!response.ok) throw new Error('Falha ao carregar cidades.');
-  const data = await response.json();
-  const cities = Array.isArray(data)
-    ? data
-        .map((entry: any) => String(entry?.nome || '').trim())
-        .filter(Boolean)
-        .sort((left: string, right: string) => left.localeCompare(right, 'pt-BR'))
-    : [];
+  const fallbackDistricts = TOURISTIC_DISTRICT_FALLBACKS_BY_STATE[uf] || [];
+  const cityUrl = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${encodeURIComponent(uf)}/municipios?orderBy=nome`;
+  const districtUrl = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${encodeURIComponent(uf)}/distritos?orderBy=nome`;
+
+  const [citiesResult, districtsResult] = await Promise.allSettled([
+    fetchIbgeLocationNames(cityUrl),
+    fetchIbgeLocationNames(districtUrl),
+  ]);
+
+  const cities = citiesResult.status === 'fulfilled' ? citiesResult.value : [];
+  const districts = districtsResult.status === 'fulfilled' ? districtsResult.value : [];
+  const mergedLocations = uniqueSortedLocationNames([...cities, ...districts, ...fallbackDistricts]);
+
+  if (!mergedLocations.length) throw new Error('Falha ao carregar cidades.');
 
   try {
-    if (typeof localStorage !== 'undefined' && cities.length) {
-      localStorage.setItem(cacheKey, JSON.stringify(cities));
+    if (typeof localStorage !== 'undefined' && mergedLocations.length) {
+      localStorage.setItem(cacheKey, JSON.stringify(mergedLocations));
     }
   } catch {
     // Cache é opcional.
   }
 
-  return cities;
+  return mergedLocations;
 };
