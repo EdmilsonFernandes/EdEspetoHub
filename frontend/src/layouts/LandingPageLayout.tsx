@@ -618,7 +618,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 </div>
                 <p className="mt-3 text-sm font-semibold text-white">Pagamentos online opcionais</p>
                 <p className="mt-1 text-xs leading-5 text-slate-400">
-                  O lojista conecta a própria conta Mercado Pago e recebe Pix, crédito e débito direto no fluxo do pedido.
+                  O comerciante conecta a própria conta Mercado Pago e recebe Pix, crédito e débito direto no fluxo do pedido.
                 </p>
                 <div className="mt-3 flex items-center gap-2 text-[11px] text-emerald-300 font-bold uppercase tracking-[0.12em]">
                   <ShieldCheck size={14} weight="duotone" />

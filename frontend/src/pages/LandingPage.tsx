@@ -85,7 +85,7 @@ export function LandingPage() {
   useEffect(() => {
     document.title = 'Já no Caminho | Venda online, organize pedidos e entregue melhor';
     const description =
-      'Sistema para lojistas venderem online sem comissão por pedido: cardápio digital, pedidos em tempo real, entregadores, pagamentos, condomínios, chalés e turismo local.';
+      'Sistema para comerciantes venderem online sem comissão por pedido: cardápio digital, pedidos em tempo real, entregadores, pagamentos, condomínios, chalés e turismo local.';
     upsertMeta('description', description, 'name');
     upsertMeta('og:title', 'Já no Caminho | Venda online, organize pedidos e entregue melhor', 'property');
     upsertMeta('og:description', description, 'property');
@@ -215,7 +215,7 @@ export function LandingPage() {
     { icon: Package, title: 'Produção e impressão organizadas', desc: 'Fila visual para preparar, imprimir, separar e finalizar sem perder pedido.', accent: 'amber' },
     { icon: Motorcycle, title: 'Entregadores no fluxo', desc: 'Vincule entregadores, ofereça corridas e acompanhe aceite, retirada e entrega.', accent: 'violet' },
     { icon: CurrencyDollar, title: 'Pagamento flexível', desc: 'Pix, crédito, débito ou pagamento presencial, com Mercado Pago da própria loja.', accent: 'emerald' },
-    { icon: Bell, title: 'Push para quem precisa agir', desc: 'Lojista, cliente e entregador recebem o aviso certo em cada etapa.', accent: 'amber' },
+    { icon: Bell, title: 'Push para quem precisa agir', desc: 'Loja, cliente e entregador recebem o aviso certo em cada etapa.', accent: 'amber' },
     { icon: ShieldCheck, title: 'Entrega com confirmação', desc: 'Código de 4 dígitos reduz confusão e confirma que o pedido chegou ao cliente.', accent: 'emerald' },
     { icon: Buildings, title: 'Condomínios e feiras', desc: 'Vitrine local para eventos, retirada, barracas e entrega em condomínios.', accent: 'indigo' },
     { icon: QrCode, title: 'Chalés, pousadas e turismo', desc: 'QR no chalé mostra delivery, serviços, passeios e lojas que atendem a região.', accent: 'emerald' },
@@ -226,7 +226,7 @@ export function LandingPage() {
       step: '01',
       title: 'Pedido entra e a loja é avisada na hora',
       desc: 'Assim que o cliente finaliza o pedido online, a operação recebe o alerta no app e no painel.',
-      badge: 'Lojista',
+      badge: 'Loja',
       icon: Bell,
       accent: 'sky',
     },
@@ -282,39 +282,39 @@ export function LandingPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(99,102,241,0.05),_transparent_60%)]" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
 
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:py-28 lg:py-36">
-          <div className="grid items-center gap-16 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="relative mx-auto max-w-6xl px-5 py-20 sm:py-28 lg:py-[7.5rem] xl:py-32">
+          <div className="grid items-center gap-14 lg:grid-cols-[1.04fr_0.96fr] xl:gap-20">
 
             {/* ── Left: copy ── */}
-            <div className="space-y-8 text-center lg:text-left">
+            <div className="space-y-7 text-center lg:text-left">
 
               {/* Eyebrow badge */}
               <div className="animate-in fade-in slide-in-from-top-3 duration-700">
-                <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/24 bg-white/[0.04] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-sky-200 backdrop-blur-md shadow-[0_14px_30px_-20px_rgba(14,165,233,0.28)]">
+                <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/24 bg-white/[0.04] px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-sky-200 backdrop-blur-md shadow-[0_14px_30px_-20px_rgba(14,165,233,0.28)]">
                   <Rocket size={12} weight="duotone" className="animate-pulse" />
                   50 primeiras lojas com 3 meses VIP
                 </span>
               </div>
 
               {/* Headline */}
-              <div className="animate-in fade-in slide-in-from-top-5 duration-700 delay-100 space-y-5">
-                <h1 className="mx-auto max-w-4xl text-[2.75rem] font-black leading-[1.03] tracking-[-0.045em] text-white sm:text-[4.25rem] lg:mx-0 lg:max-w-[48rem] xl:text-[5.85rem]">
+              <div className="animate-in fade-in slide-in-from-top-5 duration-700 delay-100 space-y-4">
+                <h1 className="mx-auto max-w-4xl text-[2.55rem] font-black leading-[1.04] tracking-[-0.045em] text-white sm:text-[3.75rem] lg:mx-0 lg:max-w-[42rem] xl:text-[4.85rem]">
                   Venda online, organize pedidos<br />
                   <span className="animate-text-gradient bg-gradient-to-r from-emerald-400 via-sky-400 to-emerald-400 bg-clip-text text-transparent">
                     e entregue melhor.
                   </span>
                 </h1>
-                <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-300 lg:mx-0 sm:text-[1.15rem] sm:leading-8">
+                <p className="mx-auto max-w-xl text-base font-medium leading-relaxed text-slate-300 lg:mx-0 sm:text-[1.04rem] sm:leading-7">
                   Campanha de lançamento para comerciantes locais: sua loja entra com acesso VIP por 3 meses para testar pedidos online, painel, pagamentos, entregas e divulgação sem comissão por pedido.
                 </p>
               </div>
 
               {/* CTAs */}
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 flex flex-col gap-4 sm:flex-row justify-center lg:justify-start">
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 flex flex-col gap-3 sm:flex-row justify-center lg:justify-start">
                 <button
                   type="button"
                   onClick={() => navigate('/create?plan=trial')}
-                  className="group inline-flex items-center justify-center gap-2.5 rounded-[1.35rem] bg-[linear-gradient(180deg,#ffffff_0%,#f5f7fb_100%)] px-8 py-4 text-base font-black text-slate-950 shadow-[0_24px_54px_-18px_rgba(255,255,255,0.24)] ring-1 ring-white/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="group inline-flex items-center justify-center gap-2.5 rounded-[1.25rem] bg-[linear-gradient(180deg,#ffffff_0%,#f5f7fb_100%)] px-6 py-3.5 text-sm font-black text-slate-950 shadow-[0_22px_48px_-20px_rgba(255,255,255,0.22)] ring-1 ring-white/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Garantir minha vaga VIP
                   <ArrowRight size={17} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
@@ -323,23 +323,23 @@ export function LandingPage() {
                   href={ctaPrimaryHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-[1.35rem] border border-white/12 bg-white/[0.05] px-8 py-4 text-base font-black text-white backdrop-blur-md transition-all hover:bg-white/[0.1] active:scale-[0.98]"
+                  className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-white/12 bg-white/[0.05] px-6 py-3.5 text-sm font-black text-white backdrop-blur-md transition-all hover:bg-white/[0.1] active:scale-[0.98]"
                 >
                   <WhatsappLogo size={18} weight="fill" className="text-emerald-300" />
                   Falar no WhatsApp Business
                 </a>
               </div>
 
-              <div className="animate-in fade-in duration-700 delay-300 grid gap-3 sm:grid-cols-3">
+              <div className="animate-in fade-in duration-700 delay-300 grid gap-2.5 sm:grid-cols-3">
                 {heroHighlights.map(({ icon: Icon, title, desc }) => (
                   <div
                     key={title}
-                    className="rounded-[1.45rem] border border-white/10 bg-white/[0.05] px-4 py-4 text-left shadow-[0_22px_42px_-30px_rgba(2,6,23,0.8)] backdrop-blur-xl"
+                    className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] px-3.5 py-3.5 text-left shadow-[0_20px_38px_-30px_rgba(2,6,23,0.76)] backdrop-blur-xl"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06]">
-                      <Icon size={18} weight="duotone" className="text-sky-300" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.06]">
+                      <Icon size={16} weight="duotone" className="text-sky-300" />
                     </div>
-                    <p className="mt-3 text-sm font-black leading-tight text-white">{title}</p>
+                    <p className="mt-2.5 text-[13px] font-black leading-tight text-white">{title}</p>
                     <p className="mt-1 text-xs font-medium leading-5 text-slate-400">{desc}</p>
                   </div>
                 ))}
@@ -377,33 +377,33 @@ export function LandingPage() {
             </div>
 
             {/* ── Right: premium payment/product preview ── */}
-            <div className="animate-in zoom-in-95 fade-in duration-700 delay-250 relative flex items-center justify-center">
+            <div className="animate-in zoom-in-95 fade-in duration-700 delay-250 relative flex items-center justify-center lg:justify-end">
               <div className="pointer-events-none absolute -inset-8 rounded-full bg-[#00bcff]/10 blur-[90px]" />
-              <div className="relative w-full max-w-xl rounded-[2.5rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04))] p-3.5 shadow-[0_40px_90px_-48px_rgba(2,6,23,0.95)] backdrop-blur-2xl">
-                <div className="mb-3 flex items-center justify-between rounded-[1.3rem] border border-white/10 bg-white/[0.05] px-4 py-3 text-left backdrop-blur-xl">
+              <div className="relative w-full max-w-[31rem] rounded-[2.15rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04))] p-3 shadow-[0_36px_78px_-50px_rgba(2,6,23,0.95)] backdrop-blur-2xl">
+                <div className="mb-2.5 flex items-center justify-between rounded-[1.15rem] border border-white/10 bg-white/[0.05] px-3.5 py-2.5 text-left backdrop-blur-xl">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-200">Fluxo unificado</p>
-                    <p className="mt-1 text-sm font-black text-white">Pedidos, pagamentos e entrega no mesmo ambiente</p>
+                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-sky-200">Fluxo unificado</p>
+                    <p className="mt-0.5 text-[13px] font-black text-white">Pedidos, pagamentos e entrega no mesmo ambiente</p>
                   </div>
                   <span className="hidden rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200 sm:inline-flex">
                     Ao vivo
                   </span>
                 </div>
-                <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950/92">
-                  <div className="border-b border-white/[0.07] bg-white/[0.035] p-5">
-                    <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                <div className="overflow-hidden rounded-[1.55rem] border border-white/10 bg-slate-950/92">
+                  <div className="border-b border-white/[0.07] bg-white/[0.035] p-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-sky-300">Checkout integrado</p>
-                        <h3 className="mt-1 text-xl font-black tracking-tight text-white">Cobrança online no pedido</h3>
-                        <p className="mt-1 max-w-xs text-xs font-semibold leading-5 text-slate-400">
-                          O cliente paga no fluxo da loja e o valor cai na conta Mercado Pago do próprio lojista.
+                        <p className="text-[9px] font-black uppercase tracking-[0.22em] text-sky-300">Checkout integrado</p>
+                        <h3 className="mt-1 text-lg font-black tracking-tight text-white">Cobrança online no pedido</h3>
+                        <p className="mt-1 max-w-[14.5rem] text-[11px] font-semibold leading-5 text-slate-400">
+                          O cliente paga no fluxo da loja e o valor cai na conta Mercado Pago do próprio negócio.
                         </p>
                       </div>
-                      <div className="relative w-full max-w-[290px] overflow-hidden rounded-[1.35rem] border border-white/10 bg-[linear-gradient(145deg,rgba(13,25,48,0.94),rgba(2,52,81,0.92))] px-4 py-3 shadow-[0_28px_56px_-32px_rgba(0,158,227,0.55)] sm:w-[270px]">
+                      <div className="relative w-full max-w-[250px] overflow-hidden rounded-[1.2rem] border border-white/10 bg-[linear-gradient(145deg,rgba(13,25,48,0.94),rgba(2,52,81,0.92))] px-3 py-2.5 shadow-[0_24px_46px_-32px_rgba(0,158,227,0.5)] sm:w-[230px]">
                         <div className="pointer-events-none absolute -left-5 top-3 h-14 w-14 rounded-full bg-[#009ee3]/30 blur-2xl" />
                         <div className="pointer-events-none absolute -right-5 bottom-2 h-14 w-14 rounded-full bg-[#84cc16]/20 blur-2xl" />
-                        <div className="relative rounded-[1rem] border border-white/70 bg-white/96 px-3 py-2 shadow-[0_18px_34px_-24px_rgba(255,255,255,0.65)]">
-                          <img src={mercadoPagoLandingLogo} alt="Mercado Pago" className="h-14 w-full object-contain object-left" />
+                        <div className="relative rounded-[0.9rem] border border-white/70 bg-white/96 px-3 py-1.5 shadow-[0_18px_34px_-24px_rgba(255,255,255,0.65)]">
+                          <img src={mercadoPagoLandingLogo} alt="Mercado Pago" className="h-11 w-full object-contain object-left" />
                         </div>
                         <div className="relative mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.08] px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-slate-100 backdrop-blur-xl">
                           <Lock size={11} weight="duotone" className="text-sky-300" />
@@ -413,7 +413,7 @@ export function LandingPage() {
                     </div>
                   </div>
 
-                  <div className="p-5">
+                  <div className="p-4">
                     <div className="grid gap-3 sm:grid-cols-[0.95fr_1.05fr]">
                       <div className="rounded-2xl border border-white/[0.07] bg-white/[0.035] p-4">
                         <div className="flex items-center justify-between gap-3">
@@ -445,7 +445,7 @@ export function LandingPage() {
                         <div className="relative flex items-center justify-between gap-3">
                           <div>
                             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-200">Conta conectada</p>
-                            <p className="mt-1 text-sm font-black text-white">Mercado Pago do lojista</p>
+                            <p className="mt-1 text-sm font-black text-white">Mercado Pago da loja</p>
                           </div>
                           <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.08] backdrop-blur-xl">
                             <ShieldCheck size={20} weight="duotone" className="text-emerald-300" />
@@ -518,7 +518,7 @@ export function LandingPage() {
                   O sistema chama a pessoa certa na hora certa.
                 </h2>
                 <p className="max-w-2xl text-sm font-medium leading-7 text-slate-600 sm:text-base">
-                  Para o lojista, isso significa menos improviso. Para o cliente, mais confiança. Para o entregador, uma operação clara, rápida e sem ruído.
+                  Para a loja, isso significa menos improviso. Para o cliente, mais confiança. Para o entregador, uma operação clara, rápida e sem ruído.
                 </p>
               </div>
 
@@ -609,7 +609,7 @@ export function LandingPage() {
                 </div>
 
                 <div className="relative mt-4 rounded-[1.4rem] border border-white/10 bg-white/[0.05] px-4 py-3 text-xs font-semibold leading-6 text-slate-300">
-                  Resultado para o lojista: menos ligação, menos improviso, menos pedido perdido e mais sensação de aplicativo profissional para quem compra.
+                  Resultado para o negócio: menos ligação, menos improviso, menos pedido perdido e mais sensação de aplicativo profissional para quem compra.
                 </div>
               </div>
             </div>
@@ -748,7 +748,7 @@ export function LandingPage() {
             Sem comissão. Sem repasse.<br className="hidden sm:block" /> Dinheiro direto na sua conta.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-sm font-medium leading-7 text-slate-500 sm:text-base">
-            O lojista conecta a própria conta Mercado Pago com segurança e libera Pix, crédito e débito no fluxo do pedido. Quem preferir manter atendimento presencial continua operando normalmente.
+            O comerciante conecta a própria conta Mercado Pago com segurança e libera Pix, crédito e débito no fluxo do pedido. Quem preferir manter atendimento presencial continua operando normalmente.
           </p>
 
           {/* Logo + badges */}
@@ -777,7 +777,7 @@ export function LandingPage() {
               <Lock size={16} weight="duotone" />
             </div>
             <p className="text-left text-xs font-semibold leading-5 text-slate-600">
-              Conexão segura com Mercado Pago — o dinheiro cai direto na conta do lojista, sem repasse manual.
+              Conexão segura com Mercado Pago — o dinheiro cai direto na conta da loja, sem repasse manual.
             </p>
           </div>
 
@@ -1117,7 +1117,7 @@ export function LandingPage() {
                 Um app para comprar, vender e acompanhar pedidos.
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
-                Baixe agora pelo canal oficial. Lojista, cliente e entregador — tudo em um só app.
+                Baixe agora pelo canal oficial. Comerciante, cliente e entregador — tudo em um só app.
               </p>
 
               {/* Botões */}
@@ -1180,7 +1180,7 @@ export function LandingPage() {
                 {[
                   <span>Android: baixe pelo botão acima ou escaneie o QR code.</span>,
                   <span>iPhone: acesse pelo Safari e adicione o app web à tela inicial.</span>,
-                  <span>Lojista e cliente entram pelo mesmo app, cada um com sua área.</span>,
+                  <span>Comerciante e cliente entram pelo mesmo app, cada um com sua área.</span>,
                 ].map((text, i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">{i + 1}</span>
