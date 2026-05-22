@@ -3500,19 +3500,19 @@ export function MarketplacePage() {
 
           {/* Seção Categorias Premium Squircle */}
           <section className="order-4 relative" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-            <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Categorias</p>
-            <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-4 py-1.5">
+            <p className="mb-1.5 px-1 text-[9px] font-black uppercase tracking-[0.24em] text-slate-400/85">Categorias</p>
+            <div className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto no-scrollbar px-4 py-1.5">
               <button
                 type="button"
-                className="group flex min-w-[58px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
+                className="group flex min-w-[54px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
                 onClick={() => setSegmentFilter('all')}
               >
-                <div className={`flex h-11 w-11 items-center justify-center rounded-[16px] transition-all duration-200 ease-out ${
-                  segmentFilter === 'all' ? 'bg-[#336886] shadow-[0_12px_26px_-14px_rgba(51,104,134,0.68)] scale-[1.04]' : 'border border-slate-100 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)] group-hover:bg-slate-50'
+                <div className={`flex h-10 w-10 items-center justify-center rounded-[15px] transition-all duration-200 ease-out ${
+                  segmentFilter === 'all' ? 'scale-[1.04] bg-[#336886] shadow-[0_16px_28px_-18px_rgba(51,104,134,0.74)]' : 'border border-white/80 bg-white/78 shadow-[0_12px_26px_-22px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/55 backdrop-blur-xl group-hover:bg-slate-50'
                 }`}>
-                  <List size={18} weight="duotone" className={segmentFilter === 'all' ? 'text-white scale-[0.95]' : 'text-slate-500'} />
+                  <List size={17} weight="duotone" className={segmentFilter === 'all' ? 'scale-[0.95] text-white' : 'text-slate-500'} />
                 </div>
-                <span className={`text-center text-[9.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
+                <span className={`text-center text-[8.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
                   segmentFilter === 'all' ? 'text-[#336886]' : 'text-slate-500'
                 }`}>Todos</span>
               </button>
@@ -3525,23 +3525,23 @@ export function MarketplacePage() {
                   <button
                     key={`${item.label}-${index}`}
                     type="button"
-                    className="group flex min-w-[58px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
+                    className="group flex min-w-[54px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
-                    <div className={`flex h-11 w-11 items-center justify-center rounded-[16px] transition-all duration-200 ease-out ${
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-[15px] transition-all duration-200 ease-out ${
                       active
-                        ? `${colors?.active ?? 'bg-[#336886] shadow-[0_12px_26px_-14px_rgba(51,104,134,0.68)]'} scale-[1.04]`
-                        : `${colors?.inactive ?? 'border border-slate-100 bg-white'} shadow-[0_8px_22px_rgba(15,23,42,0.04)] group-hover:scale-[1.03]`
+                        ? `${colors?.active ?? 'bg-[#336886] shadow-[0_16px_28px_-18px_rgba(51,104,134,0.74)]'} scale-[1.04]`
+                        : `${colors?.inactive ?? 'border border-white/80 bg-white/78'} shadow-[0_12px_26px_-22px_rgba(15,23,42,0.22)] ring-1 ring-white/70 backdrop-blur-xl group-hover:scale-[1.03]`
                     }`}>
                       <CategoryIcon
-                        size={20}
+                        size={19}
                         weight={active ? 'fill' : 'duotone'}
                         className={`transition-all duration-150 ease-out ${
                           active ? 'scale-[0.94] text-white' : `${colors?.icon ?? 'text-slate-500'} group-hover:scale-105`
                         }`}
                       />
                     </div>
-                    <span className={`text-center text-[9.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
+                    <span className={`text-center text-[8.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
                       active ? (colors ? colors.icon : 'text-[#336886]') : 'text-slate-500'
                     }`}>{item.label}</span>
                   </button>
@@ -3769,9 +3769,20 @@ export function MarketplacePage() {
             )}
 
             {loading && (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, idx) => (
-                  <div key={idx} className="h-32 animate-pulse rounded-[1.65rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)]" />
+              <div className="grid grid-cols-1 gap-2.5">
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="grid animate-pulse grid-cols-[4rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.55rem] border border-white/90 bg-white/78 px-3 py-3 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/45"
+                  >
+                    <div className="h-[3.65rem] w-[3.65rem] rounded-full bg-slate-200/70" />
+                    <div className="min-w-0 space-y-2">
+                      <div className="h-3.5 w-7/12 rounded-full bg-slate-200/75" />
+                      <div className="h-2.5 w-5/12 rounded-full bg-slate-100" />
+                      <div className="h-2.5 w-9/12 rounded-full bg-slate-100" />
+                    </div>
+                    <div className="h-9 w-9 rounded-full bg-slate-100" />
+                  </div>
                 ))}
               </div>
             )}
@@ -4045,7 +4056,8 @@ export function MarketplacePage() {
                       key={store.id}
                       to={storePath}
                       state={storeNavigationState}
-                      className={`group grid grid-cols-[4rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.55rem] border px-3 py-3 transition-all duration-300 ease-out active:scale-[0.985] ${
+                      style={{ animationDelay: `${index * 36}ms` }}
+                      className={`group grid grid-cols-[4rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.55rem] border px-3 py-3 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards transition-all ease-out active:scale-[0.985] ${
                         store.isOpen
                           ? 'border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.92)_100%)] shadow-[0_16px_34px_-28px_rgba(15,23,42,0.26),0_1px_6px_rgba(15,23,42,0.035)] ring-1 ring-slate-200/45 md:hover:-translate-y-0.5 md:hover:shadow-[0_22px_48px_-34px_rgba(15,23,42,0.32)]'
                           : 'border-slate-100/90 bg-[linear-gradient(180deg,rgba(248,250,252,0.94)_0%,rgba(241,245,249,0.82)_100%)] shadow-[0_12px_28px_-24px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/40'
