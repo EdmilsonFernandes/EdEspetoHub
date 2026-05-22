@@ -124,7 +124,7 @@ const HUB_DEBUG_QUERY_PARAM = 'hubDebug';
 const HUB_DEBUG_STORAGE_KEY = 'jnc:hub-debug-enabled';
 const HUB_DEBUG_TRACE_KEY = 'jnc:hub-debug-trace';
 const HUB_DEBUG_TRACE_LIMIT = 80;
-const HOME_STORE_PREVIEW_LIMIT = 8;
+const HOME_STORE_PREVIEW_LIMIT = 6;
 
 const HUB_DISTANCE_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
@@ -901,6 +901,7 @@ export function MarketplacePage() {
   const [preferredDiscoveryAddress, setPreferredDiscoveryAddress] = useState<PreferredDiscoveryAddress | null>(null);
   const [preferredAddressLoading, setPreferredAddressLoading] = useState(false);
   const [hubScopeOverride, setHubScopeOverride] = useState<'default' | 'all_stores'>('default');
+  const [isHomeStoreListExpanded, setIsHomeStoreListExpanded] = useState(false);
   const homePromoSlides = useMemo(
     () =>
       homeConfig.homeBanners
@@ -1681,6 +1682,10 @@ export function MarketplacePage() {
         const supportsPostal = supportsDelivery && Boolean(store?.settings?.postalEnabled);
         const deliveryFeeValue = Number((store?.settings as any)?.deliveryFee ?? (store?.settings as any)?.delivery_fee);
         const freeShipping = supportsDelivery && Number.isFinite(deliveryFeeValue) && deliveryFeeValue <= 0;
+        const deliveryFee = supportsDelivery && Number.isFinite(deliveryFeeValue)
+          ? Math.max(0, deliveryFeeValue)
+          : null;
+        const reviewCount = Math.max(0, Math.floor(Number(store?.reviewSummary?.totalReviews || 0)));
         const rawHours = Array.isArray(store?.settings?.openingHours) ? (store?.settings?.openingHours as any[]) : [];
         const isOpen =
           typeof store?.openNow === 'boolean'
@@ -1717,6 +1722,8 @@ export function MarketplacePage() {
           etaMin,
           etaMax,
           freeShipping,
+          deliveryFee,
+          reviewCount,
           isOpen,
           supportsDelivery,
           supportsPickup,
@@ -1759,6 +1766,8 @@ export function MarketplacePage() {
       etaMin: number;
       etaMax: number;
       freeShipping: boolean;
+      deliveryFee: number | null;
+      reviewCount: number;
       isOpen: boolean;
       supportsDelivery: boolean;
       supportsPickup: boolean;
@@ -2036,10 +2045,15 @@ export function MarketplacePage() {
     !isShowingAllStores &&
     quickFilter === 'all' &&
     segmentFilter === 'all';
+  const isHomeStoreListCollapsed = isHomeStorePreview && !isHomeStoreListExpanded;
   const visibleStoreCards = isHomeStorePreview
-    ? filteredStores.slice(0, HOME_STORE_PREVIEW_LIMIT)
+    ? (isHomeStoreListCollapsed ? filteredStores.slice(0, HOME_STORE_PREVIEW_LIMIT) : filteredStores)
     : filteredStores;
   const hiddenHomeStoreCount = Math.max(0, filteredStores.length - visibleStoreCards.length);
+
+  useEffect(() => {
+    if (!isHomeStorePreview) setIsHomeStoreListExpanded(false);
+  }, [isHomeStorePreview]);
 
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { icon: Storefront, label: segment });
@@ -2445,6 +2459,7 @@ export function MarketplacePage() {
     setQuickFilter('all');
     setSegmentFilter('all');
     setSelectedCondominiumSlug('');
+    setIsHomeStoreListExpanded(false);
   }, []);
 
   const enableAllStoresView = useCallback(() => {
@@ -3210,7 +3225,7 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
-            <section className="order-8 space-y-3">
+            <section className="order-7 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
@@ -3538,7 +3553,7 @@ export function MarketplacePage() {
           {/* Banner de Destaques Premium - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && (
             <section
-              className="order-7 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-3 py-2.5 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl"
+              className="order-8 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-3 py-2.5 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl"
               style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               <div className="flex items-center justify-between gap-3 px-1">
@@ -3690,7 +3705,9 @@ export function MarketplacePage() {
                     {productSearchLoading && debouncedQuery
                       ? 'Buscando também nos cardápios...'
                       : isHomeStorePreview
-                        ? `${visibleStoreCards.length} de ${filteredStores.length} opções em destaque`
+                        ? isHomeStoreListCollapsed
+                          ? `${visibleStoreCards.length} de ${filteredStores.length} opções próximas`
+                          : `${filteredStores.length} opções próximas`
                       : isShowingAllStores
                         ? `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} em outras regiões`
                         : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} ${selectedCondominium ? 'no condomínio' : geoDiscovery ? 'priorizados para sua região' : 'disponíveis no app'}`}
@@ -3864,7 +3881,7 @@ export function MarketplacePage() {
 
             {!loading && !error && filteredStores.length > 0 && (
               <>
-              <div className={selectedCondominium || isHomeStorePreview ? 'grid grid-cols-2 gap-2.5 min-[390px]:gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'}>
+              <div className={selectedCondominium ? 'grid grid-cols-2 gap-2.5 min-[390px]:gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-2.5'}>
                 {visibleStoreCards.map((store, index) => {
                   const storePath = selectedCondominiumSlug
                     ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
@@ -3902,20 +3919,28 @@ export function MarketplacePage() {
                         }
                       )
                     : null;
-                  const compactDeliveryMetaBadge = store.isOpen && primaryBadge?.key === 'delivery'
-                    ? {
-                        label: store.freeShipping ? 'Frete grátis' : 'Entrega',
-                        className: store.freeShipping
-                          ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
-                          : 'bg-sky-50 text-[#336886] ring-1 ring-sky-100',
-                      }
-                    : null;
                   const visiblePrimaryBadge = primaryBadge?.key === 'delivery' ? null : primaryBadge;
                   const visibleSecondaryBadge =
                     secondaryBadge?.key === 'favorite_hint' ||
                     (primaryBadge?.key === 'delivery' && secondaryBadge?.key === 'free_shipping')
                       ? null
                       : secondaryBadge;
+                  const visibleServiceBadges = [visiblePrimaryBadge, visibleSecondaryBadge].filter(Boolean) as StoreCardBadge[];
+                  const deliveryFeeLabel = store.supportsDelivery
+                    ? store.freeShipping
+                      ? 'Grátis'
+                      : store.deliveryFee !== null
+                        ? currency.format(store.deliveryFee)
+                        : 'Entrega'
+                    : store.supportsPickup || store.supportsTable
+                      ? 'Retirada'
+                      : 'Consulte';
+                  const resolvedDistanceLabel = distanceLoading && activeLocation && distanceByStore[store.id] == null
+                    ? '...'
+                    : formatDistance(distanceByStore[store.id] ?? store.distanceKm);
+                  const ratingLabel = store.reviewCount > 0
+                    ? `${store.rating.toFixed(1)} (${store.reviewCount})`
+                    : store.rating.toFixed(1);
 
                   if (selectedCondominium) {
                     return (
@@ -4020,138 +4045,93 @@ export function MarketplacePage() {
                       key={store.id}
                       to={storePath}
                       state={storeNavigationState}
-                      className={`group relative overflow-hidden rounded-[1.45rem] border bg-white transition-all duration-300 ease-out active:scale-[0.985] ${
+                      className={`group grid grid-cols-[4.35rem_minmax(0,1fr)_2.25rem] items-center gap-3 rounded-[1.45rem] border bg-white px-3.5 py-3.5 transition-all duration-300 ease-out active:scale-[0.985] ${
                         store.isOpen
-                          ? 'border-white shadow-[0_10px_28px_rgba(15,23,42,0.07),0_1px_6px_rgba(15,23,42,0.04)] md:hover:-translate-y-0.5 md:hover:shadow-[0_18px_36px_rgba(15,23,42,0.1)]'
-                          : 'border-slate-100 bg-slate-50/80 shadow-[0_6px_18px_rgba(15,23,42,0.04)]'
+                          ? 'border-white shadow-[0_14px_32px_-26px_rgba(15,23,42,0.24),0_1px_6px_rgba(15,23,42,0.035)] md:hover:-translate-y-0.5 md:hover:shadow-[0_20px_42px_-30px_rgba(15,23,42,0.3)]'
+                          : 'border-slate-100 bg-slate-50/82 shadow-[0_10px_26px_-24px_rgba(15,23,42,0.18)]'
                       }`}
                     >
-                      {/* Banner wrapper */}
-                      <div className="relative">
-                        <div className="relative h-[56px] overflow-hidden rounded-t-[1.45rem] bg-slate-100">
-                          <img
-                            src={store.banner || store.logo}
-                            alt=""
-                            aria-hidden
-                            loading="lazy"
-                            decoding="async"
-                            className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.06] ${store.isOpen ? '' : 'grayscale opacity-45'}`}
-                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
-                          />
-                          <div className={`absolute inset-0 ${store.isOpen ? 'bg-gradient-to-t from-black/35 via-black/5 to-black/10' : 'bg-gradient-to-t from-black/20 via-transparent to-transparent'}`} />
-
-                          {/* Open/closed status badge */}
-                          {store.isOpen ? (
-                            <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.14em] text-white shadow-[0_4px_10px_-4px_rgba(16,185,129,0.7)] backdrop-blur-sm">
-                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
-                              Aberto
-                            </span>
-                          ) : (
-                            <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-slate-800/65 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.14em] text-white/90 backdrop-blur-sm">
-                              Fechado
-                            </span>
-                          )}
-
-                          {/* Favorite */}
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              toggleFavoriteStore(store.slug);
-                            }}
-                            className={`absolute right-2.5 top-2.5 inline-flex h-7 w-7 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
-                              favoriteStoreSlugs.includes(store.slug)
-                                ? 'scale-[1.06] bg-rose-500 text-white shadow-[0_4px_18px_-4px_rgba(244,63,94,0.72)]'
-                                : 'border border-white/20 bg-black/28 text-white backdrop-blur-md hover:bg-black/42'
-                            }`}
-                            aria-label={`Favoritar ${store.name}`}
-                          >
-                            <Heart size={12} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} />
-                          </button>
-                        </div>
+                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200/80">
+                        <img
+                          src={store.logo}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${store.isOpen ? '' : 'grayscale opacity-55'}`}
+                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
+                        />
+                        {!store.isOpen ? <div className="absolute inset-0 bg-white/35" /> : null}
                       </div>
 
-                      {/* Content */}
-                      <div className="px-3.5 pb-3.5 pt-3">
-                        <div className="flex min-w-0 items-start gap-2">
-                          <img
-                            src={store.logo}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                            className={`h-8 w-8 shrink-0 rounded-[0.65rem] bg-slate-50 object-cover ring-1 ring-slate-200/70 ${store.isOpen ? '' : 'grayscale opacity-55'}`}
-                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
+                      <div className="min-w-0">
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <span
+                            className={`h-2 w-2 shrink-0 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-rose-500'}`}
+                            style={{
+                              boxShadow: store.isOpen ? '0 0 8px rgba(16,185,129,0.42)' : '0 0 8px rgba(244,63,94,0.3)',
+                            }}
                           />
-                          {!isCondominiumScope && (
-                            <span
-                              className={`mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full ${store.isOpen ? 'bg-green-500' : 'bg-red-500'}`}
-                              style={{
-                                boxShadow: store.isOpen ? '0 0 6px 1px rgba(34, 197, 94, 0.4)' : '0 0 6px 1px rgba(239, 68, 68, 0.4)',
-                              }}
-                            />
-                          )}
-                          <h3 className={`min-h-[2.05rem] min-w-0 flex-1 line-clamp-2 text-[13.5px] font-black leading-4 [overflow-wrap:anywhere] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
+                          <h3 className={`min-w-0 truncate text-[14.5px] font-black leading-5 tracking-[-0.02em] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
                             {store.name}
                           </h3>
                         </div>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10.5px] font-medium text-slate-500">
+                        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-semibold text-slate-500">
                           {store.rating > 0 ? (
-                            <span className="inline-flex items-center gap-0.5">
-                              <Star size={10} weight="fill" className="text-amber-400" />
-                              <span className="font-bold text-slate-700">{store.rating.toFixed(1)}</span>
+                            <span className="inline-flex items-center gap-1">
+                              <Star size={11} weight="fill" className="text-amber-400" />
+                              <span className="font-black text-slate-700">{ratingLabel}</span>
                             </span>
                           ) : null}
                           {store.rating > 0 ? <span className="text-slate-200">·</span> : null}
-                          <span>{store.etaMin}–{store.etaMax} min</span>
-                          {compactDeliveryMetaBadge ? (
-                            <>
-                              <span className="text-slate-200">·</span>
-                              <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${compactDeliveryMetaBadge.className}`}>
-                                <PaperPlaneTilt size={9} weight="fill" />
-                                {compactDeliveryMetaBadge.label}
-                              </span>
-                            </>
-                          ) : null}
-                          {!isCondominiumScope && (
-                            <>
-                              <span className="text-slate-200">·</span>
-                              <span>{distanceLoading && activeLocation && distanceByStore[store.id] == null ? '...' : `A ${formatDistance(distanceByStore[store.id] ?? store.distanceKm)}`}</span>
-                            </>
-                          )}
+                          <span className={store.isOpen ? 'text-emerald-700' : 'text-rose-600'}>
+                            {store.isOpen ? 'Aberto' : 'Fechado'}
+                          </span>
                         </div>
-                        {store.isOpen && (visiblePrimaryBadge || visibleSecondaryBadge) && (
-                          <div className="mt-2 flex flex-wrap gap-1.5">
-                            {visiblePrimaryBadge && (
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-semibold text-slate-500">
+                          <span>{store.etaMin}–{store.etaMax} min</span>
+                          <span className="text-slate-200">·</span>
+                          <span>{resolvedDistanceLabel}</span>
+                          <span className="text-slate-200">·</span>
+                          <span>{deliveryFeeLabel}</span>
+                        </div>
+                        {store.isOpen && visibleServiceBadges.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {visibleServiceBadges.map((badge) => (
                               <span
-                                key={`${store.id}-${visiblePrimaryBadge.key}`}
-                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] ${visiblePrimaryBadge.className} ${visiblePrimaryBadge.key === 'open_now' ? 'animate-pulse' : ''}`}
+                                key={`${store.id}-${badge.key}`}
+                                className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] ${badge.className.replace('shadow-[0_8px_18px_-14px_rgba(16,185,129,0.38)]', '')} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
                               >
-                                {visiblePrimaryBadge.icon ? (
-                                  <visiblePrimaryBadge.icon size={10} weight="duotone" className={visiblePrimaryBadge.iconClassName || 'text-sky-700'} />
+                                {badge.icon ? (
+                                  <badge.icon size={9} weight="duotone" className={badge.iconClassName || 'text-sky-700'} />
                                 ) : null}
-                                {visiblePrimaryBadge.label}
+                                {badge.label}
                               </span>
-                            )}
-                            {visibleSecondaryBadge && (
-                              <span
-                                key={`${store.id}-${visibleSecondaryBadge.key}`}
-                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-semibold ${visibleSecondaryBadge.className.replace('border-emerald-100 bg-emerald-50 text-emerald-700', 'border-emerald-200 bg-emerald-50/80 text-emerald-700').replace('border-slate-800/85 bg-[linear-gradient(135deg,#0f172a_0%,#1e293b_100%)] text-white ring-1 ring-white/10', 'border-slate-700/85 bg-[linear-gradient(135deg,#1f2a3c_0%,#2e3a4c_100%)] text-white ring-1 ring-white/15')}`}
-                              >
-                                {visibleSecondaryBadge.icon ? (
-                                  <visibleSecondaryBadge.icon size={9} weight="fill" className={visibleSecondaryBadge.iconClassName || 'text-sky-700'} />
-                                ) : null}
-                                {visibleSecondaryBadge.label}
-                              </span>
-                            )}
+                            ))}
                           </div>
                         )}
                         {!store.isOpen && (
-                          <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[9.5px] font-bold text-slate-500">
+                          <p className="mt-2 text-[10.5px] font-bold text-slate-400">
                             {store.nextOpeningLabel || 'Sem horário cadastrado'}
                           </p>
                         )}
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          toggleFavoriteStore(store.slug);
+                        }}
+                        className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
+                          favoriteStoreSlugs.includes(store.slug)
+                            ? 'bg-rose-50 text-rose-500 shadow-[0_10px_24px_-18px_rgba(244,63,94,0.58)] ring-1 ring-rose-100'
+                            : 'bg-slate-50 text-slate-400 ring-1 ring-slate-100 hover:text-rose-400'
+                        }`}
+                        aria-label={`Favoritar ${store.name}`}
+                      >
+                        <Heart size={17} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} />
+                      </button>
                     </Link>
                   );
                 })}
@@ -4159,11 +4139,11 @@ export function MarketplacePage() {
               {isHomeStorePreview && hiddenHomeStoreCount > 0 ? (
                 <button
                   type="button"
-                  onClick={enableAllStoresView}
-                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] bg-[#153A4C] px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-[0_16px_32px_-22px_rgba(21,58,76,0.7)] transition active:scale-[0.98]"
+                  onClick={() => setIsHomeStoreListExpanded(true)}
+                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] border border-[#336886]/12 bg-white/88 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-[#336886] shadow-[0_16px_34px_-28px_rgba(51,104,134,0.32)] ring-1 ring-white/70 transition active:scale-[0.98]"
                 >
-                  Ver todas as lojas
-                  <span className="rounded-full bg-white/14 px-2 py-0.5 text-[10px]">{hiddenHomeStoreCount}+</span>
+                  Ver mais lojas
+                  <span className="rounded-full bg-[#336886]/8 px-2 py-0.5 text-[10px]">+{hiddenHomeStoreCount}</span>
                 </button>
               ) : null}
               </>
