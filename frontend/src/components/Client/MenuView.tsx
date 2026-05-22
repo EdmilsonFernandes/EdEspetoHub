@@ -1059,6 +1059,13 @@ export const MenuView = ({
         detail: { visible: isVisible },
       })
     );
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent("jnk:cart-visibility", {
+          detail: { visible: false },
+        })
+      );
+    };
   }, [cartItemsCount, canOrder, isModalOpen]);
 
   return (

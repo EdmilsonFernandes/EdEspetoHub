@@ -111,6 +111,8 @@ Backend API (chamanoespeto-api :4000)
 
 - Antes de criar qualquer tela nova no frontend, localizar e reutilizar o shell/template existente mais próximo do fluxo.
 - Toda tela nova navegável deve manter a identidade visual do app: paleta, raio de borda, tipografia, espaçamento, ícones e padrão de botões já usados no módulo.
+- Telas novas do app do cliente, destinos, chalés, serviços, pedidos e subtelas públicas acessadas pelo app devem preservar o menu inferior do cliente. Em web/mobile use `ClientBottomNav`; no app nativo garanta que `NativeAppNavigator` não fique escondido por estado global antigo (`jnk:cart-visibility` / `jnc:native-nav-visibility`).
+- Não criar CTA azul-escuro isolado em telas novas do cliente/destinos. Preferir o padrão claro do app com branco, `#336886`, verde de apoio `#5FD35A`, bordas sutis e sombras leves; usar `#153A4C` apenas quando a tela existente já usa esse tom como parte do shell.
 - Toda tela nova fora de fluxo modal deve ter navegação explícita de voltar, visível principalmente no mobile, sem depender apenas de gesto do sistema.
 - Em telas mobile/native, considerar `env(safe-area-inset-top)` e `env(safe-area-inset-bottom)` para não brigar com status bar ou menu inferior.
 - Não criar componentes com aparência isolada do restante do app; se faltar padrão, criar um shell/componente compartilhado antes de duplicar UI.

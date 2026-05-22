@@ -1,8 +1,10 @@
 // @ts-nocheck
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowUpRight,
+  CheckCircle,
+  ClipboardText,
   CreditCard,
   ForkKnife,
   GlobeHemisphereWest,
@@ -23,10 +25,10 @@ const InstagramIcon = ({ className = 'h-4 w-4' }) => (
 
 const actionClasses: Record<string, string> = {
   whatsapp: 'border-emerald-100 bg-emerald-50 text-emerald-700',
-  phone: 'border-[#153A4C]/12 bg-white text-[#153A4C]',
+  phone: 'border-[#336886]/12 bg-white text-[#336886]',
   instagram: 'border-pink-100 bg-white text-slate-700',
   site: 'border-slate-200 bg-white text-slate-700',
-  route: 'border-[#153A4C]/12 bg-[#153A4C] text-white',
+  route: 'border-[#336886]/12 bg-[#336886] text-white',
 };
 
 const actionIcon = (kind?: string) => {
@@ -40,7 +42,7 @@ const actionIcon = (kind?: string) => {
 const ContactAction = ({ action }: any) => {
   if (!action?.href) return null;
   const className = action.kind === 'route'
-    ? 'mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-white/20 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.1em] text-[#153A4C] shadow-[0_18px_34px_-28px_rgba(0,0,0,0.75)] transition hover:-translate-y-0.5 active:scale-[0.98]'
+    ? 'flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-[#336886]/12 bg-[#336886] px-4 py-3 text-sm font-black uppercase tracking-[0.1em] text-white shadow-[0_18px_34px_-28px_rgba(51,104,134,0.68)] transition hover:-translate-y-0.5 active:scale-[0.98]'
     : `inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition hover:-translate-y-0.5 ${actionClasses[action.kind] || actionClasses.site}`;
 
   const handleClick = async (event: any) => {
@@ -118,6 +120,8 @@ export function PreStoreDetailSheet({
   routeAction,
   address,
 }: any) {
+  const [routeCopied, setRouteCopied] = useState(false);
+
   useEffect(() => {
     if (!open) return undefined;
 
@@ -136,6 +140,21 @@ export function PreStoreDetailSheet({
   }, [open, onClose]);
 
   if (!open || !listing) return null;
+
+  const copyRouteLink = async () => {
+    if (!routeAction?.href) return;
+    const href = String(routeAction.href || '');
+    const url = href.startsWith('/') && typeof window !== 'undefined'
+      ? `${window.location.origin}${href}`
+      : href;
+    try {
+      await navigator.clipboard.writeText(url);
+      setRouteCopied(true);
+      window.setTimeout(() => setRouteCopied(false), 2200);
+    } catch {
+      setRouteCopied(false);
+    }
+  };
 
   const actions = [
     primaryAction,
@@ -203,15 +222,25 @@ export function PreStoreDetailSheet({
               ) : null}
 
               {routeAction?.href ? (
-                <div className="mt-4 rounded-[1.4rem] border border-[#153A4C]/10 bg-[linear-gradient(135deg,#153A4C,#23556d)] p-3 text-white shadow-[0_20px_46px_-34px_rgba(21,58,76,0.9)]">
-                  <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/64">
+                <div className="mt-4 rounded-[1.4rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(238,247,242,0.9))] p-3 text-slate-900 shadow-[0_18px_42px_-34px_rgba(51,104,134,0.42)] ring-1 ring-white/80">
+                  <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
                     <NavigationArrow size={13} weight="fill" />
                     Referência para entrega
                   </p>
-                  <p className="mt-1 text-sm font-semibold leading-relaxed text-white/78">
+                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-600">
                     Mostra a distância entre este serviço e a hospedagem para facilitar a chegada do motoboy.
                   </p>
-                  <ContactAction action={routeAction} />
+                  <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                    <ContactAction action={routeAction} />
+                    <button
+                      type="button"
+                      onClick={copyRouteLink}
+                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.1em] text-slate-700 shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]"
+                    >
+                      {routeCopied ? <CheckCircle size={16} weight="fill" /> : <ClipboardText size={16} weight="duotone" />}
+                      {routeCopied ? 'Copiado' : 'Copiar'}
+                    </button>
+                  </div>
                 </div>
               ) : null}
 

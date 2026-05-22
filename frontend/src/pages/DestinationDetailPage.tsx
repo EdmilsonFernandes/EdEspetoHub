@@ -313,6 +313,51 @@ export function DestinationDetailPage() {
                   </span>
                 </div>
               </div>
+              <div className="mt-4 border-t border-[#336886]/10 pt-4">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Explore o que você procura</p>
+                    <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-slate-950 sm:text-xl">
+                      Hospedagens, comida, passeios e serviços em um só lugar
+                    </h2>
+                  </div>
+                  <p className="text-xs font-bold text-slate-500">
+                    {activeFilterLabel}: {filteredPlaces.length + filteredListings.length} resultado(s)
+                  </p>
+                </div>
+                <div className="mt-3 grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                  <label className="group flex min-h-[52px] min-w-0 max-w-full items-center gap-3 rounded-[1.35rem] border border-slate-200 bg-white px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.4)] focus-within:border-[#336886]/40 focus-within:ring-4 focus-within:ring-[#336886]/10">
+                    <MagnifyingGlass size={18} weight="bold" className="text-slate-400" />
+                    <input
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      placeholder="Buscar hospedagem, comida, passeio ou serviço"
+                      className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
+                    />
+                    {searchTerm ? (
+                      <button type="button" onClick={() => setSearchTerm('')} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-600">
+                        Limpar
+                      </button>
+                    ) : null}
+                  </label>
+                  <div className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1 lg:max-w-[620px]">
+                    {filterOptions.map((category: any) => (
+                      <button
+                        key={category.value}
+                        type="button"
+                        onClick={() => {
+                          setActiveCategory(category.value);
+                          if (category.value === 'TODOS') setSearchTerm('');
+                        }}
+                        className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] shadow-sm transition ${activeCategory === category.value ? 'bg-[#336886] text-white shadow-[0_16px_28px_-20px_rgba(51,104,134,0.62)]' : 'border border-slate-200 bg-white text-slate-600 hover:border-[#336886]/30 hover:text-[#153A4C]'}`}
+                      >
+                        <span className="max-w-[7.25rem] truncate">{category.label}</span>
+                        <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${activeCategory === category.value ? 'bg-white/16 text-white/80' : 'bg-slate-100 text-slate-500'}`}>{category.count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           ) : null}
         </div>
@@ -320,50 +365,6 @@ export function DestinationDetailPage() {
 
       {!loading && !error ? (
         <section className="mx-auto grid w-full min-w-0 max-w-6xl gap-6 px-4 pb-10 pt-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-          <div className="relative z-10 min-w-0 max-w-full overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/92 p-3 shadow-[0_16px_42px_-36px_rgba(15,23,42,0.36)] backdrop-blur lg:col-span-2 sm:p-4">
-            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-              <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Explore</p>
-                <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-slate-950">O que você procura?</h2>
-              </div>
-              <p className="text-xs font-bold text-slate-500">
-                {activeFilterLabel}: {filteredPlaces.length + filteredListings.length} resultado(s)
-              </p>
-            </div>
-            <div className="mt-3 grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-              <label className="group flex min-h-[52px] min-w-0 max-w-full items-center gap-3 rounded-[1.35rem] border border-slate-200 bg-white px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.4)] focus-within:border-[#336886]/40 focus-within:ring-4 focus-within:ring-[#336886]/10">
-                <MagnifyingGlass size={18} weight="bold" className="text-slate-400" />
-                <input
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="Buscar hospedagem, comida, passeio ou serviço"
-                  className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
-                />
-                {searchTerm ? (
-                  <button type="button" onClick={() => setSearchTerm('')} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-600">
-                    Limpar
-                  </button>
-                ) : null}
-              </label>
-              <div className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1 lg:max-w-[620px]">
-                {filterOptions.map((category: any) => (
-                  <button
-                    key={category.value}
-                    type="button"
-                    onClick={() => {
-                      setActiveCategory(category.value);
-                      if (category.value === 'TODOS') setSearchTerm('');
-                    }}
-                    className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] shadow-sm transition ${activeCategory === category.value ? 'bg-[#153A4C] text-white shadow-[0_16px_28px_-20px_rgba(21,58,76,0.72)]' : 'border border-slate-200 bg-white text-slate-600 hover:border-[#336886]/30 hover:text-[#153A4C]'}`}
-                  >
-                    <span className="max-w-[7.25rem] truncate">{category.label}</span>
-                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${activeCategory === category.value ? 'bg-white/16 text-white/80' : 'bg-slate-100 text-slate-500'}`}>{category.count}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
           {showPlacesSection ? (
           <div id="hospedagens" className="min-w-0 max-w-full scroll-mt-28 space-y-5">
             <div className="flex items-center justify-between gap-3">

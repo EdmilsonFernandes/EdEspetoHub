@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const authMock = vi.hoisted(() => ({
@@ -24,6 +24,15 @@ vi.mock('../../services/nativeBiometricService', () => ({
 }));
 
 import { NativeAppNavigator } from './NativeAppNavigator';
+
+function RouteChanger() {
+  const navigate = useNavigate();
+  return (
+    <button type="button" onClick={() => navigate('/destinos/goncalves')}>
+      Ir para destinos
+    </button>
+  );
+}
 
 describe('NativeAppNavigator', () => {
   beforeEach(() => {
@@ -53,5 +62,24 @@ describe('NativeAppNavigator', () => {
     );
 
     expect(screen.getByRole('button', { name: /Pedidos/i })).toHaveClass('text-[#2d5f7b]');
+  });
+
+  it('resets stale cart visibility when entering destination pages', () => {
+    render(
+      <MemoryRouter initialEntries={['/store/demo']}>
+        <NativeAppNavigator />
+        <RouteChanger />
+      </MemoryRouter>
+    );
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent('jnk:cart-visibility', { detail: { visible: true } }));
+    });
+
+    expect(screen.queryByRole('button', { name: /^Destinos$/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Ir para destinos/i }));
+
+    expect(screen.getByRole('button', { name: /^Destinos$/i })).toBeInTheDocument();
   });
 });

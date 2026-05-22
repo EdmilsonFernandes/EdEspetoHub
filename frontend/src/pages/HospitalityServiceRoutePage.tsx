@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { Clock, HouseLine, NavigationArrow, Storefront, WarningCircle } from '@phosphor-icons/react';
+import { CheckCircle, ClipboardText, Clock, HouseLine, NavigationArrow, Storefront, WarningCircle } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { RouteMapView } from '../components/RouteMapView';
 import { destinationService } from '../services/destinationService';
@@ -115,7 +115,7 @@ const openExternalRoute = (url: string, nativeUrl?: string) => (event: any) => {
 
 const estimateMinutes = (distanceKm?: number | null) => {
   if (!Number.isFinite(Number(distanceKm))) return '';
-  return `${Math.max(4, Math.round(Number(distanceKm) * 3.2))} min aprox.`;
+  return `${Math.max(4, Math.round(Number(distanceKm) * 4.4 + 2))} min aprox.`;
 };
 
 const pointFallbackImage = (point: any, kind: 'service' | 'place') =>
@@ -156,6 +156,7 @@ export function HospitalityServiceRoutePage() {
   const [payload, setPayload] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -194,8 +195,8 @@ export function HospitalityServiceRoutePage() {
       state: searchParams.get('serviceState') || serviceFromPayload?.state || destination.state || '',
       zipCode: searchParams.get('serviceZipCode') || serviceFromPayload?.zipCode || '',
     }),
-    lat: searchParams.get('serviceLat') || serviceFromPayload?.lat || '',
-    lng: searchParams.get('serviceLng') || serviceFromPayload?.lng || '',
+    lat: serviceFromPayload?.lat || searchParams.get('serviceLat') || '',
+    lng: serviceFromPayload?.lng || searchParams.get('serviceLng') || '',
   }), [destination.city, destination.state, searchParams, serviceFromPayload]);
   const placePoint = useMemo(() => ({
     name: searchParams.get('placeName') || place.name || 'Hospedagem',
@@ -207,8 +208,8 @@ export function HospitalityServiceRoutePage() {
       state: searchParams.get('placeState') || place.state || destination.state || '',
       zipCode: searchParams.get('placeZipCode') || place.zipCode || '',
     }),
-    lat: searchParams.get('placeLat') || place.lat || '',
-    lng: searchParams.get('placeLng') || place.lng || '',
+    lat: place.lat || searchParams.get('placeLat') || '',
+    lng: place.lng || searchParams.get('placeLng') || '',
   }), [destination.city, destination.state, place.address, place.addressNumber, place.city, place.district, place.lat, place.lng, place.name, place.state, place.zipCode, searchParams]);
   const serviceImageUrl = useMemo(() => (
     resolveAssetUrl(
@@ -239,6 +240,21 @@ export function HospitalityServiceRoutePage() {
     !hasCoords(placePoint) ? 'hospedagem' : null,
   ].filter(Boolean);
   const placePublicPath = `/destinos/${encodeURIComponent(destinationSlug)}/chales/${encodeURIComponent(placeSlug)}`;
+  const currentRouteUrl = useMemo(() => {
+    if (typeof window === 'undefined') return '';
+    return window.location.href;
+  }, []);
+  const copyText = async (value: string, feedback: string) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(feedback);
+      window.setTimeout(() => setCopied(''), 2200);
+    } catch {
+      setCopied('Toque e segure para copiar.');
+      window.setTimeout(() => setCopied(''), 2200);
+    }
+  };
 
   return (
     <PublicDestinationShell active="place" backTo={placePublicPath} backLabel="Voltar" contextLabel="Rota da hospedagem">
@@ -256,12 +272,12 @@ export function HospitalityServiceRoutePage() {
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:min-w-[15rem]">
-                <div className="rounded-[1.15rem] bg-[#153A4C] p-3 text-white">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/62">Distância</p>
+                <div className="rounded-[1.15rem] border border-[#336886]/12 bg-white/82 p-3 text-[#153A4C] shadow-sm">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Distância</p>
                   <p className="mt-1 text-sm font-black">{formatDistance(distanceKm)}</p>
                 </div>
-                <div className="rounded-[1.15rem] bg-[#5FD35A]/14 p-3 text-[#153A4C] ring-1 ring-[#5FD35A]/18">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#153A4C]/62">Tempo</p>
+                <div className="rounded-[1.15rem] border border-[#5FD35A]/20 bg-[#5FD35A]/12 p-3 text-[#153A4C] ring-1 ring-white/70">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Tempo</p>
                   <p className="mt-1 text-sm font-black">{estimateMinutes(distanceKm) || 'Abrir mapa'}</p>
                 </div>
               </div>
@@ -297,18 +313,43 @@ export function HospitalityServiceRoutePage() {
 
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               {googleDirectionsUrl ? (
-                <a href={googleDirectionsUrl} onClick={openExternalRoute(googleDirectionsUrl, googleNativeUrl)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] bg-[#153A4C] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.75)] transition hover:-translate-y-0.5 active:scale-[0.98]">
+                <a href={googleDirectionsUrl} onClick={openExternalRoute(googleDirectionsUrl, googleNativeUrl)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/16 bg-[#336886] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.62)] transition hover:-translate-y-0.5 active:scale-[0.98]">
                   <NavigationArrow size={17} weight="fill" />
                   Abrir no Google Maps
                 </a>
               ) : null}
               {wazeUrl ? (
-                <a href={wazeUrl} onClick={openExternalRoute(wazeUrl, wazeNativeUrl)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#153A4C]/14 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]">
+                <a href={wazeUrl} onClick={openExternalRoute(wazeUrl, wazeNativeUrl)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/14 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#336886] shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]">
                   <Clock size={17} weight="duotone" />
                   Abrir no Waze
                 </a>
               ) : null}
             </div>
+
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => copyText(currentRouteUrl, 'Link da rota copiado.')}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]"
+              >
+                <ClipboardText size={16} weight="duotone" />
+                Copiar link
+              </button>
+              <button
+                type="button"
+                onClick={() => copyText(placePoint.address, 'Endereço do chalé copiado.')}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]"
+              >
+                <HouseLine size={16} weight="duotone" />
+                Copiar endereço
+              </button>
+            </div>
+            {copied ? (
+              <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#5FD35A]/14 px-3 py-2 text-xs font-black text-[#2d5f7b]">
+                <CheckCircle size={15} weight="fill" />
+                {copied}
+              </p>
+            ) : null}
 
             {error ? (
               <p className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">

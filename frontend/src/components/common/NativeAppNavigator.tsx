@@ -107,6 +107,7 @@ export function NativeAppNavigator() {
       location.pathname.startsWith('/cliente/pedidos')
     ) {
       setIsHidden(false);
+      setHiddenByCart(false);
     }
   }, [location.pathname]);
 

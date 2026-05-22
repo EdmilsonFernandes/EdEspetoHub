@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Compass, House, Plus, Storefront } from '@phosphor-icons/react';
 import { AppGlassHeader } from '../common/AppGlassHeader';
@@ -23,6 +23,11 @@ export function PublicDestinationShell({
   ctaTo = '/destinos/cadastrar#dados-parceiro',
   ctaLabel = 'Cadastrar parceiro',
 }: PublicDestinationShellProps) {
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('jnk:cart-visibility', { detail: { visible: false } }));
+    window.dispatchEvent(new CustomEvent('jnc:native-nav-visibility', { detail: { hidden: false } }));
+  }, []);
+
   const navItems = [
     { id: 'home', label: 'Início', to: '/', icon: House },
     { id: 'destinations', label: 'Destinos', to: '/destinos', icon: Compass },
