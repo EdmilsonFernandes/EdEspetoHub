@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BellRinging, Check, Trash } from '@phosphor-icons/react';
 import { apiClient } from '../config/apiClient';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
+import { ClientBottomNav } from '../components/common/ClientBottomNav';
 
 type Notification = { id: string; title: string; body: string; url?: string | null; imageUrl?: string | null; read: boolean; createdAt: string };
 
@@ -54,23 +55,14 @@ export function NotificationsPage() {
       setUnread((c) => Math.max(0, c - 1));
     }
     if (n.url) {
-    if (n.url) {
-      const isExternal = /^https?:\/\//i.test(n.url) && !n.url.includes("janocaminho.com.br");
+      const isExternal = /^https?:\/\//i.test(n.url) && !n.url.includes('janocaminho.com.br');
       if (isExternal) {
-        try { const { Browser } = await import("@capacitor/browser"); await Browser.open({ url: n.url }); } catch { window.open(n.url, "_blank", "noopener"); }
+        try { const { Browser } = await import('@capacitor/browser'); await Browser.open({ url: n.url }); } catch { window.open(n.url, '_blank', 'noopener'); }
         return;
       }
-      const path = n.url.replace(/^https?:\/\/[^/]+/, "");
+      const path = n.url.replace(/^https?:\/\/[^/]+/, '');
       if (path) navigate(path);
     }
-      const path = n.url.replace(/^https?:\/\/[^/]+/, "");
-      if (path) navigate(path);
-    }
-  };
-
-  const handleRemove = async (id: string) => {
-    await apiClient.delete(`/customer/notifications/${id}`).catch(() => {});
-    setNotifications((prev) => prev.filter((x) => x.id !== id));
   };
 
   const handleMarkAllRead = async () => {
@@ -88,7 +80,7 @@ export function NotificationsPage() {
   const groups = groupByDate(notifications);
 
   return (
-    <main className="min-h-screen bg-[#EEF2F7] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[calc(env(safe-area-inset-top)+4.35rem)]">
+    <main className="min-h-screen bg-[linear-gradient(180deg,#F8FAFC_0%,#EEF4F6_100%)] pb-[calc(env(safe-area-inset-bottom)+6.35rem)] pt-[calc(env(safe-area-inset-top)+4.35rem)]">
       <div className="pointer-events-none fixed top-[-10%] right-[-8%] h-[38%] w-[46%] rounded-full bg-[#153A4C]/13 blur-[120px] -z-10" />
       <div className="pointer-events-none fixed bottom-[8%] left-[-5%] h-[26%] w-[34%] rounded-full bg-[#336886]/7 blur-[100px] -z-10" />
 
@@ -102,17 +94,20 @@ export function NotificationsPage() {
 
         <div className="px-4 pt-4">
           {notifications.length > 0 && (
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-xs font-bold text-slate-500">
-                {unread > 0 ? `${unread} não lida${unread > 1 ? 's' : ''}` : 'Todas lidas'}
-              </p>
-              <div className="flex gap-2">
+            <div className="mb-5 flex items-center justify-between gap-3 rounded-[1.35rem] border border-white/70 bg-white/80 px-3.5 py-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Central do app</p>
+                <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                  {unread > 0 ? `${unread} aviso${unread > 1 ? 's' : ''} novo${unread > 1 ? 's' : ''}` : 'Nenhum aviso pendente'}
+                </p>
+              </div>
+              <div className="flex shrink-0 gap-2">
                 {unread > 0 && (
-                  <button onClick={handleMarkAllRead} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold text-slate-600 active:scale-95">
+                  <button onClick={handleMarkAllRead} className="inline-flex items-center gap-1 rounded-full border border-[#336886]/15 bg-[#336886]/8 px-3 py-2 text-[10px] font-black text-[#2d5f7b] transition active:scale-95">
                     <Check size={12} weight="bold" /> Marcar lidas
                   </button>
                 )}
-                <button onClick={handleClearAll} className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-[10px] font-bold text-rose-600 active:scale-95">
+                <button onClick={handleClearAll} className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50/80 px-3 py-2 text-[10px] font-black text-rose-600 transition active:scale-95">
                   <Trash size={12} weight="bold" /> Limpar
                 </button>
               </div>
@@ -120,8 +115,8 @@ export function NotificationsPage() {
           )}
 
           {notifications.length === 0 && (
-            <div className="mt-16 flex flex-col items-center text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100">
+            <div className="mt-16 flex flex-col items-center rounded-[2rem] border border-white/70 bg-white/70 px-6 py-10 text-center shadow-[0_22px_54px_-42px_rgba(15,23,42,0.35)] backdrop-blur-xl">
+              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#336886]/8">
                 <BellRinging size={28} weight="duotone" className="text-slate-400" />
               </div>
               <p className="mt-4 text-sm font-bold text-slate-700">Nenhuma notificação</p>
@@ -130,35 +125,40 @@ export function NotificationsPage() {
           )}
 
           {groups.map((group) => (
-            <div key={group.label} className="mb-5">
-              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{group.label}</p>
-              <div className="space-y-2.5">
+            <section key={group.label} className="mb-6">
+              <p className="mb-3 px-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{group.label}</p>
+              <div className="space-y-1.5 rounded-[1.75rem] border border-white/70 bg-white/55 p-1.5 shadow-[0_22px_54px_-44px_rgba(15,23,42,0.26)] backdrop-blur-xl">
                 {group.items.map((n) => (
-                  <div key={n.id} onClick={() => handleRead(n)} className={`group relative overflow-hidden cursor-pointer rounded-2xl border bg-white transition-all active:scale-[0.98] ${n.read ? 'border-slate-100' : 'border-[#336886]/15 shadow-[0_8px_24px_-12px_rgba(51,104,134,0.15)]'}`}>
-                    <div className="relative flex items-start gap-3 p-4">
-                      <div className="relative shrink-0">
-                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-[linear-gradient(135deg,#0f3b53,#336886)] shadow-[0_8px_18px_-10px_rgba(51,104,134,0.4)]">
-                          <img src={n.imageUrl || "/janocaminho.jpg"} alt="" className="h-full w-full object-cover opacity-90" />
-                        </div>
-                        {!n.read && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#336886] shadow-[0_0_6px_rgba(51,104,134,0.5)]" />}
+                  <button
+                    key={n.id}
+                    type="button"
+                    onClick={() => handleRead(n)}
+                    className={`group relative grid w-full grid-cols-[4.25rem_minmax(0,1fr)_auto] items-start gap-3 rounded-[1.35rem] px-3 py-3 text-left transition-all active:scale-[0.985] ${n.read ? 'bg-transparent hover:bg-white/55' : 'bg-white shadow-[0_18px_36px_-30px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/10'}`}
+                  >
+                    <div className="relative shrink-0">
+                      <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.15rem] bg-[linear-gradient(135deg,#0f3b53,#336886)] shadow-[0_16px_28px_-24px_rgba(15,23,42,0.38)]">
+                        <img src={n.imageUrl || '/janocaminho.jpg'} alt="" className="h-full w-full object-cover opacity-90" />
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{n.title}</p>
-                        <p className={`mt-0.5 text-[13px] leading-snug ${n.read ? "font-semibold text-slate-600" : "font-black text-slate-900"}`}>{n.body || n.title}</p>
-                        <p className="mt-2 text-[10px] font-semibold text-slate-400">{timeAgo(n.createdAt)}</p>
-                      </div>
-                      <button onClick={(e) => { e.stopPropagation(); handleRemove(n.id); }} className="relative z-20 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-500 active:scale-95" aria-label="Remover">
-                        <Trash size={14} weight="bold" />
-                      </button>
+                      {!n.read && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#336886] shadow-[0_0_8px_rgba(51,104,134,0.55)]" />}
                     </div>
-                  </div>
+                    <div className="min-w-0 pt-0.5">
+                      <p className={`text-[14px] leading-snug ${n.read ? 'font-bold text-slate-700' : 'font-black text-slate-950'}`}>{n.title}</p>
+                      <p
+                        className="mt-1 text-[13px] leading-snug text-slate-600"
+                        style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                      >
+                        {n.body || n.title}
+                      </p>
+                    </div>
+                    <span className="pt-0.5 text-[11px] font-black text-slate-400">{timeAgo(n.createdAt)}</span>
+                  </button>
                 ))}
               </div>
-            </div>
+            </section>
           ))}
         </div>
       </div>
+      <ClientBottomNav active="profile" />
     </main>
   );
 }
-// deploy trigger 1778081507
