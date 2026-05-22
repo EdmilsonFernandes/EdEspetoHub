@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  BeerBottle,
   BowlFood,
   CaretRight,
-  Cat,
-  Coffee,
   ForkKnife,
   Hamburger,
+  IceCream,
   MagnifyingGlass,
+  PawPrint,
   Pizza,
   ShoppingBagOpen,
   Sparkle,
@@ -37,13 +38,17 @@ type HubHighlightItem = {
   badge?: string;
 };
 
-type HighlightCategoryKey = 'all' | 'lanches' | 'pizza' | 'pratos' | 'bebidas' | 'doces' | 'mercado' | 'outros';
+type HighlightCategoryKey = 'all' | 'lanches' | 'pizza' | 'pratos' | 'bebidas' | 'doces' | 'mercado' | 'pets' | 'outros';
 
 type HighlightCategoryOption = {
   key: HighlightCategoryKey;
   label: string;
   icon: typeof ForkKnife;
   keywords: string[];
+  surfaceClassName: string;
+  activeSurfaceClassName: string;
+  iconClassName: string;
+  glowClassName: string;
 };
 
 type CategorizedHighlightItem = HubHighlightItem & {
@@ -62,44 +67,96 @@ const normalizeHighlightSearchText = (value: unknown) =>
     .replace(/[\u0300-\u036f]/g, '');
 
 const HIGHLIGHT_CATEGORY_OPTIONS: HighlightCategoryOption[] = [
-  { key: 'all', label: 'Todos', icon: Sparkle, keywords: [] },
+  {
+    key: 'all',
+    label: 'Todos',
+    icon: Sparkle,
+    keywords: [],
+    surfaceClassName: 'bg-[linear-gradient(145deg,#eaf7fb_0%,#ffffff_54%,#e9fff0_100%)] text-[#336886]',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#153A4C_0%,#336886_60%,#5FD35A_145%)] text-white',
+    iconClassName: 'text-[#336886]',
+    glowClassName: 'bg-[#5FD35A]/45',
+  },
   {
     key: 'lanches',
     label: 'Lanches',
     icon: Hamburger,
     keywords: ['lanche', 'hamburguer', 'burger', 'x-', 'x ', 'hot dog', 'cachorro quente', 'pastel', 'salgado'],
+    surfaceClassName: 'bg-[linear-gradient(145deg,#fff4e6_0%,#fffaf3_58%,#ffe6bf_100%)] text-orange-600',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#fb923c_0%,#f97316_54%,#fed7aa_145%)] text-white',
+    iconClassName: 'text-orange-500',
+    glowClassName: 'bg-orange-300/55',
   },
   {
     key: 'pizza',
     label: 'Pizza',
     icon: Pizza,
     keywords: ['pizza', 'pizzaria', 'esfiha', 'calzone'],
+    surfaceClassName: 'bg-[linear-gradient(145deg,#fff1f2_0%,#fff7ed_58%,#fecdd3_100%)] text-rose-600',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#fb7185_0%,#e11d48_56%,#fed7aa_145%)] text-white',
+    iconClassName: 'text-rose-500',
+    glowClassName: 'bg-rose-300/55',
   },
   {
     key: 'pratos',
     label: 'Pratos',
     icon: BowlFood,
     keywords: ['prato', 'marmita', 'almoco', 'janta', 'refeicao', 'frango', 'carne', 'costela', 'espeto', 'espetinho', 'peixe', 'porcao'],
+    surfaceClassName: 'bg-[linear-gradient(145deg,#ecfdf5_0%,#ffffff_58%,#bbf7d0_100%)] text-emerald-700',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#10b981_0%,#047857_58%,#bbf7d0_145%)] text-white',
+    iconClassName: 'text-emerald-600',
+    glowClassName: 'bg-emerald-300/55',
   },
   {
     key: 'bebidas',
     label: 'Bebidas',
-    icon: Coffee,
+    icon: BeerBottle,
     keywords: ['bebida', 'cerveja', 'refrigerante', 'coca', 'guarana', 'suco', 'agua', 'vinho', 'drink', 'cafe'],
+    surfaceClassName: 'bg-[linear-gradient(145deg,#eff6ff_0%,#f8fbff_58%,#bfdbfe_100%)] text-sky-700',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#38bdf8_0%,#2563eb_58%,#bae6fd_145%)] text-white',
+    iconClassName: 'text-sky-600',
+    glowClassName: 'bg-sky-300/55',
   },
   {
     key: 'doces',
     label: 'Doces',
-    icon: Sparkle,
+    icon: IceCream,
     keywords: ['doce', 'bolo', 'sobremesa', 'chocolate', 'sorvete', 'acai', 'pudim', 'brigadeiro'],
+    surfaceClassName: 'bg-[linear-gradient(145deg,#fdf2f8_0%,#fff7fb_58%,#fbcfe8_100%)] text-pink-600',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#f472b6_0%,#db2777_58%,#fbcfe8_145%)] text-white',
+    iconClassName: 'text-pink-500',
+    glowClassName: 'bg-pink-300/55',
   },
   {
     key: 'mercado',
     label: 'Mercado',
-    icon: Cat,
-    keywords: ['mercado', 'emporio', 'conveniencia', 'racao', 'pet', 'gato', 'cachorro', 'limpeza', 'higiene'],
+    icon: ShoppingBagOpen,
+    keywords: ['mercado', 'emporio', 'conveniencia', 'limpeza', 'higiene', 'padaria', 'mercearia'],
+    surfaceClassName: 'bg-[linear-gradient(145deg,#fffbeb_0%,#ffffff_58%,#fde68a_100%)] text-amber-700',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#fbbf24_0%,#d97706_58%,#fde68a_145%)] text-white',
+    iconClassName: 'text-amber-600',
+    glowClassName: 'bg-amber-300/55',
   },
-  { key: 'outros', label: 'Outros', icon: ShoppingBagOpen, keywords: [] },
+  {
+    key: 'pets',
+    label: 'Pets',
+    icon: PawPrint,
+    keywords: ['racao', 'pet', 'gato', 'cachorro', 'cao', 'ração'],
+    surfaceClassName: 'bg-[linear-gradient(145deg,#f5f3ff_0%,#ffffff_58%,#ddd6fe_100%)] text-violet-700',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#a78bfa_0%,#7c3aed_58%,#ddd6fe_145%)] text-white',
+    iconClassName: 'text-violet-600',
+    glowClassName: 'bg-violet-300/55',
+  },
+  {
+    key: 'outros',
+    label: 'Outros',
+    icon: Sparkle,
+    keywords: [],
+    surfaceClassName: 'bg-[linear-gradient(145deg,#f8fafc_0%,#ffffff_58%,#e2e8f0_100%)] text-slate-600',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#475569_0%,#0f172a_68%,#cbd5e1_150%)] text-white',
+    iconClassName: 'text-slate-500',
+    glowClassName: 'bg-slate-300/55',
+  },
 ];
 
 const resolveHighlightCategoryKey = (item: HubHighlightItem): HighlightCategoryKey => {
@@ -330,28 +387,36 @@ export function HubHighlightsPage() {
             </div>
           </div>
 
-          <div className="relative mt-4 flex items-center gap-3 rounded-[1.35rem] bg-slate-100/90 px-4 py-3 ring-1 ring-slate-200/80">
-            <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
-            <input
-              {...inputAssistProps.search}
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Buscar prato, bebida, ração ou loja..."
-              className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
-            />
-            {query ? (
-              <button
-                type="button"
-                onClick={() => setQuery('')}
-                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm active:scale-95"
-                aria-label="Limpar busca"
-              >
-                <X size={12} weight="bold" />
-              </button>
-            ) : null}
+          <div className="relative mt-4 overflow-hidden rounded-[1.65rem] border border-white/90 bg-white/92 p-1.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/55">
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(95,211,90,0.18),transparent_68%)]" />
+            <div className="relative flex items-center gap-2.5">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.15rem] bg-[linear-gradient(145deg,#5FD35A_0%,#336886_64%,#153A4C_100%)] text-white shadow-[0_14px_26px_-18px_rgba(51,104,134,0.68)]">
+                <MagnifyingGlass size={18} weight="bold" />
+              </span>
+              <div className="min-w-0 flex-1 py-1">
+                <span className="block text-[9px] font-black uppercase tracking-[0.18em] text-[#336886]/75">Pesquisar</span>
+                <input
+                  {...inputAssistProps.search}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="O que deu vontade agora?"
+                  className="mt-0.5 min-w-0 w-full bg-transparent text-[15px] font-black tracking-[-0.02em] text-slate-900 outline-none placeholder:text-slate-400"
+                />
+              </div>
+              {query ? (
+                <button
+                  type="button"
+                  onClick={() => setQuery('')}
+                  className="mr-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 shadow-sm active:scale-95"
+                  aria-label="Limpar busca"
+                >
+                  <X size={12} weight="bold" />
+                </button>
+              ) : null}
+            </div>
           </div>
 
-          <div className="-mx-1 mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {categoryFilters.map((option) => {
               const CategoryIcon = option.icon;
               const active = selectedCategory === option.key;
@@ -360,16 +425,34 @@ export function HubHighlightsPage() {
                   key={option.key}
                   type="button"
                   onClick={() => setSelectedCategory(option.key)}
-                  className={`inline-flex h-10 shrink-0 snap-start items-center gap-2 rounded-full border px-3 text-[11px] font-black transition active:scale-[0.97] ${
-                    active
-                      ? 'border-[#336886]/18 bg-[#153A4C] text-white shadow-[0_16px_28px_-20px_rgba(21,58,76,0.56)]'
-                      : 'border-white/90 bg-white/82 text-slate-600 shadow-[0_12px_24px_-22px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/55'
-                  }`}
+                  className="group flex w-[4.45rem] shrink-0 snap-start flex-col items-center gap-1.5 text-center transition active:scale-[0.95]"
                 >
-                  <CategoryIcon size={15} weight={active ? 'fill' : 'duotone'} />
-                  {option.label}
-                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${active ? 'bg-white/18 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                    {option.count}
+                  <span
+                    className={`relative grid h-[3.65rem] w-[3.65rem] place-items-center overflow-hidden rounded-[1.35rem] border transition-all duration-300 ${
+                      active
+                        ? `${option.activeSurfaceClassName} border-white/70 shadow-[0_20px_34px_-22px_rgba(15,23,42,0.44)]`
+                        : `${option.surfaceClassName} border-white/90 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/60 group-hover:-translate-y-0.5`
+                    }`}
+                  >
+                    <span className={`absolute -right-3 -top-3 h-9 w-9 rounded-full blur-xl ${option.glowClassName}`} />
+                    <span className="absolute inset-x-2 top-1 h-4 rounded-full bg-white/35 blur-[10px]" />
+                    <CategoryIcon
+                      size={27}
+                      weight={active ? 'fill' : 'duotone'}
+                      className={`relative z-10 drop-shadow-[0_8px_14px_rgba(15,23,42,0.12)] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105 ${
+                        active ? 'text-white' : option.iconClassName
+                      }`}
+                    />
+                    {option.count > 0 ? (
+                      <span className={`absolute right-1.5 top-1.5 z-20 rounded-full px-1.5 py-0.5 text-[8px] font-black leading-none ${
+                        active ? 'bg-white/20 text-white' : 'bg-white/90 text-slate-500 shadow-sm'
+                      }`}>
+                        {option.count}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className={`max-w-full truncate text-[10px] font-black tracking-[-0.01em] ${active ? 'text-[#153A4C]' : 'text-slate-600'}`}>
+                    {option.label}
                   </span>
                 </button>
               );
