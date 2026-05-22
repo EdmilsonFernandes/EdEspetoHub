@@ -244,6 +244,59 @@ describe('Pedido — Fluxo operador (criar, fila, status, detalhe)', () => {
     }
   });
 
+  it('operador adiciona item operacional avulso com preco customizado no pedido de mesa', async () => {
+    const token = operatorToken || adminToken;
+    if (!productIdA) return;
+
+    const operationalProduct = await api
+      .post(`/api/stores/${storeId}/products`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        name: 'Couvert artistico',
+        price: 0,
+        category: 'Atendimento na mesa',
+        description: 'item operacional',
+        active: false,
+      });
+    expect(operationalProduct.status).toBe(201);
+    const operationalProductId = String(operationalProduct.body?.id || '');
+    expect(operationalProductId).toBeTruthy();
+
+    const create = await api
+      .post(`/api/stores/${storeId}/orders`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        customerName: 'Mesa 9',
+        type: 'table',
+        tableNumber: '9',
+        items: [{ productId: productIdA, quantity: 1 }],
+        paymentMethod: 'dinheiro',
+      });
+    expect(create.status).toBeLessThan(500);
+    if (create.status >= 400) return;
+
+    const res = await api
+      .patch(`/api/orders/${create.body.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        items: [
+          { productId: productIdA, quantity: 1 },
+          { productId: operationalProductId, quantity: 3, unitPriceOverride: 12.5 },
+        ],
+      });
+
+    expect(res.status).toBe(200);
+    expect(Number(res.body.total)).toBeCloseTo(55.5, 2);
+
+    const detail = await api.get(`/api/orders/${create.body.id}/public`);
+    expect(detail.status).toBe(200);
+    const items = Array.isArray(detail.body?.items) ? detail.body.items : [];
+    const couvert = items.find((item: any) => String(item?.productId || '') === operationalProductId);
+    expect(couvert).toBeTruthy();
+    expect(Number(couvert?.quantity || 0)).toBe(3);
+    expect(Number(couvert?.price || 0)).toBeCloseTo(37.5, 2);
+  });
+
   // ── Transição inválida ──────────────────────────────────────
 
   it('rejeita transição inválida (pending → finished direto)', async () => {

@@ -247,6 +247,9 @@ async acceptDelivery(orderId: string, motoboy: Motoboy) {
 
       // R2: Concorrencia - conditional update ensures only one motoboy wins.
       const prevStatus = normalizeStatus(delivery.status);
+      if (prevStatus !== 'AVAILABLE') {
+        throw new AppError('DELIV-006', 409);
+      }
       this.assertTransition(prevStatus, 'ACCEPTED');
 
       try {

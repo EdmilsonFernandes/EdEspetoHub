@@ -116,6 +116,24 @@ export async function activateSubscription(storeId: string) {
   }
 }
 
+/** Enable all plan-gated features for a store in test scenarios. */
+export async function exemptStorePlan(storeId: string, label = 'E2E test') {
+  const qr = AppDataSource.createQueryRunner();
+  await qr.connect();
+  try {
+    await qr.query(
+      `
+      UPDATE store_settings
+      SET plan_exempt = true, plan_exempt_label = $2
+      WHERE store_id = $1
+      `,
+      [storeId, label]
+    );
+  } finally {
+    await qr.release();
+  }
+}
+
 /** Expire a store subscription directly in DB */
 export async function expireSubscription(storeId: string) {
   const qr = AppDataSource.createQueryRunner();
