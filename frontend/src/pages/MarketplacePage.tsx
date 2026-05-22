@@ -3210,20 +3210,29 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
-            <section className="order-8 overflow-hidden rounded-[1.85rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(248,250,252,0.9)_100%)] p-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] ring-1 ring-white/80 backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-3">
+            <section className="order-8 overflow-hidden rounded-[2.05rem] border border-[#153A4C]/10 bg-[radial-gradient(circle_at_14%_8%,rgba(132,204,22,0.18),transparent_30%),radial-gradient(circle_at_92%_18%,rgba(255,255,255,0.18),transparent_26%),linear-gradient(145deg,#153A4C_0%,#24576a_56%,#0f2f3f_100%)] p-3.5 text-white shadow-[0_24px_58px_-38px_rgba(21,58,76,0.82)] ring-1 ring-white/20">
+              <div className="flex items-start justify-between gap-3 px-1">
                 <div className="min-w-0">
-                  <p className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-500">
+                  <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-sky-100/78">
                     <Mountains size={12} weight="duotone" />
-                    Destinos
+                    Destinos e chalés
                   </p>
-                  <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-[#0F172A]">Cidades para explorar</h2>
+                  <h2 className="mt-1 text-[18px] font-black leading-tight tracking-[-0.05em] text-white">
+                    Experiências para explorar perto de você
+                  </h2>
+                  <p className="mt-1 max-w-[17.5rem] text-xs font-semibold leading-relaxed text-sky-50/72">
+                    Cidades, hospedagens e serviços locais em uma vitrine diferente do delivery.
+                  </p>
                 </div>
-                <Link to={destinationListHref} className="shrink-0 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                  Ver todos
+                <Link
+                  to={destinationListHref}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/14 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_14px_26px_-20px_rgba(0,0,0,0.45)] backdrop-blur-xl transition active:scale-95"
+                >
+                  Explorar
+                  <CaretRight size={10} weight="bold" />
                 </Link>
               </div>
-              <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="mt-3 flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {homeDestinationHighlights.map((destination, index) => {
                   const placesCount = Number(destination.placesCount || 0);
                   const listingsCount = Number(destination.listingsCount || 0);
@@ -3236,19 +3245,33 @@ export function MarketplacePage() {
                     <Link
                       key={destination.id || destination.slug}
                       to={`/destinos/${destination.slug}`}
-                      className={`group flex shrink-0 flex-col overflow-hidden rounded-[1.35rem] bg-white text-left shadow-[0_4px_20px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(15,23,42,0.08)] active:scale-[0.99] ${index === 0 ? 'w-[16.5rem]' : 'w-[14.25rem]'}`}
+                      className={`group relative flex shrink-0 overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_20px_44px_-28px_rgba(0,0,0,0.72)] ring-1 ring-white/14 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_26px_54px_-28px_rgba(0,0,0,0.78)] active:scale-[0.985] ${index === 0 ? 'h-[12.2rem] w-[18.5rem]' : 'h-[11.25rem] w-[15.5rem]'}`}
                     >
-                      <div className={`relative overflow-hidden bg-slate-100 ${index === 0 ? 'h-20' : 'h-16'}`}>
-                        <img src={resolveDestinationAssetUrl(destination)} alt={String(destination.name || 'Destino')} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.02)_0%,rgba(15,23,42,0.22)_100%)]" />
+                      <img
+                        src={resolveDestinationAssetUrl(destination)}
+                        alt={String(destination.name || 'Destino')}
+                        loading={index === 0 ? 'eager' : 'lazy'}
+                        decoding="async"
+                        className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.10)_0%,rgba(15,23,42,0.30)_42%,rgba(15,23,42,0.84)_100%)]" />
+                      <div className="absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1 rounded-full border border-white/22 bg-black/24 px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.13em] text-white shadow-[0_12px_24px_-18px_rgba(0,0,0,0.58)] backdrop-blur-md">
+                        <MapPinLine size={10} weight="fill" className="shrink-0 text-lime-200" />
+                        <span className="truncate">{formatDestinationMatchLabel(destination)}</span>
                       </div>
-                      <div className="min-w-0 p-3">
-                        <p className="line-clamp-1 text-sm font-black tracking-[-0.02em] text-[#0F172A]">{destination.name}</p>
-                        <p className="mt-0.5 line-clamp-1 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">{formatDestinationMatchLabel(destination)}</p>
-                        <p className="mt-1.5 inline-flex max-w-full items-center gap-1 text-[10px] font-bold text-slate-500">
-                          <Sparkle size={10} weight="fill" />
-                          <span className="truncate">{countLabel}</span>
+                      <div className="relative mt-auto flex min-w-0 flex-1 flex-col justify-end p-3.5">
+                        <p className="line-clamp-2 text-[18px] font-black leading-tight tracking-[-0.05em] text-white drop-shadow-sm">
+                          {destination.name}
                         </p>
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white/14 px-2.5 py-1 text-[9.5px] font-black uppercase tracking-[0.1em] text-white backdrop-blur-md">
+                            <Sparkle size={10} weight="fill" className="shrink-0 text-lime-200" />
+                            <span className="truncate">{countLabel}</span>
+                          </span>
+                          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/18 text-white backdrop-blur-md transition group-hover:translate-x-0.5">
+                            <CaretRight size={12} weight="bold" />
+                          </span>
+                        </div>
                       </div>
                     </Link>
                   );
