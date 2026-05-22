@@ -4056,13 +4056,13 @@ export function MarketplacePage() {
                       to={storePath}
                       state={storeNavigationState}
                       style={{ animationDelay: `${index * 36}ms` }}
-                      className={`group grid grid-cols-[4rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.55rem] border px-3 py-3 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards transition-all ease-out active:scale-[0.985] ${
+                      className={`group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] border px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards transition-all ease-out active:scale-[0.985] ${
                         store.isOpen
-                          ? 'border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.92)_100%)] shadow-[0_16px_34px_-28px_rgba(15,23,42,0.26),0_1px_6px_rgba(15,23,42,0.035)] ring-1 ring-slate-200/45 md:hover:-translate-y-0.5 md:hover:shadow-[0_22px_48px_-34px_rgba(15,23,42,0.32)]'
-                          : 'border-slate-100/90 bg-[linear-gradient(180deg,rgba(248,250,252,0.94)_0%,rgba(241,245,249,0.82)_100%)] shadow-[0_12px_28px_-24px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/40'
+                          ? 'border-white/80 bg-white/78 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/38 md:hover:-translate-y-0.5 md:hover:bg-white md:hover:shadow-[0_20px_44px_-34px_rgba(15,23,42,0.32)]'
+                          : 'border-slate-100/80 bg-slate-50/72 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.16)] ring-1 ring-slate-200/35'
                       }`}
                     >
-                      <div className="relative h-[3.65rem] w-[3.65rem] shrink-0 overflow-hidden rounded-full bg-slate-100 shadow-[0_14px_26px_-22px_rgba(15,23,42,0.4)] ring-1 ring-slate-200/80">
+                      <div className="relative h-[4.45rem] w-[4.45rem] shrink-0 overflow-hidden rounded-[1.28rem] bg-white shadow-[0_16px_28px_-24px_rgba(15,23,42,0.46)] ring-1 ring-slate-200/70">
                         <img
                           src={store.logo}
                           alt=""
@@ -4137,7 +4137,7 @@ export function MarketplacePage() {
                         className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
                           favoriteStoreSlugs.includes(store.slug)
                             ? 'bg-rose-50 text-rose-500 shadow-[0_10px_24px_-18px_rgba(244,63,94,0.58)] ring-1 ring-rose-100'
-                            : 'border border-slate-100 bg-white/74 text-slate-400 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.28)] hover:text-rose-400'
+                            : 'bg-transparent text-slate-400 hover:bg-white/80 hover:text-rose-400 hover:shadow-[0_10px_22px_-20px_rgba(15,23,42,0.28)]'
                         }`}
                         aria-label={`Favoritar ${store.name}`}
                       >

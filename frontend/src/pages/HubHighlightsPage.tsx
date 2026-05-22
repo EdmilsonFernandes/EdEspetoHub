@@ -463,7 +463,7 @@ export function HubHighlightsPage() {
         <section className="mt-4 flex flex-wrap gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/86 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.28)]">
             <ForkKnife size={12} weight="fill" />
-            {filteredItems.length} opção{filteredItems.length === 1 ? '' : 'ões'}
+            {filteredItems.length === 1 ? '1 opção' : `${filteredItems.length} opções`}
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500 shadow-[0_12px_24px_-22px_rgba(15,23,42,0.18)]">
             <Storefront size={12} weight="duotone" />
