@@ -2296,7 +2296,7 @@ export function MarketplacePage() {
     const hasFoodHeavy = scopedEnrichedStores.some((store) =>
       [ 'Restaurante', 'Hamburguer', 'Lanche', 'Pizza', 'Doces' ].includes(store.segment)
     );
-    return hasFoodHeavy ? 'Itens em destaque' : 'Produtos em destaque';
+    return hasFoodHeavy ? 'Destaques de hoje' : 'Achados de hoje';
   }, [scopedEnrichedStores]);
 
   const formatDistance = (km: number | null | undefined) => {
@@ -3225,25 +3225,25 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
-            <section className="order-7 space-y-3">
+            <section className="order-8 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
                     <Mountains size={12} weight="duotone" />
-                    Destinos e chalés
+                    Explore a região
                   </p>
                   <h2 className="mt-1 text-base font-black leading-tight tracking-[-0.03em] text-slate-950 sm:text-lg">
-                    Experiências para explorar perto de você
+                    Chalés, comida e serviços perto de você
                   </h2>
                   <p className="mt-1 max-w-[18rem] text-xs font-semibold leading-relaxed text-slate-500">
-                    Cidades, hospedagens e serviços locais em uma vitrine diferente do delivery.
+                    Descubra onde ficar, pedir e passear sem sair do app.
                   </p>
                 </div>
                 <Link
                   to={destinationListHref}
                   className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.22)] transition active:scale-95"
                 >
-                  Explorar
+                  Ver destinos
                   <CaretRight size={10} weight="bold" />
                 </Link>
               </div>
@@ -3251,11 +3251,10 @@ export function MarketplacePage() {
                 {homeDestinationHighlights.map((destination, index) => {
                   const placesCount = Number(destination.placesCount || 0);
                   const listingsCount = Number(destination.listingsCount || 0);
-                  const countLabel = placesCount > 0
-                    ? `${placesCount} hospedagem${placesCount === 1 ? '' : 's'}`
-                    : listingsCount > 0
-                      ? (listingsCount === 1 ? '1 local' : `${listingsCount} locais`)
-                      : 'Destaque local';
+                  const totalOptions = placesCount + listingsCount;
+                  const countLabel = totalOptions > 0
+                    ? `${totalOptions} opç${totalOptions === 1 ? 'ão' : 'ões'}`
+                    : 'Destaque local';
                   return (
                     <Link
                       key={destination.id || destination.slug}
@@ -3553,7 +3552,7 @@ export function MarketplacePage() {
           {/* Banner de Destaques Premium - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && (
             <section
-              className="order-8 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-3 py-2.5 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl"
+              className="order-7 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-3 py-2.5 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl"
               style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               <div className="flex items-center justify-between gap-3 px-1">
@@ -3562,10 +3561,10 @@ export function MarketplacePage() {
                   <p className="mt-0.5 line-clamp-1 text-[10px] font-bold text-slate-500">
                     {hasFeaturedCarouselOverflow
                       ? hasSponsoredFeaturedProducts
-                        ? 'Patrocinados aparecem primeiro. Arraste para ver mais.'
-                        : 'Arraste para o lado e veja mais ofertas.'
+                        ? 'Sugestões para pedir agora.'
+                        : 'Arraste e descubra opções das lojas.'
                       : hasSponsoredFeaturedProducts
-                        ? 'Ofertas de lojas parceiras para pedir agora.'
+                        ? 'Sugestões de lojas parceiras para pedir agora.'
                         : 'Toque no prato e veja a loja que prepara.'}
                   </p>
                 </div>
