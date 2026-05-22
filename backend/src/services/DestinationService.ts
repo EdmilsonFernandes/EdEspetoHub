@@ -474,26 +474,42 @@ export class DestinationService {
     const name = String(payload?.name || current?.name || '').trim();
     if (!name) throw new AppError('DEST-004', 400);
     const slug = normalizeDestinationSlug(payload?.slug || current?.slug || name);
+    const destinationWithSameSlug = await this.repository.findDestinationBySlug(slug, false);
+    if (destinationWithSameSlug && (!current || destinationWithSameSlug.id !== current.id)) {
+      throw new AppError('DEST-013', 409, {
+        slug,
+        existingDestinationId: destinationWithSameSlug.id,
+        existingDestinationName: destinationWithSameSlug.name,
+      });
+    }
     const logoUrl = await saveBase64Image(payload?.logoFile, `destination-logo-${slug}`, 'destinations');
     const bannerUrl = await saveBase64Image(payload?.bannerFile, `destination-banner-${slug}`, 'destinations');
     const hasLogoUrlInput = Object.prototype.hasOwnProperty.call(payload || {}, 'logoUrl');
     const hasBannerUrlInput = Object.prototype.hasOwnProperty.call(payload || {}, 'bannerUrl');
-    const saved = await this.repository.saveDestination({
-      ...(current || {}),
-      name,
-      slug,
-      city: toOptionalText(payload?.city) ?? current?.city ?? null,
-      state: toOptionalText(payload?.state)?.toUpperCase() ?? current?.state ?? null,
-      description: payload?.description !== undefined ? toOptionalText(payload.description) : current?.description ?? null,
-      heroTitle: payload?.heroTitle !== undefined ? toOptionalText(payload.heroTitle) : current?.heroTitle ?? null,
-      heroSubtitle: payload?.heroSubtitle !== undefined ? toOptionalText(payload.heroSubtitle) : current?.heroSubtitle ?? null,
-      logoUrl: logoUrl || (hasLogoUrlInput ? toOptionalText(payload?.logoUrl) : (current?.logoUrl ?? null)),
-      bannerUrl: bannerUrl || (hasBannerUrlInput ? toOptionalText(payload?.bannerUrl) : (current?.bannerUrl ?? null)),
-      lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : current?.lat ?? null,
-      lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : current?.lng ?? null,
-      active: payload?.active !== false,
-      sortOrder: Number(payload?.sortOrder ?? current?.sortOrder ?? 0) || 0,
-    });
+    let saved;
+    try {
+      saved = await this.repository.saveDestination({
+        ...(current || {}),
+        name,
+        slug,
+        city: toOptionalText(payload?.city) ?? current?.city ?? null,
+        state: toOptionalText(payload?.state)?.toUpperCase() ?? current?.state ?? null,
+        description: payload?.description !== undefined ? toOptionalText(payload.description) : current?.description ?? null,
+        heroTitle: payload?.heroTitle !== undefined ? toOptionalText(payload.heroTitle) : current?.heroTitle ?? null,
+        heroSubtitle: payload?.heroSubtitle !== undefined ? toOptionalText(payload.heroSubtitle) : current?.heroSubtitle ?? null,
+        logoUrl: logoUrl || (hasLogoUrlInput ? toOptionalText(payload?.logoUrl) : (current?.logoUrl ?? null)),
+        bannerUrl: bannerUrl || (hasBannerUrlInput ? toOptionalText(payload?.bannerUrl) : (current?.bannerUrl ?? null)),
+        lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : current?.lat ?? null,
+        lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : current?.lng ?? null,
+        active: payload?.active !== false,
+        sortOrder: Number(payload?.sortOrder ?? current?.sortOrder ?? 0) || 0,
+      });
+    } catch (error: any) {
+      if (String(error?.code || '') === '23505') {
+        throw new AppError('DEST-013', 409, { slug });
+      }
+      throw error;
+    }
     return this.toPublicDestination(saved);
   }
 

@@ -107,6 +107,7 @@
   "DEST-010": "Partner request not found.",
   "DEST-011": "Store request not found.",
   "DEST-012": "Invalid review status.",
+  "DEST-013": "A destination with this name or link already exists. Edit the existing destination or choose another name.",
   "REVIEW-003": "This order has no tip available for payout.",
   "REVIEW-004": "The tip has not been paid by the customer yet.",
   "REVIEW-005": "This tip was already received directly by the courier."

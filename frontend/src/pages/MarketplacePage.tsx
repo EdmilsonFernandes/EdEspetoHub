@@ -3930,7 +3930,7 @@ export function MarketplacePage() {
                             : 'border-slate-200/80 bg-slate-50/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)]'
                         }`}
                       >
-                        {/* Banner + logo wrapper — sem overflow-hidden para o logo não ser cortado */}
+                        {/* Banner wrapper */}
                         <div className="relative">
                           <div className="relative h-[56px] overflow-hidden rounded-t-[1.45rem] bg-slate-100">
                             <img
@@ -3964,20 +3964,21 @@ export function MarketplacePage() {
                             >
                              <Heart size={12} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} className={favoriteStoreSlugs.includes(store.slug) ? 'animate-[pop_0.4s_ease-out]' : ''} />
                             </button>                          </div>
-                          {/* Logo fora do overflow-hidden — não é cortado */}
-                          <img
-                            src={store.logo}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                            className={`absolute -bottom-4 left-2.5 z-10 h-10 w-10 rounded-[0.75rem] border-2 border-white bg-white object-cover shadow-[0_8px_18px_-8px_rgba(15,23,42,0.45)] ${store.isOpen ? '' : 'grayscale opacity-60'}`}
-                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
-                          />
                         </div>
-                        <div className="px-3 pb-3 pt-6">
-                          <h3 className={`min-h-[2rem] line-clamp-2 text-[13px] font-black leading-4 [overflow-wrap:anywhere] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
-                            {store.name}
-                          </h3>
+                        <div className="px-3 pb-3 pt-3">
+                          <div className="flex min-w-0 items-start gap-2">
+                            <img
+                              src={store.logo}
+                              alt=""
+                              loading="lazy"
+                              decoding="async"
+                              className={`h-8 w-8 shrink-0 rounded-[0.65rem] bg-slate-50 object-cover ring-1 ring-slate-200/70 ${store.isOpen ? '' : 'grayscale opacity-60'}`}
+                              onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
+                            />
+                            <h3 className={`min-h-[2rem] min-w-0 flex-1 line-clamp-2 text-[13px] font-black leading-4 [overflow-wrap:anywhere] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
+                              {store.name}
+                            </h3>
+                          </div>
                           <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] font-bold text-slate-500">
                             {store.rating > 0 ? (
                               <span className="inline-flex items-center gap-1">
@@ -4025,7 +4026,7 @@ export function MarketplacePage() {
                           : 'border-slate-100 bg-slate-50/80 shadow-[0_6px_18px_rgba(15,23,42,0.04)]'
                       }`}
                     >
-                      {/* Banner + overlapping logo wrapper */}
+                      {/* Banner wrapper */}
                       <div className="relative">
                         <div className="relative h-[56px] overflow-hidden rounded-t-[1.45rem] bg-slate-100">
                           <img
@@ -4069,21 +4070,19 @@ export function MarketplacePage() {
                             <Heart size={12} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} />
                           </button>
                         </div>
-
-                        {/* Store logo — outside overflow-hidden so it's never clipped */}
-                        <img
-                          src={store.logo}
-                          alt=""
-                          loading="lazy"
-                          decoding="async"
-                          className={`absolute -bottom-4 left-3.5 z-10 h-10 w-10 rounded-[0.8rem] border-[2px] border-white bg-white object-cover shadow-[0_10px_22px_-10px_rgba(15,23,42,0.42)] ${store.isOpen ? '' : 'grayscale opacity-55'}`}
-                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
-                        />
                       </div>
 
                       {/* Content */}
-                      <div className="px-3.5 pb-3.5 pt-[1.65rem]">
-                        <div className="flex min-w-0 items-start gap-1.5">
+                      <div className="px-3.5 pb-3.5 pt-3">
+                        <div className="flex min-w-0 items-start gap-2">
+                          <img
+                            src={store.logo}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className={`h-8 w-8 shrink-0 rounded-[0.65rem] bg-slate-50 object-cover ring-1 ring-slate-200/70 ${store.isOpen ? '' : 'grayscale opacity-55'}`}
+                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
+                          />
                           {!isCondominiumScope && (
                             <span
                               className={`mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full ${store.isOpen ? 'bg-green-500' : 'bg-red-500'}`}

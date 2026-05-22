@@ -107,6 +107,7 @@
   "DEST-010": "Solicitação de parceiro não encontrada.",
   "DEST-011": "Solicitação de loja não encontrada.",
   "DEST-012": "Status de revisão inválido.",
+  "DEST-013": "Já existe um destino com esse nome ou link. Edite o destino já cadastrado ou escolha outro nome.",
   "REVIEW-003": "Este pedido não possui gorjeta para repasse.",
   "REVIEW-004": "A gorjeta ainda não foi paga pelo cliente.",
   "REVIEW-005": "Esta gorjeta já foi recebida diretamente pelo entregador."

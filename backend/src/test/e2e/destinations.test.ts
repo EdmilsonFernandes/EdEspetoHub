@@ -249,6 +249,45 @@ describe('Destination Hub', () => {
     }));
   });
 
+  it('returns a clear conflict when updating a destination to an existing slug', async () => {
+    const suffix = `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const firstDestinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        name: `Destino Duplicado A ${suffix}`,
+        slug: `destino-duplicado-a-${suffix}`,
+        city: 'São José dos Campos',
+        state: 'SP',
+      });
+
+    expect(firstDestinationRes.status, JSON.stringify(firstDestinationRes.body)).toBe(201);
+
+    const secondDestinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        name: `Destino Duplicado B ${suffix}`,
+        slug: `destino-duplicado-b-${suffix}`,
+        city: 'São Francisco Xavier',
+        state: 'SP',
+      });
+
+    expect(secondDestinationRes.status, JSON.stringify(secondDestinationRes.body)).toBe(201);
+
+    const conflictRes = await api
+      .patch(`/api/admin/destinations/${secondDestinationRes.body.id}`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        ...secondDestinationRes.body,
+        name: firstDestinationRes.body.name,
+        slug: firstDestinationRes.body.slug,
+      });
+
+    expect(conflictRes.status, JSON.stringify(conflictRes.body)).toBe(409);
+    expect(conflictRes.body.code).toBe('DEST-013');
+  });
+
   it('keeps inactive destinations visible in admin catalog for reactivation', async () => {
     const suffix = Date.now();
     const destinationRes = await api
