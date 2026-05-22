@@ -1,10 +1,12 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { ArrowLeft, Clock, MapPinLine, NavigationArrow, Storefront } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { RouteMapView } from '../components/RouteMapView';
 import { destinationService } from '../services/destinationService';
+import { buildDestinationAddressLine } from '../utils/destinationWhatsApp';
 
 const normalizeCoordinate = (value?: string | number | null) => {
   if (value === null || value === undefined || value === '') return null;
@@ -55,6 +57,22 @@ const buildGoogleDirectionsUrl = (origin: any, destination: any) => {
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 };
 
+const buildGoogleNativeUrl = (origin: any, destination: any, fallbackUrl: string) => {
+  if (!fallbackUrl || Capacitor.getPlatform() !== 'android') return '';
+  const originQuery = mapPointQuery(origin);
+  const destinationQuery = mapPointQuery(destination);
+  if (!destinationQuery) return '';
+
+  const params = new URLSearchParams({
+    api: '1',
+    destination: destinationQuery,
+    travelmode: 'driving',
+  });
+  if (originQuery) params.set('origin', originQuery);
+
+  return `intent://maps.google.com/maps?${params.toString()}#Intent;scheme=https;package=com.google.android.apps.maps;S.browser_fallback_url=${encodeURIComponent(fallbackUrl)};end`;
+};
+
 const buildWazeUrl = (destination: any) => {
   if (hasCoords(destination)) {
     const coords = toCoords(destination);
@@ -64,10 +82,33 @@ const buildWazeUrl = (destination: any) => {
   return address ? `https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes` : '';
 };
 
+const buildWazeNativeUrl = (destination: any, fallbackUrl: string) => {
+  if (!fallbackUrl || Capacitor.getPlatform() !== 'android') return '';
+  let params = '';
+  if (hasCoords(destination)) {
+    const coords = toCoords(destination);
+    params = `ll=${coords.lat.toFixed(6)}%2C${coords.lng.toFixed(6)}&navigate=yes`;
+  } else {
+    const address = String(destination?.address || '').trim();
+    if (address) params = `q=${encodeURIComponent(address)}&navigate=yes`;
+  }
+  return params ? `intent://?${params}#Intent;scheme=waze;package=com.waze;S.browser_fallback_url=${encodeURIComponent(fallbackUrl)};end` : '';
+};
+
 const formatDistance = (value?: number | null) => {
   if (!Number.isFinite(Number(value))) return 'Distância indisponível';
   const km = Number(value);
   return km < 1 ? `${Math.max(80, Math.round(km * 1000))} m em linha reta` : `${km.toFixed(1).replace('.', ',')} km em linha reta`;
+};
+
+const openExternalRoute = (url: string, nativeUrl?: string) => (event: any) => {
+  event.preventDefault();
+  if (!url) return;
+  if (Capacitor.isNativePlatform()) {
+    window.location.href = nativeUrl || url;
+    return;
+  }
+  window.open(url, '_blank', 'noopener,noreferrer');
 };
 
 const estimateMinutes = (distanceKm?: number | null) => {
@@ -104,21 +145,42 @@ export function HospitalityServiceRoutePage() {
 
   const destination = payload?.destination || {};
   const place = payload?.hospitalityPlace || {};
+  const serviceId = searchParams.get('servico') || searchParams.get('serviceId') || '';
+  const serviceFromPayload = useMemo(() => {
+    const listings = Array.isArray(payload?.listings) ? payload.listings : [];
+    return listings.find((item: any) => String(item?.id || '') === String(serviceId || '')) || null;
+  }, [payload?.listings, serviceId]);
   const servicePoint = useMemo(() => ({
-    name: searchParams.get('serviceName') || 'Restaurante ou serviço',
-    address: searchParams.get('serviceAddress') || '',
-    lat: searchParams.get('serviceLat') || '',
-    lng: searchParams.get('serviceLng') || '',
-  }), [searchParams]);
+    name: searchParams.get('serviceName') || serviceFromPayload?.title || 'Restaurante ou serviço',
+    address: buildDestinationAddressLine({
+      address: searchParams.get('serviceAddress') || serviceFromPayload?.address || '',
+      addressNumber: searchParams.get('serviceAddressNumber') || serviceFromPayload?.addressNumber || '',
+      district: searchParams.get('serviceDistrict') || serviceFromPayload?.district || '',
+      city: searchParams.get('serviceCity') || serviceFromPayload?.city || destination.city || '',
+      state: searchParams.get('serviceState') || serviceFromPayload?.state || destination.state || '',
+      zipCode: searchParams.get('serviceZipCode') || serviceFromPayload?.zipCode || '',
+    }),
+    lat: searchParams.get('serviceLat') || serviceFromPayload?.lat || '',
+    lng: searchParams.get('serviceLng') || serviceFromPayload?.lng || '',
+  }), [destination.city, destination.state, searchParams, serviceFromPayload]);
   const placePoint = useMemo(() => ({
     name: searchParams.get('placeName') || place.name || 'Hospedagem',
-    address: searchParams.get('placeAddress') || place.address || '',
+    address: buildDestinationAddressLine({
+      address: searchParams.get('placeAddress') || place.address || '',
+      addressNumber: searchParams.get('placeAddressNumber') || place.addressNumber || '',
+      district: searchParams.get('placeDistrict') || place.district || '',
+      city: searchParams.get('placeCity') || place.city || destination.city || '',
+      state: searchParams.get('placeState') || place.state || destination.state || '',
+      zipCode: searchParams.get('placeZipCode') || place.zipCode || '',
+    }),
     lat: searchParams.get('placeLat') || place.lat || '',
     lng: searchParams.get('placeLng') || place.lng || '',
-  }), [place.address, place.lat, place.lng, place.name, searchParams]);
+  }), [destination.city, destination.state, place.address, place.addressNumber, place.city, place.district, place.lat, place.lng, place.name, place.state, place.zipCode, searchParams]);
   const distanceKm = useMemo(() => haversineKm(servicePoint, placePoint), [servicePoint, placePoint]);
   const googleDirectionsUrl = useMemo(() => buildGoogleDirectionsUrl(servicePoint, placePoint), [servicePoint, placePoint]);
+  const googleNativeUrl = useMemo(() => buildGoogleNativeUrl(servicePoint, placePoint, googleDirectionsUrl), [googleDirectionsUrl, servicePoint, placePoint]);
   const wazeUrl = useMemo(() => buildWazeUrl(placePoint), [placePoint]);
+  const wazeNativeUrl = useMemo(() => buildWazeNativeUrl(placePoint, wazeUrl), [placePoint, wazeUrl]);
   const canShowMap = hasCoords(servicePoint) && hasCoords(placePoint);
   const placePublicPath = `/destinos/${encodeURIComponent(destinationSlug)}/chales/${encodeURIComponent(placeSlug)}`;
 
@@ -192,13 +254,13 @@ export function HospitalityServiceRoutePage() {
 
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               {googleDirectionsUrl ? (
-                <a href={googleDirectionsUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] bg-[#153A4C] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.75)] transition hover:-translate-y-0.5 active:scale-[0.98]">
+                <a href={googleDirectionsUrl} onClick={openExternalRoute(googleDirectionsUrl, googleNativeUrl)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] bg-[#153A4C] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.75)] transition hover:-translate-y-0.5 active:scale-[0.98]">
                   <NavigationArrow size={17} weight="fill" />
                   Abrir no Google Maps
                 </a>
               ) : null}
               {wazeUrl ? (
-                <a href={wazeUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#153A4C]/14 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]">
+                <a href={wazeUrl} onClick={openExternalRoute(wazeUrl, wazeNativeUrl)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#153A4C]/14 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]">
                   <Clock size={17} weight="duotone" />
                   Abrir no Waze
                 </a>

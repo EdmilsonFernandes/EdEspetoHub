@@ -140,7 +140,7 @@ export class DestinationRepository {
     const search = String(filters.search || '').trim().toLowerCase();
     if (search) {
       qb.andWhere(
-        `LOWER(CONCAT_WS(' ', place.name, place.type, place.address, place.city, place.state, place.whatsapp, place.description)) LIKE :search`,
+        `LOWER(CONCAT_WS(' ', place.name, place.type, place.address, place.address_number, place.district, place.city, place.state, place.zip_code, place.whatsapp, place.description)) LIKE :search`,
         { search: `%${search}%` }
       );
     }
@@ -168,7 +168,7 @@ export class DestinationRepository {
     const search = String(filters.search || '').trim().toLowerCase();
     if (search) {
       qb.andWhere(
-        `LOWER(CONCAT_WS(' ', listing.title, listing.category, listing.address, listing.whatsapp, listing.description, store.name, hospitalityPlace.name)) LIKE :search`,
+        `LOWER(CONCAT_WS(' ', listing.title, listing.category, listing.address, listing.address_number, listing.district, listing.city, listing.state, listing.zip_code, listing.whatsapp, listing.description, store.name, hospitalityPlace.name)) LIKE :search`,
         { search: `%${search}%` }
       );
     }
@@ -534,7 +534,7 @@ export class DestinationRepository {
       SELECT 1 FROM hospitality_places place_filter
       WHERE place_filter.destination_id = destination.id
       ${this.activeExistsSql('place_filter', status)}
-      ${withSearch ? "AND LOWER(CONCAT_WS(' ', place_filter.name, place_filter.type, place_filter.address, place_filter.city, place_filter.state, place_filter.whatsapp, place_filter.description)) LIKE :search" : ''}
+      ${withSearch ? "AND LOWER(CONCAT_WS(' ', place_filter.name, place_filter.type, place_filter.address, place_filter.address_number, place_filter.district, place_filter.city, place_filter.state, place_filter.zip_code, place_filter.whatsapp, place_filter.description)) LIKE :search" : ''}
     )`;
   }
 
@@ -546,7 +546,7 @@ export class DestinationRepository {
       WHERE listing_filter.destination_id = destination.id
       ${this.activeExistsSql('listing_filter', status)}
       ${withCategory ? 'AND UPPER(listing_filter.category) = :listingCategory' : ''}
-      ${withSearch ? "AND LOWER(CONCAT_WS(' ', listing_filter.title, listing_filter.category, listing_filter.address, listing_filter.whatsapp, listing_filter.description, store_filter.name, hospitality_filter.name)) LIKE :search" : ''}
+      ${withSearch ? "AND LOWER(CONCAT_WS(' ', listing_filter.title, listing_filter.category, listing_filter.address, listing_filter.address_number, listing_filter.district, listing_filter.city, listing_filter.state, listing_filter.zip_code, listing_filter.whatsapp, listing_filter.description, store_filter.name, hospitality_filter.name)) LIKE :search" : ''}
     )`;
   }
 

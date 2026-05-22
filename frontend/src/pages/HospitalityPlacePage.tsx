@@ -9,7 +9,7 @@ import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatCurrency } from '../utils/format';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
-import { buildDestinationInquiryMessage, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
+import { buildDestinationInquiryMessage, buildHospitalityServiceRouteUrl, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 import { openActionTarget } from '../utils/actionLink';
 import { buildListingClaimUrl } from '../utils/destinationListingClaim';
 
@@ -172,12 +172,23 @@ const buildListingAction = ({ listing, destination, place, isNativePlatform }: a
     city: destination.city,
     state: destination.state,
     itemName: listing.title,
+    itemId: listing.id,
     itemType: String(listing.category || 'serviço').replace('_', ' '),
     placeName: place.name,
     placeAddress: place.address,
+    placeAddressNumber: place.addressNumber,
+    placeDistrict: place.district,
+    placeCity: place.city || destination.city,
+    placeState: place.state || destination.state,
+    placeZipCode: place.zipCode,
     placeLat: place.lat,
     placeLng: place.lng,
     itemAddress: listing.address,
+    itemAddressNumber: listing.addressNumber,
+    itemDistrict: listing.district,
+    itemCity: listing.city || destination.city,
+    itemState: listing.state || destination.state,
+    itemZipCode: listing.zipCode,
     itemLat: listing.lat,
     itemLng: listing.lng,
     destinationSlug: destination.slug,
@@ -268,6 +279,11 @@ export function HospitalityPlacePage() {
     itemType: 'hospedagem',
     placeName: place.name,
     placeAddress: place.address,
+    placeAddressNumber: place.addressNumber,
+    placeDistrict: place.district,
+    placeCity: place.city || destination.city,
+    placeState: place.state || destination.state,
+    placeZipCode: place.zipCode,
     placeLat: place.lat,
     placeLng: place.lng,
     destinationSlug: destination.slug,
@@ -278,6 +294,30 @@ export function HospitalityPlacePage() {
   const placeBannerImages = galleryImagesFor(place);
   const selectedPlaceBanner = placeBannerImages[bannerIndex % placeBannerImages.length] || imageFor(place);
   const selectedListingAction = selectedListing ? buildListingAction({ listing: selectedListing, destination, place, isNativePlatform }) : null;
+  const selectedListingRouteUrl = selectedListing ? buildHospitalityServiceRouteUrl({
+    destinationSlug: destination.slug || destinationSlug,
+    placeSlug: place.slug || placeSlug,
+    serviceId: selectedListing.id,
+    serviceName: selectedListing.title,
+    serviceAddress: selectedListing.address,
+    serviceAddressNumber: selectedListing.addressNumber,
+    serviceDistrict: selectedListing.district,
+    serviceCity: selectedListing.city || destination.city,
+    serviceState: selectedListing.state || destination.state,
+    serviceZipCode: selectedListing.zipCode,
+    serviceLat: selectedListing.lat,
+    serviceLng: selectedListing.lng,
+    placeName: place.name,
+    placeAddress: place.address,
+    placeAddressNumber: place.addressNumber,
+    placeDistrict: place.district,
+    placeCity: place.city || destination.city,
+    placeState: place.state || destination.state,
+    placeZipCode: place.zipCode,
+    placeLat: place.lat,
+    placeLng: place.lng,
+  }) : '';
+  const selectedListingRouteHref = selectedListingRouteUrl ? selectedListingRouteUrl.replace(/^https?:\/\/[^/]+/i, '') : '';
   const selectedListingInstagramUrl = instagramUrl(selectedListing?.instagramUrl);
   const selectedListingWebsiteUrl = externalUrl(selectedListing?.websiteUrl);
   const selectedListingMediaUrl = selectedListing ? cardMediaFor(selectedListing) : '';
@@ -458,6 +498,11 @@ export function HospitalityPlacePage() {
                   hospedagem_nome: String(place.name || placeSlug || ''),
                 });
                 if (place.address) storeParams.set('hospedagem_endereco', String(place.address));
+                if (place.addressNumber) storeParams.set('hospedagem_numero', String(place.addressNumber));
+                if (place.district) storeParams.set('hospedagem_bairro', String(place.district));
+                if (place.city || destination.city) storeParams.set('hospedagem_cidade', String(place.city || destination.city));
+                if (place.state || destination.state) storeParams.set('hospedagem_uf', String(place.state || destination.state));
+                if (place.zipCode) storeParams.set('hospedagem_cep', String(place.zipCode));
                 if (place.lat) storeParams.set('hospedagem_lat', String(place.lat));
                 if (place.lng) storeParams.set('hospedagem_lng', String(place.lng));
                 return (
@@ -631,6 +676,7 @@ export function HospitalityPlacePage() {
         hasImage={selectedListingHasImage}
         claimHref={selectedListing ? buildListingClaimUrl(destination, selectedListing) : ''}
         primaryAction={selectedListingAction}
+        routeAction={selectedListingRouteHref ? { href: selectedListingRouteHref, label: 'Chegar até meu chalé', kind: 'route', external: false } : null}
         instagramUrl={selectedListingInstagramUrl}
         websiteUrl={selectedListingWebsiteUrl}
         websiteLabel={siteLabel(selectedListing?.websiteUrl)}

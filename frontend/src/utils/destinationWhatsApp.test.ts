@@ -54,16 +54,29 @@ describe('destinationWhatsApp', () => {
     });
 
     expect(message).toContain('Encontrei Massagem relaxante pelo J\u00e1 no Caminho');
-    expect(message).toContain('Estou em Sao Bento Sapucai - SP e hospedado(a) em Chale Vista da Pedra.');
-    expect(message).toContain('Referencia para entrega/atendimento:');
-    expect(message).toContain('Hospedagem: Chale Vista da Pedra');
-    expect(message).toContain('Endereco da hospedagem: Estrada do Bau, km 7');
-    expect(message).toContain('Mapa da hospedagem: https://www.google.com/maps/search/?api=1&query=-22.6901%2C-45.7321');
-    expect(message).not.toContain('Local do atendimento: Rua do Centro, 10');
-    expect(message).toContain('Link com rota/referencia para entrega: https://janocaminho.com.br/destinos/sao-bento-sapucai/chales/chale-vista-da-pedra/rota?');
+    expect(message).toContain('Estou em Sao Bento Sapucai - SP.');
+    expect(message).toContain('Estou hospedado(a) em: Chale Vista da Pedra');
+    expect(message).toContain('Endereço para entrega: Estrada do Bau, km 7');
+    expect(message).toContain('Localização do chalé: https://www.google.com/maps/search/?api=1&query=-22.6901%2C-45.7321');
+    expect(message).not.toContain('Endereço do atendimento: Rua do Centro, 10');
+    expect(message).toContain('Como chegar até meu chalé: https://janocaminho.com.br/destinos/sao-bento-sapucai/chales/chale-vista-da-pedra/rota?');
     expect(message).toContain('serviceName=Massagem+relaxante');
     expect(message).toContain('placeAddress=Estrada+do+Bau%2C+km+7');
-    expect(message).toContain('Gostaria de saber mais sobre massagem');
+    expect(message).toContain('Gostaria de saber valores, disponibilidade');
+  });
+
+  it('keeps route links short when a service id is available', () => {
+    const url = buildHospitalityServiceRouteUrl({
+      destinationSlug: 'monte-verde',
+      placeSlug: 'chale-da-serra',
+      serviceId: 'service-123',
+      serviceName: 'Restaurante da vila',
+      serviceAddress: 'Av. Monte Verde, 100',
+      placeName: 'Chale da Serra',
+      placeAddress: 'Estrada dos Pinheiros, 80',
+    });
+
+    expect(url).toBe('https://janocaminho.com.br/destinos/monte-verde/chales/chale-da-serra/rota?servico=service-123');
   });
 
   it('builds a public service-to-hospitality route URL', () => {
@@ -96,6 +109,26 @@ describe('destinationWhatsApp', () => {
     expect(url).toContain('placeAddress=Estrada+dos+Pinheiros%2C+80');
   });
 
+  it('does not add a service route when contacting the hospitality place itself', () => {
+    const message = buildDestinationInquiryMessage({
+      destinationName: 'Monte Verde',
+      state: 'MG',
+      itemName: 'Chalé da Serra',
+      itemType: 'hospedagem',
+      placeName: 'Chalé da Serra',
+      placeAddress: 'Estrada dos Pinheiros',
+      placeAddressNumber: '80',
+      placeDistrict: 'Serra',
+      placeCity: 'Monte Verde',
+      placeState: 'MG',
+      destinationSlug: 'monte-verde',
+      placeSlug: 'chale-da-serra',
+    });
+
+    expect(message).toContain('Endereço para entrega: Estrada dos Pinheiros, nº 80');
+    expect(message).not.toContain('Como chegar até meu chalé:');
+  });
+
   it('adds an item address and map when no hospitality place is present', () => {
     const message = buildDestinationInquiryMessage({
       destinationName: 'Monte Verde',
@@ -105,8 +138,8 @@ describe('destinationWhatsApp', () => {
       itemAddress: 'Av. Monte Verde, 100',
     });
 
-    expect(message).toContain('Local do atendimento: Av. Monte Verde, 100');
-    expect(message).toContain('Mapa do atendimento: https://www.google.com/maps/search/?api=1&query=Av.%20Monte%20Verde%2C%20100');
+    expect(message).toContain('Endereço do atendimento: Av. Monte Verde, 100');
+    expect(message).toContain('Abrir localização: https://www.google.com/maps/search/?api=1&query=Av.%20Monte%20Verde%2C%20100');
   });
 
   it('prettifies slugs used as fallback labels', () => {

@@ -87,6 +87,8 @@ const emptyPlace = {
   description: '',
   zipCode: '',
   address: '',
+  addressNumber: '',
+  district: '',
   city: '',
   state: '',
   whatsapp: '',
@@ -119,7 +121,14 @@ const emptyListing = {
   title: '',
   category: 'SERVICO',
   description: '',
+  zipCode: '',
   address: '',
+  addressNumber: '',
+  district: '',
+  city: '',
+  state: '',
+  lat: '',
+  lng: '',
   whatsapp: '',
   websiteUrl: '',
   instagramUrl: '',
@@ -399,6 +408,48 @@ const MediaUploadField = ({
   );
 };
 
+const DestinationAddressFields = ({
+  value,
+  update,
+  loading,
+  error,
+  title,
+  hint,
+}: any) => {
+  const hasCoordinates = Boolean(String(value?.lat || '').trim() && String(value?.lng || '').trim());
+
+  return (
+    <div className="sm:col-span-2 rounded-[1.5rem] border border-slate-200 bg-white p-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-black text-slate-950">{title || 'Endereço'}</p>
+          <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
+            {hint || 'Digite o CEP para preencher automaticamente. Se não encontrar, preencha manualmente.'}
+          </p>
+        </div>
+        <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${hasCoordinates ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+          {hasCoordinates ? 'Coordenada salva' : 'Coordenada ao salvar'}
+        </span>
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-[160px_minmax(0,1fr)_120px]">
+        <div>
+          <input value={value.zipCode || ''} onChange={(event) => update('zipCode', formatCepBr(event.target.value))} placeholder="CEP" inputMode="numeric" autoComplete="postal-code" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+          {loading ? <p className="mt-1 px-1 text-[11px] font-bold text-[#336886]">Buscando endereço...</p> : null}
+          {error ? <p className="mt-1 px-1 text-[11px] font-bold text-rose-600">{error}</p> : null}
+        </div>
+        <input value={value.address || ''} onChange={(event) => update('address', event.target.value)} placeholder="Rua, estrada ou local" autoComplete="address-line1" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+        <input value={value.addressNumber || ''} onChange={(event) => update('addressNumber', event.target.value)} placeholder="Número" autoComplete="address-line2" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+        <input value={value.district || ''} onChange={(event) => update('district', event.target.value)} placeholder="Bairro / região" autoComplete="address-level3" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+        <input value={value.city || ''} onChange={(event) => update('city', event.target.value)} placeholder="Cidade" autoComplete="address-level2" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+        <input value={value.state || ''} onChange={(event) => update('state', event.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2))} placeholder="UF" autoComplete="address-level1" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+      </div>
+      <p className="mt-2 px-1 text-[11px] font-semibold text-slate-500">
+        Latitude/longitude ficam ocultas para o cliente e são usadas só para mapa, Waze e Google Maps.
+      </p>
+    </div>
+  );
+};
+
 export function SuperAdminDestinations() {
   const [data, setData] = useState<any>({ destinations: [], places: [], listings: [], partnerRequests: [], storeRequests: [], stores: [] });
   const [catalog, setCatalog] = useState<any>(emptyCatalog);
@@ -437,6 +488,8 @@ export function SuperAdminDestinations() {
   const [destinationZipLookupError, setDestinationZipLookupError] = useState('');
   const [placeZipLookupLoading, setPlaceZipLookupLoading] = useState(false);
   const [placeZipLookupError, setPlaceZipLookupError] = useState('');
+  const [listingZipLookupLoading, setListingZipLookupLoading] = useState(false);
+  const [listingZipLookupError, setListingZipLookupError] = useState('');
   const [inviteListing, setInviteListing] = useState<any | null>(null);
   const [invitePlace, setInvitePlace] = useState<any | null>(null);
   const [inviteFeedback, setInviteFeedback] = useState('');
@@ -648,8 +701,11 @@ export function SuperAdminDestinations() {
           ...current,
           zipCode: formatCepBr(cleanedCep),
           address: String(addressData?.street || current.address || ''),
+          district: String(addressData?.district || current.district || ''),
           city: String(addressData?.city || current.city || ''),
           state: String(addressData?.state || current.state || '').toUpperCase().slice(0, 2),
+          lat: current.lat || (addressData?.latitude != null ? String(addressData.latitude) : ''),
+          lng: current.lng || (addressData?.longitude != null ? String(addressData.longitude) : ''),
         }));
       } catch {
         if (active) setPlaceZipLookupError('CEP não encontrado. Preencha manualmente.');
@@ -663,6 +719,43 @@ export function SuperAdminDestinations() {
       window.clearTimeout(timer);
     };
   }, [placeForm.zipCode]);
+
+  useEffect(() => {
+    const cleanedCep = String(listingForm.zipCode || '').replace(/\D/g, '');
+    if (cleanedCep.length !== 8) {
+      setListingZipLookupError('');
+      return;
+    }
+
+    let active = true;
+    const timer = window.setTimeout(async () => {
+      setListingZipLookupLoading(true);
+      setListingZipLookupError('');
+      try {
+        const addressData = await addressLookupService.lookupZipCode(cleanedCep);
+        if (!active || !addressData) return;
+        setListingForm((current) => ({
+          ...current,
+          zipCode: formatCepBr(cleanedCep),
+          address: String(addressData?.street || current.address || ''),
+          district: String(addressData?.district || current.district || ''),
+          city: String(addressData?.city || current.city || ''),
+          state: String(addressData?.state || current.state || '').toUpperCase().slice(0, 2),
+          lat: current.lat || (addressData?.latitude != null ? String(addressData.latitude) : ''),
+          lng: current.lng || (addressData?.longitude != null ? String(addressData.longitude) : ''),
+        }));
+      } catch {
+        if (active) setListingZipLookupError('CEP não encontrado. Preencha manualmente.');
+      } finally {
+        if (active) setListingZipLookupLoading(false);
+      }
+    }, 450);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [listingForm.zipCode]);
 
   const metrics = useMemo(() => {
     if (catalog?.metrics) return catalog.metrics;
@@ -862,6 +955,8 @@ export function SuperAdminDestinations() {
       destinationId: listing.destinationId || listing.destination?.id || '',
       hospitalityPlaceId: listing.hospitalityPlaceId || '',
       storeId: listing.storeId || listing.store?.id || '',
+      zipCode: formatCepBr(listing.zipCode || ''),
+      state: String(listing.state || listing.destination?.state || '').toUpperCase().slice(0, 2),
       active: listing.active !== false,
       featured: listing.featured === true,
       sortOrder: Number(listing.sortOrder || 0),
@@ -2430,16 +2525,14 @@ export function SuperAdminDestinations() {
                   <option value="CABANA">Cabana</option>
                   <option value="CASA_TEMPORADA">Casa temporada</option>
                 </select>
-                <input value={placeForm.city} onChange={(event) => updatePlace('city', event.target.value)} placeholder="Cidade" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <input value={placeForm.state} onChange={(event) => updatePlace('state', event.target.value.toUpperCase().slice(0, 2))} placeholder="UF" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <div className="sm:col-span-2 grid gap-3 sm:grid-cols-[160px_1fr]">
-                  <div>
-                    <input value={placeForm.zipCode} onChange={(event) => updatePlace('zipCode', formatCepBr(event.target.value))} placeholder="CEP" inputMode="numeric" autoComplete="postal-code" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                    {placeZipLookupLoading ? <p className="mt-1 px-1 text-[11px] font-bold text-[#336886]">Buscando endereço...</p> : null}
-                    {placeZipLookupError ? <p className="mt-1 px-1 text-[11px] font-bold text-rose-600">{placeZipLookupError}</p> : null}
-                  </div>
-                  <input value={placeForm.address} onChange={(event) => updatePlace('address', event.target.value)} placeholder="Endereço" autoComplete="address-line1" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                </div>
+                <DestinationAddressFields
+                  value={placeForm}
+                  update={updatePlace}
+                  loading={placeZipLookupLoading}
+                  error={placeZipLookupError}
+                  title="Endereço da hospedagem"
+                  hint="Este é o ponto que será enviado para restaurantes, serviços e motoboys chegarem ao hóspede."
+                />
                 <div className="sm:col-span-2 rounded-[1.5rem] border border-slate-200 bg-white p-3">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -2483,8 +2576,6 @@ export function SuperAdminDestinations() {
                 <input value={placeForm.whatsapp} onChange={(event) => updatePlace('whatsapp', formatPhoneBr(event.target.value))} placeholder="WhatsApp" inputMode="tel" autoComplete="tel" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <input value={placeForm.websiteUrl} onChange={(event) => updatePlace('websiteUrl', event.target.value)} placeholder="Site / Airbnb / Booking" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={placeForm.instagramUrl} onChange={(event) => updatePlace('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <input value={placeForm.lat} onChange={(event) => updatePlace('lat', event.target.value)} placeholder="Latitude" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <input value={placeForm.lng} onChange={(event) => updatePlace('lng', event.target.value)} placeholder="Longitude" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={placeForm.sortOrder} onChange={(event) => updatePlace('sortOrder', event.target.value)} placeholder="Ordem" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <select value={String(placeForm.active !== false)} onChange={(event) => updatePlace('active', event.target.value === 'true')} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
                   <option value="true">Ativo no público</option>
@@ -2547,7 +2638,14 @@ export function SuperAdminDestinations() {
                   onError={setError}
                   maxEdge={1400}
                 />
-                <input value={listingForm.address} onChange={(event) => updateListing('address', event.target.value)} placeholder="Endereço/local" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
+                <DestinationAddressFields
+                  value={listingForm}
+                  update={updateListing}
+                  loading={listingZipLookupLoading}
+                  error={listingZipLookupError}
+                  title="Endereço do restaurante ou serviço"
+                  hint="Com CEP e coordenada, a tela de rota mostra distância do serviço até o chalé com mais precisão."
+                />
                 <input value={listingForm.whatsapp} onChange={(event) => updateListing('whatsapp', formatPhoneBr(event.target.value))} placeholder="WhatsApp" inputMode="tel" autoComplete="tel" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <input value={listingForm.websiteUrl} onChange={(event) => updateListing('websiteUrl', event.target.value)} placeholder="Site / cardápio / link externo" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={listingForm.instagramUrl} onChange={(event) => updateListing('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />

@@ -480,9 +480,14 @@ export function StorePage() {
     const destinationName = String(params.get('destino_nome') || prettifyDestinationLabel(params.get('destino')) || '').trim();
     const placeName = String(params.get('hospedagem_nome') || prettifyDestinationLabel(params.get('hospedagem')) || '').trim();
     const placeAddress = String(params.get('hospedagem_endereco') || '').trim();
+    const placeAddressNumber = String(params.get('hospedagem_numero') || '').trim();
+    const placeDistrict = String(params.get('hospedagem_bairro') || '').trim();
+    const placeCity = String(params.get('hospedagem_cidade') || '').trim();
+    const placeState = String(params.get('hospedagem_uf') || '').trim();
+    const placeZipCode = String(params.get('hospedagem_cep') || '').trim();
     const placeLat = String(params.get('hospedagem_lat') || '').trim();
     const placeLng = String(params.get('hospedagem_lng') || '').trim();
-    return { destinationSlug, placeSlug, destinationName, placeName, placeAddress, placeLat, placeLng };
+    return { destinationSlug, placeSlug, destinationName, placeName, placeAddress, placeAddressNumber, placeDistrict, placeCity, placeState, placeZipCode, placeLat, placeLng };
   }, [location.search]);
   const destinationStoreWhatsAppMessage = useMemo(() => {
     if (!destinationContextFromQuery.destinationName && !destinationContextFromQuery.placeName) return '';
@@ -492,6 +497,11 @@ export function StorePage() {
       itemType: 'loja/restaurante',
       placeName: destinationContextFromQuery.placeName,
       placeAddress: destinationContextFromQuery.placeAddress,
+      placeAddressNumber: destinationContextFromQuery.placeAddressNumber,
+      placeDistrict: destinationContextFromQuery.placeDistrict,
+      placeCity: destinationContextFromQuery.placeCity,
+      placeState: destinationContextFromQuery.placeState,
+      placeZipCode: destinationContextFromQuery.placeZipCode,
       placeLat: destinationContextFromQuery.placeLat,
       placeLng: destinationContextFromQuery.placeLng,
       itemAddress: storeAddress,
@@ -506,10 +516,15 @@ export function StorePage() {
     destinationContextFromQuery.destinationName,
     destinationContextFromQuery.destinationSlug,
     destinationContextFromQuery.placeAddress,
+    destinationContextFromQuery.placeAddressNumber,
+    destinationContextFromQuery.placeCity,
+    destinationContextFromQuery.placeDistrict,
     destinationContextFromQuery.placeLat,
     destinationContextFromQuery.placeLng,
     destinationContextFromQuery.placeName,
     destinationContextFromQuery.placeSlug,
+    destinationContextFromQuery.placeState,
+    destinationContextFromQuery.placeZipCode,
     storeAddress,
     storeCoords?.lat,
     storeCoords?.lng,

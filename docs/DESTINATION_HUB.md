@@ -33,15 +33,15 @@ Serviço é qualquer item de curadoria do destino que não precisa ser uma loja 
 - **Prestador solicita pelo formulário público** em `/destinos/cadastrar`, escolhendo o tipo de parceiro como serviço/prestador. Depois da aprovação, o pedido vira um serviço publicado no destino.
 - **Lojista da plataforma pode aparecer de duas formas**: como loja vinculada a um chalé/pousada para delivery, ou como serviço/listing editorial quando fizer sentido aparecer como lugar para visitar.
 
-Quando o visitante toca em `Pedir informações`, o WhatsApp abre com uma mensagem contextual informando a cidade/destino e o serviço escolhido.
+Quando o visitante toca em `Pedir informações` dentro de um chalé/pousada, o WhatsApp abre com a referência da hospedagem, endereço para entrega, localização no Maps e um link curto de rota para o serviço entender onde o hóspede está.
 
 ## Cadastro de cidades e chalés
 
 1. Acesse `/superadmin/destinations`.
 2. Use o resumo agrupado por `UF > cidade` para localizar destinos existentes, editar, ativar/desativar e abrir a vitrine pública.
 3. Cadastre ou edite o destino com nome, slug, cidade, UF, descrição, título, banner, latitude e longitude.
-4. Cadastre ou edite chalés/pousadas no destino informando nome, tipo, endereço, WhatsApp, site/Instagram e instruções de entrega.
-5. Cadastre ou edite listings locais como passeio, massagem, restaurante para visitar, noite, atrativo, serviço ou loja.
+4. Cadastre ou edite chalés/pousadas no destino informando nome, tipo, CEP/endereço, número, bairro/região, WhatsApp, site/Instagram e instruções de entrega.
+5. Cadastre ou edite listings locais como passeio, massagem, restaurante para visitar, noite, atrativo, serviço ou loja. Sempre que possível, preencha CEP/endereço do serviço para a tela de rota calcular distância até a hospedagem.
 6. Desative o que não deve aparecer publicamente. Não use exclusão física para preservar histórico e vínculos.
 
 As cidades iniciais podem ser São Francisco Xavier e São Bento do Sapucaí, mas a estrutura é nacional. Cada nova cidade entra como um `travel_destination`, não como dado fixo no frontend.
@@ -60,7 +60,8 @@ Use a aba `Cadastro` em `/superadmin/destinations`.
 2. Em `Cadastrar chalé/pousada`, selecione o destino e preencha:
    - nome do chalé/pousada;
    - tipo;
-   - endereço;
+   - CEP e endereço;
+   - número e bairro/região, quando houver;
    - foto/banner;
    - WhatsApp, site ou Instagram quando houver;
    - descrição pública;
@@ -134,12 +135,43 @@ O seed cria/atualiza o destino `sao-bento-do-sapucai`, banners editoriais, chal�
 
 O script é idempotente para hospedagens pelo par `destination_id + slug`. Para listings e banners, ele remove e recria apenas os títulos presentes no próprio seed, evitando duplicação quando rodar mais de uma vez.
 
+### Coordenadas e rota de hospedagem
+
+Hospedagens e serviços/listings aceitam CEP, endereço, número, bairro/região, cidade, UF, latitude e longitude. A tela do SuperAdmin tenta preencher o endereço pelo CEP; se não encontrar, o cadastro manual continua permitido.
+
+As coordenadas não aparecem para o cliente final. Elas são usadas para:
+
+- montar o link de WhatsApp com a localização correta do chalé/pousada;
+- abrir a rota `/destinos/:destinationSlug/chales/:placeSlug/rota`;
+- calcular a distância visual entre restaurante/serviço e hospedagem;
+- tentar abrir Google Maps ou Waze no Android quando o app estiver instalado.
+
+Para completar coordenadas de registros antigos depois do deploy, rode primeiro em modo simulação:
+
+```bash
+npm --prefix backend run backfill:destination-coordinates
+```
+
+Para aplicar no banco do ambiente atual:
+
+```bash
+APPLY_DESTINATION_COORDINATES=true npm --prefix backend run backfill:destination-coordinates
+```
+
+Em produção, use a versão compilada dentro do container após o deploy da API:
+
+```bash
+docker exec janocaminho-backend npm run backfill:destination-coordinates:dist
+docker exec -e APPLY_DESTINATION_COORDINATES=true janocaminho-backend npm run backfill:destination-coordinates:dist
+```
+
 ## Rotas
 
 - Público: `/destinos`.
 - Solicitação pública de parceiro: `/destinos/cadastrar`.
 - Detalhe do destino: `/destinos/:destinationSlug`.
 - Detalhe do chalé/pousada: `/destinos/:destinationSlug/chales/:placeSlug`.
+- Rota de serviço até chalé/pousada: `/destinos/:destinationSlug/chales/:placeSlug/rota`.
 - SuperAdmin: `/superadmin/destinations`.
 - Lojista: `/admin/dashboard`, aba `Destinos`.
 

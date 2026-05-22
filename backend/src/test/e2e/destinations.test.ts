@@ -95,6 +95,13 @@ describe('Destination Hub', () => {
         slug: `chale-real-${suffix}`,
         type: 'CHALE',
         address: 'Estrada do teste, 10',
+        addressNumber: '10',
+        district: 'Bairro Teste',
+        city: 'Gonçalves',
+        state: 'MG',
+        zipCode: '37680-000',
+        lat: -22.6586,
+        lng: -45.8551,
         deliveryInstructions: 'Entregar na recepção.',
       });
 
@@ -108,12 +115,29 @@ describe('Destination Hub', () => {
         destinationId,
         title: `Passeio Teste ${suffix}`,
         category: 'PASSEIO',
+        address: 'Rua do passeio',
+        addressNumber: '22',
+        district: 'Centro',
+        city: 'Gonçalves',
+        state: 'MG',
+        zipCode: '37680-000',
+        lat: -22.6577,
+        lng: -45.8562,
         ctaType: 'WHATSAPP',
         ctaUrl: '5511999999999',
       });
 
     expect(listingRes.status).toBe(201);
     expect(listingRes.body.category).toBe('PASSEIO');
+    expect(listingRes.body).toEqual(expect.objectContaining({
+      addressNumber: '22',
+      district: 'Centro',
+      zipCode: '37680000',
+      city: 'Gonçalves',
+      state: 'MG',
+      lat: -22.6577,
+      lng: -45.8562,
+    }));
 
     const summaryRes = await api
       .get('/api/admin/destinations/manage/summary')
@@ -194,6 +218,13 @@ describe('Destination Hub', () => {
 
     expect(placePublicRes.status).toBe(200);
     expect(placePublicRes.body.hospitalityPlace.id).toBe(placeId);
+    expect(placePublicRes.body.hospitalityPlace).toEqual(expect.objectContaining({
+      addressNumber: '10',
+      district: 'Bairro Teste',
+      zipCode: '37680000',
+      lat: -22.6586,
+      lng: -45.8551,
+    }));
     expect(placePublicRes.body.stores.some((entry: any) => entry.store?.slug === storeSlug)).toBe(true);
     expect(placePublicRes.body.listings.some((entry: any) => entry.title === listingRes.body.title)).toBe(true);
 

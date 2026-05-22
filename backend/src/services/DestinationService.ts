@@ -20,6 +20,7 @@ import {
 } from '../utils/hospitalityMedia';
 import { saveBase64Image } from '../utils/imageStorage';
 import { logger } from '../utils/logger';
+import { GeoLocationService } from './GeoLocationService';
 import { OrderReviewService } from './OrderReviewService';
 import { SubscriptionService } from './SubscriptionService';
 
@@ -27,6 +28,7 @@ export class DestinationService {
   private repository = new DestinationRepository();
   private subscriptionService = new SubscriptionService();
   private orderReviewService = new OrderReviewService();
+  private geoLocationService = new GeoLocationService();
   private log = logger.child({ scope: 'DestinationService' });
 
   async listPublicDestinations(location?: DestinationLocationContext) {
@@ -340,6 +342,66 @@ export class DestinationService {
     };
   }
 
+  private normalizeStateCode(value: unknown) {
+    const normalized = toOptionalText(value)?.toUpperCase().replace(/[^A-Z]/g, '') || null;
+    return normalized ? normalized.slice(0, 2) : null;
+  }
+
+  private normalizeZipCode(value: unknown) {
+    const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+    return digits || toOptionalText(value);
+  }
+
+  private buildDestinationGeocodeAddress(payload: {
+    address?: string | null;
+    addressNumber?: string | null;
+    district?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zipCode?: string | null;
+  }) {
+    return [
+      toOptionalText(payload.address),
+      toOptionalText(payload.addressNumber),
+      toOptionalText(payload.district),
+      toOptionalText(payload.city),
+      this.normalizeStateCode(payload.state),
+      this.normalizeZipCode(payload.zipCode),
+    ].filter(Boolean).join(', ');
+  }
+
+  private hasCoordinatePair(lat?: number | null, lng?: number | null) {
+    return Number.isFinite(Number(lat)) && Number.isFinite(Number(lng));
+  }
+
+  private async resolveDestinationCoordinates(payload: {
+    address?: string | null;
+    addressNumber?: string | null;
+    district?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zipCode?: string | null;
+    lat?: number | null;
+    lng?: number | null;
+    scope: string;
+  }) {
+    const lat = payload.lat ?? null;
+    const lng = payload.lng ?? null;
+    if (this.hasCoordinatePair(lat, lng)) return { lat, lng };
+
+    const address = this.buildDestinationGeocodeAddress(payload);
+    if (!address) return { lat, lng };
+
+    try {
+      const geocoded = await this.geoLocationService.geocodeAddress(address);
+      if (!geocoded || !this.hasCoordinatePair(geocoded.lat, geocoded.lng)) return { lat, lng };
+      return { lat: Number(geocoded.lat), lng: Number(geocoded.lng) };
+    } catch (error) {
+      this.log.warn('Destination geocode failed', { scope: payload.scope, address, error });
+      return { lat, lng };
+    }
+  }
+
   async adminSaveDestination(payload: any, destinationId?: string) {
     const current = destinationId ? await this.repository.findDestinationById(destinationId) : null;
     if (destinationId && !current) throw new AppError('DEST-001', 404);
@@ -417,6 +479,23 @@ export class DestinationService {
     const bannerUrls = hasBannerGalleryInput
       ? normalizeHospitalityBannerUrls(resolvedBannerUrl, requestedBannerUrls)
       : normalizeHospitalityBannerUrls(resolvedBannerUrl, current?.bannerUrls);
+    const address = payload?.address !== undefined ? toOptionalText(payload.address) : current?.address ?? null;
+    const addressNumber = payload?.addressNumber !== undefined ? toOptionalText(payload.addressNumber) : current?.addressNumber ?? null;
+    const district = payload?.district !== undefined ? toOptionalText(payload.district) : current?.district ?? null;
+    const city = payload?.city !== undefined ? toOptionalText(payload.city) : current?.city ?? destination.city ?? null;
+    const state = payload?.state !== undefined ? this.normalizeStateCode(payload.state) : current?.state ?? destination.state ?? null;
+    const zipCode = payload?.zipCode !== undefined ? this.normalizeZipCode(payload.zipCode) : current?.zipCode ?? null;
+    const coordinates = await this.resolveDestinationCoordinates({
+      address,
+      addressNumber,
+      district,
+      city,
+      state,
+      zipCode,
+      lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : current?.lat ?? null,
+      lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : current?.lng ?? null,
+      scope: 'hospitality_place',
+    });
     const saved = await this.repository.savePlace({
       ...(current || {}),
       destinationId: destination.id,
@@ -424,12 +503,14 @@ export class DestinationService {
       slug,
       type: normalizeHospitalityPlaceType(payload?.type || current?.type),
       description: payload?.description !== undefined ? toOptionalText(payload.description) : current?.description ?? null,
-      address: payload?.address !== undefined ? toOptionalText(payload.address) : current?.address ?? null,
-      city: payload?.city !== undefined ? toOptionalText(payload.city) : current?.city ?? destination.city ?? null,
-      state: payload?.state !== undefined ? toOptionalText(payload.state)?.toUpperCase() : current?.state ?? destination.state ?? null,
-      zipCode: payload?.zipCode !== undefined ? toOptionalText(payload.zipCode) : current?.zipCode ?? null,
-      lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : current?.lat ?? null,
-      lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : current?.lng ?? null,
+      address,
+      addressNumber,
+      district,
+      city,
+      state,
+      zipCode,
+      lat: coordinates.lat,
+      lng: coordinates.lng,
       phone: payload?.phone !== undefined ? toOptionalText(payload.phone) : current?.phone ?? null,
       whatsapp: payload?.whatsapp !== undefined ? toOptionalText(payload.whatsapp) : current?.whatsapp ?? null,
       instagramUrl: payload?.instagramUrl !== undefined ? toOptionalText(payload.instagramUrl) : current?.instagramUrl ?? null,
@@ -463,6 +544,23 @@ export class DestinationService {
     const hasStoreInput = Object.prototype.hasOwnProperty.call(payload || {}, 'storeId');
     const storeId = hasStoreInput ? toOptionalText(payload?.storeId) : current?.storeId || null;
     if (storeId && !(await this.repository.findStoreById(storeId))) throw new AppError('STORE-001', 404);
+    const address = payload?.address !== undefined ? toOptionalText(payload.address) : current?.address ?? null;
+    const addressNumber = payload?.addressNumber !== undefined ? toOptionalText(payload.addressNumber) : current?.addressNumber ?? null;
+    const district = payload?.district !== undefined ? toOptionalText(payload.district) : current?.district ?? null;
+    const city = payload?.city !== undefined ? toOptionalText(payload.city) : current?.city ?? destination.city ?? null;
+    const state = payload?.state !== undefined ? this.normalizeStateCode(payload.state) : current?.state ?? destination.state ?? null;
+    const zipCode = payload?.zipCode !== undefined ? this.normalizeZipCode(payload.zipCode) : current?.zipCode ?? null;
+    const coordinates = await this.resolveDestinationCoordinates({
+      address,
+      addressNumber,
+      district,
+      city,
+      state,
+      zipCode,
+      lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : current?.lat ?? null,
+      lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : current?.lng ?? null,
+      scope: 'destination_listing',
+    });
     const saved = await this.repository.saveListing({
       id: current?.id,
       destinationId: destination.id,
@@ -472,9 +570,14 @@ export class DestinationService {
       title,
       description: payload?.description !== undefined ? toOptionalText(payload.description) : current?.description ?? null,
       imageUrl: imageUrl || toOptionalText(payload?.imageUrl) || current?.imageUrl || null,
-      address: payload?.address !== undefined ? toOptionalText(payload.address) : current?.address ?? null,
-      lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : current?.lat ?? null,
-      lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : current?.lng ?? null,
+      address,
+      addressNumber,
+      district,
+      city,
+      state,
+      zipCode,
+      lat: coordinates.lat,
+      lng: coordinates.lng,
       phone: payload?.phone !== undefined ? toOptionalText(payload.phone) : current?.phone ?? null,
       whatsapp: payload?.whatsapp !== undefined ? toOptionalText(payload.whatsapp) : current?.whatsapp ?? null,
       instagramUrl: payload?.instagramUrl !== undefined ? toOptionalText(payload.instagramUrl) : current?.instagramUrl ?? null,
@@ -522,6 +625,9 @@ export class DestinationService {
           description: request.description,
           imageUrl: request.imageUrl || request.bannerUrl || request.logoUrl,
           address: request.address,
+          city: request.city,
+          state: request.state,
+          zipCode: request.zipCode,
           phone: request.phone,
           whatsapp: request.whatsapp,
           instagramUrl: request.instagramUrl,
@@ -876,6 +982,8 @@ export class DestinationService {
       type: place.type || 'CHALE',
       description: place.description || null,
       address: place.address || null,
+      addressNumber: place.addressNumber || null,
+      district: place.district || null,
       city: place.city || null,
       state: place.state || null,
       zipCode: place.zipCode || null,
@@ -922,6 +1030,11 @@ export class DestinationService {
       description: listing.description || null,
       imageUrl: listing.imageUrl || null,
       address: listing.address || null,
+      addressNumber: listing.addressNumber || null,
+      district: listing.district || null,
+      city: listing.city || null,
+      state: listing.state || null,
+      zipCode: listing.zipCode || null,
       lat: listing.lat != null ? Number(listing.lat) : null,
       lng: listing.lng != null ? Number(listing.lng) : null,
       phone: listing.phone || null,

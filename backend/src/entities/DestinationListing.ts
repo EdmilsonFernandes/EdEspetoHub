@@ -52,6 +52,21 @@ export class DestinationListing {
   @Column({ type: 'text', nullable: true })
   address?: string | null;
 
+  @Column({ name: 'address_number', type: 'text', nullable: true })
+  addressNumber?: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  district?: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  city?: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  state?: string | null;
+
+  @Column({ name: 'zip_code', type: 'text', nullable: true })
+  zipCode?: string | null;
+
   @Column('numeric', { precision: 10, scale: 7, nullable: true })
   lat?: number | null;
 

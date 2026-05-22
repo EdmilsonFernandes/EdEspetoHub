@@ -237,13 +237,13 @@
       <p>Gerado a partir de tres fontes combinadas: snapshots locais de banco (<code>espetinho</code> e <code>espetinho_test</code>), metadata TypeORM e varredura de DDL em <code>backend/src</code> (incluindo <code>runMigrations.ts</code> e SQL manual fora dele).</p>
       <p>Objetivo: responder rapidamente o que cada tabela guarda, como ela se relaciona com as demais e qual a responsabilidade funcional de cada coluna relevante.</p>
       <div class="command">Regenerar: <code>cd backend && npm run docs:schema</code></div>
-      <p class="footnote">Gerado em 2026-05-21T12:38:31.684Z.</p>
+      <p class="footnote">Gerado em 2026-05-22T11:44:23.496Z.</p>
     </section>
 
     <section class="summary">
       <div class="summary-grid">
         <div class="metric"><strong>66</strong><span>Tabelas na documentacao unificada</span></div>
-        <div class="metric"><strong>59</strong><span>Tabelas no banco dev (espetinho)</span></div>
+        <div class="metric"><strong>66</strong><span>Tabelas no banco dev (espetinho)</span></div>
         <div class="metric"><strong>66</strong><span>Tabelas no banco de testes (espetinho_test)</span></div>
         <div class="metric"><strong>7</strong><span>Tabelas sem entity TypeORM</span></div>
         <div class="metric"><strong>11</strong><span>Tabelas com observacao de drift/origem</span></div>
@@ -252,7 +252,7 @@
         <strong>Comparacao de ambientes:</strong>
         <ul class="flat-list">
           <li><strong>So no dev:</strong> nenhuma</li>
-          <li><strong>So no test:</strong> <code>store_dashboard_daily_metrics</code>, <code>store_dashboard_daily_products</code>, <code>customer_push_tokens</code>, <code>store_user_push_tokens</code>, <code>motoboy_push_tokens</code>, <code>guest_order_attempts</code>, <code>guest_order_phone_blocks</code></li>
+          <li><strong>So no test:</strong> nenhuma</li>
         </ul>
       </div>
       <p class="footnote">Se uma tabela aparecer apenas em um ambiente, a documentacao destaca isso na propria secao da tabela.</p>
@@ -266,7 +266,7 @@
         </div>
         <input id="schema-filter" type="search" placeholder="Filtrar tabela..." />
       </div>
-      <div class="toc-grid" id="toc-grid"><section class="toc-group"><h3>Analytics</h3><ul><li><a href="#table-store_dashboard_daily_metrics">store_dashboard_daily_metrics</a> <span class="toc-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_dashboard_daily_products">store_dashboard_daily_products</a> <span class="toc-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Clientes &amp; Identidade</h3><ul><li><a href="#table-customer_addresses">customer_addresses</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-customer_email_otps">customer_email_otps</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-customer_push_tokens">customer_push_tokens</a> <span class="toc-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-customer_risk_events">customer_risk_events</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-customer_security_blocks">customer_security_blocks</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-email_verifications">email_verifications</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-password_resets">password_resets</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></span></li><li><a href="#table-users">users</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Condominios</h3><ul><li><a href="#table-condominium_access_requests">condominium_access_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-condominium_event_stores">condominium_event_stores</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-condominium_events">condominium_events</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-condominium_users">condominium_users</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-condominiums">condominiums</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_condominium_requests">store_condominium_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_condominiums">store_condominiums</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Lojas &amp; Catalogo</h3><ul><li><a href="#table-inventory_movements">inventory_movements</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-products">products</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_link_hits">store_link_hits</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_settings">store_settings</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_user_push_tokens">store_user_push_tokens</a> <span class="toc-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_users">store_users</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-stores">stores</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></span></li></ul></section><section class="toc-group"><h3>Motoboys &amp; Logistica</h3><ul><li><a href="#table-delivery_billing_charges">delivery_billing_charges</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-delivery_billing_cycles">delivery_billing_cycles</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-delivery_events">delivery_events</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_audit_logs">motoboy_audit_logs</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_documents">motoboy_documents</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_payment_accounts">motoboy_payment_accounts</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_push_tokens">motoboy_push_tokens</a> <span class="toc-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_store_requests">motoboy_store_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_stores">motoboy_stores</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboys">motoboys</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Pagamentos &amp; Assinatura</h3><ul><li><a href="#table-payment_audit_logs">payment_audit_logs</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-payment_events">payment_events</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></span></li><li><a href="#table-payments">payments</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-plans">plans</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_payment_accounts">store_payment_accounts</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-subscriptions">subscriptions</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Pedidos &amp; Fulfillment</h3><ul><li><a href="#table-guest_order_attempts">guest_order_attempts</a> <span class="toc-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-guest_order_phone_blocks">guest_order_phone_blocks</a> <span class="toc-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_deliveries">order_deliveries</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_eta_estimates">order_eta_estimates</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_items">order_items</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_payments">order_payments</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_reviews">order_reviews</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_shipments">order_shipments</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-orders">orders</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Plataforma &amp; Suporte</h3><ul><li><a href="#table-access_logs">access_logs</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-destination_banners">destination_banners</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-destination_listings">destination_listings</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-destination_partner_requests">destination_partner_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-destination_store_requests">destination_store_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-featured_product_requests">featured_product_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-hospitality_place_store_links">hospitality_place_store_links</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-hospitality_places">hospitality_places</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-mfa_challenges">mfa_challenges</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-mfa_settings">mfa_settings</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-notifications">notifications</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-platform_admins">platform_admins</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-promo_pushes">promo_pushes</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></span></li><li><a href="#table-site_settings">site_settings</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-travel_destinations">travel_destinations</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-trusted_devices">trusted_devices</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-zip_code_cache">zip_code_cache</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section></div>
+      <div class="toc-grid" id="toc-grid"><section class="toc-group"><h3>Analytics</h3><ul><li><a href="#table-store_dashboard_daily_metrics">store_dashboard_daily_metrics</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_dashboard_daily_products">store_dashboard_daily_products</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Clientes &amp; Identidade</h3><ul><li><a href="#table-customer_addresses">customer_addresses</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-customer_email_otps">customer_email_otps</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-customer_push_tokens">customer_push_tokens</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-customer_risk_events">customer_risk_events</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-customer_security_blocks">customer_security_blocks</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-email_verifications">email_verifications</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-password_resets">password_resets</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></span></li><li><a href="#table-users">users</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Condominios</h3><ul><li><a href="#table-condominium_access_requests">condominium_access_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-condominium_event_stores">condominium_event_stores</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-condominium_events">condominium_events</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-condominium_users">condominium_users</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-condominiums">condominiums</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_condominium_requests">store_condominium_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_condominiums">store_condominiums</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Lojas &amp; Catalogo</h3><ul><li><a href="#table-inventory_movements">inventory_movements</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-products">products</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_link_hits">store_link_hits</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_settings">store_settings</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_user_push_tokens">store_user_push_tokens</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_users">store_users</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-stores">stores</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></span></li></ul></section><section class="toc-group"><h3>Motoboys &amp; Logistica</h3><ul><li><a href="#table-delivery_billing_charges">delivery_billing_charges</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-delivery_billing_cycles">delivery_billing_cycles</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-delivery_events">delivery_events</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_audit_logs">motoboy_audit_logs</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_documents">motoboy_documents</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_payment_accounts">motoboy_payment_accounts</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_push_tokens">motoboy_push_tokens</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_store_requests">motoboy_store_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboy_stores">motoboy_stores</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-motoboys">motoboys</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Pagamentos &amp; Assinatura</h3><ul><li><a href="#table-payment_audit_logs">payment_audit_logs</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-payment_events">payment_events</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></span></li><li><a href="#table-payments">payments</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-plans">plans</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-store_payment_accounts">store_payment_accounts</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-subscriptions">subscriptions</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Pedidos &amp; Fulfillment</h3><ul><li><a href="#table-guest_order_attempts">guest_order_attempts</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-guest_order_phone_blocks">guest_order_phone_blocks</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_deliveries">order_deliveries</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_eta_estimates">order_eta_estimates</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_items">order_items</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_payments">order_payments</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_reviews">order_reviews</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-order_shipments">order_shipments</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-orders">orders</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section><section class="toc-group"><h3>Plataforma &amp; Suporte</h3><ul><li><a href="#table-access_logs">access_logs</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-destination_banners">destination_banners</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-destination_listings">destination_listings</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-destination_partner_requests">destination_partner_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-destination_store_requests">destination_store_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-featured_product_requests">featured_product_requests</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-hospitality_place_store_links">hospitality_place_store_links</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-hospitality_places">hospitality_places</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-mfa_challenges">mfa_challenges</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-mfa_settings">mfa_settings</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-notifications">notifications</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-platform_admins">platform_admins</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-promo_pushes">promo_pushes</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></span></li><li><a href="#table-site_settings">site_settings</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-travel_destinations">travel_destinations</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-trusted_devices">trusted_devices</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li><li><a href="#table-zip_code_cache">zip_code_cache</a> <span class="toc-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></span></li></ul></section></div>
     </section>
 
     
@@ -276,7 +276,7 @@
               <h2>store_dashboard_daily_metrics</h2>
               <p class="table-subtitle">Snapshot diário agregado de métricas operacionais da loja.</p>
             </div>
-            <div class="table-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
+            <div class="table-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
           </div>
           <p class="responsibility"><strong>Papel no sistema:</strong> Sustenta o dominio de snapshot diario de metricas no backend.</p>
           <ul class="meta-list">
@@ -284,7 +284,7 @@
             <li><strong>Documentado a partir de:</strong> <code>test</code></li>
             <li><strong>Entity:</strong> sem entity TypeORM</li>
           </ul>
-          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Presente no banco de testes (espetinho_test) e ausente no banco dev (espetinho).</li><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
+          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
           <div class="grid">
             <div>
               <h3>Colunas</h3>
@@ -305,63 +305,63 @@
                     <td>integer</td>
                     <td>nao</td>
                     <td><code>0</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Quantidade agregada ou unitária de customers count.</td>
                   </tr><tr>
                     <td><code>first_order_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp do evento first order at.</td>
                   </tr><tr>
                     <td><code>last_order_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp do evento last order at.</td>
                   </tr><tr>
                     <td><code>orders_count</code></td>
                     <td>integer</td>
                     <td>nao</td>
                     <td><code>0</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Quantidade agregada ou unitária de orders count.</td>
                   </tr><tr>
                     <td><code>refreshed_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>nao</td>
                     <td><code>now()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp do evento refreshed at.</td>
                   </tr><tr>
                     <td><code>revenue_total</code></td>
                     <td>numeric(10,2)</td>
                     <td>nao</td>
                     <td><code>0</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Campo revenue total que participa do contexto funcional de snapshot diario de metricas.</td>
                   </tr><tr>
                     <td><code>snapshot_date</code></td>
                     <td>date</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Campo snapshot date que participa do contexto funcional de snapshot diario de metricas.</td>
                   </tr><tr>
                     <td><code>source_updated_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp do evento source updated at.</td>
                   </tr><tr>
                     <td><code>store_id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Chave estrangeira para stores.id; conecta este snapshot diario de metricas ao registro relacionado.</td>
                   </tr>
             </tbody>
@@ -386,7 +386,7 @@
               <h2>store_dashboard_daily_products</h2>
               <p class="table-subtitle">Snapshot diário agregado por produto para analytics da loja.</p>
             </div>
-            <div class="table-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
+            <div class="table-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
           </div>
           <p class="responsibility"><strong>Papel no sistema:</strong> Sustenta o dominio de snapshot diario por produto no backend.</p>
           <ul class="meta-list">
@@ -394,7 +394,7 @@
             <li><strong>Documentado a partir de:</strong> <code>test</code></li>
             <li><strong>Entity:</strong> sem entity TypeORM</li>
           </ul>
-          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Presente no banco de testes (espetinho_test) e ausente no banco dev (espetinho).</li><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
+          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
           <div class="grid">
             <div>
               <h3>Colunas</h3>
@@ -415,63 +415,63 @@
                     <td>uuid</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Campo product id que participa do contexto funcional de snapshot diario por produto.</td>
                   </tr><tr>
                     <td><code>product_name</code></td>
                     <td>text</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Nome textual para product name.</td>
                   </tr><tr>
                     <td><code>product_ref</code></td>
                     <td>text</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Campo product ref que participa do contexto funcional de snapshot diario por produto.</td>
                   </tr><tr>
                     <td><code>quantity</code></td>
                     <td>integer</td>
                     <td>nao</td>
                     <td><code>0</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Quantidade agregada ou unitária de quantity.</td>
                   </tr><tr>
                     <td><code>refreshed_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>nao</td>
                     <td><code>now()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp do evento refreshed at.</td>
                   </tr><tr>
                     <td><code>revenue_total</code></td>
                     <td>numeric(10,2)</td>
                     <td>nao</td>
                     <td><code>0</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Campo revenue total que participa do contexto funcional de snapshot diario por produto.</td>
                   </tr><tr>
                     <td><code>snapshot_date</code></td>
                     <td>date</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Campo snapshot date que participa do contexto funcional de snapshot diario por produto.</td>
                   </tr><tr>
                     <td><code>source_updated_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp do evento source updated at.</td>
                   </tr><tr>
                     <td><code>store_id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Chave estrangeira para stores.id; conecta este snapshot diario por produto ao registro relacionado.</td>
                   </tr>
             </tbody>
@@ -779,7 +779,7 @@
               <h2>customer_push_tokens</h2>
               <p class="table-subtitle">Tokens de push notification usados para notificar clientes autenticados ou convidados.</p>
             </div>
-            <div class="table-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
+            <div class="table-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
           </div>
           <p class="responsibility"><strong>Papel no sistema:</strong> Sustenta o dominio de token de push do cliente no backend.</p>
           <ul class="meta-list">
@@ -787,7 +787,7 @@
             <li><strong>Documentado a partir de:</strong> <code>test</code></li>
             <li><strong>Entity:</strong> sem entity TypeORM</li>
           </ul>
-          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Presente no banco de testes (espetinho_test) e ausente no banco dev (espetinho).</li><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
+          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
           <div class="grid">
             <div>
               <h3>Colunas</h3>
@@ -808,70 +808,70 @@
                     <td>text</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Metadado tecnico do dispositivo/aplicacao para token de push do cliente.</td>
                   </tr><tr>
                     <td><code>created_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>nao</td>
                     <td><code>now()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp de criacao do token de push do cliente.</td>
                   </tr><tr>
                     <td><code>device_model</code></td>
                     <td>text</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Metadado tecnico do dispositivo/aplicacao para token de push do cliente.</td>
                   </tr><tr>
                     <td><code>guest_id</code></td>
                     <td>text</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Identificador tecnico do convidado/dispositivo para notificacao e antifraude.</td>
                   </tr><tr>
                     <td><code>id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><code>gen_random_uuid()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Identificador unico do token de push do cliente.</td>
                   </tr><tr>
                     <td><code>is_active</code></td>
                     <td>boolean</td>
                     <td>nao</td>
                     <td><code>true</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Flag logica que indica se o token de push do cliente esta habilitado para uso.</td>
                   </tr><tr>
                     <td><code>platform</code></td>
                     <td>text</td>
                     <td>nao</td>
                     <td><code>&#39;android&#39;::text</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Metadado tecnico do dispositivo/aplicacao para token de push do cliente.</td>
                   </tr><tr>
                     <td><code>token</code></td>
                     <td>text</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Token bruto associado ao token de push do cliente.</td>
                   </tr><tr>
                     <td><code>updated_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>nao</td>
                     <td><code>now()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp da ultima atualizacao do token de push do cliente.</td>
                   </tr><tr>
                     <td><code>user_id</code></td>
                     <td>uuid</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Chave estrangeira para users.id; conecta este token de push do cliente ao registro relacionado.</td>
                   </tr>
             </tbody>
@@ -3314,7 +3314,7 @@
               <h2>store_user_push_tokens</h2>
               <p class="table-subtitle">Tokens de push notification para lojistas e operadores.</p>
             </div>
-            <div class="table-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
+            <div class="table-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
           </div>
           <p class="responsibility"><strong>Papel no sistema:</strong> Sustenta o dominio de store user push tokens no backend.</p>
           <ul class="meta-list">
@@ -3322,7 +3322,7 @@
             <li><strong>Documentado a partir de:</strong> <code>test</code></li>
             <li><strong>Entity:</strong> sem entity TypeORM</li>
           </ul>
-          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Presente no banco de testes (espetinho_test) e ausente no banco dev (espetinho).</li><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
+          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
           <div class="grid">
             <div>
               <h3>Colunas</h3>
@@ -3343,70 +3343,70 @@
                     <td>text</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Metadado tecnico do dispositivo/aplicacao para store user push tokens.</td>
                   </tr><tr>
                     <td><code>created_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>nao</td>
                     <td><code>now()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp de criacao do store user push tokens.</td>
                   </tr><tr>
                     <td><code>device_model</code></td>
                     <td>text</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Metadado tecnico do dispositivo/aplicacao para store user push tokens.</td>
                   </tr><tr>
                     <td><code>id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><code>gen_random_uuid()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Identificador unico do store user push tokens.</td>
                   </tr><tr>
                     <td><code>is_active</code></td>
                     <td>boolean</td>
                     <td>nao</td>
                     <td><code>true</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Flag logica que indica se o store user push tokens esta habilitado para uso.</td>
                   </tr><tr>
                     <td><code>platform</code></td>
                     <td>text</td>
                     <td>nao</td>
                     <td><code>&#39;android&#39;::text</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Metadado tecnico do dispositivo/aplicacao para store user push tokens.</td>
                   </tr><tr>
                     <td><code>store_id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Chave estrangeira para stores.id; conecta este store user push tokens ao registro relacionado.</td>
                   </tr><tr>
                     <td><code>token</code></td>
                     <td>text</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Token bruto associado ao store user push tokens.</td>
                   </tr><tr>
                     <td><code>updated_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>nao</td>
                     <td><code>now()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp da ultima atualizacao do store user push tokens.</td>
                   </tr><tr>
                     <td><code>user_id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Chave estrangeira para users.id; conecta este store user push tokens ao registro relacionado.</td>
                   </tr>
             </tbody>
@@ -4353,7 +4353,7 @@
               <h2>motoboy_push_tokens</h2>
               <p class="table-subtitle">Tokens de push notification para entregadores.</p>
             </div>
-            <div class="table-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
+            <div class="table-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
           </div>
           <p class="responsibility"><strong>Papel no sistema:</strong> Sustenta o dominio de motoboy push tokens no backend.</p>
           <ul class="meta-list">
@@ -4361,7 +4361,7 @@
             <li><strong>Documentado a partir de:</strong> <code>test</code></li>
             <li><strong>Entity:</strong> sem entity TypeORM</li>
           </ul>
-          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Presente no banco de testes (espetinho_test) e ausente no banco dev (espetinho).</li><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
+          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
           <div class="grid">
             <div>
               <h3>Colunas</h3>
@@ -4382,70 +4382,70 @@
                     <td>text</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Metadado tecnico do dispositivo/aplicacao para motoboy push tokens.</td>
                   </tr><tr>
                     <td><code>created_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>nao</td>
                     <td><code>now()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp de criacao do motoboy push tokens.</td>
                   </tr><tr>
                     <td><code>device_model</code></td>
                     <td>text</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Metadado tecnico do dispositivo/aplicacao para motoboy push tokens.</td>
                   </tr><tr>
                     <td><code>id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><code>gen_random_uuid()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Identificador unico do motoboy push tokens.</td>
                   </tr><tr>
                     <td><code>is_active</code></td>
                     <td>boolean</td>
                     <td>nao</td>
                     <td><code>true</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Flag logica que indica se o motoboy push tokens esta habilitado para uso.</td>
                   </tr><tr>
                     <td><code>motoboy_id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Chave estrangeira para motoboys.id; conecta este motoboy push tokens ao registro relacionado.</td>
                   </tr><tr>
                     <td><code>platform</code></td>
                     <td>text</td>
                     <td>nao</td>
                     <td><code>&#39;android&#39;::text</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Metadado tecnico do dispositivo/aplicacao para motoboy push tokens.</td>
                   </tr><tr>
                     <td><code>token</code></td>
                     <td>text</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Token bruto associado ao motoboy push tokens.</td>
                   </tr><tr>
                     <td><code>updated_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>nao</td>
                     <td><code>now()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp da ultima atualizacao do motoboy push tokens.</td>
                   </tr><tr>
                     <td><code>user_id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Chave estrangeira para users.id; conecta este motoboy push tokens ao registro relacionado.</td>
                   </tr>
             </tbody>
@@ -5572,7 +5572,7 @@
               <h2>guest_order_attempts</h2>
               <p class="table-subtitle">Tentativas de pedido como convidado, usadas para throttling e antifraude.</p>
             </div>
-            <div class="table-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
+            <div class="table-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
           </div>
           <p class="responsibility"><strong>Papel no sistema:</strong> Sustenta o dominio de tentativa de pedido convidado no backend.</p>
           <ul class="meta-list">
@@ -5580,7 +5580,7 @@
             <li><strong>Documentado a partir de:</strong> <code>test</code></li>
             <li><strong>Entity:</strong> sem entity TypeORM</li>
           </ul>
-          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Presente no banco de testes (espetinho_test) e ausente no banco dev (espetinho).</li><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
+          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
           <div class="grid">
             <div>
               <h3>Colunas</h3>
@@ -5601,42 +5601,42 @@
                     <td>timestamp with time zone</td>
                     <td>nao</td>
                     <td><code>now()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp de criacao do tentativa de pedido convidado.</td>
                   </tr><tr>
                     <td><code>guest_push_id</code></td>
                     <td>text</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Identificador tecnico do convidado/dispositivo para notificacao e antifraude.</td>
                   </tr><tr>
                     <td><code>id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><code>gen_random_uuid()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Identificador unico do tentativa de pedido convidado.</td>
                   </tr><tr>
                     <td><code>ip_address</code></td>
                     <td>text</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Endereco IP capturado para rastreamento tecnico e seguranca.</td>
                   </tr><tr>
                     <td><code>phone_digits</code></td>
                     <td>text</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Campo phone digits que participa do contexto funcional de tentativa de pedido convidado.</td>
                   </tr><tr>
                     <td><code>store_id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Chave estrangeira para stores.id; conecta este tentativa de pedido convidado ao registro relacionado.</td>
                   </tr>
             </tbody>
@@ -5661,7 +5661,7 @@
               <h2>guest_order_phone_blocks</h2>
               <p class="table-subtitle">Bloqueios por telefone para impedir pedidos abusivos de convidados.</p>
             </div>
-            <div class="table-badges"><span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
+            <div class="table-badges"><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-slate">ddl</span></div>
           </div>
           <p class="responsibility"><strong>Papel no sistema:</strong> Sustenta o dominio de bloqueio de telefone convidado no backend.</p>
           <ul class="meta-list">
@@ -5669,7 +5669,7 @@
             <li><strong>Documentado a partir de:</strong> <code>test</code></li>
             <li><strong>Entity:</strong> sem entity TypeORM</li>
           </ul>
-          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Presente no banco de testes (espetinho_test) e ausente no banco dev (espetinho).</li><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
+          <div class="callout callout-amber"><strong>Drift / observacoes:</strong><ul class="flat-list"><li>Tabela sem entity TypeORM; acesso provavelmente acontece por SQL manual.</li></ul></div>
           <div class="grid">
             <div>
               <h3>Colunas</h3>
@@ -5690,49 +5690,49 @@
                     <td>boolean</td>
                     <td>nao</td>
                     <td><code>true</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Flag logica que indica se o bloqueio de telefone convidado esta habilitado para uso.</td>
                   </tr><tr>
                     <td><code>created_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>nao</td>
                     <td><code>now()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp de criacao do bloqueio de telefone convidado.</td>
                   </tr><tr>
                     <td><code>id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><code>gen_random_uuid()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Identificador unico do bloqueio de telefone convidado.</td>
                   </tr><tr>
                     <td><code>phone_digits</code></td>
                     <td>text</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Campo phone digits que participa do contexto funcional de bloqueio de telefone convidado.</td>
                   </tr><tr>
                     <td><code>reason</code></td>
                     <td>text</td>
                     <td>sim</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Motivo de negocio ou seguranca associado ao bloqueio de telefone convidado.</td>
                   </tr><tr>
                     <td><code>store_id</code></td>
                     <td>uuid</td>
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Chave estrangeira para stores.id; conecta este bloqueio de telefone convidado ao registro relacionado.</td>
                   </tr><tr>
                     <td><code>updated_at</code></td>
                     <td>timestamp with time zone</td>
                     <td>nao</td>
                     <td><code>now()</code></td>
-                    <td><span class="badge badge-blue">test</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span></td>
                     <td>Timestamp da ultima atualizacao do bloqueio de telefone convidado.</td>
                   </tr>
             </tbody>
@@ -7311,12 +7311,26 @@
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
                     <td>Campo de endereco (address) associado ao destination listings.</td>
                   </tr><tr>
+                    <td><code>address_number</code></td>
+                    <td>text</td>
+                    <td>sim</td>
+                    <td><span class="muted">-</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-amber">entity</span></td>
+                    <td>Campo address number que participa do contexto funcional de destination listings.</td>
+                  </tr><tr>
                     <td><code>category</code></td>
                     <td>text</td>
                     <td>nao</td>
                     <td><code>&#39;SERVICO&#39;::text</code></td>
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
                     <td>Campo category que participa do contexto funcional de destination listings.</td>
+                  </tr><tr>
+                    <td><code>city</code></td>
+                    <td>text</td>
+                    <td>sim</td>
+                    <td><span class="muted">-</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-amber">entity</span></td>
+                    <td>Campo de endereco (city) associado ao destination listings.</td>
                   </tr><tr>
                     <td><code>created_at</code></td>
                     <td>timestamp with time zone</td>
@@ -7352,6 +7366,13 @@
                     <td><span class="muted">-</span></td>
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
                     <td>Chave estrangeira para travel_destinations.id; conecta este destination listings ao registro relacionado.</td>
+                  </tr><tr>
+                    <td><code>district</code></td>
+                    <td>text</td>
+                    <td>sim</td>
+                    <td><span class="muted">-</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-amber">entity</span></td>
+                    <td>Campo district que participa do contexto funcional de destination listings.</td>
                   </tr><tr>
                     <td><code>featured</code></td>
                     <td>boolean</td>
@@ -7416,6 +7437,13 @@
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
                     <td>Campo sort order que participa do contexto funcional de destination listings.</td>
                   </tr><tr>
+                    <td><code>state</code></td>
+                    <td>character varying(2)</td>
+                    <td>sim</td>
+                    <td><span class="muted">-</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-amber">entity</span></td>
+                    <td>Campo de endereco (state) associado ao destination listings.</td>
+                  </tr><tr>
                     <td><code>store_id</code></td>
                     <td>uuid</td>
                     <td>sim</td>
@@ -7450,6 +7478,13 @@
                     <td><span class="muted">-</span></td>
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
                     <td>Campo whatsapp que participa do contexto funcional de destination listings.</td>
+                  </tr><tr>
+                    <td><code>zip_code</code></td>
+                    <td>text</td>
+                    <td>sim</td>
+                    <td><span class="muted">-</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-amber">entity</span></td>
+                    <td>Codigo/identificador curto para zip code.</td>
                   </tr>
             </tbody>
           </table>
@@ -8288,6 +8323,13 @@
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
                     <td>Campo de endereco (address) associado ao hospitality places.</td>
                   </tr><tr>
+                    <td><code>address_number</code></td>
+                    <td>text</td>
+                    <td>sim</td>
+                    <td><span class="muted">-</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-amber">entity</span></td>
+                    <td>Campo address number que participa do contexto funcional de hospitality places.</td>
+                  </tr><tr>
                     <td><code>amenities</code></td>
                     <td>jsonb</td>
                     <td>sim</td>
@@ -8343,6 +8385,13 @@
                     <td><span class="muted">-</span></td>
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
                     <td>Chave estrangeira para travel_destinations.id; conecta este hospitality places ao registro relacionado.</td>
+                  </tr><tr>
+                    <td><code>district</code></td>
+                    <td>text</td>
+                    <td>sim</td>
+                    <td><span class="muted">-</span></td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-amber">entity</span></td>
+                    <td>Campo district que participa do contexto funcional de hospitality places.</td>
                   </tr><tr>
                     <td><code>id</code></td>
                     <td>uuid</td>

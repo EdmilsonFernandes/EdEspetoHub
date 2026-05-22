@@ -239,6 +239,8 @@ const seedListings = async (destinationId: string) => {
           title,
           description,
           address,
+          city,
+          state,
           phone,
           whatsapp,
           website_url,
@@ -249,7 +251,7 @@ const seedListings = async (destinationId: string) => {
           active,
           updated_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE, NOW());
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, TRUE, NOW());
       `,
       [
         destinationId,
@@ -257,6 +259,8 @@ const seedListings = async (destinationId: string) => {
         seed.title,
         listingDescription(seed),
         seed.address || null,
+        SAO_BENTO_DESTINATION_SEED.city,
+        SAO_BENTO_DESTINATION_SEED.state,
         seed.phone || null,
         seed.whatsapp || null,
         seed.websiteUrl || null,

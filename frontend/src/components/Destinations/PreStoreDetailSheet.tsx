@@ -7,6 +7,7 @@ import {
   ForkKnife,
   GlobeHemisphereWest,
   MapPinLine,
+  NavigationArrow,
   PhoneCall,
   ShoppingBagOpen,
   Sparkle,
@@ -25,17 +26,20 @@ const actionClasses: Record<string, string> = {
   phone: 'border-[#153A4C]/12 bg-white text-[#153A4C]',
   instagram: 'border-pink-100 bg-white text-slate-700',
   site: 'border-slate-200 bg-white text-slate-700',
+  route: 'border-[#153A4C]/12 bg-[#153A4C] text-white',
 };
 
 const actionIcon = (kind?: string) => {
   if (kind === 'whatsapp') return <WhatsappLogo size={16} weight="fill" />;
   if (kind === 'phone') return <PhoneCall size={16} weight="duotone" />;
   if (kind === 'instagram') return <InstagramIcon className="h-4 w-4" />;
+  if (kind === 'route') return <NavigationArrow size={16} weight="fill" />;
   return <GlobeHemisphereWest size={16} weight="duotone" />;
 };
 
 const ContactAction = ({ action }: any) => {
   if (!action?.href) return null;
+  const className = `inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition hover:-translate-y-0.5 ${actionClasses[action.kind] || actionClasses.site}`;
 
   const handleClick = async (event: any) => {
     if (action.kind === 'whatsapp') {
@@ -58,13 +62,22 @@ const ContactAction = ({ action }: any) => {
     void openActionTarget({ href: action.href, external: true });
   };
 
+  if (action.kind === 'route' && String(action.href || '').startsWith('/')) {
+    return (
+      <Link to={action.href} className={className}>
+        {actionIcon(action.kind)}
+        {action.label}
+      </Link>
+    );
+  }
+
   return (
     <a
       href={action.href}
       onClick={handleClick}
       target={action.external || (!action.native && action.kind === 'whatsapp') ? '_blank' : undefined}
       rel="noreferrer"
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition hover:-translate-y-0.5 ${actionClasses[action.kind] || actionClasses.site}`}
+      className={className}
     >
       {actionIcon(action.kind)}
       {action.label}
@@ -100,6 +113,7 @@ export function PreStoreDetailSheet({
   instagramUrl,
   websiteUrl,
   websiteLabel = 'Site',
+  routeAction,
   address,
 }: any) {
   useEffect(() => {
@@ -123,6 +137,7 @@ export function PreStoreDetailSheet({
 
   const actions = [
     primaryAction,
+    routeAction,
     instagramUrl ? { href: instagramUrl, label: 'Instagram', kind: 'instagram', external: true } : null,
     websiteUrl ? { href: websiteUrl, label: websiteLabel, kind: 'site', external: true } : null,
   ].filter(Boolean);

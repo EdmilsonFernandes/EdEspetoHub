@@ -2183,6 +2183,8 @@ export async function runMigrations() {
       type TEXT NOT NULL DEFAULT 'CHALE',
       description TEXT,
       address TEXT,
+      address_number TEXT,
+      district TEXT,
       city TEXT,
       state VARCHAR(2),
       zip_code TEXT,
@@ -2206,6 +2208,14 @@ export async function runMigrations() {
   await AppDataSource.query(`
     ALTER TABLE hospitality_places
     ADD COLUMN IF NOT EXISTS banner_urls JSONB DEFAULT '[]'::jsonb;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE hospitality_places
+    ADD COLUMN IF NOT EXISTS address_number TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE hospitality_places
+    ADD COLUMN IF NOT EXISTS district TEXT;
   `);
   await AppDataSource.query(`
     UPDATE hospitality_places
@@ -2257,6 +2267,11 @@ export async function runMigrations() {
       description TEXT,
       image_url TEXT,
       address TEXT,
+      address_number TEXT,
+      district TEXT,
+      city TEXT,
+      state VARCHAR(2),
+      zip_code TEXT,
       lat NUMERIC(10,7),
       lng NUMERIC(10,7),
       phone TEXT,
@@ -2275,6 +2290,26 @@ export async function runMigrations() {
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_destination_listings_destination_active
     ON destination_listings(destination_id, active, featured, sort_order);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_listings
+    ADD COLUMN IF NOT EXISTS address_number TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_listings
+    ADD COLUMN IF NOT EXISTS district TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_listings
+    ADD COLUMN IF NOT EXISTS city TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_listings
+    ADD COLUMN IF NOT EXISTS state VARCHAR(2);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_listings
+    ADD COLUMN IF NOT EXISTS zip_code TEXT;
   `);
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_destination_listings_place

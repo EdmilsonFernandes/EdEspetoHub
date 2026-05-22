@@ -48,6 +48,34 @@ const normalizeCoordinate = (value?: string | number | null) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+export const buildDestinationAddressLine = ({
+  address,
+  addressNumber,
+  district,
+  city,
+  state,
+  zipCode,
+}: {
+  address?: string | null;
+  addressNumber?: string | number | null;
+  district?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zipCode?: string | null;
+}) => {
+  const street = String(address || '').trim();
+  const number = String(addressNumber || '').trim();
+  const districtText = String(district || '').trim();
+  const cityState = [city, state].map((value) => String(value || '').trim()).filter(Boolean).join(' - ');
+  const zip = String(zipCode || '').trim();
+  return [
+    [street, number ? `nº ${number}` : ''].filter(Boolean).join(', '),
+    districtText,
+    cityState,
+    zip ? `CEP ${zip}` : '',
+  ].filter(Boolean).join(' · ');
+};
+
 export const buildDestinationMapUrl = ({
   address,
   lat,
@@ -70,22 +98,44 @@ export const buildHospitalityServiceRouteUrl = ({
   destinationSlug,
   placeSlug,
   serviceName,
+  serviceId,
   serviceAddress,
+  serviceAddressNumber,
+  serviceDistrict,
+  serviceCity,
+  serviceState,
+  serviceZipCode,
   serviceLat,
   serviceLng,
   placeName,
   placeAddress,
+  placeAddressNumber,
+  placeDistrict,
+  placeCity,
+  placeState,
+  placeZipCode,
   placeLat,
   placeLng,
 }: {
   destinationSlug?: string | null;
   placeSlug?: string | null;
   serviceName?: string | null;
+  serviceId?: string | null;
   serviceAddress?: string | null;
+  serviceAddressNumber?: string | number | null;
+  serviceDistrict?: string | null;
+  serviceCity?: string | null;
+  serviceState?: string | null;
+  serviceZipCode?: string | null;
   serviceLat?: string | number | null;
   serviceLng?: string | number | null;
   placeName?: string | null;
   placeAddress?: string | null;
+  placeAddressNumber?: string | number | null;
+  placeDistrict?: string | null;
+  placeCity?: string | null;
+  placeState?: string | null;
+  placeZipCode?: string | null;
   placeLat?: string | number | null;
   placeLng?: string | number | null;
 }, origin = JNC_PUBLIC_ORIGIN) => {
@@ -102,15 +152,29 @@ export const buildHospitalityServiceRouteUrl = ({
     const text = String(value ?? '').trim();
     if (text) params.set(key, text);
   };
+  const compactServiceId = String(serviceId || '').trim();
 
-  append('serviceName', serviceName);
-  append('serviceAddress', serviceAddress);
-  append('serviceLat', serviceLat);
-  append('serviceLng', serviceLng);
-  append('placeName', placeName);
-  append('placeAddress', placeAddress);
-  append('placeLat', placeLat);
-  append('placeLng', placeLng);
+  append('servico', compactServiceId);
+  if (!compactServiceId) {
+    append('serviceName', serviceName);
+    append('serviceAddress', serviceAddress);
+    append('serviceAddressNumber', serviceAddressNumber);
+    append('serviceDistrict', serviceDistrict);
+    append('serviceCity', serviceCity);
+    append('serviceState', serviceState);
+    append('serviceZipCode', serviceZipCode);
+    append('serviceLat', serviceLat);
+    append('serviceLng', serviceLng);
+    append('placeName', placeName);
+    append('placeAddress', placeAddress);
+    append('placeAddressNumber', placeAddressNumber);
+    append('placeDistrict', placeDistrict);
+    append('placeCity', placeCity);
+    append('placeState', placeState);
+    append('placeZipCode', placeZipCode);
+    append('placeLat', placeLat);
+    append('placeLng', placeLng);
+  }
 
   const suffix = params.toString() ? `?${params.toString()}` : '';
   return `${base}/destinos/${encodeURIComponent(destination)}/chales/${encodeURIComponent(place)}/rota${suffix}`;
@@ -119,46 +183,72 @@ export const buildHospitalityServiceRouteUrl = ({
 const buildLocationMessageLines = ({
   label,
   address,
+  addressNumber,
+  district,
+  city,
+  state,
+  zipCode,
   lat,
   lng,
 }: {
   label: string;
   address?: string | null;
+  addressNumber?: string | number | null;
+  district?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zipCode?: string | null;
   lat?: string | number | null;
   lng?: string | number | null;
 }) => {
-  const safeAddress = String(address || '').trim();
+  const safeAddress = buildDestinationAddressLine({ address, addressNumber, district, city, state, zipCode });
   const mapUrl = buildDestinationMapUrl({ address: safeAddress, lat, lng });
   if (!safeAddress && !mapUrl) return [];
 
   return [
-    safeAddress ? `Local ${label}: ${safeAddress}` : '',
-    mapUrl ? `Mapa ${label.toLowerCase()}: ${mapUrl}` : '',
+    safeAddress ? `${label}: ${safeAddress}` : '',
+    mapUrl ? `Abrir localização: ${mapUrl}` : '',
   ].filter(Boolean);
 };
 
 const buildHospitalityDeliveryReferenceLines = ({
   placeName,
   placeAddress,
+  placeAddressNumber,
+  placeDistrict,
+  placeCity,
+  placeState,
+  placeZipCode,
   placeLat,
   placeLng,
 }: {
   placeName?: string | null;
   placeAddress?: string | null;
+  placeAddressNumber?: string | number | null;
+  placeDistrict?: string | null;
+  placeCity?: string | null;
+  placeState?: string | null;
+  placeZipCode?: string | null;
   placeLat?: string | number | null;
   placeLng?: string | number | null;
 }) => {
   const safePlaceName = String(placeName || '').trim();
-  const safeAddress = String(placeAddress || '').trim();
+  const safeAddress = buildDestinationAddressLine({
+    address: placeAddress,
+    addressNumber: placeAddressNumber,
+    district: placeDistrict,
+    city: placeCity,
+    state: placeState,
+    zipCode: placeZipCode,
+  });
   const mapUrl = buildDestinationMapUrl({ address: safeAddress, lat: placeLat, lng: placeLng });
 
   if (!safePlaceName && !safeAddress && !mapUrl) return [];
 
   return [
-    'Referencia para entrega/atendimento:',
-    safePlaceName ? `Hospedagem: ${safePlaceName}` : '',
-    safeAddress ? `Endereco da hospedagem: ${safeAddress}` : '',
-    mapUrl ? `Mapa da hospedagem: ${mapUrl}` : '',
+    safePlaceName ? `Estou hospedado(a) em: ${safePlaceName}` : '',
+    safeAddress ? `Endereço para entrega: ${safeAddress}` : '',
+    mapUrl ? `Localização do chalé: ${mapUrl}` : '',
   ].filter(Boolean);
 };
 
@@ -170,11 +260,22 @@ export const buildDestinationInquiryMessage = ({
   itemType,
   placeName,
   placeAddress,
+  placeAddressNumber,
+  placeDistrict,
+  placeCity,
+  placeState,
+  placeZipCode,
   placeLat,
   placeLng,
   itemAddress,
+  itemAddressNumber,
+  itemDistrict,
+  itemCity,
+  itemState,
+  itemZipCode,
   itemLat,
   itemLng,
+  itemId,
   address,
   lat,
   lng,
@@ -189,11 +290,22 @@ export const buildDestinationInquiryMessage = ({
   itemType?: string | null;
   placeName?: string | null;
   placeAddress?: string | null;
+  placeAddressNumber?: string | number | null;
+  placeDistrict?: string | null;
+  placeCity?: string | null;
+  placeState?: string | null;
+  placeZipCode?: string | null;
   placeLat?: string | number | null;
   placeLng?: string | number | null;
   itemAddress?: string | null;
+  itemAddressNumber?: string | number | null;
+  itemDistrict?: string | null;
+  itemCity?: string | null;
+  itemState?: string | null;
+  itemZipCode?: string | null;
   itemLat?: string | number | null;
   itemLng?: string | number | null;
+  itemId?: string | null;
   address?: string | null;
   lat?: string | number | null;
   lng?: string | number | null;
@@ -211,28 +323,50 @@ export const buildDestinationInquiryMessage = ({
   const hospitalityReferenceLines = buildHospitalityDeliveryReferenceLines({
     placeName,
     placeAddress,
+    placeAddressNumber,
+    placeDistrict,
+    placeCity,
+    placeState,
+    placeZipCode,
     placeLat,
     placeLng,
   });
   const itemLocationLines = buildLocationMessageLines({
-    label: typeLabel.includes('hospedagem') ? 'da hospedagem' : 'do atendimento',
+    label: typeLabel.includes('hospedagem') ? 'Endereço da hospedagem' : 'Endereço do atendimento',
     address: resolvedItemAddress,
+    addressNumber: itemAddressNumber,
+    district: itemDistrict,
+    city: itemCity,
+    state: itemState,
+    zipCode: itemZipCode,
     lat: resolvedItemLat,
     lng: resolvedItemLng,
   });
   const shouldIncludeItemLocation = Boolean(itemLocationLines.length) && !hasHospitalityContext;
-  const routeContextUrl = buildHospitalityServiceRouteUrl({
+  const shouldIncludeRouteContext = hasHospitalityContext && !typeLabel.includes('hospedagem');
+  const routeContextUrl = shouldIncludeRouteContext ? buildHospitalityServiceRouteUrl({
     destinationSlug,
     placeSlug,
     serviceName: subject,
+    serviceId: itemId,
     serviceAddress: resolvedItemAddress,
+    serviceAddressNumber: itemAddressNumber,
+    serviceDistrict: itemDistrict,
+    serviceCity: itemCity,
+    serviceState: itemState,
+    serviceZipCode: itemZipCode,
     serviceLat: resolvedItemLat,
     serviceLng: resolvedItemLng,
     placeName,
     placeAddress,
+    placeAddressNumber,
+    placeDistrict,
+    placeCity,
+    placeState,
+    placeZipCode,
     placeLat,
     placeLng,
-  });
+  }) : '';
   const appContextUrl = destinationSlug && placeSlug
     ? buildHospitalityPlaceSmartQrUrl({
         destinationSlug,
@@ -245,14 +379,14 @@ export const buildDestinationInquiryMessage = ({
   return [
     `Olá! Encontrei ${subject} pelo Já no Caminho.`,
     hasHospitalityContext
-      ? `Estou ${location ? `em ${location} e ` : ''}hospedado(a) em ${String(placeName || 'uma hospedagem cadastrada').trim()}.`
+      ? location ? `Estou em ${location}.` : ''
       : location ? `Estou visitando ${location}.` : '',
     ...hospitalityReferenceLines,
     ...(shouldIncludeItemLocation ? itemLocationLines : []),
     routeContextUrl
-      ? `Link com rota/referencia para entrega: ${routeContextUrl}`
+      ? `Como chegar até meu chalé: ${routeContextUrl}`
       : appContextUrl ? `Link do Já no Caminho para ver a hospedagem e instalar o app: ${appContextUrl}` : '',
-    `Gostaria de saber mais sobre ${typeLabel}: disponibilidade, valores e como funciona o atendimento.`,
+    `Gostaria de saber valores, disponibilidade e se vocês conseguem atender aqui.`,
     'Pode me passar os detalhes, por favor?',
   ].filter(Boolean).join('\n');
 };

@@ -39,6 +39,12 @@ export class HospitalityPlace {
   @Column({ type: 'text', nullable: true })
   address?: string | null;
 
+  @Column({ name: 'address_number', type: 'text', nullable: true })
+  addressNumber?: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  district?: string | null;
+
   @Column({ type: 'text', nullable: true })
   city?: string | null;
 
