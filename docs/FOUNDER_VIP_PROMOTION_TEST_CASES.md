@@ -14,7 +14,7 @@ Objetivo: liberar uma campanha de entrada para as primeiras lojas sem mexer no V
 ```sql
 INSERT INTO site_settings ("key", "value") VALUES
   ('founder_vip_enabled', 'true'),
-  ('founder_vip_store_limit', '30'),
+  ('founder_vip_store_limit', '50'),
   ('founder_vip_days', '90'),
   ('founder_vip_label', 'Campanha fundador - 3 meses de acesso VIP')
 ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", updated_at = NOW();

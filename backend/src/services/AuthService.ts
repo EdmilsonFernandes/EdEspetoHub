@@ -952,6 +952,11 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     }
     const planExempt = Boolean(firstStore?.settings?.planExempt);
     const planTier = resolvePlanTier(currentSubscription?.plan?.name, planExempt);
+    const founderVipPromotion =
+      firstStore?.settings?.acquisitionAttribution &&
+      typeof firstStore.settings.acquisitionAttribution === 'object'
+        ? (firstStore.settings.acquisitionAttribution as any).founderVipPromotion || null
+        : null;
     const features = resolvePlanFeatures({
       planName: currentSubscription?.plan?.name,
       planExempt,
@@ -969,6 +974,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
             plan: currentSubscription.plan,
             endDate: currentSubscription.endDate,
             planExempt,
+            founderVipPromotion,
           }
         : null,
       planTier,
@@ -1098,6 +1104,11 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     };
     const planExempt = Boolean(store?.settings?.planExempt);
     const planTier = resolvePlanTier(currentSubscription?.plan?.name, planExempt);
+    const founderVipPromotion =
+      store?.settings?.acquisitionAttribution &&
+      typeof store.settings.acquisitionAttribution === 'object'
+        ? (store.settings.acquisitionAttribution as any).founderVipPromotion || null
+        : null;
     const features = resolvePlanFeatures({
       planName: currentSubscription?.plan?.name,
       planExempt,
@@ -1115,6 +1126,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
             plan: currentSubscription.plan,
             endDate: currentSubscription.endDate,
             planExempt,
+            founderVipPromotion,
           }
         : null,
       planTier,

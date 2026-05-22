@@ -1290,12 +1290,23 @@ const PaymentsView = ({
   const plan = subscription?.plan;
   const planName = String(plan?.name || '').toLowerCase();
   const isBasicPlan = !isVip && planName.includes('basic');
+  const rawStatus = (subscription?.status || '').toUpperCase();
+  const isTrial = !isVip && rawStatus === 'TRIAL';
+  const founderVipPromotion =
+    subscription?.founderVipPromotion ||
+    subscription?.store?.settings?.acquisitionAttribution?.founderVipPromotion ||
+    null;
+  const isFounderVipTrial = Boolean(isTrial && founderVipPromotion?.applied);
   const planLabel = isVip
     ? subscription?.plan?.displayName || subscription?.planExemptLabel || 'Cliente VIP'
+    : isFounderVipTrial
+    ? 'VIP fundador - 3 meses grátis'
     : plan?.displayName || plan?.name || 'Plano não identificado';
-  const priceValue = isVip ? 0 : (subscription?.latestPaymentAmount ?? plan?.price ?? 0);
+  const priceValue = isVip || isTrial ? 0 : (subscription?.latestPaymentAmount ?? plan?.price ?? 0);
   const methodMeta = isVip
     ? { label: 'Isento de plano', icon: null }
+    : isTrial
+    ? { label: 'Sem cobrança no período grátis', icon: null }
     : getPaymentMethodMeta(subscription?.paymentMethod);
   const expiresLabel = isVip ? 'Sem vencimento' : (subscription?.endDate ? formatDateTime(subscription.endDate) : '—');
   const resolveDaysUntil = (value) => {
@@ -1316,9 +1327,12 @@ const PaymentsView = ({
         ? 'expira hoje'
         : `expirado há ${Math.abs(expiresInDays)} dia${Math.abs(expiresInDays) === 1 ? '' : 's'}`
       : '';
-  const rawStatus = (subscription?.status || '').toUpperCase();
   const statusMap: Record<string, { label: string; tone: string; accent: string }> = {
-    TRIAL: { label: 'Trial ativo (7 dias)', tone: 'bg-emerald-100 text-emerald-700', accent: 'border-l-emerald-400 bg-white' },
+    TRIAL: {
+      label: isFounderVipTrial ? 'VIP fundador ativo' : 'Trial ativo',
+      tone: 'bg-emerald-100 text-emerald-700',
+      accent: 'border-l-emerald-400 bg-white',
+    },
     ACTIVE: { label: 'Assinatura ativa', tone: 'bg-emerald-100 text-emerald-700', accent: 'border-l-emerald-400 bg-white' },
     PENDING: { label: 'Aguardando pagamento', tone: 'bg-amber-100 text-amber-700', accent: 'border-l-amber-400 bg-white' },
     EXPIRED: { label: 'Assinatura expirada', tone: 'bg-rose-100 text-rose-700', accent: 'border-l-rose-400 bg-white' },
@@ -1340,6 +1354,8 @@ const PaymentsView = ({
   const paymentStatus =
     isVip
       ? 'Isento de cobranca (VIP)'
+      : isFounderVipTrial
+      ? 'Sem cobrança durante a campanha fundador'
       : rawStatus === 'TRIAL'
       ? 'Sem cobrança durante o trial'
       : paymentStatusMap[rawPaymentStatus] || subscription?.latestPaymentStatus || '—';
@@ -1516,7 +1532,11 @@ const PaymentsView = ({
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Valor</p>
             <p className="text-lg font-semibold text-slate-900 mt-2">{formatCurrency(priceValue)}</p>
             <p className="text-xs text-slate-500 mt-1">
-              {isVip ? 'Sem cobranca e sem vencimento' : `Plano ${plan?.billingCycle || 'mensal'}`}
+              {isVip
+                ? 'Sem cobranca e sem vencimento'
+                : isTrial
+                ? 'Sem cobrança durante o período grátis'
+                : `Plano ${plan?.billingCycle || 'mensal'}`}
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 border-l-4 border-l-sky-400 bg-slate-50 p-4">

@@ -13,6 +13,11 @@
 
 import { PlanRepository } from '../repositories/PlanRepository';
 import { Plan, PlanName } from '../entities/Plan';
+import { AppDataSource } from '../config/database';
+import { env } from '../config/env';
+import { Store } from '../entities/Store';
+import { SettingsService } from './SettingsService';
+import { resolveFounderVipPromotion } from '../utils/founderVipPromotion';
 
 const BASIC_MONTHLY_DEFAULT = 69.9;
 const PRO_MONTHLY_DEFAULT = 119.9;
@@ -39,6 +44,7 @@ const LEGACY_PLANS: PlanName[] = ['monthly', 'yearly'];
  */
 export class PlanService {
   private planRepository = new PlanRepository();
+  private settingsService = new SettingsService();
 
     /**
    * Executes resolve monthly price business logic.
@@ -59,6 +65,40 @@ private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly'
   async listEnabled() {
     await this.ensureSeededPlans();
     return this.planRepository.findEnabled();
+  }
+
+  async getSignupPromotionStatus() {
+    const [enabledValue, limitValue, daysValue, labelValue, fallbackTrialDays, existingStoresCount] = await Promise.all([
+      this.settingsService.getValue('founder_vip_enabled'),
+      this.settingsService.getValue('founder_vip_store_limit'),
+      this.settingsService.getValue('founder_vip_days'),
+      this.settingsService.getValue('founder_vip_label'),
+      this.settingsService.getNumber('trial_days', env.trialDays),
+      AppDataSource.getRepository(Store).count(),
+    ]);
+    const promotion = resolveFounderVipPromotion({
+      enabledValue,
+      limitValue,
+      daysValue,
+      labelValue,
+      existingStoresCount,
+      fallbackTrialDays,
+    });
+    const used = Math.min(existingStoresCount, promotion.limit);
+    const remaining = promotion.enabled ? Math.max(0, promotion.limit - existingStoresCount) : 0;
+
+    return {
+      enabled: promotion.enabled,
+      applies: promotion.applies,
+      limit: promotion.limit,
+      used,
+      remaining,
+      promoDays: promotion.promoDays,
+      trialDays: promotion.trialDays,
+      fallbackTrialDays,
+      label: promotion.label,
+      nextPosition: promotion.position,
+    };
   }
 
   /**

@@ -81,6 +81,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     Boolean(auth?.store?.settings?.planExempt) ||
     subscription?.plan?.name === 'vip';
   const isTrial = !isVip && subscription?.status === 'TRIAL';
+  const founderVipPromotion =
+    subscription?.founderVipPromotion ||
+    auth?.subscription?.founderVipPromotion ||
+    auth?.store?.settings?.acquisitionAttribution?.founderVipPromotion ||
+    null;
+  const isFounderVipTrial = Boolean(isTrial && founderVipPromotion?.applied);
   const showRenewBanner =
     !isVip &&
     !isTrial &&
@@ -104,10 +110,16 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 ★
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">Trial premium ativo</p>
+                <p className="text-sm font-semibold text-slate-900">
+                  {isFounderVipTrial ? 'VIP fundador ativo' : 'Trial premium ativo'}
+                </p>
                 <p className="text-xs text-slate-600">
                   {typeof daysLeft === 'number' && daysLeft >= 0
-                    ? `Seu trial termina em ${daysLeft} dia${daysLeft === 1 ? '' : 's'}.`
+                    ? isFounderVipTrial
+                      ? `Sua campanha de 3 meses termina em ${daysLeft} dia${daysLeft === 1 ? '' : 's'}.`
+                      : `Seu trial termina em ${daysLeft} dia${daysLeft === 1 ? '' : 's'}.`
+                    : isFounderVipTrial
+                    ? 'Sua campanha de 3 meses esta ativa. Aproveite para configurar sua loja.'
                     : 'Seu trial esta ativo. Aproveite para configurar sua loja.'}
                 </p>
               </div>
@@ -116,7 +128,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               onClick={() => navigate('/admin/renewal')}
               className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:opacity-90 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
             >
-              Garantir minha vaga
+              {isFounderVipTrial ? 'Ver assinatura' : 'Garantir minha vaga'}
             </button>
           </div>
         </div>

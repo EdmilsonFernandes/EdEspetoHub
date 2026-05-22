@@ -73,6 +73,41 @@ describe('Auth — Registro e Login', () => {
         await AppDataSource.query(`DELETE FROM site_settings WHERE "key" = ANY($1)`, [keys]);
       }
     });
+
+    it('expõe status público da campanha fundador para o cadastro', async () => {
+      const keys = ['founder_vip_enabled', 'founder_vip_store_limit', 'founder_vip_days', 'founder_vip_label'];
+      try {
+        const rows = await AppDataSource.query(`SELECT COUNT(*)::int AS count FROM stores`);
+        const currentStores = Number(rows?.[0]?.count || 0);
+        const limit = currentStores + 2;
+        await AppDataSource.query(
+          `
+          INSERT INTO site_settings ("key", "value") VALUES
+            ('founder_vip_enabled', 'true'),
+            ('founder_vip_store_limit', $1),
+            ('founder_vip_days', '90'),
+            ('founder_vip_label', 'Campanha fundador teste')
+          ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", updated_at = NOW()
+          `,
+          [String(limit)]
+        );
+
+        const res = await api.get('/api/signup-promotion');
+        expect(res.status).toBe(200);
+        expect(res.body).toMatchObject({
+          enabled: true,
+          applies: true,
+          limit,
+          used: currentStores,
+          remaining: 2,
+          promoDays: 90,
+          trialDays: 90,
+          label: 'Campanha fundador teste',
+        });
+      } finally {
+        await AppDataSource.query(`DELETE FROM site_settings WHERE "key" = ANY($1)`, [keys]);
+      }
+    });
   });
 
   // ─── Login de Lojista ───

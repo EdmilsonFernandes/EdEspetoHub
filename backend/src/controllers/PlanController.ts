@@ -41,4 +41,15 @@ export class PlanController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+  static async signupPromotion(req: Request, res: Response) {
+    try {
+      log.debug('Signup promotion request');
+      const promotion = await planService.getSignupPromotionStatus();
+      return res.json(promotion);
+    } catch (error: any) {
+      log.warn('Signup promotion failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
 }

@@ -68,6 +68,11 @@ export class SubscriptionController {
         return respondWithError(req, res, new AppError('SUB-001', 404), 404);
       }
       const latestPaidPayment = await paymentRepository.findLatestPaidByStoreId(req.params.storeId);
+      const founderVipPromotion =
+        store?.settings?.acquisitionAttribution &&
+        typeof store.settings.acquisitionAttribution === 'object'
+          ? (store.settings.acquisitionAttribution as any).founderVipPromotion || null
+          : null;
       const payload = planExempt
         ? {
             id: `vip-${req.params.storeId}`,
@@ -82,6 +87,7 @@ export class SubscriptionController {
         ...payload,
         planExempt,
         planExemptLabel: planExempt ? planExemptLabel : null,
+        founderVipPromotion,
         latestPaymentAt: latestPaidPayment?.createdAt ?? null,
         latestPaymentStatus: latestPaidPayment?.status ?? null,
         latestPaymentAmount: latestPaidPayment?.amount ?? null,

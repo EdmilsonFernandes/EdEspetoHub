@@ -51,6 +51,8 @@ const SOCIAL_NETWORK_OPTIONS = [
   { type: 'linkedin', label: 'LinkedIn', placeholder: 'URL do perfil/empresa' },
 ];
 
+const ONBOARDING_PAID_PLANS_LOCKED = true;
+
 const STORE_SEGMENT_PRESETS: Record<string, { primaryColor: string; secondaryColor: string; description: string; orderTypes: string[]; categories: string[] }> = {
   restaurante: {
     primaryColor: '#f97316',
@@ -199,6 +201,9 @@ export function CreateStore() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isPreflightingOwner, setIsPreflightingOwner] = useState(false);
   const [plans, setPlans] = useState([]);
+  const [signupPromotion, setSignupPromotion] = useState<any | null>(null);
+  const [signupPromotionLoading, setSignupPromotionLoading] = useState(false);
+  const [signupPromotionError, setSignupPromotionError] = useState('');
   const [selectedPlanId, setSelectedPlanId] = useState('test-plan-7days');
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [paymentResult, setPaymentResult] = useState(null);
@@ -673,8 +678,8 @@ export function CreateStore() {
         const response = await planService.list();
         setPlans(response || []);
 
-        // If planId is provided via URL, use it
-        if (planIdFromUrl) {
+        // During onboarding the owner always enters through the free period; paid plans are chosen after expiration.
+        if (planIdFromUrl && !ONBOARDING_PAID_PLANS_LOCKED) {
           setSelectedPlanId(planIdFromUrl);
           return;
         }
@@ -685,7 +690,12 @@ export function CreateStore() {
           return;
         }
 
-        if ((planFromUrl === 'basic' || planFromUrl === 'pro') && Array.isArray(response) && response.length) {
+        if (
+          (planFromUrl === 'basic' || planFromUrl === 'pro') &&
+          !ONBOARDING_PAID_PLANS_LOCKED &&
+          Array.isArray(response) &&
+          response.length
+        ) {
           const resolvedBilling = 'monthly';
           const planName = getPlanName(planFromUrl, resolvedBilling);
           const matchedPlan = response.find((plan) => plan.name === planName);
@@ -719,6 +729,28 @@ export function CreateStore() {
   }, [planIdFromUrl, planFromUrl, billingFromUrl]);
 
   useEffect(() => {
+    let cancelled = false;
+    const fetchSignupPromotion = async () => {
+      setSignupPromotionLoading(true);
+      setSignupPromotionError('');
+      try {
+        const response = await planService.getSignupPromotion();
+        if (!cancelled) setSignupPromotion(response || null);
+      } catch (error: any) {
+        console.error('Não foi possível carregar a campanha de cadastro', error);
+        if (!cancelled) setSignupPromotionError('Não foi possível confirmar as vagas da campanha agora.');
+      } finally {
+        if (!cancelled) setSignupPromotionLoading(false);
+      }
+    };
+
+    fetchSignupPromotion();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     const uf = String(registerForm.state || '').toUpperCase();
     if (!uf || uf.length !== 2) {
       setCityOptions([]);
@@ -734,9 +766,27 @@ export function CreateStore() {
     acc[plan.name] = plan;
     return acc;
   }, {});
+  const paidPlanSelectionDisabled = ONBOARDING_PAID_PLANS_LOCKED;
+  const signupPromotionLimit = Number(signupPromotion?.limit || 50);
+  const signupPromotionRemaining = Math.max(0, Number(signupPromotion?.remaining || 0));
+  const signupPromotionUsed = Math.max(0, Number(signupPromotion?.used || 0));
+  const hasFounderVipOffer = Boolean(signupPromotion?.enabled && signupPromotion?.applies && signupPromotionRemaining > 0);
+  const signupTrialDays = Number(signupPromotion?.trialDays || (hasFounderVipOffer ? 90 : 7));
+  const signupTrialLabel = hasFounderVipOffer ? '3 meses VIP grátis' : `${signupTrialDays} dias grátis`;
+  const signupTrialBadge = signupPromotionLoading
+    ? 'Verificando campanha'
+    : hasFounderVipOffer
+      ? `Restam ${signupPromotionRemaining} de ${signupPromotionLimit} vagas VIP`
+      : `${signupTrialDays} dias grátis`;
+  const signupTrialSubtitle = hasFounderVipOffer
+    ? 'As primeiras lojas entram com recursos Pro liberados por 3 meses. Você escolhe um plano pago só quando o período acabar.'
+    : `Sua loja começa com recursos Pro liberados por ${signupTrialDays} dias. Você escolhe um plano pago só quando o período acabar.`;
+  const signupProgressPercent = signupPromotionLimit > 0
+    ? Math.min(100, Math.round((signupPromotionUsed / signupPromotionLimit) * 100))
+    : 0;
 
   const resolveEffectivePlanId = () => {
-    if (selectedPlanId !== 'test-plan-7days') return selectedPlanId;
+    if (!paidPlanSelectionDisabled && selectedPlanId !== 'test-plan-7days') return selectedPlanId;
     const preferred = plansByName[getPlanName('basic', billingKey)]?.id;
     const fallback = plans?.[0]?.id;
     return preferred || fallback || selectedPlanId;
@@ -1619,7 +1669,7 @@ export function CreateStore() {
         <div className="min-w-0 rounded-2xl border border-slate-100 bg-white p-6 md:p-10 shadow-sm">
           <div className="mb-5 flex flex-col items-center text-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">Abra sua loja em minutos</h1>
-            <p className="text-sm sm:text-base text-slate-600">Sem comissão por pedido · 7 dias grátis · Pronto para vender em minutos</p>
+            <p className="text-sm sm:text-base text-slate-600">Sem comissão por pedido · {signupTrialLabel} · Pronto para vender em minutos</p>
           </div>
 
           {destinationClaim ? (
@@ -2428,22 +2478,49 @@ export function CreateStore() {
 
             <div ref={planSectionRef} className={`pt-6 border-t border-gray-100 ${currentStep === 4 ? 'motion-safe:animate-[createStoreStepIn_.26s_ease-out]' : 'hidden'}`} onFocusCapture={() => setCurrentStep(4)}>
               <FormSection
-                title="Selecione um plano"
-                subtitle="Comece vendendo hoje. Sem cartão, sem compromisso."
+                title="Comece pelo período grátis"
+                subtitle="Publique sua loja sem cartão. Os planos pagos aparecem na renovação, quando o período grátis terminar."
                 variant="success"
                 className="create-store-section"
                 contentClassName="space-y-6"
                 actions={
                   <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                    7 dias grátis
+                    {signupTrialBadge}
                   </span>
                 }
               >
-              <div className="mb-6 flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-emerald-100 bg-white/72 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
-                <span className="text-sm font-black text-gray-900">Plano mensal ativo</span>
-                <span className="inline-block rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-sm font-black text-emerald-700">
-                  Cobrança mensal
-                </span>
+              <div className="mb-6 overflow-hidden rounded-[1.65rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.92),rgba(255,255,255,0.96))] px-4 py-4 shadow-[0_22px_48px_-40px_rgba(5,150,105,0.45),inset_0_1px_0_rgba(255,255,255,0.8)]">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-emerald-700">
+                      {hasFounderVipOffer ? 'Campanha fundador ativa' : 'Período grátis ativo'}
+                    </p>
+                    <h3 className="mt-1 text-lg font-black text-slate-950">{signupTrialLabel}</h3>
+                    <p className="mt-1 max-w-2xl text-sm font-semibold leading-6 text-slate-600">
+                      {signupTrialSubtitle}
+                    </p>
+                  </div>
+                  {signupPromotion?.enabled ? (
+                    <div className="rounded-2xl border border-emerald-100 bg-white/82 px-4 py-3 text-left shadow-[0_16px_34px_-30px_rgba(15,23,42,0.35)] sm:min-w-[190px]">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Vagas VIP</p>
+                      <p className="mt-1 text-2xl font-black text-emerald-700">
+                        {signupPromotionRemaining}
+                        <span className="text-sm text-slate-400">/{signupPromotionLimit}</span>
+                      </p>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full rounded-full bg-[linear-gradient(90deg,#5FD35A,#336886)] transition-all"
+                          style={{ width: `${signupProgressPercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+                {signupPromotionError ? (
+                  <p className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+                    {signupPromotionError} Vamos seguir com o período grátis padrão.
+                  </p>
+                ) : null}
               </div>
               <div data-create-field="plan" className={`grid grid-cols-1 sm:grid-cols-3 gap-4 rounded-[1.5rem] ${getMissingFieldClass('plan')}`}>
                   <button
@@ -2454,16 +2531,16 @@ export function CreateStore() {
                     : ''
                   }`}
                 >
-                  <span className="absolute -top-3 left-4 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
-                    7 DIAS GRATIS
+                  <span className="absolute -top-3 left-4 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                    {hasFounderVipOffer ? 'VAGA VIP' : 'GRÁTIS'}
                   </span>
-                  <p className="text-sm uppercase font-semibold text-amber-700">Trial completo</p>
-                  <p className="text-2xl font-bold text-gray-900">Sem cartão</p>
-                  <p className="text-xs text-gray-500">No trial você usa todos os recursos do plano Pro por 7 dias.</p>
+                  <p className="text-sm uppercase font-semibold text-emerald-700">{hasFounderVipOffer ? 'Campanha fundador' : 'Trial completo'}</p>
+                  <p className="text-2xl font-bold text-gray-900">{signupTrialLabel}</p>
+                  <p className="text-xs text-gray-500">Sem cartão no cadastro. Sua loja começa com recursos Pro liberados.</p>
                   <ul className="mt-3 text-xs text-gray-600 space-y-1">
-                    <li>✓ Loja ativa por 7 dias</li>
+                    <li>✓ Loja ativa por {signupTrialDays} dias</li>
                     <li>✓ Recursos Pro liberados</li>
-                    <li>✓ Escolha o plano depois</li>
+                    <li>✓ Escolha o plano só na renovação</li>
                   </ul>
                 </button>
                 {PLAN_TIERS.map((tier) => {
@@ -2482,15 +2559,15 @@ export function CreateStore() {
                     : billingKey === 'yearly'
                       ? '365 dias de acesso'
                       : '30 dias de acesso';
-                  const isSelected = plan?.id && selectedPlanId === plan.id;
-                  const isDisabled = !plan?.id;
+                  const isSelected = !paidPlanSelectionDisabled && plan?.id && selectedPlanId === plan.id;
+                  const isDisabled = paidPlanSelectionDisabled || !plan?.id;
                   return (
                   <button
                     type="button"
                     key={planKey}
-                    onClick={() => plan?.id && setSelectedPlanId(plan.id)}
+                    onClick={() => !isDisabled && plan?.id && setSelectedPlanId(plan.id)}
                     disabled={isDisabled}
-                    className={`create-store-plan-card ${isSelected ? 'create-store-plan-card-active' : ''} ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`create-store-plan-card ${isSelected ? 'create-store-plan-card-active' : ''} ${isDisabled ? 'opacity-45 cursor-not-allowed grayscale' : ''}`}
                   >
                     <p className="text-sm uppercase font-semibold text-gray-500">{tier.label}</p>
                     {showPromo ? (
@@ -2515,16 +2592,21 @@ export function CreateStore() {
                         MAIS POPULAR
                       </span>
                     )}
+                    {paidPlanSelectionDisabled && (
+                      <span className="mt-4 inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">
+                        Escolha depois
+                      </span>
+                    )}
                   </button>
                 );
                 })}
                 {!plans.length && <p className="text-sm text-gray-500">Carregando planos disponíveis...</p>}
               </div>
               <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
-                Durante o trial, sua loja fica com recursos Pro liberados. Após o período, você pode manter no Basic ou trocar para Pro.
+                Durante o período grátis, sua loja fica com recursos Pro liberados. Quando vencer, o painel mostra as opções pagas para renovar sem confusão.
               </p>
 
-              {selectedPlanId !== 'test-plan-7days' && (
+              {selectedPlanId !== 'test-plan-7days' && !paidPlanSelectionDisabled && (
                 <div className="mt-6">
                   <h4 className="text-sm font-semibold text-gray-700 mb-2">Forma de pagamento</h4>
                   <div className="flex flex-wrap gap-3">

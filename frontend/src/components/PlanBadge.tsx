@@ -53,12 +53,13 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
   const style = PLAN_STYLES[styleKey];
   const billing = planDetails?.billingKey ? BILLING_OPTIONS[planDetails.billingKey] : null;
   const isVip = Boolean(details?.planExempt);
+  const subscriptionStatus = String(details?.status || '').toUpperCase();
+  const isFounderVipTrial = Boolean(details?.founderVipPromotion?.applied && subscriptionStatus === 'TRIAL' && !isVip);
   const badgeTone =
     variant === 'dark'
       ? 'bg-white/15 text-white ring-white/25 shadow-black/20'
       : `bg-gradient-to-r ${style.badge}`;
-  const titleLabel = displayName || planDetails?.tier?.label || 'Plano não definido';
-  const subscriptionStatus = String(details?.status || '').toUpperCase();
+  const titleLabel = isFounderVipTrial ? 'VIP fundador' : displayName || planDetails?.tier?.label || 'Plano não definido';
   const latestPaymentStatus = String(details?.latestPaymentStatus || '').toUpperCase();
   const canShowPaidInfo = !details?.planExempt && subscriptionStatus !== 'TRIAL' && latestPaymentStatus === 'PAID';
 
@@ -87,7 +88,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
         } transition-all`}
       >
         <span className="uppercase tracking-wide">{titleLabel}</span>
-        {!isVip && billing && <span className="text-[10px] font-bold opacity-80">{billing.label}</span>}
+        {!isVip && !isFounderVipTrial && billing && <span className="text-[10px] font-bold opacity-80">{billing.label}</span>}
         {!isVip && (
           <CaretDown size={14} weight="duotone" className={`opacity-70 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         )}

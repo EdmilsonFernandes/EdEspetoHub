@@ -104,6 +104,7 @@ routes.delete('/customer/notifications/:id', requireAuth, NotificationController
 routes.delete('/customer/notifications', requireAuth, NotificationController.clearAll);
 // Plans / payments
 routes.get('/plans', PlanController.list);
+routes.get('/signup-promotion', PlanController.signupPromotion);
 routes.post('/subscriptions', SubscriptionController.create);
 routes.get('/stores/:storeId/subscription', SubscriptionController.getByStore);
 routes.post('/stores/:storeId/subscription/renew', requireAuth, requireRole('ADMIN'), SubscriptionController.createRenewalPayment);

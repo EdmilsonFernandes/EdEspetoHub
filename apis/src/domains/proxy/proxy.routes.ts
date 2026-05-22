@@ -27,6 +27,7 @@ export function createProxyRoutes(): Router {
     const r = Router();
     // Plans (public)
     r.get('/plans', forward);
+    r.get('/signup-promotion', forward);
     // Subscriptions
     r.post('/subscriptions', forward); r.get('/stores/:storeId/subscription', forward);
     r.post('/stores/:storeId/subscription/renew', authRequired, forward);

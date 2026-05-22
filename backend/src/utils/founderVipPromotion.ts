@@ -1,4 +1,4 @@
-const DEFAULT_LIMIT = 30;
+const DEFAULT_LIMIT = 50;
 const DEFAULT_DAYS = 90;
 const DEFAULT_LABEL = 'Campanha fundador - 3 meses de acesso VIP';
 

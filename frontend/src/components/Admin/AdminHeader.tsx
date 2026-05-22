@@ -160,12 +160,34 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
       auth?.subscription?.plan?.displayName,
     ]
   );
-  const planLabel = useMemo(() => planLabelFromName(effectivePlanName), [effectivePlanName]);
+  const founderVipPromotion =
+    planDetails?.founderVipPromotion ||
+    auth?.subscription?.founderVipPromotion ||
+    auth?.store?.settings?.acquisitionAttribution?.founderVipPromotion ||
+    null;
+  const isFounderVipTrial = Boolean(
+    founderVipPromotion?.applied &&
+      !planDetails?.planExempt &&
+      !auth?.subscription?.planExempt &&
+      String(planDetails?.status || auth?.subscription?.status || '').toUpperCase() === 'TRIAL'
+  );
+  const planLabel = useMemo(
+    () => (isFounderVipTrial ? 'VIP FUNDADOR' : planLabelFromName(effectivePlanName)),
+    [effectivePlanName, isFounderVipTrial]
+  );
   const planValue = useMemo(() => {
     const isVip = Boolean(planDetails?.planExempt || auth?.subscription?.planExempt);
     if (isVip) return 'Isento';
 
     const status = String(planDetails?.status || auth?.subscription?.status || '').toUpperCase();
+    if (isFounderVipTrial) {
+      const end = new Date(planDetails?.endDate || auth?.subscription?.endDate || '').getTime();
+      const daysLeft = Number.isFinite(end) ? Math.max(0, Math.ceil((end - Date.now()) / (1000 * 60 * 60 * 24))) : null;
+      return typeof daysLeft === 'number'
+        ? `3 meses grátis · ${daysLeft} dias restantes`
+        : '3 meses grátis';
+    }
+    if (status === 'TRIAL') return '7 dias grátis';
     const amount = Number(
       planDetails?.latestPaymentAmount ??
         auth?.subscription?.latestPaymentAmount ??
@@ -174,12 +196,8 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
         0
     );
     if (Number.isFinite(amount) && amount > 0) {
-      if (status === 'TRIAL') {
-        return `7 dias grátis · R$ ${amount.toFixed(2).replace('.', ',')}/mês`;
-      }
       return `R$ ${amount.toFixed(2).replace('.', ',')}/mês`;
     }
-    if (status === 'TRIAL') return '7 dias grátis';
     return '—';
   }, [
     planDetails?.planExempt,
@@ -190,6 +208,9 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
     auth?.subscription?.latestPaymentAmount,
     planDetails?.planPrice,
     auth?.subscription?.plan?.price,
+    isFounderVipTrial,
+    planDetails?.endDate,
+    auth?.subscription?.endDate,
   ]);
   const planDue = useMemo(
     () => toDisplayDate(planDetails?.endDate || auth?.subscription?.endDate),
@@ -210,6 +231,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
           latestPaymentAmount: subscription?.latestPaymentAmount || null,
           planPrice: subscription?.plan?.price ?? null,
           endDate: subscription?.endDate || null,
+          founderVipPromotion: subscription?.founderVipPromotion || null,
         });
       })
       .catch(() => setPlanDetails(null));
