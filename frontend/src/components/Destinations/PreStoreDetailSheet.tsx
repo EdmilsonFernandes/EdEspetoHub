@@ -33,13 +33,15 @@ const actionIcon = (kind?: string) => {
   if (kind === 'whatsapp') return <WhatsappLogo size={16} weight="fill" />;
   if (kind === 'phone') return <PhoneCall size={16} weight="duotone" />;
   if (kind === 'instagram') return <InstagramIcon className="h-4 w-4" />;
-  if (kind === 'route') return <NavigationArrow size={16} weight="fill" />;
+  if (kind === 'route') return <NavigationArrow size={18} weight="fill" />;
   return <GlobeHemisphereWest size={16} weight="duotone" />;
 };
 
 const ContactAction = ({ action }: any) => {
   if (!action?.href) return null;
-  const className = `inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition hover:-translate-y-0.5 ${actionClasses[action.kind] || actionClasses.site}`;
+  const className = action.kind === 'route'
+    ? 'mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-white/20 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.1em] text-[#153A4C] shadow-[0_18px_34px_-28px_rgba(0,0,0,0.75)] transition hover:-translate-y-0.5 active:scale-[0.98]'
+    : `inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition hover:-translate-y-0.5 ${actionClasses[action.kind] || actionClasses.site}`;
 
   const handleClick = async (event: any) => {
     if (action.kind === 'whatsapp') {
@@ -137,7 +139,6 @@ export function PreStoreDetailSheet({
 
   const actions = [
     primaryAction,
-    routeAction,
     instagramUrl ? { href: instagramUrl, label: 'Instagram', kind: 'instagram', external: true } : null,
     websiteUrl ? { href: websiteUrl, label: websiteLabel, kind: 'site', external: true } : null,
   ].filter(Boolean);
@@ -201,15 +202,28 @@ export function PreStoreDetailSheet({
                 </p>
               ) : null}
 
+              {routeAction?.href ? (
+                <div className="mt-4 rounded-[1.4rem] border border-[#153A4C]/10 bg-[linear-gradient(135deg,#153A4C,#23556d)] p-3 text-white shadow-[0_20px_46px_-34px_rgba(21,58,76,0.9)]">
+                  <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/64">
+                    <NavigationArrow size={13} weight="fill" />
+                    Referência para entrega
+                  </p>
+                  <p className="mt-1 text-sm font-semibold leading-relaxed text-white/78">
+                    Mostra a distância entre este serviço e a hospedagem para facilitar a chegada do motoboy.
+                  </p>
+                  <ContactAction action={routeAction} />
+                </div>
+              ) : null}
+
               {actions.length > 0 ? (
-                <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
                   {actions.map((action: any) => (
                     <ContactAction key={`${action.kind}-${action.href}`} action={action} />
                   ))}
                 </div>
-              ) : (
+              ) : !routeAction?.href ? (
                 <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">Contato ainda não informado.</p>
-              )}
+              ) : null}
             </div>
 
             <div className="rounded-[1.5rem] border border-[#153A4C]/10 bg-white p-4 shadow-[0_16px_42px_-36px_rgba(21,58,76,0.45)]">

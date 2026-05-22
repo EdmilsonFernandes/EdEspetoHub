@@ -186,7 +186,7 @@ export function NativeAppNavigator() {
     'text-slate-500 hover:text-slate-700';
 
   return (
-    <nav ref={navRef} className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] px-0 pb-0 transition-transform duration-300 ease-in-out lg:hidden">
+    <nav ref={navRef} className="pointer-events-none fixed inset-x-0 bottom-0 z-[100] px-0 pb-0 transition-transform duration-300 ease-in-out lg:hidden">
       <div className="pointer-events-auto mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
         <div className="grid grid-cols-5 gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
         <button

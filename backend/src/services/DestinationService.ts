@@ -23,12 +23,14 @@ import { logger } from '../utils/logger';
 import { GeoLocationService } from './GeoLocationService';
 import { OrderReviewService } from './OrderReviewService';
 import { SubscriptionService } from './SubscriptionService';
+import { ZipCodeLookupResult, ZipCodeLookupService } from './ZipCodeLookupService';
 
 export class DestinationService {
   private repository = new DestinationRepository();
   private subscriptionService = new SubscriptionService();
   private orderReviewService = new OrderReviewService();
   private geoLocationService = new GeoLocationService();
+  private zipCodeLookupService = new ZipCodeLookupService();
   private log = logger.child({ scope: 'DestinationService' });
 
   async listPublicDestinations(location?: DestinationLocationContext) {
@@ -370,8 +372,41 @@ export class DestinationService {
     ].filter(Boolean).join(', ');
   }
 
+  private uniqueGeocodeCandidates(candidates: Array<string | null | undefined>) {
+    const seen = new Set<string>();
+    return candidates
+      .map((candidate) => String(candidate || '').trim())
+      .filter((candidate) => {
+        if (!candidate) return false;
+        const key = candidate.toLocaleLowerCase('pt-BR');
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }
+
+  private async lookupZipCode(zipCode?: string | null): Promise<ZipCodeLookupResult | null> {
+    const normalizedZipCode = this.normalizeZipCode(zipCode);
+    if (!normalizedZipCode || normalizedZipCode.length !== 8) return null;
+    try {
+      return await this.zipCodeLookupService.lookup(normalizedZipCode);
+    } catch (error) {
+      this.log.warn('Destination zip lookup failed', { zipCode: normalizedZipCode, error });
+      return null;
+    }
+  }
+
+  private zipLookupHasCoordinates(lookup?: ZipCodeLookupResult | null) {
+    return this.hasCoordinatePair(lookup?.latitude, lookup?.longitude);
+  }
+
   private hasCoordinatePair(lat?: number | null, lng?: number | null) {
-    return Number.isFinite(Number(lat)) && Number.isFinite(Number(lng));
+    const isValidCoordinate = (value?: number | null) =>
+      value !== null &&
+      value !== undefined &&
+      String(value).trim() !== '' &&
+      Number.isFinite(Number(value));
+    return isValidCoordinate(lat) && isValidCoordinate(lng);
   }
 
   private async resolveDestinationCoordinates(payload: {
@@ -389,17 +424,48 @@ export class DestinationService {
     const lng = payload.lng ?? null;
     if (this.hasCoordinatePair(lat, lng)) return { lat, lng };
 
-    const address = this.buildDestinationGeocodeAddress(payload);
-    if (!address) return { lat, lng };
+    const zipLookup = await this.lookupZipCode(payload.zipCode);
+    const baseAddress = this.buildDestinationGeocodeAddress(payload);
+    const zipAddress = zipLookup ? this.buildDestinationGeocodeAddress({
+      address: zipLookup.street || payload.address,
+      addressNumber: payload.addressNumber,
+      district: zipLookup.district || payload.district,
+      city: zipLookup.city || payload.city,
+      state: zipLookup.state || payload.state,
+      zipCode: zipLookup.zipCode || payload.zipCode,
+    }) : null;
+    const zipAddressWithoutCode = zipLookup ? this.buildDestinationGeocodeAddress({
+      address: zipLookup.street || payload.address,
+      addressNumber: payload.addressNumber,
+      district: zipLookup.district || payload.district,
+      city: zipLookup.city || payload.city,
+      state: zipLookup.state || payload.state,
+    }) : null;
+    const cityAddress = this.buildDestinationGeocodeAddress({
+      address: payload.address,
+      addressNumber: payload.addressNumber,
+      district: payload.district,
+      city: payload.city || zipLookup?.city,
+      state: payload.state || zipLookup?.state,
+    });
+    const candidates = this.uniqueGeocodeCandidates([baseAddress, zipAddress, zipAddressWithoutCode, cityAddress]);
 
-    try {
-      const geocoded = await this.geoLocationService.geocodeAddress(address);
-      if (!geocoded || !this.hasCoordinatePair(geocoded.lat, geocoded.lng)) return { lat, lng };
-      return { lat: Number(geocoded.lat), lng: Number(geocoded.lng) };
-    } catch (error) {
-      this.log.warn('Destination geocode failed', { scope: payload.scope, address, error });
-      return { lat, lng };
+    for (const address of candidates) {
+      try {
+        const geocoded = await this.geoLocationService.geocodeAddress(address);
+        if (geocoded && this.hasCoordinatePair(geocoded.lat, geocoded.lng)) {
+          return { lat: Number(geocoded.lat), lng: Number(geocoded.lng) };
+        }
+      } catch (error) {
+        this.log.warn('Destination geocode failed', { scope: payload.scope, address, error });
+      }
     }
+
+    if (this.zipLookupHasCoordinates(zipLookup)) {
+      return { lat: Number(zipLookup?.latitude), lng: Number(zipLookup?.longitude) };
+    }
+
+    return { lat, lng };
   }
 
   async adminSaveDestination(payload: any, destinationId?: string) {

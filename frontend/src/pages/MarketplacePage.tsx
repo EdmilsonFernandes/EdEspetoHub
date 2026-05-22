@@ -3210,29 +3210,29 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
-            <section className="order-8 overflow-hidden rounded-[2.05rem] border border-[#153A4C]/10 bg-[radial-gradient(circle_at_14%_8%,rgba(132,204,22,0.18),transparent_30%),radial-gradient(circle_at_92%_18%,rgba(255,255,255,0.18),transparent_26%),linear-gradient(145deg,#153A4C_0%,#24576a_56%,#0f2f3f_100%)] p-3.5 text-white shadow-[0_24px_58px_-38px_rgba(21,58,76,0.82)] ring-1 ring-white/20">
-              <div className="flex items-start justify-between gap-3 px-1">
+            <section className="order-8 space-y-3">
+              <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-sky-100/78">
+                  <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
                     <Mountains size={12} weight="duotone" />
                     Destinos e chalés
                   </p>
-                  <h2 className="mt-1 text-[18px] font-black leading-tight tracking-[-0.05em] text-white">
+                  <h2 className="mt-1 text-base font-black leading-tight tracking-[-0.03em] text-slate-950 sm:text-lg">
                     Experiências para explorar perto de você
                   </h2>
-                  <p className="mt-1 max-w-[17.5rem] text-xs font-semibold leading-relaxed text-sky-50/72">
+                  <p className="mt-1 max-w-[18rem] text-xs font-semibold leading-relaxed text-slate-500">
                     Cidades, hospedagens e serviços locais em uma vitrine diferente do delivery.
                   </p>
                 </div>
                 <Link
                   to={destinationListHref}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/14 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_14px_26px_-20px_rgba(0,0,0,0.45)] backdrop-blur-xl transition active:scale-95"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.22)] transition active:scale-95"
                 >
                   Explorar
                   <CaretRight size={10} weight="bold" />
                 </Link>
               </div>
-              <div className="mt-3 flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {homeDestinationHighlights.map((destination, index) => {
                   const placesCount = Number(destination.placesCount || 0);
                   const listingsCount = Number(destination.listingsCount || 0);
@@ -3245,7 +3245,7 @@ export function MarketplacePage() {
                     <Link
                       key={destination.id || destination.slug}
                       to={`/destinos/${destination.slug}`}
-                      className={`group relative flex shrink-0 overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_20px_44px_-28px_rgba(0,0,0,0.72)] ring-1 ring-white/14 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_26px_54px_-28px_rgba(0,0,0,0.78)] active:scale-[0.985] ${index === 0 ? 'h-[12.2rem] w-[18.5rem]' : 'h-[11.25rem] w-[15.5rem]'}`}
+                      className={`group relative flex shrink-0 overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_18px_44px_-32px_rgba(15,23,42,0.38)] ring-1 ring-slate-200/70 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_26px_58px_-38px_rgba(15,23,42,0.42)] active:scale-[0.985] ${index === 0 ? 'h-[11.4rem] w-[18.75rem]' : 'h-[10.75rem] w-[15.75rem]'}`}
                     >
                       <img
                         src={resolveDestinationAssetUrl(destination)}
@@ -3254,8 +3254,8 @@ export function MarketplacePage() {
                         decoding="async"
                         className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.10)_0%,rgba(15,23,42,0.30)_42%,rgba(15,23,42,0.84)_100%)]" />
-                      <div className="absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1 rounded-full border border-white/22 bg-black/24 px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.13em] text-white shadow-[0_12px_24px_-18px_rgba(0,0,0,0.58)] backdrop-blur-md">
+                      <div className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.42)_42%,rgba(15,23,42,0.82)_100%)]" />
+                      <div className="absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1 rounded-full border border-white/22 bg-white/18 px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.13em] text-white shadow-[0_12px_24px_-18px_rgba(0,0,0,0.36)] backdrop-blur-md">
                         <MapPinLine size={10} weight="fill" className="shrink-0 text-lime-200" />
                         <span className="truncate">{formatDestinationMatchLabel(destination)}</span>
                       </div>
@@ -3572,7 +3572,7 @@ export function MarketplacePage() {
                 <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto no-scrollbar px-1 pb-1 pr-7">
                   {featuredLoading ? (
                     Array.from({ length: 3 }).map((_, idx) => (
-                      <div key={idx} className="h-[238px] min-w-[150px] animate-pulse rounded-[1.55rem] border border-white/90 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.055)] sm:min-w-[168px]" />
+                      <div key={idx} className="h-[112px] min-w-[268px] animate-pulse rounded-[1.45rem] bg-white shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] ring-1 ring-slate-100/80" />
                     ))
                   ) : (
                     displayedFeaturedProducts.map((item, index) => (
@@ -3585,51 +3585,44 @@ export function MarketplacePage() {
                       key={`${item.storeSlug}-${item.id}`}
                       to={featuredStorePath}
                       onClick={() => stageFeaturedProductCheckout(item)}
-                      className="group min-w-[150px] snap-start overflow-hidden rounded-[1.55rem] border border-white bg-white shadow-[0_16px_40px_-18px_rgba(15,23,42,0.14)] ring-1 ring-slate-100/80 transition-all duration-300 ease-out hover:scale-[1.025] hover:shadow-[0_20px_48px_-14px_rgba(15,23,42,0.2)] active:scale-[0.96] sm:min-w-[168px]"
+                      className="group flex min-h-[112px] min-w-[268px] snap-start gap-3 rounded-[1.45rem] bg-white p-2.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] ring-1 ring-slate-100/90 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_24px_54px_-36px_rgba(15,23,42,0.26)] active:scale-[0.98] sm:min-w-[292px]"
                     >
-                      <div className="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                      <div className="relative h-[92px] w-[92px] shrink-0 overflow-hidden rounded-[1.2rem] bg-slate-100">
                         <img
                           src={item.imageUrl}
                           alt={item.name}
                           loading={index < 2 ? 'eager' : 'lazy'}
                           fetchPriority={index < 2 ? 'high' : 'auto'}
                           decoding="async"
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                           onError={(e) => { (e.target as HTMLImageElement).src = item.storeLogo || getStoreAvatarUrl(item.storeSlug, item.storeName); }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/24 via-black/3 to-transparent" />
-                        <div className="absolute right-2.5 top-2.5">
+                        <div className="absolute inset-x-0 bottom-0 h-9 bg-gradient-to-t from-black/22 to-transparent" />
+                        <div className="absolute right-1.5 top-1.5">
                           {item.sponsored ? (
-                            <span className="inline-flex items-center gap-1 rounded-[0.78rem] border border-amber-200/90 bg-amber-300/90 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.38)] backdrop-blur-md">
+                            <span className="inline-flex items-center gap-1 rounded-[0.65rem] border border-amber-200/80 bg-amber-300/92 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.1em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.32)] backdrop-blur-md">
                               <Star size={9} weight="fill" /> {item.badge || 'Patrocinado'}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 rounded-[0.78rem] border border-white/70 bg-white/88 px-2 py-1 text-[8px] font-black italic uppercase tracking-[0.18em] text-[#153A4C] shadow-[0_8px_18px_-12px_rgba(15,23,42,0.32)] backdrop-blur-md ring-1 ring-black/5">
-                              <Sparkle size={8} weight="fill" className="text-[#336886]" />
+                            <span className="inline-flex items-center gap-1 rounded-[0.65rem] border border-white/58 bg-white/82 px-1.5 py-0.5 text-[7px] font-black italic uppercase tracking-[0.16em] text-[#153A4C] shadow-[0_8px_18px_-12px_rgba(15,23,42,0.26)] backdrop-blur-md ring-1 ring-black/5">
+                              <Sparkle size={7} weight="fill" className="text-[#336886]" />
                               Seleção
                             </span>
                           )}
                         </div>
                       </div>
 
-                      <div className="flex min-h-[104px] flex-col p-3">
-                        <p className="line-clamp-2 text-[12px] font-black leading-[1.15rem] tracking-tight text-slate-950">{item.name}</p>
-                        <div className="mt-1.5 flex min-w-0 items-center gap-1.5">
-                          <img
-                            src={item.storeLogo}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                            className="h-[18px] w-[18px] shrink-0 rounded-full border border-slate-100 bg-white object-cover shadow-sm"
-                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
-                          />
-                          <span className="truncate text-[10px] font-bold text-slate-400">
-                            por {item.storeName}
-                          </span>
-                        </div>
-                        <div className="mt-auto pt-2">
-                          <span className="text-[18px] font-black leading-none tracking-[-0.04em] text-[#153A4C]">
+                      <div className="flex min-w-0 flex-1 flex-col py-1 pr-1">
+                        <p className="line-clamp-2 text-[13px] font-extrabold leading-[1.12rem] tracking-[-0.02em] text-slate-950">{item.name}</p>
+                        <p className="mt-1 truncate text-[10.5px] font-semibold text-slate-400">
+                          por {item.storeName}
+                        </p>
+                        <div className="mt-auto flex items-end justify-between gap-2 pt-2">
+                          <span className="text-[19px] font-black leading-none tracking-[-0.05em] text-[#153A4C]">
                             {currency.format(item.price)}
+                          </span>
+                          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#edf5fa] text-[#336886] transition group-hover:translate-x-0.5">
+                            <CaretRight size={12} weight="bold" />
                           </span>
                         </div>
                       </div>

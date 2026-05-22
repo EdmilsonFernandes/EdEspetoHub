@@ -676,7 +676,7 @@ export function HospitalityPlacePage() {
         hasImage={selectedListingHasImage}
         claimHref={selectedListing ? buildListingClaimUrl(destination, selectedListing) : ''}
         primaryAction={selectedListingAction}
-        routeAction={selectedListingRouteHref ? { href: selectedListingRouteHref, label: 'Chegar até meu chalé', kind: 'route', external: false } : null}
+        routeAction={selectedListingRouteHref ? { href: selectedListingRouteHref, label: 'Ver rota até meu chalé', kind: 'route', external: false } : null}
         instagramUrl={selectedListingInstagramUrl}
         websiteUrl={selectedListingWebsiteUrl}
         websiteLabel={siteLabel(selectedListing?.websiteUrl)}
