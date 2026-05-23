@@ -138,6 +138,7 @@ export class PlatformAdminController {
    * @date 2025-12-17
    */
   static async overview(_req: Request, res: Response) {
+    const startedAt = Date.now();
     try {
       log.debug('Admin overview request');
       const stores = await storeRepository.findAll();
@@ -274,12 +275,13 @@ export class PlatformAdminController {
         }
       );
 
-      return res.json({
+      const payload = {
         summary: {
           ...summary,
           paidPayments,
           pendingPayments,
           paidRevenue,
+          generatedAt: new Date().toISOString(),
         },
         stores: enriched.map((store) => {
           const aggregate = orderAggregateMap.get(store.id);
@@ -302,9 +304,18 @@ export class PlatformAdminController {
         },
         payments: recentPayments,
         paymentEvents,
+      };
+      const durationMs = Date.now() - startedAt;
+      res.setHeader('Server-Timing', `admin-overview;dur=${durationMs}`);
+      log.info('Admin overview completed', {
+        durationMs,
+        storesCount: enriched.length,
+        paymentsCount: Array.isArray(recentPayments) ? recentPayments.length : 0,
+        paymentEventsCount: Array.isArray(paymentEvents) ? paymentEvents.length : 0,
       });
+      return res.json(payload);
     } catch (error: any) {
-      log.warn('Admin overview failed', { error });
+      log.warn('Admin overview failed', { durationMs: Date.now() - startedAt, error });
       return respondWithError(_req, res, error, 400);
     }
   }

@@ -1,5 +1,6 @@
 import { forceLogoutAndRedirect, isSessionAuthError } from '../utils/sessionRedirect';
 import { getMfaDeviceContext } from '../utils/mfaDevice';
+import { toUserFriendlyError } from '../utils/userFriendlyErrors';
 
 const resolveBaseUrl = () => {
   return import.meta.env.VITE_API_BASE_URL || '/api';
@@ -10,6 +11,14 @@ const API_BASE_URL = resolveBaseUrl();
 const buildUrl = (path: string) => {
   const normalized = path.startsWith('/') ? path : `/${path}`;
   return `${API_BASE_URL}${normalized}`;
+};
+
+const safeFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+  try {
+    return await fetch(input, init);
+  } catch (error) {
+    throw toUserFriendlyError(error, 'Não foi possível comunicar com o servidor agora.');
+  }
 };
 
 const handleResponse = async (response: Response, canAutoLogout = true) => {
@@ -32,14 +41,14 @@ const handleResponse = async (response: Response, canAutoLogout = true) => {
       forceLogoutAndRedirect('superadmin');
     }
 
-    throw error;
+    throw toUserFriendlyError(error);
   }
   return response.json();
 };
 
 export const superAdminService = {
   async login(email: string, password: string) {
-    const response = await fetch(buildUrl('/auth/super-login'), {
+    const response = await safeFetch(buildUrl('/auth/super-login'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, ...getMfaDeviceContext({ authMode: 'superadmin' }) }),
@@ -47,7 +56,7 @@ export const superAdminService = {
     return handleResponse(response);
   },
   async verifyMfaChallenge(payload: { challengeToken: string; code: string; trustDevice?: boolean }) {
-    const response = await fetch(buildUrl('/auth/mfa/challenge/verify'), {
+    const response = await safeFetch(buildUrl('/auth/mfa/challenge/verify'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...payload, ...getMfaDeviceContext({ authMode: 'superadmin' }) }),
@@ -55,7 +64,7 @@ export const superAdminService = {
     return handleResponse(response, false);
   },
   async fetchOverview(token: string) {
-    const response = await fetch(buildUrl('/admin/overview'), {
+    const response = await safeFetch(buildUrl('/admin/overview'), {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -66,7 +75,7 @@ export const superAdminService = {
     token: string,
     payload: { title: string; body: string; url?: string; topic?: string; limit?: number }
   ) {
-    const response = await fetch(buildUrl('/admin/push/broadcast'), {
+    const response = await safeFetch(buildUrl('/admin/push/broadcast'), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -82,7 +91,7 @@ export const superAdminService = {
     if (storeId) params.set('storeId', storeId);
     if (limit) params.set('limit', String(limit));
     if (offset) params.set('offset', String(offset));
-    const response = await fetch(buildUrl(`/admin/payment-events?${params.toString()}`), {
+    const response = await safeFetch(buildUrl(`/admin/payment-events?${params.toString()}`), {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -93,7 +102,7 @@ export const superAdminService = {
     const params = new URLSearchParams();
     params.set('storeId', storeId);
     if (limit) params.set('limit', String(limit));
-    const response = await fetch(buildUrl(`/admin/payment-events?${params.toString()}`), {
+    const response = await safeFetch(buildUrl(`/admin/payment-events?${params.toString()}`), {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -106,7 +115,7 @@ export const superAdminService = {
       if (!value) return;
       params.set(key, value);
     });
-    const response = await fetch(buildUrl(`/admin/access-logs?${params.toString()}`), {
+    const response = await safeFetch(buildUrl(`/admin/access-logs?${params.toString()}`), {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -131,7 +140,7 @@ export const superAdminService = {
       params.set(key, String(value));
     });
     const suffix = params.toString() ? `?${params.toString()}` : '';
-    const response = await fetch(buildUrl(`/admin/customer-security/overview${suffix}`), {
+    const response = await safeFetch(buildUrl(`/admin/customer-security/overview${suffix}`), {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -139,7 +148,7 @@ export const superAdminService = {
     return handleResponse(response);
   },
   async revokeCustomerSecurityBlock(token: string, blockId: string, reason?: string) {
-    const response = await fetch(buildUrl(`/admin/customer-security/blocks/${blockId}/revoke`), {
+    const response = await safeFetch(buildUrl(`/admin/customer-security/blocks/${blockId}/revoke`), {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -150,7 +159,7 @@ export const superAdminService = {
     return handleResponse(response);
   },
   async reprocessPayment(token: string, paymentId: string, providerId?: string) {
-    const response = await fetch(buildUrl(`/admin/payments/${paymentId}/reprocess`), {
+    const response = await safeFetch(buildUrl(`/admin/payments/${paymentId}/reprocess`), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -161,7 +170,7 @@ export const superAdminService = {
     return handleResponse(response);
   },
   async updatePlanExempt(token: string, storeId: string, payload: { planExempt: boolean; planExemptLabel?: string }) {
-    const response = await fetch(buildUrl(`/admin/stores/${storeId}/plan-exempt`), {
+    const response = await safeFetch(buildUrl(`/admin/stores/${storeId}/plan-exempt`), {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -173,35 +182,35 @@ export const superAdminService = {
   },
 
   async fetchMotoboyKycPending(token: string) {
-    const response = await fetch(buildUrl('/admin/motoboys/kyc/pending'), {
+    const response = await safeFetch(buildUrl('/admin/motoboys/kyc/pending'), {
       headers: { Authorization: `Bearer ${token}` },
     });
     return handleResponse(response);
   },
 
   async fetchMotoboyKycAudit(token: string, days = 30) {
-    const response = await fetch(buildUrl(`/admin/motoboys/kyc/audit?days=${days}`), {
+    const response = await safeFetch(buildUrl(`/admin/motoboys/kyc/audit?days=${days}`), {
       headers: { Authorization: `Bearer ${token}` },
     });
     return handleResponse(response);
   },
 
   async fetchMotoboyKycReviews(token: string, limit = 30) {
-    const response = await fetch(buildUrl(`/admin/motoboys/kyc/reviews?limit=${limit}`), {
+    const response = await safeFetch(buildUrl(`/admin/motoboys/kyc/reviews?limit=${limit}`), {
       headers: { Authorization: `Bearer ${token}` },
     });
     return handleResponse(response);
   },
 
   async fetchMotoboyDocuments(token: string, motoboyId: string) {
-    const response = await fetch(buildUrl(`/admin/motoboys/${motoboyId}/documents`), {
+    const response = await safeFetch(buildUrl(`/admin/motoboys/${motoboyId}/documents`), {
       headers: { Authorization: `Bearer ${token}` },
     });
     return handleResponse(response);
   },
 
   async approveMotoboyDocument(token: string, motoboyId: string, documentId: string) {
-    const response = await fetch(buildUrl(`/admin/motoboys/${motoboyId}/documents/${documentId}/approve`), {
+    const response = await safeFetch(buildUrl(`/admin/motoboys/${motoboyId}/documents/${documentId}/approve`), {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
@@ -210,7 +219,7 @@ export const superAdminService = {
   },
 
   async rejectMotoboyDocument(token: string, motoboyId: string, documentId: string, reason?: string | null) {
-    const response = await fetch(buildUrl(`/admin/motoboys/${motoboyId}/documents/${documentId}/reject`), {
+    const response = await safeFetch(buildUrl(`/admin/motoboys/${motoboyId}/documents/${documentId}/reject`), {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ reason: reason || null }),
@@ -224,7 +233,7 @@ export const superAdminService = {
     if (filters.storeId) params.set('storeId', String(filters.storeId));
     if (filters.limit != null) params.set('limit', String(filters.limit));
     const suffix = params.toString() ? `?${params.toString()}` : '';
-    const response = await fetch(buildUrl(`/admin/featured-requests${suffix}`), {
+    const response = await safeFetch(buildUrl(`/admin/featured-requests${suffix}`), {
       headers: { Authorization: `Bearer ${token}` },
     });
     return handleResponse(response);
@@ -242,7 +251,7 @@ export const superAdminService = {
       adminNote?: string;
     }
   ) {
-    const response = await fetch(buildUrl(`/admin/featured-requests/${requestId}/review`), {
+    const response = await safeFetch(buildUrl(`/admin/featured-requests/${requestId}/review`), {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(payload || {}),
@@ -251,21 +260,21 @@ export const superAdminService = {
   },
 
   async listPromoPushHistory(token: string) {
-    const response = await fetch(buildUrl('/admin/promo-pushes/history'), {
+    const response = await safeFetch(buildUrl('/admin/promo-pushes/history'), {
       headers: { Authorization: `Bearer ${token}` },
     });
     return handleResponse(response);
   },
 
   async listPendingPromoPushes(token: string) {
-    const response = await fetch(buildUrl('/admin/promo-pushes/pending'), {
+    const response = await safeFetch(buildUrl('/admin/promo-pushes/pending'), {
       headers: { Authorization: `Bearer ${token}` },
     });
     return handleResponse(response);
   },
 
   async approvePromoPush(token: string, pushId: string) {
-    const response = await fetch(buildUrl(`/admin/promo-pushes/${pushId}/approve`), {
+    const response = await safeFetch(buildUrl(`/admin/promo-pushes/${pushId}/approve`), {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: '{}',
@@ -274,7 +283,7 @@ export const superAdminService = {
   },
 
   async rejectPromoPush(token: string, pushId: string, reason: string) {
-    const response = await fetch(buildUrl(`/admin/promo-pushes/${pushId}/reject`), {
+    const response = await safeFetch(buildUrl(`/admin/promo-pushes/${pushId}/reject`), {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ reason }),

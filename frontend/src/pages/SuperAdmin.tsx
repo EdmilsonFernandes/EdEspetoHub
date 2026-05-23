@@ -53,6 +53,7 @@ import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
 import { AccountMfaPanel } from '../components/Auth/AccountMfaPanel';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 import { MFA_CHALLENGE_EXPIRED_MESSAGE, isMfaChallengeExpiredError } from '../utils/mfaErrors';
+import { isTransientConnectionError, normalizeUserFacingError } from '../utils/userFriendlyErrors';
 
 const STORAGE_KEY = 'superAdminToken';
 const STORAGE_USER_KEY = 'superAdminUser';
@@ -60,6 +61,9 @@ const FILTERS_KEY = 'superAdminPaymentFilters';
 const EVENTS_FILTERS_KEY = 'superAdminEventFilters';
 const EVENTS_PAGE_SIZE = 25;
 const PAYMENTS_PER_PAGE = 10;
+const OVERVIEW_REFRESH_VISIBLE_MS = 60_000;
+const OVERVIEW_REFRESH_HIDDEN_MS = 180_000;
+const OVERVIEW_REFRESH_MAX_BACKOFF_MS = 300_000;
 
 const readFilters = () => {
   try {
@@ -272,6 +276,12 @@ export function SuperAdmin() {
   const [superAdminUser, setSuperAdminUser] = useState(() => localStorage.getItem(STORAGE_USER_KEY) || '');
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [overviewRefreshing, setOverviewRefreshing] = useState(false);
+  const [overviewConnectionMessage, setOverviewConnectionMessage] = useState('');
+  const [overviewLastUpdatedAt, setOverviewLastUpdatedAt] = useState<string | null>(null);
+  const overviewRef = useRef<any | null>(null);
+  const overviewRefreshTimerRef = useRef<number | null>(null);
+  const overviewFailuresRef = useRef(0);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -390,23 +400,62 @@ export function SuperAdmin() {
     return date.toLocaleString('pt-BR');
   }, []);
 
-  const loadOverview = async (authToken: string) => {
-    setLoading(true);
-    setError('');
+  useEffect(() => {
+    overviewRef.current = overview;
+  }, [overview]);
+
+  const loadOverview = async (
+    authToken: string,
+    options: { silent?: boolean; showToastOnError?: boolean } = {}
+  ) => {
+    const silent = Boolean(options.silent);
+    const hasSnapshot = Boolean(overviewRef.current);
+    if (silent && hasSnapshot) {
+      setOverviewRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    if (!silent) {
+      setError('');
+      setOverviewConnectionMessage('');
+    }
     try {
       const data = await superAdminService.fetchOverview(authToken);
       setOverview(data);
+      overviewFailuresRef.current = 0;
+      setOverviewLastUpdatedAt(new Date().toISOString());
+      setOverviewConnectionMessage('');
     } catch (err: any) {
-      const message = err.message || 'Não foi possível carregar os dados.';
-      if (message.includes('Token inválido') || message.includes('Token ausente')) {
+      const rawMessage = String(err?.message || '');
+      const message =
+        silent && hasSnapshot && isTransientConnectionError(err)
+          ? 'Conexão instável. Mantivemos os últimos dados e vamos tentar reconectar.'
+          : normalizeUserFacingError(err, 'Não foi possível carregar os dados da plataforma agora.');
+
+      if (
+        err?.status === 401 ||
+        rawMessage.includes('Token inválido') ||
+        rawMessage.includes('Token ausente')
+      ) {
         setSessionExpired(true);
         handleLogout();
       } else {
-        showToast(message, 'error');
-        setOverview(null);
+        overviewFailuresRef.current += 1;
+        if (silent && hasSnapshot) {
+          setOverviewConnectionMessage(message);
+        } else {
+          if (options.showToastOnError !== false) {
+            showToast(message, 'error');
+          }
+          setError(message);
+          if (!hasSnapshot) {
+            setOverview(null);
+          }
+        }
       }
     } finally {
       setLoading(false);
+      setOverviewRefreshing(false);
     }
   };
 
@@ -616,8 +665,61 @@ export function SuperAdmin() {
 
   useEffect(() => {
     if (!token || !autoRefresh) return;
-    const interval = window.setInterval(() => loadOverview(token), 15000);
-    return () => window.clearInterval(interval);
+    let disposed = false;
+
+    const clearOverviewTimer = () => {
+      if (overviewRefreshTimerRef.current) {
+        window.clearTimeout(overviewRefreshTimerRef.current);
+        overviewRefreshTimerRef.current = null;
+      }
+    };
+
+    const isPageVisible = () =>
+      typeof document === 'undefined' || document.visibilityState === 'visible';
+    const isOnline = () =>
+      typeof navigator === 'undefined' || navigator.onLine !== false;
+    const nextDelay = () => {
+      if (!isPageVisible()) return OVERVIEW_REFRESH_HIDDEN_MS;
+      const failures = Math.max(0, overviewFailuresRef.current);
+      if (!failures) return OVERVIEW_REFRESH_VISIBLE_MS;
+      return Math.min(OVERVIEW_REFRESH_MAX_BACKOFF_MS, OVERVIEW_REFRESH_VISIBLE_MS * 2 ** failures);
+    };
+
+    const scheduleNextRefresh = () => {
+      clearOverviewTimer();
+      if (disposed) return;
+      overviewRefreshTimerRef.current = window.setTimeout(async () => {
+        if (disposed) return;
+        if (!isOnline()) {
+          overviewFailuresRef.current = Math.max(overviewFailuresRef.current, 1);
+          if (overviewRef.current) {
+            setOverviewConnectionMessage('Sem conexão. Mantivemos os últimos dados e vamos tentar reconectar.');
+          }
+        } else if (isPageVisible()) {
+          await loadOverview(token, { silent: true, showToastOnError: false });
+        }
+        scheduleNextRefresh();
+      }, nextDelay());
+    };
+
+    const refreshWhenActive = () => {
+      if (disposed || !isPageVisible() || !isOnline()) return;
+      clearOverviewTimer();
+      void loadOverview(token, { silent: true, showToastOnError: false }).finally(scheduleNextRefresh);
+    };
+
+    scheduleNextRefresh();
+    window.addEventListener('focus', refreshWhenActive);
+    window.addEventListener('online', refreshWhenActive);
+    document.addEventListener('visibilitychange', refreshWhenActive);
+
+    return () => {
+      disposed = true;
+      clearOverviewTimer();
+      window.removeEventListener('focus', refreshWhenActive);
+      window.removeEventListener('online', refreshWhenActive);
+      document.removeEventListener('visibilitychange', refreshWhenActive);
+    };
   }, [token, autoRefresh]);
 
   useEffect(() => {
@@ -953,6 +1055,14 @@ export function SuperAdmin() {
     if (!summary?.totalStores) return 0;
     return (summary.activeSubscriptions / summary.totalStores) * 100;
   }, [summary?.totalStores, summary?.activeSubscriptions]);
+
+  const overviewUpdatedLabel = useMemo(() => {
+    if (overviewRefreshing) return 'Atualizando...';
+    if (!overviewLastUpdatedAt) return 'Atualizado agora';
+    const date = new Date(overviewLastUpdatedAt);
+    if (Number.isNaN(date.getTime())) return 'Atualizado agora';
+    return `Atualizado ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+  }, [overviewLastUpdatedAt, overviewRefreshing]);
 
   const handleReprocess = async (paymentId: string, providerId?: string) => {
     if (!token) return;
@@ -1547,6 +1657,13 @@ export function SuperAdmin() {
 
         {loading && <PlatformRobotLoader logoSrc={platformLogo} />}
 
+        {overviewConnectionMessage && summary && (
+          <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
+            <WarningCircle size={16} weight="duotone" />
+            <span>{overviewConnectionMessage}</span>
+          </div>
+        )}
+
         {summary && activeSection === 'executive' && (
           <div id="executive" className="grid lg:grid-cols-[2.1fr,1fr] gap-4">
             <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 shadow-lg">
@@ -1559,7 +1676,7 @@ export function SuperAdmin() {
                     <h2 className="text-2xl font-black">Resumo executivo</h2>
                   </div>
                   <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white">
-                    Atualizado agora
+                    {overviewUpdatedLabel}
                   </span>
                 </div>
                 <div className="grid sm:grid-cols-3 gap-4">

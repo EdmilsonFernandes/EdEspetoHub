@@ -1,8 +1,11 @@
 import { describe, it, expect } from 'vitest';
+import jwt from 'jsonwebtoken';
 import { api, testEmail, registerStore, loginAdmin, registerCustomer, loginCustomer, verifyEmailDirectly } from '../helpers';
 import { env } from '../../config/env';
 import { generateTotpCode } from '../../utils/totp';
 import { AppDataSource } from '../../config/database';
+
+const superAdminToken = () => jwt.sign({ sub: '00000000-0000-0000-0000-000000000001', role: 'SUPER_ADMIN' }, env.jwtSecret);
 
 describe('Auth — Registro e Login', () => {
   // ─── Registro de Lojista (Store Owner) ───
@@ -205,6 +208,16 @@ describe('Auth — Registro e Login', () => {
     it('endpoint protegido rejeita sem token', async () => {
       const res = await api.get('/api/motoboy/orders/available');
       expect(res.status).toBeGreaterThanOrEqual(401);
+    });
+
+    it('super admin overview expõe métrica de duração para diagnosticar performance', async () => {
+      const res = await api
+        .get('/api/admin/overview')
+        .set('Authorization', `Bearer ${superAdminToken()}`);
+
+      expect(res.status).toBe(200);
+      expect(res.headers['server-timing']).toMatch(/admin-overview;dur=\d+/);
+      expect(res.body.summary?.generatedAt).toBeTruthy();
     });
   });
 

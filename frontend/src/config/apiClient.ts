@@ -4,6 +4,7 @@ import {
   isSessionAuthError,
   recoverCustomerSession,
 } from '../utils/sessionRedirect';
+import { toUserFriendlyError } from '../utils/userFriendlyErrors';
 
 const resolveBaseUrl = () =>
 {
@@ -98,7 +99,7 @@ const handleResponse = async (
       }
     }
 
-    throw error;
+    throw toUserFriendlyError(error);
   }
   return response.json();
 };
@@ -243,7 +244,7 @@ const request = async (path: string, options: any = {}) =>
       netError.code = 'NETWORK_ERROR';
       throw netError;
     }
-    throw error;
+    throw toUserFriendlyError(error);
   } finally {
     if (timeoutId) {
       clearTimeout(timeoutId);
@@ -289,7 +290,7 @@ const rawRequest = async (path: string, options: any = {}) =>
       netError.code = 'NETWORK_ERROR';
       throw netError;
     }
-    throw error;
+    throw toUserFriendlyError(error);
   }
 };
 
