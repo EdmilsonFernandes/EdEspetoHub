@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { buildAdminTableGroups, filterAdminQueueProducts, getAdminQueueLoadingState } from './adminQueueUx';
+import {
+  buildAdminTableGroups,
+  filterAdminQueueProducts,
+  getAdminQueueLoadingState,
+  resolveAdminSalesHistoryWindow,
+} from './adminQueueUx';
 
 describe('getAdminQueueLoadingState', () => {
   it('mostra skeleton inicial da fila sem duplicar banner', () => {
@@ -72,6 +77,38 @@ describe('filterAdminQueueProducts', () => {
 
   it('permite buscar por categoria e respeita limite', () => {
     expect(filterAdminQueueProducts(products, 'bebidas', 1)).toEqual([products[1]]);
+  });
+});
+
+describe('resolveAdminSalesHistoryWindow', () => {
+  const now = new Date('2026-05-23T15:00:00.000Z');
+
+  it('carrega hoje e ontem para manter comparação sem buscar histórico completo', () => {
+    expect(resolveAdminSalesHistoryWindow({ reportRange: 'today', now })).toEqual({
+      startDate: '2026-05-22',
+      endDate: '2026-05-23',
+    });
+  });
+
+  it('carrega 14 dias quando o relatório usa últimos 7 dias', () => {
+    expect(resolveAdminSalesHistoryWindow({ reportRange: 'last7', now })).toEqual({
+      startDate: '2026-05-10',
+      endDate: '2026-05-23',
+    });
+  });
+
+  it('inclui a janela anterior equivalente para calendário customizado', () => {
+    expect(
+      resolveAdminSalesHistoryWindow({
+        reportRange: 'custom',
+        reportFrom: '2026-05-20',
+        reportTo: '2026-05-22',
+        now,
+      })
+    ).toEqual({
+      startDate: '2026-05-17',
+      endDate: '2026-05-22',
+    });
   });
 });
 

@@ -88,6 +88,49 @@ export class OrderRepository
     });
   }
 
+  findByStoreIdFiltered(
+    storeId: string,
+    filters: {
+      startDate?: string | null;
+      endDate?: string | null;
+      statuses?: string[];
+      timezone?: string;
+    } = {}
+  ) {
+    const startDate = String(filters.startDate || '').trim();
+    const endDate = String(filters.endDate || '').trim();
+    const statuses = Array.isArray(filters.statuses)
+      ? filters.statuses.map((status) => String(status || '').trim().toLowerCase()).filter(Boolean)
+      : [];
+    const timezone = String(filters.timezone || process.env.APP_TZ || 'America/Sao_Paulo').trim() || 'America/Sao_Paulo';
+    const hasDateFilter = /^\d{4}-\d{2}-\d{2}$/.test(startDate) && /^\d{4}-\d{2}-\d{2}$/.test(endDate);
+
+    if (!hasDateFilter && statuses.length === 0) {
+      return this.findByStoreId(storeId);
+    }
+
+    const qb = this.repository
+      .createQueryBuilder('o')
+      .leftJoinAndSelect('o.items', 'item')
+      .leftJoinAndSelect('item.product', 'product')
+      .leftJoinAndSelect('o.orderPayment', 'orderPayment')
+      .where('o.store_id = :storeId', { storeId })
+      .orderBy('o.created_at', 'DESC');
+
+    if (hasDateFilter) {
+      qb.andWhere(
+        "timezone(:timezone, o.created_at)::date BETWEEN :startDate::date AND :endDate::date",
+        { timezone, startDate, endDate }
+      );
+    }
+
+    if (statuses.length > 0) {
+      qb.andWhere('LOWER(o.status) IN (:...statuses)', { statuses });
+    }
+
+    return qb.getMany();
+  }
+
 
 
 
@@ -421,5 +464,31 @@ async markItemsAsPrinted(orderId: string, itemIds?: string[]) {
       .where('o.created_at >= :since', { since })
       .getRawOne();
     return Number(row?.sum || 0);
+  }
+
+  async getPlatformSummary(since7Days: Date, since30Days: Date)
+  {
+    const row = await AppDataSource.query(
+      `
+        SELECT
+          COUNT(*)::int AS "totalOrders",
+          COUNT(*) FILTER (WHERE created_at >= $1)::int AS "ordersLast7Days",
+          COUNT(*) FILTER (WHERE created_at >= $2)::int AS "ordersLast30Days",
+          COALESCE(SUM(total), 0) AS "ordersRevenueTotal",
+          COALESCE(SUM(total) FILTER (WHERE created_at >= $1), 0) AS "ordersRevenueLast7Days",
+          COALESCE(SUM(total) FILTER (WHERE created_at >= $2), 0) AS "ordersRevenueLast30Days"
+        FROM orders
+      `,
+      [since7Days, since30Days]
+    );
+    const summary = Array.isArray(row) && row.length ? row[0] : {};
+    return {
+      totalOrders: Number(summary?.totalOrders || 0),
+      ordersLast7Days: Number(summary?.ordersLast7Days || 0),
+      ordersLast30Days: Number(summary?.ordersLast30Days || 0),
+      ordersRevenueTotal: Number(summary?.ordersRevenueTotal || 0),
+      ordersRevenueLast7Days: Number(summary?.ordersRevenueLast7Days || 0),
+      ordersRevenueLast30Days: Number(summary?.ordersRevenueLast30Days || 0),
+    };
   }
 }

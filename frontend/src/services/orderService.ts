@@ -19,6 +19,27 @@ const buildQueuePath = (identifier: string) =>
     ? `/stores/${identifier}/orders/queue`
     : `/stores/slug/${identifier}/orders/queue`;
 
+type FetchOrdersOptions = {
+  startDate?: string | null;
+  endDate?: string | null;
+  statuses?: string[];
+};
+
+const buildOrdersPathWithQuery = (identifier: string, options?: FetchOrdersOptions) => {
+  const path = buildOrdersPath(identifier);
+  const params = new URLSearchParams();
+  const startDate = String(options?.startDate || '').trim();
+  const endDate = String(options?.endDate || '').trim();
+  const statuses = Array.isArray(options?.statuses)
+    ? options.statuses.map((status) => String(status || '').trim()).filter(Boolean)
+    : [];
+  if (startDate) params.set('startDate', startDate);
+  if (endDate) params.set('endDate', endDate);
+  if (statuses.length) params.set('statuses', statuses.join(','));
+  const query = params.toString();
+  return query ? `${path}?${query}` : path;
+};
+
 const normalizeOrder = (order: any) => ({
   ...order,
   id: order.id ?? order.order_id ?? order.orderId,
@@ -228,7 +249,7 @@ export const orderService = {
     await apiClient.post(buildOrdersPath(targetStore), orderData);
   },
 
-  async fetchAll(storeId?: string)
+  async fetchAll(storeId?: string, options?: FetchOrdersOptions)
   {
     const targetStore = resolveStoreIdentifier(storeId);
     if (!targetStore)
@@ -237,7 +258,7 @@ export const orderService = {
     }
 
     try {
-      const data = await apiClient.get(buildOrdersPath(targetStore), { timeoutMs: ORDER_FEED_TIMEOUT_MS });
+      const data = await apiClient.get(buildOrdersPathWithQuery(targetStore, options), { timeoutMs: ORDER_FEED_TIMEOUT_MS });
       return data.map(normalizeOrder);
     } catch (error) {
       handleSessionError(error);

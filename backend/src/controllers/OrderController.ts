@@ -47,6 +47,26 @@ function shouldAttachPublicEta(order: any) {
 
   return Boolean(order?.store);
 }
+
+function parseOrderListFilters(query: Request['query']) {
+  const startDate = String(query?.startDate || '').trim();
+  const endDate = String(query?.endDate || '').trim();
+  const dateFilter = /^\d{4}-\d{2}-\d{2}$/.test(startDate) && /^\d{4}-\d{2}-\d{2}$/.test(endDate)
+    ? startDate <= endDate
+      ? { startDate, endDate }
+      : { startDate: endDate, endDate: startDate }
+    : {};
+  const statuses = String(query?.statuses || '')
+    .split(',')
+    .map((status) => status.trim().toLowerCase())
+    .filter(Boolean)
+    .slice(0, 12);
+
+  return {
+    ...dateFilter,
+    statuses,
+  };
+}
 /**
  * Provides OrderController functionality.
  *
@@ -100,7 +120,11 @@ export class OrderController {
   static async list(req: Request, res: Response) {
     try {
       log.debug('Order list request', { storeId: req.params.storeId });
-      const orders = await orderService.listByStoreId(req.params.storeId, req.auth?.storeId);
+      const orders = await orderService.listByStoreId(
+        req.params.storeId,
+        req.auth?.storeId,
+        parseOrderListFilters(req.query)
+      );
       return res.json(orders);
     } catch (error: any) {
       log.warn('Order list failed', { storeId: req.params.storeId, error });
@@ -168,7 +192,11 @@ export class OrderController {
   static async listBySlug(req: Request, res: Response) {
     try {
       log.debug('Order list by slug request', { slug: req.params.slug });
-      const orders = await orderService.listByStoreSlug(req.params.slug, req.auth?.storeId);
+      const orders = await orderService.listByStoreSlug(
+        req.params.slug,
+        req.auth?.storeId,
+        parseOrderListFilters(req.query)
+      );
       return res.json(orders);
     } catch (error: any) {
       log.warn('Order list by slug failed', { slug: req.params.slug, error });

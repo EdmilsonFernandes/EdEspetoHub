@@ -167,6 +167,31 @@ const KycAvatar = ({ name, profileImageUrl }: { name?: string; profileImageUrl?:
   );
 };
 
+const PlatformRobotLoader = ({ logoSrc = '/janocaminho.jpg' }) => (
+  <div className="relative overflow-hidden rounded-[1.7rem] border border-[#336886]/12 bg-white p-4 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.45)]">
+    <div className="absolute -right-10 -top-14 h-32 w-32 rounded-full bg-[#5FD35A]/18 blur-3xl" />
+    <div className="absolute -bottom-12 left-8 h-28 w-28 rounded-full bg-[#336886]/14 blur-3xl" />
+    <div className="relative flex items-center gap-3">
+      <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.25rem] bg-[linear-gradient(145deg,#153A4C,#336886)] shadow-[0_20px_42px_-28px_rgba(21,58,76,0.9)]">
+        <span className="absolute -top-2 left-1/2 h-4 w-[2px] -translate-x-1/2 rounded-full bg-[#5FD35A]/80" />
+        <span className="absolute left-[17px] top-[17px] h-1.5 w-1.5 animate-pulse rounded-full bg-[#5FD35A] shadow-[0_0_12px_rgba(95,211,90,0.9)]" />
+        <span className="absolute right-[17px] top-[17px] h-1.5 w-1.5 animate-pulse rounded-full bg-[#5FD35A] shadow-[0_0_12px_rgba(95,211,90,0.9)]" />
+        <img src={logoSrc} alt="Já no Caminho" className="mt-3 h-7 w-7 rounded-lg object-cover ring-1 ring-white/50" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Resumo da plataforma</p>
+        <p className="mt-1 text-sm font-black text-slate-900">Carregando indicadores...</p>
+        <p className="mt-0.5 text-xs font-semibold text-slate-500">Buscando vendas, lojas, planos e pagamentos sem travar a tela.</p>
+      </div>
+      <div className="ml-auto hidden items-center gap-1 sm:flex">
+        <span className="h-2 w-2 animate-bounce rounded-full bg-[#336886]" />
+        <span className="h-2 w-2 animate-bounce rounded-full bg-[#5FD35A] [animation-delay:120ms]" />
+        <span className="h-2 w-2 animate-bounce rounded-full bg-[#8EC5DD] [animation-delay:240ms]" />
+      </div>
+    </div>
+  </div>
+);
+
 const SECTION_META: Record<string, { title: string; description: string; tone: string }> = {
   executive: {
     title: 'Resumo executivo',
@@ -1520,7 +1545,7 @@ export function SuperAdmin() {
         </div>
       )}
 
-        {loading && <div className="text-sm text-slate-500">Carregando...</div>}
+        {loading && <PlatformRobotLoader logoSrc={platformLogo} />}
 
         {summary && activeSection === 'executive' && (
           <div id="executive" className="grid lg:grid-cols-[2.1fr,1fr] gap-4">

@@ -1,4 +1,5 @@
 export type AdminQueueTab = 'queue' | 'inroute' | 'completed';
+export type AdminSalesReportRange = 'today' | 'yesterday' | 'last7' | 'custom';
 
 type LoadingStateInput = {
   activeTab: AdminQueueTab;
@@ -39,6 +40,79 @@ export const getAdminQueueLoadingState = ({
     showQueueSkeleton: activeTab === 'queue' && showInitialSkeleton,
     showInRouteSkeleton: activeTab === 'inroute' && showInitialSkeleton,
     showSalesSkeleton: activeTab === 'completed' && showInitialSkeleton,
+  };
+};
+
+const dateKeyInSaoPaulo = (value: number | Date = Date.now()) => {
+  const date = value instanceof Date ? value : new Date(value);
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+};
+
+const addDaysToDateKey = (dateKey: string, days: number) => {
+  const [year, month, day] = String(dateKey || '').split('-').map((part) => Number(part));
+  if (!year || !month || !day) return dateKeyInSaoPaulo();
+  const date = new Date(Date.UTC(year, month - 1, day + days, 12, 0, 0));
+  return dateKeyInSaoPaulo(date);
+};
+
+const normalizeDateKey = (value: unknown, fallback: string) => {
+  const raw = String(value || '').trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : fallback;
+};
+
+export const resolveAdminSalesHistoryWindow = ({
+  reportRange,
+  reportFrom,
+  reportTo,
+  now = Date.now(),
+}: {
+  reportRange: AdminSalesReportRange;
+  reportFrom?: string | null;
+  reportTo?: string | null;
+  now?: number | Date;
+}) => {
+  const today = dateKeyInSaoPaulo(now instanceof Date ? now : Number(now));
+  const normalizedRange = reportRange || 'today';
+
+  if (normalizedRange === 'yesterday') {
+    const yesterday = addDaysToDateKey(today, -1);
+    return {
+      startDate: addDaysToDateKey(yesterday, -1),
+      endDate: yesterday,
+    };
+  }
+
+  if (normalizedRange === 'last7') {
+    return {
+      startDate: addDaysToDateKey(today, -13),
+      endDate: today,
+    };
+  }
+
+  if (normalizedRange === 'custom') {
+    const fromInput = normalizeDateKey(reportFrom, today);
+    const toInput = normalizeDateKey(reportTo, fromInput);
+    const start = fromInput <= toInput ? fromInput : toInput;
+    const end = fromInput <= toInput ? toInput : fromInput;
+    const startMs = Date.parse(`${start}T12:00:00Z`);
+    const endMs = Date.parse(`${end}T12:00:00Z`);
+    const rangeDays = Number.isFinite(startMs) && Number.isFinite(endMs)
+      ? Math.max(0, Math.round((endMs - startMs) / 86400000))
+      : 0;
+    return {
+      startDate: addDaysToDateKey(start, -(rangeDays + 1)),
+      endDate: end,
+    };
+  }
+
+  return {
+    startDate: addDaysToDateKey(today, -1),
+    endDate: today,
   };
 };
 

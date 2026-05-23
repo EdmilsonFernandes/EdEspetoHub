@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { api, registerStore, loginAdmin, verifyEmailDirectly, activateSubscription } from '../helpers';
+import { AppDataSource } from '../../config/database';
 
 describe('Pedido — Fluxo operador (criar, fila, status, detalhe)', () => {
   let adminToken: string;
@@ -94,6 +95,61 @@ describe('Pedido — Fluxo operador (criar, fila, status, detalhe)', () => {
     const found = list.find((o: any) => o.id === orderId);
     expect(found).toBeTruthy();
     expect(found.status).toBe('pending');
+  });
+
+  it('lista de vendas respeita filtro de data e status sem trazer historico antigo', async () => {
+    const token = operatorToken || adminToken;
+    if (!productIdA) return;
+
+    const oldOrder = await api
+      .post(`/api/stores/${storeId}/orders`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        customerName: 'Venda Antiga',
+        type: 'pickup',
+        items: [{ productId: productIdA, quantity: 1 }],
+        paymentMethod: 'dinheiro',
+      });
+    const todayOrder = await api
+      .post(`/api/stores/${storeId}/orders`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        customerName: 'Venda Hoje',
+        type: 'pickup',
+        items: [{ productId: productIdA, quantity: 1 }],
+        paymentMethod: 'dinheiro',
+      });
+    if (oldOrder.status >= 400 || todayOrder.status >= 400) return;
+
+    await AppDataSource.query(
+      `
+        UPDATE orders
+           SET status = 'done',
+               created_at = CASE
+                 WHEN id = $1 THEN NOW() - INTERVAL '20 days'
+                 ELSE NOW()
+               END
+         WHERE id IN ($1, $2)
+      `,
+      [oldOrder.body.id, todayOrder.body.id]
+    );
+
+    const dateKey = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date());
+    const res = await api
+      .get(`/api/stores/${storeId}/orders?startDate=${dateKey}&endDate=${dateKey}&statuses=done,delivered,finished,cancelled`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    const list = Array.isArray(res.body) ? res.body : res.body?.orders || [];
+    const ids = list.map((order: any) => order.id);
+    expect(ids).toContain(todayOrder.body.id);
+    expect(ids).not.toContain(oldOrder.body.id);
+    expect(list.every((order: any) => ['done', 'delivered', 'finished', 'cancelled'].includes(String(order.status).toLowerCase()))).toBe(true);
   });
 
   it('pedido aparece na fila de produção (queue)', async () => {

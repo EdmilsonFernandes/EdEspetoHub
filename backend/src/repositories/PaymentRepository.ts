@@ -75,6 +75,28 @@ export class PaymentRepository {
     });
   }
 
+  async findLatestByStoreIds(storeIds: string[]) {
+    const normalizedStoreIds = Array.from(
+      new Set((Array.isArray(storeIds) ? storeIds : []).map((id) => String(id || '').trim()).filter(Boolean))
+    );
+    if (!normalizedStoreIds.length) return new Map<string, Payment>();
+
+    const rows = await this.repository
+      .createQueryBuilder('payment')
+      .distinctOn(['payment.store_id'])
+      .leftJoinAndSelect('payment.store', 'store')
+      .where('payment.store_id IN (:...storeIds)', { storeIds: normalizedStoreIds })
+      .orderBy('payment.store_id', 'ASC')
+      .addOrderBy('payment.created_at', 'DESC')
+      .getMany();
+
+    return rows.reduce((acc, payment) => {
+      const storeId = String(payment.store?.id || '').trim();
+      if (storeId) acc.set(storeId, payment);
+      return acc;
+    }, new Map<string, Payment>());
+  }
+
     /**
    * Retrieves data for find latest paid by store id.
    *
@@ -127,6 +149,23 @@ findLatestPaidByStoreId(storeId: string) {
       .createQueryBuilder('payment')
       .where('payment.status = :status', { status })
       .getCount();
+  }
+
+  async getPlatformSummary() {
+    const [row] = await AppDataSource.query(
+      `
+        SELECT
+          COUNT(*) FILTER (WHERE status = 'PAID')::int AS "paidPayments",
+          COUNT(*) FILTER (WHERE status = 'PENDING')::int AS "pendingPayments",
+          COALESCE(SUM(amount) FILTER (WHERE status = 'PAID'), 0) AS "paidRevenue"
+        FROM payments
+      `
+    );
+    return {
+      paidPayments: Number(row?.paidPayments || 0),
+      pendingPayments: Number(row?.pendingPayments || 0),
+      paidRevenue: Number(row?.paidRevenue || 0),
+    };
   }
 
   /**

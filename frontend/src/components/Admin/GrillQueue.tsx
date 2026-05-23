@@ -45,7 +45,12 @@ import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
 import { exportToCsv } from "../../utils/export";
 import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from "../../utils/orderNotificationSound";
-import { buildAdminTableGroups, filterAdminQueueProducts, getAdminQueueLoadingState } from "../../utils/adminQueueUx";
+import {
+  buildAdminTableGroups,
+  filterAdminQueueProducts,
+  getAdminQueueLoadingState,
+  resolveAdminSalesHistoryWindow,
+} from "../../utils/adminQueueUx";
 import {
   calculateTableServiceCharge,
   isTableServiceCategory,
@@ -1138,6 +1143,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [reportRange, setReportRange] = useState<'today' | 'yesterday' | 'last7' | 'custom'>('today');
   const [reportFrom, setReportFrom] = useState(() => getNowKeyInSaoPaulo());
   const [reportTo, setReportTo] = useState(() => getNowKeyInSaoPaulo());
+  const salesHistoryWindow = useMemo(
+    () => resolveAdminSalesHistoryWindow({ reportRange, reportFrom, reportTo }),
+    [reportFrom, reportRange, reportTo]
+  );
   const [soldItemsModalOpen, setSoldItemsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [editingFinalizedOrder, setEditingFinalizedOrder] = useState(false);
@@ -1930,7 +1939,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
     historyRequestInFlightRef.current = true;
     try {
-      const data = await orderService.fetchAll(storeIdentifier);
+      const data = await orderService.fetchAll(storeIdentifier, {
+        ...salesHistoryWindow,
+        statuses: [ 'done', 'delivered', 'finished', 'cancelled' ],
+      });
       setHistoryOrders(Array.isArray(data) ? data : []);
       if (!silent) {
         setError('');
@@ -1946,7 +1958,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         setHistoryLoading(false);
       }
     }
-  }, [storeIdentifier]);
+  }, [salesHistoryWindow, storeIdentifier]);
 
   const scheduleQueuePoll = useCallback((immediate = false, elapsedMs = 0) => {
     clearQueuePollTimer();
@@ -1983,37 +1995,36 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (queueRequestInFlightRef.current) return;
     setIsPullRefreshing(true);
     try {
-      await Promise.all([
-        loadQueue({ silent: true }),
-        loadHistory({ silent: true }),
-      ]);
+      const refreshTasks = [loadQueue({ silent: true })];
+      if (activeTab === 'completed') {
+        refreshTasks.push(loadHistory({ silent: true }));
+      }
+      await Promise.all(refreshTasks);
       scheduleQueuePoll(false);
-      scheduleHistoryPoll(false);
+      if (activeTab === 'completed') {
+        scheduleHistoryPoll(false);
+      } else {
+        clearHistoryPollTimer();
+      }
     } finally {
       setIsPullRefreshing(false);
       setPullDistance(0);
       pullDistanceRef.current = 0;
     }
-  }, [loadHistory, loadQueue, scheduleHistoryPoll, scheduleQueuePoll]);
+  }, [activeTab, clearHistoryPollTimer, loadHistory, loadQueue, scheduleHistoryPoll, scheduleQueuePoll]);
 
   useEffect(() => {
     if (!storeIdentifier) return;
     void loadQueue();
-    void loadHistory({ silent: true });
     scheduleQueuePoll(false);
-    scheduleHistoryPoll(false);
     const handleFocusRefresh = () => {
       void loadQueue({ silent: true });
-      void loadHistory({ silent: true });
       scheduleQueuePoll(false);
-      scheduleHistoryPoll(false);
     };
     const handleVisibilityRefresh = () => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
         void loadQueue({ silent: true });
-        void loadHistory({ silent: true });
         scheduleQueuePoll(false);
-        scheduleHistoryPoll(false);
       }
     };
     window.addEventListener('focus', handleFocusRefresh);
@@ -2024,19 +2035,49 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
     return () => {
       clearQueuePollTimer();
-      clearHistoryPollTimer();
       window.removeEventListener('focus', handleFocusRefresh);
       window.removeEventListener('pageshow', handleFocusRefresh);
       document.removeEventListener('visibilitychange', handleVisibilityRefresh);
       unsubProducts();
     };
   }, [
-    clearHistoryPollTimer,
     clearQueuePollTimer,
-    loadHistory,
     loadQueue,
-    scheduleHistoryPoll,
     scheduleQueuePoll,
+    storeIdentifier,
+  ]);
+
+  useEffect(() => {
+    if (!storeIdentifier || activeTab !== 'completed') {
+      clearHistoryPollTimer();
+      return;
+    }
+    void loadHistory({ silent: true });
+    scheduleHistoryPoll(false);
+    const handleFocusRefresh = () => {
+      void loadHistory({ silent: true });
+      scheduleHistoryPoll(false);
+    };
+    const handleVisibilityRefresh = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        void loadHistory({ silent: true });
+        scheduleHistoryPoll(false);
+      }
+    };
+    window.addEventListener('focus', handleFocusRefresh);
+    window.addEventListener('pageshow', handleFocusRefresh);
+    document.addEventListener('visibilitychange', handleVisibilityRefresh);
+    return () => {
+      clearHistoryPollTimer();
+      window.removeEventListener('focus', handleFocusRefresh);
+      window.removeEventListener('pageshow', handleFocusRefresh);
+      document.removeEventListener('visibilitychange', handleVisibilityRefresh);
+    };
+  }, [
+    activeTab,
+    clearHistoryPollTimer,
+    loadHistory,
+    scheduleHistoryPoll,
     storeIdentifier,
   ]);
 

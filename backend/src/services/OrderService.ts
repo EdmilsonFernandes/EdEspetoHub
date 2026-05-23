@@ -1402,12 +1402,19 @@ private async seedPostalShipmentFromCheckoutTx(
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
-  async listByStoreId(storeId: string, authStoreId?: string)
+  async listByStoreId(
+    storeId: string,
+    authStoreId?: string,
+    filters: { startDate?: string | null; endDate?: string | null; statuses?: string[] } = {}
+  )
   {
     const store = await this.storeRepository.findById(storeId);
     this.ensureStoreAccess(store, authStoreId);
     await this.reconcileDeliveredOrdersByStore(store!.id);
-    const orders = await this.orderRepository.findByStoreId(store!.id);
+    const orders = await this.orderRepository.findByStoreIdFiltered(store!.id, {
+      ...filters,
+      timezone: this.tz,
+    });
     const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
     const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
     const withPayments = await this.attachOrderPaymentSnapshot(withShipment as any[]);
@@ -1423,12 +1430,19 @@ private async seedPostalShipmentFromCheckoutTx(
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
-  async listByStoreSlug(slug: string, authStoreId?: string)
+  async listByStoreSlug(
+    slug: string,
+    authStoreId?: string,
+    filters: { startDate?: string | null; endDate?: string | null; statuses?: string[] } = {}
+  )
   {
     const store = await this.storeRepository.findBySlug(slug);
     this.ensureStoreAccess(store, authStoreId);
     await this.reconcileDeliveredOrdersByStore(store!.id);
-    const orders = await this.orderRepository.findByStoreId(store!.id);
+    const orders = await this.orderRepository.findByStoreIdFiltered(store!.id, {
+      ...filters,
+      timezone: this.tz,
+    });
     const withDelivery = await this.attachDeliverySnapshot(orders as any[]);
     const withShipment = await this.attachShipmentSnapshot(withDelivery as any[]);
     const withPayments = await this.attachOrderPaymentSnapshot(withShipment as any[]);

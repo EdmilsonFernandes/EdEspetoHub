@@ -76,6 +76,27 @@ export class PlatformAdminController {
       planExemptLabel: label,
     };
   }
+
+  private static async enrichStoresForOverview(stores: any[]) {
+    const storeIds = (Array.isArray(stores) ? stores : [])
+      .map((store) => String(store?.id || '').trim())
+      .filter(Boolean);
+    const [subscriptionByStoreId, latestPaymentByStoreId] = await Promise.all([
+      subscriptionService.getCurrentByStoreIds(storeIds),
+      paymentRepository.findLatestByStoreIds(storeIds),
+    ]);
+
+    return stores.map((store) => {
+      const vipSubscription = store.settings?.planExempt
+        ? PlatformAdminController.buildVipSubscription(store)
+        : null;
+      return {
+        ...store,
+        subscription: vipSubscription || subscriptionByStoreId.get(store.id) || null,
+        latestPayment: latestPaymentByStoreId.get(store.id) || null,
+      };
+    });
+  }
   /**
    * Lists stores.
    *
@@ -120,30 +141,54 @@ export class PlatformAdminController {
     try {
       log.debug('Admin overview request');
       const stores = await storeRepository.findAll();
-      const enriched = await Promise.all(
-        stores.map(async (store) => {
-          const subscription = await subscriptionService.getCurrentByStore(store.id);
-          const latestPayment = await paymentRepository.findLatestByStoreId(store.id);
-          const vipSubscription = store.settings?.planExempt
-            ? PlatformAdminController.buildVipSubscription(store)
-            : null;
-          return { ...store, subscription: vipSubscription || subscription, latestPayment };
-        })
-      );
-
-      const paidPayments = await paymentRepository.countByStatus('PAID');
-      const pendingPayments = await paymentRepository.countByStatus('PENDING');
-      const paidRevenue = await paymentRepository.sumPaidAmounts();
+      const enriched = await PlatformAdminController.enrichStoresForOverview(stores);
       const now = new Date();
       const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      const totalOrders = await orderRepository.countAll();
-      const ordersLast7Days = await orderRepository.countSince(sevenDaysAgo);
-      const ordersLast30Days = await orderRepository.countSince(thirtyDaysAgo);
-      const ordersRevenueTotal = await orderRepository.sumAllRevenue();
-      const ordersRevenueLast7Days = await orderRepository.sumRevenueSince(sevenDaysAgo);
-      const ordersRevenueLast30Days = await orderRepository.sumRevenueSince(thirtyDaysAgo);
-      const orderAggregates = await orderRepository.aggregateByStore();
+      const [
+        paymentSummary,
+        orderSummary,
+        orderAggregates,
+        churnedStores,
+        activeUpdated,
+        startedLast30Days,
+        topProductsByStore,
+        recentPayments,
+        paymentEvents,
+      ] = await Promise.all([
+        paymentRepository.getPlatformSummary(),
+        orderRepository.getPlatformSummary(sevenDaysAgo, thirtyDaysAgo),
+        orderRepository.aggregateByStore(),
+        subscriptionRepository.countByStatuses([ 'EXPIRED', 'SUSPENDED' ]),
+        subscriptionRepository.countActiveUpdatedSince(thirtyDaysAgo),
+        subscriptionRepository.countStartedSince(thirtyDaysAgo),
+        AppDataSource.query(`
+          SELECT DISTINCT ON (o.store_id)
+            o.store_id AS "storeId",
+            p.name AS "productName",
+            SUM(oi.quantity) AS "quantity"
+          FROM order_items oi
+          INNER JOIN orders o ON o.id = oi.order_id
+          INNER JOIN products p ON p.id = oi.product_id
+          GROUP BY o.store_id, p.name
+          ORDER BY o.store_id, SUM(oi.quantity) DESC;
+        `),
+        paymentRepository.findRecent(50),
+        paymentEventRepository.findRecent(50),
+      ]);
+      const {
+        paidPayments,
+        pendingPayments,
+        paidRevenue,
+      } = paymentSummary;
+      const {
+        totalOrders,
+        ordersLast7Days,
+        ordersLast30Days,
+        ordersRevenueTotal,
+        ordersRevenueLast7Days,
+        ordersRevenueLast30Days,
+      } = orderSummary;
       /**
        * Handles order aggregate map.
        *
@@ -151,22 +196,8 @@ export class PlatformAdminController {
        * @date 2025-12-17
        */
       const orderAggregateMap = new Map(orderAggregates.map((row) => [ row.storeId, row ]));
-      const churnedStores = await subscriptionRepository.countByStatuses([ 'EXPIRED', 'SUSPENDED' ]);
-      const activeUpdated = await subscriptionRepository.countActiveUpdatedSince(thirtyDaysAgo);
-      const startedLast30Days = await subscriptionRepository.countStartedSince(thirtyDaysAgo);
       const reactivatedStores = Math.max(activeUpdated - startedLast30Days, 0);
 
-      const topProductsByStore = await AppDataSource.query(`
-        SELECT DISTINCT ON (o.store_id)
-          o.store_id AS "storeId",
-          p.name AS "productName",
-          SUM(oi.quantity) AS "quantity"
-        FROM order_items oi
-        INNER JOIN orders o ON o.id = oi.order_id
-        INNER JOIN products p ON p.id = oi.product_id
-        GROUP BY o.store_id, p.name
-        ORDER BY o.store_id, SUM(oi.quantity) DESC;
-      `);
       const topProductMap = new Map(
         (topProductsByStore || []).map((row: any) => [
           row.storeId,
@@ -242,9 +273,6 @@ export class PlatformAdminController {
           reactivatedStores,
         }
       );
-
-      const recentPayments = await paymentRepository.findRecent(50);
-      const paymentEvents = await paymentEventRepository.findRecent(50);
 
       return res.json({
         summary: {
