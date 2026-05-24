@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Buildings, Compass, MagnifyingGlass, MapTrifold, Mountains, Sparkle } from '@phosphor-icons/react';
+import { Buildings, Compass, MagnifyingGlass, MapTrifold, Mountains, Sparkle, X } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -30,6 +30,17 @@ export function DestinationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedState, setSelectedState] = useState<string>('ALL');
+
+  const states = useMemo(() => {
+    const list = new Set<string>();
+    destinations.forEach((d) => {
+      if (d.state) {
+        list.add(String(d.state).trim().toUpperCase());
+      }
+    });
+    return Array.from(list).sort();
+  }, [destinations]);
 
   useEffect(() => {
     let active = true;
@@ -65,13 +76,17 @@ export function DestinationsPage() {
   }), [destinations]);
 
   const filteredDestinations = useMemo(() => {
+    let result = destinations;
+    if (selectedState !== 'ALL') {
+      result = result.filter((d) => String(d.state).trim().toUpperCase() === selectedState);
+    }
     const query = searchTerm
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .trim();
-    if (!query) return destinations;
-    return destinations.filter((destination: any) => [
+    if (!query) return result;
+    return result.filter((destination: any) => [
       destination.name,
       destination.city,
       destination.state,
@@ -84,7 +99,7 @@ export function DestinationsPage() {
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .includes(query));
-  }, [destinations, searchTerm]);
+  }, [destinations, searchTerm, selectedState]);
 
   return (
     <PublicDestinationShell active="destinations" backTo="/hub" backLabel="Voltar" contextLabel="Destinos turísticos">
@@ -119,22 +134,56 @@ export function DestinationsPage() {
             </div>
           </div>
 
-          <div className="mt-4 rounded-[1.5rem] border border-white/80 bg-white/86 p-2 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.42)] backdrop-blur">
-            <label className="flex min-h-[3.25rem] items-center gap-3 rounded-[1.15rem] bg-slate-50 px-4 ring-1 ring-slate-200 focus-within:ring-[#336886]/30">
-              <MagnifyingGlass size={18} weight="bold" className="shrink-0 text-slate-400" />
+          <div className="mt-4 rounded-[1.5rem] border border-white/80 bg-white/86 p-2 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.42)] backdrop-blur transition-all duration-300 focus-within:border-[#336886]/35 focus-within:shadow-[0_20px_48px_-30px_rgba(51,104,134,0.25)] focus-within:ring-2 focus-within:ring-[#336886]/10">
+            <label className="flex min-h-[3.25rem] items-center gap-3 rounded-[1.15rem] bg-slate-50 px-4 ring-1 ring-slate-200/60 focus-within:ring-transparent transition-all">
+              <MagnifyingGlass size={18} weight="bold" className="shrink-0 text-[#336886]/80" />
               <input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="Buscar cidade, região ou experiência"
-                className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
+                className="min-w-0 flex-1 bg-transparent text-sm font-black text-slate-900 outline-none placeholder:text-slate-400"
               />
               {searchTerm ? (
-                <button type="button" onClick={() => setSearchTerm('')} className="rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-slate-500 ring-1 ring-slate-200">
-                  Limpar
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-slate-400 hover:text-slate-700 ring-1 ring-slate-200 shadow-sm active:scale-95 transition-transform"
+                >
+                  <X size={12} weight="bold" />
                 </button>
               ) : null}
             </label>
           </div>
+
+          {states.length > 0 && (
+            <div className="mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1.5 pt-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <button
+                type="button"
+                onClick={() => setSelectedState('ALL')}
+                className={`snap-start px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-300 active:scale-95 ${
+                  selectedState === 'ALL'
+                    ? 'bg-[linear-gradient(145deg,#153A4C_0%,#336886_60%,#5FD35A_145%)] text-white shadow-[0_10px_20px_-8px_rgba(21,58,76,0.48),0_4px_8px_-2px_rgba(95,211,90,0.3)] border border-white/20'
+                    : 'bg-white/86 text-slate-600 border border-white shadow-[0_8px_16px_-12px_rgba(15,23,42,0.18)] hover:-translate-y-0.5'
+                }`}
+              >
+                Todos
+              </button>
+              {states.map((state) => (
+                <button
+                  key={state}
+                  type="button"
+                  onClick={() => setSelectedState(state)}
+                  className={`snap-start px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-300 active:scale-95 ${
+                    selectedState === state
+                      ? 'bg-[linear-gradient(145deg,#153A4C_0%,#336886_60%,#5FD35A_145%)] text-white shadow-[0_10px_20px_-8px_rgba(21,58,76,0.48),0_4px_8px_-2px_rgba(95,211,90,0.3)] border border-white/20'
+                      : 'bg-white/86 text-slate-600 border border-white shadow-[0_8px_16px_-12px_rgba(15,23,42,0.18)] hover:-translate-y-0.5'
+                  }`}
+                >
+                  {state}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -151,46 +200,71 @@ export function DestinationsPage() {
         </div>
 
         {error ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
-        {loading ? <p className="text-sm font-semibold text-slate-500">Carregando destinos...</p> : null}
+        {loading && (
+          <div className="grid gap-4 md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="grid overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white/80 p-0 sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)] shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
+              >
+                <div className="h-36 sm:h-full sm:min-h-[12.5rem] ds-skeleton" />
+                <div className="flex flex-col justify-between gap-4 p-4">
+                  <div className="space-y-3">
+                    <div className="h-6 w-7/12 rounded-full ds-skeleton" />
+                    <div className="h-4 w-10/12 rounded-full ds-skeleton" />
+                    <div className="h-4 w-8/12 rounded-full ds-skeleton" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-24 rounded-full ds-skeleton" />
+                    <div className="h-8 w-24 rounded-full ds-skeleton" />
+                    <div className="ml-auto h-8 w-24 rounded-full ds-skeleton" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {filteredDestinations.map((destination) => (
-            <Link
-              key={destination.id}
-              to={`/destinos/${destination.slug}`}
-              className="group grid overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_48px_-34px_rgba(15,23,42,0.35)] transition hover:-translate-y-1 sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)]"
-            >
-              <div className="relative h-36 overflow-hidden bg-slate-100 sm:h-full sm:min-h-[12.5rem]">
-                <img src={destinationImage(destination)} alt={destination.name} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-black text-slate-700 shadow-sm">
-                  {destinationLocationLabel(destination)}
+        {!loading && (
+          <div className="grid gap-4 md:grid-cols-2">
+            {filteredDestinations.map((destination) => (
+              <Link
+                key={destination.id}
+                to={`/destinos/${destination.slug}`}
+                className="group grid overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)] active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.15)]"
+              >
+                <div className="relative h-36 overflow-hidden bg-slate-100 sm:h-full sm:min-h-[12.5rem]">
+                  <img src={destinationImage(destination)} alt={destination.name} className="absolute inset-0 h-full w-full object-cover transition-all duration-700 group-hover:scale-108" />
+                  <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/86 px-3 py-1 text-[11px] font-black text-slate-700 shadow-[0_6px_14px_-4px_rgba(15,23,42,0.12)] backdrop-blur-md">
+                    {destinationLocationLabel(destination)}
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col justify-between gap-4 p-4">
-                <div>
-                  <h3 className="text-xl font-black tracking-[-0.04em] text-slate-950 sm:text-2xl">{destination.name}</h3>
-                  <p className="mt-2 line-clamp-2 text-sm font-semibold leading-relaxed text-slate-600">
-                    {destination.description || destination.heroSubtitle || 'Um destino pronto para receber sua próxima viagem.'}
-                  </p>
+                <div className="flex flex-col justify-between gap-4 p-4">
+                  <div>
+                    <h3 className="text-xl font-black tracking-[-0.04em] text-slate-900 transition-colors duration-200 group-hover:text-[#336886] sm:text-2xl">{destination.name}</h3>
+                    <p className="mt-2 line-clamp-2 text-sm font-semibold leading-relaxed text-slate-600">
+                      {destination.description || destination.heroSubtitle || 'Um destino pronto para receber sua próxima viagem.'}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="inline-flex min-w-0 flex-wrap items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black leading-tight text-slate-700">
+                      <Buildings size={14} weight="duotone" />
+                      <span className="whitespace-normal break-words">{destination.placesCount || 0} hospedagens</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-700">
+                      <Sparkle size={14} weight="duotone" />
+                      {destination.listingsCount || 0} serviços
+                    </span>
+                    <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-3 py-1.5 text-xs font-black text-white transition-all duration-300 group-hover:bg-[#5FD35A] group-hover:shadow-[0_6px_16px_-4px_rgba(95,211,90,0.48)]">
+                      Explorar
+                      <Compass size={14} weight="bold" className="transition-transform duration-500 group-hover:rotate-45" />
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex min-w-0 flex-wrap items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black leading-tight text-slate-700">
-                    <Buildings size={14} weight="duotone" />
-                    <span className="whitespace-normal break-words">{destination.placesCount || 0} hospedagens</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-700">
-                    <Sparkle size={14} weight="duotone" />
-                    {destination.listingsCount || 0} serviços
-                  </span>
-                  <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-3 py-1.5 text-xs font-black text-white">
-                    Explorar
-                    <Compass size={14} weight="bold" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )}
         {!loading && !filteredDestinations.length ? (
           <p className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white/70 px-4 py-5 text-sm font-bold text-slate-500">
             Nenhuma cidade encontrada para essa busca.
