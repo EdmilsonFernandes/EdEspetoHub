@@ -16,6 +16,7 @@ import {
   Storefront,
   WhatsappLogo,
   X,
+  MagnifyingGlass,
 } from '@phosphor-icons/react';
 import { openActionTarget } from '../../utils/actionLink';
 
@@ -121,6 +122,13 @@ export function PreStoreDetailSheet({
   address,
 }: any) {
   const [routeCopied, setRouteCopied] = useState(false);
+  const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setPreviewImage(null);
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -168,9 +176,20 @@ export function PreStoreDetailSheet({
       <section className="relative w-full max-w-2xl overflow-hidden rounded-t-[2rem] bg-[#f7f1e8] shadow-[0_30px_90px_-42px_rgba(15,23,42,0.7)] sm:max-h-[92dvh] sm:rounded-[2rem]">
         <div className="max-h-[92dvh] overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div className="relative bg-slate-900">
-            <div className="aspect-[16/9] max-h-[19rem] w-full overflow-hidden">
+            <div className="aspect-[16/9] max-h-[19rem] w-full overflow-hidden relative">
               {hasImage && imageUrl ? (
-                <img src={imageUrl} alt={listing.title} className="h-full w-full object-cover" />
+                <div
+                  className="relative h-full w-full group cursor-zoom-in overflow-hidden"
+                  onClick={() => setPreviewImage({ src: imageUrl, title: listing.title })}
+                >
+                  <img src={imageUrl} alt={listing.title} className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm shadow-md">
+                      <MagnifyingGlass size={14} weight="bold" />
+                      Ampliar imagem
+                    </span>
+                  </div>
+                </div>
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgba(245,158,11,0.28),transparent_34%),linear-gradient(135deg,#17384c,#0f172a_64%,#403017)]">
                   <Storefront size={74} weight="duotone" className="text-white/42" />
@@ -308,6 +327,34 @@ export function PreStoreDetailSheet({
           </div>
         </div>
       </section>
+
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md animate-in fade-in duration-300"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            type="button"
+            className="absolute right-4 top-4 z-[310] flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition active:scale-90"
+            onClick={() => setPreviewImage(null)}
+          >
+            <X size={20} weight="bold" />
+          </button>
+          <div
+            className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={previewImage.src}
+              alt={previewImage.title}
+              className="max-h-[75vh] w-auto max-w-full object-contain"
+            />
+            <div className="bg-slate-900/90 px-4 py-3 text-center text-white">
+              <p className="text-sm font-bold">{previewImage.title}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

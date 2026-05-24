@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, MapPinLine, PhoneCall, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, MagnifyingGlass, MapPinLine, PhoneCall, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo, X } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { destinationService } from '../services/destinationService';
@@ -228,6 +228,7 @@ export function HospitalityPlacePage() {
   const [serviceFilter, setServiceFilter] = useState<'all' | 'app' | 'direct'>('all');
   const [bannerIndex, setBannerIndex] = useState(0);
   const [selectedListing, setSelectedListing] = useState<any>(null);
+  const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -326,6 +327,7 @@ export function HospitalityPlacePage() {
   useEffect(() => {
     setBannerIndex(0);
     setSelectedListing(null);
+    setPreviewImage(null);
   }, [destinationSlug, placeSlug]);
 
   useEffect(() => {
@@ -353,14 +355,38 @@ export function HospitalityPlacePage() {
             <div className="mt-4 overflow-hidden rounded-[1.75rem] border border-white/85 bg-white/90 p-2 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.44)] backdrop-blur">
               <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
                 <div className="relative h-44 overflow-hidden rounded-[1.25rem] bg-slate-100 sm:h-64 lg:h-full">
-                  <img key={selectedPlaceBanner} src={selectedPlaceBanner} alt={place.name || 'Hospedagem'} className="h-full w-full object-cover transition duration-700" />
-                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/42 via-slate-950/8 to-transparent" />
+                  <div
+                    className="relative h-full w-full group/banner cursor-zoom-in overflow-hidden"
+                    onClick={() => setPreviewImage({ src: selectedPlaceBanner, title: place.name || 'Hospedagem' })}
+                  >
+                    {placeBannerImages.map((url, index) => {
+                      const active = index === bannerIndex % placeBannerImages.length;
+                      return (
+                        <img
+                          key={url}
+                          src={url}
+                          alt={`${place.name || 'Hospedagem'} - Foto ${index + 1}`}
+                          className={`absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-in-out group-hover/banner:scale-105 ${
+                            active ? 'opacity-100 z-10 scale-100' : 'opacity-0 z-0 scale-95'
+                          }`}
+                        />
+                      );
+                    })}
+                    <div className="absolute inset-0 bg-black/10 group-hover/banner:bg-black/20 transition-colors duration-300 z-10" />
+                    <div className="absolute inset-0 opacity-0 group-hover/banner:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.1em] text-white backdrop-blur-sm shadow-md">
+                        <MagnifyingGlass size={14} weight="bold" />
+                        Ver fotos
+                      </span>
+                    </div>
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/42 via-slate-950/8 to-transparent z-10 pointer-events-none" />
                   {placeBannerImages.length > 1 ? (
                     <>
-                      <div className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm ring-1 ring-white/80 backdrop-blur">
+                      <div className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm ring-1 ring-white/80 backdrop-blur z-20">
                         {bannerIndex % placeBannerImages.length + 1}/{placeBannerImages.length}
                       </div>
-                      <div className="absolute bottom-4 right-4 flex gap-1.5">
+                      <div className="absolute bottom-4 right-4 flex gap-1.5 z-20">
                         {placeBannerImages.map((url, index) => {
                           const active = index === bannerIndex % placeBannerImages.length;
                           return (
@@ -368,7 +394,10 @@ export function HospitalityPlacePage() {
                               key={url}
                               type="button"
                               aria-label={`Ver banner ${index + 1}`}
-                              onClick={() => setBannerIndex(index)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setBannerIndex(index);
+                              }}
                               className={`h-2 rounded-full transition ${active ? 'w-6 bg-white shadow-sm' : 'w-2 bg-white/55 hover:bg-white/80'}`}
                             />
                           );
@@ -376,7 +405,7 @@ export function HospitalityPlacePage() {
                       </div>
                     </>
                   ) : null}
-                  <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-2">
+                  <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-2 z-20 pointer-events-none">
                     <span className="rounded-full bg-white/82 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-700 shadow-[0_12px_26px_-20px_rgba(15,23,42,0.42)] ring-1 ring-white/75 backdrop-blur-xl">
                       {placeTypeLabel(place.type)}
                     </span>
@@ -460,20 +489,26 @@ export function HospitalityPlacePage() {
                 {serviceFilterOptions.map((option: any) => {
                   const Icon = option.icon;
                   const active = serviceFilter === option.id;
+                  const filterStyles: Record<string, string> = {
+                    all: 'bg-[#336886] text-white shadow-[0_12px_24px_-10px_rgba(51,104,134,0.65)] border-transparent',
+                    app: 'bg-amber-600 text-white shadow-[0_12px_24px_-10px_rgba(217,119,6,0.65)] border-transparent',
+                    direct: 'bg-emerald-600 text-white shadow-[0_12px_24px_-10px_rgba(5,150,105,0.65)] border-transparent',
+                  };
+                  const activeClass = filterStyles[option.id] || filterStyles.all;
                   return (
                     <button
                       key={option.id}
                       type="button"
                       onClick={() => setServiceFilter(option.id)}
-                      className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-[11px] font-bold transition ${
+                      className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition-all duration-300 ${
                         active
-                          ? 'bg-[#336886] text-white shadow-[0_12px_26px_-18px_rgba(51,104,134,0.58)]'
-                          : 'border border-slate-200 bg-white/70 text-slate-600 hover:bg-white'
+                          ? activeClass
+                          : 'border-slate-200 bg-white/70 text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm'
                       }`}
                     >
                       <Icon size={14} weight={option.id === 'direct' ? 'fill' : 'duotone'} className={option.id === 'direct' && !active ? 'text-emerald-600' : ''} />
                       {option.label}
-                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${active ? 'bg-white/16 text-white' : 'bg-slate-100 text-slate-500'}`}>{option.count}</span>
+                      <span className={`rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{option.count}</span>
                     </button>
                   );
                 })}
@@ -509,39 +544,56 @@ export function HospitalityPlacePage() {
                   <Link
                     key={`${entry.id}-${store.id}`}
                     to={`/${store.slug}?${storeParams.toString()}`}
-                    className={`group overflow-hidden rounded-[1.55rem] border border-white/90 bg-white p-2 shadow-[0_20px_52px_-44px_rgba(15,23,42,0.42)] ring-1 ring-slate-900/[0.025] transition duration-200 hover:-translate-y-1 hover:border-[#336886]/20 hover:shadow-[0_26px_62px_-46px_rgba(51,104,134,0.42)] active:scale-[0.99] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`group/card overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
                     {mediaUrl ? (
-                      <SmartCardImage
-                        src={mediaUrl}
-                        alt={store.name}
-                        fit={hasCoverImage(store) ? 'cover' : 'contain'}
-                        className="aspect-square self-start rounded-[1.35rem]"
+                      <div
+                        className="relative aspect-square self-start overflow-hidden rounded-[1.35rem] group/image cursor-zoom-in shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setPreviewImage({ src: mediaUrl, title: store.name });
+                        }}
                       >
-                        <div className="absolute left-2 top-2 rounded-full bg-white/82 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#153A4C] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.44)] ring-1 ring-white/75 backdrop-blur-xl">
-                          App
-                        </div>
-                      </SmartCardImage>
+                        <SmartCardImage
+                          src={mediaUrl}
+                          alt={store.name}
+                          fit={hasCoverImage(store) ? 'cover' : 'contain'}
+                          className="h-full w-full"
+                        >
+                          <div className="absolute left-2 top-2 rounded-full bg-white/82 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#153A4C] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.44)] ring-1 ring-white/75 backdrop-blur-xl z-20">
+                            App
+                          </div>
+                          <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
+                            <MagnifyingGlass size={22} weight="bold" className="text-white drop-shadow-md" />
+                          </div>
+                        </SmartCardImage>
+                      </div>
                     ) : null}
                     <div className={`min-w-0 ${mediaUrl ? 'p-2.5' : 'p-3'}`}>
                       <p className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
                         <Storefront size={12} weight="duotone" />
                         Pedido pelo app
                       </p>
-                      <h3 className="mt-1 line-clamp-2 text-lg font-semibold leading-snug tracking-[-0.025em] text-slate-950">{store.name}</h3>
+                      <h3 className="mt-1 line-clamp-2 text-lg font-semibold leading-snug tracking-[-0.025em] text-slate-950 transition-colors duration-200 group-hover/card:text-[#336886]">{store.name}</h3>
                       <p className="mt-1 line-clamp-4 text-sm font-medium leading-relaxed text-slate-600">{store.settings?.description || 'Pedido online para esta hospedagem.'}</p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {link.deliveryEnabled ? (
-                          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
-                            Entrega {link.deliveryFee != null ? formatCurrency(link.deliveryFee) : ''}
-                          </span>
-                        ) : null}
-                        {link.estimatedMinutes ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">
-                            <Clock size={13} weight="duotone" />
-                            {link.estimatedMinutes} min
-                          </span>
-                        ) : null}
+                      <div className="mt-3 flex items-center justify-between gap-2">
+                        <div className="flex flex-wrap gap-2 min-w-0">
+                          {link.deliveryEnabled ? (
+                            <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] truncate">
+                              Entrega {link.deliveryFee != null ? formatCurrency(link.deliveryFee) : ''}
+                            </span>
+                          ) : null}
+                          {link.estimatedMinutes ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shrink-0">
+                              <Clock size={13} weight="duotone" />
+                              {link.estimatedMinutes} min
+                            </span>
+                          ) : null}
+                        </div>
+                        <span className="shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover/card:bg-[#336886] group-hover/card:text-white group-hover/card:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
+                          Ver cardápio
+                        </span>
                       </div>
                     </div>
                   </Link>
@@ -556,22 +608,34 @@ export function HospitalityPlacePage() {
                     tabIndex={0}
                     onClick={() => setSelectedListing(listing)}
                     onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
-                    className={`group cursor-pointer overflow-hidden rounded-[1.55rem] border border-white/90 bg-white p-2 shadow-[0_20px_52px_-44px_rgba(15,23,42,0.42)] outline-none ring-1 ring-slate-900/[0.025] transition duration-200 hover:-translate-y-1 hover:border-[#336886]/20 hover:shadow-[0_26px_62px_-46px_rgba(51,104,134,0.42)] focus-visible:ring-4 focus-visible:ring-[#336886]/14 active:scale-[0.99] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`group/card cursor-pointer overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-none ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] focus-visible:ring-4 focus-visible:ring-[#336886]/14 ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
                     {mediaUrl ? (
-                      <SmartCardImage
-                        src={mediaUrl}
-                        alt={listing.title}
-                        fit={hasCoverImage(listing) ? 'cover' : 'contain'}
-                        className="aspect-square self-start rounded-[1.35rem]"
-                      />
+                      <div
+                        className="relative aspect-square self-start overflow-hidden rounded-[1.35rem] group/image cursor-zoom-in shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setPreviewImage({ src: mediaUrl, title: listing.title });
+                        }}
+                      >
+                        <SmartCardImage
+                          src={mediaUrl}
+                          alt={listing.title}
+                          fit={hasCoverImage(listing) ? 'cover' : 'contain'}
+                          className="h-full w-full"
+                        />
+                        <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
+                          <MagnifyingGlass size={22} weight="bold" className="text-white drop-shadow-md" />
+                        </div>
+                      </div>
                     ) : null}
                     <div className={`min-w-0 ${mediaUrl ? 'p-2.5' : 'p-3'}`}>
                       <p className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
                         <ForkKnife size={12} weight="duotone" />
                         {categoryLabel(listing.category)}
                       </p>
-                      <h3 className="mt-1 line-clamp-2 text-lg font-semibold leading-snug tracking-[-0.025em] text-slate-950">{listing.title}</h3>
+                      <h3 className="mt-1 line-clamp-2 text-lg font-semibold leading-snug tracking-[-0.025em] text-slate-950 transition-colors duration-200 group-hover/card:text-[#336886]">{listing.title}</h3>
                       <ExpandableText
                         value={listing.description || listing.address}
                         fallback={`Atendimento para hóspedes em ${place.name}.`}
@@ -583,7 +647,7 @@ export function HospitalityPlacePage() {
                         <span className="truncate text-[11px] font-semibold text-slate-500">
                           {listing.address || 'Toque para ver detalhes e contatos'}
                         </span>
-                        <span className="shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition group-hover:bg-[#336886] group-hover:text-white">
+                        <span className="shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover/card:bg-[#336886] group-hover/card:text-white group-hover/card:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
                           Ver detalhes
                         </span>
                       </div>
@@ -607,36 +671,48 @@ export function HospitalityPlacePage() {
                 {destinationListings.map((listing: any) => {
                   const mediaUrl = cardMediaFor(listing);
                   return (
-                  <article
-                    key={listing.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setSelectedListing(listing)}
-                    onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
-                    className="cursor-pointer rounded-[1.25rem] border border-white/80 bg-slate-50/70 p-2.5 shadow-[0_14px_34px_-32px_rgba(15,23,42,0.3)] outline-none ring-1 ring-slate-900/[0.02] transition hover:border-[#336886]/16 hover:bg-white hover:shadow-[0_20px_44px_-36px_rgba(51,104,134,0.32)] focus-visible:ring-4 focus-visible:ring-[#336886]/12 active:scale-[0.99]"
-                  >
-                    <div className="flex gap-3">
-                      {mediaUrl ? (
-                        <SmartCardImage
-                          src={mediaUrl}
-                          alt={listing.title}
-                          fit={hasCoverImage(listing) ? 'cover' : 'contain'}
-                          className="h-12 w-12 shrink-0 rounded-[1.15rem]"
-                        />
-                      ) : null}
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#336886]">{categoryLabel(listing.category)}</p>
-                        <h3 className="mt-0.5 line-clamp-2 text-[15px] font-semibold leading-snug text-slate-950">{listing.title}</h3>
-                        <ExpandableText
-                          value={listing.description || listing.address}
-                          fallback="Dica da cidade."
-                          className="mt-0.5 text-xs font-medium leading-relaxed text-slate-600"
-                          collapsedClassName="line-clamp-3"
-                          threshold={105}
-                        />
+                    <article
+                      key={listing.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setSelectedListing(listing)}
+                      onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
+                      className="group/card cursor-pointer rounded-[1.25rem] border border-slate-100 bg-slate-50/50 p-2.5 shadow-sm outline-none ring-1 ring-slate-100/50 transition-all duration-300 hover:border-white hover:bg-white hover:shadow-[0_12px_24px_rgba(15,23,42,0.06)] focus-visible:ring-4 focus-visible:ring-[#336886]/12 active:scale-[0.99]"
+                    >
+                      <div className="flex gap-3">
+                        {mediaUrl ? (
+                          <div
+                            className="relative h-12 w-12 shrink-0 overflow-hidden rounded-[1.15rem] group/image cursor-zoom-in"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              setPreviewImage({ src: mediaUrl, title: listing.title });
+                            }}
+                          >
+                            <SmartCardImage
+                              src={mediaUrl}
+                              alt={listing.title}
+                              fit={hasCoverImage(listing) ? 'cover' : 'contain'}
+                              className="h-full w-full"
+                            />
+                            <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
+                              <MagnifyingGlass size={12} weight="bold" className="text-white drop-shadow-md" />
+                            </div>
+                          </div>
+                        ) : null}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#336886]">{categoryLabel(listing.category)}</p>
+                          <h3 className="mt-0.5 line-clamp-2 text-[15px] font-semibold leading-snug text-slate-950 transition-colors duration-200 group-hover/card:text-[#336886]">{listing.title}</h3>
+                          <ExpandableText
+                            value={listing.description || listing.address}
+                            fallback="Dica da cidade."
+                            className="mt-0.5 text-xs font-medium leading-relaxed text-slate-600"
+                            collapsedClassName="line-clamp-3"
+                            threshold={105}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </article>
+                    </article>
                   );
                 })}
                 {destinationListings.length === 0 ? <p className="text-sm font-bold text-slate-500">Sem outros serviços aprovados na cidade ainda.</p> : null}
@@ -665,6 +741,35 @@ export function HospitalityPlacePage() {
           </aside>
         </section>
       ) : null}
+
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-[250] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md animate-in fade-in duration-300"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            type="button"
+            className="absolute right-4 top-4 z-[260] flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition active:scale-90"
+            onClick={() => setPreviewImage(null)}
+          >
+            <X size={20} weight="bold" />
+          </button>
+          <div
+            className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={previewImage.src}
+              alt={previewImage.title}
+              className="max-h-[75vh] w-auto max-w-full object-contain"
+            />
+            <div className="bg-slate-900/90 px-4 py-3 text-center text-white">
+              <p className="text-sm font-bold">{previewImage.title}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <PreStoreDetailSheet
         open={Boolean(selectedListing)}
         onClose={() => setSelectedListing(null)}

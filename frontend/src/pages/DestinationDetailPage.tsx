@@ -173,6 +173,7 @@ export function DestinationDetailPage() {
   const [placeLimit, setPlaceLimit] = useState(6);
   const [listingLimit, setListingLimit] = useState(10);
   const [selectedListing, setSelectedListing] = useState<any>(null);
+  const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
   const isNativePlatform = Capacitor.isNativePlatform();
 
   useEffect(() => {
@@ -268,6 +269,7 @@ export function DestinationDetailPage() {
 
   useEffect(() => {
     setSelectedListing(null);
+    setPreviewImage(null);
   }, [destinationSlug]);
 
   return (
@@ -416,7 +418,22 @@ export function DestinationDetailPage() {
                 >
                   <div className="relative m-2 h-44 overflow-hidden rounded-[1.45rem] bg-slate-100 sm:h-40">
                     {hasConfiguredAsset(place) ? (
-                      <img src={asset(place)} alt={place.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                      <div
+                        className="relative h-full w-full group/image cursor-zoom-in overflow-hidden"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setPreviewImage({ src: asset(place, 'banner'), title: place.name });
+                        }}
+                      >
+                        <img src={asset(place)} alt={place.name} className="h-full w-full object-cover transition-all duration-700 group-hover/image:scale-110" />
+                        <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-white backdrop-blur-sm shadow-md">
+                            <MagnifyingGlass size={12} weight="bold" />
+                            Ampliar
+                          </span>
+                        </div>
+                      </div>
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_25%_20%,rgba(51,104,134,0.22),transparent_36%),linear-gradient(135deg,#e9f1ef,#d9e7df)]">
                         <Bed size={42} weight="duotone" className="text-[#153A4C]/42" />
@@ -531,7 +548,19 @@ export function DestinationDetailPage() {
                     <>
                       <div className="flex min-w-0 max-w-full gap-3">
                         {imageIsConfigured ? (
-                          <img src={imageUrl} alt={listing.title} className="h-[4.6rem] w-[4.6rem] shrink-0 rounded-[1.35rem] object-cover" />
+                          <div
+                            className="relative h-[4.6rem] w-[4.6rem] shrink-0 overflow-hidden rounded-[1.35rem] group/image cursor-zoom-in"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              setPreviewImage({ src: imageUrl, title: listing.title });
+                            }}
+                          >
+                            <img src={imageUrl} alt={listing.title} className="h-full w-full object-cover transition-all duration-500 group-hover/image:scale-110" />
+                            <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                              <MagnifyingGlass size={16} weight="bold" className="text-white drop-shadow-md" />
+                            </div>
+                          </div>
                         ) : (
                           <div className="flex h-[4.6rem] w-[4.6rem] shrink-0 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,#fff7ed,#f4f1ea)]">
                             <Sparkle size={23} weight="duotone" className="text-amber-700/70" />
@@ -554,7 +583,7 @@ export function DestinationDetailPage() {
                         <span className="min-w-0 truncate text-[11px] font-semibold text-slate-500">
                           {listing.address || (hasLinkedStore ? 'Pedido online pelo app' : 'Detalhes e contatos no toque')}
                         </span>
-                        <span className="shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition group-hover:bg-[#336886] group-hover:text-white">
+                        <span className="shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover/card:bg-[#336886] group-hover/card:text-white group-hover/card:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
                           {hasLinkedStore ? 'Ver cardápio' : 'Ver detalhes'}
                         </span>
                       </div>
@@ -565,7 +594,7 @@ export function DestinationDetailPage() {
                       <Link
                         key={listing.id}
                         to={`/store/${linkedStoreSlug}`}
-                        className="group block min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-white/90 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_18px_46px_-40px_rgba(15,23,42,0.34)] ring-1 ring-slate-900/[0.025] transition duration-200 hover:-translate-y-0.5 hover:border-[#336886]/18 hover:shadow-[0_24px_54px_-42px_rgba(51,104,134,0.4)] active:scale-[0.99]"
+                        className="group/card block min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_18px_36px_-16px_rgba(15,23,42,0.12)]"
                       >
                         {cardBody}
                       </Link>
@@ -574,7 +603,7 @@ export function DestinationDetailPage() {
                         key={listing.id}
                         type="button"
                         onClick={() => setSelectedListing(listing)}
-                        className="group block w-full min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-white/90 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_18px_46px_-40px_rgba(15,23,42,0.34)] ring-1 ring-slate-900/[0.025] transition duration-200 hover:-translate-y-0.5 hover:border-[#336886]/18 hover:shadow-[0_24px_54px_-42px_rgba(51,104,134,0.4)] active:scale-[0.99]"
+                        className="group/card block w-full min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_18px_36px_-16px_rgba(15,23,42,0.12)]"
                       >
                         {cardBody}
                       </button>
@@ -671,21 +700,34 @@ export function DestinationDetailPage() {
               {showcaseSlides.map((slide: any, index: number) => {
                 const target = externalUrl(slide.actionTarget);
                 const title = slide.title || destination.name;
-                const cardClass = 'group relative overflow-hidden rounded-[1.35rem] bg-slate-100 text-left shadow-[0_16px_36px_-30px_rgba(15,23,42,0.45)] ring-1 ring-slate-200 transition hover:-translate-y-0.5';
+                const cardClass = 'group relative overflow-hidden rounded-[1.35rem] bg-slate-100 text-left shadow-[0_12px_24px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/50 transition-all duration-300 active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.02] md:hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.15)]';
                 const content = (
                   <>
                     <div className="aspect-[4/3] w-full overflow-hidden">
                       {hasConfiguredAsset(slide.item) ? (
-                        <img src={asset(slide.item)} alt={title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" />
+                        <img src={asset(slide.item)} alt={title} className="h-full w-full object-cover transition-all duration-700 group-hover:scale-108" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#e9f1ef,#d9e7df)]">
                           <Mountains size={32} weight="duotone" className="text-[#153A4C]/42" />
                         </div>
                       )}
                     </div>
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/70 to-transparent p-3">
+                    <div className="absolute inset-0 bg-slate-950/10 group-hover:bg-slate-950/20 transition-colors duration-300" />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent p-3">
                       <p className="line-clamp-1 text-xs font-black text-white">{title}</p>
-                      {target ? <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/76">Abrir destaque</p> : null}
+                      <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-white/76 flex items-center gap-1">
+                        {target ? (
+                          <>
+                            Abrir destaque
+                            <ArrowRight size={10} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                          </>
+                        ) : (
+                          <>
+                            Visualizar foto
+                            <MagnifyingGlass size={10} weight="bold" />
+                          </>
+                        )}
+                      </p>
                     </div>
                   </>
                 );
@@ -701,15 +743,49 @@ export function DestinationDetailPage() {
                     {content}
                   </button>
                 ) : (
-                  <article key={slide.key || index} className={cardClass}>
+                  <button
+                    key={slide.key || index}
+                    type="button"
+                    onClick={() => setPreviewImage({ src: asset(slide.item, 'banner'), title })}
+                    className={cardClass}
+                    aria-label={`Visualizar ${title}`}
+                  >
                     {content}
-                  </article>
+                  </button>
                 );
               })}
             </div>
           </div>
         </section>
       ) : null}
+
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md animate-in fade-in duration-300"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            type="button"
+            className="absolute right-4 top-4 z-[110] flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition active:scale-90"
+            onClick={() => setPreviewImage(null)}
+          >
+            <X size={20} weight="bold" />
+          </button>
+          <div
+            className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={previewImage.src}
+              alt={previewImage.title}
+              className="max-h-[75vh] w-auto max-w-full object-contain"
+            />
+            <div className="bg-slate-900/90 px-4 py-3 text-center text-white">
+              <p className="text-sm font-bold">{previewImage.title}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <PreStoreDetailSheet
         open={Boolean(selectedListing)}
