@@ -48,6 +48,7 @@ import { HubFilterSheet, type HubQuickFilterKey } from '../components/Marketplac
 import { HubHeader } from '../components/Marketplace/Hub/HubHeader';
 import { HubAnonymousActiveOrders } from '../components/Marketplace/Hub/HubAnonymousActiveOrders';
 import { HubStoreCard } from '../components/Marketplace/Hub/HubStoreCard';
+import { HubFeaturedCarousel } from '../components/Marketplace/Hub/HubFeaturedCarousel';
 import { HubMarketingPopup } from '../components/Marketplace/Hub/HubMarketingPopup';
 import { CondominiumStatusModal } from '../components/Marketplace/CondominiumStatusModal';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
@@ -3316,103 +3317,17 @@ export function MarketplacePage() {
 
           {/* Banner de Destaques Premium - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && (
-            <section
-              className="order-7 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-3 py-2.5 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl"
-              style={{ transition: 'all .45s ease', transitionDelay: '200ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
-            >
-              <div className="flex items-center justify-between gap-3 px-1">
-                <div className="min-w-0">
-                  <h2 className="text-[14px] font-black tracking-tight text-slate-950">{genericHighlightLabel}</h2>
-                  <p className="mt-0.5 line-clamp-1 text-[10px] font-bold text-slate-500">
-                    {hasFeaturedCarouselOverflow
-                      ? hasSponsoredFeaturedProducts
-                        ? 'Sugestões para pedir agora.'
-                        : 'Arraste e descubra opções das lojas.'
-                      : hasSponsoredFeaturedProducts
-                        ? 'Sugestões de lojas parceiras para pedir agora.'
-                        : 'Toque no prato e veja a loja que prepara.'}
-                  </p>
-                </div>
-                {hasFeaturedCarouselOverflow ? (
-                  <Link
-                    to="/hub/destaques"
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-[#edf5fa] px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition active:scale-95"
-                  >
-                    Ver mais
-                    <CaretRight size={11} weight="bold" />
-                  </Link>
-                ) : null}
-              </div>
-              
-              <div className="relative mt-2.5">
-                {hasFeaturedCarouselOverflow ? (
-                  <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 rounded-r-[1.45rem] bg-[linear-gradient(90deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0.86)_62%,rgba(255,255,255,0.98)_100%)]" />
-                ) : null}
-                <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto no-scrollbar px-1 pb-1 pr-7">
-                  {featuredLoading ? (
-                    Array.from({ length: 3 }).map((_, idx) => (
-                      <div key={idx} className="h-[112px] min-w-[268px] animate-pulse rounded-[1.45rem] bg-white shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] ring-1 ring-slate-100/80" />
-                    ))
-                  ) : (
-                    displayedFeaturedProducts.map((item, index) => (
-                      (() => {
-                        const featuredStorePath = selectedCondominiumSlug
-                          ? `/${item.storeSlug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
-                          : `/${item.storeSlug}`;
-                        return (
-                    <Link
-                      key={`${item.storeSlug}-${item.id}`}
-                      to={featuredStorePath}
-                      onClick={() => stageFeaturedProductCheckout(item)}
-                      className="group flex min-h-[112px] min-w-[268px] snap-start gap-3 rounded-[1.45rem] bg-white p-2.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] ring-1 ring-slate-100/90 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_24px_54px_-36px_rgba(15,23,42,0.26)] active:scale-[0.98] sm:min-w-[292px]"
-                    >
-                      <div className="relative h-[92px] w-[92px] shrink-0 overflow-hidden rounded-[1.2rem] bg-slate-100">
-                        <img
-                          src={item.imageUrl}
-                          alt={item.name}
-                          loading={index < 2 ? 'eager' : 'lazy'}
-                          fetchPriority={index < 2 ? 'high' : 'auto'}
-                          decoding="async"
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          onError={(e) => { (e.target as HTMLImageElement).src = item.storeLogo || getStoreAvatarUrl(item.storeSlug, item.storeName); }}
-                        />
-                        <div className="absolute inset-x-0 bottom-0 h-9 bg-gradient-to-t from-black/22 to-transparent" />
-                        <div className="absolute right-1.5 top-1.5">
-                          {item.sponsored ? (
-                            <span className="inline-flex items-center gap-1 rounded-[0.65rem] border border-amber-200/80 bg-amber-300/92 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.1em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.32)] backdrop-blur-md">
-                              <Star size={9} weight="fill" /> {item.badge || 'Patrocinado'}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 rounded-[0.65rem] border border-white/58 bg-white/82 px-1.5 py-0.5 text-[7px] font-black italic uppercase tracking-[0.16em] text-[#153A4C] shadow-[0_8px_18px_-12px_rgba(15,23,42,0.26)] backdrop-blur-md ring-1 ring-black/5">
-                              <Sparkle size={7} weight="fill" className="text-[#336886]" />
-                              Seleção
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex min-w-0 flex-1 flex-col py-1 pr-1">
-                        <p className="line-clamp-2 text-[13px] font-extrabold leading-[1.12rem] tracking-[-0.02em] text-slate-950">{item.name}</p>
-                        <p className="mt-1 truncate text-[10.5px] font-semibold text-slate-400">
-                          por {item.storeName}
-                        </p>
-                        <div className="mt-auto flex items-end justify-between gap-2 pt-2">
-                          <span className="text-[19px] font-black leading-none tracking-[-0.05em] text-[#153A4C]">
-                            {currency.format(item.price)}
-                          </span>
-                          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#edf5fa] text-[#336886] transition group-hover:translate-x-0.5">
-                            <CaretRight size={12} weight="bold" />
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                        );
-                      })()
-                    ))
-                  )}
-                </div>
-              </div>
-            </section>
+            <HubFeaturedCarousel
+              hasEntered={hasEntered}
+              title={genericHighlightLabel}
+              loading={featuredLoading}
+              items={displayedFeaturedProducts}
+              hasOverflow={hasFeaturedCarouselOverflow}
+              hasSponsoredItems={hasSponsoredFeaturedProducts}
+              selectedCondominiumSlug={selectedCondominiumSlug}
+              currency={currency}
+              onStageProduct={(item) => stageFeaturedProductCheckout(item as FeaturedProduct)}
+            />
           )}
 
           {favoriteStores.length > 0 && debouncedQuery.length < 2 && (
