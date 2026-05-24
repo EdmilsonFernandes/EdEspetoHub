@@ -73,7 +73,7 @@ const HIGHLIGHT_CATEGORY_OPTIONS: HighlightCategoryOption[] = [
     icon: Sparkle,
     keywords: [],
     surfaceClassName: 'bg-[linear-gradient(145deg,#eaf7fb_0%,#ffffff_54%,#e9fff0_100%)] text-[#336886]',
-    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#153A4C_0%,#336886_60%,#5FD35A_145%)] text-white',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#153A4C_0%,#336886_60%,#5FD35A_145%)] text-white shadow-[0_16px_28px_-10px_rgba(21,58,76,0.48),0_4px_10px_-2px_rgba(95,211,90,0.3)]',
     iconClassName: 'text-[#336886]',
     glowClassName: 'bg-[#5FD35A]/45',
   },
@@ -83,7 +83,7 @@ const HIGHLIGHT_CATEGORY_OPTIONS: HighlightCategoryOption[] = [
     icon: Hamburger,
     keywords: ['lanche', 'hamburguer', 'burger', 'x-', 'x ', 'hot dog', 'cachorro quente', 'pastel', 'salgado'],
     surfaceClassName: 'bg-[linear-gradient(145deg,#fff4e6_0%,#fffaf3_58%,#ffe6bf_100%)] text-orange-600',
-    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#fb923c_0%,#f97316_54%,#fed7aa_145%)] text-white',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#fb923c_0%,#f97316_54%,#fed7aa_145%)] text-white shadow-[0_16px_28px_-10px_rgba(249,115,22,0.5),0_4px_10px_-2px_rgba(249,115,22,0.3)]',
     iconClassName: 'text-orange-500',
     glowClassName: 'bg-orange-300/55',
   },
@@ -93,7 +93,7 @@ const HIGHLIGHT_CATEGORY_OPTIONS: HighlightCategoryOption[] = [
     icon: Pizza,
     keywords: ['pizza', 'pizzaria', 'esfiha', 'calzone'],
     surfaceClassName: 'bg-[linear-gradient(145deg,#fff1f2_0%,#fff7ed_58%,#fecdd3_100%)] text-rose-600',
-    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#fb7185_0%,#e11d48_56%,#fed7aa_145%)] text-white',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#fb7185_0%,#e11d48_56%,#fed7aa_145%)] text-white shadow-[0_16px_28px_-10px_rgba(225,29,72,0.5),0_4px_10px_-2px_rgba(244,63,94,0.3)]',
     iconClassName: 'text-rose-500',
     glowClassName: 'bg-rose-300/55',
   },
@@ -103,7 +103,7 @@ const HIGHLIGHT_CATEGORY_OPTIONS: HighlightCategoryOption[] = [
     icon: BowlFood,
     keywords: ['prato', 'marmita', 'almoco', 'janta', 'refeicao', 'frango', 'carne', 'costela', 'espeto', 'espetinho', 'peixe', 'porcao'],
     surfaceClassName: 'bg-[linear-gradient(145deg,#ecfdf5_0%,#ffffff_58%,#bbf7d0_100%)] text-emerald-700',
-    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#10b981_0%,#047857_58%,#bbf7d0_145%)] text-white',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#10b981_0%,#047857_58%,#bbf7d0_145%)] text-white shadow-[0_16px_28px_-10px_rgba(4,120,87,0.5),0_4px_10px_-2px_rgba(16,185,129,0.3)]',
     iconClassName: 'text-emerald-600',
     glowClassName: 'bg-emerald-300/55',
   },
@@ -113,7 +113,7 @@ const HIGHLIGHT_CATEGORY_OPTIONS: HighlightCategoryOption[] = [
     icon: BeerBottle,
     keywords: ['bebida', 'cerveja', 'refrigerante', 'coca', 'guarana', 'suco', 'agua', 'vinho', 'drink', 'cafe'],
     surfaceClassName: 'bg-[linear-gradient(145deg,#eff6ff_0%,#f8fbff_58%,#bfdbfe_100%)] text-sky-700',
-    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#38bdf8_0%,#2563eb_58%,#bae6fd_145%)] text-white',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#38bdf8_0%,#2563eb_58%,#bae6fd_145%)] text-white shadow-[0_16px_28px_-10px_rgba(37,99,235,0.5),0_4px_10px_-2px_rgba(56,189,248,0.3)]',
     iconClassName: 'text-sky-600',
     glowClassName: 'bg-sky-300/55',
   },
@@ -123,7 +123,7 @@ const HIGHLIGHT_CATEGORY_OPTIONS: HighlightCategoryOption[] = [
     icon: IceCream,
     keywords: ['doce', 'bolo', 'sobremesa', 'chocolate', 'sorvete', 'acai', 'pudim', 'brigadeiro'],
     surfaceClassName: 'bg-[linear-gradient(145deg,#fdf2f8_0%,#fff7fb_58%,#fbcfe8_100%)] text-pink-600',
-    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#f472b6_0%,#db2777_58%,#fbcfe8_145%)] text-white',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#f472b6_0%,#db2777_58%,#fbcfe8_145%)] text-white shadow-[0_16px_28px_-10px_rgba(219,39,119,0.5),0_4px_10px_-2px_rgba(236,72,153,0.3)]',
     iconClassName: 'text-pink-500',
     glowClassName: 'bg-pink-300/55',
   },
@@ -133,7 +133,7 @@ const HIGHLIGHT_CATEGORY_OPTIONS: HighlightCategoryOption[] = [
     icon: ShoppingBagOpen,
     keywords: ['mercado', 'emporio', 'conveniencia', 'limpeza', 'higiene', 'padaria', 'mercearia'],
     surfaceClassName: 'bg-[linear-gradient(145deg,#fffbeb_0%,#ffffff_58%,#fde68a_100%)] text-amber-700',
-    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#fbbf24_0%,#d97706_58%,#fde68a_145%)] text-white',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#fbbf24_0%,#d97706_58%,#fde68a_145%)] text-white shadow-[0_16px_28px_-10px_rgba(217,119,6,0.5),0_4px_10px_-2px_rgba(251,191,36,0.3)]',
     iconClassName: 'text-amber-600',
     glowClassName: 'bg-amber-300/55',
   },
@@ -143,7 +143,7 @@ const HIGHLIGHT_CATEGORY_OPTIONS: HighlightCategoryOption[] = [
     icon: PawPrint,
     keywords: ['racao', 'pet', 'gato', 'cachorro', 'cao', 'ração'],
     surfaceClassName: 'bg-[linear-gradient(145deg,#f5f3ff_0%,#ffffff_58%,#ddd6fe_100%)] text-violet-700',
-    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#a78bfa_0%,#7c3aed_58%,#ddd6fe_145%)] text-white',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#a78bfa_0%,#7c3aed_58%,#ddd6fe_145%)] text-white shadow-[0_16px_28px_-10px_rgba(124,58,237,0.5),0_4px_10px_-2px_rgba(167,139,250,0.3)]',
     iconClassName: 'text-violet-600',
     glowClassName: 'bg-violet-300/55',
   },
@@ -153,7 +153,7 @@ const HIGHLIGHT_CATEGORY_OPTIONS: HighlightCategoryOption[] = [
     icon: Sparkle,
     keywords: [],
     surfaceClassName: 'bg-[linear-gradient(145deg,#f8fafc_0%,#ffffff_58%,#e2e8f0_100%)] text-slate-600',
-    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#475569_0%,#0f172a_68%,#cbd5e1_150%)] text-white',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#475569_0%,#0f172a_68%,#cbd5e1_150%)] text-white shadow-[0_16px_28px_-10px_rgba(15,23,42,0.48),0_4px_10px_-2px_rgba(71,85,105,0.3)]',
     iconClassName: 'text-slate-500',
     glowClassName: 'bg-slate-300/55',
   },
@@ -387,7 +387,7 @@ export function HubHighlightsPage() {
             </div>
           </div>
 
-          <div className="relative mt-4 overflow-hidden rounded-[1.65rem] border border-white/90 bg-white/92 p-1.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/55">
+          <div className="relative mt-4 overflow-hidden rounded-[1.65rem] border border-white/90 bg-white/92 p-1.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/55 transition-all duration-300 focus-within:border-[#336886]/35 focus-within:shadow-[0_20px_48px_-30px_rgba(51,104,134,0.25)] focus-within:ring-2 focus-within:ring-[#336886]/10">
             <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(95,211,90,0.18),transparent_68%)]" />
             <div className="relative flex items-center gap-2.5">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.15rem] bg-[linear-gradient(145deg,#5FD35A_0%,#336886_64%,#153A4C_100%)] text-white shadow-[0_14px_26px_-18px_rgba(51,104,134,0.68)]">
@@ -519,7 +519,7 @@ export function HubHighlightsPage() {
                   to={storePath}
                   onClick={() => stageFeaturedProductCheckout(item)}
                   style={{ animationDelay: `${Math.min(index, 10) * 34}ms` }}
-                  className="group grid min-h-[132px] grid-cols-[6.35rem_minmax(0,1fr)] items-center gap-3 overflow-hidden rounded-[1.65rem] border border-white bg-white p-2.5 shadow-[0_18px_42px_-30px_rgba(15,23,42,0.2)] ring-1 ring-slate-100/80 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards active:scale-[0.985] md:hover:-translate-y-0.5 md:hover:shadow-[0_24px_52px_-34px_rgba(15,23,42,0.24)]"
+                  className="group grid min-h-[132px] grid-cols-[6.35rem_minmax(0,1fr)] items-center gap-3 overflow-hidden rounded-[1.65rem] border border-slate-100 bg-white p-2.5 shadow-[0_12px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.15)]"
                 >
                   <div className="relative h-[6.35rem] w-[6.35rem] shrink-0 overflow-hidden rounded-[1.25rem] bg-slate-100">
                     <img
@@ -534,24 +534,24 @@ export function HubHighlightsPage() {
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/36 via-transparent to-black/6" />
-                    <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full border border-white/60 bg-white/88 px-2 py-1 text-[8px] font-black uppercase tracking-[0.13em] text-[#153A4C] shadow-[0_8px_18px_-12px_rgba(15,23,42,0.38)] backdrop-blur-md">
+                    <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full border border-white/80 bg-white/95 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.15em] text-[#336886] shadow-[0_6px_14px_-4px_rgba(15,23,42,0.12)] backdrop-blur-sm">
                       <CategoryIcon size={8} weight="fill" />
                       {categoryOption.label}
                     </span>
-                    <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-[0.8rem] border border-white/32 bg-black/26 px-2 py-1 text-[8px] font-black italic uppercase tracking-[0.16em] text-white shadow-[0_8px_18px_-12px_rgba(15,23,42,0.38)] backdrop-blur-md">
+                    <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full border border-white/20 bg-slate-950/65 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.15em] text-white shadow-[0_4px_12px_rgba(0,0,0,0.25)] backdrop-blur-md">
                       {item.sponsored ? <Star size={8} weight="fill" className="text-amber-500" /> : <Sparkle size={8} weight="fill" className="text-[#336886]" />}
                       {item.sponsored ? item.badge || 'Destaque' : 'Seleção'}
                     </span>
                   </div>
                   <div className="flex min-w-0 flex-col py-1 pr-1">
-                    <p className="line-clamp-2 text-[14px] font-black leading-[1.15rem] tracking-tight text-slate-950">{item.name}</p>
-                    <div className="mt-2 flex min-w-0 items-center gap-1.5">
+                    <p className="line-clamp-2 text-[14.5px] font-black leading-[1.2rem] tracking-tight text-slate-900 transition-colors duration-200 group-hover:text-[#336886]">{item.name}</p>
+                    <div className="mt-2.5 flex min-w-0 items-center gap-1.5">
                       <img
                         src={item.storeLogo}
                         alt=""
                         loading="lazy"
                         decoding="async"
-                        className="h-[18px] w-[18px] shrink-0 rounded-full border border-slate-100 bg-white object-cover"
+                        className="h-[18px] w-[18px] shrink-0 rounded-full border border-slate-100 bg-white object-cover shadow-[0_2px_6px_rgba(0,0,0,0.06)]"
                         onError={(event) => {
                           (event.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName);
                         }}
@@ -560,7 +560,7 @@ export function HubHighlightsPage() {
                     </div>
                     <div className="mt-auto flex items-end justify-between gap-2 pt-3">
                       <p className="text-[20px] font-black leading-none tracking-[-0.05em] text-[#153A4C]">{currency.format(item.price)}</p>
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf5fa] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886] transition group-hover:translate-x-0.5">
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf5fa] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover:bg-[#336886] group-hover:text-white group-hover:translate-x-0.5 group-hover:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
                         Abrir
                         <CaretRight size={9} weight="bold" />
                       </span>
