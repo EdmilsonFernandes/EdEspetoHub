@@ -5,6 +5,8 @@ const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000;
 type ClientFreshStartOptions = {
   maxAgeMs?: number;
   currentBuildId?: string;
+  preserveLocalStorageKeys?: string[];
+  preserveSessionStorageKeys?: string[];
 };
 
 const PRESERVED_LOCAL_STORAGE_KEYS = new Set([
@@ -28,17 +30,28 @@ const clearNonHttpOnlyCookies = () => {
   });
 };
 
-const clearStorage = () => {
+const clearStorage = (options?: Pick<ClientFreshStartOptions, 'preserveLocalStorageKeys' | 'preserveSessionStorageKeys'>) => {
+  const preservedLocalStorageKeys = new Set([
+    ...PRESERVED_LOCAL_STORAGE_KEYS,
+    ...(options?.preserveLocalStorageKeys || []),
+  ]);
+
   if (typeof localStorage !== 'undefined') {
     const keys = Object.keys(localStorage);
     keys.forEach((key) => {
       if (key === LAST_CACHE_CLEAR_AT_KEY) return;
-      if (PRESERVED_LOCAL_STORAGE_KEYS.has(key)) return;
+      if (preservedLocalStorageKeys.has(key)) return;
       localStorage.removeItem(key);
     });
   }
   if (typeof sessionStorage !== 'undefined') {
+    const preservedEntries = new Map<string, string>();
+    (options?.preserveSessionStorageKeys || []).forEach((key) => {
+      const value = sessionStorage.getItem(key);
+      if (value !== null) preservedEntries.set(key, value);
+    });
     sessionStorage.clear();
+    preservedEntries.forEach((value, key) => sessionStorage.setItem(key, value));
   }
 };
 
@@ -92,7 +105,7 @@ export const runClientFreshStart = async (options?: ClientFreshStartOptions) => 
   }
 
   clearNonHttpOnlyCookies();
-  clearStorage();
+  clearStorage(options);
   await clearCacheStorage();
   await refreshServiceWorkers();
 

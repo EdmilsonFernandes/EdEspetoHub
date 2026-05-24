@@ -23,6 +23,13 @@ import './index.css';
 import { MotoboyLayout } from './layouts/MotoboyLayout';
 import { loadOrderTrackingPage } from './utils/orderTrackingPrefetch';
 import { isStaleBuildErrorMessage, recoverFromStaleBuild } from './utils/staleBuildRecovery';
+import {
+  loadAdminDashboardPage,
+  loadAdminHighlightsPage,
+  loadAdminOrdersPage,
+  loadAdminQueuePage,
+  loadStorePage,
+} from './utils/adminRoutePrefetch';
 
 const lazyPage = (loader: () => Promise<any>, exportName: string) =>
   React.lazy(() =>
@@ -39,11 +46,11 @@ const lazyPage = (loader: () => Promise<any>, exportName: string) =>
 
 const LandingPage = lazyPage(() => import('./pages/LandingPage'), 'LandingPage');
 const CreateStore = lazyPage(() => import('./pages/CreateStore'), 'CreateStore');
-const StorePage = lazyPage(() => import('./pages/StorePage'), 'StorePage');
+const StorePage = lazyPage(loadStorePage, 'StorePage');
 const OrdersQueue = lazyPage(() => import('./pages/OrdersQueue'), 'OrdersQueue');
-const AdminDashboard = lazyPage(() => import('./pages/AdminDashboard'), 'AdminDashboard');
-const AdminOrders = lazyPage(() => import('./pages/AdminOrders'), 'AdminOrders');
-const AdminQueue = lazyPage(() => import('./pages/AdminQueue'), 'AdminQueue');
+const AdminDashboard = lazyPage(loadAdminDashboardPage, 'AdminDashboard');
+const AdminOrders = lazyPage(loadAdminOrdersPage, 'AdminOrders');
+const AdminQueue = lazyPage(loadAdminQueuePage, 'AdminQueue');
 const AdminRenewal = lazyPage(() => import('./pages/AdminRenewal'), 'AdminRenewal');
 const AdminDemo = lazyPage(() => import('./pages/AdminDemo'), 'AdminDemo');
 const PaymentPage = lazyPage(() => import('./pages/PaymentPage'), 'PaymentPage');
@@ -77,7 +84,7 @@ const MarketplacePage = lazyPage(() => import('./pages/MarketplacePage'), 'Marke
 const HubHighlightsPage = lazyPage(() => import('./pages/HubHighlightsPage'), 'HubHighlightsPage');
 const CondominiumAccessRequest = lazyPage(() => import('./pages/CondominiumAccessRequest'), 'CondominiumAccessRequest');
 const CondominiumDashboard = lazyPage(() => import('./pages/CondominiumDashboard'), 'CondominiumDashboard');
-const AdminHighlights = lazyPage(() => import('./pages/AdminHighlights'), 'AdminHighlights');
+const AdminHighlights = lazyPage(loadAdminHighlightsPage, 'AdminHighlights');
 const SystemGuidePage = lazyPage(() => import('./pages/SystemGuidePage'), 'SystemGuidePage');
 
 const AppRouteFallback = () => (

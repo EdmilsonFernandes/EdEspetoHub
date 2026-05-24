@@ -15,8 +15,12 @@ import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 import { MFA_CHALLENGE_EXPIRED_MESSAGE, isMfaChallengeExpiredError } from '../utils/mfaErrors';
+import { prefetchAdminLandingRoutes, scheduleAdminRoutePrefetch } from '../utils/adminRoutePrefetch';
 
 const ADMIN_REMEMBER_IDENTIFIER_KEY = 'auth:last-admin-identifier';
+const ADMIN_FRESH_START_BUDGET_MS = 350;
+
+const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 export function AdminLogin() {
   const isNativePlatform = Capacitor.isNativePlatform();
@@ -49,6 +53,8 @@ export function AdminLogin() {
     if (typeof window === 'undefined') return false;
     return localStorage.getItem('auth:superadmin-unlocked') === 'true';
   });
+
+  useEffect(() => scheduleAdminRoutePrefetch(), []);
 
   useEffect(() => {
     const refreshBiometricAvailability = () => {
@@ -260,11 +266,24 @@ export function AdminLogin() {
   const completeAdminLoginFlow = async (session: any) => {
     const redirectTab = sessionStorage.getItem('admin:redirectTab');
     const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
+    prefetchAdminLandingRoutes();
     try {
-      await runClientFreshStart({
+      const freshStartPromise = runClientFreshStart({
         maxAgeMs: 8 * 60 * 60 * 1000,
         currentBuildId: APP_BUILD_INFO.buildId,
-      });
+        preserveLocalStorageKeys: [
+          'adminSession',
+          ADMIN_REMEMBER_IDENTIFIER_KEY,
+          'auth:remember-admin',
+          'auth:superadmin-unlocked',
+        ],
+        preserveSessionStorageKeys: [
+          'admin:redirectTab',
+          'admin:redirectSlug',
+          'admin:activeTab',
+        ],
+      }).catch(() => null);
+      await Promise.race([freshStartPromise, wait(ADMIN_FRESH_START_BUDGET_MS)]);
     } catch {
       // no-op: login must continue even if client cleanup fails
     }
@@ -438,7 +457,12 @@ export function AdminLogin() {
           </button>
         ) : null}
 
-        <form onSubmit={handleLogin} autoComplete="on" className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
+        <form
+          onSubmit={handleLogin}
+          onFocusCapture={prefetchAdminLandingRoutes}
+          autoComplete="on"
+          className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40"
+        >
           {biometricAvailable ? (
             <button
               type="button"
