@@ -104,15 +104,15 @@ export const HubStoreLoadingSkeleton = memo(function HubStoreLoadingSkeleton() {
       {Array.from({ length: 5 }).map((_, idx) => (
         <div
           key={idx}
-          className="grid animate-pulse grid-cols-[4rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.55rem] border border-white/90 bg-white/78 px-3 py-3 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/45"
+          className="grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] border border-white/80 bg-white/78 px-2.5 py-2.5 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/38"
         >
-          <div className="h-[3.65rem] w-[3.65rem] rounded-full bg-slate-200/70" />
-          <div className="min-w-0 space-y-2">
-            <div className="h-3.5 w-7/12 rounded-full bg-slate-200/75" />
-            <div className="h-2.5 w-5/12 rounded-full bg-slate-100" />
-            <div className="h-2.5 w-9/12 rounded-full bg-slate-100" />
+          <div className="h-[4.45rem] w-[4.45rem] shrink-0 rounded-[1.28rem] ds-skeleton" />
+          <div className="min-w-0 space-y-2.5">
+            <div className="h-4 w-7/12 rounded-full ds-skeleton" />
+            <div className="h-3 w-5/12 rounded-full ds-skeleton" />
+            <div className="h-3 w-9/12 rounded-full ds-skeleton" />
           </div>
-          <div className="h-9 w-9 rounded-full bg-slate-100" />
+          <div className="h-9 w-9 rounded-full ds-skeleton" />
         </div>
       ))}
     </div>

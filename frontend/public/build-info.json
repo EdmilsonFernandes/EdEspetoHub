@@ -2,285 +2,285 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "3da85ccf",
-  "versionLabel": "v0.1.9.3da85ccf",
-  "versionInternal": "0.1.9+20260519.022650.3da85ccf",
-  "buildId": "0.1.9+20260519.022650.3da85ccf-20260519.022650-3da85ccf",
-  "builtAt": "2026-05-19T02:26:50.268Z",
-  "commitHash": "3da85ccffdea8a0ebb98b4ce4cc6db5d6cf193d1",
-  "shortHash": "3da85ccf",
+  "versionDisplaySuffix": "c01bfa60",
+  "versionLabel": "v0.1.9.c01bfa60",
+  "versionInternal": "0.1.9+20260524.220617.c01bfa60",
+  "buildId": "0.1.9+20260524.220617.c01bfa60-20260524.220617-c01bfa60",
+  "builtAt": "2026-05-24T22:06:17.318Z",
+  "commitHash": "c01bfa603c40027cb7df540e20f7bf27c28b728b",
+  "shortHash": "c01bfa60",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
     {
-      "hash": "3da85ccffdea8a0ebb98b4ce4cc6db5d6cf193d1",
-      "shortHash": "3da85ccf",
-      "dateIso": "2026-05-18T22:59:53-03:00",
+      "hash": "c01bfa603c40027cb7df540e20f7bf27c28b728b",
+      "shortHash": "c01bfa60",
+      "dateIso": "2026-05-24T19:02:59-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Add destination listing invite flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3da85ccffdea8a0ebb98b4ce4cc6db5d6cf193d1"
+      "subject": "Refine hub and order filters",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c01bfa603c40027cb7df540e20f7bf27c28b728b"
     },
     {
-      "hash": "2ab0f7663d7e00c276fd50edf439ba4805a90b1d",
-      "shortHash": "2ab0f766",
-      "dateIso": "2026-05-18T22:17:18-03:00",
+      "hash": "59746397d6ae88824e6808915682fe019df087da",
+      "shortHash": "59746397",
+      "dateIso": "2026-05-24T16:01:17-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Add Goncalves tourism seed",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2ab0f7663d7e00c276fd50edf439ba4805a90b1d"
+      "subject": "Document hub marketplace refactor",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/59746397d6ae88824e6808915682fe019df087da"
     },
     {
-      "hash": "6e96937d93ff8e91f9bff58804d198c0ae155acd",
-      "shortHash": "6e96937d",
-      "dateIso": "2026-05-18T22:01:30-03:00",
+      "hash": "c2f57fa1ecc4c2ec15ec9283cacc490aed5d5b22",
+      "shortHash": "c2f57fa1",
+      "dateIso": "2026-05-24T15:47:32-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish MFA challenge branding",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6e96937d93ff8e91f9bff58804d198c0ae155acd"
+      "subject": "Refactor hub location and store hooks",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c2f57fa1ecc4c2ec15ec9283cacc490aed5d5b22"
     },
     {
-      "hash": "4b27cd5a1202fdf5e2f02a239e780edc6adedc91",
-      "shortHash": "4b27cd5a",
-      "dateIso": "2026-05-18T21:18:09-03:00",
+      "hash": "5c4f4e49d66afd2c867ad1f880b54753f5659d09",
+      "shortHash": "5c4f4e49",
+      "dateIso": "2026-05-24T15:23:55-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Harden marketplace highlights and store cards",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4b27cd5a1202fdf5e2f02a239e780edc6adedc91"
+      "subject": "Documenta estrutura do hub marketplace",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5c4f4e49d66afd2c867ad1f880b54753f5659d09"
     },
     {
-      "hash": "e7a9331300da5bb57d64b1fc23e80030c5471b61",
-      "shortHash": "e7a93313",
-      "dateIso": "2026-05-18T21:07:56-03:00",
+      "hash": "692b1412dca0f19c1aa1639382bf828496413cca",
+      "shortHash": "692b1412",
+      "dateIso": "2026-05-24T15:21:28-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve condominium admin responsive layout",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e7a9331300da5bb57d64b1fc23e80030c5471b61"
+      "subject": "Merge refactor hub marketplace hooks",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/692b1412dca0f19c1aa1639382bf828496413cca"
     },
     {
-      "hash": "5377f1660d39fa513506e303ee2b341e61df6c21",
-      "shortHash": "5377f166",
-      "dateIso": "2026-05-18T20:59:45-03:00",
+      "hash": "b4f13999ae9a4fd5caf7bc5295f35de00c120657",
+      "shortHash": "b4f13999",
+      "dateIso": "2026-05-24T15:21:16-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine marketplace safe area and highlights",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5377f1660d39fa513506e303ee2b341e61df6c21"
+      "subject": "Documenta padrao tecnico do hub",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b4f13999ae9a4fd5caf7bc5295f35de00c120657"
     },
     {
-      "hash": "b01e3e7c5243b86bfe34c1fbf80b38d1dcd9f7d4",
-      "shortHash": "b01e3e7c",
-      "dateIso": "2026-05-18T16:03:31-03:00",
+      "hash": "f0da747fc422c026daced8917192546485ee32b1",
+      "shortHash": "f0da747f",
+      "dateIso": "2026-05-24T15:04:40-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve destination admin form UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b01e3e7c5243b86bfe34c1fbf80b38d1dcd9f7d4"
+      "subject": "Extrai hooks do hub marketplace",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f0da747fc422c026daced8917192546485ee32b1"
     },
     {
-      "hash": "0c903565df250c5a8fe1163a7f0e095735091037",
-      "shortHash": "0c903565",
-      "dateIso": "2026-05-18T15:30:14-03:00",
+      "hash": "7092d9278adafe943d65144500187b8be62827d2",
+      "shortHash": "7092d927",
+      "dateIso": "2026-05-24T14:39:29-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Harden MFA SSM configuration",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0c903565df250c5a8fe1163a7f0e095735091037"
+      "subject": "Merge refactor hub marketplace",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7092d9278adafe943d65144500187b8be62827d2"
     },
     {
-      "hash": "58eb0667949325addce7c82f20538e0a9402bf98",
-      "shortHash": "58eb0667",
-      "dateIso": "2026-05-18T15:20:23-03:00",
+      "hash": "5ea789aed07a86043f43cb004df187b3ea7c7644",
+      "shortHash": "5ea789ae",
+      "dateIso": "2026-05-24T14:33:03-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine marketplace conversion CTAs",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/58eb0667949325addce7c82f20538e0a9402bf98"
+      "subject": "Atualiza e2e para UX atual",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5ea789aed07a86043f43cb004df187b3ea7c7644"
     },
     {
-      "hash": "95375f0b174d67ad8642321fca3c74dea6275659",
-      "shortHash": "95375f0b",
-      "dateIso": "2026-05-18T15:10:06-03:00",
+      "hash": "eea42ec3ab5f5b017b5e0a92a9b127c0b10b64da",
+      "shortHash": "eea42ec3",
+      "dateIso": "2026-05-24T13:05:51-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Remove user-facing technical wording",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/95375f0b174d67ad8642321fca3c74dea6275659"
+      "subject": "Extrai estados visuais da lista de lojas",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eea42ec3ab5f5b017b5e0a92a9b127c0b10b64da"
     },
     {
-      "hash": "39518c347ca2825996ce07e1612e7256b0fc9216",
-      "shortHash": "39518c34",
-      "dateIso": "2026-05-18T14:55:59-03:00",
+      "hash": "c08b587798e1387a5bebd76c0efa2ab669b90aba",
+      "shortHash": "c08b5877",
+      "dateIso": "2026-05-24T13:00:26-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine landing conversion copy and motoboy logo",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/39518c347ca2825996ce07e1612e7256b0fc9216"
+      "subject": "Extrai favoritos e busca de produtos do hub",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c08b587798e1387a5bebd76c0efa2ab669b90aba"
     },
     {
-      "hash": "1bda53409b673412d0e3ca1fdc56a79c3dc98706",
-      "shortHash": "1bda5340",
-      "dateIso": "2026-05-18T14:42:05-03:00",
+      "hash": "ec38eabad483e94e893e928474ff9610e2e2ac56",
+      "shortHash": "ec38eaba",
+      "dateIso": "2026-05-24T12:43:05-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine safe area glass brand color",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1bda53409b673412d0e3ca1fdc56a79c3dc98706"
+      "subject": "Extrai carrossel de destaques do hub",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ec38eabad483e94e893e928474ff9610e2e2ac56"
     },
     {
-      "hash": "43b2d26e2a5f2812e74c42a5527edcc4ebda4157",
-      "shortHash": "43b2d26e",
-      "dateIso": "2026-05-18T14:33:07-03:00",
+      "hash": "e03c23bf6885e9826a330e42250920f5192acf66",
+      "shortHash": "e03c23bf",
+      "dateIso": "2026-05-24T12:36:02-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix app startup after frontend deploy",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/43b2d26e2a5f2812e74c42a5527edcc4ebda4157"
+      "subject": "Refatora blocos iniciais do hub marketplace",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e03c23bf6885e9826a330e42250920f5192acf66"
     },
     {
-      "hash": "f0456e013b30c6d0bb20275b5a0f815ae35af37d",
-      "shortHash": "f0456e01",
-      "dateIso": "2026-05-18T13:58:39-03:00",
+      "hash": "805c84ff7a0316e1a84892aa18e3b380354fd800",
+      "shortHash": "805c84ff",
+      "dateIso": "2026-05-24T12:15:28-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve customer MFA settings card",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f0456e013b30c6d0bb20275b5a0f815ae35af37d"
+      "subject": "Documenta restore local de dump de producao",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/805c84ff7a0316e1a84892aa18e3b380354fd800"
     },
     {
-      "hash": "1458423df7625aeb5747ba8309ebb0628b36134f",
-      "shortHash": "1458423d",
-      "dateIso": "2026-05-18T13:48:18-03:00",
+      "hash": "ac52f2a68ac48e01e6babd738fdc371643c9c42d",
+      "shortHash": "ac52f2a6",
+      "dateIso": "2026-05-24T11:47:50-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine native safe area glass styling",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1458423df7625aeb5747ba8309ebb0628b36134f"
+      "subject": "Extrai componentes iniciais do hub",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ac52f2a68ac48e01e6babd738fdc371643c9c42d"
     },
     {
-      "hash": "5499e29ad5e62c3b3bfa12608658b50bd804939a",
-      "shortHash": "5499e29a",
-      "dateIso": "2026-05-18T13:30:35-03:00",
+      "hash": "443fe2629b5178dbbbf8eefb7ae58832a10176ee",
+      "shortHash": "443fe262",
+      "dateIso": "2026-05-24T11:34:41-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve account MFA settings UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5499e29ad5e62c3b3bfa12608658b50bd804939a"
+      "subject": "Refina filtros da home e pedidos",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/443fe2629b5178dbbbf8eefb7ae58832a10176ee"
     },
     {
-      "hash": "7200a94f1c528c9ea44861702ef651e25c329e1e",
-      "shortHash": "7200a94f",
-      "dateIso": "2026-05-18T12:37:00-03:00",
+      "hash": "1863042119fd29bac7af549746934a7847f3179b",
+      "shortHash": "18630421",
+      "dateIso": "2026-05-24T10:56:49-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine marketplace home spacing",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7200a94f1c528c9ea44861702ef651e25c329e1e"
+      "subject": "Corrige cold start do app Android",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1863042119fd29bac7af549746934a7847f3179b"
     },
     {
-      "hash": "43d728175e14874b0d7931e1fe4fa7c916d07918",
-      "shortHash": "43d72817",
-      "dateIso": "2026-05-18T12:14:59-03:00",
+      "hash": "7e6e634f156da5d545547b405e749ee8a8afb3fe",
+      "shortHash": "7e6e634f",
+      "dateIso": "2026-05-24T10:43:42-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Expose MFA in account settings",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/43d728175e14874b0d7931e1fe4fa7c916d07918"
+      "subject": "Compacta logins no mobile",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7e6e634f156da5d545547b405e749ee8a8afb3fe"
     },
     {
-      "hash": "17a1c1f89f983ef2e449337e21a0cd32e08cb114",
-      "shortHash": "17a1c1f8",
-      "dateIso": "2026-05-18T10:13:55-03:00",
+      "hash": "bdbfc2cf447ed2bfa9da780ef4f042f7bdde72a2",
+      "shortHash": "bdbfc2cf",
+      "dateIso": "2026-05-24T10:27:22-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Add incremental MFA authentication",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/17a1c1f89f983ef2e449337e21a0cd32e08cb114"
+      "subject": "Melhora resposta dos menus admin",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bdbfc2cf447ed2bfa9da780ef4f042f7bdde72a2"
     },
     {
-      "hash": "073618d52c504aca17e65aba036f23280690ca0e",
-      "shortHash": "073618d5",
-      "dateIso": "2026-05-18T09:33:31-03:00",
+      "hash": "7089ec6145c8b68ac67e818707a7f951f48c3b20",
+      "shortHash": "7089ec61",
+      "dateIso": "2026-05-24T09:30:24-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine marketplace home hierarchy",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/073618d52c504aca17e65aba036f23280690ca0e"
+      "subject": "Melhora entrada no painel do lojista",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7089ec6145c8b68ac67e818707a7f951f48c3b20"
     },
     {
-      "hash": "cb853d8356d572847434d450acf0b8aa90daeffa",
-      "shortHash": "cb853d83",
-      "dateIso": "2026-05-18T09:14:13-03:00",
+      "hash": "34209f3582d048751835380189e6fb01b32e30c6",
+      "shortHash": "34209f35",
+      "dateIso": "2026-05-23T11:08:07-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix public cart stock validation",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cb853d8356d572847434d450acf0b8aa90daeffa"
+      "subject": "Melhora resiliencia do resumo super admin",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/34209f3582d048751835380189e6fb01b32e30c6"
     },
     {
-      "hash": "9ef93d6a5805c55e751c32110af93404b87901f1",
-      "shortHash": "9ef93d6a",
-      "dateIso": "2026-05-18T08:42:03-03:00",
+      "hash": "f0be7ea97007e9984cf6296d2b057d68fe9a0a6e",
+      "shortHash": "f0be7ea9",
+      "dateIso": "2026-05-23T10:33:37-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Add destinations to client bottom nav",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9ef93d6a5805c55e751c32110af93404b87901f1"
+      "subject": "Perf: otimiza vendas e resumo admin",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f0be7ea97007e9984cf6296d2b057d68fe9a0a6e"
     },
     {
-      "hash": "4a13c63b3a8b433f46370e062e494668460eb53a",
-      "shortHash": "4a13c63b",
-      "dateIso": "2026-05-17T22:09:41-03:00",
+      "hash": "5418a5346773ca4ad3e5d10bd45f00f4f27503a0",
+      "shortHash": "5418a534",
+      "dateIso": "2026-05-22T18:00:05-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Compact marketplace store badges",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4a13c63b3a8b433f46370e062e494668460eb53a"
+      "subject": "style: refine marketplace app cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5418a5346773ca4ad3e5d10bd45f00f4f27503a0"
     },
     {
-      "hash": "80907f138c83a69c58060a189667447da72e4795",
-      "shortHash": "80907f13",
-      "dateIso": "2026-05-17T22:03:57-03:00",
+      "hash": "b8ce4a1a87f3f35ace1751a4c03d18b26670f096",
+      "shortHash": "b8ce4a1a",
+      "dateIso": "2026-05-22T16:59:45-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish marketplace hub section styling",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/80907f138c83a69c58060a189667447da72e4795"
+      "subject": "style: polish highlights search filters",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b8ce4a1a87f3f35ace1751a4c03d18b26670f096"
     },
     {
-      "hash": "71e17140e0a10559d50bfee1ea5a673a0336214c",
-      "shortHash": "71e17140",
-      "dateIso": "2026-05-17T21:53:34-03:00",
+      "hash": "f70992ea2915b3fad6dd72502d2d291a89014372",
+      "shortHash": "f70992ea",
+      "dateIso": "2026-05-22T16:41:19-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Update plan prices and queue loading branding",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/71e17140e0a10559d50bfee1ea5a673a0336214c"
+      "subject": "style: refine highlights discovery page",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f70992ea2915b3fad6dd72502d2d291a89014372"
     },
     {
-      "hash": "46b57b48e5398ee86234910d894d0e6bf64faf4f",
-      "shortHash": "46b57b48",
-      "dateIso": "2026-05-17T21:35:29-03:00",
+      "hash": "7f78a0b0415878c0c162af92cdf81e5d990eec88",
+      "shortHash": "7f78a0b0",
+      "dateIso": "2026-05-22T16:34:10-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Add loading feedback to admin queue",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/46b57b48e5398ee86234910d894d0e6bf64faf4f"
+      "subject": "style: refine home discovery hierarchy",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7f78a0b0415878c0c162af92cdf81e5d990eec88"
     },
     {
-      "hash": "6a457dca691d66b9dd8aeb6b5ac202c199dda5e1",
-      "shortHash": "6a457dca",
-      "dateIso": "2026-05-17T21:17:10-03:00",
+      "hash": "d02f6efb00525bd784a90197ea494a0951cfc42c",
+      "shortHash": "d02f6efb",
+      "dateIso": "2026-05-22T16:27:22-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refactor admin highlights UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6a457dca691d66b9dd8aeb6b5ac202c199dda5e1"
+      "subject": "style: refine marketplace home polish",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d02f6efb00525bd784a90197ea494a0951cfc42c"
     },
     {
-      "hash": "686d286db4dbb9254d435949a48274ab94497a81",
-      "shortHash": "686d286d",
-      "dateIso": "2026-05-17T20:53:09-03:00",
+      "hash": "7d15141d20411017ee26775e6626cd51532cfe98",
+      "shortHash": "7d15141d",
+      "dateIso": "2026-05-22T16:20:10-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Remove blue hub background wash",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/686d286db4dbb9254d435949a48274ab94497a81"
+      "subject": "style: polish marketplace home list",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7d15141d20411017ee26775e6626cd51532cfe98"
     },
     {
-      "hash": "460f5018c09a3fe5da500ca50451a35cf1921e98",
-      "shortHash": "460f5018",
-      "dateIso": "2026-05-17T20:42:54-03:00",
+      "hash": "f337a89a702e89709ebdd28c1c9a2fd6177da300",
+      "shortHash": "f337a89a",
+      "dateIso": "2026-05-22T16:02:58-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix Mercado Pago pending webhook handling",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/460f5018c09a3fe5da500ca50451a35cf1921e98"
+      "subject": "style: refine marketplace store list",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f337a89a702e89709ebdd28c1c9a2fd6177da300"
     },
     {
-      "hash": "a68731f7248912f1232571c7093cc8d41b39d58b",
-      "shortHash": "a68731f7",
-      "dateIso": "2026-05-17T20:33:02-03:00",
+      "hash": "a65872faecb6e58fb6ba1982712c9116c74917cd",
+      "shortHash": "a65872fa",
+      "dateIso": "2026-05-22T15:49:48-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Soften app glass headers",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a68731f7248912f1232571c7093cc8d41b39d58b"
+      "subject": "style: refine customer notifications",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a65872faecb6e58fb6ba1982712c9116c74917cd"
     }
   ]
 }

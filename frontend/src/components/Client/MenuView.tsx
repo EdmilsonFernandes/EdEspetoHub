@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { Drawer } from "vaul";
@@ -149,6 +149,7 @@ const Header = ({
   const collapseLockUntilRef = React.useRef(0);
   const collapsedRef = React.useRef(false);
   const lastYRef = React.useRef(0);
+  const bannerRef = React.useRef<HTMLDivElement | null>(null);
   const storeSlug = branding?.espetoId || "";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const storeUrl = storeSlug ? `${baseUrl}/${storeSlug}` : "";
@@ -241,6 +242,14 @@ const Header = ({
 
     const update = () => {
       const y = window.scrollY || document.documentElement.scrollTop || 0;
+      if (bannerRef.current) {
+        const scale = Math.max(1, 1 + y / 800);
+        const blur = Math.min(10, y / 30);
+        const opacity = Math.max(0.25, 1 - y / 420);
+        bannerRef.current.style.transform = `scale(${scale})`;
+        bannerRef.current.style.filter = `blur(${blur}px)`;
+        bannerRef.current.style.opacity = `${opacity}`;
+      }
       const now = Date.now();
       const delta = y - lastYRef.current;
       if (Math.abs(delta) < deltaThreshold) return;
@@ -300,16 +309,18 @@ const Header = ({
                   : "h-[118px] opacity-100"
                 : "h-[210px] sm:h-[240px] lg:h-[300px]"
             }`}
-            style={
-              headerBanner
-                ? {
-                    backgroundImage: `url(${headerBanner})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }
-                : { backgroundColor: headerPrimaryColor }
-            }
           >
+            <div
+              ref={bannerRef}
+              className="absolute inset-0 bg-cover bg-center origin-center transition-all duration-100 ease-out"
+              style={
+                headerBanner
+                  ? {
+                      backgroundImage: `url(${headerBanner})`,
+                    }
+                  : { backgroundColor: headerPrimaryColor }
+              }
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/10" />
             <div className="absolute right-3 top-3 z-20 flex items-center gap-2">
               {onOpenCustomerAccount && (
@@ -1379,6 +1390,7 @@ export const MenuView = ({
                 const allowStaffModal = hasConfigurableOptions || hasAnyDescription;
                 const stockState = resolveStockState(item);
                 const itemId = String(item.id);
+                const isTopItem = topItems.some((top: any) => String(top?.id) === itemId);
                 const itemQty = itemQtyMap.get(itemId) || 0;
                 const canIncrease = !stockState.soldOut && (!stockState.manageStock || itemQty < stockState.stockQuantity);
                 const isQtyControlExpanded = activeQtyControlId === itemId && itemQty > 0;
@@ -1451,7 +1463,7 @@ export const MenuView = ({
                             openProductModal(item);
                           }
                         }}
-                        className={`text-left font-black text-slate-950 text-[16px] sm:text-[18px] leading-tight line-clamp-2 transition-colors ${(!staffView || allowStaffModal) ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
+                        className={`text-left font-black text-slate-900 tracking-tight text-[15px] sm:text-[17px] leading-snug line-clamp-2 transition-colors ${(!staffView || allowStaffModal) ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
                       >
                         {item.name}
                       </button>
@@ -1489,6 +1501,11 @@ export const MenuView = ({
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100/50">
                             <Sparkle size={10} weight="fill" />
                             Destaque
+                          </span>
+                        )}
+                        {!item.isFeatured && isTopItem && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-100/30 shadow-[0_4px_12px_rgba(249,115,22,0.08)]">
+                            🔥 Mais pedido
                           </span>
                         )}
                         {hasConfigurableOptions && (
