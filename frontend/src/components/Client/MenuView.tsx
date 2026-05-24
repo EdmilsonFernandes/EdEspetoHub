@@ -1474,111 +1474,60 @@ export const MenuView = ({
                       )}
                     </div>
 
-                    <div className="mt-4 flex items-end justify-between gap-3 w-full">
-                      <div className="flex flex-col items-start gap-2.5 min-w-0 flex-1">
-                        {(() => {
-                          const priceNode = (
-                            <div className="flex items-baseline gap-1.5 leading-none">
-                              {resolvePromoPrice(item) ? (
-                                <>
-                                  <span className="text-[17px] sm:text-[19px] font-black tracking-tight text-[#336886]">
-                                    {formatCurrency(resolvePromoPrice(item))}
-                                  </span>
-                                  <span className="text-[11px] font-bold text-slate-300 line-through">
-                                    {formatCurrency(item.price)}
-                                  </span>
-                                </>
-                              ) : (
-                                <span className="text-[17px] sm:text-[19px] font-black tracking-tight text-slate-900">
+                    <div className="mt-4 flex flex-col items-start gap-2.5">
+                      {(() => {
+                        const priceNode = (
+                          <div className="flex items-baseline gap-1.5 leading-none">
+                            {resolvePromoPrice(item) ? (
+                              <>
+                                <span className="text-lg sm:text-xl font-black tracking-tight text-[#336886]">
+                                  {formatCurrency(resolvePromoPrice(item))}
+                                </span>
+                                <span className="text-[11px] font-bold text-slate-300 line-through">
                                   {formatCurrency(item.price)}
                                 </span>
-                              )}
-                            </div>
-                          );
+                              </>
+                            ) : (
+                              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900">
+                                {formatCurrency(item.price)}
+                              </span>
+                            )}
+                          </div>
+                        );
 
-                          return priceNode;
-                        })()}
+                        return priceNode;
+                      })()}
 
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          {item.isFeatured && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100/50">
-                              <Sparkle size={10} weight="fill" />
-                              Destaque
-                            </span>
-                          )}
-                          {!item.isFeatured && isTopItem && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-100/30 shadow-[0_4px_12px_rgba(249,115,22,0.08)]">
-                              🔥 Mais pedido
-                            </span>
-                          )}
-                          {hasConfigurableOptions && (
-                            <span
-                              className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider"
-                              style={{
-                                backgroundColor: `${catalogPrimaryColor}10`,
-                                borderColor: `${catalogPrimaryColor}18`,
-                                color: catalogPrimaryColor,
-                              }}
-                            >
-                              Customizável
-                            </span>
-                          )}
-                          {stockState.soldOut && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
-                              Esgotado
-                            </span>
-                          )}
-                        </div>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {item.isFeatured && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100/50">
+                            <Sparkle size={10} weight="fill" />
+                            Destaque
+                          </span>
+                        )}
+                        {!item.isFeatured && isTopItem && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-100/30 shadow-[0_4px_12px_rgba(249,115,22,0.08)]">
+                            🔥 Mais pedido
+                          </span>
+                        )}
+                        {hasConfigurableOptions && (
+                          <span
+                            className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider"
+                            style={{
+                              backgroundColor: `${catalogPrimaryColor}10`,
+                              borderColor: `${catalogPrimaryColor}18`,
+                              color: catalogPrimaryColor,
+                            }}
+                          >
+                            Customizável
+                          </span>
+                        )}
+                        {stockState.soldOut && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
+                            Esgotado
+                          </span>
+                        )}
                       </div>
-
-                      {canOrder && !stockState.soldOut && (
-                        <div className="flex-shrink-0" onClick={(event) => event.stopPropagation()}>
-                          {itemQty <= 0 ? (
-                            <button
-                              type="button"
-                              onClick={handleIncrement}
-                              className="h-10 w-10 rounded-xl shadow-sm border border-slate-200/60 bg-white hover:bg-slate-50 inline-flex items-center justify-center transition-all duration-300 active:scale-90"
-                              style={{ color: catalogPrimaryColor }}
-                            >
-                              <Plus size={18} weight="bold" />
-                            </button>
-                          ) : (
-                            <div
-                              className={`h-9 rounded-xl border border-slate-100 bg-slate-50 shadow-sm inline-flex items-center gap-2 px-1.5 transition-all duration-300 ${isQtyControlExpanded ? 'w-auto' : 'w-9 justify-center'}`}
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              {isQtyControlExpanded ? (
-                                <>
-                                  <button
-                                    type="button"
-                                    onClick={handleDecrement}
-                                    className="h-6 w-6 rounded-lg border border-slate-200/50 flex items-center justify-center bg-white text-slate-600 active:bg-slate-100"
-                                  >
-                                    <Minus size={10} weight="bold" />
-                                  </button>
-                                  <span className="min-w-[16px] text-center text-xs font-black text-slate-900">{itemQty}</span>
-                                  <button
-                                    type="button"
-                                    onClick={handleIncrement}
-                                    className="h-6 w-6 rounded-lg flex items-center justify-center active:opacity-90"
-                                    style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
-                                  >
-                                    <Plus size={10} weight="bold" />
-                                  </button>
-                                </>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => openQtyControl(itemId)}
-                                  className="h-full w-full flex items-center justify-center"
-                                >
-                                  <span className="text-xs font-black" style={{ color: catalogPrimaryColor }}>{itemQty}</span>
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -1608,6 +1557,59 @@ export const MenuView = ({
                           </div>
                         )}
                       </button>
+
+                      {canOrder && !stockState.soldOut && (
+                        <div className="absolute -bottom-1.5 -right-1.5 z-10">
+                          {itemQty <= 0 ? (
+                            <button
+                              type="button"
+                              onClick={handleIncrement}
+                              className="h-11 w-11 rounded-[1.15rem] shadow-[0_12px_28px_-6px_rgba(0,0,0,0.32)] border-[3px] border-white inline-flex items-center justify-center ring-1 ring-black/5 transition-all duration-300 active:scale-90 hover:scale-105"
+                              style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
+                            >
+                              <Plus size={18} weight="bold" />
+                            </button>
+                          ) : (
+                            <div
+                              className="inline-flex"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              {isQtyControlExpanded ? (
+                                <div
+                                  className="h-10 rounded-2xl border-2 border-white bg-white shadow-[0_12px_28px_-6px_rgba(0,0,0,0.22)] inline-flex items-center gap-2 px-1.5 transition-all duration-300 w-auto"
+                                  onClick={(event) => event.stopPropagation()}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={handleDecrement}
+                                    className="h-7 w-7 rounded-xl border border-slate-100 flex items-center justify-center bg-slate-50 text-slate-600 active:bg-slate-100"
+                                  >
+                                    <Minus size={12} weight="bold" />
+                                  </button>
+                                  <span className="min-w-[20px] text-center text-sm font-black text-slate-900">{itemQty}</span>
+                                  <button
+                                    type="button"
+                                    onClick={handleIncrement}
+                                    className="h-7 w-7 rounded-xl flex items-center justify-center active:opacity-90"
+                                    style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
+                                  >
+                                    <Plus size={12} weight="bold" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => openQtyControl(itemId)}
+                                  className="h-11 w-11 rounded-[1.15rem] shadow-[0_12px_28px_-6px_rgba(0,0,0,0.32)] border-[3px] border-white inline-flex items-center justify-center ring-1 ring-black/5 transition-all duration-300 active:scale-90 hover:scale-105"
+                                  style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
+                                >
+                                  <span className="text-sm font-black">{itemQty}</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
