@@ -1460,6 +1460,7 @@ export function ClientOrders() {
   const orderFilters: Array<{
     key: 'all' | 'active' | 'finished' | 'cancelled';
     label: string;
+    shortLabel: string;
     count: number;
     icon: JSX.Element;
     selectedClass: string;
@@ -1468,6 +1469,7 @@ export function ClientOrders() {
     {
       key: 'all',
       label: 'Todos',
+      shortLabel: 'Todos',
       count: orders.length,
       icon: <Receipt size={13} weight="duotone" />,
       selectedClass: 'bg-[#153A4C] text-white shadow-[0_4px_12px_-4px_rgba(21,58,76,0.45)]',
@@ -1476,6 +1478,7 @@ export function ClientOrders() {
     {
       key: 'active',
       label: 'Em andamento',
+      shortLabel: 'Agora',
       count: activeOrders.length,
       icon: <Timer size={13} weight="duotone" />,
       selectedClass: 'bg-emerald-500 text-white shadow-[0_4px_12px_-4px_rgba(16,185,129,0.45)]',
@@ -1484,6 +1487,7 @@ export function ClientOrders() {
     {
       key: 'finished',
       label: 'Finalizados',
+      shortLabel: 'Feitos',
       count: deliveredOrdersCount,
       icon: <CheckCircle size={13} weight="duotone" />,
       selectedClass: 'bg-sky-500 text-white shadow-[0_4px_12px_-4px_rgba(14,165,233,0.45)]',
@@ -1491,7 +1495,8 @@ export function ClientOrders() {
     },
     {
       key: 'cancelled',
-      label: 'Cancelado',
+      label: 'Cancelados',
+      shortLabel: 'Cancel.',
       count: cancelledOrdersCount,
       icon: <XCircle size={13} weight="duotone" />,
       selectedClass: 'bg-rose-500 text-white shadow-[0_4px_12px_-4px_rgba(244,63,94,0.45)]',
@@ -1511,7 +1516,7 @@ export function ClientOrders() {
           backTo="/hub"
           onBack={() => navigate('/hub')}
         >
-          <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar">
+          <div className="grid grid-cols-4 gap-1.5 rounded-[1.45rem] border border-white/80 bg-white/54 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] ring-1 ring-[#d7e7ef]/55 backdrop-blur-xl">
             {orderFilters.map((filter) => {
               const isSelected = statusFilter === filter.key;
               return (
@@ -1519,12 +1524,14 @@ export function ClientOrders() {
                   key={filter.key}
                   type="button"
                   onClick={() => setStatusFilter(filter.key)}
-                  className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12px] font-bold transition-all duration-200 active:scale-[0.97] ${isSelected ? filter.selectedClass : filter.idleClass}`}
+                  className={`relative inline-flex min-w-0 flex-col items-center justify-center gap-1 rounded-[1.05rem] px-1.5 py-2 text-[10.5px] font-black leading-none transition-all duration-200 active:scale-[0.97] ${isSelected ? filter.selectedClass : `${filter.idleClass} shadow-sm`}`}
+                  aria-pressed={isSelected}
+                  title={filter.label}
                 >
                   {filter.icon}
-                  {filter.label}
+                  <span className="max-w-full truncate">{filter.shortLabel}</span>
                   {filter.count > 0 && (
-                    <span className={`inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-black ${isSelected ? 'bg-white/25 text-white' : 'bg-white/60 text-current'}`}>
+                    <span className={`absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[9px] font-black ring-2 ${isSelected ? 'bg-white/25 text-white ring-white/30' : 'bg-white text-current ring-white/80'}`}>
                       {filter.count}
                     </span>
                   )}

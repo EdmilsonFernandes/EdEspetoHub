@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiClient } from '../config/apiClient';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Drawer } from 'vaul';
 import { Capacitor } from '@capacitor/core';
 import {
   MagnifyingGlass,
@@ -31,6 +32,8 @@ import {
   Mountains,
   UserCircle,
   Warning,
+  SlidersHorizontal,
+  CheckCircle,
 } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { condominiumService } from '../services/condominiumService';
@@ -118,6 +121,47 @@ type PreferredDiscoveryAddress = {
   lat?: number | null;
   lng?: number | null;
 };
+
+type HubQuickFilterKey = 'all' | 'free_shipping' | 'nearby' | 'open_now' | 'favorites';
+type HubActiveQuickFilterKey = Exclude<HubQuickFilterKey, 'all'>;
+
+const HUB_PRIMARY_QUICK_FILTERS: HubActiveQuickFilterKey[] = ['open_now', 'free_shipping', 'nearby'];
+const HUB_QUICK_FILTER_OPTIONS: Array<{
+  key: HubActiveQuickFilterKey;
+  label: string;
+  compactLabel: string;
+  description: string;
+  icon: typeof Storefront;
+}> = [
+  {
+    key: 'open_now',
+    label: 'Aberto agora',
+    compactLabel: 'Aberto',
+    description: 'Mostra lojas atendendo neste momento.',
+    icon: Clock,
+  },
+  {
+    key: 'free_shipping',
+    label: 'Entrega grátis',
+    compactLabel: 'Grátis',
+    description: 'Prioriza lojas sem taxa de entrega.',
+    icon: Bicycle,
+  },
+  {
+    key: 'nearby',
+    label: 'Perto de mim',
+    compactLabel: 'Perto',
+    description: 'Lojas mais próximas do endereço atual.',
+    icon: MapPinLine,
+  },
+  {
+    key: 'favorites',
+    label: 'Favoritos',
+    compactLabel: 'Favoritos',
+    description: 'Apenas lojas salvas por você.',
+    icon: Heart,
+  },
+];
 
 const CUSTOMER_ADDRESS_UPDATED_EVENT = 'jnc:customer-addresses-updated';
 const HUB_DEBUG_QUERY_PARAM = 'hubDebug';
@@ -774,7 +818,8 @@ export function MarketplacePage() {
   const [productSearchLoading, setProductSearchLoading] = useState(false);
   const [searchedProducts, setSearchedProducts] = useState<FeaturedProduct[]>([]);
   const [segmentFilter, setSegmentFilter] = useState('all');
-  const [quickFilter, setQuickFilter] = useState<'all' | 'free_shipping' | 'nearby' | 'open_now' | 'favorites'>('all');
+  const [quickFilter, setQuickFilter] = useState<HubQuickFilterKey>('all');
+  const [filtersSheetOpen, setFiltersSheetOpen] = useState(false);
   const [condominiums, setCondominiums] = useState<HubCondominium[]>([]);
   const [destinations, setDestinations] = useState<HubDestination[]>([]);
   const [selectedCondominiumSlug, setSelectedCondominiumSlug] = useState(() => readSelectedCondominiumSlug());
@@ -2058,6 +2103,18 @@ export function MarketplacePage() {
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { icon: Storefront, label: segment });
   }, [segmentOptions]);
+  const primaryQuickFilterOptions = useMemo(
+    () => HUB_QUICK_FILTER_OPTIONS.filter((item) => HUB_PRIMARY_QUICK_FILTERS.includes(item.key)),
+    []
+  );
+  const selectedQuickFilterOption = useMemo(
+    () => HUB_QUICK_FILTER_OPTIONS.find((item) => item.key === quickFilter) || null,
+    [quickFilter]
+  );
+  const hiddenMarketplaceFilterCount =
+    (quickFilter === 'favorites' ? 1 : 0) + (segmentFilter !== 'all' ? 1 : 0);
+  const activeMarketplaceFilterCount =
+    (quickFilter !== 'all' ? 1 : 0) + (segmentFilter !== 'all' ? 1 : 0) + (debouncedQuery ? 1 : 0);
 
   const favoriteStores = useMemo(() => {
     if (!favoriteStoreSlugs.length) return [];
@@ -2891,6 +2948,186 @@ export function MarketplacePage() {
         versionLabel={APP_BUILD_INFO.versionLabel}
       />
 
+      <Drawer.Root open={filtersSheetOpen} onOpenChange={setFiltersSheetOpen}>
+        <Drawer.Portal>
+          <Drawer.Overlay className="fixed inset-0 z-[120] bg-slate-950/45 backdrop-blur-[3px]" />
+          <Drawer.Content className="fixed inset-x-0 bottom-0 z-[130] mx-auto h-fit max-h-[88vh] max-w-2xl overflow-hidden rounded-t-[2rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(247,250,252,0.98)_100%)] text-slate-950 shadow-[0_-28px_76px_-42px_rgba(15,23,42,0.68)] outline-none">
+            <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-slate-300/80" />
+            <div className="max-h-[calc(88vh-0.75rem)] overflow-y-auto px-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <Drawer.Title className="text-[19px] font-black tracking-[-0.03em] text-slate-950">
+                    Encontre mais rápido
+                  </Drawer.Title>
+                  <Drawer.Description className="mt-1 text-[12px] font-semibold leading-relaxed text-slate-500">
+                    Escolha um atalho ou refine por categoria sem perder a ordem das lojas.
+                  </Drawer.Description>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFiltersSheetOpen(false)}
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.3)] transition active:scale-95"
+                  aria-label="Fechar filtros"
+                >
+                  <X size={16} weight="bold" />
+                </button>
+              </div>
+
+              <div className="mt-4 rounded-[1.55rem] border border-[#336886]/10 bg-[#edf5fa]/70 px-4 py-3 text-[#153A4C] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]/75">Resultado atual</p>
+                    <p className="mt-0.5 truncate text-sm font-black text-[#153A4C]">
+                      {filteredStores.length} loja{filteredStores.length === 1 ? '' : 's'} encontrada{filteredStores.length === 1 ? '' : 's'}
+                    </p>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-black text-[#336886] ring-1 ring-white/80">
+                    <CheckCircle size={12} weight="fill" />
+                    {activeMarketplaceFilterCount > 0 ? `${activeMarketplaceFilterCount} ativo${activeMarketplaceFilterCount === 1 ? '' : 's'}` : 'Livre'}
+                  </span>
+                </div>
+                {selectedQuickFilterOption || segmentFilter !== 'all' || debouncedQuery ? (
+                  <p className="mt-2 text-[11px] font-semibold leading-relaxed text-[#336886]/80">
+                    {[
+                      selectedQuickFilterOption?.label,
+                      segmentFilter !== 'all' ? `Categoria: ${segmentFilter}` : '',
+                      debouncedQuery ? `Busca: ${debouncedQuery}` : '',
+                    ].filter(Boolean).join(' • ')}
+                  </p>
+                ) : null}
+              </div>
+
+              <section className="mt-5">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Atalhos</p>
+                  {quickFilter !== 'all' ? (
+                    <button
+                      type="button"
+                      onClick={() => setQuickFilter('all')}
+                      className="text-[11px] font-black text-[#336886] active:scale-95"
+                    >
+                      Limpar atalho
+                    </button>
+                  ) : null}
+                </div>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {HUB_QUICK_FILTER_OPTIONS.map((filter) => {
+                    const Icon = filter.icon;
+                    const active = quickFilter === filter.key;
+                    return (
+                      <button
+                        key={`sheet-${filter.key}`}
+                        type="button"
+                        onClick={() => {
+                          setQuickFilter(active ? 'all' : filter.key);
+                          setFiltersSheetOpen(false);
+                          if (!active) scrollStoresIntoView();
+                        }}
+                        className={`min-h-[5.2rem] rounded-[1.35rem] border p-3 text-left transition-all duration-200 active:scale-[0.98] ${
+                          active
+                            ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.72)]'
+                            : 'border-slate-200/80 bg-white text-slate-700 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.28)]'
+                        }`}
+                        aria-pressed={active}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${active ? 'bg-white/16 text-white' : 'bg-[#edf5fa] text-[#336886]'}`}>
+                            <Icon size={16} weight={active ? 'fill' : 'duotone'} />
+                          </span>
+                          <span className="min-w-0 flex-1 truncate text-sm font-black">{filter.label}</span>
+                        </div>
+                        <p className={`mt-2 line-clamp-2 text-[11px] font-semibold leading-snug ${active ? 'text-white/76' : 'text-slate-500'}`}>
+                          {filter.description}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+
+              <section className="mt-5">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Categorias</p>
+                  {segmentFilter !== 'all' ? (
+                    <button
+                      type="button"
+                      onClick={() => setSegmentFilter('all')}
+                      className="text-[11px] font-black text-[#336886] active:scale-95"
+                    >
+                      Ver todas
+                    </button>
+                  ) : null}
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSegmentFilter('all');
+                      setFiltersSheetOpen(false);
+                      scrollStoresIntoView();
+                    }}
+                    className={`min-w-0 rounded-[1.1rem] border px-2 py-2.5 text-center text-[11px] font-black transition active:scale-[0.98] ${
+                      segmentFilter === 'all'
+                        ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_28px_-22px_rgba(21,58,76,0.58)]'
+                        : 'border-slate-200 bg-white text-slate-600'
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  {categoryTiles.map((item, index) => {
+                    const active = segmentFilter === item.label;
+                    const CategoryIcon = item.icon;
+                    return (
+                      <button
+                        key={`sheet-category-${item.label}-${index}`}
+                        type="button"
+                        onClick={() => {
+                          setSegmentFilter(active ? 'all' : item.label);
+                          setFiltersSheetOpen(false);
+                          scrollStoresIntoView();
+                        }}
+                        className={`min-w-0 rounded-[1.1rem] border px-2 py-2.5 text-center transition active:scale-[0.98] ${
+                          active
+                            ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_28px_-22px_rgba(21,58,76,0.58)]'
+                            : 'border-slate-200 bg-white text-slate-600'
+                        }`}
+                      >
+                        <CategoryIcon size={15} weight={active ? 'fill' : 'duotone'} className="mx-auto mb-1" />
+                        <span className="block truncate text-[10.5px] font-black">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+
+              <div className="mt-5 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetMarketplaceFilters();
+                    setFiltersSheetOpen(false);
+                  }}
+                  disabled={activeMarketplaceFilterCount === 0}
+                  className="inline-flex h-12 flex-1 items-center justify-center rounded-[1.2rem] border border-slate-200 bg-white text-sm font-black text-slate-600 shadow-[0_14px_26px_-24px_rgba(15,23,42,0.26)] transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  Limpar filtros
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFiltersSheetOpen(false);
+                    scrollStoresIntoView();
+                  }}
+                  className="inline-flex h-12 flex-1 items-center justify-center rounded-[1.2rem] bg-[#153A4C] text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.65)] transition active:scale-[0.98]"
+                >
+                  Ver lojas
+                </button>
+              </div>
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
+
       <div
         className={`relative transition-all duration-700 ${
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
@@ -3002,69 +3239,54 @@ export function MarketplacePage() {
               </div>
             </div>
 
-            {/* Linha 3: Filtros Minimalistas (Pílulas) */}
-            <div className={`relative -mx-0.5 ${isNativePlatform ? 'py-0.5' : 'py-1'}`}>
-              <div className="flex gap-2 overflow-x-auto no-scrollbar scrollbar-hide px-0.5">
-              {(['free_shipping', 'nearby', 'open_now', 'favorites'] as const).map((filter) => {
-                const label =
-                  filter === 'free_shipping' ? 'Frete grátis' :
-                  filter === 'nearby' ? 'Perto de você' :
-                  filter === 'favorites' ? 'Favoritos' : 'Abertos';
-                const Icon =
-                  filter === 'free_shipping' ? Bicycle :
-                  filter === 'nearby' ? MapPinLine :
-                  filter === 'favorites' ? Heart : Clock;
-                const active = quickFilter === filter;
-                const activeStyle =
-                  filter === 'free_shipping'? 'border-emerald-500 bg-emerald-600 text-white  shadow-[0_10px_22px_-12px_rgba(5,150,105,0.55)]' :
-                  filter === 'nearby'       ? 'border-sky-500     bg-sky-600     text-white  shadow-[0_10px_22px_-12px_rgba(2,132,199,0.55)]' :
-                  filter === 'open_now'     ? 'border-amber-500   bg-amber-500   text-white  shadow-[0_10px_22px_-12px_rgba(245,158,11,0.55)]' :
-                                              'border-rose-400    bg-rose-500    text-white  shadow-[0_10px_22px_-12px_rgba(244,63,94,0.55)]';
-                const inactiveStyle =
-                  filter === 'free_shipping'? 'border-emerald-100/80 bg-emerald-50/60 text-emerald-700' :
-                  filter === 'nearby'       ? 'border-sky-100/80 bg-sky-50/60 text-sky-700' :
-                  filter === 'open_now'     ? 'border-amber-100/80 bg-amber-50/60 text-amber-700' :
-                                              'border-rose-100/80 bg-rose-50/60 text-rose-600';
-                return (
-                  <button
-                    key={filter}
-                    type="button"
-                    onClick={() => {
-                      const next = quickFilter === filter ? 'all' : filter;
-                      setQuickFilter(next);
-                      if (next !== 'all') {
-                        window.setTimeout(() => {
-                          const el = storesSectionRef.current;
-                          if (!el) return;
-                          const y = el.getBoundingClientRect().top + window.scrollY - 168;
-                          window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-                        }, 120);
-                      }
-                    }}
-                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] transition-all duration-200 ease-out active:scale-[0.97] shadow-[0_6px_16px_-10px_rgba(15,23,42,0.18)] ${active ? `font-black ${activeStyle}` : `font-bold ${inactiveStyle}`}`}
-                  >
-                    <Icon size={13} weight={active ? 'fill' : 'duotone'} />
-                    {label}
-                  </button>
-                );
-              })}
-              {(quickFilter !== 'all' || segmentFilter !== 'all' || debouncedQuery) && (
+            {/* Linha 3: Filtros rápidos sem scroll lateral */}
+            <div className={`${isNativePlatform ? 'py-0.5' : 'py-1'}`}>
+              <div className="grid grid-cols-[repeat(3,minmax(0,1fr))_auto] gap-1.5">
+                {primaryQuickFilterOptions.map((filter) => {
+                  const Icon = filter.icon;
+                  const active = quickFilter === filter.key;
+                  const nextFilter: HubQuickFilterKey = active ? 'all' : filter.key;
+                  return (
+                    <button
+                      key={filter.key}
+                      type="button"
+                      onClick={() => {
+                        setQuickFilter(nextFilter);
+                        if (nextFilter !== 'all') scrollStoresIntoView();
+                      }}
+                      className={`inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full border px-2.5 py-2 text-[11px] font-black transition-all duration-200 ease-out active:scale-[0.97] ${
+                        active
+                          ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.58)]'
+                          : 'border-white/80 bg-white/72 text-slate-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/50 backdrop-blur-xl'
+                      }`}
+                      aria-pressed={active}
+                      aria-label={filter.label}
+                      title={filter.label}
+                    >
+                      <Icon size={13} weight={active ? 'fill' : 'duotone'} className="shrink-0" />
+                      <span className="truncate">{filter.compactLabel}</span>
+                    </button>
+                  );
+                })}
                 <button
                   type="button"
-                  onClick={() => {
-                    setQuery('');
-                    setDebouncedQuery('');
-                    setSegmentFilter('all');
-                    setQuickFilter('all');
-                  }}
-                  className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-rose-200/80 bg-rose-50/70 ${isNativePlatform ? 'px-3 py-1.5' : 'px-3.5 py-1.5'} text-[12px] font-bold text-rose-600 shadow-[0_6px_16px_-10px_rgba(244,63,94,0.18)] transition-all duration-200 ease-out active:scale-[0.97]`}
+                  onClick={() => setFiltersSheetOpen(true)}
+                  className={`relative inline-flex h-full min-w-[3rem] items-center justify-center gap-1 rounded-full border px-2.5 py-2 text-[11px] font-black transition-all duration-200 ease-out active:scale-[0.97] ${
+                    hiddenMarketplaceFilterCount > 0
+                      ? 'border-[#336886] bg-[#edf5fa] text-[#153A4C] shadow-[0_14px_26px_-20px_rgba(51,104,134,0.34)]'
+                      : 'border-white/80 bg-white/72 text-slate-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/50 backdrop-blur-xl'
+                  }`}
+                  aria-label="Abrir filtros"
                 >
-                  <X size={12} weight="bold" />
-                  Limpar
+                  <SlidersHorizontal size={14} weight="bold" />
+                  <span className="hidden min-[390px]:inline">Filtros</span>
+                  {hiddenMarketplaceFilterCount > 0 ? (
+                    <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#153A4C] px-1 text-[9px] font-black text-white ring-2 ring-white">
+                      {hiddenMarketplaceFilterCount}
+                    </span>
+                  ) : null}
                 </button>
-              )}
               </div>
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#EEF2F7]/90 to-transparent" />
             </div>
 
           </div>
