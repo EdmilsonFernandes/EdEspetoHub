@@ -1,9 +1,10 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Buildings, ChartBar, ChefHat, Compass, CurrencyDollar, ImageSquare, Package, SignOut, UserCircle } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
+import { loadAdminDashboardPage, loadAdminQueuePage, loadStorePage } from '../../utils/adminRoutePrefetch';
 
 export function AdminMobileBottomNav() {
   const navigate = useNavigate();
@@ -31,6 +32,40 @@ export function AdminMobileBottomNav() {
   const [hiddenByOverlay, setHiddenByOverlay] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [hiddenByCart, setHiddenByCart] = useState(false);
+  const [optimisticActiveId, setOptimisticActiveId] = useState('');
+  const optimisticTimerRef = useRef<number | null>(null);
+
+  const setOptimisticNav = (id: string) => {
+    setOptimisticActiveId(id);
+    if (optimisticTimerRef.current) window.clearTimeout(optimisticTimerRef.current);
+    optimisticTimerRef.current = window.setTimeout(() => setOptimisticActiveId(''), 900);
+  };
+
+  const preloadNavTarget = (id: string) => {
+    if (id === 'monitor' || id === 'pedidos') {
+      void loadAdminQueuePage().catch(() => undefined);
+      return;
+    }
+    if (id === 'catalogo') {
+      void loadStorePage().catch(() => undefined);
+      return;
+    }
+    if (id === 'produtos' || id === 'resumo') {
+      void loadAdminDashboardPage().catch(() => undefined);
+    }
+  };
+
+  const handleNavPress = (item: any) => {
+    setOptimisticNav(item.id);
+    preloadNavTarget(item.id);
+    item.onClick();
+  };
+
+  useEffect(() => {
+    return () => {
+      if (optimisticTimerRef.current) window.clearTimeout(optimisticTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     const handleCartVisibility = (e: any) => {
@@ -245,6 +280,13 @@ export function AdminMobileBottomNav() {
     },
   ];
 
+  useEffect(() => {
+    if (!optimisticActiveId) return;
+    if (navItems.some((item: any) => item.id === optimisticActiveId && item.active)) {
+      setOptimisticActiveId('');
+    }
+  }, [dashboardTab, optimisticActiveId, path, navItems]);
+
   if (isSuperAdminPath) {
     const superItems = [
       {
@@ -306,13 +348,15 @@ export function AdminMobileBottomNav() {
           {superItems.map((item) => {
             const Icon = item.icon;
             const danger = item.tone === 'danger';
+            const isActive = optimisticActiveId ? optimisticActiveId === item.id : item.active;
             return (
               <li key={item.id}>
                 <button
                   type="button"
-                  onClick={item.onClick}
+                  onPointerDown={() => setOptimisticNav(item.id)}
+                  onClick={() => handleNavPress(item)}
                   className={`w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[9px] font-bold uppercase tracking-[0.08em] transition-all active:scale-95 ${
-                    item.active
+                    isActive
                       ? 'text-[#153A4C]'
                       : danger
                         ? 'text-rose-500'
@@ -320,13 +364,13 @@ export function AdminMobileBottomNav() {
                   }`}
                 >
                   <span className={`inline-flex h-8 w-8 items-center justify-center rounded-2xl transition-all ${
-                    item.active
+                    isActive
                       ? 'bg-[#153A4C]/10 text-[#153A4C]'
                       : danger
                         ? 'bg-rose-50 text-rose-500'
                         : 'text-slate-400'
                   }`}>
-                    <Icon size={18} weight={item.active ? 'fill' : 'duotone'} />
+                    <Icon size={18} weight={isActive ? 'fill' : 'duotone'} />
                   </span>
                   <span className="leading-none">{item.label}</span>
                 </button>
@@ -350,23 +394,28 @@ export function AdminMobileBottomNav() {
       <ul className={`pointer-events-auto mx-auto grid ${navItems.length <= 2 ? 'grid-cols-2' : navItems.length === 3 ? 'grid-cols-3' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-5'} gap-0.5 w-full max-w-lg sm:max-w-xl md:max-w-2xl border-t border-slate-200/60 bg-white/95 px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-8px_32px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl`}>
         {navItems.map((item) => {
           const Icon = item.icon;
+          const isActive = optimisticActiveId ? optimisticActiveId === item.id : item.active;
           return (
             <li key={item.id}>
               <button
                 type="button"
-                onClick={item.onClick}
+                onPointerDown={() => {
+                  setOptimisticNav(item.id);
+                  preloadNavTarget(item.id);
+                }}
+                onClick={() => handleNavPress(item)}
                 className={`w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[9px] font-bold uppercase tracking-[0.08em] transition-all active:scale-95 ${
-                  item.active ? '' : 'text-slate-400'
+                  isActive ? '' : 'text-slate-400'
                 }`}
-                style={item.active ? { color: activeTextColor } : undefined}
+                style={isActive ? { color: activeTextColor } : undefined}
               >
                 <span
                   className={`relative inline-flex h-8 w-8 items-center justify-center rounded-2xl transition-all ${
-                    item.active ? '' : 'text-slate-400'
+                    isActive ? '' : 'text-slate-400'
                   }`}
-                  style={item.active ? { backgroundColor: activePillColor, color: activeIconBg } : undefined}
+                  style={isActive ? { backgroundColor: activePillColor, color: activeIconBg } : undefined}
                 >
-                  <Icon size={18} weight={item.active ? 'fill' : 'duotone'} />
+                  <Icon size={18} weight={isActive ? 'fill' : 'duotone'} />
                   {item.badge ? (
                     <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 rounded-full bg-rose-500 px-1 text-[9px] font-black text-white flex items-center justify-center">
                       {item.badge}

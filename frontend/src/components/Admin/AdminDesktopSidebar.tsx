@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CaretDown, SignOut } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../common/PlatformTrustFooter';
 
@@ -28,6 +28,8 @@ export function AdminDesktopSidebar({
   onSelect,
   onLogout,
 }: AdminDesktopSidebarProps) {
+  const [optimisticActiveId, setOptimisticActiveId] = useState('');
+  const optimisticTimerRef = useRef<number | null>(null);
   const allItemIds = useMemo(() => new Set((items || []).map((item) => item.id)), [items]);
   const isGroupedMode = useMemo(
     () => ['resumo', 'pedidos', 'vendas', 'produtos', 'estoque', 'config', 'avaliacoes', 'fila'].some((id) => allItemIds.has(id)),
@@ -99,9 +101,26 @@ export function AdminDesktopSidebar({
     localStorage.setItem('adminSidebar:openGroups', JSON.stringify(openGroups || {}));
   }, [openGroups]);
 
+  useEffect(() => {
+    if (!optimisticActiveId) return;
+    if (activeId === optimisticActiveId) setOptimisticActiveId('');
+  }, [activeId, optimisticActiveId]);
+
+  useEffect(() => {
+    return () => {
+      if (optimisticTimerRef.current) window.clearTimeout(optimisticTimerRef.current);
+    };
+  }, []);
+
+  const setOptimisticNav = (id: string) => {
+    setOptimisticActiveId(id);
+    if (optimisticTimerRef.current) window.clearTimeout(optimisticTimerRef.current);
+    optimisticTimerRef.current = window.setTimeout(() => setOptimisticActiveId(''), 800);
+  };
+
   const renderNavItem = (item: SidebarItem, nested = false) => {
     const Icon = item.icon;
-    const isActive = activeId === item.id;
+    const isActive = (optimisticActiveId || activeId) === item.id;
     const isDisabled = Boolean(item.disabled);
     const compactBadgeTone =
       item.tone === 'violet'
@@ -120,7 +139,11 @@ export function AdminDesktopSidebar({
       <button
         key={item.id}
         type="button"
-        onClick={() => onSelect(item.id)}
+        onPointerDown={() => setOptimisticNav(item.id)}
+        onClick={() => {
+          setOptimisticNav(item.id);
+          onSelect(item.id);
+        }}
         aria-label={item.label}
         title={isDisabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
         className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${

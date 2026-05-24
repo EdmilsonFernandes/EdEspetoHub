@@ -179,34 +179,39 @@ export function AdminLayout({
     document.body.classList.remove('admin-mobile-menu-open');
   }, [location.pathname]);
 
+  const runAfterMobileNavClose = (action: () => void) => {
+    setMobileNavOpen(false);
+    if (typeof window === 'undefined') {
+      action();
+      return;
+    }
+    window.requestAnimationFrame(action);
+  };
+
   const handleNavSelect = (id: string) => {
     if (id === 'fila') {
-      navigate('/admin/queue');
-      setMobileNavOpen(false);
+      runAfterMobileNavClose(() => navigate('/admin/queue'));
       return;
     }
     if (id === 'vendas') {
-      navigate('/admin/orders');
-      setMobileNavOpen(false);
+      runAfterMobileNavClose(() => navigate('/admin/orders'));
       return;
     }
     if (id === 'cardapio') {
-      if (storeSlug) navigate(`/${storeSlug}`);
-      setMobileNavOpen(false);
+      runAfterMobileNavClose(() => {
+        if (storeSlug) navigate(`/${storeSlug}`);
+      });
       return;
     }
     if (id === 'destaques') {
-      navigate('/admin/highlights');
-      setMobileNavOpen(false);
+      runAfterMobileNavClose(() => navigate('/admin/highlights'));
       return;
     }
     if (id === 'motoboys' && !canUseMotoboys) {
-      navigate('/admin/renewal?focus=pro');
-      setMobileNavOpen(false);
+      runAfterMobileNavClose(() => navigate('/admin/renewal?focus=pro'));
       return;
     }
-    navigate('/admin/dashboard', { state: { activeTab: id } });
-    setMobileNavOpen(false);
+    runAfterMobileNavClose(() => navigate('/admin/dashboard', { state: { activeTab: id } }));
   };
 
   const accountActions = [

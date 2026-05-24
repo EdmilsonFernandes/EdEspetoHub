@@ -153,8 +153,12 @@ export function ContextSideDrawer({
                     key={action.id}
                     type="button"
                     onClick={() => {
-                      action.onClick();
                       onClose();
+                      if (typeof window === 'undefined') {
+                        action.onClick();
+                        return;
+                      }
+                      window.requestAnimationFrame(() => action.onClick());
                     }}
                     className={`flex w-full items-center gap-3 rounded-[1.25rem] border px-3.5 py-3 text-left transition-all active:scale-[0.98] ${
                       action.tone === 'danger'
