@@ -128,6 +128,27 @@ Backend API (chamanoespeto-api :4000)
 - Não criar componentes com aparência isolada do restante do app; se faltar padrão, criar um shell/componente compartilhado antes de duplicar UI.
 - Para subtelas navegáveis do app do cliente/destinos, reutilizar `frontend/src/components/common/AppGlassHeader.tsx` como cabeçalho com voltar, safe area e identidade visual padrão.
 
+### Padrão técnico para Hub/Marketplace
+
+- `frontend/src/pages/MarketplacePage.tsx` deve funcionar como orquestrador da Home/Hub, não como lugar para acumular regra nova.
+- Ao alterar a Home/Hub, primeiro procurar componentes existentes em `frontend/src/components/Marketplace/Hub/`.
+- Nova UI do Hub deve ir para componentes pequenos em `frontend/src/components/Marketplace/Hub/`, preservando props e layout atual.
+- Nova lógica de estado, cache, polling, localStorage, destaque, favoritos ou busca deve ir para hooks em `frontend/src/hooks/hub/`.
+- Não reintroduzir em `MarketplacePage.tsx` efeitos grandes, chamadas de API extensas ou blocos de JSX repetidos se puderem virar hook/componente.
+- Hooks já existentes do Hub:
+  - `useHubSearchPlaceholder`
+  - `useHubFavorites`
+  - `useHubFeaturedProducts`
+  - `useHubAnonymousOrders`
+  - `useHubCustomerActiveOrders`
+- Mudança visual ou lógica no Hub deve validar, no mínimo:
+  - `npm --prefix frontend run test:unit`
+  - `npm --prefix frontend run build`
+  - `sh scripts/compose-dev-frontend.sh`
+  - smoke local `/hub` e `/api/public/stores`
+  - consulta de contagem do banco local definida em "Validação de dados após deploy/local Docker"
+- Se a mudança afetar navegação, filtros, destaque, lojas, pedidos ativos ou UX mobile do Hub, rodar também `npm --prefix frontend run test:e2e`.
+
 ### Onde implementar algo novo
 
 - **Nova rota que o frontend consome**: registrar no BFF (`apis/src/domains/proxy/proxy.routes.ts` se for proxy, ou criar controller+processor se tiver lógica própria).
