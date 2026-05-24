@@ -8,9 +8,7 @@ import {
   Storefront,
   House,
   Receipt,
-  BellRinging,
   List,
-  CaretDown,
   Heart,
   CaretRight,
   X,
@@ -45,9 +43,11 @@ import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { formatNextOpeningLabel, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import { useCachedCustomerProfileImage } from '../hooks/useCachedCustomerProfileImage';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
-import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
-import { HubFilterBar, HubFilterSheet, type HubQuickFilterKey } from '../components/Marketplace/Hub/HubFilters';
+import { HubFilterSheet, type HubQuickFilterKey } from '../components/Marketplace/Hub/HubFilters';
+import { HubHeader } from '../components/Marketplace/Hub/HubHeader';
+import { HubAnonymousActiveOrders } from '../components/Marketplace/Hub/HubAnonymousActiveOrders';
+import { HubStoreCard } from '../components/Marketplace/Hub/HubStoreCard';
 import { HubMarketingPopup } from '../components/Marketplace/Hub/HubMarketingPopup';
 import { CondominiumStatusModal } from '../components/Marketplace/CondominiumStatusModal';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
@@ -2665,6 +2665,20 @@ export function MarketplacePage() {
     [activeAnonymousOrders, dismissedAnonymousOrderIds]
   );
 
+  const dismissVisibleAnonymousOrders = useCallback(() => {
+    const ids = visibleActiveAnonymousOrders.map((order) => String(order?.id || '').trim()).filter(Boolean);
+    const next = Array.from(new Set([ ...dismissedAnonymousOrderIds, ...ids ]));
+    try {
+      localStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(next));
+      sessionStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+    setDismissedAnonymousOrderIds(next);
+    clearAnonymousOrderCache(ids);
+    setActiveAnonymousOrders([]);
+  }, [clearAnonymousOrderCache, dismissedAnonymousOrderIds, visibleActiveAnonymousOrders]);
+
   useEffect(() => {
     const nextOrder = visibleActiveAnonymousOrders[0];
     if (!isCustomerLogged && nextOrder?.id) {
@@ -2868,208 +2882,43 @@ export function MarketplacePage() {
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}
       >
-        <header className={`sticky top-0 z-[60] border-b border-white/65 transition-all duration-300 jnc-marketplace-header-glass ${isNativePlatform ? 'jnc-marketplace-header-glass--native' : isHeaderElevated ? '' : 'jnc-marketplace-header-glass--floating'}`}>
-          <div className={`mx-auto max-w-[1200px] px-4 ${isNativePlatform ? 'pb-2 pt-[max(0.55rem,calc(env(safe-area-inset-top)+0.1rem))]' : 'pb-3 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]'}`}>
-            <div className={`${isNativePlatform ? 'space-y-2.5 rounded-[1.65rem] px-2.5 py-2.5' : 'space-y-3 rounded-[1.9rem] px-3 py-3'} relative overflow-hidden border border-white/88 bg-[linear-gradient(145deg,rgba(255,255,255,0.90)_0%,rgba(248,250,252,0.76)_56%,rgba(255,255,255,0.82)_100%)] shadow-[0_22px_54px_-38px_rgba(21,58,76,0.26)] ring-1 ring-slate-200/50 backdrop-blur-2xl`}>
-            <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#153A4C]/[0.06] blur-3xl" />
-            <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-slate-200/40 blur-3xl" />
-            {/* Linha 1: Perfil e Logo */}
-            <div className="relative flex items-center justify-between gap-2">
-              <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                <HeaderAvatarTrigger
-                  displayName={customerDisplayName}
-                  profileImageUrl={customerProfileImage}
-                  hasNotification={!isCustomerLogged}
-                  onClick={() => setProfileDrawerOpen(true)}
-                />
-                <div className="min-w-0 flex-1 rounded-[1.35rem] border border-white/75 bg-white/72 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_14px_30px_-26px_rgba(15,23,42,0.34)] ring-1 ring-slate-950/5 backdrop-blur-sm">
-                  <div className="mb-0.5 flex items-center gap-1.5">
-                    <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-4 w-4 shrink-0 rounded-[0.4rem] object-cover shadow-[0_2px_6px_-2px_rgba(21,58,76,0.3)]" />
-                    <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
-                      {hubHeaderEyebrow}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className="inline-flex w-full min-w-0 items-center justify-between gap-2 text-left text-[14px] font-black text-slate-950 transition-colors duration-150 ease-out hover:text-[#336886] active:scale-[0.99]"
-                    onClick={() => setQuickFilter((prev) => (prev === 'nearby' ? 'all' : 'nearby'))}
-                  >
-                    <span className="truncate">{displayLocationLabel}</span>
-                    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[#336886]">
-                      <CaretDown size={13} weight="bold" />
-                    </span>
-                  </button>
-                </div>
-              </div>
-              
-              <button
-                type="button"
-                onClick={handleHubNotificationClick}
-                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-white/80 bg-white/76 text-[#153A4C] shadow-[0_14px_26px_-20px_rgba(21,58,76,0.38)] ring-1 ring-[#d7e7ef]/75 backdrop-blur-xl transition-all duration-150 ease-out hover:bg-white active:scale-95"
-                aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
-                title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
-              >
-                <BellRinging size={18} weight={hubNotificationCount > 0 ? 'fill' : 'duotone'} />
-                {hubNotificationCount > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[9px] font-black leading-none text-white ring-2 ring-white shadow-[0_8px_18px_-10px_rgba(225,29,72,0.9)]">
-                    {hubNotificationCount > 9 ? '9+' : hubNotificationCount}
-                  </span>
-                ) : null}
-                {hubNotificationCount > 0 ? (
-                  <span className="absolute inset-0 rounded-[1.15rem] border border-rose-600/35 animate-ping" />
-                ) : null}
-              </button>
-            </div>
-
-            {/* Linha 2: Busca Premium */}
-            <div className="relative z-20">
-              <div
-                className={`group relative isolate flex items-center gap-3 overflow-hidden border border-slate-200/80 bg-white px-3.5 transition-[border-color,box-shadow] duration-200 ease-out hover:border-slate-300 focus-within:border-[#336886]/25 focus-within:shadow-[0_18px_40px_-24px_rgba(51,104,134,0.28)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${isNativePlatform ? 'min-h-[50px] rounded-[1.35rem] shadow-[0_14px_30px_-24px_rgba(15,23,42,0.25)]' : 'min-h-[54px] rounded-[1.55rem] shadow-[0_16px_34px_-26px_rgba(15,23,42,0.28)]'}`}
-                onClick={(e) => {
-                  if ((e.target as HTMLElement).closest('button')) return;
-                  searchInputRef.current?.focus();
-                }}
-              >
-                <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
-                <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
-                  <MagnifyingGlass size={18} weight="bold" />
-                </div>
-                <div className="relative min-w-0 flex-1">
-                  <input
-                    {...inputAssistProps.search}
-                    ref={searchInputRef}
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    onFocus={() => setIsSearchEditing(true)}
-                    onBlur={() => setIsSearchEditing(false)}
-                    placeholder={isSearchEditing ? 'Buscar loja, categoria ou produto' : SEARCH_PLACEHOLDERS[searchPlaceholderIndex]}
-                    enterKeyHint="search"
-                    className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-slate-950 outline-none transition-opacity duration-300 ${searchPlaceholderVisible || isSearchEditing ? 'placeholder:opacity-100' : 'placeholder:opacity-0'} placeholder:text-slate-400 placeholder:transition-opacity placeholder:duration-300 ${isNativePlatform ? 'min-h-[48px] text-[15px]' : 'min-h-[52px] text-[14px]'}`}
-                    style={{
-                      WebkitAppearance: 'none',
-                      caretColor: '#336886',
-                      backgroundColor: 'transparent',
-                      boxShadow: 'none',
-                      WebkitTextFillColor: 'inherit',
-                      color: '#0f172a',
-                      transform: 'translateZ(0)',
-                    }}
-                  />
-                </div>
-                {query ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQuery('');
-                      setDebouncedQuery('');
-                      setIsSearchEditing(false);
-                    }}
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700 active:scale-95"
-                    aria-label="Limpar busca"
-                    title="Limpar"
-                  >
-                    <X size={14} weight="bold" />
-                  </button>
-                ) : null}
-              </div>
-            </div>
-
-            <HubFilterBar
-              isNativePlatform={isNativePlatform}
-              quickFilter={quickFilter}
-              segmentFilter={segmentFilter}
-              onQuickFilterChange={setQuickFilter}
-              onOpenFilters={() => setFiltersSheetOpen(true)}
-              onScrollStoresIntoView={scrollStoresIntoView}
-            />
-
-          </div>
-          </div>
-        </header>
+        <HubHeader
+          isNativePlatform={isNativePlatform}
+          isHeaderElevated={isHeaderElevated}
+          customerDisplayName={customerDisplayName}
+          customerProfileImage={customerProfileImage}
+          isCustomerLogged={isCustomerLogged}
+          hubHeaderEyebrow={hubHeaderEyebrow}
+          displayLocationLabel={displayLocationLabel}
+          hubNotificationCount={hubNotificationCount}
+          searchInputRef={searchInputRef}
+          query={query}
+          isSearchEditing={isSearchEditing}
+          searchPlaceholder={SEARCH_PLACEHOLDERS[searchPlaceholderIndex]}
+          searchPlaceholderVisible={searchPlaceholderVisible}
+          quickFilter={quickFilter}
+          segmentFilter={segmentFilter}
+          onOpenProfileDrawer={() => setProfileDrawerOpen(true)}
+          onToggleNearbyFilter={() => setQuickFilter((prev) => (prev === 'nearby' ? 'all' : 'nearby'))}
+          onHubNotificationClick={handleHubNotificationClick}
+          onQueryChange={setQuery}
+          onDebouncedQueryChange={setDebouncedQuery}
+          onSearchEditingChange={setIsSearchEditing}
+          onQuickFilterChange={setQuickFilter}
+          onOpenFilters={() => setFiltersSheetOpen(true)}
+          onScrollStoresIntoView={scrollStoresIntoView}
+        />
 
         <main className={`mx-auto flex max-w-[1200px] flex-col gap-4 px-4 sm:gap-5 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
           {/* Acompanhamento anonimo salvo neste navegador */}
-          {!isCustomerLogged && visibleActiveAnonymousOrders.length > 0 && (
-            <div className="order-1 animate-in fade-in slide-in-from-top-4 duration-500">
-              <div className="relative overflow-hidden rounded-[2.5rem] border border-amber-200/50 bg-amber-50/90 backdrop-blur-md p-5 shadow-[0_20px_40px_-15px_rgba(245,158,11,0.15)]">
-                <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-amber-200/20 blur-2xl" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const ids = visibleActiveAnonymousOrders.map((order) => String(order?.id || '').trim()).filter(Boolean);
-                    const next = Array.from(new Set([ ...dismissedAnonymousOrderIds, ...ids ]));
-                    try {
-                      localStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(next));
-                      sessionStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(next));
-                    } catch {
-                      // ignore
-                    }
-                    setDismissedAnonymousOrderIds(next);
-                    clearAnonymousOrderCache(ids);
-                    setActiveAnonymousOrders([]);
-                  }}
-                  className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-amber-200 bg-white/80 text-amber-700 shadow-sm transition-colors hover:bg-white"
-                  aria-label="Fechar aviso de pedido em andamento"
-                  title="Fechar aviso"
-                >
-                  <X size={14} weight="bold" />
-                </button>
-                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                      </span>
-                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
-                        Pedido em andamento
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {visibleActiveAnonymousOrders.map((order) => (
-                        <button
-                          key={order.id}
-                          onClick={() => openOrderTracking(order.id, order.accessToken)}
-                          onMouseEnter={() => primeOrderTrackingNavigation(order.id, order.accessToken)}
-                          onFocus={() => primeOrderTrackingNavigation(order.id, order.accessToken)}
-                          onTouchStart={() => primeOrderTrackingNavigation(order.id, order.accessToken)}
-                          className="min-w-[180px] rounded-[1.4rem] border border-white/70 bg-white/95 px-3.5 py-3 text-left shadow-[0_12px_26px_-18px_rgba(245,158,11,0.28)] transition-all active:scale-95"
-                        >
-                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-                            Pedido salvo
-                          </p>
-                          <div className="mt-1 flex items-center justify-between gap-3">
-                            <p className="text-sm font-black text-slate-900">
-                              #{String(order.id).slice(-6).toUpperCase()}
-                            </p>
-                            <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700 ring-1 ring-emerald-200">
-                              Em andamento
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="sm:text-right space-y-1">
-                    <button
-                      type="button"
-                      onClick={() => openOrderTracking(visibleActiveAnonymousOrders[0]?.id, visibleActiveAnonymousOrders[0]?.accessToken)}
-                      onMouseEnter={() => primeOrderTrackingNavigation(visibleActiveAnonymousOrders[0]?.id, visibleActiveAnonymousOrders[0]?.accessToken)}
-                      onFocus={() => primeOrderTrackingNavigation(visibleActiveAnonymousOrders[0]?.id, visibleActiveAnonymousOrders[0]?.accessToken)}
-                      onTouchStart={() => primeOrderTrackingNavigation(visibleActiveAnonymousOrders[0]?.id, visibleActiveAnonymousOrders[0]?.accessToken)}
-                      className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 active:scale-95"
-                    >
-                      Acompanhar agora
-                      <CaretRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
-                    </button>
-                    <p className="text-[10px] font-bold text-emerald-600/70 italic">
-                      Disponível por 3 horas neste navegador
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {!isCustomerLogged ? (
+            <HubAnonymousActiveOrders
+              orders={visibleActiveAnonymousOrders}
+              onDismissAll={dismissVisibleAnonymousOrders}
+              onOpenOrder={openOrderTracking}
+              onPrimeOrder={primeOrderTrackingNavigation}
+            />
+          ) : null}
 
           {debouncedQuery.length < 2 && !selectedCondominium && (homeDestinationHighlights.length > 0 || condominiums.length > 0 || scopedEnrichedStores.length > 0) && (
             <section className="order-2 -mx-0.5 overflow-hidden">
@@ -3859,207 +3708,24 @@ export function MarketplacePage() {
                   const ratingLabel = store.reviewCount > 0
                     ? `${store.rating.toFixed(1)} (${store.reviewCount})`
                     : store.rating.toFixed(1);
-                  const getCompactBadgeClass = (badgeKey: string) => {
-                    if (badgeKey === 'pickup') return 'border-[#d7e7ef] bg-[#edf5fa] text-[#336886]';
-                    if (badgeKey === 'free_shipping' || badgeKey === 'delivery') return 'border-emerald-100 bg-emerald-50 text-emerald-700';
-                    if (badgeKey === 'outside') return 'border-amber-100 bg-amber-50 text-amber-700';
-                    if (badgeKey === 'postal') return 'border-violet-100 bg-violet-50 text-violet-700';
-                    if (badgeKey === 'highlight') return 'border-rose-100 bg-rose-50 text-rose-600';
-                    return 'border-slate-100 bg-slate-50 text-slate-500';
-                  };
-
-                  if (selectedCondominium) {
-                    return (
-                      <Link
-                        key={store.id}
-                        to={storePath}
-                        state={storeNavigationState}
-                        style={{ animationDelay: `${index * 50}ms` }}
-                        className={`group overflow-hidden rounded-[1.45rem] border bg-white animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-backwards transition-all ease-out active:scale-[0.985] ${
-                          store.isOpen
-                            ? 'border-white shadow-[0_12px_30px_rgba(15,23,42,0.075)] md:hover:-translate-y-0.5 md:hover:shadow-[0_18px_38px_rgba(15,23,42,0.11)]'
-                            : 'border-slate-200/80 bg-slate-50/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)]'
-                        }`}
-                      >
-                        {/* Banner wrapper */}
-                        <div className="relative">
-                          <div className="relative h-[56px] overflow-hidden rounded-t-[1.45rem] bg-slate-100">
-                            <img
-                              src={store.banner || store.logo}
-                              alt={store.name}
-                              loading="lazy"
-                              decoding="async"
-                              className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${store.isOpen ? '' : 'grayscale opacity-70'}`}
-                              onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
-                            />
-                            <div className={`absolute inset-0 ${store.isOpen ? 'bg-gradient-to-t from-black/38 via-black/5 to-transparent' : 'bg-gradient-to-t from-black/20 via-transparent to-transparent'}`} />
-                            <span className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.1em] shadow-sm backdrop-blur-sm ${
-                              isCondominiumEventLive ? 'bg-white/92 text-emerald-700' : 'bg-white/92 text-[#336886]'
-                            }`}>
-                              <span className={`h-1.5 w-1.5 rounded-full ${isCondominiumEventLive ? 'bg-emerald-500 animate-pulse' : 'bg-[#336886]'}`} />
-                              {isCondominiumEventLive ? 'Ao vivo' : hasUpcomingCondominiumEvent ? 'Agendado' : 'Prévia'}
-                            </span>
-                            <button
-                             type="button"
-                             onClick={(event) => {
-                               event.preventDefault();
-                               event.stopPropagation();
-                               toggleFavoriteStore(store.slug);
-                             }}
-                             className={`absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.8] ${
-                               favoriteStoreSlugs.includes(store.slug)
-                                 ? 'scale-[1.06] bg-rose-500 text-white shadow-[0_4px_18px_-4px_rgba(244,63,94,0.72)]'
-                                 : 'border border-white/20 bg-black/28 text-white backdrop-blur-md hover:scale-[1.1] hover:bg-black/42'
-                             }`}
-                             aria-label={`Favoritar ${store.name}`}
-                            >
-                             <Heart size={12} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} className={favoriteStoreSlugs.includes(store.slug) ? 'animate-[pop_0.4s_ease-out]' : ''} />
-                            </button>                          </div>
-                        </div>
-                        <div className="px-3 pb-3 pt-3">
-                          <div className="flex min-w-0 items-start gap-2">
-                            <img
-                              src={store.logo}
-                              alt=""
-                              loading="lazy"
-                              decoding="async"
-                              className={`h-8 w-8 shrink-0 rounded-[0.65rem] bg-slate-50 object-cover ring-1 ring-slate-200/70 ${store.isOpen ? '' : 'grayscale opacity-60'}`}
-                              onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
-                            />
-                            <h3 className={`min-h-[2rem] min-w-0 flex-1 line-clamp-2 text-[13px] font-black leading-4 [overflow-wrap:anywhere] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
-                              {store.name}
-                            </h3>
-                          </div>
-                          <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] font-bold text-slate-500">
-                            {store.rating > 0 ? (
-                              <span className="inline-flex items-center gap-1">
-                                <Star size={10} weight="fill" className="text-amber-400" />
-                                <span className="text-slate-700">{store.rating.toFixed(1)}</span>
-                              </span>
-                            ) : null}
-                            {store.rating > 0 ? <span className="text-slate-300">•</span> : null}
-                            <span>{store.etaMin}-{store.etaMax} min</span>
-                          </div>
-                          {!isCondominiumEventLive ? (
-                            <p className="mt-2 line-clamp-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#336886]">
-                              {hasUpcomingCondominiumEvent ? condominiumEventTimeLabel || 'Próxima feira' : 'Agenda em confirmação'}
-                            </p>
-                          ) : !store.isOpen ? (
-                            <p className="mt-2 line-clamp-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">
-                              {store.nextOpeningLabel || 'Sem horário cadastrado'}
-                            </p>
-                          ) : (
-                            <div className="mt-2 flex flex-wrap gap-1">
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-emerald-700">
-                                <Storefront size={10} weight="fill" />
-                                Retirada
-                              </span>
-                              {store.supportsDelivery && store.freeShipping ? (
-                                <span className="inline-flex rounded-full bg-sky-50 px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-[#336886]">
-                                  Grátis
-                                </span>
-                              ) : null}
-                            </div>
-                          )}
-                        </div>
-                      </Link>
-                    );
-                  }
-
                   return (
-                    <Link
+                    <HubStoreCard
                       key={store.id}
+                      store={store}
                       to={storePath}
                       state={storeNavigationState}
-                      style={{ animationDelay: `${index * 36}ms` }}
-                      className={`group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] border px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards transition-all ease-out active:scale-[0.985] ${
-                        store.isOpen
-                          ? 'border-white/80 bg-white/78 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/38 md:hover:-translate-y-0.5 md:hover:bg-white md:hover:shadow-[0_20px_44px_-34px_rgba(15,23,42,0.32)]'
-                          : 'border-slate-100/80 bg-slate-50/72 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.16)] ring-1 ring-slate-200/35'
-                      }`}
-                    >
-                      <div className="relative h-[4.45rem] w-[4.45rem] shrink-0 overflow-hidden rounded-[1.28rem] bg-white shadow-[0_16px_28px_-24px_rgba(15,23,42,0.46)] ring-1 ring-slate-200/70">
-                        <img
-                          src={store.logo}
-                          alt=""
-                          loading="lazy"
-                          decoding="async"
-                          className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${store.isOpen ? '' : 'grayscale opacity-55'}`}
-                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
-                        />
-                        {!store.isOpen ? <div className="absolute inset-0 bg-white/35" /> : null}
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="flex min-w-0 items-center gap-1.5">
-                          <span
-                            className={`h-2 w-2 shrink-0 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-rose-500'}`}
-                            style={{
-                              boxShadow: store.isOpen ? '0 0 8px rgba(16,185,129,0.42)' : '0 0 8px rgba(244,63,94,0.3)',
-                            }}
-                          />
-                          <h3 className={`min-w-0 truncate text-[14.5px] font-black leading-5 tracking-[-0.02em] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
-                            {store.name}
-                          </h3>
-                        </div>
-                        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-semibold text-slate-500">
-                          {store.rating > 0 ? (
-                            <span className="inline-flex items-center gap-1">
-                              <Star size={11} weight="fill" className="text-amber-400" />
-                              <span className="font-black text-slate-700">{ratingLabel}</span>
-                            </span>
-                          ) : null}
-                          {store.rating > 0 ? <span className="text-slate-200">·</span> : null}
-                          <span className={store.isOpen ? 'text-emerald-700' : 'text-rose-600'}>
-                            {store.isOpen ? 'Aberto' : 'Fechado'}
-                          </span>
-                        </div>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-semibold text-slate-500">
-                          <span>{store.etaMin}–{store.etaMax} min</span>
-                          <span className="text-slate-200">·</span>
-                          <span>{resolvedDistanceLabel}</span>
-                          <span className="text-slate-200">·</span>
-                          <span>{deliveryFeeLabel}</span>
-                        </div>
-                        {store.isOpen && visibleServiceBadges.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {visibleServiceBadges.map((badge) => (
-                              <span
-                                key={`${store.id}-${badge.key}`}
-                                className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[8.5px] font-black uppercase tracking-[0.08em] ${getCompactBadgeClass(badge.key)} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
-                              >
-                                {badge.icon ? (
-                                  <badge.icon size={9} weight="duotone" />
-                                ) : null}
-                                {badge.label}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        {!store.isOpen && (
-                          <p className="mt-2 text-[10.5px] font-bold text-slate-400">
-                            {store.nextOpeningLabel || 'Sem horário cadastrado'}
-                          </p>
-                        )}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          toggleFavoriteStore(store.slug);
-                        }}
-                        className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
-                          favoriteStoreSlugs.includes(store.slug)
-                            ? 'bg-rose-50 text-rose-500 shadow-[0_10px_24px_-18px_rgba(244,63,94,0.58)] ring-1 ring-rose-100'
-                            : 'bg-transparent text-slate-400 hover:bg-white/80 hover:text-rose-400 hover:shadow-[0_10px_22px_-20px_rgba(15,23,42,0.28)]'
-                        }`}
-                        aria-label={`Favoritar ${store.name}`}
-                      >
-                        <Heart size={17} weight={favoriteStoreSlugs.includes(store.slug) ? 'fill' : 'regular'} />
-                      </button>
-                    </Link>
+                      index={index}
+                      selectedCondominium={Boolean(selectedCondominium)}
+                      isFavorite={favoriteStoreSlugs.includes(store.slug)}
+                      isCondominiumEventLive={isCondominiumEventLive}
+                      hasUpcomingCondominiumEvent={hasUpcomingCondominiumEvent}
+                      condominiumEventTimeLabel={condominiumEventTimeLabel}
+                      serviceBadges={visibleServiceBadges}
+                      deliveryFeeLabel={deliveryFeeLabel}
+                      resolvedDistanceLabel={resolvedDistanceLabel}
+                      ratingLabel={ratingLabel}
+                      onToggleFavorite={toggleFavoriteStore}
+                    />
                   );
                 })}
               </div>

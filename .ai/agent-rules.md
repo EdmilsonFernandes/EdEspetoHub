@@ -46,6 +46,16 @@ Nome no GitHub Actions: `Publish Docker Images (GHCR)`
 - se o fluxo GHCR não estiver pronto ou falhar → informar fallback com `deploy-api.sh` / `deploy-frontend.sh`
 - não é obrigatório acompanhar o workflow/deploy depois do push, a menos que o usuário peça isso explicitamente
 
+### Validação de dados após deploy/local Docker
+
+Sempre que um deploy ou rebuild local Docker for feito/validado, conferir se a aplicação está apontando para um banco com dados coerentes antes de liberar a validação funcional:
+
+```bash
+docker exec janocaminho-postgres psql -U postgres -d espetinho -c "SELECT 'users' entidade, COUNT(*) total FROM users UNION ALL SELECT 'stores', COUNT(*) FROM stores UNION ALL SELECT 'products', COUNT(*) FROM products UNION ALL SELECT 'orders', COUNT(*) FROM orders UNION ALL SELECT 'site_settings', COUNT(*) FROM site_settings ORDER BY entidade;"
+```
+
+Se `users`, `stores` ou `products` vierem zerados/baixos sem intenção explícita, parar e avisar que o ambiente provavelmente está sem dump/seed correto antes de investigar bug de login ou UI.
+
 ### ANDROID / AAB
 - se a mudança tocar código nativo mobile, Capacitor, plugins nativos, `MainActivity`, `AndroidManifest`, `build.gradle`, `capacitor.config`, `res/` Android ou qualquer fluxo que exija novo binário Android → gerar novo `AAB`
 - ao gerar novo `AAB`, subir sempre:
