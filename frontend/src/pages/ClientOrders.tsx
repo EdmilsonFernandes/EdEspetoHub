@@ -1623,8 +1623,7 @@ export function ClientOrders() {
                   <section key={group.key}>
                     <div className="mb-3 flex items-center justify-between gap-3 px-1">
                       <div>
-                        <p className="text-sm font-semibold text-slate-700">{group.label}</p>
-                        <p className="text-[11px] text-slate-400">{group.caption}</p>
+                        <p className="text-sm font-bold text-slate-800 first-letter:uppercase">{group.label}</p>
                       </div>
                       {group.orders.length > 1 ? (
                         <div className="text-right">

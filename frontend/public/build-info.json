@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "b3dc6c06",
-  "versionLabel": "v0.1.9.b3dc6c06",
-  "versionInternal": "0.1.9+20260524.222217.b3dc6c06",
-  "buildId": "0.1.9+20260524.222217.b3dc6c06-20260524.222217-b3dc6c06",
-  "builtAt": "2026-05-24T22:22:17.267Z",
-  "commitHash": "b3dc6c0689536963a3153ff4baefcb8f1f3b8086",
-  "shortHash": "b3dc6c06",
+  "versionDisplaySuffix": "89aade4d",
+  "versionLabel": "v0.1.9.89aade4d",
+  "versionInternal": "0.1.9+20260524.223004.89aade4d",
+  "buildId": "0.1.9+20260524.223004.89aade4d-20260524.223004-89aade4d",
+  "builtAt": "2026-05-24T22:30:04.073Z",
+  "commitHash": "89aade4d41f4ef4c6ef5fcf1c376c0db38775223",
+  "shortHash": "89aade4d",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "89aade4d41f4ef4c6ef5fcf1c376c0db38775223",
+      "shortHash": "89aade4d",
+      "dateIso": "2026-05-24T19:25:00-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(frontend): premium visual details and interactive transitions in highlights page",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/89aade4d41f4ef4c6ef5fcf1c376c0db38775223"
+    },
     {
       "hash": "b3dc6c0689536963a3153ff4baefcb8f1f3b8086",
       "shortHash": "b3dc6c06",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style: refine marketplace home polish",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d02f6efb00525bd784a90197ea494a0951cfc42c"
-    },
-    {
-      "hash": "7d15141d20411017ee26775e6626cd51532cfe98",
-      "shortHash": "7d15141d",
-      "dateIso": "2026-05-22T16:20:10-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style: polish marketplace home list",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7d15141d20411017ee26775e6626cd51532cfe98"
     }
   ]
 }
