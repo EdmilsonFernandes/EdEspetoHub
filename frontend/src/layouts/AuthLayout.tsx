@@ -12,7 +12,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const isNativePlatform = Capacitor.isNativePlatform();
 
   return (
-    <div className={`min-h-screen overflow-x-clip bg-[#EEF2F7] px-4 py-6 sm:py-10 relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
+    <div className={`min-h-[100dvh] overflow-x-clip bg-[#EEF2F7] px-4 py-3 sm:py-10 relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
       {/* Background Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-sky-400/10 blur-[120px] animate-[orbFloat_18s_infinite_linear]" />
@@ -20,7 +20,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="absolute -bottom-[5%] left-[20%] w-[30%] h-[30%] rounded-full bg-emerald-400/5 blur-[80px] animate-[orbFloat_25s_infinite_linear]" />
       </div>
 
-      <div className="mx-auto w-full max-w-7xl min-h-[calc(100vh-3rem)] grid lg:grid-cols-[1.06fr_minmax(520px,1fr)] gap-7 items-stretch relative z-10">
+      <div className="mx-auto w-full max-w-7xl min-h-[calc(100dvh-1.5rem)] sm:min-h-[calc(100vh-3rem)] grid lg:grid-cols-[1.06fr_minmax(520px,1fr)] gap-7 items-stretch relative z-10">
         <aside className="hidden lg:flex flex-col justify-between rounded-[24px] border border-sky-800/25 bg-[linear-gradient(145deg,#0a3d52_0%,#0d4f66_45%,#0a3a4d_100%)] text-white px-10 py-12 shadow-[0_32px_64px_-24px_rgba(13,79,102,0.55)] relative overflow-hidden">
           {/* Background mesh */}
           <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '28px 28px' }} />
@@ -79,7 +79,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         </section>
       </div>
 
-      <div className="mx-auto mt-6 flex items-center justify-center gap-2 text-center text-[12px] font-medium text-slate-400 relative z-10">
+      <div className="mx-auto mt-6 hidden items-center justify-center gap-2 text-center text-[12px] font-medium text-slate-400 relative z-10 sm:flex">
         <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border border-white bg-white p-0.5 shadow-sm">
           <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
         </span>

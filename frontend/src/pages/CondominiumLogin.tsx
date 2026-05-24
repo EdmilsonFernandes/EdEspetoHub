@@ -42,25 +42,25 @@ export function CondominiumLogin() {
 
   return (
     <AuthLayout>
-      <div className="w-full max-w-[560px] space-y-4 ds-login-card-enter">
+      <div className="w-full max-w-[560px] space-y-3 ds-login-card-enter sm:space-y-4">
         <div className="text-center">
-          <div className="mx-auto grid h-[4.75rem] w-[4.75rem] place-items-center overflow-hidden rounded-full border-[4px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12">
+          <div className="mx-auto grid h-16 w-16 place-items-center overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12 sm:h-[4.75rem] sm:w-[4.75rem] sm:border-[4px]">
             <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
           </div>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-700">
+          <div className="mt-3 hidden items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-700 sm:inline-flex">
             <ShieldCheck size={14} weight="fill" />
             Acesso do condomínio
           </div>
-          <h1 className="mt-3 text-[2rem] font-black tracking-[-0.03em] text-slate-900 sm:text-[2.25rem]">
+          <h1 className="mt-2 text-2xl font-black tracking-[-0.03em] text-slate-900 sm:mt-3 sm:text-[2.25rem]">
             Painel do condomínio
           </h1>
-          <p className="mx-auto mt-2 max-w-sm text-sm font-semibold leading-6 text-slate-500">
+          <p className="mx-auto mt-2 hidden max-w-sm text-sm font-semibold leading-6 text-slate-500 sm:block">
             Crie feiras, convide lojas e acompanhe a operação do seu condomínio.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} autoComplete="on" className="ds-card-elevated space-y-5 border-white/40 bg-white/84 p-6 shadow-[0_26px_70px_-46px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:p-8">
-          <div className="rounded-[1.35rem] border border-[#336886]/10 bg-[#336886]/7 p-4">
+        <form onSubmit={handleSubmit} autoComplete="on" className="ds-card-elevated space-y-3 border-white/40 bg-white/84 p-4 shadow-[0_26px_70px_-46px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:space-y-5 sm:p-8">
+          <div className="hidden rounded-[1.35rem] border border-[#336886]/10 bg-[#336886]/7 p-4 sm:block">
             <div className="flex items-center gap-3">
               <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-[#336886] shadow-sm">
                 <Buildings size={22} weight="duotone" />
@@ -80,7 +80,7 @@ export function CondominiumLogin() {
               value={form.email}
               onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
               placeholder="spazio.azuli"
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white"
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white sm:py-3.5"
             />
           </label>
 
@@ -93,7 +93,7 @@ export function CondominiumLogin() {
                 value={form.password}
                 onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
                 placeholder="Sua senha"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 pr-12 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 pr-12 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white sm:py-3.5"
               />
               <button
                 type="button"
@@ -113,7 +113,7 @@ export function CondominiumLogin() {
           <button
             type="submit"
             disabled={loading || !form.email || !form.password}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-4 py-4 text-base font-black text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.65)] transition hover:bg-[#1e4d62] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-4 py-3 text-base font-black text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.65)] transition hover:bg-[#1e4d62] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55 sm:py-4"
           >
             <LockKey size={19} weight="duotone" />
             {loading ? 'Entrando...' : 'Entrar no painel'}
@@ -121,21 +121,21 @@ export function CondominiumLogin() {
           <button
             type="button"
             onClick={() => navigate('/entrar')}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-600 transition hover:bg-slate-50"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-600 transition hover:bg-slate-50 sm:py-3"
           >
             Escolher outro tipo de acesso
           </button>
           <button
             type="button"
             onClick={() => navigate('/condominio/solicitar')}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-[#153A4C] transition hover:bg-slate-50"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-[#153A4C] transition hover:bg-slate-50 sm:py-3"
           >
             Solicitar acesso para meu condomínio
           </button>
           <button
             type="button"
             onClick={() => navigate('/', { replace: true })}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-black text-slate-600 transition hover:bg-white"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-black text-slate-600 transition hover:bg-white sm:py-3"
           >
             <ArrowLeft size={16} weight="bold" />
             Voltar para a principal

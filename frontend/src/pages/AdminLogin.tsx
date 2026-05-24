@@ -422,21 +422,21 @@ export function AdminLogin() {
 
   return (
     <AuthLayout>
-      <div className="space-y-4 ds-login-card-enter w-full">
-        <div className="text-center space-y-2.5">
-          <button type="button" onClick={handleLogoTap} className="mx-auto flex flex-col items-center gap-3 hover:scale-[1.03] transition-transform active:scale-95">
-            <div className="h-[4.75rem] w-[4.75rem] overflow-hidden rounded-full border-[4px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12">
+      <div className="space-y-3 ds-login-card-enter w-full sm:space-y-4">
+        <div className="text-center space-y-1.5 sm:space-y-2.5">
+          <button type="button" onClick={handleLogoTap} className="mx-auto flex flex-col items-center gap-2 transition-transform active:scale-95 sm:gap-3 sm:hover:scale-[1.03]">
+            <div className="h-16 w-16 overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12 sm:h-[4.75rem] sm:w-[4.75rem] sm:border-[4px]">
               <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
             </div>
             <div className="text-center leading-tight">
-              <p className="text-base font-black tracking-tight text-slate-900">Já no Caminho</p>
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#336886]/80">Área do lojista</p>
+              <p className="text-sm font-black tracking-tight text-slate-900 sm:text-base">Já no Caminho</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#336886]/80 sm:text-[10px] sm:tracking-[0.22em]">Área do lojista</p>
             </div>
           </button>
-          <div className="flex items-center justify-center gap-3">
-            <LockKey size={32} weight="duotone" className="text-[#0d4f66]" />
-            <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">
-              {hubMode ? 'Login Lojista' : 'Login'}
+          <div className="flex items-center justify-center gap-2 sm:gap-3">
+            <LockKey size={28} weight="duotone" className="text-[#0d4f66] sm:h-8 sm:w-8" />
+            <h2 className="text-2xl font-black text-slate-800 tracking-[-0.03em] sm:text-[2.2rem]">
+              {hubMode ? 'Lojista' : 'Login'}
             </h2>
           </div>
           {superAdminUnlocked ? (
@@ -451,9 +451,9 @@ export function AdminLogin() {
           <button
             type="button"
             onClick={() => navigate(accessPortalPath)}
-            className="mx-auto inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/75 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.45)] transition hover:border-slate-300 hover:text-slate-700"
+            className="mx-auto inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.45)] transition hover:border-slate-300 hover:text-slate-700 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.18em]"
           >
-            Escolher outro tipo de acesso
+            Trocar tipo de acesso
           </button>
         ) : null}
 
@@ -461,14 +461,14 @@ export function AdminLogin() {
           onSubmit={handleLogin}
           onFocusCapture={prefetchAdminLandingRoutes}
           autoComplete="on"
-          className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40"
+          className="ds-card-elevated p-4 space-y-3 bg-white/80 backdrop-blur-xl border-white/40 sm:p-8 sm:space-y-5"
         >
           {biometricAvailable ? (
             <button
               type="button"
               onClick={handleBiometricLogin}
               disabled={biometricLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/12 bg-[#336886]/8 px-4 py-3 text-sm font-black text-[#336886] shadow-[0_18px_34px_-28px_rgba(51,104,134,0.35)] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/12 bg-[#336886]/8 px-4 py-2.5 text-sm font-black text-[#336886] shadow-[0_18px_34px_-28px_rgba(51,104,134,0.35)] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:py-3"
             >
               <LockKey size={18} weight="duotone" />
               {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
@@ -506,7 +506,7 @@ export function AdminLogin() {
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="floating-field">
               <input
                 id="email"
@@ -559,7 +559,7 @@ export function AdminLogin() {
             </div>
           ) : null}
 
-          <div className="flex items-center justify-center gap-2 py-1 px-3 rounded-xl bg-slate-50 border border-slate-100/50">
+          <div className="hidden items-center justify-center gap-2 py-1 px-3 rounded-xl bg-slate-50 border border-slate-100/50 sm:flex">
             <ShieldCheck size={16} weight="fill" className="text-emerald-500" />
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ambiente Seguro & Criptografado</span>
           </div>
@@ -600,7 +600,7 @@ export function AdminLogin() {
           <div className="space-y-3 pt-2">
             <button
               type="submit"
-              className="ds-btn-shine w-full h-14 rounded-2xl bg-[#0d4f66] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group"
+              className="ds-btn-shine w-full h-12 rounded-2xl bg-[#0d4f66] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group sm:h-14"
             >
               Acessar Painel
               <ArrowLeft size={20} weight="bold" className="rotate-180 group-hover:translate-x-1 transition-transform" />
@@ -609,7 +609,7 @@ export function AdminLogin() {
             <button
               type="button"
               onClick={() => navigate(hubMode ? '/hub' : '/')}
-              className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="w-full h-10 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2 sm:h-12 sm:text-base"
             >
               <ArrowLeft size={18} weight="duotone" />
               {hubMode ? 'Voltar para o app' : 'Voltar ao início'}
@@ -619,7 +619,7 @@ export function AdminLogin() {
 
         <a
           href="mailto:contato@janocaminho.com.br"
-          className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-400 hover:text-[#0d4f66] transition-colors py-2"
+          className="hidden w-full items-center justify-center gap-2 py-2 text-xs font-bold text-slate-400 transition-colors hover:text-[#0d4f66] sm:flex"
         >
           Precisa de ajuda? contato@janocaminho.com.br
         </a>
