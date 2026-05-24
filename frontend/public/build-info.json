@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "c01bfa60",
-  "versionLabel": "v0.1.9.c01bfa60",
-  "versionInternal": "0.1.9+20260524.220617.c01bfa60",
-  "buildId": "0.1.9+20260524.220617.c01bfa60-20260524.220617-c01bfa60",
-  "builtAt": "2026-05-24T22:06:17.318Z",
-  "commitHash": "c01bfa603c40027cb7df540e20f7bf27c28b728b",
-  "shortHash": "c01bfa60",
+  "versionDisplaySuffix": "13e07fdd",
+  "versionLabel": "v0.1.9.13e07fdd",
+  "versionInternal": "0.1.9+20260524.221117.13e07fdd",
+  "buildId": "0.1.9+20260524.221117.13e07fdd-20260524.221117-13e07fdd",
+  "builtAt": "2026-05-24T22:11:17.852Z",
+  "commitHash": "13e07fdd5b019ad7acc0b12ea860fe8b7a575b22",
+  "shortHash": "13e07fdd",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "13e07fdd5b019ad7acc0b12ea860fe8b7a575b22",
+      "shortHash": "13e07fdd",
+      "dateIso": "2026-05-24T19:08:43-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(frontend): premium visual polish and UX micro-interactions on hub and store catalog",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/13e07fdd5b019ad7acc0b12ea860fe8b7a575b22"
+    },
     {
       "hash": "c01bfa603c40027cb7df540e20f7bf27c28b728b",
       "shortHash": "c01bfa60",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style: refine marketplace store list",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f337a89a702e89709ebdd28c1c9a2fd6177da300"
-    },
-    {
-      "hash": "a65872faecb6e58fb6ba1982712c9116c74917cd",
-      "shortHash": "a65872fa",
-      "dateIso": "2026-05-22T15:49:48-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style: refine customer notifications",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a65872faecb6e58fb6ba1982712c9116c74917cd"
     }
   ]
 }

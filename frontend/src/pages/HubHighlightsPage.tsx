@@ -482,14 +482,14 @@ export function HubHighlightsPage() {
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="grid h-[132px] animate-pulse grid-cols-[6.35rem_minmax(0,1fr)] gap-3 rounded-[1.65rem] bg-white/80 p-2.5 shadow-[0_14px_34px_-28px_rgba(15,23,42,0.3)] ring-1 ring-slate-200/60"
+                className="grid h-[132px] grid-cols-[6.35rem_minmax(0,1fr)] items-center gap-3 rounded-[1.65rem] bg-white/80 p-2.5 shadow-[0_14px_34px_-28px_rgba(15,23,42,0.3)] ring-1 ring-slate-200/60"
               >
-                <div className="rounded-[1.25rem] bg-slate-200/80" />
+                <div className="h-[6.35rem] w-[6.35rem] shrink-0 rounded-[1.25rem] ds-skeleton" />
                 <div className="flex flex-col justify-center space-y-2.5">
-                  <div className="h-3 w-5/12 rounded-full bg-slate-200/80" />
-                  <div className="h-4 w-9/12 rounded-full bg-slate-200/70" />
-                  <div className="h-3 w-6/12 rounded-full bg-slate-100" />
-                  <div className="h-5 w-4/12 rounded-full bg-slate-200/70" />
+                  <div className="h-3 w-5/12 rounded-full ds-skeleton" />
+                  <div className="h-4 w-9/12 rounded-full ds-skeleton" />
+                  <div className="h-3 w-6/12 rounded-full ds-skeleton" />
+                  <div className="h-5 w-4/12 rounded-full ds-skeleton" />
                 </div>
               </div>
             ))}
@@ -519,9 +519,9 @@ export function HubHighlightsPage() {
                   to={storePath}
                   onClick={() => stageFeaturedProductCheckout(item)}
                   style={{ animationDelay: `${Math.min(index, 10) * 34}ms` }}
-                  className="group grid min-h-[132px] grid-cols-[6.35rem_minmax(0,1fr)] gap-3 overflow-hidden rounded-[1.65rem] border border-white bg-white p-2.5 shadow-[0_18px_42px_-30px_rgba(15,23,42,0.2)] ring-1 ring-slate-100/80 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards active:scale-[0.985] md:hover:-translate-y-0.5 md:hover:shadow-[0_24px_52px_-34px_rgba(15,23,42,0.24)]"
+                  className="group grid min-h-[132px] grid-cols-[6.35rem_minmax(0,1fr)] items-center gap-3 overflow-hidden rounded-[1.65rem] border border-white bg-white p-2.5 shadow-[0_18px_42px_-30px_rgba(15,23,42,0.2)] ring-1 ring-slate-100/80 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards active:scale-[0.985] md:hover:-translate-y-0.5 md:hover:shadow-[0_24px_52px_-34px_rgba(15,23,42,0.24)]"
                 >
-                  <div className="relative overflow-hidden rounded-[1.25rem] bg-slate-100">
+                  <div className="relative h-[6.35rem] w-[6.35rem] shrink-0 overflow-hidden rounded-[1.25rem] bg-slate-100">
                     <img
                       src={item.imageUrl}
                       alt={item.name}
