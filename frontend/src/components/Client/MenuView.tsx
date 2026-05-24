@@ -1408,7 +1408,8 @@ export const MenuView = ({
 
                 const handleIncrement = (event: React.MouseEvent) => {
                   const originButton = event.currentTarget as HTMLElement;
-                  const imageOrigin = originButton.closest("[data-menu-item-media]") as HTMLElement | null;
+                  const card = originButton.closest("[data-menu-card]") as HTMLElement | null;
+                  const imageOrigin = card?.querySelector("[data-menu-item-media]") as HTMLElement | null;
                   event.stopPropagation();
                   if (preOrderBlocked) {
                     setShowPreOrderBlockedModal(true);
@@ -1448,7 +1449,8 @@ export const MenuView = ({
                 return (
                 <div
                   key={item.id}
-                  className={`group bg-white rounded-[2rem] border border-slate-100/60 shadow-[0_16px_36px_-28px_rgba(15,23,42,0.22)] p-4 pl-[1.125rem] sm:p-5 grid grid-cols-[minmax(0,1fr)_auto] gap-4 sm:gap-5 md:hover:scale-[1.01] md:hover:shadow-[0_22px_44px_-30px_rgba(15,23,42,0.28)] active:scale-[0.98] transition-all duration-300 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
+                  data-menu-card
+                  className={`group bg-white rounded-3xl border border-slate-100/70 shadow-[0_12px_28px_rgba(15,23,42,0.04)] p-4 sm:p-5 grid grid-cols-[minmax(0,1fr)_auto] gap-4 sm:gap-5 hover:shadow-[0_20px_32px_rgba(15,23,42,0.08)] hover:border-slate-200/60 md:hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
                   }}
@@ -1472,60 +1474,111 @@ export const MenuView = ({
                       )}
                     </div>
 
-                    <div className="mt-4 flex flex-col items-start gap-2.5">
-                      {(() => {
-                        const priceNode = (
-                          <div className="flex items-baseline gap-1.5 leading-none">
-                            {resolvePromoPrice(item) ? (
-                              <>
-                                <span className="text-lg sm:text-xl font-black tracking-tight text-[#336886]">
-                                  {formatCurrency(resolvePromoPrice(item))}
-                                </span>
-                                <span className="text-[11px] font-bold text-slate-300 line-through">
+                    <div className="mt-4 flex items-end justify-between gap-3 w-full">
+                      <div className="flex flex-col items-start gap-2.5 min-w-0 flex-1">
+                        {(() => {
+                          const priceNode = (
+                            <div className="flex items-baseline gap-1.5 leading-none">
+                              {resolvePromoPrice(item) ? (
+                                <>
+                                  <span className="text-[17px] sm:text-[19px] font-black tracking-tight text-[#336886]">
+                                    {formatCurrency(resolvePromoPrice(item))}
+                                  </span>
+                                  <span className="text-[11px] font-bold text-slate-300 line-through">
+                                    {formatCurrency(item.price)}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="text-[17px] sm:text-[19px] font-black tracking-tight text-slate-900">
                                   {formatCurrency(item.price)}
                                 </span>
-                              </>
-                            ) : (
-                              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900">
-                                {formatCurrency(item.price)}
-                              </span>
-                            )}
-                          </div>
-                        );
+                              )}
+                            </div>
+                          );
 
-                        return priceNode;
-                      })()}
+                          return priceNode;
+                        })()}
 
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {item.isFeatured && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100/50">
-                            <Sparkle size={10} weight="fill" />
-                            Destaque
-                          </span>
-                        )}
-                        {!item.isFeatured && isTopItem && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-100/30 shadow-[0_4px_12px_rgba(249,115,22,0.08)]">
-                            🔥 Mais pedido
-                          </span>
-                        )}
-                        {hasConfigurableOptions && (
-                          <span
-                            className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider"
-                            style={{
-                              backgroundColor: `${catalogPrimaryColor}10`,
-                              borderColor: `${catalogPrimaryColor}18`,
-                              color: catalogPrimaryColor,
-                            }}
-                          >
-                            Customizável
-                          </span>
-                        )}
-                        {stockState.soldOut && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
-                            Esgotado
-                          </span>
-                        )}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {item.isFeatured && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100/50">
+                              <Sparkle size={10} weight="fill" />
+                              Destaque
+                            </span>
+                          )}
+                          {!item.isFeatured && isTopItem && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-100/30 shadow-[0_4px_12px_rgba(249,115,22,0.08)]">
+                              🔥 Mais pedido
+                            </span>
+                          )}
+                          {hasConfigurableOptions && (
+                            <span
+                              className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider"
+                              style={{
+                                backgroundColor: `${catalogPrimaryColor}10`,
+                                borderColor: `${catalogPrimaryColor}18`,
+                                color: catalogPrimaryColor,
+                              }}
+                            >
+                              Customizável
+                            </span>
+                          )}
+                          {stockState.soldOut && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
+                              Esgotado
+                            </span>
+                          )}
+                        </div>
                       </div>
+
+                      {canOrder && !stockState.soldOut && (
+                        <div className="flex-shrink-0" onClick={(event) => event.stopPropagation()}>
+                          {itemQty <= 0 ? (
+                            <button
+                              type="button"
+                              onClick={handleIncrement}
+                              className="h-10 w-10 rounded-xl shadow-sm border border-slate-200/60 bg-white hover:bg-slate-50 inline-flex items-center justify-center transition-all duration-300 active:scale-90"
+                              style={{ color: catalogPrimaryColor }}
+                            >
+                              <Plus size={18} weight="bold" />
+                            </button>
+                          ) : (
+                            <div
+                              className={`h-9 rounded-xl border border-slate-100 bg-slate-50 shadow-sm inline-flex items-center gap-2 px-1.5 transition-all duration-300 ${isQtyControlExpanded ? 'w-auto' : 'w-9 justify-center'}`}
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              {isQtyControlExpanded ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={handleDecrement}
+                                    className="h-6 w-6 rounded-lg border border-slate-200/50 flex items-center justify-center bg-white text-slate-600 active:bg-slate-100"
+                                  >
+                                    <Minus size={10} weight="bold" />
+                                  </button>
+                                  <span className="min-w-[16px] text-center text-xs font-black text-slate-900">{itemQty}</span>
+                                  <button
+                                    type="button"
+                                    onClick={handleIncrement}
+                                    className="h-6 w-6 rounded-lg flex items-center justify-center active:opacity-90"
+                                    style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
+                                  >
+                                    <Plus size={10} weight="bold" />
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => openQtyControl(itemId)}
+                                  className="h-full w-full flex items-center justify-center"
+                                >
+                                  <span className="text-xs font-black" style={{ color: catalogPrimaryColor }}>{itemQty}</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1539,7 +1592,7 @@ export const MenuView = ({
                             openProductModal(item);
                           }
                         }}
-                        className={`h-full w-full rounded-[1.75rem] overflow-hidden bg-slate-50 border border-white shadow-[0_14px_26px_-20px_rgba(15,23,42,0.35)] ring-1 ring-slate-100/75 ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
+                        className={`h-full w-full rounded-2xl overflow-hidden bg-slate-50 border border-white shadow-[0_12px_24px_-16px_rgba(15,23,42,0.3)] ring-1 ring-slate-100/50 ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
                       >
                         {item.imageUrl ? (
                           <img
@@ -1547,7 +1600,7 @@ export const MenuView = ({
                             alt={item.name}
                             loading="lazy"
                             decoding="async"
-                            className="w-full h-full object-cover object-center transition duration-500 group-hover:scale-110"
+                            className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.08]"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-slate-200">
@@ -1555,55 +1608,6 @@ export const MenuView = ({
                           </div>
                         )}
                       </button>
-
-                      {canOrder && !stockState.soldOut && (
-                        <div className="absolute -bottom-1.5 -right-1.5">
-                          {itemQty <= 0 ? (
-                            <button
-                              type="button"
-                              onClick={handleIncrement}
-                              className="h-11 w-11 rounded-[1.15rem] shadow-[0_16px_30px_-14px_rgba(15,23,42,0.55)] border-[3px] border-white inline-flex items-center justify-center ring-1 ring-black/5 transition-all duration-300 active:scale-90 hover:scale-105"
-                              style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
-                            >
-                              <Plus size={18} weight="bold" />
-                            </button>
-                          ) : (
-                            <div
-                              className={`h-10 rounded-2xl border-2 border-white bg-white shadow-[0_8px_16px_-4px_rgba(15,23,42,0.25)] inline-flex items-center gap-2 px-1.5 transition-all duration-300 ${isQtyControlExpanded ? 'w-auto' : 'w-10 justify-center'}`}
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              {isQtyControlExpanded ? (
-                                <>
-                                  <button
-                                    type="button"
-                                    onClick={handleDecrement}
-                                    className="h-7 w-7 rounded-xl border border-slate-100 flex items-center justify-center bg-slate-50 text-slate-600 active:bg-slate-100"
-                                  >
-                                    <Minus size={12} weight="bold" />
-                                  </button>
-                                  <span className="min-w-[20px] text-center text-sm font-black text-slate-900">{itemQty}</span>
-                                  <button
-                                    type="button"
-                                    onClick={handleIncrement}
-                                    className="h-7 w-7 rounded-xl flex items-center justify-center active:opacity-90"
-                                    style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
-                                  >
-                                    <Plus size={12} weight="bold" />
-                                  </button>
-                                </>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => openQtyControl(itemId)}
-                                  className="h-full w-full flex items-center justify-center"
-                                >
-                                  <span className="text-sm font-black" style={{ color: catalogPrimaryColor }}>{itemQty}</span>
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
