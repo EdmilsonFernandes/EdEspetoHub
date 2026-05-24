@@ -84,8 +84,11 @@ const defaultCorsOrigins = [
   'ionic://localhost',
 ];
 
-const defaultPublicUploadFolders = ['products', 'logos', 'condominiums', 'payment'];
+const defaultPublicUploadFolders = ['products', 'logos', 'condominiums', 'destinations', 'payment'];
 const configuredPublicUploadFolders = listEnv('PUBLIC_UPLOADS_FOLDERS').map((value) => value.toLowerCase());
+const resolvedPublicUploadFolders = Array.from(
+  new Set([...(configuredPublicUploadFolders.length ? configuredPublicUploadFolders : defaultPublicUploadFolders), 'destinations'])
+);
 
 export const env = {
   port: process.env.PORT ? Number(process.env.PORT) : 4000,
@@ -232,6 +235,6 @@ export const env = {
     publicUploadsS3Prefix: trimTrailingSlash(process.env.PUBLIC_UPLOADS_S3_PREFIX || 'uploads').replace(/^\/+/, ''),
     publicUploadsBaseUrl: trimTrailingSlash(process.env.PUBLIC_UPLOADS_BASE_URL || ''),
     publicUploadsDebugLog: process.env.PUBLIC_UPLOADS_DEBUG_LOG === 'true',
-    publicFolders: configuredPublicUploadFolders.length ? configuredPublicUploadFolders : defaultPublicUploadFolders,
+    publicFolders: resolvedPublicUploadFolders,
   },
 };

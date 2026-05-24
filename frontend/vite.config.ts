@@ -16,6 +16,28 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        runtimeCaching: [
+          {
+            urlPattern: ({ request, url, sameOrigin }) =>
+              request.destination === 'image' &&
+              (sameOrigin ||
+                url.hostname === 'janocaminho.com.br' ||
+                url.hostname === 'www.janocaminho.com.br' ||
+                url.hostname.endsWith('.amazonaws.com') ||
+                url.hostname.endsWith('.cloudfront.net')),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'jnc-public-images-v1',
+              expiration: {
+                maxEntries: 320,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
       },
       includeAssets: ['favicon.svg', 'robots.txt', 'janocaminho.jpg'],
       manifest: {

@@ -42,6 +42,7 @@ import { useHubAnonymousOrders } from '../hooks/hub/useHubAnonymousOrders';
 import { useHubCustomerActiveOrders } from '../hooks/hub/useHubCustomerActiveOrders';
 import { useHubFavorites } from '../hooks/hub/useHubFavorites';
 import { useHubFeaturedProducts, type HubFeaturedProduct as FeaturedProduct } from '../hooks/hub/useHubFeaturedProducts';
+import { useHubImagePreload } from '../hooks/hub/useHubImagePreload';
 import { useHubLocation } from '../hooks/hub/useHubLocation';
 import { useHubSearchPlaceholder } from '../hooks/hub/useHubSearchPlaceholder';
 import { useHubStoreDistances } from '../hooks/hub/useHubStoreDistances';
@@ -1504,6 +1505,26 @@ export function MarketplacePage() {
     ? (isHomeStoreListCollapsed ? filteredStores.slice(0, HOME_STORE_PREVIEW_LIMIT) : filteredStores)
     : filteredStores;
   const hiddenHomeStoreCount = Math.max(0, filteredStores.length - visibleStoreCards.length);
+  const preloadHomeBannerImages = useMemo(
+    () => homePromoSlides.map((slide) => slide.image).filter(Boolean),
+    [homePromoSlides]
+  );
+  const preloadDestinationImages = useMemo(
+    () =>
+      homeDestinationHighlights.map((destination) => ({
+        ...destination,
+        resolvedImageUrl: resolveDestinationAssetUrl(destination),
+      })),
+    [homeDestinationHighlights]
+  );
+
+  useHubImagePreload({
+    enabled: debouncedQuery.length < 2,
+    homeBanners: preloadHomeBannerImages,
+    featuredProducts: displayedFeaturedProducts,
+    stores: visibleStoreCards,
+    destinations: preloadDestinationImages,
+  });
 
   useEffect(() => {
     if (!isHomeStorePreview) setIsHomeStoreListExpanded(false);

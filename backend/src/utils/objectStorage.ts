@@ -13,7 +13,8 @@ export type PublicObjectReadResult = {
   lastModified?: Date;
 };
 
-export const DEFAULT_PUBLIC_UPLOAD_FOLDERS = ['products', 'logos', 'condominiums', 'payment'] as const;
+export const DEFAULT_PUBLIC_UPLOAD_FOLDERS = ['products', 'logos', 'condominiums', 'destinations', 'payment'] as const;
+export const PUBLIC_UPLOAD_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 
 const UPLOADS_ROOT = path.join(process.cwd(), 'uploads');
 
@@ -130,6 +131,7 @@ export const uploadPublicObjectToS3 = async (
       Key: resolveUploadObjectKey(relativePath, env.storage.publicUploadsS3Prefix),
       Body: buffer,
       ContentType: contentType || inferContentTypeFromFilename(relativePath),
+      CacheControl: PUBLIC_UPLOAD_CACHE_CONTROL,
     })
   );
 };

@@ -85,6 +85,23 @@ describe('publicUploadsMiddleware', () => {
     );
   });
 
+  it('applies immutable cache to S3 public uploads without metadata', async () => {
+    env.storage.publicUploadsMode = 'hybrid';
+    shouldReadPublicUploadFromS3Mock.mockReturnValue(true);
+    getPublicObjectFromS3Mock.mockResolvedValue({
+      body: Buffer.from('from-s3'),
+      contentLength: 7,
+      contentType: 'image/webp',
+    });
+
+    const response = await request(createTestApp()).get('/uploads/destinations/chale.webp');
+
+    expect(response.status).toBe(200);
+    expect(response.headers['cache-control']).toBe('public, max-age=31536000, immutable');
+    expect(response.headers['content-type']).toContain('image/webp');
+    expect(getPublicObjectFromS3Mock).toHaveBeenCalledWith('/uploads/destinations/chale.webp');
+  });
+
   it('falls back to local storage in hybrid mode when the object is missing in S3', async () => {
     env.storage.publicUploadsMode = 'hybrid';
     env.storage.publicUploadsDebugLog = true;

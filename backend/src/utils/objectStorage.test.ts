@@ -14,8 +14,10 @@ import {
 describe('objectStorage', () => {
   it('recognizes configured public upload folders and paths', () => {
     expect(isPublicUploadFolder('products')).toBe(true);
+    expect(isPublicUploadFolder('destinations')).toBe(true);
     expect(isPublicUploadFolder('motoboys')).toBe(false);
     expect(isPublicUploadPath('/uploads/logos/store.png')).toBe(true);
+    expect(isPublicUploadPath('/uploads/destinations/chale.webp')).toBe(true);
     expect(isPublicUploadPath('/uploads/customers/customer.png')).toBe(false);
   });
 
@@ -40,6 +42,6 @@ describe('objectStorage', () => {
   });
 
   it('keeps the default public folders stable', () => {
-    expect(DEFAULT_PUBLIC_UPLOAD_FOLDERS).toEqual(['products', 'logos', 'condominiums', 'payment']);
+    expect(DEFAULT_PUBLIC_UPLOAD_FOLDERS).toEqual(['products', 'logos', 'condominiums', 'destinations', 'payment']);
   });
 });

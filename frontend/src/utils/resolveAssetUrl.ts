@@ -6,6 +6,7 @@ const publicUploadPrefixes = [
   '/uploads/products/',
   '/uploads/logos/',
   '/uploads/condominiums/',
+  '/uploads/destinations/',
   '/uploads/payment/',
 ];
 

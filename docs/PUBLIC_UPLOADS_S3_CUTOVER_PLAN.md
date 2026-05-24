@@ -9,6 +9,7 @@ Uploads públicos cobertos:
 - `products`
 - `logos`
 - `condominiums`
+- `destinations`
 - `payment`
 
 Buckets atuais:
@@ -61,7 +62,7 @@ Manter por um período curto:
 
 Objetivo:
 
-- confirmar navegação normal nas áreas que carregam produtos, logos, assets de condomínio e assets de pagamento
+- confirmar navegação normal nas áreas que carregam produtos, logos, assets de condomínio, destinos/chalés e assets de pagamento
 - observar logs `Served public upload from S3`
 - garantir ausência de fallback inesperado para local
 
@@ -104,8 +105,9 @@ Validar pelo menos:
 2. criação/edição de produto com imagem
 3. logo/banner de loja
 4. logo/banner/evento de condomínio
-5. assets de pagamento
-6. logs sem `404` ou falhas de leitura pública
+5. imagens de destino/chalé/serviço local
+6. assets de pagamento
+7. logs sem `404` ou falhas de leitura pública
 
 ### Fase 5: limpeza posterior
 
@@ -147,6 +149,6 @@ Esses itens devem ser tratados em uma fase separada de assets privados.
 1. confirmar `PUBLIC_UPLOADS_DEBUG_LOG=false`
 2. alterar `PUBLIC_UPLOADS_STORAGE_MODE=s3`
 3. redeploy da `api`
-4. testar produto, logo, condomínio e payment
+4. testar produto, logo, condomínio, destinos/chalés e payment
 5. verificar logs do backend
 6. se algo falhar, voltar imediatamente para `hybrid`

@@ -81,6 +81,7 @@ export function useHubStores({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const portfolioLoadInFlightRef = useRef(false);
   const pendingPortfolioReloadRef = useRef(false);
+  const latestLoadPortfolioRef = useRef<(() => Promise<void>) | null>(null);
   const isShowingAllStores = hubScopeOverride === 'all_stores';
 
   const loadPortfolio = useCallback(async () => {
@@ -124,7 +125,7 @@ export function useHubStores({
       if (pendingPortfolioReloadRef.current) {
         pendingPortfolioReloadRef.current = false;
         window.setTimeout(() => {
-          void loadPortfolio();
+          void (latestLoadPortfolioRef.current || loadPortfolio)();
         }, 0);
       }
     }
@@ -143,6 +144,7 @@ export function useHubStores({
     userLocation?.lat,
     userLocation?.lng,
   ]);
+  latestLoadPortfolioRef.current = loadPortfolio;
 
   const refreshHub = useCallback(async () => {
     if (portfolioLoadInFlightRef.current) return;

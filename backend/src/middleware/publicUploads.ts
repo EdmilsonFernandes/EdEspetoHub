@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { env } from '../config/env';
-import { getPublicObjectFromS3, shouldReadPublicUploadFromS3 } from '../utils/objectStorage';
+import { getPublicObjectFromS3, PUBLIC_UPLOAD_CACHE_CONTROL, shouldReadPublicUploadFromS3 } from '../utils/objectStorage';
 import { logger } from '../utils/logger';
 
 const uploadsLog = logger.child({ scope: 'PublicUploads' });
@@ -24,9 +24,7 @@ const applyObjectHeaders = (
 ) => {
   if (!object) return;
 
-  if (object.cacheControl) {
-    response.setHeader('Cache-Control', object.cacheControl);
-  }
+  response.setHeader('Cache-Control', object.cacheControl || PUBLIC_UPLOAD_CACHE_CONTROL);
   if (object.contentLength != null) {
     response.setHeader('Content-Length', String(object.contentLength));
   }
