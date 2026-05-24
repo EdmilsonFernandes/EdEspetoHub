@@ -93,3 +93,9 @@ backend/keys/
 !frontend/public/marketing/promo-marketing-lite.jpg
 
 .claude/
+
+# Local production DB dumps for development restore only.
+# Never commit database dumps or exported production data.
+.local-db-dumps/
+*.dump
+*.backup

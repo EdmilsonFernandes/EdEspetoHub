@@ -200,6 +200,55 @@ NÃO usar SSH para rodar deploy ou git pull proativamente.
 
 ---
 
+## DUMP DE PRODUÇÃO PARA VALIDAÇÃO LOCAL
+
+Quando o usuário pedir para validar local com dados reais:
+
+- Usar sempre o caminho local padrão:
+  - `.local-db-dumps/latest-prod.dump`
+- Manter dumps fora do Git. A pasta `.local-db-dumps/` e arquivos `*.dump` / `*.backup` devem permanecer ignorados.
+- Nunca imprimir hashes de senha, tokens, secrets ou dados sensíveis do dump.
+- Gerar dump no EC2 apenas quando solicitado explicitamente pelo usuário.
+- Não rodar deploy, `git pull` ou scripts de release no EC2 durante esse processo.
+
+Fluxo padrão para atualizar o dump local:
+
+```powershell
+$stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+$remoteDump = "/tmp/jnc-espetinho-prod-$stamp.dump"
+$localDump = ".local-db-dumps/jnc-espetinho-prod-$stamp.dump"
+$key = "D:\PESSOAL\chamanoespeto-aws\medtrack-system.pem"
+$hostName = "ec2-user@ec2-3-137-119-152.us-east-2.compute.amazonaws.com"
+
+New-Item -ItemType Directory -Force -Path ".local-db-dumps" | Out-Null
+ssh -i $key -o StrictHostKeyChecking=no $hostName "docker exec janocaminho-postgres pg_dump -U postgres -d espetinho -Fc -Z 6 -f /tmp/jnc-prod.dump && docker cp janocaminho-postgres:/tmp/jnc-prod.dump $remoteDump && docker exec janocaminho-postgres rm -f /tmp/jnc-prod.dump && chmod 600 $remoteDump"
+scp -i $key -o StrictHostKeyChecking=no "$hostName`:$remoteDump" $localDump
+ssh -i $key -o StrictHostKeyChecking=no $hostName "rm -f $remoteDump"
+Copy-Item -LiteralPath $localDump -Destination ".local-db-dumps/latest-prod.dump" -Force
+```
+
+Fluxo padrão para restaurar no Docker local:
+
+```powershell
+docker compose --env-file .env.dev stop backend apis frontend
+docker exec janocaminho-postgres psql -U postgres -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'espetinho' AND pid <> pg_backend_pid();"
+docker exec janocaminho-postgres dropdb -U postgres --if-exists espetinho
+docker exec janocaminho-postgres createdb -U postgres -O postgres espetinho
+docker cp .local-db-dumps/latest-prod.dump janocaminho-postgres:/tmp/latest-prod.dump
+docker exec janocaminho-postgres pg_restore -U postgres --no-owner --no-privileges -d espetinho /tmp/latest-prod.dump
+docker exec janocaminho-postgres rm -f /tmp/latest-prod.dump
+docker compose --env-file .env.dev up -d backend apis frontend
+```
+
+Validação mínima após restore:
+
+```powershell
+docker exec janocaminho-postgres psql -U postgres -d espetinho -c "SELECT 'users' entidade, COUNT(*) total FROM users UNION ALL SELECT 'stores', COUNT(*) FROM stores UNION ALL SELECT 'products', COUNT(*) FROM products UNION ALL SELECT 'orders', COUNT(*) FROM orders;"
+docker compose --env-file .env.dev ps backend apis frontend postgres
+```
+
+---
+
 ## REGRAS CRÍTICAS
 
 - NÃO rodar scripts de deploy via SSH
