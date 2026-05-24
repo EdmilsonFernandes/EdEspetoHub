@@ -9,7 +9,6 @@ import {
   House,
   Receipt,
   List,
-  Heart,
   CaretRight,
   X,
   Bicycle,
@@ -49,6 +48,8 @@ import { HubHeader } from '../components/Marketplace/Hub/HubHeader';
 import { HubAnonymousActiveOrders } from '../components/Marketplace/Hub/HubAnonymousActiveOrders';
 import { HubStoreCard } from '../components/Marketplace/Hub/HubStoreCard';
 import { HubFeaturedCarousel } from '../components/Marketplace/Hub/HubFeaturedCarousel';
+import { HubFavoriteStores } from '../components/Marketplace/Hub/HubFavoriteStores';
+import { HubSearchProductResults } from '../components/Marketplace/Hub/HubSearchProductResults';
 import { HubMarketingPopup } from '../components/Marketplace/Hub/HubMarketingPopup';
 import { CondominiumStatusModal } from '../components/Marketplace/CondominiumStatusModal';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
@@ -3330,43 +3331,16 @@ export function MarketplacePage() {
             />
           )}
 
-          {favoriteStores.length > 0 && debouncedQuery.length < 2 && (
-            <section className="order-5 space-y-3" style={{ transition: 'all .45s ease', transitionDelay: '300ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-              <div className="flex items-center justify-between">
-                <h2 className="text-base sm:text-lg font-black text-slate-900">Minhas favoritas</h2>
-                <button
-                  type="button"
-                  onClick={() => setQuickFilter('favorites')}
-                  className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 hover:text-slate-700"
-                >
-                  Ver todas
-                </button>
-              </div>
-              <div className="flex gap-2.5 overflow-x-auto no-scrollbar scrollbar-hide pb-1">
-                {favoriteStores.map((store) => (
-                  <Link
-                    key={`favorite-${store.id}`}
-                    to={`/${store.slug}`}
-                    className="group min-w-[168px] rounded-[1.45rem] border border-white/90 bg-white p-2 shadow-[0_8px_24px_rgba(15,23,42,0.055)] transition-all duration-200 ease-out active:scale-[0.97] md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_30px_rgba(15,23,42,0.085)] sm:min-w-[186px]"
-                  >
-                    <img 
-                      src={store.banner || store.logo} 
-                      alt={store.name} 
-                      loading="lazy" 
-                      className="h-20 w-full rounded-[1rem] border border-slate-100 object-cover" 
-                      onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name); }}
-                    />
-                    <div className="mt-1.5 flex items-center justify-between gap-2">
-                      <p className="line-clamp-1 text-sm font-black text-slate-900">{store.name}</p>
-                      <Heart size={14} weight="fill" className="text-rose-500 shrink-0" />
-                    </div>
-                    <p className="mt-0.5 text-[11px] text-slate-600">
-                      {distanceLoading && activeLocation && distanceByStore[store.id] == null ? '...' : formatDistance(distanceByStore[store.id] ?? store.distanceKm)} • {store.etaMin}-{store.etaMax} min
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </section>
+          {debouncedQuery.length < 2 && (
+            <HubFavoriteStores
+              hasEntered={hasEntered}
+              stores={favoriteStores}
+              distanceLoading={distanceLoading}
+              activeLocation={activeLocation}
+              distanceByStore={distanceByStore}
+              formatDistance={formatDistance}
+              onShowAll={() => setQuickFilter('favorites')}
+            />
           )}
 
           <section ref={storesSectionRef} className="order-6 space-y-3.5" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
@@ -3661,59 +3635,13 @@ export function MarketplacePage() {
           </section>
 
           {/* Nova Seção: Itens encontrados na busca */}
-          {debouncedQuery.length >= 2 && searchedProducts.length > 0 && (
-            <section className="order-10 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex items-center justify-between px-1">
-                <h2 className="text-[15px] font-black tracking-tight text-slate-950">
-                  Itens encontrados que você busca
-                </h2>
-                <div className="flex gap-1">
-                  <span className="text-[10px] font-bold text-[#336886] uppercase tracking-wider">
-                    {searchedProducts.length} itens
-                  </span>
-                </div>
-              </div>
-              
-              <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-1 pb-3">
-                {searchedProducts.map((item) => (
-                  <Link
-                    key={`search-res-${item.storeSlug}-${item.id}`}
-                    to={selectedCondominiumSlug ? `/${item.storeSlug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}` : `/${item.storeSlug}`}
-                    onClick={() => stageFeaturedProductCheckout(item)}
-                    className="group min-w-[160px] snap-start overflow-hidden rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 ease-out hover:scale-[1.015] active:scale-[0.97]"
-                  >
-                    <div className="relative h-[90px] overflow-hidden bg-slate-100">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.name}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        onError={(e) => { (e.target as HTMLImageElement).src = item.storeLogo; }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    </div>
-
-                    <div className="bg-white p-2.5">
-                      <p className="line-clamp-1 text-[11px] font-black tracking-tight text-slate-950">{item.name}</p>
-                      <div className="mt-1.5 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <img 
-                            src={item.storeLogo} 
-                            alt={item.storeName} 
-                            className="h-4 w-4 rounded-full border border-slate-100 object-cover" 
-                            onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName); }}
-                          />
-                          <span className="truncate text-[9px] font-bold text-slate-400">{item.storeName}</span>
-                        </div>
-                        <span className="shrink-0 text-[10px] font-black text-[#336886]">
-                          {currency.format(item.price)}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
+          {debouncedQuery.length >= 2 && (
+            <HubSearchProductResults
+              items={searchedProducts}
+              selectedCondominiumSlug={selectedCondominiumSlug}
+              currency={currency}
+              onStageProduct={(item) => stageFeaturedProductCheckout(item as FeaturedProduct)}
+            />
           )}
 
           {/* Banner: convite para lojistas */}
