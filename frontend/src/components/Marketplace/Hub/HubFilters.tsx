@@ -78,7 +78,7 @@ export function HubFilterBar({
   const primaryOptions = HUB_QUICK_FILTER_OPTIONS.filter((item) => HUB_PRIMARY_QUICK_FILTERS.includes(item.key));
 
   return (
-    <div className={`${isNativePlatform ? 'py-0.5' : 'py-1'}`}>
+    <div className={`${isNativePlatform ? 'pt-0.5' : 'pt-1'}`}>
       <div className="grid grid-cols-[repeat(3,minmax(0,1fr))_auto] gap-1.5">
         {primaryOptions.map((filter) => {
           const Icon = filter.icon;
@@ -95,7 +95,7 @@ export function HubFilterBar({
               className={`inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full border px-2.5 py-2 text-[11px] font-black transition-all duration-200 ease-out active:scale-[0.97] ${
                 active
                   ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.58)]'
-                  : 'border-white/80 bg-white/72 text-slate-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/50 backdrop-blur-xl'
+                  : 'border-white/85 bg-white/78 text-slate-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/50 backdrop-blur-xl'
               }`}
               aria-pressed={active}
               aria-label={filter.label}
@@ -109,15 +109,15 @@ export function HubFilterBar({
         <button
           type="button"
           onClick={onOpenFilters}
-          className={`relative inline-flex h-full min-w-[3rem] items-center justify-center gap-1 rounded-full border px-2.5 py-2 text-[11px] font-black transition-all duration-200 ease-out active:scale-[0.97] ${
+          className={`relative inline-flex h-full min-w-[3.35rem] items-center justify-center gap-1 rounded-full border px-2.5 py-2 text-[11px] font-black transition-all duration-200 ease-out active:scale-[0.97] ${
             hiddenFilterCount > 0
               ? 'border-[#336886] bg-[#edf5fa] text-[#153A4C] shadow-[0_14px_26px_-20px_rgba(51,104,134,0.34)]'
-              : 'border-white/80 bg-white/72 text-slate-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/50 backdrop-blur-xl'
+              : 'border-white/85 bg-white/78 text-slate-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/50 backdrop-blur-xl'
           }`}
           aria-label="Abrir filtros"
         >
           <SlidersHorizontal size={14} weight="bold" />
-          <span className="hidden min-[390px]:inline">Filtros</span>
+          <span className="inline">Mais</span>
           {hiddenFilterCount > 0 ? (
             <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#153A4C] px-1 text-[9px] font-black text-white ring-2 ring-white">
               {hiddenFilterCount}

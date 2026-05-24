@@ -1463,8 +1463,7 @@ export function ClientOrders() {
     shortLabel: string;
     count: number;
     icon: JSX.Element;
-    selectedClass: string;
-    idleClass: string;
+    toneClass: string;
   }> = [
     {
       key: 'all',
@@ -1472,8 +1471,7 @@ export function ClientOrders() {
       shortLabel: 'Todos',
       count: orders.length,
       icon: <Receipt size={13} weight="duotone" />,
-      selectedClass: 'bg-[#153A4C] text-white shadow-[0_4px_12px_-4px_rgba(21,58,76,0.45)]',
-      idleClass: 'bg-slate-100 text-slate-600',
+      toneClass: 'text-slate-500',
     },
     {
       key: 'active',
@@ -1481,8 +1479,7 @@ export function ClientOrders() {
       shortLabel: 'Agora',
       count: activeOrders.length,
       icon: <Timer size={13} weight="duotone" />,
-      selectedClass: 'bg-emerald-500 text-white shadow-[0_4px_12px_-4px_rgba(16,185,129,0.45)]',
-      idleClass: 'bg-emerald-50 text-emerald-700',
+      toneClass: 'text-emerald-600',
     },
     {
       key: 'finished',
@@ -1490,8 +1487,7 @@ export function ClientOrders() {
       shortLabel: 'Feitos',
       count: deliveredOrdersCount,
       icon: <CheckCircle size={13} weight="duotone" />,
-      selectedClass: 'bg-sky-500 text-white shadow-[0_4px_12px_-4px_rgba(14,165,233,0.45)]',
-      idleClass: 'bg-sky-50 text-sky-700',
+      toneClass: 'text-sky-600',
     },
     {
       key: 'cancelled',
@@ -1499,8 +1495,7 @@ export function ClientOrders() {
       shortLabel: 'Cancel.',
       count: cancelledOrdersCount,
       icon: <XCircle size={13} weight="duotone" />,
-      selectedClass: 'bg-rose-500 text-white shadow-[0_4px_12px_-4px_rgba(244,63,94,0.45)]',
-      idleClass: 'bg-rose-50 text-rose-600',
+      toneClass: 'text-rose-600',
     },
   ];
 
@@ -1516,7 +1511,7 @@ export function ClientOrders() {
           backTo="/hub"
           onBack={() => navigate('/hub')}
         >
-          <div className="grid grid-cols-4 gap-1.5 rounded-[1.45rem] border border-white/80 bg-white/54 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] ring-1 ring-[#d7e7ef]/55 backdrop-blur-xl">
+          <div className="grid grid-cols-4 gap-1.5 rounded-[1.45rem] border border-white/80 bg-white/60 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] ring-1 ring-[#d7e7ef]/55 backdrop-blur-xl">
             {orderFilters.map((filter) => {
               const isSelected = statusFilter === filter.key;
               return (
@@ -1524,17 +1519,25 @@ export function ClientOrders() {
                   key={filter.key}
                   type="button"
                   onClick={() => setStatusFilter(filter.key)}
-                  className={`relative inline-flex min-w-0 flex-col items-center justify-center gap-1 rounded-[1.05rem] px-1.5 py-2 text-[10.5px] font-black leading-none transition-all duration-200 active:scale-[0.97] ${isSelected ? filter.selectedClass : `${filter.idleClass} shadow-sm`}`}
+                  className={`inline-flex min-h-[3.45rem] min-w-0 flex-col items-center justify-center gap-1.5 rounded-[1.05rem] border px-1.5 py-2 text-[10.5px] font-black leading-none transition-all duration-200 active:scale-[0.97] ${
+                    isSelected
+                      ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_12px_24px_-18px_rgba(21,58,76,0.62)]'
+                      : 'border-white/80 bg-white/78 text-slate-600 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/45'
+                  }`}
                   aria-pressed={isSelected}
                   title={filter.label}
                 >
-                  {filter.icon}
-                  <span className="max-w-full truncate">{filter.shortLabel}</span>
-                  {filter.count > 0 && (
-                    <span className={`absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[9px] font-black ring-2 ${isSelected ? 'bg-white/25 text-white ring-white/30' : 'bg-white text-current ring-white/80'}`}>
-                      {filter.count}
-                    </span>
-                  )}
+                  <span className={`flex max-w-full items-center justify-center gap-1 ${isSelected ? 'text-white' : filter.toneClass}`}>
+                    {filter.icon}
+                    <span className="truncate">{filter.shortLabel}</span>
+                  </span>
+                  <span className={`inline-flex min-w-[1.55rem] items-center justify-center rounded-full px-2 py-0.5 text-[10px] font-black leading-none ${
+                    isSelected
+                      ? 'bg-white text-[#153A4C] shadow-[0_8px_16px_-12px_rgba(15,23,42,0.45)]'
+                      : 'bg-slate-100/90 text-slate-600 ring-1 ring-white/80'
+                  }`}>
+                    {filter.count}
+                  </span>
                 </button>
               );
             })}

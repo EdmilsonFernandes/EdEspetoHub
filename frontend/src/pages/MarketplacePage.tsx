@@ -523,15 +523,15 @@ const categoryVisuals: Record<string, { icon: typeof Storefront; label: string }
 };
 
 const CATEGORY_COLORS: Record<string, { active: string; inactive: string; icon: string }> = {
-  Restaurante: { active: 'bg-amber-500 shadow-[0_12px_26px_-14px_rgba(245,158,11,0.62)]', inactive: 'border border-amber-100 bg-amber-50/80', icon: 'text-amber-500' },
-  Hamburguer: { active: 'bg-orange-500 shadow-[0_12px_26px_-14px_rgba(249,115,22,0.62)]', inactive: 'border border-orange-100 bg-orange-50/80', icon: 'text-orange-500' },
-  Lanche:     { active: 'bg-orange-400 shadow-[0_12px_26px_-14px_rgba(249,115,22,0.55)]', inactive: 'border border-orange-100 bg-orange-50/80', icon: 'text-orange-400' },
-  Pizza:      { active: 'bg-rose-500 shadow-[0_12px_26px_-14px_rgba(244,63,94,0.62)]',    inactive: 'border border-rose-100 bg-rose-50/80',   icon: 'text-rose-500' },
-  Bebidas:    { active: 'bg-violet-500 shadow-[0_12px_26px_-14px_rgba(139,92,246,0.62)]', inactive: 'border border-violet-100 bg-violet-50/80', icon: 'text-violet-500' },
-  Mercado:    { active: 'bg-emerald-600 shadow-[0_12px_26px_-14px_rgba(5,150,105,0.62)]', inactive: 'border border-emerald-100 bg-emerald-50/80', icon: 'text-emerald-600' },
-  Farmacia:   { active: 'bg-teal-500 shadow-[0_12px_26px_-14px_rgba(20,184,166,0.62)]',  inactive: 'border border-teal-100 bg-teal-50/80',   icon: 'text-teal-500' },
-  Doces:      { active: 'bg-pink-500 shadow-[0_12px_26px_-14px_rgba(236,72,153,0.62)]',  inactive: 'border border-pink-100 bg-pink-50/80',   icon: 'text-pink-500' },
-  Empório:    { active: 'bg-lime-600 shadow-[0_12px_26px_-14px_rgba(101,163,13,0.62)]',  inactive: 'border border-lime-100 bg-lime-50/80',   icon: 'text-lime-600' },
+  Restaurante: { active: 'bg-amber-500 shadow-[0_16px_32px_-10px_rgba(245,158,11,0.65),0_4px_12px_-4px_rgba(245,158,11,0.4)]', inactive: 'border border-amber-100 bg-amber-50/80', icon: 'text-amber-500' },
+  Hamburguer: { active: 'bg-orange-500 shadow-[0_16px_32px_-10px_rgba(249,115,22,0.65),0_4px_12px_-4px_rgba(249,115,22,0.4)]', inactive: 'border border-orange-100 bg-orange-50/80', icon: 'text-orange-500' },
+  Lanche:     { active: 'bg-orange-400 shadow-[0_16px_32px_-10px_rgba(249,115,22,0.58),0_4px_12px_-4px_rgba(249,115,22,0.35)]', inactive: 'border border-orange-100 bg-orange-50/80', icon: 'text-orange-400' },
+  Pizza:      { active: 'bg-rose-500 shadow-[0_16px_32px_-10px_rgba(244,63,94,0.65),0_4px_12px_-4px_rgba(244,63,94,0.4)]',    inactive: 'border border-rose-100 bg-rose-50/80',   icon: 'text-rose-500' },
+  Bebidas:    { active: 'bg-violet-500 shadow-[0_16px_32px_-10px_rgba(139,92,246,0.65),0_4px_12px_-4px_rgba(139,92,246,0.4)]', inactive: 'border border-violet-100 bg-violet-50/80', icon: 'text-violet-500' },
+  Mercado:    { active: 'bg-emerald-600 shadow-[0_16px_32px_-10px_rgba(5,150,105,0.65),0_4px_12px_-4px_rgba(5,150,105,0.4)]', inactive: 'border border-emerald-100 bg-emerald-50/80', icon: 'text-emerald-600' },
+  Farmacia:   { active: 'bg-teal-500 shadow-[0_16px_32px_-10px_rgba(20,184,166,0.65),0_4px_12px_-4px_rgba(20,184,166,0.4)]',  inactive: 'border border-teal-100 bg-teal-50/80',   icon: 'text-teal-500' },
+  Doces:      { active: 'bg-pink-500 shadow-[0_16px_32px_-10px_rgba(236,72,153,0.65),0_4px_12px_-4px_rgba(236,72,153,0.4)]',  inactive: 'border border-pink-100 bg-pink-50/80',   icon: 'text-pink-500' },
+  Empório:    { active: 'bg-lime-600 shadow-[0_16px_32px_-10px_rgba(101,163,13,0.65),0_4px_12px_-4px_rgba(101,163,13,0.4)]',  inactive: 'border border-lime-100 bg-lime-50/80',   icon: 'text-lime-600' },
 };
 
 const readCustomerSession = () => {

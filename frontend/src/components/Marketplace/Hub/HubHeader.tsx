@@ -90,7 +90,7 @@ export const HubHeader = memo(function HubHeader({
                 hasNotification={!isCustomerLogged}
                 onClick={onOpenProfileDrawer}
               />
-              <div className="min-w-0 flex-1 rounded-[1.35rem] border border-white/75 bg-white/72 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_14px_30px_-26px_rgba(15,23,42,0.34)] ring-1 ring-slate-950/5 backdrop-blur-sm">
+              <div className="min-w-0 flex-1 rounded-[1.35rem] border border-white/20 bg-white/60 px-3 py-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_32px_0_rgba(31,38,135,0.06)] ring-1 ring-white/10 backdrop-blur-md">
                 <div className="mb-0.5 flex items-center gap-1.5">
                   <img
                     src="/janocaminho.jpg"
@@ -106,7 +106,15 @@ export const HubHeader = memo(function HubHeader({
                   className="inline-flex w-full min-w-0 items-center justify-between gap-2 text-left text-[14px] font-black text-slate-950 transition-colors duration-150 ease-out hover:text-[#336886] active:scale-[0.99]"
                   onClick={onToggleNearbyFilter}
                 >
-                  <span className="truncate">{displayLocationLabel}</span>
+                  <span className="flex min-w-0 items-center gap-1.5 truncate">
+                    {quickFilter === 'nearby' && (
+                      <span className="relative flex h-2 w-2 shrink-0">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
+                      </span>
+                    )}
+                    <span className="truncate">{displayLocationLabel}</span>
+                  </span>
                   <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[#336886]">
                     <CaretDown size={13} weight="bold" />
                   </span>
