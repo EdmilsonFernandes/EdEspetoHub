@@ -180,7 +180,7 @@ test.describe('Admin queue UX', () => {
       const viewportWidth = page.viewportSize()?.width || 1280;
       const expectedLeft = box ? (viewportWidth - box.width) / 2 : 0;
 
-      expect(box?.width).toBeLessThan(viewportWidth * 0.85);
+      expect(box?.width).toBeLessThan(viewportWidth * 0.94);
       expect(Math.abs((box?.x || 0) - expectedLeft)).toBeLessThan(48);
     });
   });

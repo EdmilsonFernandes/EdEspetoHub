@@ -83,14 +83,15 @@ test.describe('Destination WhatsApp location', () => {
   test('inclui endereco e mapa no link de WhatsApp da hospedagem', async ({ page }) => {
     await page.goto('/destinos/sao-bento');
 
-    const talkLink = page.locator('a[href*="wa.me/5512999991111"]').first();
+    const talkLink = page.locator('a[href*="phone=5512999991111"]').first();
     await expect(talkLink).toBeVisible();
 
     const href = await talkLink.getAttribute('href');
     const decodedHref = decodeURIComponent(href || '');
 
-    expect(decodedHref).toContain('Local da hospedagem: Estrada do Bau, km 7');
-    expect(decodedHref).toContain('Mapa da hospedagem: https://www.google.com/maps/search/?api=1&query=-22.6901%2C-45.7321');
+    expect(decodedHref).toContain('Endereço para entrega: Estrada do Bau, km 7');
+    expect(decodedHref).toContain('Localização do chalé: https://www.google.com/maps/search/?api=1&query=-22.6901%2C-45.7321');
+    expect(decodedHref).toContain('Link do Já no Caminho para ver a hospedagem e instalar o app');
   });
 
   test('leva o contexto da hospedagem para lojas oficiais dentro do chale', async ({ page }) => {
