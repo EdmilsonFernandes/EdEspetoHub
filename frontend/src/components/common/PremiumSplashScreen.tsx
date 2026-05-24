@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { Buildings, ForkKnife, MapPin, Sparkle, Storefront, Truck, WifiSlash } from '@phosphor-icons/react';
 
 const loadingSteps = [
@@ -16,6 +17,7 @@ const experienceCards = [
 ];
 
 export function PremiumSplashScreen() {
+  const isNativePlatform = Capacitor.isNativePlatform();
   const [isVisible, setIsVisible] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
@@ -23,8 +25,10 @@ export function PremiumSplashScreen() {
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const showDuration = prefersReducedMotion ? 850 : 2600;
-    const fadeDuration = prefersReducedMotion ? 0 : 480;
+    const showDuration = isNativePlatform
+      ? (prefersReducedMotion ? 260 : 950)
+      : (prefersReducedMotion ? 850 : 2600);
+    const fadeDuration = prefersReducedMotion ? 0 : isNativePlatform ? 260 : 480;
 
     const stepTimer = prefersReducedMotion
       ? 0
@@ -45,7 +49,7 @@ export function PremiumSplashScreen() {
       window.clearTimeout(fadeTimer);
       window.clearTimeout(removeTimer);
     };
-  }, [isOffline]);
+  }, [isNativePlatform, isOffline]);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);

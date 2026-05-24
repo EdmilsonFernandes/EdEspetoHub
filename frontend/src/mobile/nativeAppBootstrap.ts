@@ -35,6 +35,31 @@ let foregroundAudioContext: AudioContext | null = null;
 let foregroundNotificationAudio: HTMLAudioElement | null = null;
 let lastForegroundNotificationAudioSrc = '';
 let buildCheckInFlight = false;
+let nativeLaunchReadyNotified = false;
+
+export const notifyNativeAppReady = () => {
+  if (!Capacitor.isNativePlatform() || typeof window === 'undefined') return;
+  if (nativeLaunchReadyNotified) return;
+
+  try {
+    const bridge = (window as Window & { JNCLaunch?: { appReady?: () => void } }).JNCLaunch;
+    if (!bridge || typeof bridge.appReady !== 'function') return;
+    nativeLaunchReadyNotified = true;
+    bridge.appReady();
+  } catch {
+    nativeLaunchReadyNotified = false;
+  }
+};
+
+export const scheduleNativeAppReadySignal = () => {
+  if (!Capacitor.isNativePlatform() || typeof window === 'undefined') return;
+
+  const signal = () => notifyNativeAppReady();
+  window.requestAnimationFrame(() => window.requestAnimationFrame(signal));
+  [120, 420, 900, 1800, 3200].forEach((delay) => {
+    window.setTimeout(signal, delay);
+  });
+};
 
 const normalizeInternalUrl = (rawUrl: string): string | null => {
   try {

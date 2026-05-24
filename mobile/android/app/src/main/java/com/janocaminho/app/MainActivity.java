@@ -99,6 +99,8 @@ public class MainActivity extends BridgeActivity {
     private boolean pageFailedToLoad = false;
     private boolean mainFrameLoadInProgress = false;
     private boolean webViewClientConfigured = false;
+    private boolean launchBridgeInjected = false;
+    private boolean webAppReady = false;
     private final Handler launchOverlayHandler = new Handler(Looper.getMainLooper());
     private Runnable launchOverlayTimeoutRunnable;
     private Runnable resumeWebViewHealthCheckRunnable;
@@ -133,6 +135,8 @@ public class MainActivity extends BridgeActivity {
             getWindow().setNavigationBarContrastEnforced(false);
         }
         super.onCreate(savedInstanceState);
+        configureWebViewPersistence();
+        configureWebViewClientIfNeeded();
         initializeInAppUpdates();
         initializeLaunchOverlay();
     }
@@ -187,6 +191,10 @@ public class MainActivity extends BridgeActivity {
         if (!biometricBridgeInjected) {
             webView.addJavascriptInterface(new BiometricBridge(), "JNCBiometrics");
             biometricBridgeInjected = true;
+        }
+        if (!launchBridgeInjected) {
+            webView.addJavascriptInterface(new LaunchBridge(), "JNCLaunch");
+            launchBridgeInjected = true;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             webView.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_YES);
@@ -294,11 +302,14 @@ public class MainActivity extends BridgeActivity {
     public void onStart() {
         super.onStart();
         configureWebViewPersistence();
+        configureWebViewClientIfNeeded();
         configureNavigationTransitions();
         restoreLastVisitedUrl();
         openDeepLinkIfAny();
         checkForAppUpdates();
+    }
 
+    private void configureWebViewClientIfNeeded() {
         if (webViewClientConfigured || bridge == null || bridge.getWebView() == null) {
             return;
         }
@@ -337,6 +348,8 @@ public class MainActivity extends BridgeActivity {
                     super.onPageStarted(view, url, favicon);
                     if (normalizeTrustedWebUrl(url) == null) return;
                     mainFrameLoadInProgress = true;
+                    webAppReady = false;
+                    pageFailedToLoad = false;
                     cancelResumeWebViewHealthCheck();
 
                     if (!launchOverlayDismissed) {
@@ -362,6 +375,7 @@ public class MainActivity extends BridgeActivity {
                     if (trustedUrl != null) {
                         mainFrameLoadInProgress = false;
                         pageFailedToLoad = false;
+                        webAppReady = true;
                         cancelLaunchOverlayTimeout();
                         cancelResumeWebViewHealthCheck();
                         lastKnownUrl = trustedUrl;
@@ -379,6 +393,7 @@ public class MainActivity extends BridgeActivity {
 
                     mainFrameLoadInProgress = false;
                     pageFailedToLoad = true;
+                    webAppReady = false;
                     launchOverlayDismissed = false;
                     showLaunchOverlayRecovery(getString(R.string.launch_timeout_message));
                 }
@@ -395,6 +410,7 @@ public class MainActivity extends BridgeActivity {
                     if (statusCode >= 500) {
                         mainFrameLoadInProgress = false;
                         pageFailedToLoad = true;
+                        webAppReady = false;
                         launchOverlayDismissed = false;
                         showLaunchOverlayRecovery(getString(R.string.launch_http_error_message));
                     }
@@ -405,6 +421,7 @@ public class MainActivity extends BridgeActivity {
                     handler.cancel();
                     mainFrameLoadInProgress = false;
                     pageFailedToLoad = true;
+                    webAppReady = false;
                     launchOverlayDismissed = false;
                     showLaunchOverlayRecovery(getString(R.string.launch_ssl_error_message));
                 }
@@ -413,6 +430,7 @@ public class MainActivity extends BridgeActivity {
                 public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
                     mainFrameLoadInProgress = false;
                     pageFailedToLoad = true;
+                    webAppReady = false;
                     launchOverlayDismissed = false;
                     cancelLaunchOverlayTimeout();
                     cancelResumeWebViewHealthCheck();
@@ -427,6 +445,7 @@ public class MainActivity extends BridgeActivity {
                     if (normalizeTrustedWebUrl(url) == null) return;
                     mainFrameLoadInProgress = false;
                     pageFailedToLoad = false;
+                    webAppReady = true;
                     cancelLaunchOverlayTimeout();
                     cancelResumeWebViewHealthCheck();
                     lastKnownUrl = url;
@@ -437,6 +456,8 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onDestroy() {
+        cancelLaunchOverlayTimeout();
+        cancelResumeWebViewHealthCheck();
         if (appUpdateManager != null && installStateUpdatedListener != null) {
             appUpdateManager.unregisterListener(installStateUpdatedListener);
         }
@@ -511,6 +532,11 @@ public class MainActivity extends BridgeActivity {
                 .setStartDelay(130L)
                 .setDuration(260L)
                 .start();
+        }
+        if (webAppReady) {
+            launchOverlayHandler.postDelayed(this::dismissLaunchOverlay, 120L);
+        } else {
+            scheduleLaunchOverlayTimeout();
         }
     }
 
@@ -718,6 +744,8 @@ public class MainActivity extends BridgeActivity {
         scheduleLaunchOverlayTimeout();
         cancelResumeWebViewHealthCheck();
         mainFrameLoadInProgress = true;
+        pageFailedToLoad = false;
+        webAppReady = false;
         WebView webView = bridge.getWebView();
         webView.stopLoading();
         webView.clearCache(false);
@@ -751,7 +779,18 @@ public class MainActivity extends BridgeActivity {
             boolean stillLoading = mainFrameLoadInProgress || webView.getProgress() < 100;
             boolean noVisibleContent = webView.getContentHeight() <= 0;
 
+            if (webAppReady || !noVisibleContent || webView.getProgress() >= 70) {
+                mainFrameLoadInProgress = false;
+                pageFailedToLoad = false;
+                cancelLaunchOverlayTimeout();
+                dismissLaunchOverlay();
+                return;
+            }
+
             if (stillLoading) {
+                if (launchOverlayTimeoutRunnable == null) {
+                    scheduleLaunchOverlayTimeout();
+                }
                 scheduleResumeWebViewHealthCheck();
                 return;
             }
@@ -819,12 +858,18 @@ public class MainActivity extends BridgeActivity {
         
         // Se não houver URL carregada ou se for a tela inicial branca, carrega a salva
         if (currentUrl == null || currentUrl.isEmpty() || currentUrl.equals("about:blank")) {
+            String trustedSavedUrl = normalizeTrustedWebUrl(savedUrl);
+            if (trustedSavedUrl == null) {
+                trustedSavedUrl = HUB_URL;
+            }
             if (!launchOverlayDismissed) {
                 showLaunchOverlayLoading(null);
                 scheduleLaunchOverlayTimeout();
             }
-            webView.loadUrl(savedUrl);
-            lastKnownUrl = savedUrl;
+            mainFrameLoadInProgress = true;
+            webAppReady = false;
+            webView.loadUrl(trustedSavedUrl);
+            lastKnownUrl = trustedSavedUrl;
         }
     }
 
@@ -843,6 +888,12 @@ public class MainActivity extends BridgeActivity {
         String incoming = getIntent().getDataString();
         String trustedUrl = normalizeTrustedWebUrl(incoming);
         if (trustedUrl == null) return;
+        if (!launchOverlayDismissed) {
+            showLaunchOverlayLoading(null);
+            scheduleLaunchOverlayTimeout();
+        }
+        mainFrameLoadInProgress = true;
+        webAppReady = false;
         bridge.getWebView().loadUrl(trustedUrl);
         lastKnownUrl = trustedUrl;
     }
@@ -915,6 +966,25 @@ public class MainActivity extends BridgeActivity {
             bridge.getWebView().post(() -> bridge.getWebView().evaluateJavascript(script, null));
         } catch (Exception error) {
             android.util.Log.w("JNC_BIO", "Falha ao enviar evento biometrico ao app", error);
+        }
+    }
+
+    private void markWebAppReadyFromJavascript() {
+        runOnUiThread(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            webAppReady = true;
+            pageFailedToLoad = false;
+            mainFrameLoadInProgress = false;
+            cancelLaunchOverlayTimeout();
+            cancelResumeWebViewHealthCheck();
+            dismissLaunchOverlay();
+        });
+    }
+
+    private class LaunchBridge {
+        @JavascriptInterface
+        public void appReady() {
+            markWebAppReadyFromJavascript();
         }
     }
 

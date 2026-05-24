@@ -7,7 +7,7 @@ import { registerSW } from 'virtual:pwa-register';
 import './index.css';
 import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
-import { bootstrapNativeApp } from './mobile/nativeAppBootstrap';
+import { bootstrapNativeApp, scheduleNativeAppReadySignal } from './mobile/nativeAppBootstrap';
 import { installStaleBuildRecovery } from './utils/staleBuildRecovery';
 
 const isNativePlatform = Capacitor.isNativePlatform();
@@ -64,3 +64,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </AuthProvider>
   </React.StrictMode>
 );
+
+scheduleNativeAppReadySignal();
