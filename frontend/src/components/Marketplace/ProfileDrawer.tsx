@@ -91,6 +91,7 @@ export function ProfileDrawer({
   onRegisterClient,
   onRegisterStore,
   onRegisterMotoboy,
+  versionLabel,
 }: ProfileDrawerProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const drawerNavigate = useNavigate();
@@ -704,6 +705,12 @@ export function ProfileDrawer({
                     <ShieldCheckered size={13} weight="fill" />
                     Seguro
                   </p>
+                </div>
+                <div className="col-span-2 rounded-[1.2rem] border border-slate-200/80 bg-white/88 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Versão</p>
+                    <p className="truncate text-xs font-black text-slate-800">{versionLabel || 'Indisponível'}</p>
+                  </div>
                 </div>
               </div>
               <div className="rounded-[1.35rem] border border-slate-200/80 bg-slate-50/80 p-4">

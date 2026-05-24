@@ -29,7 +29,6 @@ import {
   UserCircle,
   Warning,
 } from '@phosphor-icons/react';
-import { storeService } from '../services/storeService';
 import { condominiumService } from '../services/condominiumService';
 import { destinationService } from '../services/destinationService';
 import { productService } from '../services/productService';
@@ -43,7 +42,10 @@ import { useHubAnonymousOrders } from '../hooks/hub/useHubAnonymousOrders';
 import { useHubCustomerActiveOrders } from '../hooks/hub/useHubCustomerActiveOrders';
 import { useHubFavorites } from '../hooks/hub/useHubFavorites';
 import { useHubFeaturedProducts, type HubFeaturedProduct as FeaturedProduct } from '../hooks/hub/useHubFeaturedProducts';
+import { useHubLocation } from '../hooks/hub/useHubLocation';
 import { useHubSearchPlaceholder } from '../hooks/hub/useHubSearchPlaceholder';
+import { useHubStoreDistances } from '../hooks/hub/useHubStoreDistances';
+import { useHubStores } from '../hooks/hub/useHubStores';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
 import { HubFilterSheet, type HubQuickFilterKey } from '../components/Marketplace/Hub/HubFilters';
@@ -72,73 +74,11 @@ import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/o
 import { DEFAULT_HOME_CONFIG, homeConfigService } from '../services/homeConfigService';
 import { openActionTarget, resolveActionLabel, resolveActionTarget } from '../utils/actionLink';
 
-type MarketplaceStore = {
-  id?: string;
-  name?: string;
-  slug?: string;
-  distanceKm?: number | null;
-  deliveryRadiusKm?: number | null;
-  deliversToUserLocation?: boolean | null;
-  deliveryStatusLabel?: string | null;
-  acceptsDelivery?: boolean | null;
-  acceptsPickup?: boolean | null;
-  geoAvailability?: string | null;
-  isNearest?: boolean | null;
-  reviewSummary?: {
-    totalReviews?: number;
-    avgStoreRating?: number;
-  } | null;
-  settings?: {
-    logoUrl?: string | null;
-    bannerUrl?: string | null;
-    segment?: string | null;
-    address?: string | null;
-    city?: string | null;
-    state?: string | null;
-    primaryColor?: string | null;
-    secondaryColor?: string | null;
-    isOrderingEnabled?: boolean;
-    orderTypes?: string[] | null;
-    postalEnabled?: boolean | null;
-    lat?: number | null;
-    lng?: number | null;
-    openingHours?: Array<{
-      day: number;
-      enabled?: boolean;
-      intervals?: Array<{ start: string; end: string }>;
-    }> | null;
-  } | null;
-  openNow?: boolean;
-  nextOpeningLabel?: string | null;
-};
-
-type StoreDiscoveryResponse = {
-  mode?: 'deliverable' | 'same_city_fallback' | 'nearby_fallback' | 'no_coverage' | string;
-  stores?: MarketplaceStore[];
-  summary?: {
-    deliverableCount?: number;
-    sameCityCount?: number;
-    nearbyCount?: number;
-  } | null;
-};
-
-type PreferredDiscoveryAddress = {
-  label: string;
-  city: string;
-  state: string;
-  addressLine?: string;
-  lat?: number | null;
-  lng?: number | null;
-};
-
-const CUSTOMER_ADDRESS_UPDATED_EVENT = 'jnc:customer-addresses-updated';
 const HUB_DEBUG_QUERY_PARAM = 'hubDebug';
 const HUB_DEBUG_STORAGE_KEY = 'jnc:hub-debug-enabled';
 const HUB_DEBUG_TRACE_KEY = 'jnc:hub-debug-trace';
 const HUB_DEBUG_TRACE_LIMIT = 80;
 const HOME_STORE_PREVIEW_LIMIT = 6;
-
-const HUB_DISTANCE_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
 const appendAssetCacheKey = (value?: string | null, cacheKey?: string) => {
   const normalized = String(value || '').trim();
@@ -200,60 +140,6 @@ const parseOptionalNumber = (value: unknown): number | null => {
   if (!normalized) return null;
   const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : null;
-};
-
-const buildCustomerAddressLookup = (address: any) => {
-  const city = String(address?.city || '').trim();
-  const state = String(address?.state || '').trim().toUpperCase();
-  const street = String(address?.street || '').trim();
-  const number = String(address?.number || '').trim();
-  const streetLine = [street, number].filter(Boolean).join(', ');
-  const addressLine = [
-    street,
-    number,
-    String(address?.neighborhood || '').trim(),
-    city,
-    state,
-    String(address?.cep || '').trim(),
-  ]
-    .filter(Boolean)
-    .join(', ');
-  const label = streetLine || (city && state ? `${city} - ${state}` : city || 'Endereço principal');
-
-  return {
-    city,
-    state,
-    addressLine,
-    label: label || 'Endereço principal',
-    lat: parseOptionalNumber(address?.lat),
-    lng: parseOptionalNumber(address?.lng),
-  };
-};
-
-const readHubCache = <T,>(key: string, ttlMs: number): T | null => {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    const ts = Number(parsed?.ts || 0);
-    if (!ts || Date.now() - ts > ttlMs) {
-      localStorage.removeItem(key);
-      return null;
-    }
-    return (parsed?.data ?? null) as T | null;
-  } catch {
-    return null;
-  }
-};
-
-const writeHubCache = (key: string, data: unknown) => {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-  } catch {
-    // ignore
-  }
 };
 
 const appendHubDebugTrace = (entry: Record<string, any>) => {
@@ -421,22 +307,6 @@ const getSecondaryStoreCardBadge = (
   }
 
   return null;
-};
-
-const buildDistanceContextKey = (
-  savedAddress: PreferredDiscoveryAddress | null,
-  location: { lat: number; lng: number } | null,
-  region: { city: string; state: string } | null
-) => {
-  if (savedAddress?.lat != null && savedAddress?.lng != null) {
-    return `saved:${Number(savedAddress.lat).toFixed(5)}:${Number(savedAddress.lng).toFixed(5)}`;
-  }
-  const savedAddressKey = normalizeSearchText(savedAddress?.addressLine || '');
-  if (savedAddressKey) return `saved:${savedAddressKey}`;
-  if (location) return `gps:${location.lat.toFixed(4)}:${location.lng.toFixed(4)}`;
-  const city = normalizeSearchText(region?.city || '');
-  const state = normalizeSearchText(region?.state || '');
-  return `region:${city}:${state}`;
 };
 
 type HubCondominium = {
@@ -736,9 +606,6 @@ export function MarketplacePage() {
   const isNativePlatform = Capacitor.isNativePlatform();
   const { setAuth } = useAuth();
   const { setBranding } = useTheme();
-  const [stores, setStores] = useState<MarketplaceStore[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [productSearchBySlug, setProductSearchBySlug] = useState<Record<string, string>>({});
@@ -758,7 +625,6 @@ export function MarketplacePage() {
   const [condominiumAvailabilityModal, setCondominiumAvailabilityModal] = useState<CondominiumAvailabilityModalState | null>(null);
   const [condominiumPromoModal, setCondominiumPromoModal] = useState<CondominiumPromoModalState | null>(null);
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [isHeaderElevated, setIsHeaderElevated] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
@@ -766,7 +632,6 @@ export function MarketplacePage() {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const condominiumSearchInputRef = useRef<HTMLInputElement | null>(null);
   const storesSectionRef = useRef<HTMLElement | null>(null);
-  const portfolioLoadInFlightRef = useRef(false);
   const publicCondominiumLoadInFlightRef = useRef(false);
   const openOrderTracking = useCallback((orderId?: string | null, accessToken?: string | null) => {
     const normalizedOrderId = String(orderId || '').trim();
@@ -841,13 +706,6 @@ export function MarketplacePage() {
   const [showStorePromoPopup, setShowStorePromoPopup] = useState(false);
   const [homeConfig, setHomeConfig] = useState(() => DEFAULT_HOME_CONFIG);
   const [homeConfigLoaded, setHomeConfigLoaded] = useState(false);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [userRegion, setUserRegion] = useState<{ city: string; state: string } | null>(null);
-  const [locationLabel, setLocationLabel] = useState('Sua região');
-  const [geoDiscovery, setGeoDiscovery] = useState<StoreDiscoveryResponse | null>(null);
-  const [preferredDiscoveryAddress, setPreferredDiscoveryAddress] = useState<PreferredDiscoveryAddress | null>(null);
-  const [preferredAddressLoading, setPreferredAddressLoading] = useState(false);
-  const [hubScopeOverride, setHubScopeOverride] = useState<'default' | 'all_stores'>('default');
   const [isHomeStoreListExpanded, setIsHomeStoreListExpanded] = useState(false);
   const homePromoSlides = useMemo(
     () =>
@@ -878,42 +736,13 @@ export function MarketplacePage() {
         : '',
     [homeConfig.marketingPopup.actionLabel, homeConfig.marketingPopup.actionUrl, marketingPopupHasAction]
   );
-  const savedAddressLocation = useMemo(() => {
-    if (preferredDiscoveryAddress?.lat == null || preferredDiscoveryAddress?.lng == null) return null;
-    return {
-      lat: Number(preferredDiscoveryAddress.lat),
-      lng: Number(preferredDiscoveryAddress.lng),
-    };
-  }, [preferredDiscoveryAddress?.lat, preferredDiscoveryAddress?.lng]);
-  const activeLocation = savedAddressLocation || userLocation;
-  const activeRegion =
-    (preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state
-      ? { city: preferredDiscoveryAddress?.city || '', state: preferredDiscoveryAddress?.state || '' }
-      : null) ||
-    userRegion;
-  const activeLocationLabel = preferredDiscoveryAddress?.label || locationLabel;
-  const destinationListHref = useMemo(() => {
-    const search = new URLSearchParams();
-    if (activeLocation?.lat != null) search.set('lat', String(activeLocation.lat));
-    if (activeLocation?.lng != null) search.set('lng', String(activeLocation.lng));
-    if (activeRegion?.city) search.set('city', activeRegion.city);
-    if (activeRegion?.state) search.set('state', activeRegion.state);
-    const suffix = search.toString();
-    return suffix ? `/destinos?${suffix}` : '/destinos';
-  }, [activeLocation?.lat, activeLocation?.lng, activeRegion?.city, activeRegion?.state]);
-  const isShowingAllStores = hubScopeOverride === 'all_stores';
-
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [customerSession, setCustomerSession] = useState(() => readCustomerSession());
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
   const [deactivating, setDeactivating] = useState(false);
-  const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
-  const [distanceLoading, setDistanceLoading] = useState(false);
   const touchStartYRef = useRef<number | null>(null);
   const touchPullActiveRef = useRef(false);
   const pullDistanceRef = useRef(0);
-  const pendingPortfolioReloadRef = useRef(false);
-  const distanceCacheKeyRef = useRef<string>('');
   const hubDebugEnabled = useMemo(() => {
     if (typeof window === 'undefined') return false;
     try {
@@ -943,6 +772,37 @@ export function MarketplacePage() {
     appendHubDebugTrace(entry);
     console.info('[HubDebug]', entry);
   }, [hubDebugEnabled]);
+  const {
+    userLocation,
+    preferredDiscoveryAddress,
+    savedAddressLocation,
+    activeLocation,
+    activeRegion,
+    activeLocationLabel,
+    destinationListHref,
+  } = useHubLocation({
+    customerToken: customerSession?.token,
+    customerEmail: customerSession?.user?.email,
+    hubDebug,
+  });
+  const {
+    stores,
+    loading,
+    error,
+    geoDiscovery,
+    setHubScopeOverride,
+    isShowingAllStores,
+    isRefreshing,
+    refreshHub,
+  } = useHubStores({
+    selectedCondominiumSlug,
+    activeLocation,
+    activeRegion,
+    savedAddressLocation,
+    userLocation,
+    preferredDiscoveryAddress,
+    hubDebug,
+  });
 
   useEffect(() => {
     document.title = 'Já no Caminho | App local';
@@ -969,80 +829,6 @@ export function MarketplacePage() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const resolvePreferredDiscoveryAddress = async () => {
-      if (!customerSession?.token) {
-        setPreferredDiscoveryAddress(null);
-        setPreferredAddressLoading(false);
-        hubDebug('preferred-address-cleared', { reason: 'no-customer-session' });
-        return;
-      }
-
-      try {
-        setPreferredAddressLoading(true);
-        const rows = await customerAccountService.listAddresses();
-        if (cancelled) return;
-        const preferred = (Array.isArray(rows) ? rows : []).find((item: any) => item?.isDefault) || rows?.[0];
-        if (!preferred) {
-          setPreferredDiscoveryAddress(null);
-          hubDebug('preferred-address-missing', { totalAddresses: Array.isArray(rows) ? rows.length : 0 });
-          return;
-        }
-
-        const normalized = buildCustomerAddressLookup(preferred);
-        if (!normalized.city && !normalized.state) {
-          setPreferredDiscoveryAddress(null);
-          hubDebug('preferred-address-invalid', {
-            addressId: preferred?.id || null,
-            hasLatLng: normalized.lat != null && normalized.lng != null,
-          });
-          return;
-        }
-
-        const nextAddress: PreferredDiscoveryAddress = {
-          label: normalized.label,
-          city: normalized.city,
-          state: normalized.state,
-          addressLine: normalized.addressLine,
-          lat: normalized.lat,
-          lng: normalized.lng,
-        };
-
-        setPreferredDiscoveryAddress(nextAddress);
-        hubDebug('preferred-address-loaded', {
-          addressId: preferred?.id || null,
-          label: nextAddress.label,
-          city: nextAddress.city,
-          state: nextAddress.state,
-          hasLatLng: nextAddress.lat != null && nextAddress.lng != null,
-        });
-      } catch {
-        if (!cancelled) {
-          setPreferredDiscoveryAddress(null);
-          hubDebug('preferred-address-error');
-        }
-      } finally {
-        if (!cancelled) {
-          setPreferredAddressLoading(false);
-        }
-      }
-    };
-
-    void resolvePreferredDiscoveryAddress();
-    const refreshAddressContext = () => {
-      void resolvePreferredDiscoveryAddress();
-    };
-    window.addEventListener('focus', refreshAddressContext);
-    window.addEventListener(CUSTOMER_ADDRESS_UPDATED_EVENT, refreshAddressContext as EventListener);
-    return () => {
-      cancelled = true;
-      window.removeEventListener('focus', refreshAddressContext);
-      window.removeEventListener(CUSTOMER_ADDRESS_UPDATED_EVENT, refreshAddressContext as EventListener);
-    };
-  }, [customerSession?.token, customerSession?.user?.email, hubDebug]);
-
-  useEffect(() => {
     const handleOpenProfileDrawer = () => setProfileDrawerOpen(true);
     window.addEventListener('jnk:open-profile-drawer', handleOpenProfileDrawer);
     return () => window.removeEventListener('jnk:open-profile-drawer', handleOpenProfileDrawer);
@@ -1063,176 +849,6 @@ export function MarketplacePage() {
     }, 900);
     return () => window.clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const resolveUserLabel = async () => {
-      if (!userLocation) return;
-      try {
-        const controller = new AbortController();
-        const timeout = window.setTimeout(() => controller.abort(), 4500);
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${userLocation.lat}&lon=${userLocation.lng}`,
-          { signal: controller.signal }
-        );
-        window.clearTimeout(timeout);
-        const data = await response.json().catch(() => null);
-        const addr = data?.address || {};
-        const city =
-          addr.city ||
-          addr.town ||
-          addr.village ||
-          addr.municipality ||
-          addr.county ||
-          '';
-        const locality =
-          city ||
-          addr.city_district ||
-          addr.suburb ||
-          addr.neighbourhood ||
-          '';
-        const state = (addr.state_code || addr.state || '').toString();
-        const nextLabel = [locality, state].filter(Boolean).join(' - ').trim();
-        if (!cancelled) {
-          setUserRegion((city || locality) ? { city: String(city || locality), state } : null);
-          if (nextLabel) setLocationLabel(nextLabel);
-          hubDebug('gps-region-resolved', {
-            lat: Number(userLocation.lat).toFixed(5),
-            lng: Number(userLocation.lng).toFixed(5),
-            city: String(city || locality || ''),
-            state,
-            label: nextLabel || 'Sua região',
-          });
-        }
-      } catch (_error) {
-        if (!cancelled) {
-          setLocationLabel('Sua região');
-          setUserRegion(null);
-          hubDebug('gps-region-error', {
-            lat: Number(userLocation.lat).toFixed(5),
-            lng: Number(userLocation.lng).toFixed(5),
-          });
-        }
-      }
-    };
-    resolveUserLabel();
-    return () => {
-      cancelled = true;
-    };
-  }, [hubDebug, userLocation]);
-
-  useEffect(() => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-    if (customerSession?.token && preferredAddressLoading) return;
-    if (savedAddressLocation) {
-      setUserLocation(null);
-      hubDebug('gps-skip-saved-address', {
-        lat: Number(savedAddressLocation.lat).toFixed(5),
-        lng: Number(savedAddressLocation.lng).toFixed(5),
-      });
-      return;
-    }
-    const timer = window.setTimeout(() => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const nextLocation = {
-            lat: Number(position.coords.latitude),
-            lng: Number(position.coords.longitude),
-          };
-          setUserLocation({
-            lat: nextLocation.lat,
-            lng: nextLocation.lng,
-          });
-          hubDebug('gps-position-loaded', {
-            lat: nextLocation.lat.toFixed(5),
-            lng: nextLocation.lng.toFixed(5),
-            accuracyM: Number(position.coords.accuracy || 0).toFixed(0),
-          });
-        },
-        () => {
-          setUserLocation(null);
-          hubDebug('gps-position-error');
-        },
-        { enableHighAccuracy: false, timeout: 4500, maximumAge: 10 * 60 * 1000 }
-      );
-    }, 1400);
-    return () => window.clearTimeout(timer);
-  }, [customerSession?.token, hubDebug, preferredAddressLoading, savedAddressLocation]);
-
-  const loadPortfolio = useCallback(async () => {
-    if (portfolioLoadInFlightRef.current) {
-      pendingPortfolioReloadRef.current = true;
-      hubDebug('portfolio-load-skipped', { reason: 'in-flight' });
-      return;
-    }
-    portfolioLoadInFlightRef.current = true;
-    try {
-      const locationQuery = selectedCondominiumSlug || hubScopeOverride === 'all_stores'
-        ? { lat: null, lng: null, city: null, state: null }
-        : {
-            lat: savedAddressLocation?.lat ?? userLocation?.lat ?? null,
-            lng: savedAddressLocation?.lng ?? userLocation?.lng ?? null,
-            city: preferredDiscoveryAddress?.city || activeRegion?.city || null,
-            state: preferredDiscoveryAddress?.state || activeRegion?.state || null,
-          };
-      const basePortfolio = await storeService.listPortfolio({
-        lat: locationQuery.lat,
-        lng: locationQuery.lng,
-        city: locationQuery.city,
-        state: locationQuery.state,
-      });
-      const baseStores = Array.isArray(basePortfolio) ? basePortfolio : [];
-      setGeoDiscovery(null);
-      setStores(baseStores);
-      setError('');
-      hubDebug('portfolio-loaded', {
-        count: baseStores.length,
-        sample: baseStores.slice(0, 5).map((store: any) => ({
-          slug: String(store?.slug || ''),
-          hasStoreLatLng: Number.isFinite(Number(store?.settings?.lat)) && Number.isFinite(Number(store?.settings?.lng)),
-          city: String(store?.settings?.city || ''),
-          state: String(store?.settings?.state || ''),
-        })),
-      });
-    } finally {
-      portfolioLoadInFlightRef.current = false;
-      if (pendingPortfolioReloadRef.current) {
-        pendingPortfolioReloadRef.current = false;
-        window.setTimeout(() => {
-          void loadPortfolio();
-        }, 0);
-      }
-    }
-  }, [activeRegion?.city, activeRegion?.state, hubDebug, hubScopeOverride, preferredDiscoveryAddress?.city, preferredDiscoveryAddress?.state, savedAddressLocation?.lat, savedAddressLocation?.lng, selectedCondominiumSlug, userLocation?.lat, userLocation?.lng]);
-
-  const refreshHub = useCallback(async () => {
-    if (portfolioLoadInFlightRef.current) return;
-    setIsRefreshing(true);
-    try {
-      await loadPortfolio();
-    } catch (err: any) {
-      setError(err?.message || 'Não foi possível atualizar o app agora.');
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [loadPortfolio]);
-
-  useEffect(() => {
-    let active = true;
-    if (!stores.length) setLoading(true);
-    loadPortfolio()
-      .catch((err: any) => {
-        if (!active) return;
-        setError(err?.message || 'Não foi possível carregar as lojas agora.');
-      })
-      .finally(() => {
-        if (!active) return;
-        setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [hubScopeOverride, loadPortfolio]);
 
   const refreshPublicCondominiums = useCallback(async (options?: { skipIfHidden?: boolean }) => {
     if (options?.skipIfHidden && typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
@@ -1838,6 +1454,17 @@ export function MarketplacePage() {
     };
   }, [filteredCondominiums]);
 
+  const { distanceByStore, distanceLoading } = useHubStoreDistances({
+    stores: scopedEnrichedStores,
+    activeLocation,
+    activeRegion,
+    preferredDiscoveryAddress,
+    savedAddressLocation,
+    isCondominiumScope,
+    hubDebug,
+    hubDebugEnabled,
+  });
+
   const filteredStores = useMemo(() => {
     return scopedEnrichedStores
       .filter((store) => {
@@ -1885,142 +1512,6 @@ export function MarketplacePage() {
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { icon: Storefront, label: segment });
   }, [segmentOptions]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const toRad = (deg: number) => (deg * Math.PI) / 180;
-    const haversineKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
-      const R = 6371;
-      const dLat = toRad(b.lat - a.lat);
-      const dLng = toRad(b.lng - a.lng);
-      const lat1 = toRad(a.lat);
-      const lat2 = toRad(b.lat);
-      const x =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.sin(dLng / 2) * Math.sin(dLng / 2) * Math.cos(lat1) * Math.cos(lat2);
-      const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-      return R * c;
-    };
-
-    const loadApproxDistances = async () => {
-      if (isCondominiumScope || !activeLocation || scopedEnrichedStores.length === 0) {
-        setDistanceByStore({});
-        return;
-      }
-      const contextKey = buildDistanceContextKey(preferredDiscoveryAddress, activeLocation, activeRegion);
-      if (distanceCacheKeyRef.current !== contextKey) {
-        distanceCacheKeyRef.current = contextKey;
-        try {
-          const cached = readHubCache<Record<string, number>>(`hub:store-distance:${contextKey}`, HUB_DISTANCE_CACHE_TTL_MS);
-          setDistanceByStore(cached && typeof cached === 'object' ? cached : {});
-        } catch {
-          setDistanceByStore({});
-        }
-      }
-      if (scopedEnrichedStores.every((store) => store.distanceSource === 'server')) {
-        setDistanceByStore({});
-        return;
-      }
-
-      try {
-        const targets = scopedEnrichedStores
-          .filter((store) => store.distanceSource !== 'server')
-          .slice(0, 8)
-          .filter((store) => store.storeLat != null && store.storeLng != null);
-        const cachedDistances =
-          readHubCache<Record<string, number>>(`hub:store-distance:${contextKey}`, HUB_DISTANCE_CACHE_TTL_MS) || {};
-
-        const missingTargets = targets.filter((store) => {
-          const cachedKm = Number(cachedDistances?.[store.id]);
-          return !Number.isFinite(cachedKm);
-        });
-
-        if (Object.keys(cachedDistances).length > 0 && !cancelled) {
-          setDistanceByStore(cachedDistances);
-        }
-        if (missingTargets.length === 0) {
-          hubDebug('distance-cache-hit', {
-            contextKey,
-            cachedCount: Object.keys(cachedDistances).length,
-          });
-          setDistanceLoading(false);
-          return;
-        }
-
-        setDistanceLoading(true);
-        const settled = await Promise.allSettled(
-          missingTargets.map(async (store) => {
-            const km = haversineKm(activeLocation, { lat: Number(store.storeLat), lng: Number(store.storeLng) });
-            return [store.id, km] as const;
-          })
-        );
-        if (cancelled) return;
-        const next: Record<string, number> = { ...cachedDistances };
-        settled.forEach((result) => {
-          if (result.status === 'fulfilled') {
-            next[result.value[0]] = result.value[1];
-          }
-        });
-        setDistanceByStore(next);
-        writeHubCache(`hub:store-distance:${contextKey}`, next);
-        hubDebug('distance-calculated', {
-          contextKey,
-          activeSource: savedAddressLocation ? 'saved_address' : activeLocation ? 'gps' : 'none',
-          targetCount: missingTargets.length,
-          sample: missingTargets.slice(0, 5).map((store) => ({
-            slug: store.slug,
-            km: next[store.id] ?? null,
-            storeLat: store.storeLat,
-            storeLng: store.storeLng,
-          })),
-        });
-      } catch (_err) {
-        // preserve the last valid cache instead of clearing the distance badge
-      } finally {
-        if (!cancelled) setDistanceLoading(false);
-      }
-    };
-    const timer = window.setTimeout(loadApproxDistances, 1800);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [activeLocation, activeRegion?.city, activeRegion?.state, hubDebug, isCondominiumScope, preferredDiscoveryAddress?.addressLine, savedAddressLocation, scopedEnrichedStores]);
-
-  useEffect(() => {
-    hubDebug('location-source', {
-      source: savedAddressLocation ? 'saved_address' : activeLocation ? 'gps' : 'none',
-      isLoggedIn: Boolean(customerSession?.token),
-      label: activeLocationLabel,
-      lat: activeLocation ? Number(activeLocation.lat).toFixed(5) : null,
-      lng: activeLocation ? Number(activeLocation.lng).toFixed(5) : null,
-      regionCity: activeRegion?.city || null,
-      regionState: activeRegion?.state || null,
-    });
-  }, [
-    activeLocation,
-    activeLocationLabel,
-    activeRegion?.city,
-    activeRegion?.state,
-    customerSession?.token,
-    hubDebug,
-    savedAddressLocation,
-  ]);
-
-  useEffect(() => {
-    if (!hubDebugEnabled) return;
-    hubDebug('distance-snapshot', {
-      totalStores: scopedEnrichedStores.length,
-      computedLocalDistances: Object.keys(distanceByStore).length,
-      distanceLoading,
-      sample: scopedEnrichedStores.slice(0, 5).map((store) => ({
-        slug: store.slug,
-        source: distanceByStore[store.id] != null ? 'local_haversine' : store.distanceKm != null ? 'server' : 'none',
-        km: distanceByStore[store.id] ?? store.distanceKm ?? null,
-        hasStoreLatLng: store.storeLat != null && store.storeLng != null,
-      })),
-    });
-  }, [distanceByStore, distanceLoading, hubDebug, hubDebugEnabled, scopedEnrichedStores]);
 
   const currency = useMemo(
     () =>

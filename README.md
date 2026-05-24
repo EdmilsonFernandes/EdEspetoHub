@@ -72,6 +72,9 @@ Hooks atuais do Hub:
 - `useHubSearchPlaceholder`: controla a rotacao do placeholder da busca.
 - `useHubFavorites`: controla favoritos de loja no localStorage e ordenacao visual de favoritos.
 - `useHubFeaturedProducts`: busca e monta os itens em destaque patrocinados/organicos.
+- `useHubLocation`: resolve endereco principal do cliente, GPS, regiao ativa e link de destinos.
+- `useHubStores`: carrega a vitrine de lojas, controla refresh e alternancia entre regiao/todas as lojas.
+- `useHubStoreDistances`: calcula/cacheia distancias locais quando a API nao entrega distancia pronta.
 - `useHubAnonymousOrders`: hidrata pedidos anonimos salvos no navegador e reconcilia status publico.
 - `useHubCustomerActiveOrders`: faz polling dos pedidos ativos do cliente logado.
 

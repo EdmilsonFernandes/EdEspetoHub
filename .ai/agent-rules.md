@@ -139,6 +139,9 @@ Backend API (chamanoespeto-api :4000)
   - `useHubSearchPlaceholder`
   - `useHubFavorites`
   - `useHubFeaturedProducts`
+  - `useHubLocation`
+  - `useHubStores`
+  - `useHubStoreDistances`
   - `useHubAnonymousOrders`
   - `useHubCustomerActiveOrders`
 - Mudança visual ou lógica no Hub deve validar, no mínimo:
