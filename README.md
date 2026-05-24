@@ -59,6 +59,8 @@ A Home principal do app fica em `frontend/src/pages/MarketplacePage.tsx`.
 
 Depois do refactor, essa pagina deve ser tratada como **orquestradora**: ela junta dados, hooks, componentes e callbacks principais, mas nao deve voltar a acumular blocos grandes de estado, polling, cache, localStorage, chamadas de API ou JSX repetido.
 
+Documentacao detalhada do refactor e manutencao: `docs/HUB_MARKETPLACE_REFACTOR.md`.
+
 Estrutura atual para manutencao:
 
 - `frontend/src/pages/MarketplacePage.tsx`: shell principal da Home/Hub, composicao dos blocos e integracao com navegacao.
