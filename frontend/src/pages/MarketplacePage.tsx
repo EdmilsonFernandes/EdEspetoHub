@@ -33,14 +33,17 @@ import { storeService } from '../services/storeService';
 import { condominiumService } from '../services/condominiumService';
 import { destinationService } from '../services/destinationService';
 import { productService } from '../services/productService';
-import { orderService } from '../services/orderService';
 import { customerAccountService } from '../services/customerAccountService';
 import { inputAssistProps } from '../utils/inputAssist';
-import { featuredService } from '../services/featuredService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { formatNextOpeningLabel, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import { useCachedCustomerProfileImage } from '../hooks/useCachedCustomerProfileImage';
+import { useHubAnonymousOrders } from '../hooks/hub/useHubAnonymousOrders';
+import { useHubCustomerActiveOrders } from '../hooks/hub/useHubCustomerActiveOrders';
+import { useHubFavorites } from '../hooks/hub/useHubFavorites';
+import { useHubFeaturedProducts, type HubFeaturedProduct as FeaturedProduct } from '../hooks/hub/useHubFeaturedProducts';
+import { useHubSearchPlaceholder } from '../hooks/hub/useHubSearchPlaceholder';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
 import { HubFilterSheet, type HubQuickFilterKey } from '../components/Marketplace/Hub/HubFilters';
@@ -661,19 +664,6 @@ const CATEGORY_COLORS: Record<string, { active: string; inactive: string; icon: 
   Empório:    { active: 'bg-lime-600 shadow-[0_12px_26px_-14px_rgba(101,163,13,0.62)]',  inactive: 'border border-lime-100 bg-lime-50/80',   icon: 'text-lime-600' },
 };
 
-type FeaturedProduct = {
-  id: string;
-  productId?: string;
-  storeSlug: string;
-  storeName: string;
-  storeLogo: string;
-  name: string;
-  imageUrl: string;
-  price: number;
-  sponsored?: boolean;
-  badge?: string;
-};
-
 const readCustomerSession = () => {
   try {
     const raw = localStorage.getItem('customerSession');
@@ -699,13 +689,9 @@ const readCustomerSession = () => {
   }
 };
 
-const FAVORITES_STORAGE_KEY = 'hub:favorites:stores';
 const SELECTED_CONDOMINIUM_STORAGE_KEY = 'hub:selected-condominium';
-const DISMISSED_ANONYMOUS_ORDERS_KEY = 'hub:dismissed-anonymous-orders';
 const STORE_PROMO_POPUP_DISMISSED_UNTIL_KEY = 'hub:store-promo-popup-dismissed-until';
 const STORE_PROMO_POPUP_PRIMED_KEY = 'hub:store-promo-popup-primed';
-const ORDER_EXPIRATION_MS = 3 * 60 * 60 * 1000; // 3 horas
-const ACTIVE_ORDER_ALERT_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6 horas
 const STORE_PROMO_POPUP_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 horas
 
 const readSelectedCondominiumSlug = () => {
@@ -742,30 +728,6 @@ const readMotoboySession = () => {
   } catch {
     return null;
   }
-};
-
-// Interface para pedidos em andamento (cache anônimo)
-type ActiveAnonymousOrder = {
-  id: string;
-  storeSlug: string;
-  createdAt: number;
-  status?: string;
-  storeName?: string;
-  accessToken?: string;
-  type?: string;
-  paymentStatus?: string;
-};
-
-const isTerminalRecentOrder = (entry?: {
-  status?: string;
-  paymentStatus?: string;
-}) => {
-  const status = String(entry?.status || '').trim().toLowerCase();
-  const paymentStatus = String(entry?.paymentStatus || '').trim().toUpperCase();
-  if ([ 'done', 'delivered', 'finished', 'cancelled', 'rejected' ].includes(status)) return true;
-  if (!status && paymentStatus === 'PAID') return true;
-  if (paymentStatus === 'PAID' && [ 'ready', 'dispatched' ].includes(status)) return true;
-  return false;
 };
 
 export function MarketplacePage() {
@@ -806,8 +768,6 @@ export function MarketplacePage() {
   const storesSectionRef = useRef<HTMLElement | null>(null);
   const portfolioLoadInFlightRef = useRef(false);
   const publicCondominiumLoadInFlightRef = useRef(false);
-  const activeOrdersLoadInFlightRef = useRef(false);
-  const anonymousOrdersHydrationInFlightRef = useRef(false);
   const openOrderTracking = useCallback((orderId?: string | null, accessToken?: string | null) => {
     const normalizedOrderId = String(orderId || '').trim();
     if (!normalizedOrderId) return;
@@ -837,28 +797,8 @@ export function MarketplacePage() {
     }
   };
 
-  const SEARCH_PLACEHOLDERS = [
-    'Buscar espetinho...',
-    'Buscar hambúrguer...',
-    'Buscar loja ou produto...',
-    'Buscar churrasco...',
-    'Buscar bebida...',
-    'Buscar sobremesa...',
-  ];
-  const [searchPlaceholderIndex, setSearchPlaceholderIndex] = useState(0);
-  const [searchPlaceholderVisible, setSearchPlaceholderVisible] = useState(true);
+  const { searchPlaceholder, searchPlaceholderVisible } = useHubSearchPlaceholder(isSearchEditing);
   const [condoPickerFilter, setCondoPickerFilter] = useState<'all' | 'live' | 'upcoming' | 'none'>('all');
-  useEffect(() => {
-    if (isSearchEditing) return;
-    const cycle = window.setInterval(() => {
-      setSearchPlaceholderVisible(false);
-      window.setTimeout(() => {
-        setSearchPlaceholderIndex((i) => (i + 1) % SEARCH_PLACEHOLDERS.length);
-        setSearchPlaceholderVisible(true);
-      }, 350);
-    }, 2800);
-    return () => window.clearInterval(cycle);
-  }, [isSearchEditing]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search || '');
@@ -901,9 +841,6 @@ export function MarketplacePage() {
   const [showStorePromoPopup, setShowStorePromoPopup] = useState(false);
   const [homeConfig, setHomeConfig] = useState(() => DEFAULT_HOME_CONFIG);
   const [homeConfigLoaded, setHomeConfigLoaded] = useState(false);
-  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
-  const [featuredLoading, setFeaturedLoading] = useState(false);
-  const [featuredOffset, setFeaturedOffset] = useState(0);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [userRegion, setUserRegion] = useState<{ city: string; state: string } | null>(null);
   const [locationLabel, setLocationLabel] = useState('Sua região');
@@ -972,25 +909,6 @@ export function MarketplacePage() {
   const [deactivating, setDeactivating] = useState(false);
   const [distanceByStore, setDistanceByStore] = useState<Record<string, number>>({});
   const [distanceLoading, setDistanceLoading] = useState(false);
-  const [activeAnonymousOrders, setActiveAnonymousOrders] = useState<ActiveAnonymousOrder[]>([]);
-  const [dismissedAnonymousOrderIds, setDismissedAnonymousOrderIds] = useState<string[]>(() => {
-    try {
-      const raw = localStorage.getItem(DISMISSED_ANONYMOUS_ORDERS_KEY) || sessionStorage.getItem(DISMISSED_ANONYMOUS_ORDERS_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed.map((item) => String(item || '').trim()).filter(Boolean) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [favoriteStoreSlugs, setFavoriteStoreSlugs] = useState<string[]>(() => {
-    try {
-      const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed.map((item) => String(item || '').trim()).filter(Boolean) : [];
-    } catch {
-      return [];
-    }
-  });
   const touchStartYRef = useRef<number | null>(null);
   const touchPullActiveRef = useRef(false);
   const pullDistanceRef = useRef(0);
@@ -1145,104 +1063,6 @@ export function MarketplacePage() {
     }, 900);
     return () => window.clearTimeout(timer);
   }, []);
-
-  // Carregar pedidos anônimos do localStorage e reconciliar status real
-  useEffect(() => {
-    let cancelled = false;
-    const hydrateOrders = async () => {
-      if (anonymousOrdersHydrationInFlightRef.current) return;
-      if (typeof document !== 'undefined' && document.hidden) return;
-      anonymousOrdersHydrationInFlightRef.current = true;
-      const now = Date.now();
-      const found: ActiveAnonymousOrder[] = [];
-      
-      try {
-        Object.keys(localStorage).forEach(key => {
-          if (key.startsWith('lastOrders:')) {
-            const slug = key.replace('lastOrders:', '');
-            const raw = localStorage.getItem(key);
-            if (!raw) return;
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) {
-              parsed.forEach(order => {
-                const createdAt = Number(order.createdAt || 0);
-                if (createdAt && now - createdAt < ORDER_EXPIRATION_MS) {
-                  const orderId = String(order?.id || '').trim();
-                  if (!orderId) return;
-                  const persistedAccessToken = String(
-                    order?.accessToken || localStorage.getItem(`orderAccess:${orderId}`) || ''
-                  ).trim();
-                  found.push({
-                    id: orderId,
-                    storeSlug: slug,
-                    createdAt,
-                    status: order?.status ? String(order.status) : undefined,
-                    accessToken: persistedAccessToken || undefined,
-                    type: order?.type ? String(order.type) : undefined,
-                    paymentStatus: order?.paymentStatus ? String(order.paymentStatus) : undefined,
-                  });
-                }
-              });
-            }
-          }
-        });
-
-        const checked = await Promise.all(
-          found
-            .sort((a, b) => b.createdAt - a.createdAt)
-            .slice(0, 3)
-            .map(async (entry) => {
-              try {
-                const data = await orderService.getPublicById(entry.id);
-                return {
-                  ...entry,
-                  status: String(data?.status || entry.status || '').trim() || undefined,
-                  type: String(data?.type || entry.type || '').trim() || undefined,
-                  paymentStatus: String(data?.paymentStatus || entry.paymentStatus || '').trim() || undefined,
-                };
-              } catch {
-                return entry;
-              }
-            })
-        );
-
-        const active = checked.filter((entry) => !isTerminalRecentOrder(entry));
-        if (!cancelled) {
-          setActiveAnonymousOrders(active);
-        }
-      } catch (e) {
-        console.error('Erro ao carregar pedidos anônimos', e);
-      } finally {
-        anonymousOrdersHydrationInFlightRef.current = false;
-      }
-    };
-
-    void hydrateOrders();
-    const interval = window.setInterval(() => {
-      void hydrateOrders();
-    }, 60000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteStoreSlugs));
-    } catch {
-      // ignore
-    }
-  }, [favoriteStoreSlugs]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(dismissedAnonymousOrderIds));
-      sessionStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(dismissedAnonymousOrderIds));
-    } catch {
-      // ignore
-    }
-  }, [dismissedAnonymousOrderIds]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1547,17 +1367,6 @@ export function MarketplacePage() {
   }, [isSearchEditing]);
 
   useEffect(() => {
-    if (featuredProducts.length <= 8) {
-      setFeaturedOffset(0);
-      return;
-    }
-    const timer = window.setInterval(() => {
-      setFeaturedOffset((prev) => (prev + 1) % featuredProducts.length);
-    }, 8000);
-    return () => window.clearInterval(timer);
-  }, [featuredProducts]);
-
-  useEffect(() => {
     const raf = window.requestAnimationFrame(() => setHasEntered(true));
     return () => window.cancelAnimationFrame(raf);
   }, []);
@@ -1809,6 +1618,14 @@ export function MarketplacePage() {
     return enrichedStores.filter((store) => condominiumSlugSet.has(store.slug));
   }, [enrichedStores, condominiumStoreSlugs, selectedCondominiumSlug]);
   const isCondominiumScope = Boolean(selectedCondominiumSlug);
+  const { favoriteStoreSlugs, favoriteStores, toggleFavoriteStore } = useHubFavorites(scopedEnrichedStores);
+  const {
+    featuredLoading,
+    displayedFeaturedProducts,
+    genericHighlightLabel,
+    hasSponsoredFeaturedProducts,
+    hasFeaturedCarouselOverflow,
+  } = useHubFeaturedProducts(scopedEnrichedStores);
 
   useEffect(() => {
     if (debouncedQuery.length < 2) {
@@ -2069,13 +1886,6 @@ export function MarketplacePage() {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { icon: Storefront, label: segment });
   }, [segmentOptions]);
 
-  const favoriteStores = useMemo(() => {
-    if (!favoriteStoreSlugs.length) return [];
-    return scopedEnrichedStores
-      .filter((store) => favoriteStoreSlugs.includes(store.slug))
-      .sort((a, b) => Number(b.isOpen) - Number(a.isOpen) || b.rating - a.rating);
-  }, [scopedEnrichedStores, favoriteStoreSlugs]);
-
   useEffect(() => {
     let cancelled = false;
     const toRad = (deg: number) => (deg * Math.PI) / 180;
@@ -2212,87 +2022,6 @@ export function MarketplacePage() {
     });
   }, [distanceByStore, distanceLoading, hubDebug, hubDebugEnabled, scopedEnrichedStores]);
 
-  useEffect(() => {
-    let cancelled = false;
-    const loadFeaturedProducts = async () => {
-      if (scopedEnrichedStores.length === 0) {
-        setFeaturedProducts([]);
-        return;
-      }
-      setFeaturedLoading(true);
-      try {
-        const sponsored = await featuredService.listPublicFeatured(18).catch(() => []);
-        const sponsoredEntries = (Array.isArray(sponsored) ? sponsored : [])
-          .filter((item: any) => String(item?.storeSlug || '').trim())
-          .map((item: any) => ({
-            id: String(item?.id || `${item?.storeSlug}-${item?.productId || item?.productName || 'sponsored'}`),
-            productId: String(item?.productId || '').trim() || undefined,
-            storeSlug: String(item?.storeSlug || ''),
-            storeName: String(item?.storeName || 'Loja'),
-            name: String(item?.productName || 'Produto em destaque'),
-            storeLogo: resolveAssetUrl(item?.storeLogoUrl || undefined) || '/janocaminho.jpg',
-            imageUrl:
-              resolveAssetUrl(item?.imageUrl || undefined) ||
-              resolveAssetUrl(item?.storeLogoUrl || undefined) ||
-              getStoreAvatarUrl(item?.storeSlug, item?.storeName),
-            price: Number(item?.price || 0),
-            sponsored: true,
-            badge: String(item?.badge || 'Patrocinado'),
-          }))
-          .filter((item: any) => item.storeSlug && item.price > 0);
-
-        const candidates = scopedEnrichedStores.slice(0, 4);
-        const responses = await Promise.allSettled(
-          candidates.map(async (store) => {
-            const products = await productService.listPublicBySlug(store.slug);
-            const valid = (Array.isArray(products) ? products : [])
-              .filter((product: any) => Boolean(product?.name) && Number(product?.price || product?.promoPrice || 0) > 0)
-              .map((product: any) => ({
-                id: String(product?.id || `${store.slug}-${product?.name}`),
-                productId: String(product?.id || '').trim() || undefined,
-                storeSlug: store.slug,
-                storeName: store.name,
-                name: String(product?.name || 'Produto'),
-                storeLogo: store.logo,
-                imageUrl: resolveAssetUrl(product?.imageUrl || undefined) || store.logo,
-                price: Number(
-                  (product?.promoActive && product?.promoPrice != null ? product?.promoPrice : product?.price) || 0
-                ),
-                featured: Boolean(product?.isFeatured),
-                sponsored: false,
-              }))
-              .sort((a, b) => Number(b.featured) - Number(a.featured))
-              .slice(0, 5);
-            return valid;
-          })
-        );
-        if (cancelled) return;
-        const organicPool = responses
-          .flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
-          .filter((entry) => entry.price > 0)
-          .map(({ featured: _featured, ...entry }) => entry);
-        const sponsoredKeys = new Set(
-          sponsoredEntries.map((entry: any) => `${entry.storeSlug}::${entry.id}::${entry.name}`)
-        );
-        const uniqueOrganic = organicPool.filter(
-          (entry: any) => !sponsoredKeys.has(`${entry.storeSlug}::${entry.id}::${entry.name}`)
-        );
-        const shuffledOrganic = [...uniqueOrganic].sort(() => Math.random() - 0.5);
-        const merged = [...sponsoredEntries, ...shuffledOrganic].slice(0, 18);
-        setFeaturedProducts(merged);
-      } catch (_error) {
-        if (!cancelled) setFeaturedProducts([]);
-      } finally {
-        if (!cancelled) setFeaturedLoading(false);
-      }
-    };
-    const timer = window.setTimeout(loadFeaturedProducts, 900);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [scopedEnrichedStores]);
-
   const currency = useMemo(
     () =>
       new Intl.NumberFormat('pt-BR', {
@@ -2302,13 +2031,6 @@ export function MarketplacePage() {
     []
   );
 
-  const genericHighlightLabel = useMemo(() => {
-    const hasFoodHeavy = scopedEnrichedStores.some((store) =>
-      [ 'Restaurante', 'Hamburguer', 'Lanche', 'Pizza', 'Doces' ].includes(store.segment)
-    );
-    return hasFoodHeavy ? 'Destaques de hoje' : 'Achados de hoje';
-  }, [scopedEnrichedStores]);
-
   const formatDistance = (km: number | null | undefined) => {
     const normalizedKm = typeof km === 'number' && Number.isFinite(km) ? km : null;
     if (normalizedKm === null) return '-- km';
@@ -2316,28 +2038,9 @@ export function MarketplacePage() {
     return `${displayKm.toFixed(1).replace('.', ',')} km`;
   };
 
-  const displayedFeaturedProducts = useMemo(() => {
-    const items = Array.isArray(featuredProducts) ? featuredProducts : [];
-    const sponsored = items.filter((item) => item.sponsored);
-    const organic = items.filter((item) => !item.sponsored);
-    const windowSize = 8;
-    if (items.length <= windowSize) return [...sponsored, ...organic];
-    if (organic.length === 0) return sponsored.slice(0, windowSize);
-
-    const fixedSponsored = sponsored.slice(0, Math.min(windowSize, sponsored.length));
-    const remainingSlots = Math.max(0, windowSize - fixedSponsored.length);
-    if (remainingSlots === 0) return fixedSponsored;
-
-    const rotatedOrganic: FeaturedProduct[] = [];
-    for (let i = 0; i < remainingSlots; i += 1) {
-      rotatedOrganic.push(organic[(featuredOffset + i) % organic.length]);
-    }
-    return [...fixedSponsored, ...rotatedOrganic];
-  }, [featuredProducts, featuredOffset]);
-  const hasSponsoredFeaturedProducts = displayedFeaturedProducts.some((item) => item.sponsored);
-  const hasFeaturedCarouselOverflow = displayedFeaturedProducts.length > 3;
-
   const isCustomerLogged = Boolean(customerSession?.token);
+  const { visibleActiveAnonymousOrders, dismissVisibleAnonymousOrders } = useHubAnonymousOrders(isCustomerLogged);
+  useHubCustomerActiveOrders(isCustomerLogged);
   const customerDisplayName = String(
     customerSession?.user?.fullName || customerSession?.user?.name || (isCustomerLogged ? 'Cliente' : 'Anônimo')
   ).trim();
@@ -2534,15 +2237,6 @@ export function MarketplacePage() {
     }
   }, [handleCustomerLogout]);
 
-  const toggleFavoriteStore = useCallback((slug: string) => {
-    const normalized = String(slug || '').trim();
-    if (!normalized) return;
-    setFavoriteStoreSlugs((prev) => {
-      if (prev.includes(normalized)) return prev.filter((item) => item !== normalized);
-      return [normalized, ...prev].slice(0, 200);
-    });
-  }, []);
-
   const resetMarketplaceFilters = useCallback(() => {
     setQuery('');
     setDebouncedQuery('');
@@ -2640,59 +2334,6 @@ export function MarketplacePage() {
     navigate('/cliente?mode=login&next=/cliente/pedidos&hub=1&bio=1');
   }, [navigate, isCustomerLogged, setCustomerSession]);
 
-  const [activeOrders, setActiveOrders] = useState<any[]>([]); void activeOrders;
-
-  const clearAnonymousOrderCache = useCallback((orderIds: string[]) => {
-    const ids = orderIds.map((item) => String(item || '').trim()).filter(Boolean);
-    if (!ids.length) return;
-    try {
-      Object.keys(localStorage).forEach((key) => {
-        if (!key.startsWith('lastOrders:')) return;
-        const raw = localStorage.getItem(key);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) return;
-        const next = parsed.filter((entry) => !ids.includes(String(entry?.id || '').trim()));
-        if (next.length > 0) {
-          localStorage.setItem(key, JSON.stringify(next));
-        } else {
-          localStorage.removeItem(key);
-        }
-      });
-      ids.forEach((id) => localStorage.removeItem(`orderAccess:${id}`));
-      ids.forEach((id) => sessionStorage.removeItem(`orderAccess:${id}`));
-    } catch {
-      // ignore
-    }
-  }, []);
-
-
-  const visibleActiveAnonymousOrders = useMemo(
-    () => activeAnonymousOrders.filter((order) => !dismissedAnonymousOrderIds.includes(String(order?.id || '').trim())),
-    [activeAnonymousOrders, dismissedAnonymousOrderIds]
-  );
-
-  const dismissVisibleAnonymousOrders = useCallback(() => {
-    const ids = visibleActiveAnonymousOrders.map((order) => String(order?.id || '').trim()).filter(Boolean);
-    const next = Array.from(new Set([ ...dismissedAnonymousOrderIds, ...ids ]));
-    try {
-      localStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(next));
-      sessionStorage.setItem(DISMISSED_ANONYMOUS_ORDERS_KEY, JSON.stringify(next));
-    } catch {
-      // ignore
-    }
-    setDismissedAnonymousOrderIds(next);
-    clearAnonymousOrderCache(ids);
-    setActiveAnonymousOrders([]);
-  }, [clearAnonymousOrderCache, dismissedAnonymousOrderIds, visibleActiveAnonymousOrders]);
-
-  useEffect(() => {
-    const nextOrder = visibleActiveAnonymousOrders[0];
-    if (!isCustomerLogged && nextOrder?.id) {
-      primeOrderTrackingNavigation(nextOrder.id, nextOrder.accessToken);
-    }
-  }, [isCustomerLogged, visibleActiveAnonymousOrders]);
-
   const [storageUnread, setStorageUnread] = useState(0);
   useEffect(() => {
     apiClient.get("/customer/notifications").then((r: any) => setStorageUnread(r?.unreadCount || 0)).catch(() => {});
@@ -2706,59 +2347,6 @@ export function MarketplacePage() {
   const handleHubNotificationClick = useCallback(() => {
     navigate('/notificacoes');
   }, [navigate]);
-
-  useEffect(() => {
-    if (isCustomerLogged) setActiveAnonymousOrders([]);
-  }, [isCustomerLogged]);
-
-  const loadActiveOrders = useCallback(async () => {
-    if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
-    if (activeOrdersLoadInFlightRef.current) return;
-    const session = readCustomerSession();
-    if (!session?.token) {
-      setActiveOrders([]);
-      return;
-    }
-    activeOrdersLoadInFlightRef.current = true;
-    try {
-      const result = await customerAccountService.listOrders({ limit: 20 });
-      const active = ((result?.data) || []).filter((o: any) => {
-        const status = String(o.status || '').toLowerCase();
-        const createdAt = new Date(o?.createdAt || 0).getTime();
-        const isRecentEnough = Number.isFinite(createdAt) ? (Date.now() - createdAt) < ACTIVE_ORDER_ALERT_MAX_AGE_MS : true;
-        return isRecentEnough && !['done', 'delivered', 'finished', 'cancelled', 'rejected'].includes(status);
-      });
-      setActiveOrders(active.slice(0, 3));
-      setActiveOrders(active.slice(0, 3));
-    } catch {
-      // ignore
-    } finally {
-      activeOrdersLoadInFlightRef.current = false;
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isCustomerLogged) {
-      setActiveOrders([]);
-      return;
-    }
-    const refreshIfVisible = () => {
-      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
-      void loadActiveOrders();
-    };
-    const timer = window.setTimeout(refreshIfVisible, 1200);
-    const interval = window.setInterval(refreshIfVisible, 10000);
-    window.addEventListener('focus', refreshIfVisible);
-    document.addEventListener('visibilitychange', refreshIfVisible);
-    window.addEventListener('jnc:app-foreground', refreshIfVisible as EventListener);
-    return () => {
-      window.clearTimeout(timer);
-      window.clearInterval(interval);
-      window.removeEventListener('focus', refreshIfVisible);
-      document.removeEventListener('visibilitychange', refreshIfVisible);
-      window.removeEventListener('jnc:app-foreground', refreshIfVisible as EventListener);
-    };
-  }, [isCustomerLogged, loadActiveOrders]);
 
   useEffect(() => {
     let active = true;
@@ -2901,7 +2489,7 @@ export function MarketplacePage() {
           searchInputRef={searchInputRef}
           query={query}
           isSearchEditing={isSearchEditing}
-          searchPlaceholder={SEARCH_PLACEHOLDERS[searchPlaceholderIndex]}
+          searchPlaceholder={searchPlaceholder}
           searchPlaceholderVisible={searchPlaceholderVisible}
           quickFilter={quickFilter}
           segmentFilter={segmentFilter}
