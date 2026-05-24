@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiClient } from '../config/apiClient';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Drawer } from 'vaul';
 import { Capacitor } from '@capacitor/core';
 import {
   MagnifyingGlass,
@@ -32,8 +31,6 @@ import {
   Mountains,
   UserCircle,
   Warning,
-  SlidersHorizontal,
-  CheckCircle,
 } from '@phosphor-icons/react';
 import { storeService } from '../services/storeService';
 import { condominiumService } from '../services/condominiumService';
@@ -50,6 +47,8 @@ import { useCachedCustomerProfileImage } from '../hooks/useCachedCustomerProfile
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { HeaderAvatarTrigger } from '../components/Marketplace/HeaderAvatarTrigger';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
+import { HubFilterBar, HubFilterSheet, type HubQuickFilterKey } from '../components/Marketplace/Hub/HubFilters';
+import { HubMarketingPopup } from '../components/Marketplace/Hub/HubMarketingPopup';
 import { CondominiumStatusModal } from '../components/Marketplace/CondominiumStatusModal';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
@@ -121,47 +120,6 @@ type PreferredDiscoveryAddress = {
   lat?: number | null;
   lng?: number | null;
 };
-
-type HubQuickFilterKey = 'all' | 'free_shipping' | 'nearby' | 'open_now' | 'favorites';
-type HubActiveQuickFilterKey = Exclude<HubQuickFilterKey, 'all'>;
-
-const HUB_PRIMARY_QUICK_FILTERS: HubActiveQuickFilterKey[] = ['open_now', 'free_shipping', 'nearby'];
-const HUB_QUICK_FILTER_OPTIONS: Array<{
-  key: HubActiveQuickFilterKey;
-  label: string;
-  compactLabel: string;
-  description: string;
-  icon: typeof Storefront;
-}> = [
-  {
-    key: 'open_now',
-    label: 'Aberto agora',
-    compactLabel: 'Aberto',
-    description: 'Mostra lojas atendendo neste momento.',
-    icon: Clock,
-  },
-  {
-    key: 'free_shipping',
-    label: 'Entrega grátis',
-    compactLabel: 'Grátis',
-    description: 'Prioriza lojas sem taxa de entrega.',
-    icon: Bicycle,
-  },
-  {
-    key: 'nearby',
-    label: 'Perto de mim',
-    compactLabel: 'Perto',
-    description: 'Lojas mais próximas do endereço atual.',
-    icon: MapPinLine,
-  },
-  {
-    key: 'favorites',
-    label: 'Favoritos',
-    compactLabel: 'Favoritos',
-    description: 'Apenas lojas salvas por você.',
-    icon: Heart,
-  },
-];
 
 const CUSTOMER_ADDRESS_UPDATED_EVENT = 'jnc:customer-addresses-updated';
 const HUB_DEBUG_QUERY_PARAM = 'hubDebug';
@@ -2103,18 +2061,6 @@ export function MarketplacePage() {
   const categoryTiles = useMemo(() => {
     return segmentOptions.map((segment) => categoryVisuals[segment] || { icon: Storefront, label: segment });
   }, [segmentOptions]);
-  const primaryQuickFilterOptions = useMemo(
-    () => HUB_QUICK_FILTER_OPTIONS.filter((item) => HUB_PRIMARY_QUICK_FILTERS.includes(item.key)),
-    []
-  );
-  const selectedQuickFilterOption = useMemo(
-    () => HUB_QUICK_FILTER_OPTIONS.find((item) => item.key === quickFilter) || null,
-    [quickFilter]
-  );
-  const hiddenMarketplaceFilterCount =
-    (quickFilter === 'favorites' ? 1 : 0) + (segmentFilter !== 'all' ? 1 : 0);
-  const activeMarketplaceFilterCount =
-    (quickFilter !== 'all' ? 1 : 0) + (segmentFilter !== 'all' ? 1 : 0) + (debouncedQuery ? 1 : 0);
 
   const favoriteStores = useMemo(() => {
     if (!favoriteStoreSlugs.length) return [];
@@ -2859,69 +2805,24 @@ export function MarketplacePage() {
         {isRefreshing ? 'Atualizando...' : pullDistance >= 68 ? 'Solte para atualizar' : 'Puxe para atualizar'}
       </div>
 
-      {showStorePromoPopup && !profileDrawerOpen && (
-        <div
-          className="fixed inset-0 z-[140] flex items-center justify-center bg-slate-950/48 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md animate-in fade-in duration-200"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Campanha em destaque do Já no Caminho"
-        >
-          <div className="relative w-full max-w-[430px] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200">
-            <button
-              type="button"
-              onClick={dismissStorePromoPopup}
-              className="absolute -right-2 -top-2 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/80 bg-white text-slate-900 shadow-[0_14px_30px_-14px_rgba(15,23,42,0.45)] transition-all duration-150 ease-out hover:bg-slate-50 active:scale-95"
-              aria-label="Fechar destaque"
-              title="Fechar"
-            >
-              <X size={19} weight="bold" />
-            </button>
-            <a
-              href={marketingPopupActionTarget?.href || '#'}
-              target={marketingPopupActionTarget?.external ? '_blank' : undefined}
-              rel={marketingPopupActionTarget?.external ? 'noopener noreferrer' : undefined}
-              onClick={(event) => {
-                event.preventDefault();
-                dismissStorePromoPopup();
-                if (marketingPopupActionTarget) {
-                  void openActionTarget(marketingPopupActionTarget, navigate);
-                }
-              }}
-              className="group block overflow-hidden rounded-[1.85rem] border border-white/80 bg-white shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] transition-all duration-200 ease-out active:scale-[0.985]"
-              aria-label={homeConfig.marketingPopup.title || 'Abrir popup de marketing do Já no Caminho'}
-            >
-              <div className="relative aspect-[3/4] bg-slate-950">
-                <img
-                  src={marketingPopupImageUrl}
-                  alt={homeConfig.marketingPopup.title || 'Banner de marketing do Já no Caminho'}
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  className={`absolute inset-0 h-full w-full ${homeConfig.marketingPopup.fit === 'contain' ? 'object-contain bg-slate-900/5' : 'object-cover'}`}
-                />
-                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/20 to-transparent opacity-80 transition-opacity duration-200 group-active:opacity-100" />
-              </div>
-              {(homeConfig.marketingPopup.title || homeConfig.marketingPopup.description || homeConfig.marketingPopup.actionUrl) ? (
-                <div className="border-t border-slate-100 px-5 py-4">
-                  {homeConfig.marketingPopup.title ? (
-                    <p className="tracking-tight text-base font-black text-slate-950">{homeConfig.marketingPopup.title}</p>
-                  ) : null}
-                  {homeConfig.marketingPopup.description ? (
-                    <p className="mt-1.5 text-sm font-medium leading-relaxed text-slate-600">
-                      {homeConfig.marketingPopup.description}
-                    </p>
-                  ) : null}
-                  {homeConfig.marketingPopup.actionUrl ? (
-                    <div className="mt-4 inline-flex max-w-full rounded-full bg-slate-950 px-5 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white shadow-[0_12px_20px_-8px_rgba(15,23,42,0.3)] transition-colors duration-300 hover:bg-slate-800">
-                      <span className="truncate">{marketingPopupActionLabel}</span>
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-            </a>
-          </div>
-        </div>
-      )}
+      <HubMarketingPopup
+        visible={showStorePromoPopup && !profileDrawerOpen}
+        imageUrl={marketingPopupImageUrl}
+        title={homeConfig.marketingPopup.title}
+        description={homeConfig.marketingPopup.description}
+        actionUrl={homeConfig.marketingPopup.actionUrl}
+        actionLabel={marketingPopupActionLabel}
+        actionHref={marketingPopupActionTarget?.href}
+        actionExternal={marketingPopupActionTarget?.external}
+        fit={homeConfig.marketingPopup.fit}
+        onDismiss={dismissStorePromoPopup}
+        onOpenAction={() => {
+          dismissStorePromoPopup();
+          if (marketingPopupActionTarget) {
+            void openActionTarget(marketingPopupActionTarget, navigate);
+          }
+        }}
+      />
       
       <ProfileDrawer
         isOpen={profileDrawerOpen}
@@ -2948,185 +2849,19 @@ export function MarketplacePage() {
         versionLabel={APP_BUILD_INFO.versionLabel}
       />
 
-      <Drawer.Root open={filtersSheetOpen} onOpenChange={setFiltersSheetOpen}>
-        <Drawer.Portal>
-          <Drawer.Overlay className="fixed inset-0 z-[120] bg-slate-950/45 backdrop-blur-[3px]" />
-          <Drawer.Content className="fixed inset-x-0 bottom-0 z-[130] mx-auto h-fit max-h-[88vh] max-w-2xl overflow-hidden rounded-t-[2rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(247,250,252,0.98)_100%)] text-slate-950 shadow-[0_-28px_76px_-42px_rgba(15,23,42,0.68)] outline-none">
-            <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-slate-300/80" />
-            <div className="max-h-[calc(88vh-0.75rem)] overflow-y-auto px-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <Drawer.Title className="text-[19px] font-black tracking-[-0.03em] text-slate-950">
-                    Encontre mais rápido
-                  </Drawer.Title>
-                  <Drawer.Description className="mt-1 text-[12px] font-semibold leading-relaxed text-slate-500">
-                    Escolha um atalho ou refine por categoria sem perder a ordem das lojas.
-                  </Drawer.Description>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFiltersSheetOpen(false)}
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.3)] transition active:scale-95"
-                  aria-label="Fechar filtros"
-                >
-                  <X size={16} weight="bold" />
-                </button>
-              </div>
-
-              <div className="mt-4 rounded-[1.55rem] border border-[#336886]/10 bg-[#edf5fa]/70 px-4 py-3 text-[#153A4C] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]/75">Resultado atual</p>
-                    <p className="mt-0.5 truncate text-sm font-black text-[#153A4C]">
-                      {filteredStores.length} loja{filteredStores.length === 1 ? '' : 's'} encontrada{filteredStores.length === 1 ? '' : 's'}
-                    </p>
-                  </div>
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-black text-[#336886] ring-1 ring-white/80">
-                    <CheckCircle size={12} weight="fill" />
-                    {activeMarketplaceFilterCount > 0 ? `${activeMarketplaceFilterCount} ativo${activeMarketplaceFilterCount === 1 ? '' : 's'}` : 'Livre'}
-                  </span>
-                </div>
-                {selectedQuickFilterOption || segmentFilter !== 'all' || debouncedQuery ? (
-                  <p className="mt-2 text-[11px] font-semibold leading-relaxed text-[#336886]/80">
-                    {[
-                      selectedQuickFilterOption?.label,
-                      segmentFilter !== 'all' ? `Categoria: ${segmentFilter}` : '',
-                      debouncedQuery ? `Busca: ${debouncedQuery}` : '',
-                    ].filter(Boolean).join(' • ')}
-                  </p>
-                ) : null}
-              </div>
-
-              <section className="mt-5">
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Atalhos</p>
-                  {quickFilter !== 'all' ? (
-                    <button
-                      type="button"
-                      onClick={() => setQuickFilter('all')}
-                      className="text-[11px] font-black text-[#336886] active:scale-95"
-                    >
-                      Limpar atalho
-                    </button>
-                  ) : null}
-                </div>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {HUB_QUICK_FILTER_OPTIONS.map((filter) => {
-                    const Icon = filter.icon;
-                    const active = quickFilter === filter.key;
-                    return (
-                      <button
-                        key={`sheet-${filter.key}`}
-                        type="button"
-                        onClick={() => {
-                          setQuickFilter(active ? 'all' : filter.key);
-                          setFiltersSheetOpen(false);
-                          if (!active) scrollStoresIntoView();
-                        }}
-                        className={`min-h-[5.2rem] rounded-[1.35rem] border p-3 text-left transition-all duration-200 active:scale-[0.98] ${
-                          active
-                            ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.72)]'
-                            : 'border-slate-200/80 bg-white text-slate-700 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.28)]'
-                        }`}
-                        aria-pressed={active}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${active ? 'bg-white/16 text-white' : 'bg-[#edf5fa] text-[#336886]'}`}>
-                            <Icon size={16} weight={active ? 'fill' : 'duotone'} />
-                          </span>
-                          <span className="min-w-0 flex-1 truncate text-sm font-black">{filter.label}</span>
-                        </div>
-                        <p className={`mt-2 line-clamp-2 text-[11px] font-semibold leading-snug ${active ? 'text-white/76' : 'text-slate-500'}`}>
-                          {filter.description}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-
-              <section className="mt-5">
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Categorias</p>
-                  {segmentFilter !== 'all' ? (
-                    <button
-                      type="button"
-                      onClick={() => setSegmentFilter('all')}
-                      className="text-[11px] font-black text-[#336886] active:scale-95"
-                    >
-                      Ver todas
-                    </button>
-                  ) : null}
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSegmentFilter('all');
-                      setFiltersSheetOpen(false);
-                      scrollStoresIntoView();
-                    }}
-                    className={`min-w-0 rounded-[1.1rem] border px-2 py-2.5 text-center text-[11px] font-black transition active:scale-[0.98] ${
-                      segmentFilter === 'all'
-                        ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_28px_-22px_rgba(21,58,76,0.58)]'
-                        : 'border-slate-200 bg-white text-slate-600'
-                    }`}
-                  >
-                    Todos
-                  </button>
-                  {categoryTiles.map((item, index) => {
-                    const active = segmentFilter === item.label;
-                    const CategoryIcon = item.icon;
-                    return (
-                      <button
-                        key={`sheet-category-${item.label}-${index}`}
-                        type="button"
-                        onClick={() => {
-                          setSegmentFilter(active ? 'all' : item.label);
-                          setFiltersSheetOpen(false);
-                          scrollStoresIntoView();
-                        }}
-                        className={`min-w-0 rounded-[1.1rem] border px-2 py-2.5 text-center transition active:scale-[0.98] ${
-                          active
-                            ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_28px_-22px_rgba(21,58,76,0.58)]'
-                            : 'border-slate-200 bg-white text-slate-600'
-                        }`}
-                      >
-                        <CategoryIcon size={15} weight={active ? 'fill' : 'duotone'} className="mx-auto mb-1" />
-                        <span className="block truncate text-[10.5px] font-black">{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-
-              <div className="mt-5 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    resetMarketplaceFilters();
-                    setFiltersSheetOpen(false);
-                  }}
-                  disabled={activeMarketplaceFilterCount === 0}
-                  className="inline-flex h-12 flex-1 items-center justify-center rounded-[1.2rem] border border-slate-200 bg-white text-sm font-black text-slate-600 shadow-[0_14px_26px_-24px_rgba(15,23,42,0.26)] transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
-                >
-                  Limpar filtros
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFiltersSheetOpen(false);
-                    scrollStoresIntoView();
-                  }}
-                  className="inline-flex h-12 flex-1 items-center justify-center rounded-[1.2rem] bg-[#153A4C] text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.65)] transition active:scale-[0.98]"
-                >
-                  Ver lojas
-                </button>
-              </div>
-            </div>
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
+      <HubFilterSheet
+        open={filtersSheetOpen}
+        quickFilter={quickFilter}
+        segmentFilter={segmentFilter}
+        debouncedQuery={debouncedQuery}
+        filteredStoresCount={filteredStores.length}
+        categoryTiles={categoryTiles}
+        onOpenChange={setFiltersSheetOpen}
+        onQuickFilterChange={setQuickFilter}
+        onSegmentFilterChange={setSegmentFilter}
+        onResetFilters={resetMarketplaceFilters}
+        onScrollStoresIntoView={scrollStoresIntoView}
+      />
 
       <div
         className={`relative transition-all duration-700 ${
@@ -3239,55 +2974,14 @@ export function MarketplacePage() {
               </div>
             </div>
 
-            {/* Linha 3: Filtros rápidos sem scroll lateral */}
-            <div className={`${isNativePlatform ? 'py-0.5' : 'py-1'}`}>
-              <div className="grid grid-cols-[repeat(3,minmax(0,1fr))_auto] gap-1.5">
-                {primaryQuickFilterOptions.map((filter) => {
-                  const Icon = filter.icon;
-                  const active = quickFilter === filter.key;
-                  const nextFilter: HubQuickFilterKey = active ? 'all' : filter.key;
-                  return (
-                    <button
-                      key={filter.key}
-                      type="button"
-                      onClick={() => {
-                        setQuickFilter(nextFilter);
-                        if (nextFilter !== 'all') scrollStoresIntoView();
-                      }}
-                      className={`inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full border px-2.5 py-2 text-[11px] font-black transition-all duration-200 ease-out active:scale-[0.97] ${
-                        active
-                          ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.58)]'
-                          : 'border-white/80 bg-white/72 text-slate-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/50 backdrop-blur-xl'
-                      }`}
-                      aria-pressed={active}
-                      aria-label={filter.label}
-                      title={filter.label}
-                    >
-                      <Icon size={13} weight={active ? 'fill' : 'duotone'} className="shrink-0" />
-                      <span className="truncate">{filter.compactLabel}</span>
-                    </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  onClick={() => setFiltersSheetOpen(true)}
-                  className={`relative inline-flex h-full min-w-[3rem] items-center justify-center gap-1 rounded-full border px-2.5 py-2 text-[11px] font-black transition-all duration-200 ease-out active:scale-[0.97] ${
-                    hiddenMarketplaceFilterCount > 0
-                      ? 'border-[#336886] bg-[#edf5fa] text-[#153A4C] shadow-[0_14px_26px_-20px_rgba(51,104,134,0.34)]'
-                      : 'border-white/80 bg-white/72 text-slate-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/50 backdrop-blur-xl'
-                  }`}
-                  aria-label="Abrir filtros"
-                >
-                  <SlidersHorizontal size={14} weight="bold" />
-                  <span className="hidden min-[390px]:inline">Filtros</span>
-                  {hiddenMarketplaceFilterCount > 0 ? (
-                    <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#153A4C] px-1 text-[9px] font-black text-white ring-2 ring-white">
-                      {hiddenMarketplaceFilterCount}
-                    </span>
-                  ) : null}
-                </button>
-              </div>
-            </div>
+            <HubFilterBar
+              isNativePlatform={isNativePlatform}
+              quickFilter={quickFilter}
+              segmentFilter={segmentFilter}
+              onQuickFilterChange={setQuickFilter}
+              onOpenFilters={() => setFiltersSheetOpen(true)}
+              onScrollStoresIntoView={scrollStoresIntoView}
+            />
 
           </div>
           </div>
