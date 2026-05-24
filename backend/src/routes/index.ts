@@ -39,6 +39,8 @@ import { DestinationController } from '../controllers/DestinationController';
 import { StorePaymentAccountController } from '../controllers/StorePaymentAccountController';
 import { MotoboyPaymentAccountController } from '../controllers/MotoboyPaymentAccountController';
 import { MapsController } from '../controllers/MapsController';
+import { EmailAdminController } from '../controllers/EmailAdminController';
+import { EmailPublicController } from '../controllers/EmailPublicController';
 
 import { hydrateAuthOptional, requireAuth, requireRole } from '../middleware/authGuard';
 import { authLoginRateLimit, authRecoveryRateLimit } from '../middleware/rateLimit';
@@ -334,8 +336,19 @@ routes.post('/motoboy/stores/:storeId/leave', requireAuth, MotoboyController.lea
 routes.get('/legal/terms', LegalController.getTerms);
 routes.get('/legal/lgpd', LegalController.getLgpd);
 routes.get('/public/home-config', HomeConfigController.getPublic);
+routes.get('/public/email/unsubscribe/preview', EmailPublicController.previewUnsubscribe);
+routes.post('/public/email/unsubscribe', EmailPublicController.unsubscribe);
+routes.post('/public/email/unsubscribe/one-click', EmailPublicController.oneClickUnsubscribe);
 routes.get('/admin/home-config', requireAuth, requireRole('SUPER_ADMIN'), HomeConfigController.getAdmin);
 routes.put('/admin/home-config', requireAuth, requireRole('SUPER_ADMIN'), HomeConfigController.saveAdmin);
+routes.get('/admin/email/templates', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.listTemplates);
+routes.get('/admin/email/templates/:key', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.getTemplate);
+routes.put('/admin/email/templates/:key', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.saveTemplate);
+routes.post('/admin/email/templates/:key/preview', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.previewTemplate);
+routes.post('/admin/email/templates/:key/test', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.sendTest);
+routes.get('/admin/email/suppressions', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.listSuppressions);
+routes.post('/admin/email/suppressions', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.createSuppression);
+routes.delete('/admin/email/suppressions/:suppressionId', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.removeSuppression);
 routes.post('/admin/site-settings', requireAuth, requireRole('SUPER_ADMIN'), LegalController.setSetting);
 routes.get('/admin/featured-requests', requireAuth, requireRole('SUPER_ADMIN'), FeaturedProductController.listForAdmin);
 routes.patch('/admin/featured-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), FeaturedProductController.reviewByAdmin);

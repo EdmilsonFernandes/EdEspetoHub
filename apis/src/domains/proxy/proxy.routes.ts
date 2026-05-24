@@ -15,7 +15,11 @@ async function forward(req: Request, res: Response, _next: NextFunction): Promis
             case 'DELETE': data = await backendClient.delete(path, req.token); break;
             default: res.status(405).json({ data: null, error: { code: 'METHOD_NOT_ALLOWED', message: `${req.method} not supported` } }); return;
         }
-        res.status(req.method === 'POST' ? 201 : 200).json(data);
+        const status =
+            req.method === 'POST' && !path.startsWith('/public/email/unsubscribe/one-click')
+                ? 201
+                : 200;
+        res.status(status).json(data);
     } catch (err) {
         const e = fromAxiosError(err);
         const errorPayload = { code: e.code, message: e.message, details: e.details };
@@ -200,6 +204,14 @@ export function createProxyRoutes(): Router {
     r.post('/admin/payments/:paymentId/reprocess', authRequired, forward);
     r.get('/admin/home-config', authRequired, forward);
     r.put('/admin/home-config', authRequired, forward);
+    r.get('/admin/email/templates', authRequired, forward);
+    r.get('/admin/email/templates/:key', authRequired, forward);
+    r.put('/admin/email/templates/:key', authRequired, forward);
+    r.post('/admin/email/templates/:key/preview', authRequired, forward);
+    r.post('/admin/email/templates/:key/test', authRequired, forward);
+    r.get('/admin/email/suppressions', authRequired, forward);
+    r.post('/admin/email/suppressions', authRequired, forward);
+    r.delete('/admin/email/suppressions/:suppressionId', authRequired, forward);
     r.post('/admin/site-settings', authRequired, forward);
     r.get('/admin/featured-requests', authRequired, forward);
     r.patch('/admin/featured-requests/:requestId/review', authRequired, forward);
@@ -245,6 +257,9 @@ export function createProxyRoutes(): Router {
 
     // Customer notifications
     r.get('/public/home-config', forward);
+    r.get('/public/email/unsubscribe/preview', forward);
+    r.post('/public/email/unsubscribe', forward);
+    r.post('/public/email/unsubscribe/one-click', forward);
     r.get('/customer/notifications', authRequired, forward);
     r.post('/customer/notifications', authRequired, forward);
     r.patch('/customer/notifications/:id/read', authRequired, forward);

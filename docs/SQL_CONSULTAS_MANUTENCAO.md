@@ -47,6 +47,8 @@ UNION ALL SELECT 'tokens_push_cliente', COUNT(*) FROM customer_push_tokens
 UNION ALL SELECT 'tokens_push_motoboy', COUNT(*) FROM motoboy_push_tokens
 UNION ALL SELECT 'assinaturas', COUNT(*) FROM subscriptions
 UNION ALL SELECT 'configuracoes_site', COUNT(*) FROM site_settings
+UNION ALL SELECT 'templates_email', COUNT(*) FROM email_templates
+UNION ALL SELECT 'descadastros_email', COUNT(*) FROM email_suppressions
 ORDER BY entidade;
 ```
 
@@ -1325,7 +1327,141 @@ WHERE updated_at >= NOW() - INTERVAL '7 days'
 ORDER BY updated_at DESC;
 ```
 
-## 21. Notificacoes internas
+## 21. E-mails, templates e descadastros
+
+Templates gerenciados no Super Admin.
+
+```sql
+SELECT
+  key,
+  name,
+  category,
+  active,
+  allow_unsubscribe,
+  updated_by,
+  updated_at
+FROM email_templates
+ORDER BY category, key;
+```
+
+Preview de assunto e variaveis de um template.
+
+```sql
+\set template_key 'marketing_invite'
+
+SELECT
+  key,
+  subject,
+  preheader,
+  variables,
+  left(text_body, 300) AS text_preview,
+  left(html_body, 300) AS html_preview
+FROM email_templates
+WHERE key = :'template_key';
+```
+
+Historico de versoes de um template.
+
+```sql
+\set template_key 'marketing_invite'
+
+SELECT
+  v.version,
+  v.created_by,
+  v.created_at,
+  v.subject
+FROM email_template_versions v
+JOIN email_templates t ON t.id = v.template_id
+WHERE t.key = :'template_key'
+ORDER BY v.version DESC
+LIMIT 20;
+```
+
+Auditoria de envios recentes. Nao selecione corpo completo quando nao for necessario.
+
+```sql
+SELECT
+  id,
+  template_key,
+  category,
+  to_email,
+  subject,
+  status,
+  provider,
+  error_message,
+  created_at
+FROM email_send_logs
+ORDER BY created_at DESC
+LIMIT 100;
+```
+
+Envios de um e-mail especifico.
+
+```sql
+\set email 'cliente@email.com'
+
+SELECT
+  template_key,
+  category,
+  subject,
+  status,
+  provider,
+  error_message,
+  created_at
+FROM email_send_logs
+WHERE lower(to_email) = lower(:'email')
+ORDER BY created_at DESC
+LIMIT 100;
+```
+
+Descadastros ativos. O descadastro bloqueia apenas e-mails de marketing; e-mails de seguranca, senha, OTP, pagamento e conta continuam sendo enviados.
+
+```sql
+SELECT
+  id,
+  email,
+  category,
+  source,
+  reason,
+  created_by,
+  created_at
+FROM email_suppressions
+ORDER BY created_at DESC
+LIMIT 100;
+```
+
+Verificar se um e-mail esta bloqueado para marketing.
+
+```sql
+\set email 'cliente@email.com'
+
+SELECT
+  id,
+  email,
+  category,
+  source,
+  reason,
+  created_at
+FROM email_suppressions
+WHERE lower(email) = lower(:'email')
+  AND category = 'marketing';
+```
+
+Remover descadastro manualmente, somente apos confirmacao do usuario.
+
+```sql
+\set suppression_id '00000000-0000-0000-0000-000000000000'
+
+BEGIN;
+
+DELETE FROM email_suppressions
+WHERE id = :'suppression_id'
+RETURNING id, email, category, source, created_at;
+
+COMMIT;
+```
+
+## 22. Notificacoes internas
 
 Notificacoes salvas para um usuario.
 
@@ -1347,7 +1483,7 @@ ORDER BY n.created_at DESC
 LIMIT 100;
 ```
 
-## 22. Auditoria basica
+## 23. Auditoria basica
 
 Acessos recentes por papel.
 
@@ -1385,7 +1521,7 @@ ORDER BY created_at DESC
 LIMIT 100;
 ```
 
-## 23. Exemplos de manutencao segura
+## 24. Exemplos de manutencao segura
 
 Desativar recebimento de pedidos de uma loja, mantendo a vitrine:
 
@@ -1448,7 +1584,7 @@ WHERE token LIKE :'token_prefix' || '%';
 COMMIT;
 ```
 
-## 24. Quando desconfiar de problema de dados
+## 25. Quando desconfiar de problema de dados
 
 Use este checklist rapido:
 
@@ -1460,3 +1596,4 @@ Use este checklist rapido:
 - Loja bloqueada por plano: consultar `subscriptions.status`, `subscriptions.end_date` e `store_settings.plan_exempt`.
 - Campanha fundador nao aplicou: consultar `founder_vip_*`, quantidade de lojas e `store_settings.acquisition_attribution`.
 - Produto nao aparece: consultar `products.active`, `availability_days`, `store_settings.opening_hours` e `store_settings.is_ordering_enabled`.
+- E-mail nao chegou: consultar `email_send_logs.status`, `email_templates.active`, SMTP do backend e `email_suppressions` se for marketing.

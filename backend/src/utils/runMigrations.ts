@@ -735,6 +735,83 @@ export async function runMigrations() {
     );
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS email_templates (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      key TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL DEFAULT 'transactional',
+      description TEXT,
+      subject TEXT NOT NULL,
+      preheader TEXT,
+      text_body TEXT NOT NULL,
+      html_body TEXT NOT NULL,
+      variables JSONB NOT NULL DEFAULT '[]'::jsonb,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      allow_unsubscribe BOOLEAN NOT NULL DEFAULT FALSE,
+      updated_by TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS email_template_versions (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      template_id UUID NOT NULL REFERENCES email_templates(id) ON DELETE CASCADE,
+      version INT NOT NULL,
+      key TEXT NOT NULL,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      description TEXT,
+      subject TEXT NOT NULL,
+      preheader TEXT,
+      text_body TEXT NOT NULL,
+      html_body TEXT NOT NULL,
+      variables JSONB NOT NULL DEFAULT '[]'::jsonb,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      allow_unsubscribe BOOLEAN NOT NULL DEFAULT FALSE,
+      created_by TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(template_id, version)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS email_suppressions (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      email TEXT NOT NULL,
+      normalized_email TEXT NOT NULL,
+      category TEXT NOT NULL DEFAULT 'marketing',
+      source TEXT NOT NULL DEFAULT 'public_link',
+      reason TEXT,
+      created_by TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(normalized_email, category)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS email_send_logs (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      template_key TEXT,
+      category TEXT NOT NULL DEFAULT 'transactional',
+      to_email TEXT NOT NULL,
+      subject TEXT,
+      status TEXT NOT NULL,
+      provider_message_id TEXT,
+      error_message TEXT,
+      suppression_id UUID REFERENCES email_suppressions(id) ON DELETE SET NULL,
+      metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_email_templates_category ON email_templates(category, active);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_email_send_logs_created ON email_send_logs(created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_email_send_logs_to_email ON email_send_logs(to_email, created_at DESC);
+  `);
+  await AppDataSource.query(`
     INSERT INTO site_settings (key, value)
     VALUES
       ('legal.terms', '<h2>Termos de uso</h2><p>Atualize os termos no painel do super admin.</p>'),

@@ -32,6 +32,7 @@ import {
   RocketLaunch,
   Cpu,
   Compass,
+  EnvelopeSimple,
 } from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
@@ -1437,6 +1438,14 @@ export function SuperAdmin() {
           </button>
           <button
             type="button"
+            onClick={() => { window.location.href = '/superadmin/email-templates'; }}
+            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#336886]/25 hover:text-[#336886] xl:inline-flex"
+          >
+            <EnvelopeSimple size={15} weight="duotone" />
+            E-mails
+          </button>
+          <button
+            type="button"
             onClick={() => { window.location.href = '/superadmin/condominiums'; }}
             className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#336886]/25 hover:text-[#336886] sm:inline-flex"
           >
@@ -1497,6 +1506,17 @@ export function SuperAdmin() {
               >
                 <ImageSquare size={16} weight="duotone" />
                 Configuração da Home
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileMenuOpen(false);
+                  window.location.href = '/superadmin/email-templates';
+                }}
+                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              >
+                <EnvelopeSimple size={16} weight="duotone" />
+                E-mails e templates
               </button>
               <button
                 type="button"

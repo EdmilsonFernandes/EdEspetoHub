@@ -58,6 +58,8 @@ const SuperAdmin = lazyPage(() => import('./pages/SuperAdmin'), 'SuperAdmin');
 const SuperAdminCondominiums = lazyPage(() => import('./pages/SuperAdminCondominiums'), 'SuperAdminCondominiums');
 const SuperAdminDestinations = lazyPage(() => import('./pages/SuperAdminDestinations'), 'SuperAdminDestinations');
 const SuperAdminHomeConfig = lazyPage(() => import('./pages/SuperAdminHomeConfig'), 'SuperAdminHomeConfig');
+const SuperAdminEmailTemplates = lazyPage(() => import('./pages/SuperAdminEmailTemplates'), 'SuperAdminEmailTemplates');
+const EmailUnsubscribePage = lazyPage(() => import('./pages/EmailUnsubscribePage'), 'EmailUnsubscribePage');
 const DestinationsPage = lazyPage(() => import('./pages/DestinationsPage'), 'DestinationsPage');
 const DestinationDetailPage = lazyPage(() => import('./pages/DestinationDetailPage'), 'DestinationDetailPage');
 const DestinationPartnerRequestPage = lazyPage(() => import('./pages/DestinationPartnerRequestPage'), 'DestinationPartnerRequestPage');
@@ -153,6 +155,7 @@ function App() {
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/terms" element={<TermsOfUse />} />
+              <Route path="/email/unsubscribe" element={<EmailUnsubscribePage />} />
               <Route
                 path="/admin/dashboard"
                 element={
@@ -264,6 +267,14 @@ function App() {
                 element={
                   <AppErrorBoundary>
                     <SuperAdminHomeConfig />
+                  </AppErrorBoundary>
+                }
+              />
+              <Route
+                path="/superadmin/email-templates"
+                element={
+                  <AppErrorBoundary>
+                    <SuperAdminEmailTemplates />
                   </AppErrorBoundary>
                 }
               />

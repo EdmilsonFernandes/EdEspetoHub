@@ -14,7 +14,7 @@ O projeto roda como monorepo e hoje tem quatro servicos principais em producao:
 - **Cliente**: home do app, busca de lojas, carrinho, checkout, meus pedidos, acompanhamento publico e notificacoes.
 - **Lojista/Admin**: dashboard, cardapio, fila de pedidos, produtos, pagamentos, motoboys, condominios e destinos.
 - **Motoboy**: fila de entregas, entrega atual, ganhos, perfil, documentos e repasse/recebimento de gorjetas.
-- **Super Admin**: gestao de lojas, planos, usuarios, KYC de motoboy, destinos, banners da home, seguranca e configuracoes globais.
+- **Super Admin**: gestao de lojas, planos, usuarios, KYC de motoboy, destinos, banners da home, e-mails, seguranca e configuracoes globais.
 - **Destinos turisticos**: cidades, chale/pousada, servicos locais, lojas que atendem hospedagens e convites comerciais.
 - **Condominios**: vitrines por condominio/evento, lojas participantes e fluxo normal de pedido.
 
@@ -150,6 +150,22 @@ A home principal nao depende mais de banners hardcoded para configuracao operaci
 - Estrutura: `homeBanners` com ate 4 banners e `marketingPopup`.
 - Imagens: upload pelo backend para S3/public uploads.
 - Fallback: se a configuracao nao existir ou estiver invalida, o app usa banners padrao temporarios para nao quebrar producao.
+
+## E-mails e templates
+
+Os e-mails do sistema agora usam templates gerenciados no banco, com preview e teste pelo Super Admin.
+
+- Tela: `Super Admin > E-mails e templates`.
+- Persistencia: `email_templates`, `email_template_versions`, `email_send_logs` e `email_suppressions`.
+- Catalogo base: `backend/src/utils/emailTemplateCatalog.ts`. O backend cria os templates padrao sob demanda quando a tela ou um envio acessa a feature.
+- Layout padrao: `backend/src/utils/emailTemplateRenderer.ts`, com logo oficial, preheader, conteudo HTML/texto e rodape.
+- Auditoria: cada envio/mock/falha/descadastro bloqueado fica registrado em `email_send_logs`.
+- Descadastro: vale apenas para categoria `marketing` com `allowUnsubscribe = true`; e-mails de senha, OTP, seguranca, pagamento, conta e avisos internos continuam sendo enviados.
+- Rota publica: `/email/unsubscribe?token=...`.
+- One-click unsubscribe de provedores: `/api/public/email/unsubscribe/one-click?token=...`.
+- Rotas admin passam pelo BFF em `/api/admin/email/templates` e `/api/admin/email/suppressions`.
+
+Para variaveis em template, use `{{VARIAVEL}}` para conteudo escapado e `{{{HTML_RAW}}}` apenas quando o valor ja for HTML seguro gerado pelo backend.
 
 ## Campanha VIP fundador
 
