@@ -53,6 +53,58 @@ Fluxo importante:
 - `scripts/`: deploy, compose local, backup, release e utilitarios.
 - `server/`: codigo legado de mapas; nao sobe no compose padrao atual.
 
+## Frontend: Home/Hub Marketplace
+
+A Home principal do app fica em `frontend/src/pages/MarketplacePage.tsx`.
+
+Depois do refactor, essa pagina deve ser tratada como **orquestradora**: ela junta dados, hooks, componentes e callbacks principais, mas nao deve voltar a acumular blocos grandes de estado, polling, cache, localStorage, chamadas de API ou JSX repetido.
+
+Estrutura atual para manutencao:
+
+- `frontend/src/pages/MarketplacePage.tsx`: shell principal da Home/Hub, composicao dos blocos e integracao com navegacao.
+- `frontend/src/components/Marketplace/Hub/`: componentes visuais do Hub, como header, filtros, cards, carrosseis, favoritos, estados da lista e popup.
+- `frontend/src/hooks/hub/`: hooks de regra de tela, estado, cache e polling especificos do Hub.
+- `frontend/src/services/`: servicos HTTP usados pelos hooks e pela pagina.
+- `frontend/src/utils/`: funcoes puras compartilhadas, formatadores, assets, links e regras reutilizaveis.
+
+Hooks atuais do Hub:
+
+- `useHubSearchPlaceholder`: controla a rotacao do placeholder da busca.
+- `useHubFavorites`: controla favoritos de loja no localStorage e ordenacao visual de favoritos.
+- `useHubFeaturedProducts`: busca e monta os itens em destaque patrocinados/organicos.
+- `useHubAnonymousOrders`: hidrata pedidos anonimos salvos no navegador e reconcilia status publico.
+- `useHubCustomerActiveOrders`: faz polling dos pedidos ativos do cliente logado.
+
+Regra para novas features no Hub:
+
+- Nova UI deve virar componente pequeno em `frontend/src/components/Marketplace/Hub/`.
+- Nova logica de estado/cache/polling/localStorage deve virar hook em `frontend/src/hooks/hub/`.
+- Evitar colocar efeitos grandes e chamadas de API diretamente em `MarketplacePage.tsx`.
+- Preservar a ordenacao das lojas e regras de filtro existentes, salvo pedido explicito.
+- Se a feature mexer em busca, filtros, lojas, destaques, pedidos ativos ou navegacao mobile, criar ou ajustar teste unitario/e2e correspondente.
+
+Validacao minima para mudancas no Hub:
+
+```bash
+npm --prefix frontend run test:unit
+npm --prefix frontend run build
+sh scripts/compose-dev-frontend.sh
+```
+
+Apos rebuild local Docker, validar tambem:
+
+```bash
+curl -I http://localhost:8080/hub
+curl -I http://localhost:8080/api/public/stores
+docker exec janocaminho-postgres psql -U postgres -d espetinho -c "SELECT 'users' entidade, COUNT(*) total FROM users UNION ALL SELECT 'stores', COUNT(*) FROM stores UNION ALL SELECT 'products', COUNT(*) FROM products UNION ALL SELECT 'orders', COUNT(*) FROM orders UNION ALL SELECT 'site_settings', COUNT(*) FROM site_settings ORDER BY entidade;"
+```
+
+Para mudancas que afetem UX critica ou navegacao:
+
+```bash
+npm --prefix frontend run test:e2e
+```
+
 ## Banco e configuracoes
 
 Banco principal: PostgreSQL.
