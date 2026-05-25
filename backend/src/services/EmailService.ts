@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
 import { EmailTemplateCategory, normalizeEmailTemplateCategory } from '../utils/emailTemplateCatalog';
-import { escapeHtml, renderPremiumEmailLayout } from '../utils/emailTemplateRenderer';
+import { escapeHtml, renderPremiumEmailLayout, resolveEmailAssetUrl } from '../utils/emailTemplateRenderer';
 import { EmailPreferenceService } from './EmailPreferenceService';
 import { EmailTemplateService } from './EmailTemplateService';
 
@@ -35,8 +35,7 @@ export class EmailService {
   }
 
   private getLogoUrl() {
-    const base = env.appUrl?.replace(/\/$/, '') || 'https://janocaminho.com.br';
-    return `${base}/janocaminho.png`;
+    return resolveEmailAssetUrl();
   }
 
   private getSupportEmail() {

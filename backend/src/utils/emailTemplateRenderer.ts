@@ -14,6 +14,9 @@ export type RenderEmailTemplateInput = {
   allowUnsubscribe?: boolean;
 };
 
+const DEFAULT_EMAIL_PUBLIC_BASE_URL = 'https://janocaminho.com.br';
+export const DEFAULT_EMAIL_LOGO_PATH = '/janocaminho.jpg';
+
 export const normalizeBrandingContent = (content: string) =>
   String(content || '')
     .replace(/Chama no Espeto/g, 'Já no Caminho')
@@ -23,6 +26,24 @@ export const normalizeBrandingContent = (content: string) =>
     .replace(/chamanoespeto\.com\.br/g, 'janocaminho.com.br')
     .replace(/\/chama-no-espeto\.jpeg/g, '/janocaminho.jpg')
     .replace(/chama-no-espeto\.jpeg/g, 'janocaminho.jpg');
+
+const getEmailPublicBaseUrl = () => {
+  const configured = String(env.appUrl || '').trim().replace(/\/+$/, '');
+  if (!configured) return DEFAULT_EMAIL_PUBLIC_BASE_URL;
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configured)) {
+    return DEFAULT_EMAIL_PUBLIC_BASE_URL;
+  }
+  return configured;
+};
+
+export const resolveEmailAssetUrl = (value?: string | null, fallbackPath = DEFAULT_EMAIL_LOGO_PATH) => {
+  const raw = normalizeBrandingContent(String(value || fallbackPath || '').trim());
+  if (!raw) return `${getEmailPublicBaseUrl()}${DEFAULT_EMAIL_LOGO_PATH}`;
+  if (/^data:image\//i.test(raw)) return raw;
+  if (/^\/\//.test(raw)) return `https:${raw}`;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return `${getEmailPublicBaseUrl()}${raw.startsWith('/') ? raw : `/${raw}`}`;
+};
 
 export const escapeHtml = (value: unknown) =>
   String(value ?? '')
@@ -67,8 +88,7 @@ export const renderPremiumEmailLayout = ({
   const renderedPreheader = renderTextTemplate(preheader || '', variables);
   const renderedText = renderTextTemplate(textBody, variables);
   const renderedBody = renderHtmlTemplate(htmlBody, variables);
-  const baseUrl = env.appUrl?.replace(/\/$/, '') || 'https://janocaminho.com.br';
-  const resolvedLogoUrl = logoUrl || `${baseUrl}/janocaminho.png`;
+  const resolvedLogoUrl = resolveEmailAssetUrl(logoUrl);
   const canUnsubscribe = Boolean(allowUnsubscribe && unsubscribeUrl && isSuppressibleEmailCategory(category));
   const footerText = canUnsubscribe
     ? `\n\n---\nJá no Caminho\nAjuda: ${supportEmail}\nCancelar comunicações comerciais: ${unsubscribeUrl}`

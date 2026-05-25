@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { renderHtmlTemplate, renderPremiumEmailLayout, renderTextTemplate } from './emailTemplateRenderer';
+import { DEFAULT_EMAIL_LOGO_PATH, renderHtmlTemplate, renderPremiumEmailLayout, renderTextTemplate, resolveEmailAssetUrl } from './emailTemplateRenderer';
 
 describe('emailTemplateRenderer', () => {
   it('renders text variables and normalizes legacy branding', () => {
@@ -53,5 +53,21 @@ describe('emailTemplateRenderer', () => {
 
     expect(rendered.text).toContain('Mensagem operacional ou de segurança');
     expect(rendered.html).not.toContain('cancele aqui');
+  });
+
+  it('uses the official public jpg logo in the premium layout', () => {
+    const rendered = renderPremiumEmailLayout({
+      subject: 'Teste',
+      textBody: 'Mensagem',
+      htmlBody: '<p>Mensagem</p>',
+    });
+
+    expect(rendered.html).toContain(`src="https://janocaminho.com.br${DEFAULT_EMAIL_LOGO_PATH}"`);
+    expect(rendered.html).not.toContain('janocaminho.png');
+  });
+
+  it('normalizes relative and legacy logo URLs to an absolute public asset', () => {
+    expect(resolveEmailAssetUrl('/chama-no-espeto.jpeg')).toBe('https://janocaminho.com.br/janocaminho.jpg');
+    expect(resolveEmailAssetUrl('janocaminho.jpg')).toBe('https://janocaminho.com.br/janocaminho.jpg');
   });
 });
