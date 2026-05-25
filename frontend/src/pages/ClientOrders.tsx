@@ -25,7 +25,6 @@ import {
   WarningCircle,
   WhatsappLogo,
   MagnifyingGlass,
-  X,
   XCircle,
   Buildings,
   Mountains,
@@ -39,6 +38,7 @@ import { getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
+import { AppImagePreviewDialog } from '../components/common/AppImagePreviewDialog';
 import { textareaAssistProps } from '../utils/inputAssist';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
@@ -521,71 +521,6 @@ const getOrderStatusBadgeClass = (status: string, isActive?: boolean) => {
   return 'border-slate-100 bg-slate-50 text-slate-600 ring-slate-100';
 };
 
-function OrderImageLightbox({
-  image,
-  onClose,
-}: {
-  image: { src: string; title: string } | null;
-  onClose: () => void;
-}) {
-  useEffect(() => {
-    if (!image) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [image, onClose]);
-
-  if (!image) return null;
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Imagem ampliada de ${image.title || 'item do pedido'}`}
-      className="fixed inset-0 z-[260] flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,rgba(51,104,134,0.28),transparent_34%),linear-gradient(180deg,rgba(2,6,23,0.80),rgba(15,23,42,0.92))] px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md animate-in fade-in duration-200"
-      onClick={onClose}
-    >
-      <div className="absolute inset-x-0 top-[max(0.85rem,env(safe-area-inset-top))] z-[270] flex justify-center px-4 sm:justify-end">
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/18 bg-white/14 px-4 text-sm font-black text-white shadow-[0_24px_52px_-30px_rgba(0,0,0,0.85)] ring-1 ring-white/10 backdrop-blur-xl transition-all hover:bg-white/22 active:scale-[0.97]"
-          aria-label="Fechar imagem"
-        >
-          <X size={17} weight="bold" />
-          Fechar
-        </button>
-      </div>
-
-      <figure
-        className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-white/14 bg-white/10 p-2 shadow-[0_36px_110px_-46px_rgba(0,0,0,0.96)] ring-1 ring-white/10 animate-in zoom-in-95 duration-200"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="grid max-h-[74dvh] place-items-center overflow-hidden rounded-[1.55rem] bg-slate-950/45">
-          <img
-            src={image.src}
-            alt={image.title || 'Item do pedido'}
-            className="max-h-[74dvh] w-auto max-w-full object-contain"
-          />
-        </div>
-        <figcaption className="flex items-center justify-between gap-3 px-3 py-3 text-white">
-          <div className="min-w-0">
-            <p className="truncate text-sm font-black">{image.title || 'Item do pedido'}</p>
-            <p className="mt-0.5 text-[11px] font-semibold text-white/62">Toque fora da imagem ou use Esc para fechar.</p>
-          </div>
-          <span className="hidden shrink-0 rounded-full bg-white/12 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white/74 sm:inline-flex">
-            Visualização
-          </span>
-        </figcaption>
-      </figure>
-    </div>
-  );
-}
-
 function OrderCard({
   order,
   isActive,
@@ -978,7 +913,7 @@ function OrderCard({
         )}
       </div>
     </article>
-    {previewImage ? <OrderImageLightbox image={previewImage} onClose={() => setPreviewImage(null)} /> : null}
+    <AppImagePreviewDialog image={previewImage} onClose={() => setPreviewImage(null)} label="Imagem ampliada do pedido" />
     </>
   );
 }

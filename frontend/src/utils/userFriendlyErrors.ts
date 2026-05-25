@@ -23,6 +23,28 @@ const TECHNICAL_ERROR_PATTERNS = [
   /cannot read/i,
 ];
 
+const INVALID_CREDENTIALS_PATTERNS = [
+  /credenciais inv[aá]lidas/i,
+  /invalid credentials/i,
+  /usu[aá]rio.*senha.*inv[aá]lid/i,
+  /senha.*usu[aá]rio.*inv[aá]lid/i,
+  /login.*inv[aá]lid/i,
+];
+
+const SESSION_ERROR_PATTERNS = [
+  /jwt expired/i,
+  /invalid token/i,
+  /unauthorized/i,
+  /forbidden/i,
+  /not authorized/i,
+  /sess[aã]o expirada/i,
+];
+
+const TOKEN_LINK_ERROR_PATTERNS = [
+  /token expirad/i,
+  /token inv[aá]lid/i,
+];
+
 const getErrorMessage = (error: unknown) => {
   if (!error) return '';
   if (typeof error === 'string') return error;
@@ -61,8 +83,23 @@ export const normalizeUserFacingError = (
   const status = getErrorStatus(error);
   const message = getErrorMessage(error).trim();
 
+  if (INVALID_CREDENTIALS_PATTERNS.some((pattern) => pattern.test(message))) {
+    return 'E-mail, usuário ou senha incorretos. Confira os dados e tente de novo.';
+  }
+
+  if (SESSION_ERROR_PATTERNS.some((pattern) => pattern.test(message))) {
+    return 'Sua sessão expirou. Entre novamente para continuar.';
+  }
+
+  if (TOKEN_LINK_ERROR_PATTERNS.some((pattern) => pattern.test(message))) {
+    if (status === 401 || status === 403) {
+      return 'Sua sessão expirou. Entre novamente para continuar.';
+    }
+    return 'Esse link ou código expirou. Solicite um novo e tente novamente.';
+  }
+
   if (status === 401 || status === 403) {
-    return message || 'Sua sessão expirou. Entre novamente para continuar.';
+    return 'Sua sessão expirou. Entre novamente para continuar.';
   }
 
   if (isTransientConnectionError(error)) {

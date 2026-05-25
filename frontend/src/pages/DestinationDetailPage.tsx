@@ -2,9 +2,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, Mountains, PhoneCall, Sparkle, WhatsappLogo, X } from '@phosphor-icons/react';
+import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, Mountains, PhoneCall, Sparkle, WhatsappLogo } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
+import { AppImagePreviewDialog } from '../components/common/AppImagePreviewDialog';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -776,33 +777,7 @@ export function DestinationDetailPage() {
         </section>
       ) : null}
 
-      {previewImage && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md animate-in fade-in duration-300"
-          onClick={() => setPreviewImage(null)}
-        >
-          <button
-            type="button"
-            className="absolute right-4 top-4 z-[110] flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition active:scale-90"
-            onClick={() => setPreviewImage(null)}
-          >
-            <X size={20} weight="bold" />
-          </button>
-          <div
-            className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={previewImage.src}
-              alt={previewImage.title}
-              className="max-h-[75vh] w-auto max-w-full object-contain"
-            />
-            <div className="bg-slate-900/90 px-4 py-3 text-center text-white">
-              <p className="text-sm font-bold">{previewImage.title}</p>
-            </div>
-          </div>
-        </div>
-      )}
+      <AppImagePreviewDialog image={previewImage} onClose={() => setPreviewImage(null)} label="Imagem ampliada do destino" />
 
       <PreStoreDetailSheet
         open={Boolean(selectedListing)}

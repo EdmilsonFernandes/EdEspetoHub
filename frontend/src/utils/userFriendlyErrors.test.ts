@@ -30,6 +30,24 @@ describe('userFriendlyErrors', () => {
     );
   });
 
+  it('humaniza credenciais invalidas', () => {
+    expect(normalizeUserFacingError(Object.assign(new Error('Credenciais inválidas'), { status: 401 }))).toBe(
+      'E-mail, usuário ou senha incorretos. Confira os dados e tente de novo.'
+    );
+  });
+
+  it('humaniza token ou sessao expirada', () => {
+    expect(normalizeUserFacingError(Object.assign(new Error('jwt expired'), { status: 401 }))).toBe(
+      'Sua sessão expirou. Entre novamente para continuar.'
+    );
+  });
+
+  it('humaniza link ou codigo expirado sem tratar como login', () => {
+    expect(normalizeUserFacingError(Object.assign(new Error('Token inválido.'), { status: 400 }))).toBe(
+      'Esse link ou código expirou. Solicite um novo e tente novamente.'
+    );
+  });
+
   it('identifica falhas transitórias para polling silencioso', () => {
     expect(isTransientConnectionError(Object.assign(new Error('Backend is unavailable'), { status: 502 }))).toBe(true);
   });

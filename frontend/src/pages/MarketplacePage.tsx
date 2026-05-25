@@ -2027,51 +2027,42 @@ export function MarketplacePage() {
             />
           ) : null}
 
-          {debouncedQuery.length < 2 && !selectedCondominium && (homeDestinationHighlights.length > 0 || condominiums.length > 0 || scopedEnrichedStores.length > 0) && (
-            <section className="order-2 -mx-0.5 overflow-hidden">
-              <div className="flex gap-2 overflow-x-auto pb-1 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <button
-                  type="button"
-                  onClick={() => {
-                    resetMarketplaceFilters();
-                    scrollStoresIntoView();
-                  }}
-                  className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full bg-[#153A4C] px-3.5 text-xs font-black text-white shadow-[0_14px_28px_-18px_rgba(21,58,76,0.5)] transition active:scale-95"
-                >
-                  <ForkKnife size={15} weight="fill" />
-                  Pedir agora
-                </button>
+          {debouncedQuery.length < 2 && !selectedCondominium && (homeDestinationHighlights.length > 0 || condominiums.length > 0) && (
+            <section className="order-2 overflow-hidden rounded-[1.55rem] border border-white/80 bg-white/72 p-2.5 shadow-[0_16px_34px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/45 backdrop-blur-xl">
+              <div className="mb-2 flex items-center justify-between gap-2 px-1">
+                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Explore também</span>
+                <span className="text-[10px] font-bold text-slate-400">atalhos</span>
+              </div>
+              <div className={`grid gap-2 ${homeDestinationHighlights.length > 0 && condominiums.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                 {homeDestinationHighlights.length > 0 ? (
                   <Link
                     to={destinationListHref}
-                    className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/88 px-3.5 text-xs font-black text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(15,23,42,0.22)] transition active:scale-95"
+                    className="group flex min-h-[3.55rem] items-center gap-2.5 rounded-[1.25rem] border border-[#336886]/10 bg-white px-3 text-left shadow-[0_12px_24px_-22px_rgba(15,23,42,0.2)] transition active:scale-[0.98]"
                   >
-                    <Mountains size={15} weight="duotone" />
-                    Destinos
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[1rem] bg-[#edf5fa] text-[#336886] ring-1 ring-[#d7e7ef]/80">
+                      <Mountains size={17} weight="duotone" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-xs font-black text-slate-900">Destinos e chalés</span>
+                      <span className="block truncate text-[10px] font-semibold text-slate-500">Hospedagem e serviços</span>
+                    </span>
                   </Link>
                 ) : null}
                 {condominiums.length > 0 ? (
                   <button
                     type="button"
                     onClick={() => openCondominiumPicker('all')}
-                    className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/88 px-3.5 text-xs font-black text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(15,23,42,0.22)] transition active:scale-95"
+                    className="group flex min-h-[3.55rem] items-center gap-2.5 rounded-[1.25rem] border border-emerald-100 bg-white px-3 text-left shadow-[0_12px_24px_-22px_rgba(15,23,42,0.2)] transition active:scale-[0.98]"
                   >
-                    <CalendarBlank size={15} weight="duotone" />
-                    Feiras
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[1rem] bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+                      <CalendarBlank size={17} weight="duotone" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-xs font-black text-slate-900">Feiras no condomínio</span>
+                      <span className="block truncate text-[10px] font-semibold text-slate-500">Veja agendas próximas</span>
+                    </span>
                   </button>
                 ) : null}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuickFilter('nearby');
-                    setSegmentFilter('all');
-                    scrollStoresIntoView();
-                  }}
-                  className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-sky-100 bg-sky-50/80 px-3.5 text-xs font-black text-sky-700 shadow-[0_12px_24px_-20px_rgba(14,165,233,0.22)] transition active:scale-95"
-                >
-                  <MapPinLine size={15} weight="duotone" />
-                  Perto de mim
-                </button>
               </div>
             </section>
           )}

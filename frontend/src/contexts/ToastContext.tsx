@@ -1,5 +1,7 @@
 // @ts-nocheck
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { CheckCircle, Info, WarningCircle, X, XCircle } from '@phosphor-icons/react';
+import { normalizeUserFacingError } from '../utils/userFriendlyErrors';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -48,7 +50,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   ) => {
     const id = Math.random().toString(36).substring(7);
-    setToasts((prev) => [...prev, { id, message, type, actionLabel: options?.actionLabel, onAction: options?.onAction }]);
+    const safeMessage = normalizeUserFacingError(message);
+    setToasts((prev) => [...prev.slice(-2), { id, message: safeMessage, type, actionLabel: options?.actionLabel, onAction: options?.onAction }]);
     setTimeout(() => {
       removeToast(id);
     }, Math.max(1500, Number(options?.durationMs || 4000)));
@@ -70,28 +73,28 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const getIcon = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return '✓';
+        return <CheckCircle size={20} weight="fill" />;
       case 'error':
-        return '✕';
+        return <XCircle size={20} weight="fill" />;
       case 'warning':
-        return '⚠';
+        return <WarningCircle size={20} weight="fill" />;
       default:
-        return 'ℹ';
+        return <Info size={20} weight="fill" />;
     }
   };
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 space-y-2 px-3 w-full max-w-xl">
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--jnk-client-bottom-nav-height,0px)+env(safe-area-inset-bottom)+0.85rem)] z-[320] mx-auto flex w-full max-w-xl flex-col gap-2 px-3 sm:bottom-auto sm:top-[calc(env(safe-area-inset-top)+1rem)]">
         {toasts.map((toast) => (
           <div
             key={toast.id}
             onClick={() => removeToast(toast.id)}
             role="button"
-            className={`ds-toast animate-slide-in-right ${getToastClass(toast.type)}`}
+            className={`ds-toast pointer-events-auto animate-slide-in-right ${getToastClass(toast.type)}`}
           >
-            <span className="text-lg font-bold">{getIcon(toast.type)}</span>
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/70 text-lg font-bold shadow-sm ring-1 ring-white/70">{getIcon(toast.type)}</span>
             <span className="text-sm font-medium flex-1">{toast.message}</span>
             {toast.actionLabel && toast.onAction && (
               <button
@@ -113,10 +116,10 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 event.stopPropagation();
                 removeToast(toast.id);
               }}
-              className="text-lg font-bold hover:opacity-70 transition-opacity"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/55 text-current hover:bg-white/80 transition-opacity"
               aria-label="Fechar"
             >
-              ×
+              <X size={14} weight="bold" />
             </button>
           </div>
         ))}
