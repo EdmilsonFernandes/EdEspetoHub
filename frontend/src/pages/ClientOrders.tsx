@@ -24,6 +24,8 @@ import {
   Timer,
   WarningCircle,
   WhatsappLogo,
+  MagnifyingGlass,
+  X,
   XCircle,
   Buildings,
   Mountains,
@@ -519,6 +521,71 @@ const getOrderStatusBadgeClass = (status: string, isActive?: boolean) => {
   return 'border-slate-100 bg-slate-50 text-slate-600 ring-slate-100';
 };
 
+function OrderImageLightbox({
+  image,
+  onClose,
+}: {
+  image: { src: string; title: string } | null;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!image) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [image, onClose]);
+
+  if (!image) return null;
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Imagem ampliada de ${image.title || 'item do pedido'}`}
+      className="fixed inset-0 z-[260] flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,rgba(51,104,134,0.28),transparent_34%),linear-gradient(180deg,rgba(2,6,23,0.80),rgba(15,23,42,0.92))] px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div className="absolute inset-x-0 top-[max(0.85rem,env(safe-area-inset-top))] z-[270] flex justify-center px-4 sm:justify-end">
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/18 bg-white/14 px-4 text-sm font-black text-white shadow-[0_24px_52px_-30px_rgba(0,0,0,0.85)] ring-1 ring-white/10 backdrop-blur-xl transition-all hover:bg-white/22 active:scale-[0.97]"
+          aria-label="Fechar imagem"
+        >
+          <X size={17} weight="bold" />
+          Fechar
+        </button>
+      </div>
+
+      <figure
+        className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-white/14 bg-white/10 p-2 shadow-[0_36px_110px_-46px_rgba(0,0,0,0.96)] ring-1 ring-white/10 animate-in zoom-in-95 duration-200"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="grid max-h-[74dvh] place-items-center overflow-hidden rounded-[1.55rem] bg-slate-950/45">
+          <img
+            src={image.src}
+            alt={image.title || 'Item do pedido'}
+            className="max-h-[74dvh] w-auto max-w-full object-contain"
+          />
+        </div>
+        <figcaption className="flex items-center justify-between gap-3 px-3 py-3 text-white">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-black">{image.title || 'Item do pedido'}</p>
+            <p className="mt-0.5 text-[11px] font-semibold text-white/62">Toque fora da imagem ou use Esc para fechar.</p>
+          </div>
+          <span className="hidden shrink-0 rounded-full bg-white/12 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white/74 sm:inline-flex">
+            Visualização
+          </span>
+        </figcaption>
+      </figure>
+    </div>
+  );
+}
+
 function OrderCard({
   order,
   isActive,
@@ -540,6 +607,7 @@ function OrderCard({
   onOpenOrder: (orderId: string) => void;
   onOpenStore: (slug?: string) => void;
 }) {
+  const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
   const statusMeta = getStatusMeta(order.status, order.type);
   const items = Array.isArray(order.items) ? order.items : [];
   const primaryItem = items[0] || null;
@@ -606,12 +674,21 @@ function OrderCard({
     String(order?.type || '').trim().toLowerCase() === 'delivery' &&
     !order?.customerReceivedAt;
 
+  const openOrderFromKeyboard = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    onOpenOrder(order.id);
+  };
+
   return (
+    <>
     <article className={`overflow-hidden rounded-[28px] bg-white shadow-[0_18px_46px_-34px_rgba(15,23,42,0.28)] ${isActive ? 'ring-1 ring-emerald-200/80' : isCancelled ? 'ring-1 ring-rose-100/80' : 'ring-1 ring-slate-100'}`}>
       {/* Header do card */}
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => onOpenOrder(order.id)}
+        onKeyDown={openOrderFromKeyboard}
         onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
         onFocus={() => primeOrderTrackingNavigation(order.id)}
         onTouchStart={() => primeOrderTrackingNavigation(order.id)}
@@ -678,7 +755,7 @@ function OrderCard({
             </div>
           )}
         </div>
-      </button>
+      </div>
 
       {/* Botão pagar MP */}
       {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && order.paymentLink && (
@@ -699,9 +776,11 @@ function OrderCard({
       )}
 
       {/* Itens */}
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => onOpenOrder(order.id)}
+        onKeyDown={openOrderFromKeyboard}
         onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
         onFocus={() => primeOrderTrackingNavigation(order.id)}
         onTouchStart={() => primeOrderTrackingNavigation(order.id)}
@@ -728,12 +807,25 @@ function OrderCard({
             <div className="px-3 py-3">
               <div className="flex items-center gap-3">
                 {primaryItemImageUrl ? (
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-[1rem] bg-white shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] ring-1 ring-white">
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setPreviewImage({ src: primaryItemImageUrl, title: primaryItem.name || 'Item do pedido' });
+                    }}
+                    onKeyDown={(event) => event.stopPropagation()}
+                    className="group relative h-12 w-12 shrink-0 cursor-zoom-in overflow-hidden rounded-[1rem] bg-white text-left shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] ring-1 ring-white transition-transform active:scale-95"
+                    aria-label={`Ampliar imagem de ${primaryItem.name || 'item do pedido'}`}
+                    title="Ampliar imagem"
+                  >
                     <img src={primaryItemImageUrl} alt={primaryItem.name || 'Item do pedido'} className="h-full w-full object-cover" />
                     <span className="absolute left-1 top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white/92 px-1 text-[10px] font-black text-slate-700 shadow-sm">
                       {getOrderItemQty(primaryItem)}
                     </span>
-                  </div>
+                    <span className="absolute right-1 bottom-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-950/72 text-white shadow-sm ring-1 ring-white/28 backdrop-blur-md transition group-hover:scale-105">
+                      <MagnifyingGlass size={11} weight="bold" />
+                    </span>
+                  </button>
                 ) : (
                   <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-black text-slate-600 shadow-sm ring-1 ring-slate-200">
                     {getOrderItemQty(primaryItem)}
@@ -806,7 +898,7 @@ function OrderCard({
             </div>
           )}
         </div>
-      </button>
+      </div>
 
       {/* Rodapé com ações */}
       <div className="flex items-center gap-2 border-t border-slate-100/80 bg-[linear-gradient(180deg,#ffffff_0%,#fbfdff_100%)] px-4 py-2.5">
@@ -886,6 +978,8 @@ function OrderCard({
         )}
       </div>
     </article>
+    {previewImage ? <OrderImageLightbox image={previewImage} onClose={() => setPreviewImage(null)} /> : null}
+    </>
   );
 }
 
@@ -1500,7 +1594,7 @@ export function ClientOrders() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#EEF2F7] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[calc(env(safe-area-inset-top)+7.35rem)]">
+    <main className="min-h-screen bg-[#EEF2F7] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[calc(env(safe-area-inset-top)+4.35rem)]">
       <div className="pointer-events-none fixed top-[-10%] right-[-8%] h-[38%] w-[46%] rounded-full bg-[#153A4C]/13 blur-[120px] -z-10" />
       <div className="pointer-events-none fixed bottom-[8%] left-[-5%] h-[26%] w-[34%] rounded-full bg-[#336886]/7 blur-[100px] -z-10" />
       <div className="mx-auto max-w-2xl">
@@ -1510,41 +1604,64 @@ export function ClientOrders() {
           subtitle={activeOrders.length > 0 ? `${activeOrders.length} em andamento` : 'Acompanhe seus pedidos'}
           backTo="/hub"
           onBack={() => navigate('/hub')}
-        >
-          <div className="grid grid-cols-4 gap-1.5 rounded-[1.45rem] border border-white/80 bg-white/60 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] ring-1 ring-[#d7e7ef]/55 backdrop-blur-xl">
-            {orderFilters.map((filter) => {
-              const isSelected = statusFilter === filter.key;
-              return (
-                <button
-                  key={filter.key}
-                  type="button"
-                  onClick={() => setStatusFilter(filter.key)}
-                  className={`inline-flex min-h-[3.45rem] min-w-0 flex-col items-center justify-center gap-1.5 rounded-[1.05rem] border px-1.5 py-2 text-[10.5px] font-black leading-none transition-all duration-200 active:scale-[0.97] ${
-                    isSelected
-                      ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_12px_24px_-18px_rgba(21,58,76,0.62)]'
-                      : 'border-white/80 bg-white/78 text-slate-600 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/45'
-                  }`}
-                  aria-pressed={isSelected}
-                  title={filter.label}
-                >
-                  <span className={`flex max-w-full items-center justify-center gap-1 ${isSelected ? 'text-white' : filter.toneClass}`}>
-                    {filter.icon}
-                    <span className="truncate">{filter.shortLabel}</span>
-                  </span>
-                  <span className={`inline-flex min-w-[1.55rem] items-center justify-center rounded-full px-2 py-0.5 text-[10px] font-black leading-none ${
-                    isSelected
-                      ? 'bg-white text-[#153A4C] shadow-[0_8px_16px_-12px_rgba(15,23,42,0.45)]'
-                      : 'bg-slate-100/90 text-slate-600 ring-1 ring-white/80'
-                  }`}>
-                    {filter.count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </AppGlassHeader>
+        />
 
         <div className="px-4 py-4">
+          <section className="mb-5 overflow-hidden rounded-[1.8rem] border border-white/85 bg-white/78 p-3 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.26)] ring-1 ring-[#d7e7ef]/55 backdrop-blur-xl">
+            <div className="flex items-center justify-between gap-3 px-1">
+              <div className="min-w-0">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Filtrar pedidos</p>
+                <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
+                  Escolha uma visão sem esconder o histórico.
+                </p>
+              </div>
+              <span className="inline-flex shrink-0 rounded-full bg-[#edf5fa] px-2.5 py-1 text-[11px] font-black text-[#336886] ring-1 ring-[#cfe0ea]">
+                {filteredOrders.length}/{orders.length}
+              </span>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {orderFilters.map((filter) => {
+                const isSelected = statusFilter === filter.key;
+                return (
+                  <button
+                    key={filter.key}
+                    type="button"
+                    onClick={() => setStatusFilter(filter.key)}
+                    className={`inline-flex min-h-[3.15rem] min-w-0 items-center justify-between gap-2 rounded-[1.2rem] border px-3 py-2 text-left transition-all duration-200 active:scale-[0.98] ${
+                      isSelected
+                        ? 'border-[#153A4C] bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_16px_30px_-22px_rgba(21,58,76,0.62)]'
+                        : 'border-white/90 bg-white/82 text-slate-700 shadow-[0_12px_26px_-24px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/55'
+                    }`}
+                    aria-pressed={isSelected}
+                    aria-label={`${filter.label}: ${filter.count} pedido${filter.count === 1 ? '' : 's'}`}
+                    title={filter.label}
+                  >
+                    <span className={`flex min-w-0 items-center gap-2 ${isSelected ? 'text-white' : filter.toneClass}`}>
+                      <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${
+                        isSelected ? 'bg-white/15 text-white ring-1 ring-white/18' : 'bg-slate-50 text-current ring-1 ring-slate-200/70'
+                      }`}>
+                        {filter.icon}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-[12px] font-black leading-tight">{filter.label}</span>
+                        <span className={`block text-[10px] font-semibold leading-tight ${isSelected ? 'text-white/68' : 'text-slate-400'}`}>
+                          {filter.key === 'all' ? 'Tudo' : filter.shortLabel}
+                        </span>
+                      </span>
+                    </span>
+                    <span className={`inline-flex min-w-[1.65rem] shrink-0 items-center justify-center rounded-full px-2 py-1 text-[11px] font-black leading-none ${
+                      isSelected
+                        ? 'bg-white text-[#153A4C] shadow-[0_8px_16px_-12px_rgba(15,23,42,0.45)]'
+                        : 'bg-slate-100/90 text-slate-600 ring-1 ring-white/80'
+                    }`}>
+                      {filter.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           {error ? (
             <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
               {error}
