@@ -26,8 +26,14 @@ export function AuthLayout({
 }: AuthLayoutProps) {
   const isNativePlatform = Capacitor.isNativePlatform();
   const spacingClass = showHeader
-    ? 'pb-3 pt-[calc(env(safe-area-inset-top)+5.05rem)] sm:pb-10 sm:pt-[calc(env(safe-area-inset-top)+6rem)]'
+    ? 'pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+4.35rem)] sm:pb-10 sm:pt-[calc(env(safe-area-inset-top)+6rem)]'
     : 'py-3 sm:py-10';
+  const shellMinHeightClass = showHeader
+    ? 'min-h-0 lg:min-h-[calc(100vh-3rem)]'
+    : 'min-h-[calc(100dvh-1.5rem)] sm:min-h-[calc(100vh-3rem)]';
+  const contentAlignmentClass = showHeader
+    ? 'items-start pt-1 lg:items-center lg:pt-0'
+    : 'items-center';
 
   return (
     <div className={`min-h-[100dvh] overflow-x-clip bg-[#EEF2F7] px-4 ${spacingClass} relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
@@ -48,7 +54,7 @@ export function AuthLayout({
         <div className="absolute -bottom-[5%] left-[20%] w-[30%] h-[30%] rounded-full bg-emerald-400/5 blur-[80px] animate-[orbFloat_25s_infinite_linear]" />
       </div>
 
-      <div className="mx-auto w-full max-w-7xl min-h-[calc(100dvh-1.5rem)] sm:min-h-[calc(100vh-3rem)] grid lg:grid-cols-[1.06fr_minmax(520px,1fr)] gap-7 items-stretch relative z-10">
+      <div className={`mx-auto grid w-full max-w-7xl ${shellMinHeightClass} items-stretch gap-7 lg:grid-cols-[1.06fr_minmax(520px,1fr)] relative z-10`}>
         <aside className="hidden lg:flex flex-col justify-between rounded-[24px] border border-sky-800/25 bg-[linear-gradient(145deg,#0a3d52_0%,#0d4f66_45%,#0a3a4d_100%)] text-white px-10 py-12 shadow-[0_32px_64px_-24px_rgba(13,79,102,0.55)] relative overflow-hidden">
           {/* Background mesh */}
           <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '28px 28px' }} />
@@ -102,7 +108,7 @@ export function AuthLayout({
           </div>
         </aside>
 
-        <section className="mx-auto flex w-full max-w-[560px] items-center justify-center lg:max-w-none relative">
+        <section className={`mx-auto flex w-full max-w-[560px] justify-center lg:max-w-none relative ${contentAlignmentClass}`}>
           {children}
         </section>
       </div>

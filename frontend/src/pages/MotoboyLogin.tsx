@@ -328,9 +328,9 @@ export function MotoboyLogin() {
       backTo={hubMode ? '/hub' : accessPortalPath}
       showHeader
     >
-      <div className="space-y-3 ds-login-card-enter w-full sm:space-y-4">
-        <div className="text-center space-y-1.5 sm:space-y-2.5">
-          <button type="button" onClick={handleLogoTap} className="mx-auto flex flex-col items-center gap-2 transition-transform active:scale-95 sm:gap-3 sm:hover:scale-[1.03]">
+      <div className="space-y-2 ds-login-card-enter w-full sm:space-y-4">
+        <div className="text-center space-y-1 sm:space-y-2.5">
+          <button type="button" onClick={handleLogoTap} className="mx-auto hidden flex-col items-center gap-3 transition-transform active:scale-95 sm:flex sm:hover:scale-[1.03]">
             <div className="h-16 w-16 overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12 sm:h-[4.75rem] sm:w-[4.75rem] sm:border-[4px]">
               <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
             </div>
@@ -340,8 +340,8 @@ export function MotoboyLogin() {
             </div>
           </button>
           <div className="flex items-center justify-center gap-2 sm:gap-3">
-            <Scooter size={28} weight="duotone" className="text-[#0d4f66] sm:h-[34px] sm:w-[34px]" />
-            <h2 className="text-2xl font-black text-slate-800 tracking-[-0.03em] sm:text-[2.2rem]">
+            <Scooter size={24} weight="duotone" className="text-[#0d4f66] sm:h-[34px] sm:w-[34px]" />
+            <h2 className="text-xl font-black text-slate-800 tracking-[-0.03em] sm:text-[2.2rem]">
               {alreadyLoggedIn ? 'Sessão ativa' : 'Entregador'}
             </h2>
           </div>
@@ -554,7 +554,7 @@ export function MotoboyLogin() {
                 </button>
               </div>
 
-              <div className="space-y-3 pt-2">
+              <div className="space-y-3 pt-1 sm:pt-2">
                 <button
                   type="submit"
                   disabled={loading}
@@ -581,7 +581,7 @@ export function MotoboyLogin() {
             <button
               type="button"
               onClick={() => navigate(hubMode ? '/hub' : '/')}
-              className="w-full text-center text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
+              className="hidden w-full text-center text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest sm:block"
             >
               {hubMode ? 'Voltar para o hub' : 'Voltar para o site'}
             </button>

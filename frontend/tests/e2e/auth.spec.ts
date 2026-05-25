@@ -23,6 +23,7 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
     await page.goto('/admin?hub=1');
 
     await expect(page.getByRole('banner')).toContainText('Área do lojista');
+    await expect(page.getByText('Voltar para o app')).toBeHidden();
     await page.getByRole('button', { name: /Acessar Painel/i }).click();
 
     await expect(page.getByText('Informe seu e-mail ou usuário.').first()).toBeVisible();
@@ -33,6 +34,7 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
     await page.goto('/motoboy/login?hub=1');
 
     await expect(page.getByRole('banner')).toContainText('Área do entregador');
+    await expect(page.getByText('Voltar para o hub')).toBeHidden();
     await page.getByRole('button', { name: /Acessar Painel/i }).click();
 
     await expect(page.getByText('Informe seu e-mail ou usuário.').first()).toBeVisible();

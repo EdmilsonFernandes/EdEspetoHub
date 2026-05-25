@@ -449,9 +449,9 @@ export function AdminLogin() {
       backTo={hubMode ? '/hub' : accessPortalPath}
       showHeader
     >
-      <div className="space-y-3 ds-login-card-enter w-full sm:space-y-4">
-        <div className="text-center space-y-1.5 sm:space-y-2.5">
-          <button type="button" onClick={handleLogoTap} className="mx-auto flex flex-col items-center gap-2 transition-transform active:scale-95 sm:gap-3 sm:hover:scale-[1.03]">
+      <div className="space-y-2 ds-login-card-enter w-full sm:space-y-4">
+        <div className="text-center space-y-1 sm:space-y-2.5">
+          <button type="button" onClick={handleLogoTap} className="mx-auto hidden flex-col items-center gap-3 transition-transform active:scale-95 sm:flex sm:hover:scale-[1.03]">
             <div className="h-16 w-16 overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12 sm:h-[4.75rem] sm:w-[4.75rem] sm:border-[4px]">
               <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
             </div>
@@ -461,8 +461,8 @@ export function AdminLogin() {
             </div>
           </button>
           <div className="flex items-center justify-center gap-2 sm:gap-3">
-            <LockKey size={28} weight="duotone" className="text-[#0d4f66] sm:h-8 sm:w-8" />
-            <h2 className="text-2xl font-black text-slate-800 tracking-[-0.03em] sm:text-[2.2rem]">
+            <LockKey size={24} weight="duotone" className="text-[#0d4f66] sm:h-8 sm:w-8" />
+            <h2 className="text-xl font-black text-slate-800 tracking-[-0.03em] sm:text-[2.2rem]">
               {hubMode ? 'Lojista' : 'Login'}
             </h2>
           </div>
@@ -636,7 +636,7 @@ export function AdminLogin() {
             </button>
           </div>
 
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3 pt-1 sm:pt-2">
             <button
               type="submit"
               className="ds-btn-shine w-full h-12 rounded-2xl bg-[#0d4f66] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group sm:h-14"
@@ -648,7 +648,7 @@ export function AdminLogin() {
             <button
               type="button"
               onClick={() => navigate(hubMode ? '/hub' : '/')}
-              className="w-full h-10 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2 sm:h-12 sm:text-base"
+              className="hidden w-full h-10 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 active:scale-[0.98] transition-all items-center justify-center gap-2 sm:flex sm:h-12 sm:text-base"
             >
               <ArrowLeft size={18} weight="duotone" />
               {hubMode ? 'Voltar para o app' : 'Voltar ao início'}
