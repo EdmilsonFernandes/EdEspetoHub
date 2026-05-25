@@ -656,14 +656,32 @@ export function StorePage() {
   const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
   const showClientWebBottomNav = !isNativeRuntime && !isStoreAdmin && view === 'menu';
   const showPublicStoreAppHeader = !isStoreAdmin && [ 'menu', 'cart', 'success' ].includes(String(view || ''));
+  const [publicStoreHeaderScrolled, setPublicStoreHeaderScrolled] = useState(false);
+  const publicStoreHeaderIsSolid = view !== 'menu' || publicStoreHeaderScrolled;
   const publicStoreHeaderTitle =
     view === 'cart'
       ? 'Revisar pedido'
       : view === 'success'
       ? 'Pedido enviado'
-      : (storeName || branding?.brandName || 'Loja');
+      : publicStoreHeaderIsSolid
+      ? (storeName || branding?.brandName || 'Loja')
+      : 'Pedido online';
+  const publicStoreHeaderEyebrow = 'Já no Caminho';
+  const publicStoreHeaderRight =
+    view === 'menu' && publicStoreHeaderIsSolid ? (
+      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] shadow-[0_12px_22px_-20px_rgba(21,58,76,0.38)] ${
+        storeOpenNow
+          ? 'border-emerald-200 bg-emerald-50/88 text-emerald-700'
+          : 'border-amber-200 bg-amber-50/88 text-amber-700'
+      }`}>
+        <span className={`h-1.5 w-1.5 rounded-full ${storeOpenNow ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+        {storeOpenNow ? 'Aberto' : 'Fechado'}
+      </span>
+    ) : null;
   const publicStoreHeaderSubtitle =
-    view === 'cart'
+    view === 'menu' && !publicStoreHeaderIsSolid
+      ? (storeName || branding?.brandName || 'Cardápio e pedidos')
+      : view === 'cart'
       ? 'Confira sua sacola'
       : view === 'success'
       ? 'Acompanhe o andamento'
@@ -680,6 +698,39 @@ export function StorePage() {
     }
     navigateBackOrFallback(navigate, '/hub');
   }, [navigate, view]);
+  useEffect(() => {
+    if (!showPublicStoreAppHeader) {
+      setPublicStoreHeaderScrolled(false);
+      return;
+    }
+
+    if (view !== 'menu') {
+      setPublicStoreHeaderScrolled(true);
+      return;
+    }
+
+    let frame = 0;
+    const updateHeaderState = () => {
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      setPublicStoreHeaderScrolled((prev) => {
+        const next = y > 72;
+        return prev === next ? prev : next;
+      });
+    };
+    const handleScroll = () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(updateHeaderState);
+    };
+
+    updateHeaderState();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [showPublicStoreAppHeader, view]);
   const normalizedRole = String(user?.user?.role || user?.role || '').toLowerCase();
   const isProfessionalCheckoutUser = [
     'admin',
@@ -3359,10 +3410,12 @@ export function StorePage() {
       {showPublicStoreAppHeader ? (
         <AppGlassHeader
           title={publicStoreHeaderTitle}
-          eyebrow="Já no Caminho"
+          eyebrow={publicStoreHeaderEyebrow}
           subtitle={publicStoreHeaderSubtitle}
           backTo="/hub"
           onBack={handlePublicStoreHeaderBack}
+          right={publicStoreHeaderRight}
+          className={publicStoreHeaderIsSolid ? 'jnc-app-glass-header--solid' : 'jnc-app-glass-header--ambient'}
           maxWidthClassName="max-w-6xl"
         />
       ) : null}
