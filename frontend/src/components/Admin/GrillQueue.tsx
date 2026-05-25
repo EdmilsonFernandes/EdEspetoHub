@@ -2762,7 +2762,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       quantity: 1,
       category: TABLE_SERVICE_CATEGORY,
       title: "Adicionar couvert",
-      helper: "Informe quantas pessoas estão na mesa. O valor entra como item do pedido e sai na impressão.",
+      helper: "Escolha quantas pessoas serão cobradas. O pedido mostra quantidade, valor por pessoa e total.",
       quantityLabel: "Pessoas na mesa",
       ctaLabel: "Adicionar couvert",
     });
@@ -3392,17 +3392,25 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return (
       <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50/85 p-2.5 shadow-[0_12px_34px_-28px_rgba(15,23,42,0.45)]">
         {activeAddons.length ? (
-          <div className="mb-2 space-y-1.5">
+          <div className="mb-2 rounded-2xl border border-white/80 bg-white px-3 py-2 shadow-sm">
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+                Adicionais aplicados
+              </p>
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-500">
+                {activeAddons.length}
+              </span>
+            </div>
             {activeAddons.map((addon: any) => (
               <div
                 key={addon.id}
-                className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/80 bg-white px-3 py-2 text-xs shadow-sm"
+                className="flex min-w-0 items-center gap-2 rounded-xl bg-slate-50 px-2 py-1.5 text-xs"
               >
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#FFF3E0] text-[#E65100]">
                   {renderFontAwesomeIcon(addon.icon)}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-black text-slate-700">{addon.label}</span>
+                  <span className="block truncate font-black text-slate-800">{addon.label}</span>
                   {addon.detail ? (
                     <span className="mt-0.5 block text-[10px] font-bold leading-tight text-slate-500">
                       {addon.detail}
@@ -3416,7 +3424,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   type="button"
                   onClick={() => removeVisualOrderItemGroup(order.id, addon.group)}
                   disabled={updating === order.id}
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-rose-50 text-rose-600 transition hover:bg-rose-100 active:scale-95 disabled:opacity-50"
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white text-rose-600 ring-1 ring-rose-100 transition hover:bg-rose-50 active:scale-95 disabled:opacity-50"
                   aria-label={`Remover ${addon.label}`}
                   title={`Remover ${addon.label}`}
                 >
@@ -3672,20 +3680,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         </div>
       )}
       {canCancelOrder && (
-        <div className="w-full border-t border-slate-100 pt-3">
-          <div className="mb-2 rounded-2xl border border-rose-100 bg-rose-50/70 px-3 py-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-rose-700">
-              Ação sensível
-            </p>
-            <p className="mt-1 text-[11px] font-semibold text-rose-600/90">
-              Use apenas se o pedido realmente não puder mais seguir no fluxo normal.
-            </p>
-          </div>
+        <div className="w-full border-t border-slate-100 pt-2">
           <button
             type="button"
             onClick={() => openCancelOrderModal(order)}
             disabled={updating === order.id}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700 shadow-[0_12px_24px_-18px_rgba(225,29,72,0.28)] transition-all hover:border-rose-300 hover:bg-rose-100 active:scale-[0.98] disabled:opacity-50"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-white px-4 py-2.5 text-sm font-bold text-rose-600 transition-all hover:border-rose-200 hover:bg-rose-50 active:scale-[0.98] disabled:opacity-50"
           >
             <X size={15} weight="bold" />
             Cancelar pedido
@@ -4524,7 +4524,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
 
               {/* ADICIONAR ITEM */}
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 rounded-[1.35rem] border border-slate-200/80 bg-slate-50/80 p-2.5 shadow-[0_14px_32px_-28px_rgba(15,23,42,0.45)]">
                 <div className="flex w-full min-w-0 flex-row items-stretch gap-2 rounded-2xl border border-slate-200/70 bg-white/70 p-1.5">
                   <ProductQuickPicker
                     value={selectedProducts[order.id] || ""}
@@ -4550,24 +4550,24 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   </button>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="mt-2 grid grid-cols-[repeat(auto-fit,minmax(6.25rem,1fr))] gap-1.5" data-testid="admin-order-quick-actions">
                   <button
                     type="button"
                     onClick={() => openManualItemModal(String(order.id))}
-                    className="inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 active:scale-95"
+                    className="inline-flex min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-2 py-2 text-[10px] font-black uppercase tracking-[0.05em] text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 active:scale-95 sm:text-[11px]"
                   >
                     {renderFontAwesomeIcon("fa-asterisk")}
-                    Item avulso
+                    <span className="truncate">Item avulso</span>
                   </button>
 
                   {isTableOrder(order) && tableServiceSettings.couvertEnabled && Number(tableServiceSettings.couvertPrice || 0) > 0 && !activeCouvertGroup ? (
                     <button
                       type="button"
                       onClick={() => openCouvertModal(order)}
-                      className="inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-amber-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-amber-100 active:scale-95"
+                      className="inline-flex min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-2xl border border-amber-200 bg-amber-50 px-2 py-2 text-[10px] font-black uppercase tracking-[0.05em] text-amber-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-amber-100 active:scale-95 sm:text-[11px]"
                     >
                       {renderFontAwesomeIcon("fa-music")}
-                      + Couvert
+                      <span className="truncate">Couvert</span>
                     </button>
                   ) : null}
 
@@ -4576,14 +4576,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       type="button"
                       onClick={() => handleApplyServiceCharge(order)}
                       disabled={updating === order.id}
-                      className="inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-sky-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-sky-100 active:scale-95 disabled:opacity-60"
+                      className="inline-flex min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-2xl border border-sky-200 bg-sky-50 px-2 py-2 text-[10px] font-black uppercase tracking-[0.05em] text-sky-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-sky-100 active:scale-95 disabled:opacity-60 sm:text-[11px]"
                     >
                       {serviceChargeUpdating ? (
                         <ArrowsClockwise size={13} weight="bold" className="animate-spin" />
                       ) : (
                         renderFontAwesomeIcon("fa-bell-concierge")
                       )}
-                      {serviceChargeUpdating ? "Aplicando taxa..." : `+ Taxa ${tableServiceSettings.serviceChargePercent || 10}%`}
+                      <span className="truncate">
+                        {serviceChargeUpdating ? "Aplicando..." : `Taxa ${tableServiceSettings.serviceChargePercent || 10}%`}
+                      </span>
                     </button>
                   ) : null}
                 </div>
@@ -5476,6 +5478,29 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     inputMode="numeric"
                     className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200"
                   />
+                  {(() => {
+                    const preview = getManualCouvertPreview();
+                    if (!preview) return null;
+                    const currentQuantity = preview.quantity;
+                    return (
+                      <div className="mt-2 grid grid-cols-6 gap-1" aria-label="Pessoas do couvert">
+                        {[1, 2, 3, 4, 5, 6].map((people) => (
+                          <button
+                            key={`couvert-people-${people}`}
+                            type="button"
+                            onClick={() => setManualItemModal((prev) => ({ ...prev, quantity: String(people), error: "" }))}
+                            className={`h-8 rounded-xl text-xs font-black transition active:scale-95 ${
+                              currentQuantity === people
+                                ? "bg-amber-500 text-white shadow-[0_10px_22px_-16px_rgba(217,119,6,0.75)]"
+                                : "border border-amber-100 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                            }`}
+                          >
+                            {people}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
               {(() => {
@@ -5498,9 +5523,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   </div>
                 );
               })()}
-              <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
-                O item fica interno da operação e não aparece no cardápio público.
-              </div>
+              {!isTableServiceCategory(manualItemModal.category) ? (
+                <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
+                  O item fica interno da operação e não aparece no cardápio público.
+                </div>
+              ) : null}
               {manualItemModal.error ? (
                 <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
                   {manualItemModal.error}

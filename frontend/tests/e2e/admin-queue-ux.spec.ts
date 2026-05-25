@@ -229,6 +229,7 @@ test.describe('Admin queue UX', () => {
 
     const orderDetail = page.getByTestId('admin-order-detail');
     await expect(orderDetail).toBeVisible();
+    await expect(orderDetail.getByTestId('admin-order-quick-actions')).toBeVisible();
     await expect(orderDetail.getByRole('button', { name: /Item avulso/i })).toBeVisible();
     await expect(orderDetail.getByRole('button', { name: /Couvert/i })).toBeVisible();
     await expect(orderDetail.getByRole('button', { name: /Taxa 10%/i })).toBeVisible();
@@ -236,8 +237,12 @@ test.describe('Admin queue UX', () => {
     await orderDetail.getByRole('button', { name: /Couvert/i }).click();
 
     await expect(page.getByRole('button', { name: 'Adicionar couvert' })).toBeVisible();
+    await expect(page.getByLabel('Pessoas do couvert')).toBeVisible();
     await expect(page.getByText('Cobrança do couvert')).toBeVisible();
     await expect(page.getByText('R$ 12,50 por pessoa')).toBeVisible();
+    await page.getByLabel('Pessoas do couvert').getByRole('button', { name: '3' }).click();
+    await expect(page.getByText('3 pessoas x R$ 12,50 por pessoa.')).toBeVisible();
+    await expect(page.getByText('R$ 37,50')).toBeVisible();
     await page.getByLabel('Fechar item avulso').click({ force: true });
     await expect(page.getByRole('button', { name: 'Adicionar couvert' })).toBeHidden();
   });
