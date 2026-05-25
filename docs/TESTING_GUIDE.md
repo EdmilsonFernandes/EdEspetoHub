@@ -57,8 +57,10 @@ Os testes ficam em `frontend/tests/e2e`. Eles validam UI e navegação crítica,
 | Arquivo | Cobertura principal |
 | --- | --- |
 | `auth.spec.ts` | Smoke test da tela principal/autenticação em viewport mobile. |
-| `admin-queue-ux.spec.ts` | UX da fila do lojista: abre detalhe do pedido, picker de produto com imagem/categoria/preço, detalhe centralizado no web e agrupamento por mesa. |
-| `destination-whatsapp-location.spec.ts` | Fluxo visual de destinos/chalés: WhatsApp com endereço/mapa da hospedagem e contexto da hospedagem carregado para lojas oficiais. |
+| `admin-queue-ux.spec.ts` | UX da fila do lojista: abre detalhe do pedido, picker de produto com imagem/categoria/preço, detalhe centralizado no web, agrupamento por mesa e chips/modal de item avulso, couvert e taxa de serviço. |
+| `client-orders-account.spec.ts` | UI do cliente: filtros de pedidos com contadores, preview de imagem do item, conta do cliente, endereço principal e telefone mascarado na edição de perfil. |
+| `destination-whatsapp-location.spec.ts` | Fluxo visual de destinos/chalés: WhatsApp com endereço/mapa da hospedagem, contexto da hospedagem carregado para lojas oficiais e tela de rota com mapa, logos, distância e navegação sem voltar duplicado. |
+| `hub-marketplace.spec.ts` | Home/Hub do marketplace: carregamento de lojas, filtros principais, dados de card, itens em destaque, link "Ver mais" e busca na tela de destaques. |
 
 ### Unitários Relevantes
 
@@ -82,7 +84,7 @@ Estas áreas ainda merecem testes adicionais antes de chamar a cobertura de "mui
 | Pagamento Mercado Pago real | Não usar pagamento real em E2E comum. Criar sandbox/mock para payload, status `awaiting_payment`, webhook aprovado/expirado e falha. |
 | Push notification ponta a ponta | Testar backend por contrato/payload e mockar provedor. Push real em dispositivo deve ser checklist manual/release, não E2E automático. |
 | Impressão RawBT/Android | Cobrir fallback/intent por unitário ou teste de integração do adaptador. Impressão Bluetooth real deve ficar em checklist manual de release/AAB. |
-| UI completa de minha conta/endereço | Backend já cobre regra de endereço principal; falta Playwright para validar visual e cliques no fluxo mobile/web. |
+| UI completa de minha conta/endereço | Conta e endereço principal já têm smoke Playwright; ainda falta cobrir CRUD completo da tela de endereços em navegador. |
 | Fluxos financeiros de gorjeta/repasse | Adicionar E2E/API com contas fake/mockadas e unitários para regras de repasse, sem transferir dinheiro real. |
 
 ### Critério Prático de Cobertura

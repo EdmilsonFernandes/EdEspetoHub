@@ -57,7 +57,24 @@ const hospitalityPayload = {
       },
     },
   ],
-  listings: [],
+  listings: [
+    {
+      id: 'listing-route-e2e',
+      title: 'Restaurante Silvia Lanches',
+      category: 'RESTAURANTE',
+      address: 'Estrada do Bau',
+      addressNumber: '9',
+      district: 'Centro',
+      city: 'Sao Bento Sapucai',
+      state: 'SP',
+      zipCode: '12490-000',
+      whatsapp: '(12) 99999-3333',
+      description: 'Lanches proximos ao chale',
+      logoUrl: '/janocaminho.jpg',
+      lat: -22.6907,
+      lng: -45.7315,
+    },
+  ],
 };
 
 test.use({ serviceWorkers: 'block' });
@@ -122,5 +139,20 @@ test.describe('Destination WhatsApp location', () => {
     await expect(page).toHaveURL(/\/destinos\/sao-bento\/chales\/chale-vista/);
     await expect(page.locator('a[href^="/gustavao-e2e?"]').first()).toBeVisible();
     expect(pageErrors).toEqual([]);
+  });
+
+  test('mostra rota da hospedagem com mapa, logos e navegacao sem voltar duplicado', async ({ page }) => {
+    await page.goto('/destinos/sao-bento/chales/chale-vista/rota?servico=listing-route-e2e');
+
+    await expect(page.getByRole('heading', { name: 'Rota da hospedagem' })).toBeVisible();
+    await expect(page.getByText('Restaurante Silvia Lanches até Chale Vista da Pedra')).toBeVisible();
+    await expect(page.getByText('Origem').first()).toBeVisible();
+    await expect(page.getByText('Destino do hóspede')).toBeVisible();
+    await expect(page.getByText('Rota estimada')).toBeVisible();
+    await expect(page.getByText('4 min aprox.')).toBeVisible();
+    await expect(page.getByRole('link', { name: /Abrir no Google Maps/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Abrir no Waze/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Copiar link/i })).toBeVisible();
+    await expect(page.getByText('Voltar para o chalé')).toHaveCount(0);
   });
 });

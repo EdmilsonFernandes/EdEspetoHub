@@ -19,6 +19,14 @@ const adminSession = {
       prepBaseMinutes: 20,
       orderNotificationSound: '',
       orderNotificationSoundDuration: 5,
+      tableServiceSettings: {
+        couvertEnabled: true,
+        couvertLabel: 'Couvert artístico',
+        couvertPrice: 12.5,
+        serviceChargeEnabled: true,
+        serviceChargeLabel: 'Taxa de serviço',
+        serviceChargePercent: 10,
+      },
     },
   },
   subscription: {
@@ -208,5 +216,29 @@ test.describe('Admin queue UX', () => {
     await expect(orderDetail).toBeVisible();
     await expect(orderDetail.getByText('Medalhao de Palmito').first()).toBeVisible();
     await expect(page.getByTestId('admin-product-picker-button')).toBeVisible();
+  });
+
+  test('mantem acoes compactas de mesa e modal de couvert usaveis no mobile', async ({ page }) => {
+    await page.goto('/admin/queue');
+
+    await expect(page.getByTestId('admin-queue-mode-tables')).toBeVisible({ timeout: 15000 });
+    await page.getByTestId('admin-queue-mode-tables').click();
+
+    await page.getByTestId('admin-table-card').first().click();
+    await page.getByTestId('admin-table-order-row').first().click();
+
+    const orderDetail = page.getByTestId('admin-order-detail');
+    await expect(orderDetail).toBeVisible();
+    await expect(orderDetail.getByRole('button', { name: /Item avulso/i })).toBeVisible();
+    await expect(orderDetail.getByRole('button', { name: /Couvert/i })).toBeVisible();
+    await expect(orderDetail.getByRole('button', { name: /Taxa 10%/i })).toBeVisible();
+
+    await orderDetail.getByRole('button', { name: /Couvert/i }).click();
+
+    await expect(page.getByRole('button', { name: 'Adicionar couvert' })).toBeVisible();
+    await expect(page.getByText('Cobrança do couvert')).toBeVisible();
+    await expect(page.getByText('R$ 12,50 por pessoa')).toBeVisible();
+    await page.getByLabel('Fechar item avulso').click({ force: true });
+    await expect(page.getByRole('button', { name: 'Adicionar couvert' })).toBeHidden();
   });
 });
