@@ -747,6 +747,7 @@ export const CartView = ({
   const hasLoggedContactInfo = Boolean(loggedDeliveryName || loggedDeliveryPhone);
   const canUseLockedContactSummary = Boolean(isLoggedAssistedFlow && hasLoggedContactInfo);
   const useMultiStepFlow = isEndCustomerLogged;
+  const compactSummaryShouldStick = !useMultiStepFlow || checkoutStep === 2;
 
   useEffect(() => {
     if (!useMultiStepFlow || !checkoutResume?.token) return;
@@ -874,6 +875,76 @@ export const CartView = ({
     </div>
   );
 
+  const renderPaymentMethodCard = (method: any, tone: "online" | "local") => {
+    const methodMeta = getPaymentMethodMeta(method.id);
+    const selected = paymentMethod === method.id;
+    const accent = tone === "online" ? "#336886" : "#207A52";
+    const selectedClasses =
+      tone === "online"
+        ? "border-[#336886]/70 bg-white text-slate-950 shadow-[0_20px_44px_-34px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/10"
+        : "border-emerald-400/80 bg-white text-slate-950 shadow-[0_20px_44px_-34px_rgba(32,122,82,0.42)] ring-2 ring-emerald-200/60";
+
+    return (
+      <button
+        key={method.id}
+        type="button"
+        onClick={() => onChangePayment(method.id)}
+        className={`group relative overflow-hidden rounded-[1.35rem] border p-3.5 text-left transition-all duration-200 active:scale-[0.985] ${
+          selected
+            ? selectedClasses
+            : "border-slate-200/80 bg-white/88 text-slate-500 shadow-[0_14px_36px_-34px_rgba(15,23,42,0.3)] hover:-translate-y-0.5 hover:border-[#336886]/22 hover:bg-white hover:shadow-[0_22px_46px_-38px_rgba(51,104,134,0.32)]"
+        }`}
+        aria-pressed={selected}
+      >
+        {selected && (
+          <span
+            className="pointer-events-none absolute inset-x-0 top-0 h-1"
+            style={{ background: `linear-gradient(90deg, ${accent}, rgba(95,211,90,0.72))` }}
+          />
+        )}
+        <div className="flex items-center gap-3">
+          <span
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.05rem] border transition-colors ${
+              selected
+                ? tone === "online"
+                  ? "border-[#336886]/16 bg-[#eef7fb]"
+                  : "border-emerald-200 bg-emerald-50"
+                : "border-slate-200 bg-slate-50"
+            }`}
+          >
+            {methodMeta.icon ? (
+              <img
+                src={methodMeta.icon}
+                alt={methodMeta.label}
+                className="h-7 w-7 object-contain"
+                loading="lazy"
+              />
+            ) : (
+              <CreditCard size={18} weight="duotone" className="text-slate-500" />
+            )}
+          </span>
+          <div className="min-w-0 flex-1 space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="truncate text-sm font-black tracking-tight text-slate-950 sm:text-[15px]">
+                {method.label}
+              </span>
+              {selected && (
+                <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-black text-white ${
+                  tone === "online" ? "bg-[#336886]" : "bg-emerald-600"
+                }`}>
+                  ✓
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] leading-snug text-slate-500">
+              {method.description}
+            </p>
+          </div>
+        </div>
+      </button>
+    );
+  };
+
   return (
     <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[max(env(safe-area-inset-top),0.85rem)] bg-[linear-gradient(180deg,rgba(238,245,247,0.98),rgba(238,245,247,0.74))]" />
@@ -932,7 +1003,7 @@ export const CartView = ({
       </div>
 
       {/* Resumo compacto (mobile) */}
-      {(!useMultiStepFlow || checkoutStep > 1) && <div className={`sm:hidden mb-4 rounded-2xl border border-slate-100 bg-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky ${summaryStickyTopClass} z-30 transition-all shadow-sm`}>
+      {(!useMultiStepFlow || checkoutStep > 1) && <div className={`sm:hidden mb-4 rounded-2xl border border-slate-100 bg-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between ${compactSummaryShouldStick ? `sticky ${summaryStickyTopClass} z-30` : "relative z-10"} transition-all shadow-sm`}>
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex items-center -space-x-2">
             {cartPreviewItems.map((item, index) => {
@@ -2031,149 +2102,101 @@ export const CartView = ({
       )}
 
       {/* Forma de Pagamento */}
-      {(!useMultiStepFlow || checkoutStep === 3) && <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 sm:p-6 mb-4 sm:mb-6 shadow-[0_24px_60px_-48px_rgba(15,23,42,0.3)]">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="font-black text-slate-900 text-base sm:text-lg flex items-center gap-2 tracking-tight">
-              <CreditCard size={18} className="text-slate-900" /> Forma de Pagamento
-            </h2>
-            <p className="mt-1 text-[11px] sm:text-xs text-slate-500">
-              Escolha como deseja confirmar este pedido.
-            </p>
+      {(!useMultiStepFlow || checkoutStep === 3) && (
+        <div className="relative mb-4 overflow-hidden rounded-[2rem] border border-white/80 bg-[radial-gradient(circle_at_top_right,rgba(95,211,90,0.18),transparent_28%),linear-gradient(145deg,rgba(255,255,255,0.98),rgba(239,247,249,0.92))] p-4 shadow-[0_30px_70px_-52px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-6">
+          <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#336886]/28 to-transparent" />
+          <div className="relative z-10 mb-4 flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.2rem] bg-white text-[#336886] shadow-[0_18px_36px_-28px_rgba(51,104,134,0.48)] ring-1 ring-[#336886]/10">
+                <Wallet size={22} weight="duotone" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
+                  Pagamento
+                </p>
+                <h2 className="text-base font-black tracking-tight text-slate-950 sm:text-lg">
+                  Escolha como pagar
+                </h2>
+                <p className="mt-0.5 text-[11px] leading-snug text-slate-500 sm:text-xs">
+                  Pix, cartão ou direto com a loja. Simples e sem confusão.
+                </p>
+              </div>
+            </div>
+            <div className="hidden h-12 w-12 shrink-0 place-items-center rounded-[1.25rem] border border-white/80 bg-white/86 shadow-[0_20px_40px_-30px_rgba(15,23,42,0.36)] min-[380px]:grid">
+              <div className="relative h-8 w-8">
+                <span className="absolute left-1 top-1 h-6 w-6 rounded-[0.8rem] border border-[#336886]/14 bg-[#eaf6f8]" />
+                <span className="absolute left-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#336886]" />
+                <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#336886]" />
+                <span className="absolute bottom-2 left-1/2 h-1 w-3 -translate-x-1/2 rounded-full bg-[#5FD35A]" />
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="space-y-3">
-          {paymentGroups.online.length > 0 && (
-            <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50/60 p-3 sm:p-4 space-y-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Online</p>
-                  <p className="mt-1 text-[11px] text-slate-500">Cobrança processada com segurança.</p>
+          <div className="relative z-10 space-y-3">
+            {paymentGroups.online.length > 0 && (
+              <section className="rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(232,244,248,0.82))] p-3.5 shadow-[0_22px_50px_-44px_rgba(51,104,134,0.32)] sm:p-4">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">
+                      Pagar online
+                    </p>
+                    <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                      Confirmação processada com segurança antes do envio.
+                    </p>
+                  </div>
+                  <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/92 px-2.5 py-1.5 text-[10px] font-black text-slate-600 shadow-[0_14px_26px_-22px_rgba(51,104,134,0.34)]">
+                    {mercadoPagoMeta.icon ? (
+                      <img src={mercadoPagoMeta.icon} alt={mercadoPagoMeta.label} className="h-4 w-4 object-contain" />
+                    ) : (
+                      <ShieldCheck size={12} weight="duotone" className="text-emerald-600" />
+                    )}
+                    <span>Seguro</span>
+                  </div>
                 </div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold text-slate-600 shadow-sm">
-                  {mercadoPagoMeta.icon ? (
-                    <img src={mercadoPagoMeta.icon} alt={mercadoPagoMeta.label} className="h-4 w-4 object-contain" />
-                  ) : (
-                    <ShieldCheck size={12} weight="duotone" className="text-emerald-600" />
-                  )}
-                  <span className="hidden sm:inline">Mercado Pago</span>
-                  <span className="inline-flex items-center gap-1 text-slate-500">
-                    <ShieldCheck size={10} weight="duotone" className="text-emerald-600" />
-                    Seguro
+                <div className={`grid gap-2.5 ${paymentGroups.online.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
+                  {paymentGroups.online.map((method) => renderPaymentMethodCard(method, "online"))}
+                </div>
+              </section>
+            )}
+
+            {paymentGroups.local.length > 0 && (
+              <section className="rounded-[1.55rem] border border-emerald-200/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(238,250,241,0.82))] p-3.5 shadow-[0_22px_50px_-44px_rgba(32,122,82,0.28)] sm:p-4">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-700">
+                      Pagar na loja
+                    </p>
+                    <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                      Combine no atendimento, na entrega ou na retirada.
+                    </p>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-white/90 px-2.5 py-1.5 text-[10px] font-black text-emerald-700">
+                    <ShieldCheck size={12} weight="duotone" />
+                    Direto
                   </span>
                 </div>
-              </div>
-              <div className={`grid gap-3 ${paymentGroups.online.length === 1 ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3"}`}>
-                {paymentGroups.online.map((method) => (
-                  <button
-                    key={method.id}
-                    onClick={() => onChangePayment(method.id)}
-                    className={`rounded-[1.35rem] border p-4 text-left transition-all active:scale-[0.985] ${
-                      paymentMethod === method.id
-                        ? "border-orange-400 bg-orange-50/70 text-slate-900 shadow-[0_16px_36px_-28px_rgba(249,115,22,0.55)]"
-                        : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:shadow-[0_14px_30px_-30px_rgba(15,23,42,0.3)]"
-                    }`}
-                  >
-                    {(() => {
-                      const methodMeta = getPaymentMethodMeta(method.id);
-                      return (
-                        <div className="flex items-center gap-3">
-                          <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${
-                            paymentMethod === method.id
-                              ? "border-orange-200 bg-white text-orange-500"
-                              : "border-slate-200 bg-slate-50 text-slate-500"
-                          }`}>
-                            {methodMeta.icon ? (
-                              <img
-                                src={methodMeta.icon}
-                                alt={methodMeta.label}
-                                className="h-5 w-5 object-contain"
-                              />
-                            ) : (
-                              <CreditCard size={16} />
-                            )}
-                          </span>
-                          <div className="min-w-0 space-y-1">
-                            <div className="text-sm sm:text-[15px] font-bold tracking-tight text-slate-900">{method.label}</div>
-                            <div className="text-[11px] leading-relaxed text-slate-500">
-                              {method.description}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+                <div className={`grid gap-2.5 ${paymentGroups.local.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
+                  {paymentGroups.local.map((method) => renderPaymentMethodCard(method, "local"))}
+                </div>
+              </section>
+            )}
+          </div>
 
-          {paymentGroups.local.length > 0 && (
-            <div className="rounded-[1.4rem] border border-slate-200 bg-white p-3 sm:p-4 space-y-3">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Na loja</p>
-                <p className="mt-1 text-[11px] text-slate-500">Pagamento confirmado no atendimento ou na retirada.</p>
+          {isManualPix && (
+            <div className="relative z-10 mt-4 flex items-center gap-3 rounded-[1.35rem] border border-emerald-200/80 bg-emerald-50/80 p-3 shadow-[0_16px_34px_-28px_rgba(32,122,82,0.36)]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-emerald-200 bg-white">
+                <img src={getPaymentMethodMeta("pix_loja").icon} alt="Pix da loja" className="h-7 w-7 object-contain" />
               </div>
-              <div className={`grid gap-3 ${paymentGroups.local.length === 1 ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3"}`}>
-                {paymentGroups.local.map((method) => (
-                  <button
-                    key={method.id}
-                    onClick={() => onChangePayment(method.id)}
-                    className={`rounded-[1.35rem] border p-4 text-left transition-all active:scale-[0.985] ${
-                      paymentMethod === method.id
-                        ? "border-orange-400 bg-orange-50/70 text-slate-900 shadow-[0_16px_36px_-28px_rgba(249,115,22,0.55)]"
-                        : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:shadow-[0_14px_30px_-30px_rgba(15,23,42,0.3)]"
-                    }`}
-                  >
-                    {(() => {
-                      const methodMeta = getPaymentMethodMeta(method.id);
-                      return (
-                        <div className="flex items-center gap-3">
-                          <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${
-                            paymentMethod === method.id
-                              ? "border-orange-200 bg-white text-orange-500"
-                              : "border-slate-200 bg-slate-50 text-slate-500"
-                          }`}>
-                            {methodMeta.icon ? (
-                              <img
-                                src={methodMeta.icon}
-                                alt={methodMeta.label}
-                                className="h-5 w-5 object-contain"
-                              />
-                            ) : (
-                              <CreditCard size={16} />
-                            )}
-                          </span>
-                          <div className="min-w-0 space-y-1">
-                            <div className="text-sm sm:text-[15px] font-bold tracking-tight text-slate-900">{method.label}</div>
-                            <div className="text-[11px] leading-relaxed text-slate-500">
-                              {method.description}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </button>
-                ))}
+              <div className="min-w-0">
+                <p className="text-[11px] font-black text-emerald-700">Pix da loja</p>
+                <p className="text-[10px] leading-tight text-slate-500">
+                  A chave Pix da loja será exibida após confirmar o pedido.
+                </p>
               </div>
             </div>
           )}
         </div>
-        {isManualPix && (
-          <div className="mt-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-3 flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-emerald-200 overflow-hidden">
-              <img src={getPaymentMethodMeta("pix_loja").icon} alt="Pix da loja" className="h-5 w-5 object-contain" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-black text-emerald-700">Pix da loja</p>
-              <p className="text-[10px] text-slate-500 leading-tight">
-                A chave Pix da loja será exibida após confirmar o pedido.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>}
+      )}
 
       {(!useMultiStepFlow || checkoutStep === 3) && isCash && (
         <div className="relative overflow-hidden bg-gradient-to-br from-white via-amber-50/35 to-white rounded-2xl border border-amber-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] space-y-3 shadow-[0_28px_56px_-44px_rgba(245,158,11,0.4)]">
@@ -2455,6 +2478,8 @@ export const CartView = ({
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
                   : checkoutStep === 4
                   ? isOnlinePaymentMethod ? "bg-[#009ee3] text-white cursor-pointer" : "bg-emerald-600 text-white cursor-pointer"
+                  : checkoutStep === 3
+                  ? "bg-[linear-gradient(135deg,#336886,#207A52)] text-white cursor-pointer shadow-[0_18px_36px_-24px_rgba(51,104,134,0.55)]"
                   : "bg-slate-900 text-white cursor-pointer"
               }`}
               style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}

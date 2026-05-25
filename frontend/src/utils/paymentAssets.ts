@@ -38,20 +38,20 @@ const METHOD_LABELS: Record<string, string> = {
 };
 
 const METHOD_ICONS: Record<string, string> = {
-  pix: '/uploads/payment/pix.webp',
-  pix_loja: '/uploads/payment/pix.webp',
-  'pix-loja': '/uploads/payment/pix.webp',
-  pix_presencial: '/uploads/payment/pix.webp',
-  debito: '/uploads/payment/credit-card.webp',
-  debit: '/uploads/payment/credit-card.webp',
-  debito_presencial: '/uploads/payment/credit-card.webp',
-  credito: '/uploads/payment/credit-card.webp',
-  credit: '/uploads/payment/credit-card.webp',
-  credito_presencial: '/uploads/payment/credit-card.webp',
-  credit_card: '/uploads/payment/credit-card.webp',
-  'credit-card': '/uploads/payment/credit-card.webp',
-  dinheiro: '/uploads/payment/cash.svg',
-  cash: '/uploads/payment/cash.svg',
+  pix: '/payment/pix.svg',
+  pix_loja: '/payment/pix.svg',
+  'pix-loja': '/payment/pix.svg',
+  pix_presencial: '/payment/pix.svg',
+  debito: '/payment/debit-card.svg',
+  debit: '/payment/debit-card.svg',
+  debito_presencial: '/payment/debit-card.svg',
+  credito: '/payment/credit-card.svg',
+  credit: '/payment/credit-card.svg',
+  credito_presencial: '/payment/credit-card.svg',
+  credit_card: '/payment/credit-card.svg',
+  'credit-card': '/payment/credit-card.svg',
+  dinheiro: '/payment/cash.svg',
+  cash: '/payment/cash.svg',
 };
 
 const PROVIDER_LABELS: Record<string, string> = {

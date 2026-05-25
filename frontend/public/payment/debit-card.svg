@@ -1,0 +1,18 @@
+<svg width="96" height="72" viewBox="0 0 96 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cartao de debito">
+  <rect x="10" y="12" width="76" height="48" rx="14" fill="url(#paint0_linear)"/>
+  <rect x="10" y="12" width="76" height="48" rx="14" stroke="white" stroke-opacity=".82" stroke-width="2"/>
+  <rect x="18" y="24" width="22" height="14" rx="4" fill="#DDF8EA" fill-opacity=".95"/>
+  <path d="M23 31h12" stroke="#16A34A" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M28 26v10" stroke="#16A34A" stroke-width="2.4" stroke-linecap="round"/>
+  <rect x="20" y="44" width="21" height="5" rx="2.5" fill="white" fill-opacity=".92"/>
+  <rect x="45" y="44" width="13" height="5" rx="2.5" fill="white" fill-opacity=".72"/>
+  <path d="M67 25c5 0 9 4 9 9s-4 9-9 9" stroke="#DDF8EA" stroke-width="4" stroke-linecap="round"/>
+  <path d="M61 28c3 0 6 3 6 6s-3 6-6 6" stroke="#DDF8EA" stroke-width="4" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="paint0_linear" x1="14" y1="14" x2="82" y2="61" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5FD35A"/>
+      <stop offset=".52" stop-color="#2F9B6F"/>
+      <stop offset="1" stop-color="#153A4C"/>
+    </linearGradient>
+  </defs>
+</svg>

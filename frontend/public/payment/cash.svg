@@ -1,0 +1,7 @@
+<svg width="96" height="72" viewBox="0 0 96 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dinheiro">
+  <rect x="12" y="18" width="72" height="40" rx="12" fill="#DDF8EA"/>
+  <rect x="12" y="18" width="72" height="40" rx="12" stroke="#16A34A" stroke-opacity=".28" stroke-width="2"/>
+  <circle cx="48" cy="38" r="13" fill="#16A34A" fill-opacity=".88"/>
+  <path d="M48 29v18M42 34.5c0-3 2.8-5.5 6.3-5.5 3 0 5.7 1.7 6.5 4.1M54 41.5c0 3-2.8 5.5-6.3 5.5-3 0-5.7-1.7-6.5-4.1" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <path d="M23 30c5.5 0 10-4.5 10-10M73 46c-5.5 0-10 4.5-10 10" stroke="#16A34A" stroke-opacity=".55" stroke-width="4" stroke-linecap="round"/>
+</svg>
