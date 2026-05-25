@@ -139,6 +139,13 @@ test.describe('Admin queue UX', () => {
     await page.route(`**/api/stores/${storeId}/products**`, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(products) });
     });
+    await page.route('**/api/orders/*', async (route) => {
+      if (route.request().method() === 'PATCH') {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+        return;
+      }
+      await route.continue();
+    });
     await page.route('**/api/stores/slug/e2e-store', async (route) => {
       await route.fulfill({
         status: 200,
@@ -172,6 +179,12 @@ test.describe('Admin queue UX', () => {
     await expect(option).toBeVisible();
     await expect(option).toContainText('Espetos');
     await expect(option).toContainText('R$ 12,00');
+    await option.click();
+    await expect(detail.getByTestId('admin-product-picker-button')).toContainText('Medalhao de Palmito');
+    const addSelectedProductButton = detail.getByTestId('admin-add-selected-product-button');
+    await expect(addSelectedProductButton).toBeVisible();
+    await addSelectedProductButton.click({ force: true });
+    await expect(detail.getByTestId('admin-product-picker-button')).toContainText('Adicionar item...');
   });
 
   test.describe('viewport web', () => {
@@ -240,10 +253,14 @@ test.describe('Admin queue UX', () => {
     await expect(page.getByLabel('Pessoas do couvert')).toBeVisible();
     await expect(page.getByText('Cobrança do couvert')).toBeVisible();
     await expect(page.getByText('R$ 12,50 por pessoa')).toBeVisible();
-    await page.getByLabel('Pessoas do couvert').getByRole('button', { name: '3' }).click();
-    await expect(page.getByText('3 pessoas x R$ 12,50 por pessoa.')).toBeVisible();
-    await expect(page.getByText('R$ 37,50')).toBeVisible();
-    await page.getByLabel('Fechar item avulso').click({ force: true });
+    await page.getByLabel('Nome do couvert').fill('Couvert Luan Santana');
+    await page.getByLabel('Valor por pessoa (R$)').fill('15,50');
+    const threePeopleButton = page.getByLabel('Pessoas do couvert').getByRole('button', { name: '3' });
+    await expect(threePeopleButton).toBeVisible();
+    await threePeopleButton.click({ force: true });
+    await expect(page.getByText('3 pessoas x R$ 15,50 por pessoa.')).toBeVisible();
+    await expect(page.getByText('R$ 46,50')).toBeVisible();
+    await page.getByTestId('admin-manual-item-close').click({ force: true });
     await expect(page.getByRole('button', { name: 'Adicionar couvert' })).toBeHidden();
   });
 });

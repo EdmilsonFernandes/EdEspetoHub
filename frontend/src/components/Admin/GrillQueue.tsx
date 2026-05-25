@@ -203,6 +203,7 @@ const isPostalOrder = (order: any) =>
 const isCondominiumOrder = (order: any) => Boolean(order?.condominiumId || order?.condominiumName);
 
 const MANUAL_ITEM_CATEGORY = "Avulsos";
+const TABLE_SERVICE_KIND_COUVERT = "couvert";
 
 const isTableOrder = (order: any) => String(order?.type || "").toLowerCase() === "table";
 
@@ -1226,6 +1227,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     helper: string;
     quantityLabel: string;
     ctaLabel: string;
+    serviceKind?: string;
     loading: boolean;
     error: string;
   }>({
@@ -1239,6 +1241,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     helper: "Use para bala, cobrança extra ou algo fora do cardápio.",
     quantityLabel: "Quantidade",
     ctaLabel: "Salvar e incluir",
+    serviceKind: "",
     loading: false,
     error: "",
   });
@@ -1790,14 +1793,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const normalizedCouvertLabel = normalizeTableText(tableServiceSettings.couvertLabel || "Couvert artistico");
     const normalizedServiceLabel = normalizeTableText(tableServiceSettings.serviceChargeLabel || "Taxa de servico");
     const tableServiceGroups = visualGroups.filter((group: any) => isTableServiceOrderItem(group.primary, productsById));
+    const isServiceChargeGroup = (group: any) =>
+      normalizeTableText(group.name || group.primary?.name || group.primary?.product?.name) === normalizedServiceLabel;
+    const activeServiceChargeGroup = tableServiceGroups.find(isServiceChargeGroup);
     return {
       tableServiceGroups,
-      activeCouvertGroup: tableServiceGroups.find(
-        (group: any) => normalizeTableText(group.name || group.primary?.name || group.primary?.product?.name) === normalizedCouvertLabel
-      ),
-      activeServiceChargeGroup: tableServiceGroups.find(
-        (group: any) => normalizeTableText(group.name || group.primary?.name || group.primary?.product?.name) === normalizedServiceLabel
-      ),
+      activeCouvertGroup:
+        tableServiceGroups.find(
+          (group: any) => normalizeTableText(group.name || group.primary?.name || group.primary?.product?.name) === normalizedCouvertLabel
+        ) || tableServiceGroups.find((group: any) => !isServiceChargeGroup(group)),
+      activeServiceChargeGroup,
     };
   };
 
@@ -2648,6 +2653,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         buildOrderItemFromProduct(product, options),
       ];
     });
+    setSelectedProducts((prev: any) => ({ ...prev, [orderId]: "" }));
   };
 
   const openCatalogPicker = (orderId: string, initialQuery = "") => {
@@ -2670,6 +2676,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       helper: "Use para bala, cobrança extra ou algo fora do cardápio.",
       quantityLabel: "Quantidade",
       ctaLabel: "Salvar e incluir",
+      serviceKind: "",
       loading: false,
       error: "",
     });
@@ -2687,6 +2694,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       helper: options.helper || "Use para bala, cobrança extra ou algo fora do cardápio.",
       quantityLabel: options.quantityLabel || "Quantidade",
       ctaLabel: options.ctaLabel || "Salvar e incluir",
+      serviceKind: options.serviceKind || "",
       loading: false,
       error: "",
     });
@@ -2733,7 +2741,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         return;
       }
 
-      setSelectedProducts((prev: any) => ({ ...prev, [manualItemModal.orderId as string]: nextProduct.id }));
+      setSelectedProducts((prev: any) => ({ ...prev, [manualItemModal.orderId as string]: "" }));
       const updatePromise = applyItemsChange(manualItemModal.orderId, (items) => [
         ...items,
         buildOrderItemFromProduct(nextProduct, { quantity, unitPriceOverride: price }),
@@ -2765,6 +2773,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       helper: "Escolha quantas pessoas serão cobradas. O pedido mostra quantidade, valor por pessoa e total.",
       quantityLabel: "Pessoas na mesa",
       ctaLabel: "Adicionar couvert",
+      serviceKind: TABLE_SERVICE_KIND_COUVERT,
     });
   };
 
@@ -3344,9 +3353,19 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return normalizeTableText(label) === normalizeTableText(tableServiceSettings.couvertLabel || "Couvert artístico");
   };
 
+  const isManualCouvertModal = () =>
+    manualItemModal.serviceKind === TABLE_SERVICE_KIND_COUVERT ||
+    (
+      isTableServiceCategory(manualItemModal.category) &&
+      (
+        isCouvertServiceItem(manualItemModal) ||
+        normalizeTableText(manualItemModal.title).includes("couvert") ||
+        normalizeTableText(manualItemModal.ctaLabel).includes("couvert")
+      )
+    );
+
   const getManualCouvertPreview = () => {
-    const isCouvertModal = isTableServiceCategory(manualItemModal.category) && isCouvertServiceItem(manualItemModal);
-    if (!isCouvertModal) return null;
+    if (!isManualCouvertModal()) return null;
 
     const quantity = Math.max(
       1,
@@ -4543,6 +4562,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   <button
                     type="button"
                     onClick={() => handleAddItem(order.id)}
+                    data-testid="admin-add-selected-product-button"
                     className="flex h-11 w-11 flex-shrink-0 items-center justify-center gap-1 rounded-xl bg-brand-primary text-xs font-bold text-white transition-all hover:-translate-y-0.5 hover:opacity-90 active:scale-95 sm:w-auto sm:px-3"
                   >
                     <Plus size={14} weight="duotone" />
@@ -5439,6 +5459,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 type="button"
                 disabled={manualItemModal.loading}
                 onClick={closeManualItemModal}
+                data-testid="admin-manual-item-close"
                 className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black uppercase tracking-[0.12em] text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                 aria-label="Fechar item avulso"
               >
@@ -5448,18 +5469,24 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Nome do item</label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  {isManualCouvertModal() ? "Nome do couvert" : "Nome do item"}
+                </label>
                 <input
+                  aria-label={isManualCouvertModal() ? "Nome do couvert" : "Nome do item"}
                   value={manualItemModal.name}
                   onChange={(event) => setManualItemModal((prev) => ({ ...prev, name: event.target.value, error: "" }))}
-                  placeholder="Ex: Sobremesa da casa"
+                  placeholder={isManualCouvertModal() ? "Ex: Couvert Luan Santana" : "Ex: Sobremesa da casa"}
                   className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200"
                 />
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Valor unitário (R$)</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    {isManualCouvertModal() ? "Valor por pessoa (R$)" : "Valor unitário (R$)"}
+                  </label>
                   <input
+                    aria-label={isManualCouvertModal() ? "Valor por pessoa (R$)" : "Valor unitário (R$)"}
                     value={manualItemModal.price}
                     onChange={(event) => setManualItemModal((prev) => ({ ...prev, price: event.target.value, error: "" }))}
                     placeholder="0,00"
@@ -5526,6 +5553,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               {!isTableServiceCategory(manualItemModal.category) ? (
                 <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
                   O item fica interno da operação e não aparece no cardápio público.
+                </div>
+              ) : isManualCouvertModal() ? (
+                <div className="rounded-xl border border-amber-100 bg-white px-3 py-2 text-[11px] font-semibold text-slate-500">
+                  Nome e valor vêm das configurações, mas podem ser ajustados só para esta mesa.
                 </div>
               ) : null}
               {manualItemModal.error ? (
