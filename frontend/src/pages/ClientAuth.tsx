@@ -510,13 +510,13 @@ export function ClientAuth() {
 
   return (
     <AuthLayout
-      title={mode === 'register' ? 'Criar conta' : 'Entrar'}
-      eyebrow="Área do cliente"
+      title="Área do cliente"
+      eyebrow="Já no Caminho"
       subtitle={mode === 'register' ? 'Cadastre seu acesso' : 'Acesse pedidos e endereços'}
       backTo={hubMode ? '/hub' : accessPortalPath}
       showHeader
     >
-      <div className="space-y-2 ds-login-card-enter w-full sm:space-y-4">
+      <div className="space-y-1.5 ds-login-card-enter w-full sm:space-y-4">
         <div className="text-center space-y-1 sm:space-y-2.5">
           <button type="button" onClick={() => navigate(hubMode ? '/hub' : '/')} className="mx-auto hidden flex-col items-center gap-3 transition-transform active:scale-95 sm:flex sm:hover:scale-[1.03]">
             <div className="h-16 w-16 overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12 sm:h-[4.75rem] sm:w-[4.75rem] sm:border-[4px]">
@@ -532,7 +532,7 @@ export function ClientAuth() {
               <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(34,197,94,0.14)]" />
               Conta protegida
             </div>
-            <div className="flex items-center justify-center gap-2 sm:gap-3">
+            <div className="hidden items-center justify-center gap-2 sm:flex sm:gap-3">
               <LockKey size={24} weight="duotone" className="text-[#0d4f66] sm:h-8 sm:w-8" />
               <h2 className="text-xl font-black text-slate-800 tracking-[-0.03em] sm:text-[2.2rem]">
                 {mode === 'register' ? 'Criar conta' : 'Entrar'}
@@ -550,13 +550,13 @@ export function ClientAuth() {
           <button
             type="button"
             onClick={() => navigate(accessPortalPath)}
-            className="mx-auto inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.45)] transition hover:border-slate-300 hover:text-slate-700 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.18em]"
+            className="mx-auto hidden items-center justify-center rounded-full border border-slate-200 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.45)] transition hover:border-slate-300 hover:text-slate-700 sm:inline-flex sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.18em]"
           >
             Trocar tipo de acesso
           </button>
         ) : null}
 
-        <div className="ds-card-elevated space-y-3 border-white/40 bg-white/82 p-4 backdrop-blur-xl sm:space-y-5 sm:p-8">
+        <div className="ds-card-elevated space-y-3 border-white/40 bg-white/82 p-4 backdrop-blur-xl sm:space-y-5 sm:p-7 lg:p-8">
           <div className="hidden rounded-[1.45rem] border border-[#153A4C]/10 bg-[linear-gradient(135deg,rgba(21,58,76,0.06),rgba(255,255,255,0.92)_58%,rgba(51,104,134,0.06)_100%)] px-4 py-4 sm:block">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-full border border-white/80 bg-white/82 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#153A4C]">
@@ -613,7 +613,7 @@ export function ClientAuth() {
               submit();
             }}
             autoComplete="on"
-            className="space-y-3"
+            className="space-y-2.5 sm:space-y-3"
           >
             {mode === 'register' && (
               <div className="relative">
@@ -696,6 +696,18 @@ export function ClientAuth() {
               {fieldErrors.password ? <p id="customer-password-error" className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.password}</p> : null}
             </div>
 
+            {mode === 'login' ? (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  className="text-[11px] font-black uppercase tracking-[0.12em] text-[#0d4f66] hover:text-[#0b3f52] hover:underline sm:text-xs"
+                >
+                  Esqueci minha senha
+                </button>
+              </div>
+            ) : null}
+
             {mode === 'register' && (
               <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-2.5 sm:p-3">
                 <label className="flex items-start gap-2 text-[10px] font-semibold leading-relaxed text-slate-600 sm:text-[11px]">
@@ -726,49 +738,32 @@ export function ClientAuth() {
             {error ? <p className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-semibold text-rose-600">{error}</p> : null}
             {message ? <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-semibold text-emerald-600">{message}</p> : null}
 
-            {mode === 'login' && biometricAvailable ? (
-              <>
-                <div className="flex items-center gap-3 py-2">
-                  <div className="h-px flex-1 bg-slate-200"></div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ou</span>
-                  <div className="h-px flex-1 bg-slate-200"></div>
-                </div>
-                <div className="space-y-2">
-                  <button
-                    type="button"
-                    onClick={handleBiometricLogin}
-                    disabled={biometricLoading || loading}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/20 bg-[#336886]/10 px-4 py-2.5 text-sm font-black text-[#336886] transition-all active:scale-[0.98] hover:bg-[#336886]/15 disabled:cursor-not-allowed disabled:opacity-60 sm:py-3"
-                  >
-                    <LockKey size={18} weight="duotone" />
-                    {biometricLoading ? 'Lendo biometria...' : 'Entrar com biometria'}
-                  </button>
-                  <p className="hidden text-center text-[10px] font-semibold leading-relaxed text-slate-400 sm:block">
-                    {storedBiometricProfile?.email
-                      ? `Biometria vinculada: ${storedBiometricProfile.email}`
-                      : 'Toque para entrar de forma rápida.'}
-                  </p>
-                </div>
-                <div className="hidden py-1 sm:block"></div>
-              </>
-            ) : null}
-
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-2xl bg-[linear-gradient(120deg,#0f172a,#1e293b)] px-4 py-3 text-sm font-black text-white shadow-[0_14px_26px_-16px_rgba(15,23,42,0.6)] active:scale-[0.99] disabled:opacity-60 sm:py-3.5"
+              className="ds-btn-shine w-full rounded-2xl bg-[linear-gradient(135deg,#0d4f66,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] transition-all active:scale-[0.99] disabled:opacity-60 sm:py-3.5"
             >
               {loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : 'Entrar'}
             </button>
-            {mode === 'login' && (
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                className="w-full text-center text-xs font-semibold text-sky-700 hover:text-sky-800"
-              >
-                Esqueci minha senha
-              </button>
-            )}
+
+            {mode === 'login' && biometricAvailable ? (
+              <div className="space-y-1.5">
+                <button
+                  type="button"
+                  onClick={handleBiometricLogin}
+                  disabled={biometricLoading || loading}
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/15 bg-[#edf5fa] px-4 py-2.5 text-sm font-black text-[#153A4C] shadow-[0_14px_30px_-26px_rgba(51,104,134,0.45)] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:py-3"
+                >
+                  <LockKey size={18} weight="duotone" />
+                  {biometricLoading ? 'Lendo biometria...' : 'Usar biometria neste aparelho'}
+                </button>
+                {storedBiometricProfile?.email ? (
+                  <p className="hidden text-center text-[10px] font-semibold leading-relaxed text-slate-400 sm:block">
+                    Biometria vinculada: {storedBiometricProfile.email}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </form>
         </div>
       </div>
