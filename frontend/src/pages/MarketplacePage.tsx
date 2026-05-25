@@ -2363,10 +2363,10 @@ export function MarketplacePage() {
           {/* Seção Categorias Premium Squircle */}
           <section className="order-4 relative" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <p className="mb-1.5 px-1 text-[9px] font-black uppercase tracking-[0.24em] text-slate-400/85">Categorias</p>
-            <div className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto no-scrollbar px-4 py-1.5">
+            <div className="-mx-4 grid grid-flow-col auto-cols-[minmax(54px,1fr)] snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <button
                 type="button"
-                className="group flex min-w-[54px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
+                className="group flex min-w-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
                 onClick={() => setSegmentFilter('all')}
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-[15px] transition-all duration-200 ease-out ${
@@ -2387,7 +2387,7 @@ export function MarketplacePage() {
                   <button
                     key={`${item.label}-${index}`}
                     type="button"
-                    className="group flex min-w-[54px] shrink-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
+                    className="group flex min-w-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
                     <div className={`flex h-10 w-10 items-center justify-center rounded-[15px] transition-all duration-200 ease-out ${
