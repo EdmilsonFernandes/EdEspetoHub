@@ -16,6 +16,12 @@
 
 # testing
 /coverage
+/playwright-report/
+/test-results/
+/test-results-artifacts/
+/frontend/playwright-report/
+/frontend/test-results/
+/frontend/test-results-artifacts/
 
 # misc
 .DS_Store

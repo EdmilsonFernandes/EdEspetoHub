@@ -111,7 +111,7 @@ Os testes unitários moram na pasta `frontend/src/tests/` ou espalhados junto ao
 Para verificar lógicas de PIX e taxas, rode pelo próprio terminal do *Host* (sua máquina, não precisa entrar no Docker pra rodar o Node):
 ```bash
 cd frontend
-npm run test
+npm run test:unit
 ```
 
 ### Passo 3.3: Rodar os Testes E2E (Playwright)
@@ -119,14 +119,96 @@ O Playwright irá bater no seu Docker exposto na porta `:8080`.
 Para rodar silenciosamente:
 ```bash
 cd frontend
-npx playwright test
+npm run test:e2e
 ```
 
-Para rodar **Vendo a Tela do Robô** (Visual Debugging - Muito útil para entender onde o teste quebrou na UI):
+Para rodar só um arquivo de teste:
 ```bash
 cd frontend
-npx playwright test --ui
+npm run test:e2e -- admin-queue-ux.spec.ts
 ```
+
+Para rodar todos os E2E só no projeto `Mobile Chrome`:
+```bash
+cd frontend
+npm run test:e2e:chrome
+```
+
+Para combinar arquivo específico e projeto, use `npx` direto para evitar ambiguidade do `npm`:
+```bash
+cd frontend
+npx playwright test admin-queue-ux.spec.ts --project "Mobile Chrome"
+```
+
+Projetos disponíveis hoje:
+- `Mobile Chrome`
+- `Mobile Safari`
+
+### Passo 3.4: Ver o robô abrindo o navegador
+Para rodar com o navegador visível, parecido com Selenium:
+```bash
+cd frontend
+npm run test:e2e:headed -- admin-queue-ux.spec.ts --project "Mobile Chrome"
+```
+
+Para abrir o Playwright UI, que permite selecionar o teste e executar visualmente:
+```bash
+cd frontend
+npm run test:e2e:ui
+```
+
+Para debugar passo a passo com Inspector:
+```bash
+cd frontend
+npm run test:e2e:debug -- admin-queue-ux.spec.ts --project "Mobile Chrome"
+```
+
+No modo debug, clique em `Resume` no Inspector para avançar a execução. Use esse modo quando quiser ver exatamente onde o robô clicou.
+
+### Passo 3.5: Gerar prints, vídeos e traces
+Quando precisar evidência visual para revisar UI/UX, use o config dedicado `frontend/playwright.artifacts.config.ts`.
+
+Rodar um teste com screenshot, vídeo e trace:
+```bash
+cd frontend
+npx playwright test admin-queue-ux.spec.ts --config playwright.artifacts.config.ts --project "Mobile Chrome"
+```
+
+Rodar todos os E2E com artefatos:
+```bash
+cd frontend
+npm run test:e2e:artifacts
+```
+
+Rodar todos os E2E com artefatos apenas no Mobile Chrome:
+```bash
+cd frontend
+npm run test:e2e:artifacts:chrome
+```
+
+Abrir o relatório HTML depois da execução:
+```bash
+cd frontend
+npm run test:e2e:report
+```
+
+Onde encontrar os arquivos:
+- `frontend/playwright-report/`: relatório HTML aberto pelo `show-report`.
+- `frontend/test-results-artifacts/`: evidências geradas com o config de artefatos.
+- `test-finished-1.png`: print final do teste.
+- `video.webm`: gravação do teste.
+- `trace.zip`: replay completo da execução, com snapshots, ações e rede.
+
+Para abrir um trace diretamente:
+```bash
+cd frontend
+npx playwright show-trace test-results-artifacts/<pasta-do-teste>/trace.zip
+```
+
+Importante:
+- Não commitar `playwright-report/`, `test-results/` ou `test-results-artifacts/`.
+- Prints/vídeos são evidências locais para análise e debug, não fazem parte do código.
+- Se o teste precisa validar regra de negócio, prefira backend E2E ou unitário. Use Playwright para tela, navegação, layout e fluxo do usuário.
 
 ---
 

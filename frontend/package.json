@@ -13,7 +13,15 @@
     "preview": "vite preview",
     "test:unit": "vitest run --pool threads",
     "test:e2e": "playwright test",
+    "test:e2e:chrome": "playwright test --project \"Mobile Chrome\"",
+    "test:e2e:safari": "playwright test --project \"Mobile Safari\"",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed --workers=1",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:artifacts": "playwright test --config playwright.artifacts.config.ts",
+    "test:e2e:artifacts:chrome": "playwright test --config playwright.artifacts.config.ts --project \"Mobile Chrome\"",
+    "test:e2e:artifacts:safari": "playwright test --config playwright.artifacts.config.ts --project \"Mobile Safari\"",
+    "test:e2e:report": "playwright show-report",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
