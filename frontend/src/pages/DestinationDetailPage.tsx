@@ -94,6 +94,11 @@ const stopCardClick = (event: any) => {
   event.stopPropagation();
 };
 
+const isPreviewTriggerTarget = (target: EventTarget | null) => {
+  if (!target || typeof Element === 'undefined' || !(target instanceof Element)) return false;
+  return Boolean(target.closest('[data-image-preview-trigger]'));
+};
+
 const resolveLinkedStoreSlug = (listing: any) => {
   const directSlug = String(listing?.store?.slug || '').trim();
   if (directSlug) return directSlug;
@@ -408,9 +413,13 @@ export function DestinationDetailPage() {
                   key={place.id}
                   role="button"
                   tabIndex={0}
-                  onClick={() => navigate(placePath)}
+                  onClick={(event) => {
+                    if (isPreviewTriggerTarget(event.target)) return;
+                    navigate(placePath);
+                  }}
                   onKeyDown={(event) => {
                     if (event.key !== 'Enter' && event.key !== ' ') return;
+                    if (isPreviewTriggerTarget(event.target)) return;
                     event.preventDefault();
                     navigate(placePath);
                   }}
@@ -419,6 +428,7 @@ export function DestinationDetailPage() {
                   <div className="relative m-2 h-44 overflow-hidden rounded-[1.45rem] bg-slate-100 sm:h-40">
                     {hasConfiguredAsset(place) ? (
                       <div
+                        data-image-preview-trigger
                         className="relative h-full w-full group/image cursor-zoom-in overflow-hidden"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -549,6 +559,7 @@ export function DestinationDetailPage() {
                       <div className="flex min-w-0 max-w-full gap-3">
                         {imageIsConfigured ? (
                           <div
+                            data-image-preview-trigger
                             className="relative h-[4.6rem] w-[4.6rem] shrink-0 overflow-hidden rounded-[1.35rem] group/image cursor-zoom-in"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -594,6 +605,9 @@ export function DestinationDetailPage() {
                       <Link
                         key={listing.id}
                         to={`/store/${linkedStoreSlug}`}
+                        onClick={(event) => {
+                          if (isPreviewTriggerTarget(event.target)) event.preventDefault();
+                        }}
                         className="group/card block min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_18px_36px_-16px_rgba(15,23,42,0.12)]"
                       >
                         {cardBody}
@@ -602,7 +616,10 @@ export function DestinationDetailPage() {
                       <button
                         key={listing.id}
                         type="button"
-                        onClick={() => setSelectedListing(listing)}
+                        onClick={(event) => {
+                          if (isPreviewTriggerTarget(event.target)) return;
+                          setSelectedListing(listing);
+                        }}
                         className="group/card block w-full min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_18px_36px_-16px_rgba(15,23,42,0.12)]"
                       >
                         {cardBody}

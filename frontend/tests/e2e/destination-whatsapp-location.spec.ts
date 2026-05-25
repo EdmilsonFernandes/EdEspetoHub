@@ -16,6 +16,7 @@ const destinationPayload = {
       name: 'Chale Vista da Pedra',
       type: 'CHALE',
       address: 'Estrada do Bau, km 7',
+      bannerUrl: '/janocaminho.jpg',
       lat: -22.6901,
       lng: -45.7321,
       whatsapp: '(12) 99999-1111',
@@ -107,5 +108,19 @@ test.describe('Destination WhatsApp location', () => {
     expect(params.get('hospedagem_endereco')).toBe('Estrada do Bau, km 7');
     expect(params.get('hospedagem_lat')).toBe('-22.6901');
     expect(params.get('hospedagem_lng')).toBe('-45.7321');
+  });
+
+  test('abre a pagina do chale ao tocar no card da hospedagem sem derrubar a SPA', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (error) => {
+      pageErrors.push(error.message);
+    });
+
+    await page.goto('/destinos/sao-bento');
+    await page.getByText('Chale Vista da Pedra').click();
+
+    await expect(page).toHaveURL(/\/destinos\/sao-bento\/chales\/chale-vista/);
+    await expect(page.locator('a[href^="/gustavao-e2e?"]').first()).toBeVisible();
+    expect(pageErrors).toEqual([]);
   });
 });
