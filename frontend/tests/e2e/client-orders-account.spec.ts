@@ -127,6 +127,27 @@ const orders = [
   },
 ];
 
+const notifications = [
+  {
+    id: 'notification-informative-e2e',
+    title: 'Aviso importante',
+    body: 'Mensagem completa para o cliente ler dentro da central, sem depender do texto cortado pelo banner do celular.',
+    url: null,
+    imageUrl: '/janocaminho.jpg',
+    read: false,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'notification-route-e2e',
+    title: 'Pedido atualizado',
+    body: 'Toque para ver seus pedidos.',
+    url: '/cliente/pedidos',
+    imageUrl: '/janocaminho.jpg',
+    read: true,
+    createdAt: new Date(Date.now() - 60_000).toISOString(),
+  },
+];
+
 test.use({ serviceWorkers: 'block' });
 
 test.describe('Cliente pedidos e conta', () => {
@@ -151,6 +172,26 @@ test.describe('Cliente pedidos e conta', () => {
         contentType: 'application/json',
         body: JSON.stringify(isPaginated ? { data: orders, hasMore: false } : orders),
       });
+    });
+
+    await page.route('**/api/customer/notifications', async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ items: notifications, unreadCount: 1 }),
+        });
+        return;
+      }
+      if (route.request().method() === 'POST') {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.route('**/api/customer/notifications/**/read', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
     });
 
     await page.route('**/api/orders/order-active-e2e/public', async (route) => {
@@ -202,5 +243,19 @@ test.describe('Cliente pedidos e conta', () => {
     await page.getByRole('button', { name: /Editar perfil/i }).first().click();
     await expect(page.getByText('Altere apenas nome e telefone quando precisar.')).toBeVisible();
     await expect(page.getByPlaceholder('(12) 99999-9999')).toHaveValue('(11) 98765-4321');
+  });
+
+  test('abre detalhe completo para notificacao sem direcionamento', async ({ page }) => {
+    await page.goto('/notificacoes');
+
+    await expect(page.getByRole('heading', { name: 'Notificações' })).toBeVisible({ timeout: 15000 });
+    await page.getByRole('button', { name: /Aviso importante/i }).click();
+
+    const dialog = page.getByRole('dialog', { name: /Detalhe da notificação: Aviso importante/i });
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText('Mensagem completa para o cliente ler dentro da central');
+    await expect(dialog).toContainText('Sem direcionamento');
+    await dialog.getByRole('button', { name: 'Fechar detalhe da notificação' }).click();
+    await expect(dialog).toBeHidden();
   });
 });

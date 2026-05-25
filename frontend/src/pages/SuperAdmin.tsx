@@ -65,6 +65,22 @@ const PAYMENTS_PER_PAGE = 10;
 const OVERVIEW_REFRESH_VISIBLE_MS = 60_000;
 const OVERVIEW_REFRESH_HIDDEN_MS = 180_000;
 const OVERVIEW_REFRESH_MAX_BACKOFF_MS = 300_000;
+const BROADCAST_TITLE_RECOMMENDED_MAX = 48;
+const BROADCAST_BODY_RECOMMENDED_MAX = 140;
+
+const PUSH_APP_ROUTE_OPTIONS = [
+  { value: '/hub', label: 'Início do app' },
+  { value: '/hub/destaques', label: 'Itens em destaque' },
+  { value: '/notificacoes', label: 'Central de notificações' },
+  { value: '/cliente?mode=login', label: 'Login do cliente' },
+  { value: '/cliente/conta', label: 'Minha conta' },
+  { value: '/cliente/pedidos', label: 'Meus pedidos' },
+  { value: '/cliente/enderecos', label: 'Meus endereços' },
+  { value: '/destinos', label: 'Destinos e chalés' },
+  { value: '/create', label: 'Criar loja' },
+  { value: '/instalar', label: 'Instalar app' },
+  { value: '/guia', label: 'Sobre o app / Guia' },
+];
 
 const readFilters = () => {
   try {
@@ -363,7 +379,11 @@ export function SuperAdmin() {
   const [broadcastForm, setBroadcastForm] = useState({
     title: '',
     body: '',
-    url: 'https://janocaminho.com.br/hub',
+    targetType: 'none',
+    route: '/hub',
+    storeRoute: '',
+    customRoute: '',
+    url: '',
     topic: 'janocaminho_global',
     limit: 1500,
   });
@@ -841,6 +861,33 @@ export function SuperAdmin() {
     return map;
   }, [safeStores]);
 
+  const broadcastStoreRouteOptions = useMemo(() => {
+    return safeStores
+      .map((store: any) => {
+        const slug = String(store.slug || store.storeSlug || '').trim();
+        if (!slug) return null;
+        return {
+          value: `/store/${slug}`,
+          label: store.name || slug,
+        };
+      })
+      .filter(Boolean)
+      .sort((a: any, b: any) => String(a.label).localeCompare(String(b.label), 'pt-BR'));
+  }, [safeStores]);
+
+  const resolveBroadcastTargetUrl = () => {
+    const targetType = String(broadcastForm.targetType || 'none');
+    if (targetType === 'app') return String(broadcastForm.route || '').trim();
+    if (targetType === 'store') return String(broadcastForm.storeRoute || '').trim();
+    if (targetType === 'custom') return String(broadcastForm.customRoute || '').trim();
+    if (targetType === 'external') return String(broadcastForm.url || '').trim();
+    return '';
+  };
+
+  const broadcastResolvedUrl = resolveBroadcastTargetUrl();
+  const broadcastTitleLength = String(broadcastForm.title || '').length;
+  const broadcastBodyLength = String(broadcastForm.body || '').length;
+
   const storeVipById = useMemo(() => {
     const map = new Map();
     safeStores.forEach((store: any) => {
@@ -1087,12 +1134,26 @@ export function SuperAdmin() {
       showToast('Informe título e mensagem para o disparo.', 'warning');
       return;
     }
+    const targetType = String(broadcastForm.targetType || 'none');
+    const targetUrl = resolveBroadcastTargetUrl();
+    if (targetType === 'external' && !/^https?:\/\//i.test(targetUrl)) {
+      showToast('Informe uma URL externa começando com http:// ou https://.', 'warning');
+      return;
+    }
+    if ((targetType === 'app' || targetType === 'store' || targetType === 'custom') && !targetUrl) {
+      showToast('Escolha uma rota do app ou deixe como sem direcionamento.', 'warning');
+      return;
+    }
+    if (targetType === 'custom' && !/^\/[A-Za-z0-9/_?=&%#.,:+-]*$/.test(targetUrl)) {
+      showToast('A rota interna personalizada precisa começar com / e ser uma rota válida do app.', 'warning');
+      return;
+    }
     setBroadcastSending(true);
     try {
       const result = await superAdminService.broadcastPush(token, {
         title: String(broadcastForm.title || '').trim(),
         body: String(broadcastForm.body || '').trim(),
-        url: String(broadcastForm.url || '').trim(),
+        url: targetUrl,
         topic: String(broadcastForm.topic || 'janocaminho_global').trim(),
         limit: Number(broadcastForm.limit || 1500),
       });
@@ -2086,17 +2147,27 @@ export function SuperAdmin() {
             </div>
             <form onSubmit={handleBroadcastPush} className="grid gap-3">
               <label className="grid gap-1">
-                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Título</span>
+                <span className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  <span>Título</span>
+                  <span className={broadcastTitleLength > BROADCAST_TITLE_RECOMMENDED_MAX ? 'text-amber-600' : 'text-slate-400'}>
+                    {broadcastTitleLength}/{BROADCAST_TITLE_RECOMMENDED_MAX}
+                  </span>
+                </span>
                 <input
                   value={broadcastForm.title}
                   onChange={(e) => setBroadcastForm((prev) => ({ ...prev, title: e.target.value }))}
                   className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                   placeholder="Ex: Promoção Já no Caminho"
-                  maxLength={80}
+                  maxLength={70}
                 />
               </label>
               <label className="grid gap-1">
-                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Mensagem</span>
+                <span className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  <span>Mensagem</span>
+                  <span className={broadcastBodyLength > BROADCAST_BODY_RECOMMENDED_MAX ? 'text-amber-600' : 'text-slate-400'}>
+                    {broadcastBodyLength}/{BROADCAST_BODY_RECOMMENDED_MAX}
+                  </span>
+                </span>
                 <textarea
                   value={broadcastForm.body}
                   onChange={(e) => setBroadcastForm((prev) => ({ ...prev, body: e.target.value }))}
@@ -2104,28 +2175,99 @@ export function SuperAdmin() {
                   placeholder="Ex: Hoje frete grátis nas lojas parceiras."
                   maxLength={220}
                 />
+                <span className="text-[11px] font-medium text-slate-400">
+                  O celular pode cortar textos longos no banner do sistema; a Central de Notificações mostra a mensagem completa.
+                </span>
               </label>
-              <div className="grid sm:grid-cols-3 gap-3">
-                <label className="grid gap-1 sm:col-span-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">URL ao clicar</span>
-                  <input
-                    value={broadcastForm.url}
-                    onChange={(e) => setBroadcastForm((prev) => ({ ...prev, url: e.target.value }))}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                    placeholder="https://janocaminho.com.br/hub"
-                  />
-                </label>
-                <label className="grid gap-1">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Limite</span>
-                  <input
-                    type="number"
-                    min={1}
-                    max={5000}
-                    value={broadcastForm.limit}
-                    onChange={(e) => setBroadcastForm((prev) => ({ ...prev, limit: Number(e.target.value || 1500) }))}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                  />
-                </label>
+              <div className="grid gap-3 rounded-2xl border border-cyan-100 bg-white/75 p-3">
+                <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
+                  <label className="grid gap-1">
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Ação ao tocar</span>
+                    <select
+                      value={broadcastForm.targetType}
+                      onChange={(e) => setBroadcastForm((prev) => ({ ...prev, targetType: e.target.value }))}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
+                    >
+                      <option value="none">Sem direcionamento: abrir detalhes da mensagem</option>
+                      <option value="app">Rota do app</option>
+                      <option value="store">Vitrine de uma loja</option>
+                      <option value="custom">Rota interna personalizada</option>
+                      <option value="external">URL externa</option>
+                    </select>
+                  </label>
+                  <label className="grid gap-1">
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Limite</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={5000}
+                      value={broadcastForm.limit}
+                      onChange={(e) => setBroadcastForm((prev) => ({ ...prev, limit: Number(e.target.value || 1500) }))}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                    />
+                  </label>
+                </div>
+                {broadcastForm.targetType === 'app' && (
+                  <label className="grid gap-1">
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tela do app</span>
+                    <select
+                      value={broadcastForm.route}
+                      onChange={(e) => setBroadcastForm((prev) => ({ ...prev, route: e.target.value }))}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                    >
+                      {PUSH_APP_ROUTE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {broadcastForm.targetType === 'store' && (
+                  <label className="grid gap-1">
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Loja / vitrine</span>
+                    <select
+                      value={broadcastForm.storeRoute}
+                      onChange={(e) => setBroadcastForm((prev) => ({ ...prev, storeRoute: e.target.value }))}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                    >
+                      <option value="">Selecione uma loja</option>
+                      {broadcastStoreRouteOptions.map((option: any) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {broadcastForm.targetType === 'custom' && (
+                  <label className="grid gap-1">
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Rota interna</span>
+                    <input
+                      value={broadcastForm.customRoute}
+                      onChange={(e) => setBroadcastForm((prev) => ({ ...prev, customRoute: e.target.value }))}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                      placeholder="/destinos/sao-francisco-xavier"
+                    />
+                  </label>
+                )}
+                {broadcastForm.targetType === 'external' && (
+                  <label className="grid gap-1">
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">URL externa</span>
+                    <input
+                      value={broadcastForm.url}
+                      onChange={(e) => setBroadcastForm((prev) => ({ ...prev, url: e.target.value }))}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                      placeholder="https://wa.me/551239334979"
+                    />
+                  </label>
+                )}
+                <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
+                  Destino: <span className="font-black text-slate-700">{broadcastResolvedUrl || 'Sem link: abre a Central de Notificações e mostra a mensagem completa.'}</span>
+                </div>
+              </div>
+              <div className="grid gap-1">
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Preview no celular</span>
+                <div className="rounded-[1.25rem] border border-slate-200 bg-slate-950 p-3 text-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.55)]">
+                  <p className="truncate text-sm font-black">{broadcastForm.title || 'Título do push'}</p>
+                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/78">{broadcastForm.body || 'A mensagem aparece resumida no banner do celular.'}</p>
+                </div>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs text-slate-500">

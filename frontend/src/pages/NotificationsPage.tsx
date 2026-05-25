@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BellRinging, Check, Trash } from '@phosphor-icons/react';
+import { ArrowSquareOut, BellRinging, Check, Trash, X } from '@phosphor-icons/react';
 import { apiClient } from '../config/apiClient';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
+import { resolvePushClickTarget } from '../utils/pushNavigation';
 
 type Notification = { id: string; title: string; body: string; url?: string | null; imageUrl?: string | null; read: boolean; createdAt: string };
 
@@ -37,6 +38,7 @@ export function NotificationsPage() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -54,15 +56,16 @@ export function NotificationsPage() {
       setNotifications((prev) => prev.map((x) => x.id === n.id ? { ...x, read: true } : x));
       setUnread((c) => Math.max(0, c - 1));
     }
-    if (n.url) {
-      const isExternal = /^https?:\/\//i.test(n.url) && !n.url.includes('janocaminho.com.br');
-      if (isExternal) {
-        try { const { Browser } = await import('@capacitor/browser'); await Browser.open({ url: n.url }); } catch { window.open(n.url, '_blank', 'noopener'); }
-        return;
-      }
-      const path = n.url.replace(/^https?:\/\/[^/]+/, '');
-      if (path) navigate(path);
+    const target = resolvePushClickTarget(n.url);
+    if (target.kind === 'external') {
+      try { const { Browser } = await import('@capacitor/browser'); await Browser.open({ url: target.value }); } catch { window.open(target.value, '_blank', 'noopener'); }
+      return;
     }
+    if (target.kind === 'internal') {
+      navigate(target.value);
+      return;
+    }
+    setSelectedNotification(n);
   };
 
   const handleMarkAllRead = async () => {
@@ -149,6 +152,11 @@ export function NotificationsPage() {
                       >
                         {n.body || n.title}
                       </p>
+                      {!n.url ? (
+                        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                          Ler completo
+                        </span>
+                      ) : null}
                     </div>
                     <span className="pt-0.5 text-[11px] font-black text-slate-400">{timeAgo(n.createdAt)}</span>
                   </button>
@@ -158,6 +166,53 @@ export function NotificationsPage() {
           ))}
         </div>
       </div>
+      {selectedNotification ? (
+        <div
+          className="fixed inset-0 z-[14000] flex items-end justify-center bg-slate-950/45 p-3 backdrop-blur-sm sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Detalhe da notificação: ${selectedNotification.title}`}
+          onClick={() => setSelectedNotification(null)}
+        >
+          <div
+            className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-[0_28px_80px_-44px_rgba(15,23,42,0.55)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="relative h-28 bg-[linear-gradient(135deg,#153A4C,#336886)]">
+              <img
+                src={selectedNotification.imageUrl || '/janocaminho.jpg'}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover opacity-30"
+              />
+              <button
+                type="button"
+                onClick={() => setSelectedNotification(null)}
+                className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-white/85 text-slate-700 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.4)] backdrop-blur-xl transition active:scale-95"
+                aria-label="Fechar detalhe da notificação"
+              >
+                <X size={18} weight="bold" />
+              </button>
+              <div className="absolute bottom-4 left-4 right-16">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">Mensagem do app</p>
+                <p className="mt-1 text-xs font-bold text-white/80">{timeAgo(selectedNotification.createdAt)}</p>
+              </div>
+            </div>
+            <div className="p-5">
+              <h2 className="text-lg font-black leading-tight text-slate-950">{selectedNotification.title}</h2>
+              <p className="mt-3 whitespace-pre-wrap break-words text-[15px] leading-6 text-slate-700">
+                {selectedNotification.body || selectedNotification.title}
+              </p>
+              <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Sem direcionamento</p>
+                  <p className="mt-0.5 text-xs font-semibold text-slate-600">Esta notificação é apenas informativa.</p>
+                </div>
+                <ArrowSquareOut size={20} weight="duotone" className="text-slate-300" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <ClientBottomNav active="profile" />
     </main>
   );

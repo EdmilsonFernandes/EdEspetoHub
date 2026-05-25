@@ -7,6 +7,7 @@ import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT, MOTOBOY_SESSION_EVENT } fr
 import { motoboyService } from '../services/motoboyService';
 import { storePushService } from '../services/storePushService';
 import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from '../utils/orderNotificationSound';
+import { resolvePushClickTarget } from '../utils/pushNavigation';
 
 
 const MOBILE_PUSH_ENABLED =
@@ -61,44 +62,18 @@ export const scheduleNativeAppReadySignal = () => {
   });
 };
 
-const normalizeInternalUrl = (rawUrl: string): string | null => {
-  try {
-    const parsed = new URL(rawUrl);
-    const host = String(parsed.host || '').toLowerCase();
-    if (
-      parsed.protocol === 'https:' &&
-      (host === 'janocaminho.com.br' || host === 'www.janocaminho.com.br')
-    ) {
-      return `${parsed.pathname || '/'}${parsed.search || ''}${parsed.hash || ''}`;
-    }
-  } catch {
-    // no-op
-  }
-
-  // Push/deep links no app podem chegar pelo esquema customizado em vez da URL web.
-  if (rawUrl.startsWith('janocaminho://')) {
-    const value = rawUrl.replace('janocaminho://', '').trim();
-    if (!value) return '/hub';
-    const normalized = value.startsWith('/') ? value : `/${value}`;
-    if (!/^\/[A-Za-z0-9/_?=&%#.-]*$/.test(normalized)) return null;
-    return normalized;
-  }
-  return null;
-};
-
 const navigateFromPayload = (payload?: unknown) => {
   const data = (payload && typeof payload === 'object' ? payload : {}) as Record<string, unknown>;
   const candidates = [data.url, data.path, data.route]
     .map((value) => String(value || '').trim())
     .filter(Boolean);
   const target = candidates.find(Boolean);
-  if (!target) return;
-  const internal = normalizeInternalUrl(target);
-  if (internal) {
-    if (window.location.pathname + window.location.search + window.location.hash === internal) return;
-    window.location.assign(internal);
-  } else if (/^https?:\/\//i.test(target)) {
-    import("@capacitor/browser").then(({ Browser }) => Browser.open({ url: target })).catch(() => window.open(target, "_blank", "noopener"));
+  const resolved = resolvePushClickTarget(target);
+  if (resolved.kind === 'internal' || resolved.kind === 'notifications') {
+    if (window.location.pathname + window.location.search + window.location.hash === resolved.value) return;
+    window.location.assign(resolved.value);
+  } else if (resolved.kind === 'external') {
+    import("@capacitor/browser").then(({ Browser }) => Browser.open({ url: resolved.value })).catch(() => window.open(resolved.value, "_blank", "noopener"));
   }
 };
 
