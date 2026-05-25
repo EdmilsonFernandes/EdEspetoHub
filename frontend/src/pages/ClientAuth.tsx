@@ -8,6 +8,7 @@ import { AuthLayout } from '../layouts/AuthLayout';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
+import { AuthMascotPanel } from '../components/Auth/AuthMascotPanel';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 import { inputAssistProps } from '../utils/inputAssist';
 import { MFA_CHALLENGE_EXPIRED_MESSAGE, isMfaChallengeExpiredError } from '../utils/mfaErrors';
@@ -557,27 +558,6 @@ export function ClientAuth() {
         ) : null}
 
         <div className="ds-card-elevated space-y-3 border-white/40 bg-white/82 p-4 backdrop-blur-xl sm:space-y-5 sm:p-7 lg:p-8">
-          <div className="relative overflow-hidden rounded-[1.55rem] border border-[#336886]/12 bg-[radial-gradient(circle_at_top_right,rgba(95,211,90,0.20),transparent_38%),linear-gradient(135deg,rgba(255,255,255,0.96),rgba(237,247,249,0.92))] p-3.5 shadow-[0_22px_46px_-38px_rgba(51,104,134,0.42)] sm:hidden">
-            <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-[1.15rem] border border-white/90 bg-white shadow-[0_14px_28px_-22px_rgba(15,23,42,0.35)]">
-                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
-                  Cliente
-                </p>
-                <h1 className="text-[1.05rem] font-black leading-tight tracking-[-0.03em] text-slate-950">
-                  {mode === 'register' ? 'Crie sua conta em poucos passos' : 'Entre para continuar seu pedido'}
-                </h1>
-                <p className="mt-1 text-[11px] font-semibold leading-snug text-slate-500">
-                  Pedidos, endereços e compras ficam salvos neste aparelho.
-                </p>
-              </div>
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/86 text-emerald-600 ring-1 ring-emerald-100">
-                <SealCheck size={19} weight="duotone" />
-              </span>
-            </div>
-          </div>
           <div className="hidden rounded-[1.45rem] border border-[#153A4C]/10 bg-[linear-gradient(135deg,rgba(21,58,76,0.06),rgba(255,255,255,0.92)_58%,rgba(51,104,134,0.06)_100%)] px-4 py-4 sm:block">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-full border border-white/80 bg-white/82 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#153A4C]">
@@ -787,6 +767,7 @@ export function ClientAuth() {
             ) : null}
           </form>
         </div>
+        <AuthMascotPanel variant="client" mode={mode} />
       </div>
       <ConfirmationModal
         isOpen={enrollmentPromptOpen}

@@ -10,6 +10,7 @@ import { nativeBiometricService } from '../services/nativeBiometricService';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
+import { AuthMascotPanel } from '../components/Auth/AuthMascotPanel';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 import { MFA_CHALLENGE_EXPIRED_MESSAGE, isMfaChallengeExpiredError } from '../utils/mfaErrors';
 
@@ -398,28 +399,6 @@ export function MotoboyLogin() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} autoComplete="on" className="space-y-3 sm:space-y-5">
-              <div className="relative overflow-hidden rounded-[1.55rem] border border-[#336886]/12 bg-[radial-gradient(circle_at_top_right,rgba(95,211,90,0.20),transparent_38%),linear-gradient(135deg,rgba(255,255,255,0.96),rgba(237,247,249,0.94))] p-3.5 shadow-[0_22px_46px_-38px_rgba(51,104,134,0.42)] sm:hidden">
-                <div className="flex items-center gap-3">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.15rem] bg-white text-[#336886] shadow-[0_14px_28px_-22px_rgba(15,23,42,0.35)] ring-1 ring-[#336886]/10">
-                    <Scooter size={23} weight="duotone" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
-                      Entregador
-                    </p>
-                    <h1 className="text-[1.05rem] font-black leading-tight tracking-[-0.03em] text-slate-950">
-                      Rotas e ganhos no seu painel
-                    </h1>
-                    <p className="mt-1 text-[11px] font-semibold leading-snug text-slate-500">
-                      Entre para aceitar entregas, acompanhar coletas e ver seu histórico.
-                    </p>
-                  </div>
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/88 text-emerald-600 ring-1 ring-emerald-100">
-                    <ShieldCheck size={18} weight="duotone" />
-                  </span>
-                </div>
-              </div>
-
               <div className="hidden items-center gap-3 rounded-2xl border border-[#336886]/10 bg-[#336886]/6 px-3.5 py-3 text-left sm:flex">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-[#0d4f66] shadow-sm ring-1 ring-[#336886]/10">
                   <Scooter size={22} weight="duotone" />
@@ -618,6 +597,7 @@ export function MotoboyLogin() {
             </button>
           </div>
         </div>
+        {!alreadyLoggedIn ? <AuthMascotPanel variant="motoboy" /> : null}
       </div>
       <ConfirmationModal
         isOpen={enrollmentPromptOpen}

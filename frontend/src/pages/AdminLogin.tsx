@@ -13,6 +13,7 @@ import { ArrowLeft, Check, Eye, EyeSlash, LockKey, ShieldCheck, WarningCircle } 
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
+import { AuthMascotPanel } from '../components/Auth/AuthMascotPanel';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 import { MFA_CHALLENGE_EXPIRED_MESSAGE, isMfaChallengeExpiredError } from '../utils/mfaErrors';
 import { prefetchAdminLandingRoutes, scheduleAdminRoutePrefetch } from '../utils/adminRoutePrefetch';
@@ -490,28 +491,6 @@ export function AdminLogin() {
           autoComplete="on"
           className="ds-card-elevated p-4 space-y-3 bg-white/80 backdrop-blur-xl border-white/40 sm:p-7 sm:space-y-5 lg:p-8"
         >
-          <div className="relative overflow-hidden rounded-[1.55rem] border border-[#336886]/12 bg-[radial-gradient(circle_at_top_right,rgba(95,211,90,0.18),transparent_38%),linear-gradient(135deg,rgba(255,255,255,0.96),rgba(235,247,250,0.94))] p-3.5 shadow-[0_22px_46px_-38px_rgba(51,104,134,0.42)] sm:hidden">
-            <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.15rem] bg-white text-[#336886] shadow-[0_14px_28px_-22px_rgba(15,23,42,0.35)] ring-1 ring-[#336886]/10">
-                <LockKey size={22} weight="duotone" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
-                  Operação da loja
-                </p>
-                <h1 className="text-[1.05rem] font-black leading-tight tracking-[-0.03em] text-slate-950">
-                  Acesse pedidos, fila e vendas
-                </h1>
-                <p className="mt-1 text-[11px] font-semibold leading-snug text-slate-500">
-                  Painel seguro para atendimento rápido no balcão e no delivery.
-                </p>
-              </div>
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/88 text-emerald-600 ring-1 ring-emerald-100">
-                <ShieldCheck size={18} weight="duotone" />
-              </span>
-            </div>
-          </div>
-
           {verifyPrompt && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-amber-900 text-xs space-y-3 backdrop-blur-sm">
               <div className="flex items-center gap-2">
@@ -677,6 +656,7 @@ export function AdminLogin() {
             </button>
           </div>
         </form>
+        <AuthMascotPanel variant="admin" />
 
         <a
           href="mailto:contato@janocaminho.com.br"
