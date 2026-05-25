@@ -43,3 +43,10 @@ export const resolvePushClickTarget = (rawTarget?: unknown): PushClickTarget => 
 
   return { kind: 'notifications', value: '/notificacoes' };
 };
+
+export const extractPushTargetCandidate = (payload?: unknown): string => {
+  const data = (payload && typeof payload === 'object' ? payload : {}) as Record<string, unknown>;
+  return [data.url, data.targetUrl, data.link, data.deepLink, data.path, data.route]
+    .map((value) => String(value || '').trim())
+    .find(Boolean) || '';
+};

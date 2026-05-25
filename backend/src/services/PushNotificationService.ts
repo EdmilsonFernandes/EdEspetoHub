@@ -621,7 +621,13 @@ export class PushNotificationService {
         const rows = await DS.query("SELECT ss.logo_url FROM store_settings ss JOIN stores s ON s.id = ss.store_id JOIN orders o ON o.store_id = s.id WHERE o.id = $1 LIMIT 1", [(payload.data as any).orderId]);
         imageUrl = rows?.[0]?.logo_url || null;
       }
-      void repo.save(repo.create({ userId, title: String(payload.title || "").trim(), body: String(payload.body || "").trim(), url: (payload.data as any)?.url || null, imageUrl }));
+      void repo.save(repo.create({
+        userId,
+        title: String((payload.data as any)?.fullTitle || payload.title || "").trim(),
+        body: String((payload.data as any)?.fullBody || payload.body || "").trim(),
+        url: (payload.data as any)?.url || null,
+        imageUrl
+      }));
     } catch { /* non-blocking */ }
     return this.dispatchByOwner({
       ownerKey: 'userId',
@@ -979,7 +985,12 @@ export class PushNotificationService {
          SELECT DISTINCT cpt.user_id, $1, $2, $3, $4
          FROM customer_push_tokens cpt
          WHERE cpt.is_active = TRUE AND cpt.user_id IS NOT NULL`,
-        [String(payload.title || "").trim(), String(payload.body || "").trim(), (payload.data as any)?.url || null, (payload.data as any)?.imageUrl || null]
+        [
+          String((payload.data as any)?.fullTitle || payload.title || "").trim(),
+          String((payload.data as any)?.fullBody || payload.body || "").trim(),
+          (payload.data as any)?.url || null,
+          (payload.data as any)?.imageUrl || null
+        ]
       );
     } catch { /* non-blocking */ }
     log.info('Push broadcast finished', {

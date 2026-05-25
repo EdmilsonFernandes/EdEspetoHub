@@ -7,7 +7,7 @@ import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT, MOTOBOY_SESSION_EVENT } fr
 import { motoboyService } from '../services/motoboyService';
 import { storePushService } from '../services/storePushService';
 import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from '../utils/orderNotificationSound';
-import { resolvePushClickTarget } from '../utils/pushNavigation';
+import { extractPushTargetCandidate, resolvePushClickTarget } from '../utils/pushNavigation';
 
 
 const MOBILE_PUSH_ENABLED =
@@ -30,6 +30,7 @@ const MOTOBOY_QUEUE_BADGE_EVENT = 'jnc:motoboy-queue-badge';
 const BUILD_INFO_PUBLIC_PATH = '/build-info.json';
 const NATIVE_BUILD_CHECK_INTERVAL_MS = 90 * 1000;
 const LAST_RELOADED_BUILD_KEY = 'jnk_native_last_reloaded_build_id';
+const PENDING_PUSH_NAVIGATION_KEY = 'jnc_pending_push_navigation_target';
 
 let lastStoreForegroundAlertAt = 0;
 let foregroundAudioContext: AudioContext | null = null;
@@ -64,17 +65,36 @@ export const scheduleNativeAppReadySignal = () => {
 
 const navigateFromPayload = (payload?: unknown) => {
   const data = (payload && typeof payload === 'object' ? payload : {}) as Record<string, unknown>;
-  const candidates = [data.url, data.path, data.route]
-    .map((value) => String(value || '').trim())
-    .filter(Boolean);
-  const target = candidates.find(Boolean);
+  const target = extractPushTargetCandidate(data);
   const resolved = resolvePushClickTarget(target);
   if (resolved.kind === 'internal' || resolved.kind === 'notifications') {
     if (window.location.pathname + window.location.search + window.location.hash === resolved.value) return;
-    window.location.assign(resolved.value);
+    try {
+      sessionStorage.setItem(PENDING_PUSH_NAVIGATION_KEY, resolved.value);
+    } catch {
+      // no-op
+    }
+    window.setTimeout(() => window.location.assign(resolved.value), 40);
   } else if (resolved.kind === 'external') {
     import("@capacitor/browser").then(({ Browser }) => Browser.open({ url: resolved.value })).catch(() => window.open(resolved.value, "_blank", "noopener"));
   }
+};
+
+const consumePendingPushNavigation = () => {
+  if (typeof window === 'undefined') return;
+  let target = '';
+  try {
+    target = String(sessionStorage.getItem(PENDING_PUSH_NAVIGATION_KEY) || '').trim();
+  } catch {
+    target = '';
+  }
+  if (!target) return;
+  try {
+    sessionStorage.removeItem(PENDING_PUSH_NAVIGATION_KEY);
+  } catch {
+    // no-op
+  }
+  navigateFromPayload({ url: target });
 };
 
 const isStoreNewOrderPush = (payload?: unknown) => {
@@ -336,20 +356,22 @@ const bootstrapPushNotifications = async () => {
 
     await PushNotifications.addListener('pushNotificationActionPerformed', (event) => {
       // Save to storage when user taps a background notification
-      const title = String(event?.notification?.title || event?.notification?.data?.title || '').trim();
-      const body = String(event?.notification?.body || event?.notification?.data?.body || '').trim();
-      const url = String(event?.notification?.data?.url || '').trim();
+      const data = (event?.notification?.data || {}) as Record<string, unknown>;
+      const title = String(data.fullTitle || event?.notification?.title || data.title || '').trim();
+      const body = String(data.fullBody || event?.notification?.body || data.body || '').trim();
+      const url = extractPushTargetCandidate(data);
       if (title || body) {
         fetch("/api/customer/notifications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: title || "Notificação", body, url: url || undefined }) }).catch(() => {});
       }
-      navigateFromPayload(event?.notification?.data);
+      navigateFromPayload(data);
     });
 
     await PushNotifications.addListener('pushNotificationReceived', (notification) => {
       // Save to notification storage for the notifications page
-      const title = String(notification?.title || notification?.data?.title || '').trim();
-      const body = String(notification?.body || notification?.data?.body || '').trim();
-      const url = String(notification?.data?.url || '').trim();
+      const data = (notification?.data || {}) as Record<string, unknown>;
+      const title = String(data.fullTitle || notification?.title || data.title || '').trim();
+      const body = String(data.fullBody || notification?.body || data.body || '').trim();
+      const url = extractPushTargetCandidate(data);
       if (title || body) {
         fetch("/api/customer/notifications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: title || "Notificação", body, url: url || undefined }) }).catch(() => {});
       }
@@ -452,9 +474,14 @@ export const bootstrapNativeApp = async () => {
     await App.addListener('appUrlOpen', ({ url }) => {
       navigateFromPayload({ url });
     });
+    const launch = await App.getLaunchUrl().catch(() => null);
+    if (launch?.url) {
+      window.setTimeout(() => navigateFromPayload({ url: launch.url }), 250);
+    }
     await App.addListener('appStateChange', ({ isActive }) => {
       if (isActive) {
         if (MOBILE_PUSH_ENABLED) syncPushTokenNow();
+        consumePendingPushNavigation();
         void checkForNativeBuildUpdate();
         // O app usa esse evento para reidratar telas nativas sem forçar reload da WebView.
         window.dispatchEvent(new CustomEvent('jnc:app-foreground'));

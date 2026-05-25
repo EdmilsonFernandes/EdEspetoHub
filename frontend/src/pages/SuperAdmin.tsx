@@ -67,6 +67,7 @@ const OVERVIEW_REFRESH_HIDDEN_MS = 180_000;
 const OVERVIEW_REFRESH_MAX_BACKOFF_MS = 300_000;
 const BROADCAST_TITLE_RECOMMENDED_MAX = 48;
 const BROADCAST_BODY_RECOMMENDED_MAX = 140;
+const BROADCAST_BODY_MAX = 420;
 
 const PUSH_APP_ROUTE_OPTIONS = [
   { value: '/hub', label: 'Início do app' },
@@ -2164,8 +2165,8 @@ export function SuperAdmin() {
               <label className="grid gap-1">
                 <span className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                   <span>Mensagem</span>
-                  <span className={broadcastBodyLength > BROADCAST_BODY_RECOMMENDED_MAX ? 'text-amber-600' : 'text-slate-400'}>
-                    {broadcastBodyLength}/{BROADCAST_BODY_RECOMMENDED_MAX}
+                  <span className={broadcastBodyLength > BROADCAST_BODY_MAX ? 'text-amber-600' : 'text-slate-400'}>
+                    {broadcastBodyLength}/{BROADCAST_BODY_MAX}
                   </span>
                 </span>
                 <textarea
@@ -2173,29 +2174,29 @@ export function SuperAdmin() {
                   onChange={(e) => setBroadcastForm((prev) => ({ ...prev, body: e.target.value }))}
                   className="min-h-[88px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                   placeholder="Ex: Hoje frete grátis nas lojas parceiras."
-                  maxLength={220}
+                  maxLength={BROADCAST_BODY_MAX}
                 />
                 <span className="text-[11px] font-medium text-slate-400">
-                  O celular pode cortar textos longos no banner do sistema; a Central de Notificações mostra a mensagem completa.
+                  O banner do celular usa um resumo automático de até {BROADCAST_BODY_RECOMMENDED_MAX} caracteres; a Central mostra a mensagem completa.
                 </span>
               </label>
-              <div className="grid gap-3 rounded-2xl border border-cyan-100 bg-white/75 p-3">
+              <div className="grid min-w-0 gap-3 overflow-hidden rounded-2xl border border-cyan-100 bg-white/75 p-3">
                 <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
-                  <label className="grid gap-1">
+                  <label className="grid min-w-0 gap-1">
                     <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Ação ao tocar</span>
                     <select
                       value={broadcastForm.targetType}
                       onChange={(e) => setBroadcastForm((prev) => ({ ...prev, targetType: e.target.value }))}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
+                      className="w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
                     >
-                      <option value="none">Sem direcionamento: abrir detalhes da mensagem</option>
+                      <option value="none">Sem direcionamento</option>
                       <option value="app">Rota do app</option>
                       <option value="store">Vitrine de uma loja</option>
                       <option value="custom">Rota interna personalizada</option>
                       <option value="external">URL externa</option>
                     </select>
                   </label>
-                  <label className="grid gap-1">
+                  <label className="grid min-w-0 gap-1">
                     <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Limite</span>
                     <input
                       type="number"
@@ -2203,17 +2204,17 @@ export function SuperAdmin() {
                       max={5000}
                       value={broadcastForm.limit}
                       onChange={(e) => setBroadcastForm((prev) => ({ ...prev, limit: Number(e.target.value || 1500) }))}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                      className="w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                     />
                   </label>
                 </div>
                 {broadcastForm.targetType === 'app' && (
-                  <label className="grid gap-1">
+                  <label className="grid min-w-0 gap-1">
                     <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tela do app</span>
                     <select
                       value={broadcastForm.route}
                       onChange={(e) => setBroadcastForm((prev) => ({ ...prev, route: e.target.value }))}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                      className="w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                     >
                       {PUSH_APP_ROUTE_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>{option.label}</option>
@@ -2222,12 +2223,12 @@ export function SuperAdmin() {
                   </label>
                 )}
                 {broadcastForm.targetType === 'store' && (
-                  <label className="grid gap-1">
+                  <label className="grid min-w-0 gap-1">
                     <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Loja / vitrine</span>
                     <select
                       value={broadcastForm.storeRoute}
                       onChange={(e) => setBroadcastForm((prev) => ({ ...prev, storeRoute: e.target.value }))}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                      className="w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                     >
                       <option value="">Selecione uma loja</option>
                       {broadcastStoreRouteOptions.map((option: any) => (
@@ -2237,46 +2238,57 @@ export function SuperAdmin() {
                   </label>
                 )}
                 {broadcastForm.targetType === 'custom' && (
-                  <label className="grid gap-1">
+                  <label className="grid min-w-0 gap-1">
                     <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Rota interna</span>
                     <input
                       value={broadcastForm.customRoute}
                       onChange={(e) => setBroadcastForm((prev) => ({ ...prev, customRoute: e.target.value }))}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                      className="w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                       placeholder="/destinos/sao-francisco-xavier"
                     />
                   </label>
                 )}
                 {broadcastForm.targetType === 'external' && (
-                  <label className="grid gap-1">
+                  <label className="grid min-w-0 gap-1">
                     <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">URL externa</span>
                     <input
                       value={broadcastForm.url}
                       onChange={(e) => setBroadcastForm((prev) => ({ ...prev, url: e.target.value }))}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                      className="w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                       placeholder="https://wa.me/551239334979"
                     />
                   </label>
                 )}
-                <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
-                  Destino: <span className="font-black text-slate-700">{broadcastResolvedUrl || 'Sem link: abre a Central de Notificações e mostra a mensagem completa.'}</span>
+                <div className="min-w-0 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
+                  <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Destino</span>
+                  <span className="mt-0.5 block break-words font-black text-slate-700">
+                    {broadcastResolvedUrl || 'Sem link: abre a Central de Notificações e mostra a mensagem completa.'}
+                  </span>
                 </div>
               </div>
               <div className="grid gap-1">
                 <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Preview no celular</span>
-                <div className="rounded-[1.25rem] border border-slate-200 bg-slate-950 p-3 text-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.55)]">
-                  <p className="truncate text-sm font-black">{broadcastForm.title || 'Título do push'}</p>
-                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/78">{broadcastForm.body || 'A mensagem aparece resumida no banner do celular.'}</p>
+                <div className="grid min-w-0 gap-2 rounded-[1.25rem] border border-slate-200 bg-slate-950 p-3 text-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.55)]">
+                  <div className="min-w-0 rounded-2xl bg-white/8 p-3 ring-1 ring-white/10">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/45">Banner do sistema</p>
+                    <p className="mt-1 truncate text-sm font-black">{broadcastForm.title || 'Título do push'}</p>
+                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/78">{broadcastForm.body || 'A mensagem aparece resumida no banner do celular.'}</p>
+                  </div>
+                  <div className="min-w-0 rounded-2xl bg-white p-3 text-slate-800">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Central de notificações</p>
+                    <p className="mt-1 break-words text-sm font-black text-slate-950">{broadcastForm.title || 'Título do push'}</p>
+                    <p className="mt-1 whitespace-pre-wrap break-words text-xs leading-5 text-slate-600">{broadcastForm.body || 'Aqui a mensagem completa fica legível.'}</p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-xs text-slate-500">
                   Tópico: <span className="font-semibold text-slate-700">{broadcastForm.topic}</span>
                 </span>
                 <button
                   type="submit"
                   disabled={broadcastSending}
-                  className="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-60"
+                  className="w-full rounded-xl bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-60 sm:w-auto"
                 >
                   {broadcastSending ? 'Enviando...' : 'Enviar Push Global'}
                 </button>

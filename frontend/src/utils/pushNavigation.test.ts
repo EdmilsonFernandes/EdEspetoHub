@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeInternalPushPath, resolvePushClickTarget } from './pushNavigation';
+import { extractPushTargetCandidate, normalizeInternalPushPath, resolvePushClickTarget } from './pushNavigation';
 
 describe('pushNavigation', () => {
   it('normaliza rotas internas absolutas do app', () => {
@@ -22,5 +22,11 @@ describe('pushNavigation', () => {
   it('usa central de notificacoes quando nao ha direcionamento', () => {
     expect(resolvePushClickTarget('')).toEqual({ kind: 'notifications', value: '/notificacoes' });
     expect(resolvePushClickTarget(undefined)).toEqual({ kind: 'notifications', value: '/notificacoes' });
+  });
+
+  it('extrai destino usando chaves redundantes do payload nativo', () => {
+    expect(extractPushTargetCandidate({ targetUrl: '/cliente/pedidos' })).toBe('/cliente/pedidos');
+    expect(extractPushTargetCandidate({ deepLink: 'janocaminho://destinos' })).toBe('janocaminho://destinos');
+    expect(extractPushTargetCandidate({ route: '/hub/destaques' })).toBe('/hub/destaques');
   });
 });

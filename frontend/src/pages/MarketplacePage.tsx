@@ -70,6 +70,8 @@ import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import destinationShortcutIcon from '../assets/icone-destinos.svg';
+import condominiumShortcutIcon from '../assets/icone-feiras.svg';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { DEFAULT_HOME_CONFIG, homeConfigService } from '../services/homeConfigService';
@@ -2039,8 +2041,8 @@ export function MarketplacePage() {
                     to={destinationListHref}
                     className="group flex min-h-[3.55rem] items-center gap-2.5 rounded-[1.25rem] border border-[#336886]/10 bg-white px-3 text-left shadow-[0_12px_24px_-22px_rgba(15,23,42,0.2)] transition active:scale-[0.98]"
                   >
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[1rem] bg-[#edf5fa] text-[#336886] ring-1 ring-[#d7e7ef]/80">
-                      <Mountains size={17} weight="duotone" />
+                    <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[1rem] bg-[#edf5fa] shadow-[0_10px_22px_-18px_rgba(51,104,134,0.5)] ring-1 ring-[#d7e7ef]/80">
+                      <img src={destinationShortcutIcon} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
                     </span>
                     <span className="min-w-0">
                       <span className="block truncate text-xs font-black text-slate-900">Destinos e chalés</span>
@@ -2054,8 +2056,8 @@ export function MarketplacePage() {
                     onClick={() => openCondominiumPicker('all')}
                     className="group flex min-h-[3.55rem] items-center gap-2.5 rounded-[1.25rem] border border-emerald-100 bg-white px-3 text-left shadow-[0_12px_24px_-22px_rgba(15,23,42,0.2)] transition active:scale-[0.98]"
                   >
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[1rem] bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
-                      <CalendarBlank size={17} weight="duotone" />
+                    <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[1rem] bg-emerald-50 shadow-[0_10px_22px_-18px_rgba(16,185,129,0.5)] ring-1 ring-emerald-100">
+                      <img src={condominiumShortcutIcon} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
                     </span>
                     <span className="min-w-0">
                       <span className="block truncate text-xs font-black text-slate-900">Feiras no condomínio</span>

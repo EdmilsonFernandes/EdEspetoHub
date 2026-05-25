@@ -67,6 +67,14 @@ public class MainActivity extends BridgeActivity {
     private static final String TRUSTED_HOST = "janocaminho.com.br";
     private static final String TRUSTED_WWW_HOST = "www.janocaminho.com.br";
     private static final String APP_SCHEME = "janocaminho";
+    private static final String[] PUSH_TARGET_EXTRA_KEYS = new String[] {
+        "url",
+        "targetUrl",
+        "link",
+        "deepLink",
+        "path",
+        "route"
+    };
     private static final String PREFS_NAME = "jnk_mobile_prefs";
     private static final String SECURE_PREFS_NAME = "jnk_secure_bio_prefs";
     private static final String LAST_URL_KEY = "last_url";
@@ -884,9 +892,12 @@ public class MainActivity extends BridgeActivity {
 
     private void openDeepLinkIfAny() {
         if (bridge == null || bridge.getWebView() == null) return;
-        if (getIntent() == null || getIntent().getData() == null) return;
+        if (getIntent() == null) return;
         String incoming = getIntent().getDataString();
-        String trustedUrl = normalizeTrustedWebUrl(incoming);
+        String trustedUrl = normalizeTrustedPushTarget(incoming);
+        if (trustedUrl == null) {
+            trustedUrl = resolvePushTargetFromIntentExtras(getIntent());
+        }
         if (trustedUrl == null) return;
         if (!launchOverlayDismissed) {
             showLaunchOverlayLoading(null);
@@ -922,6 +933,28 @@ public class MainActivity extends BridgeActivity {
             }
         } catch (Exception ignored) {
             return null;
+        }
+        return null;
+    }
+
+    private String normalizeTrustedPushTarget(String value) {
+        if (value == null || value.trim().isEmpty()) return null;
+        String target = value.trim();
+        if (target.startsWith("/")) {
+            if (!target.matches("^/[A-Za-z0-9/_?=&%#\\.,:\\+\\-]*$")) return null;
+            return TRUSTED_SCHEME + "://" + TRUSTED_HOST + target;
+        }
+        return normalizeTrustedWebUrl(target);
+    }
+
+    private String resolvePushTargetFromIntentExtras(android.content.Intent intent) {
+        if (intent == null || intent.getExtras() == null) return null;
+        Bundle extras = intent.getExtras();
+        for (String key : PUSH_TARGET_EXTRA_KEYS) {
+            Object value = extras.get(key);
+            if (value == null) continue;
+            String trustedUrl = normalizeTrustedPushTarget(String.valueOf(value));
+            if (trustedUrl != null) return trustedUrl;
         }
         return null;
     }

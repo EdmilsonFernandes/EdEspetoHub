@@ -147,16 +147,19 @@ export function NotificationsPage() {
                     <div className="min-w-0 pt-0.5">
                       <p className={`text-[14px] leading-snug ${n.read ? 'font-bold text-slate-700' : 'font-black text-slate-950'}`}>{n.title}</p>
                       <p
-                        className="mt-1 text-[13px] leading-snug text-slate-600"
-                        style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                        className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-snug text-slate-600"
                       >
                         {n.body || n.title}
                       </p>
-                      {!n.url ? (
+                      {n.url ? (
+                        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                          Abrir tela
+                        </span>
+                      ) : (
                         <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
                           Ler completo
                         </span>
-                      ) : null}
+                      )}
                     </div>
                     <span className="pt-0.5 text-[11px] font-black text-slate-400">{timeAgo(n.createdAt)}</span>
                   </button>

@@ -32,6 +32,7 @@ import { Store } from '../entities/Store';
 import { PushNotificationService } from '../services/PushNotificationService';
 import { CustomerSecurityService } from '../services/CustomerSecurityService';
 import { buildOrderTimelineJson } from '../utils/orderTimeline';
+import { buildBroadcastPushPayload } from '../utils/pushTarget';
 
 const storeRepository = new StoreRepository();
 const subscriptionService = new SubscriptionService();
@@ -840,12 +841,9 @@ export class PlatformAdminController {
         limit: limit || null,
         title,
       });
+      const pushPayload = buildBroadcastPushPayload({ title, body, url });
       const result = await pushNotificationService.broadcastToAllActive(
-        {
-          title,
-          body,
-          data: url ? { url } : {},
-        },
+        pushPayload,
         { topic, limit }
       );
       return res.json(result);
