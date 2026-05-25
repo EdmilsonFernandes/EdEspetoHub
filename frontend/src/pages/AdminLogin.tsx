@@ -655,8 +655,8 @@ export function AdminLogin() {
               {hubMode ? 'Voltar para o app' : 'Voltar ao início'}
             </button>
           </div>
+          <AuthMascotPanel variant="admin" />
         </form>
-        <AuthMascotPanel variant="admin" />
 
         <a
           href="mailto:contato@janocaminho.com.br"

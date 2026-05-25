@@ -575,6 +575,7 @@ export function MotoboyLogin() {
                   </button>
                 ) : null}
               </div>
+              <AuthMascotPanel variant="motoboy" />
             </form>
           )}
 
@@ -597,7 +598,6 @@ export function MotoboyLogin() {
             </button>
           </div>
         </div>
-        {!alreadyLoggedIn ? <AuthMascotPanel variant="motoboy" /> : null}
       </div>
       <ConfirmationModal
         isOpen={enrollmentPromptOpen}

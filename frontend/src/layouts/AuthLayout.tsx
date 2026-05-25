@@ -29,10 +29,10 @@ export function AuthLayout({
     ? 'pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-[calc(env(safe-area-inset-top)+3.7rem)] sm:pb-10 sm:pt-[calc(env(safe-area-inset-top)+5.6rem)]'
     : 'py-3 sm:py-10';
   const shellMinHeightClass = showHeader
-    ? 'min-h-0 lg:min-h-[calc(100vh-3rem)]'
+    ? 'min-h-[calc(100dvh-4.35rem)] sm:min-h-[calc(100vh-8.1rem)] lg:min-h-[calc(100vh-3rem)]'
     : 'min-h-[calc(100dvh-1.5rem)] sm:min-h-[calc(100vh-3rem)]';
   const contentAlignmentClass = showHeader
-    ? 'items-start lg:items-center lg:pt-0'
+    ? 'items-start pt-[clamp(0.75rem,5dvh,3rem)] lg:items-center lg:pt-0'
     : 'items-center';
 
   return (

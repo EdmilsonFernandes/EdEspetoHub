@@ -765,9 +765,9 @@ export function ClientAuth() {
                 ) : null}
               </div>
             ) : null}
+            <AuthMascotPanel variant="client" mode={mode} />
           </form>
         </div>
-        <AuthMascotPanel variant="client" mode={mode} />
       </div>
       <ConfirmationModal
         isOpen={enrollmentPromptOpen}
