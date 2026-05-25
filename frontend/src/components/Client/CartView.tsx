@@ -128,15 +128,22 @@ export const CartView = ({
   storeSlug = "",
   suggestedProducts = [],
   userRole = "",
+  systemHeaderOffset = false,
 }) => {
   const isNativePlatform = Capacitor.isNativePlatform();
-  const checkoutTopPaddingClass = isNativePlatform
+  const checkoutTopPaddingClass = systemHeaderOffset
+    ? "pt-3 sm:pt-4"
+    : isNativePlatform
     ? "pt-[max(calc(env(safe-area-inset-top)+0.8rem),1.05rem)]"
     : "pt-[max(calc(env(safe-area-inset-top)+1rem),1.25rem)]";
-  const checkoutStickyTopClass = isNativePlatform
+  const checkoutStickyTopClass = systemHeaderOffset
+    ? "top-[calc(env(safe-area-inset-top)+4.1rem)]"
+    : isNativePlatform
     ? "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.7rem)]"
     : "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.75rem)]";
-  const summaryStickyTopClass = isNativePlatform
+  const summaryStickyTopClass = systemHeaderOffset
+    ? "top-[calc(env(safe-area-inset-top)+9.75rem)]"
+    : isNativePlatform
     ? "top-[max(calc(env(safe-area-inset-top)+5.9rem),6.1rem)]"
     : "top-[max(calc(env(safe-area-inset-top)+5.9rem),6.1rem)]";
   const checkoutStoreLogo = resolveAssetUrl(storeLogoUrl || "") || getStoreAvatarUrl(storeSlug, storeLabel || "Loja");

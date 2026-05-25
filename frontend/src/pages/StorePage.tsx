@@ -18,6 +18,7 @@ import { CartViewCondominium } from '../components/Client/CartViewCondominium';
 import { SuccessView } from '../components/Client/SuccessView';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
+import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -654,6 +655,31 @@ export function StorePage() {
   const isNativeRuntime = Capacitor.isNativePlatform();
   const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
   const showClientWebBottomNav = !isNativeRuntime && !isStoreAdmin && view === 'menu';
+  const showPublicStoreAppHeader = !isStoreAdmin && [ 'menu', 'cart', 'success' ].includes(String(view || ''));
+  const publicStoreHeaderTitle =
+    view === 'cart'
+      ? 'Revisar pedido'
+      : view === 'success'
+      ? 'Pedido enviado'
+      : (storeName || branding?.brandName || 'Loja');
+  const publicStoreHeaderSubtitle =
+    view === 'cart'
+      ? 'Confira sua sacola'
+      : view === 'success'
+      ? 'Acompanhe o andamento'
+      : storeOpenNow
+      ? 'Cardápio e pedidos'
+      : 'Loja fechada agora';
+  const publicStoreHeaderPadding = showPublicStoreAppHeader
+    ? 'pt-[calc(env(safe-area-inset-top)+4.35rem)] sm:pt-[calc(env(safe-area-inset-top)+4.9rem)]'
+    : '';
+  const handlePublicStoreHeaderBack = useCallback(() => {
+    if (view === 'cart' || view === 'success') {
+      setView('menu');
+      return;
+    }
+    navigateBackOrFallback(navigate, '/hub');
+  }, [navigate, view]);
   const normalizedRole = String(user?.user?.role || user?.role || '').toLowerCase();
   const isProfessionalCheckoutUser = [
     'admin',
@@ -3329,7 +3355,17 @@ export function StorePage() {
   const hasContent = products.length > 0 || !loadError;
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-[#EEF2F7] to-[#E4EBF3] font-sans overflow-x-clip no-x-scroll ${isNativeRuntime ? 'ds-native-nav-content' : 'pb-28 sm:pb-24'}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-[#EEF2F7] to-[#E4EBF3] font-sans overflow-x-clip no-x-scroll ${publicStoreHeaderPadding} ${isNativeRuntime ? 'ds-native-nav-content' : 'pb-28 sm:pb-24'}`}>
+      {showPublicStoreAppHeader ? (
+        <AppGlassHeader
+          title={publicStoreHeaderTitle}
+          eyebrow="Já no Caminho"
+          subtitle={publicStoreHeaderSubtitle}
+          backTo="/hub"
+          onBack={handlePublicStoreHeaderBack}
+          maxWidthClassName="max-w-6xl"
+        />
+      ) : null}
       {isDemo && view === 'menu' && (
         <div className="bg-amber-50 border-b border-amber-200">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-amber-900">
@@ -3776,6 +3812,7 @@ export function StorePage() {
               orderTypes={orderTypes}
               todayClosingLabel={todayClosingLabel}
               compactHeader={isMobile}
+              systemHeaderOffset={showPublicStoreAppHeader}
               staffView={Boolean(canUseAdminPrintFlow)}
               isOrderingEnabled={storeOrderingEnabled || Boolean(user?.token)}
               preOrderBlocked={isCondominiumPreOrderPreview}
@@ -3816,6 +3853,7 @@ export function StorePage() {
             onCheckoutResumeConsumed={() => setCustomerCheckoutResume(null)}
             checkoutLoading={checkoutLoading}
             onBack={() => setView('menu')}
+            systemHeaderOffset={showPublicStoreAppHeader}
           />
         ) : view === 'cart' && (
           <CartView
@@ -3887,6 +3925,7 @@ export function StorePage() {
             storeSlug={storeSlug || ''}
             suggestedProducts={suggestedProducts}
             userRole={normalizedRole}
+            systemHeaderOffset={showPublicStoreAppHeader}
           />
         )}
         {view === 'success' && (
@@ -3915,6 +3954,7 @@ export function StorePage() {
             storeLabel={storeName || branding?.brandName || ''}
             storeLogoUrl={branding?.logoUrl || ''}
             storeSlug={storeSlug || ''}
+            systemHeaderOffset={showPublicStoreAppHeader}
           />
         )}
       </main>

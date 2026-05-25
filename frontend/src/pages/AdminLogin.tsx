@@ -21,6 +21,8 @@ const ADMIN_REMEMBER_IDENTIFIER_KEY = 'auth:last-admin-identifier';
 const ADMIN_FRESH_START_BUDGET_MS = 350;
 
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+const hasInvalidEmailShape = (value: string) =>
+  String(value || '').includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(value || '').trim());
 
 export function AdminLogin() {
   const isNativePlatform = Capacitor.isNativePlatform();
@@ -30,6 +32,7 @@ export function AdminLogin() {
   const { setBranding } = useTheme();
   const [loginForm, setLoginForm] = useState({ identifier: '', password: '' });
   const [loginError, setLoginError] = useState('');
+  const [loginFieldErrors, setLoginFieldErrors] = useState<{ identifier?: string; password?: string }>({});
   const [pendingPayment, setPendingPayment] = useState(null);
   const [branding] = useState(getPersistedBranding());
   const [showPassword, setShowPassword] = useState(false);
@@ -333,8 +336,26 @@ export function AdminLogin() {
     setLoginError('');
     setPendingPayment(null);
     setVerifyPrompt(null);
+    const identifierValue = String(loginForm.identifier || '').trim();
+    const passwordValue = String(loginForm.password || '');
+    const nextFieldErrors: { identifier?: string; password?: string } = {};
+
+    if (!identifierValue) {
+      nextFieldErrors.identifier = 'Informe seu e-mail ou usuário.';
+    } else if (hasInvalidEmailShape(identifierValue)) {
+      nextFieldErrors.identifier = 'E-mail inválido.';
+    }
+    if (!passwordValue) {
+      nextFieldErrors.password = 'Informe sua senha.';
+    }
+    if (Object.keys(nextFieldErrors).length) {
+      setLoginFieldErrors(nextFieldErrors);
+      setLoginError(nextFieldErrors.identifier || nextFieldErrors.password || 'Confira os campos obrigatórios.');
+      return;
+    }
 
     try {
+      setLoginFieldErrors({});
       const session = await authService.adminLogin(loginForm.identifier, loginForm.password);
       if (session?.mfaRequired) {
         setMfaError('');
@@ -421,7 +442,13 @@ export function AdminLogin() {
   }, [searchParams]);
 
   return (
-    <AuthLayout>
+    <AuthLayout
+      title={hubMode ? 'Lojista' : 'Login'}
+      eyebrow="Área do lojista"
+      subtitle="Painel, pedidos e operação"
+      backTo={hubMode ? '/hub' : accessPortalPath}
+      showHeader
+    >
       <div className="space-y-3 ds-login-card-enter w-full sm:space-y-4">
         <div className="text-center space-y-1.5 sm:space-y-2.5">
           <button type="button" onClick={handleLogoTap} className="mx-auto flex flex-col items-center gap-2 transition-transform active:scale-95 sm:gap-3 sm:hover:scale-[1.03]">
@@ -514,15 +541,21 @@ export function AdminLogin() {
                 autoComplete="username"
                 type="text"
                 value={loginForm.identifier}
-                onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
-                className="floating-input"
+                onChange={e => {
+                  setLoginForm(prev => ({ ...prev, identifier: e.target.value }));
+                  if (loginFieldErrors.identifier) setLoginFieldErrors(prev => ({ ...prev, identifier: '' }));
+                }}
+                className={`floating-input ${loginFieldErrors.identifier ? 'border-rose-300 bg-rose-50/80 focus:border-rose-300 focus:ring-rose-200' : ''}`}
                 placeholder=" "
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
                 enterKeyHint="next"
+                aria-invalid={Boolean(loginFieldErrors.identifier)}
+                aria-describedby={loginFieldErrors.identifier ? 'admin-identifier-error' : undefined}
               />
               <label htmlFor="email" className="floating-label">E-mail ou usuário</label>
+              {loginFieldErrors.identifier ? <p id="admin-identifier-error" className="mt-1.5 text-xs font-bold text-rose-600">{loginFieldErrors.identifier}</p> : null}
             </div>
 
             <div className="floating-field">
@@ -532,13 +565,18 @@ export function AdminLogin() {
                 autoComplete="current-password"
                 type={showPassword ? 'text' : 'password'}
                 value={loginForm.password}
-                onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                className="floating-input"
+                onChange={e => {
+                  setLoginForm(prev => ({ ...prev, password: e.target.value }));
+                  if (loginFieldErrors.password) setLoginFieldErrors(prev => ({ ...prev, password: '' }));
+                }}
+                className={`floating-input ${loginFieldErrors.password ? 'border-rose-300 bg-rose-50/80 focus:border-rose-300 focus:ring-rose-200' : ''}`}
                 placeholder=" "
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
                 enterKeyHint="done"
+                aria-invalid={Boolean(loginFieldErrors.password)}
+                aria-describedby={loginFieldErrors.password ? 'admin-password-error' : undefined}
               />
               <label htmlFor="password" className="floating-label">Sua senha secreta</label>
               <button
@@ -549,6 +587,7 @@ export function AdminLogin() {
               >
                 {showPassword ? <EyeSlash size={20} weight="duotone" /> : <Eye size={20} weight="duotone" />}
               </button>
+              {loginFieldErrors.password ? <p id="admin-password-error" className="mt-1.5 text-xs font-bold text-rose-600">{loginFieldErrors.password}</p> : null}
             </div>
           </div>
 

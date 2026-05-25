@@ -19,7 +19,7 @@ const formatCountdown = (ms: number) => {
 };
 
 // ─── PIX DEDICATED SCREEN ───────────────────────────────────────────────────
-const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel, storeLogoUrl, storeSlug }) => {
+const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel, storeLogoUrl, storeSlug, systemHeaderOffset = false }) => {
   const isPaid = String(paymentStatus || "").toUpperCase() === "PAID";
   const isFailed = String(paymentStatus || "").toUpperCase() === "FAILED";
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -37,10 +37,14 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
   const isExpired = timeLeft !== null && timeLeft === 0;
   const isNative = Capacitor.isNativePlatform();
   const storeLogo = resolveAssetUrl(storeLogoUrl || "") || getStoreAvatarUrl(storeSlug, storeLabel || "Loja");
-  const stickyTop = isNative
+  const stickyTop = systemHeaderOffset
+    ? "top-[calc(env(safe-area-inset-top)+4.1rem)]"
+    : isNative
     ? "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.7rem)]"
     : "top-0";
-  const topPad = isNative
+  const topPad = systemHeaderOffset
+    ? "pt-3 sm:pt-4"
+    : isNative
     ? "pt-[max(calc(env(safe-area-inset-top)+0.45rem),0.7rem)]"
     : "pt-0";
 
@@ -365,6 +369,7 @@ export const SuccessView = ({
   storeLabel = "",
   storeLogoUrl = "",
   storeSlug = "",
+  systemHeaderOffset = false,
 }) => {
   const hasOnlinePayment = Boolean(
     onlinePayment?.qrCodeBase64 || onlinePayment?.qrCodeText || onlinePayment?.paymentLink
@@ -465,15 +470,20 @@ export const SuccessView = ({
         storeLabel={storeLabel}
         storeLogoUrl={storeLogoUrl}
         storeSlug={storeSlug}
+        systemHeaderOffset={systemHeaderOffset}
       />
     );
   }
 
   // ── Generic success / card ─────────────────────────────────────────────────
-  const checkoutTopPaddingClass = isNativePlatform
+  const checkoutTopPaddingClass = systemHeaderOffset
+    ? "pt-3 sm:pt-4"
+    : isNativePlatform
     ? "pt-[max(calc(env(safe-area-inset-top)+0.45rem),0.7rem)]"
     : "pt-[max(calc(env(safe-area-inset-top)+0.45rem),0.75rem)]";
-  const checkoutStickyTopClass = isNativePlatform
+  const checkoutStickyTopClass = systemHeaderOffset
+    ? "top-[calc(env(safe-area-inset-top)+4.1rem)]"
+    : isNativePlatform
     ? "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.7rem)]"
     : "top-[max(calc(env(safe-area-inset-top)+0.45rem),0.75rem)]";
   const storeLogo = resolveAssetUrl(storeLogoUrl || "") || getStoreAvatarUrl(storeSlug, storeLabel || "Loja");

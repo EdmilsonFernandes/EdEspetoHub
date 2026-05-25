@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowSquareOut, Check, Eye, EyeSlash, LockKey, Scooter, ShieldCheck, SignOut, UserCircle, WarningCircle, WhatsappLogo } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
@@ -13,9 +13,13 @@ import { MfaChallengeModal } from '../components/Auth/MfaChallengeModal';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 import { MFA_CHALLENGE_EXPIRED_MESSAGE, isMfaChallengeExpiredError } from '../utils/mfaErrors';
 
+const hasInvalidEmailShape = (value: string) =>
+  String(value || '').includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(value || '').trim());
+
 export function MotoboyLogin() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [verifyPrompt, setVerifyPrompt] = useState<{ email?: string; emailMasked?: string } | null>(null);
@@ -96,10 +100,6 @@ export function MotoboyLogin() {
   useEffect(() => {
     if (form.email) localStorage.setItem('motoboy:last_email', form.email);
   }, [form.email]);
-
-  const formValid = useMemo(() => {
-    return Boolean(String(form.email || '').trim()) && Boolean(String(form.password || '').trim());
-  }, [form.email, form.password]);
 
   const finishMotoboyLogin = (sessionData: any) => {
     nativeBiometricService.syncMotoboySession(sessionData);
@@ -220,7 +220,26 @@ export function MotoboyLogin() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!formValid || loading) return;
+    if (loading) return;
+    const identifierValue = String(form.email || '').trim();
+    const passwordValue = String(form.password || '');
+    const nextFieldErrors: { email?: string; password?: string } = {};
+
+    if (!identifierValue) {
+      nextFieldErrors.email = 'Informe seu e-mail ou usuário.';
+    } else if (hasInvalidEmailShape(identifierValue)) {
+      nextFieldErrors.email = 'E-mail inválido.';
+    }
+    if (!passwordValue) {
+      nextFieldErrors.password = 'Informe sua senha.';
+    }
+    if (Object.keys(nextFieldErrors).length) {
+      setFieldErrors(nextFieldErrors);
+      setError(nextFieldErrors.email || nextFieldErrors.password || 'Confira os campos obrigatórios.');
+      return;
+    }
+
+    setFieldErrors({});
     setError('');
     setVerifyPrompt(null);
     setLoading(true);
@@ -302,7 +321,13 @@ export function MotoboyLogin() {
   };
 
   return (
-    <AuthLayout>
+    <AuthLayout
+      title={alreadyLoggedIn ? 'Sessão ativa' : 'Entregador'}
+      eyebrow="Área do entregador"
+      subtitle="Entregas, rotas e ganhos"
+      backTo={hubMode ? '/hub' : accessPortalPath}
+      showHeader
+    >
       <div className="space-y-3 ds-login-card-enter w-full sm:space-y-4">
         <div className="text-center space-y-1.5 sm:space-y-2.5">
           <button type="button" onClick={handleLogoTap} className="mx-auto flex flex-col items-center gap-2 transition-transform active:scale-95 sm:gap-3 sm:hover:scale-[1.03]">
@@ -434,15 +459,21 @@ export function MotoboyLogin() {
                     autoComplete="username"
                     type="text"
                     value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="floating-input"
+                    onChange={(e) => {
+                      setForm({ ...form, email: e.target.value });
+                      if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: '' }));
+                    }}
+                    className={`floating-input ${fieldErrors.email ? 'border-rose-300 bg-rose-50/80 focus:border-rose-300 focus:ring-rose-200' : ''}`}
                     placeholder=" "
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
                     enterKeyHint="next"
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    aria-describedby={fieldErrors.email ? 'motoboy-identifier-error' : undefined}
                   />
                   <label htmlFor="email" className="floating-label">Seu e-mail ou usuário</label>
+                  {fieldErrors.email ? <p id="motoboy-identifier-error" className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.email}</p> : null}
                 </div>
 
                 <div className="floating-field">
@@ -452,13 +483,18 @@ export function MotoboyLogin() {
                     autoComplete="current-password"
                     type={showPassword ? 'text' : 'password'}
                     value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="floating-input"
+                    onChange={(e) => {
+                      setForm({ ...form, password: e.target.value });
+                      if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: '' }));
+                    }}
+                    className={`floating-input ${fieldErrors.password ? 'border-rose-300 bg-rose-50/80 focus:border-rose-300 focus:ring-rose-200' : ''}`}
                     placeholder=" "
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
                     enterKeyHint="done"
+                    aria-invalid={Boolean(fieldErrors.password)}
+                    aria-describedby={fieldErrors.password ? 'motoboy-password-error' : undefined}
                   />
                   <label htmlFor="password" className="floating-label">Sua senha secreta</label>
                   <button
@@ -469,6 +505,7 @@ export function MotoboyLogin() {
                   >
                     {showPassword ? <EyeSlash size={20} weight="duotone" /> : <Eye size={20} weight="duotone" />}
                   </button>
+                  {fieldErrors.password ? <p id="motoboy-password-error" className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.password}</p> : null}
                 </div>
               </div>
 
@@ -520,7 +557,7 @@ export function MotoboyLogin() {
               <div className="space-y-3 pt-2">
                 <button
                   type="submit"
-                  disabled={!formValid || loading}
+                  disabled={loading}
                   className="ds-btn-shine w-full h-12 rounded-2xl bg-[#0d4f66] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-60 sm:h-14"
                 >
                   <Scooter size={22} weight="duotone" className="group-hover:translate-x-1 transition-transform" />

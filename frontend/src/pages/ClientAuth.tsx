@@ -83,6 +83,7 @@ export function ClientAuth() {
     termsAccepted: false,
     lgpdAccepted: false,
   });
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
   const nextPath = useMemo(() => {
     const params = new URLSearchParams(location.search || '');
@@ -291,6 +292,27 @@ export function ClientAuth() {
 
   const submit = async () => {
     if (loading) return;
+    const emailValue = String(form.email || '').trim();
+    const passwordValue = String(form.password || '');
+    const nextFieldErrors: { email?: string; password?: string } = {};
+
+    if (!emailValue) {
+      nextFieldErrors.email = 'Informe seu e-mail ou usuário.';
+    } else if (!isValidEmail(emailValue)) {
+      nextFieldErrors.email = 'E-mail inválido.';
+    }
+    if (!passwordValue) {
+      nextFieldErrors.password = 'Informe sua senha.';
+    }
+    if (Object.keys(nextFieldErrors).length) {
+      setFieldErrors(nextFieldErrors);
+      setMessage('');
+      setVerifyPrompt(null);
+      setError(nextFieldErrors.email || nextFieldErrors.password || 'Confira os campos obrigatórios.');
+      return;
+    }
+
+    setFieldErrors({});
     setLoading(true);
     setError('');
     setMessage('');
@@ -487,7 +509,13 @@ export function ClientAuth() {
   };
 
   return (
-    <AuthLayout>
+    <AuthLayout
+      title={mode === 'register' ? 'Criar conta' : 'Entrar'}
+      eyebrow="Área do cliente"
+      subtitle={mode === 'register' ? 'Cadastre seu acesso' : 'Acesse pedidos e endereços'}
+      backTo={hubMode ? '/hub' : accessPortalPath}
+      showHeader
+    >
       <div className="space-y-3 ds-login-card-enter w-full sm:space-y-4">
         <div className="text-center space-y-1.5 sm:space-y-2.5">
           <button type="button" onClick={() => navigate(hubMode ? '/hub' : '/')} className="mx-auto flex flex-col items-center gap-2 transition-transform active:scale-95 sm:gap-3 sm:hover:scale-[1.03]">
@@ -557,14 +585,22 @@ export function ClientAuth() {
           <div className="flex gap-2 rounded-[1.1rem] border border-slate-200 bg-slate-100 p-1.5">
             <button
               type="button"
-              onClick={() => setMode('login')}
+              onClick={() => {
+                setFieldErrors({});
+                setError('');
+                setMode('login');
+              }}
               className={`flex-1 rounded-[0.9rem] px-3 py-2 text-xs font-bold transition-all sm:py-2.5 ${mode === 'login' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-700 hover:bg-white/70'}`}
             >
               Login
             </button>
             <button
               type="button"
-              onClick={() => setMode('register')}
+              onClick={() => {
+                setFieldErrors({});
+                setError('');
+                setMode('register');
+              }}
               className={`flex-1 rounded-[0.9rem] px-3 py-2 text-xs font-bold transition-all sm:py-2.5 ${mode === 'register' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-700 hover:bg-white/70'}`}
             >
               Cadastro
@@ -606,30 +642,49 @@ export function ClientAuth() {
               </div>
             )}
             <div className="relative">
-              <EnvelopeSimple size={18} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <EnvelopeSimple size={18} weight="duotone" className="absolute left-3 top-[1.32rem] text-slate-400 sm:top-[1.45rem]" />
               <input
                 {...inputAssistProps.email}
                 id="email"
                 name="email"
                 value={form.email}
-                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                onChange={(e) => {
+                  setForm((p) => ({ ...p, email: e.target.value }));
+                  if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: '' }));
+                }}
                 placeholder="E-mail"
                 enterKeyHint={mode === 'register' ? 'next' : 'done'}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 sm:py-3"
+                aria-invalid={Boolean(fieldErrors.email)}
+                aria-describedby={fieldErrors.email ? 'customer-email-error' : undefined}
+                className={`w-full rounded-2xl border py-2.5 pl-11 pr-4 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 sm:py-3 ${
+                  fieldErrors.email
+                    ? 'border-rose-300 bg-rose-50/80 focus:ring-rose-200'
+                    : 'border-slate-200 bg-slate-50 focus:ring-slate-300'
+                }`}
               />
+              {fieldErrors.email ? <p id="customer-email-error" className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.email}</p> : null}
             </div>
             <div className="relative">
-              <LockKey size={18} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <LockKey size={18} weight="duotone" className="absolute left-3 top-[1.32rem] text-slate-400 sm:top-[1.45rem]" />
               <input
                 {...(mode === 'register' ? inputAssistProps.newPassword : inputAssistProps.currentPassword)}
                 id="password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 value={form.password}
-                onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+                onChange={(e) => {
+                  setForm((p) => ({ ...p, password: e.target.value }));
+                  if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: '' }));
+                }}
                 placeholder="Senha"
                 enterKeyHint="done"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-12 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 sm:py-3"
+                aria-invalid={Boolean(fieldErrors.password)}
+                aria-describedby={fieldErrors.password ? 'customer-password-error' : undefined}
+                className={`w-full rounded-2xl border py-2.5 pl-11 pr-12 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 sm:py-3 ${
+                  fieldErrors.password
+                    ? 'border-rose-300 bg-rose-50/80 focus:ring-rose-200'
+                    : 'border-slate-200 bg-slate-50 focus:ring-slate-300'
+                }`}
               />
               <button
                 type="button"
@@ -638,6 +693,7 @@ export function ClientAuth() {
               >
                 {showPassword ? <EyeSlash size={18} weight="bold" /> : <Eye size={18} weight="bold" />}
               </button>
+              {fieldErrors.password ? <p id="customer-password-error" className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.password}</p> : null}
             </div>
 
             {mode === 'register' && (

@@ -584,6 +584,7 @@ export const MenuView = ({
   preOrderBlocked = false,
   preOrderBlockedTitle = "Pedidos em breve",
   preOrderBlockedMessage = "",
+  systemHeaderOffset = false,
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -1107,7 +1108,10 @@ export const MenuView = ({
         />
       )}
 
-      <div ref={stickySearchContainerRef} className="sticky top-0 z-30 w-full border-b border-slate-100 bg-white/95 shadow-[0_4px_18px_-10px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+      <div
+        ref={stickySearchContainerRef}
+        className={`sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-slate-100 bg-white/95 shadow-[0_4px_18px_-10px_rgba(15,23,42,0.12)] backdrop-blur-xl`}
+      >
         {Capacitor.isNativePlatform() && (
           <div className="flex items-center justify-center gap-1.5 border-b border-slate-100/80 py-1.5">
             <img src="/janocaminho.jpg" alt="" aria-hidden className="h-[14px] w-[14px] rounded-[0.3rem] object-cover opacity-80" />

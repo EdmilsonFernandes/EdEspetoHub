@@ -2,17 +2,45 @@
 import React from 'react';
 import { Capacitor } from '@capacitor/core';
 import { AppVersionBadge } from '../components/common/AppVersionBadge';
+import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { ChartLineUp, DeviceMobile, ShieldCheckered } from '@phosphor-icons/react';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
+  title?: React.ReactNode;
+  eyebrow?: React.ReactNode;
+  subtitle?: React.ReactNode;
+  backTo?: string;
+  onBack?: () => void;
+  showHeader?: boolean;
 }
 
-export function AuthLayout({ children }: AuthLayoutProps) {
+export function AuthLayout({
+  children,
+  title = 'Acesso',
+  eyebrow = 'Já no Caminho',
+  subtitle = 'Entre para continuar',
+  backTo = '/hub',
+  onBack,
+  showHeader = false,
+}: AuthLayoutProps) {
   const isNativePlatform = Capacitor.isNativePlatform();
+  const spacingClass = showHeader
+    ? 'pb-3 pt-[calc(env(safe-area-inset-top)+5.05rem)] sm:pb-10 sm:pt-[calc(env(safe-area-inset-top)+6rem)]'
+    : 'py-3 sm:py-10';
 
   return (
-    <div className={`min-h-[100dvh] overflow-x-clip bg-[#EEF2F7] px-4 py-3 sm:py-10 relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
+    <div className={`min-h-[100dvh] overflow-x-clip bg-[#EEF2F7] px-4 ${spacingClass} relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
+      {showHeader ? (
+        <AppGlassHeader
+          title={title}
+          eyebrow={eyebrow}
+          subtitle={subtitle}
+          backTo={backTo}
+          onBack={onBack}
+          maxWidthClassName="max-w-2xl"
+        />
+      ) : null}
       {/* Background Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-sky-400/10 blur-[120px] animate-[orbFloat_18s_infinite_linear]" />
