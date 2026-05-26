@@ -65,5 +65,10 @@ test.describe('Configuração de impressora térmica', () => {
     await expect(printerRegion).toContainText('Abra esta tela pelo app Android da loja');
     await expect(page.getByText('Perfil e marca')).toBeHidden();
     await expect(page.getByText('Entrega e logística')).toBeHidden();
+
+    await page.getByRole('button', { name: 'Conta da operação' }).click();
+    await expect(
+      page.getByRole('button', { name: /Impressora Configure a impressora Bluetooth deste aparelho/i })
+    ).toBeVisible();
   });
 });
