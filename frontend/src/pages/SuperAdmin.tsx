@@ -287,6 +287,27 @@ const SUPER_ADMIN_SECTIONS = [
   { id: 'versions',  label: 'Versões',    icon: RocketLaunch,      group: 'tecnico'     },
 ];
 
+const SUPER_ADMIN_SECTION_GROUPS = [
+  {
+    id: 'operacional',
+    label: 'Operação',
+    subtitle: 'Resumo, lojas e receita',
+    icon: ChartBar,
+  },
+  {
+    id: 'plataforma',
+    label: 'Plataforma',
+    subtitle: 'Push, destinos e segurança',
+    icon: Megaphone,
+  },
+  {
+    id: 'tecnico',
+    label: 'Técnico',
+    subtitle: 'Logs, eventos e versões',
+    icon: Cpu,
+  },
+];
+
 const readInitialSuperAdminSection = () => {
   if (typeof window === 'undefined') return 'executive';
   const stored = String(sessionStorage.getItem(ACTIVE_SECTION_STORAGE_KEY) || '').trim();
@@ -444,6 +465,25 @@ export function SuperAdmin() {
     if (!Number.isFinite(date.getTime())) return '-';
     return date.toLocaleString('pt-BR');
   }, []);
+  const activeSuperAdminGroup = useMemo(() => {
+    return SUPER_ADMIN_SECTIONS.find((section) => section.id === activeSection)?.group || 'operacional';
+  }, [activeSection]);
+  const activeSuperAdminGroupSections = useMemo(() => {
+    return SUPER_ADMIN_SECTIONS.filter((section) => section.group === activeSuperAdminGroup);
+  }, [activeSuperAdminGroup]);
+  const openSuperAdminSection = (sectionId: string) => {
+    if (sectionId === 'destinations') {
+      window.location.href = '/superadmin/destinations';
+      return;
+    }
+    setActiveSection(sectionId);
+  };
+  const openSuperAdminGroup = (groupId: string) => {
+    const firstSection = SUPER_ADMIN_SECTIONS.find((section) => section.group === groupId && section.id !== 'destinations')
+      || SUPER_ADMIN_SECTIONS.find((section) => section.group === groupId);
+    if (!firstSection) return;
+    openSuperAdminSection(firstSection.id);
+  };
 
   useEffect(() => {
     overviewRef.current = overview;
@@ -1662,28 +1702,53 @@ export function SuperAdmin() {
         </div>
       </div>
 
-      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-[#0d1f35]/97 backdrop-blur border-b border-white/8 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.4)]">
-        {/* Mobile segmented rail */}
-        <div className="sm:hidden">
-          <div className="flex gap-2 overflow-x-auto no-scrollbar rounded-[1.35rem] border border-white/10 bg-white/[0.06] p-1.5">
-            {SUPER_ADMIN_SECTIONS.map(({ id, label, icon: Icon }) => {
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/82 backdrop-blur-2xl border-b border-slate-200/70 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.45)]">
+        <div className="rounded-[1.7rem] border border-white/80 bg-white/86 p-2.5 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.5)] ring-1 ring-slate-100/80 backdrop-blur-xl">
+          <div className="grid grid-cols-3 gap-2">
+            {SUPER_ADMIN_SECTION_GROUPS.map(({ id, label, subtitle, icon: Icon }) => {
+              const isActiveGroup = activeSuperAdminGroup === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => openSuperAdminGroup(id)}
+                  className={`min-w-0 rounded-[1.25rem] border px-2.5 py-2.5 text-left transition-all active:scale-[0.985] ${
+                    isActiveGroup
+                      ? 'border-[#336886]/18 bg-[#336886]/10 text-[#153A4C] shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)]'
+                      : 'border-slate-100 bg-slate-50/72 text-slate-500 hover:bg-white hover:text-slate-800'
+                  }`}
+                  aria-pressed={isActiveGroup}
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-2xl ${
+                      isActiveGroup ? 'bg-[#153A4C] text-white' : 'bg-white text-[#336886]'
+                    }`}>
+                      <Icon size={17} weight={isActiveGroup ? 'fill' : 'duotone'} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-[11px] font-black uppercase tracking-[0.08em] sm:text-xs">{label}</span>
+                      <span className="hidden truncate text-[10px] font-semibold text-slate-400 md:block">{subtitle}</span>
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-2 flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
+            {activeSuperAdminGroupSections.map(({ id, label, icon: Icon }) => {
               const isActive = activeSection === id;
               return (
                 <button
                   key={id}
                   type="button"
-                  onClick={() => {
-                    if (id === 'destinations') {
-                      window.location.href = '/superadmin/destinations';
-                      return;
-                    }
-                    setActiveSection(id);
-                  }}
-                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-2xl px-3 py-2 text-[11px] font-black transition-all active:scale-[0.98] ${
+                  onClick={() => openSuperAdminSection(id)}
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition-all active:scale-[0.98] ${
                     isActive
-                      ? 'bg-white text-[#153A4C] shadow-[0_12px_28px_-20px_rgba(0,0,0,0.5)]'
-                      : 'text-white/58 hover:bg-white/8 hover:text-white'
+                      ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_12px_28px_-20px_rgba(15,23,42,0.65)]'
+                      : 'border-slate-100 bg-white text-slate-500 hover:border-[#336886]/20 hover:text-[#153A4C]'
                   }`}
+                  aria-pressed={isActive}
                 >
                   <Icon size={14} weight={isActive ? 'fill' : 'duotone'} />
                   {label}
@@ -1691,43 +1756,6 @@ export function SuperAdmin() {
               );
             })}
           </div>
-        </div>
-
-        {/* Desktop nav com grupos */}
-        <div className="hidden sm:flex items-center gap-4 overflow-x-auto no-scrollbar">
-          {(['operacional', 'plataforma', 'tecnico'] as const).map((group, gi) => {
-            const items = SUPER_ADMIN_SECTIONS.filter(s => s.group === group);
-            const groupLabel = group === 'operacional' ? 'Operacional' : group === 'plataforma' ? 'Plataforma' : 'Técnico';
-            return (
-              <div key={group} className={`flex items-center gap-1 ${gi > 0 ? 'border-l border-white/10 pl-4' : ''}`}>
-                <span className="mr-1 text-[9px] font-black uppercase tracking-[0.2em] text-white/30 hidden lg:block">{groupLabel}</span>
-                {items.map(({ id, label, icon: Icon }) => {
-                  const isActive = activeSection === id;
-                  return (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => {
-                        if (id === 'destinations') {
-                          window.location.href = '/superadmin/destinations';
-                          return;
-                        }
-                        setActiveSection(id);
-                      }}
-                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-bold transition-all ${
-                        isActive
-                          ? 'bg-[#336886] text-white shadow-[0_4px_12px_-4px_rgba(51,104,134,0.6)]'
-                          : 'text-white/55 hover:text-white hover:bg-white/8'
-                      }`}
-                    >
-                      <Icon size={13} weight={isActive ? 'fill' : 'duotone'} />
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            );
-          })}
         </div>
       </div>
 
