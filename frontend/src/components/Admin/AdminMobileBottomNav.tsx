@@ -1,10 +1,12 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Buildings, ChartBar, ChefHat, Compass, CurrencyDollar, EnvelopeSimple, ImageSquare, Package, SignOut, UserCircle } from '@phosphor-icons/react';
+import { Buildings, ChartBar, ChefHat, Compass, CurrencyDollar, DotsThreeCircle, EnvelopeSimple, ImageSquare, Megaphone, Package, RocketLaunch, ShieldCheck, SignOut, Storefront, UserCircle, X } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
 import { loadAdminDashboardPage, loadAdminQueuePage, loadStorePage } from '../../utils/adminRoutePrefetch';
+
+const SUPER_ADMIN_ACTIVE_SECTION_KEY = 'superadmin:activeSection';
 
 export function AdminMobileBottomNav() {
   const navigate = useNavigate();
@@ -33,12 +35,27 @@ export function AdminMobileBottomNav() {
   const [isVisible, setIsVisible] = useState(true);
   const [hiddenByCart, setHiddenByCart] = useState(false);
   const [optimisticActiveId, setOptimisticActiveId] = useState('');
+  const [superMoreOpen, setSuperMoreOpen] = useState(false);
+  const [superActiveSection, setSuperActiveSection] = useState(() => {
+    if (typeof window === 'undefined') return 'executive';
+    return String(sessionStorage.getItem(SUPER_ADMIN_ACTIVE_SECTION_KEY) || 'executive');
+  });
   const optimisticTimerRef = useRef<number | null>(null);
 
   const setOptimisticNav = (id: string) => {
     setOptimisticActiveId(id);
     if (optimisticTimerRef.current) window.clearTimeout(optimisticTimerRef.current);
     optimisticTimerRef.current = window.setTimeout(() => setOptimisticActiveId(''), 900);
+  };
+
+  const openSuperAdminSection = (section: string) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(SUPER_ADMIN_ACTIVE_SECTION_KEY, section);
+      window.dispatchEvent(new CustomEvent('superadmin:set-section', { detail: { section } }));
+    }
+    setSuperActiveSection(section);
+    setSuperMoreOpen(false);
+    if (path !== '/superadmin') navigate('/superadmin');
   };
 
   const preloadNavTarget = (id: string) => {
@@ -174,6 +191,28 @@ export function AdminMobileBottomNav() {
   }, []);
 
   useEffect(() => {
+    if (!isSuperAdminPath) {
+      setSuperMoreOpen(false);
+      return;
+    }
+    const syncSuperSection = (event?: any) => {
+      const fromEvent = String(event?.detail?.section || '').trim();
+      const fromStorage =
+        typeof window !== 'undefined'
+          ? String(sessionStorage.getItem(SUPER_ADMIN_ACTIVE_SECTION_KEY) || '').trim()
+          : '';
+      setSuperActiveSection(fromEvent || fromStorage || 'executive');
+    };
+    syncSuperSection();
+    window.addEventListener('superadmin:active-section-changed', syncSuperSection as EventListener);
+    window.addEventListener('superadmin:set-section', syncSuperSection as EventListener);
+    return () => {
+      window.removeEventListener('superadmin:active-section-changed', syncSuperSection as EventListener);
+      window.removeEventListener('superadmin:set-section', syncSuperSection as EventListener);
+    };
+  }, [isSuperAdminPath, path]);
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     let lastY = window.scrollY || 0;
     let anchorY = lastY;
@@ -288,104 +327,159 @@ export function AdminMobileBottomNav() {
   }, [dashboardTab, optimisticActiveId, path, navItems]);
 
   if (isSuperAdminPath) {
-    const superItems = [
+    const superPrimaryItems = [
       {
         id: 'super-home',
         label: 'Resumo',
         icon: ChartBar,
-        active: path === '/superadmin',
-        onClick: () => navigate('/superadmin'),
+        active: path === '/superadmin' && superActiveSection === 'executive',
+        onClick: () => openSuperAdminSection('executive'),
       },
       {
-        id: 'super-condominiums',
-        label: 'Condomínios',
-        icon: Buildings,
-        active: path.startsWith('/superadmin/condominiums'),
-        onClick: () => navigate('/superadmin/condominiums'),
+        id: 'super-operation',
+        label: 'Operação',
+        icon: Storefront,
+        active: path === '/superadmin' && ['rankings', 'stores', 'payments'].includes(superActiveSection),
+        onClick: () => openSuperAdminSection('stores'),
       },
       {
-        id: 'super-destinations',
-        label: 'Destinos',
-        icon: Compass,
-        active: path.startsWith('/superadmin/destinations'),
-        onClick: () => navigate('/superadmin/destinations'),
+        id: 'super-platform',
+        label: 'Plataforma',
+        icon: Megaphone,
+        active:
+          path === '/superadmin' && ['push', 'kyc', 'security'].includes(superActiveSection),
+        onClick: () => openSuperAdminSection('push'),
       },
       {
-        id: 'super-home-config',
-        label: 'Banners',
-        icon: ImageSquare,
-        active: path.startsWith('/superadmin/home-config'),
-        onClick: () => navigate('/superadmin/home-config'),
+        id: 'super-more',
+        label: 'Mais',
+        icon: DotsThreeCircle,
+        active:
+          superMoreOpen ||
+          path.startsWith('/superadmin/condominiums') ||
+          path.startsWith('/superadmin/destinations') ||
+          path.startsWith('/superadmin/home-config') ||
+          path.startsWith('/superadmin/email-templates') ||
+          ['logs', 'events', 'versions'].includes(superActiveSection),
+        onClick: () => setSuperMoreOpen((prev) => !prev),
       },
-      {
-        id: 'super-email',
-        label: 'E-mails',
-        icon: EnvelopeSimple,
-        active: path.startsWith('/superadmin/email-templates'),
-        onClick: () => navigate('/superadmin/email-templates'),
-      },
-      {
-        id: 'super-logout',
-        label: 'Sair',
-        icon: SignOut,
-        tone: 'danger',
-        active: false,
-        onClick: () => {
-          localStorage.removeItem('superAdminToken');
-          localStorage.removeItem('superAdminUser');
-          if (typeof window !== 'undefined') {
-            window.location.assign('/superadmin');
-          } else {
-            navigate('/superadmin', { replace: true });
-          }
-        },
-      },
+    ];
+    const superMoreItems = [
+      { id: 'super-condominiums', label: 'Condomínios', subtitle: 'Acessos e feiras', icon: Buildings, href: '/superadmin/condominiums', active: path.startsWith('/superadmin/condominiums') },
+      { id: 'super-destinations', label: 'Destinos', subtitle: 'Chalés e serviços', icon: Compass, href: '/superadmin/destinations', active: path.startsWith('/superadmin/destinations') },
+      { id: 'super-home-config', label: 'Banners da Home', subtitle: 'Home e popup', icon: ImageSquare, href: '/superadmin/home-config', active: path.startsWith('/superadmin/home-config') },
+      { id: 'super-email', label: 'E-mails', subtitle: 'Templates e descadastro', icon: EnvelopeSimple, href: '/superadmin/email-templates', active: path.startsWith('/superadmin/email-templates') },
+      { id: 'super-kyc', label: 'KYC entregadores', subtitle: 'Documentos e decisão', icon: ShieldCheck, section: 'kyc', active: path === '/superadmin' && superActiveSection === 'kyc' },
+      { id: 'super-security', label: 'Segurança', subtitle: 'Clientes e bloqueios', icon: ShieldCheck, section: 'security', active: path === '/superadmin' && superActiveSection === 'security' },
+      { id: 'super-versions', label: 'Versões', subtitle: 'Build e commits', icon: RocketLaunch, section: 'versions', active: path === '/superadmin' && superActiveSection === 'versions' },
+      { id: 'super-logout', label: 'Sair', subtitle: 'Encerrar sessão', icon: SignOut, danger: true },
     ];
 
     if (hiddenByOverlay) return null;
 
     return (
-      <nav
-        className="fixed inset-x-0 bottom-0 z-[220] pointer-events-none transition-transform duration-300 ease-in-out flex justify-center"
-        style={{
-          transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
-        }}
-      >
-        <ul className={`pointer-events-auto mx-auto grid w-full max-w-md ${superItems.length === 3 ? 'grid-cols-3' : superItems.length === 5 ? 'grid-cols-5' : 'grid-cols-4'} gap-0.5 border-t border-slate-200/60 bg-white/95 px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-8px_32px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl`}>
-          {superItems.map((item) => {
-            const Icon = item.icon;
-            const danger = item.tone === 'danger';
-            const isActive = optimisticActiveId ? optimisticActiveId === item.id : item.active;
-            return (
-              <li key={item.id}>
+      <>
+        {superMoreOpen ? (
+          <div className="fixed inset-0 z-[240] bg-slate-950/35 backdrop-blur-[2px]" onClick={() => setSuperMoreOpen(false)}>
+            <div
+              className="absolute inset-x-2 bottom-[calc(env(safe-area-inset-bottom)+5.9rem)] mx-auto max-w-md overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/95 p-3 shadow-[0_26px_70px_-34px_rgba(15,23,42,0.58)] backdrop-blur-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-2 flex items-center justify-between gap-3 px-1">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Super Admin</p>
+                  <p className="text-sm font-black text-slate-950">Mais opções</p>
+                </div>
                 <button
                   type="button"
-                  onPointerDown={() => setOptimisticNav(item.id)}
-                  onClick={() => handleNavPress(item)}
-                  className={`w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[9px] font-bold uppercase tracking-[0.08em] transition-all active:scale-95 ${
-                    isActive
-                      ? 'text-[#153A4C]'
-                      : danger
-                        ? 'text-rose-500'
-                        : 'text-slate-400'
-                  }`}
+                  onClick={() => setSuperMoreOpen(false)}
+                  className="grid h-9 w-9 place-items-center rounded-full border border-slate-100 bg-slate-50 text-slate-500 active:scale-95"
+                  aria-label="Fechar mais opções"
                 >
-                  <span className={`inline-flex h-8 w-8 items-center justify-center rounded-2xl transition-all ${
-                    isActive
-                      ? 'bg-[#153A4C]/10 text-[#153A4C]'
-                      : danger
-                        ? 'bg-rose-50 text-rose-500'
-                        : 'text-slate-400'
-                  }`}>
-                    <Icon size={18} weight={isActive ? 'fill' : 'duotone'} />
-                  </span>
-                  <span className="leading-none">{item.label}</span>
+                  <X size={16} weight="bold" />
                 </button>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {superMoreItems.map((item: any) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        if (item.danger) {
+                          localStorage.removeItem('superAdminToken');
+                          localStorage.removeItem('superAdminUser');
+                          window.location.assign('/superadmin');
+                          return;
+                        }
+                        if (item.href) {
+                          setSuperMoreOpen(false);
+                          navigate(item.href);
+                          return;
+                        }
+                        if (item.section) openSuperAdminSection(item.section);
+                      }}
+                      className={`min-h-[76px] rounded-2xl border p-3 text-left transition active:scale-[0.98] ${
+                        item.active
+                          ? 'border-[#336886]/20 bg-[#336886]/8 text-[#153A4C]'
+                          : item.danger
+                            ? 'border-rose-100 bg-rose-50/80 text-rose-600'
+                            : 'border-slate-100 bg-slate-50/80 text-slate-700 hover:bg-white'
+                      }`}
+                    >
+                      <span className={`mb-2 grid h-8 w-8 place-items-center rounded-xl ${
+                        item.active
+                          ? 'bg-[#153A4C] text-white'
+                          : item.danger
+                            ? 'bg-rose-100 text-rose-600'
+                            : 'bg-white text-[#336886]'
+                      }`}>
+                        <Icon size={17} weight={item.active ? 'fill' : 'duotone'} />
+                      </span>
+                      <span className="block text-xs font-black leading-tight">{item.label}</span>
+                      <span className={`mt-0.5 block text-[10px] font-semibold leading-tight ${item.danger ? 'text-rose-500/75' : 'text-slate-400'}`}>{item.subtitle}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        <nav
+          className="fixed inset-x-0 bottom-0 z-[220] pointer-events-none transition-transform duration-300 ease-in-out flex justify-center"
+          style={{
+            transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
+          }}
+        >
+          <ul className="pointer-events-auto mx-auto grid w-full max-w-md grid-cols-4 gap-1 border-t border-slate-200/60 bg-white/95 px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-8px_32px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl">
+            {superPrimaryItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = optimisticActiveId ? optimisticActiveId === item.id : item.active;
+              return (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    onPointerDown={() => setOptimisticNav(item.id)}
+                    onClick={() => item.onClick()}
+                    className={`w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[9px] font-bold uppercase tracking-[0.08em] transition-all active:scale-95 ${
+                      isActive ? 'text-[#153A4C]' : 'text-slate-400'
+                    }`}
+                  >
+                    <span className={`inline-flex h-8 w-8 items-center justify-center rounded-2xl transition-all ${
+                      isActive ? 'bg-[#153A4C]/10 text-[#153A4C]' : 'text-slate-400'
+                    }`}>
+                      <Icon size={18} weight={isActive ? 'fill' : 'duotone'} />
+                    </span>
+                    <span className="leading-none">{item.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </>
     );
   }
 

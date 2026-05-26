@@ -58,6 +58,7 @@ import { isTransientConnectionError, normalizeUserFacingError } from '../utils/u
 
 const STORAGE_KEY = 'superAdminToken';
 const STORAGE_USER_KEY = 'superAdminUser';
+const ACTIVE_SECTION_STORAGE_KEY = 'superadmin:activeSection';
 const FILTERS_KEY = 'superAdminPaymentFilters';
 const EVENTS_FILTERS_KEY = 'superAdminEventFilters';
 const EVENTS_PAGE_SIZE = 25;
@@ -286,6 +287,12 @@ const SUPER_ADMIN_SECTIONS = [
   { id: 'versions',  label: 'Versões',    icon: RocketLaunch,      group: 'tecnico'     },
 ];
 
+const readInitialSuperAdminSection = () => {
+  if (typeof window === 'undefined') return 'executive';
+  const stored = String(sessionStorage.getItem(ACTIVE_SECTION_STORAGE_KEY) || '').trim();
+  return SUPER_ADMIN_SECTIONS.some((section) => section.id === stored) ? stored : 'executive';
+};
+
 export function SuperAdmin() {
   const isNativePlatform = Capacitor.isNativePlatform();
   const { showToast } = useToast();
@@ -376,7 +383,7 @@ export function SuperAdmin() {
     events: false,
     kyc: true,
   });
-  const [activeSection, setActiveSection] = useState('executive');
+  const [activeSection, setActiveSection] = useState(readInitialSuperAdminSection);
   const [broadcastForm, setBroadcastForm] = useState({
     title: '',
     body: '',
@@ -401,6 +408,21 @@ export function SuperAdmin() {
     superAdminService.listPendingPromoPushes(token).then((data) => setPendingPushes(Array.isArray(data) ? data : [])).catch(() => {});
     superAdminService.listPromoPushHistory(token).then((data) => setPushHistory(Array.isArray(data) ? data : [])).catch(() => {});
   }, [activeSection, token]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    sessionStorage.setItem(ACTIVE_SECTION_STORAGE_KEY, activeSection);
+    window.dispatchEvent(new CustomEvent('superadmin:active-section-changed', { detail: { section: activeSection } }));
+  }, [activeSection]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onSuperAdminSectionChange = (event: any) => {
+      const nextSection = String(event?.detail?.section || '').trim();
+      if (!SUPER_ADMIN_SECTIONS.some((section) => section.id === nextSection)) return;
+      setActiveSection(nextSection);
+    };
+    window.addEventListener('superadmin:set-section', onSuperAdminSectionChange as EventListener);
+    return () => window.removeEventListener('superadmin:set-section', onSuperAdminSectionChange as EventListener);
+  }, []);
   const [broadcastLastResult, setBroadcastLastResult] = useState<any | null>(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -1641,32 +1663,34 @@ export function SuperAdmin() {
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-[#0d1f35]/97 backdrop-blur border-b border-white/8 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.4)]">
-        {/* Mobile select */}
+        {/* Mobile segmented rail */}
         <div className="sm:hidden">
-          <select
-            value={activeSection}
-            onChange={(event) => {
-              if (event.target.value === 'destinations') {
-                window.location.href = '/superadmin/destinations';
-                return;
-              }
-              setActiveSection(event.target.value);
-            }}
-            className="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-sm font-bold text-white outline-none"
-          >
-            {[
-              { label: '— Operacional —', disabled: true },
-              ...SUPER_ADMIN_SECTIONS.filter(s => s.group === 'operacional'),
-              { label: '— Plataforma —', disabled: true },
-              ...SUPER_ADMIN_SECTIONS.filter(s => s.group === 'plataforma'),
-              { label: '— Técnico —', disabled: true },
-              ...SUPER_ADMIN_SECTIONS.filter(s => s.group === 'tecnico'),
-            ].map((s: any) => (
-              s.disabled
-                ? <option key={s.label} disabled>{s.label}</option>
-                : <option key={s.id} value={s.id}>{s.label}</option>
-            ))}
-          </select>
+          <div className="flex gap-2 overflow-x-auto no-scrollbar rounded-[1.35rem] border border-white/10 bg-white/[0.06] p-1.5">
+            {SUPER_ADMIN_SECTIONS.map(({ id, label, icon: Icon }) => {
+              const isActive = activeSection === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => {
+                    if (id === 'destinations') {
+                      window.location.href = '/superadmin/destinations';
+                      return;
+                    }
+                    setActiveSection(id);
+                  }}
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-2xl px-3 py-2 text-[11px] font-black transition-all active:scale-[0.98] ${
+                    isActive
+                      ? 'bg-white text-[#153A4C] shadow-[0_12px_28px_-20px_rgba(0,0,0,0.5)]'
+                      : 'text-white/58 hover:bg-white/8 hover:text-white'
+                  }`}
+                >
+                  <Icon size={14} weight={isActive ? 'fill' : 'duotone'} />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Desktop nav com grupos */}
