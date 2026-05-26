@@ -119,9 +119,21 @@ private normalizePostalZip(value?: string | null) {
   private parseCoordinate(value?: any): number | null | undefined {
     if (value === undefined) return undefined;
     if (value === null) return null;
-    const parsed = Number(String(value).replace(',', '.').trim());
+    const raw = String(value).replace(',', '.').trim();
+    if (!raw) return null;
+    const parsed = Number(raw);
     if (!Number.isFinite(parsed)) return null;
     return parsed;
+  }
+
+  private isUsableStoreCoordinatePair(lat?: any, lng?: any) {
+    const parsedLat = this.parseCoordinate(lat);
+    const parsedLng = this.parseCoordinate(lng);
+    if (!Number.isFinite(Number(parsedLat)) || !Number.isFinite(Number(parsedLng))) return false;
+    const numericLat = Number(parsedLat);
+    const numericLng = Number(parsedLng);
+    if (Math.abs(numericLat) < 0.000001 && Math.abs(numericLng) < 0.000001) return false;
+    return numericLat >= -34 && numericLat <= 6 && numericLng >= -74 && numericLng <= -34;
   }
 
 private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallbackValue?: number | null): number | null {
@@ -209,7 +221,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
   }
 
   private assertResolvedCoordinates(lat?: number | null, lng?: number | null) {
-    if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) {
+    if (!this.isUsableStoreCoordinatePair(lat, lng)) {
       throw new AppError('STORE-004', 400);
     }
   }
@@ -260,7 +272,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
     if (!store?.id || !store?.settings) return store;
     const currentLat = this.parseCoordinate(store.settings.lat);
     const currentLng = this.parseCoordinate(store.settings.lng);
-    if (Number.isFinite(Number(currentLat)) && Number.isFinite(Number(currentLng))) {
+    if (this.isUsableStoreCoordinatePair(currentLat, currentLng)) {
       return store;
     }
     const address = this.buildGeocodeAddress({
@@ -282,7 +294,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
     if (!store?.id || !store?.settings) return store;
     const currentLat = this.parseCoordinate(store.settings.lat);
     const currentLng = this.parseCoordinate(store.settings.lng);
-    if (Number.isFinite(Number(currentLat)) && Number.isFinite(Number(currentLng))) {
+    if (this.isUsableStoreCoordinatePair(currentLat, currentLng)) {
       return store;
     }
 
@@ -321,7 +333,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
         const next = await this.ensureStoreCoordinates(store);
         const lat = this.parseCoordinate(next?.settings?.lat);
         const lng = this.parseCoordinate(next?.settings?.lng);
-        if (lat !== null && lng !== null) {
+        if (this.isUsableStoreCoordinatePair(lat, lng)) {
           updated += 1;
         } else {
           failed += 1;
@@ -398,7 +410,7 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
       const requestedLng = this.parseCoordinate(input.lng);
       let resolvedLat = Number.isFinite(Number(requestedLat)) ? Number(requestedLat) : null;
       let resolvedLng = Number.isFinite(Number(requestedLng)) ? Number(requestedLng) : null;
-      if (resolvedLat === null || resolvedLng === null) {
+      if (!this.isUsableStoreCoordinatePair(resolvedLat, resolvedLng)) {
         const geocoded = await this.geocodeAddress(
           this.buildGeocodeAddress({
             address: trimmedAddress,
@@ -674,10 +686,12 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
 
       const nextLat = this.parseCoordinate(data.lat);
       const nextLng = this.parseCoordinate(data.lng);
-      const shouldRefreshCoordinates =
+      const locationTextChanged =
         data.address !== undefined ||
         data.city !== undefined ||
-        data.state !== undefined ||
+        data.state !== undefined;
+      const shouldRefreshCoordinates =
+        locationTextChanged ||
         data.lat !== undefined ||
         data.lng !== undefined;
 
@@ -688,7 +702,10 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
         store.settings.lng = Number.isFinite(Number(nextLng)) ? Number(nextLng) : null;
       }
       if (shouldRefreshCoordinates) {
-        if (data.lat === undefined || data.lng === undefined) {
+        const hasExplicitUsableCoordinates =
+          (data.lat !== undefined || data.lng !== undefined) &&
+          this.isUsableStoreCoordinatePair(store.settings.lat, store.settings.lng);
+        if (!hasExplicitUsableCoordinates && (locationTextChanged || !this.isUsableStoreCoordinatePair(store.settings.lat, store.settings.lng))) {
           const geocoded = await this.geocodeAddress(
             this.buildGeocodeAddress({
               address: store.settings.address,
@@ -698,8 +715,8 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
             })
           );
           if (geocoded) {
-            if (data.lat === undefined) store.settings.lat = geocoded.lat;
-            if (data.lng === undefined) store.settings.lng = geocoded.lng;
+            store.settings.lat = geocoded.lat;
+            store.settings.lng = geocoded.lng;
           }
         }
         this.assertResolvedCoordinates(store.settings.lat as number | null, store.settings.lng as number | null);

@@ -74,6 +74,33 @@ const sanitizeDestinationDeliveryMode = (value: unknown) => {
   const normalized = String(value || '').trim().toLowerCase();
   return [ 'all', 'selected', 'none' ].includes(normalized) ? normalized : null;
 };
+
+const parseOptionalNumber = (value: unknown): number | null => {
+  if (value === undefined || value === null) return null;
+  const raw = String(value).replace(',', '.').trim();
+  if (!raw) return null;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const isUsableBrazilCoordinatePair = (lat: unknown, lng: unknown) => {
+  const numericLat = parseOptionalNumber(lat);
+  const numericLng = parseOptionalNumber(lng);
+  if (numericLat === null || numericLng === null) return false;
+  if (Math.abs(numericLat) < 0.000001 && Math.abs(numericLng) < 0.000001) return false;
+  return numericLat >= -34 && numericLat <= 6 && numericLng >= -74 && numericLng <= -34;
+};
+
+const normalizePostalZip = (value?: unknown) => {
+  if (value === undefined || value === null) return null;
+  const digits = String(value).replace(/\D/g, '').slice(0, 8);
+  return digits.length === 8 ? digits : null;
+};
+
+const extractPostalZipFromAddress = (address?: unknown) => {
+  const match = String(address || '').match(/\b\d{5}-?\d{3}\b/);
+  return normalizePostalZip(match?.[0]);
+};
 /**
  * Provides AuthService functionality.
  *
@@ -824,6 +851,13 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       const trimmedCity = storePayload.city?.toString().trim();
       const trimmedState = storePayload.state?.toString().trim().toUpperCase();
       const trimmedAddress = storePayload.address?.toString().trim() || userPayload.address?.toString().trim();
+      const requestedLat = parseOptionalNumber((storePayload as any).lat);
+      const requestedLng = parseOptionalNumber((storePayload as any).lng);
+      const hasUsableCoordinates = isUsableBrazilCoordinatePair(requestedLat, requestedLng);
+      const deliveryRadiusKm = parseOptionalNumber((storePayload as any).deliveryRadiusKm);
+      const postalOriginZip =
+        normalizePostalZip((storePayload as any).postalOriginZip) ||
+        extractPostalZipFromAddress(trimmedAddress);
       const baseTrialDays = await this.settingsService.getNumber('trial_days', env.trialDays);
       const existingStoresCount = await storeRepo.count();
       const signupPromotion = await this.resolveStoreSignupPromotion(existingStoresCount, baseTrialDays);
@@ -847,10 +881,14 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         address: trimmedAddress || null,
         city: trimmedCity || null,
         state: trimmedState || null,
+        lat: hasUsableCoordinates ? requestedLat : null,
+        lng: hasUsableCoordinates ? requestedLng : null,
         primaryColor: storePayload.primaryColor || segmentPreset.primaryColor,
         secondaryColor: storePayload.secondaryColor || segmentPreset.secondaryColor,
         isOrderingEnabled: storePayload.isOrderingEnabled !== false,
         segment,
+        deliveryRadiusKm: deliveryRadiusKm && deliveryRadiusKm > 0 ? deliveryRadiusKm : Number(env.delivery.defaultRadiusKm || 5),
+        postalOriginZip,
         socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
         openingHours: storePayload.openingHours ?? [],
         orderTypes: storePayload.orderTypes ?? segmentPreset.orderTypes,

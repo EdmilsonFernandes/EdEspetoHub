@@ -300,6 +300,14 @@ export class StoreController {
     return calculateDistanceKm(origin, destination);
   }
 
+  private static hasUsableStoreCoordinatePair(lat: unknown, lng: unknown) {
+    const numericLat = StoreController.toQueryNumber(lat);
+    const numericLng = StoreController.toQueryNumber(lng);
+    if (numericLat === null || numericLng === null) return false;
+    if (Math.abs(numericLat) < 0.000001 && Math.abs(numericLng) < 0.000001) return false;
+    return numericLat >= -34 && numericLat <= 6 && numericLng >= -74 && numericLng <= -34;
+  }
+
   private static enrichStoreGeoPayload(
     entry: any,
     location: { lat: number | null; lng: number | null; city?: string | null; state?: string | null }
@@ -312,7 +320,7 @@ export class StoreController {
     const latitude = StoreController.toQueryNumber(entry?.settings?.lat);
     const longitude = StoreController.toQueryNumber(entry?.settings?.lng);
     const hasUserCoords = location.lat !== null && location.lng !== null;
-    const hasStoreCoords = latitude !== null && longitude !== null;
+    const hasStoreCoords = StoreController.hasUsableStoreCoordinatePair(latitude, longitude);
     const rawDistanceKm =
       hasUserCoords && hasStoreCoords
         ? StoreController.haversineKm(
@@ -360,8 +368,8 @@ export class StoreController {
 
     return {
       ...entry,
-      latitude,
-      longitude,
+      latitude: hasStoreCoords ? latitude : null,
+      longitude: hasStoreCoords ? longitude : null,
       acceptsDelivery,
       acceptsPickup,
       acceptsTable,

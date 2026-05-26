@@ -2860,6 +2860,16 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     const normalizedCity = String(brandingDraft.city || '').trim();
     const normalizedState = String(brandingDraft.state || '').trim().toUpperCase();
     const normalizedAddress = String(brandingDraft.address || '').trim();
+    const normalizeCoordinatePayload = (value: any) => {
+      const raw = String(value ?? '').replace(',', '.').trim();
+      if (!raw) return undefined;
+      const parsed = Number(raw);
+      if (!Number.isFinite(parsed)) return undefined;
+      if (Math.abs(parsed) < 0.000001) return undefined;
+      return parsed;
+    };
+    const latPayload = normalizeCoordinatePayload(brandingDraft.lat);
+    const lngPayload = normalizeCoordinatePayload(brandingDraft.lng);
     if (!normalizedAddress || !normalizedCity || normalizedState.length !== 2) {
       setError('Preencha endereço, cidade e UF da loja para salvar a localização.');
       showToast('Preencha endereço, cidade e UF da loja para salvar a localização.', 'error');
@@ -2894,8 +2904,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         address: normalizedAddress,
         city: normalizedCity,
         state: normalizedState,
-        lat: brandingDraft.lat,
-        lng: brandingDraft.lng,
+        ...(latPayload !== undefined ? { lat: latPayload } : {}),
+        ...(lngPayload !== undefined ? { lng: lngPayload } : {}),
         deliveryRadiusKm: brandingDraft.deliveryRadiusKm,
         deliveryFee: brandingDraft.deliveryFee,
         orderNotificationSound: brandingDraft.orderNotificationSound?.trim() ?? '',
