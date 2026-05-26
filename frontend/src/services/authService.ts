@@ -66,6 +66,14 @@ export const authService = {
         });
         return response;
     },
+    async resetPasswordWithCode(email: string, code: string, newPassword: string) {
+        const response = await apiClient.post("/auth/reset-password-code", {
+            email,
+            code,
+            newPassword,
+        });
+        return response;
+    },
     async verifyEmail(payload: { token: string; email?: string }) {
         const response = await apiClient.post("/auth/verify-email", payload);
         return response;

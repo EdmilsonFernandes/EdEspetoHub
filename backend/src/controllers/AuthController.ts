@@ -182,7 +182,7 @@ export class AuthController
     try
     {
       log.info('Forgot password request', { email });
-      const result = await authService.requestPasswordReset(email);
+      const result = await authService.requestPasswordReset(email, { ipAddress: req.ip });
       log.info('Forgot password dispatched', { email });
       const { code, ...data } = result;
       return respondWithSuccess(req, res, code, data);
@@ -307,6 +307,31 @@ static async changePassword(req: Request, res: Response) {
       return res.json(result);
     } catch (error: any) {
       log.warn('MFA status failed', { userId: req.auth?.sub, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+
+
+
+  /**
+   * Executes reset password by email code logic.
+   *
+   * @author Edmilson Lopes
+   */
+  static async resetPasswordWithCode(req: Request, res: Response)
+  {
+    const { email, code, newPassword } = req.body || {};
+    try
+    {
+      log.info('Reset password by code request', { email });
+      const result = await authService.resetPasswordWithCode(email, code, newPassword);
+      log.info('Reset password by code success', { email });
+      const { code: responseCode, ...data } = result;
+      return respondWithSuccess(req, res, responseCode, data);
+    } catch (error: any)
+    {
+      log.warn('Reset password by code failed', { email, error });
       return respondWithError(req, res, error, 400);
     }
   }

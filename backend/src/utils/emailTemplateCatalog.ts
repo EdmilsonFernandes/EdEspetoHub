@@ -40,6 +40,24 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     `,
   },
   {
+    key: 'password_reset_code',
+    name: 'Redefinir senha por código',
+    category: 'security',
+    description: 'Enviado quando usuario pede redefinicao de senha pelo app usando codigo curto.',
+    subject: 'Código para redefinir sua senha - Já no Caminho',
+    preheader: 'Digite o código no app para criar uma nova senha.',
+    variables: ['CODE', 'CODE_SPACED', 'LINK', 'APP_URL', 'EXPIRES_MINUTES'],
+    textBody: 'Recebemos seu pedido para redefinir a senha.\n\nCódigo: {{CODE}}\n\nO código expira em {{EXPIRES_MINUTES}} minutos.\nSe preferir, abra este link seguro: {{LINK}}\n\nSe não foi você, ignore este e-mail.',
+    htmlBody: `
+      <h1 style="margin: 0 0 10px; font-size: 28px; line-height: 1.12; color: #0f172a;">Redefinir senha</h1>
+      <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.7;">Digite este código no app para confirmar que o e-mail é seu e criar uma nova senha.</p>
+      ${codeBox()}
+      <p style="margin: 0 0 20px; color: #64748b; font-size: 13px; line-height: 1.7;">O código expira em <strong>{{EXPIRES_MINUTES}} minutos</strong>. Se estiver usando o navegador, você também pode continuar pelo botão abaixo.</p>
+      <a href="{{LINK}}" style="display: inline-block; padding: 13px 18px; border-radius: 14px; background: #153A4C; color: #ffffff; text-decoration: none; font-weight: 800;">Abrir recuperação segura</a>
+      <p style="margin: 20px 0 0; color: #64748b; font-size: 12px; line-height: 1.7;">Se você não pediu essa alteração, ignore este e-mail.</p>
+    `,
+  },
+  {
     key: 'store_verification',
     name: 'Confirmar e-mail da loja por link',
     category: 'transactional',

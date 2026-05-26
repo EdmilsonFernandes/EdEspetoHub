@@ -32,6 +32,18 @@ export class PasswordReset {
   @Column({ name: 'token_hash', type: 'varchar' })
   tokenHash!: string;
 
+  @Column({ name: 'resend_count', type: 'int', default: 0 })
+  resendCount!: number;
+
+  @Column({ name: 'attempts_count', type: 'int', default: 0 })
+  attemptsCount!: number;
+
+  @Column({ name: 'request_ip', type: 'text', nullable: true })
+  requestIp?: string | null;
+
+  @Column({ name: 'last_sent_at', type: 'timestamptz', nullable: true })
+  lastSentAt?: Date | null;
+
   @Column({ name: 'expires_at', type: 'timestamptz' })
   expiresAt!: Date;
 

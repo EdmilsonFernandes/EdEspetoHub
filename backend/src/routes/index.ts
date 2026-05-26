@@ -66,6 +66,7 @@ routes.get('/auth/mfa/trusted-devices', requireAuth, AuthController.listTrustedD
 routes.delete('/auth/mfa/trusted-devices/:deviceId', requireAuth, AuthController.revokeTrustedDevice);
 routes.post('/auth/forgot-password', authRecoveryRateLimit, AuthController.forgotPassword);
 routes.post('/auth/reset-password', authRecoveryRateLimit, AuthController.resetPassword);
+routes.post('/auth/reset-password-code', authRecoveryRateLimit, AuthController.resetPasswordWithCode);
 routes.post('/auth/verify-email', authRecoveryRateLimit, AuthController.verifyEmail);
 routes.get('/auth/verify-email', authRecoveryRateLimit, AuthController.verifyEmail);
 routes.post('/auth/resend-verification', authRecoveryRateLimit, AuthController.resendVerification);

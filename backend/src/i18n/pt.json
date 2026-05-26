@@ -26,6 +26,8 @@
   "AUTH-024": "Conta temporariamente bloqueada por segurança.",
   "AUTH-025": "Usuário já cadastrado.",
   "AUTH-026": "Usuário inválido. Use de 3 a 30 caracteres com letras, números, ponto, hífen ou underline.",
+  "AUTH-027": "Informe o código de 6 dígitos enviado por e-mail.",
+  "AUTH-028": "Código inválido ou expirado. Peça um novo código e tente novamente.",
   "AUTH-S001": "Se o e-mail existir, enviaremos instruções.",
   "AUTH-S002": "Se o e-mail existir, enviaremos instruções.",
   "AUTH-S003": "Senha atualizada com sucesso.",

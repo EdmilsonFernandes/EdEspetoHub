@@ -536,7 +536,7 @@ export function MotoboyLogin() {
 
                 <button
                   type="button"
-                  onClick={() => navigate('/forgot-password')}
+                  onClick={() => navigate('/forgot-password?perfil=entregador')}
                   className="text-xs font-bold text-[#0d4f66] hover:text-[#0b3f52] hover:underline uppercase tracking-wider"
                 >
                   Recuperar senha

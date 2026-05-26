@@ -22,6 +22,7 @@ export function createAuthRoutes(producer: CommandProducer): Router {
     r.delete('/mfa/trusted-devices/:deviceId', authRequired, ctrl.revokeTrustedDevice.bind(ctrl));
     r.post('/forgot-password', ctrl.forgotPassword.bind(ctrl));
     r.post('/reset-password', ctrl.resetPassword.bind(ctrl));
+    r.post('/reset-password-code', ctrl.resetPasswordWithCode.bind(ctrl));
     r.post('/verify-email', ctrl.verifyEmail.bind(ctrl));
     r.get('/verify-email', ctrl.verifyEmail.bind(ctrl));
     r.post('/resend-verification', ctrl.resendVerification.bind(ctrl));

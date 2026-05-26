@@ -18,6 +18,7 @@ export class AuthController {
     public async revokeTrustedDevice(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.revokeTrustedDevice(String(req.params.deviceId || ''), req.token!)); } catch (e) { next(e); } }
     public async forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.forgotPassword(req.body)); } catch (e) { next(e); } }
     public async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.resetPassword(req.body)); } catch (e) { next(e); } }
+    public async resetPasswordWithCode(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.resetPasswordWithCode(req.body)); } catch (e) { next(e); } }
     public async verifyEmail(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.verifyEmail(req.body, req.query)); } catch (e) { next(e); } }
     public async resendVerification(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.resendVerification(req.body)); } catch (e) { next(e); } }
     public async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> { try { sendServiceResponse(res, await this.lib.changePassword(req.body, req.token!)); } catch (e) { next(e); } }

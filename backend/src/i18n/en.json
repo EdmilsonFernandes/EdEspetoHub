@@ -26,6 +26,8 @@
   "AUTH-024": "Account temporarily blocked for security reasons.",
   "AUTH-025": "Username already registered.",
   "AUTH-026": "Invalid username. Use 3 to 30 characters with letters, numbers, dots, hyphens or underscores.",
+  "AUTH-027": "Enter the 6-digit code sent by email.",
+  "AUTH-028": "Invalid or expired code. Request a new code and try again.",
   "AUTH-S001": "If the email exists, we will send instructions.",
   "AUTH-S002": "If the email exists, we will send instructions.",
   "AUTH-S003": "Password updated successfully.",

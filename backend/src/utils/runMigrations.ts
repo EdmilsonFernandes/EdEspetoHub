@@ -20,6 +20,10 @@ import { AppDataSource } from '../config/database';
  */
 export async function runMigrations() {
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS password_resets
+    ADD COLUMN IF NOT EXISTS attempts_count INTEGER NOT NULL DEFAULT 0;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings
     ADD COLUMN IF NOT EXISTS social_links JSONB DEFAULT '[]';
   `);

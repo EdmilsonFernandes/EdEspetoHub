@@ -11,6 +11,12 @@ export function ResetPassword() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const token = useMemo(() => params.get('token') || '', [params]);
+  const loginPath = useMemo(() => {
+    const perfil = String(params.get('perfil') || '').trim().toLowerCase();
+    if (['cliente', 'customer', 'client'].includes(perfil)) return '/cliente?mode=login';
+    if (['entregador', 'motoboy', 'delivery'].includes(perfil)) return '/motoboy/login';
+    return '/admin';
+  }, [params]);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [message, setMessage] = useState('');
@@ -41,7 +47,7 @@ export function ResetPassword() {
       setMessage(result?.message || 'Senha atualizada com sucesso.');
       setPassword('');
       setConfirm('');
-      setTimeout(() => navigate('/admin'), 3000);
+      setTimeout(() => navigate(loginPath), 3000);
     } catch (err) {
       setError(err?.message || 'Não foi possível atualizar a senha agora.');
     } finally {
@@ -147,7 +153,7 @@ export function ResetPassword() {
 
             <button
               type="button"
-              onClick={() => navigate('/admin')}
+              onClick={() => navigate(loginPath)}
               className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               <ArrowLeft size={18} weight="duotone" />

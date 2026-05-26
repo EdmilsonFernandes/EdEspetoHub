@@ -17,6 +17,7 @@ export class AuthLib {
     public async revokeTrustedDevice(deviceId: string, token: string): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'revokeTrustedDevice' }, { data: { deviceId }, accessToken: token }); }
     public async forgotPassword(body: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'forgotPassword' }, { data: { body } }); }
     public async resetPassword(body: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'resetPassword' }, { data: { body } }); }
+    public async resetPasswordWithCode(body: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'resetPasswordWithCode' }, { data: { body } }); }
     public async verifyEmail(body: unknown, query: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'verifyEmail' }, { data: { body, query } }); }
     public async resendVerification(body: unknown): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'resendVerification' }, { data: { body } }); }
     public async changePassword(body: unknown, token: string): Promise<ServiceResponse<unknown>> { return this.p.send({ service: 'auth', action: 'changePassword' }, { data: { body }, accessToken: token }); }

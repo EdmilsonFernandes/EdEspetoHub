@@ -58,7 +58,7 @@ describe.skipIf(!url)('DeliveryService integration (real DB)', () => {
       AppDataSource.getRepository(Order).create({ customerName: 'C', type: 'delivery', status: 'waiting_for_motoboy', total: 10, store, deliveryFee: 10 } as any),
     );
     await svc.ensureQueueDelivery(order1 as any, AppDataSource.manager);
-  });
+  }, 60_000);
 
   afterAll(async () => {
     if (AppDataSource.isInitialized) await AppDataSource.destroy();

@@ -490,23 +490,9 @@ export function ClientAuth() {
     }
   };
 
-  const handleForgotPassword = async () => {
+  const handleForgotPassword = () => {
     const email = String(form.email || '').trim();
-    if (!email) {
-      setError('Informe seu e-mail para recuperar a senha.');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    setMessage('');
-    try {
-      await customerAccountService.forgotPassword(email);
-      setMessage('Enviamos o link de recuperação para seu e-mail.');
-    } catch (e: any) {
-      setError(e?.message || 'Não foi possível enviar recuperação de senha.');
-    } finally {
-      setLoading(false);
-    }
+    navigate(`/forgot-password?perfil=cliente${email ? `&email=${encodeURIComponent(email)}` : ''}`);
   };
 
   return (

@@ -1,98 +1,406 @@
 // @ts-nocheck
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  CheckCircle,
+  ClipboardText,
+  EnvelopeSimple,
+  Eye,
+  EyeSlash,
+  Key,
+  LockSimple,
+  PaperPlaneTilt,
+  ShieldCheck,
+  WarningCircle,
+} from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { inputAssistProps } from '../utils/inputAssist';
 
-import { ArrowLeft, EnvelopeSimple, ShieldCheck, WarningCircle } from '@phosphor-icons/react';
+type RecoveryStep = 'email' | 'password' | 'code' | 'success';
+
+const RECOVERY_CONTEXT = {
+  cliente: {
+    title: 'Recuperar senha',
+    subtitle: 'Acesso do cliente',
+    backTo: '/cliente?mode=login',
+    loginPath: '/cliente?mode=login',
+    eyebrow: 'Conta do cliente',
+    headline: 'Vamos recuperar seu acesso',
+    description: 'Informe seu e-mail. Depois você cria uma nova senha e confirma com o código recebido.',
+  },
+  entregador: {
+    title: 'Recuperar senha',
+    subtitle: 'Acesso do entregador',
+    backTo: '/motoboy/login',
+    loginPath: '/motoboy/login',
+    eyebrow: 'Área do entregador',
+    headline: 'Recupere seu acesso de entregador',
+    description: 'Use o e-mail cadastrado para receber um código seguro e voltar ao app.',
+  },
+  lojista: {
+    title: 'Recuperar senha',
+    subtitle: 'Acesso da loja',
+    backTo: '/admin',
+    loginPath: '/admin',
+    eyebrow: 'Área da loja',
+    headline: 'Recupere o acesso da loja',
+    description: 'Digite o e-mail do acesso. Enviaremos um código para validar a troca da senha.',
+  },
+};
+
+const normalizeAudience = (value?: string | null) => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (['cliente', 'customer', 'client'].includes(normalized)) return 'cliente';
+  if (['entregador', 'motoboy', 'delivery'].includes(normalized)) return 'entregador';
+  return 'lojista';
+};
+
+const cleanCode = (value: string) => String(value || '').replace(/\D/g, '').slice(0, 6);
 
 export function ForgotPassword() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [params] = useSearchParams();
+  const context = useMemo(() => RECOVERY_CONTEXT[normalizeAudience(params.get('perfil'))], [params]);
+  const [step, setStep] = useState<RecoveryStep>('email');
+  const [email, setEmail] = useState(() => String(params.get('email') || '').trim().toLowerCase());
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [code, setCode] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  useEffect(() => {
+    if (cooldown <= 0) return undefined;
+    const timer = window.setTimeout(() => setCooldown((current) => Math.max(0, current - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [cooldown]);
+
+  const codeDigits = useMemo(() => Array.from({ length: 6 }, (_, index) => code[index] || ''), [code]);
+
+  const requestCode = async (options?: { stayOnStep?: boolean }) => {
+    const normalizedEmail = String(email || '').trim().toLowerCase();
     setError('');
     setMessage('');
+    if (!normalizedEmail) {
+      setError('Informe seu e-mail para continuar.');
+      return;
+    }
     setLoading(true);
     try {
-      const result = await authService.forgotPassword(email);
-      setMessage(result?.message || 'Se o e-mail existir, enviaremos as instruções.');
+      await authService.forgotPassword(normalizedEmail);
+      setEmail(normalizedEmail);
+      setCooldown(60);
+      setMessage('Enviamos um código para seu e-mail. Ele vale por alguns minutos.');
+      if (!options?.stayOnStep) setStep('password');
     } catch (err) {
-      setError(err?.message || 'Não foi possível enviar o e-mail agora.');
+      setError(err?.message || 'Não foi possível enviar o código agora. Tente novamente.');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleEmailSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    await requestCode();
+  };
+
+  const handlePasswordSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    setError('');
+    setMessage('');
+    if (password.length < 6) {
+      setError('A nova senha precisa ter pelo menos 6 caracteres.');
+      return;
+    }
+    if (password !== confirm) {
+      setError('As senhas não conferem. Revise e tente novamente.');
+      return;
+    }
+    setStep('code');
+    window.setTimeout(() => document.getElementById('reset-code')?.focus(), 80);
+  };
+
+  const handleCodeSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const normalizedCode = cleanCode(code);
+    setError('');
+    setMessage('');
+    if (normalizedCode.length !== 6) {
+      setError('Digite o código de 6 dígitos enviado por e-mail.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await authService.resetPasswordWithCode(email, normalizedCode, password);
+      setPassword('');
+      setConfirm('');
+      setCode('');
+      setStep('success');
+      setMessage('Senha alterada com sucesso. Você já pode entrar com a nova senha.');
+      window.setTimeout(() => navigate(context.loginPath, { replace: true }), 1800);
+    } catch (err) {
+      setError(err?.message || 'Código inválido ou expirado. Peça um novo código e tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pasteCode = async () => {
+    setError('');
+    try {
+      const text = await navigator.clipboard?.readText?.();
+      const nextCode = cleanCode(text || '');
+      if (!nextCode) {
+        setError('Não encontrei um código válido na área de transferência.');
+        return;
+      }
+      setCode(nextCode);
+    } catch {
+      setError('Não deu para ler o código copiado. Você pode digitar manualmente.');
+    }
+  };
+
   return (
-    <AuthLayout>
-      <div className="space-y-4 ds-login-card-enter w-full">
-        <div className="text-center space-y-2.5">
-          <div className="mx-auto w-16 h-16 bg-sky-50 rounded-2xl flex items-center justify-center text-[#0d4f66] shadow-sm border border-sky-100">
-            <EnvelopeSimple size={32} weight="duotone" />
+    <AuthLayout
+      title={context.title}
+      eyebrow="Já no Caminho"
+      subtitle={context.subtitle}
+      backTo={context.backTo}
+      showHeader
+    >
+      <div className="w-full space-y-3 ds-login-card-enter sm:space-y-4">
+        <div className="text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[1.2rem] border border-white/70 bg-white/78 text-[#153A4C] shadow-[0_18px_38px_-26px_rgba(21,58,76,0.55)] sm:h-16 sm:w-16">
+            {step === 'email' ? <EnvelopeSimple size={30} weight="duotone" /> : step === 'password' ? <LockSimple size={30} weight="duotone" /> : <Key size={30} weight="duotone" />}
           </div>
-          <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-400">Recuperação de Acesso</p>
-          <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">Esqueci minha senha</h2>
-          <p className="text-sm font-medium text-slate-500 max-w-[280px] mx-auto leading-relaxed">
-            Digite seu e-mail e enviaremos um link seguro para redefinir sua senha.
+          <p className="mt-3 text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]/75">{context.eyebrow}</p>
+          <h2 className="mt-1 text-[1.7rem] font-black leading-tight tracking-[-0.04em] text-slate-900 sm:text-[2.15rem]">
+            {step === 'email' ? context.headline : step === 'password' ? 'Crie sua nova senha' : step === 'code' ? 'Confirme o código' : 'Senha atualizada'}
+          </h2>
+          <p className="mx-auto mt-2 max-w-[21rem] text-sm font-semibold leading-relaxed text-slate-500">
+            {step === 'email'
+              ? context.description
+              : step === 'password'
+              ? 'Agora escolha uma senha nova. A confirmação será feita com o código enviado ao seu e-mail.'
+              : step === 'code'
+              ? `Digite o código enviado para ${email}.`
+              : 'Você será direcionado para entrar novamente.'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
-          {message && (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 text-emerald-900 text-[13px] font-semibold leading-relaxed animate-shake">
-              {message}
+        <div className="ds-card-elevated border-white/55 bg-white/86 p-5 shadow-[0_28px_70px_-42px_rgba(21,58,76,0.45)] backdrop-blur-xl sm:p-7">
+          <div className="mb-4 grid grid-cols-3 gap-2">
+            {[
+              { key: 'email', label: 'E-mail' },
+              { key: 'password', label: 'Senha' },
+              { key: 'code', label: 'Código' },
+            ].map((item, index) => {
+              const activeIndex = step === 'email' ? 0 : step === 'password' ? 1 : 2;
+              const isDone = index < activeIndex || step === 'success';
+              const isActive = index === activeIndex && step !== 'success';
+              return (
+                <div
+                  key={item.key}
+                  className={`rounded-2xl px-2 py-2 text-center text-[10px] font-black uppercase tracking-[0.14em] transition ${
+                    isDone
+                      ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
+                      : isActive
+                      ? 'bg-[#e8f3f7] text-[#153A4C] ring-1 ring-[#cfe4ed]'
+                      : 'bg-slate-50 text-slate-400 ring-1 ring-slate-100'
+                  }`}
+                >
+                  {item.label}
+                </div>
+              );
+            })}
+          </div>
+
+          {message ? (
+            <div className="mb-4 flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-semibold text-emerald-800">
+              <CheckCircle size={18} weight="fill" className="mt-0.5 shrink-0 text-emerald-500" />
+              <span>{message}</span>
             </div>
-          )}
-          {error && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-50 text-[13px] font-semibold text-rose-600 border border-rose-100 animate-shake">
-              <WarningCircle size={16} weight="fill" />
+          ) : null}
+
+          {error ? (
+            <div className="mb-4 flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-semibold text-rose-700 animate-shake">
+              <WarningCircle size={18} weight="fill" className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
-          )}
+          ) : null}
 
-          <div className="flex items-center justify-center gap-2 py-1 px-3 rounded-xl bg-slate-50 border border-slate-100/50">
-            <ShieldCheck size={16} weight="fill" className="text-emerald-500" />
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ambiente Seguro & Criptografado</span>
-          </div>
+          {step === 'email' ? (
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+              <div className="rounded-2xl border border-[#d7e7ef] bg-[#f5fafc] px-3 py-2.5">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
+                  <ShieldCheck size={15} weight="fill" />
+                  Código seguro por e-mail
+                </div>
+                <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
+                  Não mostramos se o e-mail existe ou não. Isso protege sua conta.
+                </p>
+              </div>
+              <div className="floating-field">
+                <input
+                  {...inputAssistProps.email}
+                  id="reset-email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="floating-input"
+                  placeholder=" "
+                  required
+                />
+                <label htmlFor="reset-email" className="floating-label">E-mail cadastrado</label>
+              </div>
+              <button
+                type="submit"
+                disabled={loading || !email}
+                className="ds-btn-shine flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)] transition active:scale-[0.98] disabled:opacity-60 sm:h-14 sm:text-base"
+              >
+                <PaperPlaneTilt size={19} weight="duotone" />
+                {loading ? 'Enviando código...' : 'Continuar'}
+              </button>
+            </form>
+          ) : null}
 
-          <div className="floating-field">
-            <input
-              {...inputAssistProps.email}
-              id="reset-email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="floating-input"
-              placeholder=" "
-              required
-            />
-            <label htmlFor="reset-email" className="floating-label">Seu e-mail cadastrado</label>
-          </div>
+          {step === 'password' ? (
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div className="floating-field">
+                <input
+                  {...inputAssistProps.newPassword}
+                  id="new-password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="floating-input pr-12"
+                  placeholder=" "
+                  required
+                />
+                <label htmlFor="new-password" className="floating-label">Nova senha</label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {showPassword ? <EyeSlash size={20} weight="duotone" /> : <Eye size={20} weight="duotone" />}
+                </button>
+              </div>
+              <div className="floating-field">
+                <input
+                  {...inputAssistProps.newPassword}
+                  id="confirm-password"
+                  type={showConfirm ? 'text' : 'password'}
+                  value={confirm}
+                  onChange={(event) => setConfirm(event.target.value)}
+                  className="floating-input pr-12"
+                  placeholder=" "
+                  required
+                />
+                <label htmlFor="confirm-password" className="floating-label">Confirmar nova senha</label>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((current) => !current)}
+                  className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                  aria-label={showConfirm ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {showConfirm ? <EyeSlash size={20} weight="duotone" /> : <Eye size={20} weight="duotone" />}
+                </button>
+              </div>
+              <button
+                type="submit"
+                disabled={!password || !confirm}
+                className="ds-btn-shine flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)] transition active:scale-[0.98] disabled:opacity-60 sm:h-14 sm:text-base"
+              >
+                Alterar senha
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep('email')}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-600 transition active:scale-[0.98]"
+              >
+                Trocar e-mail
+              </button>
+            </form>
+          ) : null}
 
-          <div className="space-y-3 pt-2">
-            <button
-              type="submit"
-              disabled={loading || !email}
-              className="ds-btn-shine w-full h-14 rounded-2xl bg-[#0d4f66] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-60"
-            >
-              {loading ? 'Enviando...' : 'Enviar Link de Recuperação'}
-            </button>
+          {step === 'code' ? (
+            <form onSubmit={handleCodeSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="reset-code" className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                  Código recebido
+                </label>
+                <label htmlFor="reset-code" className="grid cursor-text grid-cols-6 gap-2">
+                  {codeDigits.map((digit, index) => (
+                    <span
+                      key={index}
+                      className={`flex h-14 items-center justify-center rounded-2xl border text-xl font-black tracking-tight shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] transition sm:h-14 ${
+                        digit ? 'border-[#b8d8e5] bg-white text-[#153A4C]' : 'border-slate-200 bg-slate-50 text-slate-300'
+                      }`}
+                    >
+                      {digit || '0'}
+                    </span>
+                  ))}
+                </label>
+                <input
+                  {...inputAssistProps.otp}
+                  id="reset-code"
+                  value={code}
+                  onChange={(event) => setCode(cleanCode(event.target.value))}
+                  onPaste={(event) => {
+                    event.preventDefault();
+                    setCode(cleanCode(event.clipboardData.getData('text')));
+                  }}
+                  className="sr-only"
+                  maxLength={6}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={pasteCode}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#cfe4ed] bg-[#f2f8fb] px-4 py-3 text-sm font-black text-[#153A4C] transition active:scale-[0.98]"
+              >
+                <ClipboardText size={18} weight="duotone" />
+                Colar código
+              </button>
+              <button
+                type="submit"
+                disabled={loading || code.length !== 6}
+                className="ds-btn-shine flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)] transition active:scale-[0.98] disabled:opacity-60 sm:h-14 sm:text-base"
+              >
+                {loading ? 'Confirmando...' : 'Confirmar código e alterar senha'}
+              </button>
+              <button
+                type="button"
+                onClick={() => requestCode({ stayOnStep: true })}
+                disabled={loading || cooldown > 0}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-600 transition active:scale-[0.98] disabled:opacity-55"
+              >
+                {cooldown > 0 ? `Reenviar código em ${cooldown}s` : 'Reenviar código'}
+              </button>
+            </form>
+          ) : null}
 
-            <button
-              type="button"
-              onClick={() => window.history.back()}
-              className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-            >
-              <ArrowLeft size={18} weight="duotone" />
-              Voltar ao Login
-            </button>
-          </div>
-        </form>
+          {step === 'success' ? (
+            <div className="space-y-4 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[1.4rem] bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+                <CheckCircle size={36} weight="fill" />
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate(context.loginPath, { replace: true })}
+                className="w-full rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)]"
+              >
+                Entrar com nova senha
+              </button>
+            </div>
+          ) : null}
+        </div>
       </div>
     </AuthLayout>
   );

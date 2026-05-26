@@ -580,6 +580,7 @@ CREATE TABLE IF NOT EXISTS password_resets (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   token_hash TEXT NOT NULL,
   resend_count INTEGER NOT NULL DEFAULT 0,
+  attempts_count INTEGER NOT NULL DEFAULT 0,
   request_ip TEXT,
   last_sent_at TIMESTAMPTZ,
   expires_at TIMESTAMPTZ NOT NULL,

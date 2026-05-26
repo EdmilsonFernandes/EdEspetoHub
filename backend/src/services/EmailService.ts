@@ -202,9 +202,13 @@ export class EmailService {
     });
   }
 
-  async sendPasswordReset(email: string, link: string) {
-    await this.sendTemplate(email, 'password_reset', {
+  async sendPasswordReset(email: string, link: string, code?: string, expiresMinutes = 15) {
+    const hasCode = Boolean(String(code || '').trim());
+    await this.sendTemplate(email, hasCode ? 'password_reset_code' : 'password_reset', {
       LINK: link,
+      CODE: code || '',
+      CODE_SPACED: String(code || '').split('').join(' '),
+      EXPIRES_MINUTES: String(expiresMinutes),
       APP_URL: env.appUrl || 'https://janocaminho.com.br',
     });
   }

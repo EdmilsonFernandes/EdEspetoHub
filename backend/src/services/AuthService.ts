@@ -222,6 +222,44 @@ private sanitizeEmailCode(value?: string | null) {
     return String(value || '').replace(/\D/g, '').slice(0, 4);
   }
 
+private generatePasswordResetCode() {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
+
+private sanitizePasswordResetCode(value?: string | null) {
+    return String(value || '').replace(/\D/g, '').slice(0, 6);
+  }
+
+private hashPasswordResetCode(email: string, code: string) {
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    return this.hashVerificationValue(`${normalizedEmail}:${this.sanitizePasswordResetCode(code)}`);
+  }
+
+private resolvePasswordResetAudience(user: User) {
+    if (user.userRole === 'CUSTOMER') return 'cliente';
+    if (user.userRole === 'MOTOBOY') return 'entregador';
+    return 'lojista';
+  }
+
+private async registerPasswordResetFailedAttempt(userId: string) {
+    const resetRepo = AppDataSource.getRepository(PasswordReset);
+    const latest = await resetRepo
+      .createQueryBuilder('reset')
+      .where('reset.user_id = :userId', { userId })
+      .andWhere('reset.used_at IS NULL')
+      .orderBy('reset.expires_at', 'ASC')
+      .addOrderBy('reset.created_at', 'DESC')
+      .getOne();
+
+    if (!latest) return;
+
+    latest.attemptsCount = Number(latest.attemptsCount || 0) + 1;
+    if (latest.attemptsCount >= 5) {
+      latest.usedAt = new Date();
+    }
+    await resetRepo.save(latest);
+  }
+
     /**
    * Executes is verification resend allowed business logic.
    *
@@ -1154,7 +1192,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
-  async requestPasswordReset(email: string)
+  async requestPasswordReset(email: string, meta?: { ipAddress?: string | null })
   {
     const normalizedEmail = email?.trim().toLowerCase();
     if (!normalizedEmail) throw new AppError('AUTH-006', 400);
@@ -1173,19 +1211,40 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       .execute();
 
     const token = crypto.randomBytes(32).toString('hex');
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    const tokenHash = this.hashVerificationValue(token);
+    const recoveryCode = this.generatePasswordResetCode();
+    const recoveryCodeHash = this.hashPasswordResetCode(normalizedEmail, recoveryCode);
+    const now = new Date();
+    const linkExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    const codeExpiresMinutes = 15;
+    const codeExpiresAt = new Date(Date.now() + codeExpiresMinutes * 60 * 1000);
+    const baseUrl = (env.appUrl || 'https://janocaminho.com.br').replace(/\/$/, '');
+    const audience = this.resolvePasswordResetAudience(user);
+    const link = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}&perfil=${encodeURIComponent(audience)}`;
+    const requestIp = this.getClientIp(meta?.ipAddress);
 
-    await resetRepo.save(
+    await resetRepo.save([
       resetRepo.create({
         user,
         tokenHash,
-        expiresAt,
-      })
-    );
+        resendCount: 1,
+        attemptsCount: 0,
+        requestIp,
+        lastSentAt: now,
+        expiresAt: linkExpiresAt,
+      }),
+      resetRepo.create({
+        user,
+        tokenHash: recoveryCodeHash,
+        resendCount: 1,
+        attemptsCount: 0,
+        requestIp,
+        lastSentAt: now,
+        expiresAt: codeExpiresAt,
+      }),
+    ]);
 
-    const link = `${env.appUrl}/reset-password?token=${encodeURIComponent(token)}`;
-    await this.emailService.sendPasswordReset(user.email, link);
+    await this.emailService.sendPasswordReset(user.email, link, recoveryCode, codeExpiresMinutes);
     return { code: 'AUTH-S001' };
   }
 
@@ -1266,11 +1325,67 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
 
     reset.user.password = await bcrypt.hash(newPassword, 10);
     reset.user.mustChangePassword = false;
-    reset.usedAt = new Date();
+    const usedAt = new Date();
+    reset.usedAt = usedAt;
 
     await AppDataSource.transaction(async (manager) => {
       await manager.save(reset.user);
-      await manager.save(reset);
+      await manager
+        .createQueryBuilder()
+        .update(PasswordReset)
+        .set({ usedAt })
+        .where('user_id = :userId AND used_at IS NULL', { userId: reset.user.id })
+        .execute();
+    });
+
+    return { code: 'AUTH-S003' };
+  }
+
+  async resetPasswordWithCode(email: string, code: string, newPassword: string)
+  {
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    const sanitizedCode = this.sanitizePasswordResetCode(code);
+    if (!normalizedEmail) throw new AppError('AUTH-006', 400);
+    if (sanitizedCode.length !== 6) throw new AppError('AUTH-027', 400);
+    if (!newPassword || newPassword.length < 6) throw new AppError('AUTH-008', 400);
+
+    const user = await this.userRepository.findByEmail(normalizedEmail);
+    if (!user) throw new AppError('AUTH-028', 400);
+
+    const tokenHash = this.hashPasswordResetCode(normalizedEmail, sanitizedCode);
+    const resetRepo = AppDataSource.getRepository(PasswordReset);
+    const reset = await resetRepo
+      .createQueryBuilder('reset')
+      .leftJoinAndSelect('reset.user', 'user')
+      .where('reset.token_hash = :tokenHash', { tokenHash })
+      .andWhere('user.id = :userId', { userId: user.id })
+      .orderBy('reset.created_at', 'DESC')
+      .getOne();
+
+    if (!reset || reset.usedAt || reset.expiresAt.getTime() < Date.now()) {
+      await this.registerPasswordResetFailedAttempt(user.id);
+      throw new AppError('AUTH-028', 400);
+    }
+
+    if (Number(reset.attemptsCount || 0) >= 5) {
+      reset.usedAt = new Date();
+      await resetRepo.save(reset);
+      throw new AppError('AUTH-028', 400);
+    }
+
+    reset.user.password = await bcrypt.hash(newPassword, 10);
+    reset.user.mustChangePassword = false;
+    const usedAt = new Date();
+    reset.usedAt = usedAt;
+
+    await AppDataSource.transaction(async (manager) => {
+      await manager.save(reset.user);
+      await manager
+        .createQueryBuilder()
+        .update(PasswordReset)
+        .set({ usedAt })
+        .where('user_id = :userId AND used_at IS NULL', { userId: reset.user.id })
+        .execute();
     });
 
     return { code: 'AUTH-S003' };
