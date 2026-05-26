@@ -98,10 +98,37 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
   return null;
 });
 
-export const HubStoreLoadingSkeleton = memo(function HubStoreLoadingSkeleton() {
+export const HubStoreLoadingSkeleton = memo(function HubStoreLoadingSkeleton({
+  selectedCondominium,
+}: {
+  selectedCondominium?: boolean;
+}) {
+  if (selectedCondominium) {
+    return (
+      <div className="grid grid-cols-2 gap-2.5 min-[390px]:gap-3 md:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 6 }).map((_, idx) => (
+          <div
+            key={idx}
+            className="overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white/78 p-0 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/38"
+          >
+            <div className="h-[56px] w-full ds-skeleton rounded-t-[1.45rem]" />
+            <div className="p-3 space-y-3">
+              <div className="flex items-start gap-2">
+                <div className="h-8 w-8 shrink-0 rounded-[0.65rem] ds-skeleton" />
+                <div className="h-4 flex-1 rounded-full ds-skeleton mt-1" />
+              </div>
+              <div className="h-3 w-8/12 rounded-full ds-skeleton" />
+              <div className="h-4 w-16 rounded-full ds-skeleton mt-2" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 gap-2.5">
-      {Array.from({ length: 5 }).map((_, idx) => (
+    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {Array.from({ length: 8 }).map((_, idx) => (
         <div
           key={idx}
           className="grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] border border-white/80 bg-white/78 px-2.5 py-2.5 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/38"

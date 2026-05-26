@@ -2016,6 +2016,11 @@ export function MarketplacePage() {
           onQuickFilterChange={setQuickFilter}
           onOpenFilters={() => setFiltersSheetOpen(true)}
           onScrollStoresIntoView={scrollStoresIntoView}
+          onHomeClick={handleHomeHubNavigation}
+          onAgendaClick={() => setCondominiumPickerOpen(true)}
+          onPedidosClick={handleOpenPedidos}
+          onDestinosClick={() => navigate('/destinos')}
+          isCondominiumScope={isCondominiumScope}
         />
 
         <main className={`mx-auto flex max-w-[1200px] flex-col gap-4 px-4 sm:gap-5 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
@@ -2466,7 +2471,7 @@ export function MarketplacePage() {
               onRestoreRegionalView={restoreRegionalView}
             />
 
-            {loading && <HubStoreLoadingSkeleton />}
+            {loading && <HubStoreLoadingSkeleton selectedCondominium={isCondominiumScope} />}
 
             {!loading && error && <div className="rounded-2xl border border-rose-900/60 bg-rose-950/50 p-4 text-sm text-rose-200">{error}</div>}
 
@@ -2484,7 +2489,7 @@ export function MarketplacePage() {
 
             {!loading && !error && filteredStores.length > 0 && (
               <>
-              <div className={selectedCondominium ? 'grid grid-cols-2 gap-2.5 min-[390px]:gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-2.5'}>
+              <div className={selectedCondominium ? 'grid grid-cols-2 gap-2.5 min-[390px]:gap-3 md:grid-cols-3 lg:grid-cols-4' : 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 lg:gap-4'}>
                 {visibleStoreCards.map((store, index) => {
                   const storePath = selectedCondominiumSlug
                     ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
