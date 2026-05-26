@@ -3376,7 +3376,7 @@ export function StorePage() {
       });
     } catch (printError) {
       console.error('[print] erro ao imprimir', printError);
-      showToast('Falha ao imprimir. Verifique popup/permissões no navegador.', 'error');
+      showToast(printError?.message || 'Falha ao imprimir. Verifique impressora, Bluetooth ou RawBT.', 'error');
     } finally {
       setIsGeneratingPrint(false);
     }

@@ -1,3 +1,5 @@
+import { printNativeThermalReceipt } from "./thermalPrinter";
+
 type ReceiptItem = {
   quantity: number;
   name: string;
@@ -18,6 +20,16 @@ type PrintReceiptRawBtInput = {
   items: ReceiptItem[];
   totalLabel: string;
 };
+
+type PrintReceiptMode = 'native' | 'rawbt' | 'browser';
+type PrintReceiptResult = {
+  mode: PrintReceiptMode;
+  durationMs?: number;
+  bytes?: number;
+  fallbackReason?: string;
+};
+
+let activePrintPromise: Promise<PrintReceiptResult> | null = null;
 
 const sanitizeText = (value: unknown) =>
   String(value ?? "")
@@ -334,16 +346,40 @@ const openExternalScheme = (url: string) => {
   }, 1000);
 };
 
-export const printReceiptAsImage = async (payload: PrintReceiptRawBtInput) => {
+const runPrintReceipt = async (payload: PrintReceiptRawBtInput): Promise<PrintReceiptResult> => {
   if (!payload?.items?.length) {
     throw new Error("Pedido sem itens para impressão.");
   }
 
   if (isMobileUserAgent()) {
+    const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const rawText = buildRawBtText(payload);
-    const base64 = toBase64Utf8(rawText);
-    openExternalScheme(`rawbt:base64,${base64}`);
-    return { mode: 'rawbt' as const };
+    try {
+      const result = await printNativeThermalReceipt(rawText);
+      const durationMs = Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt);
+      console.info('[print] impressão nativa concluída', {
+        durationMs,
+        bytes: result?.bytes,
+        items: payload.items.length,
+      });
+      return { mode: 'native', durationMs, bytes: result?.bytes };
+    } catch (nativeError: any) {
+      const nativeCode = String(nativeError?.code || nativeError?.message || 'NATIVE_PRINT_UNAVAILABLE');
+      console.warn('[print] impressão nativa indisponível, usando fallback RawBT', {
+        code: nativeCode,
+        message: nativeError?.message,
+      });
+      const base64 = toBase64Utf8(rawText);
+      openExternalScheme(`rawbt:base64,${base64}`);
+      const durationMs = Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt);
+      console.info('[print] impressão enviada via RawBT', {
+        durationMs,
+        bytes: base64.length,
+        fallbackReason: nativeCode,
+        items: payload.items.length,
+      });
+      return { mode: 'rawbt', durationMs, bytes: base64.length, fallbackReason: nativeCode };
+    }
   }
 
   const printWindow = window.open('', '_blank', 'width=420,height=760');
@@ -362,5 +398,25 @@ export const printReceiptAsImage = async (payload: PrintReceiptRawBtInput) => {
       // no-op
     }
   }, 450);
-  return { mode: 'browser' as const };
+  return { mode: 'browser' };
+};
+
+export const printReceiptAsImage = async (payload: PrintReceiptRawBtInput) => {
+  if (activePrintPromise) {
+    throw new Error("Aguarde a impressão atual terminar antes de enviar outro cupom.");
+  }
+  const current = runPrintReceipt(payload).finally(() => {
+    const releaseLock = () => {
+      if (activePrintPromise === current) {
+        activePrintPromise = null;
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.setTimeout(releaseLock, 700);
+    } else {
+      setTimeout(releaseLock, 700);
+    }
+  });
+  activePrintPromise = current;
+  return current;
 };

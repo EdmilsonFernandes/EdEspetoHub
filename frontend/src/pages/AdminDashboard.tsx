@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, Compass, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, Compass, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck, Printer } from '@phosphor-icons/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -14,6 +14,7 @@ import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
 import { ProductManager } from '../components/Admin/ProductManager';
 import { InventoryManager } from '../components/Admin/InventoryManager';
 import { OrderTypeSettingsCard } from '../components/Admin/OrderTypeSettingsCard';
+import { ThermalPrinterSettingsCard } from '../components/Admin/ThermalPrinterSettingsCard';
 import { StoreUsersPanel } from '../components/Admin/StoreUsersPanel';
 import { AdminMotoboys } from './AdminMotoboys';
 import { useAuth } from '../contexts/AuthContext';
@@ -1809,9 +1810,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
   const openConfigSection = React.useCallback((section = 'hub') => {
-    setConfigSection(section);
+    setConfigSection(isOperatorUser ? 'printer' : section);
     setActiveTab('config');
-  }, []);
+  }, [isOperatorUser]);
 
   const desktopTabItems = useMemo(
     () =>
@@ -1819,6 +1820,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         ? [
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
+            { id: 'config', label: 'Impressora', icon: Printer },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
           ]
         : [
@@ -1964,11 +1966,17 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   useEffect(() => {
     if (!isOperatorUser) return;
-    const disallowed = new Set(['resumo', 'pedidos', 'pagamentos', 'gateway', 'avaliacoes', 'config', 'motoboys', 'usuarios', 'estoque', 'condominios', 'destinos']);
+    const disallowed = new Set(['resumo', 'pedidos', 'pagamentos', 'gateway', 'avaliacoes', 'motoboys', 'usuarios', 'estoque', 'condominios', 'destinos']);
     if (disallowed.has(activeTab)) {
       setActiveTab('fila');
     }
   }, [activeTab, isOperatorUser]);
+
+  useEffect(() => {
+    if (isOperatorUser && activeTab === 'config' && configSection !== 'printer') {
+      setConfigSection('printer');
+    }
+  }, [activeTab, configSection, isOperatorUser]);
   const [brandingDraft, setBrandingDraft] = useState(() => ({
     brandName: session?.store?.name || '',
     logoUrl: resolveAssetUrl(session?.store?.settings?.logoUrl) || '',
@@ -2094,7 +2102,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
     const allowedTabs = new Set(
       isOperatorUser
-        ? ['produtos', 'cardapio']
+        ? ['produtos', 'cardapio', 'config']
         : ['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'gateway', 'motoboys', 'condominios', 'destinos', 'usuarios']
     );
     if (!allowedTabs.has(nextTab)) {
@@ -2103,7 +2111,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
     if (nextTab === 'config') {
       const nextSectionFromQuery = String(new URLSearchParams(location.search || '').get('section') || '').trim();
-      setConfigSection(nextSectionFromQuery || 'hub');
+      setConfigSection(isOperatorUser ? 'printer' : nextSectionFromQuery || 'hub');
     }
     setActiveTab(nextTab as typeof activeTab);
     // Consome o estado de navegação para evitar "reaplicar" aba e causar pisca ao trocar de menu.
@@ -3027,6 +3035,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       sections: ['access'],
       saveLabel: 'Salvar operação',
     },
+    printer: {
+      title: 'Impressora térmica',
+      subtitle: 'Escolha a impressora Bluetooth deste aparelho para imprimir direto pelo app.',
+    },
   };
   const configCards = [
     {
@@ -3064,6 +3076,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       badge: Array.isArray(orderTypes) && orderTypes.length > 0 ? 'Ativo' : 'Revisar',
       tone: Array.isArray(orderTypes) && orderTypes.length > 0 ? 'success' : 'warning',
       action: () => setConfigSection('ordering'),
+    },
+    {
+      id: 'printer',
+      title: 'Impressora térmica',
+      description: 'Configuração local por aparelho para admin e operador imprimirem sem sair do app.',
+      icon: Printer,
+      badge: 'App Android',
+      tone: 'neutral',
+      action: () => setConfigSection('printer'),
     },
     {
       id: 'hours',
@@ -3615,6 +3636,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     />
                   )}
                   {configSection === 'ordering' && <OrderTypeSettingsCard />}
+                  {configSection === 'printer' && <ThermalPrinterSettingsCard />}
                   {configSection === 'hours' && <OpeningHoursCard />}
                 </>
               )}

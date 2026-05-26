@@ -143,6 +143,7 @@ public class MainActivity extends BridgeActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             getWindow().setNavigationBarContrastEnforced(false);
         }
+        registerPlugin(ThermalPrinterPlugin.class);
         super.onCreate(savedInstanceState);
         configureWebViewPersistence();
         configureWebViewClientIfNeeded();

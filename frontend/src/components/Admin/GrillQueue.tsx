@@ -1329,7 +1329,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         setSelectedOrder((prev: any) => (prev ? { ...prev, items: nextItems } : prev));
       }
     };
-    let printMode: 'rawbt' | 'browser' | '' = '';
+    let printMode: 'native' | 'rawbt' | 'browser' | '' = '';
     try {
       const result = await printReceiptAsImage({
         storeName: (payload.storeName || storeNameForPrint || 'Minha Loja').toUpperCase(),
@@ -1364,9 +1364,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       printMode = result?.mode || '';
     } catch (printError) {
       console.error('[print] erro ao imprimir', printError);
-      setError('Falha ao disparar impressão. Marcando itens como impressos no sistema.');
+      setError(printError?.message || 'Falha ao disparar impressão. Verifique a impressora e tente novamente.');
     } finally {
-      if (printMode === 'rawbt') {
+      if (!printMode) {
+        setIsGeneratingPrint(false);
+        return;
+      }
+      if (printMode === 'rawbt' || printMode === 'native') {
         applyPrintedState();
         setError('');
         setIsGeneratingPrint(false);

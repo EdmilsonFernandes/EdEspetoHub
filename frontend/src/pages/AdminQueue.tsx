@@ -5,7 +5,7 @@ import { GrillQueue } from '../components/Admin/GrillQueue';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
-import { ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, CheckSquare, UsersThree } from '@phosphor-icons/react';
+import { ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, CheckSquare, UsersThree, Printer } from '@phosphor-icons/react';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 
 export function AdminQueue() {
@@ -63,6 +63,7 @@ export function AdminQueue() {
         ? [
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
+            { id: 'config', label: 'Impressora', icon: Printer },
             { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
           ]
         : [

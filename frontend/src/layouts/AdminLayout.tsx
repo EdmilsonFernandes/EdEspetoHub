@@ -5,7 +5,7 @@ import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Buildings, CaretDown, ChartBar, CheckSquare, ClipboardText, Compass, CreditCard, Gear, LockKey, Package, ShoppingCart, SignOut, Scooter, Star, UserCircle, X, UsersThree } from '@phosphor-icons/react';
+import { Buildings, CaretDown, ChartBar, CheckSquare, ClipboardText, Compass, CreditCard, Gear, LockKey, Package, Printer, ShoppingCart, SignOut, Scooter, Star, UserCircle, X, UsersThree } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
@@ -74,6 +74,7 @@ export function AdminLayout({
             { id: 'fila', label: 'Fila ao Vivo', icon: CheckSquare },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'cardapio', label: 'Loja Online', icon: Package },
+            { id: 'config', label: 'Impressora', icon: Printer },
           ]
         : [
             { id: 'resumo', label: 'Visão Geral', icon: ChartBar },
@@ -101,6 +102,7 @@ export function AdminLayout({
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'fila') },
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'produtos') },
         { type: 'item', item: mobileNavItems.find((i) => i.id === 'cardapio') },
+        { type: 'item', item: mobileNavItems.find((i) => i.id === 'config') },
       ].filter((entry) => Boolean(entry?.item));
     }
     const byId = new Map((mobileNavItems || []).map((item) => [item.id, item]));
