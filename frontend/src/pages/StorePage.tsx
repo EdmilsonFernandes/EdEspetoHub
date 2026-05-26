@@ -1,9 +1,9 @@
 // @ts-nocheck
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle, WarningCircle, X, Gear, Package, LockKey, Scooter, SignOut, Star, CreditCard, UsersThree, Mountains } from '@phosphor-icons/react';
+import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle, WarningCircle, X, Gear, Package, LockKey, Scooter, SignOut, Star, CreditCard, UsersThree, Mountains, Printer } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
@@ -321,6 +321,16 @@ export function StorePage() {
   const syncAdminSession = useCallback((candidate?: any | null) => {
     setUser(readAdminSessionSnapshot(candidate));
   }, [readAdminSessionSnapshot]);
+  const openAdminAccountDrawer = useCallback(() => {
+    const session = readAdminSessionSnapshot();
+    const sessionStoreSlug = String(session?.store?.slug || '').trim();
+    const routeStoreSlug = String(storeSlug || '').trim();
+    if (!session?.token || !sessionStoreSlug || !routeStoreSlug || sessionStoreSlug !== routeStoreSlug) {
+      return;
+    }
+    syncAdminSession(session);
+    setAdminAccountDrawerOpen(true);
+  }, [readAdminSessionSnapshot, storeSlug, syncAdminSession]);
 
   useEffect(() => {
     const warning = location.state && (location.state as any).hubCoverageWarning;
@@ -331,14 +341,15 @@ export function StorePage() {
     setHubCoverageNotice({ message: String(warning.message) });
   }, [location.state]);
 
+  useLayoutEffect(() => {
+    window.addEventListener('admin:open-account-drawer', openAdminAccountDrawer as EventListener);
+    return () => window.removeEventListener('admin:open-account-drawer', openAdminAccountDrawer as EventListener);
+  }, [openAdminAccountDrawer]);
+
   useEffect(() => {
     if (!isStoreAdmin) {
       setAdminAccountDrawerOpen(false);
-      return;
     }
-    const openAccountDrawer = () => setAdminAccountDrawerOpen(true);
-    window.addEventListener('admin:open-account-drawer', openAccountDrawer as EventListener);
-    return () => window.removeEventListener('admin:open-account-drawer', openAccountDrawer as EventListener);
   }, [isStoreAdmin]);
 
   useEffect(() => {
@@ -2910,6 +2921,14 @@ export function StorePage() {
       icon: <ShoppingCart size={22} weight="duotone" />,
       onClick: () => navigate(`/${storeSlug}`),
     },
+    {
+      section: 'Loja',
+      id: 'printer',
+      label: 'Impressora',
+      description: 'Configure a impressora Bluetooth deste aparelho.',
+      icon: <Printer size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/dashboard?tab=config&section=printer'),
+    },
     ...(!isOperatorStoreUser
       ? [{
           section: 'Loja',
@@ -4012,7 +4031,7 @@ export function StorePage() {
         )}
       </main>
 
-      {isStoreAdmin && view === 'menu' && <AdminMobileBottomNav />}
+      {isStoreAdmin && view === 'menu' && <AdminMobileBottomNav onOpenAccount={openAdminAccountDrawer} />}
       {isStoreAdmin && view === 'menu' && adminAccountDrawerOpen && (
         <ContextSideDrawer
           isOpen={adminAccountDrawerOpen}

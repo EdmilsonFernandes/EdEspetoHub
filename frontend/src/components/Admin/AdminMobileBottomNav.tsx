@@ -8,7 +8,7 @@ import { loadAdminDashboardPage, loadAdminQueuePage, loadStorePage } from '../..
 
 const SUPER_ADMIN_ACTIVE_SECTION_KEY = 'superadmin:activeSection';
 
-export function AdminMobileBottomNav() {
+export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => void } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { auth } = useAuth();
@@ -312,6 +312,10 @@ export function AdminMobileBottomNav() {
       icon: UserCircle,
       active: false,
       onClick: () => {
+        if (typeof onOpenAccount === 'function') {
+          onOpenAccount();
+          return;
+        }
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('admin:open-account-drawer'));
         }
@@ -501,6 +505,7 @@ export function AdminMobileBottomNav() {
               <button
                 type="button"
                 onPointerDown={() => {
+                  if (item.id === 'account') return;
                   setOptimisticNav(item.id);
                   preloadNavTarget(item.id);
                 }}

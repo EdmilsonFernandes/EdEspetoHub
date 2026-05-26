@@ -41,9 +41,23 @@ test.describe('Configuração de impressora térmica', () => {
         await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
         return;
       }
+      if (url.includes(`/stores/slug/${operatorSession.store.slug}`) && !url.includes('/products') && !url.includes('/categories')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            ...operatorSession.store,
+            openNow: true,
+            owner: { phone: '(12) 99999-0000' },
+            subscription: operatorSession.subscription,
+          }),
+        });
+        return;
+      }
       if (
         url.includes('/orders') ||
         url.includes('/products') ||
+        url.includes('/categories') ||
         url.includes('/reviews') ||
         url.includes('/motoboy') ||
         url.includes('/payments')
@@ -67,6 +81,17 @@ test.describe('Configuração de impressora térmica', () => {
     await expect(page.getByText('Entrega e logística')).toBeHidden();
 
     await page.getByRole('button', { name: 'Conta da operação' }).click();
+    await expect(
+      page.getByRole('button', { name: /Impressora Configure a impressora Bluetooth deste aparelho/i })
+    ).toBeVisible();
+  });
+
+  test('mostra impressora no menu da vitrine logo no primeiro acesso', async ({ page }) => {
+    await page.goto(`/${operatorSession.store.slug}`);
+
+    await expect(page.getByRole('button', { name: /^Conta$/ })).toBeVisible({ timeout: 15000 });
+    await page.getByRole('button', { name: /^Conta$/ }).click();
+
     await expect(
       page.getByRole('button', { name: /Impressora Configure a impressora Bluetooth deste aparelho/i })
     ).toBeVisible();
