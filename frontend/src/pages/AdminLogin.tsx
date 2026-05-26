@@ -451,24 +451,23 @@ export function AdminLogin() {
       showHeader
     >
       <div className="space-y-1.5 ds-login-card-enter w-full sm:space-y-4">
-        <div className="text-center space-y-1 sm:space-y-2.5">
-          <button type="button" onClick={handleLogoTap} className="mx-auto hidden flex-col items-center gap-3 transition-transform active:scale-95 sm:flex sm:hover:scale-[1.03]">
-            <div className="h-16 w-16 overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12 sm:h-[4.75rem] sm:w-[4.75rem] sm:border-[4px]">
-              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
-            </div>
-            <div className="text-center leading-tight">
-              <p className="text-sm font-black tracking-tight text-slate-900 sm:text-base">Já no Caminho</p>
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#336886]/80 sm:text-[10px] sm:tracking-[0.22em]">Área do lojista</p>
-            </div>
+        <div className="hidden text-center sm:block">
+          <button
+            type="button"
+            onClick={handleLogoTap}
+            className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#0d4f66] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)] transition active:scale-95 sm:hover:scale-[1.03]"
+            aria-label="Acesso seguro"
+          >
+            <LockKey size={23} weight="duotone" />
           </button>
-          <div className="hidden items-center justify-center gap-2 sm:flex sm:gap-3">
-            <LockKey size={24} weight="duotone" className="text-[#0d4f66] sm:h-8 sm:w-8" />
-            <h2 className="text-xl font-black text-slate-800 tracking-[-0.03em] sm:text-[2.2rem]">
-              {hubMode ? 'Lojista' : 'Login'}
-            </h2>
-          </div>
+          <h2 className="text-[2rem] font-black tracking-[-0.03em] text-slate-800">
+            {hubMode ? 'Acesso da loja' : 'Entrar no painel'}
+          </h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm font-semibold leading-6 text-slate-500">
+            Gerencie pedidos, cardápio e operação com sua conta cadastrada.
+          </p>
           {superAdminUnlocked ? (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Modo Super Admin</p>
             </div>

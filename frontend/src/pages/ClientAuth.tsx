@@ -504,33 +504,18 @@ export function ClientAuth() {
       showHeader
     >
       <div className="space-y-1.5 ds-login-card-enter w-full sm:space-y-4">
-        <div className="text-center space-y-1 sm:space-y-2.5">
-          <button type="button" onClick={() => navigate(hubMode ? '/hub' : '/')} className="mx-auto hidden flex-col items-center gap-3 transition-transform active:scale-95 sm:flex sm:hover:scale-[1.03]">
-            <div className="h-16 w-16 overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12 sm:h-[4.75rem] sm:w-[4.75rem] sm:border-[4px]">
-              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
-            </div>
-            <div className="text-center leading-tight">
-              <p className="text-sm font-black tracking-tight text-slate-900 sm:text-base">Já no Caminho</p>
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#336886]/80 sm:text-[10px] sm:tracking-[0.22em]">Área do cliente</p>
-            </div>
-          </button>
-          <div className="space-y-1 sm:space-y-3">
-            <div className="mx-auto hidden items-center gap-2 rounded-full border border-[#153A4C]/10 bg-white/75 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#153A4C] shadow-[0_16px_34px_-26px_rgba(21,58,76,0.4)] sm:inline-flex">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(34,197,94,0.14)]" />
-              Conta protegida
-            </div>
-            <div className="hidden items-center justify-center gap-2 sm:flex sm:gap-3">
-              <LockKey size={24} weight="duotone" className="text-[#0d4f66] sm:h-8 sm:w-8" />
-              <h2 className="text-xl font-black text-slate-800 tracking-[-0.03em] sm:text-[2.2rem]">
-                {mode === 'register' ? 'Criar conta' : 'Entrar'}
-              </h2>
-            </div>
-            <p className="mx-auto hidden max-w-md text-sm font-semibold leading-6 text-slate-500 sm:block">
-              {mode === 'register'
-                ? 'Cadastre seu acesso para acompanhar pedidos, salvar endereços e voltar com tudo pronto no próximo pedido.'
-                : 'Entre para acompanhar pedidos, revisar compras e continuar direto pelo app do cliente.'}
-            </p>
+        <div className="hidden text-center sm:block">
+          <div className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#0d4f66] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)]">
+            <LockKey size={23} weight="duotone" />
           </div>
+          <h2 className="text-[2rem] font-black tracking-[-0.03em] text-slate-800">
+            {mode === 'register' ? 'Criar conta' : 'Entrar'}
+          </h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm font-semibold leading-6 text-slate-500">
+            {mode === 'register'
+              ? 'Cadastre seu acesso para acompanhar pedidos e salvar endereços.'
+              : 'Acesse pedidos, endereços e compras com e-mail e senha.'}
+          </p>
         </div>
 
         {!hubMode ? (
@@ -544,31 +529,6 @@ export function ClientAuth() {
         ) : null}
 
         <div className="ds-card-elevated space-y-3 border-white/40 bg-white/82 p-4 backdrop-blur-xl sm:space-y-5 sm:p-7 lg:p-8">
-          <div className="hidden rounded-[1.45rem] border border-[#153A4C]/10 bg-[linear-gradient(135deg,rgba(21,58,76,0.06),rgba(255,255,255,0.92)_58%,rgba(51,104,134,0.06)_100%)] px-4 py-4 sm:block">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-full border border-white/80 bg-white/82 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#153A4C]">
-                Conta do cliente
-              </span>
-              <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/82 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-slate-500">
-                App, pedidos e endereços
-              </span>
-            </div>
-            <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
-              {mode === 'register'
-                ? 'Use seu e-mail para ativar a conta e concluir tudo no mesmo fluxo.'
-                : 'O acesso segue simples: e-mail, senha e, quando houver, biometria neste aparelho.'}
-            </p>
-          </div>
-          <div className="hidden items-center gap-3 sm:flex">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 shadow-inner">
-              <UserCircle size={22} weight="duotone" />
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 font-black">Área do cliente</p>
-              <h1 className="text-xl font-black">{mode === 'register' ? 'Criar conta' : 'Entrar'}</h1>
-            </div>
-          </div>
-
           <div className="flex gap-2 rounded-[1.1rem] border border-slate-200 bg-slate-100 p-1.5">
             <button
               type="button"

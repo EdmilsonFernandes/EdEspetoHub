@@ -117,8 +117,8 @@ export function AuthLayout({
         <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border border-white bg-white p-0.5 shadow-sm">
           <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
         </span>
-        <span>
-          Desenvolvido com excelência por <span className="text-slate-500 font-bold">Já no Caminho</span> <AppVersionBadge prefix=" | " />
+        <span className="font-semibold text-slate-500">
+          <AppVersionBadge prefix="Versão " />
         </span>
       </div>
     </div>
