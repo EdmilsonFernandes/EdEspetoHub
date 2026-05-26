@@ -108,6 +108,7 @@ public class MainActivity extends BridgeActivity {
     private boolean mainFrameLoadInProgress = false;
     private boolean webViewClientConfigured = false;
     private boolean launchBridgeInjected = false;
+    private android.content.Intent handledPushNavigationIntent = null;
     private boolean webAppReady = false;
     private final Handler launchOverlayHandler = new Handler(Looper.getMainLooper());
     private Runnable launchOverlayTimeoutRunnable;
@@ -157,7 +158,9 @@ public class MainActivity extends BridgeActivity {
             launchOverlayDismissed = false;
             retryInitialPageLoad();
         } else {
-            restoreLastVisitedUrl();
+            if (!openDeepLinkIfAny()) {
+                restoreLastVisitedUrl();
+            }
             scheduleResumeWebViewHealthCheck();
         }
         checkForAppUpdates();
@@ -312,8 +315,9 @@ public class MainActivity extends BridgeActivity {
         configureWebViewPersistence();
         configureWebViewClientIfNeeded();
         configureNavigationTransitions();
-        restoreLastVisitedUrl();
-        openDeepLinkIfAny();
+        if (!openDeepLinkIfAny()) {
+            restoreLastVisitedUrl();
+        }
         checkForAppUpdates();
     }
 
@@ -890,15 +894,17 @@ public class MainActivity extends BridgeActivity {
         prefs.edit().putString(LAST_URL_KEY, trustedUrl).apply();
     }
 
-    private void openDeepLinkIfAny() {
-        if (bridge == null || bridge.getWebView() == null) return;
-        if (getIntent() == null) return;
-        String incoming = getIntent().getDataString();
+    private boolean openDeepLinkIfAny() {
+        if (bridge == null || bridge.getWebView() == null) return false;
+        android.content.Intent intent = getIntent();
+        if (intent == null) return false;
+        if (handledPushNavigationIntent == intent) return false;
+        String incoming = intent.getDataString();
         String trustedUrl = normalizeTrustedPushTarget(incoming);
         if (trustedUrl == null) {
-            trustedUrl = resolvePushTargetFromIntentExtras(getIntent());
+            trustedUrl = resolvePushTargetFromIntentExtras(intent);
         }
-        if (trustedUrl == null) return;
+        if (trustedUrl == null) return false;
         if (!launchOverlayDismissed) {
             showLaunchOverlayLoading(null);
             scheduleLaunchOverlayTimeout();
@@ -907,6 +913,8 @@ public class MainActivity extends BridgeActivity {
         webAppReady = false;
         bridge.getWebView().loadUrl(trustedUrl);
         lastKnownUrl = trustedUrl;
+        handledPushNavigationIntent = intent;
+        return true;
     }
 
     private String normalizeTrustedWebUrl(String value) {

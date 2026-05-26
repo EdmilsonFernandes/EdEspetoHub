@@ -394,6 +394,7 @@ export function SuperAdmin() {
   const [rejectReason, setRejectReason] = useState('');
   const [rejectingId, setRejectingId] = useState('');
   const [pushHistory, setPushHistory] = useState<any[]>([]);
+  const [pushPanel, setPushPanel] = useState<'broadcast' | 'review' | 'history'>('broadcast');
 
   useEffect(() => {
     if (activeSection !== 'push' || !token) return;
@@ -2134,8 +2135,52 @@ export function SuperAdmin() {
 
         {activeSection === 'push' && (
           <>
+          <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/80 p-4 shadow-[0_24px_60px_-44px_rgba(15,23,42,0.35)] backdrop-blur-xl">
+            <div className="flex items-start gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_16px_34px_-24px_rgba(21,58,76,0.65)]">
+                <Megaphone size={22} weight="duotone" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Comunicação</p>
+                <h2 className="mt-1 text-lg font-black tracking-tight text-slate-950">Push do app</h2>
+                <p className="mt-1 text-sm leading-5 text-slate-500">
+                  Crie avisos globais, aprove promoções de lojas e acompanhe o histórico sem misturar os fluxos.
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl border border-slate-100 bg-slate-50/80 p-1.5">
+              {[
+                { id: 'broadcast', label: 'Criar', count: null },
+                { id: 'review', label: 'Aprovar', count: pendingPushes.length },
+                { id: 'history', label: 'Histórico', count: pushHistory.length },
+              ].map((item) => {
+                const selected = pushPanel === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setPushPanel(item.id as any)}
+                    className={`min-w-0 rounded-xl px-2.5 py-2.5 text-center text-xs font-black transition active:scale-[0.98] ${
+                      selected
+                        ? 'bg-white text-[#153A4C] shadow-[0_12px_28px_-22px_rgba(15,23,42,0.45)] ring-1 ring-[#336886]/10'
+                        : 'text-slate-500 hover:bg-white/65'
+                    }`}
+                  >
+                    <span className="block truncate">{item.label}</span>
+                    {item.count !== null ? (
+                      <span className={`mt-0.5 block text-[10px] ${selected ? 'text-[#336886]' : 'text-slate-400'}`}>
+                        {item.count}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {pushPanel === 'broadcast' && (
           <FormSection
-            title="Push Global"
+            title="Criar push"
             variant="primary"
             className="bg-gradient-to-br from-cyan-50/70 via-white to-white border-cyan-100"
             contentClassName="space-y-4"
@@ -2281,7 +2326,7 @@ export function SuperAdmin() {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="sticky bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-10 -mx-1 flex flex-col items-stretch gap-2 rounded-2xl border border-white/80 bg-white/90 p-2 shadow-[0_18px_48px_-34px_rgba(15,23,42,0.38)] backdrop-blur-xl sm:static sm:mx-0 sm:flex-row sm:items-center sm:justify-between sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-0">
                 <span className="text-xs text-slate-500">
                   Tópico: <span className="font-semibold text-slate-700">{broadcastForm.topic}</span>
                 </span>
@@ -2290,7 +2335,7 @@ export function SuperAdmin() {
                   disabled={broadcastSending}
                   className="w-full rounded-xl bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-60 sm:w-auto"
                 >
-                  {broadcastSending ? 'Enviando...' : 'Enviar Push Global'}
+                  {broadcastSending ? 'Enviando...' : 'Enviar push'}
                 </button>
               </div>
             </form>
@@ -2301,10 +2346,12 @@ export function SuperAdmin() {
               </div>
             ) : null}
           </FormSection>
+          )}
 
           {/* Aprovação de Pushes Promocionais */}
+          {pushPanel === 'review' && (
           <FormSection
-            title="Pushes Promocionais Pendentes"
+            title="Aprovar promoções"
             variant="primary"
             className="bg-gradient-to-br from-violet-50/70 via-white to-white border-violet-100"
             contentClassName="space-y-3"
@@ -2394,9 +2441,11 @@ export function SuperAdmin() {
               </div>
             )}
           </FormSection>
+          )}
 
+          {pushPanel === 'history' && (
           <FormSection
-            title="Histórico de Pushes"
+            title="Histórico"
             variant="primary"
             className="bg-gradient-to-br from-slate-50/70 via-white to-white border-slate-200"
             contentClassName="space-y-3"
@@ -2467,6 +2516,7 @@ export function SuperAdmin() {
               </div>
             )}
           </FormSection>
+          )}
           </>
         )}
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowSquareOut, BellRinging, Check, Trash, X } from '@phosphor-icons/react';
+import { BellRinging, CaretRight, Check, Trash, X } from '@phosphor-icons/react';
 import { apiClient } from '../config/apiClient';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
@@ -32,6 +32,21 @@ function groupByDate(items: Notification[]) {
   });
   map.forEach((v, k) => groups.push({ label: k, items: v }));
   return groups;
+}
+
+function getNotificationActionLabel(url?: string | null) {
+  const target = resolvePushClickTarget(url);
+  if (target.kind === 'external') return 'Abrir link';
+  if (target.kind === 'notifications') return 'Ler mensagem';
+
+  const path = target.value.toLowerCase();
+  if (path.startsWith('/cliente/pedidos') || path.startsWith('/pedido/')) return 'Ver pedido';
+  if (path.startsWith('/store/') || path.includes('/loja') || path.includes('/vitrine')) return 'Abrir loja';
+  if (path.startsWith('/destinos')) return 'Ver destino';
+  if (path.startsWith('/hub/destaques')) return 'Ver destaques';
+  if (path.startsWith('/cliente/conta')) return 'Abrir conta';
+  if (path.startsWith('/cliente/enderecos')) return 'Ver endereços';
+  return 'Abrir no app';
 }
 
 export function NotificationsPage() {
@@ -136,7 +151,7 @@ export function NotificationsPage() {
                     key={n.id}
                     type="button"
                     onClick={() => handleRead(n)}
-                    className={`group relative grid w-full grid-cols-[4.25rem_minmax(0,1fr)_auto] items-start gap-3 rounded-[1.35rem] px-3 py-3 text-left transition-all active:scale-[0.985] ${n.read ? 'bg-transparent hover:bg-white/55' : 'bg-white shadow-[0_18px_36px_-30px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/10'}`}
+                    className={`group relative grid w-full grid-cols-[4.25rem_minmax(0,1fr)_2.35rem] items-start gap-3 rounded-[1.35rem] px-3 py-3 text-left transition-all active:scale-[0.985] ${n.read ? 'bg-transparent hover:bg-white/55' : 'bg-white shadow-[0_18px_36px_-30px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/10'}`}
                   >
                     <div className="relative shrink-0">
                       <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.15rem] bg-[linear-gradient(135deg,#0f3b53,#336886)] shadow-[0_16px_28px_-24px_rgba(15,23,42,0.38)]">
@@ -151,17 +166,16 @@ export function NotificationsPage() {
                       >
                         {n.body || n.title}
                       </p>
-                      {n.url ? (
-                        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
-                          Abrir tela
-                        </span>
-                      ) : (
-                        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]">
-                          Ler completo
-                        </span>
-                      )}
+                      <span className="mt-2 block text-[11px] font-black uppercase tracking-[0.13em] text-[#336886]">
+                        {getNotificationActionLabel(n.url)}
+                      </span>
                     </div>
-                    <span className="pt-0.5 text-[11px] font-black text-slate-400">{timeAgo(n.createdAt)}</span>
+                    <span className="flex h-full flex-col items-end justify-between gap-3 pt-0.5">
+                      <span className="text-[11px] font-black text-slate-400">{timeAgo(n.createdAt)}</span>
+                      <span className="grid h-8 w-8 place-items-center rounded-full bg-white/70 text-[#336886] shadow-[0_12px_26px_-24px_rgba(15,23,42,0.42)] ring-1 ring-slate-100 transition group-active:scale-95">
+                        <CaretRight size={15} weight="bold" />
+                      </span>
+                    </span>
                   </button>
                 ))}
               </div>
@@ -210,7 +224,7 @@ export function NotificationsPage() {
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Sem direcionamento</p>
                   <p className="mt-0.5 text-xs font-semibold text-slate-600">Esta notificação é apenas informativa.</p>
                 </div>
-                <ArrowSquareOut size={20} weight="duotone" className="text-slate-300" />
+                <BellRinging size={20} weight="duotone" className="text-slate-300" />
               </div>
             </div>
           </div>
