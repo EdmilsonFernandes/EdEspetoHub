@@ -14,6 +14,10 @@ import {
   Clock,
   ArrowLeft,
   ChefHat,
+  BeerBottle,
+  BowlFood,
+  Coffee,
+  Cookie,
   Sparkle,
   ShoppingCart,
   ForkKnife,
@@ -73,25 +77,32 @@ const isEspetoCategory = (category) => {
 
 const categoryVisualMeta = (key = "") => {
   const normalized = String(key || "").toLowerCase();
-  if (normalized.includes("espeto"))    return { icon: ChefHat,      tone: "text-rose-600   bg-rose-50   border-rose-100"   };
-  if (normalized.includes("bebida"))    return { icon: ShoppingCart,  tone: "text-sky-600    bg-sky-50    border-sky-100"    };
-  if (normalized.includes("cerveja"))   return { icon: ShoppingCart,  tone: "text-amber-600  bg-amber-50  border-amber-100"  };
-  if (normalized.includes("por"))       return { icon: ForkKnife,     tone: "text-orange-600 bg-orange-50 border-orange-100" };
-  if (normalized.includes("lanche"))    return { icon: Sparkle,       tone: "text-amber-600  bg-amber-50  border-amber-100"  };
-  if (normalized.includes("sobremesa")) return { icon: Sparkle,       tone: "text-pink-600   bg-pink-50   border-pink-100"   };
-  if (normalized.includes("entrada"))   return { icon: ForkKnife,     tone: "text-emerald-600 bg-emerald-50 border-emerald-100" };
-  if (normalized.includes("refeic"))    return { icon: ForkKnife,     tone: "text-amber-600  bg-amber-50  border-amber-100"  };
+  if (normalized.includes("espeto") || normalized.includes("carne") || normalized.includes("churrasco")) {
+    return { icon: ChefHat, tone: "text-rose-600 bg-rose-50 border-rose-100" };
+  }
+  if (normalized.includes("cerveja") || normalized.includes("drink")) {
+    return { icon: BeerBottle, tone: "text-amber-600 bg-amber-50 border-amber-100" };
+  }
+  if (normalized.includes("bebida") || normalized.includes("suco") || normalized.includes("refrigerante")) {
+    return { icon: Coffee, tone: "text-sky-600 bg-sky-50 border-sky-100" };
+  }
+  if (normalized.includes("por") || normalized.includes("entrada") || normalized.includes("petisco")) {
+    return { icon: ForkKnife, tone: "text-orange-600 bg-orange-50 border-orange-100" };
+  }
+  if (normalized.includes("lanche") || normalized.includes("hamb") || normalized.includes("burger")) {
+    return { icon: BowlFood, tone: "text-amber-600 bg-amber-50 border-amber-100" };
+  }
+  if (normalized.includes("sobremesa") || normalized.includes("doce") || normalized.includes("bolo")) {
+    return { icon: Cookie, tone: "text-pink-600 bg-pink-50 border-pink-100" };
+  }
+  if (normalized.includes("refeic") || normalized.includes("prato") || normalized.includes("almoco") || normalized.includes("jantar")) {
+    return { icon: ForkKnife, tone: "text-emerald-600 bg-emerald-50 border-emerald-100" };
+  }
   return { icon: SquaresFour, tone: "text-violet-600 bg-violet-50 border-violet-100" };
 };
 
 const categoryGlyph = (key = "") => {
-  const normalized = String(key || "").toLowerCase();
-  if (normalized.includes("espeto")) return "🥩";
-  if (normalized.includes("bebida")) return "🥤";
-  if (normalized.includes("lanche")) return "🍔";
-  if (normalized.includes("sobremesa")) return "🍰";
-  if (normalized.includes("entrada")) return "🍽️";
-  return "📋";
+  return categoryVisualMeta(key).icon;
 };
 
 const categoryDotTone = (key = "") => {
@@ -1152,9 +1163,9 @@ export const MenuView = ({
                   type="button"
                   aria-label="Abrir categorias"
                   onClick={() => setIsCategorySheetOpen(true)}
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-all active:scale-95"
+                  className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white text-slate-700 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)] ring-1 ring-slate-100 transition-all active:scale-95"
                 >
-                  <List size={18} weight="bold" />
+                  <List size={18} weight="bold" style={{ color: catalogPrimaryColor }} />
                 </button>
               )}
               <div className={`${
@@ -1165,7 +1176,8 @@ export const MenuView = ({
                 <div className={`${filteredGrouped.length > 2 ? "inline-flex items-center gap-2.5 pr-8 sm:flex sm:flex-wrap sm:gap-2 sm:pr-0" : "contents"}`}>
                 {filteredGrouped.map((category) => {
                   const isActive = activeCategoryKey === category.key;
-                  const glyph = categoryGlyph(category.key);
+                  const Icon = categoryGlyph(category.key);
+                  const meta = categoryVisualMeta(category.key);
                   return (
                     <button
                       key={category.key}
@@ -1177,7 +1189,7 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={`inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-2 text-[13px] font-black transition-all duration-300 snap-start active:scale-95 ${
+                      className={`inline-flex items-center justify-center gap-2 rounded-[1.15rem] border px-3.5 py-2.5 text-[13px] font-black transition-all duration-300 snap-start active:scale-95 ${
                         filteredGrouped.length <= 2 ? "w-full min-w-0" : "max-w-full sm:min-w-0"
                       } ${isActive ? 'shadow-[0_8px_20px_-8px_rgba(15,23,42,0.15)]' : 'shadow-none'}`}
                       style={
@@ -1186,7 +1198,11 @@ export const MenuView = ({
                           : { backgroundColor: "#ffffff", color: "#64748b", borderColor: "#f1f5f9" }
                       }
                     >
-                      <span className="text-base leading-none">{glyph}</span>
+                      <span
+                        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border ${isActive ? "border-white/22 bg-white/16 text-current" : meta.tone}`}
+                      >
+                        <Icon size={14} weight={isActive ? "fill" : "duotone"} />
+                      </span>
                       <span className="truncate whitespace-nowrap uppercase tracking-wider">{category.label}</span>
                     </button>
                   );
@@ -1645,12 +1661,16 @@ export const MenuView = ({
           <Drawer.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px]" />
           <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[60] mt-24 h-fit max-h-[88vh] rounded-t-[32px] bg-white outline-none shadow-[0_-24px_64px_-38px_rgba(15,23,42,0.55)]">
             <div className="mx-auto my-4 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
-            <div className="px-6 py-2">
-              <h3 className="text-xl font-black text-zinc-900">Menu</h3>
+            <div className="px-5 pb-3 pt-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Navegue pelo cardápio</p>
+              <h3 className="mt-1 text-2xl font-black tracking-tight text-zinc-950">Categorias</h3>
+              <p className="mt-1 text-sm font-medium text-slate-500">Toque em uma categoria para ir direto aos produtos.</p>
             </div>
-            <div className="max-h-[72vh] overflow-y-auto pb-5">
+            <div className="max-h-[72vh] space-y-2 overflow-y-auto px-4 pb-5">
               {grouped.map((category) => {
                 const isActive = activeCategoryKey === category.key;
+                const meta = categoryVisualMeta(category.key);
+                const Icon = meta.icon;
                 return (
                   <button
                     key={`sheet-${category.key}`}
@@ -1663,24 +1683,32 @@ export const MenuView = ({
                         scrollToCategory(category.key);
                       }, 80);
                     }}
-                    className="flex w-full items-center justify-between px-6 py-4 text-left transition-colors active:bg-zinc-50"
+                    className={`flex w-full items-center justify-between gap-3 rounded-3xl border px-3.5 py-3 text-left transition-all active:scale-[0.985] ${
+                      isActive
+                        ? "border-transparent bg-slate-950 text-white shadow-[0_16px_36px_-26px_rgba(15,23,42,0.65)]"
+                        : "border-slate-100 bg-slate-50/80 text-slate-800 hover:bg-white"
+                    }`}
+                    style={isActive ? { backgroundColor: catalogPrimaryColor, color: catalogPrimaryText } : undefined}
                   >
-                    <div className="min-w-0">
-                      <p className={`truncate text-base font-semibold ${isActive ? "text-zinc-900" : "text-zinc-800"}`}>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${
+                        isActive ? "border-white/24 bg-white/16 text-current" : meta.tone
+                      }`}>
+                        <Icon size={20} weight={isActive ? "fill" : "duotone"} />
+                      </span>
+                      <p className={`truncate text-base font-black ${isActive ? "text-current" : "text-zinc-900"}`}>
                         {category.label}
-                        <span className="ml-2 text-sm font-medium text-zinc-400">{category.items.length}</span>
+                        <span className={`ml-2 text-sm font-black ${isActive ? "text-current/70" : "text-zinc-400"}`}>{category.items.length}</span>
                       </p>
                     </div>
                     <span
-                      className={`relative h-6 w-6 shrink-0 rounded-full border-2 ${
-                        isActive ? "" : "border-zinc-200"
+                      className={`relative h-7 w-7 shrink-0 rounded-full border-2 ${
+                        isActive ? "border-white/70" : "border-zinc-200 bg-white"
                       }`}
-                      style={isActive ? { borderColor: catalogPrimaryColor } : undefined}
                     >
                       {isActive && (
                         <span
-                          className="absolute inset-1 rounded-full"
-                          style={{ backgroundColor: catalogPrimaryColor }}
+                          className="absolute inset-1 rounded-full bg-white"
                         />
                       )}
                     </span>
