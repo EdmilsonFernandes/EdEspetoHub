@@ -2045,33 +2045,31 @@ export function MarketplacePage() {
                 <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Explore também</span>
                 <span className="text-[10px] font-bold text-slate-400">atalhos</span>
               </div>
-              <div className={`grid gap-3 ${homeDestinationHighlights.length > 0 && condominiums.length > 0 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1'}`}>
+              <div className={`grid gap-2.5 sm:gap-3 ${homeDestinationHighlights.length > 0 && condominiums.length > 0 ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2'}`}>
                 {condominiums.length > 0 ? (
                   <button
                     type="button"
                     onClick={() => openCondominiumPicker('all')}
-                    className={`group relative flex min-h-[4.25rem] items-center justify-between gap-3 overflow-hidden rounded-[1.35rem] border border-emerald-500/15 bg-gradient-to-br from-emerald-50/60 via-white to-emerald-500/5 px-4 py-2.5 text-left shadow-[0_8px_20px_-12px_rgba(16,185,129,0.2)] transition-all duration-300 ease-out hover:border-emerald-500/40 hover:shadow-[0_12px_24px_-10px_rgba(16,185,129,0.3)] active:scale-[0.98] ${
-                      homeDestinationHighlights.length > 0 ? 'md:col-span-2' : 'col-span-full'
-                    }`}
+                    className="group relative flex min-h-[5rem] items-center gap-2.5 overflow-hidden rounded-[1.35rem] border border-emerald-500/15 bg-gradient-to-br from-emerald-50/70 via-white to-emerald-500/5 px-3 py-2.5 text-left shadow-[0_10px_24px_-18px_rgba(16,185,129,0.32)] transition-all duration-300 ease-out hover:border-emerald-500/40 hover:shadow-[0_14px_28px_-16px_rgba(16,185,129,0.34)] active:scale-[0.98] sm:min-h-[4.35rem] sm:gap-3 sm:px-4"
                   >
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.08),transparent_50%)] pointer-events-none" />
                     
-                    <div className="flex items-center gap-3 min-w-0 z-10">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-[1.1rem] bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-[0_8px_16px_-8px_rgba(16,185,129,0.6)] ring-2 ring-white">
+                    <div className="flex items-center gap-2.5 min-w-0 z-10">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[1rem] bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-[0_8px_16px_-8px_rgba(16,185,129,0.6)] ring-2 ring-white sm:h-10 sm:w-10 sm:rounded-[1.1rem]">
                         <span className="grid h-full w-full place-items-center rounded-[0.95rem] bg-emerald-50">
-                          <img src={condominiumShortcutIcon} alt="" className="h-6.5 w-6.5 object-cover" loading="lazy" decoding="async" />
+                          <img src={condominiumShortcutIcon} alt="" className="h-6 w-6 object-cover sm:h-6.5 sm:w-6.5" loading="lazy" decoding="async" />
                         </span>
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate text-xs font-black text-slate-900 sm:text-sm">Feiras & Condomínios</span>
-                        <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">Programação e compras na portaria</span>
+                        <span className="block truncate text-[11px] font-black text-slate-900 sm:text-sm">Feiras</span>
+                        <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">Condomínios</span>
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0 z-10">
+                    <div className="ml-auto flex items-center gap-1.5 shrink-0 z-10">
                       <span className="text-[10px] font-bold text-emerald-600 hidden sm:inline-block opacity-0 group-hover:opacity-100 transition-opacity duration-300">Explorar</span>
-                      <div className="grid h-7 w-7 place-items-center rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 shadow-sm transition-transform duration-300 ease-out group-hover:translate-x-1.5 group-hover:bg-emerald-500 group-hover:text-white">
-                        <svg className="h-4 w-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="grid h-6 w-6 place-items-center rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 shadow-sm transition-transform duration-300 ease-out group-hover:translate-x-1.5 group-hover:bg-emerald-500 group-hover:text-white sm:h-7 sm:w-7">
+                        <svg className="h-3.5 w-3.5 stroke-[2.5] sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
@@ -2082,27 +2080,25 @@ export function MarketplacePage() {
                 {homeDestinationHighlights.length > 0 ? (
                   <Link
                     to={destinationListHref}
-                    className={`group relative flex min-h-[4.25rem] items-center justify-between gap-3 overflow-hidden rounded-[1.35rem] border border-[#336886]/15 bg-gradient-to-br from-[#edf5fa]/40 via-white to-[#336886]/5 px-4 py-2.5 text-left shadow-[0_8px_20px_-12px_rgba(51,104,134,0.2)] transition-all duration-300 ease-out hover:border-[#336886]/40 hover:shadow-[0_12px_24px_-10px_rgba(51,104,134,0.3)] active:scale-[0.98] ${
-                      condominiums.length > 0 ? 'md:col-span-1' : 'col-span-full'
-                    }`}
+                    className="group relative flex min-h-[5rem] items-center gap-2.5 overflow-hidden rounded-[1.35rem] border border-[#336886]/15 bg-gradient-to-br from-[#edf5fa]/50 via-white to-[#336886]/5 px-3 py-2.5 text-left shadow-[0_10px_24px_-18px_rgba(51,104,134,0.32)] transition-all duration-300 ease-out hover:border-[#336886]/40 hover:shadow-[0_14px_28px_-16px_rgba(51,104,134,0.34)] active:scale-[0.98] sm:min-h-[4.35rem] sm:gap-3 sm:px-4"
                   >
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(51,104,134,0.06),transparent_50%)] pointer-events-none" />
 
-                    <div className="flex items-center gap-3 min-w-0 z-10">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-[1.1rem] bg-gradient-to-tr from-[#336886] to-[#5a9cbf] p-0.5 shadow-[0_8px_16px_-8px_rgba(51,104,134,0.6)] ring-2 ring-white">
+                    <div className="flex items-center gap-2.5 min-w-0 z-10">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[1rem] bg-gradient-to-tr from-[#336886] to-[#5a9cbf] p-0.5 shadow-[0_8px_16px_-8px_rgba(51,104,134,0.6)] ring-2 ring-white sm:h-10 sm:w-10 sm:rounded-[1.1rem]">
                         <span className="grid h-full w-full place-items-center rounded-[0.95rem] bg-[#edf5fa]">
-                          <img src={destinationShortcutIcon} alt="" className="h-6.5 w-6.5 object-cover" loading="lazy" decoding="async" />
+                          <img src={destinationShortcutIcon} alt="" className="h-6 w-6 object-cover sm:h-6.5 sm:w-6.5" loading="lazy" decoding="async" />
                         </span>
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate text-xs font-black text-slate-900">Turismo & Chalés</span>
-                        <span className="block truncate text-[10px] font-semibold text-slate-500">Hospedagem e serviços</span>
+                        <span className="block truncate text-[11px] font-black text-slate-900 sm:text-sm">Destinos</span>
+                        <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">Chalés e serviços</span>
                       </span>
                     </div>
 
-                    <div className="flex items-center shrink-0 z-10">
-                      <div className="grid h-7 w-7 place-items-center rounded-full bg-[#edf5fa] border border-[#d7e7ef] text-[#336886] shadow-sm transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:bg-[#336886] group-hover:text-white">
-                        <svg className="h-4 w-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="ml-auto flex items-center shrink-0 z-10">
+                      <div className="grid h-6 w-6 place-items-center rounded-full bg-[#edf5fa] border border-[#d7e7ef] text-[#336886] shadow-sm transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:bg-[#336886] group-hover:text-white sm:h-7 sm:w-7">
+                        <svg className="h-3.5 w-3.5 stroke-[2.5] sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
