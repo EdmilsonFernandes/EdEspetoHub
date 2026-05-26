@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "a01bf7d2",
-  "versionLabel": "v0.1.9.a01bf7d2",
-  "versionInternal": "0.1.9+20260526.164817.a01bf7d2",
-  "buildId": "0.1.9+20260526.164817.a01bf7d2-20260526.164817-a01bf7d2",
-  "builtAt": "2026-05-26T16:48:17.820Z",
-  "commitHash": "a01bf7d2d9e871b5facf9f2f8924f186f44fb2f2",
-  "shortHash": "a01bf7d2",
+  "versionDisplaySuffix": "bb379cc8",
+  "versionLabel": "v0.1.9.bb379cc8",
+  "versionInternal": "0.1.9+20260526.171158.bb379cc8",
+  "buildId": "0.1.9+20260526.171158.bb379cc8-20260526.171158-bb379cc8",
+  "builtAt": "2026-05-26T17:11:58.589Z",
+  "commitHash": "bb379cc83a3ea999575df29984c34b5f8d6ca8ca",
+  "shortHash": "bb379cc8",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "bb379cc83a3ea999575df29984c34b5f8d6ca8ca",
+      "shortHash": "bb379cc8",
+      "dateIso": "2026-05-26T13:57:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(frontend): transform landing page to premium dark theme with interactive flow simulator and bento features grid",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bb379cc83a3ea999575df29984c34b5f8d6ca8ca"
+    },
+    {
+      "hash": "95062ee98e9bdd3d7878d9011a3cd10f58efb25a",
+      "shortHash": "95062ee9",
+      "dateIso": "2026-05-26T13:51:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Add Instagram link to landing page",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/95062ee98e9bdd3d7878d9011a3cd10f58efb25a"
+    },
     {
       "hash": "a01bf7d2d9e871b5facf9f2f8924f186f44fb2f2",
       "shortHash": "a01bf7d2",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(frontend): premium card layout and inline add button in menu view",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1728f9cd5f4d16dcf41c3994ea1779c94519fa5b"
-    },
-    {
-      "hash": "6008915e465abe04f95ee7d73248021c4d5da3d4",
-      "shortHash": "6008915e",
-      "dateIso": "2026-05-24T20:03:34-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(frontend): premium visual polishes and lightbox preview in destinations flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6008915e465abe04f95ee7d73248021c4d5da3d4"
-    },
-    {
-      "hash": "4d22b857a16dbb919b62ea733775b943b879e3c4",
-      "shortHash": "4d22b857",
-      "dateIso": "2026-05-24T19:51:41-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve public image caching and hub preload",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4d22b857a16dbb919b62ea733775b943b879e3c4"
     }
   ]
 }

@@ -36,6 +36,7 @@
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@phosphor-icons/react": "^2.1.10",
     "firebase": "^12.6.0",
+    "framer-motion": "^12.40.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
     "lottie-react": "^2.4.1",

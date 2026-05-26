@@ -29,6 +29,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
 import { HubFlowSimulator } from '../components/Landing/HubFlowSimulator';
 import { BentoFeatures } from '../components/Landing/BentoFeatures';
+import { LandingUseCases } from '../components/Landing/LandingUseCases';
 
 const mercadoPagoLandingLogo = '/mercado-pago-horizontal.png';
 
@@ -397,6 +398,16 @@ export function LandingPage() {
           <div className="pointer-events-none absolute left-0 bottom-0 h-96 w-96 rounded-full bg-emerald-500/5 blur-[120px]" />
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <BentoFeatures />
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════
+            CASOS DE USO REAIS (SIMULADORES INTERATIVOS)
+        ══════════════════════════════════════════════════════════════ */}
+        <section className="relative bg-[#030712] pb-20 sm:pb-28 overflow-hidden">
+          <div className="pointer-events-none absolute right-0 top-0 h-96 w-96 rounded-full bg-cyan-500/5 blur-[120px]" />
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <LandingUseCases />
           </div>
         </section>
 
