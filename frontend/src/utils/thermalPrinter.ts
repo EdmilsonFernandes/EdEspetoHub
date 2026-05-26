@@ -43,24 +43,33 @@ const ThermalPrinter = registerPlugin<ThermalPrinterPlugin>('ThermalPrinter');
 export const isAndroidNativeThermalPrinterRuntime = () =>
   Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
 
-export const getNativeThermalPrinterStatus = async () => {
+export const isNativeThermalPrinterPluginAvailable = () =>
+  isAndroidNativeThermalPrinterRuntime() && Capacitor.isPluginAvailable('ThermalPrinter');
+
+const ensureNativeThermalPrinterAvailable = (message: string) => {
   if (!isAndroidNativeThermalPrinterRuntime()) {
-    throw new NativeThermalPrinterError('UNAVAILABLE', 'Impressão nativa disponível apenas no app Android.');
+    throw new NativeThermalPrinterError('UNAVAILABLE', message);
   }
+  if (!Capacitor.isPluginAvailable('ThermalPrinter')) {
+    throw new NativeThermalPrinterError(
+      'PLUGIN_UNAVAILABLE',
+      'Atualize o app da loja para usar a impressão Bluetooth direta. Enquanto isso, a impressão continua pelo RawBT.'
+    );
+  }
+};
+
+export const getNativeThermalPrinterStatus = async () => {
+  ensureNativeThermalPrinterAvailable('Impressão nativa disponível apenas no app Android.');
   return ThermalPrinter.getStatus();
 };
 
 export const listNativeThermalPrinters = async () => {
-  if (!isAndroidNativeThermalPrinterRuntime()) {
-    throw new NativeThermalPrinterError('UNAVAILABLE', 'Abra pelo app Android para configurar a impressora.');
-  }
+  ensureNativeThermalPrinterAvailable('Abra pelo app Android para configurar a impressora.');
   return ThermalPrinter.listPairedDevices();
 };
 
 export const saveNativeThermalPrinter = async (device: NativeThermalPrinterDevice, paperWidth = 32) => {
-  if (!isAndroidNativeThermalPrinterRuntime()) {
-    throw new NativeThermalPrinterError('UNAVAILABLE', 'Abra pelo app Android para configurar a impressora.');
-  }
+  ensureNativeThermalPrinterAvailable('Abra pelo app Android para configurar a impressora.');
   return ThermalPrinter.savePrinter({
     address: device.address,
     name: device.name || 'Impressora Bluetooth',
@@ -69,23 +78,17 @@ export const saveNativeThermalPrinter = async (device: NativeThermalPrinterDevic
 };
 
 export const clearNativeThermalPrinter = async () => {
-  if (!isAndroidNativeThermalPrinterRuntime()) {
-    throw new NativeThermalPrinterError('UNAVAILABLE', 'Abra pelo app Android para configurar a impressora.');
-  }
+  ensureNativeThermalPrinterAvailable('Abra pelo app Android para configurar a impressora.');
   return ThermalPrinter.clearPrinter();
 };
 
 export const openNativeBluetoothSettings = async () => {
-  if (!isAndroidNativeThermalPrinterRuntime()) {
-    throw new NativeThermalPrinterError('UNAVAILABLE', 'Abra pelo app Android para configurar a impressora.');
-  }
+  ensureNativeThermalPrinterAvailable('Abra pelo app Android para configurar a impressora.');
   return ThermalPrinter.openBluetoothSettings();
 };
 
 export const printNativeThermalReceipt = async (text: string) => {
-  if (!isAndroidNativeThermalPrinterRuntime()) {
-    throw new NativeThermalPrinterError('UNAVAILABLE', 'Impressão nativa disponível apenas no app Android.');
-  }
+  ensureNativeThermalPrinterAvailable('Impressão nativa disponível apenas no app Android.');
   const status = await ThermalPrinter.getStatus();
   const address = String(status?.savedPrinter?.address || '').trim();
   if (!address) {

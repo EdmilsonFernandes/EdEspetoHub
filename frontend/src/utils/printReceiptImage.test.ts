@@ -64,6 +64,22 @@ describe('printReceiptAsImage', () => {
     expect(href).toContain('rawbt:base64,');
   });
 
+  it('cai para RawBT quando o APK ainda não tem o plugin nativo', async () => {
+    vi.mocked(printNativeThermalReceipt).mockRejectedValue(
+      Object.assign(new Error('ThermalPrinter plugin is not implemented on android'), { code: 'PLUGIN_UNAVAILABLE' })
+    );
+    let href = '';
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function click(this: HTMLAnchorElement) {
+      href = this.href;
+    });
+
+    const result = await printReceiptAsImage(payload);
+
+    expect(result.mode).toBe('rawbt');
+    expect(result.fallbackReason).toBe('PLUGIN_UNAVAILABLE');
+    expect(href).toContain('rawbt:base64,');
+  });
+
   it('preserva os dados principais do cupom enviado para impressão', () => {
     const text = buildRawBtText({
       ...payload,

@@ -6,6 +6,7 @@ import {
   clearNativeThermalPrinter,
   getNativeThermalPrinterStatus,
   isAndroidNativeThermalPrinterRuntime,
+  isNativeThermalPrinterPluginAvailable,
   listNativeThermalPrinters,
   openNativeBluetoothSettings,
   saveNativeThermalPrinter,
@@ -18,9 +19,10 @@ export function ThermalPrinterSettingsCard() {
   const [loading, setLoading] = useState(false);
   const [savingAddress, setSavingAddress] = useState('');
   const isNativeAndroid = isAndroidNativeThermalPrinterRuntime();
+  const hasNativePrinterPlugin = isNativeThermalPrinterPluginAvailable();
 
   const loadStatus = async () => {
-    if (!isNativeAndroid) return;
+    if (!hasNativePrinterPlugin) return;
     try {
       const nextStatus = await getNativeThermalPrinterStatus();
       setStatus(nextStatus);
@@ -31,11 +33,15 @@ export function ThermalPrinterSettingsCard() {
 
   useEffect(() => {
     void loadStatus();
-  }, [isNativeAndroid]);
+  }, [hasNativePrinterPlugin]);
 
   const loadDevices = async () => {
     if (!isNativeAndroid) {
       showToast('Configuração disponível apenas no app Android da loja.', 'info');
+      return;
+    }
+    if (!hasNativePrinterPlugin) {
+      showToast('Atualize o app da loja para configurar a impressão Bluetooth direta. Enquanto isso, use o RawBT.', 'info');
       return;
     }
     setLoading(true);
@@ -118,6 +124,10 @@ export function ThermalPrinterSettingsCard() {
       {!isNativeAndroid ? (
         <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
           Abra esta tela pelo app Android da loja para parear e salvar a impressora. No navegador web, a impressão continua pelo modo do navegador.
+        </div>
+      ) : !hasNativePrinterPlugin ? (
+        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+          Esta versão instalada do app ainda não tem o plugin de impressão Bluetooth direta. Atualize o app da loja para configurar a impressora aqui. Até lá, a impressão continua funcionando pelo RawBT instalado no aparelho.
         </div>
       ) : (
         <>
