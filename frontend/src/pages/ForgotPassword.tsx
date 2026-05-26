@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   CheckCircle,
@@ -27,7 +27,7 @@ const RECOVERY_CONTEXT = {
     loginPath: '/cliente?mode=login',
     eyebrow: 'Conta do cliente',
     headline: 'Vamos recuperar seu acesso',
-    description: 'Informe seu e-mail. Depois você cria uma nova senha e confirma com o código recebido.',
+    description: 'Informe seu e-mail. Depois você cria a nova senha e recebe o código para confirmar.',
   },
   entregador: {
     title: 'Recuperar senha',
@@ -36,7 +36,7 @@ const RECOVERY_CONTEXT = {
     loginPath: '/motoboy/login',
     eyebrow: 'Área do entregador',
     headline: 'Recupere seu acesso de entregador',
-    description: 'Use o e-mail cadastrado para receber um código seguro e voltar ao app.',
+    description: 'Use o e-mail cadastrado. Depois você recebe um código seguro para voltar ao app.',
   },
   lojista: {
     title: 'Recuperar senha',
@@ -45,7 +45,7 @@ const RECOVERY_CONTEXT = {
     loginPath: '/admin',
     eyebrow: 'Área da loja',
     headline: 'Recupere o acesso da loja',
-    description: 'Digite o e-mail do acesso. Enviaremos um código para validar a troca da senha.',
+    description: 'Digite o e-mail do acesso. O código será enviado depois que você definir a nova senha.',
   },
 };
 
@@ -73,6 +73,8 @@ export function ForgotPassword() {
   const [cooldown, setCooldown] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const codeInputRef = useRef<HTMLInputElement | null>(null);
+  const codeSubmitInFlightRef = useRef(false);
 
   useEffect(() => {
     if (cooldown <= 0) return undefined;
@@ -82,7 +84,7 @@ export function ForgotPassword() {
 
   const codeDigits = useMemo(() => Array.from({ length: 6 }, (_, index) => code[index] || ''), [code]);
 
-  const requestCode = async (options?: { stayOnStep?: boolean }) => {
+  const sendResetCode = async (options?: { stayOnStep?: boolean }) => {
     const normalizedEmail = String(email || '').trim().toLowerCase();
     setError('');
     setMessage('');
@@ -95,8 +97,11 @@ export function ForgotPassword() {
       await authService.forgotPassword(normalizedEmail);
       setEmail(normalizedEmail);
       setCooldown(60);
-      setMessage('Enviamos um código para seu e-mail. Ele vale por alguns minutos.');
-      if (!options?.stayOnStep) setStep('password');
+      setMessage('Enviamos um código para seu e-mail. Copie os 6 números e cole aqui.');
+      if (!options?.stayOnStep) {
+        setStep('code');
+        window.setTimeout(() => codeInputRef.current?.focus(), 120);
+      }
     } catch (err) {
       setError(err?.message || 'Não foi possível enviar o código agora. Tente novamente.');
     } finally {
@@ -106,10 +111,19 @@ export function ForgotPassword() {
 
   const handleEmailSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    await requestCode();
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    setError('');
+    setMessage('');
+    if (!normalizedEmail) {
+      setError('Informe seu e-mail para continuar.');
+      return;
+    }
+    setEmail(normalizedEmail);
+    setStep('password');
+    window.setTimeout(() => document.getElementById('new-password')?.focus(), 80);
   };
 
-  const handlePasswordSubmit = (event: React.FormEvent) => {
+  const handlePasswordSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
     setMessage('');
@@ -121,19 +135,19 @@ export function ForgotPassword() {
       setError('As senhas não conferem. Revise e tente novamente.');
       return;
     }
-    setStep('code');
-    window.setTimeout(() => document.getElementById('reset-code')?.focus(), 80);
+    await sendResetCode();
   };
 
-  const handleCodeSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const normalizedCode = cleanCode(code);
+  const submitCode = async (codeOverride?: string) => {
+    const normalizedCode = cleanCode(codeOverride ?? code);
     setError('');
     setMessage('');
     if (normalizedCode.length !== 6) {
       setError('Digite o código de 6 dígitos enviado por e-mail.');
       return;
     }
+    if (codeSubmitInFlightRef.current) return;
+    codeSubmitInFlightRef.current = true;
     setLoading(true);
     try {
       await authService.resetPasswordWithCode(email, normalizedCode, password);
@@ -142,11 +156,25 @@ export function ForgotPassword() {
       setCode('');
       setStep('success');
       setMessage('Senha alterada com sucesso. Você já pode entrar com a nova senha.');
-      window.setTimeout(() => navigate(context.loginPath, { replace: true }), 1800);
+      window.setTimeout(() => navigate(context.loginPath, { replace: true }), 700);
     } catch (err) {
       setError(err?.message || 'Código inválido ou expirado. Peça um novo código e tente novamente.');
     } finally {
       setLoading(false);
+      codeSubmitInFlightRef.current = false;
+    }
+  };
+
+  const handleCodeSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    await submitCode();
+  };
+
+  const applyCode = (value: string, autoSubmit = false) => {
+    const nextCode = cleanCode(value);
+    setCode(nextCode);
+    if (autoSubmit && nextCode.length === 6) {
+      window.setTimeout(() => submitCode(nextCode), 0);
     }
   };
 
@@ -156,12 +184,14 @@ export function ForgotPassword() {
       const text = await navigator.clipboard?.readText?.();
       const nextCode = cleanCode(text || '');
       if (!nextCode) {
-        setError('Não encontrei um código válido na área de transferência.');
+        codeInputRef.current?.focus();
+        setError('Não encontrei um código válido copiado. Toque no campo e use colar do teclado.');
         return;
       }
-      setCode(nextCode);
+      applyCode(nextCode, true);
     } catch {
-      setError('Não deu para ler o código copiado. Você pode digitar manualmente.');
+      codeInputRef.current?.focus();
+      setError('Não deu para ler automaticamente. Toque no campo e use colar do teclado.');
     }
   };
 
@@ -186,9 +216,9 @@ export function ForgotPassword() {
             {step === 'email'
               ? context.description
               : step === 'password'
-              ? 'Agora escolha uma senha nova. A confirmação será feita com o código enviado ao seu e-mail.'
+              ? 'Agora escolha uma senha nova. Ao continuar, enviaremos o código para seu e-mail.'
               : step === 'code'
-              ? `Digite o código enviado para ${email}.`
+              ? `Enviamos o código para ${email}. Cole ou digite os 6 números.`
               : 'Você será direcionado para entrar novamente.'}
           </p>
         </div>
@@ -242,7 +272,7 @@ export function ForgotPassword() {
                   Código seguro por e-mail
                 </div>
                 <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
-                  Não mostramos se o e-mail existe ou não. Isso protege sua conta.
+                  Primeiro confirme o e-mail e crie a nova senha. O código será enviado no próximo passo.
                 </p>
               </div>
               <div className="floating-field">
@@ -263,7 +293,7 @@ export function ForgotPassword() {
                 className="ds-btn-shine flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)] transition active:scale-[0.98] disabled:opacity-60 sm:h-14 sm:text-base"
               >
                 <PaperPlaneTilt size={19} weight="duotone" />
-                {loading ? 'Enviando código...' : 'Continuar'}
+                Continuar
               </button>
             </form>
           ) : null}
@@ -314,10 +344,10 @@ export function ForgotPassword() {
               </div>
               <button
                 type="submit"
-                disabled={!password || !confirm}
+                disabled={loading || !password || !confirm}
                 className="ds-btn-shine flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)] transition active:scale-[0.98] disabled:opacity-60 sm:h-14 sm:text-base"
               >
-                Alterar senha
+                {loading ? 'Enviando código...' : 'Enviar código por e-mail'}
               </button>
               <button
                 type="button"
@@ -335,30 +365,37 @@ export function ForgotPassword() {
                 <label htmlFor="reset-code" className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
                   Código recebido
                 </label>
-                <label htmlFor="reset-code" className="grid cursor-text grid-cols-6 gap-2">
-                  {codeDigits.map((digit, index) => (
-                    <span
-                      key={index}
-                      className={`flex h-14 items-center justify-center rounded-2xl border text-xl font-black tracking-tight shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] transition sm:h-14 ${
-                        digit ? 'border-[#b8d8e5] bg-white text-[#153A4C]' : 'border-slate-200 bg-slate-50 text-slate-300'
-                      }`}
-                    >
-                      {digit || '0'}
-                    </span>
-                  ))}
-                </label>
-                <input
-                  {...inputAssistProps.otp}
-                  id="reset-code"
-                  value={code}
-                  onChange={(event) => setCode(cleanCode(event.target.value))}
-                  onPaste={(event) => {
-                    event.preventDefault();
-                    setCode(cleanCode(event.clipboardData.getData('text')));
-                  }}
-                  className="sr-only"
-                  maxLength={6}
-                />
+                <div className="relative">
+                  <label htmlFor="reset-code" className="grid cursor-text grid-cols-6 gap-2">
+                    {codeDigits.map((digit, index) => (
+                      <span
+                        key={index}
+                        className={`flex h-14 items-center justify-center rounded-2xl border text-xl font-black tracking-tight shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] transition sm:h-14 ${
+                          digit ? 'border-[#b8d8e5] bg-white text-[#153A4C]' : 'border-slate-200 bg-slate-50 text-slate-300'
+                        }`}
+                      >
+                        {digit || '0'}
+                      </span>
+                    ))}
+                  </label>
+                  <input
+                    {...inputAssistProps.otp}
+                    ref={codeInputRef}
+                    id="reset-code"
+                    value={code}
+                    onChange={(event) => applyCode(event.target.value, true)}
+                    onPaste={(event) => {
+                      event.preventDefault();
+                      applyCode(event.clipboardData.getData('text'), true);
+                    }}
+                    className="absolute inset-0 h-full w-full cursor-text opacity-0"
+                    maxLength={6}
+                    aria-label="Código de 6 dígitos"
+                  />
+                </div>
+                <p className="mt-2 text-center text-xs font-semibold text-slate-500">
+                  Ao colar os 6 números, validamos automaticamente.
+                </p>
               </div>
               <button
                 type="button"
@@ -377,7 +414,7 @@ export function ForgotPassword() {
               </button>
               <button
                 type="button"
-                onClick={() => requestCode({ stayOnStep: true })}
+                onClick={() => sendResetCode({ stayOnStep: true })}
                 disabled={loading || cooldown > 0}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-600 transition active:scale-[0.98] disabled:opacity-55"
               >

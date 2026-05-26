@@ -14,10 +14,11 @@ export type EmailTemplateDefinition = {
   legacySettingPrefix?: string;
 };
 
-const codeBox = (variable = 'CODE_SPACED') => `
-  <div style="margin: 22px 0; padding: 18px; border-radius: 24px; background: linear-gradient(135deg, rgba(15,59,83,0.08) 0%, rgba(45,212,191,0.12) 100%); border: 1px solid rgba(45,212,191,0.22);">
+const codeBox = (variable = 'CODE') => `
+  <div style="margin: 22px 0; padding: 18px; border-radius: 24px; background: linear-gradient(135deg, rgba(15,59,83,0.08) 0%, rgba(45,212,191,0.12) 100%); border: 1px solid rgba(45,212,191,0.22); overflow: hidden;">
     <div style="font-size: 12px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: #0f3b53; opacity: 0.78;">Codigo</div>
-    <div style="margin-top: 10px; font-size: 38px; line-height: 1; letter-spacing: 0.32em; font-weight: 900; color: #0f172a;">{{${variable}}}</div>
+    <div style="margin-top: 10px; font-family: Arial, Helvetica, sans-serif; font-size: 34px; line-height: 1; letter-spacing: 0.16em; font-weight: 900; color: #0f172a; white-space: nowrap; word-break: keep-all; user-select: all;">{{${variable}}}</div>
+    <div style="margin-top: 10px; color: #64748b; font-size: 12px; line-height: 1.6;">Copie os numeros juntos, sem espacos.</div>
   </div>
 `;
 
@@ -46,13 +47,13 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     description: 'Enviado quando usuario pede redefinicao de senha pelo app usando codigo curto.',
     subject: 'Código para redefinir sua senha - Já no Caminho',
     preheader: 'Digite o código no app para criar uma nova senha.',
-    variables: ['CODE', 'CODE_SPACED', 'LINK', 'APP_URL', 'EXPIRES_MINUTES'],
-    textBody: 'Recebemos seu pedido para redefinir a senha.\n\nCódigo: {{CODE}}\n\nO código expira em {{EXPIRES_MINUTES}} minutos.\nSe preferir, abra este link seguro: {{LINK}}\n\nSe não foi você, ignore este e-mail.',
+    variables: ['CODE', 'LINK', 'APP_URL', 'EXPIRES_MINUTES'],
+    textBody: 'Recebemos seu pedido para redefinir a senha.\n\nCódigo: {{CODE}}\n\nCopie os 6 números juntos, sem espaços. O código expira em {{EXPIRES_MINUTES}} minutos.\nSe preferir, abra este link seguro: {{LINK}}\n\nSe não foi você, ignore este e-mail.',
     htmlBody: `
       <h1 style="margin: 0 0 10px; font-size: 28px; line-height: 1.12; color: #0f172a;">Redefinir senha</h1>
       <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.7;">Digite este código no app para confirmar que o e-mail é seu e criar uma nova senha.</p>
       ${codeBox()}
-      <p style="margin: 0 0 20px; color: #64748b; font-size: 13px; line-height: 1.7;">O código expira em <strong>{{EXPIRES_MINUTES}} minutos</strong>. Se estiver usando o navegador, você também pode continuar pelo botão abaixo.</p>
+      <p style="margin: 0 0 20px; color: #64748b; font-size: 13px; line-height: 1.7;">Copie os <strong>6 números juntos</strong>. O código expira em <strong>{{EXPIRES_MINUTES}} minutos</strong>. Se estiver usando o navegador, você também pode continuar pelo botão abaixo.</p>
       <a href="{{LINK}}" style="display: inline-block; padding: 13px 18px; border-radius: 14px; background: #153A4C; color: #ffffff; text-decoration: none; font-weight: 800;">Abrir recuperação segura</a>
       <p style="margin: 20px 0 0; color: #64748b; font-size: 12px; line-height: 1.7;">Se você não pediu essa alteração, ignore este e-mail.</p>
     `,

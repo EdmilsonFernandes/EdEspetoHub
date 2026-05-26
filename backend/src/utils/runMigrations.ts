@@ -12,6 +12,22 @@
  */
 
 import { AppDataSource } from '../config/database';
+
+const PASSWORD_RESET_CODE_TEXT_BODY =
+  'Recebemos seu pedido para redefinir a senha.\n\nCodigo: {{CODE}}\n\nCopie os 6 numeros juntos, sem espacos. O codigo expira em {{EXPIRES_MINUTES}} minutos.\nSe preferir, abra este link seguro: {{LINK}}\n\nSe nao foi voce, ignore este e-mail.';
+
+const PASSWORD_RESET_CODE_HTML_BODY = `
+  <h1 style="margin: 0 0 10px; font-size: 28px; line-height: 1.12; color: #0f172a;">Redefinir senha</h1>
+  <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.7;">Digite este codigo no app para confirmar que o e-mail e seu e criar uma nova senha.</p>
+  <div style="margin: 22px 0; padding: 18px; border-radius: 24px; background: linear-gradient(135deg, rgba(15,59,83,0.08) 0%, rgba(45,212,191,0.12) 100%); border: 1px solid rgba(45,212,191,0.22); overflow: hidden;">
+    <div style="font-size: 12px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: #0f3b53; opacity: 0.78;">Codigo</div>
+    <div style="margin-top: 10px; font-family: Arial, Helvetica, sans-serif; font-size: 34px; line-height: 1; letter-spacing: 0.16em; font-weight: 900; color: #0f172a; white-space: nowrap; word-break: keep-all; user-select: all;">{{CODE}}</div>
+    <div style="margin-top: 10px; color: #64748b; font-size: 12px; line-height: 1.6;">Copie os numeros juntos, sem espacos.</div>
+  </div>
+  <p style="margin: 0 0 20px; color: #64748b; font-size: 13px; line-height: 1.7;">Copie os <strong>6 numeros juntos</strong>. O codigo expira em <strong>{{EXPIRES_MINUTES}} minutos</strong>. Se estiver usando o navegador, voce tambem pode continuar pelo botao abaixo.</p>
+  <a href="{{LINK}}" style="display: inline-block; padding: 13px 18px; border-radius: 14px; background: #153A4C; color: #ffffff; text-decoration: none; font-weight: 800;">Abrir recuperacao segura</a>
+  <p style="margin: 20px 0 0; color: #64748b; font-size: 12px; line-height: 1.7;">Se voce nao pediu essa alteracao, ignore este e-mail.</p>
+`;
 /**
  * Handles run migrations.
  *
@@ -827,6 +843,26 @@ export async function runMigrations() {
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_email_templates_category ON email_templates(category, active);
   `);
+  await AppDataSource.query(
+    `
+    UPDATE email_templates
+    SET text_body = $1,
+        html_body = $2,
+        variables = $3::jsonb,
+        updated_at = NOW()
+    WHERE key = 'password_reset_code'
+      AND (
+        html_body LIKE '%CODE_SPACED%'
+        OR html_body LIKE '%letter-spacing: 0.32em%'
+        OR html_body LIKE '%Digite este código no app%'
+      );
+  `,
+    [
+      PASSWORD_RESET_CODE_TEXT_BODY,
+      PASSWORD_RESET_CODE_HTML_BODY,
+      JSON.stringify(['CODE', 'LINK', 'APP_URL', 'EXPIRES_MINUTES']),
+    ]
+  );
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_email_send_logs_created ON email_send_logs(created_at DESC);
   `);

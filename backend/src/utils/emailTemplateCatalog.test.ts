@@ -60,4 +60,14 @@ describe('emailTemplateCatalog', () => {
       expect(rendered.html, `${template.key} html`).not.toMatch(PLACEHOLDER_PATTERN);
     }
   });
+
+  it('keeps password reset code copy-friendly in email clients', () => {
+    const template = DEFAULT_EMAIL_TEMPLATES.find((item) => item.key === 'password_reset_code');
+
+    expect(template?.htmlBody).toContain('{{CODE}}');
+    expect(template?.htmlBody).not.toContain('{{CODE_SPACED}}');
+    expect(template?.variables).not.toContain('CODE_SPACED');
+    expect(template?.htmlBody).toContain('white-space: nowrap');
+    expect(template?.textBody).toContain('Copie os 6 números juntos');
+  });
 });

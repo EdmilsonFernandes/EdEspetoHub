@@ -4,6 +4,8 @@ const waitForAppIntro = async (page: Page) => {
   await expect(page.getByText('Conectando com segurança')).toBeHidden({ timeout: 10000 });
 };
 
+test.use({ serviceWorkers: 'block' });
+
 test.describe('Suíte E2E: Auth e Acesso', () => {
   test('deve abrir a tela principal e carregar a plataforma do marketplace (Mobile)', async ({ page }) => {
     // A baseURL já gerencia o http://localhost:8080 configurado no playwright.config.ts
@@ -34,6 +36,59 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
     await expect(page.getByText('App, pedidos e endereços')).toHaveCount(0);
     await expect(page.getByText('Desenvolvido com excelência')).toHaveCount(0);
     await expect(page.getByText('Área do cliente', { exact: true })).toHaveCount(1);
+  });
+
+  test('recuperacao envia codigo apos senha e valida automaticamente ao preencher 6 digitos', async ({ page }) => {
+    await page.addInitScript(() => {
+      const w = window as any;
+      const originalFetch = window.fetch.bind(window);
+
+      w.__forgotCalls = 0;
+      w.__resetCalls = 0;
+      w.__lastResetPayload = null;
+
+      window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === 'string' ? input : input instanceof Request ? input.url : String(input);
+        if (url.includes('/auth/forgot-password')) {
+          w.__forgotCalls += 1;
+          return new Response(
+            JSON.stringify({ code: 'AUTH-S001', message: 'Se o e-mail existir, enviaremos instruções.' }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+        if (url.includes('/auth/reset-password-code')) {
+          w.__resetCalls += 1;
+          w.__lastResetPayload = JSON.parse(String(init?.body || '{}'));
+          return new Response(JSON.stringify({ code: 'AUTH-S003', message: 'Senha alterada com sucesso.' }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        return originalFetch(input, init);
+      };
+    });
+
+    await page.goto('/forgot-password?perfil=cliente');
+    await waitForAppIntro(page);
+
+    await page.locator('#reset-email').fill('cliente.e2e@janocaminho.test');
+    await page.getByRole('button', { name: /^Continuar$/ }).click();
+    await expect.poll(() => page.evaluate(() => (window as any).__forgotCalls)).toBe(0);
+
+    await expect(page.getByRole('heading', { name: 'Crie sua nova senha' })).toBeVisible();
+    await page.locator('#new-password').fill('senha-nova-123');
+    await page.locator('#confirm-password').fill('senha-nova-123');
+    await page.getByRole('button', { name: 'Enviar código por e-mail' }).click();
+
+    await expect(page.getByText('Enviamos um código para seu e-mail')).toBeVisible();
+    await expect.poll(() => page.evaluate(() => (window as any).__forgotCalls)).toBe(1);
+
+    await page.locator('#reset-code').fill('123456');
+    await expect(page).toHaveURL(/\/cliente\?mode=login/);
+    await expect.poll(() => page.evaluate(() => (window as any).__resetCalls)).toBe(1);
+    await expect
+      .poll(() => page.evaluate(() => (window as any).__lastResetPayload))
+      .toEqual({ email: 'cliente.e2e@janocaminho.test', code: '123456', newPassword: 'senha-nova-123' });
   });
 
   test('mostra header padrao e valida login do lojista sem envio silencioso', async ({ page }) => {
