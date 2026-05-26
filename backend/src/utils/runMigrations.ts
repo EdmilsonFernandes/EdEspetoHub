@@ -24,6 +24,24 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS attempts_count INTEGER NOT NULL DEFAULT 0;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS password_resets
+    ADD COLUMN IF NOT EXISTS resend_count INTEGER NOT NULL DEFAULT 0;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS password_resets
+    ADD COLUMN IF NOT EXISTS request_ip TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS password_resets
+    ADD COLUMN IF NOT EXISTS last_sent_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    UPDATE password_resets
+    SET last_sent_at = COALESCE(last_sent_at, created_at),
+        resend_count = COALESCE(resend_count, 0)
+    WHERE last_sent_at IS NULL;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings
     ADD COLUMN IF NOT EXISTS social_links JSONB DEFAULT '[]';
   `);
