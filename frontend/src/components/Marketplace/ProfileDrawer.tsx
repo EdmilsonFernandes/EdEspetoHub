@@ -483,11 +483,20 @@ export function ProfileDrawer({
                       decoding="async"
                       className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/15"
                     />
-                    <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                    <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                    </span>
                   </div>
                 ) : (
-                  <div className={`grid h-16 w-16 place-items-center ${currentIdentity.iconShell}`}>
-                    {currentIdentity.icon}
+                  <div className="relative">
+                    <div className={`grid h-16 w-16 place-items-center ${currentIdentity.iconShell}`}>
+                      {currentIdentity.icon}
+                    </div>
+                    <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                    </span>
                   </div>
                 )}
                 <div className="min-w-0 flex-1">

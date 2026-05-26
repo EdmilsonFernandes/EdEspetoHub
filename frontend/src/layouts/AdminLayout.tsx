@@ -283,6 +283,14 @@ export function AdminLayout({
       icon: <Package size={22} weight="duotone" />,
       onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
     },
+    {
+      section: 'Loja',
+      id: 'printer',
+      label: 'Impressora',
+      description: 'Configure a impressora Bluetooth deste aparelho.',
+      icon: <Printer size={22} weight="duotone" />,
+      onClick: () => navigate('/admin/dashboard?tab=config&section=printer'),
+    },
     ...(!isOperatorUser
       ? [{
           section: 'Loja',
@@ -549,6 +557,7 @@ export function AdminLayout({
           isOpen={accountDrawerOpen}
           onClose={() => setAccountDrawerOpen(false)}
           side="left"
+          theme="store"
           eyebrow="Menu da operação"
           title={storeName}
           subtitle={[operatorRoleLabel, operatorName || null, storeEmail || null].filter(Boolean).join(' · ') || 'Acesso da operação neste aparelho'}

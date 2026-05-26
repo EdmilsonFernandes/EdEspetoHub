@@ -240,6 +240,8 @@ export function MotoboyLayout() {
       description: 'Veja os pedidos disponíveis e novas coletas.',
       icon: <ListChecks size={22} weight="duotone" />,
       onClick: () => navigate('/motoboy/available'),
+      badge: queueBadge ? 'Novo' : undefined,
+      badgeTone: 'danger' as const,
     },
     {
       id: 'earnings',
@@ -437,6 +439,7 @@ export function MotoboyLayout() {
           isOpen={accountDrawerOpen}
           onClose={() => setAccountDrawerOpen(false)}
           side="left"
+          theme="motoboy"
           eyebrow="Menu do entregador"
           title={motoboyName || 'Entregador'}
           subtitle={motoboyEmail || 'Acesso ativo neste aparelho'}

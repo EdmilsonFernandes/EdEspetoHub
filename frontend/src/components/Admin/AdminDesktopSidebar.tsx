@@ -146,19 +146,22 @@ export function AdminDesktopSidebar({
         }}
         aria-label={item.label}
         title={isDisabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
-        className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
+        className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center transition-all duration-200 ${
           compact ? 'justify-center px-0' : 'justify-between gap-2'
         } ${nested && !compact ? 'pl-4 pr-2.5 py-2.5 rounded-[1rem] text-[13px] font-bold text-slate-500 hover:text-slate-950' : ''} ${
           !nested && !compact ? 'font-semibold' : ''
-        } ${isActive ? 'ds-admin-sidebar-item-active text-white font-medium' : ''} ${
+        } ${isActive ? 'ds-admin-sidebar-item-active text-white font-medium pl-5' : ''} ${
           isDisabled ? 'opacity-80 cursor-pointer border border-violet-300/50 bg-violet-500/10 hover:bg-violet-500/20' : ''
         }`}
       >
-        <span className={`inline-flex items-center min-w-0 ${compact ? '' : 'gap-2.5'}`}>
-          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition-colors ${
+        {isActive && !compact && (
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-1 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] animate-in fade-in zoom-in-75 duration-200" />
+        )}
+        <span className={`inline-flex items-center min-w-0 ${compact ? '' : 'gap-2.5'} transition-transform duration-200 group-hover:translate-x-0.5`}>
+          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition-all duration-200 ${
             isActive
               ? 'bg-white/12 text-white'
-              : 'border border-white/80 bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.88))] text-[#336886] shadow-[0_12px_22px_-20px_rgba(15,23,42,0.25)]'
+              : 'border border-white/80 bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.88))] text-[#336886] shadow-[0_12px_22px_-20px_rgba(15,23,42,0.25)] group-hover:scale-105 group-hover:shadow-[0_14px_24px_-18px_rgba(15,23,42,0.35)]'
           }`}>
             <Icon size={17} weight={isActive ? 'fill' : 'duotone'} />
           </span>

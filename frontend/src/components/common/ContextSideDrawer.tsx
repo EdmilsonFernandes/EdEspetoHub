@@ -14,6 +14,8 @@ type ContextSideDrawerAction = {
   icon: ReactNode;
   onClick: () => void;
   tone?: 'default' | 'danger';
+  badge?: string | number;
+  badgeTone?: 'danger' | 'brand' | 'success' | 'neutral';
 };
 
 type ContextSideDrawerProps = {
@@ -29,6 +31,7 @@ type ContextSideDrawerProps = {
   footerSubtitle?: string;
   footer?: ReactNode;
   side?: 'left' | 'right';
+  theme?: 'client' | 'store' | 'motoboy' | 'default';
 };
 
 export function ContextSideDrawer({
@@ -44,6 +47,7 @@ export function ContextSideDrawer({
   footerSubtitle,
   footer,
   side = 'right',
+  theme = 'default',
 }: ContextSideDrawerProps) {
   useEffect(() => {
     if (!isOpen) return;
@@ -81,6 +85,90 @@ export function ContextSideDrawer({
     return groups;
   }, [actions]);
 
+  // Theme resolution classes
+  const themeClasses = {
+    default: {
+      aside: 'bg-[linear-gradient(180deg,rgba(255,255,255,0.99)_0%,rgba(246,249,251,0.98)_100%)] border-slate-200/70',
+      headerBorder: 'border-slate-200/80',
+      eyebrow: 'text-slate-400',
+      title: 'text-slate-950',
+      subtitle: 'text-slate-500',
+      closeBtn: 'border-slate-200/80 bg-white text-slate-500 hover:text-slate-800 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.25)]',
+      sectionTitle: 'text-slate-400',
+      actionBtn: {
+        danger: 'border-rose-100 bg-rose-50/75 text-rose-700 hover:bg-rose-50',
+        default: 'border-slate-200 bg-white text-slate-800 hover:border-[#d8e5ee] hover:bg-[#f7fafc]',
+      },
+      iconBox: {
+        danger: 'border-rose-100 bg-rose-100/80 text-rose-500',
+        default: 'border-slate-200 bg-slate-50 text-slate-700',
+      },
+      footerBorder: 'border-slate-200/80',
+      footerTitle: 'text-slate-900',
+      footerSubtitle: 'text-slate-400',
+    },
+    store: {
+      aside: 'bg-[linear-gradient(180deg,#070d19_0%,#0e1424_100%)] border-slate-800/80',
+      headerBorder: 'border-slate-850',
+      eyebrow: 'text-violet-400/80',
+      title: 'text-white',
+      subtitle: 'text-slate-400',
+      closeBtn: 'border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white shadow-md',
+      sectionTitle: 'text-slate-500',
+      actionBtn: {
+        danger: 'border-rose-950/60 bg-rose-950/20 text-rose-300 hover:bg-rose-950/30',
+        default: 'border-slate-850 bg-slate-900/40 text-slate-200 hover:border-slate-700/80 hover:bg-slate-900/80',
+      },
+      iconBox: {
+        danger: 'border-rose-900/60 bg-rose-950/50 text-rose-400',
+        default: 'border-slate-800 bg-slate-950 text-violet-400',
+      },
+      footerBorder: 'border-slate-850',
+      footerTitle: 'text-slate-200',
+      footerSubtitle: 'text-slate-550',
+    },
+    motoboy: {
+      aside: 'bg-[linear-gradient(180deg,#0a0f1d_0%,#111827_100%)] border-slate-800/80',
+      headerBorder: 'border-slate-850',
+      eyebrow: 'text-[#f59e0b]/80',
+      title: 'text-white',
+      subtitle: 'text-slate-400',
+      closeBtn: 'border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white shadow-md',
+      sectionTitle: 'text-slate-500',
+      actionBtn: {
+        danger: 'border-rose-950/60 bg-rose-950/20 text-rose-300 hover:bg-rose-950/30',
+        default: 'border-slate-850 bg-slate-900/40 text-slate-200 hover:border-slate-700/80 hover:bg-slate-900/80',
+      },
+      iconBox: {
+        danger: 'border-rose-900/60 bg-rose-950/50 text-rose-400',
+        default: 'border-slate-800 bg-slate-950 text-[#f59e0b]/90',
+      },
+      footerBorder: 'border-slate-850',
+      footerTitle: 'text-slate-200',
+      footerSubtitle: 'text-slate-550',
+    },
+    client: {
+      aside: 'bg-[linear-gradient(180deg,rgba(255,255,255,0.99)_0%,rgba(246,249,251,0.98)_100%)] border-slate-200/70',
+      headerBorder: 'border-slate-200/80',
+      eyebrow: 'text-[#336886]/80',
+      title: 'text-slate-950',
+      subtitle: 'text-slate-500',
+      closeBtn: 'border-slate-200/80 bg-white text-slate-500 hover:text-slate-800 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.25)]',
+      sectionTitle: 'text-slate-450',
+      actionBtn: {
+        danger: 'border-rose-100 bg-rose-50/75 text-rose-700 hover:bg-rose-50',
+        default: 'border-slate-200 bg-white text-slate-800 hover:border-[#d8e5ee] hover:bg-[#f7fafc]',
+      },
+      iconBox: {
+        danger: 'border-rose-100 bg-rose-100/80 text-rose-500',
+        default: 'border-slate-200 bg-[#edf5fa] text-[#336886]',
+      },
+      footerBorder: 'border-slate-200/80',
+      footerTitle: 'text-slate-900',
+      footerSubtitle: 'text-slate-400',
+    },
+  }[theme];
+
   return (
     <div
       className={`fixed inset-0 z-[10040] transition-opacity duration-300 ${
@@ -89,23 +177,33 @@ export function ContextSideDrawer({
     >
       <div className="absolute inset-0 bg-slate-950/45 backdrop-blur-[3px]" onClick={onClose} />
       <aside
-        className={`absolute inset-y-0 ${side === 'right' ? 'right-0' : 'left-0'} flex h-full w-[320px] max-w-[88vw] flex-col border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.99)_0%,rgba(246,249,251,0.98)_100%)] shadow-[0_24px_60px_-28px_rgba(15,23,42,0.45)] transition-transform duration-300 ${
+        className={`absolute inset-y-0 ${side === 'right' ? 'right-0' : 'left-0'} flex h-full w-[320px] max-w-[88vw] flex-col transition-transform duration-300 ${themeClasses.aside} shadow-[0_24px_60px_-28px_rgba(15,23,42,0.45)] ${
           side === 'right'
             ? `border-l ${isOpen ? 'translate-x-0' : 'translate-x-full'}`
             : `border-r ${isOpen ? 'translate-x-0' : '-translate-x-full'}`
         }`}
       >
-        <div className="relative border-b border-slate-200/80 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))]">
+        <div className={`relative border-b px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] ${themeClasses.headerBorder}`}>
           <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
           <div className="relative flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-start gap-3">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.2rem] border border-white/90 bg-white shadow-[0_14px_26px_-18px_rgba(15,23,42,0.22)]">
-                {leading}
+              {/* Pulsing Active Status Indicator */}
+              <div className="relative shrink-0">
+                <div className="grid h-12 w-12 place-items-center rounded-[1.2rem] border border-white/90 bg-white shadow-[0_14px_26px_-18px_rgba(15,23,42,0.22)] overflow-hidden">
+                  {leading}
+                </div>
+                {theme !== 'default' && (
+                  <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white" />
+                  </span>
+                )}
               </div>
+
               <div className="min-w-0">
-                <p className="truncate text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{eyebrow}</p>
-                <h2 className="mt-1 truncate text-[1.1rem] font-black tracking-[-0.03em] text-slate-950">{title}</h2>
-                {subtitle ? <p className="mt-1 text-[12px] font-semibold leading-relaxed text-slate-500">{subtitle}</p> : null}
+                <p className={`truncate text-[10px] font-black uppercase tracking-[0.2em] ${themeClasses.eyebrow}`}>{eyebrow}</p>
+                <h2 className={`mt-1 truncate text-[1.1rem] font-black tracking-[-0.03em] ${themeClasses.title}`}>{title}</h2>
+                {subtitle ? <p className={`mt-1 text-[12px] font-semibold leading-relaxed ${themeClasses.subtitle}`}>{subtitle}</p> : null}
                 {badges.length > 0 ? (
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     {badges.map((badge) => (
@@ -131,7 +229,7 @@ export function ContextSideDrawer({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-500 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.25)] transition-all active:scale-95"
+              className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all active:scale-95 ${themeClasses.closeBtn}`}
               aria-label="Fechar conta"
             >
               <X size={16} weight="bold" />
@@ -144,7 +242,7 @@ export function ContextSideDrawer({
             {groupedActions.map((group) => (
               <div key={group.key} className="space-y-2">
                 {group.label ? (
-                  <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                  <p className={`px-1 text-[10px] font-black uppercase tracking-[0.18em] ${themeClasses.sectionTitle}`}>
                     {group.label}
                   </p>
                 ) : null}
@@ -162,26 +260,43 @@ export function ContextSideDrawer({
                     }}
                     className={`flex w-full items-center gap-3 rounded-[1.25rem] border px-3.5 py-3 text-left transition-all active:scale-[0.98] ${
                       action.tone === 'danger'
-                        ? 'border-rose-100 bg-rose-50/75 text-rose-700 hover:bg-rose-50'
-                        : 'border-slate-200 bg-white text-slate-800 hover:border-[#d8e5ee] hover:bg-[#f7fafc]'
+                        ? themeClasses.actionBtn.danger
+                        : themeClasses.actionBtn.default
                     }`}
                   >
                     <div
                       className={`grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] border ${
                         action.tone === 'danger'
-                          ? 'border-rose-100 bg-rose-100/80 text-rose-500'
-                          : 'border-slate-200 bg-slate-50 text-slate-700'
+                          ? themeClasses.iconBox.danger
+                          : themeClasses.iconBox.default
                       }`}
                     >
                       {action.icon}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className={`text-[14px] leading-tight ${action.tone === 'danger' ? 'font-black' : 'font-semibold'}`}>{action.label}</p>
-                      {action.description ? (
-                        <p className={`mt-0.5 text-[11px] font-semibold ${action.tone === 'danger' ? 'text-rose-700/70' : 'text-slate-500'}`}>
-                          {action.description}
-                        </p>
-                      ) : null}
+                    <div className="min-w-0 flex-1 flex items-center justify-between gap-2">
+                      <div>
+                        <p className={`text-[14px] leading-tight ${action.tone === 'danger' ? 'font-black' : 'font-semibold'}`}>{action.label}</p>
+                        {action.description ? (
+                          <p className={`mt-0.5 text-[11px] font-semibold ${action.tone === 'danger' ? 'text-rose-700/70' : 'text-slate-500'}`}>
+                            {action.description}
+                          </p>
+                        ) : null}
+                      </div>
+
+                      {/* Premium Badge Counter */}
+                      {action.badge !== undefined && action.badge !== null && String(action.badge) !== '' && (
+                        <span className={`inline-flex shrink-0 items-center justify-center rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wide leading-none ${
+                          action.badgeTone === 'danger' || !action.badgeTone
+                            ? 'bg-rose-600 text-white shadow-[0_4px_12px_rgba(225,29,72,0.3)]'
+                            : action.badgeTone === 'brand'
+                            ? 'bg-[#336886] text-white shadow-[0_4px_12px_rgba(51,104,134,0.3)]'
+                            : action.badgeTone === 'success'
+                            ? 'bg-emerald-600 text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)]'
+                            : 'bg-slate-650 text-white'
+                        }`}>
+                          {action.badge}
+                        </span>
+                      )}
                     </div>
                   </button>
                 ))}
@@ -191,13 +306,13 @@ export function ContextSideDrawer({
         </div>
 
         {footer ? (
-          <div className="border-t border-slate-200/80 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className={`border-t px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] ${themeClasses.footerBorder}`}>
             {footer}
           </div>
         ) : (footerTitle || footerSubtitle) ? (
-          <div className="border-t border-slate-200/80 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            {footerTitle ? <p className="text-[11px] font-black text-slate-900">{footerTitle}</p> : null}
-            {footerSubtitle ? <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{footerSubtitle}</p> : null}
+          <div className={`border-t px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] ${themeClasses.footerBorder}`}>
+            {footerTitle ? <p className={`text-[11px] font-black ${themeClasses.footerTitle}`}>{footerTitle}</p> : null}
+            {footerSubtitle ? <p className={`mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${themeClasses.footerSubtitle}`}>{footerSubtitle}</p> : null}
           </div>
         ) : null}
       </aside>
