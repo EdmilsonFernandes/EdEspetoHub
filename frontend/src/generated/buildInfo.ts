@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "c7032f2a",
-  "versionLabel": "v0.1.9.c7032f2a",
-  "versionInternal": "0.1.9+20260526.175249.c7032f2a",
-  "buildId": "0.1.9+20260526.175249.c7032f2a-20260526.175249-c7032f2a",
-  "builtAt": "2026-05-26T17:52:49.495Z",
-  "commitHash": "c7032f2a6f63d04658cfcfafab66e7a094fe15e8",
-  "shortHash": "c7032f2a",
+  "versionDisplaySuffix": "c93622ef",
+  "versionLabel": "v0.1.9.c93622ef",
+  "versionInternal": "0.1.9+20260526.180208.c93622ef",
+  "buildId": "0.1.9+20260526.180208.c93622ef-20260526.180208-c93622ef",
+  "builtAt": "2026-05-26T18:02:08.448Z",
+  "commitHash": "c93622ef64db60bd24aa0a131452fd3b5e362356",
+  "shortHash": "c93622ef",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "c93622ef64db60bd24aa0a131452fd3b5e362356",
+      "shortHash": "c93622ef",
+      "dateIso": "2026-05-26T14:54:32-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(frontend): apply premium design enhancements to /hub, including ambient mesh gradients, Bento Grid shortcuts, animated placeholders, and springy store card lift animations",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c93622ef64db60bd24aa0a131452fd3b5e362356"
+    },
     {
       "hash": "c7032f2a6f63d04658cfcfafab66e7a094fe15e8",
       "shortHash": "c7032f2a",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Padroniza headers e valida login",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/be8d3fa2593d77dca567ee6307e6d365940b5aa7"
-    },
-    {
-      "hash": "12a8515f94b59a6979e9db415437d0a1786b52ea",
-      "shortHash": "12a8515f",
-      "dateIso": "2026-05-25T10:44:27-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish image previews toasts and hub filters",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/12a8515f94b59a6979e9db415437d0a1786b52ea"
     }
   ]
 } as const;
