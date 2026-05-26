@@ -116,7 +116,7 @@ const toBase64Utf8 = (value: string) => {
   return btoa(utf8);
 };
 
-const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
+export const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
   const locationLabel = sanitizeText(
     payload.locationLabel || (payload.tableLabel ? `MESA ${payload.tableLabel}` : "")
   );

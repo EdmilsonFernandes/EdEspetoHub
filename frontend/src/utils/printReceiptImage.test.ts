@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { printNativeThermalReceipt } from './thermalPrinter';
-import { printReceiptAsImage } from './printReceiptImage';
+import { buildRawBtText, printReceiptAsImage } from './printReceiptImage';
 
 vi.mock('./thermalPrinter', () => ({
   printNativeThermalReceipt: vi.fn(),
@@ -62,5 +62,41 @@ describe('printReceiptAsImage', () => {
     expect(result.mode).toBe('rawbt');
     expect(result.fallbackReason).toBe('NO_PRINTER');
     expect(href).toContain('rawbt:base64,');
+  });
+
+  it('preserva os dados principais do cupom enviado para impressão', () => {
+    const text = buildRawBtText({
+      ...payload,
+      storeName: 'Gustavão Espetos',
+      queueLabel: '#07',
+      orderLabel: '#PED123',
+      customerLabel: 'Mesa 12',
+      customerNote: 'Sem ketchup e avisar para descer.',
+      locationLabel: 'MESA 12',
+      items: [
+        { quantity: 2, name: 'Medalhão de Palmito', lineTotal: 'R$ 24,00', notes: 'Ao ponto' },
+        { quantity: 3, name: 'Couvert Luan Santana', lineTotal: 'R$ 46,50', notes: '3 pessoas x R$ 15,50 por pessoa' },
+        { quantity: 1, name: 'Taxa de serviço', lineTotal: 'R$ 7,05' },
+      ],
+      totalLabel: 'R$ 77,55',
+    });
+
+    expect(text).toContain('GUSTAVÃO ESPETOS');
+    expect(text).toContain('Fila: #07');
+    expect(text).toContain('Pedido: #PED123');
+    expect(text).toContain('MESA 12');
+    expect(text).toContain('CLIENTE: MESA 12');
+    expect(text).toContain('OBS CLIENTE');
+    expect(text).toContain('Sem ketchup');
+    expect(text).toContain('descer.');
+    expect(text).toContain('2x Medalhão de Palmito');
+    expect(text).toContain('R$ 24,00');
+    expect(text).toContain('Ao ponto');
+    expect(text).toContain('3x Couvert Luan Santana');
+    expect(text).toContain('3 pessoas x R$ 15,50');
+    expect(text).toContain('pessoa');
+    expect(text).toContain('1x Taxa de serviço');
+    expect(text).toContain('TOTAL:');
+    expect(text).toContain('R$ 77,55');
   });
 });
