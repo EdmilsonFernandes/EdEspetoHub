@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Buildings, CaretDown, CreditCard, CurrencyDollar, DownloadSimple, GooglePlayLogo, House, List, MagnifyingGlass, Moon, QrCode, ShieldCheck, SignOut, Storefront, Sun, UserCircle, WhatsappLogo, X } from '@phosphor-icons/react';
+import { Buildings, CaretDown, CreditCard, CurrencyDollar, DownloadSimple, GooglePlayLogo, House, InstagramLogo, List, MagnifyingGlass, Moon, QrCode, ShieldCheck, SignOut, Storefront, Sun, UserCircle, WhatsappLogo, X } from '@phosphor-icons/react';
 interface LandingPageLayoutProps {
   children: React.ReactNode;
 }
@@ -12,6 +12,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   const COOKIE_CONSENT_KEY = 'jnk_cookie_consent_v1';
   const ATTRIBUTION_KEY = 'jnk_attribution_v1';
   const whatsAppBusinessHref = 'https://wa.me/551239334979';
+  const instagramHref = 'https://www.instagram.com/janocaminho';
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -314,6 +315,16 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
+              <a
+                href={instagramHref}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram oficial do Já no Caminho"
+                className="hidden lg:inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3.5 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-200 transition-all hover:border-pink-300/35 hover:bg-white/[0.08] hover:text-white"
+              >
+                <InstagramLogo size={16} weight="duotone" className="text-pink-300" />
+                @janocaminho
+              </a>
               <button
                 onClick={goToAccessPortal}
                 className="hidden md:inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-200 transition-all hover:bg-white/[0.08] hover:text-white"
@@ -409,6 +420,15 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               Solicitar acesso do condomínio
               <Buildings size={18} weight="duotone" />
             </button>
+            <a
+              href={instagramHref}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full inline-flex items-center justify-between rounded-xl border border-pink-200 bg-pink-50 px-4 py-3 text-sm font-semibold text-pink-800 dark:border-pink-900/60 dark:bg-pink-950/20 dark:text-pink-300"
+            >
+              Instagram oficial @janocaminho
+              <InstagramLogo size={18} weight="duotone" />
+            </a>
             <div className="rounded-2xl border border-slate-200/80 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/70">
               <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Soluções</p>
               <div className="mt-3 space-y-2">
@@ -559,6 +579,18 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 </div>
               </div>
               <p className="mt-3 text-sm text-slate-400">Solução completa para pedidos, operação e entregas com experiência app-like.</p>
+              <a
+                href={instagramHref}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram oficial do Já no Caminho"
+                className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-700 bg-white/[0.04] px-3 py-2 text-xs font-black text-slate-200 transition hover:border-pink-300/35 hover:bg-white/[0.08] hover:text-white"
+              >
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-fuchsia-500 via-pink-500 to-amber-400 text-white">
+                  <InstagramLogo size={15} weight="fill" />
+                </span>
+                @janocaminho
+              </a>
             </div>
 
             <div>
@@ -587,6 +619,10 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <div className="space-y-2 text-sm text-slate-400">
                 <a href="mailto:contato@janocaminho.com.br" className="block hover:text-white transition-colors">
                   contato@janocaminho.com.br
+                </a>
+                <a href={instagramHref} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 hover:text-white transition-colors">
+                  <InstagramLogo size={16} weight="duotone" className="text-pink-300" />
+                  Instagram @janocaminho
                 </a>
                 <button onClick={goToAccessPortal} className="block hover:text-white transition-colors">
                   Entrar na plataforma
