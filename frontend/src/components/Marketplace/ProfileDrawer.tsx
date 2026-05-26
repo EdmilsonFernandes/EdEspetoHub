@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BellRinging,
@@ -19,7 +19,12 @@ import {
   Fingerprint,
   X
 } from '@phosphor-icons/react';
-import { nativeBiometricService } from '../../services/nativeBiometricService';
+import {
+  ADMIN_SESSION_EVENT,
+  CUSTOMER_SESSION_EVENT,
+  MOTOBOY_SESSION_EVENT,
+  nativeBiometricService,
+} from '../../services/nativeBiometricService';
 
 type DrawerAction = {
   id: string;
@@ -69,6 +74,12 @@ type AccessProfile = {
 
 type DrawerContext = 'guest' | 'client' | 'store' | 'motoboy';
 
+const EMPTY_ACCESS_PROFILES = {
+  customer: { name: '', email: '', biometric: false, hasSession: false },
+  admin: { name: '', email: '', biometric: false, hasSession: false },
+  motoboy: { name: '', email: '', biometric: false, hasSession: false },
+};
+
 export function ProfileDrawer({
   isOpen,
   isLogged,
@@ -106,15 +117,9 @@ export function ProfileDrawer({
     customer: { name: string; email: string; biometric: boolean; hasSession: boolean };
     admin: { name: string; email: string; biometric: boolean; hasSession: boolean };
     motoboy: { name: string; email: string; biometric: boolean; hasSession: boolean };
-  }>({
-    customer: { name: '', email: '', biometric: false, hasSession: false },
-    admin: { name: '', email: '', biometric: false, hasSession: false },
-    motoboy: { name: '', email: '', biometric: false, hasSession: false },
-  });
+  }>(EMPTY_ACCESS_PROFILES);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    fetch("/api/customer/notifications").then(r => r.ok ? r.json() : null).then(d => setNotifBadge(d?.unreadCount || 0)).catch(() => {});
+  const refreshAccessContext = useCallback(() => {
     try {
       const adminRaw = localStorage.getItem('adminSession');
       const motoboyRaw = localStorage.getItem('motoboySession');
@@ -172,13 +177,47 @@ export function ProfileDrawer({
         },
       });
     } catch {
-      setSavedAccessProfiles({
-        customer: { name: '', email: '', biometric: false, hasSession: false },
-        admin: { name: '', email: '', biometric: false, hasSession: false },
-        motoboy: { name: '', email: '', biometric: false, hasSession: false },
-      });
+      setSavedAccessProfiles(EMPTY_ACCESS_PROFILES);
     }
-  }, [isOpen]);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch("/api/customer/notifications").then(r => r.ok ? r.json() : null).then(d => setNotifBadge(d?.unreadCount || 0)).catch(() => {});
+    refreshAccessContext();
+  }, [isOpen, refreshAccessContext]);
+
+  useEffect(() => {
+    const refresh = () => refreshAccessContext();
+    const handleStorage = (event: StorageEvent) => {
+      if (
+        !event.key ||
+        event.key === 'customerSession' ||
+        event.key === 'adminSession' ||
+        event.key === 'motoboySession'
+      ) {
+        refresh();
+      }
+    };
+
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener(CUSTOMER_SESSION_EVENT, refresh as EventListener);
+    window.addEventListener(ADMIN_SESSION_EVENT, refresh as EventListener);
+    window.addEventListener(MOTOBOY_SESSION_EVENT, refresh as EventListener);
+
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener(CUSTOMER_SESSION_EVENT, refresh as EventListener);
+      window.removeEventListener(ADMIN_SESSION_EVENT, refresh as EventListener);
+      window.removeEventListener(MOTOBOY_SESSION_EVENT, refresh as EventListener);
+    };
+  }, [refreshAccessContext]);
+
+  useEffect(() => {
+    refreshAccessContext();
+  }, [isOpen, refreshAccessContext]);
 
   useEffect(() => {
     if (isOpen) {
@@ -273,7 +312,7 @@ export function ProfileDrawer({
             email: String(savedAccessProfiles.admin.email || '').trim(),
             imageUrl: null,
             icon: <Storefront size={32} weight="duotone" />,
-            iconShell: 'rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/12',
+            iconShell: 'rounded-2xl bg-violet-50 text-violet-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_32px_-24px_rgba(139,92,246,0.35)] ring-1 ring-violet-100',
             badges: [
               { label: 'Lojista', tone: 'brand' as const },
             ],
@@ -287,9 +326,9 @@ export function ProfileDrawer({
               email: String(savedAccessProfiles.motoboy.email || '').trim(),
               imageUrl: null,
               icon: <Motorcycle size={32} weight="duotone" />,
-              iconShell: 'rounded-2xl bg-[linear-gradient(135deg,#0f172a,#334155)] text-white shadow-[0_18px_30px_-18px_rgba(15,23,42,0.45)] ring-2 ring-slate-300/12',
+              iconShell: 'rounded-2xl bg-amber-50 text-amber-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_32px_-24px_rgba(245,158,11,0.35)] ring-1 ring-amber-100',
               badges: [
-                { label: 'Entregador', tone: 'dark' as const },
+                { label: 'Entregador', tone: 'neutral' as const },
               ],
               switchTitle: 'Outros acessos',
               switchHint: 'Cliente e lojista aparecem aqui.',
@@ -512,7 +551,7 @@ export function ProfileDrawer({
                             ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
                             : badge.tone === 'brand'
                               ? 'border border-[#d8e5ee] bg-[#edf5fa] text-[#336886]'
-                              : badge.tone === 'dark'
+                            : (badge.tone as string) === 'dark'
                                 ? 'border border-slate-200 bg-slate-900 text-white'
                                 : 'border border-slate-200 bg-white/90 text-slate-500'
                         }`}

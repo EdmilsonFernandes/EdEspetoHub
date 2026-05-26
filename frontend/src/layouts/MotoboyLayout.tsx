@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { House, IdentificationCard, ListChecks, Motorcycle, ShieldCheck, SignOut, Truck, Wallet } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { motoboyService } from '../services/motoboyService';
-import { nativeBiometricService } from '../services/nativeBiometricService';
+import { MOTOBOY_SESSION_EVENT, nativeBiometricService } from '../services/nativeBiometricService';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -54,6 +54,11 @@ export function MotoboyLayout() {
   const motoboyEmail = String(motoboyUser?.email || '').trim();
   const motoboyImage = resolveAssetUrl(String(motoboyUser?.profileImageUrl || '')) || '';
   const requiresPasswordChange = Boolean(motoboyUser?.mustChangePassword);
+  const refreshMotoboySession = () => setSessionRefreshKey((prev) => prev + 1);
+  const openMotoboyAccountDrawer = () => {
+    refreshMotoboySession();
+    setAccountDrawerOpen(true);
+  };
 
   const tabs: Tab[] = [
     {
@@ -89,7 +94,7 @@ export function MotoboyLayout() {
       label: 'Menu',
       icon: <IdentificationCard size={20} weight="duotone" />,
       match: (p) => p.startsWith('/motoboy/profile'),
-      onClick: () => setAccountDrawerOpen(true),
+      onClick: openMotoboyAccountDrawer,
     },
   ];
 
@@ -136,13 +141,31 @@ export function MotoboyLayout() {
   }, [pathname]);
 
   useEffect(() => {
-    const openAccountDrawer = () => setAccountDrawerOpen(true);
-    const openMenuDrawer = () => setAccountDrawerOpen(true);
+    const openAccountDrawer = () => openMotoboyAccountDrawer();
+    const openMenuDrawer = () => openMotoboyAccountDrawer();
     window.addEventListener('motoboy:open-account-drawer', openAccountDrawer as EventListener);
     window.addEventListener('motoboy:open-menu-drawer', openMenuDrawer as EventListener);
     return () => {
       window.removeEventListener('motoboy:open-account-drawer', openAccountDrawer as EventListener);
       window.removeEventListener('motoboy:open-menu-drawer', openMenuDrawer as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    const refresh = () => refreshMotoboySession();
+    const handleStorage = (event: StorageEvent) => {
+      if (!event.key || event.key === 'motoboySession') {
+        refresh();
+      }
+    };
+
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener(MOTOBOY_SESSION_EVENT, refresh as EventListener);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener(MOTOBOY_SESSION_EVENT, refresh as EventListener);
     };
   }, []);
 

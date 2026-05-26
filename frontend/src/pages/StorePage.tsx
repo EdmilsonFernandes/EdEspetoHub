@@ -4018,6 +4018,7 @@ export function StorePage() {
           isOpen={adminAccountDrawerOpen}
           onClose={() => setAdminAccountDrawerOpen(false)}
           side="left"
+          theme="store"
           eyebrow="Menu da operação"
           title={adminStoreName}
           subtitle={[adminRoleLabel, adminOperatorName || null, adminOperatorEmail || null].filter(Boolean).join(' · ') || 'Acesso da operação neste aparelho'}
