@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.janocaminho.app",
+      "sha256_cert_fingerprints": [
+        "12:A0:6F:54:9C:73:06:B7:28:A5:B3:BB:6B:A7:15:82:2B:C5:48:30:41:23:DB:59:BB:46:2C:3E:AF:D1:A7:53"
+      ]
+    }
+  }
+]
