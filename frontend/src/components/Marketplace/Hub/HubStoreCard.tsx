@@ -80,9 +80,9 @@ export function HubStoreCard({
         to={to}
         state={state}
         style={{ animationDelay: `${index * 50}ms` }}
-        className={`group overflow-hidden rounded-[1.45rem] border animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-backwards transition-all ease-out active:scale-[0.985] ${
+        className={`group overflow-hidden rounded-[1.45rem] border animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-backwards transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.985] ${
           store.isOpen
-            ? 'border-white bg-white shadow-[0_12px_30px_rgba(15,23,42,0.075)] md:hover:-translate-y-0.5 md:hover:shadow-[0_18px_38px_rgba(15,23,42,0.11)]'
+            ? 'border-white bg-white shadow-[0_12px_30px_rgba(15,23,42,0.075)] md:hover:-translate-y-1.5 md:hover:scale-[1.01] md:hover:shadow-[0_20px_45px_rgba(15,23,42,0.15)] md:hover:border-[#336886]/20'
             : 'border-slate-200/80 bg-slate-50/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)] grayscale-[25%] opacity-85 filter blur-[0.4px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
         }`}
       >
@@ -178,9 +178,9 @@ export function HubStoreCard({
       to={to}
       state={state}
       style={{ animationDelay: `${index * 36}ms` }}
-      className={`group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] border px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards transition-all ease-out active:scale-[0.985] ${
+      className={`group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] border px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.985] ${
         store.isOpen
-          ? 'border-white/80 bg-white/78 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/38 md:hover:-translate-y-0.5 md:hover:bg-white md:hover:shadow-[0_20px_44px_-34px_rgba(15,23,42,0.32)]'
+          ? 'border-white/80 bg-white/78 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/38 md:hover:-translate-y-1.5 md:hover:scale-[1.01] md:hover:bg-white md:hover:shadow-[0_20px_45px_-30px_rgba(15,23,42,0.35)] md:hover:border-[#336886]/20'
           : 'border-slate-100/80 bg-slate-50/72 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.16)] ring-1 ring-slate-200/35 grayscale-[25%] opacity-85 filter blur-[0.4px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
       }`}
     >

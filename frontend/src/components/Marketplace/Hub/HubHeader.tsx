@@ -180,7 +180,7 @@ export const HubHeader = memo(function HubHeader({
                 <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
                   <MagnifyingGlass size={18} weight="bold" />
                 </div>
-                <div className="relative min-w-0 flex-1">
+                <div className="relative min-w-0 flex-1 flex items-center">
                   <input
                     {...inputAssistProps.search}
                     ref={(el) => {
@@ -193,11 +193,9 @@ export const HubHeader = memo(function HubHeader({
                     onChange={(event) => onQueryChange(event.target.value)}
                     onFocus={() => onSearchEditingChange(true)}
                     onBlur={() => onSearchEditingChange(false)}
-                    placeholder={isSearchEditing ? 'Buscar loja, categoria ou produto' : searchPlaceholder}
+                    placeholder={isSearchEditing ? 'Buscar loja, categoria ou produto' : ''}
                     enterKeyHint="search"
                     className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-slate-950 outline-none transition-opacity duration-300 ${
-                      searchPlaceholderVisible || isSearchEditing ? 'placeholder:opacity-100' : 'placeholder:opacity-0'
-                    } placeholder:text-slate-400 placeholder:transition-opacity placeholder:duration-300 ${
                       isNativePlatform ? 'min-h-[48px] text-[15px]' : 'min-h-[52px] text-[14px]'
                     }`}
                     style={{
@@ -210,6 +208,19 @@ export const HubHeader = memo(function HubHeader({
                       transform: 'translateZ(0)',
                     }}
                   />
+                  {!isSearchEditing && !query && (
+                    <div
+                      className={`pointer-events-none absolute left-0 flex items-center transition-all duration-300 ${
+                        searchPlaceholderVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+                      } ${
+                        isNativePlatform ? 'text-[15px]' : 'text-[14px]'
+                      }`}
+                    >
+                      <span className="font-semibold text-slate-400 truncate">
+                        {searchPlaceholder}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 {query ? (
                   <button
@@ -322,20 +333,33 @@ export const HubHeader = memo(function HubHeader({
                 onClick={() => desktopSearchInputRef.current?.focus()}
               >
                 <MagnifyingGlass size={15} weight="bold" className="text-[#336886] shrink-0" />
-                <input
-                  {...inputAssistProps.search}
-                  ref={(el) => {
-                    desktopSearchInputRef.current = el;
-                    assignVisibleSearchRef(el);
-                  }}
-                  value={query}
-                  onChange={(event) => onQueryChange(event.target.value)}
-                  onFocus={() => onSearchEditingChange(true)}
-                  onBlur={() => onSearchEditingChange(false)}
-                  placeholder={isSearchEditing ? 'Buscar no app' : searchPlaceholder}
-                  enterKeyHint="search"
-                  className="block w-full min-w-0 appearance-none bg-transparent font-bold text-slate-900 outline-none text-xs placeholder:text-slate-400 placeholder:font-semibold"
-                />
+                <div className="relative min-w-0 flex-1 flex items-center h-full">
+                  <input
+                    {...inputAssistProps.search}
+                    ref={(el) => {
+                      desktopSearchInputRef.current = el;
+                      assignVisibleSearchRef(el);
+                    }}
+                    value={query}
+                    onChange={(event) => onQueryChange(event.target.value)}
+                    onFocus={() => onSearchEditingChange(true)}
+                    onBlur={() => onSearchEditingChange(false)}
+                    placeholder={isSearchEditing ? 'Buscar no app' : ''}
+                    enterKeyHint="search"
+                    className="block w-full min-w-0 appearance-none bg-transparent font-bold text-slate-900 outline-none text-xs placeholder:text-slate-400 placeholder:font-semibold"
+                  />
+                  {!isSearchEditing && !query && (
+                    <div
+                      className={`pointer-events-none absolute left-0 flex items-center transition-all duration-300 ${
+                        searchPlaceholderVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+                      }`}
+                    >
+                      <span className="font-bold text-slate-400 text-xs truncate">
+                        {searchPlaceholder}
+                      </span>
+                    </div>
+                  )}
+                </div>
                 {query ? (
                   <button
                     type="button"

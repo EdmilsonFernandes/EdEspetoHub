@@ -5,16 +5,70 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "bb379cc8",
-  "versionLabel": "v0.1.9.bb379cc8",
-  "versionInternal": "0.1.9+20260526.171158.bb379cc8",
-  "buildId": "0.1.9+20260526.171158.bb379cc8-20260526.171158-bb379cc8",
-  "builtAt": "2026-05-26T17:11:58.589Z",
-  "commitHash": "bb379cc83a3ea999575df29984c34b5f8d6ca8ca",
-  "shortHash": "bb379cc8",
+  "versionDisplaySuffix": "c7032f2a",
+  "versionLabel": "v0.1.9.c7032f2a",
+  "versionInternal": "0.1.9+20260526.175249.c7032f2a",
+  "buildId": "0.1.9+20260526.175249.c7032f2a-20260526.175249-c7032f2a",
+  "builtAt": "2026-05-26T17:52:49.495Z",
+  "commitHash": "c7032f2a6f63d04658cfcfafab66e7a094fe15e8",
+  "shortHash": "c7032f2a",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "c7032f2a6f63d04658cfcfafab66e7a094fe15e8",
+      "shortHash": "c7032f2a",
+      "dateIso": "2026-05-26T14:52:33-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Cover operator printer menu access",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c7032f2a6f63d04658cfcfafab66e7a094fe15e8"
+    },
+    {
+      "hash": "314c8145fb33b5c4a0a213ba9cf4791cc88b76be",
+      "shortHash": "314c8145",
+      "dateIso": "2026-05-26T14:44:27-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(frontend): enhance vertical menus with premium design theme styling, pulsing indicators, and action badges",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/314c8145fb33b5c4a0a213ba9cf4791cc88b76be"
+    },
+    {
+      "hash": "a65dc663bd12e1ab59a128e57342283cc90fd704",
+      "shortHash": "a65dc663",
+      "dateIso": "2026-05-26T14:40:25-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Add printer flow regression tests",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a65dc663bd12e1ab59a128e57342283cc90fd704"
+    },
+    {
+      "hash": "6bcdce9959a500fd241eb49d0e48c60776e38fe4",
+      "shortHash": "6bcdce99",
+      "dateIso": "2026-05-26T14:33:38-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(frontend): adapt marketplace page layout and header for premium responsive desktop viewports",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6bcdce9959a500fd241eb49d0e48c60776e38fe4"
+    },
+    {
+      "hash": "00fc344a425ff0a8bc8e16df263889a58a7fff00",
+      "shortHash": "00fc344a",
+      "dateIso": "2026-05-26T14:22:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Add native thermal printer flow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/00fc344a425ff0a8bc8e16df263889a58a7fff00"
+    },
+    {
+      "hash": "5801767c7aa068b1fb315676eede566f9513c39b",
+      "shortHash": "5801767c",
+      "dateIso": "2026-05-26T14:12:36-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(landing): add dynamic use-cases simulator using framer-motion showing real platform features",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5801767c7aa068b1fb315676eede566f9513c39b"
+    },
     {
       "hash": "bb379cc83a3ea999575df29984c34b5f8d6ca8ca",
       "shortHash": "bb379cc8",
@@ -230,60 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Polish image previews toasts and hub filters",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/12a8515f94b59a6979e9db415437d0a1786b52ea"
-    },
-    {
-      "hash": "c4b400399978507d5ea46b854b136888e6aa7ed1",
-      "shortHash": "c4b40039",
-      "dateIso": "2026-05-25T10:08:04-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine client orders filters and image preview",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c4b400399978507d5ea46b854b136888e6aa7ed1"
-    },
-    {
-      "hash": "4ed2969d4a90b322922a0efde5e2fd22209aa9ba",
-      "shortHash": "4ed2969d",
-      "dateIso": "2026-05-24T21:54:39-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix email logo asset and template variable coverage",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4ed2969d4a90b322922a0efde5e2fd22209aa9ba"
-    },
-    {
-      "hash": "8073d12bc5a051537674db46b72e8b564e1c4e5c",
-      "shortHash": "8073d12b",
-      "dateIso": "2026-05-24T21:31:13-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix destination hospitality card click crash",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8073d12bc5a051537674db46b72e8b564e1c4e5c"
-    },
-    {
-      "hash": "03b9ba4434fc98a8f6b2a4056e0ea75458d2bad6",
-      "shortHash": "03b9ba44",
-      "dateIso": "2026-05-24T20:45:40-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(frontend): import X icon in DestinationDetailPage and revert menu add button position and style",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/03b9ba4434fc98a8f6b2a4056e0ea75458d2bad6"
-    },
-    {
-      "hash": "0aa1d3560aea9423ca8cb43002f98c91e05e5dab",
-      "shortHash": "0aa1d356",
-      "dateIso": "2026-05-24T20:44:01-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Add managed email templates and unsubscribe",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0aa1d3560aea9423ca8cb43002f98c91e05e5dab"
-    },
-    {
-      "hash": "1728f9cd5f4d16dcf41c3994ea1779c94519fa5b",
-      "shortHash": "1728f9cd",
-      "dateIso": "2026-05-24T20:29:44-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(frontend): premium card layout and inline add button in menu view",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1728f9cd5f4d16dcf41c3994ea1779c94519fa5b"
     }
   ]
 } as const;

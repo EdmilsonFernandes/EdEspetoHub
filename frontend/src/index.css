@@ -1350,24 +1350,25 @@ body {
   }
 
   .ds-interactive-card {
-    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+    transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 300ms cubic-bezier(0.34, 1.56, 0.64, 1), border-color 300ms ease;
   }
 
   .ds-interactive-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 18px 42px -26px rgba(15, 23, 42, 0.34);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 35px -12px rgba(15, 23, 42, 0.12), 0 0 25px -5px rgba(51, 104, 134, 0.08);
+    border-color: rgba(51, 104, 134, 0.25);
   }
 
   .ds-skeleton {
     border-radius: 12px;
     background: linear-gradient(
       110deg,
-      rgba(226, 232, 240, 0.9) 8%,
-      rgba(241, 245, 249, 0.95) 18%,
-      rgba(226, 232, 240, 0.9) 33%
+      #e2e8f0 35%,
+      #f8fafc 50%,
+      #e2e8f0 65%
     );
     background-size: 200% 100%;
-    animation: dsSkeletonShimmer 1.2s linear infinite;
+    animation: dsSkeletonShimmer 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
 
   .ds-sheet-panel {
@@ -1526,8 +1527,11 @@ body {
   }
 
   @keyframes dsSkeletonShimmer {
-    to {
-      background-position-x: -200%;
+    0% {
+      background-position-x: 150%;
+    }
+    100% {
+      background-position-x: -50%;
     }
   }
 
