@@ -25,6 +25,7 @@ import {
   MOTOBOY_SESSION_EVENT,
   nativeBiometricService,
 } from '../../services/nativeBiometricService';
+import { SmartDrawerScrollArea } from '../common/SmartDrawerScrollArea';
 
 type DrawerAction = {
   id: string;
@@ -380,6 +381,14 @@ export function ProfileDrawer({
         : activeContext === 'motoboy'
           ? motoboyActions
           : guestActions;
+  const drawerScrollTone =
+    activeContext === 'store'
+      ? 'store'
+      : activeContext === 'motoboy'
+        ? 'motoboy'
+        : activeContext === 'client'
+          ? 'client'
+          : 'neutral';
 
   const quickSwitchAccess = accessProfiles
     .filter((item) => hasActiveContext && item.id !== activeContext)
@@ -637,7 +646,12 @@ export function ProfileDrawer({
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+        <SmartDrawerScrollArea
+          className="flex-1"
+          contentClassName="px-4 py-4 pb-16 space-y-6"
+          tone={drawerScrollTone}
+          hint="Mais no menu"
+        >
           <nav className="space-y-2">
             <p className="mb-3 text-[11px] font-bold tracking-tight text-slate-400 px-1">
               {activeContext === 'client'
@@ -683,7 +697,7 @@ export function ProfileDrawer({
               </div>
             ))}
           </nav>
-        </div>
+        </SmartDrawerScrollArea>
 
         <div className="border-t border-slate-100/90 bg-white/70 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
           <button

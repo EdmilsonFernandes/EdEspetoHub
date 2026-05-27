@@ -1,5 +1,6 @@
 import { useEffect, useMemo, type ReactNode } from 'react';
 import { X } from '@phosphor-icons/react';
+import { SmartDrawerScrollArea } from './SmartDrawerScrollArea';
 
 type ContextSideDrawerBadge = {
   label: string;
@@ -237,7 +238,11 @@ export function ContextSideDrawer({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4">
+        <SmartDrawerScrollArea
+          className="flex-1"
+          contentClassName="px-4 py-4 pb-16"
+          tone={theme === 'default' ? 'neutral' : theme}
+        >
           <div className="space-y-4">
             {groupedActions.map((group) => (
               <div key={group.key} className="space-y-2">
@@ -303,7 +308,7 @@ export function ContextSideDrawer({
               </div>
             ))}
           </div>
-        </div>
+        </SmartDrawerScrollArea>
 
         {footer ? (
           <div className={`border-t px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] ${themeClasses.footerBorder}`}>
