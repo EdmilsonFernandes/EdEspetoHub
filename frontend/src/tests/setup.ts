@@ -17,6 +17,7 @@ vi.mock('@phosphor-icons/react', () => {
     ArrowClockwise: Icon,
     Buildings: Icon,
     CaretDown: Icon,
+    CaretUp: Icon,
     CheckCircle: Icon,
     ClockCounterClockwise: Icon,
     Code: Icon,

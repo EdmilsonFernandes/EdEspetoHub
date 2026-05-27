@@ -650,7 +650,6 @@ export function ProfileDrawer({
           className="flex-1"
           contentClassName="px-4 py-4 space-y-6"
           tone={drawerScrollTone}
-          hint="Mais no menu"
         >
           <nav className="space-y-2">
             <p className="mb-3 text-[11px] font-bold tracking-tight text-slate-400 px-1">

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { CaretDown } from '@phosphor-icons/react';
+import { CaretDown, CaretUp } from '@phosphor-icons/react';
 
 type SmartDrawerScrollAreaTone = 'client' | 'store' | 'motoboy' | 'neutral';
 
@@ -7,7 +7,6 @@ type SmartDrawerScrollAreaProps = {
   children: ReactNode;
   className?: string;
   contentClassName?: string;
-  hint?: string;
   tone?: SmartDrawerScrollAreaTone;
 };
 
@@ -19,25 +18,29 @@ type ScrollState = {
 
 const SCROLL_EDGE_TOLERANCE = 6;
 
-const toneClasses: Record<SmartDrawerScrollAreaTone, { hint: string; icon: string; bottomGlow: string }> = {
+const toneClasses: Record<SmartDrawerScrollAreaTone, { rail: string; activeButton: string; inactiveButton: string; bottomGlow: string }> = {
   client: {
-    hint: 'border-[#d8e5ee] bg-white/92 text-[#336886] shadow-[0_18px_34px_-24px_rgba(51,104,134,0.5)]',
-    icon: 'bg-[#edf5fa] text-[#336886]',
+    rail: 'border-[#d8e5ee] bg-white/82 shadow-[0_18px_34px_-24px_rgba(51,104,134,0.5)]',
+    activeButton: 'bg-[#edf5fa] text-[#336886] ring-[#d8e5ee]',
+    inactiveButton: 'bg-white/60 text-slate-300 ring-slate-100',
     bottomGlow: 'bg-[#336886]/18',
   },
   store: {
-    hint: 'border-violet-100 bg-white/92 text-violet-700 shadow-[0_18px_34px_-24px_rgba(124,58,237,0.45)]',
-    icon: 'bg-violet-50 text-violet-700',
+    rail: 'border-violet-100 bg-white/82 shadow-[0_18px_34px_-24px_rgba(124,58,237,0.45)]',
+    activeButton: 'bg-violet-50 text-violet-700 ring-violet-100',
+    inactiveButton: 'bg-white/60 text-slate-300 ring-slate-100',
     bottomGlow: 'bg-violet-400/16',
   },
   motoboy: {
-    hint: 'border-amber-100 bg-white/92 text-amber-700 shadow-[0_18px_34px_-24px_rgba(245,158,11,0.45)]',
-    icon: 'bg-amber-50 text-amber-700',
+    rail: 'border-amber-100 bg-white/82 shadow-[0_18px_34px_-24px_rgba(245,158,11,0.45)]',
+    activeButton: 'bg-amber-50 text-amber-700 ring-amber-100',
+    inactiveButton: 'bg-white/60 text-slate-300 ring-slate-100',
     bottomGlow: 'bg-amber-400/16',
   },
   neutral: {
-    hint: 'border-slate-200 bg-white/92 text-slate-700 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.35)]',
-    icon: 'bg-slate-100 text-slate-700',
+    rail: 'border-slate-200 bg-white/82 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.35)]',
+    activeButton: 'bg-slate-100 text-slate-700 ring-slate-200',
+    inactiveButton: 'bg-white/60 text-slate-300 ring-slate-100',
     bottomGlow: 'bg-slate-400/14',
   },
 };
@@ -46,7 +49,6 @@ export function SmartDrawerScrollArea({
   children,
   className = '',
   contentClassName = '',
-  hint = 'Mais opções abaixo',
   tone = 'neutral',
 }: SmartDrawerScrollAreaProps) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -113,11 +115,11 @@ export function SmartDrawerScrollArea({
     return () => window.cancelAnimationFrame(animationFrame);
   });
 
-  const scrollToMoreOptions = () => {
+  const scrollByPage = (direction: 'up' | 'down') => {
     const element = scrollRef.current;
     if (!element) return;
     element.scrollBy({
-      top: Math.max(180, Math.round(element.clientHeight * 0.58)),
+      top: (direction === 'down' ? 1 : -1) * Math.max(180, Math.round(element.clientHeight * 0.58)),
       behavior: 'smooth',
     });
   };
@@ -154,19 +156,36 @@ export function SmartDrawerScrollArea({
             }`}
             aria-hidden="true"
           />
-          <button
-            type="button"
-            onClick={scrollToMoreOptions}
-            className={`absolute bottom-3 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-2 rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] backdrop-blur-xl transition-all duration-200 active:scale-95 ${
-              classes.hint
-            } ${scrollState.canScrollDown ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0'}`}
-            aria-label="Mostrar mais opções do menu"
+
+          <div
+            className={`absolute right-2 top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1 rounded-full border p-1 backdrop-blur-xl transition-opacity duration-200 ${classes.rail}`}
+            aria-label="Controle de rolagem do menu"
+            role="group"
           >
-            <span className={`grid h-5 w-5 place-items-center rounded-full ${classes.icon}`}>
-              <CaretDown size={12} weight="bold" />
-            </span>
-            {hint}
-          </button>
+            <button
+              type="button"
+              onClick={() => scrollByPage('up')}
+              disabled={!scrollState.canScrollUp}
+              className={`grid h-7 w-7 place-items-center rounded-full ring-1 transition-all active:scale-95 ${
+                scrollState.canScrollUp ? classes.activeButton : classes.inactiveButton
+              }`}
+              aria-label="Rolar menu para cima"
+            >
+              <CaretUp size={13} weight="bold" />
+            </button>
+            <span className="h-4 w-px rounded-full bg-slate-200/80" aria-hidden="true" />
+            <button
+              type="button"
+              onClick={() => scrollByPage('down')}
+              disabled={!scrollState.canScrollDown}
+              className={`grid h-7 w-7 place-items-center rounded-full ring-1 transition-all active:scale-95 ${
+                scrollState.canScrollDown ? classes.activeButton : classes.inactiveButton
+              }`}
+              aria-label="Rolar menu para baixo"
+            >
+              <CaretDown size={13} weight="bold" />
+            </button>
+          </div>
         </>
       )}
     </div>

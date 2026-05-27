@@ -13,7 +13,7 @@ const mockScrollMetrics = (element: HTMLElement, metrics: { clientHeight: number
 };
 
 describe('SmartDrawerScrollArea', () => {
-  it('shows the menu continuation hint only when the drawer has hidden content below', async () => {
+  it('shows compact scroll controls only when the drawer has hidden content', async () => {
     render(
       <SmartDrawerScrollArea className="h-32" contentClassName="space-y-2">
         <button type="button">Primeira opção</button>
@@ -21,16 +21,18 @@ describe('SmartDrawerScrollArea', () => {
       </SmartDrawerScrollArea>
     );
 
-    expect(screen.queryByRole('button', { name: 'Mostrar mais opções do menu' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Controle de rolagem do menu' })).not.toBeInTheDocument();
 
     const scroller = screen.getByTestId('smart-drawer-scroll');
     mockScrollMetrics(scroller, { clientHeight: 100, scrollHeight: 260 });
     fireEvent.scroll(scroller);
 
-    expect(await screen.findByRole('button', { name: 'Mostrar mais opções do menu' })).toBeInTheDocument();
+    expect(await screen.findByRole('group', { name: 'Controle de rolagem do menu' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Rolar menu para cima' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Rolar menu para baixo' })).toBeEnabled();
   });
 
-  it('scrolls the menu down when the continuation hint is tapped', async () => {
+  it('scrolls the menu down and up from the compact controls', async () => {
     render(
       <SmartDrawerScrollArea className="h-32" contentClassName="space-y-2">
         <button type="button">Conta</button>
@@ -44,11 +46,18 @@ describe('SmartDrawerScrollArea', () => {
     mockScrollMetrics(scroller, { clientHeight: 120, scrollHeight: 340 });
     fireEvent.scroll(scroller);
 
-    const hint = await screen.findByRole('button', { name: 'Mostrar mais opções do menu' });
-    fireEvent.click(hint);
+    fireEvent.click(await screen.findByRole('button', { name: 'Rolar menu para baixo' }));
 
     await waitFor(() => {
       expect(scrollBy).toHaveBeenCalledWith({ top: 180, behavior: 'smooth' });
+    });
+
+    mockScrollMetrics(scroller, { clientHeight: 120, scrollHeight: 340, scrollTop: 120 });
+    fireEvent.scroll(scroller);
+    fireEvent.click(screen.getByRole('button', { name: 'Rolar menu para cima' }));
+
+    await waitFor(() => {
+      expect(scrollBy).toHaveBeenCalledWith({ top: -180, behavior: 'smooth' });
     });
   });
 });
