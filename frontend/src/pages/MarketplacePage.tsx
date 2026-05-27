@@ -2174,8 +2174,8 @@ export function MarketplacePage() {
                         className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
                       />
                       <div className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.42)_42%,rgba(15,23,42,0.82)_100%)]" />
-                      <div className="absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1 rounded-full border border-white/22 bg-white/18 px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.13em] text-white shadow-[0_12px_24px_-18px_rgba(0,0,0,0.36)] backdrop-blur-md">
-                        <MapPinLine size={10} weight="fill" className="shrink-0 text-lime-200" />
+                      <div className="absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full border border-white/80 bg-white/92 px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.13em] text-[#153A4C] shadow-[0_16px_32px_-18px_rgba(15,23,42,0.42)] ring-1 ring-[#d7e7ef]/70 backdrop-blur-xl">
+                        <MapPinLine size={10} weight="fill" className="shrink-0 text-[#336886]" />
                         <span className="truncate">{formatDestinationMatchLabel(destination)}</span>
                       </div>
                       <div className="relative mt-auto flex min-w-0 flex-1 flex-col justify-end p-3.5">

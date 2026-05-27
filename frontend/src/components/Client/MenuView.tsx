@@ -1123,12 +1123,6 @@ export const MenuView = ({
         ref={stickySearchContainerRef}
         className={`sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-slate-100 bg-white/95 shadow-[0_4px_18px_-10px_rgba(15,23,42,0.12)] backdrop-blur-xl`}
       >
-        {Capacitor.isNativePlatform() && (
-          <div className="flex items-center justify-center gap-1.5 border-b border-slate-100/80 py-1.5">
-            <img src="/janocaminho.jpg" alt="" aria-hidden className="h-[14px] w-[14px] rounded-[0.3rem] object-cover opacity-80" />
-            <span className="text-[7.5px] font-black uppercase tracking-[0.28em] text-[#336886]/55">Já no Caminho</span>
-          </div>
-        )}
         <div className="mx-auto w-full max-w-6xl px-4 pt-3 pb-2">
           <div className="relative flex items-center gap-2.5 rounded-[1.2rem] border border-slate-200/80 bg-white px-3.5 shadow-[0_2px_10px_-4px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow] duration-200 focus-within:border-slate-300 focus-within:shadow-[0_4px_16px_-6px_rgba(15,23,42,0.14)]">
             <span
