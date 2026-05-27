@@ -1151,28 +1151,30 @@ export const MenuView = ({
           </div>
         </div>
         {filteredGrouped.length > 1 && (
-          <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-2.5">
-            <div className="flex w-full items-center gap-1.5 rounded-[1.35rem] border border-slate-100/90 bg-slate-50/78 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+          <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-3">
+            <div className="flex w-full items-stretch gap-2 rounded-[1.65rem] border border-white/85 bg-white/76 p-1.5 shadow-[0_16px_36px_-30px_rgba(15,23,42,0.32),inset_0_1px_0_rgba(255,255,255,0.82)] ring-1 ring-slate-900/[0.025] backdrop-blur-xl">
               {useCompactCategoryCarousel && (
                 <button
                   type="button"
                   aria-label="Abrir categorias"
                   onClick={() => setIsCategorySheetOpen(true)}
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] border border-white/90 bg-white text-slate-700 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-100 transition-all active:scale-95"
+                  className="inline-flex w-[3.65rem] shrink-0 flex-col items-center justify-center gap-1 rounded-[1.25rem] border border-white/90 bg-white text-slate-700 shadow-[0_14px_28px_-22px_rgba(15,23,42,0.36)] ring-1 ring-slate-100 transition-all active:scale-95"
                 >
-                  <List size={15} weight="bold" style={{ color: catalogPrimaryColor }} />
+                  <List size={17} weight="bold" style={{ color: catalogPrimaryColor }} />
+                  <span className="text-[9px] font-black uppercase tracking-[0.08em] text-slate-400">Menu</span>
                 </button>
               )}
               <div className={`${
                 useCompactCategoryCarousel
-                  ? "min-w-0 flex-1 overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide sm:overflow-visible sm:whitespace-normal [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                  : `flex-1 grid gap-1.5 ${filteredGrouped.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`
+                  ? "min-w-0 flex-1 snap-x overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide sm:overflow-visible sm:whitespace-normal [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                  : `flex-1 grid gap-2 ${filteredGrouped.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`
               }`}>
-                <div className={`${useCompactCategoryCarousel ? "inline-flex items-center gap-2.5 pr-8 sm:flex sm:flex-wrap sm:gap-2 sm:pr-0" : "contents"}`}>
+                <div className={`${useCompactCategoryCarousel ? "inline-flex items-stretch gap-2.5 pr-10 sm:flex sm:flex-wrap sm:gap-2 sm:pr-0" : "contents"}`}>
                 {filteredGrouped.map((category) => {
                   const isActive = activeCategoryKey === category.key;
                   const Icon = categoryGlyph(category.key);
                   const meta = categoryVisualMeta(category.key);
+                  const categoryCountLabel = category.items.length === 1 ? '1 item' : `${category.items.length} itens`;
                   return (
                     <button
                       key={category.key}
@@ -1184,21 +1186,32 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-full border px-2.5 text-[11.5px] font-black transition-all duration-300 snap-start active:scale-95 sm:px-3 sm:text-xs ${
-                        useCompactCategoryCarousel ? "max-w-full sm:min-w-0" : "w-full min-w-0"
-                      } ${isActive ? 'shadow-[0_10px_22px_-13px_rgba(15,23,42,0.28)]' : 'shadow-none'}`}
+                      className={`group relative flex min-h-[4.75rem] flex-col items-center justify-center overflow-hidden rounded-[1.35rem] border px-2.5 py-2 text-center transition-all duration-300 snap-start active:scale-[0.97] ${
+                        useCompactCategoryCarousel ? "w-[6.9rem] shrink-0 sm:min-w-0" : "w-full min-w-0"
+                      } ${isActive ? 'shadow-[0_18px_34px_-22px_rgba(15,23,42,0.38)]' : 'shadow-[0_10px_24px_-22px_rgba(15,23,42,0.28)] hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-24px_rgba(15,23,42,0.34)]'}`}
                       style={
                         isActive
-                          ? { backgroundColor: catalogPrimaryColor, color: catalogPrimaryText, borderColor: catalogPrimaryColor }
-                          : { backgroundColor: "#ffffff", color: "#64748b", borderColor: "#f1f5f9" }
+                          ? {
+                              background: `linear-gradient(135deg, ${catalogPrimaryColor} 0%, ${catalogPrimaryColor}e8 100%)`,
+                              color: catalogPrimaryText,
+                              borderColor: catalogPrimaryColor,
+                            }
+                          : { backgroundColor: "#ffffff", color: "#334155", borderColor: "#eef2f7" }
                       }
+                      aria-label={`Ir para ${category.label}, ${categoryCountLabel}`}
                     >
+                      {isActive ? <span className="pointer-events-none absolute -right-5 -top-5 h-14 w-14 rounded-full bg-white/16 blur-xl" /> : null}
                       <span
-                        className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${isActive ? "border-white/22 bg-white/16 text-current" : meta.tone}`}
+                        className={`relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-transform duration-300 group-hover:scale-105 ${isActive ? "border-white/24 bg-white/18 text-current" : meta.tone}`}
                       >
-                        <Icon size={12} weight={isActive ? "fill" : "duotone"} />
+                        <Icon size={17} weight={isActive ? "fill" : "duotone"} />
                       </span>
-                      <span className="truncate whitespace-nowrap tracking-[-0.01em]">{category.label}</span>
+                      <span className={`mt-1.5 block w-full truncate text-[11.5px] font-black leading-tight tracking-[-0.02em] sm:text-xs ${isActive ? "text-current" : "text-slate-800"}`}>
+                        {category.label}
+                      </span>
+                      <span className={`mt-0.5 block text-[9px] font-black uppercase tracking-[0.1em] ${isActive ? "text-current/70" : "text-slate-400"}`}>
+                        {categoryCountLabel}
+                      </span>
                     </button>
                   );
                 })}
