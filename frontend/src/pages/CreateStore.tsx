@@ -14,8 +14,10 @@ import { formatPhoneInput } from '../utils/format';
 import { normalizePixCode } from '../utils/pixPayload';
 import { BRAZIL_STATES, loadBrazilCitiesByState } from '../utils/brazilLocations';
 import { inputAssistProps, textareaAssistProps } from '../utils/inputAssist';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { formatDestinationClaimPlaceAddress, getDestinationClaimPlaceImage, resolveDestinationClaimPlaces } from '../utils/destinationClaimPlaces';
 import { FormSection } from '../components/common/FormSection';
-import { Buildings, CheckCircle, CopySimple, CreditCard, EnvelopeSimple, GlobeHemisphereWest, MapPinLine, RocketLaunch, Storefront, UserCircle, WarningCircle } from '@phosphor-icons/react';
+import { Bed, Buildings, CheckCircle, CopySimple, CreditCard, EnvelopeSimple, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, RocketLaunch, Storefront, UserCircle, WarningCircle } from '@phosphor-icons/react';
 
 const BRAZIL_DDDS = [
   '11', '12', '13', '14', '15', '16', '17', '18', '19',
@@ -255,6 +257,7 @@ export function CreateStore() {
   const logoObjectUrlRef = useRef('');
   const bannerObjectUrlRef = useRef('');
   const destinationClaimAppliedRef = useRef('');
+  const destinationClaimPanelRef = useRef<HTMLDivElement | null>(null);
   const personalSectionRef = useRef<HTMLDivElement | null>(null);
   const addressSectionRef = useRef<HTMLDivElement | null>(null);
   const storeSectionRef = useRef<HTMLDivElement | null>(null);
@@ -493,7 +496,7 @@ export function CreateStore() {
       .getPublic(destinationClaim.destinationSlug)
       .then((payload: any) => {
         if (!active) return;
-        setDestinationClaimPlaces(Array.isArray(payload?.places) ? payload.places : []);
+        setDestinationClaimPlaces(resolveDestinationClaimPlaces(payload));
       })
       .catch(() => {
         if (active) setDestinationClaimPlacesError('Não conseguimos carregar os chalés deste destino agora. Você pode concluir o cadastro mesmo assim.');
@@ -512,9 +515,7 @@ export function CreateStore() {
 
     setCurrentStep(1);
     window.setTimeout(() => {
-      personalSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      const firstField = document.querySelector('[data-create-field="fullName"]') as HTMLElement | null;
-      firstField?.focus?.({ preventScroll: true });
+      destinationClaimPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 180);
   }, [destinationClaim?.destinationListingId]);
 
@@ -1673,7 +1674,10 @@ export function CreateStore() {
           </div>
 
           {destinationClaim ? (
-            <div className="mb-6 overflow-hidden rounded-[1.7rem] border border-[#153A4C]/12 bg-[radial-gradient(circle_at_10%_0%,rgba(51,104,134,0.16),transparent_36%),linear-gradient(135deg,#ffffff,#f3f7f5)] p-4 shadow-[0_18px_45px_-34px_rgba(15,23,42,0.42)]">
+            <div
+              ref={destinationClaimPanelRef}
+              className="mb-6 overflow-hidden rounded-[1.7rem] border border-[#153A4C]/12 bg-[radial-gradient(circle_at_10%_0%,rgba(51,104,134,0.16),transparent_36%),linear-gradient(135deg,#ffffff,#f3f7f5)] p-4 shadow-[0_18px_45px_-34px_rgba(15,23,42,0.42)]"
+            >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#153A4C] text-white shadow-[0_18px_30px_-22px_rgba(21,58,76,0.75)]">
@@ -1725,40 +1729,97 @@ export function CreateStore() {
                 </div>
 
                 {destinationClaimDeliveryMode === 'selected' ? (
-                  <div className="mt-3">
-                    <input
-                      {...inputAssistProps.search}
-                      value={destinationClaimPlaceSearch}
-                      onChange={(event) => setDestinationClaimPlaceSearch(event.target.value)}
-                      placeholder="Buscar chalé ou pousada"
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
-                    />
+                  <div className="mt-4 rounded-[1.35rem] border border-slate-200/80 bg-white/88 p-3 shadow-[0_18px_34px_-30px_rgba(15,23,42,0.5)]">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Seleção múltipla</p>
+                        <p className="mt-1 text-xs font-bold text-slate-500">
+                          {selectedDestinationClaimPlaces.length
+                            ? `${selectedDestinationClaimPlaces.length} chalé(s) selecionado(s)`
+                            : 'Escolha um ou mais chalés que sua loja atende.'}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDestinationClaimPlaceIds(destinationClaimPlaces.map((place: any) => String(place.id || '')).filter(Boolean))}
+                          disabled={!destinationClaimPlaces.length}
+                          className="rounded-full border border-[#336886]/18 bg-[#eef6f8] px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-[#153A4C] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Todos
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDestinationClaimPlaceIds([])}
+                          disabled={!selectedDestinationClaimPlaceIds.length}
+                          className="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Limpar
+                        </button>
+                      </div>
+                    </div>
+                    <div className="relative mt-3">
+                      <MagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} weight="bold" />
+                      <input
+                        {...inputAssistProps.search}
+                        value={destinationClaimPlaceSearch}
+                        onChange={(event) => setDestinationClaimPlaceSearch(event.target.value)}
+                        placeholder="Buscar chalé, pousada ou bairro"
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-3 py-3 pl-10 text-sm font-bold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#336886]/35 focus:bg-white"
+                      />
+                    </div>
                     {destinationClaimPlacesLoading ? (
                       <p className="mt-2 rounded-2xl bg-[#edf5fa] px-3 py-2 text-xs font-bold text-[#336886]">Carregando chalés do destino...</p>
                     ) : null}
                     {destinationClaimPlacesError ? (
                       <p className="mt-2 rounded-2xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700">{destinationClaimPlacesError}</p>
                     ) : null}
-                    <div className="mt-2 max-h-52 space-y-2 overflow-y-auto pr-1">
+                    <div className="mt-3 grid max-h-[34rem] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
                       {filteredDestinationClaimPlaces.slice(0, 80).map((place: any) => {
                         const checked = selectedDestinationClaimPlaceIds.includes(String(place.id));
+                        const imageUrl = resolveAssetUrl(getDestinationClaimPlaceImage(place));
+                        const address = formatDestinationClaimPlaceAddress(place);
                         return (
                           <button
                             key={place.id}
                             type="button"
                             onClick={() => toggleDestinationClaimPlace(String(place.id))}
-                            className={`flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition ${
+                            className={`group relative flex w-full items-stretch gap-3 overflow-hidden rounded-[1.25rem] border p-2 text-left transition active:scale-[0.99] ${
                               checked
-                                ? 'border-[#153A4C]/30 bg-[#eef5f7]'
-                                : 'border-slate-200 bg-white hover:border-slate-300'
+                                ? 'border-[#153A4C]/35 bg-[#eef5f7] shadow-[0_18px_34px_-28px_rgba(21,58,76,0.58)]'
+                                : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-[0_16px_30px_-28px_rgba(15,23,42,0.45)]'
                             }`}
                           >
-                            <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border ${checked ? 'border-[#153A4C] bg-[#153A4C] text-white' : 'border-slate-300 bg-white text-transparent'}`}>
-                              <CheckCircle size={14} weight="fill" />
+                            <span className="relative h-20 w-24 shrink-0 overflow-hidden rounded-[1rem] bg-[linear-gradient(135deg,#e8f2f5,#f8fafc)]">
+                              {imageUrl ? (
+                                <img src={imageUrl} alt={place.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" loading="lazy" />
+                              ) : (
+                                <span className="flex h-full w-full items-center justify-center text-[#336886]">
+                                  <Bed size={28} weight="duotone" />
+                                </span>
+                              )}
+                              <span className="absolute left-2 top-2 rounded-full bg-white/88 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm backdrop-blur">
+                                {String(place.type || 'Chalé').replace(/_/g, ' ')}
+                              </span>
                             </span>
-                            <span className="min-w-0">
-                              <span className="block text-sm font-black leading-tight text-slate-950">{place.name}</span>
-                              <span className="mt-0.5 line-clamp-1 block text-xs font-semibold text-slate-500">{place.address || place.type || 'Hospedagem do destino'}</span>
+                            <span className="flex min-w-0 flex-1 flex-col justify-between py-1 pr-7">
+                              <span>
+                                <span className="line-clamp-2 block text-sm font-black leading-tight text-slate-950">{place.name}</span>
+                                <span className="mt-1 line-clamp-2 block text-xs font-semibold leading-snug text-slate-500">
+                                  {address || place.description || 'Hospedagem do destino'}
+                                </span>
+                              </span>
+                              <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                                <MapPinLine size={13} weight="duotone" />
+                                Atendo aqui
+                              </span>
+                            </span>
+                            <span className={`absolute right-3 top-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border shadow-sm ${
+                              checked
+                                ? 'border-[#153A4C] bg-[#153A4C] text-white'
+                                : 'border-slate-200 bg-white/90 text-transparent'
+                            }`}>
+                              <CheckCircle size={18} weight="fill" />
                             </span>
                           </button>
                         );
@@ -1769,6 +1830,18 @@ export function CreateStore() {
                         Nenhum chalé encontrado nesta busca. Você pode continuar e o time ajusta depois.
                       </p>
                     ) : null}
+                    <div className="mt-3 flex flex-col gap-2 rounded-2xl bg-slate-50 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-xs font-semibold leading-relaxed text-slate-500">
+                        Depois de escolher os chalés, continue para preencher os dados da loja.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => personalSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                        className="rounded-full bg-[#153A4C] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-white shadow-[0_16px_28px_-20px_rgba(21,58,76,0.72)]"
+                      >
+                        Continuar cadastro
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <p className="mt-3 rounded-2xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">
