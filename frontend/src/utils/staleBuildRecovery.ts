@@ -8,6 +8,7 @@ const STALE_BUILD_ERROR_PATTERNS = [
   /failed to load module script/i,
   /chunkloaderror/i,
   /loading chunk .+ failed/i,
+  /cannot access .+ before initialization/i,
   /\.js\b.*(?:404|net::err_|failed)/i,
 ];
 
@@ -71,9 +72,9 @@ const reloadWithCacheBust = () => {
   window.location.replace(nextUrl.toString());
 };
 
-export const recoverFromStaleBuild = async () => {
+export const recoverFromStaleBuild = async (options: { force?: boolean } = {}) => {
   if (typeof window === 'undefined') return;
-  if (wasRecentlyRecovered()) return;
+  if (!options.force && wasRecentlyRecovered()) return;
   markRecovered();
   await clearRuntimeCaches();
   reloadWithCacheBust();

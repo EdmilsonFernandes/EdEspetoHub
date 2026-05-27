@@ -45,7 +45,7 @@ import {
 import { getCartPricing } from '../utils/orderPricing';
 import { printReceiptAsImage } from '../utils/printReceiptImage';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
-import { ADMIN_SESSION_EVENT, nativeBiometricService } from '../services/nativeBiometricService';
+import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT, nativeBiometricService } from '../services/nativeBiometricService';
 import { navigateBackOrFallback } from '../utils/navigation';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { buildDestinationInquiryMessage, prettifyDestinationLabel } from '../utils/destinationWhatsApp';
@@ -472,14 +472,44 @@ export function StorePage() {
 
   useEffect(() => {
     const recentOrder = recentPublicOrders[0];
-    if (!user?.token && !customerSession?.token && recentOrder?.id) {
+    if (!isStoreAdmin && !customerSession?.token && recentOrder?.id) {
       primeOrderTrackingNavigation(recentOrder.id, recentOrder.accessToken);
     }
-  }, [customerSession?.token, recentPublicOrders, user?.token]);
+  }, [customerSession?.token, isStoreAdmin, recentPublicOrders]);
   const checkoutCustomerStorageKey = useMemo(
     () => `checkoutCustomer:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
   );
+  const readCustomerSessionSnapshot = useCallback((candidate?: any | null) => {
+    const session = candidate && typeof candidate === 'object' ? candidate : null;
+    if (session?.token) {
+      return session;
+    }
+    try {
+      const savedCustomerSession =
+        localStorage.getItem('customerSession') || localStorage.getItem(customerSessionStorageKey);
+      if (!savedCustomerSession) {
+        return null;
+      }
+      const parsedCustomerSession = JSON.parse(savedCustomerSession);
+      return parsedCustomerSession?.token ? parsedCustomerSession : null;
+    } catch {
+      clearAllCustomerSessions();
+      return null;
+    }
+  }, [customerSessionStorageKey]);
+  const syncCustomerSessionSnapshot = useCallback((candidate?: any | null) => {
+    const nextSession = readCustomerSessionSnapshot(candidate);
+    setCustomerSession(nextSession);
+    if (nextSession?.token) {
+      try {
+        localStorage.setItem('customerSession', JSON.stringify(nextSession));
+      } catch {
+        // localStorage can fail in restricted webviews; keep the in-memory session.
+      }
+    }
+    return nextSession;
+  }, [readCustomerSessionSnapshot]);
   const guestPushIdStorageKey = 'jnk_mobile_push_guest_id';
   const condominiumSlugFromQuery = useMemo(() => {
     if (typeof window === 'undefined') return '';
@@ -743,7 +773,7 @@ export function StorePage() {
     };
   }, [showPublicStoreAppHeader, view]);
   const normalizedRole = String(user?.user?.role || user?.role || '').toLowerCase();
-  const isProfessionalCheckoutUser = [
+  const isProfessionalCheckoutUser = isStoreAdmin && [
     'admin',
     'operator',
     'lojista',
@@ -752,8 +782,8 @@ export function StorePage() {
     'motoboy',
     'entregador',
   ].includes(normalizedRole);
-  const hasAdminPrintAccess = normalizedRole === 'admin';
-  const canUseAdminPrintFlow = hasAdminPrintAccess || isStoreAdmin;
+  const hasAdminPrintAccess = isStoreAdmin && normalizedRole === 'admin';
+  const canUseAdminPrintFlow = isStoreAdmin;
   const adminStoreName = String(user?.store?.name || storeName || branding?.brandName || 'Minha loja').trim() || 'Minha loja';
   const adminStoreLogo = resolveAssetUrl(String(user?.store?.settings?.logoUrl || branding?.logoUrl || '')) || '';
   const adminOperatorName = String(user?.user?.fullName || user?.user?.name || '').trim();
@@ -1221,12 +1251,12 @@ export function StorePage() {
   }, []);
 
   useEffect(() => {
-    if (storeOrderingEnabled || user?.token) return;
+    if (storeOrderingEnabled || isStoreAdmin) return;
     setCart({});
     if (view === 'cart' || view === 'success') {
       setView('menu');
     }
-  }, [storeOrderingEnabled, user?.token, view]);
+  }, [isStoreAdmin, storeOrderingEnabled, view]);
 
   useEffect(() => {
     syncAdminSession(auth);
@@ -1252,6 +1282,26 @@ export function StorePage() {
   }, [syncAdminSession]);
 
   useEffect(() => {
+    if (isStoreAdmin) return;
+    syncCustomerSessionSnapshot();
+    const handleCustomerSessionUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<any>;
+      syncCustomerSessionSnapshot(customEvent?.detail ?? null);
+    };
+    const handleStorage = (event: StorageEvent) => {
+      if (!event.key || event.key === 'customerSession' || event.key === customerSessionStorageKey) {
+        syncCustomerSessionSnapshot();
+      }
+    };
+    window.addEventListener(CUSTOMER_SESSION_EVENT, handleCustomerSessionUpdated as EventListener);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener(CUSTOMER_SESSION_EVENT, handleCustomerSessionUpdated as EventListener);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [customerSessionStorageKey, isStoreAdmin, syncCustomerSessionSnapshot]);
+
+  useEffect(() => {
     if (isStoreAdmin) {
       setCustomerSession(null);
       setCustomerAddresses([]);
@@ -1268,19 +1318,7 @@ export function StorePage() {
       return;
     }
 
-    const savedCustomerSession =
-      localStorage.getItem('customerSession') || localStorage.getItem(customerSessionStorageKey);
-    if (savedCustomerSession) {
-      try {
-        const parsedCustomerSession = JSON.parse(savedCustomerSession);
-        if (parsedCustomerSession?.token) {
-          setCustomerSession(parsedCustomerSession);
-          localStorage.setItem('customerSession', JSON.stringify(parsedCustomerSession));
-        }
-      } catch {
-        clearAllCustomerSessions();
-      }
-    }
+    syncCustomerSessionSnapshot();
 
     const savedCustomers = localStorage.getItem(customersStorageKey);
     if (savedCustomers) {
@@ -1308,7 +1346,7 @@ export function StorePage() {
         console.error('Falha ao carregar dados salvos do checkout', error);
       }
     }
-  }, [isStoreAdmin, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey, customerSession?.token]);
+  }, [isStoreAdmin, customersStorageKey, checkoutCustomerStorageKey, customerSessionStorageKey, customerSession?.token, syncCustomerSessionSnapshot]);
 
   useEffect(() => {
     if (!storeSlug) {
@@ -1820,10 +1858,10 @@ export function StorePage() {
   }, [view, lastOrder?.id, lastOrder?.paymentStatus, lastOrder?.onlinePayment]);
 
   useEffect(() => {
-    if (user?.token) {
+    if (isStoreAdmin) {
       setLastPublicOrderId('');
     }
-  }, [user?.token]);
+  }, [isStoreAdmin]);
 
   // storeCoords is set directly from store data load (line ~1210).
   // No need to reset on storeAddress change — coords come from the same API response.
@@ -2281,7 +2319,7 @@ export function StorePage() {
       updatedCustomer.lat = null;
       updatedCustomer.lng = null;
     }
-    if (!user?.token && nextCustomer.type === 'table') {
+    if (!isStoreAdmin && nextCustomer.type === 'table') {
       setLastPublicOrderId('');
       if (storeSlug) {
         localStorage.removeItem(`lastOrder:${storeSlug}`);
@@ -2769,7 +2807,7 @@ export function StorePage() {
         return [ ...prev, normalized ];
       });
     }
-    if (createdOrder?.id && !user?.token) {
+    if (createdOrder?.id && !isStoreAdmin) {
       const entry = {
         id: createdOrder.id,
         createdAt: Date.now(),
@@ -3793,7 +3831,7 @@ export function StorePage() {
           </div>
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length > 0 && (
           <div className="space-y-4">
-              {!user?.token && !customerSession?.token && recentPublicOrders.length > 0 && (
+              {!isStoreAdmin && !customerSession?.token && recentPublicOrders.length > 0 && (
               <div className="fixed bottom-20 left-4 right-4 z-[110] sm:relative sm:bottom-0 sm:left-0 sm:right-0 sm:mx-6 rounded-[1.75rem] border border-emerald-200/60 bg-white/92 backdrop-blur-xl px-4 py-3 shadow-[0_18px_42px_-22px_rgba(16,185,129,0.35)] flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <button
                   type="button"
@@ -3862,8 +3900,8 @@ export function StorePage() {
                 setShowCustomerAccount(true);
               } : undefined}
               isCustomerAuthenticated={Boolean(customerSession?.token)}
-              userRole={normalizedRole}
-              isAuthenticated={Boolean(user?.token)}
+              userRole={isStoreAdmin ? normalizedRole : undefined}
+              isAuthenticated={isStoreAdmin}
               isOpenNow={storeOpenNow}
               whatsappNumber={storePhone}
               whatsappMessage={destinationStoreWhatsAppMessage}
@@ -3886,7 +3924,7 @@ export function StorePage() {
               compactHeader={isMobile}
               systemHeaderOffset={showPublicStoreAppHeader}
               staffView={Boolean(canUseAdminPrintFlow)}
-              isOrderingEnabled={storeOrderingEnabled || Boolean(user?.token)}
+              isOrderingEnabled={storeOrderingEnabled || isStoreAdmin}
               preOrderBlocked={isCondominiumPreOrderPreview}
               preOrderBlockedTitle={condominiumPreOrderTitle}
               preOrderBlockedMessage={condominiumPreOrderMessage}
@@ -3900,7 +3938,7 @@ export function StorePage() {
             customers={customers}
             paymentMethod={paymentMethod}
             condominiumCheckoutContext={condominiumCheckoutContext}
-            allowCustomerAutocomplete={Boolean(user?.token)}
+            allowCustomerAutocomplete={canUseAdminPrintFlow}
             guestPhoneRequired={!customerSession?.token && !isStoreAdmin}
             checkoutDisabled={!cartItemsCount || condominiumCheckoutLoading || !condominiumCheckoutContext?.event?.canOrderInCondominium}
             checkoutDisabledReason={
@@ -3934,7 +3972,7 @@ export function StorePage() {
             customers={customers}
             paymentMethod={paymentMethod}
             allowedOrderTypes={orderTypes}
-            allowCustomerAutocomplete={Boolean(user?.token)}
+            allowCustomerAutocomplete={canUseAdminPrintFlow}
             tablePhoneOptional={canUseAdminPrintFlow}
             guestPhoneRequired={!customerSession?.token && !isStoreAdmin}
             occupiedTables={occupiedTables}

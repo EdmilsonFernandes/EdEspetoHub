@@ -6,6 +6,7 @@ describe('staleBuildRecovery', () => {
     expect(isStaleBuildErrorMessage('Failed to fetch dynamically imported module')).toBe(true);
     expect(isStaleBuildErrorMessage('ChunkLoadError: Loading chunk 42 failed')).toBe(true);
     expect(isStaleBuildErrorMessage('/assets/MarketplacePage-abc.js net::ERR_ABORTED 404')).toBe(true);
+    expect(isStaleBuildErrorMessage("ReferenceError: Cannot access 'ct' before initialization")).toBe(true);
   });
 
   it('ignores regular application errors', () => {
