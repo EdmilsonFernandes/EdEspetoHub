@@ -1706,53 +1706,54 @@ export function CreateStore() {
                       Isso ajuda o time Já no Caminho a validar sua loja e conectar você aos hóspedes certos.
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid w-full grid-cols-3 gap-2 lg:w-auto">
                     {[
-                      { id: 'all', label: 'Atendo todos' },
-                      { id: 'selected', label: 'Escolher chalés' },
-                      { id: 'none', label: 'Só recebo visita' },
+                      { id: 'all', label: 'Atendo todos', shortLabel: 'Todos' },
+                      { id: 'selected', label: 'Escolher chalés', shortLabel: 'Escolher' },
+                      { id: 'none', label: 'Só recebo visita', shortLabel: 'Local' },
                     ].map((option) => (
                       <button
                         key={option.id}
                         type="button"
                         onClick={() => setDestinationClaimDeliveryMode(option.id as any)}
-                        className={`rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition ${
+                        className={`min-h-10 rounded-2xl px-2 py-2 text-[10px] font-black uppercase tracking-[0.06em] transition sm:px-3 sm:text-[11px] ${
                           destinationClaimDeliveryMode === option.id
                             ? 'bg-[#153A4C] text-white shadow-[0_14px_24px_-18px_rgba(21,58,76,0.8)]'
                             : 'border border-slate-200 bg-white text-slate-600'
                         }`}
                       >
-                        {option.label}
+                        <span className="sm:hidden">{option.shortLabel}</span>
+                        <span className="hidden sm:inline">{option.label}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {destinationClaimDeliveryMode === 'selected' ? (
-                  <div className="mt-4 rounded-[1.35rem] border border-slate-200/80 bg-white/88 p-3 shadow-[0_18px_34px_-30px_rgba(15,23,42,0.5)]">
+                  <div className="mt-4 rounded-[1.35rem] border border-slate-200/80 bg-white/88 p-2.5 shadow-[0_18px_34px_-30px_rgba(15,23,42,0.5)] sm:p-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Seleção múltipla</p>
-                        <p className="mt-1 text-xs font-bold text-slate-500">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Chalés atendidos</p>
+                        <p className="mt-1 text-xs font-bold leading-relaxed text-slate-500">
                           {selectedDestinationClaimPlaces.length
                             ? `${selectedDestinationClaimPlaces.length} chalé(s) selecionado(s)`
-                            : 'Escolha um ou mais chalés que sua loja atende.'}
+                            : 'Toque nos chalés que sua loja consegue atender.'}
                         </p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="grid grid-cols-2 gap-2 sm:flex">
                         <button
                           type="button"
                           onClick={() => setSelectedDestinationClaimPlaceIds(destinationClaimPlaces.map((place: any) => String(place.id || '')).filter(Boolean))}
                           disabled={!destinationClaimPlaces.length}
-                          className="rounded-full border border-[#336886]/18 bg-[#eef6f8] px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-[#153A4C] disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded-2xl border border-[#336886]/18 bg-[#eef6f8] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#153A4C] disabled:cursor-not-allowed disabled:opacity-50 sm:rounded-full sm:py-2"
                         >
-                          Todos
+                          Selecionar todos
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedDestinationClaimPlaceIds([])}
                           disabled={!selectedDestinationClaimPlaceIds.length}
-                          className="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-500 disabled:cursor-not-allowed disabled:opacity-50 sm:rounded-full sm:py-2"
                         >
                           Limpar
                         </button>
@@ -1774,7 +1775,7 @@ export function CreateStore() {
                     {destinationClaimPlacesError ? (
                       <p className="mt-2 rounded-2xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700">{destinationClaimPlacesError}</p>
                     ) : null}
-                    <div className="mt-3 grid max-h-[34rem] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+                    <div className="mt-3 grid max-h-none grid-cols-1 gap-2 overflow-visible pr-0 sm:max-h-[34rem] sm:grid-cols-2 sm:gap-3 sm:overflow-y-auto sm:pr-1">
                       {filteredDestinationClaimPlaces.slice(0, 80).map((place: any) => {
                         const checked = selectedDestinationClaimPlaceIds.includes(String(place.id));
                         const imageUrl = resolveAssetUrl(getDestinationClaimPlaceImage(place));
@@ -1784,13 +1785,13 @@ export function CreateStore() {
                             key={place.id}
                             type="button"
                             onClick={() => toggleDestinationClaimPlace(String(place.id))}
-                            className={`group relative flex w-full items-stretch gap-3 overflow-hidden rounded-[1.25rem] border p-2 text-left transition active:scale-[0.99] ${
+                            className={`group relative flex w-full items-center gap-2.5 overflow-hidden rounded-[1.1rem] border p-2 text-left transition active:scale-[0.99] sm:items-stretch sm:gap-3 sm:rounded-[1.25rem] ${
                               checked
                                 ? 'border-[#153A4C]/35 bg-[#eef5f7] shadow-[0_18px_34px_-28px_rgba(21,58,76,0.58)]'
                                 : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-[0_16px_30px_-28px_rgba(15,23,42,0.45)]'
                             }`}
                           >
-                            <span className="relative h-20 w-24 shrink-0 overflow-hidden rounded-[1rem] bg-[linear-gradient(135deg,#e8f2f5,#f8fafc)]">
+                            <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[0.95rem] bg-[linear-gradient(135deg,#e8f2f5,#f8fafc)] sm:h-20 sm:w-24 sm:rounded-[1rem]">
                               {imageUrl ? (
                                 <img src={imageUrl} alt={place.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" loading="lazy" />
                               ) : (
@@ -1798,23 +1799,23 @@ export function CreateStore() {
                                   <Bed size={28} weight="duotone" />
                                 </span>
                               )}
-                              <span className="absolute left-2 top-2 rounded-full bg-white/88 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm backdrop-blur">
+                              <span className="absolute left-2 top-2 hidden rounded-full bg-white/88 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm backdrop-blur sm:block">
                                 {String(place.type || 'Chalé').replace(/_/g, ' ')}
                               </span>
                             </span>
-                            <span className="flex min-w-0 flex-1 flex-col justify-between py-1 pr-7">
+                            <span className="flex min-w-0 flex-1 flex-col justify-center py-0.5 pr-8 sm:justify-between sm:py-1 sm:pr-7">
                               <span>
-                                <span className="line-clamp-2 block text-sm font-black leading-tight text-slate-950">{place.name}</span>
-                                <span className="mt-1 line-clamp-2 block text-xs font-semibold leading-snug text-slate-500">
+                                <span className="line-clamp-1 block text-sm font-black leading-tight text-slate-950 sm:line-clamp-2">{place.name}</span>
+                                <span className="mt-1 line-clamp-1 block text-xs font-semibold leading-snug text-slate-500 sm:line-clamp-2">
                                   {address || place.description || 'Hospedagem do destino'}
                                 </span>
                               </span>
-                              <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                              <span className="mt-2 hidden items-center gap-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#336886] sm:inline-flex">
                                 <MapPinLine size={13} weight="duotone" />
                                 Atendo aqui
                               </span>
                             </span>
-                            <span className={`absolute right-3 top-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border shadow-sm ${
+                            <span className={`absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 shrink-0 items-center justify-center rounded-full border shadow-sm sm:top-3 sm:translate-y-0 ${
                               checked
                                 ? 'border-[#153A4C] bg-[#153A4C] text-white'
                                 : 'border-slate-200 bg-white/90 text-transparent'
@@ -1831,13 +1832,13 @@ export function CreateStore() {
                       </p>
                     ) : null}
                     <div className="mt-3 flex flex-col gap-2 rounded-2xl bg-slate-50 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-                      <p className="text-xs font-semibold leading-relaxed text-slate-500">
+                      <p className="text-xs font-semibold leading-relaxed text-slate-500 sm:max-w-md">
                         Depois de escolher os chalés, continue para preencher os dados da loja.
                       </p>
                       <button
                         type="button"
                         onClick={() => personalSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                        className="rounded-full bg-[#153A4C] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-white shadow-[0_16px_28px_-20px_rgba(21,58,76,0.72)]"
+                        className="w-full rounded-2xl bg-[#153A4C] px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-white shadow-[0_16px_28px_-20px_rgba(21,58,76,0.72)] sm:w-auto sm:rounded-full sm:py-2"
                       >
                         Continuar cadastro
                       </button>
