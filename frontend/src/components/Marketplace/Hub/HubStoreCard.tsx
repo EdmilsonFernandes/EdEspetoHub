@@ -80,9 +80,9 @@ export function HubStoreCard({
         to={to}
         state={state}
         style={{ animationDelay: `${index * 50}ms` }}
-        className={`group overflow-hidden rounded-[1.45rem] border animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-backwards transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.985] ${
+        className={`jnc-hub-touch jnc-hub-lift group overflow-hidden rounded-[1.45rem] animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-backwards ${
           store.isOpen
-            ? 'border-white bg-white shadow-[0_12px_30px_rgba(15,23,42,0.075)] md:hover:-translate-y-1.5 md:hover:scale-[1.01] md:hover:shadow-[0_20px_45px_rgba(15,23,42,0.15)] md:hover:border-[#336886]/20'
+            ? 'jnc-hub-card md:hover:border-[#336886]/20'
             : 'border-slate-200/80 bg-slate-50/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)] grayscale-[25%] opacity-85 filter blur-[0.4px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
         }`}
       >
@@ -100,7 +100,7 @@ export function HubStoreCard({
             />
             <div className={`absolute inset-0 ${store.isOpen ? 'bg-gradient-to-t from-black/38 via-black/5 to-transparent' : 'bg-gradient-to-t from-black/20 via-transparent to-transparent'}`} />
             <span
-              className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.1em] shadow-sm backdrop-blur-sm ${
+              className={`jnc-hub-glass-badge absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.1em] ${
                 isCondominiumEventLive ? 'bg-white/92 text-emerald-700' : 'bg-white/92 text-[#336886]'
               }`}
             >
@@ -178,9 +178,9 @@ export function HubStoreCard({
       to={to}
       state={state}
       style={{ animationDelay: `${index * 36}ms` }}
-      className={`group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] border px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.985] ${
+        className={`jnc-hub-touch jnc-hub-lift group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards ${
         store.isOpen
-          ? 'border-white/80 bg-white/78 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/38 md:hover:-translate-y-1.5 md:hover:scale-[1.01] md:hover:bg-white md:hover:shadow-[0_20px_45px_-30px_rgba(15,23,42,0.35)] md:hover:border-[#336886]/20'
+          ? 'jnc-hub-surface-soft md:hover:bg-white md:hover:border-[#336886]/20'
           : 'border-slate-100/80 bg-slate-50/72 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.16)] ring-1 ring-slate-200/35 grayscale-[25%] opacity-85 filter blur-[0.4px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
       }`}
     >
@@ -255,7 +255,7 @@ export function HubStoreCard({
       <button
         type="button"
         onClick={toggleFavorite}
-        className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-[0.86] ${
+        className={`jnc-hub-touch inline-flex h-9 w-9 items-center justify-center rounded-full ${
           isFavorite
             ? 'bg-rose-50 text-rose-500 shadow-[0_10px_24px_-18px_rgba(244,63,94,0.58)] ring-1 ring-rose-100'
             : 'bg-transparent text-slate-400 hover:bg-white/80 hover:text-rose-400 hover:shadow-[0_10px_22px_-20px_rgba(15,23,42,0.28)]'

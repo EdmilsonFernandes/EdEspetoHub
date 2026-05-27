@@ -98,7 +98,7 @@ export const HubHeader = memo(function HubHeader({
         <div
           className={`${
             isNativePlatform ? 'space-y-2.5 rounded-[1.65rem] px-2.5 py-2.5' : 'space-y-3 rounded-[1.9rem] px-3 py-3'
-          } relative overflow-hidden border border-white/88 bg-[linear-gradient(145deg,rgba(255,255,255,0.90)_0%,rgba(248,250,252,0.76)_56%,rgba(255,255,255,0.82)_100%)] shadow-[0_22px_54px_-38px_rgba(21,58,76,0.26)] ring-1 ring-slate-200/50 backdrop-blur-2xl`}
+          } jnc-hub-surface relative overflow-hidden`}
         >
           <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#153A4C]/[0.06] blur-3xl" />
           <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-slate-200/40 blur-3xl" />
@@ -113,7 +113,7 @@ export const HubHeader = memo(function HubHeader({
                   hasNotification={!isCustomerLogged}
                   onClick={onOpenProfileDrawer}
                 />
-                <div className="min-w-0 flex-1 rounded-[1.35rem] border border-white/20 bg-white/60 px-3 py-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_32px_0_rgba(31,38,135,0.06)] ring-1 ring-white/10 backdrop-blur-md">
+                <div className="jnc-hub-surface-soft min-w-0 flex-1 rounded-[1.35rem] px-3 py-2">
                   <div className="mb-0.5 flex items-center gap-1.5">
                     <img
                       src="/janocaminho.jpg"
@@ -126,7 +126,7 @@ export const HubHeader = memo(function HubHeader({
                   </div>
                   <button
                     type="button"
-                    className="inline-flex w-full min-w-0 items-center justify-between gap-2 text-left text-[14px] font-black text-slate-950 transition-colors duration-150 ease-out hover:text-[#336886] active:scale-[0.99]"
+                    className="jnc-hub-touch inline-flex w-full min-w-0 items-center justify-between gap-2 text-left text-[14px] font-black text-slate-950 hover:text-[#336886]"
                     onClick={onToggleNearbyFilter}
                   >
                     <span className="flex min-w-0 items-center gap-1.5 truncate">
@@ -148,7 +148,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onHubNotificationClick}
-                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-white/80 bg-white/76 text-[#153A4C] shadow-[0_14px_26px_-20px_rgba(21,58,76,0.38)] ring-1 ring-[#d7e7ef]/75 backdrop-blur-xl transition-all duration-150 ease-out hover:bg-white active:scale-95"
+                className="jnc-hub-touch jnc-hub-pill relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] text-[#153A4C] hover:bg-white"
                 aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
                 title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
@@ -166,10 +166,10 @@ export const HubHeader = memo(function HubHeader({
 
             <div className="relative z-20">
               <div
-                className={`group relative isolate flex items-center gap-3 overflow-hidden border border-slate-200/80 bg-white px-3.5 transition-[border-color,box-shadow] duration-200 ease-out hover:border-slate-300 focus-within:border-[#336886]/25 focus-within:shadow-[0_18px_40px_-24px_rgba(51,104,134,0.28)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${
+                className={`jnc-hub-card group relative isolate flex items-center gap-3 overflow-hidden px-3.5 transition-[border-color,box-shadow] duration-200 ease-out hover:border-[#336886]/15 focus-within:border-[#336886]/25 focus-within:shadow-[0_18px_40px_-28px_rgba(51,104,134,0.34)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${
                   isNativePlatform
-                    ? 'min-h-[50px] rounded-[1.35rem] shadow-[0_14px_30px_-24px_rgba(15,23,42,0.25)]'
-                    : 'min-h-[54px] rounded-[1.55rem] shadow-[0_16px_34px_-26px_rgba(15,23,42,0.28)]'
+                    ? 'min-h-[50px] rounded-[1.35rem]'
+                    : 'min-h-[54px] rounded-[1.55rem]'
                 }`}
                 onClick={(event) => {
                   if ((event.target as HTMLElement).closest('button')) return;
@@ -230,7 +230,7 @@ export const HubHeader = memo(function HubHeader({
                       onDebouncedQueryChange('');
                       onSearchEditingChange(false);
                     }}
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700 active:scale-95"
+                    className="jnc-hub-touch inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-700"
                     aria-label="Limpar busca"
                     title="Limpar"
                   >
@@ -262,7 +262,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onToggleNearbyFilter}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/70 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 hover:shadow-sm transition-all duration-200 active:scale-[0.985]"
+                className="jnc-hub-touch jnc-hub-pill inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300"
               >
                 {quickFilter === 'nearby' ? (
                   <span className="relative flex h-2 w-2 shrink-0">
@@ -286,7 +286,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onHomeClick}
-                className={`transition-all duration-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-slate-100/70 ${
+                className={`jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-slate-100/70 ${
                   !isCondominiumScope
                     ? 'text-[#336886] bg-slate-100 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] font-black'
                     : 'text-slate-500 hover:text-slate-800'
@@ -298,7 +298,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onAgendaClick}
-                className={`transition-all duration-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-slate-100/70 ${
+                className={`jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-slate-100/70 ${
                   isCondominiumScope
                     ? 'text-[#336886] bg-slate-100 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] font-black'
                     : 'text-slate-500 hover:text-slate-800'
@@ -310,7 +310,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onPedidosClick}
-                className="transition-all duration-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 hover:text-[#336886] hover:bg-slate-100/70"
+                className="jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 hover:text-[#336886] hover:bg-slate-100/70"
               >
                 <Receipt size={14} weight="bold" />
                 Pedidos
@@ -318,7 +318,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onDestinosClick}
-                className="transition-all duration-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 hover:text-[#336886] hover:bg-slate-100/70"
+                className="jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 hover:text-[#336886] hover:bg-slate-100/70"
               >
                 <Mountains size={14} weight="bold" />
                 Destinos
@@ -329,7 +329,7 @@ export const HubHeader = memo(function HubHeader({
             <div className="flex items-center gap-3.5 flex-1 max-w-[440px] justify-end">
               {/* Desktop Search Bar */}
               <div
-                className="relative flex items-center gap-2.5 border border-slate-200 bg-white/70 hover:bg-white hover:border-slate-300 focus-within:bg-white px-3 py-1.5 rounded-[1.25rem] shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] focus-within:ring-2 focus-within:ring-[#336886]/10 focus-within:border-[#336886]/25 transition-all duration-200 flex-1 max-w-[280px]"
+                className="jnc-hub-card relative flex items-center gap-2.5 hover:bg-white focus-within:bg-white px-3 py-1.5 rounded-[1.25rem] focus-within:ring-2 focus-within:ring-[#336886]/10 focus-within:border-[#336886]/25 transition-all duration-200 flex-1 max-w-[280px]"
                 onClick={() => desktopSearchInputRef.current?.focus()}
               >
                 <MagnifyingGlass size={15} weight="bold" className="text-[#336886] shrink-0" />
@@ -368,7 +368,7 @@ export const HubHeader = memo(function HubHeader({
                       onDebouncedQueryChange('');
                       onSearchEditingChange(false);
                     }}
-                    className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition"
+                    className="jnc-hub-touch inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-700"
                   >
                     <X size={10} weight="bold" />
                   </button>
@@ -379,7 +379,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onHubNotificationClick}
-                className="relative flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[0.85rem] border border-slate-200 bg-white text-[#153A4C] hover:bg-slate-50 transition active:scale-95 shadow-sm p-1.5"
+                className="jnc-hub-touch jnc-hub-pill relative flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[0.85rem] text-[#153A4C] hover:bg-slate-50 p-1.5"
                 title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
                 <BellRinging size={15} weight={hubNotificationCount > 0 ? 'fill' : 'bold'} />

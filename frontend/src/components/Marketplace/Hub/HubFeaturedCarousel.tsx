@@ -48,7 +48,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
 
   return (
     <section
-      className="order-7 overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-3 py-2.5 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl"
+      className="jnc-hub-surface order-7 overflow-hidden rounded-[1.8rem] px-3 py-2.5"
       style={{
         transition: 'all .45s ease',
         transitionDelay: '200ms',
@@ -64,7 +64,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
         {hasOverflow ? (
           <Link
             to="/hub/destaques"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-[#edf5fa] px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition active:scale-95"
+            className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-[#edf5fa]/86 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]"
           >
             Ver mais
             <CaretRight size={11} weight="bold" />
@@ -81,7 +81,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
             ? Array.from({ length: 3 }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="h-[112px] min-w-[268px] animate-pulse rounded-[1.45rem] bg-white shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] ring-1 ring-slate-100/80"
+                  className="h-[112px] min-w-[268px] animate-pulse rounded-[1.45rem] bg-white shadow-[0_18px_42px_-34px_rgba(15,23,42,0.18)] ring-1 ring-slate-100/80"
                 />
               ))
             : items.map((item, index) => {
@@ -94,7 +94,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                     key={`${item.storeSlug}-${item.id}`}
                     to={featuredStorePath}
                     onClick={() => onStageProduct(item)}
-                    className="group flex min-h-[112px] min-w-[268px] snap-start gap-3 rounded-[1.45rem] bg-white p-2.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] ring-1 ring-slate-100/90 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_24px_54px_-36px_rgba(15,23,42,0.26)] active:scale-[0.98] sm:min-w-[292px]"
+                    className="jnc-hub-touch jnc-hub-lift jnc-hub-card group flex min-h-[112px] min-w-[268px] snap-start gap-3 rounded-[1.45rem] p-2.5 sm:min-w-[292px]"
                   >
                     <div className="relative h-[92px] w-[92px] shrink-0 overflow-hidden rounded-[1.2rem] bg-slate-100">
                       <img
@@ -112,11 +112,11 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                       <div className="absolute inset-x-0 bottom-0 h-9 bg-gradient-to-t from-black/22 to-transparent" />
                       <div className="absolute right-1.5 top-1.5">
                         {item.sponsored ? (
-                          <span className="inline-flex items-center gap-1 rounded-[0.65rem] border border-amber-200/80 bg-amber-300/92 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.1em] text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.32)] backdrop-blur-md">
+                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] bg-amber-300/92 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.1em] text-slate-950">
                             <Star size={9} weight="fill" /> {item.badge || 'Patrocinado'}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-[0.65rem] border border-white/58 bg-white/82 px-1.5 py-0.5 text-[7px] font-black italic uppercase tracking-[0.16em] text-[#153A4C] shadow-[0_8px_18px_-12px_rgba(15,23,42,0.26)] backdrop-blur-md ring-1 ring-black/5">
+                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] px-1.5 py-0.5 text-[7px] font-black italic uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-black/5">
                             <Sparkle size={7} weight="fill" className="text-[#336886]" />
                             Seleção
                           </span>

@@ -30,7 +30,7 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
 }: HubStoreDiscoveryNoticeProps) {
   if (isShowingAllStores) {
     return (
-      <div className="rounded-[1.55rem] border border-[#336886]/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(239,247,255,0.96)_100%)] px-4 py-3 shadow-[0_16px_34px_-24px_rgba(51,104,134,0.22)]">
+      <div className="jnc-hub-surface-soft rounded-[1.55rem] px-4 py-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#336886]/10 text-[#336886]">
@@ -47,7 +47,7 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
           <button
             type="button"
             onClick={onRestoreRegionalView}
-            className="shrink-0 rounded-[1rem] border border-slate-200 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.24)]"
+            className="jnc-hub-touch jnc-hub-pill shrink-0 rounded-[1rem] px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600"
           >
             Voltar
           </button>
@@ -59,7 +59,7 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
   if (geoDiscovery?.mode === 'deliverable') {
     const deliverableCount = geoDiscovery?.summary?.deliverableCount || 0;
     return (
-      <div className="rounded-[1.55rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.98)_0%,rgba(240,253,250,0.94)_100%)] px-4 py-3 shadow-[0_14px_34px_-26px_rgba(16,185,129,0.38)]">
+      <div className="rounded-[1.55rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.98)_0%,rgba(240,253,250,0.94)_100%)] px-4 py-3 shadow-[0_18px_40px_-34px_rgba(16,185,129,0.30)]">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
             <MapPinLine size={18} weight="duotone" />
@@ -78,7 +78,7 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
 
   if (geoDiscovery?.mode === 'nearby_fallback') {
     return (
-      <div className="rounded-[1.55rem] border border-sky-100 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] px-4 py-3 shadow-[0_14px_34px_-26px_rgba(2,132,199,0.24)]">
+      <div className="rounded-[1.55rem] border border-sky-100 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] px-4 py-3 shadow-[0_18px_40px_-34px_rgba(2,132,199,0.22)]">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-100 text-sky-700">
             <MapPinLine size={18} weight="duotone" />
@@ -109,7 +109,7 @@ export const HubStoreLoadingSkeleton = memo(function HubStoreLoadingSkeleton({
         {Array.from({ length: 6 }).map((_, idx) => (
           <div
             key={idx}
-            className="overflow-hidden rounded-[1.45rem] border border-slate-200/80 bg-white/78 p-0 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/38"
+            className="jnc-hub-card overflow-hidden rounded-[1.45rem] p-0"
           >
             <div className="h-[56px] w-full ds-skeleton rounded-t-[1.45rem]" />
             <div className="p-3 space-y-3">
@@ -131,7 +131,7 @@ export const HubStoreLoadingSkeleton = memo(function HubStoreLoadingSkeleton({
       {Array.from({ length: 8 }).map((_, idx) => (
         <div
           key={idx}
-          className="grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] border border-white/80 bg-white/78 px-2.5 py-2.5 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/38"
+          className="jnc-hub-card grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] px-2.5 py-2.5"
         >
           <div className="h-[4.45rem] w-[4.45rem] shrink-0 rounded-[1.28rem] ds-skeleton" />
           <div className="min-w-0 space-y-2.5">
@@ -176,7 +176,7 @@ export const HubStoreEmptyState = memo(function HubStoreEmptyState({
 
   if (geoDiscovery?.mode === 'no_coverage') {
     return (
-      <div className="relative overflow-hidden rounded-[2rem] border border-[#336886]/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(239,247,255,0.96)_52%,rgba(248,250,252,0.98)_100%)] p-5 shadow-[0_24px_54px_-34px_rgba(51,104,134,0.28)]">
+      <div className="jnc-hub-surface relative overflow-hidden rounded-[2rem] p-5">
         <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[#336886]/10 blur-3xl" />
         <div className="pointer-events-none absolute -left-10 bottom-0 h-36 w-36 rounded-full bg-emerald-300/12 blur-3xl" />
         <div className="relative flex flex-col gap-5">

@@ -44,7 +44,7 @@ export const HubSearchProductResults = memo(function HubSearchProductResults({
             key={`search-res-${item.storeSlug}-${item.id}`}
             to={selectedCondominiumSlug ? `/${item.storeSlug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}` : `/${item.storeSlug}`}
             onClick={() => onStageProduct(item)}
-            className="group min-w-[160px] snap-start overflow-hidden rounded-[1.45rem] border border-white bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 ease-out hover:scale-[1.015] active:scale-[0.97]"
+            className="jnc-hub-touch jnc-hub-lift jnc-hub-card group min-w-[160px] snap-start overflow-hidden rounded-[1.45rem]"
           >
             <div className="relative h-[90px] overflow-hidden bg-slate-100">
               <img

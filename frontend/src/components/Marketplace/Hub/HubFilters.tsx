@@ -92,10 +92,10 @@ export function HubFilterBar({
                 onQuickFilterChange(nextFilter);
                 if (nextFilter !== 'all') onScrollStoresIntoView();
               }}
-              className={`inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full border px-2.5 py-2 text-[11px] font-black transition-all duration-200 ease-out active:scale-[0.97] ${
+              className={`jnc-hub-touch inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full px-2.5 py-2 text-[11px] font-black ${
                 active
-                  ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.58)]'
-                  : 'border-white/85 bg-white/78 text-slate-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/50 backdrop-blur-xl'
+                  ? 'jnc-hub-pill-active'
+                  : 'jnc-hub-pill text-slate-600 hover:text-[#153A4C]'
               }`}
               aria-pressed={active}
               aria-label={filter.label}
@@ -109,10 +109,10 @@ export function HubFilterBar({
         <button
           type="button"
           onClick={onOpenFilters}
-          className={`relative inline-flex h-full min-w-[3.35rem] items-center justify-center gap-1 rounded-full border px-2.5 py-2 text-[11px] font-black transition-all duration-200 ease-out active:scale-[0.97] ${
+          className={`jnc-hub-touch relative inline-flex h-full min-w-[3.35rem] items-center justify-center gap-1 rounded-full px-2.5 py-2 text-[11px] font-black ${
             hiddenFilterCount > 0
-              ? 'border-[#336886] bg-[#edf5fa] text-[#153A4C] shadow-[0_14px_26px_-20px_rgba(51,104,134,0.34)]'
-              : 'border-white/85 bg-white/78 text-slate-600 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/50 backdrop-blur-xl'
+              ? 'border border-[#336886]/22 bg-[#edf5fa]/86 text-[#153A4C] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.34)]'
+              : 'jnc-hub-pill text-slate-600 hover:text-[#153A4C]'
           }`}
           aria-label="Abrir filtros"
         >
@@ -164,7 +164,7 @@ export function HubFilterSheet({
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-[120] bg-slate-950/45 backdrop-blur-[3px]" />
-        <Drawer.Content className="fixed inset-x-0 bottom-0 z-[130] mx-auto h-fit max-h-[88vh] max-w-2xl overflow-hidden rounded-t-[2rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(247,250,252,0.98)_100%)] text-slate-950 shadow-[0_-28px_76px_-42px_rgba(15,23,42,0.68)] outline-none">
+        <Drawer.Content className="jnc-hub-surface fixed inset-x-0 bottom-0 z-[130] mx-auto h-fit max-h-[88vh] max-w-2xl overflow-hidden rounded-t-[2rem] text-slate-950 shadow-[0_-28px_76px_-42px_rgba(15,23,42,0.68)] outline-none">
           <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-slate-300/80" />
           <div className="max-h-[calc(88vh-0.75rem)] overflow-y-auto px-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-4">
             <div className="flex items-start justify-between gap-3">
@@ -186,7 +186,7 @@ export function HubFilterSheet({
               </button>
             </div>
 
-            <div className="mt-4 rounded-[1.55rem] border border-[#336886]/10 bg-[#edf5fa]/70 px-4 py-3 text-[#153A4C] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+            <div className="mt-4 rounded-[1.55rem] border border-[#336886]/10 bg-[#edf5fa]/72 px-4 py-3 text-[#153A4C] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]/75">Resultado atual</p>
@@ -236,10 +236,10 @@ export function HubFilterSheet({
                         onOpenChange(false);
                         if (!active) onScrollStoresIntoView();
                       }}
-                      className={`min-h-[5.2rem] rounded-[1.35rem] border p-3 text-left transition-all duration-200 active:scale-[0.98] ${
+                      className={`jnc-hub-touch min-h-[5.2rem] rounded-[1.35rem] p-3 text-left ${
                         active
-                          ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.72)]'
-                          : 'border-slate-200/80 bg-white text-slate-700 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.28)]'
+                          ? 'jnc-hub-pill-active'
+                          : 'jnc-hub-card text-slate-700'
                       }`}
                       aria-pressed={active}
                     >
@@ -279,10 +279,10 @@ export function HubFilterSheet({
                     onOpenChange(false);
                     onScrollStoresIntoView();
                   }}
-                  className={`min-w-0 rounded-[1.1rem] border px-2 py-2.5 text-center text-[11px] font-black transition active:scale-[0.98] ${
+                  className={`jnc-hub-touch min-w-0 rounded-[1.1rem] px-2 py-2.5 text-center text-[11px] font-black ${
                     segmentFilter === 'all'
-                      ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_28px_-22px_rgba(21,58,76,0.58)]'
-                      : 'border-slate-200 bg-white text-slate-600'
+                      ? 'jnc-hub-pill-active'
+                      : 'jnc-hub-pill text-slate-600'
                   }`}
                 >
                   Todos
@@ -299,10 +299,10 @@ export function HubFilterSheet({
                         onOpenChange(false);
                         onScrollStoresIntoView();
                       }}
-                      className={`min-w-0 rounded-[1.1rem] border px-2 py-2.5 text-center transition active:scale-[0.98] ${
+                      className={`jnc-hub-touch min-w-0 rounded-[1.1rem] px-2 py-2.5 text-center ${
                         active
-                          ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_28px_-22px_rgba(21,58,76,0.58)]'
-                          : 'border-slate-200 bg-white text-slate-600'
+                          ? 'jnc-hub-pill-active'
+                          : 'jnc-hub-pill text-slate-600'
                       }`}
                     >
                       <CategoryIcon size={15} weight={active ? 'fill' : 'duotone'} className="mx-auto mb-1" />

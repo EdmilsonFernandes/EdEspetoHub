@@ -2040,7 +2040,7 @@ export function MarketplacePage() {
           ) : null}
 
           {debouncedQuery.length < 2 && !selectedCondominium && (homeDestinationHighlights.length > 0 || condominiums.length > 0) && (
-            <section className="order-2 overflow-hidden rounded-[1.55rem] border border-white/80 bg-white/72 p-2.5 shadow-[0_16px_34px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/45 backdrop-blur-xl">
+            <section className="jnc-hub-surface order-2 overflow-hidden rounded-[1.55rem] p-2.5">
               <div className="mb-2 flex items-center justify-between gap-2 px-1">
                 <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Explore também</span>
                 <span className="text-[10px] font-bold text-slate-400">atalhos</span>
@@ -2050,7 +2050,7 @@ export function MarketplacePage() {
                   <button
                     type="button"
                     onClick={() => openCondominiumPicker('all')}
-                    className="group relative flex min-h-[5rem] items-center gap-2.5 overflow-hidden rounded-[1.35rem] border border-emerald-500/15 bg-gradient-to-br from-emerald-50/70 via-white to-emerald-500/5 px-3 py-2.5 text-left shadow-[0_10px_24px_-18px_rgba(16,185,129,0.32)] transition-all duration-300 ease-out hover:border-emerald-500/40 hover:shadow-[0_14px_28px_-16px_rgba(16,185,129,0.34)] active:scale-[0.98] sm:min-h-[4.35rem] sm:gap-3 sm:px-4"
+                    className="jnc-hub-touch jnc-hub-lift group relative flex min-h-[5rem] items-center gap-2.5 overflow-hidden rounded-[1.35rem] border border-emerald-500/15 bg-gradient-to-br from-emerald-50/70 via-white to-emerald-500/5 px-3 py-2.5 text-left shadow-[0_16px_36px_-30px_rgba(16,185,129,0.34)] sm:min-h-[4.35rem] sm:gap-3 sm:px-4"
                   >
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.08),transparent_50%)] pointer-events-none" />
                     
@@ -2080,7 +2080,7 @@ export function MarketplacePage() {
                 {homeDestinationHighlights.length > 0 ? (
                   <Link
                     to={destinationListHref}
-                    className="group relative flex min-h-[5rem] items-center gap-2.5 overflow-hidden rounded-[1.35rem] border border-[#336886]/15 bg-gradient-to-br from-[#edf5fa]/50 via-white to-[#336886]/5 px-3 py-2.5 text-left shadow-[0_10px_24px_-18px_rgba(51,104,134,0.32)] transition-all duration-300 ease-out hover:border-[#336886]/40 hover:shadow-[0_14px_28px_-16px_rgba(51,104,134,0.34)] active:scale-[0.98] sm:min-h-[4.35rem] sm:gap-3 sm:px-4"
+                    className="jnc-hub-touch jnc-hub-lift group relative flex min-h-[5rem] items-center gap-2.5 overflow-hidden rounded-[1.35rem] border border-[#336886]/15 bg-gradient-to-br from-[#edf5fa]/50 via-white to-[#336886]/5 px-3 py-2.5 text-left shadow-[0_16px_36px_-30px_rgba(51,104,134,0.34)] sm:min-h-[4.35rem] sm:gap-3 sm:px-4"
                   >
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(51,104,134,0.06),transparent_50%)] pointer-events-none" />
 
@@ -2112,7 +2112,7 @@ export function MarketplacePage() {
           {/* Carrossel de Banners - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && !selectedCondominium && homePromoSlides.length > 0 && (
             <div className="order-3 animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
-              <section className="relative overflow-hidden rounded-[2.15rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(248,250,252,0.86)_100%)] p-2.5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.38)] ring-1 ring-slate-200/60 backdrop-blur-xl">
+              <section className="jnc-hub-surface relative overflow-hidden rounded-[2.15rem] p-2.5">
                 <div className="pointer-events-none absolute -left-10 -top-12 h-32 w-32 rounded-full bg-[#336886]/10 blur-3xl" />
                 <div className="pointer-events-none absolute -right-8 bottom-0 h-28 w-28 rounded-full bg-emerald-200/35 blur-3xl" />
                 <div className="relative mb-2 flex items-center justify-between px-2">
@@ -2124,7 +2124,7 @@ export function MarketplacePage() {
                     Início
                   </span>
                 </div>
-                <SegmentPromoCarousel mode="hub" slides={homePromoSlides} className="mx-0 shadow-[0_18px_42px_-28px_rgba(15,23,42,0.45)]" />
+                <SegmentPromoCarousel mode="hub" slides={homePromoSlides} className="mx-0 shadow-[0_22px_52px_-40px_rgba(15,23,42,0.44)]" />
               </section>
             </div>
           )}
@@ -2146,7 +2146,7 @@ export function MarketplacePage() {
                 </div>
                 <Link
                   to={destinationListHref}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.22)] transition active:scale-95"
+                  className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]"
                 >
                   Ver destinos
                   <CaretRight size={10} weight="bold" />
@@ -2164,7 +2164,7 @@ export function MarketplacePage() {
                     <Link
                       key={destination.id || destination.slug}
                       to={`/destinos/${destination.slug}`}
-                      className={`group relative flex shrink-0 overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_18px_44px_-32px_rgba(15,23,42,0.38)] ring-1 ring-slate-200/70 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_26px_58px_-38px_rgba(15,23,42,0.42)] active:scale-[0.985] ${index === 0 ? 'h-[11.4rem] w-[18.75rem]' : 'h-[10.75rem] w-[15.75rem]'}`}
+                      className={`jnc-hub-touch jnc-hub-lift group relative flex shrink-0 overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_22px_54px_-40px_rgba(15,23,42,0.46)] ring-1 ring-slate-200/70 ${index === 0 ? 'h-[11.4rem] w-[18.75rem]' : 'h-[10.75rem] w-[15.75rem]'}`}
                     >
                       <img
                         src={resolveDestinationAssetUrl(destination)}
@@ -2174,7 +2174,7 @@ export function MarketplacePage() {
                         className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
                       />
                       <div className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.42)_42%,rgba(15,23,42,0.82)_100%)]" />
-                      <div className="absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full border border-white/80 bg-white/92 px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.13em] text-[#153A4C] shadow-[0_16px_32px_-18px_rgba(15,23,42,0.42)] ring-1 ring-[#d7e7ef]/70 backdrop-blur-xl">
+                      <div className="jnc-hub-glass-badge absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.13em] text-[#153A4C] ring-1 ring-[#d7e7ef]/70">
                         <MapPinLine size={10} weight="fill" className="shrink-0 text-[#336886]" />
                         <span className="truncate">{formatDestinationMatchLabel(destination)}</span>
                       </div>
@@ -2183,7 +2183,7 @@ export function MarketplacePage() {
                           {destination.name}
                         </p>
                         <div className="mt-2 flex items-center justify-between gap-2">
-                          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white/14 px-2.5 py-1 text-[9.5px] font-black uppercase tracking-[0.1em] text-white backdrop-blur-md">
+                          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/18 bg-white/16 px-2.5 py-1 text-[9.5px] font-black uppercase tracking-[0.1em] text-white shadow-[0_12px_24px_-20px_rgba(15,23,42,0.55)] backdrop-blur-md">
                             <Sparkle size={10} weight="fill" className="shrink-0 text-lime-200" />
                             <span className="truncate">{countLabel}</span>
                           </span>
@@ -2412,7 +2412,7 @@ export function MarketplacePage() {
                 onClick={() => setSegmentFilter('all')}
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-[15px] transition-all duration-200 ease-out ${
-                  segmentFilter === 'all' ? 'scale-[1.04] bg-[#336886] shadow-[0_16px_28px_-18px_rgba(51,104,134,0.74)]' : 'border border-white/80 bg-white/78 shadow-[0_12px_26px_-22px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/55 backdrop-blur-xl group-hover:bg-slate-50'
+                  segmentFilter === 'all' ? 'scale-[1.04] bg-[#336886] shadow-[0_18px_34px_-26px_rgba(51,104,134,0.66)]' : 'jnc-hub-pill group-hover:bg-slate-50'
                 }`}>
                   <List size={17} weight="duotone" className={segmentFilter === 'all' ? 'scale-[0.95] text-white' : 'text-slate-500'} />
                 </div>
@@ -2435,7 +2435,7 @@ export function MarketplacePage() {
                     <div className={`flex h-10 w-10 items-center justify-center rounded-[15px] transition-all duration-200 ease-out ${
                       active
                         ? `${colors?.active ?? 'bg-[#336886] shadow-[0_16px_28px_-18px_rgba(51,104,134,0.74)]'} scale-[1.04]`
-                        : `${colors?.inactive ?? 'border border-white/80 bg-white/78'} shadow-[0_12px_26px_-22px_rgba(15,23,42,0.22)] ring-1 ring-white/70 backdrop-blur-xl group-hover:scale-[1.03]`
+                        : `${colors?.inactive ?? 'jnc-hub-pill'} shadow-[0_14px_30px_-26px_rgba(15,23,42,0.18)] ring-1 ring-white/70 backdrop-blur-xl group-hover:scale-[1.03]`
                     }`}>
                       <CategoryIcon
                         size={19}
@@ -2610,7 +2610,7 @@ export function MarketplacePage() {
                   <button
                     type="button"
                     onClick={() => setIsHomeStoreListExpanded(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-[#336886]/12 bg-white/82 px-4 py-2.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886] shadow-[0_16px_34px_-28px_rgba(51,104,134,0.34)] ring-1 ring-white/70 transition active:scale-[0.98]"
+                    className="jnc-hub-touch jnc-hub-pill inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886]"
                   >
                     Ver mais lojas
                     <span className="rounded-full bg-[#336886]/8 px-2 py-0.5 text-[10px]">+{hiddenHomeStoreCount}</span>
@@ -2636,12 +2636,12 @@ export function MarketplacePage() {
             <button
               type="button"
               onClick={() => navigate('/create?plan=trial')}
-              className="group relative w-full overflow-hidden rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(247,251,252,0.96)_52%,rgba(236,253,245,0.88)_100%)] p-3.5 text-left shadow-[0_22px_48px_-34px_rgba(15,23,42,0.32)] ring-1 ring-[#d7e7ef]/70 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_28px_58px_-36px_rgba(21,58,76,0.42)] active:scale-[0.99]"
+              className="jnc-hub-touch jnc-hub-lift jnc-hub-card-strong group relative w-full overflow-hidden rounded-[1.85rem] p-3.5 text-left"
             >
               <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-[#5FD35A]/18 blur-3xl" />
               <div className="pointer-events-none absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-[#336886]/8 blur-3xl" />
               <div className="relative flex items-start gap-3.5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem] border border-[#336886]/12 bg-[linear-gradient(145deg,#ffffff,#edf7f2)] text-[#153A4C] shadow-[0_16px_30px_-24px_rgba(21,58,76,0.45)] ring-1 ring-white/90">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem] border border-[#336886]/12 bg-[linear-gradient(145deg,#ffffff,#edf7f2)] text-[#153A4C] shadow-[0_18px_34px_-28px_rgba(21,58,76,0.42)] ring-1 ring-white/90">
                   <Storefront size={24} weight="duotone" className="text-[#336886]" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -2659,12 +2659,12 @@ export function MarketplacePage() {
                   </p>
                   <div className="mt-2.5 flex flex-wrap gap-1.5">
                     {['sem comissão', 'app + web', 'pedidos em tempo real'].map((label) => (
-                      <span key={label} className="rounded-full border border-[#336886]/10 bg-white/78 px-2 py-1 text-[9px] font-black uppercase tracking-[0.09em] text-[#336886] shadow-sm">
+                      <span key={label} className="jnc-hub-pill rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-[0.09em] text-[#336886]">
                         {label}
                       </span>
                     ))}
                   </div>
-                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#153A4C] px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.09em] text-white shadow-[0_16px_26px_-18px_rgba(21,58,76,0.65)] transition group-hover:translate-x-0.5">
+                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#153A4C] px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.09em] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.62)] transition group-hover:translate-x-0.5">
                     Criar minha loja
                     <CaretRight size={12} weight="bold" />
                   </div>

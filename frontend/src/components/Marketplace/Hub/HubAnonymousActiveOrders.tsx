@@ -24,12 +24,12 @@ export function HubAnonymousActiveOrders({
 
   return (
     <div className="order-1 animate-in fade-in slide-in-from-top-4 duration-500">
-      <div className="relative overflow-hidden rounded-[2.5rem] border border-amber-200/50 bg-amber-50/90 p-5 shadow-[0_20px_40px_-15px_rgba(245,158,11,0.15)] backdrop-blur-md">
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-amber-200/50 bg-amber-50/90 p-5 shadow-[0_24px_54px_-40px_rgba(245,158,11,0.34)] backdrop-blur-md">
         <div className="absolute right-0 top-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-amber-200/20 blur-2xl" />
         <button
           type="button"
           onClick={onDismissAll}
-          className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-amber-200 bg-white/80 text-amber-700 shadow-sm transition-colors hover:bg-white"
+          className="jnc-hub-touch absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-amber-200 bg-white/80 text-amber-700 shadow-sm hover:bg-white"
           aria-label="Fechar aviso de pedido em andamento"
           title="Fechar aviso"
         >
@@ -55,7 +55,7 @@ export function HubAnonymousActiveOrders({
                   onMouseEnter={() => onPrimeOrder(order.id, order.accessToken)}
                   onFocus={() => onPrimeOrder(order.id, order.accessToken)}
                   onTouchStart={() => onPrimeOrder(order.id, order.accessToken)}
-                  className="min-w-[180px] rounded-[1.4rem] border border-white/70 bg-white/95 px-3.5 py-3 text-left shadow-[0_12px_26px_-18px_rgba(245,158,11,0.28)] transition-all active:scale-95"
+                  className="jnc-hub-touch min-w-[180px] rounded-[1.4rem] border border-white/70 bg-white/95 px-3.5 py-3 text-left shadow-[0_16px_34px_-28px_rgba(245,158,11,0.28)]"
                 >
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
                     Pedido salvo
@@ -79,7 +79,7 @@ export function HubAnonymousActiveOrders({
               onMouseEnter={() => onPrimeOrder(firstOrder?.id, firstOrder?.accessToken)}
               onFocus={() => onPrimeOrder(firstOrder?.id, firstOrder?.accessToken)}
               onTouchStart={() => onPrimeOrder(firstOrder?.id, firstOrder?.accessToken)}
-              className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 active:scale-95"
+              className="jnc-hub-touch group inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(16,185,129,0.50)] hover:bg-emerald-600"
             >
               Acompanhar agora
               <CaretRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
