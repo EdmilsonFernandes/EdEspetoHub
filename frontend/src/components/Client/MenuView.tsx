@@ -630,6 +630,7 @@ export const MenuView = ({
   const categorySyncLockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const canOrder = isOrderingEnabled !== false && !preOrderBlocked;
   const effectiveCompactHeader = compactHeader || autoCompactHeader;
+  const useCompactCategoryCarousel = filteredGrouped.length > 3;
   const catalogPrimaryColor = branding?.primaryColor || "#f59e0b";
   const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
   const catalogPrimaryText = getContrastTextColor(catalogPrimaryColor);
@@ -1152,7 +1153,7 @@ export const MenuView = ({
         {filteredGrouped.length > 1 && (
           <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-2.5">
             <div className="flex w-full items-center gap-1.5 rounded-[1.35rem] border border-slate-100/90 bg-slate-50/78 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-              {filteredGrouped.length > 2 && (
+              {useCompactCategoryCarousel && (
                 <button
                   type="button"
                   aria-label="Abrir categorias"
@@ -1163,11 +1164,11 @@ export const MenuView = ({
                 </button>
               )}
               <div className={`${
-                filteredGrouped.length > 2
+                useCompactCategoryCarousel
                   ? "min-w-0 flex-1 overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide sm:overflow-visible sm:whitespace-normal [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                  : "flex-1 grid grid-cols-2 gap-2"
+                  : `flex-1 grid gap-1.5 ${filteredGrouped.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`
               }`}>
-                <div className={`${filteredGrouped.length > 2 ? "inline-flex items-center gap-2.5 pr-8 sm:flex sm:flex-wrap sm:gap-2 sm:pr-0" : "contents"}`}>
+                <div className={`${useCompactCategoryCarousel ? "inline-flex items-center gap-2.5 pr-8 sm:flex sm:flex-wrap sm:gap-2 sm:pr-0" : "contents"}`}>
                 {filteredGrouped.map((category) => {
                   const isActive = activeCategoryKey === category.key;
                   const Icon = categoryGlyph(category.key);
@@ -1184,7 +1185,7 @@ export const MenuView = ({
                         scrollToCategory(category.key);
                       }}
                       className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-full border px-2.5 text-[11.5px] font-black transition-all duration-300 snap-start active:scale-95 sm:px-3 sm:text-xs ${
-                        filteredGrouped.length <= 2 ? "w-full min-w-0" : "max-w-full sm:min-w-0"
+                        useCompactCategoryCarousel ? "max-w-full sm:min-w-0" : "w-full min-w-0"
                       } ${isActive ? 'shadow-[0_10px_22px_-13px_rgba(15,23,42,0.28)]' : 'shadow-none'}`}
                       style={
                         isActive
