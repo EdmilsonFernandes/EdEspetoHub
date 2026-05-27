@@ -153,6 +153,33 @@ private async geocodeAddress(address: string): Promise<{ lat: number; lng: numbe
     }
   }
 
+private async resolveAddressCoordinates(payload: {
+    cep?: string | null;
+    street?: string | null;
+    number?: string | null;
+    complement?: string | null;
+    neighborhood?: string | null;
+    city?: string | null;
+    state?: string | null;
+  }): Promise<{ lat: number; lng: number } | null> {
+    const cep = String(payload?.cep || '').replace(/\D/g, '').slice(0, 8);
+    if (cep.length === 8) {
+      try {
+        const lookedUp = await this.zipCodeLookupService.lookup(cep);
+        if (lookedUp.latitude !== null && lookedUp.longitude !== null) {
+          return {
+            lat: Number(lookedUp.latitude),
+            lng: Number(lookedUp.longitude),
+          };
+        }
+      } catch {
+        // keep address save resilient even when zip providers are unavailable
+      }
+    }
+
+    return this.geocodeAddress(this.buildGeocodeAddress(payload));
+  }
+
     /**
    * Retrieves data for get client ip.
    *
@@ -768,18 +795,26 @@ async createAddress(userId: string, input: AddressInput) {
 
     const requestedLat = this.parseCoordinate(input?.lat);
     const requestedLng = this.parseCoordinate(input?.lng);
-    const hasExplicitCoordinates = requestedLat !== null && requestedLng !== null;
+    const hasExplicitCoordinates =
+      requestedLat !== undefined &&
+      requestedLng !== undefined &&
+      requestedLat !== null &&
+      requestedLng !== null;
     let resolvedLat = hasExplicitCoordinates ? Number(requestedLat) : null;
     let resolvedLng = hasExplicitCoordinates ? Number(requestedLng) : null;
     if (!hasExplicitCoordinates) {
-      try {
-        const lookedUp = await this.zipCodeLookupService.lookup(cep);
-        if (lookedUp.latitude !== null && lookedUp.longitude !== null) {
-          resolvedLat = Number(lookedUp.latitude);
-          resolvedLng = Number(lookedUp.longitude);
-        }
-      } catch {
-        // keep address save resilient even when zip providers are unavailable
+      const coordinates = await this.resolveAddressCoordinates({
+        cep,
+        street,
+        number,
+        neighborhood: input?.neighborhood,
+        complement: input?.complement,
+        city,
+        state,
+      });
+      if (coordinates) {
+        resolvedLat = coordinates.lat;
+        resolvedLng = coordinates.lng;
       }
     }
 
@@ -880,16 +915,18 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
         if (!hasExplicitLat) address.lat = null;
         if (!hasExplicitLng) address.lng = null;
         if (!hasExplicitLat || !hasExplicitLng) {
-          try {
-            const lookedUp = await this.zipCodeLookupService.lookup(address.cep);
-            if (!hasExplicitLat && lookedUp.latitude !== null) {
-              address.lat = Number(lookedUp.latitude);
-            }
-            if (!hasExplicitLng && lookedUp.longitude !== null) {
-              address.lng = Number(lookedUp.longitude);
-            }
-          } catch {
-            // ignore lookup failures here; manual address entry must continue working
+          const coordinates = await this.resolveAddressCoordinates({
+            cep: address.cep,
+            street: address.street,
+            number: address.number,
+            complement: address.complement,
+            neighborhood: address.neighborhood,
+            city: address.city,
+            state: address.state,
+          });
+          if (coordinates) {
+            if (!hasExplicitLat) address.lat = coordinates.lat;
+            if (!hasExplicitLng) address.lng = coordinates.lng;
           }
         }
       }

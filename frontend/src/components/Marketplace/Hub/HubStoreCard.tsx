@@ -24,6 +24,8 @@ export type HubStoreCardStore = {
   supportsDelivery: boolean;
   freeShipping: boolean;
   nextOpeningLabel?: string | null;
+  isOutOfRegion?: boolean;
+  deliveryStatusLabel?: string | null;
 };
 
 type HubStoreCardProps = {
@@ -73,6 +75,7 @@ export function HubStoreCard({
     event.stopPropagation();
     onToggleFavorite(store.slug);
   };
+  const isUnavailableForRegion = Boolean(store.isOutOfRegion);
 
   if (selectedCondominium) {
     return (
@@ -179,9 +182,9 @@ export function HubStoreCard({
       state={state}
       style={{ animationDelay: `${index * 36}ms` }}
         className={`jnc-hub-touch jnc-hub-lift group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards ${
-        store.isOpen
+        store.isOpen && !isUnavailableForRegion
           ? 'jnc-hub-surface-soft md:hover:bg-white md:hover:border-[#336886]/20'
-          : 'border-slate-100/80 bg-slate-50/72 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.16)] ring-1 ring-slate-200/35 grayscale-[25%] opacity-85 filter blur-[0.4px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
+          : 'border-slate-100/80 bg-slate-50/72 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.16)] ring-1 ring-slate-200/35 grayscale-[18%] opacity-85 filter blur-[0.25px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
       }`}
     >
       <div className="relative h-[4.45rem] w-[4.45rem] shrink-0 overflow-hidden rounded-[1.28rem] bg-white shadow-[0_16px_28px_-24px_rgba(15,23,42,0.46)] ring-1 ring-slate-200/70">
@@ -190,23 +193,23 @@ export function HubStoreCard({
           alt=""
           loading="lazy"
           decoding="async"
-          className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${store.isOpen ? '' : 'grayscale opacity-55'}`}
+          className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${store.isOpen && !isUnavailableForRegion ? '' : 'grayscale opacity-55'}`}
           onError={(event) => {
             (event.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name);
           }}
         />
-        {!store.isOpen ? <div className="absolute inset-0 bg-white/35" /> : null}
+        {!store.isOpen || isUnavailableForRegion ? <div className="absolute inset-0 bg-white/35" /> : null}
       </div>
 
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-1.5">
           <span
-            className={`h-2 w-2 shrink-0 rounded-full ${store.isOpen ? 'bg-emerald-500' : 'bg-rose-500'}`}
+            className={`h-2 w-2 shrink-0 rounded-full ${store.isOpen && !isUnavailableForRegion ? 'bg-emerald-500' : isUnavailableForRegion ? 'bg-slate-400' : 'bg-rose-500'}`}
             style={{
-              boxShadow: store.isOpen ? '0 0 8px rgba(16,185,129,0.42)' : '0 0 8px rgba(244,63,94,0.3)',
+              boxShadow: store.isOpen && !isUnavailableForRegion ? '0 0 8px rgba(16,185,129,0.42)' : '0 0 8px rgba(100,116,139,0.28)',
             }}
           />
-          <h3 className={`min-w-0 truncate text-[14.5px] font-black leading-5 tracking-[-0.02em] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
+          <h3 className={`min-w-0 truncate text-[14.5px] font-black leading-5 tracking-[-0.02em] ${store.isOpen && !isUnavailableForRegion ? 'text-slate-950' : 'text-slate-500'}`}>
             {store.name}
           </h3>
         </div>
@@ -218,8 +221,8 @@ export function HubStoreCard({
             </span>
           ) : null}
           {store.rating > 0 ? <span className="text-slate-200">·</span> : null}
-          <span className={store.isOpen ? 'text-emerald-700' : 'text-rose-600'}>
-            {store.isOpen ? 'Aberto' : 'Fechado'}
+          <span className={store.isOpen && !isUnavailableForRegion ? 'text-emerald-700' : isUnavailableForRegion ? 'text-slate-500' : 'text-rose-600'}>
+            {isUnavailableForRegion ? 'Fora da região' : store.isOpen ? 'Aberto' : 'Fechado'}
           </span>
         </div>
         <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-semibold text-slate-500">
@@ -245,9 +248,9 @@ export function HubStoreCard({
             })}
           </div>
         ) : null}
-        {!store.isOpen ? (
+        {!store.isOpen || isUnavailableForRegion ? (
           <p className="mt-2 text-[10.5px] font-bold text-slate-400">
-            {store.nextOpeningLabel || 'Sem horário cadastrado'}
+            {isUnavailableForRegion ? store.deliveryStatusLabel || 'Não atende sua região atual' : store.nextOpeningLabel || 'Sem horário cadastrado'}
           </p>
         ) : null}
       </div>

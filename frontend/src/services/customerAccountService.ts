@@ -1,5 +1,18 @@
 import { apiClient } from '../config/apiClient';
 import { getMfaDeviceContext } from '../utils/mfaDevice';
+import { storeService } from './storeService';
+
+const CUSTOMER_ADDRESS_UPDATED_EVENT = 'jnc:customer-addresses-updated';
+
+const notifyCustomerAddressChanged = () => {
+  storeService.clearPortfolioCache();
+  if (typeof window === 'undefined') return;
+  try {
+    window.dispatchEvent(new CustomEvent(CUSTOMER_ADDRESS_UPDATED_EVENT));
+  } catch {
+    // ignore notification failures
+  }
+};
 
 export const customerAccountService = {
   register(payload: { fullName: string; email: string; password: string; phone?: string; termsAccepted?: boolean; lgpdAccepted?: boolean }) {
@@ -60,20 +73,28 @@ export const customerAccountService = {
     return apiClient.get('/customer/addresses');
   },
 
-  createAddress(payload: any) {
-    return apiClient.post('/customer/addresses', payload);
+  async createAddress(payload: any) {
+    const response = await apiClient.post('/customer/addresses', payload);
+    notifyCustomerAddressChanged();
+    return response;
   },
 
-  updateAddress(addressId: string, payload: any) {
-    return apiClient.patch(`/customer/addresses/${addressId}`, payload);
+  async updateAddress(addressId: string, payload: any) {
+    const response = await apiClient.patch(`/customer/addresses/${addressId}`, payload);
+    notifyCustomerAddressChanged();
+    return response;
   },
 
-  setDefaultAddress(addressId: string) {
-    return apiClient.patch(`/customer/addresses/${addressId}/default`, {});
+  async setDefaultAddress(addressId: string) {
+    const response = await apiClient.patch(`/customer/addresses/${addressId}/default`, {});
+    notifyCustomerAddressChanged();
+    return response;
   },
 
-  deleteAddress(addressId: string) {
-    return apiClient.delete(`/customer/addresses/${addressId}`);
+  async deleteAddress(addressId: string) {
+    const response = await apiClient.delete(`/customer/addresses/${addressId}`);
+    notifyCustomerAddressChanged();
+    return response;
   },
 
   registerPushToken(payload: { token: string; platform?: string; appVersion?: string; deviceModel?: string }) {

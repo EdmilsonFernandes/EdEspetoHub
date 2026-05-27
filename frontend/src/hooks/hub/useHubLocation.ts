@@ -75,7 +75,13 @@ export function useHubLocation({ customerToken, customerEmail, hubDebug }: UseHu
     };
   }, [preferredDiscoveryAddress?.lat, preferredDiscoveryAddress?.lng]);
 
-  const activeLocation = savedAddressLocation || userLocation;
+  const hasPreferredAddressContext = Boolean(
+    preferredDiscoveryAddress?.city ||
+      preferredDiscoveryAddress?.state ||
+      preferredDiscoveryAddress?.addressLine ||
+      preferredDiscoveryAddress?.label
+  );
+  const activeLocation = savedAddressLocation || (hasPreferredAddressContext ? null : userLocation);
   const activeRegion =
     (preferredDiscoveryAddress?.city || preferredDiscoveryAddress?.state
       ? { city: preferredDiscoveryAddress?.city || '', state: preferredDiscoveryAddress?.state || '' }
@@ -227,11 +233,12 @@ export function useHubLocation({ customerToken, customerEmail, hubDebug }: UseHu
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) return;
     if (customerToken && preferredAddressLoading) return;
-    if (savedAddressLocation) {
+    if (savedAddressLocation || hasPreferredAddressContext) {
       setUserLocation(null);
       hubDebug('gps-skip-saved-address', {
-        lat: Number(savedAddressLocation.lat).toFixed(5),
-        lng: Number(savedAddressLocation.lng).toFixed(5),
+        lat: savedAddressLocation ? Number(savedAddressLocation.lat).toFixed(5) : null,
+        lng: savedAddressLocation ? Number(savedAddressLocation.lng).toFixed(5) : null,
+        hasPreferredAddressContext,
       });
       return;
     }
@@ -260,7 +267,7 @@ export function useHubLocation({ customerToken, customerEmail, hubDebug }: UseHu
       );
     }, 1400);
     return () => window.clearTimeout(timer);
-  }, [customerToken, hubDebug, preferredAddressLoading, savedAddressLocation]);
+  }, [customerToken, hasPreferredAddressContext, hubDebug, preferredAddressLoading, savedAddressLocation]);
 
   useEffect(() => {
     hubDebug('location-source', {

@@ -13,6 +13,7 @@ export type MarketplaceStore = {
   acceptsDelivery?: boolean | null;
   acceptsPickup?: boolean | null;
   geoAvailability?: string | null;
+  isOutOfRegion?: boolean | null;
   isNearest?: boolean | null;
   reviewSummary?: {
     totalReviews?: number;
@@ -53,6 +54,7 @@ export type StoreDiscoveryResponse = {
 };
 
 type HubDebug = (event: string, payload?: Record<string, any>) => void;
+const CUSTOMER_ADDRESS_UPDATED_EVENT = 'jnc:customer-addresses-updated';
 
 type UseHubStoresParams = {
   selectedCondominiumSlug?: string | null;
@@ -101,18 +103,37 @@ export function useHubStores({
               city: preferredDiscoveryAddress?.city || activeRegion?.city || null,
               state: preferredDiscoveryAddress?.state || activeRegion?.state || null,
             };
-      const basePortfolio = await storeService.listPortfolio({
-        lat: locationQuery.lat,
-        lng: locationQuery.lng,
-        city: locationQuery.city,
-        state: locationQuery.state,
-      });
-      const baseStores = Array.isArray(basePortfolio) ? basePortfolio : [];
-      setGeoDiscovery(null);
+      const hasDiscoveryContext = Boolean(
+        Number.isFinite(Number(locationQuery.lat)) ||
+          Number.isFinite(Number(locationQuery.lng)) ||
+          locationQuery.city ||
+          locationQuery.state
+      );
+      const basePortfolio =
+        !selectedCondominiumSlug && hubScopeOverride !== 'all_stores' && hasDiscoveryContext
+          ? await storeService.discoverPortfolio({
+              lat: locationQuery.lat,
+              lng: locationQuery.lng,
+              city: locationQuery.city,
+              state: locationQuery.state,
+            })
+          : await storeService.listPortfolio({
+              lat: locationQuery.lat,
+              lng: locationQuery.lng,
+              city: locationQuery.city,
+              state: locationQuery.state,
+            });
+      const discoveryPayload =
+        basePortfolio && !Array.isArray(basePortfolio) && Array.isArray((basePortfolio as StoreDiscoveryResponse).stores)
+          ? (basePortfolio as StoreDiscoveryResponse)
+          : null;
+      const baseStores = discoveryPayload ? discoveryPayload.stores || [] : Array.isArray(basePortfolio) ? basePortfolio : [];
+      setGeoDiscovery(discoveryPayload);
       setStores(baseStores);
       setError('');
       hubDebug('portfolio-loaded', {
         count: baseStores.length,
+        mode: discoveryPayload?.mode || null,
         sample: baseStores.slice(0, 5).map((store: any) => ({
           slug: String(store?.slug || ''),
           hasStoreLatLng: Number.isFinite(Number(store?.settings?.lat)) && Number.isFinite(Number(store?.settings?.lng)),
@@ -174,6 +195,17 @@ export function useHubStores({
       active = false;
     };
   }, [hubScopeOverride, loadPortfolio]);
+
+  useEffect(() => {
+    const clearAndReload = () => {
+      storeService.clearPortfolioCache();
+      window.setTimeout(() => {
+        void (latestLoadPortfolioRef.current || loadPortfolio)();
+      }, 80);
+    };
+    window.addEventListener(CUSTOMER_ADDRESS_UPDATED_EVENT, clearAndReload as EventListener);
+    return () => window.removeEventListener(CUSTOMER_ADDRESS_UPDATED_EVENT, clearAndReload as EventListener);
+  }, [loadPortfolio]);
 
   return {
     stores,

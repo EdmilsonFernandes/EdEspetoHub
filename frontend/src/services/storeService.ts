@@ -84,6 +84,18 @@ const writeCollectionCache = (key: string, data: any) => {
   return data;
 };
 
+const clearPortfolioCollectionCache = () => {
+  publicPortfolioMemoryCache.clear();
+  if (typeof window === 'undefined') return;
+  try {
+    Object.keys(sessionStorage)
+      .filter((key) => key.startsWith('public:portfolio:'))
+      .forEach((key) => sessionStorage.removeItem(key));
+  } catch {
+    // ignore cache clear failure
+  }
+};
+
 const toJson = async (response: any) => {
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
@@ -93,6 +105,10 @@ const toJson = async (response: any) => {
 };
 
 export const storeService = {
+  clearPortfolioCache() {
+    clearPortfolioCollectionCache();
+  },
+
   async preflightOwner(payload: any) {
     const response = await apiClient.rawPost('/auth/register/preflight', payload);
     return toJson(response);

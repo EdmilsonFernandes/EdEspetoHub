@@ -37,6 +37,8 @@ const storeDashboardAnalyticsService = new StoreDashboardAnalyticsService();
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
 const log = logger.child({ scope: 'StoreController' });
 const SAO_PAULO_TZ = 'America/Sao_Paulo';
+const MAX_LOCAL_PICKUP_DISTANCE_KM = 50;
+const MAX_NEARBY_DISCOVERY_DISTANCE_KM = 80;
 let storeCoordinateBackfillPromise: Promise<void> | null = null;
 let storeCoordinateBackfillLastRunAt = 0;
 /**
@@ -335,10 +337,13 @@ export class StoreController {
       : null;
     const normalizedCity = StoreController.normalizeGeoText(location.city);
     const normalizedState = StoreController.normalizeGeoText(location.state);
+    const normalizedStoreCity = StoreController.normalizeGeoText(entry?.settings?.city);
+    const normalizedStoreState = StoreController.normalizeGeoText(entry?.settings?.state);
+    const hasRegionContext = hasUserCoords || Boolean(normalizedCity || normalizedState);
     const sameCity =
       Boolean(normalizedCity) &&
-      StoreController.normalizeGeoText(entry?.settings?.city) === normalizedCity &&
-      (!normalizedState || StoreController.normalizeGeoText(entry?.settings?.state) === normalizedState);
+      normalizedStoreCity === normalizedCity &&
+      (!normalizedState || normalizedStoreState === normalizedState);
     const deliversToUserLocation = Boolean(
       acceptsDelivery &&
         hasUserCoords &&
@@ -347,24 +352,33 @@ export class StoreController {
         effectiveDeliveryRadiusKm !== null &&
         rawDistanceKm <= effectiveDeliveryRadiusKm
     );
-    const deliveryStatusLabel = !hasUserCoords
-      ? 'Distância indisponível'
-      : deliversToUserLocation
-        ? 'Entrega disponível'
-        : acceptsDelivery
-          ? 'Fora da área de entrega'
-          : (acceptsPickup || acceptsTable)
-            ? 'Retirada disponível'
-            : 'Distância indisponível';
+    const pickupEnabled = acceptsPickup || acceptsTable;
+    const pickupAvailableForRegion = Boolean(
+      pickupEnabled &&
+        (!hasRegionContext ||
+          sameCity ||
+          (rawDistanceKm !== null && rawDistanceKm <= MAX_LOCAL_PICKUP_DISTANCE_KM))
+    );
     const geoAvailability = supportsPostal
       ? 'postal_everywhere'
       : deliversToUserLocation
         ? 'deliver_now'
-        : (acceptsPickup || acceptsTable)
-          ? (sameCity ? 'same_city_pickup' : 'pickup_available')
+        : pickupEnabled
+          ? (pickupAvailableForRegion ? (sameCity ? 'same_city_pickup' : 'pickup_available') : 'out_of_region')
           : acceptsDelivery
             ? (distanceKm !== null ? 'outside_radius' : 'unknown')
             : 'unknown';
+    const deliveryStatusLabel = supportsPostal
+      ? 'Entrega postal disponível'
+      : deliversToUserLocation
+        ? 'Entrega disponível'
+        : geoAvailability === 'out_of_region'
+          ? 'Não atende sua região'
+          : acceptsDelivery
+            ? 'Fora da área de entrega'
+            : pickupAvailableForRegion
+              ? 'Retirada disponível'
+              : 'Distância indisponível';
 
     return {
       ...entry,
@@ -376,6 +390,7 @@ export class StoreController {
       supportsPostal,
       sameCity,
       geoAvailability,
+      isOutOfRegion: geoAvailability === 'out_of_region',
       deliveryRadiusKm: effectiveDeliveryRadiusKm,
       distanceKm,
       deliversToUserLocation,
@@ -386,10 +401,12 @@ export class StoreController {
   private static sortStoresForLocation(entries: any[]) {
     return entries.sort((a, b) => {
       const rank = (entry: any) => {
-        if (entry?.openNow && entry?.deliversToUserLocation) return 0;
-        if (entry?.openNow && (entry?.acceptsPickup || entry?.acceptsTable)) return 1;
-        if (entry?.openNow) return 2;
-        return 3;
+        const availability = String(entry?.geoAvailability || '').trim().toLowerCase();
+        if (entry?.openNow && (entry?.deliversToUserLocation || availability === 'deliver_now' || availability === 'postal_everywhere')) return 0;
+        if (entry?.openNow && [ 'same_city_pickup', 'pickup_available' ].includes(availability)) return 1;
+        if (entry?.openNow && availability !== 'out_of_region') return 2;
+        if (entry?.openNow) return 3;
+        return 4;
       };
       const rankDelta = rank(a) - rank(b);
       if (rankDelta !== 0) return rankDelta;
@@ -697,10 +714,13 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
       );
       const nearbyStores = sortByProximity(
         hydrated.filter(
-          (entry: any) =>
-            !deliverableStores.some((item: any) => item.id === entry.id) &&
-            !sameCityStores.some((item: any) => item.id === entry.id) &&
-            StoreController.toQueryNumber(entry?.distanceKm) !== null
+          (entry: any) => {
+            if (String(entry?.geoAvailability || '').trim().toLowerCase() === 'out_of_region') return false;
+            if (deliverableStores.some((item: any) => item.id === entry.id)) return false;
+            if (sameCityStores.some((item: any) => item.id === entry.id)) return false;
+            const distanceKm = StoreController.toQueryNumber(entry?.distanceKm);
+            return distanceKm !== null && distanceKm <= MAX_NEARBY_DISCOVERY_DISTANCE_KM;
+          }
         )
       );
 

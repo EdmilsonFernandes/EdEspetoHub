@@ -163,6 +163,7 @@ const appendHubDebugTrace = (entry: Record<string, any>) => {
 const storeRegionalPriority = (
   store: {
     geoAvailability?: string | null;
+    isOutOfRegion?: boolean | null;
     supportsPostal?: boolean;
     deliversToUserLocation?: boolean | null;
     isOpen?: boolean;
@@ -175,10 +176,12 @@ const storeRegionalPriority = (
     return store?.isOpen ? 0 : 1;
   }
   const availability = String(store?.geoAvailability || '').trim().toLowerCase();
+  if (store?.isOpen && (store?.isOutOfRegion || availability === 'out_of_region')) return 3;
   if (store?.isOpen && (store?.deliversToUserLocation || availability === 'deliver_now' || availability === 'postal_everywhere' || store?.supportsPostal)) return 0;
-  if (store?.isOpen && (availability === 'pickup_available' || availability === 'same_city_pickup' || store?.acceptsPickup || store?.supportsTable)) return 1;
+  if (store?.isOpen && (availability === 'pickup_available' || availability === 'same_city_pickup')) return 1;
+  if (store?.isOpen && !availability && (store?.acceptsPickup || store?.supportsTable)) return 1;
   if (store?.isOpen) return 2;
-  return 3;
+  return 4;
 };
 
 type StoreCardBadge = {
@@ -195,6 +198,7 @@ const getPrimaryStoreCardBadge = (
     supportsDelivery?: boolean;
     deliversToUserLocation?: boolean;
     geoAvailability?: string;
+    isOutOfRegion?: boolean | null;
     acceptsPickup?: boolean;
     supportsTable?: boolean;
   },
@@ -202,6 +206,16 @@ const getPrimaryStoreCardBadge = (
 ): StoreCardBadge | null => {
   const availability = String(store?.geoAvailability || '').trim().toLowerCase();
   const pickupEnabled = Boolean(store?.acceptsPickup || store?.supportsTable);
+
+  if (!options?.condominiumScope && (store?.isOutOfRegion || availability === 'out_of_region')) {
+    return {
+      key: 'outside_region',
+      label: 'Não atende sua região',
+      icon: Warning,
+      className:
+        'border-slate-200 bg-slate-50 text-slate-600 shadow-[0_8px_18px_-14px_rgba(15,23,42,0.18)]',
+    };
+  }
 
   if (!options?.condominiumScope && store?.supportsDelivery && !store?.supportsPostal && store?.deliversToUserLocation) {
     return {
@@ -213,7 +227,7 @@ const getPrimaryStoreCardBadge = (
     };
   }
 
-  if (pickupEnabled) {
+  if (pickupEnabled && [ 'pickup_available', 'same_city_pickup' ].includes(availability)) {
     return {
       key: 'pickup',
       label: 'Retirada no local',
@@ -1172,6 +1186,7 @@ export function MarketplacePage() {
           acceptsDelivery: Boolean((store as any)?.acceptsDelivery ?? supportsDelivery),
           acceptsPickup: Boolean((store as any)?.acceptsPickup ?? supportsPickup),
           geoAvailability: String((store as any)?.geoAvailability || '').trim(),
+          isOutOfRegion: Boolean((store as any)?.isOutOfRegion || String((store as any)?.geoAvailability || '').trim().toLowerCase() === 'out_of_region'),
           isNearest: Boolean((store as any)?.isNearest),
           distanceSource: apiDistanceKm !== null ? 'server' : 'local',
           nextOpeningLabel: formatNextOpeningLabel(String(store?.nextOpeningLabel || '').trim()),
@@ -1216,6 +1231,7 @@ export function MarketplacePage() {
       acceptsDelivery: boolean;
       acceptsPickup: boolean;
       geoAvailability: string;
+      isOutOfRegion: boolean;
       isNearest: boolean;
       distanceSource: 'server' | 'local';
       nextOpeningLabel: string;
@@ -2529,11 +2545,13 @@ export function MarketplacePage() {
                   const storePath = selectedCondominiumSlug
                     ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
                     : `/${store.slug}`;
+                  const isOutOfRegion = !selectedCondominium && Boolean(store.isOutOfRegion || String(store.geoAvailability || '').toLowerCase() === 'out_of_region');
                   const shouldWarnCoverage =
-                    !selectedCondominium &&
-                    store.supportsDelivery &&
-                    !store.supportsPostal &&
-                    [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase());
+                    isOutOfRegion ||
+                    (!selectedCondominium &&
+                      store.supportsDelivery &&
+                      !store.supportsPostal &&
+                      [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase()));
                   const navigationDistanceKm = distanceByStore[store.id] ?? store.distanceKm ?? null;
                   const storeNavigationState =
                     shouldWarnCoverage || navigationDistanceKm !== null
@@ -2541,7 +2559,9 @@ export function MarketplacePage() {
                           ...(shouldWarnCoverage
                             ? {
                                 hubCoverageWarning: {
-                                  message: 'Essa loja ainda não atende o seu endereço principal com entrega. Você pode ver o cardápio e conferir outras opções como retirada.',
+                                  message: isOutOfRegion
+                                    ? 'Essa loja não atende sua região atual. Você pode ver a vitrine, mas pedidos ficam disponíveis apenas para regiões atendidas.'
+                                    : 'Essa loja ainda não atende o seu endereço principal com entrega. Você pode ver o cardápio e conferir outras opções como retirada.',
                                 },
                               }
                             : {}),
@@ -2569,7 +2589,9 @@ export function MarketplacePage() {
                       ? null
                       : secondaryBadge;
                   const visibleServiceBadges = [visiblePrimaryBadge, visibleSecondaryBadge].filter(Boolean) as StoreCardBadge[];
-                  const deliveryFeeLabel = store.supportsDelivery
+                  const deliveryFeeLabel = isOutOfRegion
+                    ? 'Fora da região'
+                    : store.supportsDelivery
                     ? store.freeShipping
                       ? 'Grátis'
                       : store.deliveryFee !== null
@@ -2578,7 +2600,9 @@ export function MarketplacePage() {
                     : store.supportsPickup || store.supportsTable
                       ? 'Retirada'
                       : 'Consulte';
-                  const resolvedDistanceLabel = distanceLoading && activeLocation && distanceByStore[store.id] == null
+                  const resolvedDistanceLabel = isOutOfRegion && navigationDistanceKm !== null && navigationDistanceKm > 80
+                    ? 'Outra região'
+                    : distanceLoading && activeLocation && distanceByStore[store.id] == null
                     ? '...'
                     : formatDistance(distanceByStore[store.id] ?? store.distanceKm);
                   const ratingLabel = store.reviewCount > 0

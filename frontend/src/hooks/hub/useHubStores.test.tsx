@@ -5,6 +5,8 @@ import { useHubStores } from './useHubStores';
 
 vi.mock('../../services/storeService', () => ({
   storeService: {
+    clearPortfolioCache: vi.fn(),
+    discoverPortfolio: vi.fn(),
     listPortfolio: vi.fn(),
   },
 }));
@@ -37,12 +39,17 @@ afterEach(() => {
 
 describe('useHubStores', () => {
   it('loads portfolio with regional context and clears location when showing all stores', async () => {
-    vi.mocked(storeService.listPortfolio).mockResolvedValue([{ id: '1', slug: 'loja-a', name: 'Loja A' }] as any);
+    vi.mocked(storeService.discoverPortfolio).mockResolvedValue({
+      mode: 'deliverable',
+      stores: [{ id: '1', slug: 'loja-a', name: 'Loja A' }],
+      summary: { deliverableCount: 1 },
+    } as any);
+    vi.mocked(storeService.listPortfolio).mockResolvedValue([{ id: '2', slug: 'loja-b', name: 'Loja B' }] as any);
 
     render(<StoresHarness />);
 
     await waitFor(() => expect(screen.getByTestId('stores')).toHaveTextContent('loja-a'));
-    expect(storeService.listPortfolio).toHaveBeenLastCalledWith({
+    expect(storeService.discoverPortfolio).toHaveBeenLastCalledWith({
       lat: -23.1,
       lng: -45.9,
       city: 'São José dos Campos',
@@ -51,6 +58,7 @@ describe('useHubStores', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Ver todas' }));
 
+    await waitFor(() => expect(screen.getByTestId('stores')).toHaveTextContent('loja-b'));
     await waitFor(() =>
       expect(storeService.listPortfolio).toHaveBeenLastCalledWith({
         lat: null,
