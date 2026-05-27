@@ -630,7 +630,6 @@ export const MenuView = ({
   const categorySyncLockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const canOrder = isOrderingEnabled !== false && !preOrderBlocked;
   const effectiveCompactHeader = compactHeader || autoCompactHeader;
-  const useCompactCategoryCarousel = filteredGrouped.length > 3;
   const catalogPrimaryColor = branding?.primaryColor || "#f59e0b";
   const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
   const catalogPrimaryText = getContrastTextColor(catalogPrimaryColor);
@@ -866,6 +865,7 @@ export const MenuView = ({
       })
       .filter((category) => category.items.length > 0);
   }, [grouped, query]);
+  const useCompactCategoryCarousel = filteredGrouped.length > 3;
 
   const registerCategoryRef = (key) => (node) => {
     if (node) {
