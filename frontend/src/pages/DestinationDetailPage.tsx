@@ -537,13 +537,15 @@ export function DestinationDetailPage() {
             <div className="min-w-0 max-w-full overflow-hidden rounded-[2rem] border border-white/85 bg-white/94 p-4 shadow-[0_22px_60px_-48px_rgba(15,23,42,0.36)] ring-1 ring-slate-900/[0.025] sm:p-5">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Cidade</p>
-                  <h2 className="mt-1 text-xl font-black">Comer, comprar e fazer</h2>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">{showPlacesSection ? 'Ainda explorando?' : 'Região'}</p>
+                  <h2 className="mt-1 text-xl font-black">{showPlacesSection ? 'Comida, compras e serviços da cidade' : 'Comer, comprar e fazer'}</h2>
                   <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">
-                    Lojas oficiais ganham pedido pelo app. Os demais aparecem como contato direto até ativarem o cardápio online.
+                    {showPlacesSection
+                      ? 'Veja opções da região antes de escolher uma hospedagem. Ao entrar em um chalé, mostramos quem atende ali.'
+                      : 'Veja opções úteis da região para pedir, comprar ou combinar atendimento direto.'}
                   </p>
                 </div>
-                <Sparkle size={25} weight="duotone" className="text-amber-700" />
+                <Sparkle size={25} weight="duotone" className="text-[#336886]" />
               </div>
               <div className="mt-4 min-w-0 space-y-3">
                 {visibleListings.map((listing: any) => {

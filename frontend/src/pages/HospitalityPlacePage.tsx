@@ -260,6 +260,8 @@ export function HospitalityPlacePage() {
   const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
   const placeListings = listings.filter((listing: any) => String(listing.hospitalityPlaceId || '') === String(place.id || ''));
   const destinationListings = listings.filter((listing: any) => !listing.hospitalityPlaceId);
+  const nearbyCityListings = destinationListings.slice(0, 4);
+  const destinationDisplayName = destination.name || destination.city || destinationSlug || 'a região';
   const hasPlaceDeliveryOptions = stores.length > 0 || placeListings.length > 0;
   const deliveryOptionCount = stores.length + placeListings.length;
   const deliveryOptionLabel = deliveryOptionCount === 1 ? '1 opção vinculada' : `${deliveryOptionCount} opções vinculadas`;
@@ -477,9 +479,9 @@ export function HospitalityPlacePage() {
                     <ShoppingBagOpen size={15} weight="duotone" />
                     Atendem este chalé
                   </p>
-                  <h2 className="mt-1 text-2xl font-bold tracking-[-0.035em] text-slate-950">Comida e serviços que chegam aqui</h2>
+                  <h2 className="mt-1 text-2xl font-bold tracking-[-0.035em] text-slate-950">Delivery e serviços para este chalé</h2>
                   <p className="mt-1 max-w-2xl text-sm font-medium leading-relaxed text-slate-600">
-                    Toque em um card para pedir pelo app ou chamar o atendimento direto no WhatsApp.
+                    A referência da hospedagem já acompanha o pedido ou a mensagem para facilitar a entrega.
                   </p>
                 </div>
                 <p className="hidden min-w-0 max-w-[18rem] whitespace-normal break-words text-right text-xs font-medium leading-relaxed text-slate-500 sm:block">
@@ -660,16 +662,19 @@ export function HospitalityPlacePage() {
           </div>
 
           <aside className="space-y-4">
-            <div className="rounded-[1.5rem] border border-slate-200 bg-white/82 p-4 shadow-[0_14px_38px_-34px_rgba(15,23,42,0.32)]">
+            <div className="rounded-[1.5rem] border border-white/80 bg-white/72 p-4 shadow-[0_14px_38px_-34px_rgba(15,23,42,0.24)] ring-1 ring-slate-900/[0.025] backdrop-blur-xl">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-700">Cidade</p>
-                  <h2 className="mt-1 text-base font-bold">Também por perto</h2>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#336886]">Região</p>
+                  <h2 className="mt-1 text-base font-bold">Também em {destinationDisplayName}</h2>
+                  <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
+                    Outras opções da cidade para descobrir durante a estadia.
+                  </p>
                 </div>
-                <Sparkle size={21} weight="duotone" className="text-amber-700" />
+                <Sparkle size={21} weight="duotone" className="text-[#336886]" />
               </div>
               <div className="mt-3 space-y-2.5">
-                {destinationListings.map((listing: any) => {
+                {nearbyCityListings.map((listing: any) => {
                   const mediaUrl = cardMediaFor(listing);
                   return (
                     <article
@@ -716,7 +721,16 @@ export function HospitalityPlacePage() {
                     </article>
                   );
                 })}
-                {destinationListings.length === 0 ? <p className="text-sm font-bold text-slate-500">Sem outros serviços aprovados na cidade ainda.</p> : null}
+                {destinationListings.length > nearbyCityListings.length ? (
+                  <Link
+                    to={`/destinos/${destination.slug || destinationSlug}`}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-[#336886] transition hover:bg-[#336886] hover:text-white"
+                  >
+                    Ver tudo em {destinationDisplayName}
+                    <ArrowRight size={12} weight="bold" />
+                  </Link>
+                ) : null}
+                {destinationListings.length === 0 ? <p className="text-sm font-bold text-slate-500">Sem outras sugestões da cidade por enquanto.</p> : null}
               </div>
             </div>
             {place.deliveryInstructions ? (
