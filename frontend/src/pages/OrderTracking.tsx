@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowClockwise, Bicycle, CheckCircle, Clock, CircleNotch, CopySimple, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowClockwise, Bicycle, CheckCircle, Clock, CircleNotch, CopySimple, CreditCard, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
 import { Capacitor } from '@capacitor/core';
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
@@ -1697,37 +1697,47 @@ export function OrderTracking() {
                 (!isPostalDelivery && etaWindowMin && etaWindowMax && !isTerminal) ||
                 (isPostalDelivery && !isTerminal && (postalRemainingDays !== null || Boolean(postalExpectedDeliveryDate))) ||
                 isEstimateDelayed ? (
-                  <div className="mb-4 space-y-1.5">
-                    {isReady && elapsedMs > 0 && (
-                      <div className="inline-flex items-center gap-2 text-sm text-stone-500">
-                        <Clock size={13} weight="duotone" className="text-amber-600" />
-                        <span className="font-medium">Tempo total: {formatDuration(elapsedMs)}</span>
-                      </div>
-                    )}
-                    {isPostalDelivery && !isReady && postalRemainingDays !== null && (
-                      <div className="inline-flex items-center gap-2 text-sm text-stone-500">
-                        <Clock size={13} weight="duotone" className="text-amber-600" />
-                        <span className="font-medium">Prazo restante: ~{postalRemainingDays} dia(s)</span>
-                      </div>
-                    )}
-                    {remainingEstimateMinutes !== null && !isReady && (
-                      <div className="inline-flex items-center gap-2 text-sm text-stone-500">
-                        <Clock size={13} weight="duotone" className="text-amber-600" />
-                        <span className="font-medium">{etaPhaseLabel} restante: ~{remainingEstimateMinutes} min</span>
-                      </div>
-                    )}
-                    {!isPostalDelivery && etaWindowMin && etaWindowMax && !isReady && (
-                      <div className="inline-flex items-center gap-2 text-sm text-stone-500">
-                        <Clock size={13} weight="duotone" className="text-amber-600" />
-                        <span className="font-medium">Janela prevista: {etaWindowMin}–{etaWindowMax} min</span>
-                      </div>
-                    )}
-                    {isEstimateDelayed && (
-                      <div className="inline-flex items-center gap-2 text-sm text-stone-500">
-                        <Clock size={13} weight="duotone" className="text-amber-600" />
-                        <span className="font-medium">Seu pedido está demorando mais que o previsto.</span>
-                      </div>
-                    )}
+                  <div className="mb-4 grid gap-2 sm:grid-cols-2">
+                    {isReady && elapsedMs > 0 ? (
+                      <TrackingMetaCard
+                        label="Tempo total"
+                        value={formatDuration(elapsedMs)}
+                        detail="Tempo até a conclusão do pedido"
+                        accent="success"
+                      />
+                    ) : null}
+                    {isPostalDelivery && !isReady && postalRemainingDays !== null ? (
+                      <TrackingMetaCard
+                        label="Prazo restante"
+                        value={`~${postalRemainingDays} dia(s)`}
+                        detail={postalExpectedDeliveryDate ? `Entrega prevista até ${postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}` : 'Estimativa atual para envio'}
+                        accent="primary"
+                      />
+                    ) : null}
+                    {remainingEstimateMinutes !== null && !isReady ? (
+                      <TrackingMetaCard
+                        label={`${etaPhaseLabel} restante`}
+                        value={`~${remainingEstimateMinutes} min`}
+                        detail={etaWindowMin && etaWindowMax ? `Janela prevista: ${etaWindowMin}–${etaWindowMax} min` : etaForecastLabel}
+                        accent={isEstimateDelayed ? 'warning' : 'primary'}
+                      />
+                    ) : null}
+                    {remainingEstimateMinutes === null && !isPostalDelivery && etaWindowMin && etaWindowMax && !isReady ? (
+                      <TrackingMetaCard
+                        label="Janela prevista"
+                        value={`${etaWindowMin}–${etaWindowMax} min`}
+                        detail={etaForecastLabel}
+                        accent="primary"
+                      />
+                    ) : null}
+                    {isEstimateDelayed ? (
+                      <TrackingMetaCard
+                        label="Previsão"
+                        value="Em atraso"
+                        detail="Seu pedido está demorando mais que o previsto."
+                        accent="warning"
+                      />
+                    ) : null}
                   </div>
                 ) : null}
 
@@ -1809,15 +1819,10 @@ export function OrderTracking() {
                   className="rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] p-5 shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]"
                 >
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <p className="text-sm font-semibold text-stone-950">Resumo do pedido</p>
-                    {paymentMeta?.label && (
-                      <span className="inline-flex items-center gap-2 rounded-full border border-[#d6e4ed] bg-[linear-gradient(135deg,#ffffff,#edf5fa)] px-3 py-1 text-[11px] font-semibold text-[#336886]">
-                        {paymentMeta.icon && (
-                          <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
-                        )}
-                        {paymentMeta.label}
-                      </span>
-                    )}
+                    <p className="text-sm font-semibold text-stone-950">Itens do pedido</p>
+                    <span className="rounded-full border border-[#d6e4ed] bg-white/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">
+                      {itemsToRender.length} {itemsToRender.length === 1 ? 'item' : 'itens'}
+                    </span>
                   </div>
                   <div className="space-y-2 text-sm text-slate-600">
                     {(itemsExpanded ? itemsToRender : itemsToRender.slice(0, 2)).map((item) => {
@@ -1915,15 +1920,51 @@ export function OrderTracking() {
                 </div>
                 <div id="order-info-section" className="overflow-hidden rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]">
                   <div className="border-b border-[#dce9f1] px-5 py-4">
-                    <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Informações do pedido</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Pagamento e entrega</p>
                   </div>
                   <div className="space-y-4 px-4 py-4 sm:px-5">
+                    <div className="rounded-[1.35rem] border border-[#d6e4ed] bg-[linear-gradient(135deg,#ffffff_0%,#f5fafd_58%,#edf6fb_100%)] p-4 shadow-[0_20px_40px_-32px_rgba(51,104,134,0.22)]">
+                      <div className="flex items-start gap-3">
+                        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-[#d6e4ed] bg-white shadow-[0_14px_26px_-22px_rgba(51,104,134,0.4)]">
+                          {paymentMeta?.icon ? (
+                            <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-7 w-7 object-contain" />
+                          ) : (
+                            <CreditCard size={22} weight="duotone" className="text-[#336886]" />
+                          )}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Pagamento</p>
+                            {isPaymentApproved ? (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700">
+                                <SealCheck size={12} weight="fill" />
+                                Confirmado
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="mt-1 text-base font-black leading-tight text-slate-950">
+                            {paymentMeta?.label || 'A confirmar'}
+                          </p>
+                          <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">
+                            {paymentSummaryDetail}
+                          </p>
+                        </div>
+                      </div>
+                      {showMercadoPagoApproved ? (
+                        <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#009ee3]/15 bg-white/85 px-3 py-2">
+                          <span className="text-[11px] font-semibold leading-4 text-slate-500">{mercadoPagoApprovalDetail}</span>
+                          <span className="flex h-9 w-[124px] shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-white px-2">
+                            <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-7 w-[104px] object-contain" />
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {(isCancelled && hasOnlinePayment && isPaymentApproved && !order?.refundStatus) ||
+                    (isCancelled && order?.refundStatus === 'REFUNDED') ||
+                    (isCancelled && order?.refundStatus === 'PARTIALLY_REFUNDED') ||
+                    (isCancelled && order?.refundStatus === 'DENIED') ? (
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <TrackingMetaCard
-                        label="Pagamento"
-                        value={paymentMeta?.label || 'A confirmar'}
-                        detail={paymentSummaryDetail}
-                      />
                       {isCancelled && hasOnlinePayment && isPaymentApproved && !order?.refundStatus && (
                         <TrackingMetaCard label="Reembolso" value="Em análise" detail="O estabelecimento está processando a devolução" accent="default" />
                       )}
@@ -1936,13 +1977,8 @@ export function OrderTracking() {
                       {isCancelled && order?.refundStatus === 'DENIED' && (
                         <TrackingMetaCard label="Reembolso" value="Não aprovado" detail={order?.refundReason || 'Entre em contato com o estabelecimento'} accent="warning" />
                       )}
-                      <TrackingMetaCard
-                        label="Total"
-                        value={formatCurrency(order.total || 0)}
-                        detail={deliveryFeeValue !== null ? `Frete ${formatCurrency(deliveryFeeValue)}` : isDelivery ? 'Entrega' : 'Retirada'}
-                        accent="primary"
-                      />
                     </div>
+                    ) : null}
 
                     <div className="space-y-3">
                       {isAdminForStore && (
@@ -1976,29 +2012,6 @@ export function OrderTracking() {
                         />
                       ) : null}
                     </div>
-
-                    {showMercadoPagoApproved && (
-                      <div className="overflow-hidden rounded-[1.35rem] border border-[#009ee3]/20 bg-[linear-gradient(135deg,#f8fdff_0%,#ffffff_52%,#eefaff_100%)] p-[1px] shadow-[0_18px_34px_-30px_rgba(0,158,227,0.68)]">
-                        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.3rem] bg-white/94 px-4 py-3">
-                          <div className="flex min-w-0 items-center gap-2.5">
-                            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[15px] bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
-                              <SealCheck size={21} weight="fill" />
-                            </span>
-                            <span className="min-w-0">
-                              <span className="block text-[12px] font-black leading-tight text-slate-950">
-                                Pagamento aprovado
-                              </span>
-                              <span className="mt-0.5 block text-[11px] font-semibold leading-tight text-slate-500">
-                                {mercadoPagoApprovalDetail}
-                              </span>
-                            </span>
-                          </div>
-                          <span className="ml-auto flex h-11 w-[142px] shrink-0 items-center justify-center rounded-[16px] border border-slate-200/85 bg-white px-2.5 shadow-[0_10px_24px_-20px_rgba(10,0,128,0.42)]">
-                            <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-8 w-[118px] object-contain" />
-                          </span>
-                        </div>
-                      </div>
-                    )}
 
                     {cashTenderedValue !== null ? (
                       <div className="rounded-[1.35rem] border border-amber-100/80 bg-[linear-gradient(135deg,#fffdf7,#faf6ee)] p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
@@ -2059,14 +2072,8 @@ export function OrderTracking() {
                       </div>
                     )}
 
-                    {isPixPayment ? (
-                      shouldHidePixPaymentBlockBase ? (
-                        <div className="rounded-[1.35rem] border border-emerald-200 bg-emerald-50 p-4">
-                          <span className="inline-flex items-center rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-bold text-emerald-700">
-                            {isCancelled ? 'Pagamento confirmado antes do cancelamento' : 'Pagamento confirmado'}
-                          </span>
-                        </div>
-                      ) : isCancelled ? (
+                    {isPixPayment && !shouldHidePixPaymentBlockBase ? (
+                      isCancelled ? (
                         <div className="rounded-[1.35rem] border border-rose-200 bg-rose-50 p-4">
                           <span className="inline-flex items-center rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-bold text-rose-700">
                             Pagamento nao concluido
@@ -2140,99 +2147,11 @@ export function OrderTracking() {
                             {etaForecastLabel}: {formatEtaMoment(deliveryEta)}
                           </div>
                         ) : null}
-                        {etaDetails ? (
-                          <div className="mt-3 space-y-2 rounded-xl border border-amber-100/80 bg-[linear-gradient(180deg,#fffdf7,#faf6ee)] p-3">
-                            <div className="flex items-center justify-between text-xs font-semibold text-stone-700">
-                              <span>{isInTransitPhase ? 'Tempo de trajeto estimado' : 'Tempo de preparo estimado'}</span>
-                              <span className="text-stone-950">
-                                {etaTotalMinutes ? `~${etaTotalMinutes} min` : '-'}
-                              </span>
-                            </div>
-                            {(etaDetails.prepMinutes !== undefined || etaDetails.queueMinutes !== undefined) && (
-                              <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-stone-600">
-                                {etaDetails.prepMinutes !== undefined && (
-                                  <span className="rounded-full border border-amber-100 bg-white px-2 py-1">
-                                    Tempo de preparo: {etaDetails.prepMinutes} min
-                                  </span>
-                                )}
-                                {etaDetails.queueMinutes !== undefined && (
-                                  <span className="rounded-full border border-amber-100 bg-white px-2 py-1">
-                                    Fila: {etaDetails.queueMinutes} min
-                                  </span>
-                                )}
-                                {etaDetails.travelMinutes !== undefined && etaDetails.travelMinutes !== null && (
-                                  <span className="rounded-full border border-amber-100 bg-white px-2 py-1">
-                                    Tempo de trajeto: {etaDetails.travelMinutes} min
-                                  </span>
-                                )}
-                                {etaDetails.bufferMinutes !== undefined && (
-                                  <span className="rounded-full border border-amber-100 bg-white px-2 py-1">
-                                    Buffer: {etaDetails.bufferMinutes} min
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                            {etaWindowMin && etaWindowMax ? (
-                              <div className="text-[11px] text-stone-500">
-                                Janela prevista: {etaWindowMin}–{etaWindowMax} min
-                              </div>
-                            ) : null}
-                            {trackingLoading ? (
-                              <div className="text-[11px] text-stone-400">Atualizando acompanhamento...</div>
-                            ) : null}
-                          </div>
+                        {trackingLoading ? (
+                          <div className="mt-2 text-[11px] text-stone-400">Atualizando acompanhamento...</div>
                         ) : null}
                       </div>
                     )}
-
-                    {(isReady && elapsedMs > 0) || (remainingEstimateMinutes !== null && !isReady) || (isPostalDelivery && !isReady && postalRemainingDays !== null) || isEstimateDelayed || (!isPostalDelivery && etaWindowMin && etaWindowMax && !isReady) || (isPostalDelivery && postalExpectedDeliveryDate && !isReady) ? (
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        {isReady && elapsedMs > 0 ? (
-                          <TrackingMetaCard
-                            label="Tempo total"
-                            value={formatDuration(elapsedMs)}
-                            detail="Tempo total ate a conclusao do pedido"
-                          />
-                        ) : null}
-                        {remainingEstimateMinutes !== null && !isReady ? (
-                          <TrackingMetaCard
-                            label={`${etaPhaseLabel} restante`}
-                            value={`~${remainingEstimateMinutes} min`}
-                            detail={etaForecastLabel}
-                            accent={isEstimateDelayed ? 'warning' : 'primary'}
-                          />
-                        ) : null}
-                        {isPostalDelivery && !isReady && postalRemainingDays !== null ? (
-                          <TrackingMetaCard
-                            label="Prazo restante"
-                            value={`~${postalRemainingDays} dia(s)`}
-                            detail="Estimativa atual para o envio postal"
-                          />
-                        ) : null}
-                        {isEstimateDelayed ? (
-                          <TrackingMetaCard
-                            label="Previsao"
-                            value="Em atraso"
-                            detail="O pedido passou da estimativa inicial."
-                            accent="warning"
-                          />
-                        ) : null}
-                        {!isPostalDelivery && etaWindowMin && etaWindowMax && !isReady ? (
-                          <TrackingMetaCard
-                            label="Janela prevista"
-                            value={`${etaWindowMin}–${etaWindowMax} min`}
-                            detail="Faixa atual informada para este pedido"
-                          />
-                        ) : null}
-                        {isPostalDelivery && postalExpectedDeliveryDate && !isReady ? (
-                          <TrackingMetaCard
-                            label="Previsao de entrega"
-                            value={postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}
-                            detail="Estimativa atual dos Correios"
-                          />
-                        ) : null}
-                      </div>
-                    ) : null}
 
                     {(order?.items?.length || storeWhatsappLink) ? (
                       <div className="flex flex-wrap gap-2 pt-1">
