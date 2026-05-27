@@ -72,10 +72,10 @@ test.describe('Configuração de impressora térmica', () => {
   test('operador acessa a configuração local da impressora sem abrir configurações sensíveis da loja', async ({ page }) => {
     await page.goto('/admin/dashboard?tab=config&section=printer');
 
-    const printerRegion = page.getByRole('region', { name: 'Impressora térmica' });
+    const printerRegion = page.getByTestId('thermal-printer-settings');
     await expect(printerRegion).toBeVisible({ timeout: 15000 });
     await expect(printerRegion).toContainText('Impressora térmica');
-    await expect(printerRegion).toContainText('Admin e operador podem salvar a impressora usada na fila de pedidos.');
+    await expect(printerRegion).toContainText('Admin e operador podem salvar a impressora usada na fila de pedidos');
     await expect(printerRegion).toContainText('Abra esta tela pelo app Android da loja');
     await expect(page.getByText('Perfil e marca')).toBeHidden();
     await expect(page.getByText('Entrega e logística')).toBeHidden();

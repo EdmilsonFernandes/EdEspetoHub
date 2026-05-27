@@ -1,31 +1,89 @@
 // @ts-nocheck
-import { useEffect, useState } from 'react';
-import { ArrowClockwise, CheckCircle, Gear, Printer, Trash, WarningCircle } from '@phosphor-icons/react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  ArrowClockwise,
+  CheckCircle,
+  Gear,
+  PlugsConnected,
+  Printer,
+  Receipt,
+  Trash,
+  WarningCircle,
+} from '@phosphor-icons/react';
 import { useToast } from '../../contexts/ToastContext';
+import { buildRawBtText } from '../../utils/printReceiptImage';
 import {
   clearNativeThermalPrinter,
   getNativeThermalPrinterStatus,
+  getStoredThermalPrinterSettings,
   isAndroidNativeThermalPrinterRuntime,
   isNativeThermalPrinterPluginAvailable,
   listNativeThermalPrinters,
+  normalizeThermalPrinterSettings,
   openNativeBluetoothSettings,
+  printNativeThermalReceipt,
   saveNativeThermalPrinter,
+  saveNativeThermalPrinterSettings,
 } from '../../utils/thermalPrinter';
+
+const sampleReceiptPayload = {
+  storeName: 'Ja no Caminho',
+  platformName: 'Ja no Caminho',
+  queueLabel: '#TESTE',
+  orderLabel: '#IMPRESSAO',
+  customerLabel: 'Operador',
+  locationLabel: 'MESA TESTE',
+  dateLabel: '27/05/2026 15:30',
+  items: [
+    {
+      quantity: 1,
+      name: 'Teste de impressao',
+      lineTotal: 'R$ 0,00',
+      notes: 'Se este cupom saiu legivel, a impressora esta pronta.',
+    },
+  ],
+  totalLabel: 'R$ 0,00',
+};
+
+const stripPrinterCommands = (value: string) =>
+  String(value || '')
+    .replace(/\x1B[\x00-\x7F]{1,2}/g, '')
+    .replace(/\x1D[\x00-\x7F]{1,2}/g, '');
+
+const settingButtonClass = (active: boolean) =>
+  `rounded-2xl border px-3 py-2.5 text-left text-xs font-black transition active:scale-[0.99] ${
+    active
+      ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_18px_34px_-26px_rgba(21,58,76,0.9)]'
+      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+  }`;
 
 export function ThermalPrinterSettingsCard() {
   const { showToast } = useToast();
   const [status, setStatus] = useState(null);
   const [devices, setDevices] = useState([]);
+  const [settings, setSettings] = useState(() => getStoredThermalPrinterSettings());
   const [loading, setLoading] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [savingSettings, setSavingSettings] = useState(false);
   const [savingAddress, setSavingAddress] = useState('');
   const isNativeAndroid = isAndroidNativeThermalPrinterRuntime();
   const hasNativePrinterPlugin = isNativeThermalPrinterPluginAvailable();
+
+  const mergeStatusSettings = (nextStatus) => {
+    const nextSettings = normalizeThermalPrinterSettings({
+      ...getStoredThermalPrinterSettings(),
+      ...(nextStatus?.settings || {}),
+      ...(nextStatus?.savedPrinter || {}),
+    });
+    setSettings(nextSettings);
+  };
 
   const loadStatus = async () => {
     if (!hasNativePrinterPlugin) return;
     try {
       const nextStatus = await getNativeThermalPrinterStatus();
       setStatus(nextStatus);
+      mergeStatusSettings(nextStatus);
     } catch (error) {
       console.warn('[thermal-printer] status indisponível', error);
     }
@@ -69,8 +127,12 @@ export function ThermalPrinterSettingsCard() {
   const handleSave = async (device) => {
     setSavingAddress(device.address);
     try {
-      const result = await saveNativeThermalPrinter(device, 32);
-      setStatus((prev) => ({ ...(prev || {}), savedPrinter: result?.savedPrinter || device }));
+      const result = await saveNativeThermalPrinter(device, settings);
+      setStatus((prev) => ({
+        ...(prev || {}),
+        settings: result?.settings || settings,
+        savedPrinter: result?.savedPrinter || { ...device, ...settings },
+      }));
       showToast(`Impressora ${device.name || device.address} salva neste aparelho.`, 'success');
     } catch (error) {
       showToast(error?.message || 'Não foi possível salvar a impressora.', 'error');
@@ -79,11 +141,53 @@ export function ThermalPrinterSettingsCard() {
     }
   };
 
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const result = await saveNativeThermalPrinterSettings(settings);
+      setStatus((prev) => ({
+        ...(prev || {}),
+        settings: result?.settings || settings,
+        savedPrinter: result?.savedPrinter || prev?.savedPrinter,
+      }));
+      showToast('Formato do cupom salvo neste aparelho.', 'success');
+    } catch (error) {
+      showToast(error?.message || 'Não foi possível salvar o formato do cupom.', 'error');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleTestPrint = async () => {
+    if (!status?.savedPrinter?.address) {
+      showToast('Escolha uma impressora antes de testar.', 'warning');
+      return;
+    }
+    setTesting(true);
+    try {
+      await saveNativeThermalPrinterSettings(settings);
+      const text = buildRawBtText(sampleReceiptPayload, settings);
+      await printNativeThermalReceipt(text, settings);
+      showToast('Teste enviado para a impressora configurada.', 'success');
+    } catch (error) {
+      const code = String(error?.code || '');
+      if (code === 'PRINT_TIMEOUT') {
+        showToast('A impressora demorou para responder. Confira se ela está ligada e perto do celular.', 'warning');
+      } else if (code === 'NO_PRINTER') {
+        showToast('Escolha uma impressora antes de testar.', 'warning');
+      } else {
+        showToast(error?.message || 'Não foi possível imprimir o teste.', 'error');
+      }
+    } finally {
+      setTesting(false);
+    }
+  };
+
   const handleClear = async () => {
     try {
       await clearNativeThermalPrinter();
       setStatus((prev) => ({ ...(prev || {}), savedPrinter: null }));
-      showToast('Impressora removida deste aparelho.', 'success');
+      showToast('Impressora removida deste aparelho. O RawBT continua como fallback.', 'success');
     } catch (error) {
       showToast(error?.message || 'Não foi possível remover a impressora.', 'error');
     }
@@ -98,18 +202,27 @@ export function ThermalPrinterSettingsCard() {
   };
 
   const savedAddress = String(status?.savedPrinter?.address || '');
+  const previewText = useMemo(
+    () => stripPrinterCommands(buildRawBtText(sampleReceiptPayload, settings)).split('\n').slice(0, 18).join('\n'),
+    [settings]
+  );
 
   return (
-    <div data-testid="thermal-printer-settings" className="rounded-2xl border border-slate-200 border-l-4 border-l-emerald-500 bg-white p-5 shadow-sm">
+    <section
+      role="region"
+      aria-label="Impressora térmica"
+      data-testid="thermal-printer-settings"
+      className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.45)] sm:p-5"
+    >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
-          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
-            <Printer size={21} weight="duotone" />
+          <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+            <Printer size={22} weight="duotone" />
           </span>
           <div>
             <h3 className="text-lg font-black text-slate-900">Impressora térmica</h3>
             <p className="mt-1 text-sm leading-relaxed text-slate-500">
-              Configure a impressora Bluetooth deste aparelho. Admin e operador podem salvar a impressora usada na fila de pedidos.
+              Admin e operador podem salvar a impressora usada na fila de pedidos, testar a impressão e ajustar como o cupom sai.
             </p>
           </div>
         </div>
@@ -117,7 +230,7 @@ export function ThermalPrinterSettingsCard() {
           savedAddress ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700'
         }`}>
           {savedAddress ? <CheckCircle size={13} weight="fill" /> : <WarningCircle size={13} weight="fill" />}
-          {savedAddress ? 'Configurada' : 'Pendente'}
+          {savedAddress ? 'Pronta' : 'Pendente'}
         </span>
       </div>
 
@@ -131,52 +244,140 @@ export function ThermalPrinterSettingsCard() {
         </div>
       ) : (
         <>
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4">
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Impressora salva neste aparelho</p>
-            <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-black text-slate-900">
-                  {status?.savedPrinter?.name || (savedAddress ? 'Impressora Bluetooth' : 'Nenhuma impressora configurada')}
-                </p>
-                <p className="mt-1 text-xs font-semibold text-slate-500">
-                  {savedAddress || 'Escolha uma impressora pareada para imprimir sem abrir app externo.'}
-                </p>
+          <div className="mt-5 grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="rounded-[1.5rem] border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Impressora deste aparelho</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">
+                    {status?.savedPrinter?.name || (savedAddress ? 'Impressora Bluetooth' : 'Nenhuma impressora configurada')}
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    {savedAddress || 'A lista mostra aparelhos já pareados no Bluetooth do Android.'}
+                  </p>
+                </div>
+                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-500 ring-1 ring-slate-200">
+                  <PlugsConnected size={18} weight="duotone" />
+                </span>
               </div>
-              {savedAddress ? (
+
+              <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={handleClear}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs font-black text-rose-700 hover:bg-rose-100"
+                  onClick={loadDevices}
+                  data-testid="thermal-printer-search"
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.75)] disabled:opacity-60"
                 >
-                  <Trash size={14} weight="duotone" /> Remover
+                  <ArrowClockwise size={16} weight="bold" className={loading ? 'animate-spin' : ''} />
+                  {loading ? 'Buscando...' : 'Buscar'}
                 </button>
-              ) : null}
-            </div>
-          </div>
+                <button
+                  type="button"
+                  onClick={handleTestPrint}
+                  data-testid="thermal-printer-test"
+                  disabled={testing || !savedAddress}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 disabled:opacity-50"
+                >
+                  <Receipt size={16} weight="duotone" />
+                  {testing ? 'Testando...' : 'Testar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleOpenBluetooth}
+                  data-testid="thermal-printer-open-bluetooth"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 hover:bg-slate-50"
+                >
+                  <Gear size={16} weight="duotone" /> Bluetooth
+                </button>
+                {savedAddress ? (
+                  <button
+                    type="button"
+                    onClick={handleClear}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-black text-rose-700 hover:bg-rose-100"
+                  >
+                    <Trash size={16} weight="duotone" /> Desconectar
+                  </button>
+                ) : null}
+              </div>
 
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <button
-              type="button"
-              onClick={loadDevices}
-              data-testid="thermal-printer-search"
-              disabled={loading}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.75)] disabled:opacity-60"
-            >
-              <ArrowClockwise size={16} weight="bold" className={loading ? 'animate-spin' : ''} />
-              {loading ? 'Buscando...' : 'Buscar impressoras pareadas'}
-            </button>
-            <button
-              type="button"
-              onClick={handleOpenBluetooth}
-              data-testid="thermal-printer-open-bluetooth"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 hover:bg-slate-50"
-            >
-              <Gear size={16} weight="duotone" /> Abrir Bluetooth
-            </button>
+              <p className="mt-3 text-xs leading-relaxed text-slate-500">
+                A impressão direta abre a conexão só na hora de imprimir e fecha em seguida. Isso reduz travamento por conexão Bluetooth presa.
+              </p>
+            </div>
+
+            <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Como o cupom sai</p>
+                  <p className="mt-1 text-sm font-bold text-slate-700">Configuração local deste celular.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSaveSettings}
+                  disabled={savingSettings}
+                  className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-black text-white disabled:opacity-60"
+                >
+                  {savingSettings ? 'Salvando...' : 'Salvar'}
+                </button>
+              </div>
+
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setSettings((prev) => ({ ...prev, paperWidth: 32 }))}
+                  className={settingButtonClass(settings.paperWidth === 32)}
+                >
+                  58mm compacto
+                  <span className="mt-1 block text-[10px] font-semibold opacity-75">32 colunas</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSettings((prev) => ({ ...prev, paperWidth: 42 }))}
+                  className={settingButtonClass(settings.paperWidth === 42)}
+                >
+                  80mm / maior
+                  <span className="mt-1 block text-[10px] font-semibold opacity-75">42 colunas</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSettings((prev) => ({ ...prev, headerMode: 'complete' }))}
+                  className={settingButtonClass(settings.headerMode === 'complete')}
+                >
+                  Cupom completo
+                  <span className="mt-1 block text-[10px] font-semibold opacity-75">Mais detalhes</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSettings((prev) => ({ ...prev, headerMode: 'compact' }))}
+                  className={settingButtonClass(settings.headerMode === 'compact')}
+                >
+                  Cupom compacto
+                  <span className="mt-1 block text-[10px] font-semibold opacity-75">Menos espaço</span>
+                </button>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {[1, 2].map((copies) => (
+                  <button
+                    key={copies}
+                    type="button"
+                    onClick={() => setSettings((prev) => ({ ...prev, copies }))}
+                    className={settingButtonClass(settings.copies === copies)}
+                  >
+                    {copies} via{copies > 1 ? 's' : ''}
+                    <span className="mt-1 block text-[10px] font-semibold opacity-75">
+                      {copies === 1 ? 'Padrão' : 'Cozinha + caixa'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {devices.length > 0 ? (
             <div className="mt-4 grid gap-2">
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Impressoras pareadas</p>
               {devices.map((device) => {
                 const selected = savedAddress && savedAddress === device.address;
                 return (
@@ -198,15 +399,27 @@ export function ThermalPrinterSettingsCard() {
                     <span className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${
                       selected ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'
                     }`}>
-                      {savingAddress === device.address ? 'Salvando' : selected ? 'Atual' : 'Usar'}
+                      {savingAddress === device.address ? 'Salvando' : selected ? 'Selecionada' : 'Usar esta'}
                     </span>
                   </button>
                 );
               })}
             </div>
           ) : null}
+
+          <div className="mt-4 rounded-[1.5rem] border border-slate-200 bg-slate-950 p-4 text-slate-50">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Preview do cupom</p>
+              <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-300">
+                {settings.paperWidth} colunas
+              </span>
+            </div>
+            <pre className="max-h-72 overflow-auto whitespace-pre-wrap font-mono text-[11px] leading-relaxed text-slate-100">
+              {previewText}
+            </pre>
+          </div>
         </>
       )}
-    </div>
+    </section>
   );
 }

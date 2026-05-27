@@ -1,9 +1,27 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { printNativeThermalReceipt } from './thermalPrinter';
+import { getStoredThermalPrinterSettings, printNativeThermalReceipt } from './thermalPrinter';
 import { buildRawBtText, printReceiptAsImage } from './printReceiptImage';
+
+const thermalPrinterMock = vi.hoisted(() => {
+  const defaultPrinterSettings = {
+    paperWidth: 32,
+    copies: 1,
+    headerMode: 'complete',
+    feedLines: 3,
+  } as const;
+  const normalizePrinterSettings = (settings: any = {}) => ({
+    paperWidth: Number(settings.paperWidth) === 42 ? 42 : 32,
+    copies: Number(settings.copies) === 2 ? 2 : 1,
+    headerMode: settings.headerMode === 'compact' ? 'compact' : 'complete',
+    feedLines: Number.isFinite(Number(settings.feedLines)) ? Math.max(1, Math.min(6, Math.round(Number(settings.feedLines)))) : 3,
+  });
+  return { defaultPrinterSettings, normalizePrinterSettings };
+});
 
 vi.mock('./thermalPrinter', () => ({
   printNativeThermalReceipt: vi.fn(),
+  getStoredThermalPrinterSettings: vi.fn(() => thermalPrinterMock.defaultPrinterSettings),
+  normalizeThermalPrinterSettings: vi.fn((settings) => thermalPrinterMock.normalizePrinterSettings(settings)),
 }));
 
 const payload = {
@@ -28,6 +46,8 @@ describe('printReceiptAsImage', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.mocked(printNativeThermalReceipt).mockReset();
+    vi.mocked(getStoredThermalPrinterSettings).mockReset();
+    vi.mocked(getStoredThermalPrinterSettings).mockReturnValue(thermalPrinterMock.defaultPrinterSettings);
     setUserAgent('Mozilla/5.0 Android Já no Caminho');
   });
 
@@ -45,6 +65,7 @@ describe('printReceiptAsImage', () => {
 
     expect(result.mode).toBe('native');
     expect(result.bytes).toBe(180);
+    expect(printNativeThermalReceipt).toHaveBeenCalledWith(expect.stringContaining('LOJA TESTE'), thermalPrinterMock.defaultPrinterSettings);
     expect(clickSpy).not.toHaveBeenCalled();
   });
 
@@ -114,5 +135,31 @@ describe('printReceiptAsImage', () => {
     expect(text).toContain('1x Taxa de serviço');
     expect(text).toContain('TOTAL:');
     expect(text).toContain('R$ 77,55');
+  });
+
+  it('usa a configuração local de cópias e largura ao montar o cupom Android', async () => {
+    const customSettings = {
+      paperWidth: 42,
+      copies: 2,
+      headerMode: 'compact',
+      feedLines: 4,
+    } as const;
+    vi.mocked(getStoredThermalPrinterSettings).mockReturnValue(customSettings);
+    vi.mocked(printNativeThermalReceipt).mockResolvedValue({ mode: 'native', bytes: 220 });
+
+    const result = await printReceiptAsImage(payload);
+
+    expect(result.mode).toBe('native');
+    expect(printNativeThermalReceipt).toHaveBeenCalledWith(expect.any(String), customSettings);
+    const sentText = vi.mocked(printNativeThermalReceipt).mock.calls[0][0];
+    expect(sentText).not.toContain('PLATAFORMA:');
+    expect(sentText).toContain('==========================================');
+  });
+
+  it('mantém opção de cupom completo por padrão', () => {
+    const text = buildRawBtText(payload);
+
+    expect(text).toContain('PLATAFORMA: Já no Caminho');
+    expect(text).toContain('================================');
   });
 });

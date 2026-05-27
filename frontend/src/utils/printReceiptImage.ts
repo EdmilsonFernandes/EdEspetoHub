@@ -1,4 +1,9 @@
-import { printNativeThermalReceipt } from "./thermalPrinter";
+import {
+  getStoredThermalPrinterSettings,
+  normalizeThermalPrinterSettings,
+  printNativeThermalReceipt,
+  type ThermalPrinterSettings,
+} from "./thermalPrinter";
 
 type ReceiptItem = {
   quantity: number;
@@ -49,10 +54,10 @@ const escapeHtml = (value: unknown) =>
     return entities[char] || char;
   });
 
-// Conservative width for mobile + mixed RawBT profiles (58mm/80mm).
-const LINE_WIDTH = 32;
+// Conservative default for 58mm printers. Larger 80mm printers can use 42 columns.
+const DEFAULT_LINE_WIDTH = 32;
 
-const wrapWords = (value: string, width = LINE_WIDTH) => {
+const wrapWords = (value: string, width = DEFAULT_LINE_WIDTH) => {
   const text = sanitizeText(value);
   if (!text) return [""];
   const words = text.split(/\s+/);
@@ -76,7 +81,7 @@ const wrapWords = (value: string, width = LINE_WIDTH) => {
   return lines;
 };
 
-const centerText = (value: string, width = LINE_WIDTH) => {
+const centerText = (value: string, width = DEFAULT_LINE_WIDTH) => {
   const lines = wrapWords(value, width);
   return lines
     .map((line) => {
@@ -88,8 +93,8 @@ const centerText = (value: string, width = LINE_WIDTH) => {
     .join("\n");
 };
 
-const separator = (width = LINE_WIDTH) => "-".repeat(width);
-const strongSeparator = (width = LINE_WIDTH) => "=".repeat(width);
+const separator = (width = DEFAULT_LINE_WIDTH) => "-".repeat(width);
+const strongSeparator = (width = DEFAULT_LINE_WIDTH) => "=".repeat(width);
 const ESC_POS = {
   boldOn: "\x1B\x45\x01",
   boldOff: "\x1B\x45\x00",
@@ -99,7 +104,7 @@ const ESC_POS = {
   textSizeReset: "\x1D\x21\x00",
 };
 
-const fitLeftRight = (left: string, right: string, width = LINE_WIDTH) => {
+const fitLeftRight = (left: string, right: string, width = DEFAULT_LINE_WIDTH) => {
   const safeRight = sanitizeText(right);
   const rightWidth = Math.min(12, Math.max(8, safeRight.length));
   const leftMax = Math.max(8, width - rightWidth);
@@ -116,7 +121,13 @@ const toBase64Utf8 = (value: string) => {
   return btoa(utf8);
 };
 
-export const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
+export const buildRawBtText = (
+  payload: PrintReceiptRawBtInput,
+  printerSettings?: Partial<ThermalPrinterSettings>
+) => {
+  const settings = normalizeThermalPrinterSettings(printerSettings);
+  const lineWidth = settings.paperWidth;
+  const compactMode = settings.headerMode === 'compact';
   const locationLabel = sanitizeText(
     payload.locationLabel || (payload.tableLabel ? `MESA ${payload.tableLabel}` : "")
   );
@@ -126,7 +137,7 @@ export const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     const lineTotal = sanitizeText(item.lineTotal || "R$ 0,00");
     const note = sanitizeText(item.notes || "");
     const rightWidth = Math.min(12, Math.max(8, lineTotal.length));
-    const leftWidth = Math.max(8, LINE_WIDTH - rightWidth);
+    const leftWidth = Math.max(8, lineWidth - rightWidth);
     const nameLines = wrapWords(`${qty}x ${name}`, leftWidth);
     const lines = nameLines.slice(0, -1);
     const lastNameLine = (nameLines[nameLines.length - 1] || "").slice(0, leftWidth);
@@ -134,66 +145,76 @@ export const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
       `${ESC_POS.boldOn}${lastNameLine.padEnd(leftWidth, ".")}${lineTotal.padStart(rightWidth, " ")}${ESC_POS.boldOff}`
     );
     if (note) {
-      const noteLines = wrapWords(note, LINE_WIDTH - 4);
+      const noteLines = wrapWords(note, lineWidth - 4);
       noteLines.forEach((n, index) => {
         lines.push(index === 0 ? `  - ${n}` : `    ${n}`);
       });
     }
     lines.push("");
-    lines.push("");
+    if (!compactMode) lines.push("");
     return lines;
   });
 
   const locationBlock = locationLabel
     ? [
-        strongSeparator(),
-        ...centerText(locationLabel.toUpperCase())
+        strongSeparator(lineWidth),
+        ...centerText(locationLabel.toUpperCase(), lineWidth)
           .split("\n")
           .map(
             (line) =>
               `${ESC_POS.boldOn}${ESC_POS.textDoubleHeightOn}${line}${ESC_POS.textSizeReset}${ESC_POS.boldOff}`
           ),
-        strongSeparator(),
+        strongSeparator(lineWidth),
       ]
     : [];
   const customerBlock = (() => {
     const customer = sanitizeText(payload.customerLabel || "Cliente");
     if (!customer) return [];
-    const lines = centerText(`CLIENTE: ${customer}`.toUpperCase())
+    const lines = centerText(`CLIENTE: ${customer}`.toUpperCase(), lineWidth)
       .split("\n")
       .map(
         (line) =>
           `${ESC_POS.boldOn}${ESC_POS.textDoubleHeightOn}${line}${ESC_POS.textSizeReset}${ESC_POS.boldOff}`
     );
-    return [strongSeparator(), ...lines, strongSeparator()];
+    return [strongSeparator(lineWidth), ...lines, strongSeparator(lineWidth)];
   })();
   const customerNoteBlock = (() => {
     const note = sanitizeText(payload.customerNote || "");
     if (!note) return [];
     return [
-      separator(),
+      separator(lineWidth),
       `${ESC_POS.boldOn}OBS CLIENTE${ESC_POS.boldOff}`,
-      ...wrapWords(note, LINE_WIDTH),
+      ...wrapWords(note, lineWidth),
     ];
   })();
 
+  const headerBlock = compactMode
+    ? [
+        strongSeparator(lineWidth),
+        centerText(sanitizeText(payload.storeName || "MINHA LOJA").toUpperCase(), lineWidth),
+        strongSeparator(lineWidth),
+      ]
+    : [
+        strongSeparator(lineWidth),
+        centerText(sanitizeText(payload.storeName || "MINHA LOJA").toUpperCase(), lineWidth),
+        centerText(`PLATAFORMA: ${sanitizeText(payload.platformName || "Já no Caminho")}`, lineWidth),
+        strongSeparator(lineWidth),
+      ];
+
   const chunks = [
-    strongSeparator(),
-    centerText(sanitizeText(payload.storeName || "MINHA LOJA").toUpperCase()),
-    centerText(`PLATAFORMA: ${sanitizeText(payload.platformName || "Já no Caminho")}`),
-    strongSeparator(),
-    ...wrapWords(`Fila: ${sanitizeText(payload.queueLabel || "--")}`, LINE_WIDTH),
-    ...wrapWords(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, LINE_WIDTH),
+    ...headerBlock,
+    ...wrapWords(`Fila: ${sanitizeText(payload.queueLabel || "--")}`, lineWidth),
+    ...wrapWords(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, lineWidth),
     ...locationBlock,
     ...customerBlock,
     ...customerNoteBlock,
-    ...wrapWords(`Data: ${sanitizeText(payload.dateLabel || "")}`, LINE_WIDTH),
-    separator(),
+    ...wrapWords(`Data: ${sanitizeText(payload.dateLabel || "")}`, lineWidth),
+    separator(lineWidth),
     `${ESC_POS.boldOn}ITENS${ESC_POS.boldOff}`,
-    separator(),
+    separator(lineWidth),
     ...itemsLines,
-    separator(),
-    `${ESC_POS.boldOn}${ESC_POS.textDoubleHeightOn}${fitLeftRight("TOTAL:", sanitizeText(payload.totalLabel || "R$ 0,00"))}${ESC_POS.textSizeReset}${ESC_POS.boldOff}`,
+    separator(lineWidth),
+    `${ESC_POS.boldOn}${ESC_POS.textDoubleHeightOn}${fitLeftRight("TOTAL:", sanitizeText(payload.totalLabel || "R$ 0,00"), lineWidth)}${ESC_POS.textSizeReset}${ESC_POS.boldOff}`,
     "",
     "",
   ];
@@ -353,9 +374,10 @@ const runPrintReceipt = async (payload: PrintReceiptRawBtInput): Promise<PrintRe
 
   if (isMobileUserAgent()) {
     const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
-    const rawText = buildRawBtText(payload);
+    const printerSettings = getStoredThermalPrinterSettings();
+    const rawText = buildRawBtText(payload, printerSettings);
     try {
-      const result = await printNativeThermalReceipt(rawText);
+      const result = await printNativeThermalReceipt(rawText, printerSettings);
       const durationMs = Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt);
       console.info('[print] impressão nativa concluída', {
         durationMs,

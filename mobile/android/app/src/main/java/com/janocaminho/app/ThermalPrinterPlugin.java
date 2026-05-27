@@ -40,7 +40,13 @@ public class ThermalPrinterPlugin extends Plugin {
     private static final String KEY_ADDRESS = "printer_address";
     private static final String KEY_NAME = "printer_name";
     private static final String KEY_WIDTH = "printer_width";
+    private static final String KEY_COPIES = "printer_copies";
+    private static final String KEY_HEADER_MODE = "printer_header_mode";
+    private static final String KEY_FEED_LINES = "printer_feed_lines";
     private static final int DEFAULT_PAPER_WIDTH = 32;
+    private static final int DEFAULT_COPIES = 1;
+    private static final String DEFAULT_HEADER_MODE = "complete";
+    private static final int DEFAULT_FEED_LINES = 3;
     private static final int WRITE_CHUNK_SIZE = 512;
     private static final long WRITE_CHUNK_DELAY_MS = 18L;
     private static final long PRINT_TIMEOUT_MS = 9000L;
@@ -53,6 +59,7 @@ public class ThermalPrinterPlugin extends Plugin {
         ret.put("available", adapter != null);
         ret.put("enabled", adapter != null && adapter.isEnabled());
         ret.put("permissionGranted", hasBluetoothConnectPermission());
+        ret.put("settings", getSettingsObject());
         ret.put("savedPrinter", getSavedPrinterObject());
         call.resolve(ret);
     }
@@ -79,7 +86,10 @@ public class ThermalPrinterPlugin extends Plugin {
     public void savePrinter(PluginCall call) {
         String address = sanitize(call.getString("address"));
         String name = sanitize(call.getString("name"));
-        int paperWidth = Math.max(24, Math.min(48, call.getInt("paperWidth", DEFAULT_PAPER_WIDTH)));
+        int paperWidth = sanitizePaperWidth(call.getInt("paperWidth", getPreferences().getInt(KEY_WIDTH, DEFAULT_PAPER_WIDTH)));
+        int copies = sanitizeCopies(call.getInt("copies", getPreferences().getInt(KEY_COPIES, DEFAULT_COPIES)));
+        String headerMode = sanitizeHeaderMode(call.getString("headerMode", getPreferences().getString(KEY_HEADER_MODE, DEFAULT_HEADER_MODE)));
+        int feedLines = sanitizeFeedLines(call.getInt("feedLines", getPreferences().getInt(KEY_FEED_LINES, DEFAULT_FEED_LINES)));
 
         if (address.isEmpty()) {
             call.reject("Impressora inválida.", "INVALID_PRINTER");
@@ -91,17 +101,47 @@ public class ThermalPrinterPlugin extends Plugin {
             .putString(KEY_ADDRESS, address)
             .putString(KEY_NAME, name)
             .putInt(KEY_WIDTH, paperWidth)
+            .putInt(KEY_COPIES, copies)
+            .putString(KEY_HEADER_MODE, headerMode)
+            .putInt(KEY_FEED_LINES, feedLines)
             .apply();
 
         JSObject ret = new JSObject();
+        ret.put("settings", getSettingsObject());
+        ret.put("savedPrinter", getSavedPrinterObject());
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void saveSettings(PluginCall call) {
+        int paperWidth = sanitizePaperWidth(call.getInt("paperWidth", getPreferences().getInt(KEY_WIDTH, DEFAULT_PAPER_WIDTH)));
+        int copies = sanitizeCopies(call.getInt("copies", getPreferences().getInt(KEY_COPIES, DEFAULT_COPIES)));
+        String headerMode = sanitizeHeaderMode(call.getString("headerMode", getPreferences().getString(KEY_HEADER_MODE, DEFAULT_HEADER_MODE)));
+        int feedLines = sanitizeFeedLines(call.getInt("feedLines", getPreferences().getInt(KEY_FEED_LINES, DEFAULT_FEED_LINES)));
+
+        getPreferences()
+            .edit()
+            .putInt(KEY_WIDTH, paperWidth)
+            .putInt(KEY_COPIES, copies)
+            .putString(KEY_HEADER_MODE, headerMode)
+            .putInt(KEY_FEED_LINES, feedLines)
+            .apply();
+
+        JSObject ret = new JSObject();
+        ret.put("settings", getSettingsObject());
         ret.put("savedPrinter", getSavedPrinterObject());
         call.resolve(ret);
     }
 
     @PluginMethod
     public void clearPrinter(PluginCall call) {
-        getPreferences().edit().clear().apply();
+        getPreferences()
+            .edit()
+            .remove(KEY_ADDRESS)
+            .remove(KEY_NAME)
+            .apply();
         JSObject ret = new JSObject();
+        ret.put("settings", getSettingsObject());
         ret.put("savedPrinter", JSONObject.NULL);
         call.resolve(ret);
     }
@@ -166,6 +206,7 @@ public class ThermalPrinterPlugin extends Plugin {
 
         JSObject ret = new JSObject();
         ret.put("devices", devices);
+        ret.put("settings", getSettingsObject());
         ret.put("savedPrinter", getSavedPrinterObject());
         call.resolve(ret);
     }
@@ -183,7 +224,8 @@ public class ThermalPrinterPlugin extends Plugin {
 
         String text = call.getString("text", "");
         String address = sanitize(call.getString("address"));
-        int copies = Math.max(1, Math.min(3, call.getInt("copies", 1)));
+        int copies = sanitizeCopies(call.getInt("copies", getPreferences().getInt(KEY_COPIES, DEFAULT_COPIES)));
+        int feedLines = sanitizeFeedLines(call.getInt("feedLines", getPreferences().getInt(KEY_FEED_LINES, DEFAULT_FEED_LINES)));
         if (text.trim().isEmpty()) {
             call.reject("Cupom vazio.", "EMPTY_RECEIPT");
             return;
@@ -200,6 +242,7 @@ public class ThermalPrinterPlugin extends Plugin {
         final String printerAddress = address;
         final String printerText = text;
         final int printerCopies = copies;
+        final int printerFeedLines = feedLines;
         final AtomicBoolean finished = new AtomicBoolean(false);
         final BluetoothSocket[] socketRef = new BluetoothSocket[1];
 
@@ -213,7 +256,7 @@ public class ThermalPrinterPlugin extends Plugin {
                 socket.connect();
 
                 OutputStream output = socket.getOutputStream();
-                byte[] bytes = toPrinterBytes(printerText);
+                byte[] bytes = toPrinterBytes(printerText, printerFeedLines);
                 for (int copy = 0; copy < printerCopies; copy++) {
                     writeInChunks(output, bytes);
                     if (copy + 1 < printerCopies) {
@@ -264,8 +307,20 @@ public class ThermalPrinterPlugin extends Plugin {
         JSObject printer = new JSObject();
         printer.put("address", address);
         printer.put("name", getPreferences().getString(KEY_NAME, ""));
-        printer.put("paperWidth", getPreferences().getInt(KEY_WIDTH, DEFAULT_PAPER_WIDTH));
+        printer.put("paperWidth", sanitizePaperWidth(getPreferences().getInt(KEY_WIDTH, DEFAULT_PAPER_WIDTH)));
+        printer.put("copies", sanitizeCopies(getPreferences().getInt(KEY_COPIES, DEFAULT_COPIES)));
+        printer.put("headerMode", sanitizeHeaderMode(getPreferences().getString(KEY_HEADER_MODE, DEFAULT_HEADER_MODE)));
+        printer.put("feedLines", sanitizeFeedLines(getPreferences().getInt(KEY_FEED_LINES, DEFAULT_FEED_LINES)));
         return printer;
+    }
+
+    private JSObject getSettingsObject() {
+        JSObject settings = new JSObject();
+        settings.put("paperWidth", sanitizePaperWidth(getPreferences().getInt(KEY_WIDTH, DEFAULT_PAPER_WIDTH)));
+        settings.put("copies", sanitizeCopies(getPreferences().getInt(KEY_COPIES, DEFAULT_COPIES)));
+        settings.put("headerMode", sanitizeHeaderMode(getPreferences().getString(KEY_HEADER_MODE, DEFAULT_HEADER_MODE)));
+        settings.put("feedLines", sanitizeFeedLines(getPreferences().getInt(KEY_FEED_LINES, DEFAULT_FEED_LINES)));
+        return settings;
     }
 
     private String safeDeviceName(BluetoothDevice device) {
@@ -277,12 +332,14 @@ public class ThermalPrinterPlugin extends Plugin {
         }
     }
 
-    private byte[] toPrinterBytes(String text) throws Exception {
+    private byte[] toPrinterBytes(String text, int feedLines) throws Exception {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         output.write(new byte[] { 0x1B, 0x40 });
         String normalized = normalizePrinterText(text);
         output.write(normalized.getBytes(Charset.forName("ISO-8859-1")));
-        output.write(new byte[] { 0x0A, 0x0A, 0x0A });
+        for (int i = 0; i < feedLines; i++) {
+            output.write(0x0A);
+        }
         output.write(new byte[] { 0x1D, 0x56, 0x42, 0x00 });
         return output.toByteArray();
     }
@@ -316,6 +373,26 @@ public class ThermalPrinterPlugin extends Plugin {
 
     private String sanitize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private int sanitizePaperWidth(Integer value) {
+        int width = value == null ? DEFAULT_PAPER_WIDTH : value;
+        return width >= 40 ? 42 : 32;
+    }
+
+    private int sanitizeCopies(Integer value) {
+        int copies = value == null ? DEFAULT_COPIES : value;
+        return Math.max(1, Math.min(2, copies));
+    }
+
+    private int sanitizeFeedLines(Integer value) {
+        int feedLines = value == null ? DEFAULT_FEED_LINES : value;
+        return Math.max(1, Math.min(6, feedLines));
+    }
+
+    private String sanitizeHeaderMode(String value) {
+        String mode = sanitize(value).toLowerCase();
+        return "compact".equals(mode) ? "compact" : DEFAULT_HEADER_MODE;
     }
 
     private void closeSocketQuietly(BluetoothSocket socket) {
