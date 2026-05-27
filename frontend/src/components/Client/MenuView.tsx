@@ -1150,16 +1150,16 @@ export const MenuView = ({
           </div>
         </div>
         {filteredGrouped.length > 1 && (
-          <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-3">
-            <div className="flex w-full items-start gap-2">
+          <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-2.5">
+            <div className="flex w-full items-center gap-1.5 rounded-[1.35rem] border border-slate-100/90 bg-slate-50/78 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
               {filteredGrouped.length > 2 && (
                 <button
                   type="button"
                   aria-label="Abrir categorias"
                   onClick={() => setIsCategorySheetOpen(true)}
-                  className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white text-slate-700 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)] ring-1 ring-slate-100 transition-all active:scale-95"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] border border-white/90 bg-white text-slate-700 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-100 transition-all active:scale-95"
                 >
-                  <List size={18} weight="bold" style={{ color: catalogPrimaryColor }} />
+                  <List size={15} weight="bold" style={{ color: catalogPrimaryColor }} />
                 </button>
               )}
               <div className={`${
@@ -1183,9 +1183,9 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={`inline-flex items-center justify-center gap-2 rounded-[1.15rem] border px-3.5 py-2.5 text-[13px] font-black transition-all duration-300 snap-start active:scale-95 ${
+                      className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-full border px-2.5 text-[11.5px] font-black transition-all duration-300 snap-start active:scale-95 sm:px-3 sm:text-xs ${
                         filteredGrouped.length <= 2 ? "w-full min-w-0" : "max-w-full sm:min-w-0"
-                      } ${isActive ? 'shadow-[0_8px_20px_-8px_rgba(15,23,42,0.15)]' : 'shadow-none'}`}
+                      } ${isActive ? 'shadow-[0_10px_22px_-13px_rgba(15,23,42,0.28)]' : 'shadow-none'}`}
                       style={
                         isActive
                           ? { backgroundColor: catalogPrimaryColor, color: catalogPrimaryText, borderColor: catalogPrimaryColor }
@@ -1193,11 +1193,11 @@ export const MenuView = ({
                       }
                     >
                       <span
-                        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border ${isActive ? "border-white/22 bg-white/16 text-current" : meta.tone}`}
+                        className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${isActive ? "border-white/22 bg-white/16 text-current" : meta.tone}`}
                       >
-                        <Icon size={14} weight={isActive ? "fill" : "duotone"} />
+                        <Icon size={12} weight={isActive ? "fill" : "duotone"} />
                       </span>
-                      <span className="truncate whitespace-nowrap uppercase tracking-wider">{category.label}</span>
+                      <span className="truncate whitespace-nowrap tracking-[-0.01em]">{category.label}</span>
                     </button>
                   );
                 })}
