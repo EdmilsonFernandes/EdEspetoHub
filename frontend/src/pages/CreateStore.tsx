@@ -1775,7 +1775,7 @@ export function CreateStore() {
                     {destinationClaimPlacesError ? (
                       <p className="mt-2 rounded-2xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700">{destinationClaimPlacesError}</p>
                     ) : null}
-                    <div className="mt-3 grid max-h-none grid-cols-1 gap-2 overflow-visible pr-0 sm:max-h-[34rem] sm:grid-cols-2 sm:gap-3 sm:overflow-y-auto sm:pr-1">
+                    <div className="mt-3 grid max-h-none grid-cols-2 gap-2 overflow-visible pr-0 max-[360px]:grid-cols-1 sm:max-h-[34rem] sm:grid-cols-2 sm:gap-3 sm:overflow-y-auto sm:pr-1">
                       {filteredDestinationClaimPlaces.slice(0, 80).map((place: any) => {
                         const checked = selectedDestinationClaimPlaceIds.includes(String(place.id));
                         const imageUrl = resolveAssetUrl(getDestinationClaimPlaceImage(place));
@@ -1785,13 +1785,13 @@ export function CreateStore() {
                             key={place.id}
                             type="button"
                             onClick={() => toggleDestinationClaimPlace(String(place.id))}
-                            className={`group relative flex w-full items-center gap-2.5 overflow-hidden rounded-[1.1rem] border p-2 text-left transition active:scale-[0.99] sm:items-stretch sm:gap-3 sm:rounded-[1.25rem] ${
+                            className={`group relative flex min-h-[12rem] w-full flex-col overflow-hidden rounded-[1.1rem] border p-2 text-left transition active:scale-[0.99] sm:min-h-0 sm:flex-row sm:items-stretch sm:gap-3 sm:rounded-[1.25rem] ${
                               checked
                                 ? 'border-[#153A4C]/35 bg-[#eef5f7] shadow-[0_18px_34px_-28px_rgba(21,58,76,0.58)]'
                                 : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-[0_16px_30px_-28px_rgba(15,23,42,0.45)]'
                             }`}
                           >
-                            <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[0.95rem] bg-[linear-gradient(135deg,#e8f2f5,#f8fafc)] sm:h-20 sm:w-24 sm:rounded-[1rem]">
+                            <span className="relative h-24 w-full shrink-0 overflow-hidden rounded-[0.95rem] bg-[linear-gradient(135deg,#e8f2f5,#f8fafc)] sm:h-20 sm:w-24 sm:rounded-[1rem]">
                               {imageUrl ? (
                                 <img src={imageUrl} alt={place.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" loading="lazy" />
                               ) : (
@@ -1803,10 +1803,10 @@ export function CreateStore() {
                                 {String(place.type || 'Chalé').replace(/_/g, ' ')}
                               </span>
                             </span>
-                            <span className="flex min-w-0 flex-1 flex-col justify-center py-0.5 pr-8 sm:justify-between sm:py-1 sm:pr-7">
+                            <span className="flex min-w-0 flex-1 flex-col justify-start py-1 pr-0 sm:justify-between sm:py-1 sm:pr-7">
                               <span>
-                                <span className="line-clamp-1 block text-sm font-black leading-tight text-slate-950 sm:line-clamp-2">{place.name}</span>
-                                <span className="mt-1 line-clamp-1 block text-xs font-semibold leading-snug text-slate-500 sm:line-clamp-2">
+                                <span className="line-clamp-2 block text-[13px] font-black leading-tight text-slate-950 sm:text-sm">{place.name}</span>
+                                <span className="mt-1 line-clamp-1 block text-[11px] font-semibold leading-snug text-slate-500 sm:text-xs sm:line-clamp-2">
                                   {address || place.description || 'Hospedagem do destino'}
                                 </span>
                               </span>
@@ -1815,7 +1815,7 @@ export function CreateStore() {
                                 Atendo aqui
                               </span>
                             </span>
-                            <span className={`absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 shrink-0 items-center justify-center rounded-full border shadow-sm sm:top-3 sm:translate-y-0 ${
+                            <span className={`absolute right-3 top-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border shadow-sm ${
                               checked
                                 ? 'border-[#153A4C] bg-[#153A4C] text-white'
                                 : 'border-slate-200 bg-white/90 text-transparent'
