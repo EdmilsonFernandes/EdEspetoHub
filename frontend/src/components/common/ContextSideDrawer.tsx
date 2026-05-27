@@ -240,7 +240,7 @@ export function ContextSideDrawer({
 
         <SmartDrawerScrollArea
           className="flex-1"
-          contentClassName="px-4 py-4 pb-16"
+          contentClassName="px-4 py-4"
           tone={theme === 'default' ? 'neutral' : theme}
         >
           <div className="space-y-4">

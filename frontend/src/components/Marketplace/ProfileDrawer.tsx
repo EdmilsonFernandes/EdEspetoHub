@@ -648,7 +648,7 @@ export function ProfileDrawer({
 
         <SmartDrawerScrollArea
           className="flex-1"
-          contentClassName="px-4 py-4 pb-16 space-y-6"
+          contentClassName="px-4 py-4 space-y-6"
           tone={drawerScrollTone}
           hint="Mais no menu"
         >
