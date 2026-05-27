@@ -1216,7 +1216,7 @@ export const MenuView = ({
             <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">{branding?.brandName || "Seu Espeto"}</h2>
           </section>
         )}
-        <div id="menu-list" className="space-y-10">
+        <div id="menu-list" className="space-y-7 sm:space-y-8">
         {promoMessage && (
           <div className="rounded-3xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
             <p className="text-[11px] uppercase tracking-[0.3em] text-fuchsia-500 font-semibold">Mensagem do dia</p>
@@ -1356,39 +1356,25 @@ export const MenuView = ({
           </div>
         ) : null}
         {filteredGrouped.map((category, index) => {
-          const accentColors = [
-            "ds-accent-red",
-            "ds-accent-amber",
-            "ds-accent-emerald",
-            "ds-accent-blue",
-            "ds-accent-violet",
-            "ds-accent-pink",
-          ];
-          const accent = accentColors[index % accentColors.length];
           return (
-          <div key={category.key} className="space-y-3" id={`cat-${category.key}`} ref={registerCategoryRef(category.key)}>
+          <div key={category.key} className={`scroll-mt-[9.5rem] space-y-2.5 sm:space-y-3 ${index > 0 ? 'pt-1 sm:pt-2' : ''}`} id={`cat-${category.key}`} ref={registerCategoryRef(category.key)}>
 
             {/* Título da categoria */}
-            <div
-              className="px-4 py-2 rounded-2xl border border-slate-100 bg-white shadow-sm ds-category-head flex items-center justify-between"
-            >
-              <div className="flex items-center gap-3">
-                {(() => {
-                  const meta = categoryVisualMeta(category.key);
-                  const Icon = meta.icon;
-                  return (
-                    <>
-                      <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl border ${meta.tone}`}>
-                        <Icon size={16} weight="duotone" />
-                      </span>
-                      <h2 className="font-bold text-xl capitalize tracking-tight text-slate-800">
-                        {category.label}
-                      </h2>
-                    </>
-                  );
-                })()}
+            <div className="flex items-end justify-between gap-3 px-1.5">
+              <div className="min-w-0">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span
+                    className="h-6 w-1 shrink-0 rounded-full shadow-[0_8px_18px_-10px_rgba(15,23,42,0.35)]"
+                    style={{ backgroundColor: catalogPrimaryColor }}
+                    aria-hidden="true"
+                  />
+                  <h2 className="truncate text-[1.18rem] font-black capitalize leading-tight tracking-[-0.035em] text-slate-950 sm:text-[1.28rem]">
+                    {category.label}
+                  </h2>
+                </div>
+                <div className="mt-1 h-px w-16 rounded-full bg-gradient-to-r from-slate-200 via-slate-100 to-transparent" />
               </div>
-              <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-1 rounded-full">
+              <span className="shrink-0 pb-0.5 text-[11px] font-bold text-slate-400 sm:text-xs">
                 {category.items.length === 1 ? '1 item' : `${category.items.length} itens`}
               </span>
             </div>
