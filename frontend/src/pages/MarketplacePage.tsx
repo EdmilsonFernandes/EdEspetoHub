@@ -2636,29 +2636,38 @@ export function MarketplacePage() {
             <button
               type="button"
               onClick={() => navigate('/create?plan=trial')}
-              className="group relative w-full overflow-hidden rounded-[1.65rem] border border-white/10 bg-[radial-gradient(circle_at_12%_18%,rgba(132,204,22,0.22),transparent_26%),linear-gradient(135deg,#102b3a_0%,#153A4C_46%,#081520_100%)] p-4 text-left shadow-[0_22px_54px_-34px_rgba(21,58,76,0.78)] ring-1 ring-[#336886]/12 transition-all hover:-translate-y-0.5 hover:shadow-[0_28px_64px_-34px_rgba(21,58,76,0.88)] active:scale-[0.99]"
+              className="group relative w-full overflow-hidden rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(247,251,252,0.96)_52%,rgba(236,253,245,0.88)_100%)] p-3.5 text-left shadow-[0_22px_48px_-34px_rgba(15,23,42,0.32)] ring-1 ring-[#d7e7ef]/70 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_28px_58px_-36px_rgba(21,58,76,0.42)] active:scale-[0.99]"
             >
-              <div className="pointer-events-none absolute -right-10 -top-12 h-28 w-28 rounded-full bg-sky-300/18 blur-3xl" />
-              <div className="pointer-events-none absolute bottom-0 right-0 h-20 w-36 bg-[radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.14),transparent_70%)]" />
-              <div className="relative flex items-center gap-3.5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-white/10 text-white shadow-[0_16px_32px_-24px_rgba(2,6,23,0.95)] backdrop-blur-xl">
-                  <Storefront size={24} weight="duotone" className="text-lime-200" />
+              <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-[#5FD35A]/18 blur-3xl" />
+              <div className="pointer-events-none absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-[#336886]/8 blur-3xl" />
+              <div className="relative flex items-start gap-3.5">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem] border border-[#336886]/12 bg-[linear-gradient(145deg,#ffffff,#edf7f2)] text-[#153A4C] shadow-[0_16px_30px_-24px_rgba(21,58,76,0.45)] ring-1 ring-white/90">
+                  <Storefront size={24} weight="duotone" className="text-[#336886]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-lime-200/90">Para lojistas</p>
-                  <p className="mt-0.5 text-base font-black leading-tight tracking-[-0.03em] text-white">3 meses VIP para as primeiras lojas</p>
-                  <p className="mt-1 text-[11px] font-semibold leading-5 text-sky-50/76">Receba pedidos online, organize a produção e fale com nosso WhatsApp Business oficial.</p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {['50 vagas', '3 meses VIP', 'sem comissão'].map((label) => (
-                      <span key={label} className="rounded-full border border-white/10 bg-white/[0.08] px-2 py-1 text-[9px] font-black uppercase tracking-[0.11em] text-white/86">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Venda pelo Já no Caminho</p>
+                    <span className="rounded-full bg-[#5FD35A]/18 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-emerald-700 ring-1 ring-emerald-100">
+                      Primeiras 50 lojas
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[1.02rem] font-black leading-tight tracking-[-0.035em] text-slate-950">
+                    3 meses VIP para começar a vender online
+                  </p>
+                  <p className="mt-1 text-[11px] font-semibold leading-5 text-slate-500">
+                    Pedidos online, fila organizada e WhatsApp Business oficial em uma vitrine pronta.
+                  </p>
+                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                    {['sem comissão', 'app + web', 'pedidos em tempo real'].map((label) => (
+                      <span key={label} className="rounded-full border border-[#336886]/10 bg-white/78 px-2 py-1 text-[9px] font-black uppercase tracking-[0.09em] text-[#336886] shadow-sm">
                         {label}
                       </span>
                     ))}
                   </div>
-                </div>
-                <div className="shrink-0 flex items-center gap-1 rounded-full bg-white px-3 py-2 text-[11px] font-black text-[#153A4C] shadow-[0_14px_30px_-20px_rgba(255,255,255,0.6)] transition group-hover:translate-x-0.5">
-                  Quero
-                  <CaretRight size={11} weight="bold" />
+                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#153A4C] px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.09em] text-white shadow-[0_16px_26px_-18px_rgba(21,58,76,0.65)] transition group-hover:translate-x-0.5">
+                    Criar minha loja
+                    <CaretRight size={12} weight="bold" />
+                  </div>
                 </div>
               </div>
             </button>
