@@ -75,4 +75,36 @@ describe('DestinationService coordinate resolver', () => {
 
     expect(coordinates).toEqual({ lat: -23.1826081, lng: -45.885768 });
   });
+
+  it('falls back to destination coordinates when CEP and geocoding do not resolve a precise point', async () => {
+    const service = makeService();
+    vi.spyOn(service.zipCodeLookupService, 'lookup').mockResolvedValue({
+      zipCode: '12490000',
+      street: null,
+      district: null,
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      ibgeCode: null,
+      latitude: null,
+      longitude: null,
+      provider: 'test',
+    });
+    vi.spyOn(service.geoLocationService, 'geocodeAddress').mockResolvedValue(null);
+
+    const coordinates = await service.resolveDestinationCoordinates({
+      address: 'Rua Santa Edwiges, 100 - Quilombo',
+      addressNumber: '900',
+      district: 'Quilombo',
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      zipCode: '12490-000',
+      lat: null,
+      lng: null,
+      fallbackLat: -22.687778,
+      fallbackLng: -45.731945,
+      scope: 'hospitality_place',
+    });
+
+    expect(coordinates).toEqual({ lat: -22.687778, lng: -45.731945 });
+  });
 });

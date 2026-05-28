@@ -55,6 +55,25 @@ const galleryImagesFor = (item: any) => {
   return uniqueUrls.length ? uniqueUrls : [imageFor(item)];
 };
 
+const listingHospitalityPlaceIds = (listing: any) =>
+  Array.from(
+    new Set(
+      [
+        ...(Array.isArray(listing?.hospitalityPlaceIds) ? listing.hospitalityPlaceIds : []),
+        listing?.hospitalityPlaceId,
+      ]
+        .map((value) => String(value || '').trim())
+        .filter(Boolean)
+    )
+  );
+
+const listingBelongsToPlace = (listing: any, placeId: any) => {
+  const normalizedPlaceId = String(placeId || '').trim();
+  return Boolean(normalizedPlaceId) && listingHospitalityPlaceIds(listing).includes(normalizedPlaceId);
+};
+
+const listingIsDestinationWide = (listing: any) => listingHospitalityPlaceIds(listing).length === 0;
+
 const externalUrl = (value?: string | null) => {
   const url = String(value || '').trim();
   if (!url) return '';
@@ -258,8 +277,8 @@ export function HospitalityPlacePage() {
   const listings = Array.isArray(payload?.listings) ? payload.listings : [];
   const isNativePlatform = Capacitor.isNativePlatform();
   const destinationLocationLabel = [destination.city, destination.state].filter(Boolean).join(', ') || destination.name || 'Destino';
-  const placeListings = listings.filter((listing: any) => String(listing.hospitalityPlaceId || '') === String(place.id || ''));
-  const destinationListings = listings.filter((listing: any) => !listing.hospitalityPlaceId);
+  const placeListings = listings.filter((listing: any) => listingBelongsToPlace(listing, place.id));
+  const destinationListings = listings.filter((listing: any) => listingIsDestinationWide(listing));
   const nearbyCityListings = destinationListings.slice(0, 4);
   const destinationDisplayName = destination.name || destination.city || destinationSlug || 'a região';
   const hasPlaceDeliveryOptions = stores.length > 0 || placeListings.length > 0;
@@ -764,7 +783,7 @@ export function HospitalityPlacePage() {
         onClose={() => setSelectedListing(null)}
         listing={selectedListing}
         destination={destination}
-        placeName={selectedListing?.hospitalityPlaceId ? place.name : ''}
+        placeName={selectedListing && listingBelongsToPlace(selectedListing, place.id) ? place.name : ''}
         categoryLabel={categoryLabel(selectedListing?.category)}
         imageUrl={selectedListingMediaUrl}
         hasImage={selectedListingHasImage}

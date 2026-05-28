@@ -165,6 +165,13 @@ export class ZipCodeLookupService {
     }
   }
 
+  private hasCoordinates(result: ZipCodeLookupResult | null) {
+    return result?.latitude !== null &&
+      result?.latitude !== undefined &&
+      result?.longitude !== null &&
+      result?.longitude !== undefined;
+  }
+
   async lookup(rawZipCode: string): Promise<ZipCodeLookupResult> {
     const zipCode = normalizeZipCode(rawZipCode);
     if (zipCode.length !== 8) {
@@ -172,7 +179,15 @@ export class ZipCodeLookupService {
     }
 
     const cached = await this.fromCache(zipCode);
-    if (cached) return cached;
+    if (cached) {
+      if (this.hasCoordinates(cached)) return cached;
+      const fallback = await this.lookupCoordinateFallback(cached);
+      if (fallback && this.hasCoordinates(fallback)) {
+        await this.persist(fallback);
+        return fallback;
+      }
+      return cached;
+    }
 
     const providers = [
       () => this.lookupViaCep(zipCode),

@@ -455,6 +455,12 @@ export class DestinationService {
     return isValidCoordinate(lat) && isValidCoordinate(lng);
   }
 
+  private destinationFallbackCoordinates(destination?: { lat?: number | null; lng?: number | null } | null) {
+    return this.hasCoordinatePair(destination?.lat, destination?.lng)
+      ? { lat: Number(destination?.lat), lng: Number(destination?.lng) }
+      : { lat: null, lng: null };
+  }
+
   private async resolveDestinationCoordinates(payload: {
     address?: string | null;
     addressNumber?: string | null;
@@ -464,6 +470,8 @@ export class DestinationService {
     zipCode?: string | null;
     lat?: number | null;
     lng?: number | null;
+    fallbackLat?: number | null;
+    fallbackLng?: number | null;
     scope: string;
   }) {
     const lat = payload.lat ?? null;
@@ -509,6 +517,10 @@ export class DestinationService {
 
     if (this.zipLookupHasCoordinates(zipLookup)) {
       return { lat: Number(zipLookup?.latitude), lng: Number(zipLookup?.longitude) };
+    }
+
+    if (this.hasCoordinatePair(payload.fallbackLat, payload.fallbackLng)) {
+      return { lat: Number(payload.fallbackLat), lng: Number(payload.fallbackLng) };
     }
 
     return { lat, lng };
@@ -613,6 +625,15 @@ export class DestinationService {
     const city = payload?.city !== undefined ? toOptionalText(payload.city) : current?.city ?? destination.city ?? null;
     const state = payload?.state !== undefined ? this.normalizeStateCode(payload.state) : current?.state ?? destination.state ?? null;
     const zipCode = payload?.zipCode !== undefined ? this.normalizeZipCode(payload.zipCode) : current?.zipCode ?? null;
+    const addressChanged = Boolean(current) && (
+      (payload?.address !== undefined && address !== (current?.address ?? null)) ||
+      (payload?.addressNumber !== undefined && addressNumber !== (current?.addressNumber ?? null)) ||
+      (payload?.district !== undefined && district !== (current?.district ?? null)) ||
+      (payload?.city !== undefined && city !== (current?.city ?? null)) ||
+      (payload?.state !== undefined && state !== (current?.state ?? null)) ||
+      (payload?.zipCode !== undefined && zipCode !== (current?.zipCode ?? null))
+    );
+    const fallbackCoordinates = this.destinationFallbackCoordinates(destination);
     const coordinates = await this.resolveDestinationCoordinates({
       address,
       addressNumber,
@@ -620,8 +641,10 @@ export class DestinationService {
       city,
       state,
       zipCode,
-      lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : current?.lat ?? null,
-      lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : current?.lng ?? null,
+      lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : addressChanged ? null : current?.lat ?? null,
+      lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : addressChanged ? null : current?.lng ?? null,
+      fallbackLat: fallbackCoordinates.lat,
+      fallbackLng: fallbackCoordinates.lng,
       scope: 'hospitality_place',
     });
     const saved = await this.repository.savePlace({
@@ -675,6 +698,15 @@ export class DestinationService {
     const city = payload?.city !== undefined ? toOptionalText(payload.city) : current?.city ?? destination.city ?? null;
     const state = payload?.state !== undefined ? this.normalizeStateCode(payload.state) : current?.state ?? destination.state ?? null;
     const zipCode = payload?.zipCode !== undefined ? this.normalizeZipCode(payload.zipCode) : current?.zipCode ?? null;
+    const addressChanged = Boolean(current) && (
+      (payload?.address !== undefined && address !== (current?.address ?? null)) ||
+      (payload?.addressNumber !== undefined && addressNumber !== (current?.addressNumber ?? null)) ||
+      (payload?.district !== undefined && district !== (current?.district ?? null)) ||
+      (payload?.city !== undefined && city !== (current?.city ?? null)) ||
+      (payload?.state !== undefined && state !== (current?.state ?? null)) ||
+      (payload?.zipCode !== undefined && zipCode !== (current?.zipCode ?? null))
+    );
+    const fallbackCoordinates = this.destinationFallbackCoordinates(destination);
     const coordinates = await this.resolveDestinationCoordinates({
       address,
       addressNumber,
@@ -682,8 +714,10 @@ export class DestinationService {
       city,
       state,
       zipCode,
-      lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : current?.lat ?? null,
-      lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : current?.lng ?? null,
+      lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : addressChanged ? null : current?.lat ?? null,
+      lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : addressChanged ? null : current?.lng ?? null,
+      fallbackLat: fallbackCoordinates.lat,
+      fallbackLng: fallbackCoordinates.lng,
       scope: 'destination_listing',
     });
     const saved = await this.repository.saveListing({

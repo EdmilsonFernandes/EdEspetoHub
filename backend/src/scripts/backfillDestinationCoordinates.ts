@@ -13,6 +13,8 @@ type Candidate = {
   city?: string | null;
   state?: string | null;
   zipCode?: string | null;
+  destinationLat?: number | null;
+  destinationLng?: number | null;
 };
 
 const log = logger.child({ scope: 'BackfillDestinationCoordinates' });
@@ -33,35 +35,49 @@ const buildAddress = (row: Candidate) =>
     String(row.zipCode || '').replace(/\D/g, '').slice(0, 8) || null,
   ].filter(Boolean).join(', ');
 
+const hasCoordinatePair = (lat?: number | null, lng?: number | null) =>
+  lat !== null &&
+  lat !== undefined &&
+  lng !== null &&
+  lng !== undefined &&
+  Number.isFinite(Number(lat)) &&
+  Number.isFinite(Number(lng));
+
 const loadCandidates = async (): Promise<Candidate[]> => {
   const rows = await AppDataSource.query(`
     SELECT
-      id,
+      hp.id,
       'hospitality_place' AS kind,
-      name,
-      address,
-      address_number AS "addressNumber",
-      district,
-      city,
-      state,
-      zip_code AS "zipCode"
-    FROM hospitality_places
-    WHERE (lat IS NULL OR lng IS NULL)
-      AND COALESCE(address, city, state, zip_code) IS NOT NULL
+      hp.name,
+      hp.address,
+      hp.address_number AS "addressNumber",
+      hp.district,
+      hp.city,
+      hp.state,
+      hp.zip_code AS "zipCode",
+      td.lat AS "destinationLat",
+      td.lng AS "destinationLng"
+    FROM hospitality_places hp
+    JOIN travel_destinations td ON td.id = hp.destination_id
+    WHERE (hp.lat IS NULL OR hp.lng IS NULL)
+      AND COALESCE(hp.address, hp.city, hp.state, hp.zip_code) IS NOT NULL
     UNION ALL
     SELECT
-      id,
+      dl.id,
       'destination_listing' AS kind,
-      title AS name,
-      address,
-      address_number AS "addressNumber",
-      district,
-      city,
-      state,
-      zip_code AS "zipCode"
-    FROM destination_listings
-    WHERE (lat IS NULL OR lng IS NULL)
-      AND COALESCE(address, city, state, zip_code) IS NOT NULL
+      dl.title AS name,
+      dl.address,
+      dl.address_number AS "addressNumber",
+      dl.district,
+      dl.city,
+      dl.state,
+      dl.zip_code AS "zipCode",
+      td.lat AS "destinationLat",
+      td.lng AS "destinationLng"
+    FROM destination_listings dl
+    JOIN travel_destinations td ON td.id = dl.destination_id
+    WHERE (dl.lat IS NULL OR dl.lng IS NULL)
+      AND COALESCE(dl.address, dl.city, dl.state, dl.zip_code) IS NOT NULL
     ORDER BY kind, name;
   `);
   return rows as Candidate[];
@@ -73,6 +89,21 @@ const updateCoordinates = async (candidate: Candidate, lat: number, lng: number)
     `UPDATE ${table} SET lat = $1, lng = $2, updated_at = NOW() WHERE id = $3;`,
     [lat, lng, candidate.id]
   );
+};
+
+const applyDestinationFallback = async (candidate: Candidate, shouldApply: boolean) => {
+  if (!hasCoordinatePair(candidate.destinationLat, candidate.destinationLng)) return false;
+  if (shouldApply) {
+    await updateCoordinates(candidate, Number(candidate.destinationLat), Number(candidate.destinationLng));
+  }
+  log.info('Destination coordinate resolved from destination fallback', {
+    mode: shouldApply ? 'apply' : 'dry-run',
+    kind: candidate.kind,
+    name: candidate.name,
+    lat: Number(candidate.destinationLat),
+    lng: Number(candidate.destinationLng),
+  });
+  return true;
 };
 
 const run = async () => {
@@ -91,6 +122,10 @@ const run = async () => {
     try {
       const geocoded = await geoLocationService.geocodeAddress(address);
       if (!geocoded) {
+        if (await applyDestinationFallback(candidate, shouldApply)) {
+          resolved += 1;
+          continue;
+        }
         failed += 1;
         log.warn('Destination coordinate not found', { kind: candidate.kind, name: candidate.name, address });
         continue;
@@ -108,6 +143,10 @@ const run = async () => {
         lng: Number(geocoded.lng),
       });
     } catch (error) {
+      if (await applyDestinationFallback(candidate, shouldApply)) {
+        resolved += 1;
+        continue;
+      }
       failed += 1;
       log.warn('Destination coordinate lookup failed', { kind: candidate.kind, name: candidate.name, address, error });
     }
