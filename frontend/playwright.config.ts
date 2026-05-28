@@ -20,7 +20,8 @@ export default defineConfig({
   use: {
     // A Base URI é a URL onde seu frontend levanta via Docker-compose
     baseURL: process.env.BASE_URL || 'http://localhost:8080',
-    
+    reducedMotion: 'reduce',
+
     // Liga os rastros (tracing) quando o teste falha, pra você ver um 'replay' exato de onde o robô clicou
     trace: 'on-first-retry',
   },

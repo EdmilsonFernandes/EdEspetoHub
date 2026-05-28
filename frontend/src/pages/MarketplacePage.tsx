@@ -176,12 +176,12 @@ const storeRegionalPriority = (
     return store?.isOpen ? 0 : 1;
   }
   const availability = String(store?.geoAvailability || '').trim().toLowerCase();
-  if (store?.isOpen && (store?.isOutOfRegion || availability === 'out_of_region')) return 3;
   if (store?.isOpen && (store?.deliversToUserLocation || availability === 'deliver_now' || availability === 'postal_everywhere' || store?.supportsPostal)) return 0;
-  if (store?.isOpen && (availability === 'pickup_available' || availability === 'same_city_pickup')) return 1;
-  if (store?.isOpen && !availability && (store?.acceptsPickup || store?.supportsTable)) return 1;
-  if (store?.isOpen) return 2;
-  return 4;
+  if (store?.isOpen && availability === 'same_city_pickup') return 1;
+  if (store?.isOpen && (availability === 'pickup_available' || !availability && (store?.acceptsPickup || store?.supportsTable))) return 2;
+  if (store?.isOpen && store?.isOutOfRegion) return 3;
+  if (store?.isOpen) return 4;
+  return 5;
 };
 
 type StoreCardBadge = {
@@ -207,10 +207,10 @@ const getPrimaryStoreCardBadge = (
   const availability = String(store?.geoAvailability || '').trim().toLowerCase();
   const pickupEnabled = Boolean(store?.acceptsPickup || store?.supportsTable);
 
-  if (!options?.condominiumScope && (store?.isOutOfRegion || availability === 'out_of_region')) {
+  if (!options?.condominiumScope && store?.isOutOfRegion && !pickupEnabled) {
     return {
       key: 'outside_region',
-      label: 'Não atende sua região',
+      label: 'Entrega fora da área',
       icon: Warning,
       className:
         'border-slate-200 bg-slate-50 text-slate-600 shadow-[0_8px_18px_-14px_rgba(15,23,42,0.18)]',
@@ -1186,7 +1186,7 @@ export function MarketplacePage() {
           acceptsDelivery: Boolean((store as any)?.acceptsDelivery ?? supportsDelivery),
           acceptsPickup: Boolean((store as any)?.acceptsPickup ?? supportsPickup),
           geoAvailability: String((store as any)?.geoAvailability || '').trim(),
-          isOutOfRegion: Boolean((store as any)?.isOutOfRegion || String((store as any)?.geoAvailability || '').trim().toLowerCase() === 'out_of_region'),
+          isOutOfRegion: Boolean((store as any)?.isOutOfRegion),
           isNearest: Boolean((store as any)?.isNearest),
           distanceSource: apiDistanceKm !== null ? 'server' : 'local',
           nextOpeningLabel: formatNextOpeningLabel(String(store?.nextOpeningLabel || '').trim()),
@@ -2508,8 +2508,8 @@ export function MarketplacePage() {
                     {productSearchLoading && debouncedQuery
                       ? 'Buscando também nos cardápios...'
                       : isShowingAllStores
-                        ? `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} em outras regiões`
-                        : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} ${selectedCondominium ? 'no condomínio' : geoDiscovery ? 'priorizados para sua região' : 'disponíveis no app'}`}
+                        ? `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} no app`
+                        : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} ${selectedCondominium ? 'no condomínio' : 'disponíveis'}`}
                   </p>
                 ) : null}
               </div>
@@ -2545,9 +2545,10 @@ export function MarketplacePage() {
                   const storePath = selectedCondominiumSlug
                     ? `/${store.slug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
                     : `/${store.slug}`;
-                  const isOutOfRegion = !selectedCondominium && Boolean(store.isOutOfRegion || String(store.geoAvailability || '').toLowerCase() === 'out_of_region');
+                  const isOutOfRegion = !selectedCondominium && Boolean(store.isOutOfRegion);
+                  const pickupEnabled = Boolean(store.supportsPickup || store.supportsTable);
                   const shouldWarnCoverage =
-                    isOutOfRegion ||
+                    (isOutOfRegion && !pickupEnabled) ||
                     (!selectedCondominium &&
                       store.supportsDelivery &&
                       !store.supportsPostal &&
@@ -2560,7 +2561,7 @@ export function MarketplacePage() {
                             ? {
                                 hubCoverageWarning: {
                                   message: isOutOfRegion
-                                    ? 'Essa loja não atende sua região atual. Você pode ver a vitrine, mas pedidos ficam disponíveis apenas para regiões atendidas.'
+                                    ? 'Essa loja está fora da área de entrega para o seu endereço atual. Você ainda pode ver a vitrine e conferir as opções disponíveis.'
                                     : 'Essa loja ainda não atende o seu endereço principal com entrega. Você pode ver o cardápio e conferir outras opções como retirada.',
                                 },
                               }
@@ -2589,8 +2590,8 @@ export function MarketplacePage() {
                       ? null
                       : secondaryBadge;
                   const visibleServiceBadges = [visiblePrimaryBadge, visibleSecondaryBadge].filter(Boolean) as StoreCardBadge[];
-                  const deliveryFeeLabel = isOutOfRegion
-                    ? 'Fora da região'
+                  const deliveryFeeLabel = isOutOfRegion && !pickupEnabled
+                    ? 'Fora da entrega'
                     : store.supportsDelivery
                     ? store.freeShipping
                       ? 'Grátis'
@@ -2600,9 +2601,7 @@ export function MarketplacePage() {
                     : store.supportsPickup || store.supportsTable
                       ? 'Retirada'
                       : 'Consulte';
-                  const resolvedDistanceLabel = isOutOfRegion && navigationDistanceKm !== null && navigationDistanceKm > 80
-                    ? 'Outra região'
-                    : distanceLoading && activeLocation && distanceByStore[store.id] == null
+                  const resolvedDistanceLabel = distanceLoading && activeLocation && distanceByStore[store.id] == null
                     ? '...'
                     : formatDistance(distanceByStore[store.id] ?? store.distanceKm);
                   const ratingLabel = store.reviewCount > 0

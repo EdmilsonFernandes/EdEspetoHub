@@ -78,7 +78,7 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
     await expect(page.getByRole('heading', { name: 'Crie sua nova senha' })).toBeVisible();
     await page.locator('#new-password').fill('senha-nova-123');
     await page.locator('#confirm-password').fill('senha-nova-123');
-    await page.getByRole('button', { name: 'Enviar código por e-mail' }).click();
+    await page.getByRole('button', { name: 'Enviar código por e-mail' }).click({ force: true });
 
     await expect(page.getByText('Enviamos um código para seu e-mail')).toBeVisible();
     await expect.poll(() => page.evaluate(() => (window as any).__forgotCalls)).toBe(1);

@@ -20,7 +20,7 @@ const baseStore = (overrides: Record<string, any> = {}) => ({
 });
 
 describe('StoreController geo availability', () => {
-  it('classifies far pickup stores as outside the customer region', () => {
+  it('keeps far pickup stores visible as pickup/cardapio options', () => {
     const payload = enrichStoreGeoPayload(baseStore(), {
       lat: -15.2475,
       lng: -40.2478,
@@ -28,9 +28,22 @@ describe('StoreController geo availability', () => {
       state: 'BA',
     });
 
-    expect(payload.geoAvailability).toBe('out_of_region');
+    expect(payload.geoAvailability).toBe('pickup_available');
+    expect(payload.isOutOfRegion).toBe(false);
+    expect(payload.deliveryStatusLabel).toBe('Retirada disponível');
+  });
+
+  it('marks delivery-only stores outside the delivery area without hiding pickup stores', () => {
+    const payload = enrichStoreGeoPayload(baseStore({ orderTypes: ['delivery'] }), {
+      lat: -15.2475,
+      lng: -40.2478,
+      city: 'Itapetinga',
+      state: 'BA',
+    });
+
+    expect(payload.geoAvailability).toBe('outside_radius');
     expect(payload.isOutOfRegion).toBe(true);
-    expect(payload.deliveryStatusLabel).toBe('Não atende sua região');
+    expect(payload.deliveryStatusLabel).toBe('Entrega fora da área');
   });
 
   it('keeps same-city pickup available even when precise coordinates are missing', () => {
@@ -62,7 +75,7 @@ describe('StoreController geo availability', () => {
     expect(payload.deliveryStatusLabel).toBe('Entrega postal disponível');
   });
 
-  it('sorts local coverage before out-of-region stores', () => {
+  it('sorts local coverage before remote pickup stores', () => {
     const localPickup = enrichStoreGeoPayload(baseStore({ id: 'local' }), {
       lat: null,
       lng: null,

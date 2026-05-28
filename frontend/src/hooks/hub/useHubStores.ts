@@ -103,26 +103,12 @@ export function useHubStores({
               city: preferredDiscoveryAddress?.city || activeRegion?.city || null,
               state: preferredDiscoveryAddress?.state || activeRegion?.state || null,
             };
-      const hasDiscoveryContext = Boolean(
-        Number.isFinite(Number(locationQuery.lat)) ||
-          Number.isFinite(Number(locationQuery.lng)) ||
-          locationQuery.city ||
-          locationQuery.state
-      );
-      const basePortfolio =
-        !selectedCondominiumSlug && hubScopeOverride !== 'all_stores' && hasDiscoveryContext
-          ? await storeService.discoverPortfolio({
-              lat: locationQuery.lat,
-              lng: locationQuery.lng,
-              city: locationQuery.city,
-              state: locationQuery.state,
-            })
-          : await storeService.listPortfolio({
-              lat: locationQuery.lat,
-              lng: locationQuery.lng,
-              city: locationQuery.city,
-              state: locationQuery.state,
-            });
+      const basePortfolio = await storeService.listPortfolio({
+        lat: locationQuery.lat,
+        lng: locationQuery.lng,
+        city: locationQuery.city,
+        state: locationQuery.state,
+      });
       const discoveryPayload =
         basePortfolio && !Array.isArray(basePortfolio) && Array.isArray((basePortfolio as StoreDiscoveryResponse).stores)
           ? (basePortfolio as StoreDiscoveryResponse)

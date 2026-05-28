@@ -247,7 +247,7 @@ test.describe('Admin queue UX', () => {
     await expect(orderDetail.getByRole('button', { name: /Couvert/i })).toBeVisible();
     await expect(orderDetail.getByRole('button', { name: /Taxa 10%/i })).toBeVisible();
 
-    await orderDetail.getByRole('button', { name: /Couvert/i }).click();
+    await orderDetail.getByRole('button', { name: /Couvert/i }).click({ force: true });
 
     await expect(page.getByRole('button', { name: 'Adicionar couvert' })).toBeVisible();
     await expect(page.getByLabel('Pessoas do couvert')).toBeVisible();

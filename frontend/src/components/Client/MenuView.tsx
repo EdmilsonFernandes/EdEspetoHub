@@ -1186,8 +1186,8 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={`group relative flex min-h-[3.9rem] flex-col items-center justify-center overflow-hidden rounded-[1.25rem] border px-2.5 py-1.5 text-center transition-all duration-300 snap-start active:scale-[0.97] ${
-                        useCompactCategoryCarousel ? "w-[6.35rem] shrink-0 sm:min-w-0" : "w-full min-w-0"
+                      className={`group relative flex min-h-[3.45rem] flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border px-2 py-1.5 text-center transition-all duration-300 snap-start active:scale-[0.97] ${
+                        useCompactCategoryCarousel ? "w-[5.95rem] shrink-0 sm:min-w-0" : "w-full min-w-0"
                       } ${isActive ? 'shadow-[0_18px_34px_-22px_rgba(15,23,42,0.38)]' : 'shadow-[0_10px_24px_-22px_rgba(15,23,42,0.28)] hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-24px_rgba(15,23,42,0.34)]'}`}
                       style={
                         isActive
@@ -1202,14 +1202,14 @@ export const MenuView = ({
                     >
                       {isActive ? <span className="pointer-events-none absolute -right-5 -top-5 h-14 w-14 rounded-full bg-white/16 blur-xl" /> : null}
                       <span
-                        className={`relative inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-transform duration-300 group-hover:scale-105 ${isActive ? "border-white/24 bg-white/16 text-current" : `${meta.tone} bg-opacity-70`}`}
+                        className={`relative inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-transform duration-300 group-hover:scale-105 ${isActive ? "border-white/24 bg-white/16 text-current" : `${meta.tone} bg-opacity-70`}`}
                       >
-                        <Icon size={14} weight={isActive ? "fill" : "duotone"} />
+                        <Icon size={13} weight={isActive ? "fill" : "duotone"} />
                       </span>
-                      <span className={`mt-1 block w-full truncate text-[11px] font-black leading-tight tracking-[-0.02em] sm:text-[11.5px] ${isActive ? "text-current" : "text-slate-800"}`}>
+                      <span className={`mt-0.5 block w-full truncate text-[10.5px] font-black leading-tight tracking-[-0.02em] sm:text-[11px] ${isActive ? "text-current" : "text-slate-800"}`}>
                         {category.label}
                       </span>
-                      <span className={`mt-0.5 block text-[9px] font-black uppercase tracking-[0.1em] ${isActive ? "text-current/70" : "text-slate-400"}`}>
+                      <span className={`mt-0.5 block text-[8.5px] font-black uppercase tracking-[0.1em] ${isActive ? "text-current/70" : "text-slate-400"}`}>
                         {categoryCountLabel}
                       </span>
                     </button>
@@ -1685,10 +1685,10 @@ export const MenuView = ({
                     style={isActive ? { backgroundColor: catalogPrimaryColor, color: catalogPrimaryText } : undefined}
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border ${
+                      <span className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl border ${
                         isActive ? "border-white/24 bg-white/16 text-current" : meta.tone
                       }`}>
-                        <Icon size={17} weight={isActive ? "fill" : "duotone"} />
+                        <Icon size={15} weight={isActive ? "fill" : "duotone"} />
                       </span>
                       <p className={`truncate text-base font-black ${isActive ? "text-current" : "text-zinc-900"}`}>
                         {category.label}

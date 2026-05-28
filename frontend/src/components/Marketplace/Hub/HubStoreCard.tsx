@@ -222,7 +222,7 @@ export function HubStoreCard({
           ) : null}
           {store.rating > 0 ? <span className="text-slate-200">·</span> : null}
           <span className={store.isOpen && !isUnavailableForRegion ? 'text-emerald-700' : isUnavailableForRegion ? 'text-slate-500' : 'text-rose-600'}>
-            {isUnavailableForRegion ? 'Fora da região' : store.isOpen ? 'Aberto' : 'Fechado'}
+            {isUnavailableForRegion ? 'Fora da entrega' : store.isOpen ? 'Aberto' : 'Fechado'}
           </span>
         </div>
         <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-semibold text-slate-500">
@@ -250,7 +250,7 @@ export function HubStoreCard({
         ) : null}
         {!store.isOpen || isUnavailableForRegion ? (
           <p className="mt-2 text-[10.5px] font-bold text-slate-400">
-            {isUnavailableForRegion ? store.deliveryStatusLabel || 'Não atende sua região atual' : store.nextOpeningLabel || 'Sem horário cadastrado'}
+            {isUnavailableForRegion ? store.deliveryStatusLabel || 'Entrega fora da área' : store.nextOpeningLabel || 'Sem horário cadastrado'}
           </p>
         ) : null}
       </div>

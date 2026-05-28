@@ -37,7 +37,6 @@ const storeDashboardAnalyticsService = new StoreDashboardAnalyticsService();
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
 const log = logger.child({ scope: 'StoreController' });
 const SAO_PAULO_TZ = 'America/Sao_Paulo';
-const MAX_LOCAL_PICKUP_DISTANCE_KM = 50;
 const MAX_NEARBY_DISCOVERY_DISTANCE_KM = 80;
 let storeCoordinateBackfillPromise: Promise<void> | null = null;
 let storeCoordinateBackfillLastRunAt = 0;
@@ -353,18 +352,20 @@ export class StoreController {
         rawDistanceKm <= effectiveDeliveryRadiusKm
     );
     const pickupEnabled = acceptsPickup || acceptsTable;
-    const pickupAvailableForRegion = Boolean(
-      pickupEnabled &&
-        (!hasRegionContext ||
-          sameCity ||
-          (rawDistanceKm !== null && rawDistanceKm <= MAX_LOCAL_PICKUP_DISTANCE_KM))
+    const deliveryOnlyOutsideRegion = Boolean(
+      acceptsDelivery &&
+        !pickupEnabled &&
+        !supportsPostal &&
+        !deliversToUserLocation &&
+        hasRegionContext &&
+        (distanceKm !== null || normalizedCity || normalizedState)
     );
     const geoAvailability = supportsPostal
       ? 'postal_everywhere'
       : deliversToUserLocation
         ? 'deliver_now'
         : pickupEnabled
-          ? (pickupAvailableForRegion ? (sameCity ? 'same_city_pickup' : 'pickup_available') : 'out_of_region')
+          ? (sameCity ? 'same_city_pickup' : 'pickup_available')
           : acceptsDelivery
             ? (distanceKm !== null ? 'outside_radius' : 'unknown')
             : 'unknown';
@@ -372,11 +373,11 @@ export class StoreController {
       ? 'Entrega postal disponível'
       : deliversToUserLocation
         ? 'Entrega disponível'
-        : geoAvailability === 'out_of_region'
-          ? 'Não atende sua região'
+        : deliveryOnlyOutsideRegion
+          ? 'Entrega fora da área'
           : acceptsDelivery
             ? 'Fora da área de entrega'
-            : pickupAvailableForRegion
+            : pickupEnabled
               ? 'Retirada disponível'
               : 'Distância indisponível';
 
@@ -390,7 +391,7 @@ export class StoreController {
       supportsPostal,
       sameCity,
       geoAvailability,
-      isOutOfRegion: geoAvailability === 'out_of_region',
+      isOutOfRegion: deliveryOnlyOutsideRegion,
       deliveryRadiusKm: effectiveDeliveryRadiusKm,
       distanceKm,
       deliversToUserLocation,
@@ -403,10 +404,11 @@ export class StoreController {
       const rank = (entry: any) => {
         const availability = String(entry?.geoAvailability || '').trim().toLowerCase();
         if (entry?.openNow && (entry?.deliversToUserLocation || availability === 'deliver_now' || availability === 'postal_everywhere')) return 0;
-        if (entry?.openNow && [ 'same_city_pickup', 'pickup_available' ].includes(availability)) return 1;
-        if (entry?.openNow && availability !== 'out_of_region') return 2;
-        if (entry?.openNow) return 3;
-        return 4;
+        if (entry?.openNow && availability === 'same_city_pickup') return 1;
+        if (entry?.openNow && availability === 'pickup_available') return 2;
+        if (entry?.openNow && !entry?.isOutOfRegion) return 3;
+        if (entry?.openNow) return 4;
+        return 5;
       };
       const rankDelta = rank(a) - rank(b);
       if (rankDelta !== 0) return rankDelta;
