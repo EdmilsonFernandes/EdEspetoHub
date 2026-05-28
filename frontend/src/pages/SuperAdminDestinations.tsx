@@ -188,6 +188,30 @@ const normalizeListingPlaceIds = (placeIds: any, fallbackPlaceId?: any) => {
   return Array.from(new Set(raw.map((item: any) => String(item || '').trim()).filter(Boolean)));
 };
 
+const listingPlacesForDisplay = (listing: any, places: any[]) => {
+  const ids = normalizeListingPlaceIds(listing?.hospitalityPlaceIds, listing?.hospitalityPlaceId);
+  const knownPlaces = [
+    ...(Array.isArray(listing?.hospitalityPlaces) ? listing.hospitalityPlaces : []),
+    ...(listing?.hospitalityPlace ? [listing.hospitalityPlace] : []),
+    ...(Array.isArray(places) ? places : []),
+  ];
+  const byId = new Map<string, any>();
+  knownPlaces.filter(Boolean).forEach((place: any) => {
+    const id = String(place?.id || '');
+    if (id && !byId.has(id)) byId.set(id, place);
+  });
+  return ids.map((id) => byId.get(id)).filter(Boolean);
+};
+
+const initialsFor = (value = '') =>
+  String(value || '?')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
+
 const formatCepBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
   if (digits.length <= 5) return digits;
@@ -2386,7 +2410,14 @@ export function SuperAdminDestinations() {
                         </div>
                       </div>
                       <div className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-                        {(listingsResult.items || []).map((listing: any) => (
+                        {(listingsResult.items || []).map((listing: any) => {
+                          const linkedPlaceIds = normalizeListingPlaceIds(listing.hospitalityPlaceIds, listing.hospitalityPlaceId);
+                          const linkedPlaces = listingPlacesForDisplay(listing, data.places || []);
+                          const isDestinationWide = linkedPlaceIds.length === 0;
+                          const visiblePlaces = linkedPlaces.slice(0, 3);
+                          const hiddenPlaceCount = Math.max(0, linkedPlaceIds.length - visiblePlaces.length);
+                          const placesSummary = linkedPlaceIds.length === 1 ? '1 hospedagem selecionada' : `${linkedPlaceIds.length} hospedagens selecionadas`;
+                          return (
                           <div key={listing.id} className="rounded-2xl border border-amber-100 bg-amber-50/60 px-3 py-3">
                             <div className="flex items-start gap-3">
                               <img src={imageFor(listing)} alt={listing.title} className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-amber-100" />
@@ -2404,6 +2435,65 @@ export function SuperAdminDestinations() {
                                   <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(listing.active)}`}>{activeLabel(listing.active)}</span>
                                 </div>
                               </div>
+                            </div>
+                            <div className="mt-3 rounded-[1.15rem] border border-white/80 bg-white/75 p-2.5 shadow-[0_14px_34px_rgba(120,53,15,0.06)]">
+                              <div className="flex min-w-0 items-center gap-2">
+                                <div className="flex shrink-0 -space-x-2">
+                                  {isDestinationWide ? (
+                                    <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#336886] text-white shadow-sm">
+                                      <MapTrifold size={16} weight="duotone" />
+                                    </span>
+                                  ) : linkedPlaces.length ? (
+                                    linkedPlaces.slice(0, 4).map((place: any) => {
+                                      const placeImage = logoFor(place);
+                                      return (
+                                        <span key={place.id} className="h-8 w-8 overflow-hidden rounded-full border-2 border-white bg-slate-100 shadow-sm">
+                                          {placeImage ? (
+                                            <img src={placeImage} alt={place.name} className="h-full w-full object-cover" />
+                                          ) : (
+                                            <span className="flex h-full w-full items-center justify-center bg-[#EEF6F4] text-[10px] font-black text-[#336886]">
+                                              {initialsFor(place.name)}
+                                            </span>
+                                          )}
+                                        </span>
+                                      );
+                                    })
+                                  ) : (
+                                    <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-amber-100 text-amber-700 shadow-sm">
+                                      <Bed size={16} weight="duotone" />
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Aparece em</p>
+                                  <p className="truncate text-xs font-black text-slate-900">
+                                    {isDestinationWide ? 'Destino inteiro' : placesSummary}
+                                  </p>
+                                </div>
+                              </div>
+                              {isDestinationWide ? (
+                                <p className="mt-2 rounded-full bg-[#EEF6F4] px-2.5 py-1 text-[11px] font-bold text-[#336886]">
+                                  Visível para todos os chalés e pousadas da cidade.
+                                </p>
+                              ) : (
+                                <div className="mt-2 flex flex-wrap gap-1.5">
+                                  {visiblePlaces.map((place: any) => (
+                                    <span key={place.id} className="max-w-full truncate rounded-full border border-[#336886]/10 bg-[#EEF6F4] px-2.5 py-1 text-[10px] font-black text-[#336886]">
+                                      {place.name}
+                                    </span>
+                                  ))}
+                                  {hiddenPlaceCount > 0 ? (
+                                    <span className="rounded-full bg-slate-900 px-2.5 py-1 text-[10px] font-black text-white">
+                                      +{hiddenPlaceCount}
+                                    </span>
+                                  ) : null}
+                                  {!visiblePlaces.length ? (
+                                    <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black text-amber-700">
+                                      Hospedagens selecionadas
+                                    </span>
+                                  ) : null}
+                                </div>
+                              )}
                             </div>
                             <div className="mt-3 flex flex-wrap gap-2">
                               <button type="button" onClick={() => startListingEdit(listing)} className={actionButtonClass('neutral')}>
@@ -2427,7 +2517,8 @@ export function SuperAdminDestinations() {
                               </button>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                         {!detailLoading && !(listingsResult.items || []).length ? (
                           <p className="rounded-2xl border border-dashed border-amber-200 bg-amber-50/60 px-3 py-4 text-xs font-bold text-slate-500">Nenhum serviço encontrado nesta busca.</p>
                         ) : null}
