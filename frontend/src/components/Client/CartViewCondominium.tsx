@@ -71,6 +71,7 @@ export const CartViewCondominium = ({
   checkoutDisabled = false,
   checkoutDisabledReason = "",
   checkoutLoading = false,
+  checkoutSlow = false,
   pricingSummary,
   onChangeCustomer,
   onChangePayment,
@@ -95,6 +96,7 @@ export const CartViewCondominium = ({
   const subtotal = pricingSummary?.subtotal ?? fallbackPricing.subtotal;
   const discountTotal = pricingSummary?.discountTotal ?? fallbackPricing.discountTotal;
   const total = pricingSummary?.total ?? fallbackPricing.discountedSubtotal;
+  const checkoutLoadingLabel = checkoutSlow ? 'Internet lenta... confirmando' : 'Enviando...';
   
   const buildCartOptions = (entry: any) => ({
     cookingPoint: entry?.cookingPoint || "",
@@ -532,6 +534,11 @@ export const CartViewCondominium = ({
       {/* Botão Finalizar */}
       <div className={`fixed left-0 right-0 z-50 border-t border-slate-100 bg-white/90 p-4 backdrop-blur-md ${isNativePlatform ? "ds-native-nav-dock" : "bottom-0"}`}>
         <div className="mx-auto max-w-lg rounded-[1.65rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(248,250,252,0.94))] p-3 shadow-[0_18px_34px_-26px_rgba(15,23,42,0.22)]">
+        {checkoutLoading && checkoutSlow && (
+          <p className="mb-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[11px] font-bold leading-snug text-amber-800">
+            Conexão lenta. Estamos confirmando com a loja. Não feche esta tela nem toque de novo.
+          </p>
+        )}
         <button
           onClick={() => {
             setHasTriedCheckout(true);
@@ -564,7 +571,7 @@ export const CartViewCondominium = ({
           style={ctaPulse ? { animation: 'btnPop 200ms ease' } : undefined}
         >
           <PaperPlaneTilt size={20} weight="bold" />
-          {checkoutLoading ? 'Enviando...' : isApartmentDelivery ? 'Pedir no Apartamento' : 'Pedir e Retirar'}
+          {checkoutLoading ? checkoutLoadingLabel : isApartmentDelivery ? 'Pedir no Apartamento' : 'Pedir e Retirar'}
         </button>
         <p className="mt-2 text-center text-[11px] font-semibold text-slate-500">
           {isApartmentDelivery ? 'A loja receberá seus dados do morador e o ponto de entrega.' : 'A retirada ficará vinculada ao seu nome e WhatsApp.'}

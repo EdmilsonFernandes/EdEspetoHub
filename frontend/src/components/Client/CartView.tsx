@@ -114,6 +114,7 @@ export const CartView = ({
   checkoutDisabled = false,
   checkoutDisabledReason = "",
   checkoutLoading = false,
+  checkoutSlow = false,
   checkoutResume = null,
   pricingSummary,
   paymentSummary = null,
@@ -350,6 +351,7 @@ export const CartView = ({
     : isPostalQuoteMode
     ? (checkoutLoading || postalQuoteLoading)
     : (checkoutLoading || checkoutDisabled || cashValidation.blocked);
+  const checkoutLoadingLabel = checkoutSlow ? "Internet lenta... confirmando" : "Processando...";
 
   const [selectedDdd, setSelectedDdd] = useState(() => extractPhoneParts(customer.phone || "").ddd);
   const [localPhoneDigits, setLocalPhoneDigits] = useState(() => extractPhoneParts(customer.phone || "").localNumber);
@@ -2426,6 +2428,11 @@ export const CartView = ({
                 Pedido processado pelo estabelecimento, responsável por produtos, preparo, preços e entrega.
               </p>
             )}
+            {checkoutLoading && checkoutSlow && (
+              <p className="mb-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[11px] font-bold leading-snug text-amber-800">
+                Conexão lenta. Estamos confirmando com a loja. Não feche esta tela nem toque de novo.
+              </p>
+            )}
             <button
               onClick={async () => {
                 setCtaPulse(true);
@@ -2500,7 +2507,7 @@ export const CartView = ({
                   </>
                 : <>
                     {checkoutLoading
-                      ? 'Processando...'
+                      ? checkoutLoadingLabel
                       : isOnlinePaymentMethod
                       ? <><img src={mercadoPagoMeta.icon} alt="" className="h-5 w-5 object-contain brightness-0 invert" /> {isOnlinePix ? 'Gerar Pix via Mercado Pago' : 'Pagar via Mercado Pago'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
                       : <>{isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {'Confirmar pedido'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
@@ -2519,6 +2526,11 @@ export const CartView = ({
             <p className="text-[11px] text-slate-400 text-center leading-relaxed mb-2">
               Pedido processado pelo estabelecimento, responsável por produtos, preparo, preços e entrega.
             </p>
+            {checkoutLoading && checkoutSlow && (
+              <p className="mb-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[11px] font-bold leading-snug text-amber-800">
+                Conexão lenta. Estamos confirmando com a loja. Não feche esta tela nem toque de novo.
+              </p>
+            )}
             <button
               onClick={async () => {
                 setHasTriedCheckout(true);
@@ -2562,7 +2574,7 @@ export const CartView = ({
               style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
             >
               {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
-              {checkoutLoading ? "Processando..." : primaryCtaLabel}
+              {checkoutLoading ? checkoutLoadingLabel : primaryCtaLabel}
             </button>
             {hasTriedCheckout && !isDeliveryValidationMode && (checkoutDisabled || cashValidation.blocked) && !hideOutOfRangeInlineReason && (checkoutDisabledReason || cashValidation.reason) && (
               <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">

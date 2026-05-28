@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "1d26e399",
-  "versionLabel": "v0.1.9.1d26e399",
-  "versionInternal": "0.1.9+20260528.020546.1d26e399",
-  "buildId": "0.1.9+20260528.020546.1d26e399-20260528.020546-1d26e399",
-  "builtAt": "2026-05-28T02:05:46.839Z",
-  "commitHash": "1d26e39915a28323104397d117f8dbf7b9f7dc96",
-  "shortHash": "1d26e399",
+  "versionDisplaySuffix": "93a99cea",
+  "versionLabel": "v0.1.9.93a99cea",
+  "versionInternal": "0.1.9+20260528.021935.93a99cea",
+  "buildId": "0.1.9+20260528.021935.93a99cea-20260528.021935-93a99cea",
+  "builtAt": "2026-05-28T02:19:35.991Z",
+  "commitHash": "93a99cea0d419a4ad0be6f186e890320ce0e20e0",
+  "shortHash": "93a99cea",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "93a99cea0d419a4ad0be6f186e890320ce0e20e0",
+      "shortHash": "93a99cea",
+      "dateIso": "2026-05-27T23:11:04-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Improve printer setup test flow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/93a99cea0d419a4ad0be6f186e890320ce0e20e0"
+    },
     {
       "hash": "1d26e39915a28323104397d117f8dbf7b9f7dc96",
       "shortHash": "1d26e399",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Compact hub explore shortcuts",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c0c3312deec0ebe81f1e1a3ac34c422265aa3899"
-    },
-    {
-      "hash": "c206ccf8c838029ac89cb4129b6bb22553a55abe",
-      "shortHash": "c206ccf8",
-      "dateIso": "2026-05-26T15:41:08-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix access drawer session refresh",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c206ccf8c838029ac89cb4129b6bb22553a55abe"
     }
   ]
 } as const;

@@ -57,6 +57,8 @@ const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-fei
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
 const CUSTOMER_REMEMBER_EMAIL_KEY = 'jnk_customer_auth_email';
 const NATIVE_NAV_VISIBILITY_EVENT = 'jnc:native-nav-visibility';
+const CHECKOUT_SLOW_FEEDBACK_MS = 2800;
+const CHECKOUT_CREATE_ORDER_TIMEOUT_MS = 18000;
 
 const buildPublicPaymentSummary = (storeData: any) => {
   const rawSummary = storeData?.paymentSummary || {};
@@ -801,7 +803,17 @@ export function StorePage() {
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutSlow, setCheckoutSlow] = useState(false);
   const checkoutLockRef = useRef(false);
+  const checkoutSlowTimerRef = useRef(null);
+  const clearCheckoutSlowTimer = useCallback(() => {
+    if (checkoutSlowTimerRef.current) {
+      window.clearTimeout(checkoutSlowTimerRef.current);
+      checkoutSlowTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => clearCheckoutSlowTimer(), [clearCheckoutSlowTimer]);
 
   const cartPricing = useMemo(() => getCartPricing(cart), [cart]);
   const validCartItems = useMemo(
@@ -2391,6 +2403,11 @@ export function StorePage() {
     if (checkoutLockRef.current || checkoutLoading) return;
     checkoutLockRef.current = true;
     setCheckoutLoading(true);
+    setCheckoutSlow(false);
+    clearCheckoutSlowTimer();
+    checkoutSlowTimerRef.current = window.setTimeout(() => {
+      setCheckoutSlow(true);
+    }, CHECKOUT_SLOW_FEEDBACK_MS);
     try {
     const isSubscriptionActive =
       storePlanExempt ||
@@ -2684,6 +2701,7 @@ export function StorePage() {
       try {
       createdOrder = await orderService.createBySlug(order, storeSlug, {
         authMode: createOrderAuthMode,
+        timeoutMs: CHECKOUT_CREATE_ORDER_TIMEOUT_MS,
       });
       } catch (error) {
         const backendMessage =
@@ -2692,6 +2710,22 @@ export function StorePage() {
         error?.error?.message ||
         error?.message;
       const backendCode = String(error?.code || error?.error?.code || '').trim().toUpperCase();
+      if (backendCode === 'REQUEST_TIMEOUT') {
+        showErrorNotice(
+          isStoreAdmin
+            ? 'A conexão demorou demais. Confira a fila antes de tentar novamente para evitar pedido duplicado.'
+            : 'A conexão demorou demais. Confira seus pedidos antes de tentar novamente para evitar pedido duplicado.'
+        );
+        return;
+      }
+      if (backendCode === 'NETWORK_ERROR') {
+        showErrorNotice(
+          isStoreAdmin
+            ? 'Sua internet caiu durante o envio. Confira a fila antes de tentar novamente.'
+            : 'Sua internet caiu durante o envio. Confira seus pedidos antes de tentar novamente.'
+        );
+        return;
+      }
       if (backendCode === 'ORDER-005' || String(backendMessage || '').toLowerCase().includes('estoque')) {
         showErrorNotice(backendMessage || 'Produto sem estoque suficiente. Revise o carrinho e tente novamente.');
         if (storeSlug) {
@@ -2889,8 +2923,10 @@ export function StorePage() {
       showOrderNotice(createdOrder?.id);
     }
     } finally {
+      clearCheckoutSlowTimer();
       checkoutLockRef.current = false;
       setCheckoutLoading(false);
+      setCheckoutSlow(false);
     }
   };
 
@@ -3976,6 +4012,7 @@ export function StorePage() {
             checkoutResume={customerCheckoutResume}
             onCheckoutResumeConsumed={() => setCustomerCheckoutResume(null)}
             checkoutLoading={checkoutLoading}
+            checkoutSlow={checkoutSlow}
             onBack={() => setView('menu')}
             systemHeaderOffset={showPublicStoreAppHeader}
           />
@@ -4043,6 +4080,7 @@ export function StorePage() {
             onUpdateCart={updateCart}
             onCheckout={checkout}
             checkoutLoading={checkoutLoading}
+            checkoutSlow={checkoutSlow}
             onBack={() => setView('menu')}
             storeLabel={storeName || branding?.brandName || ''}
             storeLogoUrl={branding?.logoUrl || ''}

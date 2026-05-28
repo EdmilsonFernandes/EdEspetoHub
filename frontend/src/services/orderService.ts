@@ -210,7 +210,7 @@ export const orderService = {
   async createBySlug(
     orderData: any,
     storeSlug: string,
-    options?: { authMode?: 'auto' | 'none' | 'admin' | 'customer' | 'motoboy' }
+    options?: { authMode?: 'auto' | 'none' | 'admin' | 'customer' | 'motoboy'; timeoutMs?: number }
   )
   {
     if (!storeSlug)
@@ -220,6 +220,7 @@ export const orderService = {
 
     return apiClient.post(`/stores/slug/${storeSlug}/orders`, orderData, {
       authMode: options?.authMode || 'auto',
+      ...(options?.timeoutMs ? { timeoutMs: options.timeoutMs } : {}),
     });
   },
   async fetchHighlightsBySlug(storeSlug: string)
