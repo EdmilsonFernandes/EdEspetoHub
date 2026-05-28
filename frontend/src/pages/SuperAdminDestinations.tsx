@@ -117,6 +117,7 @@ const normalizePlaceBannerSlots = (value: any) => {
 const emptyListing = {
   destinationId: '',
   hospitalityPlaceId: '',
+  hospitalityPlaceIds: [],
   storeId: '',
   title: '',
   category: 'SERVICO',
@@ -176,6 +177,16 @@ const imageFor = (item: any) =>
 const logoFor = (item: any) =>
   resolveAssetUrl(item?.logoUrl || item?.bannerUrl || item?.imageUrl || '') ||
   getStoreAvatarUrl(item?.slug || item?.id, item?.name || item?.title);
+
+const normalizeListingPlaceIds = (placeIds: any, fallbackPlaceId?: any) => {
+  const raw = Array.isArray(placeIds)
+    ? placeIds
+    : typeof placeIds === 'string'
+      ? placeIds.split(',')
+      : [];
+  if (fallbackPlaceId) raw.push(fallbackPlaceId);
+  return Array.from(new Set(raw.map((item: any) => String(item || '').trim()).filter(Boolean)));
+};
 
 const formatCepBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
@@ -832,6 +843,49 @@ export function SuperAdminDestinations() {
   const updateListing = (key: string, value: any) => setListingForm((current) => ({ ...current, [key]: value }));
   const updateStoreLink = (key: string, value: any) => setStoreLinkForm((current) => ({ ...current, [key]: value }));
 
+  const listingDestinationPlaces = useMemo(
+    () => (data.places || []).filter((place: any) => !listingForm.destinationId || place.destinationId === listingForm.destinationId),
+    [data.places, listingForm.destinationId]
+  );
+
+  const selectedListingPlaceIds = useMemo(
+    () => normalizeListingPlaceIds(listingForm.hospitalityPlaceIds, listingForm.hospitalityPlaceId),
+    [listingForm.hospitalityPlaceIds, listingForm.hospitalityPlaceId]
+  );
+
+  const updateListingDestination = (destinationId: string) => {
+    const allowedPlaceIds = new Set((data.places || [])
+      .filter((place: any) => !destinationId || place.destinationId === destinationId)
+      .map((place: any) => String(place.id)));
+    setListingForm((current) => {
+      const nextPlaceIds = normalizeListingPlaceIds(current.hospitalityPlaceIds, current.hospitalityPlaceId)
+        .filter((placeId) => allowedPlaceIds.has(placeId));
+      return {
+        ...current,
+        destinationId,
+        hospitalityPlaceIds: nextPlaceIds,
+        hospitalityPlaceId: nextPlaceIds[0] || '',
+      };
+    });
+  };
+
+  const setListingPlaceIds = (placeIds: string[]) => {
+    const nextPlaceIds = normalizeListingPlaceIds(placeIds);
+    setListingForm((current) => ({
+      ...current,
+      hospitalityPlaceIds: nextPlaceIds,
+      hospitalityPlaceId: nextPlaceIds[0] || '',
+    }));
+  };
+
+  const toggleListingPlace = (placeId: string) => {
+    const currentIds = normalizeListingPlaceIds(listingForm.hospitalityPlaceIds, listingForm.hospitalityPlaceId);
+    const nextIds = currentIds.includes(placeId)
+      ? currentIds.filter((id) => id !== placeId)
+      : [ ...currentIds, placeId ];
+    setListingPlaceIds(nextIds);
+  };
+
   const updateDestinationGallerySlot = (index: number, patch: any) => {
     setDestinationForm((current: any) => {
       const gallery = normalizeDestinationGallerySlots(current.gallery, current.name || 'Destino');
@@ -946,6 +1000,7 @@ export function SuperAdminDestinations() {
   };
 
   const startListingEdit = (listing: any) => {
+    const hospitalityPlaceIds = normalizeListingPlaceIds(listing.hospitalityPlaceIds, listing.hospitalityPlaceId);
     setEditingDestinationId('');
     setEditingPlaceId('');
     setEditingListingId(listing.id);
@@ -954,7 +1009,8 @@ export function SuperAdminDestinations() {
       ...emptyListing,
       ...Object.fromEntries(Object.entries(listing).map(([key, value]) => [key, toFormValue(value)])),
       destinationId: listing.destinationId || listing.destination?.id || '',
-      hospitalityPlaceId: listing.hospitalityPlaceId || '',
+      hospitalityPlaceId: hospitalityPlaceIds[0] || '',
+      hospitalityPlaceIds,
       storeId: listing.storeId || listing.store?.id || '',
       zipCode: formatCepBr(listing.zipCode || ''),
       state: String(listing.state || listing.destination?.state || '').toUpperCase().slice(0, 2),
@@ -1087,7 +1143,14 @@ export function SuperAdminDestinations() {
     setError('');
     try {
       const wasEditing = Boolean(editingListingId);
-      const payload = { ...listingForm, active: toBool(listingForm.active), featured: toBool(listingForm.featured) };
+      const hospitalityPlaceIds = normalizeListingPlaceIds(listingForm.hospitalityPlaceIds, listingForm.hospitalityPlaceId);
+      const payload = {
+        ...listingForm,
+        hospitalityPlaceIds,
+        hospitalityPlaceId: hospitalityPlaceIds[0] || '',
+        active: toBool(listingForm.active),
+        featured: toBool(listingForm.featured),
+      };
       if (editingListingId) {
         await destinationService.adminUpdateListing(editingListingId, payload);
       } else {
@@ -2679,15 +2742,84 @@ export function SuperAdminDestinations() {
                 ) : null}
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <select value={listingForm.destinationId} onChange={(event) => updateListing('destinationId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" required>
+                <select value={listingForm.destinationId} onChange={(event) => updateListingDestination(event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" required>
                   {(data.destinations || []).map((destination: any) => <option key={destination.id} value={destination.id}>{destination.name}</option>)}
                 </select>
-                <select value={listingForm.hospitalityPlaceId} onChange={(event) => updateListing('hospitalityPlaceId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2">
-                  <option value="">Aparece no destino inteiro</option>
-                  {(data.places || [])
-                    .filter((place: any) => !listingForm.destinationId || place.destinationId === listingForm.destinationId)
-                    .map((place: any) => <option key={place.id} value={place.id}>{place.name} · {place.destination?.name}</option>)}
-                </select>
+                <div className="sm:col-span-2 rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-black text-slate-900">Onde esse serviço aparece?</p>
+                      <p className="mt-1 text-xs font-semibold text-slate-500">
+                        Selecione um ou mais chalés/pousadas. Sem seleção, o serviço aparece no destino inteiro.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setListingPlaceIds([])}
+                      className={`rounded-full px-3 py-2 text-xs font-black transition ${
+                        selectedListingPlaceIds.length === 0
+                          ? 'bg-[#336886] text-white shadow-sm'
+                          : 'border border-slate-200 bg-white text-slate-600 hover:border-[#336886]/40'
+                      }`}
+                    >
+                      Destino inteiro
+                    </button>
+                  </div>
+                  {listingDestinationPlaces.length ? (
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {listingDestinationPlaces.map((place: any) => {
+                        const selected = selectedListingPlaceIds.includes(String(place.id));
+                        const cover = imageFor(place);
+                        return (
+                          <button
+                            key={place.id}
+                            type="button"
+                            onClick={() => toggleListingPlace(String(place.id))}
+                            className={`group flex min-w-0 items-center gap-3 rounded-2xl border p-2 text-left transition ${
+                              selected
+                                ? 'border-[#336886] bg-white shadow-[0_14px_40px_rgba(51,104,134,0.14)]'
+                                : 'border-white bg-white/75 hover:border-[#336886]/35 hover:bg-white'
+                            }`}
+                            aria-pressed={selected}
+                          >
+                            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                              {cover ? (
+                                <img src={cover} alt={place.name} className="h-full w-full object-cover" />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-slate-400">
+                                  <Bed size={22} weight="duotone" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-black text-slate-900">{place.name}</p>
+                              <p className="mt-0.5 truncate text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                                {place.type || 'Hospedagem'} · {place.city || place.destination?.city || place.destination?.name || 'Destino'}
+                              </p>
+                              {place.address ? (
+                                <p className="mt-1 line-clamp-1 text-xs font-semibold text-slate-500">{place.address}</p>
+                              ) : null}
+                            </div>
+                            <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${
+                              selected ? 'border-[#336886] bg-[#336886] text-white' : 'border-slate-200 bg-slate-50 text-transparent'
+                            }`}>
+                              ✓
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-white px-3 py-4 text-sm font-semibold text-slate-500">
+                      Nenhuma hospedagem cadastrada para este destino ainda. O serviço ficará disponível no destino inteiro.
+                    </div>
+                  )}
+                  {selectedListingPlaceIds.length ? (
+                    <p className="mt-3 text-xs font-bold text-[#336886]">
+                      {selectedListingPlaceIds.length} hospedagem(ns) selecionada(s). O card aparecerá em todas elas.
+                    </p>
+                  ) : null}
+                </div>
                 <select value={listingForm.storeId} onChange={(event) => updateListing('storeId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2">
                   <option value="">Sem loja vinculada / aguardando validação</option>
                   {(data.stores || []).map((store: any) => (

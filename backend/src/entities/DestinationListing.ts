@@ -4,9 +4,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { DestinationListingHospitalityPlace } from './DestinationListingHospitalityPlace';
 import { HospitalityPlace } from './HospitalityPlace';
 import { Store } from './Store';
 import { TravelDestination } from './TravelDestination';
@@ -29,6 +31,9 @@ export class DestinationListing {
 
   @Column({ name: 'hospitality_place_id', type: 'uuid', nullable: true })
   hospitalityPlaceId?: string | null;
+
+  @OneToMany(() => DestinationListingHospitalityPlace, (link) => link.listing)
+  hospitalityPlaceLinks?: DestinationListingHospitalityPlace[];
 
   @ManyToOne(() => Store, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'store_id' })

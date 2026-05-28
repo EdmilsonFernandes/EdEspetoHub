@@ -9,24 +9,33 @@ dotenv.config({ path: '.env.test', override: true });
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import 'reflect-metadata';
-import { AppDataSource } from '../config/database';
-import { User } from '../entities/User';
-import { Store } from '../entities/Store';
-import { StoreSettings } from '../entities/StoreSettings';
-import { Motoboy } from '../entities/Motoboy';
-import { MotoboyStore } from '../entities/MotoboyStore';
-import { Order } from '../entities/Order';
-import { DeliveryService } from './DeliveryService';
 
 const url = process.env.TEST_DATABASE_URL;
 
 describe.skipIf(!url)('DeliveryService integration (real DB)', () => {
+  let AppDataSource: any;
+  let User: any;
+  let Store: any;
+  let StoreSettings: any;
+  let Motoboy: any;
+  let MotoboyStore: any;
+  let Order: any;
+  let DeliveryService: any;
   let svc: DeliveryService;
   let store: any;
   let motoboy: any;
   let order1: any;
 
   beforeAll(async () => {
+    ({ AppDataSource } = await import('../config/database'));
+    ({ User } = await import('../entities/User'));
+    ({ Store } = await import('../entities/Store'));
+    ({ StoreSettings } = await import('../entities/StoreSettings'));
+    ({ Motoboy } = await import('../entities/Motoboy'));
+    ({ MotoboyStore } = await import('../entities/MotoboyStore'));
+    ({ Order } = await import('../entities/Order'));
+    ({ DeliveryService } = await import('./DeliveryService'));
+
     if (!AppDataSource.isInitialized) {
       await AppDataSource.initialize();
     }

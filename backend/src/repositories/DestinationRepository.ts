@@ -1,7 +1,8 @@
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { DestinationBanner } from '../entities/DestinationBanner';
 import { DestinationListing } from '../entities/DestinationListing';
+import { DestinationListingHospitalityPlace } from '../entities/DestinationListingHospitalityPlace';
 import { DestinationPartnerRequest } from '../entities/DestinationPartnerRequest';
 import { DestinationStoreRequest } from '../entities/DestinationStoreRequest';
 import { HospitalityPlace } from '../entities/HospitalityPlace';
@@ -15,6 +16,7 @@ export class DestinationRepository {
   private placeRepository: Repository<HospitalityPlace>;
   private storeLinkRepository: Repository<HospitalityPlaceStoreLink>;
   private listingRepository: Repository<DestinationListing>;
+  private listingPlaceRepository: Repository<DestinationListingHospitalityPlace>;
   private partnerRequestRepository: Repository<DestinationPartnerRequest>;
   private storeRequestRepository: Repository<DestinationStoreRequest>;
   private storeRepository: Repository<Store>;
@@ -25,6 +27,7 @@ export class DestinationRepository {
     this.placeRepository = AppDataSource.getRepository(HospitalityPlace);
     this.storeLinkRepository = AppDataSource.getRepository(HospitalityPlaceStoreLink);
     this.listingRepository = AppDataSource.getRepository(DestinationListing);
+    this.listingPlaceRepository = AppDataSource.getRepository(DestinationListingHospitalityPlace);
     this.partnerRequestRepository = AppDataSource.getRepository(DestinationPartnerRequest);
     this.storeRequestRepository = AppDataSource.getRepository(DestinationStoreRequest);
     this.storeRepository = AppDataSource.getRepository(Store);
@@ -231,6 +234,15 @@ export class DestinationRepository {
     });
   }
 
+  findPlacesByIds(ids: string[]) {
+    const uniqueIds = Array.from(new Set((ids || []).map((id) => String(id || '').trim()).filter(Boolean)));
+    if (!uniqueIds.length) return Promise.resolve([] as HospitalityPlace[]);
+    return this.placeRepository.find({
+      where: { id: In(uniqueIds) },
+      relations: [ 'destination' ],
+    });
+  }
+
   findActivePlaceBySlug(destinationId: string, slug: string) {
     return this.placeRepository.findOne({
       where: { destinationId, slug, active: true },
@@ -350,12 +362,50 @@ export class DestinationRepository {
   findListingById(id: string) {
     return this.listingRepository.findOne({
       where: { id },
-      relations: [ 'destination', 'hospitalityPlace', 'store', 'store.settings' ],
+      relations: [
+        'destination',
+        'hospitalityPlace',
+        'hospitalityPlaceLinks',
+        'hospitalityPlaceLinks.hospitalityPlace',
+        'hospitalityPlaceLinks.hospitalityPlace.destination',
+        'store',
+        'store.settings',
+      ],
     });
   }
 
   saveListing(payload: Partial<DestinationListing>) {
     return this.listingRepository.save(this.listingRepository.create(payload));
+  }
+
+  listListingPlaceLinksByListingIds(listingIds: string[]) {
+    const uniqueIds = Array.from(new Set((listingIds || []).map((id) => String(id || '').trim()).filter(Boolean)));
+    if (!uniqueIds.length) return Promise.resolve([] as DestinationListingHospitalityPlace[]);
+    return this.listingPlaceRepository.find({
+      where: { listingId: In(uniqueIds) },
+      relations: [ 'hospitalityPlace', 'hospitalityPlace.destination' ],
+      order: { createdAt: 'ASC' },
+    });
+  }
+
+  async syncListingHospitalityPlaces(listingId: string, placeIds: string[]) {
+    const uniqueIds = Array.from(new Set((placeIds || []).map((id) => String(id || '').trim()).filter(Boolean)));
+    await AppDataSource.transaction(async (manager) => {
+      await manager.query(
+        `DELETE FROM destination_listing_hospitality_places WHERE listing_id = $1`,
+        [listingId]
+      );
+      if (!uniqueIds.length) return;
+      const values = uniqueIds.map((_, index) => `($1, $${index + 2})`).join(', ');
+      await manager.query(
+        `
+          INSERT INTO destination_listing_hospitality_places (listing_id, hospitality_place_id)
+          VALUES ${values}
+          ON CONFLICT (listing_id, hospitality_place_id) DO NOTHING
+        `,
+        [listingId, ...uniqueIds]
+      );
+    });
   }
 
   listPartnerRequests(status?: string) {

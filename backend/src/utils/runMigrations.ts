@@ -2451,6 +2451,30 @@ export async function runMigrations() {
     ON destination_listings(hospitality_place_id);
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS destination_listing_hospitality_places (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      listing_id UUID NOT NULL REFERENCES destination_listings(id) ON DELETE CASCADE,
+      hospitality_place_id UUID NOT NULL REFERENCES hospitality_places(id) ON DELETE CASCADE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT uq_destination_listing_hospitality_places_listing_place UNIQUE (listing_id, hospitality_place_id)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_listing_hospitality_places_listing
+    ON destination_listing_hospitality_places(listing_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_listing_hospitality_places_place
+    ON destination_listing_hospitality_places(hospitality_place_id);
+  `);
+  await AppDataSource.query(`
+    INSERT INTO destination_listing_hospitality_places (listing_id, hospitality_place_id)
+    SELECT id, hospitality_place_id
+    FROM destination_listings
+    WHERE hospitality_place_id IS NOT NULL
+    ON CONFLICT (listing_id, hospitality_place_id) DO NOTHING;
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS destination_partner_requests (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       destination_id UUID NOT NULL REFERENCES travel_destinations(id) ON DELETE CASCADE,

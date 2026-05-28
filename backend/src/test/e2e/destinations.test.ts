@@ -354,6 +354,111 @@ describe('Destination Hub', () => {
     expect(inactiveListingsRes.body.destinations.some((item: any) => item.id === destinationRes.body.id)).toBe(true);
   });
 
+  it('allows one service listing to appear in multiple hospitality places', async () => {
+    const suffix = Date.now();
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        name: `Destino Multi Serviço ${suffix}`,
+        slug: `destino-multi-servico-${suffix}`,
+        city: 'São Bento do Sapucaí',
+        state: 'SP',
+      });
+
+    expect(destinationRes.status).toBe(201);
+
+    const firstPlaceRes = await api
+      .post('/api/admin/hospitality-places')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        name: `Chalé Serra ${suffix}`,
+        slug: `chale-serra-${suffix}`,
+        type: 'CHALE',
+        address: 'Estrada da Serra, 10',
+      });
+
+    const secondPlaceRes = await api
+      .post('/api/admin/hospitality-places')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        name: `Pousada Vale ${suffix}`,
+        slug: `pousada-vale-${suffix}`,
+        type: 'POUSADA',
+        address: 'Rua do Vale, 20',
+      });
+
+    expect(firstPlaceRes.status).toBe(201);
+    expect(secondPlaceRes.status).toBe(201);
+
+    const listingRes = await api
+      .post('/api/admin/destination-listings')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        title: `Restaurante Multi ${suffix}`,
+        category: 'RESTAURANTE_VISITAR',
+        hospitalityPlaceIds: [firstPlaceRes.body.id, secondPlaceRes.body.id],
+        whatsapp: '5512999999999',
+      });
+
+    expect(listingRes.status, JSON.stringify(listingRes.body)).toBe(201);
+    expect([...listingRes.body.hospitalityPlaceIds].sort()).toEqual([firstPlaceRes.body.id, secondPlaceRes.body.id].sort());
+    expect(listingRes.body.hospitalityPlaces.map((place: any) => place.id).sort()).toEqual([
+      firstPlaceRes.body.id,
+      secondPlaceRes.body.id,
+    ].sort());
+
+    const firstPublicRes = await api.get(
+      `/api/public/destinations/${destinationRes.body.slug}/hospitality/${firstPlaceRes.body.slug}`
+    );
+    const secondPublicRes = await api.get(
+      `/api/public/destinations/${destinationRes.body.slug}/hospitality/${secondPlaceRes.body.slug}`
+    );
+
+    expect(firstPublicRes.status).toBe(200);
+    expect(secondPublicRes.status).toBe(200);
+    expect(firstPublicRes.body.listings.some((listing: any) => listing.id === listingRes.body.id)).toBe(true);
+    expect(secondPublicRes.body.listings.some((listing: any) => listing.id === listingRes.body.id)).toBe(true);
+
+    const updateToSecondOnly = await api
+      .patch(`/api/admin/destination-listings/${listingRes.body.id}`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        hospitalityPlaceIds: [secondPlaceRes.body.id],
+      });
+
+    expect(updateToSecondOnly.status, JSON.stringify(updateToSecondOnly.body)).toBe(200);
+    expect(updateToSecondOnly.body.hospitalityPlaceIds).toEqual([secondPlaceRes.body.id]);
+
+    const firstAfterRestrictRes = await api.get(
+      `/api/public/destinations/${destinationRes.body.slug}/hospitality/${firstPlaceRes.body.slug}`
+    );
+    const secondAfterRestrictRes = await api.get(
+      `/api/public/destinations/${destinationRes.body.slug}/hospitality/${secondPlaceRes.body.slug}`
+    );
+
+    expect(firstAfterRestrictRes.body.listings.some((listing: any) => listing.id === listingRes.body.id)).toBe(false);
+    expect(secondAfterRestrictRes.body.listings.some((listing: any) => listing.id === listingRes.body.id)).toBe(true);
+
+    const updateToDestinationWide = await api
+      .patch(`/api/admin/destination-listings/${listingRes.body.id}`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        hospitalityPlaceIds: [],
+      });
+
+    expect(updateToDestinationWide.status, JSON.stringify(updateToDestinationWide.body)).toBe(200);
+    expect(updateToDestinationWide.body.hospitalityPlaceIds).toEqual([]);
+
+    const firstGlobalRes = await api.get(
+      `/api/public/destinations/${destinationRes.body.slug}/hospitality/${firstPlaceRes.body.slug}`
+    );
+    expect(firstGlobalRes.body.listings.some((listing: any) => listing.id === listingRes.body.id)).toBe(true);
+  });
+
   it('accepts partner requests and converts approved hospitality into real records', async () => {
     const suffix = Date.now();
     const destinationRes = await api

@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { DestinationListing } from './DestinationListing';
+import { DestinationListingHospitalityPlace } from './DestinationListingHospitalityPlace';
 import { HospitalityPlaceStoreLink } from './HospitalityPlaceStoreLink';
 import { TravelDestination } from './TravelDestination';
 
@@ -115,6 +116,9 @@ export class HospitalityPlace {
 
   @OneToMany(() => DestinationListing, (listing) => listing.hospitalityPlace)
   listings!: DestinationListing[];
+
+  @OneToMany(() => DestinationListingHospitalityPlace, (link) => link.hospitalityPlace)
+  listingLinks!: DestinationListingHospitalityPlace[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

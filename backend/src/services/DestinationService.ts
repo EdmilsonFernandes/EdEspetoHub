@@ -84,11 +84,12 @@ export class DestinationService {
   async getPublicDestinationBySlug(slug: string) {
     const destination = await this.repository.findDestinationBySlug(normalizeDestinationSlug(slug));
     if (!destination) throw new AppError('DEST-001', 404);
-    const [banners, places, listings] = await Promise.all([
+    const [banners, places, rawListings] = await Promise.all([
       this.repository.listBannersByDestinationId(destination.id),
       this.repository.listPlacesByDestinationId(destination.id),
       this.repository.listListingsByDestinationId(destination.id),
     ]);
+    const listings = await this.withListingHospitalityPlaces(rawListings);
     const links = await this.repository.listStoreLinksByPlaceIds(places.map((place) => place.id));
     const linksByPlace = links.reduce((acc, link: any) => {
       const placeId = String(link.hospitalityPlaceId || '');
@@ -124,17 +125,18 @@ export class DestinationService {
     if (!destination) throw new AppError('DEST-001', 404);
     const place = await this.repository.findActivePlaceBySlug(destination.id, normalizeDestinationSlug(placeSlug));
     if (!place) throw new AppError('DEST-002', 404);
-    const [links, listings] = await Promise.all([
+    const [links, rawListings] = await Promise.all([
       this.repository.listStoreLinksByPlaceId(place.id),
       this.repository.listListingsByDestinationId(destination.id),
     ]);
+    const listings = await this.withListingHospitalityPlaces(rawListings);
     const stores = await this.resolvePublicStoreLinks(links);
     return {
       destination: this.toPublicDestination(destination),
       hospitalityPlace: this.toPublicPlace(place),
       stores,
       listings: listings
-        .filter((listing) => !listing.hospitalityPlaceId || listing.hospitalityPlaceId === place.id)
+        .filter((listing) => this.listingAppliesToHospitalityPlace(listing, place.id))
         .map((listing) => this.toPublicListing(listing)),
     };
   }
@@ -192,7 +194,7 @@ export class DestinationService {
 
   async adminOverview(query: any = {}) {
     const lite = query?.lite === true || String(query?.lite || '').toLowerCase() === 'true';
-    const [destinations, places, listings, partnerRequests, storeRequests, stores] = await Promise.all([
+    const [destinations, places, rawListings, partnerRequests, storeRequests, stores] = await Promise.all([
       this.repository.listAllDestinations(),
       this.repository.listAllPlaces(),
       lite ? Promise.resolve([]) : this.repository.listAllListings(),
@@ -200,6 +202,7 @@ export class DestinationService {
       this.repository.listStoreRequests(),
       this.repository.listAllStoresForAdmin(),
     ]);
+    const listings = await this.withListingHospitalityPlaces(rawListings);
     const placeIds = places.map((place) => place.id);
     const allLinks = await this.repository.listStoreLinksByPlaceIds(placeIds, false);
     const linksByPlace = allLinks.reduce((acc, link: any) => {
@@ -319,13 +322,14 @@ export class DestinationService {
     const status = this.normalizeAdminStatus(query?.status);
     const search = String(query?.search || '').trim();
     const listingCategory = String(query?.listingCategory || query?.category || 'all').trim().toUpperCase() || 'ALL';
-    const [listings, total] = await this.repository.listAdminListingsPage(destinationId, {
+    const [rawListings, total] = await this.repository.listAdminListingsPage(destinationId, {
       page,
       pageSize,
       search,
       status,
       listingCategory,
     });
+    const listings = await this.withListingHospitalityPlaces(rawListings);
     return {
       destination: this.toPublicDestination(destination),
       items: listings.map((listing) => this.toPublicListing(listing)),
@@ -347,6 +351,48 @@ export class DestinationService {
   private normalizeStateCode(value: unknown) {
     const normalized = toOptionalText(value)?.toUpperCase().replace(/[^A-Z]/g, '') || null;
     return normalized ? normalized.slice(0, 2) : null;
+  }
+
+  private normalizeListingHospitalityPlaceIds(payload: any, current: any) {
+    const hasPlaceIdsInput =
+      Object.prototype.hasOwnProperty.call(payload || {}, 'hospitalityPlaceIds') ||
+      Object.prototype.hasOwnProperty.call(payload || {}, 'placeIds');
+    const hasSinglePlaceInput = Object.prototype.hasOwnProperty.call(payload || {}, 'hospitalityPlaceId');
+
+    if (hasPlaceIdsInput) {
+      const raw = Array.isArray(payload?.hospitalityPlaceIds)
+        ? payload.hospitalityPlaceIds
+        : Array.isArray(payload?.placeIds)
+          ? payload.placeIds
+          : typeof payload?.hospitalityPlaceIds === 'string'
+            ? payload.hospitalityPlaceIds.split(',')
+            : typeof payload?.placeIds === 'string'
+              ? payload.placeIds.split(',')
+              : [];
+      return Array.from(new Set(raw.map((item: any) => toOptionalText(item)).filter(Boolean))) as string[];
+    }
+
+    if (hasSinglePlaceInput) {
+      const placeId = toOptionalText(payload?.hospitalityPlaceId);
+      return placeId ? [placeId] : [];
+    }
+
+    const currentLinks = Array.isArray(current?.hospitalityPlaceLinks)
+      ? current.hospitalityPlaceLinks.map((link: any) => toOptionalText(link?.hospitalityPlaceId)).filter(Boolean)
+      : [];
+    if (currentLinks.length) return Array.from(new Set(currentLinks)) as string[];
+    return current?.hospitalityPlaceId ? [String(current.hospitalityPlaceId)] : [];
+  }
+
+  private async assertListingHospitalityPlaces(placeIds: string[], destinationId: string) {
+    if (!placeIds.length) return;
+    const places = await this.repository.findPlacesByIds(placeIds);
+    const foundIds = new Set(places.map((place) => String(place.id)));
+    const invalid = placeIds.find((placeId) => !foundIds.has(placeId));
+    if (invalid) throw new AppError('DEST-002', 404);
+    if (places.some((place) => String(place.destinationId) !== String(destinationId))) {
+      throw new AppError('DEST-002', 404);
+    }
   }
 
   private normalizeZipCode(value: unknown) {
@@ -617,12 +663,9 @@ export class DestinationService {
     const title = String(payload?.title || current?.title || '').trim();
     if (!title) throw new AppError('DEST-009', 400);
     const imageUrl = await saveBase64Image(payload?.imageFile, `destination-listing-${normalizeDestinationSlug(title)}`, 'destinations');
-    const hasPlaceInput = Object.prototype.hasOwnProperty.call(payload || {}, 'hospitalityPlaceId');
-    const placeId = hasPlaceInput ? toOptionalText(payload?.hospitalityPlaceId) : current?.hospitalityPlaceId || null;
-    if (placeId) {
-      const place = await this.repository.findPlaceById(placeId);
-      if (!place || place.destinationId !== destination.id) throw new AppError('DEST-002', 404);
-    }
+    const placeIds = this.normalizeListingHospitalityPlaceIds(payload, current);
+    await this.assertListingHospitalityPlaces(placeIds, destination.id);
+    const placeId = placeIds[0] || null;
     const hasStoreInput = Object.prototype.hasOwnProperty.call(payload || {}, 'storeId');
     const storeId = hasStoreInput ? toOptionalText(payload?.storeId) : current?.storeId || null;
     if (storeId && !(await this.repository.findStoreById(storeId))) throw new AppError('STORE-001', 404);
@@ -670,8 +713,10 @@ export class DestinationService {
       active: payload?.active !== undefined ? payload.active !== false : current?.active !== false,
       sortOrder: Number(payload?.sortOrder ?? current?.sortOrder ?? 0) || 0,
     });
+    await this.repository.syncListingHospitalityPlaces(saved.id, placeIds);
     const hydrated = await this.repository.findListingById(saved.id);
-    return this.toPublicListing({ ...(hydrated || saved), destination: hydrated?.destination || destination });
+    const [listing] = await this.withListingHospitalityPlaces([{ ...(hydrated || saved), destination: hydrated?.destination || destination }]);
+    return this.toPublicListing(listing);
   }
 
   async adminLinkStore(placeId: string, payload: any) {
@@ -1101,11 +1146,61 @@ export class DestinationService {
     };
   }
 
+  private async withListingHospitalityPlaces(listings: any[]) {
+    const items = Array.isArray(listings) ? listings.filter(Boolean) : [];
+    const ids = items.map((listing) => String(listing?.id || '')).filter(Boolean);
+    if (!ids.length) return items;
+    const links = await this.repository.listListingPlaceLinksByListingIds(ids);
+    const linksByListing = links.reduce((acc, link: any) => {
+      const listingId = String(link.listingId || '');
+      if (!acc.has(listingId)) acc.set(listingId, []);
+      acc.get(listingId)?.push(link);
+      return acc;
+    }, new Map<string, any[]>());
+    return items.map((listing) => ({
+      ...listing,
+      hospitalityPlaceLinks: linksByListing.get(String(listing.id)) || listing.hospitalityPlaceLinks || [],
+    }));
+  }
+
+  private listingHospitalityPlaceIds(listing: any) {
+    const linkedIds = Array.isArray(listing?.hospitalityPlaceLinks)
+      ? listing.hospitalityPlaceLinks
+          .map((link: any) => toOptionalText(link?.hospitalityPlaceId || link?.hospitalityPlace?.id))
+          .filter(Boolean)
+      : [];
+    const legacyId = toOptionalText(listing?.hospitalityPlaceId);
+    return Array.from(new Set([ legacyId, ...linkedIds ].filter(Boolean))) as string[];
+  }
+
+  private listingHospitalityPlaces(listing: any) {
+    const linkedPlaces = Array.isArray(listing?.hospitalityPlaceLinks)
+      ? listing.hospitalityPlaceLinks
+          .map((link: any) => link?.hospitalityPlace)
+          .filter(Boolean)
+      : [];
+    const legacyPlace = listing?.hospitalityPlace || null;
+    const byId = new Map<string, any>();
+    [ ...linkedPlaces, legacyPlace ].filter(Boolean).forEach((place: any) => {
+      const id = String(place?.id || '');
+      if (id && !byId.has(id)) byId.set(id, place);
+    });
+    return Array.from(byId.values());
+  }
+
+  private listingAppliesToHospitalityPlace(listing: any, placeId: string) {
+    const placeIds = this.listingHospitalityPlaceIds(listing);
+    return placeIds.length === 0 || placeIds.includes(String(placeId));
+  }
+
   private toPublicListing(listing: any) {
+    const hospitalityPlaceIds = this.listingHospitalityPlaceIds(listing);
+    const hospitalityPlaces = this.listingHospitalityPlaces(listing);
     return {
       id: listing.id,
       destinationId: listing.destinationId,
-      hospitalityPlaceId: listing.hospitalityPlaceId || null,
+      hospitalityPlaceId: hospitalityPlaceIds[0] || null,
+      hospitalityPlaceIds,
       storeId: listing.storeId || null,
       category: listing.category || 'SERVICO',
       title: listing.title,
@@ -1130,6 +1225,7 @@ export class DestinationService {
       sortOrder: Number(listing.sortOrder || 0),
       store: listing.store ? this.toPublicStoreSummary(listing.store) : null,
       hospitalityPlace: listing.hospitalityPlace ? this.toPublicPlace(listing.hospitalityPlace) : null,
+      hospitalityPlaces: hospitalityPlaces.map((place) => this.toPublicPlace(place)),
       destination: listing.destination ? this.toPublicDestination(listing.destination) : null,
     };
   }
