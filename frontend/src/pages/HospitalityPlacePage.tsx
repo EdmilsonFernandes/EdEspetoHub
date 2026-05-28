@@ -17,6 +17,19 @@ import { buildListingClaimUrl } from '../utils/destinationListingClaim';
 const fallbackAvatarFor = (item: any) =>
   getStoreAvatarUrl(item?.slug || item?.store?.slug || item?.id, item?.name || item?.title || item?.store?.name);
 
+const domTokenFor = (...values: any[]) =>
+  String(values.find((value) => value !== undefined && value !== null && String(value).trim()) || 'item')
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 96) || 'item';
+
+const providerStoreTargetId = (entry: any, store: any, index: number) =>
+  `hospitality-provider-store-${domTokenFor(entry?.id, store?.id, store?.slug, index)}`;
+
+const providerListingTargetId = (listing: any, index: number) =>
+  `hospitality-provider-listing-${domTokenFor(listing?.id, listing?.slug, listing?.title, index)}`;
+
 const logoFor = (item: any) =>
   resolveAssetUrl(item?.logoUrl || item?.settings?.logoUrl || item?.store?.settings?.logoUrl || '');
 
@@ -249,6 +262,7 @@ export function HospitalityPlacePage() {
   const [bannerIndex, setBannerIndex] = useState(0);
   const [selectedListing, setSelectedListing] = useState<any>(null);
   const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
+  const [highlightedProviderTarget, setHighlightedProviderTarget] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -350,6 +364,7 @@ export function HospitalityPlacePage() {
       const store = entry.store || {};
       return {
         id: `store-${entry.id || store.id || store.slug || index}`,
+        targetId: providerStoreTargetId(entry, store, index),
         name: store.name || 'Loja',
         label: 'Pedido no app',
         imageUrl: logoFor(store) || imageFor(store),
@@ -359,6 +374,7 @@ export function HospitalityPlacePage() {
     }),
     ...placeListings.map((listing: any, index: number) => ({
       id: `listing-${listing.id || listing.slug || listing.title || index}`,
+      targetId: providerListingTargetId(listing, index),
       name: listing.title || 'Serviço',
       label: categoryLabel(listing.category),
       imageUrl: logoFor(listing) || imageFor(listing),
@@ -368,11 +384,23 @@ export function HospitalityPlacePage() {
   ];
   const spotlightProviders = allSpotlightProviders.slice(0, 10);
   const hiddenSpotlightCount = Math.max(0, allSpotlightProviders.length - spotlightProviders.length);
+  const scrollToProviderTarget = (targetId: string) => {
+    if (!targetId || typeof window === 'undefined' || typeof document === 'undefined') return;
+    setServiceFilter('all');
+    setHighlightedProviderTarget(targetId);
+    window.setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+    window.setTimeout(() => {
+      setHighlightedProviderTarget((current) => (current === targetId ? '' : current));
+    }, 1800);
+  };
 
   useEffect(() => {
     setBannerIndex(0);
     setSelectedListing(null);
     setPreviewImage(null);
+    setHighlightedProviderTarget('');
   }, [destinationSlug, placeSlug]);
 
   useEffect(() => {
@@ -531,9 +559,12 @@ export function HospitalityPlacePage() {
                 <div className="min-w-0 sm:flex sm:items-center sm:justify-end sm:gap-3">
                   <div className="-mx-1 flex max-w-full items-center gap-0 overflow-x-auto px-1 pb-1 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:overflow-visible sm:px-0 sm:pb-0 sm:pt-0">
                     {spotlightProviders.map((provider: any, index: number) => (
-                      <div
+                      <button
+                        type="button"
                         key={provider.id}
                         className={`group/provider relative -ml-2 first:ml-0 h-14 w-14 shrink-0 rounded-full bg-gradient-to-br ${provider.accentClass} p-[3px] shadow-[0_18px_34px_-22px_rgba(15,23,42,0.62)] ring-2 ${provider.ringClass} transition duration-300 ease-out hover:z-20 hover:-translate-y-1 hover:scale-105 active:scale-95 sm:h-16 sm:w-16`}
+                        onClick={() => scrollToProviderTarget(provider.targetId)}
+                        aria-label={`Ver ${provider.name} na lista abaixo`}
                         title={`${provider.name} - ${provider.label}`}
                         style={{ zIndex: spotlightProviders.length - index }}
                       >
@@ -546,7 +577,7 @@ export function HospitalityPlacePage() {
                           className="h-full w-full rounded-full border-[3px] border-white bg-slate-100 object-cover"
                           loading="lazy"
                         />
-                      </div>
+                      </button>
                     ))}
                     {hiddenSpotlightCount > 0 ? (
                       <span
@@ -623,10 +654,12 @@ export function HospitalityPlacePage() {
               </div>
             ) : null}
             <div className="grid gap-3 xl:grid-cols-2">
-              {visibleStores.map((entry: any) => {
+              {visibleStores.map((entry: any, index: number) => {
                 const store = entry.store || {};
                 const link = entry || {};
                 const mediaUrl = cardMediaFor(store);
+                const targetId = providerStoreTargetId(entry, store, index);
+                const highlighted = highlightedProviderTarget === targetId;
                 const storeParams = new URLSearchParams({
                   destino: String(destination.slug || destinationSlug || ''),
                   destino_nome: String(destination.name || destination.city || destinationSlug || ''),
@@ -643,9 +676,10 @@ export function HospitalityPlacePage() {
                 if (place.lng) storeParams.set('hospedagem_lng', String(place.lng));
                 return (
                   <Link
+                    id={targetId}
                     key={`${entry.id}-${store.id}`}
                     to={`/${store.slug}?${storeParams.toString()}`}
-                    className={`group/card overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`group/card scroll-mt-28 overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-offset-4 ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] ${highlighted ? 'border-[#5FD35A]/50 outline outline-2 outline-[#5FD35A]/55 shadow-[0_26px_58px_-32px_rgba(51,104,134,0.42)]' : ''} ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
                     {mediaUrl ? (
                       <div
@@ -700,16 +734,19 @@ export function HospitalityPlacePage() {
                   </Link>
                 );
               })}
-              {visiblePlaceListings.map((listing: any) => {
+              {visiblePlaceListings.map((listing: any, index: number) => {
                 const mediaUrl = cardMediaFor(listing);
+                const targetId = providerListingTargetId(listing, index);
+                const highlighted = highlightedProviderTarget === targetId;
                 return (
                   <article
+                    id={targetId}
                     key={listing.id}
                     role="button"
                     tabIndex={0}
                     onClick={() => setSelectedListing(listing)}
                     onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
-                    className={`group/card cursor-pointer overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-none ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] focus-visible:ring-4 focus-visible:ring-[#336886]/14 ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`group/card scroll-mt-28 cursor-pointer overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-none outline-offset-4 ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] focus-visible:ring-4 focus-visible:ring-[#336886]/14 ${highlighted ? 'border-[#5FD35A]/50 outline outline-2 outline-[#5FD35A]/55 shadow-[0_26px_58px_-32px_rgba(51,104,134,0.42)]' : ''} ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
                     {mediaUrl ? (
                       <div
