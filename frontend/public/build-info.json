@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "a9dec60c",
-  "versionLabel": "v0.1.9.a9dec60c",
-  "versionInternal": "0.1.9+20260528.014653.a9dec60c",
-  "buildId": "0.1.9+20260528.014653.a9dec60c-20260528.014653-a9dec60c",
-  "builtAt": "2026-05-28T01:46:53.551Z",
-  "commitHash": "a9dec60c50194511c78c27c91313b6bc930af300",
-  "shortHash": "a9dec60c",
+  "versionDisplaySuffix": "1d26e399",
+  "versionLabel": "v0.1.9.1d26e399",
+  "versionInternal": "0.1.9+20260528.020546.1d26e399",
+  "buildId": "0.1.9+20260528.020546.1d26e399-20260528.020546-1d26e399",
+  "builtAt": "2026-05-28T02:05:46.839Z",
+  "commitHash": "1d26e39915a28323104397d117f8dbf7b9f7dc96",
+  "shortHash": "1d26e399",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "1d26e39915a28323104397d117f8dbf7b9f7dc96",
+      "shortHash": "1d26e399",
+      "dateIso": "2026-05-27T23:00:18-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Improve checkout and printer reliability",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1d26e39915a28323104397d117f8dbf7b9f7dc96"
+    },
     {
       "hash": "a9dec60c50194511c78c27c91313b6bc930af300",
       "shortHash": "a9dec60c",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Fix access drawer session refresh",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c206ccf8c838029ac89cb4129b6bb22553a55abe"
-    },
-    {
-      "hash": "79dd9894b20a0afefeda8b125b23c023dcf38ee9",
-      "shortHash": "79dd9894",
-      "dateIso": "2026-05-26T15:24:50-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Update public printer setup guide",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/79dd9894b20a0afefeda8b125b23c023dcf38ee9"
     }
   ]
 }

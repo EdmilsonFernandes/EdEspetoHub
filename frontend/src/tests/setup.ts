@@ -30,6 +30,7 @@ vi.mock('@phosphor-icons/react', () => {
     LockKey: Icon,
     Mountains: Icon,
     Printer: Icon,
+    PlugsConnected: Icon,
     QrCode: Icon,
     Receipt: Icon,
     ShieldCheck: Icon,

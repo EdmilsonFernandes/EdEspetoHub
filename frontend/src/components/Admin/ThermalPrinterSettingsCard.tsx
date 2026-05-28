@@ -78,12 +78,17 @@ export function ThermalPrinterSettingsCard() {
     setSettings(nextSettings);
   };
 
+  const refreshNativeStatus = async () => {
+    const nextStatus = await getNativeThermalPrinterStatus();
+    setStatus(nextStatus);
+    mergeStatusSettings(nextStatus);
+    return nextStatus;
+  };
+
   const loadStatus = async () => {
     if (!hasNativePrinterPlugin) return;
     try {
-      const nextStatus = await getNativeThermalPrinterStatus();
-      setStatus(nextStatus);
-      mergeStatusSettings(nextStatus);
+      await refreshNativeStatus();
     } catch (error) {
       console.warn('[thermal-printer] status indisponível', error);
     }
@@ -93,52 +98,66 @@ export function ThermalPrinterSettingsCard() {
     void loadStatus();
   }, [hasNativePrinterPlugin]);
 
-  const loadDevices = async () => {
+  const loadDevices = async (options = {}) => {
+    const silent = Boolean(options?.silent);
     if (!isNativeAndroid) {
-      showToast('Configuração disponível apenas no app Android da loja.', 'info');
-      return;
+      if (!silent) showToast('Configuração disponível apenas no app Android da loja.', 'info');
+      return [];
     }
     if (!hasNativePrinterPlugin) {
-      showToast('Atualize o app da loja para configurar a impressão Bluetooth direta. Enquanto isso, use o RawBT.', 'info');
-      return;
+      if (!silent) showToast('Atualize o app da loja para configurar a impressão Bluetooth direta. Enquanto isso, use o RawBT.', 'info');
+      return [];
     }
     setLoading(true);
     try {
       const result = await listNativeThermalPrinters();
-      setDevices(result?.devices || []);
-      if (!result?.devices?.length) {
+      const nextDevices = result?.devices || [];
+      setDevices(nextDevices);
+      if (!silent && !nextDevices.length) {
         showToast('Nenhuma impressora pareada. Pareie no Bluetooth do aparelho e toque em buscar novamente.', 'warning');
       }
       await loadStatus();
+      return nextDevices;
     } catch (error) {
-      const code = String(error?.code || '');
-      if (code === 'BLUETOOTH_DISABLED') {
-        showToast('Bluetooth desligado. Ligue o Bluetooth e tente novamente.', 'warning');
-      } else if (code === 'PERMISSION_DENIED') {
-        showToast('Permita dispositivos próximos para listar impressoras.', 'warning');
-      } else {
-        showToast(error?.message || 'Não foi possível listar impressoras.', 'error');
+      if (!silent) {
+        const code = String(error?.code || '');
+        if (code === 'BLUETOOTH_DISABLED') {
+          showToast('Bluetooth desligado. Ligue o Bluetooth e tente novamente.', 'warning');
+        } else if (code === 'PERMISSION_DENIED') {
+          showToast('Permita dispositivos próximos para listar impressoras.', 'warning');
+        } else {
+          showToast(error?.message || 'Não foi possível listar impressoras.', 'error');
+        }
       }
+      return [];
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async (device) => {
+  const savePrinterDevice = async (device, options = {}) => {
+    const notify = options?.notify !== false;
     setSavingAddress(device.address);
     try {
       const result = await saveNativeThermalPrinter(device, settings);
-      setStatus((prev) => ({
-        ...(prev || {}),
+      const nextStatus = {
+        ...(status || {}),
         settings: result?.settings || settings,
         savedPrinter: result?.savedPrinter || { ...device, ...settings },
-      }));
-      showToast(`Impressora ${device.name || device.address} salva neste aparelho.`, 'success');
+      };
+      setStatus(nextStatus);
+      if (notify) showToast(`Impressora ${device.name || device.address} salva neste aparelho.`, 'success');
+      return nextStatus;
     } catch (error) {
-      showToast(error?.message || 'Não foi possível salvar a impressora.', 'error');
+      if (notify) showToast(error?.message || 'Não foi possível salvar a impressora.', 'error');
+      throw error;
     } finally {
       setSavingAddress('');
     }
+  };
+
+  const handleSave = async (device) => {
+    await savePrinterDevice(device);
   };
 
   const handleSaveSettings = async () => {
@@ -159,12 +178,40 @@ export function ThermalPrinterSettingsCard() {
   };
 
   const handleTestPrint = async () => {
-    if (!status?.savedPrinter?.address) {
-      showToast('Escolha uma impressora antes de testar.', 'warning');
+    if (!hasNativePrinterPlugin) {
+      showToast('Atualize o app da loja para testar a impressão Bluetooth direta. O RawBT continua como fallback.', 'info');
       return;
     }
     setTesting(true);
     try {
+      let currentStatus = status;
+      if (!currentStatus?.savedPrinter?.address) {
+        try {
+          currentStatus = await refreshNativeStatus();
+        } catch {
+          currentStatus = status;
+        }
+      }
+
+      if (!currentStatus?.savedPrinter?.address) {
+        const availableDevices = devices.length ? devices : await loadDevices({ silent: true });
+        if (availableDevices.length === 1) {
+          currentStatus = await savePrinterDevice(availableDevices[0], { notify: false });
+          showToast(`Impressora ${availableDevices[0].name || availableDevices[0].address} selecionada para o teste.`, 'info');
+        } else if (availableDevices.length > 1) {
+          showToast('Escolha uma impressora na lista antes de testar.', 'warning');
+          return;
+        } else {
+          showToast('Nenhuma impressora pareada foi encontrada. Pareie no Bluetooth do Android ou use o RawBT como fallback.', 'warning');
+          return;
+        }
+      }
+
+      if (!currentStatus?.savedPrinter?.address) {
+        showToast('Escolha uma impressora antes de testar.', 'warning');
+        return;
+      }
+
       await saveNativeThermalPrinterSettings(settings);
       const text = buildRawBtText(sampleReceiptPayload, settings);
       await printNativeThermalReceipt(text, settings);
@@ -276,7 +323,7 @@ export function ThermalPrinterSettingsCard() {
                   type="button"
                   onClick={handleTestPrint}
                   data-testid="thermal-printer-test"
-                  disabled={testing || !savedAddress}
+                  disabled={testing}
                   className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 disabled:opacity-50"
                 >
                   <Receipt size={16} weight="duotone" />
