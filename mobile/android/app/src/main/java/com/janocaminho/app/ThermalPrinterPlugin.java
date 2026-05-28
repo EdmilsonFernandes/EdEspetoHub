@@ -49,7 +49,7 @@ public class ThermalPrinterPlugin extends Plugin {
     private static final int DEFAULT_FEED_LINES = 3;
     private static final int WRITE_CHUNK_SIZE = 512;
     private static final long WRITE_CHUNK_DELAY_MS = 18L;
-    private static final long PRINT_TIMEOUT_MS = 9000L;
+    private static final long PRINT_TIMEOUT_MS = 4500L;
     private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     @PluginMethod
@@ -250,10 +250,20 @@ public class ThermalPrinterPlugin extends Plugin {
             long start = System.currentTimeMillis();
             try {
                 BluetoothDevice device = adapter.getRemoteDevice(printerAddress);
-                BluetoothSocket socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
-                socketRef[0] = socket;
                 adapter.cancelDiscovery();
-                socket.connect();
+
+                BluetoothSocket socket = null;
+                try {
+                    socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
+                    socketRef[0] = socket;
+                    socket.connect();
+                } catch (Exception firstError) {
+                    closeSocketQuietly(socket);
+                    if (finished.get()) return;
+                    socket = device.createInsecureRfcommSocketToServiceRecord(SPP_UUID);
+                    socketRef[0] = socket;
+                    socket.connect();
+                }
 
                 OutputStream output = socket.getOutputStream();
                 byte[] bytes = toPrinterBytes(printerText, printerFeedLines);

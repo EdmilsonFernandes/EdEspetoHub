@@ -35,6 +35,8 @@ type PrintReceiptResult = {
 };
 
 let activePrintPromise: Promise<PrintReceiptResult> | null = null;
+const RAWBT_FAST_FALLBACK_UNTIL_KEY = 'jnc:thermal-printer-rawbt-fast-fallback-until';
+const RAWBT_FAST_FALLBACK_MS = 2 * 60 * 1000;
 
 const sanitizeText = (value: unknown) =>
   String(value ?? "")
@@ -367,18 +369,78 @@ const openExternalScheme = (url: string) => {
   }, 1000);
 };
 
+const getNow = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
+const getRawBtFastFallbackReason = () => {
+  if (typeof window === 'undefined') return '';
+  try {
+    const until = Number(window.localStorage.getItem(RAWBT_FAST_FALLBACK_UNTIL_KEY) || 0);
+    if (until > Date.now()) return 'NATIVE_RECENTLY_FAILED';
+    window.localStorage.removeItem(RAWBT_FAST_FALLBACK_UNTIL_KEY);
+  } catch {
+    // no-op
+  }
+  return '';
+};
+
+const markRawBtFastFallback = (code: string) => {
+  const normalizedCode = String(code || '').trim().toUpperCase();
+  if (![ 'PRINT_FAILED', 'PRINT_TIMEOUT' ].includes(normalizedCode)) return;
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(
+      RAWBT_FAST_FALLBACK_UNTIL_KEY,
+      String(Date.now() + RAWBT_FAST_FALLBACK_MS)
+    );
+  } catch {
+    // no-op
+  }
+};
+
+const clearRawBtFastFallback = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(RAWBT_FAST_FALLBACK_UNTIL_KEY);
+  } catch {
+    // no-op
+  }
+};
+
+const sendToRawBt = (
+  rawText: string,
+  startedAt: number,
+  fallbackReason: string,
+  itemsCount: number
+): PrintReceiptResult => {
+  const base64 = toBase64Utf8(rawText);
+  openExternalScheme(`rawbt:base64,${base64}`);
+  const durationMs = Math.round(getNow() - startedAt);
+  console.info('[print] impressão enviada via RawBT', {
+    durationMs,
+    bytes: base64.length,
+    fallbackReason,
+    items: itemsCount,
+  });
+  return { mode: 'rawbt', durationMs, bytes: base64.length, fallbackReason };
+};
+
 const runPrintReceipt = async (payload: PrintReceiptRawBtInput): Promise<PrintReceiptResult> => {
   if (!payload?.items?.length) {
     throw new Error("Pedido sem itens para impressão.");
   }
 
   if (isMobileUserAgent()) {
-    const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    const startedAt = getNow();
     const printerSettings = getStoredThermalPrinterSettings();
     const rawText = buildRawBtText(payload, printerSettings);
+    const fastFallbackReason = getRawBtFastFallbackReason();
+    if (fastFallbackReason) {
+      return sendToRawBt(rawText, startedAt, fastFallbackReason, payload.items.length);
+    }
     try {
       const result = await printNativeThermalReceipt(rawText, printerSettings);
-      const durationMs = Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt);
+      clearRawBtFastFallback();
+      const durationMs = Math.round(getNow() - startedAt);
       console.info('[print] impressão nativa concluída', {
         durationMs,
         bytes: result?.bytes,
@@ -387,20 +449,12 @@ const runPrintReceipt = async (payload: PrintReceiptRawBtInput): Promise<PrintRe
       return { mode: 'native', durationMs, bytes: result?.bytes };
     } catch (nativeError: any) {
       const nativeCode = String(nativeError?.code || nativeError?.message || 'NATIVE_PRINT_UNAVAILABLE');
+      markRawBtFastFallback(nativeCode);
       console.warn('[print] impressão nativa indisponível, usando fallback RawBT', {
         code: nativeCode,
         message: nativeError?.message,
       });
-      const base64 = toBase64Utf8(rawText);
-      openExternalScheme(`rawbt:base64,${base64}`);
-      const durationMs = Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt);
-      console.info('[print] impressão enviada via RawBT', {
-        durationMs,
-        bytes: base64.length,
-        fallbackReason: nativeCode,
-        items: payload.items.length,
-      });
-      return { mode: 'rawbt', durationMs, bytes: base64.length, fallbackReason: nativeCode };
+      return sendToRawBt(rawText, startedAt, nativeCode, payload.items.length);
     }
   }
 

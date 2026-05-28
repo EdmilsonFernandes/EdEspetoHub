@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
-import { ADMIN_SESSION_EVENT } from '../services/nativeBiometricService';
+import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT, MOTOBOY_SESSION_EVENT } from '../services/nativeBiometricService';
 import { storePushService } from '../services/storePushService';
+import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 
 type AuthSession = {
   token: string;
@@ -89,6 +90,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  const clearNonAdminSessions = () => {
+    try {
+      clearAllCustomerSessions();
+      localStorage.removeItem('motoboySession');
+      window.dispatchEvent(new CustomEvent(CUSTOMER_SESSION_EVENT));
+      window.dispatchEvent(new CustomEvent(MOTOBOY_SESSION_EVENT));
+    } catch {
+      // Keep admin auth resilient when storage is restricted.
+    }
+  };
+
   useEffect(() => {
     const raw = localStorage.getItem('adminSession');
 
@@ -100,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (isOperationalAuthSession(parsed))
         {
+          clearNonAdminSessions();
           setAuthState(parsed);
           previousStoreRef.current = {
             id: parsed?.store?.id ? String(parsed.store.id) : '',
@@ -147,6 +160,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     if (normalizedSession) {
+      clearNonAdminSessions();
       localStorage.setItem('adminSession', JSON.stringify(normalizedSession));
       window.dispatchEvent(new CustomEvent(ADMIN_SESSION_EVENT, { detail: normalizedSession }));
     } else {

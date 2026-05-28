@@ -2349,6 +2349,20 @@ export function StorePage() {
   const validateCartStockBeforeCheckout = async () => {
     if (!storeSlug || isDemo) return true;
 
+    if (Array.isArray(products) && products.length) {
+      const localResult = reconcileCartStock(cart, products);
+      if (!localResult.ok) {
+        setCart(localResult.nextCart);
+        showErrorNotice(localResult.message || 'Revise o carrinho: um item não possui estoque suficiente.');
+        return false;
+      }
+    }
+
+    const needsFreshStockCheck = validCartItems.some((item: any) => Boolean(item?.manageStock));
+    if (!needsFreshStockCheck || canUseAdminPrintFlow) {
+      return true;
+    }
+
     try {
       const freshProducts = (await productService.listPublicBySlug(storeSlug, { forceRefresh: true })) || [];
       if (Array.isArray(freshProducts)) {

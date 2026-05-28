@@ -45,6 +45,7 @@ const setUserAgent = (value: string) => {
 describe('printReceiptAsImage', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    localStorage.clear();
     vi.mocked(printNativeThermalReceipt).mockReset();
     vi.mocked(getStoredThermalPrinterSettings).mockReset();
     vi.mocked(getStoredThermalPrinterSettings).mockReturnValue(thermalPrinterMock.defaultPrinterSettings);
@@ -99,6 +100,18 @@ describe('printReceiptAsImage', () => {
     expect(result.mode).toBe('rawbt');
     expect(result.fallbackReason).toBe('PLUGIN_UNAVAILABLE');
     expect(href).toContain('rawbt:base64,');
+  });
+
+  it('usa RawBT direto por alguns minutos quando a impressão nativa acabou de falhar', async () => {
+    localStorage.setItem('jnc:thermal-printer-rawbt-fast-fallback-until', String(Date.now() + 60_000));
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+
+    const result = await printReceiptAsImage(payload);
+
+    expect(result.mode).toBe('rawbt');
+    expect(result.fallbackReason).toBe('NATIVE_RECENTLY_FAILED');
+    expect(printNativeThermalReceipt).not.toHaveBeenCalled();
+    expect(clickSpy).toHaveBeenCalled();
   });
 
   it('preserva os dados principais do cupom enviado para impressão', () => {
