@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bed, Buildings, ChartBar, ChatCircleText, CheckCircle, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, Sparkle, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { Bed, Buildings, ChartBar, ChatCircleText, CheckCircle, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, Sparkle, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
@@ -222,6 +222,16 @@ const listingPlacesForDisplay = (listing: any, places: any[]) => {
   return ids.map((id) => byId.get(id)).filter(Boolean);
 };
 
+const listingAppliesToPlace = (listing: any, placeId: string) => {
+  const ids = normalizeListingPlaceIds(listing?.hospitalityPlaceIds, listing?.hospitalityPlaceId);
+  return ids.length === 0 || ids.includes(String(placeId));
+};
+
+const listingLinkForPlace = (listing: any, placeId: string) => {
+  const links = normalizeListingPlaceLinks(listing?.hospitalityPlaceLinks, listing?.hospitalityPlaceIds, listing?.hospitalityPlaceId);
+  return links.find((link) => String(link.hospitalityPlaceId) === String(placeId)) || null;
+};
+
 const initialsFor = (value = '') =>
   String(value || '?')
     .split(/\s+/)
@@ -289,6 +299,7 @@ const actionButtonClass = (tone = 'neutral') => {
     success: 'bg-emerald-600 text-white shadow-[0_10px_24px_-18px_rgba(5,150,105,0.9)] hover:bg-emerald-700',
     muted: 'border border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200',
     amber: 'bg-amber-500 text-slate-950 shadow-[0_10px_24px_-18px_rgba(245,158,11,0.9)] hover:bg-amber-400',
+    danger: 'border border-rose-100 bg-rose-50 text-rose-700 hover:bg-rose-100',
   };
   return `inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${tones[tone] || tones.neutral}`;
 };
@@ -527,6 +538,10 @@ export function SuperAdminDestinations() {
   const [editingListingId, setEditingListingId] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [cadastroMode, setCadastroMode] = useState<'destination' | 'place' | 'listing' | 'storeLink'>('destination');
+  const [placeEditSection, setPlaceEditSection] = useState<'details' | 'services'>('details');
+  const [placeListingSearch, setPlaceListingSearch] = useState('');
+  const [placeListingsLoading, setPlaceListingsLoading] = useState(false);
+  const [placeListings, setPlaceListings] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'active' | 'all' | 'inactive'>('active');
@@ -633,6 +648,28 @@ export function SuperAdminDestinations() {
       setError(err?.message || 'Não foi possível carregar detalhes da cidade.');
     } finally {
       setDetailLoading(false);
+    }
+  };
+
+  const loadPlaceListings = async (destinationId: string, query = placeListingSearch) => {
+    if (!destinationId) {
+      setPlaceListings([]);
+      return;
+    }
+    setPlaceListingsLoading(true);
+    try {
+      const payload = await destinationService.adminDestinationListings(destinationId, {
+        page: 1,
+        pageSize: 50,
+        search: query,
+        status: 'all',
+        listingCategory: 'all',
+      });
+      setPlaceListings(payload?.items || []);
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível carregar serviços da hospedagem.');
+    } finally {
+      setPlaceListingsLoading(false);
     }
   };
 
@@ -901,6 +938,30 @@ export function SuperAdminDestinations() {
     [listingForm.hospitalityPlaceLinks, selectedListingPlaceIds]
   );
 
+  const placeServiceRows = useMemo(() => {
+    const placeId = String(editingPlaceId || '');
+    if (!placeId) return [];
+    return (placeListings || [])
+      .filter((listing: any) => listingAppliesToPlace(listing, placeId))
+      .sort((left: any, right: any) => {
+        const leftLink = listingLinkForPlace(left, placeId);
+        const rightLink = listingLinkForPlace(right, placeId);
+        const featuredDiff = Number(right.featured === true) - Number(left.featured === true);
+        if (featuredDiff !== 0) return featuredDiff;
+        const placeSortDiff = Number(leftLink?.sortOrder ?? left.sortOrder ?? 0) - Number(rightLink?.sortOrder ?? right.sortOrder ?? 0);
+        if (placeSortDiff !== 0) return placeSortDiff;
+        return String(left.title || '').localeCompare(String(right.title || ''), 'pt-BR');
+      });
+  }, [editingPlaceId, placeListings]);
+
+  const placeAvailableListingRows = useMemo(() => {
+    const placeId = String(editingPlaceId || '');
+    if (!placeId) return [];
+    return (placeListings || [])
+      .filter((listing: any) => !listingAppliesToPlace(listing, placeId))
+      .slice(0, 12);
+  }, [editingPlaceId, placeListings]);
+
   const updateListingDestination = (destinationId: string) => {
     const allowedPlaceIds = new Set((data.places || [])
       .filter((place: any) => !destinationId || place.destinationId === destinationId)
@@ -1060,6 +1121,9 @@ export function SuperAdminDestinations() {
     setEditingPlaceId(place.id);
     setEditingListingId('');
     setCadastroMode('place');
+    setPlaceEditSection('details');
+    setPlaceListingSearch('');
+    setPlaceListings([]);
     setPlaceForm({
       ...emptyPlace,
       ...Object.fromEntries(Object.entries(place).map(([key, value]) => [key, toFormValue(value)])),
@@ -1073,6 +1137,7 @@ export function SuperAdminDestinations() {
       active: place.active !== false,
       sortOrder: Number(place.sortOrder || 0),
     });
+    loadPlaceListings(place.destinationId || place.destination?.id || selectedDestinationId, '');
     setActiveTab('cadastro');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -1112,6 +1177,9 @@ export function SuperAdminDestinations() {
 
   const cancelPlaceEdit = () => {
     setEditingPlaceId('');
+    setPlaceEditSection('details');
+    setPlaceListingSearch('');
+    setPlaceListings([]);
     setPlaceForm((current) => ({ ...emptyPlace, destinationId: current.destinationId }));
     setActiveTab('dashboard');
   };
@@ -1327,6 +1395,119 @@ export function SuperAdminDestinations() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const updateListingPlaceLinksFromPlace = async (listing: any, nextLinks: Array<{ hospitalityPlaceId: string; sortOrder: number }>) => {
+    const hospitalityPlaceIds = nextLinks.map((link) => link.hospitalityPlaceId);
+    await destinationService.adminUpdateListing(listing.id, {
+      hospitalityPlaceIds,
+      hospitalityPlaceId: hospitalityPlaceIds[0] || '',
+      hospitalityPlaceLinks: nextLinks,
+    });
+    await Promise.all([
+      loadPlaceListings(placeForm.destinationId || listing.destinationId || selectedDestinationId, placeListingSearch),
+      loadDestinationDetails(placeForm.destinationId || listing.destinationId || selectedDestinationId, placesPage, listingsPage),
+    ]);
+  };
+
+  const addListingToEditingPlace = async (listing: any) => {
+    const placeId = String(editingPlaceId || '');
+    if (!placeId) return;
+    const currentLinks = normalizeListingPlaceLinks(listing.hospitalityPlaceLinks, listing.hospitalityPlaceIds, listing.hospitalityPlaceId);
+    if (!currentLinks.length) {
+      setError('Este serviço já aparece no destino inteiro. Edite o serviço se quiser restringir para chalés específicos.');
+      return;
+    }
+    if (currentLinks.some((link) => String(link.hospitalityPlaceId) === placeId)) return;
+    const maxSortOrder = currentLinks.reduce((max, link) => Math.max(max, Number(link.sortOrder || 0)), 0);
+    setSaving(true);
+    setError('');
+    try {
+      await updateListingPlaceLinksFromPlace(listing, [
+        ...currentLinks,
+        { hospitalityPlaceId: placeId, sortOrder: maxSortOrder + 10 },
+      ]);
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível adicionar o serviço neste chalé.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeListingFromEditingPlace = async (listing: any) => {
+    const placeId = String(editingPlaceId || '');
+    if (!placeId) return;
+    const currentLinks = normalizeListingPlaceLinks(listing.hospitalityPlaceLinks, listing.hospitalityPlaceIds, listing.hospitalityPlaceId);
+    if (!currentLinks.length) {
+      setError('Este serviço aparece no destino inteiro. Para tirar de um único chalé, primeiro restrinja o serviço na tela de edição dele.');
+      return;
+    }
+    if (currentLinks.length <= 1) {
+      setError('Este é o único chalé vinculado ao serviço. Edite o serviço para desativar ou trocar o vínculo sem virar destino inteiro.');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      await updateListingPlaceLinksFromPlace(
+        listing,
+        currentLinks.filter((link) => String(link.hospitalityPlaceId) !== placeId)
+      );
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível remover o serviço deste chalé.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateListingSortForEditingPlace = async (listing: any, value: any) => {
+    const placeId = String(editingPlaceId || '');
+    if (!placeId) return;
+    const currentLinks = normalizeListingPlaceLinks(listing.hospitalityPlaceLinks, listing.hospitalityPlaceIds, listing.hospitalityPlaceId);
+    if (!currentLinks.length) {
+      setError('Serviço do destino inteiro não tem prioridade específica por chalé. Restrinja o serviço se precisar ordenar por hospedagem.');
+      return;
+    }
+    const sortOrder = Number(value);
+    setSaving(true);
+    setError('');
+    try {
+      await updateListingPlaceLinksFromPlace(
+        listing,
+        currentLinks.map((link) => String(link.hospitalityPlaceId) === placeId
+          ? { ...link, sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0 }
+          : link
+        )
+      );
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível atualizar a ordem do serviço.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const createListingForEditingPlace = () => {
+    const placeId = String(editingPlaceId || '');
+    if (!placeId) return;
+    const destinationId = placeForm.destinationId || selectedDestinationId;
+    setEditingPlaceId('');
+    setEditingListingId('');
+    setCadastroMode('listing');
+    setListingForm({
+      ...emptyListing,
+      destinationId,
+      hospitalityPlaceId: placeId,
+      hospitalityPlaceIds: [placeId],
+      hospitalityPlaceLinks: [{ hospitalityPlaceId: placeId, sortOrder: 0 }],
+      city: placeForm.city || '',
+      state: placeForm.state || '',
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const editListingFromPlace = (listing: any) => {
+    setEditingPlaceId('');
+    startListingEdit(listing);
   };
 
   const getDestinationForListing = (listing: any) =>
@@ -2804,6 +2985,33 @@ export function SuperAdminDestinations() {
                   </button>
                 ) : null}
               </div>
+              {editingPlaceId ? (
+                <div className="mt-4 grid gap-2 rounded-[1.35rem] border border-slate-200 bg-slate-50 p-1.5 sm:grid-cols-2">
+                  {[
+                    { id: 'details', label: 'Dados do chalé', hint: 'Fotos, endereço e prioridade' },
+                    { id: 'services', label: 'Serviços vinculados', hint: 'Adicionar, remover e ordenar' },
+                  ].map((item: any) => {
+                    const active = placeEditSection === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setPlaceEditSection(item.id);
+                          if (item.id === 'services') loadPlaceListings(placeForm.destinationId || selectedDestinationId, placeListingSearch);
+                        }}
+                        className={`rounded-[1.1rem] px-3 py-2.5 text-left transition ${
+                          active ? 'bg-white text-slate-950 shadow-[0_14px_34px_rgba(15,23,42,0.08)]' : 'text-slate-500 hover:bg-white/70'
+                        }`}
+                      >
+                        <p className="text-sm font-black">{item.label}</p>
+                        <p className="mt-0.5 text-[11px] font-bold">{item.hint}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+              {!editingPlaceId || placeEditSection === 'details' ? (
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <select value={placeForm.destinationId} onChange={(event) => updatePlace('destinationId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" required>
                   {(data.destinations || []).map((destination: any) => <option key={destination.id} value={destination.id}>{destination.name}</option>)}
@@ -2879,7 +3087,175 @@ export function SuperAdminDestinations() {
                 <textarea value={placeForm.description} onChange={(event) => updatePlace('description', event.target.value)} placeholder="Descrição pública da hospedagem" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <textarea value={placeForm.deliveryInstructions} onChange={(event) => updatePlace('deliveryInstructions', event.target.value)} placeholder="Instruções de entrega" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
               </div>
-              <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">{editingPlaceId ? 'Atualizar hospedagem' : 'Salvar hospedagem'}</button>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  <div className="rounded-[1.5rem] border border-[#336886]/10 bg-[linear-gradient(135deg,#ffffff,#f3faf8)] p-4">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Serviços deste chalé</p>
+                        <h3 className="text-lg font-black text-slate-950">{placeForm.name || 'Hospedagem selecionada'}</h3>
+                        <p className="mt-1 text-xs font-semibold text-slate-500">
+                          Essa visão é o inverso da edição do serviço: aqui o chalé é o centro, e você controla o que aparece nele.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button type="button" onClick={createListingForEditingPlace} className={actionButtonClass('primary')}>
+                          <Plus size={13} weight="bold" />
+                          Novo serviço neste chalé
+                        </button>
+                        <button type="button" onClick={() => loadPlaceListings(placeForm.destinationId || selectedDestinationId, placeListingSearch)} className={actionButtonClass('neutral')}>
+                          Atualizar
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto]">
+                      <div className="relative">
+                        <MagnifyingGlass size={17} weight="bold" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          value={placeListingSearch}
+                          onChange={(event) => setPlaceListingSearch(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                              event.preventDefault();
+                              loadPlaceListings(placeForm.destinationId || selectedDestinationId, placeListingSearch);
+                            }
+                          }}
+                          placeholder="Buscar serviço existente para vincular..."
+                          className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm font-bold outline-none focus:border-[#336886]"
+                        />
+                      </div>
+                      <button type="button" onClick={() => loadPlaceListings(placeForm.destinationId || selectedDestinationId, placeListingSearch)} className={actionButtonClass('neutral')}>
+                        Buscar
+                      </button>
+                    </div>
+                  </div>
+
+                  {placeListingsLoading ? (
+                    <p className="rounded-2xl bg-[#edf5fa] px-4 py-3 text-sm font-bold text-[#336886]">Carregando serviços vinculados...</p>
+                  ) : null}
+
+                  <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-black text-slate-950">Aparecem neste chalé</p>
+                        <p className="text-xs font-semibold text-slate-500">{placeServiceRows.length} serviço(s) visível(is), incluindo escopo destino inteiro.</p>
+                      </div>
+                      <Sparkle size={22} weight="duotone" className="text-[#336886]" />
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      {placeServiceRows.map((listing: any) => {
+                        const placeIds = normalizeListingPlaceIds(listing.hospitalityPlaceIds, listing.hospitalityPlaceId);
+                        const globalScope = placeIds.length === 0;
+                        const currentLink = listingLinkForPlace(listing, editingPlaceId);
+                        const canRemove = !globalScope && placeIds.length > 1;
+                        return (
+                          <article key={listing.id} className="rounded-[1.25rem] border border-slate-100 bg-slate-50/80 p-3">
+                            <div className="flex min-w-0 gap-3">
+                              <img src={imageFor(listing)} alt={listing.title} className="h-14 w-14 shrink-0 rounded-2xl object-cover ring-1 ring-slate-200" />
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-start justify-between gap-2">
+                                  <div className="min-w-0">
+                                    <p className="break-words text-sm font-black text-slate-950">{listing.title}</p>
+                                    <p className="mt-0.5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">{labelForListingCategory(listing.category)}</p>
+                                    {listing.store ? (
+                                      <p className="mt-1 text-xs font-bold text-emerald-700">Loja: {listing.store.name}</p>
+                                    ) : null}
+                                  </div>
+                                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${globalScope ? 'bg-[#EEF6F4] text-[#336886]' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>
+                                    {globalScope ? 'Destino inteiro' : 'Vínculo direto'}
+                                  </span>
+                                </div>
+                                <div className="mt-3 flex flex-wrap items-end gap-2">
+                                  {!globalScope ? (
+                                    <label className="grid w-24 gap-1">
+                                      <span className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400">Ordem</span>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        defaultValue={Number(currentLink?.sortOrder || 0)}
+                                        onBlur={(event) => updateListingSortForEditingPlace(listing, event.target.value)}
+                                        onKeyDown={(event) => {
+                                          if (event.key === 'Enter') {
+                                            event.preventDefault();
+                                            (event.currentTarget as HTMLInputElement).blur();
+                                          }
+                                        }}
+                                        className="rounded-xl border border-slate-200 bg-white px-2 py-2 text-center text-sm font-black text-slate-900 outline-none focus:border-[#336886]"
+                                      />
+                                    </label>
+                                  ) : (
+                                    <p className="max-w-md text-xs font-semibold text-slate-500">
+                                      Serviço global. Para tirar de um chalé específico, primeiro restrinja o escopo na edição do serviço.
+                                    </p>
+                                  )}
+                                  <button type="button" onClick={() => editListingFromPlace(listing)} className={actionButtonClass('neutral')}>
+                                    <PencilSimple size={13} weight="bold" />
+                                    Editar serviço
+                                  </button>
+                                  {!globalScope ? (
+                                    <button
+                                      type="button"
+                                      disabled={saving || !canRemove}
+                                      title={canRemove ? 'Remove só deste chalé, sem apagar o serviço.' : 'Único vínculo: edite o serviço para trocar ou desativar sem virar destino inteiro.'}
+                                      onClick={() => removeListingFromEditingPlace(listing)}
+                                      className={actionButtonClass(canRemove ? 'danger' : 'muted')}
+                                    >
+                                      <Trash size={13} weight="bold" />
+                                      Remover vínculo
+                                    </button>
+                                  ) : null}
+                                </div>
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
+                      {!placeListingsLoading && !placeServiceRows.length ? (
+                        <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-sm font-bold text-slate-500">
+                          Nenhum serviço aparece neste chalé ainda. Busque um serviço existente ou crie um novo já vinculado.
+                        </p>
+                      ) : null}
+                    </div>
+                  </section>
+
+                  <section className="rounded-[1.5rem] border border-amber-100 bg-amber-50/50 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-black text-slate-950">Adicionar serviço existente</p>
+                        <p className="text-xs font-semibold text-slate-500">Lista serviços da cidade que ainda não aparecem neste chalé.</p>
+                      </div>
+                      <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black text-amber-700">{placeAvailableListingRows.length} disponível(is)</span>
+                    </div>
+                    <div className="mt-3 grid gap-2 md:grid-cols-2">
+                      {placeAvailableListingRows.map((listing: any) => (
+                        <button
+                          key={listing.id}
+                          type="button"
+                          onClick={() => addListingToEditingPlace(listing)}
+                          className="flex min-w-0 items-center gap-3 rounded-2xl border border-white bg-white/85 p-2 text-left shadow-[0_12px_30px_rgba(120,53,15,0.06)] transition hover:border-amber-200"
+                        >
+                          <img src={imageFor(listing)} alt={listing.title} className="h-12 w-12 shrink-0 rounded-2xl object-cover ring-1 ring-amber-100" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-black text-slate-950">{listing.title}</p>
+                            <p className="mt-0.5 truncate text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">{labelForListingCategory(listing.category)}</p>
+                          </div>
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                            <Plus size={15} weight="bold" />
+                          </span>
+                        </button>
+                      ))}
+                      {!placeListingsLoading && !placeAvailableListingRows.length ? (
+                        <p className="rounded-2xl border border-dashed border-amber-200 bg-white/70 px-3 py-4 text-sm font-bold text-slate-500 md:col-span-2">
+                          Nenhum serviço disponível neste filtro. Use a busca ou crie um novo serviço para este chalé.
+                        </p>
+                      ) : null}
+                    </div>
+                  </section>
+                </div>
+              )}
+              {(!editingPlaceId || placeEditSection === 'details') ? (
+                <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">{editingPlaceId ? 'Atualizar hospedagem' : 'Salvar hospedagem'}</button>
+              ) : null}
             </form>
               ) : null}
 
