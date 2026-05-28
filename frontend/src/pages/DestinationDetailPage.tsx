@@ -414,13 +414,9 @@ export function DestinationDetailPage() {
                   key={place.id}
                   role="button"
                   tabIndex={0}
-                  onClick={(event) => {
-                    if (isPreviewTriggerTarget(event.target)) return;
-                    navigate(placePath);
-                  }}
+                  onClick={() => navigate(placePath)}
                   onKeyDown={(event) => {
                     if (event.key !== 'Enter' && event.key !== ' ') return;
-                    if (isPreviewTriggerTarget(event.target)) return;
                     event.preventDefault();
                     navigate(placePath);
                   }}
@@ -429,19 +425,13 @@ export function DestinationDetailPage() {
                   <div className="relative m-2 h-44 overflow-hidden rounded-[1.45rem] bg-slate-100 sm:h-40">
                     {hasConfiguredAsset(place) ? (
                       <div
-                        data-image-preview-trigger
-                        className="relative h-full w-full group/image cursor-zoom-in overflow-hidden"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          setPreviewImage({ src: asset(place, 'banner'), title: place.name });
-                        }}
+                        className="relative h-full w-full group/image overflow-hidden"
                       >
                         <img src={asset(place)} alt={place.name} className="h-full w-full object-cover transition-all duration-700 group-hover/image:scale-110" />
                         <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-white backdrop-blur-sm shadow-md">
-                            <MagnifyingGlass size={12} weight="bold" />
-                            Ampliar
+                            <ArrowRight size={12} weight="bold" />
+                            Ver chalé
                           </span>
                         </div>
                       </div>

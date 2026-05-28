@@ -330,6 +330,20 @@ export function HospitalityPlacePage() {
   const placePhoneUrl = placeWhatsAppUrl ? '' : buildPhoneCallUrl(place.whatsapp);
   const placeBannerImages = galleryImagesFor(place);
   const selectedPlaceBanner = placeBannerImages[bannerIndex % placeBannerImages.length] || imageFor(place);
+  const placeGalleryPreviewImages = placeBannerImages.map((src, index) => ({
+    src,
+    title: `${place.name || 'Hospedagem'} - Foto ${index + 1}`,
+  }));
+  const openPlaceGallery = (index = bannerIndex % Math.max(placeBannerImages.length, 1)) => {
+    const safeIndex = Math.max(0, Math.min(placeGalleryPreviewImages.length - 1, index));
+    const selected = placeGalleryPreviewImages[safeIndex] || { src: selectedPlaceBanner, title: place.name || 'Hospedagem' };
+    setPreviewImage({
+      src: selected.src,
+      title: place.name || selected.title || 'Hospedagem',
+      images: placeGalleryPreviewImages.length ? placeGalleryPreviewImages : [selected],
+      initialIndex: safeIndex,
+    });
+  };
   const selectedListingAction = selectedListing ? buildListingAction({ listing: selectedListing, destination, place, isNativePlatform }) : null;
   const selectedListingRouteUrl = selectedListing ? buildHospitalityServiceRouteUrl({
     destinationSlug: destination.slug || destinationSlug,
@@ -430,7 +444,7 @@ export function HospitalityPlacePage() {
                 <div className="relative h-44 overflow-hidden rounded-[1.25rem] bg-slate-100 sm:h-64 lg:h-full">
                   <div
                     className="relative h-full w-full group/banner cursor-zoom-in overflow-hidden"
-                    onClick={() => setPreviewImage({ src: selectedPlaceBanner, title: place.name || 'Hospedagem' })}
+                    onClick={() => openPlaceGallery(bannerIndex % Math.max(placeBannerImages.length, 1))}
                   >
                     {placeBannerImages.map((url, index) => {
                       const active = index === bannerIndex % placeBannerImages.length;
