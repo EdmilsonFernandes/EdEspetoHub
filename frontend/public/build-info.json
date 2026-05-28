@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "93a99cea",
-  "versionLabel": "v0.1.9.93a99cea",
-  "versionInternal": "0.1.9+20260528.021935.93a99cea",
-  "buildId": "0.1.9+20260528.021935.93a99cea-20260528.021935-93a99cea",
-  "builtAt": "2026-05-28T02:19:35.991Z",
-  "commitHash": "93a99cea0d419a4ad0be6f186e890320ce0e20e0",
-  "shortHash": "93a99cea",
+  "versionDisplaySuffix": "724056ff",
+  "versionLabel": "v0.1.9.724056ff",
+  "versionInternal": "0.1.9+20260528.030113.724056ff",
+  "buildId": "0.1.9+20260528.030113.724056ff-20260528.030113-724056ff",
+  "builtAt": "2026-05-28T03:01:13.174Z",
+  "commitHash": "724056ff920a214a363d45a69e27616f6b97f054",
+  "shortHash": "724056ff",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "724056ff920a214a363d45a69e27616f6b97f054",
+      "shortHash": "724056ff",
+      "dateIso": "2026-05-27T23:25:00-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Improve checkout feedback on slow connections",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/724056ff920a214a363d45a69e27616f6b97f054"
+    },
     {
       "hash": "93a99cea0d419a4ad0be6f186e890320ce0e20e0",
       "shortHash": "93a99cea",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Fix storefront printer menu on first access",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ef169b1250396f2802f68e9a0c60a6b0a7c926ea"
-    },
-    {
-      "hash": "c0c3312deec0ebe81f1e1a3ac34c422265aa3899",
-      "shortHash": "c0c3312d",
-      "dateIso": "2026-05-26T15:58:19-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Compact hub explore shortcuts",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c0c3312deec0ebe81f1e1a3ac34c422265aa3899"
     }
   ]
 }

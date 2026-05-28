@@ -59,6 +59,9 @@ const CUSTOMER_REMEMBER_EMAIL_KEY = 'jnk_customer_auth_email';
 const NATIVE_NAV_VISIBILITY_EVENT = 'jnc:native-nav-visibility';
 const CHECKOUT_SLOW_FEEDBACK_MS = 2800;
 const CHECKOUT_CREATE_ORDER_TIMEOUT_MS = 18000;
+const STOREFRONT_PRODUCTS_REFRESH_TIMEOUT_MS = 10000;
+const STOREFRONT_PRODUCTS_SLOW_FEEDBACK_MS = 2200;
+const STOREFRONT_PRODUCTS_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 const buildPublicPaymentSummary = (storeData: any) => {
   const rawSummary = storeData?.paymentSummary || {};
@@ -405,6 +408,11 @@ export function StorePage() {
       .trim()
       .toLowerCase();
   const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsSlow, setProductsSlow] = useState(false);
+  const [productsLoadError, setProductsLoadError] = useState('');
+  const [productsRetryKey, setProductsRetryKey] = useState(0);
+  const productRequestIdRef = useRef(0);
   const [customers, setCustomers] = useState([]);
   const [view, setView] = useState('menu');
   const [cart, setCart] = useState({});
@@ -1099,6 +1107,66 @@ export function StorePage() {
     );
   };
 
+  const syncCartItemsWithFreshProducts = (freshProducts: any[] = []) => {
+    if (!Array.isArray(freshProducts) || freshProducts.length === 0) return;
+    const byId = new Map<string, any>();
+    freshProducts.forEach((product: any) => {
+      const productId = String(product?.id || product?.productId || '').trim();
+      if (productId) byId.set(productId, product);
+    });
+    if (!byId.size) return;
+
+    setCart((previous: Record<string, any>) => {
+      let changed = false;
+      const nextCart = Object.entries(previous || {}).reduce((acc: Record<string, any>, [key, entry]: [string, any]) => {
+        const productId = String(entry?.id || entry?.productId || '').trim();
+        const fresh = productId ? byId.get(productId) : null;
+        if (!fresh || fresh.active === false) {
+          acc[key] = entry;
+          return acc;
+        }
+
+        const selectedModifiers = Array.isArray(entry?.selectedModifiers) ? entry.selectedModifiers : [];
+        const nextUnitPrice = Number((resolveItemPrice(fresh) + getModifiersTotal(selectedModifiers)).toFixed(2));
+        const syncedEntry = {
+          ...entry,
+          name: fresh.name ?? entry.name,
+          desc: fresh.desc ?? fresh.description ?? entry.desc,
+          description: fresh.description ?? fresh.desc ?? entry.description,
+          imageUrl: fresh.imageUrl ?? entry.imageUrl,
+          price: nextUnitPrice,
+          originalPrice: fresh.price ?? entry.originalPrice,
+          promoActive: Boolean(fresh.promoActive),
+          promoPrice: fresh.promoPrice ?? null,
+          bundlePromoActive: Boolean(fresh.bundlePromoActive),
+          bundlePromoQty: fresh.bundlePromoQty ?? null,
+          bundlePromoPrice: fresh.bundlePromoPrice ?? null,
+          manageStock: Boolean(fresh.manageStock),
+          stockQuantity: Number(fresh.stockQuantity ?? entry.stockQuantity ?? 0),
+          lowStockAlert: fresh.lowStockAlert ?? entry.lowStockAlert,
+          active: fresh.active ?? entry.active,
+        };
+
+        if (
+          syncedEntry.name !== entry.name ||
+          syncedEntry.imageUrl !== entry.imageUrl ||
+          Number(syncedEntry.price || 0) !== Number(entry.price || 0) ||
+          Number(syncedEntry.stockQuantity || 0) !== Number(entry.stockQuantity || 0) ||
+          Boolean(syncedEntry.promoActive) !== Boolean(entry.promoActive) ||
+          Number(syncedEntry.promoPrice || 0) !== Number(entry.promoPrice || 0) ||
+          Boolean(syncedEntry.bundlePromoActive) !== Boolean(entry.bundlePromoActive)
+        ) {
+          changed = true;
+        }
+
+        acc[key] = syncedEntry;
+        return acc;
+      }, {});
+
+      return changed ? nextCart : previous;
+    });
+  };
+
   const applyStoreMeta = (store: any) => {
     if (!store) return;
     const name = store.name || store.slug || 'Já no Caminho';
@@ -1453,12 +1521,67 @@ export function StorePage() {
     };
 
     const PRODUCTS_CACHE_KEY = `products_cache:${storeSlug}`;
-    const loadProducts = async () => {
+    const readProductsCache = () => {
       try {
-        const list = (await productService.listPublicBySlug(storeSlug, { forceRefresh: true })) || [];
+        const raw = localStorage.getItem(PRODUCTS_CACHE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        const ts = Number(parsed?.ts || 0);
+        const data = Array.isArray(parsed?.data) ? parsed.data : [];
+        if (!data.length) return null;
+        if (ts && Date.now() - ts > STOREFRONT_PRODUCTS_CACHE_MAX_AGE_MS) {
+          localStorage.removeItem(PRODUCTS_CACHE_KEY);
+          return null;
+        }
+        return { data, ts };
+      } catch {
+        return null;
+      }
+    };
+    const writeProductsCache = (list: any[]) => {
+      try {
+        localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify({ data: list, ts: Date.now() }));
+      } catch {
+        // storage cheio ou indisponivel
+      }
+    };
+    const loadProducts = async ({ silent = false } = {}) => {
+      const requestId = productRequestIdRef.current + 1;
+      productRequestIdRef.current = requestId;
+      const isLatestRequest = () => productRequestIdRef.current === requestId;
+      const cached = readProductsCache();
+      const hasCachedProducts = Boolean(cached?.data?.length);
+
+      if (!silent) {
+        setProductsLoadError('');
+        setProductsSlow(false);
+        if (hasCachedProducts) {
+          setProducts(cached.data);
+          setProductsLoading(false);
+        } else {
+          setProducts([]);
+          setProductsLoading(true);
+        }
+      }
+
+      const slowTimer = window.setTimeout(() => {
+        if (isLatestRequest() && !hasCachedProducts) {
+          setProductsSlow(true);
+        }
+      }, STOREFRONT_PRODUCTS_SLOW_FEEDBACK_MS);
+
+      try {
+        const list = (await productService.listPublicBySlug(storeSlug, {
+          forceRefresh: true,
+          timeoutMs: STOREFRONT_PRODUCTS_REFRESH_TIMEOUT_MS,
+        })) || [];
+        if (!isLatestRequest()) return;
         setProducts(list);
-        try { localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify({ data: list, ts: Date.now() })); } catch { /* storage cheio */ }
+        syncCartItemsWithFreshProducts(list);
+        setProductsLoadError('');
+        writeProductsCache(list);
       } catch (error) {
+        if (!isLatestRequest()) return;
         console.error('Erro ao carregar produtos públicos da loja', {
           error,
           storeSlug,
@@ -1466,13 +1589,19 @@ export function StorePage() {
           hasAdminSession: Boolean(user?.token),
           hasCustomerSession: Boolean(customerSession?.token),
         });
-        try {
-          const raw = localStorage.getItem(PRODUCTS_CACHE_KEY);
-          if (raw) {
-            const { data } = JSON.parse(raw);
-            if (Array.isArray(data) && data.length > 0) setProducts(data);
-          }
-        } catch { /* no-op */ }
+        const fallback = cached || readProductsCache();
+        if (fallback?.data?.length) {
+          setProducts(fallback.data);
+          setProductsLoadError('');
+        } else {
+          setProductsLoadError('Não deu para carregar o cardápio agora. Verifique sua internet e tente novamente.');
+        }
+      } finally {
+        window.clearTimeout(slowTimer);
+        if (isLatestRequest()) {
+          setProductsLoading(false);
+          setProductsSlow(false);
+        }
       }
     };
 
@@ -1576,6 +1705,7 @@ export function StorePage() {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         loadStore(true);
+        loadProducts({ silent: true });
       }
     };
 
@@ -1588,7 +1718,7 @@ export function StorePage() {
       }
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [isStoreAdmin, publicOrderTtlMs, reorderTtlMs, storeSlug]);
+  }, [isStoreAdmin, productsRetryKey, publicOrderTtlMs, reorderTtlMs, storeSlug]);
 
   useEffect(() => {
     let active = true;
@@ -3853,7 +3983,49 @@ export function StorePage() {
             </div>
           </div>
         )}
-        {!showInactiveState && !showClosedState && view === 'menu' && products.length === 0 ? (
+        {!showInactiveState && !showClosedState && view === 'menu' && products.length === 0 && productsLoading ? (
+          <div className="mx-auto min-h-[68vh] w-full max-w-5xl px-4 py-8">
+            <div className="rounded-[2rem] border border-white/80 bg-white/85 p-5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.26)] backdrop-blur-xl">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-2xl bg-slate-100 animate-pulse" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="h-4 w-44 rounded-full bg-slate-100 animate-pulse" />
+                  <div className="h-3 w-32 rounded-full bg-slate-100 animate-pulse" />
+                </div>
+              </div>
+              <div className="mt-6 space-y-3">
+                {[0, 1, 2].map((item) => (
+                  <div key={item} className="flex items-center gap-4 rounded-[1.5rem] border border-slate-100 bg-white p-3">
+                    <div className="h-20 w-20 rounded-2xl bg-slate-100 animate-pulse" />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="h-4 w-3/4 rounded-full bg-slate-100 animate-pulse" />
+                      <div className="h-3 w-11/12 rounded-full bg-slate-100 animate-pulse" />
+                      <div className="h-4 w-24 rounded-full bg-slate-100 animate-pulse" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-5 text-center text-sm font-bold text-slate-600">
+                {productsSlow ? 'Internet lenta. Ainda estamos carregando o cardápio...' : 'Carregando cardápio...'}
+              </p>
+            </div>
+          </div>
+        ) : !showInactiveState && !showClosedState && view === 'menu' && products.length === 0 && productsLoadError ? (
+          <div className="min-h-[70vh] flex items-center justify-center px-4">
+            <div className="max-w-md rounded-[2rem] border border-white/80 bg-white/90 p-6 text-center shadow-[0_24px_54px_-36px_rgba(15,23,42,0.3)] backdrop-blur-xl">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-2xl">📶</div>
+              <h2 className="text-xl font-black text-slate-900">Não carregou o cardápio</h2>
+              <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">{productsLoadError}</p>
+              <button
+                type="button"
+                onClick={() => setProductsRetryKey((value) => value + 1)}
+                className="mt-5 w-full rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow-[0_16px_32px_-24px_rgba(15,23,42,0.55)] active:scale-[0.98]"
+              >
+                Tentar carregar novamente
+              </button>
+            </div>
+          </div>
+        ) : !showInactiveState && !showClosedState && view === 'menu' && products.length === 0 ? (
           <div className="min-h-[80vh] flex items-center justify-center">
             <div className="text-center px-4">
               <div className="mb-4">

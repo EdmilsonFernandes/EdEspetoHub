@@ -123,7 +123,6 @@ export function useHubStoreDistances({
       try {
         const targets = stores
           .filter((store) => store.distanceSource !== 'server')
-          .slice(0, 8)
           .filter((store) => store.storeLat != null && store.storeLng != null);
         const cachedDistances =
           readHubCache<Record<string, number>>(`hub:store-distance:${contextKey}`, HUB_DISTANCE_CACHE_TTL_MS) || {};

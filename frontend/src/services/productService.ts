@@ -244,13 +244,14 @@ export const productService = {
     return data.map(normalizeProduct);
   },
 
-  async listPublicBySlug(slug: string, options?: { forceRefresh?: boolean })
+  async listPublicBySlug(slug: string, options?: { forceRefresh?: boolean; timeoutMs?: number })
   {
     const cached = options?.forceRefresh ? null : readPublicProductCache(slug);
     if (cached) return cached;
     const suffix = options?.forceRefresh ? `?t=${Date.now()}` : '';
     const data = await apiClient.get(`/public/stores/slug/${slug}/products${suffix}`, {
       authMode: 'none',
+      ...(options?.timeoutMs ? { timeoutMs: options.timeoutMs } : {}),
       ...(options?.forceRefresh ? { headers: { 'Cache-Control': 'no-cache' } } : {}),
     });
     const normalized = data.map(normalizeProduct);

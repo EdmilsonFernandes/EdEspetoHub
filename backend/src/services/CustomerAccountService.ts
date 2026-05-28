@@ -117,6 +117,35 @@ private buildGeocodeAddress(payload: {
     return parts.join(', ');
   }
 
+private buildGeocodeCandidates(payload: {
+    cep?: string | null;
+    street?: string | null;
+    number?: string | null;
+    complement?: string | null;
+    neighborhood?: string | null;
+    city?: string | null;
+    state?: string | null;
+  }) {
+    const cep = String(payload?.cep || '').replace(/\D/g, '').slice(0, 8);
+    const street = this.normalizeAddressForGeocode(payload.street);
+    const number = this.normalizeAddressForGeocode(payload.number);
+    const complement = this.normalizeAddressForGeocode(payload.complement);
+    const neighborhood = this.normalizeAddressForGeocode(payload.neighborhood);
+    const city = this.normalizeAddressForGeocode(payload.city);
+    const state = this.normalizeAddressForGeocode(payload.state);
+    const candidates = [
+      this.buildGeocodeAddress({ ...payload, cep }),
+      [street, number, neighborhood, city, state].filter(Boolean).join(', '),
+      [street, neighborhood, city, state].filter(Boolean).join(', '),
+      [cep, city, state].filter(Boolean).join(', '),
+      [city, state, 'Brasil'].filter(Boolean).join(', '),
+    ];
+
+    return candidates
+      .map((value) => value.replace(/\s+/g, ' ').replace(/,\s*,/g, ', ').trim())
+      .filter((value, index, values) => value.length >= 5 && values.indexOf(value) === index);
+  }
+
 private assertRequiredAddressFields(payload: {
     cep?: string | null;
     street?: string | null;
@@ -163,6 +192,7 @@ private async resolveAddressCoordinates(payload: {
     state?: string | null;
   }): Promise<{ lat: number; lng: number } | null> {
     const cep = String(payload?.cep || '').replace(/\D/g, '').slice(0, 8);
+    let lookupAddressFallback: Partial<typeof payload> | null = null;
     if (cep.length === 8) {
       try {
         const lookedUp = await this.zipCodeLookupService.lookup(cep);
@@ -172,12 +202,28 @@ private async resolveAddressCoordinates(payload: {
             lng: Number(lookedUp.longitude),
           };
         }
+        lookupAddressFallback = {
+          cep,
+          street: lookedUp.street || payload.street,
+          neighborhood: lookedUp.district || payload.neighborhood,
+          city: lookedUp.city || payload.city,
+          state: lookedUp.state || payload.state,
+        };
       } catch {
         // keep address save resilient even when zip providers are unavailable
       }
     }
 
-    return this.geocodeAddress(this.buildGeocodeAddress(payload));
+    const candidates = this.buildGeocodeCandidates({
+      ...payload,
+      ...(lookupAddressFallback || {}),
+      cep,
+    });
+    for (const candidate of candidates) {
+      const coordinates = await this.geocodeAddress(candidate);
+      if (coordinates) return coordinates;
+    }
+    return null;
   }
 
     /**
@@ -398,17 +444,15 @@ private mapAddress(entity: CustomerAddress) {
     if (currentLat !== null && currentLng !== null) {
       return address;
     }
-    const geocoded = await this.geocodeAddress(
-      this.buildGeocodeAddress({
-        cep: address.cep,
-        street: address.street,
-        number: address.number,
-        complement: address.complement,
-        neighborhood: address.neighborhood,
-        city: address.city,
-        state: address.state,
-      })
-    );
+    const geocoded = await this.resolveAddressCoordinates({
+      cep: address.cep,
+      street: address.street,
+      number: address.number,
+      complement: address.complement,
+      neighborhood: address.neighborhood,
+      city: address.city,
+      state: address.state,
+    });
     if (!geocoded) return address;
     address.lat = geocoded.lat;
     address.lng = geocoded.lng;
@@ -777,7 +821,19 @@ async listAddresses(userId: string) {
       where: { userId },
       order: { isDefault: 'DESC', createdAt: 'DESC' },
     });
-    return rows.map((row) => this.mapAddress(row));
+    const resolvedRows = await Promise.all(
+      rows.map((row) =>
+        this.ensureAddressCoordinates(row).catch((error) => {
+          this.log.warn('Customer address lazy coordinate resolve failed', {
+            addressId: row.id,
+            userId: row.userId,
+            error,
+          });
+          return row;
+        })
+      )
+    );
+    return resolvedRows.map((row) => this.mapAddress(row));
   }
 
     /**
