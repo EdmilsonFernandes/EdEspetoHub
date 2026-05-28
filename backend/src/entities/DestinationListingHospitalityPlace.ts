@@ -30,6 +30,9 @@ export class DestinationListingHospitalityPlace {
   @Column({ name: 'hospitality_place_id', type: 'uuid' })
   hospitalityPlaceId!: string;
 
+  @Column({ name: 'sort_order', type: 'int', default: 0 })
+  sortOrder!: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 }

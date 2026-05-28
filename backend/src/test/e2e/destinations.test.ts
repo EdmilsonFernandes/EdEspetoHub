@@ -401,6 +401,10 @@ describe('Destination Hub', () => {
         title: `Restaurante Multi ${suffix}`,
         category: 'RESTAURANTE_VISITAR',
         hospitalityPlaceIds: [firstPlaceRes.body.id, secondPlaceRes.body.id],
+        hospitalityPlaceLinks: [
+          { hospitalityPlaceId: firstPlaceRes.body.id, sortOrder: 20 },
+          { hospitalityPlaceId: secondPlaceRes.body.id, sortOrder: 5 },
+        ],
         whatsapp: '5512999999999',
       });
 
@@ -410,6 +414,27 @@ describe('Destination Hub', () => {
       firstPlaceRes.body.id,
       secondPlaceRes.body.id,
     ].sort());
+    expect(listingRes.body.hospitalityPlaceLinks).toEqual(expect.arrayContaining([
+      expect.objectContaining({ hospitalityPlaceId: firstPlaceRes.body.id, sortOrder: 20 }),
+      expect.objectContaining({ hospitalityPlaceId: secondPlaceRes.body.id, sortOrder: 5 }),
+    ]));
+
+    const priorityListingRes = await api
+      .post('/api/admin/destination-listings')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        title: `Restaurante Prioritário ${suffix}`,
+        category: 'RESTAURANTE_VISITAR',
+        hospitalityPlaceIds: [firstPlaceRes.body.id, secondPlaceRes.body.id],
+        hospitalityPlaceLinks: [
+          { hospitalityPlaceId: firstPlaceRes.body.id, sortOrder: 1 },
+          { hospitalityPlaceId: secondPlaceRes.body.id, sortOrder: 30 },
+        ],
+        whatsapp: '5512888888888',
+      });
+
+    expect(priorityListingRes.status, JSON.stringify(priorityListingRes.body)).toBe(201);
 
     const firstPublicRes = await api.get(
       `/api/public/destinations/${destinationRes.body.slug}/hospitality/${firstPlaceRes.body.slug}`
@@ -422,6 +447,10 @@ describe('Destination Hub', () => {
     expect(secondPublicRes.status).toBe(200);
     expect(firstPublicRes.body.listings.some((listing: any) => listing.id === listingRes.body.id)).toBe(true);
     expect(secondPublicRes.body.listings.some((listing: any) => listing.id === listingRes.body.id)).toBe(true);
+    const firstPublicListingIds = firstPublicRes.body.listings.map((listing: any) => listing.id);
+    const secondPublicListingIds = secondPublicRes.body.listings.map((listing: any) => listing.id);
+    expect(firstPublicListingIds.indexOf(priorityListingRes.body.id)).toBeLessThan(firstPublicListingIds.indexOf(listingRes.body.id));
+    expect(secondPublicListingIds.indexOf(listingRes.body.id)).toBeLessThan(secondPublicListingIds.indexOf(priorityListingRes.body.id));
 
     const updateToSecondOnly = await api
       .patch(`/api/admin/destination-listings/${listingRes.body.id}`)

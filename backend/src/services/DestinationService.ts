@@ -137,6 +137,7 @@ export class DestinationService {
       stores,
       listings: listings
         .filter((listing) => this.listingAppliesToHospitalityPlace(listing, place.id))
+        .sort((left, right) => this.compareHospitalityListings(left, right, place.id))
         .map((listing) => this.toPublicListing(listing)),
     };
   }
@@ -382,6 +383,47 @@ export class DestinationService {
       : [];
     if (currentLinks.length) return Array.from(new Set(currentLinks)) as string[];
     return current?.hospitalityPlaceId ? [String(current.hospitalityPlaceId)] : [];
+  }
+
+  private normalizeListingHospitalityPlaceLinks(payload: any, current: any) {
+    const hasLinkInput =
+      Object.prototype.hasOwnProperty.call(payload || {}, 'hospitalityPlaceLinks') ||
+      Object.prototype.hasOwnProperty.call(payload || {}, 'placeLinks');
+    if (hasLinkInput) {
+      const rawLinks = Array.isArray(payload?.hospitalityPlaceLinks)
+        ? payload.hospitalityPlaceLinks
+        : Array.isArray(payload?.placeLinks)
+          ? payload.placeLinks
+          : [];
+      const links = new Map<string, { hospitalityPlaceId: string; sortOrder: number }>();
+      rawLinks.forEach((item: any, index: number) => {
+        const placeId = typeof item === 'string'
+          ? toOptionalText(item)
+          : toOptionalText(item?.hospitalityPlaceId || item?.placeId || item?.id);
+        if (!placeId || links.has(placeId)) return;
+        const sortOrder = Number(typeof item === 'string' ? index : item?.sortOrder ?? index);
+        links.set(placeId, {
+          hospitalityPlaceId: placeId,
+          sortOrder: Number.isFinite(sortOrder) ? sortOrder : index,
+        });
+      });
+      return Array.from(links.values());
+    }
+
+    const currentSortByPlace = new Map<string, number>();
+    if (Array.isArray(current?.hospitalityPlaceLinks)) {
+      current.hospitalityPlaceLinks.forEach((link: any, index: number) => {
+        const placeId = toOptionalText(link?.hospitalityPlaceId || link?.hospitalityPlace?.id);
+        if (!placeId || currentSortByPlace.has(placeId)) return;
+        const sortOrder = Number(link?.sortOrder ?? index);
+        currentSortByPlace.set(placeId, Number.isFinite(sortOrder) ? sortOrder : index);
+      });
+    }
+
+    return this.normalizeListingHospitalityPlaceIds(payload, current).map((hospitalityPlaceId, index) => ({
+      hospitalityPlaceId,
+      sortOrder: currentSortByPlace.get(hospitalityPlaceId) ?? index,
+    }));
   }
 
   private async assertListingHospitalityPlaces(placeIds: string[], destinationId: string) {
@@ -686,7 +728,8 @@ export class DestinationService {
     const title = String(payload?.title || current?.title || '').trim();
     if (!title) throw new AppError('DEST-009', 400);
     const imageUrl = await saveBase64Image(payload?.imageFile, `destination-listing-${normalizeDestinationSlug(title)}`, 'destinations');
-    const placeIds = this.normalizeListingHospitalityPlaceIds(payload, current);
+    const placeLinks = this.normalizeListingHospitalityPlaceLinks(payload, current);
+    const placeIds = placeLinks.map((link) => link.hospitalityPlaceId);
     await this.assertListingHospitalityPlaces(placeIds, destination.id);
     const placeId = placeIds[0] || null;
     const hasStoreInput = Object.prototype.hasOwnProperty.call(payload || {}, 'storeId');
@@ -747,7 +790,7 @@ export class DestinationService {
       active: payload?.active !== undefined ? payload.active !== false : current?.active !== false,
       sortOrder: Number(payload?.sortOrder ?? current?.sortOrder ?? 0) || 0,
     });
-    await this.repository.syncListingHospitalityPlaces(saved.id, placeIds);
+    await this.repository.syncListingHospitalityPlaces(saved.id, placeLinks);
     const hydrated = await this.repository.findListingById(saved.id);
     const [listing] = await this.withListingHospitalityPlaces([{ ...(hydrated || saved), destination: hydrated?.destination || destination }]);
     return this.toPublicListing(listing);
@@ -1197,22 +1240,27 @@ export class DestinationService {
     }));
   }
 
+  private listingHospitalityPlaceLinks(listing: any) {
+    const links = Array.isArray(listing?.hospitalityPlaceLinks) ? listing.hospitalityPlaceLinks : [];
+    return [...links].sort((left: any, right: any) => {
+      const sortDiff = Number(left?.sortOrder ?? 0) - Number(right?.sortOrder ?? 0);
+      if (sortDiff !== 0) return sortDiff;
+      return String(left?.createdAt || '').localeCompare(String(right?.createdAt || ''));
+    });
+  }
+
   private listingHospitalityPlaceIds(listing: any) {
-    const linkedIds = Array.isArray(listing?.hospitalityPlaceLinks)
-      ? listing.hospitalityPlaceLinks
-          .map((link: any) => toOptionalText(link?.hospitalityPlaceId || link?.hospitalityPlace?.id))
-          .filter(Boolean)
-      : [];
+    const linkedIds = this.listingHospitalityPlaceLinks(listing)
+      .map((link: any) => toOptionalText(link?.hospitalityPlaceId || link?.hospitalityPlace?.id))
+      .filter(Boolean);
     const legacyId = toOptionalText(listing?.hospitalityPlaceId);
-    return Array.from(new Set([ legacyId, ...linkedIds ].filter(Boolean))) as string[];
+    return Array.from(new Set([ ...linkedIds, legacyId ].filter(Boolean))) as string[];
   }
 
   private listingHospitalityPlaces(listing: any) {
-    const linkedPlaces = Array.isArray(listing?.hospitalityPlaceLinks)
-      ? listing.hospitalityPlaceLinks
-          .map((link: any) => link?.hospitalityPlace)
-          .filter(Boolean)
-      : [];
+    const linkedPlaces = this.listingHospitalityPlaceLinks(listing)
+      .map((link: any) => link?.hospitalityPlace)
+      .filter(Boolean);
     const legacyPlace = listing?.hospitalityPlace || null;
     const byId = new Map<string, any>();
     [ ...linkedPlaces, legacyPlace ].filter(Boolean).forEach((place: any) => {
@@ -1227,9 +1275,32 @@ export class DestinationService {
     return placeIds.length === 0 || placeIds.includes(String(placeId));
   }
 
+  private listingSortOrderForHospitalityPlace(listing: any, placeId: string) {
+    const link = this.listingHospitalityPlaceLinks(listing).find((item: any) =>
+      String(item?.hospitalityPlaceId || item?.hospitalityPlace?.id || '') === String(placeId)
+    );
+    if (link) {
+      const sortOrder = Number(link.sortOrder ?? 0);
+      return Number.isFinite(sortOrder) ? sortOrder : 0;
+    }
+    const sortOrder = Number(listing?.sortOrder ?? 0);
+    return Number.isFinite(sortOrder) ? sortOrder : 0;
+  }
+
+  private compareHospitalityListings(left: any, right: any, placeId: string) {
+    const featuredDiff = Number(right?.featured === true) - Number(left?.featured === true);
+    if (featuredDiff !== 0) return featuredDiff;
+    const placeSortDiff = this.listingSortOrderForHospitalityPlace(left, placeId) - this.listingSortOrderForHospitalityPlace(right, placeId);
+    if (placeSortDiff !== 0) return placeSortDiff;
+    const listingSortDiff = Number(left?.sortOrder ?? 0) - Number(right?.sortOrder ?? 0);
+    if (listingSortDiff !== 0) return listingSortDiff;
+    return String(left?.title || '').localeCompare(String(right?.title || ''), 'pt-BR');
+  }
+
   private toPublicListing(listing: any) {
     const hospitalityPlaceIds = this.listingHospitalityPlaceIds(listing);
     const hospitalityPlaces = this.listingHospitalityPlaces(listing);
+    const hospitalityPlaceLinks = this.listingHospitalityPlaceLinks(listing);
     return {
       id: listing.id,
       destinationId: listing.destinationId,
@@ -1259,6 +1330,12 @@ export class DestinationService {
       sortOrder: Number(listing.sortOrder || 0),
       store: listing.store ? this.toPublicStoreSummary(listing.store) : null,
       hospitalityPlace: listing.hospitalityPlace ? this.toPublicPlace(listing.hospitalityPlace) : null,
+      hospitalityPlaceLinks: hospitalityPlaceLinks.map((link: any) => ({
+        id: link.id || null,
+        hospitalityPlaceId: link.hospitalityPlaceId || link.hospitalityPlace?.id || null,
+        sortOrder: Number(link.sortOrder || 0),
+        hospitalityPlace: link.hospitalityPlace ? this.toPublicPlace(link.hospitalityPlace) : null,
+      })),
       hospitalityPlaces: hospitalityPlaces.map((place) => this.toPublicPlace(place)),
       destination: listing.destination ? this.toPublicDestination(listing.destination) : null,
     };

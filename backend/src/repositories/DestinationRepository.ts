@@ -384,26 +384,40 @@ export class DestinationRepository {
     return this.listingPlaceRepository.find({
       where: { listingId: In(uniqueIds) },
       relations: [ 'hospitalityPlace', 'hospitalityPlace.destination' ],
-      order: { createdAt: 'ASC' },
+      order: { sortOrder: 'ASC', createdAt: 'ASC' },
     });
   }
 
-  async syncListingHospitalityPlaces(listingId: string, placeIds: string[]) {
-    const uniqueIds = Array.from(new Set((placeIds || []).map((id) => String(id || '').trim()).filter(Boolean)));
+  async syncListingHospitalityPlaces(
+    listingId: string,
+    placeLinks: Array<string | { hospitalityPlaceId?: string | null; placeId?: string | null; id?: string | null; sortOrder?: number | string | null }>
+  ) {
+    const uniqueLinks = new Map<string, number>();
+    (placeLinks || []).forEach((item, index) => {
+      const placeId = typeof item === 'string'
+        ? item
+        : String(item?.hospitalityPlaceId || item?.placeId || item?.id || '').trim();
+      if (!placeId || uniqueLinks.has(placeId)) return;
+      const sortOrder = typeof item === 'string' ? index : Number(item?.sortOrder ?? index);
+      uniqueLinks.set(placeId, Number.isFinite(sortOrder) ? sortOrder : index);
+    });
+    const links = Array.from(uniqueLinks.entries()).map(([hospitalityPlaceId, sortOrder]) => ({ hospitalityPlaceId, sortOrder }));
     await AppDataSource.transaction(async (manager) => {
       await manager.query(
         `DELETE FROM destination_listing_hospitality_places WHERE listing_id = $1`,
         [listingId]
       );
-      if (!uniqueIds.length) return;
-      const values = uniqueIds.map((_, index) => `($1, $${index + 2})`).join(', ');
+      if (!links.length) return;
+      const values = links.map((_, index) => `($1, $${index * 2 + 2}, $${index * 2 + 3})`).join(', ');
+      const params = links.flatMap((link) => [link.hospitalityPlaceId, link.sortOrder]);
       await manager.query(
         `
-          INSERT INTO destination_listing_hospitality_places (listing_id, hospitality_place_id)
+          INSERT INTO destination_listing_hospitality_places (listing_id, hospitality_place_id, sort_order)
           VALUES ${values}
-          ON CONFLICT (listing_id, hospitality_place_id) DO NOTHING
+          ON CONFLICT (listing_id, hospitality_place_id)
+          DO UPDATE SET sort_order = EXCLUDED.sort_order
         `,
-        [listingId, ...uniqueIds]
+        [listingId, ...params]
       );
     });
   }

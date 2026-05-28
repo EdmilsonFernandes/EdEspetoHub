@@ -1161,6 +1161,28 @@ WHERE td.slug = :'destination_slug'
 ORDER BY tipo_registro, sort_order, nome;
 ```
 
+Prioridade de servicos por chale/pousada:
+
+```sql
+\set place_slug 'pousada-refugio-dos-palmares'
+
+SELECT
+  hp.name AS hospedagem,
+  dl.title AS servico,
+  dl.category AS categoria,
+  dl.active AS servico_ativo,
+  dlhp.sort_order AS ordem_na_hospedagem,
+  dl.sort_order AS ordem_geral_servico,
+  dl.whatsapp,
+  dl.city,
+  dl.state
+FROM destination_listing_hospitality_places dlhp
+JOIN hospitality_places hp ON hp.id = dlhp.hospitality_place_id
+JOIN destination_listings dl ON dl.id = dlhp.listing_id
+WHERE hp.slug = :'place_slug'
+ORDER BY dlhp.sort_order, dl.featured DESC, dl.sort_order, dl.title;
+```
+
 ## 17. Pagamentos de pedido
 
 Pagamentos PIX/cartao de pedidos.

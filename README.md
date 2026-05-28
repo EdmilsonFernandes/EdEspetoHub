@@ -151,6 +151,17 @@ A home principal nao depende mais de banners hardcoded para configuracao operaci
 - Imagens: upload pelo backend para S3/public uploads.
 - Fallback: se a configuracao nao existir ou estiver invalida, o app usa banners padrao temporarios para nao quebrar producao.
 
+## Ordenacao de destinos, hospedagens e servicos
+
+A ordem publica dos destinos turisticos e controlada no Super Admin em `Destinos`.
+
+- `travel_destinations.sort_order`: prioridade da cidade/destino na Home.
+- `hospitality_places.sort_order`: prioridade de chales/pousadas dentro do destino.
+- `destination_listings.sort_order`: prioridade geral de servicos/restaurantes no destino.
+- `destination_listing_hospitality_places.sort_order`: prioridade do mesmo servico dentro de uma hospedagem especifica.
+
+Use numeros menores para aparecer primeiro. O vinculo por hospedagem permite monetizar destaque por chale sem duplicar o cadastro do servico.
+
 ## E-mails e templates
 
 Os e-mails do sistema agora usam templates gerenciados no banco, com preview e teste pelo Super Admin.

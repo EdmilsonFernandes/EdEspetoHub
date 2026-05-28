@@ -118,6 +118,7 @@ const emptyListing = {
   destinationId: '',
   hospitalityPlaceId: '',
   hospitalityPlaceIds: [],
+  hospitalityPlaceLinks: [],
   storeId: '',
   title: '',
   category: 'SERVICO',
@@ -186,6 +187,24 @@ const normalizeListingPlaceIds = (placeIds: any, fallbackPlaceId?: any) => {
       : [];
   if (fallbackPlaceId) raw.push(fallbackPlaceId);
   return Array.from(new Set(raw.map((item: any) => String(item || '').trim()).filter(Boolean)));
+};
+
+const normalizeListingPlaceLinks = (placeLinks: any, placeIds: any, fallbackPlaceId?: any) => {
+  const selectedIds = normalizeListingPlaceIds(placeIds, fallbackPlaceId);
+  const links = new Map<string, { hospitalityPlaceId: string; sortOrder: number }>();
+  (Array.isArray(placeLinks) ? placeLinks : []).forEach((link: any, index: number) => {
+    const placeId = String(link?.hospitalityPlaceId || link?.placeId || link?.id || '').trim();
+    if (!placeId || links.has(placeId)) return;
+    const sortOrder = Number(link?.sortOrder ?? index);
+    links.set(placeId, {
+      hospitalityPlaceId: placeId,
+      sortOrder: Number.isFinite(sortOrder) ? sortOrder : index,
+    });
+  });
+  return selectedIds.map((placeId, index) => ({
+    hospitalityPlaceId: placeId,
+    sortOrder: links.get(placeId)?.sortOrder ?? index,
+  }));
 };
 
 const listingPlacesForDisplay = (listing: any, places: any[]) => {
@@ -877,6 +896,11 @@ export function SuperAdminDestinations() {
     [listingForm.hospitalityPlaceIds, listingForm.hospitalityPlaceId]
   );
 
+  const selectedListingPlaceLinks = useMemo(
+    () => normalizeListingPlaceLinks(listingForm.hospitalityPlaceLinks, selectedListingPlaceIds),
+    [listingForm.hospitalityPlaceLinks, selectedListingPlaceIds]
+  );
+
   const updateListingDestination = (destinationId: string) => {
     const allowedPlaceIds = new Set((data.places || [])
       .filter((place: any) => !destinationId || place.destinationId === destinationId)
@@ -884,22 +908,34 @@ export function SuperAdminDestinations() {
     setListingForm((current) => {
       const nextPlaceIds = normalizeListingPlaceIds(current.hospitalityPlaceIds, current.hospitalityPlaceId)
         .filter((placeId) => allowedPlaceIds.has(placeId));
+      const nextPlaceLinks = normalizeListingPlaceLinks(current.hospitalityPlaceLinks, current.hospitalityPlaceIds, current.hospitalityPlaceId)
+        .filter((link) => allowedPlaceIds.has(link.hospitalityPlaceId));
       return {
         ...current,
         destinationId,
         hospitalityPlaceIds: nextPlaceIds,
         hospitalityPlaceId: nextPlaceIds[0] || '',
+        hospitalityPlaceLinks: nextPlaceLinks,
       };
     });
   };
 
   const setListingPlaceIds = (placeIds: string[]) => {
     const nextPlaceIds = normalizeListingPlaceIds(placeIds);
-    setListingForm((current) => ({
-      ...current,
-      hospitalityPlaceIds: nextPlaceIds,
-      hospitalityPlaceId: nextPlaceIds[0] || '',
-    }));
+    setListingForm((current) => {
+      const currentLinks = normalizeListingPlaceLinks(current.hospitalityPlaceLinks, current.hospitalityPlaceIds, current.hospitalityPlaceId);
+      const currentLinksByPlace = new Map(currentLinks.map((link) => [link.hospitalityPlaceId, link]));
+      const nextPlaceLinks = nextPlaceIds.map((placeId, index) => ({
+        hospitalityPlaceId: placeId,
+        sortOrder: currentLinksByPlace.get(placeId)?.sortOrder ?? index,
+      }));
+      return {
+        ...current,
+        hospitalityPlaceIds: nextPlaceIds,
+        hospitalityPlaceId: nextPlaceIds[0] || '',
+        hospitalityPlaceLinks: nextPlaceLinks,
+      };
+    });
   };
 
   const toggleListingPlace = (placeId: string) => {
@@ -908,6 +944,24 @@ export function SuperAdminDestinations() {
       ? currentIds.filter((id) => id !== placeId)
       : [ ...currentIds, placeId ];
     setListingPlaceIds(nextIds);
+  };
+
+  const updateListingPlaceSortOrder = (placeId: string, value: any) => {
+    setListingForm((current) => {
+      const selectedIds = normalizeListingPlaceIds(current.hospitalityPlaceIds, current.hospitalityPlaceId);
+      const currentLinks = normalizeListingPlaceLinks(current.hospitalityPlaceLinks, selectedIds);
+      const currentLinksByPlace = new Map(currentLinks.map((link) => [link.hospitalityPlaceId, link]));
+      const sortOrder = Number(value);
+      return {
+        ...current,
+        hospitalityPlaceLinks: selectedIds.map((id, index) => ({
+          hospitalityPlaceId: id,
+          sortOrder: id === placeId
+            ? (Number.isFinite(sortOrder) ? sortOrder : 0)
+            : (currentLinksByPlace.get(id)?.sortOrder ?? index),
+        })),
+      };
+    });
   };
 
   const updateDestinationGallerySlot = (index: number, patch: any) => {
@@ -1025,6 +1079,7 @@ export function SuperAdminDestinations() {
 
   const startListingEdit = (listing: any) => {
     const hospitalityPlaceIds = normalizeListingPlaceIds(listing.hospitalityPlaceIds, listing.hospitalityPlaceId);
+    const hospitalityPlaceLinks = normalizeListingPlaceLinks(listing.hospitalityPlaceLinks, hospitalityPlaceIds);
     setEditingDestinationId('');
     setEditingPlaceId('');
     setEditingListingId(listing.id);
@@ -1035,6 +1090,7 @@ export function SuperAdminDestinations() {
       destinationId: listing.destinationId || listing.destination?.id || '',
       hospitalityPlaceId: hospitalityPlaceIds[0] || '',
       hospitalityPlaceIds,
+      hospitalityPlaceLinks,
       storeId: listing.storeId || listing.store?.id || '',
       zipCode: formatCepBr(listing.zipCode || ''),
       state: String(listing.state || listing.destination?.state || '').toUpperCase().slice(0, 2),
@@ -1168,9 +1224,11 @@ export function SuperAdminDestinations() {
     try {
       const wasEditing = Boolean(editingListingId);
       const hospitalityPlaceIds = normalizeListingPlaceIds(listingForm.hospitalityPlaceIds, listingForm.hospitalityPlaceId);
+      const hospitalityPlaceLinks = normalizeListingPlaceLinks(listingForm.hospitalityPlaceLinks, hospitalityPlaceIds);
       const payload = {
         ...listingForm,
         hospitalityPlaceIds,
+        hospitalityPlaceLinks,
         hospitalityPlaceId: hospitalityPlaceIds[0] || '',
         active: toBool(listingForm.active),
         featured: toBool(listingForm.featured),
@@ -2719,7 +2777,10 @@ export function SuperAdminDestinations() {
                     <input value={destinationForm.lng} readOnly placeholder="Preenchida pelo CEP" className="rounded-2xl border border-slate-200 bg-slate-100 px-3 py-3 text-sm font-bold text-slate-600 outline-none" />
                   </label>
                 </div>
-                <input value={destinationForm.sortOrder} onChange={(event) => updateDestination('sortOrder', event.target.value)} placeholder="Ordem" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                <label className="grid gap-1.5">
+                  <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Ordem na Home</span>
+                  <input type="number" min="0" value={destinationForm.sortOrder} onChange={(event) => updateDestination('sortOrder', event.target.value)} placeholder="0" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                </label>
                 <select value={String(destinationForm.active !== false)} onChange={(event) => updateDestination('active', event.target.value === 'true')} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
                   <option value="true">Ativo no público</option>
                   <option value="false">Inativo/oculto</option>
@@ -2807,7 +2868,10 @@ export function SuperAdminDestinations() {
                 <input value={placeForm.whatsapp} onChange={(event) => updatePlace('whatsapp', formatPhoneBr(event.target.value))} placeholder="WhatsApp" inputMode="tel" autoComplete="tel" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
                 <input value={placeForm.websiteUrl} onChange={(event) => updatePlace('websiteUrl', event.target.value)} placeholder="Site / Airbnb / Booking" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={placeForm.instagramUrl} onChange={(event) => updatePlace('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-                <input value={placeForm.sortOrder} onChange={(event) => updatePlace('sortOrder', event.target.value)} placeholder="Ordem" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                <label className="grid gap-1.5">
+                  <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Prioridade na lista</span>
+                  <input type="number" min="0" value={placeForm.sortOrder} onChange={(event) => updatePlace('sortOrder', event.target.value)} placeholder="0" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                </label>
                 <select value={String(placeForm.active !== false)} onChange={(event) => updatePlace('active', event.target.value === 'true')} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
                   <option value="true">Ativo no público</option>
                   <option value="false">Inativo/oculto</option>
@@ -2905,10 +2969,54 @@ export function SuperAdminDestinations() {
                       Nenhuma hospedagem cadastrada para este destino ainda. O serviço ficará disponível no destino inteiro.
                     </div>
                   )}
-                  {selectedListingPlaceIds.length ? (
-                    <p className="mt-3 text-xs font-bold text-[#336886]">
-                      {selectedListingPlaceIds.length} hospedagem(ns) selecionada(s). O card aparecerá em todas elas.
-                    </p>
+                  {selectedListingPlaceLinks.length ? (
+                    <div className="mt-3 rounded-[1.25rem] border border-[#336886]/10 bg-white p-3 shadow-[0_12px_34px_rgba(51,104,134,0.08)]">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#336886]">Prioridade por hospedagem</p>
+                          <p className="mt-1 text-xs font-semibold text-slate-500">
+                            Número menor aparece primeiro naquele chalé. Use para destacar parceiros estratégicos sem duplicar serviço.
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black text-[#336886]">
+                          {selectedListingPlaceLinks.length} selecionada(s)
+                        </span>
+                      </div>
+                      <div className="mt-3 grid gap-2">
+                        {selectedListingPlaceLinks.map((link) => {
+                          const place = listingDestinationPlaces.find((item: any) => String(item.id) === String(link.hospitalityPlaceId));
+                          if (!place) return null;
+                          const cover = imageFor(place);
+                          return (
+                            <div key={link.hospitalityPlaceId} className="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-2">
+                              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-2xl bg-white">
+                                {cover ? (
+                                  <img src={cover} alt={place.name} className="h-full w-full object-cover" />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center text-[#336886]">
+                                    <Bed size={18} weight="duotone" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-black text-slate-900">{place.name}</p>
+                                <p className="text-[11px] font-bold text-slate-500">Ordem do serviço dentro desta hospedagem</p>
+                              </div>
+                              <label className="grid w-24 shrink-0 gap-1">
+                                <span className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400">Ordem</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={link.sortOrder}
+                                  onChange={(event) => updateListingPlaceSortOrder(link.hospitalityPlaceId, event.target.value)}
+                                  className="rounded-xl border border-slate-200 bg-white px-2 py-2 text-center text-sm font-black text-slate-900 outline-none focus:border-[#336886]"
+                                />
+                              </label>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   ) : null}
                 </div>
                 <select value={listingForm.storeId} onChange={(event) => updateListing('storeId', event.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2">
@@ -2950,7 +3058,10 @@ export function SuperAdminDestinations() {
                 <input value={listingForm.websiteUrl} onChange={(event) => updateListing('websiteUrl', event.target.value)} placeholder="Site / cardápio / link externo" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={listingForm.instagramUrl} onChange={(event) => updateListing('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={listingForm.ctaUrl} onChange={(event) => updateListing('ctaUrl', event.target.value)} placeholder="Link de contato/CTA" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
-                <input value={listingForm.sortOrder} onChange={(event) => updateListing('sortOrder', event.target.value)} placeholder="Ordem" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                <label className="grid gap-1.5">
+                  <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Prioridade geral</span>
+                  <input type="number" min="0" value={listingForm.sortOrder} onChange={(event) => updateListing('sortOrder', event.target.value)} placeholder="0" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                </label>
                 <select value={String(listingForm.active !== false)} onChange={(event) => updateListing('active', event.target.value === 'true')} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
                   <option value="true">Ativo no público</option>
                   <option value="false">Inativo/oculto</option>
