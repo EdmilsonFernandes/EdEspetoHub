@@ -345,6 +345,29 @@ export function HospitalityPlacePage() {
   const selectedListingWebsiteUrl = externalUrl(selectedListing?.websiteUrl);
   const selectedListingMediaUrl = selectedListing ? cardMediaFor(selectedListing) : '';
   const selectedListingHasImage = Boolean(selectedListingMediaUrl);
+  const allSpotlightProviders = [
+    ...stores.map((entry: any, index: number) => {
+      const store = entry.store || {};
+      return {
+        id: `store-${entry.id || store.id || store.slug || index}`,
+        name: store.name || 'Loja',
+        label: 'Pedido no app',
+        imageUrl: logoFor(store) || imageFor(store),
+        accentClass: 'from-[#336886] via-[#5FD35A] to-emerald-300',
+        ringClass: 'ring-[#5FD35A]/35',
+      };
+    }),
+    ...placeListings.map((listing: any, index: number) => ({
+      id: `listing-${listing.id || listing.slug || listing.title || index}`,
+      name: listing.title || 'Serviço',
+      label: categoryLabel(listing.category),
+      imageUrl: logoFor(listing) || imageFor(listing),
+      accentClass: 'from-amber-300 via-orange-400 to-[#336886]',
+      ringClass: 'ring-amber-300/40',
+    })),
+  ];
+  const spotlightProviders = allSpotlightProviders.slice(0, 8);
+  const hiddenSpotlightCount = Math.max(0, allSpotlightProviders.length - spotlightProviders.length);
 
   useEffect(() => {
     setBannerIndex(0);
@@ -487,6 +510,62 @@ export function HospitalityPlacePage() {
           ) : null}
         </div>
       </section>
+
+      {!loading && !error && spotlightProviders.length > 0 ? (
+        <section className="relative z-10 -mt-4 px-4">
+          <div className="mx-auto max-w-6xl">
+            <div className="overflow-hidden rounded-[1.45rem] border border-white/80 bg-white/85 px-3.5 py-3 shadow-[0_20px_54px_-36px_rgba(15,23,42,0.36)] ring-1 ring-slate-950/[0.03] backdrop-blur-xl sm:px-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
+                    <Sparkle size={14} weight="fill" className="text-amber-500" />
+                    Rede local
+                  </p>
+                  <h2 className="mt-1 truncate text-[1.05rem] font-black tracking-[-0.035em] text-slate-950 sm:text-xl">
+                    Lojas e serviços que atendem aqui
+                  </h2>
+                  <p className="mt-0.5 text-xs font-semibold leading-relaxed text-slate-500 sm:text-sm">
+                    Lojas e serviços vinculados aparecem prontos para pedir ou chamar.
+                  </p>
+                </div>
+                <div className="flex items-center justify-between gap-3 sm:justify-end">
+                  <div className="flex min-w-0 -space-x-2.5">
+                    {spotlightProviders.map((provider: any, index: number) => (
+                      <div
+                        key={provider.id}
+                        className={`group/provider relative h-11 w-11 shrink-0 rounded-full bg-gradient-to-br ${provider.accentClass} p-[2px] shadow-[0_12px_22px_-16px_rgba(15,23,42,0.55)] ring-2 ${provider.ringClass} transition duration-300 ease-out hover:z-20 hover:-translate-y-1 sm:h-12 sm:w-12`}
+                        title={`${provider.name} - ${provider.label}`}
+                        style={{ zIndex: spotlightProviders.length - index }}
+                      >
+                        {index === 0 ? (
+                          <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full bg-[#5FD35A] ring-2 ring-white motion-safe:animate-pulse" />
+                        ) : null}
+                        <img
+                          src={provider.imageUrl}
+                          alt={provider.name}
+                          className="h-full w-full rounded-full border-2 border-white bg-slate-100 object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    ))}
+                    {hiddenSpotlightCount > 0 ? (
+                      <span
+                        className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white bg-slate-950 text-xs font-black text-white shadow-[0_12px_22px_-16px_rgba(15,23,42,0.55)] sm:h-12 sm:w-12"
+                        style={{ zIndex: 0 }}
+                      >
+                        +{hiddenSpotlightCount}
+                      </span>
+                    ) : null}
+                  </div>
+                  <span className="hidden shrink-0 rounded-full bg-[#336886]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] sm:inline-flex">
+                    {deliveryOptionLabel}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {!loading && !error ? (
         <section className="mx-auto grid max-w-6xl gap-5 px-4 pb-10 pt-3 lg:grid-cols-[1.35fr_0.65fr]">
