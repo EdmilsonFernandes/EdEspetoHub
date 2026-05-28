@@ -366,7 +366,7 @@ export function HospitalityPlacePage() {
       ringClass: 'ring-amber-300/40',
     })),
   ];
-  const spotlightProviders = allSpotlightProviders.slice(0, 8);
+  const spotlightProviders = allSpotlightProviders.slice(0, 10);
   const hiddenSpotlightCount = Math.max(0, allSpotlightProviders.length - spotlightProviders.length);
 
   useEffect(() => {
@@ -514,50 +514,50 @@ export function HospitalityPlacePage() {
       {!loading && !error && spotlightProviders.length > 0 ? (
         <section className="relative z-10 -mt-4 px-4">
           <div className="mx-auto max-w-6xl">
-            <div className="overflow-hidden rounded-[1.45rem] border border-white/80 bg-white/85 px-3.5 py-3 shadow-[0_20px_54px_-36px_rgba(15,23,42,0.36)] ring-1 ring-slate-950/[0.03] backdrop-blur-xl sm:px-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="overflow-hidden rounded-[1.65rem] border border-white/85 bg-white/88 px-3.5 py-3.5 shadow-[0_24px_62px_-38px_rgba(15,23,42,0.38)] ring-1 ring-slate-950/[0.03] backdrop-blur-xl sm:px-4 sm:py-4">
+              <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
                     <Sparkle size={14} weight="fill" className="text-amber-500" />
                     Rede local
                   </p>
-                  <h2 className="mt-1 truncate text-[1.05rem] font-black tracking-[-0.035em] text-slate-950 sm:text-xl">
-                    Lojas e serviços que atendem aqui
+                  <h2 className="mt-1 text-[1.1rem] font-black tracking-[-0.035em] text-slate-950 sm:text-xl">
+                    Quem atende este chalé
                   </h2>
                   <p className="mt-0.5 text-xs font-semibold leading-relaxed text-slate-500 sm:text-sm">
-                    Lojas e serviços vinculados aparecem prontos para pedir ou chamar.
+                    Marcas vinculadas para pedir pelo app ou chamar direto.
                   </p>
                 </div>
-                <div className="flex items-center justify-between gap-3 sm:justify-end">
-                  <div className="flex min-w-0 -space-x-2.5">
+                <div className="min-w-0 sm:flex sm:items-center sm:justify-end sm:gap-3">
+                  <div className="-mx-1 flex max-w-full items-center gap-0 overflow-x-auto px-1 pb-1 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:overflow-visible sm:px-0 sm:pb-0 sm:pt-0">
                     {spotlightProviders.map((provider: any, index: number) => (
                       <div
                         key={provider.id}
-                        className={`group/provider relative h-11 w-11 shrink-0 rounded-full bg-gradient-to-br ${provider.accentClass} p-[2px] shadow-[0_12px_22px_-16px_rgba(15,23,42,0.55)] ring-2 ${provider.ringClass} transition duration-300 ease-out hover:z-20 hover:-translate-y-1 sm:h-12 sm:w-12`}
+                        className={`group/provider relative -ml-2 first:ml-0 h-14 w-14 shrink-0 rounded-full bg-gradient-to-br ${provider.accentClass} p-[3px] shadow-[0_18px_34px_-22px_rgba(15,23,42,0.62)] ring-2 ${provider.ringClass} transition duration-300 ease-out hover:z-20 hover:-translate-y-1 hover:scale-105 active:scale-95 sm:h-16 sm:w-16`}
                         title={`${provider.name} - ${provider.label}`}
                         style={{ zIndex: spotlightProviders.length - index }}
                       >
                         {index === 0 ? (
-                          <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full bg-[#5FD35A] ring-2 ring-white motion-safe:animate-pulse" />
+                          <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-[#5FD35A] ring-2 ring-white motion-safe:animate-pulse" />
                         ) : null}
                         <img
                           src={provider.imageUrl}
                           alt={provider.name}
-                          className="h-full w-full rounded-full border-2 border-white bg-slate-100 object-cover"
+                          className="h-full w-full rounded-full border-[3px] border-white bg-slate-100 object-cover"
                           loading="lazy"
                         />
                       </div>
                     ))}
                     {hiddenSpotlightCount > 0 ? (
                       <span
-                        className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white bg-slate-950 text-xs font-black text-white shadow-[0_12px_22px_-16px_rgba(15,23,42,0.55)] sm:h-12 sm:w-12"
+                        className="relative -ml-2 inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-[3px] border-white bg-slate-950 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(15,23,42,0.62)] sm:h-16 sm:w-16"
                         style={{ zIndex: 0 }}
                       >
                         +{hiddenSpotlightCount}
                       </span>
                     ) : null}
                   </div>
-                  <span className="hidden shrink-0 rounded-full bg-[#336886]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] sm:inline-flex">
+                  <span className="mt-1 inline-flex shrink-0 rounded-full bg-[#336886]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] sm:mt-0">
                     {deliveryOptionLabel}
                   </span>
                 </div>
