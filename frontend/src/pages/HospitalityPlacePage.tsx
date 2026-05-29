@@ -403,6 +403,8 @@ export function HospitalityPlacePage() {
   ];
   const spotlightProviders = allSpotlightProviders.slice(0, 10);
   const hiddenSpotlightCount = Math.max(0, allSpotlightProviders.length - spotlightProviders.length);
+  const highlightedProviderCardClass =
+    'border-[#5FD35A]/70 bg-[linear-gradient(135deg,rgba(95,211,90,0.13),#ffffff_46%,rgba(51,104,134,0.10))] outline outline-2 outline-[#5FD35A]/65 ring-[#5FD35A]/45 shadow-[0_30px_70px_-32px_rgba(51,104,134,0.60)]';
   const scrollToProviderTarget = (targetId: string, providerName = '') => {
     if (!targetId || typeof window === 'undefined' || typeof document === 'undefined') return;
     setServiceFilter('all');
@@ -718,8 +720,17 @@ export function HospitalityPlacePage() {
                     id={targetId}
                     key={`${entry.id}-${store.id}`}
                     to={`/${store.slug}?${storeParams.toString()}`}
-                    className={`group/card scroll-mt-28 overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-offset-4 ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] ${highlighted ? 'border-[#5FD35A]/50 outline outline-2 outline-[#5FD35A]/55 shadow-[0_26px_58px_-32px_rgba(51,104,134,0.42)]' : ''} ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`group/card relative scroll-mt-28 overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-offset-4 ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] ${highlighted ? highlightedProviderCardClass : ''} ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
+                    {highlighted ? (
+                      <>
+                        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(95,211,90,0.22),transparent_32%),radial-gradient(circle_at_88%_8%,rgba(51,104,134,0.15),transparent_28%)]" />
+                        <div className="pointer-events-none absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/92 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-[0_16px_34px_-22px_rgba(15,23,42,0.48)] backdrop-blur-xl">
+                          <Sparkle size={12} weight="fill" className="text-[#5FD35A]" />
+                          Localizado
+                        </div>
+                      </>
+                    ) : null}
                     {mediaUrl ? (
                       <div
                         className="relative aspect-square self-start overflow-hidden rounded-[1.35rem] group/image cursor-zoom-in shrink-0"
@@ -785,8 +796,17 @@ export function HospitalityPlacePage() {
                     tabIndex={0}
                     onClick={() => setSelectedListing(listing)}
                     onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
-                    className={`group/card scroll-mt-28 cursor-pointer overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-none outline-offset-4 ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] focus-visible:ring-4 focus-visible:ring-[#336886]/14 ${highlighted ? 'border-[#5FD35A]/50 outline outline-2 outline-[#5FD35A]/55 shadow-[0_26px_58px_-32px_rgba(51,104,134,0.42)]' : ''} ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`group/card relative scroll-mt-28 cursor-pointer overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-none outline-offset-4 ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] focus-visible:ring-4 focus-visible:ring-[#336886]/14 ${highlighted ? highlightedProviderCardClass : ''} ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
+                    {highlighted ? (
+                      <>
+                        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(95,211,90,0.22),transparent_32%),radial-gradient(circle_at_88%_8%,rgba(51,104,134,0.15),transparent_28%)]" />
+                        <div className="pointer-events-none absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/92 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-[0_16px_34px_-22px_rgba(15,23,42,0.48)] backdrop-blur-xl">
+                          <Sparkle size={12} weight="fill" className="text-[#5FD35A]" />
+                          Localizado
+                        </div>
+                      </>
+                    ) : null}
                     {mediaUrl ? (
                       <div
                         className="relative aspect-square self-start overflow-hidden rounded-[1.35rem] group/image cursor-zoom-in shrink-0"
