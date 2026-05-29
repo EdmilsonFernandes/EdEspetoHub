@@ -26,7 +26,7 @@ export function PremiumSplashScreen() {
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const showDuration = isNativePlatform
-      ? (prefersReducedMotion ? 260 : 950)
+      ? (prefersReducedMotion ? 260 : 1600)
       : (prefersReducedMotion ? 850 : 2600);
     const fadeDuration = prefersReducedMotion ? 0 : isNativePlatform ? 260 : 480;
 
