@@ -263,6 +263,7 @@ export function HospitalityPlacePage() {
   const [selectedListing, setSelectedListing] = useState<any>(null);
   const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
   const [highlightedProviderTarget, setHighlightedProviderTarget] = useState('');
+  const [providerJumpLabel, setProviderJumpLabel] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -384,6 +385,8 @@ export function HospitalityPlacePage() {
         imageUrl: logoFor(store) || imageFor(store),
         accentClass: 'from-[#336886] via-[#5FD35A] to-emerald-300',
         ringClass: 'ring-[#5FD35A]/35',
+        badgeLabel: 'App',
+        BadgeIcon: Storefront,
       };
     }),
     ...placeListings.map((listing: any, index: number) => ({
@@ -394,19 +397,23 @@ export function HospitalityPlacePage() {
       imageUrl: logoFor(listing) || imageFor(listing),
       accentClass: 'from-amber-300 via-orange-400 to-[#336886]',
       ringClass: 'ring-amber-300/40',
+      badgeLabel: 'Direto',
+      BadgeIcon: PhoneCall,
     })),
   ];
   const spotlightProviders = allSpotlightProviders.slice(0, 10);
   const hiddenSpotlightCount = Math.max(0, allSpotlightProviders.length - spotlightProviders.length);
-  const scrollToProviderTarget = (targetId: string) => {
+  const scrollToProviderTarget = (targetId: string, providerName = '') => {
     if (!targetId || typeof window === 'undefined' || typeof document === 'undefined') return;
     setServiceFilter('all');
     setHighlightedProviderTarget(targetId);
+    setProviderJumpLabel(providerName ? `${providerName} localizado na lista.` : 'Serviço localizado na lista.');
     window.setTimeout(() => {
       document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 80);
     window.setTimeout(() => {
       setHighlightedProviderTarget((current) => (current === targetId ? '' : current));
+      setProviderJumpLabel('');
     }, 1800);
   };
 
@@ -415,6 +422,7 @@ export function HospitalityPlacePage() {
     setSelectedListing(null);
     setPreviewImage(null);
     setHighlightedProviderTarget('');
+    setProviderJumpLabel('');
   }, [destinationSlug, placeSlug]);
 
   useEffect(() => {
@@ -561,38 +569,45 @@ export function HospitalityPlacePage() {
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
                     <Sparkle size={14} weight="fill" className="text-amber-500" />
-                    Rede local
+                    Parceiros do chalé
                   </p>
                   <h2 className="mt-1 text-[1.1rem] font-black tracking-[-0.035em] text-slate-950 sm:text-xl">
                     Quem atende este chalé
                   </h2>
                   <p className="mt-0.5 text-xs font-semibold leading-relaxed text-slate-500 sm:text-sm">
-                    Marcas vinculadas para pedir pelo app ou chamar direto.
+                    Toque no logo para ir direto ao serviço abaixo.
                   </p>
                 </div>
                 <div className="min-w-0 sm:flex sm:items-center sm:justify-end sm:gap-3">
                   <div className="-mx-1 flex max-w-full items-center gap-0 overflow-x-auto px-1 pb-1 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:overflow-visible sm:px-0 sm:pb-0 sm:pt-0">
-                    {spotlightProviders.map((provider: any, index: number) => (
-                      <button
-                        type="button"
-                        key={provider.id}
-                        className={`group/provider relative -ml-2 first:ml-0 h-14 w-14 shrink-0 rounded-full bg-gradient-to-br ${provider.accentClass} p-[3px] shadow-[0_18px_34px_-22px_rgba(15,23,42,0.62)] ring-2 ${provider.ringClass} transition duration-300 ease-out hover:z-20 hover:-translate-y-1 hover:scale-105 active:scale-95 sm:h-16 sm:w-16`}
-                        onClick={() => scrollToProviderTarget(provider.targetId)}
-                        aria-label={`Ver ${provider.name} na lista abaixo`}
-                        title={`${provider.name} - ${provider.label}`}
-                        style={{ zIndex: spotlightProviders.length - index }}
-                      >
-                        {index === 0 ? (
-                          <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-[#5FD35A] ring-2 ring-white motion-safe:animate-pulse" />
-                        ) : null}
-                        <img
-                          src={provider.imageUrl}
-                          alt={provider.name}
-                          className="h-full w-full rounded-full border-[3px] border-white bg-slate-100 object-cover"
-                          loading="lazy"
-                        />
-                      </button>
-                    ))}
+                    {spotlightProviders.map((provider: any, index: number) => {
+                      const BadgeIcon = provider.BadgeIcon;
+                      return (
+                        <button
+                          type="button"
+                          key={provider.id}
+                          className={`group/provider relative -ml-2 first:ml-0 h-14 w-14 shrink-0 rounded-full bg-gradient-to-br ${provider.accentClass} p-[3px] shadow-[0_18px_34px_-22px_rgba(15,23,42,0.62)] ring-2 ${provider.ringClass} transition duration-300 ease-out hover:z-20 hover:-translate-y-1 hover:scale-105 active:scale-95 sm:h-16 sm:w-16`}
+                          onClick={() => scrollToProviderTarget(provider.targetId, provider.name)}
+                          aria-label={`Ver ${provider.name} na lista abaixo`}
+                          title={`${provider.name} - ${provider.label}`}
+                          style={{ zIndex: spotlightProviders.length - index }}
+                        >
+                          <img
+                            src={provider.imageUrl}
+                            alt={provider.name}
+                            className="h-full w-full rounded-full border-[3px] border-white bg-slate-100 object-cover"
+                            loading="lazy"
+                          />
+                          <span
+                            className="absolute -bottom-1 -right-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-slate-950 px-1 text-[8px] font-black uppercase tracking-[-0.02em] text-white shadow-[0_12px_24px_-16px_rgba(15,23,42,0.9)]"
+                            aria-hidden="true"
+                            title={provider.badgeLabel}
+                          >
+                            {BadgeIcon ? <BadgeIcon size={10} weight="bold" /> : provider.badgeLabel}
+                          </span>
+                        </button>
+                      );
+                    })}
                     {hiddenSpotlightCount > 0 ? (
                       <span
                         className="relative -ml-2 inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-[3px] border-white bg-slate-950 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(15,23,42,0.62)] sm:h-16 sm:w-16"
@@ -607,6 +622,16 @@ export function HospitalityPlacePage() {
                   </span>
                 </div>
               </div>
+              {providerJumpLabel ? (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-[#5FD35A]/35 bg-[#5FD35A]/12 px-3 py-2 text-[11px] font-black text-[#153A4C] shadow-[0_18px_36px_-28px_rgba(51,104,134,0.36)] animate-in fade-in slide-in-from-top-1 duration-200"
+                >
+                  <Sparkle size={13} weight="fill" className="shrink-0 text-[#336886]" />
+                  <span className="truncate">{providerJumpLabel}</span>
+                </div>
+              ) : null}
             </div>
           </div>
         </section>
