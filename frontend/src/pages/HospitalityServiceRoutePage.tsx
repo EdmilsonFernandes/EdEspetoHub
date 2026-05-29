@@ -258,7 +258,7 @@ export function HospitalityServiceRoutePage() {
 
   return (
     <PublicDestinationShell active="place" backTo={placePublicPath} backLabel="Voltar" contextLabel="Rota da hospedagem">
-      <main className="min-h-screen bg-[radial-gradient(circle_at_12%_0%,rgba(51,104,134,0.16),transparent_34%),linear-gradient(135deg,#f6f2e9,#eef5f1_58%,#eadfc8)] px-4 pb-10 pt-5">
+      <main className="min-h-screen bg-[radial-gradient(circle_at_12%_0%,rgba(51,104,134,0.16),transparent_34%),linear-gradient(135deg,#f6f2e9,#eef5f1_58%,#eadfc8)] px-4 pb-10 pt-3 sm:pt-5">
         <section className="mx-auto max-w-4xl">
           <div className="overflow-hidden rounded-[1.85rem] border border-white/85 bg-white/92 p-4 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.5)] backdrop-blur sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

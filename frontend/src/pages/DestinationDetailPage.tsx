@@ -280,20 +280,20 @@ export function DestinationDetailPage() {
 
   return (
     <PublicDestinationShell active="city" backTo="/destinos" backLabel="Voltar" contextLabel={destination.name || 'Cidade turística'}>
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.55),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-3 pt-3 sm:pb-4 sm:pt-5">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.55),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-3 pt-2.5 sm:pb-4 sm:pt-4">
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#336886]/16 blur-3xl" />
         <div className="absolute -left-16 bottom-4 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
           {loading ? (
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <PreStoreCardSkeleton />
               <PreStoreCardSkeleton />
             </div>
           ) : null}
-          {error ? <p className="mt-8 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
+          {error ? <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
 
           {!loading && !error ? (
-            <div className="space-y-4 py-2 sm:py-4">
+            <div className="space-y-4 py-1.5 sm:py-3">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="min-w-0 max-w-3xl">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Explore a região</p>
@@ -354,7 +354,7 @@ export function DestinationDetailPage() {
       </section>
 
       {!loading && !error ? (
-        <section className="mx-auto grid w-full min-w-0 max-w-6xl gap-7 px-4 pb-10 pt-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <section className="mx-auto grid w-full min-w-0 max-w-6xl gap-7 px-4 pb-10 pt-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
           {showPlacesSection ? (
           <div id="hospedagens" className="min-w-0 max-w-full scroll-mt-28 space-y-5">
             <div className="flex items-center justify-between gap-3">
