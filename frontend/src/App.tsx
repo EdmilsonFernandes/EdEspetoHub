@@ -11,6 +11,7 @@ import { NativePushPermissionBanner } from './components/common/NativePushPermis
 import { NativeAppNavigator } from './components/common/NativeAppNavigator';
 import { OfflineAlert } from './components/common/OfflineAlert';
 import { PremiumSplashScreen } from './components/common/PremiumSplashScreen';
+import { AppRobotLoader } from './components/common/AppRobotLoader';
 import { AccessPortal } from './pages/AccessPortal';
 import { AdminLogin } from './pages/AdminLogin';
 import { ClientAuth } from './pages/ClientAuth';
@@ -105,22 +106,11 @@ const AdminHighlights = lazyPage(loadAdminHighlightsPage, 'AdminHighlights');
 const SystemGuidePage = lazyPage(() => import('./pages/SystemGuidePage'), 'SystemGuidePage');
 
 const AppRouteFallback = () => (
-  <div className="min-h-screen bg-[#EEF2F7] px-4 py-[max(2rem,env(safe-area-inset-top))] text-slate-900">
-    <div className="mx-auto max-w-[430px] space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="h-11 w-11 animate-pulse rounded-full bg-white shadow-[0_8px_24px_rgba(0,0,0,0.055)]" />
-        <div className="space-y-2">
-          <div className="h-3 w-24 animate-pulse rounded-full bg-slate-200" />
-          <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
-        </div>
-      </div>
-      <div className="h-12 animate-pulse rounded-[18px] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.055)]" />
-      <div className="grid gap-3">
-        <div className="h-28 animate-pulse rounded-[1.5rem] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.055)]" />
-        <div className="h-24 animate-pulse rounded-[1.5rem] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.055)]" />
-      </div>
-    </div>
-  </div>
+  <AppRobotLoader
+    fullScreen
+    title="Abrindo a próxima tela"
+    subtitle="Carregando a experiência sem perder o contexto do app."
+  />
 );
 
 const AppRouteWarmup = () => {

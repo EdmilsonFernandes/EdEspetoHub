@@ -54,21 +54,28 @@ export function OfflineAlert() {
   if (!isOffline) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[max(0.85rem,env(safe-area-inset-bottom))] z-[10000] flex justify-center px-3 sm:bottom-auto sm:top-[max(0.9rem,env(safe-area-inset-top))]">
-      <div className="pointer-events-auto w-full max-w-md overflow-hidden rounded-[1.6rem] border border-white/12 bg-[#0B0F1A]/94 text-white shadow-[0_24px_80px_-36px_rgba(8,17,31,0.9)] ring-1 ring-[#336886]/20 backdrop-blur-xl">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[max(0.85rem,env(safe-area-inset-bottom))] z-[10000] flex justify-center px-3 sm:bottom-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="pointer-events-auto w-full max-w-md overflow-hidden rounded-[1.65rem] border border-white/85 bg-white/94 text-slate-900 shadow-[0_24px_70px_-40px_rgba(15,23,42,0.46)] ring-1 ring-[#336886]/10 backdrop-blur-xl">
         <div className="relative p-4">
-          <div className="pointer-events-none absolute -right-10 -top-12 h-28 w-28 rounded-full bg-[#336886]/24 blur-2xl" />
-          <div className="pointer-events-none absolute -bottom-12 left-4 h-28 w-28 rounded-full bg-[#5FD35A]/10 blur-2xl" />
+          <div className="pointer-events-none absolute -right-10 -top-12 h-28 w-28 rounded-full bg-[#336886]/16 blur-2xl" />
+          <div className="pointer-events-none absolute -bottom-12 left-4 h-28 w-28 rounded-full bg-[#5FD35A]/16 blur-2xl" />
 
           <div className="relative flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-300/25 bg-amber-300/10 text-amber-200 shadow-[0_0_28px_rgba(251,191,36,0.14)]">
-              <WifiSlash size={21} weight="duotone" />
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.05rem] bg-[linear-gradient(145deg,#153A4C,#336886)] shadow-[0_18px_38px_-26px_rgba(21,58,76,0.85)]">
+              <span className="absolute -top-2 left-1/2 h-4 w-[2px] -translate-x-1/2 rounded-full bg-[#5FD35A]/85" />
+              <span className="absolute left-[15px] top-[15px] h-1.5 w-1.5 animate-pulse rounded-full bg-[#5FD35A] shadow-[0_0_10px_rgba(95,211,90,0.9)]" />
+              <span className="absolute right-[15px] top-[15px] h-1.5 w-1.5 animate-pulse rounded-full bg-[#5FD35A] shadow-[0_0_10px_rgba(95,211,90,0.9)]" />
+              <img src="/janocaminho.jpg" alt="" className="mt-3 h-7 w-7 rounded-lg object-contain" />
+              <span className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-amber-400 text-white">
+                <WifiSlash size={11} weight="bold" />
+              </span>
             </div>
+
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#8EC5DD]">Conexão pausada</p>
-              <h2 className="mt-1 text-base font-black leading-tight text-white">Sem internet agora</h2>
-              <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-300">
-                Mantemos sua rota preparada. Assim que a conexão voltar, lojas, destinos e pedidos atualizam automaticamente.
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Conexão pausada</p>
+              <h2 className="mt-1 text-base font-black leading-tight text-slate-950">Sem internet agora</h2>
+              <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
+                O app fica preparado e atualiza lojas, destinos e pedidos assim que a conexão voltar.
               </p>
             </div>
           </div>
@@ -81,9 +88,9 @@ export function OfflineAlert() {
             ].map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.06] px-2 py-2 text-center">
-                  <Icon size={16} weight="duotone" className="mx-auto text-[#8EC5DD]" />
-                  <p className="mt-1 truncate text-[10px] font-black uppercase tracking-[0.1em] text-slate-300">{item.label}</p>
+                <div key={item.label} className="rounded-2xl border border-[#336886]/10 bg-[#F4F8FB] px-2 py-2 text-center">
+                  <Icon size={16} weight="duotone" className="mx-auto text-[#336886]" />
+                  <p className="mt-1 truncate text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">{item.label}</p>
                 </div>
               );
             })}
@@ -93,7 +100,7 @@ export function OfflineAlert() {
             type="button"
             onClick={handleRetry}
             disabled={checking}
-            className="relative mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#336886] px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-white shadow-[0_18px_42px_-28px_rgba(51,104,134,0.9)] transition-all hover:bg-[#2b5b75] active:scale-[0.99] disabled:opacity-70"
+            className="relative mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-white shadow-[0_18px_42px_-28px_rgba(51,104,134,0.9)] transition-all hover:brightness-105 active:scale-[0.99] disabled:opacity-70"
           >
             <ArrowClockwise size={15} weight="bold" className={checking ? 'animate-spin' : ''} />
             {checking ? 'Verificando...' : 'Tentar reconectar'}

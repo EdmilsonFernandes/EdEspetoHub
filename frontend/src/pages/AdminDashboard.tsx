@@ -35,6 +35,7 @@ import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { FormSection } from '../components/common/FormSection';
 import { PremiumSelect } from '../components/common/PremiumSelect';
+import { AppRobotLoader } from '../components/common/AppRobotLoader';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
 import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
@@ -2803,7 +2804,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
    * RENDER
    * ========================= */
   if (!session?.store) {
-    return <div className="ds-loading-page">Carregando painel da loja...</div>;
+    return (
+      <AppRobotLoader
+        fullScreen
+        title="Abrindo painel da loja"
+        subtitle="Preparando fila, vendas e configurações da operação."
+      />
+    );
   }
 
   const openingHours = session?.store?.settings?.openingHours || [];

@@ -39,6 +39,7 @@ import { formatSelectedModifiers } from '../utils/productModifiers';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AppImagePreviewDialog } from '../components/common/AppImagePreviewDialog';
+import { AppRobotLoader } from '../components/common/AppRobotLoader';
 import { textareaAssistProps } from '../utils/inputAssist';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
@@ -1480,9 +1481,11 @@ export function ClientOrders() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#EEF2F7]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
-      </div>
+      <AppRobotLoader
+        fullScreen
+        title="Buscando seus pedidos"
+        subtitle="Sincronizando histórico, andamento e notificações."
+      />
     );
   }
 

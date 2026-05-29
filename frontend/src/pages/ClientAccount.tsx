@@ -27,6 +27,7 @@ import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
+import { AppRobotLoader } from '../components/common/AppRobotLoader';
 import { AccountMfaPanel } from '../components/Auth/AccountMfaPanel';
 import { authService } from '../services/authService';
 import { forgetTrustedMfaDevice } from '../utils/mfaDevice';
@@ -644,9 +645,11 @@ export function ClientAccount() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#EEF2F7]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
-      </div>
+      <AppRobotLoader
+        fullScreen
+        title="Abrindo sua conta"
+        subtitle="Carregando perfil, endereços e preferências com segurança."
+      />
     );
   }
 

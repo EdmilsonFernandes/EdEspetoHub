@@ -20,6 +20,7 @@ import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
+import { AppRobotLoader } from '../components/common/AppRobotLoader';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
@@ -3633,14 +3634,11 @@ export function StorePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#EEF2F7] to-[#E4EBF3] flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="mb-4">
-            <div className="w-16 h-16 mx-auto rounded-full border-4 border-gray-200 dark:border-gray-700 border-t-red-500 dark:border-t-red-500 animate-spin"></div>
-          </div>
-          <p className="text-gray-600 dark:text-gray-300 font-semibold">Carregando loja...</p>
-        </div>
-      </div>
+      <AppRobotLoader
+        fullScreen
+        title="Carregando loja"
+        subtitle="Preparando cardápio, fotos e dados da vitrine."
+      />
     );
   }
 
