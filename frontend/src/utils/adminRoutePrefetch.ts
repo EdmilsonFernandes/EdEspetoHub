@@ -29,6 +29,12 @@ export const loadStorePage = () => {
   return storePagePromise;
 };
 
+const warmAdminProductCatalog = () => {
+  void import('../services/productService')
+    .then(({ productService }) => productService.list())
+    .catch(() => undefined);
+};
+
 export const prefetchAdminLandingRoutes = () => {
   const isMobile =
     typeof window !== 'undefined' &&
@@ -37,12 +43,14 @@ export const prefetchAdminLandingRoutes = () => {
   if (isMobile) {
     void loadStorePage().catch(() => undefined);
     void loadAdminQueuePage().catch(() => undefined);
+    warmAdminProductCatalog();
     return;
   }
 
   void loadAdminDashboardPage().catch(() => undefined);
   void loadAdminQueuePage().catch(() => undefined);
   void loadAdminOrdersPage().catch(() => undefined);
+  warmAdminProductCatalog();
 };
 
 export const scheduleAdminRoutePrefetch = () => {

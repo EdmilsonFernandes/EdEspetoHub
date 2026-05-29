@@ -13,6 +13,77 @@ const toJson = async (response: any) => {
   return response.json();
 };
 
+const PUBLIC_DESTINATION_CACHE_TTL_MS = 60_000;
+const publicDestinationCache = new Map<string, { ts: number; data: any }>();
+const publicDestinationInflight = new Map<string, Promise<any>>();
+
+const readPublicDestinationCache = (key: string) => {
+  const normalizedKey = String(key || '').trim();
+  if (!normalizedKey) return null;
+  const now = Date.now();
+  const memory = publicDestinationCache.get(normalizedKey);
+  if (memory && now - Number(memory.ts || 0) <= PUBLIC_DESTINATION_CACHE_TTL_MS) {
+    return memory.data;
+  }
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(normalizedKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const ts = Number(parsed?.ts || 0);
+    if (!ts || now - ts > PUBLIC_DESTINATION_CACHE_TTL_MS) {
+      sessionStorage.removeItem(normalizedKey);
+      publicDestinationCache.delete(normalizedKey);
+      return null;
+    }
+    publicDestinationCache.set(normalizedKey, { ts, data: parsed?.data ?? null });
+    return parsed?.data ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const writePublicDestinationCache = (key: string, data: any) => {
+  const normalizedKey = String(key || '').trim();
+  if (!normalizedKey) return data;
+  const payload = { ts: Date.now(), data };
+  publicDestinationCache.set(normalizedKey, payload);
+  if (typeof window !== 'undefined') {
+    try {
+      sessionStorage.setItem(normalizedKey, JSON.stringify(payload));
+    } catch {
+      // ignore cache write failure
+    }
+  }
+  return data;
+};
+
+const publicCachedRawGet = async (cacheKey: string, path: string, options?: { forceRefresh?: boolean }) => {
+  if (!options?.forceRefresh) {
+    const cached = readPublicDestinationCache(cacheKey);
+    if (cached) return cached;
+  }
+
+  const inflightKey = options?.forceRefresh ? `${cacheKey}:force` : cacheKey;
+  const inflight = publicDestinationInflight.get(inflightKey);
+  if (inflight) return inflight;
+
+  const request = apiClient
+    .rawGet(path, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' },
+      authMode: 'none',
+    })
+    .then(toJson)
+    .then((data) => writePublicDestinationCache(cacheKey, data))
+    .finally(() => {
+      publicDestinationInflight.delete(inflightKey);
+    });
+
+  publicDestinationInflight.set(inflightKey, request);
+  return request;
+};
+
 const superAdminRequest = async (path: string, options: any = {}) => {
   const token = localStorage.getItem('superAdminToken') || '';
   const base = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -29,40 +100,43 @@ const superAdminRequest = async (path: string, options: any = {}) => {
 };
 
 export const destinationService = {
-  async listPublic(params?: { lat?: number | string | null; lng?: number | string | null; city?: string | null; state?: string | null }) {
+  async listPublic(params?: { lat?: number | string | null; lng?: number | string | null; city?: string | null; state?: string | null }, options?: { forceRefresh?: boolean }) {
     const search = new URLSearchParams();
     if (params?.lat !== null && params?.lat !== undefined && String(params.lat).trim()) search.set('lat', String(params.lat));
     if (params?.lng !== null && params?.lng !== undefined && String(params.lng).trim()) search.set('lng', String(params.lng));
     if (params?.city) search.set('city', String(params.city).trim());
     if (params?.state) search.set('state', String(params.state).trim().toUpperCase());
     const suffix = search.toString() ? `?${search.toString()}` : '';
-    const response = await apiClient.rawGet(`/public/destinations${suffix}`, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' },
-      authMode: 'none',
-    });
-    return toJson(response);
+    return publicCachedRawGet(`public:destinations:list:${suffix || 'default'}`, `/public/destinations${suffix}`, options);
   },
 
-  async getPublic(slug: string) {
-    const response = await apiClient.rawGet(`/public/destinations/${encodeURIComponent(slug)}`, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' },
-      authMode: 'none',
-    });
-    return toJson(response);
-  },
-
-  async getHospitalityPlace(destinationSlug: string, placeSlug: string) {
-    const response = await apiClient.rawGet(
-      `/public/destinations/${encodeURIComponent(destinationSlug)}/hospitality/${encodeURIComponent(placeSlug)}`,
-      {
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' },
-        authMode: 'none',
-      }
+  async getPublic(slug: string, options?: { forceRefresh?: boolean }) {
+    const normalizedSlug = String(slug || '').trim().toLowerCase();
+    return publicCachedRawGet(
+      `public:destinations:detail:${normalizedSlug}`,
+      `/public/destinations/${encodeURIComponent(slug)}`,
+      options
     );
-    return toJson(response);
+  },
+
+  async getHospitalityPlace(destinationSlug: string, placeSlug: string, options?: { forceRefresh?: boolean }) {
+    const normalizedDestinationSlug = String(destinationSlug || '').trim().toLowerCase();
+    const normalizedPlaceSlug = String(placeSlug || '').trim().toLowerCase();
+    return publicCachedRawGet(
+      `public:destinations:hospitality:${normalizedDestinationSlug}:${normalizedPlaceSlug}`,
+      `/public/destinations/${encodeURIComponent(destinationSlug)}/hospitality/${encodeURIComponent(placeSlug)}`,
+      options
+    );
+  },
+
+  prefetchPublic(slug: string) {
+    if (!String(slug || '').trim()) return Promise.resolve(null);
+    return destinationService.getPublic(slug).catch(() => null);
+  },
+
+  prefetchHospitalityPlace(destinationSlug: string, placeSlug: string) {
+    if (!String(destinationSlug || '').trim() || !String(placeSlug || '').trim()) return Promise.resolve(null);
+    return destinationService.getHospitalityPlace(destinationSlug, placeSlug).catch(() => null);
   },
 
   createPartnerRequest(payload: any) {

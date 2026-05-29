@@ -14,6 +14,7 @@ const PRODUCT_CACHE_TTL_MS = 90 * 1000;
 const PRODUCT_CACHE_KEY_PREFIX = 'products:catalog:';
 const inMemoryProductCache = new Map<string, { ts: number; items: any[] }>();
 const publicSlugProductCache = new Map<string, { ts: number; items: any[] }>();
+const publicSlugProductInflight = new Map<string, Promise<any[]>>();
 
 const normalizeProduct = (product: any) => {
   const description = product.description ?? product.desc ?? "";
@@ -160,6 +161,8 @@ const writePublicProductCache = (slug: string, items: any[]) => {
   return items;
 };
 
+const normalizePublicSlug = (slug: string) => String(slug || '').trim().toLowerCase();
+
 // 🔐 fonte única da loja (admin/produção)
 const getStoreIdentifierFromSession = (): string | null =>
 {
@@ -246,16 +249,41 @@ export const productService = {
 
   async listPublicBySlug(slug: string, options?: { forceRefresh?: boolean; timeoutMs?: number })
   {
-    const cached = options?.forceRefresh ? null : readPublicProductCache(slug);
+    const normalizedSlug = normalizePublicSlug(slug);
+    const cached = options?.forceRefresh ? null : readPublicProductCache(normalizedSlug);
     if (cached) return cached;
+    const inflight = publicSlugProductInflight.get(normalizedSlug);
+    if (inflight) return inflight;
     const suffix = options?.forceRefresh ? `?t=${Date.now()}` : '';
-    const data = await apiClient.get(`/public/stores/slug/${slug}/products${suffix}`, {
-      authMode: 'none',
-      ...(options?.timeoutMs ? { timeoutMs: options.timeoutMs } : {}),
-      ...(options?.forceRefresh ? { headers: { 'Cache-Control': 'no-cache' } } : {}),
-    });
-    const normalized = data.map(normalizeProduct);
-    return writePublicProductCache(slug, normalized);
+    const request = apiClient
+      .get(`/public/stores/slug/${slug}/products${suffix}`, {
+        authMode: 'none',
+        ...(options?.timeoutMs ? { timeoutMs: options.timeoutMs } : {}),
+        ...(options?.forceRefresh ? { headers: { 'Cache-Control': 'no-cache' } } : {}),
+      })
+      .then((data) => {
+        const normalized = data.map(normalizeProduct);
+        return writePublicProductCache(slug, normalized);
+      })
+      .finally(() => {
+        publicSlugProductInflight.delete(normalizedSlug);
+      });
+    publicSlugProductInflight.set(normalizedSlug, request);
+    return request;
+  },
+
+  peekPublicBySlug(slug: string) {
+    return readPublicProductCache(slug);
+  },
+
+  async prefetchPublicBySlug(slug: string, options?: { timeoutMs?: number }) {
+    const normalizedSlug = normalizePublicSlug(slug);
+    if (!normalizedSlug) return [];
+
+    const cached = readPublicProductCache(normalizedSlug);
+    if (cached) return cached;
+
+    return productService.listPublicBySlug(normalizedSlug, { timeoutMs: options?.timeoutMs || 6500 });
   },
 
   async listCategories(storeId?: string) {

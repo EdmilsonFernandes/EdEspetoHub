@@ -61,7 +61,7 @@ const CHECKOUT_SLOW_FEEDBACK_MS = 2800;
 const CHECKOUT_CREATE_ORDER_TIMEOUT_MS = 18000;
 const STOREFRONT_PRODUCTS_REFRESH_TIMEOUT_MS = 10000;
 const STOREFRONT_PRODUCTS_SLOW_FEEDBACK_MS = 2200;
-const STOREFRONT_PRODUCTS_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const STOREFRONT_PRODUCTS_CACHE_MAX_AGE_MS = 90 * 1000;
 
 const buildPublicPaymentSummary = (storeData: any) => {
   const rawSummary = storeData?.paymentSummary || {};
@@ -1522,6 +1522,11 @@ export function StorePage() {
 
     const PRODUCTS_CACHE_KEY = `products_cache:${storeSlug}`;
     const readProductsCache = () => {
+      const prefetched = productService.peekPublicBySlug(storeSlug);
+      if (Array.isArray(prefetched) && prefetched.length) {
+        return { data: prefetched, ts: Date.now() };
+      }
+
       try {
         const raw = localStorage.getItem(PRODUCTS_CACHE_KEY);
         if (!raw) return null;

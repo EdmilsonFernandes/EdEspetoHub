@@ -3,6 +3,7 @@ import { apiClient } from '../config/apiClient';
 const PUBLIC_STORE_CACHE_TTL_MS = 60 * 1000;
 const publicStoreMemoryCache = new Map<string, { ts: number; data: any }>();
 const publicPortfolioMemoryCache = new Map<string, { ts: number; data: any }>();
+const publicStoreInflight = new Map<string, Promise<any>>();
 
 const getStoreCacheKey = (slug: string) => `public:store:${String(slug || '').trim().toLowerCase()}`;
 
@@ -121,12 +122,23 @@ export const storeService = {
 
   async fetchBySlug(slug: any) {
     if (!slug) return null;
+    const normalizedSlug = String(slug || '').trim().toLowerCase();
     const cached = readPublicStoreCache(slug);
     if (cached) return cached;
-    const response = await apiClient.rawGet(`/stores/slug/${slug}`, { authMode: 'none' });
-    if (response.status === 404) return null;
-    const data = await toJson(response);
-    return writePublicStoreCache(slug, data);
+    const inflight = publicStoreInflight.get(normalizedSlug);
+    if (inflight) return inflight;
+    const request = apiClient
+      .rawGet(`/stores/slug/${slug}`, { authMode: 'none' })
+      .then(async (response) => {
+        if (response.status === 404) return null;
+        const data = await toJson(response);
+        return writePublicStoreCache(slug, data);
+      })
+      .finally(() => {
+        publicStoreInflight.delete(normalizedSlug);
+      });
+    publicStoreInflight.set(normalizedSlug, request);
+    return request;
   },
 
   async listPortfolio(params?: { lat?: number | null; lng?: number | null; city?: string | null; state?: string | null }) {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { CaretRight, Sparkle, Star } from '@phosphor-icons/react';
 import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
 import { prefetchRouteByPath } from '../../../utils/clientRoutePrefetch';
+import { prefetchStorefrontData } from '../../../utils/storefrontPrefetch';
 
 export type HubFeaturedCarouselItem = {
   id: string;
@@ -92,14 +93,18 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                 const featuredStorePath = selectedCondominiumSlug
                   ? `/${item.storeSlug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}`
                   : `/${item.storeSlug}`;
+                const warmupStore = () => {
+                  prefetchRouteByPath(featuredStorePath);
+                  prefetchStorefrontData(item.storeSlug);
+                };
 
                 return (
                   <Link
                     key={`${item.storeSlug}-${item.id}`}
                     to={featuredStorePath}
-                    onPointerEnter={() => prefetchRouteByPath(featuredStorePath)}
-                    onFocus={() => prefetchRouteByPath(featuredStorePath)}
-                    onTouchStart={() => prefetchRouteByPath(featuredStorePath)}
+                    onPointerEnter={warmupStore}
+                    onFocus={warmupStore}
+                    onTouchStart={warmupStore}
                     onClick={() => onStageProduct(item)}
                     className="jnc-hub-touch jnc-hub-lift jnc-hub-card group flex min-h-[112px] min-w-[268px] snap-start gap-3 rounded-[1.45rem] p-2.5 sm:min-w-[292px]"
                   >

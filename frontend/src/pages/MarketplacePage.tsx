@@ -2176,10 +2176,16 @@ export function MarketplacePage() {
                   const countLabel = totalOptions > 0
                     ? `${totalOptions} opç${totalOptions === 1 ? 'ão' : 'ões'}`
                     : 'Destaque local';
+                  const warmupDestination = () => {
+                    if (destination.slug) void destinationService.prefetchPublic(destination.slug);
+                  };
                   return (
                     <Link
                       key={destination.id || destination.slug}
                       to={`/destinos/${destination.slug}`}
+                      onPointerEnter={warmupDestination}
+                      onFocus={warmupDestination}
+                      onTouchStart={warmupDestination}
                       className={`jnc-hub-touch jnc-hub-lift group relative flex shrink-0 overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_22px_54px_-40px_rgba(15,23,42,0.46)] ring-1 ring-slate-200/70 ${index === 0 ? 'h-[11.4rem] w-[18.75rem]' : 'h-[10.75rem] w-[15.75rem]'}`}
                     >
                       <img
@@ -2946,11 +2952,17 @@ export function MarketplacePage() {
                             const logoUrl = resolveCondominiumAssetUrl(condominium, 'logo');
                             const bannerUrl = resolveCondominiumAssetUrl(condominium, 'banner') || logoUrl;
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
+                            const warmupCondominium = () => {
+                              void condominiumService.prefetchStores(slug);
+                            };
                             return (
                               <button
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event)}
+                                onPointerEnter={warmupCondominium}
+                                onFocus={warmupCondominium}
+                                onTouchStart={warmupCondominium}
                                 className={`group relative w-full overflow-hidden rounded-[1.65rem] p-3 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
                                     ? 'bg-white shadow-[0_22px_42px_-27px_rgba(51,104,134,0.34)] ring-1 ring-[#336886]/16'
@@ -3039,11 +3051,17 @@ export function MarketplacePage() {
                             const logoUrl = resolveCondominiumAssetUrl(condominium, 'logo');
                             const bannerUrl = resolveCondominiumAssetUrl(condominium, 'banner') || logoUrl;
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
+                            const warmupCondominium = () => {
+                              void condominiumService.prefetchStores(slug);
+                            };
                             return (
                               <button
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, event)}
+                                onPointerEnter={warmupCondominium}
+                                onFocus={warmupCondominium}
+                                onTouchStart={warmupCondominium}
                                 className={`group relative w-full overflow-hidden rounded-[1.65rem] p-3 text-left transition-all duration-300 active:scale-[0.985] ${
                                   active
                                     ? 'bg-white shadow-[0_20px_38px_-27px_rgba(51,104,134,0.32)] ring-1 ring-[#336886]/16'
@@ -3114,11 +3132,17 @@ export function MarketplacePage() {
                             const displayName = formatCondominiumDisplayName(name);
                             const logoUrl = resolveCondominiumAssetUrl(condominium, 'logo');
                             const bannerUrl = resolveCondominiumAssetUrl(condominium, 'banner') || logoUrl;
+                            const warmupCondominium = () => {
+                              void condominiumService.prefetchStores(slug);
+                            };
                             return (
                               <button
                                 key={slug}
                                 type="button"
                                 onClick={() => handleClick(slug, name, null)}
+                                onPointerEnter={warmupCondominium}
+                                onFocus={warmupCondominium}
+                                onTouchStart={warmupCondominium}
                                 className={`group relative w-full overflow-hidden rounded-[1.45rem] p-3 text-left transition-all duration-200 active:scale-[0.99] ${
                                   active
                                     ? 'bg-white shadow-[0_16px_32px_-27px_rgba(51,104,134,0.24)] ring-1 ring-[#336886]/14'

@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
+import { prefetchStorefrontData } from '../../../utils/storefrontPrefetch';
 
 export type HubSearchProductItem = {
   id: string;
@@ -39,10 +40,17 @@ export const HubSearchProductResults = memo(function HubSearchProductResults({
       </div>
 
       <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto no-scrollbar px-1 pb-3">
-        {items.map((item) => (
+        {items.map((item) => {
+          const targetPath = selectedCondominiumSlug ? `/${item.storeSlug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}` : `/${item.storeSlug}`;
+          const warmupStore = () => prefetchStorefrontData(item.storeSlug);
+
+          return (
           <Link
             key={`search-res-${item.storeSlug}-${item.id}`}
-            to={selectedCondominiumSlug ? `/${item.storeSlug}?condominio=${encodeURIComponent(selectedCondominiumSlug)}` : `/${item.storeSlug}`}
+            to={targetPath}
+            onPointerEnter={warmupStore}
+            onFocus={warmupStore}
+            onTouchStart={warmupStore}
             onClick={() => onStageProduct(item)}
             className="jnc-hub-touch jnc-hub-lift jnc-hub-card group min-w-[160px] snap-start overflow-hidden rounded-[1.45rem]"
           >
@@ -79,7 +87,8 @@ export const HubSearchProductResults = memo(function HubSearchProductResults({
               </div>
             </div>
           </Link>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

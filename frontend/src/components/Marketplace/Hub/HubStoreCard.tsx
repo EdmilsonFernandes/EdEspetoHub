@@ -3,6 +3,7 @@ import type { ComponentType, MouseEvent } from 'react';
 import { Heart, Star, Storefront } from '@phosphor-icons/react';
 import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
 import { prefetchRouteByPath } from '../../../utils/clientRoutePrefetch';
+import { prefetchStorefrontData } from '../../../utils/storefrontPrefetch';
 
 type BadgeIcon = ComponentType<{ size?: number; weight?: any; className?: string }>;
 
@@ -77,7 +78,10 @@ export function HubStoreCard({
     onToggleFavorite(store.slug);
   };
   const isUnavailableForRegion = Boolean(store.isOutOfRegion);
-  const warmupStoreRoute = () => prefetchRouteByPath(to);
+  const warmupStoreRoute = () => {
+    prefetchRouteByPath(to);
+    prefetchStorefrontData(store.slug);
+  };
 
   if (selectedCondominium) {
     return (

@@ -13,6 +13,70 @@ const toJson = async (response: any) => {
   return response.json();
 };
 
+const PUBLIC_CONDOMINIUM_CACHE_TTL_MS = 30_000;
+const publicCondominiumCache = new Map<string, { ts: number; data: any }>();
+const publicCondominiumInflight = new Map<string, Promise<any>>();
+
+const readPublicCondominiumCache = (key: string) => {
+  const now = Date.now();
+  const entry = publicCondominiumCache.get(key);
+  if (entry && now - Number(entry.ts || 0) <= PUBLIC_CONDOMINIUM_CACHE_TTL_MS) {
+    return entry.data;
+  }
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const ts = Number(parsed?.ts || 0);
+    if (!ts || now - ts > PUBLIC_CONDOMINIUM_CACHE_TTL_MS) {
+      sessionStorage.removeItem(key);
+      publicCondominiumCache.delete(key);
+      return null;
+    }
+    publicCondominiumCache.set(key, { ts, data: parsed?.data ?? null });
+    return parsed?.data ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const writePublicCondominiumCache = (key: string, data: any) => {
+  const payload = { ts: Date.now(), data };
+  publicCondominiumCache.set(key, payload);
+  if (typeof window !== 'undefined') {
+    try {
+      sessionStorage.setItem(key, JSON.stringify(payload));
+    } catch {
+      // ignore cache write failure
+    }
+  }
+  return data;
+};
+
+const publicCachedRawGet = async (key: string, path: string) => {
+  const cached = readPublicCondominiumCache(key);
+  if (cached) return cached;
+
+  const inflight = publicCondominiumInflight.get(key);
+  if (inflight) return inflight;
+
+  const request = apiClient
+    .rawGet(path, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' },
+      authMode: 'none',
+    })
+    .then(toJson)
+    .then((data) => writePublicCondominiumCache(key, data))
+    .finally(() => {
+      publicCondominiumInflight.delete(key);
+    });
+
+  publicCondominiumInflight.set(key, request);
+  return request;
+};
+
 const adminRequest = async (path: string, options: any = {}) => {
   const token = localStorage.getItem('superAdminToken') || '';
   const base = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -54,19 +118,17 @@ const condominiumRequest = async (path: string, options: any = {}) => {
 
 export const condominiumService = {
   async listPublic() {
-    const response = await apiClient.rawGet('/public/condominiums', {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' },
-    });
-    return toJson(response);
+    return publicCachedRawGet('public:condominiums:list', '/public/condominiums');
   },
 
   async listStores(slug: string) {
-    const response = await apiClient.rawGet(`/public/condominiums/${encodeURIComponent(slug)}/stores`, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' },
-    });
-    return toJson(response);
+    const normalizedSlug = String(slug || '').trim().toLowerCase();
+    return publicCachedRawGet(`public:condominiums:stores:${normalizedSlug}`, `/public/condominiums/${encodeURIComponent(slug)}/stores`);
+  },
+
+  prefetchStores(slug: string) {
+    if (!String(slug || '').trim()) return Promise.resolve(null);
+    return condominiumService.listStores(slug).catch(() => null);
   },
 
   createAccessRequest(payload: any) {

@@ -410,14 +410,18 @@ export function DestinationDetailPage() {
                 const placeServiceCount = Number(place.storeCount || place.featuredStores?.length || 0);
                 const placeServiceLabel = placeServiceCount === 1 ? '1 lugar atende aqui' : `${placeServiceCount} lugares atendem aqui`;
                 const placePath = `/destinos/${destination.slug}/chales/${place.slug}`;
+                const warmupPlace = () => {
+                  prefetchRouteByPath(placePath);
+                  void destinationService.prefetchHospitalityPlace(destination.slug, place.slug);
+                };
                 return (
                 <article
                   key={place.id}
                   role="button"
                   tabIndex={0}
-                  onPointerEnter={() => prefetchRouteByPath(placePath)}
-                  onFocus={() => prefetchRouteByPath(placePath)}
-                  onTouchStart={() => prefetchRouteByPath(placePath)}
+                  onPointerEnter={warmupPlace}
+                  onFocus={warmupPlace}
+                  onTouchStart={warmupPlace}
                   onClick={() => navigate(placePath)}
                   onKeyDown={(event) => {
                     if (event.key !== 'Enter' && event.key !== ' ') return;
