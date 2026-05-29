@@ -4,6 +4,7 @@ import { Capacitor } from '@capacitor/core';
 import { Buildings, House, Mountains, Receipt, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { nativeBiometricService } from '../../services/nativeBiometricService';
+import { prefetchRouteByPath } from '../../utils/clientRoutePrefetch';
 
 const STACK_KEY = 'jnk_native_route_stack_v1';
 const LEGACY_HIDDEN_KEY = 'jnk_native_nav_hidden_v1';
@@ -150,6 +151,7 @@ export function NativeAppNavigator() {
     writeStack([ ...nextStack, '/hub' ]);
     navigate('/hub');
   };
+  const warmupRoute = (path: string) => () => prefetchRouteByPath(path);
 
   const handleOrders = async () => {
     const savedSession = readCustomerSession();
@@ -192,6 +194,9 @@ export function NativeAppNavigator() {
         <div className="grid grid-cols-5 gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
         <button
           type="button"
+          onPointerEnter={warmupRoute('/hub')}
+          onFocus={warmupRoute('/hub')}
+          onTouchStart={warmupRoute('/hub')}
           onClick={handleHome}
           className={`${itemBaseClass} ${isHome ? activeItemClass : inactiveItemClass}`}
         >
@@ -206,6 +211,9 @@ export function NativeAppNavigator() {
         </button>
         <button
           type="button"
+          onPointerEnter={warmupRoute('/cliente/pedidos')}
+          onFocus={warmupRoute('/cliente/pedidos')}
+          onTouchStart={warmupRoute('/cliente/pedidos')}
           onClick={handleOrders}
           className={`${itemBaseClass} ${isOrders ? activeItemClass : inactiveItemClass}`}
         >
@@ -220,6 +228,9 @@ export function NativeAppNavigator() {
         </button>
         <button
           type="button"
+          onPointerEnter={warmupRoute('/hub')}
+          onFocus={warmupRoute('/hub')}
+          onTouchStart={warmupRoute('/hub')}
           onClick={() => navigate('/hub?panel=condominios')}
           className={`${itemBaseClass} ${isCondominium ? activeItemClass : inactiveItemClass}`}
         >
@@ -234,6 +245,9 @@ export function NativeAppNavigator() {
         </button>
         <button
           type="button"
+          onPointerEnter={warmupRoute('/destinos')}
+          onFocus={warmupRoute('/destinos')}
+          onTouchStart={warmupRoute('/destinos')}
           onClick={() => navigate('/destinos')}
           className={`${itemBaseClass} ${isDestinations ? activeItemClass : inactiveItemClass}`}
         >
@@ -248,6 +262,9 @@ export function NativeAppNavigator() {
         </button>
         <button
           type="button"
+          onPointerEnter={warmupRoute('/cliente/conta')}
+          onFocus={warmupRoute('/cliente/conta')}
+          onTouchStart={warmupRoute('/cliente/conta')}
           onClick={() => navigate('/hub?profile=1')}
           className={`${itemBaseClass} ${inactiveItemClass}`}
         >

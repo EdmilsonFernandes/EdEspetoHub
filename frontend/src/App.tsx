@@ -1,6 +1,6 @@
 // @ts-nocheck
-import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { Suspense, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
@@ -30,6 +30,21 @@ import {
   loadAdminQueuePage,
   loadStorePage,
 } from './utils/adminRoutePrefetch';
+import {
+  loadAddressDistancePage,
+  loadClientAccountPage,
+  loadClientOrdersPage,
+  loadDestinationDetailPage,
+  loadDestinationInviteRedirectPage,
+  loadDestinationPartnerRequestPage,
+  loadDestinationsPage,
+  loadHospitalityPlacePage,
+  loadHospitalityServiceRoutePage,
+  loadHubHighlightsPage,
+  loadMarketplacePage,
+  loadNotificationsPage,
+  scheduleRouteWarmup,
+} from './utils/clientRoutePrefetch';
 
 const lazyPage = (loader: () => Promise<any>, exportName: string) =>
   React.lazy(() =>
@@ -60,15 +75,15 @@ const SuperAdminDestinations = lazyPage(() => import('./pages/SuperAdminDestinat
 const SuperAdminHomeConfig = lazyPage(() => import('./pages/SuperAdminHomeConfig'), 'SuperAdminHomeConfig');
 const SuperAdminEmailTemplates = lazyPage(() => import('./pages/SuperAdminEmailTemplates'), 'SuperAdminEmailTemplates');
 const EmailUnsubscribePage = lazyPage(() => import('./pages/EmailUnsubscribePage'), 'EmailUnsubscribePage');
-const DestinationsPage = lazyPage(() => import('./pages/DestinationsPage'), 'DestinationsPage');
-const DestinationDetailPage = lazyPage(() => import('./pages/DestinationDetailPage'), 'DestinationDetailPage');
-const DestinationPartnerRequestPage = lazyPage(() => import('./pages/DestinationPartnerRequestPage'), 'DestinationPartnerRequestPage');
-const DestinationInviteRedirectPage = lazyPage(() => import('./pages/DestinationInviteRedirectPage'), 'DestinationInviteRedirectPage');
-const HospitalityPlacePage = lazyPage(() => import('./pages/HospitalityPlacePage'), 'HospitalityPlacePage');
-const HospitalityServiceRoutePage = lazyPage(() => import('./pages/HospitalityServiceRoutePage'), 'HospitalityServiceRoutePage');
+const DestinationsPage = lazyPage(loadDestinationsPage, 'DestinationsPage');
+const DestinationDetailPage = lazyPage(loadDestinationDetailPage, 'DestinationDetailPage');
+const DestinationPartnerRequestPage = lazyPage(loadDestinationPartnerRequestPage, 'DestinationPartnerRequestPage');
+const DestinationInviteRedirectPage = lazyPage(loadDestinationInviteRedirectPage, 'DestinationInviteRedirectPage');
+const HospitalityPlacePage = lazyPage(loadHospitalityPlacePage, 'HospitalityPlacePage');
+const HospitalityServiceRoutePage = lazyPage(loadHospitalityServiceRoutePage, 'HospitalityServiceRoutePage');
 const TermsOfUse = lazyPage(() => import('./pages/TermsOfUse'), 'TermsOfUse');
 const OrderTracking = lazyPage(loadOrderTrackingPage, 'OrderTracking');
-const AddressDistance = lazyPage(() => import('./pages/AddressDistance'), 'AddressDistance');
+const AddressDistance = lazyPage(loadAddressDistancePage, 'AddressDistance');
 const AdminMotoboys = lazyPage(() => import('./pages/AdminMotoboys'), 'AdminMotoboys');
 const MotoboyAvailable = lazyPage(() => import('./pages/MotoboyAvailable'), 'MotoboyAvailable');
 const MotoboyCurrent = lazyPage(() => import('./pages/MotoboyCurrent'), 'MotoboyCurrent');
@@ -79,11 +94,11 @@ const MotoboyRegister = lazyPage(() => import('./pages/MotoboyRegister'), 'Motob
 const MotoboyProfile = lazyPage(() => import('./pages/MotoboyProfile'), 'MotoboyProfile');
 const ArchitecturePage = lazyPage(() => import('./pages/ArchitecturePage'), 'ArchitecturePage');
 const InstallAppPage = lazyPage(() => import('./pages/InstallAppPage'), 'InstallAppPage');
-const ClientAccount = lazyPage(() => import('./pages/ClientAccount'), 'ClientAccount');
-const ClientOrders = lazyPage(() => import('./pages/ClientOrders'), 'ClientOrders');
-import { NotificationsPage } from './pages/NotificationsPage';
-const MarketplacePage = lazyPage(() => import('./pages/MarketplacePage'), 'MarketplacePage');
-const HubHighlightsPage = lazyPage(() => import('./pages/HubHighlightsPage'), 'HubHighlightsPage');
+const ClientAccount = lazyPage(loadClientAccountPage, 'ClientAccount');
+const ClientOrders = lazyPage(loadClientOrdersPage, 'ClientOrders');
+const NotificationsPage = lazyPage(loadNotificationsPage, 'NotificationsPage');
+const MarketplacePage = lazyPage(loadMarketplacePage, 'MarketplacePage');
+const HubHighlightsPage = lazyPage(loadHubHighlightsPage, 'HubHighlightsPage');
 const CondominiumAccessRequest = lazyPage(() => import('./pages/CondominiumAccessRequest'), 'CondominiumAccessRequest');
 const CondominiumDashboard = lazyPage(() => import('./pages/CondominiumDashboard'), 'CondominiumDashboard');
 const AdminHighlights = lazyPage(loadAdminHighlightsPage, 'AdminHighlights');
@@ -108,12 +123,21 @@ const AppRouteFallback = () => (
   </div>
 );
 
+const AppRouteWarmup = () => {
+  const location = useLocation();
+
+  useEffect(() => scheduleRouteWarmup(location.pathname), [location.pathname]);
+
+  return null;
+};
+
 function App() {
   return (
     <ThemeProvider>
       <PremiumSplashScreen />
       <ToastProvider>
         <Router>
+          <AppRouteWarmup />
           <OfflineAlert />
           <NativePushPermissionBanner />
           <NativeAppNavigator />

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Compass, House, Plus, Storefront } from '@phosphor-icons/react';
 import { AppGlassHeader } from '../common/AppGlassHeader';
 import { ClientBottomNav } from '../common/ClientBottomNav';
+import { prefetchRouteByPath } from '../../utils/clientRoutePrefetch';
 
 type PublicDestinationShellProps = {
   children: ReactNode;
@@ -60,6 +61,9 @@ export function PublicDestinationShell({
                   <Link
                     key={item.id}
                     to={item.to}
+                    onPointerEnter={() => prefetchRouteByPath(item.to)}
+                    onFocus={() => prefetchRouteByPath(item.to)}
+                    onTouchStart={() => prefetchRouteByPath(item.to)}
                     className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-black transition ${
                       selected ? 'bg-white text-[#07111f]' : 'text-slate-300 hover:bg-white/[0.06] hover:text-white'
                     }`}
@@ -74,6 +78,9 @@ export function PublicDestinationShell({
             <div className="flex shrink-0 items-center gap-2">
               <Link
                 to="/hub"
+                onPointerEnter={() => prefetchRouteByPath('/hub')}
+                onFocus={() => prefetchRouteByPath('/hub')}
+                onTouchStart={() => prefetchRouteByPath('/hub')}
                 className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-black text-slate-200 transition hover:bg-white/[0.08] sm:inline-flex"
               >
                 <Storefront size={14} weight="duotone" className="text-emerald-300" />
@@ -81,6 +88,9 @@ export function PublicDestinationShell({
               </Link>
               <Link
                 to={ctaTo}
+                onPointerEnter={() => prefetchRouteByPath(ctaTo)}
+                onFocus={() => prefetchRouteByPath(ctaTo)}
+                onTouchStart={() => prefetchRouteByPath(ctaTo)}
                 className="inline-flex items-center gap-1.5 rounded-full bg-[linear-gradient(180deg,#b7ef53_0%,#84cc16_100%)] px-3.5 py-2 text-xs font-black text-[#07111f] shadow-[0_16px_28px_-18px_rgba(132,204,22,0.62)] transition hover:scale-[1.01] active:scale-[0.98]"
               >
                 <Plus size={13} weight="bold" />
@@ -90,7 +100,13 @@ export function PublicDestinationShell({
           </div>
 
           <div className="mt-2 hidden items-center justify-between gap-3 rounded-full border border-white/8 bg-white/[0.035] px-2 py-1.5 sm:flex">
-            <Link to={backTo} className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-slate-200 transition hover:bg-white/[0.1]">
+            <Link
+              to={backTo}
+              onPointerEnter={() => prefetchRouteByPath(backTo)}
+              onFocus={() => prefetchRouteByPath(backTo)}
+              onTouchStart={() => prefetchRouteByPath(backTo)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-slate-200 transition hover:bg-white/[0.1]"
+            >
               <ArrowRight size={12} className="rotate-180" weight="bold" />
               {backLabel}
             </Link>
@@ -114,6 +130,9 @@ export function PublicDestinationShell({
         right={(
           <Link
             to="/hub"
+            onPointerEnter={() => prefetchRouteByPath('/hub')}
+            onFocus={() => prefetchRouteByPath('/hub')}
+            onTouchStart={() => prefetchRouteByPath('/hub')}
             className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/80 bg-white/82 p-0.5 shadow-[0_14px_26px_-20px_rgba(21,58,76,0.55)] active:scale-95"
             aria-label="Abrir início"
           >

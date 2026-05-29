@@ -13,6 +13,7 @@ import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { buildDestinationInquiryMessage, buildHospitalityServiceRouteUrl, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 import { openActionTarget } from '../utils/actionLink';
 import { buildListingClaimUrl } from '../utils/destinationListingClaim';
+import { prefetchRouteByPath } from '../utils/clientRoutePrefetch';
 
 const fallbackAvatarFor = (item: any) =>
   getStoreAvatarUrl(item?.slug || item?.store?.slug || item?.id, item?.name || item?.title || item?.store?.name);
@@ -715,11 +716,15 @@ export function HospitalityPlacePage() {
                 if (place.zipCode) storeParams.set('hospedagem_cep', String(place.zipCode));
                 if (place.lat) storeParams.set('hospedagem_lat', String(place.lat));
                 if (place.lng) storeParams.set('hospedagem_lng', String(place.lng));
+                const storePath = `/${store.slug}?${storeParams.toString()}`;
                 return (
                   <Link
                     id={targetId}
                     key={`${entry.id}-${store.id}`}
-                    to={`/${store.slug}?${storeParams.toString()}`}
+                    to={storePath}
+                    onPointerEnter={() => prefetchRouteByPath(storePath)}
+                    onFocus={() => prefetchRouteByPath(storePath)}
+                    onTouchStart={() => prefetchRouteByPath(storePath)}
                     className={`group/card relative scroll-mt-28 overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-offset-4 ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] ${highlighted ? highlightedProviderCardClass : ''} ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
                     {highlighted ? (

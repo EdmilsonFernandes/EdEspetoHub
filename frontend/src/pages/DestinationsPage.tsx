@@ -6,6 +6,7 @@ import { PublicDestinationShell } from '../components/Destinations/PublicDestina
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
+import { prefetchRouteByPath } from '../utils/clientRoutePrefetch';
 
 const destinationImage = (destination: any, variant: 'logo' | 'banner' = 'banner') => {
   const firstBanner = (Array.isArray(destination?.banners) ? destination.banners : []).find((banner: any) => banner?.imageUrl);
@@ -231,6 +232,9 @@ export function DestinationsPage() {
               <Link
                 key={destination.id}
                 to={`/destinos/${destination.slug}`}
+                onPointerEnter={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
+                onFocus={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
+                onTouchStart={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
                 className="group grid overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)] active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.15)]"
               >
                 <div className="relative h-36 overflow-hidden bg-slate-100 sm:h-full sm:min-h-[12.5rem]">

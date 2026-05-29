@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { CaretRight, Sparkle, Star } from '@phosphor-icons/react';
 import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
+import { prefetchRouteByPath } from '../../../utils/clientRoutePrefetch';
 
 export type HubFeaturedCarouselItem = {
   id: string;
@@ -64,6 +65,9 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
         {hasOverflow ? (
           <Link
             to="/hub/destaques"
+            onPointerEnter={() => prefetchRouteByPath('/hub/destaques')}
+            onFocus={() => prefetchRouteByPath('/hub/destaques')}
+            onTouchStart={() => prefetchRouteByPath('/hub/destaques')}
             className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886]"
           >
             Ver mais
@@ -93,6 +97,9 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                   <Link
                     key={`${item.storeSlug}-${item.id}`}
                     to={featuredStorePath}
+                    onPointerEnter={() => prefetchRouteByPath(featuredStorePath)}
+                    onFocus={() => prefetchRouteByPath(featuredStorePath)}
+                    onTouchStart={() => prefetchRouteByPath(featuredStorePath)}
                     onClick={() => onStageProduct(item)}
                     className="jnc-hub-touch jnc-hub-lift jnc-hub-card group flex min-h-[112px] min-w-[268px] snap-start gap-3 rounded-[1.45rem] p-2.5 sm:min-w-[292px]"
                   >

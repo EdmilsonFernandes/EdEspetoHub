@@ -12,6 +12,7 @@ import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { buildDestinationInquiryMessage, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 import { openActionTarget } from '../utils/actionLink';
 import { buildListingClaimUrl } from '../utils/destinationListingClaim';
+import { prefetchRouteByPath } from '../utils/clientRoutePrefetch';
 
 const asset = (item: any, variant: 'logo' | 'banner' | 'image' = 'banner') => {
   const source =
@@ -414,6 +415,9 @@ export function DestinationDetailPage() {
                   key={place.id}
                   role="button"
                   tabIndex={0}
+                  onPointerEnter={() => prefetchRouteByPath(placePath)}
+                  onFocus={() => prefetchRouteByPath(placePath)}
+                  onTouchStart={() => prefetchRouteByPath(placePath)}
                   onClick={() => navigate(placePath)}
                   onKeyDown={(event) => {
                     if (event.key !== 'Enter' && event.key !== ' ') return;

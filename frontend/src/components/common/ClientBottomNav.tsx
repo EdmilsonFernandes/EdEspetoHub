@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Buildings, House, Mountains, Receipt, UserCircle } from '@phosphor-icons/react';
+import { prefetchRouteByPath } from '../../utils/clientRoutePrefetch';
 
 type ClientBottomNavItem = 'home' | 'orders' | 'agenda' | 'destinations' | 'profile';
 
@@ -72,6 +73,7 @@ export function ClientBottomNav({
 
   const itemClass = (item: ClientBottomNavItem) =>
     `${itemBaseClass} ${active === item ? activeItemClass : inactiveItemClass}`;
+  const warmupRoute = (path: string) => () => prefetchRouteByPath(path);
 
   const openOrders = () => {
     if (onOpenOrders) {
@@ -105,35 +107,35 @@ export function ClientBottomNav({
     >
       <div className="mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
         <div className="grid min-h-[4.65rem] grid-cols-5 items-center gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
-          <button type="button" onClick={() => navigate('/hub')} className={itemClass('home')} aria-current={active === 'home' ? 'page' : undefined}>
+          <button type="button" onPointerEnter={warmupRoute('/hub')} onFocus={warmupRoute('/hub')} onTouchStart={warmupRoute('/hub')} onClick={() => navigate('/hub')} className={itemClass('home')} aria-current={active === 'home' ? 'page' : undefined}>
             <span className={iconClass(active === 'home')}>
               <House size={16} weight={active === 'home' ? 'fill' : 'duotone'} />
             </span>
             <span>Início</span>
           </button>
 
-          <button type="button" onClick={openOrders} className={itemClass('orders')} aria-current={active === 'orders' ? 'page' : undefined}>
+          <button type="button" onPointerEnter={warmupRoute('/cliente/pedidos')} onFocus={warmupRoute('/cliente/pedidos')} onTouchStart={warmupRoute('/cliente/pedidos')} onClick={openOrders} className={itemClass('orders')} aria-current={active === 'orders' ? 'page' : undefined}>
             <span className={iconClass(active === 'orders')}>
               <Receipt size={16} weight={active === 'orders' ? 'fill' : 'duotone'} />
             </span>
             <span>Pedidos</span>
           </button>
 
-          <button type="button" onClick={openAgenda} className={itemClass('agenda')} aria-current={active === 'agenda' ? 'page' : undefined}>
+          <button type="button" onPointerEnter={warmupRoute('/hub')} onFocus={warmupRoute('/hub')} onTouchStart={warmupRoute('/hub')} onClick={openAgenda} className={itemClass('agenda')} aria-current={active === 'agenda' ? 'page' : undefined}>
             <span className={iconClass(active === 'agenda')}>
               <Buildings size={16} weight={active === 'agenda' ? 'fill' : 'duotone'} />
             </span>
             <span>Agenda</span>
           </button>
 
-          <button type="button" onClick={() => navigate('/destinos')} className={itemClass('destinations')} aria-current={active === 'destinations' ? 'page' : undefined}>
+          <button type="button" onPointerEnter={warmupRoute('/destinos')} onFocus={warmupRoute('/destinos')} onTouchStart={warmupRoute('/destinos')} onClick={() => navigate('/destinos')} className={itemClass('destinations')} aria-current={active === 'destinations' ? 'page' : undefined}>
             <span className={iconClass(active === 'destinations')}>
               <Mountains size={16} weight={active === 'destinations' ? 'fill' : 'duotone'} />
             </span>
             <span>Destinos</span>
           </button>
 
-          <button type="button" onClick={openProfile} className={itemClass('profile')} aria-current={active === 'profile' ? 'page' : undefined}>
+          <button type="button" onPointerEnter={warmupRoute('/cliente/conta')} onFocus={warmupRoute('/cliente/conta')} onTouchStart={warmupRoute('/cliente/conta')} onClick={openProfile} className={itemClass('profile')} aria-current={active === 'profile' ? 'page' : undefined}>
             <span className={iconClass(active === 'profile')}>
               <UserCircle size={16} weight={active === 'profile' ? 'fill' : 'duotone'} />
             </span>

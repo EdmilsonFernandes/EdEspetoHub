@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import type { ComponentType, MouseEvent } from 'react';
 import { Heart, Star, Storefront } from '@phosphor-icons/react';
 import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
+import { prefetchRouteByPath } from '../../../utils/clientRoutePrefetch';
 
 type BadgeIcon = ComponentType<{ size?: number; weight?: any; className?: string }>;
 
@@ -76,12 +77,16 @@ export function HubStoreCard({
     onToggleFavorite(store.slug);
   };
   const isUnavailableForRegion = Boolean(store.isOutOfRegion);
+  const warmupStoreRoute = () => prefetchRouteByPath(to);
 
   if (selectedCondominium) {
     return (
       <Link
         to={to}
         state={state}
+        onPointerEnter={warmupStoreRoute}
+        onFocus={warmupStoreRoute}
+        onTouchStart={warmupStoreRoute}
         style={{ animationDelay: `${index * 50}ms` }}
         className={`jnc-hub-touch jnc-hub-lift group overflow-hidden rounded-[1.45rem] animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-backwards ${
           store.isOpen
@@ -180,6 +185,9 @@ export function HubStoreCard({
     <Link
       to={to}
       state={state}
+      onPointerEnter={warmupStoreRoute}
+      onFocus={warmupStoreRoute}
+      onTouchStart={warmupStoreRoute}
       style={{ animationDelay: `${index * 36}ms` }}
         className={`jnc-hub-touch jnc-hub-lift group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3.5 rounded-[1.45rem] px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards ${
         store.isOpen && !isUnavailableForRegion
