@@ -64,7 +64,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
         {hasOverflow ? (
           <Link
             to="/hub/destaques"
-            className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/10 bg-[#edf5fa]/86 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886]"
+            className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886]"
           >
             Ver mais
             <CaretRight size={11} weight="bold" />
@@ -96,14 +96,14 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                     onClick={() => onStageProduct(item)}
                     className="jnc-hub-touch jnc-hub-lift jnc-hub-card group flex min-h-[112px] min-w-[268px] snap-start gap-3 rounded-[1.45rem] p-2.5 sm:min-w-[292px]"
                   >
-                    <div className="relative h-[92px] w-[92px] shrink-0 overflow-hidden rounded-[1.2rem] bg-slate-100">
+                    <div className="relative h-[92px] w-[92px] shrink-0 overflow-hidden rounded-[1.2rem] bg-slate-100 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.36)] ring-1 ring-white/80">
                       <img
                         src={item.imageUrl}
                         alt={item.name}
                         loading={index < 2 ? 'eager' : 'lazy'}
                         fetchPriority={index < 2 ? 'high' : 'auto'}
                         decoding="async"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="h-full w-full object-cover drop-shadow-[0_10px_18px_rgba(15,23,42,0.10)] transition-transform duration-700 group-hover:scale-105"
                         onError={(event) => {
                           (event.target as HTMLImageElement).src =
                             item.storeLogo || getStoreAvatarUrl(item.storeSlug, item.storeName);

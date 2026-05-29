@@ -2341,7 +2341,7 @@ export function MarketplacePage() {
                           <button
                             type="button"
                             onClick={() => openCondominiumPicker('all')}
-                            className="shrink-0 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white transition active:scale-95"
+                            className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center justify-center rounded-full px-3 py-2 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886]"
                           >
                             Ver todos
                           </button>
@@ -2420,7 +2420,7 @@ export function MarketplacePage() {
 
           {/* Seção Categorias Premium Squircle */}
           <section className="order-4 relative" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-            <p className="mb-1.5 px-1 text-[9px] font-black uppercase tracking-[0.24em] text-slate-400/85">Categorias</p>
+            <p className="mb-1.5 px-1 text-[9px] font-black uppercase tracking-[0.24em] text-slate-500/85">Categorias</p>
             <div className="-mx-4 grid grid-flow-col auto-cols-[minmax(54px,1fr)] snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <button
                 type="button"
@@ -2430,10 +2430,10 @@ export function MarketplacePage() {
                 <div className={`flex h-10 w-10 items-center justify-center rounded-[15px] transition-all duration-200 ease-out ${
                   segmentFilter === 'all' ? 'scale-[1.04] bg-[#336886] shadow-[0_18px_34px_-26px_rgba(51,104,134,0.66)]' : 'jnc-hub-pill group-hover:bg-slate-50'
                 }`}>
-                  <List size={17} weight="duotone" className={segmentFilter === 'all' ? 'scale-[0.95] text-white' : 'text-slate-500'} />
+                  <List size={17} weight="duotone" className={segmentFilter === 'all' ? 'scale-[0.95] text-white' : 'text-slate-600'} />
                 </div>
-                <span className={`text-center text-[8.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
-                  segmentFilter === 'all' ? 'text-[#336886]' : 'text-slate-500'
+                <span className={`text-center text-[8.5px] font-extrabold uppercase tracking-[0.08em] transition-colors ${
+                  segmentFilter === 'all' ? 'text-[#336886]' : 'text-slate-600'
                 }`}>Todos</span>
               </button>
               
@@ -2461,8 +2461,8 @@ export function MarketplacePage() {
                         }`}
                       />
                     </div>
-                    <span className={`text-center text-[8.5px] font-bold uppercase tracking-[0.08em] transition-colors ${
-                      active ? (colors ? colors.icon : 'text-[#336886]') : 'text-slate-500'
+                    <span className={`text-center text-[8.5px] font-extrabold uppercase tracking-[0.08em] transition-colors ${
+                      active ? (colors ? colors.icon : 'text-[#336886]') : 'text-slate-600'
                     }`}>{item.label}</span>
                   </button>
                 );

@@ -160,12 +160,12 @@ export function HubStoreCard({
             </p>
           ) : (
             <div className="mt-2 flex flex-wrap gap-1">
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-emerald-700">
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-emerald-700">
                 <Storefront size={10} weight="fill" />
                 Retirada
               </span>
               {store.supportsDelivery && store.freeShipping ? (
-                <span className="inline-flex rounded-full bg-sky-50 px-2 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-[#336886]">
+                <span className="inline-flex rounded-full bg-sky-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-[#336886]">
                   Grátis
                 </span>
               ) : null}
@@ -181,7 +181,7 @@ export function HubStoreCard({
       to={to}
       state={state}
       style={{ animationDelay: `${index * 36}ms` }}
-        className={`jnc-hub-touch jnc-hub-lift group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3 rounded-[1.45rem] px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards ${
+        className={`jnc-hub-touch jnc-hub-lift group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3.5 rounded-[1.45rem] px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards ${
         store.isOpen && !isUnavailableForRegion
           ? 'jnc-hub-surface-soft md:hover:bg-white md:hover:border-[#336886]/20'
           : 'border-slate-100/80 bg-slate-50/72 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.16)] ring-1 ring-slate-200/35 grayscale-[18%] opacity-85 filter blur-[0.25px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
@@ -239,7 +239,7 @@ export function HubStoreCard({
               return (
                 <span
                   key={`${store.id}-${badge.key}`}
-                  className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[8.5px] font-black uppercase tracking-[0.08em] ${getCompactBadgeClass(badge.key)} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.08em] ${getCompactBadgeClass(badge.key)} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
                 >
                   {Icon ? <Icon size={9} weight="duotone" /> : null}
                   {badge.label}
