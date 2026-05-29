@@ -2,64 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const isNodeModule = (id: string, packageName: string) =>
-  id.includes(`/node_modules/${packageName}/`) ||
-  id.includes(`\\node_modules\\${packageName}\\`)
-
-const vendorChunkFor = (id: string) => {
-  if (!id.includes('node_modules')) return undefined
-
-  if (
-    isNodeModule(id, 'react') ||
-    isNodeModule(id, 'react-dom') ||
-    isNodeModule(id, 'scheduler')
-  ) {
-    return 'vendor-react'
-  }
-
-  if (
-    isNodeModule(id, 'react-router') ||
-    isNodeModule(id, 'react-router-dom') ||
-    isNodeModule(id, '@remix-run/router')
-  ) {
-    return 'vendor-router'
-  }
-
-  if (
-    isNodeModule(id, 'recharts') ||
-    isNodeModule(id, 'd3-array') ||
-    isNodeModule(id, 'd3-color') ||
-    isNodeModule(id, 'd3-format') ||
-    isNodeModule(id, 'd3-interpolate') ||
-    isNodeModule(id, 'd3-scale') ||
-    isNodeModule(id, 'd3-shape') ||
-    isNodeModule(id, 'd3-time') ||
-    isNodeModule(id, 'd3-time-format') ||
-    isNodeModule(id, 'victory-vendor')
-  ) {
-    return 'vendor-charts'
-  }
-
-  if (
-    isNodeModule(id, 'jspdf') ||
-    isNodeModule(id, 'jspdf-autotable') ||
-    isNodeModule(id, 'html2canvas') ||
-    isNodeModule(id, 'dompurify')
-  ) {
-    return 'vendor-pdf'
-  }
-
-  if (
-    isNodeModule(id, 'framer-motion') ||
-    isNodeModule(id, 'lottie-react') ||
-    isNodeModule(id, 'vaul')
-  ) {
-    return 'vendor-motion'
-  }
-
-  return undefined
-}
-
 export default defineConfig({
   plugins: [
     react(),
@@ -141,13 +83,6 @@ export default defineConfig({
       '/api/maps': {
         target: 'http://localhost:4000',
         changeOrigin: true,
-      },
-    },
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: vendorChunkFor,
       },
     },
   }
