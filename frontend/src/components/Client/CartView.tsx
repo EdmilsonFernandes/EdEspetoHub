@@ -181,6 +181,7 @@ export const CartView = ({
   const [showOptionalPhoneFields, setShowOptionalPhoneFields] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState(1);
   const [isEditingTable, setIsEditingTable] = useState(false);
+  const [isEditingPayment, setIsEditingPayment] = useState(false);
   const previousCartItemsCountRef = useRef<number>(cartItems.length);
   const cepLookupLockRef = useRef(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
@@ -891,7 +892,10 @@ export const CartView = ({
       <button
         key={method.id}
         type="button"
-        onClick={() => onChangePayment(method.id)}
+        onClick={() => {
+          onChangePayment(method.id);
+          setIsEditingPayment(false);
+        }}
         className={`jnc-hub-touch group relative overflow-hidden rounded-[1.35rem] border p-3.5 text-left active:scale-[0.985] ${
           selected
             ? selectedClasses
@@ -2198,55 +2202,85 @@ export const CartView = ({
             </div>
           </div>
 
-          <div className="relative z-10 space-y-3">
-            {paymentGroups.online.length > 0 && (
-              <section className="rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(232,244,248,0.82))] p-3.5 shadow-[0_22px_50px_-44px_rgba(51,104,134,0.32)] sm:p-4">
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">
-                      Pagar online
-                    </p>
-                    <p className="mt-1 text-[11px] leading-snug text-slate-500">
-                      Confirmação processada com segurança antes do envio.
-                    </p>
-                  </div>
-                  <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/92 px-2.5 py-1.5 text-[10px] font-black text-slate-600 shadow-[0_14px_26px_-22px_rgba(51,104,134,0.34)]">
-                    {mercadoPagoMeta.icon ? (
-                      <img src={mercadoPagoMeta.icon} alt={mercadoPagoMeta.label} className="h-4 w-4 object-contain" />
+          {paymentMethod && !isEditingPayment && isProfessionalUser ? (
+            <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm flex items-center justify-between gap-3.5 animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex items-center gap-3">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.05rem] border border-slate-200 bg-slate-50">
+                  {(() => {
+                    const meta = getPaymentMethodMeta(paymentMethod);
+                    return meta.icon ? (
+                      <img src={meta.icon} alt={meta.label} className="h-6 w-6 object-contain" />
                     ) : (
-                      <ShieldCheck size={12} weight="duotone" className="text-emerald-600" />
-                    )}
-                    <span>Seguro</span>
+                      <CreditCard size={18} weight="duotone" className="text-slate-500" />
+                    );
+                  })()}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 leading-none">Forma de Pagamento</p>
+                  <p className="mt-1 text-sm font-bold text-slate-800 capitalize">
+                    {getPaymentMethodMeta(paymentMethod).label}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEditingPayment(true)}
+                className="jnc-hub-touch text-xs font-black uppercase tracking-wider text-[#336886] hover:text-[#153A4C]"
+              >
+                Alterar
+              </button>
+            </div>
+          ) : (
+            <div className="relative z-10 space-y-3">
+              {paymentGroups.online.length > 0 && (
+                <section className="rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(232,244,248,0.82))] p-3.5 shadow-[0_22px_50px_-44px_rgba(51,104,134,0.32)] sm:p-4">
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">
+                        Pagar online
+                      </p>
+                      <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                        Confirmação processada com segurança antes do envio.
+                      </p>
+                    </div>
+                    <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/92 px-2.5 py-1.5 text-[10px] font-black text-slate-600 shadow-[0_14px_26px_-22px_rgba(51,104,134,0.34)]">
+                      {mercadoPagoMeta.icon ? (
+                        <img src={mercadoPagoMeta.icon} alt={mercadoPagoMeta.label} className="h-4 w-4 object-contain" />
+                      ) : (
+                        <ShieldCheck size={12} weight="duotone" className="text-emerald-600" />
+                      )}
+                      <span>Seguro</span>
+                    </div>
                   </div>
-                </div>
-                <div className={`grid gap-2.5 ${paymentGroups.online.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
-                  {paymentGroups.online.map((method) => renderPaymentMethodCard(method, "online"))}
-                </div>
-              </section>
-            )}
+                  <div className={`grid gap-2.5 ${paymentGroups.online.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
+                    {paymentGroups.online.map((method) => renderPaymentMethodCard(method, "online"))}
+                  </div>
+                </section>
+              )}
 
-            {paymentGroups.local.length > 0 && (
-              <section className="rounded-[1.55rem] border border-emerald-200/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(238,250,241,0.82))] p-3.5 shadow-[0_22px_50px_-44px_rgba(32,122,82,0.28)] sm:p-4">
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-700">
-                      Pagar na loja
-                    </p>
-                    <p className="mt-1 text-[11px] leading-snug text-slate-500">
-                      Combine no atendimento, na entrega ou na retirada.
-                    </p>
+              {paymentGroups.local.length > 0 && (
+                <section className="rounded-[1.55rem] border border-emerald-200/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(238,250,241,0.82))] p-3.5 shadow-[0_22px_50px_-44px_rgba(32,122,82,0.28)] sm:p-4">
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-700">
+                        Pagar na loja
+                      </p>
+                      <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                        Combine no atendimento, na entrega ou na retirada.
+                      </p>
+                    </div>
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-white/90 px-2.5 py-1.5 text-[10px] font-black text-emerald-700">
+                      <ShieldCheck size={12} weight="duotone" />
+                      Direto
+                    </span>
                   </div>
-                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-white/90 px-2.5 py-1.5 text-[10px] font-black text-emerald-700">
-                    <ShieldCheck size={12} weight="duotone" />
-                    Direto
-                  </span>
-                </div>
-                <div className={`grid gap-2.5 ${paymentGroups.local.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
-                  {paymentGroups.local.map((method) => renderPaymentMethodCard(method, "local"))}
-                </div>
-              </section>
-            )}
-          </div>
+                  <div className={`grid gap-2.5 ${paymentGroups.local.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
+                    {paymentGroups.local.map((method) => renderPaymentMethodCard(method, "local"))}
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
 
           {isManualPix && (
             <div className="relative z-10 mt-4 flex items-center gap-3 rounded-[1.35rem] border border-emerald-200/80 bg-emerald-50/80 p-3 shadow-[0_16px_34px_-28px_rgba(32,122,82,0.36)]">

@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "21e745b7",
-  "versionLabel": "v0.1.9.21e745b7",
-  "versionInternal": "0.1.9+20260530.213137.21e745b7",
-  "buildId": "0.1.9+20260530.213137.21e745b7-20260530.213137-21e745b7",
-  "builtAt": "2026-05-30T21:31:37.294Z",
-  "commitHash": "21e745b7d7da5a362c798cc3e2a2d92614f8be4d",
-  "shortHash": "21e745b7",
+  "versionDisplaySuffix": "6429db22",
+  "versionLabel": "v0.1.9.6429db22",
+  "versionInternal": "0.1.9+20260530.213818.6429db22",
+  "buildId": "0.1.9+20260530.213818.6429db22-20260530.213818-6429db22",
+  "builtAt": "2026-05-30T21:38:18.432Z",
+  "commitHash": "6429db2275d0d71771ed86fcaa6771f4064a6070",
+  "shortHash": "6429db22",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "6429db2275d0d71771ed86fcaa6771f4064a6070",
+      "shortHash": "6429db22",
+      "dateIso": "2026-05-30T18:32:44-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(filters): replace large category carousel with minimal row-level pills on highlights page",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6429db2275d0d71771ed86fcaa6771f4064a6070"
+    },
     {
       "hash": "21e745b7d7da5a362c798cc3e2a2d92614f8be4d",
       "shortHash": "21e745b7",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Improve storefront loading and address distances",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fc464c24edae11c059c134fc18a471c344160435"
-    },
-    {
-      "hash": "724056ff920a214a363d45a69e27616f6b97f054",
-      "shortHash": "724056ff",
-      "dateIso": "2026-05-27T23:25:00-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve checkout feedback on slow connections",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/724056ff920a214a363d45a69e27616f6b97f054"
     }
   ]
 } as const;
