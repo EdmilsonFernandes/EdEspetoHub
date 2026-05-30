@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "6249c751",
-  "versionLabel": "v0.1.9.6249c751",
-  "versionInternal": "0.1.9+20260530.123150.6249c751",
-  "buildId": "0.1.9+20260530.123150.6249c751-20260530.123150-6249c751",
-  "builtAt": "2026-05-30T12:31:50.200Z",
-  "commitHash": "6249c751a36fff330ba8bfd6f152633bd136d965",
-  "shortHash": "6249c751",
+  "versionDisplaySuffix": "62b8993b",
+  "versionLabel": "v0.1.9.62b8993b",
+  "versionInternal": "0.1.9+20260530.130924.62b8993b",
+  "buildId": "0.1.9+20260530.130924.62b8993b-20260530.130924-62b8993b",
+  "builtAt": "2026-05-30T13:09:24.920Z",
+  "commitHash": "62b8993b71d4321014625b1e0842254a37c695e8",
+  "shortHash": "62b8993b",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "62b8993b71d4321014625b1e0842254a37c695e8",
+      "shortHash": "62b8993b",
+      "dateIso": "2026-05-30T09:32:46-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(frontend): slightly darken app page background gradient and surface variable to improve contrast with white cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/62b8993b71d4321014625b1e0842254a37c695e8"
+    },
     {
       "hash": "6249c751a36fff330ba8bfd6f152633bd136d965",
       "shortHash": "6249c751",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Refine destination and hospitality discovery hierarchy",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4091b6f8b110a5eab71d758863bfc20013047251"
-    },
-    {
-      "hash": "665de0c4932999cfe156562d1be5710c70132565",
-      "shortHash": "665de0c4",
-      "dateIso": "2026-05-27T18:49:05-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine storefront category sections",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/665de0c4932999cfe156562d1be5710c70132565"
     }
   ]
 } as const;

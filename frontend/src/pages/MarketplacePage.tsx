@@ -2128,20 +2128,7 @@ export function MarketplacePage() {
           {/* Carrossel de Banners - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && !selectedCondominium && homePromoSlides.length > 0 && (
             <div className="order-3 animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
-              <section className="jnc-hub-surface relative overflow-hidden rounded-[2.15rem] p-2.5">
-                <div className="pointer-events-none absolute -left-10 -top-12 h-32 w-32 rounded-full bg-[#336886]/10 blur-3xl" />
-                <div className="pointer-events-none absolute -right-8 bottom-0 h-28 w-28 rounded-full bg-emerald-200/35 blur-3xl" />
-                <div className="relative mb-2 flex items-center justify-between px-2">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Destaques</p>
-                    <p className="mt-0.5 text-xs font-semibold text-slate-500">Novidades e oportunidades para começar melhor.</p>
-                  </div>
-                  <span className="hidden rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shadow-sm sm:inline-flex">
-                    Início
-                  </span>
-                </div>
-                <SegmentPromoCarousel mode="hub" slides={homePromoSlides} className="mx-0 shadow-[0_22px_52px_-40px_rgba(15,23,42,0.44)]" />
-              </section>
+              <SegmentPromoCarousel mode="hub" slides={homePromoSlides} className="mx-0 shadow-[0_22px_52px_-40px_rgba(15,23,42,0.44)]" />
             </div>
           )}
 
