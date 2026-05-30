@@ -272,6 +272,43 @@ const requestTone = (status?: string) => {
   return 'bg-amber-50 text-amber-700 border-amber-100';
 };
 
+const requestStatusLabel = (status?: string) => {
+  const normalized = String(status || 'pending').toLowerCase();
+  if (normalized === 'approved') return 'Aprovada';
+  if (normalized === 'rejected') return 'Recusada';
+  if (normalized === 'cancelled') return 'Cancelada';
+  return 'Pendente';
+};
+
+const isPendingRequest = (status?: string) => String(status || 'pending').toLowerCase() === 'pending';
+
+const partnerTypeLabel = (request: any) => {
+  const partnerType = String(request?.partnerType || '').toUpperCase();
+  if (partnerType === 'SERVICE_PROVIDER') return labelForListingCategory(request?.category) || 'Serviço local';
+  const placeType = String(request?.placeType || 'HOSPITALITY').toUpperCase();
+  const labels: any = {
+    CHALE: 'Chalé',
+    POUSADA: 'Pousada',
+    HOTEL: 'Hotel',
+    CABANA: 'Cabana',
+    CASA_TEMPORADA: 'Casa de temporada',
+    OUTRO: 'Hospedagem',
+  };
+  return labels[placeType] || 'Hospedagem';
+};
+
+const formatRequestDate = (value: any) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+};
+
 const statusPill = (active: any) =>
   active === false
     ? 'border-slate-200 bg-slate-100 text-slate-600'
@@ -860,6 +897,89 @@ export function SuperAdminDestinations() {
       pending: pendingPartner + pendingStores,
     };
   }, [catalog?.metrics, data]);
+
+  const requestBoard = useMemo(() => {
+    const destinationById = new Map<string, any>();
+    const placeById = new Map<string, any>();
+    (data.destinations || []).forEach((destination: any) => {
+      if (destination?.id) destinationById.set(String(destination.id), destination);
+    });
+    (data.places || []).forEach((place: any) => {
+      if (place?.id) placeById.set(String(place.id), place);
+    });
+
+    const groups = new Map<string, any>();
+    const ensureGroup = (key: string, fallback: any = {}) => {
+      const normalizedKey = key || 'sem-destino';
+      if (!groups.has(normalizedKey)) {
+        groups.set(normalizedKey, {
+          id: normalizedKey,
+          name: fallback.name || fallback.destinationName || 'Destino não informado',
+          city: fallback.city || '',
+          state: fallback.state || '',
+          partnerHospitality: [],
+          partnerServices: [],
+          storeRequests: [],
+        });
+      }
+      return groups.get(normalizedKey);
+    };
+
+    (data.partnerRequests || []).forEach((request: any) => {
+      const destination = request.destination || destinationById.get(String(request.destinationId || '')) || {};
+      const key = String(destination.id || request.destinationId || destination.name || request.destinationName || request.city || 'sem-destino');
+      const group = ensureGroup(key, {
+        name: destination.name || request.destinationName || request.city || 'Destino não informado',
+        city: destination.city || request.city || '',
+        state: destination.state || request.state || '',
+      });
+      if (String(request.partnerType || '').toUpperCase() === 'SERVICE_PROVIDER') {
+        group.partnerServices.push(request);
+      } else {
+        group.partnerHospitality.push(request);
+      }
+    });
+
+    (data.storeRequests || []).forEach((request: any) => {
+      const place = request.hospitalityPlace || placeById.get(String(request.hospitalityPlaceId || '')) || {};
+      const destination = request.destination || place.destination || destinationById.get(String(request.destinationId || place.destinationId || '')) || {};
+      const key = String(destination.id || request.destinationId || place.destinationId || destination.name || request.destinationName || place.destination?.name || 'sem-destino');
+      const group = ensureGroup(key, {
+        name: destination.name || request.destinationName || place.destination?.name || 'Destino não informado',
+        city: destination.city || request.city || '',
+        state: destination.state || request.state || '',
+      });
+      group.storeRequests.push({ ...request, hospitalityPlace: request.hospitalityPlace || place });
+    });
+
+    const sortRequests = (items: any[]) => [...items].sort((left, right) => {
+      const leftPending = isPendingRequest(left.status) ? 0 : 1;
+      const rightPending = isPendingRequest(right.status) ? 0 : 1;
+      if (leftPending !== rightPending) return leftPending - rightPending;
+      return new Date(right.createdAt || right.updatedAt || 0).getTime() - new Date(left.createdAt || left.updatedAt || 0).getTime();
+    });
+
+    return Array.from(groups.values())
+      .map((group) => {
+        const partnerHospitality = sortRequests(group.partnerHospitality);
+        const partnerServices = sortRequests(group.partnerServices);
+        const storeRequests = sortRequests(group.storeRequests);
+        const all = [...partnerHospitality, ...partnerServices, ...storeRequests];
+        return {
+          ...group,
+          partnerHospitality,
+          partnerServices,
+          storeRequests,
+          total: all.length,
+          pending: all.filter((request) => isPendingRequest(request.status)).length,
+        };
+      })
+      .filter((group) => group.total > 0)
+      .sort((left, right) => {
+        if (right.pending !== left.pending) return right.pending - left.pending;
+        return String(left.name).localeCompare(String(right.name), 'pt-BR');
+      });
+  }, [data.destinations, data.partnerRequests, data.places, data.storeRequests]);
 
   const stateOptions = useMemo(() => {
     if (Array.isArray(catalog?.states) && catalog.states.length) return catalog.states;
@@ -2222,6 +2342,107 @@ export function SuperAdminDestinations() {
       </div>
     </div>
   );
+  const renderRequestActions = (request: any, onApprove: () => void, onReject: () => void) => (
+    isPendingRequest(request.status) ? (
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <button type="button" disabled={saving} onClick={onApprove} className={actionButtonClass('success')}>
+          <CheckCircle size={13} weight="fill" />
+          Aprovar
+        </button>
+        <button type="button" disabled={saving} onClick={onReject} className={actionButtonClass('danger')}>
+          Recusar
+        </button>
+      </div>
+    ) : null
+  );
+  const renderPartnerRequestCard = (request: any) => (
+    <article key={request.id} className={`rounded-[1.35rem] border p-3.5 ${requestTone(request.status)}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-black text-slate-950">{request.name}</p>
+          <p className="mt-0.5 text-[11px] font-black uppercase tracking-[0.12em] opacity-75">
+            {partnerTypeLabel(request)}
+          </p>
+          <p className="mt-2 line-clamp-2 text-xs font-semibold opacity-85">
+            {request.responsibleName || 'Responsável não informado'} · {request.responsibleEmail || request.responsiblePhone || 'Contato pendente'}
+          </p>
+          {request.message || request.description ? (
+            <p className="mt-2 line-clamp-2 text-xs font-semibold opacity-80">{request.message || request.description}</p>
+          ) : null}
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span className="rounded-full bg-white/82 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em]">
+            {requestStatusLabel(request.status)}
+          </span>
+          {formatRequestDate(request.createdAt) ? (
+            <span className="text-[10px] font-black uppercase tracking-[0.08em] opacity-60">{formatRequestDate(request.createdAt)}</span>
+          ) : null}
+        </div>
+      </div>
+      {renderRequestActions(
+        request,
+        () => reviewPartner(request.id, 'approved'),
+        () => reviewPartner(request.id, 'rejected')
+      )}
+    </article>
+  );
+  const renderStoreRequestCard = (request: any) => (
+    <article key={request.id} className={`rounded-[1.35rem] border p-3.5 ${requestTone(request.status)}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-black text-slate-950">{request.store?.name || 'Loja não informada'}</p>
+          <p className="mt-0.5 text-[11px] font-black uppercase tracking-[0.12em] opacity-75">
+            Quer atender {request.hospitalityPlace?.name || 'uma hospedagem'}
+          </p>
+          <p className="mt-2 line-clamp-2 text-xs font-semibold opacity-85">{request.message || 'Sem mensagem do lojista.'}</p>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span className="rounded-full bg-white/82 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em]">
+            {requestStatusLabel(request.status)}
+          </span>
+          {formatRequestDate(request.createdAt) ? (
+            <span className="text-[10px] font-black uppercase tracking-[0.08em] opacity-60">{formatRequestDate(request.createdAt)}</span>
+          ) : null}
+        </div>
+      </div>
+      {renderRequestActions(
+        request,
+        () => reviewStore(request.id, 'approved'),
+        () => reviewStore(request.id, 'rejected')
+      )}
+    </article>
+  );
+  const renderRequestSection = (title: string, subtitle: string, icon: any, items: any[], renderCard: (request: any) => any) => {
+    const Icon = icon;
+    const pendingCount = items.filter((request) => isPendingRequest(request.status)).length;
+    return (
+      <section className="rounded-[1.45rem] border border-slate-100 bg-white/78 p-3 shadow-[0_16px_36px_-30px_rgba(15,23,42,0.35)]">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start gap-2.5">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-[#EEF6F4] text-[#336886]">
+              <Icon size={18} weight="duotone" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-black text-slate-950">{title}</p>
+              <p className="mt-0.5 text-xs font-semibold text-slate-500">{subtitle}</p>
+            </div>
+          </div>
+          <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${
+            pendingCount ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'
+          }`}>
+            {pendingCount ? `${pendingCount} pend.` : `${items.length} total`}
+          </span>
+        </div>
+        <div className="mt-3 grid gap-2.5">
+          {items.length ? items.map(renderCard) : (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-sm font-semibold text-slate-500">
+              Nenhuma solicitação nesta categoria.
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  };
 
   return (
     <AdminLayout contextLabel="Destinos" showHeader={false}>
@@ -3470,57 +3691,101 @@ export function SuperAdminDestinations() {
         ) : null}
 
         {activeTab === 'requests' ? (
-          <div className="grid gap-4 xl:grid-cols-2">
-            <section className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-black">Chalés/prestadores aguardando aprovação</h2>
-              <div className="mt-4 space-y-3">
-                {(data.partnerRequests || []).map((request: any) => (
-                  <article key={request.id} className={`rounded-2xl border p-4 ${requestTone(request.status)}`}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-black text-slate-950">{request.name}</p>
-                        <p className="text-xs font-bold text-slate-500">{request.partnerType} · {request.destination?.name}</p>
-                        <p className="mt-1 text-xs font-semibold text-slate-600">{request.responsibleName} · {request.responsibleEmail}</p>
+          <div className="space-y-4">
+            <section className="overflow-hidden rounded-[1.9rem] border border-slate-200 bg-[radial-gradient(circle_at_0%_0%,rgba(51,104,134,0.14),transparent_34%),linear-gradient(135deg,#ffffff,#f8fafc)] p-5 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.55)]">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="inline-flex items-center gap-2 rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                    <WarningCircle size={14} weight="fill" />
+                    Central de solicitações
+                  </p>
+                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-slate-950">Fila por cidade, hospedagem e serviço</h2>
+                  <p className="mt-1 max-w-2xl text-sm font-semibold text-slate-500">
+                    A aprovação continua usando a regra atual. A tela só organiza a operação para enxergar pendências por destino sem perder contexto.
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 gap-2 sm:min-w-[360px]">
+                  {[
+                    { label: 'Hospedagens', value: (data.partnerRequests || []).filter((request: any) => String(request.partnerType || '').toUpperCase() !== 'SERVICE_PROVIDER').length, icon: Bed },
+                    { label: 'Serviços', value: (data.partnerRequests || []).filter((request: any) => String(request.partnerType || '').toUpperCase() === 'SERVICE_PROVIDER').length, icon: Sparkle },
+                    { label: 'Lojas', value: (data.storeRequests || []).length, icon: Buildings },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div key={item.label} className="rounded-[1.25rem] border border-white bg-white/82 p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.35)]">
+                        <Icon size={17} weight="duotone" className="text-[#336886]" />
+                        <p className="mt-2 text-xl font-black text-slate-950">{item.value}</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">{item.label}</p>
                       </div>
-                      <span className="rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase">{request.status}</span>
-                    </div>
-                    {String(request.status) === 'pending' ? (
-                      <div className="mt-3 flex gap-2">
-                        <button type="button" disabled={saving} onClick={() => reviewPartner(request.id, 'approved')} className="rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-black text-white">Aprovar</button>
-                        <button type="button" disabled={saving} onClick={() => reviewPartner(request.id, 'rejected')} className="rounded-full bg-rose-600 px-3 py-1.5 text-xs font-black text-white">Recusar</button>
-                      </div>
-                    ) : null}
-                  </article>
-                ))}
+                    );
+                  })}
+                </div>
               </div>
             </section>
 
-            <section className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-black">Lojas solicitando atender chalés</h2>
-              <div className="mt-4 space-y-3">
-                {(data.storeRequests || []).map((request: any) => (
-                  <article key={request.id} className={`rounded-2xl border p-4 ${requestTone(request.status)}`}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-black text-slate-950">{request.store?.name}</p>
-                        <p className="text-xs font-bold text-slate-500">{request.hospitalityPlace?.name} · {request.destination?.name}</p>
-                        <p className="mt-1 text-xs font-semibold text-slate-600">{request.message || 'Sem mensagem'}</p>
+            {requestBoard.length ? (
+              <div className="grid gap-4">
+                {requestBoard.map((group) => (
+                  <article key={group.id} className="overflow-hidden rounded-[1.9rem] border border-slate-200 bg-slate-50/70 p-3 shadow-[0_22px_56px_-44px_rgba(15,23,42,0.48)]">
+                    <div className="rounded-[1.55rem] border border-white bg-white p-4 shadow-[0_14px_36px_-32px_rgba(15,23,42,0.42)]">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.15rem] bg-[#153A4C] text-white shadow-[0_16px_34px_-24px_rgba(15,23,42,0.68)]">
+                            <MapTrifold size={22} weight="duotone" />
+                          </span>
+                          <div className="min-w-0">
+                            <p className="truncate text-lg font-black tracking-[-0.03em] text-slate-950">{group.name}</p>
+                            <p className="text-xs font-bold text-slate-500">
+                              {[group.city, group.state].filter(Boolean).join(' · ') || 'Destino aguardando validação'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black text-slate-600">{group.total} solicitação(ões)</span>
+                          <span className={`rounded-full px-3 py-1 text-[11px] font-black ${
+                            group.pending ? 'bg-amber-100 text-amber-700' : 'bg-emerald-50 text-emerald-700'
+                          }`}>
+                            {group.pending ? `${group.pending} pendente(s)` : 'Sem pendência'}
+                          </span>
+                        </div>
                       </div>
-                      <span className="rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase">{request.status}</span>
                     </div>
-                    {String(request.status) === 'pending' ? (
-                      <div className="mt-3 flex gap-2">
-                        <button type="button" disabled={saving} onClick={() => reviewStore(request.id, 'approved')} className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-black text-white">
-                          <CheckCircle size={13} weight="fill" />
-                          Aprovar
-                        </button>
-                        <button type="button" disabled={saving} onClick={() => reviewStore(request.id, 'rejected')} className="rounded-full bg-rose-600 px-3 py-1.5 text-xs font-black text-white">Recusar</button>
-                      </div>
-                    ) : null}
+
+                    <div className="mt-3 grid gap-3 xl:grid-cols-3">
+                      {renderRequestSection(
+                        'Chalés e pousadas',
+                        'Solicitações de hospedagem que viram página pública.',
+                        Bed,
+                        group.partnerHospitality,
+                        renderPartnerRequestCard
+                      )}
+                      {renderRequestSection(
+                        'Serviços e lugares',
+                        'Prestadores, restaurantes e experiências locais.',
+                        Sparkle,
+                        group.partnerServices,
+                        renderPartnerRequestCard
+                      )}
+                      {renderRequestSection(
+                        'Lojas para chalés',
+                        'Lojistas pedindo para atender uma hospedagem.',
+                        Buildings,
+                        group.storeRequests,
+                        renderStoreRequestCard
+                      )}
+                    </div>
                   </article>
                 ))}
               </div>
-            </section>
+            ) : (
+              <div className="rounded-[1.75rem] border border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">
+                <WarningCircle size={30} weight="duotone" className="mx-auto text-[#336886]" />
+                <h3 className="mt-3 text-lg font-black text-slate-950">Nenhuma solicitação cadastrada</h3>
+                <p className="mx-auto mt-1 max-w-lg text-sm font-semibold text-slate-500">
+                  Quando um chalé, serviço ou loja demonstrar interesse, ele aparecerá aqui já agrupado por cidade.
+                </p>
+              </div>
+            )}
           </div>
         ) : null}
       </div>

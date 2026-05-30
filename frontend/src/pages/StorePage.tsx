@@ -3864,19 +3864,21 @@ export function StorePage() {
         {showClosedState && (
           <div className="min-h-[72vh] bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.16),transparent_36%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.08),transparent_42%),linear-gradient(180deg,#EEF2F7_0%,#F4F8FB_54%,#EEF2F7_100%)]">
             <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:py-7">
-              <button
-                type="button"
-                onClick={() => navigateBackOrFallback(navigate, '/hub')}
-                className="mb-4 inline-flex items-center gap-2 text-left text-slate-700 transition-colors hover:text-[#336886]"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#c9dbe7]/80 bg-white/90 text-slate-700 shadow-[0_12px_24px_-22px_rgba(51,104,134,0.25)] transition-all active:scale-95">
-                  <ArrowLeft size={16} weight="bold" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Navegação</span>
-                  <span className="block text-sm font-black leading-tight text-slate-800">Voltar para o app</span>
-                </span>
-              </button>
+              {!showPublicStoreAppHeader ? (
+                <button
+                  type="button"
+                  onClick={() => navigateBackOrFallback(navigate, '/hub')}
+                  className="mb-4 inline-flex items-center gap-2 text-left text-slate-700 transition-colors hover:text-[#336886]"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#c9dbe7]/80 bg-white/90 text-slate-700 shadow-[0_12px_24px_-22px_rgba(51,104,134,0.25)] transition-all active:scale-95">
+                    <ArrowLeft size={16} weight="bold" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Navegação</span>
+                    <span className="block text-sm font-black leading-tight text-slate-800">Voltar para o app</span>
+                  </span>
+                </button>
+              ) : null}
 
               <div className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)] md:items-start">
                 <div className="space-y-4">
