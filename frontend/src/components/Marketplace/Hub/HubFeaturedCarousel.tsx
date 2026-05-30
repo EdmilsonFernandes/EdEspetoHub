@@ -86,8 +86,23 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
             ? Array.from({ length: 3 }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="h-[112px] min-w-[268px] animate-pulse rounded-[1.45rem] bg-white shadow-[0_18px_42px_-34px_rgba(15,23,42,0.18)] ring-1 ring-slate-100/80"
-                />
+                  className="relative overflow-hidden h-[112px] min-w-[268px] rounded-[1.45rem] bg-white p-2.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.18)] ring-1 ring-slate-100/80 flex gap-3 sm:min-w-[292px]"
+                >
+                  <div className="relative h-[92px] w-[92px] shrink-0 rounded-[1.2rem] bg-slate-100 overflow-hidden">
+                    <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                  </div>
+                  <div className="flex-1 flex flex-col py-1.5 space-y-2">
+                    <div className="relative h-4 w-3/4 rounded bg-slate-100 overflow-hidden">
+                      <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                    </div>
+                    <div className="relative h-3 w-1/2 rounded bg-slate-100 overflow-hidden">
+                      <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                    </div>
+                    <div className="relative mt-auto h-5 w-1/3 rounded bg-slate-100 overflow-hidden">
+                      <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                    </div>
+                  </div>
+                </div>
               ))
             : items.map((item, index) => {
                 const featuredStorePath = selectedCondominiumSlug
@@ -106,7 +121,11 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                     onFocus={warmupStore}
                     onTouchStart={warmupStore}
                     onClick={() => onStageProduct(item)}
-                    className="jnc-hub-touch jnc-hub-lift jnc-hub-card group flex min-h-[112px] min-w-[268px] snap-start gap-3 rounded-[1.45rem] p-2.5 sm:min-w-[292px]"
+                    className={`jnc-hub-touch jnc-hub-lift jnc-hub-card group flex min-h-[112px] min-w-[268px] snap-start gap-3 rounded-[1.45rem] p-2.5 sm:min-w-[292px] border transition-all duration-300 ${
+                      item.sponsored
+                        ? 'border-amber-200/70 bg-[linear-gradient(135deg,rgba(254,243,199,0.25)_0%,#ffffff_60%,#ffffff_100%)] shadow-[0_14px_34px_-26px_rgba(245,158,11,0.22)]'
+                        : 'border-slate-100 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.04)]'
+                    }`}
                   >
                     <div className="relative h-[92px] w-[92px] shrink-0 overflow-hidden rounded-[1.2rem] bg-slate-100 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.36)] ring-1 ring-white/80">
                       <img
@@ -121,30 +140,48 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                             item.storeLogo || getStoreAvatarUrl(item.storeSlug, item.storeName);
                         }}
                       />
+                      
+                      <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
+                      
                       <div className="absolute inset-x-0 bottom-0 h-9 bg-gradient-to-t from-black/22 to-transparent" />
-                      <div className="absolute right-1.5 top-1.5">
+                      
+                      <div className="absolute right-1.5 top-1.5 z-20">
                         {item.sponsored ? (
-                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] bg-amber-300/92 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.1em] text-slate-950">
+                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] bg-amber-300/92 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.1em] text-slate-950 shadow-sm">
                             <Star size={9} weight="fill" /> {item.badge || 'Patrocinado'}
                           </span>
                         ) : (
-                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] px-1.5 py-0.5 text-[7px] font-black italic uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-black/5">
+                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] px-1.5 py-0.5 text-[7px] font-black italic uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-black/5 shadow-sm">
                             <Sparkle size={7} weight="fill" className="text-[#336886]" />
                             Seleção
                           </span>
                         )}
                       </div>
+
+                      <div className="absolute bottom-1 right-1 z-20 h-6 w-6 overflow-hidden rounded-full border-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.15)] bg-white">
+                        <img
+                          src={item.storeLogo || getStoreAvatarUrl(item.storeSlug, item.storeName)}
+                          alt={item.storeName}
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                          onError={(event) => {
+                            (event.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName);
+                          }}
+                        />
+                      </div>
                     </div>
 
                     <div className="flex min-w-0 flex-1 flex-col py-1 pr-1">
-                      <p className="line-clamp-2 text-[13px] font-extrabold leading-[1.12rem] tracking-[-0.02em] text-slate-950">{item.name}</p>
+                      <p className="line-clamp-2 text-[13px] font-extrabold leading-[1.12rem] tracking-[-0.02em] text-slate-950 group-hover:text-[#336886] transition-colors">{item.name}</p>
                       <p className="mt-1 truncate text-[10.5px] font-semibold text-slate-400">por {item.storeName}</p>
                       <div className="mt-auto flex items-end justify-between gap-2 pt-2">
                         <span className="text-[19px] font-black leading-none tracking-[-0.05em] text-[#153A4C]">
                           {currency.format(item.price)}
                         </span>
-                        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#edf5fa] text-[#336886] transition group-hover:translate-x-0.5">
-                          <CaretRight size={12} weight="bold" />
+                        
+                        <span className="inline-flex h-7 items-center gap-1 rounded-full bg-[#edf5fa] px-2 text-[#336886] transition-all duration-300 group-hover:bg-[#336886] group-hover:text-white group-hover:px-3 group-hover:shadow-[0_4px_12px_rgba(51,104,134,0.25)]">
+                          <span className="max-w-0 scale-0 opacity-0 text-[9px] font-black uppercase tracking-wider transition-all duration-300 group-hover:max-w-[40px] group-hover:scale-100 group-hover:opacity-100">Pedir</span>
+                          <CaretRight size={11} weight="bold" />
                         </span>
                       </div>
                     </div>

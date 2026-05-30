@@ -376,22 +376,23 @@ export function HubHighlightsPage() {
       />
 
       <main className="mx-auto w-full max-w-3xl px-4 pb-[calc(var(--jnk-client-bottom-nav-height,0px)+2rem)] pt-[calc(env(safe-area-inset-top)+5.2rem)]">
-        <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 p-4 shadow-[0_24px_54px_-38px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/60 backdrop-blur-xl">
+        <section className="relative overflow-hidden rounded-[2rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.96)_0%,rgba(244,249,252,0.94)_100%)] p-4 shadow-[0_24px_54px_-38px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/50 backdrop-blur-xl">
           <div className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full bg-[#336886]/12 blur-3xl" />
+          <div className="pointer-events-none absolute -left-10 -bottom-12 h-44 w-44 rounded-full bg-emerald-500/8 blur-3xl" />
           <div className="relative flex items-start gap-3">
             <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.2rem] bg-[#153A4C] text-white shadow-[0_16px_30px_-22px_rgba(21,58,76,0.6)]">
-              <Sparkle size={20} weight="fill" />
+              <Sparkle size={20} weight="fill" className="text-amber-300 animate-pulse" />
             </span>
             <div className="min-w-0">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Para pedir agora</p>
               <h2 className="mt-1 text-lg font-black tracking-[-0.04em] text-slate-950">Escolha o item. A loja certa abre para você.</h2>
-              <p className="mt-1.5 text-sm font-medium leading-relaxed text-slate-600">
+              <p className="mt-1.5 text-xs font-semibold leading-relaxed text-slate-500">
                 {heroSubtitle}
               </p>
             </div>
           </div>
 
-          <div className="relative mt-4 overflow-hidden rounded-[1.65rem] border border-white/90 bg-white/92 p-1.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/55 transition-all duration-300 focus-within:border-[#336886]/35 focus-within:shadow-[0_20px_48px_-30px_rgba(51,104,134,0.25)] focus-within:ring-2 focus-within:ring-[#336886]/10">
+          <div className="relative mt-4 overflow-hidden rounded-[1.65rem] border border-slate-200 bg-white/92 p-1.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/5 transition-all duration-300 focus-within:border-[#336886]/45 focus-within:bg-white focus-within:shadow-[0_20px_48px_-30px_rgba(51,104,134,0.25)] focus-within:ring-4 focus-within:ring-[#336886]/10">
             <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(95,211,90,0.18),transparent_68%)]" />
             <div className="relative flex items-center gap-2.5">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.15rem] bg-[linear-gradient(145deg,#5FD35A_0%,#336886_64%,#153A4C_100%)] text-white shadow-[0_14px_26px_-18px_rgba(51,104,134,0.68)]">
@@ -429,13 +430,13 @@ export function HubHighlightsPage() {
                   key={option.key}
                   type="button"
                   onClick={() => setSelectedCategory(option.key)}
-                  className="group flex w-[4.45rem] shrink-0 snap-start flex-col items-center gap-1.5 text-center transition active:scale-[0.95]"
+                  className="jnc-hub-touch group flex w-[4.45rem] shrink-0 snap-start flex-col items-center gap-1.5 text-center"
                 >
                   <span
                     className={`relative grid h-[3.65rem] w-[3.65rem] place-items-center overflow-hidden rounded-[1.35rem] border transition-all duration-300 ${
                       active
-                        ? `${option.activeSurfaceClassName} border-white/70 shadow-[0_20px_34px_-22px_rgba(15,23,42,0.44)]`
-                        : `${option.surfaceClassName} border-white/90 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/60 group-hover:-translate-y-0.5`
+                        ? `${option.activeSurfaceClassName} border-white/70`
+                        : `${option.surfaceClassName} border-slate-100/90 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.1)]`
                     }`}
                   >
                     <span className={`absolute -right-3 -top-3 h-9 w-9 rounded-full blur-xl ${option.glowClassName}`} />
@@ -486,14 +487,21 @@ export function HubHighlightsPage() {
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="grid h-[132px] grid-cols-[6.35rem_minmax(0,1fr)] items-center gap-3 rounded-[1.65rem] bg-white/80 p-2.5 shadow-[0_14px_34px_-28px_rgba(15,23,42,0.3)] ring-1 ring-slate-200/60"
+                className="relative overflow-hidden grid h-[132px] grid-cols-[6.35rem_minmax(0,1fr)] items-center gap-3 rounded-[1.65rem] bg-white p-2.5 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50"
               >
-                <div className="h-[6.35rem] w-[6.35rem] shrink-0 rounded-[1.25rem] ds-skeleton" />
-                <div className="flex flex-col justify-center space-y-2.5">
-                  <div className="h-3 w-5/12 rounded-full ds-skeleton" />
-                  <div className="h-4 w-9/12 rounded-full ds-skeleton" />
-                  <div className="h-3 w-6/12 rounded-full ds-skeleton" />
-                  <div className="h-5 w-4/12 rounded-full ds-skeleton" />
+                <div className="relative h-[6.35rem] w-[6.35rem] shrink-0 rounded-[1.25rem] bg-slate-100 overflow-hidden">
+                  <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                </div>
+                <div className="flex-1 flex flex-col justify-center space-y-2 py-1 pr-1">
+                  <div className="relative h-4.5 w-11/12 rounded bg-slate-100 overflow-hidden">
+                    <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                  </div>
+                  <div className="relative h-3.5 w-6/12 rounded bg-slate-100 overflow-hidden">
+                    <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                  </div>
+                  <div className="relative mt-auto h-5 w-4/12 rounded bg-slate-100 overflow-hidden">
+                    <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                  </div>
                 </div>
               </div>
             ))}
@@ -523,7 +531,11 @@ export function HubHighlightsPage() {
                   to={storePath}
                   onClick={() => stageFeaturedProductCheckout(item)}
                   style={{ animationDelay: `${Math.min(index, 10) * 34}ms` }}
-                  className="group grid min-h-[132px] grid-cols-[6.35rem_minmax(0,1fr)] items-center gap-3 overflow-hidden rounded-[1.65rem] border border-slate-100 bg-white p-2.5 shadow-[0_12px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.15)]"
+                  className={`jnc-hub-touch jnc-hub-lift group grid min-h-[132px] grid-cols-[6.35rem_minmax(0,1fr)] items-center gap-3 overflow-hidden rounded-[1.65rem] border p-2.5 transition-all duration-300 ease-out animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards ${
+                    item.sponsored
+                      ? 'border-amber-200/70 bg-[linear-gradient(135deg,rgba(254,243,199,0.18)_0%,#ffffff_56%,#ffffff_100%)] shadow-[0_14px_34px_-26px_rgba(245,158,11,0.2)]'
+                      : 'border-slate-100 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.06)]'
+                  }`}
                 >
                   <div className="relative h-[6.35rem] w-[6.35rem] shrink-0 overflow-hidden rounded-[1.25rem] bg-slate-100">
                     <img
@@ -537,35 +549,46 @@ export function HubHighlightsPage() {
                         (event.target as HTMLImageElement).src = item.storeLogo || getStoreAvatarUrl(item.storeSlug, item.storeName);
                       }}
                     />
+                    
+                    {/* Glare sweep diagonal sweep overlay */}
+                    <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
+                    
                     <div className="absolute inset-0 bg-gradient-to-t from-black/36 via-transparent to-black/6" />
+                    
                     <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full border border-white/80 bg-white/95 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.15em] text-[#336886] shadow-[0_6px_14px_-4px_rgba(15,23,42,0.12)] backdrop-blur-sm">
                       <CategoryIcon size={8} weight="fill" />
                       {categoryOption.label}
                     </span>
+                    
                     <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full border border-white/20 bg-slate-950/65 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.15em] text-white shadow-[0_4px_12px_rgba(0,0,0,0.25)] backdrop-blur-md">
                       {item.sponsored ? <Star size={8} weight="fill" className="text-amber-500" /> : <Sparkle size={8} weight="fill" className="text-[#336886]" />}
                       {item.sponsored ? item.badge || 'Destaque' : 'Seleção'}
                     </span>
-                  </div>
-                  <div className="flex min-w-0 flex-col py-1 pr-1">
-                    <p className="line-clamp-2 text-[14.5px] font-black leading-[1.2rem] tracking-tight text-slate-900 transition-colors duration-200 group-hover:text-[#336886]">{item.name}</p>
-                    <div className="mt-2.5 flex min-w-0 items-center gap-1.5">
+
+                    {/* Store Logo floating in picture-in-picture style */}
+                    <div className="absolute bottom-1.5 right-1.5 z-20 h-6.5 w-6.5 overflow-hidden rounded-full border border-white shadow-[0_4px_10px_rgba(0,0,0,0.18)] bg-white">
                       <img
                         src={item.storeLogo}
                         alt=""
                         loading="lazy"
-                        decoding="async"
-                        className="h-[18px] w-[18px] shrink-0 rounded-full border border-slate-100 bg-white object-cover shadow-[0_2px_6px_rgba(0,0,0,0.06)]"
+                        className="h-full w-full object-cover"
                         onError={(event) => {
                           (event.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName);
                         }}
                       />
+                    </div>
+                  </div>
+                  
+                  <div className="flex min-w-0 flex-col py-1 pr-1">
+                    <p className="line-clamp-2 text-[14.5px] font-black leading-[1.2rem] tracking-tight text-slate-900 transition-colors duration-200 group-hover:text-[#336886]">{item.name}</p>
+                    <div className="mt-2 flex min-w-0 items-center gap-1">
                       <span className="truncate text-[10.5px] font-bold text-slate-400">por {item.storeName}</span>
                     </div>
                     <div className="mt-auto flex items-end justify-between gap-2 pt-3">
                       <p className="text-[20px] font-black leading-none tracking-[-0.05em] text-[#153A4C]">{currency.format(item.price)}</p>
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf5fa] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover:bg-[#336886] group-hover:text-white group-hover:translate-x-0.5 group-hover:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
-                        Abrir
+                      
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf5fa] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover:bg-[#336886] group-hover:text-white group-hover:px-3.5 group-hover:shadow-[0_4px_12px_rgba(51,104,134,0.25)]">
+                        <span className="max-w-0 scale-0 opacity-0 text-[8.5px] font-black uppercase tracking-wider transition-all duration-300 group-hover:max-w-[65px] group-hover:scale-100 group-hover:opacity-100">Pedir</span>
                         <CaretRight size={9} weight="bold" />
                       </span>
                     </div>

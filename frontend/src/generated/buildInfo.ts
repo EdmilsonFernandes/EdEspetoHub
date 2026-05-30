@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "867d5674",
-  "versionLabel": "v0.1.9.867d5674",
-  "versionInternal": "0.1.9+20260530.210619.867d5674",
-  "buildId": "0.1.9+20260530.210619.867d5674-20260530.210619-867d5674",
-  "builtAt": "2026-05-30T21:06:19.524Z",
-  "commitHash": "867d56746e9176378bb4f764a43aedc51419bdfd",
-  "shortHash": "867d5674",
+  "versionDisplaySuffix": "401159c4",
+  "versionLabel": "v0.1.9.401159c4",
+  "versionInternal": "0.1.9+20260530.211639.401159c4",
+  "buildId": "0.1.9+20260530.211639.401159c4-20260530.211639-401159c4",
+  "builtAt": "2026-05-30T21:16:39.973Z",
+  "commitHash": "401159c4a68da48cc7f1f6411c08a133e25b9992",
+  "shortHash": "401159c4",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "401159c4a68da48cc7f1f6411c08a133e25b9992",
+      "shortHash": "401159c4",
+      "dateIso": "2026-05-30T18:09:37-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(frontend): premium UI/UX enhancements on storefront, checkout, and order tracking",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/401159c4a68da48cc7f1f6411c08a133e25b9992"
+    },
     {
       "hash": "867d56746e9176378bb4f764a43aedc51419bdfd",
       "shortHash": "867d5674",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Improve checkout and printer reliability",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1d26e39915a28323104397d117f8dbf7b9f7dc96"
-    },
-    {
-      "hash": "a9dec60c50194511c78c27c91313b6bc930af300",
-      "shortHash": "a9dec60c",
-      "dateIso": "2026-05-27T22:29:35-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Keep pickup stores visible in hub",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a9dec60c50194511c78c27c91313b6bc930af300"
     }
   ]
 } as const;
