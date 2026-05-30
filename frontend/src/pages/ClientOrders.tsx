@@ -618,7 +618,8 @@ function OrderCard({
 
   return (
     <>
-    <article className={`overflow-hidden rounded-[28px] bg-white shadow-[0_18px_46px_-34px_rgba(15,23,42,0.28)] ${isActive ? 'ring-1 ring-emerald-200/80' : isCancelled ? 'ring-1 ring-rose-100/80' : 'ring-1 ring-slate-100'}`}>
+    <article className={`jnc-hub-touch jnc-hub-lift group relative overflow-hidden rounded-[28px] bg-white shadow-[0_18px_46px_-34px_rgba(15,23,42,0.28)] md:hover:border-[#336886]/18 ${isActive ? 'ring-1 ring-emerald-200/80' : isCancelled ? 'ring-1 ring-rose-100/80' : 'ring-1 ring-slate-100'}`}>
+      <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent z-20" />
       {/* Header do card */}
       <div
         role="button"
@@ -655,9 +656,9 @@ function OrderCard({
           <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-1.5">
             <span className={`inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-black shadow-sm ring-1 ${statusBadgeClass}`}>
               {isActive ? (
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 duration-1000" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
                 </span>
               ) : statusMeta.icon}
               <span className="truncate">{statusMeta.label}</span>
@@ -1565,9 +1566,9 @@ export function ClientOrders() {
                     key={filter.key}
                     type="button"
                     onClick={() => setStatusFilter(filter.key)}
-                    className={`inline-flex min-h-[3.15rem] min-w-0 items-center justify-between gap-2 rounded-[1.2rem] border px-3 py-2 text-left transition-all duration-200 active:scale-[0.98] ${
+                    className={`jnc-hub-touch inline-flex min-h-[3.15rem] min-w-0 items-center justify-between gap-2 rounded-[1.2rem] border px-3 py-2 text-left ${
                       isSelected
-                        ? 'border-[#153A4C] bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_16px_30px_-22px_rgba(21,58,76,0.62)]'
+                        ? 'border-[#153A4C] bg-[linear-gradient(135deg,#153A4C_0%,#336886_100%)] text-white shadow-[0_16px_30px_-22px_rgba(21,58,76,0.62)]'
                         : 'border-white/90 bg-white/82 text-slate-700 shadow-[0_12px_26px_-24px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/55'
                     }`}
                     aria-pressed={isSelected}

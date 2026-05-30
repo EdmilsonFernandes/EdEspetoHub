@@ -1430,9 +1430,11 @@ export function OrderTracking() {
         topSlot={(
           <div className="h-[2.5px] w-full overflow-hidden bg-[#dce9f1]/80">
             <div
-              className="h-full transition-all duration-700 ease-out"
+              className="relative h-full transition-all duration-700 ease-out overflow-hidden"
               style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#336886,#009ee3)' }}
-            />
+            >
+              <div className="jnc-animate-shimmer absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            </div>
           </div>
         )}
         right={(
@@ -1647,7 +1649,7 @@ export function OrderTracking() {
                             type="button"
                             onClick={handleConfirmReceipt}
                             disabled={confirmReceiptLoading}
-                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_32px_-24px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-70"
+                            className="jnc-hub-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_32px_-24px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98]"
                           >
                             {confirmReceiptLoading ? <CircleNotch size={16} className="animate-spin" /> : <SealCheck size={16} weight="fill" />}
                             Confirmar recebimento
@@ -1683,13 +1685,18 @@ export function OrderTracking() {
                 <div className="mb-4">
                   <div className="h-2 w-full overflow-hidden rounded-full bg-[#dce9f1]/80">
                     <div
-                      className="h-full transition-all duration-700 ease-out"
+                      className="relative h-full transition-all duration-700 ease-out overflow-hidden"
                       style={{
                         width: `${progress}%`,
-                        backgroundImage:
-                          'linear-gradient(90deg, #336886, #009ee3)',
+                        backgroundImage: isCancelled
+                          ? 'linear-gradient(90deg, #f43f5e, #fda4af)'
+                          : 'linear-gradient(90deg, #336886, #009ee3)',
                       }}
-                    />
+                    >
+                      {!isTerminal && (
+                        <div className="jnc-animate-shimmer absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                      )}
+                    </div>
                   </div>
                 </div>
                 {(isReady && elapsedMs > 0) ||
@@ -1744,11 +1751,11 @@ export function OrderTracking() {
                 <div className="rounded-2xl border border-[#d9e6ee] bg-white/92 px-4 py-4 shadow-[0_12px_28px_-24px_rgba(51,104,134,0.14)]">
                   <div className="relative pl-1">
                     {/* Trilho de fundo */}
-                    <span className="pointer-events-none absolute left-[10px] top-3 bottom-6 w-[2px] rounded-full bg-[#dce9f1]/85" />
+                    <span className="pointer-events-none absolute left-[10px] top-3 bottom-6 w-[1.5px] rounded-full bg-[#dce9f1]/60" />
                     {/* Trilho preenchido (concluído) */}
                     {currentIndex > 0 && (
                       <span
-                        className="pointer-events-none absolute left-[10px] top-3 w-[2px] rounded-full transition-all duration-700"
+                        className="pointer-events-none absolute left-[10px] top-3 w-[1.5px] rounded-full transition-all duration-700"
                         style={{
                           height: `${(currentIndex / Math.max(steps.length - 1, 1)) * 100}%`,
                           background: isCancelled ? '#fda4af' : 'linear-gradient(180deg,#336886,#009ee3)',
@@ -1762,23 +1769,28 @@ export function OrderTracking() {
                       const isCurrent = stepIndex === currentIndex;
                       return (
                         <div key={`mobile-line-${step.id}`} className="relative z-[1] flex items-center gap-3">
-                          <span
-                            className={`h-[22px] w-[22px] shrink-0 rounded-full border-2 grid place-items-center transition-all duration-300 ${isCurrent && !isTerminal ? 'animate-pulse' : ''} ${
-                              isCurrent
-                                ? isCancelled
-                                  ? 'border-rose-500 bg-rose-500 text-white shadow-[0_0_0_3px_rgba(244,63,94,0.15)]'
-                                  : 'border-[#336886] bg-[#336886] text-white shadow-[0_0_0_3px_rgba(51,104,134,0.2)]'
-                                : isCompleted
+                          <span className="relative flex h-[22px] w-[22px] shrink-0 items-center justify-center">
+                            {isCurrent && !isCancelled && !isTerminal && (
+                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 duration-1000" />
+                            )}
+                            <span
+                              className={`relative z-[2] h-[22px] w-[22px] rounded-full border-2 grid place-items-center transition-all duration-300 ${
+                                isCurrent
                                   ? isCancelled
-                                    ? 'border-rose-200 bg-rose-100 text-rose-600'
-                                    : 'border-emerald-200 bg-emerald-100 text-emerald-600'
-                                  : 'border-stone-200 bg-stone-50 text-stone-300'
-                            }`}
-                          >
-                            {isCompleted
-                              ? <CheckCircle size={13} weight="fill" />
-                              : <span className="text-[8px] font-black">{stepIndex + 1}</span>
-                            }
+                                    ? 'border-rose-500 bg-rose-500 text-white shadow-[0_0_0_4px_rgba(244,63,94,0.2)]'
+                                    : 'border-emerald-500 bg-emerald-500 text-white ring-4 ring-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.6)] scale-110'
+                                  : isCompleted
+                                    ? isCancelled
+                                      ? 'border-rose-200 bg-rose-100 text-rose-600'
+                                      : 'border-emerald-200 bg-emerald-100 text-emerald-600'
+                                    : 'border-stone-200 bg-stone-50 text-stone-300'
+                              }`}
+                            >
+                              {isCompleted
+                                ? <CheckCircle size={13} weight="fill" />
+                                : <span className="text-[8px] font-black">{stepIndex + 1}</span>
+                              }
+                            </span>
                           </span>
                           <div className="min-w-0">
                             <span className={`text-[12.5px] leading-tight ${
@@ -2088,11 +2100,13 @@ export function OrderTracking() {
                           {pixKey ? (
                             <>
                               <div className="mt-4 flex items-center justify-center">
-                                <img
-                                  src={pixQrUrl}
-                                  alt="QR Code Pix"
-                                  className="h-40 w-40 rounded-2xl border border-amber-200/80 bg-white object-contain"
-                                />
+                                <div className="overflow-hidden rounded-2xl border-4 border-white bg-white p-2 shadow-[0_12px_32px_-16px_rgba(120,53,15,0.25)]">
+                                  <img
+                                    src={pixQrUrl}
+                                    alt="QR Code Pix"
+                                    className="h-40 w-40 object-contain"
+                                  />
+                                </div>
                               </div>
                               <button
                                 type="button"
@@ -2105,7 +2119,7 @@ export function OrderTracking() {
                                     console.error('Falha ao copiar Pix', err);
                                   }
                                 }}
-                                className="mt-4 w-full rounded-xl border border-amber-200/80 bg-white px-3 py-2 text-xs font-semibold text-stone-700 transition-all duration-200 hover:bg-amber-50 active:scale-[0.97] active:opacity-80"
+                                className={`jnc-hub-touch mt-4 w-full rounded-xl border px-3 py-2 text-xs font-semibold shadow-sm active:scale-[0.98] ${pixCopied ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-amber-200 bg-white text-stone-700 hover:bg-amber-50/50'}`}
                               >
                                 {pixCopied ? 'Copiado!' : 'Copiar codigo Pix'}
                               </button>
@@ -2163,7 +2177,7 @@ export function OrderTracking() {
                               window.setTimeout(() => setCtaPulse(false), 220);
                               handleRepeatOrder();
                             }}
-                            className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.46)] transition-transform active:scale-[0.98]"
+                            className="jnc-hub-touch inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.46)]"
                             style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
                           >
                             <ArrowClockwise size={15} weight="bold" />
@@ -2193,46 +2207,46 @@ export function OrderTracking() {
                           <div>
                             <p className="text-xs font-semibold text-slate-600 mb-1">Nota da loja</p>
                             <div className="flex items-center gap-1">
-                              {[1, 2, 3, 4, 5].map((n) => (
-                                <button
-                                  key={`store-${n}`}
-                                  type="button"
-                                  onClick={() => setReviewForm((prev) => ({ ...prev, storeRating: n }))}
-                                  className={`h-8 w-8 rounded-lg border grid place-items-center ${
-                                    Number(reviewForm.storeRating || 0) >= n
-                                      ? 'bg-amber-50 border-amber-200 text-amber-600'
-                                      : 'bg-white border-slate-200 text-slate-400'
-                                  }`}
-                                  disabled={Boolean(reviewState?.review)}
-                                >
-                                  <Star size={16} weight={Number(reviewForm.storeRating || 0) >= n ? 'fill' : 'duotone'} />
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          {canRateDelivery && (
-                            <div>
-                              <p className="text-xs font-semibold text-slate-600 mb-1">Nota do entregador</p>
-                              <div className="flex items-center gap-1">
                                 {[1, 2, 3, 4, 5].map((n) => (
                                   <button
-                                    key={`delivery-${n}`}
+                                    key={`store-${n}`}
                                     type="button"
-                                    onClick={() => setReviewForm((prev) => ({ ...prev, deliveryRating: n }))}
-                                    className={`h-8 w-8 rounded-lg border grid place-items-center ${
-                                      Number(reviewForm.deliveryRating || 0) >= n
-                                        ? 'bg-amber-50 border-amber-200 text-amber-600'
+                                    onClick={() => setReviewForm((prev) => ({ ...prev, storeRating: n }))}
+                                    className={`h-8 w-8 rounded-lg border grid place-items-center transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-115 hover:rotate-12 active:scale-90 ${
+                                      Number(reviewForm.storeRating || 0) >= n
+                                        ? 'bg-amber-50 border-amber-200 text-amber-600 scale-105'
                                         : 'bg-white border-slate-200 text-slate-400'
                                     }`}
                                     disabled={Boolean(reviewState?.review)}
                                   >
-                                    <Star size={16} weight={Number(reviewForm.deliveryRating || 0) >= n ? 'fill' : 'duotone'} />
+                                    <Star size={16} weight={Number(reviewForm.storeRating || 0) >= n ? 'fill' : 'duotone'} />
                                   </button>
                                 ))}
                               </div>
                             </div>
-                          )}
+
+                            {canRateDelivery && (
+                              <div>
+                                <p className="text-xs font-semibold text-slate-600 mb-1">Nota do entregador</p>
+                                <div className="flex items-center gap-1">
+                                  {[1, 2, 3, 4, 5].map((n) => (
+                                    <button
+                                      key={`delivery-${n}`}
+                                      type="button"
+                                      onClick={() => setReviewForm((prev) => ({ ...prev, deliveryRating: n }))}
+                                      className={`h-8 w-8 rounded-lg border grid place-items-center transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-115 hover:rotate-12 active:scale-90 ${
+                                        Number(reviewForm.deliveryRating || 0) >= n
+                                          ? 'bg-amber-50 border-amber-200 text-amber-600 scale-105'
+                                          : 'bg-white border-slate-200 text-slate-400'
+                                      }`}
+                                      disabled={Boolean(reviewState?.review)}
+                                    >
+                                      <Star size={16} weight={Number(reviewForm.deliveryRating || 0) >= n ? 'fill' : 'duotone'} />
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
 
                           <div>
                             <p className="text-xs font-semibold text-slate-600 mb-1">Pontos da loja</p>
@@ -2288,10 +2302,10 @@ export function OrderTracking() {
                                     type="button"
                                     onClick={() => setReviewForm((prev) => ({ ...prev, tipAmount: value }))}
                                     disabled={Boolean(reviewState?.review)}
-                                    className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${
+                                    className={`jnc-hub-touch px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all duration-300 ${
                                       Number(reviewForm.tipAmount || 0) === value
-                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                        : 'bg-white text-slate-600 border-slate-200'
+                                        ? 'bg-emerald-500 text-white border-emerald-500 shadow-[0_6px_15px_-4px_rgba(16,185,129,0.4)] scale-[1.03]'
+                                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                                     }`}
                                   >
                                     {value === 0 ? 'Sem gorjeta' : `R$ ${value}`}
@@ -2336,11 +2350,13 @@ export function OrderTracking() {
                                   </div>
                                   {reviewTip?.tipQrCodeBase64 ? (
                                     <div className="flex items-center justify-center">
-                                      <img
-                                        src={reviewTip.tipQrCodeBase64}
-                                        alt="QR Code da gorjeta"
-                                        className="w-40 h-40 rounded-xl bg-white border border-slate-200 object-contain"
-                                      />
+                                      <div className="overflow-hidden rounded-2xl border-4 border-white bg-white p-2 shadow-[0_12px_32px_-16px_rgba(15,23,42,0.25)]">
+                                        <img
+                                          src={reviewTip.tipQrCodeBase64}
+                                          alt="QR Code da gorjeta"
+                                          className="w-36 h-36 object-contain"
+                                        />
+                                      </div>
                                     </div>
                                   ) : null}
                                   {reviewTip?.tipQrCodeText ? (
@@ -2355,7 +2371,7 @@ export function OrderTracking() {
                                           console.error('Falha ao copiar PIX da gorjeta', error);
                                         }
                                       }}
-                                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                                      className="jnc-hub-touch w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50/50 shadow-sm active:scale-[0.98]"
                                     >
                                       {tipPixCopied ? 'Copiado!' : 'Copiar Pix da gorjeta'}
                                     </button>
@@ -2365,7 +2381,7 @@ export function OrderTracking() {
                                       href={String(reviewTip.tipPaymentLink)}
                                       target="_blank"
                                       rel="noreferrer"
-                                      className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-center text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                                      className="jnc-hub-touch block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-center text-xs font-semibold text-slate-700 hover:bg-slate-50/50 shadow-sm active:scale-[0.98]"
                                     >
                                       Abrir link de pagamento
                                     </a>
@@ -2387,7 +2403,7 @@ export function OrderTracking() {
                                     <div className="rounded-lg border border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-white px-3 py-2 space-y-2 shadow-[0_10px_24px_-22px_rgba(234,88,12,0.85)]">
                                       <div className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-white/80 px-2.5 py-2">
                                         <span className="text-[11px] font-semibold text-amber-900 uppercase tracking-[0.2em]">Tempo restante</span>
-                                        <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1 text-xs font-black text-white animate-pulse">
+                                        <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1 text-xs font-mono font-black text-white animate-pulse">
                                           {tipCountdownLabel}
                                         </span>
                                       </div>
@@ -2427,7 +2443,7 @@ export function OrderTracking() {
                                         type="button"
                                         onClick={tipPolling.verifyNow}
                                         disabled={tipPolling.isChecking}
-                                        className="w-full rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
+                                        className="jnc-hub-touch w-full rounded-xl bg-slate-900 px-3 py-2.5 text-xs font-extrabold text-white shadow-sm active:scale-[0.98] disabled:opacity-60"
                                       >
                                         {tipPolling.isChecking ? 'Verificando...' : 'Já paguei, verificar agora'}
                                       </button>
@@ -2446,7 +2462,7 @@ export function OrderTracking() {
                               type="button"
                               onClick={submitReview}
                               disabled={reviewSubmitting}
-                              className="w-full rounded-xl bg-slate-900 text-white text-xs font-extrabold px-3 py-2 disabled:opacity-60 transition-all duration-200 active:scale-[0.97] active:opacity-90"
+                              className="jnc-hub-touch w-full rounded-xl bg-slate-900 text-white text-xs font-extrabold px-3 py-2.5 disabled:opacity-60 shadow-sm active:scale-[0.98]"
                             >
                               {reviewSubmitting ? 'Enviando...' : 'Enviar avaliação'}
                             </button>

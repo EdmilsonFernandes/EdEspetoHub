@@ -383,6 +383,19 @@ body {
   outline: 2px solid rgba(95, 211, 90, 0.55) !important;
 }
 
+@keyframes jnc-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.jnc-animate-shimmer {
+  animation: jnc-shimmer 2.5s infinite linear;
+}
+
 .client-marquee-track {
   animation: clientMarquee 32s linear infinite;
   will-change: transform;

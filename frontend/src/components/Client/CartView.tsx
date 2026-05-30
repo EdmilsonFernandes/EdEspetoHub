@@ -185,7 +185,7 @@ export const CartView = ({
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const cepInputRef = useRef<HTMLInputElement | null>(null);
   const premiumInputClass =
-    "w-full rounded-2xl bg-slate-100 px-4 py-3 text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all shadow-sm";
+    "w-full rounded-2xl bg-slate-100/80 border border-slate-200/50 px-4 py-3 text-slate-800 placeholder:text-slate-400/85 outline-none focus:ring-4 focus:ring-[#336886]/10 focus:border-[#336886]/45 focus:bg-white transition-all duration-300 shadow-sm";
 
   const normalizedUserRole = String(userRole || "").trim().toLowerCase();
   const isProfessionalUser = [
@@ -844,19 +844,19 @@ export const CartView = ({
   };
   const renderCustomerOrderNoteCard = () => (
     <div
-      className="rounded-[1.75rem] border border-amber-100 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(255,251,235,0.78))] p-4 shadow-[0_22px_44px_-36px_rgba(245,158,11,0.35)]"
+      className="rounded-[1.75rem] border border-amber-200 bg-[linear-gradient(135deg,#ffffff_0%,#fffdf9_100%)] p-4 shadow-[0_16px_36px_-32px_rgba(217,119,6,0.3)] hover:border-amber-300/80 transition-all duration-300"
       data-testid="customer-order-note-card"
     >
-      <div className="flex items-start gap-3">
-        <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
-          <NotePencil size={19} weight="duotone" />
+      <div className="flex items-start gap-3.5">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/20">
+          <NotePencil size={19} weight="duotone" className="text-amber-600 animate-pulse" />
         </span>
-        <div className="min-w-0">
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-700">
-            Observação para a loja
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-800">
+            Observações do Pedido
           </p>
-          <p className="mt-1 text-xs leading-relaxed text-slate-500">
-            Opcional. Use para avisos simples, como sem ketchup, interfone ou como chamar no portão.
+          <p className="mt-0.5 text-[11.5px] leading-relaxed text-slate-500 font-medium">
+            Alguma preferência ou restrição? Escreva aqui (ex: ponto da carne, sem cebola, interfone).
           </p>
         </div>
       </div>
@@ -866,13 +866,13 @@ export const CartView = ({
         onChange={(event) => handleCustomerOrderNoteChange(event.target.value)}
         maxLength={CUSTOMER_ORDER_NOTE_MAX_LENGTH}
         rows={3}
-        placeholder="Ex: sem ketchup. Quando estiver chegando, chamar no WhatsApp."
-        className="mt-3 min-h-[88px] w-full resize-none rounded-2xl border border-amber-100 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-amber-300 focus:bg-white focus:ring-2 focus:ring-amber-100"
+        placeholder="Adicione observações aqui..."
+        className="mt-3.5 min-h-[84px] w-full resize-none rounded-xl border border-slate-200/90 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10"
         data-testid="customer-order-note-input"
       />
-      <div className="mt-2 flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-500">
-        <span>Essa mensagem vai junto com o pedido para a operação.</span>
-        <span className="shrink-0 tabular-nums">{customerOrderNoteValue.length}/{CUSTOMER_ORDER_NOTE_MAX_LENGTH}</span>
+      <div className="mt-2 flex items-center justify-between gap-3 text-[10.5px] font-bold text-slate-400">
+        <span>Essa mensagem será enviada junto com o pedido.</span>
+        <span className="shrink-0 tabular-nums bg-slate-100 rounded-full px-2 py-0.5">{customerOrderNoteValue.length}/{CUSTOMER_ORDER_NOTE_MAX_LENGTH}</span>
       </div>
     </div>
   );
@@ -891,7 +891,7 @@ export const CartView = ({
         key={method.id}
         type="button"
         onClick={() => onChangePayment(method.id)}
-        className={`group relative overflow-hidden rounded-[1.35rem] border p-3.5 text-left transition-all duration-200 active:scale-[0.985] ${
+        className={`jnc-hub-touch group relative overflow-hidden rounded-[1.35rem] border p-3.5 text-left active:scale-[0.985] ${
           selected
             ? selectedClasses
             : "border-slate-200/80 bg-white/88 text-slate-500 shadow-[0_14px_36px_-34px_rgba(15,23,42,0.3)] hover:-translate-y-0.5 hover:border-[#336886]/22 hover:bg-white hover:shadow-[0_22px_46px_-38px_rgba(51,104,134,0.32)]"
@@ -954,19 +954,32 @@ export const CartView = ({
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4 sm:mb-6`}>
         <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
           {useMultiStepFlow && (
-            <div className="mb-3 flex items-center gap-1">
+            <div className="mb-3.5 flex items-center gap-1.5">
               {[{ label: 'Sacola', step: 1 }, { label: 'Entrega', step: 2 }, { label: 'Pagamento', step: 3 }, { label: 'Confirmar', step: 4 }].map(({ label, step }, i) => {
                 const isActive = checkoutStep === step;
                 const isDone = checkoutStep > step;
                 return (
                   <React.Fragment key={step}>
-                    <div className="flex items-center gap-1">
-                      <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black transition-colors ${isDone ? 'bg-emerald-500 text-white' : isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`flex h-4.5 w-4.5 items-center justify-center rounded-full text-[9px] font-black transition-all ${
+                        isDone
+                          ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-[0_4px_10px_rgba(16,185,129,0.25)] text-white'
+                          : isActive
+                            ? 'bg-gradient-to-br from-slate-800 to-slate-950 text-white ring-2 ring-slate-950/15 ring-offset-1 shadow-sm'
+                            : 'bg-slate-200 text-slate-500'
+                      }`}>
                         {isDone ? '✓' : step}
                       </span>
-                      <span className={`text-[9px] font-bold uppercase tracking-wide transition-colors ${isActive ? 'text-slate-900' : isDone ? 'text-emerald-600' : 'text-slate-400'}`}>{label}</span>
+                      <span className={`text-[9px] font-bold uppercase tracking-wide transition-colors ${isActive ? 'text-slate-900 font-extrabold' : isDone ? 'text-emerald-600' : 'text-slate-400'}`}>{label}</span>
                     </div>
-                    {i < 3 && <div className={`h-px flex-1 transition-colors ${isDone ? 'bg-emerald-300' : 'bg-slate-200'}`} />}
+                    {i < 3 && (
+                      <div className="h-[2px] flex-1 rounded-full overflow-hidden bg-slate-200">
+                        <div
+                          className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-500 ease-out"
+                          style={{ width: isDone ? "100%" : "0%" }}
+                        />
+                      </div>
+                    )}
                   </React.Fragment>
                 );
               })}
@@ -1244,10 +1257,10 @@ export const CartView = ({
                   <button
                     key={type}
                     onClick={() => onChangeCustomer({ ...customer, type })}
-                    className={`flex min-h-[74px] min-w-0 flex-1 items-center gap-3 rounded-[1.2rem] border px-3 py-3 text-left transition-all active:scale-[0.98] ${
+                    className={`jnc-hub-touch flex min-h-[74px] min-w-0 flex-1 items-center gap-3 rounded-[1.2rem] border px-3 py-3 text-left ${
                       isActive
-                        ? "border-slate-900 bg-white text-slate-900 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.45)]"
-                        : "border-transparent bg-white/60 text-slate-500 hover:border-slate-200 hover:bg-white"
+                        ? "border-slate-900 bg-white text-slate-900 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.45)] active:scale-[0.985]"
+                        : "border-transparent bg-white/60 text-slate-500 hover:border-slate-200 hover:bg-white active:scale-[0.985]"
                     }`}
                   >
                     <span
@@ -1842,7 +1855,9 @@ export const CartView = ({
       </div>}
 
       {/* Resumo */}
-      {(!useMultiStepFlow || checkoutStep === 1) && <div className="relative overflow-hidden bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-sm">
+      {(!useMultiStepFlow || checkoutStep === 1) && (
+        <div className="space-y-4 mb-4 sm:mb-6">
+          <div className="relative overflow-hidden bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-sm">
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">
             {useMultiStepFlow ? 'Sua Sacola' : 'Resumo'}
@@ -1972,8 +1987,12 @@ export const CartView = ({
             Mesa {customer.table}
           </div>
         )}
+      </div>
 
-      </div>}
+      <div className="mb-1">
+        {renderCustomerOrderNoteCard()}
+      </div>
+    </div>)}
 
       {/* Sugestões (carrossel horizontal – step 1) */}
       {(!useMultiStepFlow || checkoutStep === 1) && showSuggestedProducts && (
@@ -2256,11 +2275,7 @@ export const CartView = ({
         </div>
       )}
 
-      {!useMultiStepFlow && (
-        <div className="mb-4 sm:mb-6">
-          {renderCustomerOrderNoteCard()}
-        </div>
-      )}
+
 
       {/* Step 4: Confirmação do pedido */}
       {useMultiStepFlow && checkoutStep === 4 && (

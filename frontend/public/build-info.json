@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "4d3437b7",
-  "versionLabel": "v0.1.9.4d3437b7",
-  "versionInternal": "0.1.9+20260530.204017.4d3437b7",
-  "buildId": "0.1.9+20260530.204017.4d3437b7-20260530.204017-4d3437b7",
-  "builtAt": "2026-05-30T20:40:17.072Z",
-  "commitHash": "4d3437b72142b7cd2fd87eddbc0b67df3df27c5b",
-  "shortHash": "4d3437b7",
+  "versionDisplaySuffix": "867d5674",
+  "versionLabel": "v0.1.9.867d5674",
+  "versionInternal": "0.1.9+20260530.210619.867d5674",
+  "buildId": "0.1.9+20260530.210619.867d5674-20260530.210619-867d5674",
+  "builtAt": "2026-05-30T21:06:19.524Z",
+  "commitHash": "867d56746e9176378bb4f764a43aedc51419bdfd",
+  "shortHash": "867d5674",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "867d56746e9176378bb4f764a43aedc51419bdfd",
+      "shortHash": "867d5674",
+      "dateIso": "2026-05-30T17:44:01-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(frontend): add premium UI refinements and micro-interactions to destinations, chalets, and services",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/867d56746e9176378bb4f764a43aedc51419bdfd"
+    },
     {
       "hash": "4d3437b72142b7cd2fd87eddbc0b67df3df27c5b",
       "shortHash": "4d3437b7",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Keep pickup stores visible in hub",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a9dec60c50194511c78c27c91313b6bc930af300"
-    },
-    {
-      "hash": "49aa861e2ad2e97df3fa4902e9ff1165c5e3e508",
-      "shortHash": "49aa861e",
-      "dateIso": "2026-05-27T20:24:52-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix regional store coverage and address cache",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/49aa861e2ad2e97df3fa4902e9ff1165c5e3e508"
     }
   ]
 }

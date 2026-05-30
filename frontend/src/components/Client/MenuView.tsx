@@ -1186,7 +1186,7 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={`group relative flex min-h-[3.45rem] flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border px-2 py-1.5 text-center transition-all duration-300 snap-start active:scale-[0.97] ${
+                      className={`jnc-hub-touch group relative flex min-h-[3.45rem] flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border px-2 py-1.5 text-center snap-start ${
                         useCompactCategoryCarousel ? "w-[5.95rem] shrink-0 sm:min-w-0" : "w-full min-w-0"
                       } ${isActive ? 'shadow-[0_18px_34px_-22px_rgba(15,23,42,0.38)]' : 'shadow-[0_10px_24px_-22px_rgba(15,23,42,0.28)] hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-24px_rgba(15,23,42,0.34)]'}`}
                       style={
@@ -1464,7 +1464,7 @@ export const MenuView = ({
                 <div
                   key={item.id}
                   data-menu-card
-                  className={`group bg-white rounded-3xl border border-slate-100/70 shadow-[0_12px_28px_rgba(15,23,42,0.04)] p-4 sm:p-5 grid grid-cols-[minmax(0,1fr)_auto] gap-4 sm:gap-5 hover:shadow-[0_20px_32px_rgba(15,23,42,0.08)] hover:border-slate-200/60 md:hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
+                  className={`jnc-hub-touch jnc-hub-lift group bg-white rounded-3xl border border-slate-100/70 p-4 sm:p-5 grid grid-cols-[minmax(0,1fr)_auto] gap-4 sm:gap-5 hover:border-slate-200/60 transition-all duration-300 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
                   }}
@@ -1937,7 +1937,7 @@ export const MenuView = ({
                 e.stopPropagation();
                 setShowClearCartModal(true);
               }}
-              className="absolute -top-12 right-2 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/40 bg-white/30 text-rose-500 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl transition-all duration-300 hover:bg-rose-50 hover:text-rose-600 active:scale-90"
+              className="jnc-hub-touch absolute -top-12 right-2 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/40 bg-white/30 text-rose-500 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl hover:bg-rose-50 hover:text-rose-600 active:scale-90"
               title="Limpar sacola"
             >
               <Trash size={18} weight="fill" />
@@ -1954,8 +1954,8 @@ export const MenuView = ({
                 }
                 onProceed?.();
               }}
-              className={`group w-full px-5 py-4 rounded-[2.2rem] flex justify-between items-center active:scale-[0.97] transition-all duration-300 ${
-                cartPulse ? "scale-[1.04] shadow-[0_24px_50px_-12px_rgba(15,23,42,0.45)]" : "shadow-[0_20px_48px_-14px_rgba(15,23,42,0.35)]"
+              className={`jnc-hub-touch group w-full px-5 py-4 rounded-[2.2rem] flex justify-between items-center ${
+                cartPulse ? "scale-[1.04] shadow-[0_24px_50px_-12px_rgba(15,23,42,0.45)]" : "shadow-[0_20px_48px_-14px_rgba(15,23,42,0.35)] active:scale-[0.985]"
               }`}
               style={{
                 backgroundColor: catalogPrimaryColor,
