@@ -180,6 +180,7 @@ export const CartView = ({
   const [hasTriedCheckout, setHasTriedCheckout] = useState(false);
   const [showOptionalPhoneFields, setShowOptionalPhoneFields] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState(1);
+  const [isEditingTable, setIsEditingTable] = useState(false);
   const previousCartItemsCountRef = useRef<number>(cartItems.length);
   const cepLookupLockRef = useRef(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
@@ -948,7 +949,7 @@ export const CartView = ({
   };
 
   return (
-    <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
+    <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg pb-32" : "pb-44"}`}>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[max(env(safe-area-inset-top),0.85rem)] bg-[linear-gradient(180deg,rgba(238,245,247,0.98),rgba(238,245,247,0.74))]" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4 sm:mb-6`}>
@@ -1814,41 +1815,85 @@ export const CartView = ({
 
           {customer.type === "table" && visibleOrderTypes.includes('table') && (
             <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4 space-y-3">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                Escolha a mesa
-              </p>
-              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                {tableOptions.map((table) => {
-                  const isSelected = customer.table === table;
-                  return (
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  Mesa do Pedido
+                </p>
+                {customer.table && !isEditingTable && (
                   <button
-                    key={table}
                     type="button"
-                    onClick={() => handleSelectTable(table)}
-                    className={`py-2.5 rounded-xl text-sm font-semibold border transition shadow-sm ${
-                      isSelected
-                        ? "bg-amber-500 text-white font-bold border-amber-500 ring-2 ring-amber-300/60 shadow-[inset_0_0_0_1px_rgba(217,119,6,0.35)]"
-                        : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
-                    }`}
+                    onClick={() => setIsEditingTable(true)}
+                    className="jnc-hub-touch text-xs font-black uppercase tracking-wider text-[#336886] hover:text-[#153A4C]"
                   >
-                    {table}
+                    Alterar
                   </button>
-                  );
-                })}
+                )}
               </div>
-              <input
-                value={customer.table}
-                onChange={(e) => handleTableInputChange(e.target.value)}
-                type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                enterKeyHint="done"
-                placeholder="Número da mesa"
-                className={`${premiumInputClass} sm:py-4`}
-              />
-              <p className="text-xs text-slate-500">
-                Você pode lançar múltiplos pedidos na mesma mesa.
-              </p>
+
+              {customer.table && !isEditingTable ? (
+                <div className="flex items-center gap-3.5 bg-amber-500/10 border border-amber-500/25 rounded-2xl p-3 animate-in fade-in zoom-in-95 duration-200">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white font-black text-lg shadow-sm">
+                    {customer.table}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-slate-800">
+                      Mesa {customer.table} Selecionada
+                    </p>
+                    <p className="text-xs font-medium text-slate-500">
+                      Toque em "Alterar" para trocar de mesa.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 animate-in fade-in duration-200">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                    {tableOptions.map((table) => {
+                      const isSelected = customer.table === table;
+                      return (
+                      <button
+                        key={table}
+                        type="button"
+                        onClick={() => {
+                          handleSelectTable(table);
+                          setIsEditingTable(false);
+                        }}
+                        className={`jnc-hub-touch py-2.5 rounded-xl text-sm font-semibold border transition shadow-sm ${
+                          isSelected
+                            ? "bg-amber-500 text-white font-bold border-amber-500 ring-2 ring-amber-300/60 shadow-[inset_0_0_0_1px_rgba(217,119,6,0.35)]"
+                            : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                        }`}
+                      >
+                        {table}
+                      </button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      value={customer.table}
+                      onChange={(e) => handleTableInputChange(e.target.value)}
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      enterKeyHint="done"
+                      placeholder="Outro número de mesa"
+                      className={`${premiumInputClass} flex-1`}
+                    />
+                    {customer.table && (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingTable(false)}
+                        className="jnc-hub-touch px-4 rounded-xl bg-slate-900 text-white text-xs font-black uppercase tracking-wider shadow-sm"
+                      >
+                        OK
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    Você pode lançar múltiplos pedidos na mesma mesa.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>

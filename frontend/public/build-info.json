@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "401159c4",
-  "versionLabel": "v0.1.9.401159c4",
-  "versionInternal": "0.1.9+20260530.211639.401159c4",
-  "buildId": "0.1.9+20260530.211639.401159c4-20260530.211639-401159c4",
-  "builtAt": "2026-05-30T21:16:39.973Z",
-  "commitHash": "401159c4a68da48cc7f1f6411c08a133e25b9992",
-  "shortHash": "401159c4",
+  "versionDisplaySuffix": "fae62045",
+  "versionLabel": "v0.1.9.fae62045",
+  "versionInternal": "0.1.9+20260530.212127.fae62045",
+  "buildId": "0.1.9+20260530.212127.fae62045-20260530.212127-fae62045",
+  "builtAt": "2026-05-30T21:21:27.847Z",
+  "commitHash": "fae6204523d3b971107c3ed60bdb2d4edb3d4020",
+  "shortHash": "fae62045",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "fae6204523d3b971107c3ed60bdb2d4edb3d4020",
+      "shortHash": "fae62045",
+      "dateIso": "2026-05-30T18:18:16-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(frontend): premium UI/UX enhancements on hub highlights carousel and listing page",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fae6204523d3b971107c3ed60bdb2d4edb3d4020"
+    },
     {
       "hash": "401159c4a68da48cc7f1f6411c08a133e25b9992",
       "shortHash": "401159c4",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Improve printer setup test flow",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/93a99cea0d419a4ad0be6f186e890320ce0e20e0"
-    },
-    {
-      "hash": "1d26e39915a28323104397d117f8dbf7b9f7dc96",
-      "shortHash": "1d26e399",
-      "dateIso": "2026-05-27T23:00:18-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve checkout and printer reliability",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1d26e39915a28323104397d117f8dbf7b9f7dc96"
     }
   ]
 }
