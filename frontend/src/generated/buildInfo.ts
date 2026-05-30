@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "a18f0dc8",
-  "versionLabel": "v0.1.9.a18f0dc8",
-  "versionInternal": "0.1.9+20260530.132746.a18f0dc8",
-  "buildId": "0.1.9+20260530.132746.a18f0dc8-20260530.132746-a18f0dc8",
-  "builtAt": "2026-05-30T13:27:46.096Z",
-  "commitHash": "a18f0dc8121dcfd4fa5c9ab09262a01ef89c7096",
-  "shortHash": "a18f0dc8",
+  "versionDisplaySuffix": "4d3437b7",
+  "versionLabel": "v0.1.9.4d3437b7",
+  "versionInternal": "0.1.9+20260530.204017.4d3437b7",
+  "buildId": "0.1.9+20260530.204017.4d3437b7-20260530.204017-4d3437b7",
+  "builtAt": "2026-05-30T20:40:17.072Z",
+  "commitHash": "4d3437b72142b7cd2fd87eddbc0b67df3df27c5b",
+  "shortHash": "4d3437b7",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "4d3437b72142b7cd2fd87eddbc0b67df3df27c5b",
+      "shortHash": "4d3437b7",
+      "dateIso": "2026-05-30T10:29:03-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(frontend): add premium hover glare shine to store cards and pulsing ring to header avatar notification",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4d3437b72142b7cd2fd87eddbc0b67df3df27c5b"
+    },
     {
       "hash": "a18f0dc8121dcfd4fa5c9ab09262a01ef89c7096",
       "shortHash": "a18f0dc8",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Fix regional store coverage and address cache",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/49aa861e2ad2e97df3fa4902e9ff1165c5e3e508"
-    },
-    {
-      "hash": "0de66caf43af810ea498286399c6c1ed07ae5e41",
-      "shortHash": "0de66caf",
-      "dateIso": "2026-05-27T19:22:33-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish storefront category navigation tiles",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0de66caf43af810ea498286399c6c1ed07ae5e41"
     }
   ]
 } as const;

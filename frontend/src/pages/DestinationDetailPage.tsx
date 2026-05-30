@@ -428,7 +428,7 @@ export function DestinationDetailPage() {
                     event.preventDefault();
                     navigate(placePath);
                   }}
-                  className="group min-w-0 max-w-full cursor-pointer overflow-hidden rounded-[1.85rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,250,240,0.92)_0%,#ffffff_52%,rgba(237,247,242,0.86)_100%)] shadow-[0_22px_58px_-46px_rgba(21,58,76,0.46)] outline-none ring-1 ring-[#336886]/[0.04] transition duration-200 hover:-translate-y-1 hover:border-[#336886]/18 hover:shadow-[0_28px_68px_-48px_rgba(21,58,76,0.52)] focus-visible:ring-4 focus-visible:ring-[#336886]/14 active:scale-[0.99]"
+                  className="jnc-hub-touch jnc-hub-lift group min-w-0 max-w-full cursor-pointer overflow-hidden rounded-[1.85rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,250,240,0.92)_0%,#ffffff_52%,rgba(237,247,242,0.86)_100%)] shadow-[0_22px_58px_-46px_rgba(21,58,76,0.46)] outline-none ring-1 ring-[#336886]/[0.04] focus-visible:ring-4 focus-visible:ring-[#336886]/14 md:hover:border-[#336886]/20"
                 >
                   <div className="relative m-2 h-44 overflow-hidden rounded-[1.45rem] bg-slate-100 sm:h-40">
                     {hasConfiguredAsset(place) ? (
@@ -436,8 +436,9 @@ export function DestinationDetailPage() {
                         className="relative h-full w-full group/image overflow-hidden"
                       >
                         <img src={asset(place)} alt={place.name} className="h-full w-full object-cover transition-all duration-700 group-hover/image:scale-110" />
-                        <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-white backdrop-blur-sm shadow-md">
+                        <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover/image:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-20" />
+                        <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-white backdrop-blur-sm shadow-md transition duration-300 scale-95 group-hover/image:scale-100">
                             <ArrowRight size={12} weight="bold" />
                             Ver chalé
                           </span>
@@ -448,7 +449,7 @@ export function DestinationDetailPage() {
                         <Bed size={42} weight="duotone" className="text-[#153A4C]/42" />
                       </div>
                     )}
-                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/42 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/42 to-transparent z-10" />
                     <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/82 px-2.5 py-1 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-20px_rgba(15,23,42,0.42)] ring-1 ring-white/75 backdrop-blur-xl">
                       <Bed size={12} weight="duotone" />
                       {placeTypeLabel(place.type)}
@@ -582,7 +583,10 @@ export function DestinationDetailPage() {
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                             <span className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#336886]">{categoryLabel(listing.category)}</span>
                             {hasLinkedStore ? (
-                              <span className="rounded-full bg-[#336886]/8 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-[#336886] ring-1 ring-[#336886]/10">Loja oficial</span>
+                              <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-[#336886] ring-1 ring-[#336886]/10">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#5FD35A] animate-pulse" />
+                                Loja oficial
+                              </span>
                             ) : (
                               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-slate-500 ring-1 ring-slate-200/80">Contato direto</span>
                             )}
@@ -609,8 +613,9 @@ export function DestinationDetailPage() {
                         onClick={(event) => {
                           if (isPreviewTriggerTarget(event.target)) event.preventDefault();
                         }}
-                        className="group/card block min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_18px_36px_-16px_rgba(15,23,42,0.12)]"
+                        className="jnc-hub-touch jnc-hub-lift group/card relative block min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(95,211,90,0.06),#ffffff_45%,rgba(51,104,134,0.04))] p-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 md:hover:border-emerald-300/40"
                       >
+                        <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover/card:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-20" />
                         {cardBody}
                       </Link>
                     ) : (
@@ -621,8 +626,9 @@ export function DestinationDetailPage() {
                           if (isPreviewTriggerTarget(event.target)) return;
                           setSelectedListing(listing);
                         }}
-                        className="group/card block w-full min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_18px_36px_-16px_rgba(15,23,42,0.12)]"
+                        className="jnc-hub-touch jnc-hub-lift group/card relative block w-full min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 md:hover:border-[#336886]/18"
                       >
+                        <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover/card:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-20" />
                         {cardBody}
                       </button>
                     )

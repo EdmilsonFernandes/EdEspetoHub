@@ -406,7 +406,7 @@ export function HospitalityPlacePage() {
   const spotlightProviders = allSpotlightProviders.slice(0, 10);
   const hiddenSpotlightCount = Math.max(0, allSpotlightProviders.length - spotlightProviders.length);
   const highlightedProviderCardClass =
-    'border-[#5FD35A]/70 bg-[linear-gradient(135deg,rgba(95,211,90,0.13),#ffffff_46%,rgba(51,104,134,0.10))] outline outline-2 outline-[#5FD35A]/65 ring-[#5FD35A]/45 shadow-[0_30px_70px_-32px_rgba(51,104,134,0.60)]';
+    'jnc-provider-card-highlighted bg-[linear-gradient(135deg,rgba(95,211,90,0.13),#ffffff_46%,rgba(51,104,134,0.10))]';
   const scrollToProviderTarget = (targetId: string, providerName = '') => {
     if (!targetId || typeof window === 'undefined' || typeof document === 'undefined') return;
     setServiceFilter('all');
@@ -465,8 +465,8 @@ export function HospitalityPlacePage() {
                           key={url}
                           src={url}
                           alt={`${place.name || 'Hospedagem'} - Foto ${index + 1}`}
-                          className={`absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-in-out group-hover/banner:scale-105 ${
-                            active ? 'opacity-100 z-10 scale-100' : 'opacity-0 z-0 scale-95'
+                          className={`absolute inset-0 h-full w-full object-cover ease-in-out group-hover/banner:scale-108 ${
+                            active ? 'opacity-100 z-10 scale-105 transition-all duration-[4500ms]' : 'opacity-0 z-0 scale-100 transition-all duration-1000'
                           }`}
                         />
                       );
@@ -590,7 +590,7 @@ export function HospitalityPlacePage() {
                         <button
                           type="button"
                           key={provider.id}
-                          className={`group/provider relative -ml-2 first:ml-0 h-14 w-14 shrink-0 rounded-full bg-gradient-to-br ${provider.accentClass} p-[3px] shadow-[0_18px_34px_-22px_rgba(15,23,42,0.62)] ring-2 ${provider.ringClass} transition duration-300 ease-out hover:z-20 hover:-translate-y-1 hover:scale-105 active:scale-95 sm:h-16 sm:w-16`}
+                          className={`group/provider relative -ml-2 first:ml-0 h-14 w-14 shrink-0 rounded-full bg-gradient-to-br ${provider.accentClass} p-[3px] shadow-[0_18px_34px_-22px_rgba(15,23,42,0.62)] ring-2 ${provider.ringClass} transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:z-20 hover:-translate-y-1.5 hover:scale-[1.08] hover:shadow-[0_22px_42px_-18px_rgba(15,23,42,0.74)] active:scale-90 sm:h-16 sm:w-16`}
                           onClick={() => scrollToProviderTarget(provider.targetId, provider.name)}
                           aria-label={`Ver ${provider.name} na lista abaixo`}
                           title={`${provider.name} - ${provider.label}`}
@@ -730,8 +730,9 @@ export function HospitalityPlacePage() {
                     onPointerEnter={warmupStore}
                     onFocus={warmupStore}
                     onTouchStart={warmupStore}
-                    className={`group/card relative scroll-mt-28 overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-offset-4 ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] ${highlighted ? highlightedProviderCardClass : ''} ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`jnc-hub-touch jnc-hub-lift group/card relative scroll-mt-28 overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-offset-4 ring-1 ring-slate-100/50 md:hover:border-[#336886]/18 ${highlighted ? highlightedProviderCardClass : ''} ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
+                    <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover/card:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-20" />
                     {highlighted ? (
                       <>
                         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(95,211,90,0.22),transparent_32%),radial-gradient(circle_at_88%_8%,rgba(51,104,134,0.15),transparent_28%)]" />
@@ -806,8 +807,9 @@ export function HospitalityPlacePage() {
                     tabIndex={0}
                     onClick={() => setSelectedListing(listing)}
                     onKeyDown={handleListingCardKeyDown(listing, setSelectedListing)}
-                    className={`group/card relative scroll-mt-28 cursor-pointer overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-none outline-offset-4 ring-1 ring-slate-100/50 transition-all duration-300 ease-out active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_22px_48px_-20px_rgba(15,23,42,0.12)] focus-visible:ring-4 focus-visible:ring-[#336886]/14 ${highlighted ? highlightedProviderCardClass : ''} ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
+                    className={`jnc-hub-touch jnc-hub-lift group/card relative scroll-mt-28 cursor-pointer overflow-hidden rounded-[1.55rem] border border-slate-100 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.04)] outline-none outline-offset-4 ring-1 ring-slate-100/50 focus-visible:ring-4 focus-visible:ring-[#336886]/14 md:hover:border-[#336886]/18 ${highlighted ? highlightedProviderCardClass : ''} ${mediaUrl ? 'grid grid-cols-[6.75rem_1fr] items-start sm:grid-cols-[7.25rem_1fr]' : 'block'}`}
                   >
+                    <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover/card:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-20" />
                     {highlighted ? (
                       <>
                         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(95,211,90,0.22),transparent_32%),radial-gradient(circle_at_88%_8%,rgba(51,104,134,0.15),transparent_28%)]" />

@@ -121,20 +121,20 @@ export function DestinationsPage() {
                 Chalés, pousadas, comida, passeios e serviços locais em um guia direto para sua viagem.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-2 rounded-[1.35rem] border border-white/80 bg-white/76 p-2 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.42)] backdrop-blur lg:min-w-[20rem]">
+            <div className="grid grid-cols-3 gap-2 rounded-[1.35rem] border border-white/82 bg-white/80 p-2 shadow-[0_20px_48px_-36px_rgba(15,23,42,0.42)] ring-1 ring-white/20 backdrop-blur-xl lg:min-w-[20rem]">
               {[
                 { value: stats.cities, label: 'cidades' },
                 { value: stats.places, label: 'hospedagens' },
                 { value: stats.listings, label: 'serviços' },
               ].map((stat) => (
-                <div key={stat.label} className="rounded-[1rem] bg-white/86 px-3 py-2.5 text-center ring-1 ring-slate-200/70">
+                <div key={stat.label} className="rounded-[1rem] bg-white/92 px-3 py-2.5 text-center ring-1 ring-slate-200/40 shadow-sm">
                   <p className="text-xl font-black tracking-[-0.04em] text-[#153A4C]">{stat.value}</p>
                   <p className="mt-1 whitespace-normal break-words text-[10px] font-black uppercase leading-tight tracking-[0.12em] text-slate-500">{stat.label}</p>
                 </div>
               ))}
             </div>
           </div>
-
+          {/* ... Search Term field ... */}
           <div className="mt-4 rounded-[1.5rem] border border-white/80 bg-white/86 p-2 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.42)] backdrop-blur transition-all duration-300 focus-within:border-[#336886]/35 focus-within:shadow-[0_20px_48px_-30px_rgba(51,104,134,0.25)] focus-within:ring-2 focus-within:ring-[#336886]/10">
             <label className="flex min-h-[3.25rem] items-center gap-3 rounded-[1.15rem] bg-slate-50 px-4 ring-1 ring-slate-200/60 focus-within:ring-transparent transition-all">
               <MagnifyingGlass size={18} weight="bold" className="shrink-0 text-[#336886]/80" />
@@ -235,10 +235,11 @@ export function DestinationsPage() {
                 onPointerEnter={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
                 onFocus={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
                 onTouchStart={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
-                className="group grid overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-100/50 transition-all duration-300 ease-out sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)] active:scale-[0.985] md:hover:-translate-y-1 md:hover:scale-[1.015] md:hover:border-white md:hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.15)]"
+                className="jnc-hub-touch jnc-hub-lift group grid overflow-hidden rounded-[1.75rem] border border-slate-100 bg-gradient-to-br from-white to-slate-50/50 shadow-[0_12px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-100/50 sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)] md:hover:border-[#336886]/18"
               >
                 <div className="relative h-36 overflow-hidden bg-slate-100 sm:h-full sm:min-h-[12.5rem]">
                   <img src={destinationImage(destination)} alt={destination.name} className="absolute inset-0 h-full w-full object-cover transition-all duration-700 group-hover:scale-108" />
+                  <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                   <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/86 px-3 py-1 text-[11px] font-black text-slate-700 shadow-[0_6px_14px_-4px_rgba(15,23,42,0.12)] backdrop-blur-md">
                     {destinationLocationLabel(destination)}
                   </div>

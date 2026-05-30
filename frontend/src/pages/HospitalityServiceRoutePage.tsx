@@ -122,7 +122,8 @@ const pointFallbackImage = (point: any, kind: 'service' | 'place') =>
   getStoreAvatarUrl(point?.slug || point?.id || point?.name, point?.name || (kind === 'service' ? 'Serviço' : 'Hospedagem'));
 
 const PointCard = ({ point, label, kind, icon: Icon, imageUrl, accent = '#336886' }: any) => (
-  <div className="rounded-[1.45rem] border border-white/80 bg-white/88 p-3 shadow-[0_18px_46px_-40px_rgba(15,23,42,0.52)] ring-1 ring-slate-900/[0.03] backdrop-blur">
+  <div className="jnc-hub-touch jnc-hub-lift group relative overflow-hidden rounded-[1.45rem] border border-white/80 bg-white/88 p-3 shadow-[0_18px_46px_-40px_rgba(15,23,42,0.52)] ring-1 ring-slate-900/[0.03] backdrop-blur-xl md:hover:border-[#336886]/18">
+    <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-20" />
     <div className="flex gap-3">
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[1.15rem] bg-slate-100 ring-1 ring-white">
         <img
@@ -313,13 +314,13 @@ export function HospitalityServiceRoutePage() {
 
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               {googleDirectionsUrl ? (
-                <a href={googleDirectionsUrl} onClick={openExternalRoute(googleDirectionsUrl, googleNativeUrl)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/16 bg-[#336886] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.62)] transition hover:-translate-y-0.5 active:scale-[0.98]">
+                <a href={googleDirectionsUrl} onClick={openExternalRoute(googleDirectionsUrl, googleNativeUrl)} target="_blank" rel="noreferrer" className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/16 bg-[#336886] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.62)] hover:-translate-y-0.5">
                   <NavigationArrow size={17} weight="fill" />
                   Abrir no Google Maps
                 </a>
               ) : null}
               {wazeUrl ? (
-                <a href={wazeUrl} onClick={openExternalRoute(wazeUrl, wazeNativeUrl)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/14 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#336886] shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]">
+                <a href={wazeUrl} onClick={openExternalRoute(wazeUrl, wazeNativeUrl)} target="_blank" rel="noreferrer" className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/14 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#336886] shadow-sm hover:-translate-y-0.5 hover:border-[#336886]/18">
                   <Clock size={17} weight="duotone" />
                   Abrir no Waze
                 </a>
@@ -330,7 +331,7 @@ export function HospitalityServiceRoutePage() {
               <button
                 type="button"
                 onClick={() => copyText(currentRouteUrl, 'Link da rota copiado.')}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]"
+                className="jnc-hub-touch inline-flex min-h-11 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-slate-300"
               >
                 <ClipboardText size={16} weight="duotone" />
                 Copiar link
@@ -338,7 +339,7 @@ export function HospitalityServiceRoutePage() {
               <button
                 type="button"
                 onClick={() => copyText(placePoint.address, 'Endereço do chalé copiado.')}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]"
+                className="jnc-hub-touch inline-flex min-h-11 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-slate-300"
               >
                 <HouseLine size={16} weight="duotone" />
                 Copiar endereço
