@@ -52,7 +52,7 @@ export function AppRobotLoader({
   if (!fullScreen) return content;
 
   return (
-    <div className="flex min-h-screen items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#EEF2F7_0%,#F8FAFC_52%,#EEF2F7_100%)] px-4 py-[max(2rem,env(safe-area-inset-top))]">
+    <div className="flex min-h-screen items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#E2EBF2_0%,#E7F0F6_52%,#E2EBF2_100%)] px-4 py-[max(2rem,env(safe-area-inset-top))]">
       {content}
     </div>
   );

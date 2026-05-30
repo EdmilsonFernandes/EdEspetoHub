@@ -1927,7 +1927,7 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.055),transparent_40%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.035),transparent_42%),linear-gradient(180deg,#F7FAFC_0%,#F3F7FA_48%,#EEF3F7_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.055),transparent_40%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.035),transparent_42%),linear-gradient(180deg,#ECF3F8_0%,#E7EFF5_48%,#E2EBF2_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Elemento Decorativo de Fundo (Premium Look) */}
       <div className="jnc-safe-area-glass pointer-events-none fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top)]" />
       <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-white/80 via-slate-50/35 to-transparent" />

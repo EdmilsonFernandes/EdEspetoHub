@@ -36,7 +36,7 @@ export function AuthLayout({
     : 'items-center';
 
   return (
-    <div className={`min-h-[100dvh] overflow-x-clip bg-[#EEF2F7] px-4 ${spacingClass} relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
+    <div className={`min-h-[100dvh] overflow-x-clip bg-[#E2EBF2] px-4 ${spacingClass} relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
       {showHeader ? (
         <AppGlassHeader
           title={title}

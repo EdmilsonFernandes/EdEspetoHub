@@ -5,16 +5,214 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "724056ff",
-  "versionLabel": "v0.1.9.724056ff",
-  "versionInternal": "0.1.9+20260528.030113.724056ff",
-  "buildId": "0.1.9+20260528.030113.724056ff-20260528.030113-724056ff",
-  "builtAt": "2026-05-28T03:01:13.174Z",
-  "commitHash": "724056ff920a214a363d45a69e27616f6b97f054",
-  "shortHash": "724056ff",
+  "versionDisplaySuffix": "6249c751",
+  "versionLabel": "v0.1.9.6249c751",
+  "versionInternal": "0.1.9+20260530.123150.6249c751",
+  "buildId": "0.1.9+20260530.123150.6249c751-20260530.123150-6249c751",
+  "builtAt": "2026-05-30T12:31:50.200Z",
+  "commitHash": "6249c751a36fff330ba8bfd6f152633bd136d965",
+  "shortHash": "6249c751",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "6249c751a36fff330ba8bfd6f152633bd136d965",
+      "shortHash": "6249c751",
+      "dateIso": "2026-05-30T07:50:43-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: organizar solicitacoes de destinos",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6249c751a36fff330ba8bfd6f152633bd136d965"
+    },
+    {
+      "hash": "d74c2e6927de6a901d142d512f2586fbe9855235",
+      "shortHash": "d74c2e69",
+      "dateIso": "2026-05-30T07:34:31-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat: reforcar abertura nativa do app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d74c2e6927de6a901d142d512f2586fbe9855235"
+    },
+    {
+      "hash": "adfebee5869fc87448d99849b5625fb21890c55a",
+      "shortHash": "adfebee5",
+      "dateIso": "2026-05-29T17:13:14-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: ajustar tempo do splash do app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/adfebee5869fc87448d99849b5625fb21890c55a"
+    },
+    {
+      "hash": "c90251ffa92eaf8312f23084c901e5c3a2f6d532",
+      "shortHash": "c90251ff",
+      "dateIso": "2026-05-29T16:57:57-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: adicionar loader premium do app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c90251ffa92eaf8312f23084c901e5c3a2f6d532"
+    },
+    {
+      "hash": "abdc8dbd2cabe6253cb89adb2813fda055ca5532",
+      "shortHash": "abdc8dbd",
+      "dateIso": "2026-05-29T14:53:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "perf: aquecer dados publicos do app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/abdc8dbd2cabe6253cb89adb2813fda055ca5532"
+    },
+    {
+      "hash": "ad58fbd883bac9e51f5530ca97a365a04fe40fc9",
+      "shortHash": "ad58fbd8",
+      "dateIso": "2026-05-29T14:22:47-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix: remover split manual instavel do frontend",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ad58fbd883bac9e51f5530ca97a365a04fe40fc9"
+    },
+    {
+      "hash": "1f573f137a9821644fb0cb2d4444d6f366188ec9",
+      "shortHash": "1f573f13",
+      "dateIso": "2026-05-29T14:01:59-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "perf: separar vendors pesados do frontend",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1f573f137a9821644fb0cb2d4444d6f366188ec9"
+    },
+    {
+      "hash": "4094c5d6c4f44063e14e8078704a5b9daac4c5f9",
+      "shortHash": "4094c5d6",
+      "dateIso": "2026-05-29T13:45:52-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "perf: preaquecer rotas criticas do app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4094c5d6c4f44063e14e8078704a5b9daac4c5f9"
+    },
+    {
+      "hash": "1096c059643c1f3dc411936ba1121912e80dbd67",
+      "shortHash": "1096c059",
+      "dateIso": "2026-05-29T12:42:38-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: ajustar respiro das telas de destinos",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1096c059643c1f3dc411936ba1121912e80dbd67"
+    },
+    {
+      "hash": "2b29b08a342cd04ad295547df831516734af94e3",
+      "shortHash": "2b29b08a",
+      "dateIso": "2026-05-29T12:33:39-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: lapidar home do hub",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2b29b08a342cd04ad295547df831516734af94e3"
+    },
+    {
+      "hash": "f3c1b1300fc816f2160db31285931efcb11c465e",
+      "shortHash": "f3c1b130",
+      "dateIso": "2026-05-29T12:20:46-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: destacar card localizado do parceiro",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f3c1b1300fc816f2160db31285931efcb11c465e"
+    },
+    {
+      "hash": "b98bb8f47a958142accac23eddd9b79af014c779",
+      "shortHash": "b98bb8f4",
+      "dateIso": "2026-05-29T12:07:47-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: refinar atalhos dos parceiros do chale",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b98bb8f47a958142accac23eddd9b79af014c779"
+    },
+    {
+      "hash": "eb3c76949d54c952b5b6969917184a7a5b0f050e",
+      "shortHash": "eb3c7694",
+      "dateIso": "2026-05-28T19:46:46-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat: melhorar galeria de imagens dos chales",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eb3c76949d54c952b5b6969917184a7a5b0f050e"
+    },
+    {
+      "hash": "f573a4fc916af21fcdfd5798465b295c8f5f31de",
+      "shortHash": "f573a4fc",
+      "dateIso": "2026-05-28T18:54:26-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat: criar atalhos nos logos do chale",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f573a4fc916af21fcdfd5798465b295c8f5f31de"
+    },
+    {
+      "hash": "7b53a87d53be5f6fd1574d9033ae0d343c144ef8",
+      "shortHash": "7b53a87d",
+      "dateIso": "2026-05-28T16:51:08-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: ampliar logos de parceiros do chale",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7b53a87d53be5f6fd1574d9033ae0d343c144ef8"
+    },
+    {
+      "hash": "c22fee094c122b70a5b4ad95cae4ce6074ada00b",
+      "shortHash": "c22fee09",
+      "dateIso": "2026-05-28T16:05:15-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat: destacar parceiros do chale no mobile",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c22fee094c122b70a5b4ad95cae4ce6074ada00b"
+    },
+    {
+      "hash": "27b3a5cb884d9657f4db522b29bb575a7d39c550",
+      "shortHash": "27b3a5cb",
+      "dateIso": "2026-05-28T15:15:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat: gerenciar servicos pelo chale no superadmin",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/27b3a5cb884d9657f4db522b29bb575a7d39c550"
+    },
+    {
+      "hash": "13c6b1253c2e7664f574fe14b72682f66a236f31",
+      "shortHash": "13c6b125",
+      "dateIso": "2026-05-28T14:52:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat: ordenar destinos e servicos por hospedagem",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/13c6b1253c2e7664f574fe14b72682f66a236f31"
+    },
+    {
+      "hash": "f5800b0251c2d9cc6f24ff831a92aa587b25ce7a",
+      "shortHash": "f5800b02",
+      "dateIso": "2026-05-28T14:20:27-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Fix destination stay listings and coordinates",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f5800b0251c2d9cc6f24ff831a92aa587b25ce7a"
+    },
+    {
+      "hash": "46effe3a9ae421aab763715d7e4576b56bea79ae",
+      "shortHash": "46effe3a",
+      "dateIso": "2026-05-28T13:57:52-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Polish destination service stay badges",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/46effe3a9ae421aab763715d7e4576b56bea79ae"
+    },
+    {
+      "hash": "89c5381cb3b3a1bc9b93206019cd9ec375419731",
+      "shortHash": "89c5381c",
+      "dateIso": "2026-05-28T12:29:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Allow destination services in multiple stays",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/89c5381cb3b3a1bc9b93206019cd9ec375419731"
+    },
+    {
+      "hash": "fc464c24edae11c059c134fc18a471c344160435",
+      "shortHash": "fc464c24",
+      "dateIso": "2026-05-28T00:08:44-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Improve storefront loading and address distances",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fc464c24edae11c059c134fc18a471c344160435"
+    },
     {
       "hash": "724056ff920a214a363d45a69e27616f6b97f054",
       "shortHash": "724056ff",
@@ -86,204 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Refine storefront category sections",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/665de0c4932999cfe156562d1be5710c70132565"
-    },
-    {
-      "hash": "3ffe50c618f93bbcbf8dbda905d94eab7e9db17c",
-      "shortHash": "3ffe50c6",
-      "dateIso": "2026-05-27T17:05:52-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish hub premium visual tokens",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3ffe50c618f93bbcbf8dbda905d94eab7e9db17c"
-    },
-    {
-      "hash": "32d07bb3d73b129263b4eaaf35f9c58bd0a6ee7b",
-      "shortHash": "32d07bb3",
-      "dateIso": "2026-05-27T16:04:58-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine hub merchant signup card",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/32d07bb3d73b129263b4eaaf35f9c58bd0a6ee7b"
-    },
-    {
-      "hash": "cb170a48c448ae55104f8bae6ef0c8f9190c4e12",
-      "shortHash": "cb170a48",
-      "dateIso": "2026-05-27T14:28:38-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Use compact mobile grid for destination claim places",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cb170a48c448ae55104f8bae6ef0c8f9190c4e12"
-    },
-    {
-      "hash": "d4fc4cdb7c9b94641c3645b337b78fa50021451d",
-      "shortHash": "d4fc4cdb",
-      "dateIso": "2026-05-27T13:55:43-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve mobile destination claim selection",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d4fc4cdb7c9b94641c3645b337b78fa50021451d"
-    },
-    {
-      "hash": "af759cabb3939b5f210e73a0cb34df150a02d767",
-      "shortHash": "af759cab",
-      "dateIso": "2026-05-27T13:37:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix destination claim hospitality selection",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/af759cabb3939b5f210e73a0cb34df150a02d767"
-    },
-    {
-      "hash": "68324196d2b4f16490451f04fe8d3ca373c6f40f",
-      "shortHash": "68324196",
-      "dateIso": "2026-05-27T12:58:14-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine mobile drawer scroll controls",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/68324196d2b4f16490451f04fe8d3ca373c6f40f"
-    },
-    {
-      "hash": "ff8758909ce2500c4bf1470768ca47c0b4d08969",
-      "shortHash": "ff875890",
-      "dateIso": "2026-05-27T12:45:47-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Tighten mobile drawer scroll spacing",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ff8758909ce2500c4bf1470768ca47c0b4d08969"
-    },
-    {
-      "hash": "355a91f8b0c6636db43637008c91e8633beb8170",
-      "shortHash": "355a91f8",
-      "dateIso": "2026-05-27T12:37:10-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve mobile drawer scroll affordance",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/355a91f8b0c6636db43637008c91e8633beb8170"
-    },
-    {
-      "hash": "3113095aa1c80b939de1a7e80984f46f6da09c62",
-      "shortHash": "3113095a",
-      "dateIso": "2026-05-27T11:59:20-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine customer order tracking details",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3113095aa1c80b939de1a7e80984f46f6da09c62"
-    },
-    {
-      "hash": "4dd2bfb9b8750bb9f349d40687d08e428e327781",
-      "shortHash": "4dd2bfb9",
-      "dateIso": "2026-05-27T11:45:11-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix storefront session isolation and recovery",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4dd2bfb9b8750bb9f349d40687d08e428e327781"
-    },
-    {
-      "hash": "de484d92ca0c775b2c74d57a222f9ed2ba2efcc5",
-      "shortHash": "de484d92",
-      "dateIso": "2026-05-27T11:14:44-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve Android thermal printer settings",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/de484d92ca0c775b2c74d57a222f9ed2ba2efcc5"
-    },
-    {
-      "hash": "fa51bff038a1c9a655cac6eb6757235daac1332a",
-      "shortHash": "fa51bff0",
-      "dateIso": "2026-05-27T10:46:01-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix storefront category rail initialization",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fa51bff038a1c9a655cac6eb6757235daac1332a"
-    },
-    {
-      "hash": "8a15e6370db4e2569ab9e0b022f9fffbac013a84",
-      "shortHash": "8a15e637",
-      "dateIso": "2026-05-27T10:31:54-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Adapt storefront category rail sizing",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8a15e6370db4e2569ab9e0b022f9fffbac013a84"
-    },
-    {
-      "hash": "6de59ac567670b88f3518985c432731025cb0012",
-      "shortHash": "6de59ac5",
-      "dateIso": "2026-05-27T10:19:36-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine storefront category rail",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6de59ac567670b88f3518985c432731025cb0012"
-    },
-    {
-      "hash": "a47378db35f8ca85ff76ba7430712d199a62dc1b",
-      "shortHash": "a47378db",
-      "dateIso": "2026-05-27T09:35:23-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish storefront and destination badges",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a47378db35f8ca85ff76ba7430712d199a62dc1b"
-    },
-    {
-      "hash": "710be47b416939bcc5e76bc7d9c261a1925c782b",
-      "shortHash": "710be47b",
-      "dateIso": "2026-05-26T19:55:53-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix store coordinates on address updates",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/710be47b416939bcc5e76bc7d9c261a1925c782b"
-    },
-    {
-      "hash": "998e2894e791c5f802f004e5f550d445d570ac43",
-      "shortHash": "998e2894",
-      "dateIso": "2026-05-26T19:28:26-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve password reset code flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/998e2894e791c5f802f004e5f550d445d570ac43"
-    },
-    {
-      "hash": "975111040bc790e2955718f704a6f28724693055",
-      "shortHash": "97511104",
-      "dateIso": "2026-05-26T18:53:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix password reset migration columns",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/975111040bc790e2955718f704a6f28724693055"
-    },
-    {
-      "hash": "6d161762fb6b054105a1baf60533a2aab2997e55",
-      "shortHash": "6d161762",
-      "dateIso": "2026-05-26T18:44:08-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Simplify desktop auth login copy",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6d161762fb6b054105a1baf60533a2aab2997e55"
-    },
-    {
-      "hash": "a3224ec59eae2fafb7dafbedf00e5a66fb43c7ed",
-      "shortHash": "a3224ec5",
-      "dateIso": "2026-05-26T18:25:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Add password recovery code flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a3224ec59eae2fafb7dafbedf00e5a66fb43c7ed"
-    },
-    {
-      "hash": "2565adc584f0c1e817a794449772074ebb63c4a0",
-      "shortHash": "2565adc5",
-      "dateIso": "2026-05-26T17:10:28-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Add Android app links asset association",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2565adc584f0c1e817a794449772074ebb63c4a0"
-    },
-    {
-      "hash": "ef169b1250396f2802f68e9a0c60a6b0a7c926ea",
-      "shortHash": "ef169b12",
-      "dateIso": "2026-05-26T16:31:54-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix storefront printer menu on first access",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ef169b1250396f2802f68e9a0c60a6b0a7c926ea"
     }
   ]
 } as const;

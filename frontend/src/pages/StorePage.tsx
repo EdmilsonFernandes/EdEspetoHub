@@ -3646,7 +3646,7 @@ export function StorePage() {
   const hasContent = products.length > 0 || !loadError;
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-[#EEF2F7] to-[#E4EBF3] font-sans overflow-x-clip no-x-scroll ${publicStoreHeaderPadding} ${isNativeRuntime ? 'ds-native-nav-content' : 'pb-28 sm:pb-24'}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-[#E2EBF2] to-[#D9E4EF] font-sans overflow-x-clip no-x-scroll ${publicStoreHeaderPadding} ${isNativeRuntime ? 'ds-native-nav-content' : 'pb-28 sm:pb-24'}`}>
       {showPublicStoreAppHeader ? (
         <AppGlassHeader
           title={publicStoreHeaderTitle}
@@ -3862,7 +3862,7 @@ export function StorePage() {
           </div>
         )}
         {showClosedState && (
-          <div className="min-h-[72vh] bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.16),transparent_36%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.08),transparent_42%),linear-gradient(180deg,#EEF2F7_0%,#F4F8FB_54%,#EEF2F7_100%)]">
+          <div className="min-h-[72vh] bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.16),transparent_36%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.08),transparent_42%),linear-gradient(180deg,#E2EBF2_0%,#E7F0F6_54%,#E2EBF2_100%)]">
             <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:py-7">
               {!showPublicStoreAppHeader ? (
                 <button

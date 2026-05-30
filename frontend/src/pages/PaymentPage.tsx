@@ -176,7 +176,7 @@ export function PaymentPage() {
   }, [isPaid, isVerified, navigate, storeSlug]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EEF2F7] to-[#E4EBF3]">
+    <div className="min-h-screen bg-gradient-to-br from-[#E2EBF2] to-[#D9E4EF]">
       <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
         <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

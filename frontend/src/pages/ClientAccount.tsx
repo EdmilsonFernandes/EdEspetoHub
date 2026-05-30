@@ -441,7 +441,7 @@ export function ClientAccount() {
     return {
       label: 'Não verificado',
       tone: 'text-slate-600',
-      bg: 'bg-[#EEF2F7] border-slate-100',
+      bg: 'bg-[#E2EBF2] border-slate-100',
       icon: <XCircle size={16} weight="duotone" className="text-slate-400" />,
     };
   };
@@ -654,7 +654,7 @@ export function ClientAccount() {
   }
 
   return (
-    <main className="min-h-screen bg-[#EEF2F7] pb-12 pt-[calc(env(safe-area-inset-top)+4.35rem)]">
+    <main className="min-h-screen bg-[#E2EBF2] pb-12 pt-[calc(env(safe-area-inset-top)+4.35rem)]">
       <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[40%] w-[48%] rounded-full bg-[#153A4C]/12 blur-[120px] -z-10" />
       <div className="pointer-events-none fixed bottom-[5%] left-[-6%] h-[24%] w-[32%] rounded-full bg-[#336886]/7 blur-[100px] -z-10" />
       <div className="mx-auto max-w-2xl">
@@ -1071,7 +1071,7 @@ export function ClientAccount() {
 
               {biometricSupported ? (
                 <div className={`flex flex-col gap-3 rounded-[1.45rem] border px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between ${
-                  biometricEnabled ? 'bg-[#336886]/[0.07] border-[#336886]/15' : 'bg-[#EEF2F7] border-slate-100'
+                  biometricEnabled ? 'bg-[#336886]/[0.07] border-[#336886]/15' : 'bg-[#E2EBF2] border-slate-100'
                 }`}>
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#336886] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
@@ -1111,7 +1111,7 @@ export function ClientAccount() {
                   description: 'Avisos de status e acompanhamento.',
                   state: pushEnabled
                     ? { label: 'Permitido', tone: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' }
-                    : { label: 'Bloqueado', tone: 'text-slate-500', bg: 'bg-[#EEF2F7] border-slate-100' },
+                    : { label: 'Bloqueado', tone: 'text-slate-500', bg: 'bg-[#E2EBF2] border-slate-100' },
                   icon: <BellSimpleRinging size={18} weight="duotone" className="text-[#336886]" />,
                   checked: pushEnabled,
                   action: () => handlePermissionAction('push', pushEnabled),
