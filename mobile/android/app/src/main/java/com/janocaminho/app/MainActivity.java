@@ -7,12 +7,18 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.webkit.JavascriptInterface;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -87,6 +93,7 @@ public class MainActivity extends BridgeActivity {
     private static final String BIOMETRIC_RESULT_EVENT = "jnc:android-biometric-result";
     private static final long NAV_ANIM_DURATION_MS = 220L;
     private static final long LAUNCH_OVERLAY_FADE_MS = 260L;
+    private static final long LAUNCH_OVERLAY_MIN_VISIBLE_MS = 1600L;
     private static final long LAUNCH_OVERLAY_NETWORK_TIMEOUT_MS = 6500L;
     private static final long RESUME_WEBVIEW_HEALTH_CHECK_DELAY_MS = 1800L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
@@ -110,9 +117,13 @@ public class MainActivity extends BridgeActivity {
     private boolean launchBridgeInjected = false;
     private android.content.Intent handledPushNavigationIntent = null;
     private boolean webAppReady = false;
+    private long launchOverlayShownAtMs = 0L;
     private final Handler launchOverlayHandler = new Handler(Looper.getMainLooper());
     private Runnable launchOverlayTimeoutRunnable;
+    private Runnable launchOverlayDismissRunnable;
     private Runnable resumeWebViewHealthCheckRunnable;
+    private ConnectivityManager connectivityManager;
+    private ConnectivityManager.NetworkCallback networkCallback;
     private AppUpdateManager appUpdateManager;
     private InstallStateUpdatedListener installStateUpdatedListener;
     private boolean flexibleUpdatePromptVisible = false;
@@ -149,6 +160,7 @@ public class MainActivity extends BridgeActivity {
         configureWebViewClientIfNeeded();
         initializeInAppUpdates();
         initializeLaunchOverlay();
+        registerNetworkMonitor();
     }
 
     @Override
@@ -469,6 +481,8 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onDestroy() {
+        unregisterNetworkMonitor();
+        cancelLaunchOverlayDismiss();
         cancelLaunchOverlayTimeout();
         cancelResumeWebViewHealthCheck();
         if (appUpdateManager != null && installStateUpdatedListener != null) {
@@ -495,6 +509,7 @@ public class MainActivity extends BridgeActivity {
         if (launchOverlay != null) {
             launchOverlay.setAlpha(1f);
             launchOverlay.setVisibility(View.VISIBLE);
+            launchOverlayShownAtMs = SystemClock.elapsedRealtime();
             applyLaunchOverlayInsets();
         }
         if (launchRetryButton != null) {
@@ -546,7 +561,9 @@ public class MainActivity extends BridgeActivity {
                 .setDuration(260L)
                 .start();
         }
-        if (webAppReady) {
+        if (!isDeviceOnline()) {
+            showLaunchOverlayRecovery(getString(R.string.launch_offline_message));
+        } else if (webAppReady) {
             launchOverlayHandler.postDelayed(this::dismissLaunchOverlay, 120L);
         } else {
             scheduleLaunchOverlayTimeout();
@@ -652,9 +669,106 @@ public class MainActivity extends BridgeActivity {
         });
     }
 
+    private boolean isDeviceOnline() {
+        try {
+            ConnectivityManager manager = connectivityManager;
+            if (manager == null) {
+                manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            }
+            if (manager == null) return true;
+
+            Network network = manager.getActiveNetwork();
+            if (network == null) return false;
+
+            NetworkCapabilities capabilities = manager.getNetworkCapabilities(network);
+            return capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        } catch (Exception error) {
+            android.util.Log.w("JNC_NETWORK", "Nao foi possivel ler conectividade", error);
+            return true;
+        }
+    }
+
+    private void registerNetworkMonitor() {
+        if (networkCallback != null) return;
+
+        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager == null) return;
+
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(@NonNull Network network) {
+                launchOverlayHandler.post(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+
+                    if (pageFailedToLoad && !webAppReady) {
+                        retryInitialPageLoad();
+                        return;
+                    }
+
+                    if (!launchOverlayDismissed && mainFrameLoadInProgress) {
+                        showLaunchOverlayLoading(getString(R.string.launch_retrying_message));
+                    }
+                });
+            }
+
+            @Override
+            public void onLost(@NonNull Network network) {
+                launchOverlayHandler.post(() -> {
+                    if (isFinishing() || isDestroyed() || isDeviceOnline() || launchOverlayDismissed) return;
+                    mainFrameLoadInProgress = false;
+                    pageFailedToLoad = true;
+                    webAppReady = false;
+                    showLaunchOverlayRecovery(getString(R.string.launch_offline_message));
+                });
+            }
+        };
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                connectivityManager.registerDefaultNetworkCallback(networkCallback);
+            } else {
+                NetworkRequest request = new NetworkRequest.Builder()
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .build();
+                connectivityManager.registerNetworkCallback(request, networkCallback);
+            }
+        } catch (Exception error) {
+            android.util.Log.w("JNC_NETWORK", "Nao foi possivel observar conectividade", error);
+            networkCallback = null;
+        }
+    }
+
+    private void unregisterNetworkMonitor() {
+        if (connectivityManager == null || networkCallback == null) return;
+
+        try {
+            connectivityManager.unregisterNetworkCallback(networkCallback);
+        } catch (Exception ignored) {
+        } finally {
+            networkCallback = null;
+        }
+    }
+
     private void dismissLaunchOverlay() {
         if (launchOverlayDismissed || launchOverlay == null) return;
+
+        long elapsedMs = launchOverlayShownAtMs <= 0L
+            ? LAUNCH_OVERLAY_MIN_VISIBLE_MS
+            : SystemClock.elapsedRealtime() - launchOverlayShownAtMs;
+        long remainingMs = LAUNCH_OVERLAY_MIN_VISIBLE_MS - elapsedMs;
+        if (remainingMs > 0L) {
+            if (launchOverlayDismissRunnable == null) {
+                launchOverlayDismissRunnable = () -> {
+                    launchOverlayDismissRunnable = null;
+                    dismissLaunchOverlay();
+                };
+                launchOverlayHandler.postDelayed(launchOverlayDismissRunnable, remainingMs);
+            }
+            return;
+        }
+
         cancelLaunchOverlayTimeout();
+        cancelLaunchOverlayDismiss();
         launchOverlayDismissed = true;
         launchOverlay.animate()
             .alpha(0f)
@@ -667,9 +781,19 @@ public class MainActivity extends BridgeActivity {
             .start();
     }
 
+    private void cancelLaunchOverlayDismiss() {
+        if (launchOverlayDismissRunnable == null) return;
+        launchOverlayHandler.removeCallbacks(launchOverlayDismissRunnable);
+        launchOverlayDismissRunnable = null;
+    }
+
     private void showLaunchOverlayLoading(String message) {
         if (launchOverlay == null || launchOverlayDismissed) return;
 
+        cancelLaunchOverlayDismiss();
+        if (launchOverlay.getVisibility() != View.VISIBLE || launchOverlayShownAtMs <= 0L) {
+            launchOverlayShownAtMs = SystemClock.elapsedRealtime();
+        }
         launchOverlay.setVisibility(View.VISIBLE);
         launchOverlay.setAlpha(1f);
 
@@ -698,7 +822,11 @@ public class MainActivity extends BridgeActivity {
     private void showLaunchOverlayRecovery(String message) {
         if (launchOverlay == null || launchOverlayDismissed) return;
 
+        cancelLaunchOverlayDismiss();
         cancelLaunchOverlayTimeout();
+        if (launchOverlay.getVisibility() != View.VISIBLE || launchOverlayShownAtMs <= 0L) {
+            launchOverlayShownAtMs = SystemClock.elapsedRealtime();
+        }
         launchOverlay.setVisibility(View.VISIBLE);
         launchOverlay.setAlpha(1f);
 
@@ -728,11 +856,20 @@ public class MainActivity extends BridgeActivity {
         if (launchOverlayDismissed) return;
 
         cancelLaunchOverlayTimeout();
+        if (!isDeviceOnline()) {
+            showLaunchOverlayRecovery(getString(R.string.launch_offline_message));
+            return;
+        }
+
         launchOverlayTimeoutRunnable = () -> {
             if (!launchOverlayDismissed) {
                 mainFrameLoadInProgress = false;
                 pageFailedToLoad = true;
-                showLaunchOverlayRecovery(getString(R.string.launch_timeout_message));
+                showLaunchOverlayRecovery(
+                    isDeviceOnline()
+                        ? getString(R.string.launch_timeout_message)
+                        : getString(R.string.launch_offline_message)
+                );
             }
         };
         launchOverlayHandler.postDelayed(launchOverlayTimeoutRunnable, LAUNCH_OVERLAY_NETWORK_TIMEOUT_MS);
@@ -750,6 +887,15 @@ public class MainActivity extends BridgeActivity {
         String retryUrl = normalizeTrustedWebUrl(lastKnownUrl);
         if (retryUrl == null) {
             retryUrl = HUB_URL;
+        }
+
+        if (!isDeviceOnline()) {
+            mainFrameLoadInProgress = false;
+            pageFailedToLoad = true;
+            webAppReady = false;
+            launchOverlayDismissed = false;
+            showLaunchOverlayRecovery(getString(R.string.launch_offline_message));
+            return;
         }
 
         retryUrl = appendReloadNonce(retryUrl);

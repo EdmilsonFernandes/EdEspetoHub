@@ -8,6 +8,7 @@
     <string name="launch_status">Conectando com segurança</string>
     <string name="launch_retry">Tentar novamente</string>
     <string name="launch_retrying_message">Reconectando rotas, lojas e condomínios</string>
+    <string name="launch_offline_message">Sem internet agora. Confira o Wi-Fi ou os dados móveis e tente novamente.</string>
     <string name="launch_timeout_message">Sem conexão agora. Assim que a internet voltar, seguimos com lojas, destinos e pedidos.</string>
     <string name="launch_http_error_message">Não foi possível abrir o app agora. Estamos tentando reconectar sua rota.</string>
     <string name="launch_ssl_error_message">Não foi possível validar a conexão segura. Tente novamente.</string>
