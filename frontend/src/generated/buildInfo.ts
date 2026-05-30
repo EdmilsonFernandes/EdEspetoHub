@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "fae62045",
-  "versionLabel": "v0.1.9.fae62045",
-  "versionInternal": "0.1.9+20260530.212127.fae62045",
-  "buildId": "0.1.9+20260530.212127.fae62045-20260530.212127-fae62045",
-  "builtAt": "2026-05-30T21:21:27.847Z",
-  "commitHash": "fae6204523d3b971107c3ed60bdb2d4edb3d4020",
-  "shortHash": "fae62045",
+  "versionDisplaySuffix": "21e745b7",
+  "versionLabel": "v0.1.9.21e745b7",
+  "versionInternal": "0.1.9+20260530.213137.21e745b7",
+  "buildId": "0.1.9+20260530.213137.21e745b7-20260530.213137-21e745b7",
+  "builtAt": "2026-05-30T21:31:37.294Z",
+  "commitHash": "21e745b7d7da5a362c798cc3e2a2d92614f8be4d",
+  "shortHash": "21e745b7",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "21e745b7d7da5a362c798cc3e2a2d92614f8be4d",
+      "shortHash": "21e745b7",
+      "dateIso": "2026-05-30T18:23:47-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(checkout): collapse table selector on selection and add bottom padding to prevent checkout button overlapping info",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/21e745b7d7da5a362c798cc3e2a2d92614f8be4d"
+    },
     {
       "hash": "fae6204523d3b971107c3ed60bdb2d4edb3d4020",
       "shortHash": "fae62045",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Improve checkout feedback on slow connections",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/724056ff920a214a363d45a69e27616f6b97f054"
-    },
-    {
-      "hash": "93a99cea0d419a4ad0be6f186e890320ce0e20e0",
-      "shortHash": "93a99cea",
-      "dateIso": "2026-05-27T23:11:04-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve printer setup test flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/93a99cea0d419a4ad0be6f186e890320ce0e20e0"
     }
   ]
 } as const;

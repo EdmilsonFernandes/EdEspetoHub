@@ -348,11 +348,6 @@ export function HubHighlightsPage() {
       return normalizeHighlightSearchText(`${item.name} ${item.storeName}`).includes(normalized);
     });
   }, [categorizedItems, query, selectedCategory]);
-
-  const selectedCategoryLabel = getHighlightCategoryOption(selectedCategory).label;
-  const heroSubtitle = selectedCategory === 'all'
-    ? 'Veja pratos, bebidas, mercado e achados das lojas em uma lista simples.'
-    : `Mostrando ${selectedCategoryLabel.toLowerCase()} das lojas disponíveis.`;
   const resetFilters = () => {
     setQuery('');
     setSelectedCategory('all');
@@ -376,94 +371,69 @@ export function HubHighlightsPage() {
       />
 
       <main className="mx-auto w-full max-w-3xl px-4 pb-[calc(var(--jnk-client-bottom-nav-height,0px)+2rem)] pt-[calc(env(safe-area-inset-top)+5.2rem)]">
-        <section className="relative overflow-hidden rounded-[2rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.96)_0%,rgba(244,249,252,0.94)_100%)] p-4 shadow-[0_24px_54px_-38px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/50 backdrop-blur-xl">
-          <div className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full bg-[#336886]/12 blur-3xl" />
-          <div className="pointer-events-none absolute -left-10 -bottom-12 h-44 w-44 rounded-full bg-emerald-500/8 blur-3xl" />
-          <div className="relative flex items-start gap-3">
-            <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.2rem] bg-[#153A4C] text-white shadow-[0_16px_30px_-22px_rgba(21,58,76,0.6)]">
-              <Sparkle size={20} weight="fill" className="text-amber-300 animate-pulse" />
+        {/* Barra de Pesquisa Compacta Premium */}
+        <div className="relative z-10 mb-3 overflow-hidden rounded-2xl border border-slate-200 bg-white/92 p-1.5 shadow-[0_12px_28px_-16px_rgba(15,23,42,0.15)] ring-1 ring-slate-200/5 transition-all duration-300 focus-within:border-[#336886]/45 focus-within:bg-white focus-within:shadow-[0_16px_36px_-20px_rgba(51,104,134,0.25)] focus-within:ring-4 focus-within:ring-[#336886]/10">
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(95,211,90,0.12),transparent_68%)]" />
+          <div className="relative flex items-center gap-2.5">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[linear-gradient(145deg,#5FD35A_0%,#336886_64%,#153A4C_100%)] text-white shadow-[0_10px_20px_-14px_rgba(51,104,134,0.68)]">
+              <MagnifyingGlass size={16} weight="bold" />
             </span>
-            <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Para pedir agora</p>
-              <h2 className="mt-1 text-lg font-black tracking-[-0.04em] text-slate-950">Escolha o item. A loja certa abre para você.</h2>
-              <p className="mt-1.5 text-xs font-semibold leading-relaxed text-slate-500">
-                {heroSubtitle}
-              </p>
+            <div className="min-w-0 flex-1 py-0.5">
+              <span className="block text-[8px] font-black uppercase tracking-[0.18em] text-[#336886]/75 leading-none">Pesquisar destaques</span>
+              <input
+                {...inputAssistProps.search}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="O que deu vontade agora?"
+                className="mt-0.5 min-w-0 w-full bg-transparent text-[14px] font-black tracking-[-0.02em] text-slate-900 outline-none placeholder:text-slate-400"
+              />
             </div>
+            {query ? (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                className="mr-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 shadow-sm active:scale-95"
+                aria-label="Limpar busca"
+              >
+                <X size={10} weight="bold" />
+              </button>
+            ) : null}
           </div>
+        </div>
 
-          <div className="relative mt-4 overflow-hidden rounded-[1.65rem] border border-slate-200 bg-white/92 p-1.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/5 transition-all duration-300 focus-within:border-[#336886]/45 focus-within:bg-white focus-within:shadow-[0_20px_48px_-30px_rgba(51,104,134,0.25)] focus-within:ring-4 focus-within:ring-[#336886]/10">
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(95,211,90,0.18),transparent_68%)]" />
-            <div className="relative flex items-center gap-2.5">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.15rem] bg-[linear-gradient(145deg,#5FD35A_0%,#336886_64%,#153A4C_100%)] text-white shadow-[0_14px_26px_-18px_rgba(51,104,134,0.68)]">
-                <MagnifyingGlass size={18} weight="bold" />
-              </span>
-              <div className="min-w-0 flex-1 py-1">
-                <span className="block text-[9px] font-black uppercase tracking-[0.18em] text-[#336886]/75">Pesquisar</span>
-                <input
-                  {...inputAssistProps.search}
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="O que deu vontade agora?"
-                  className="mt-0.5 min-w-0 w-full bg-transparent text-[15px] font-black tracking-[-0.02em] text-slate-900 outline-none placeholder:text-slate-400"
+        {/* Carrossel de Pílulas de Categoria Minimalistas */}
+        <div className="relative z-10 mb-4 -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1.5 pt-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {categoryFilters.map((option) => {
+            const CategoryIcon = option.icon;
+            const active = selectedCategory === option.key;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => setSelectedCategory(option.key)}
+                className={`jnc-hub-touch shrink-0 snap-start flex items-center gap-1.5 rounded-full px-3.5 py-1.5 border text-xs font-black transition-all duration-300 shadow-sm ${
+                  active
+                    ? "bg-[#153A4C] border-[#153A4C] text-white shadow-[0_8px_16px_-8px_rgba(21,58,76,0.6)]"
+                    : "bg-white border-slate-200/80 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                <CategoryIcon
+                  size={14}
+                  weight={active ? 'fill' : 'bold'}
+                  className={active ? 'text-white' : 'text-[#336886]'}
                 />
-              </div>
-              {query ? (
-                <button
-                  type="button"
-                  onClick={() => setQuery('')}
-                  className="mr-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 shadow-sm active:scale-95"
-                  aria-label="Limpar busca"
-                >
-                  <X size={12} weight="bold" />
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {categoryFilters.map((option) => {
-              const CategoryIcon = option.icon;
-              const active = selectedCategory === option.key;
-              return (
-                <button
-                  key={option.key}
-                  type="button"
-                  onClick={() => setSelectedCategory(option.key)}
-                  className="jnc-hub-touch group flex w-[4.45rem] shrink-0 snap-start flex-col items-center gap-1.5 text-center"
-                >
-                  <span
-                    className={`relative grid h-[3.65rem] w-[3.65rem] place-items-center overflow-hidden rounded-[1.35rem] border transition-all duration-300 ${
-                      active
-                        ? `${option.activeSurfaceClassName} border-white/70`
-                        : `${option.surfaceClassName} border-slate-100/90 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.1)]`
-                    }`}
-                  >
-                    <span className={`absolute -right-3 -top-3 h-9 w-9 rounded-full blur-xl ${option.glowClassName}`} />
-                    <span className="absolute inset-x-2 top-1 h-4 rounded-full bg-white/35 blur-[10px]" />
-                    <CategoryIcon
-                      size={27}
-                      weight={active ? 'fill' : 'duotone'}
-                      className={`relative z-10 drop-shadow-[0_8px_14px_rgba(15,23,42,0.12)] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105 ${
-                        active ? 'text-white' : option.iconClassName
-                      }`}
-                    />
-                    {option.count > 0 ? (
-                      <span className={`absolute right-1.5 top-1.5 z-20 rounded-full px-1.5 py-0.5 text-[8px] font-black leading-none ${
-                        active ? 'bg-white/20 text-white' : 'bg-white/90 text-slate-500 shadow-sm'
-                      }`}>
-                        {option.count}
-                      </span>
-                    ) : null}
+                <span className="tracking-tight">{option.label}</span>
+                {option.count > 0 && (
+                  <span className={`rounded-full px-1.5 py-0.5 text-[8.5px] font-black leading-none ${
+                    active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {option.count}
                   </span>
-                  <span className={`max-w-full truncate text-[10px] font-black tracking-[-0.01em] ${active ? 'text-[#153A4C]' : 'text-slate-600'}`}>
-                    {option.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
         <section className="mt-4 flex flex-wrap gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/86 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.28)]">
