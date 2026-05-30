@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "62b8993b",
-  "versionLabel": "v0.1.9.62b8993b",
-  "versionInternal": "0.1.9+20260530.130924.62b8993b",
-  "buildId": "0.1.9+20260530.130924.62b8993b-20260530.130924-62b8993b",
-  "builtAt": "2026-05-30T13:09:24.920Z",
-  "commitHash": "62b8993b71d4321014625b1e0842254a37c695e8",
-  "shortHash": "62b8993b",
+  "versionDisplaySuffix": "a18f0dc8",
+  "versionLabel": "v0.1.9.a18f0dc8",
+  "versionInternal": "0.1.9+20260530.132746.a18f0dc8",
+  "buildId": "0.1.9+20260530.132746.a18f0dc8-20260530.132746-a18f0dc8",
+  "builtAt": "2026-05-30T13:27:46.096Z",
+  "commitHash": "a18f0dc8121dcfd4fa5c9ab09262a01ef89c7096",
+  "shortHash": "a18f0dc8",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "a18f0dc8121dcfd4fa5c9ab09262a01ef89c7096",
+      "shortHash": "a18f0dc8",
+      "dateIso": "2026-05-30T10:16:21-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(frontend): simplify featured banner layout on hub by removing outer wrapper card and generic title",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a18f0dc8121dcfd4fa5c9ab09262a01ef89c7096"
+    },
     {
       "hash": "62b8993b71d4321014625b1e0842254a37c695e8",
       "shortHash": "62b8993b",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Polish storefront category navigation tiles",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0de66caf43af810ea498286399c6c1ed07ae5e41"
-    },
-    {
-      "hash": "4091b6f8b110a5eab71d758863bfc20013047251",
-      "shortHash": "4091b6f8",
-      "dateIso": "2026-05-27T19:01:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine destination and hospitality discovery hierarchy",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4091b6f8b110a5eab71d758863bfc20013047251"
     }
   ]
 } as const;

@@ -46,7 +46,10 @@ export function HeaderAvatarTrigger({
         <UserCircle size={21} weight="duotone" />
       )}
       {hasNotification ? (
-        <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-white shadow-[0_8px_14px_-8px_rgba(225,29,72,0.95)]" />
+        <>
+          <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-white shadow-[0_8px_14px_-8px_rgba(225,29,72,0.95)] z-10" />
+          <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping opacity-65" />
+        </>
       ) : null}
     </button>
   );
