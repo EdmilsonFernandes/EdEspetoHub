@@ -22,6 +22,7 @@ import {
   destinationPartnerPortalService,
   DestinationPartnerResource,
 } from '../services/destinationPartnerPortalService';
+import { buildListingClaimUrl } from '../utils/destinationListingClaim';
 import { inputAssistProps, textareaAssistProps } from '../utils/inputAssist';
 
 const blankForm = {
@@ -101,6 +102,22 @@ const buildForm = (resource?: DestinationPartnerResource | null) => {
     lng: item.lng ?? '',
     deliveryInstructions: item.deliveryInstructions || '',
   };
+};
+
+const buildStoreSignupUrl = (resource?: DestinationPartnerResource | null) => {
+  if (!resource || resource.resourceType !== 'DESTINATION_LISTING') return '';
+  const listing = resource.item || {};
+  const destination = listing.destination || {};
+  const linkedPlaceIds = [
+    ...(Array.isArray(listing.hospitalityPlaceIds) ? listing.hospitalityPlaceIds : []),
+    ...(Array.isArray(listing.hospitalityPlaceLinks) ? listing.hospitalityPlaceLinks.map((link: any) => link?.hospitalityPlaceId || link?.hospitalityPlace?.id) : []),
+    ...(Array.isArray(listing.hospitalityPlaces) ? listing.hospitalityPlaces.map((place: any) => place?.id) : []),
+    listing.hospitalityPlaceId,
+  ].map((id) => String(id || '').trim()).filter(Boolean);
+  return buildListingClaimUrl(destination, listing, {
+    deliveryMode: linkedPlaceIds.length ? 'selected' : 'all',
+    placeIds: Array.from(new Set(linkedPlaceIds)),
+  });
 };
 
 function PartnerLogin({ onLoggedIn }: { onLoggedIn: (session: any) => void }) {
@@ -201,6 +218,7 @@ export function DestinationPartnerPortal() {
     () => resources.find((resource) => resource.permissionId === selectedId) || resources[0] || null,
     [resources, selectedId]
   );
+  const storeSignupUrl = useMemo(() => buildStoreSignupUrl(selectedResource), [selectedResource]);
 
   useEffect(() => {
     if (!session?.token) return;
@@ -461,6 +479,12 @@ export function DestinationPartnerPortal() {
                   <ArrowSquareOut size={17} weight="bold" />
                   Ver página pública
                 </a>
+                {storeSignupUrl ? (
+                  <a href={storeSignupUrl} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 transition hover:bg-emerald-100">
+                    <Buildings size={17} weight="duotone" />
+                    Quero receber pedidos
+                  </a>
+                ) : null}
                 <button type="submit" disabled={saving} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.65)] transition active:scale-[0.98] disabled:opacity-60">
                   {saving ? <Buildings size={17} weight="duotone" /> : <FloppyDisk size={17} weight="duotone" />}
                   {saving ? 'Salvando...' : 'Salvar alterações'}

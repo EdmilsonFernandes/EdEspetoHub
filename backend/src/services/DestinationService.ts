@@ -188,6 +188,28 @@ export class DestinationService {
       throw new AppError('DEST-003', 400);
     }
 
+    const requestSource = toOptionalText(payload?.requestSource || payload?.source);
+    const requestedClaimedPlaceId = toOptionalText(payload?.claimedHospitalityPlaceId || payload?.placeId);
+    const requestedClaimedListingId = toOptionalText(payload?.claimedListingId || payload?.destinationListingId || payload?.listingId);
+    let claimedHospitalityPlaceId: string | null = null;
+    let claimedListingId: string | null = null;
+
+    if (requestedClaimedPlaceId && partnerType !== 'SERVICE_PROVIDER') {
+      const claimedPlace = await this.repository.findPlaceById(requestedClaimedPlaceId);
+      if (!claimedPlace || String(claimedPlace.destinationId) !== String(destination.id)) {
+        throw new AppError('DEST-002', 404);
+      }
+      claimedHospitalityPlaceId = claimedPlace.id;
+    }
+
+    if (requestedClaimedListingId && partnerType === 'SERVICE_PROVIDER') {
+      const claimedListing = await this.repository.findListingById(requestedClaimedListingId);
+      if (!claimedListing || String(claimedListing.destinationId) !== String(destination.id)) {
+        throw new AppError('DEST-012', 404);
+      }
+      claimedListingId = claimedListing.id;
+    }
+
     const existing = await this.repository.findPendingPartnerRequestByEmailAndName(responsibleEmail, name, destination.id);
     if (existing) {
       await this.notifyPartnerRequestByEmail({
@@ -230,6 +252,9 @@ export class DestinationService {
       bannerUrl: bannerUrl || toOptionalText(payload?.bannerUrl),
       imageUrl: imageUrl || toOptionalText(payload?.imageUrl),
       deliveryInstructions: toOptionalText(payload?.deliveryInstructions),
+      requestSource,
+      claimedHospitalityPlaceId,
+      claimedListingId,
       responsibleName,
       responsibleEmail,
       responsiblePhone,
@@ -881,24 +906,28 @@ export class DestinationService {
     let partnerActivationToken: string | null | undefined;
     if (status === 'approved' && request.status !== 'approved') {
       if (String(request.partnerType || '').toUpperCase() === 'SERVICE_PROVIDER') {
-        const listing = await this.adminSaveListing({
-          destinationId: request.destinationId,
-          title: request.name,
-          category: request.category || 'SERVICO',
-          description: request.description,
-          imageUrl: request.imageUrl || request.bannerUrl || request.logoUrl,
-          address: request.address,
-          city: request.city,
-          state: request.state,
-          zipCode: request.zipCode,
-          phone: request.phone,
-          whatsapp: request.whatsapp,
-          instagramUrl: request.instagramUrl,
-          websiteUrl: request.websiteUrl,
-          ctaType: request.whatsapp ? 'WHATSAPP' : request.websiteUrl ? 'SITE' : null,
-          ctaUrl: request.whatsapp || request.websiteUrl || request.instagramUrl || null,
-          active: true,
-        });
+        const claimedListingId = toOptionalText(request.claimedListingId);
+        const listing = claimedListingId
+          ? await this.repository.findListingById(claimedListingId)
+          : await this.adminSaveListing({
+              destinationId: request.destinationId,
+              title: request.name,
+              category: request.category || 'SERVICO',
+              description: request.description,
+              imageUrl: request.imageUrl || request.bannerUrl || request.logoUrl,
+              address: request.address,
+              city: request.city,
+              state: request.state,
+              zipCode: request.zipCode,
+              phone: request.phone,
+              whatsapp: request.whatsapp,
+              instagramUrl: request.instagramUrl,
+              websiteUrl: request.websiteUrl,
+              ctaType: request.whatsapp ? 'WHATSAPP' : request.websiteUrl ? 'SITE' : null,
+              ctaUrl: request.whatsapp || request.websiteUrl || request.instagramUrl || null,
+              active: true,
+            });
+        if (!listing || String(listing.destinationId) !== String(request.destinationId)) throw new AppError('DEST-012', 404);
         request.createdListingId = listing.id;
         const access = await this.destinationPartnerPortalService.ensureAccessForApprovedRequest({
           request,
@@ -911,25 +940,29 @@ export class DestinationService {
         partnerActivationToken = access.activationToken;
         (request as any).createdListing = undefined;
       } else {
-        const place = await this.adminSaveHospitalityPlace({
-          destinationId: request.destinationId,
-          name: request.name,
-          slug: request.slug,
-          type: request.placeType || 'CHALE',
-          description: request.description,
-          address: request.address,
-          city: request.city,
-          state: request.state,
-          zipCode: request.zipCode,
-          phone: request.phone,
-          whatsapp: request.whatsapp,
-          instagramUrl: request.instagramUrl,
-          websiteUrl: request.websiteUrl,
-          logoUrl: request.logoUrl,
-          bannerUrl: request.bannerUrl,
-          deliveryInstructions: request.deliveryInstructions,
-          active: true,
-        });
+        const claimedPlaceId = toOptionalText(request.claimedHospitalityPlaceId);
+        const place = claimedPlaceId
+          ? await this.repository.findPlaceById(claimedPlaceId)
+          : await this.adminSaveHospitalityPlace({
+              destinationId: request.destinationId,
+              name: request.name,
+              slug: request.slug,
+              type: request.placeType || 'CHALE',
+              description: request.description,
+              address: request.address,
+              city: request.city,
+              state: request.state,
+              zipCode: request.zipCode,
+              phone: request.phone,
+              whatsapp: request.whatsapp,
+              instagramUrl: request.instagramUrl,
+              websiteUrl: request.websiteUrl,
+              logoUrl: request.logoUrl,
+              bannerUrl: request.bannerUrl,
+              deliveryInstructions: request.deliveryInstructions,
+              active: true,
+            });
+        if (!place || String(place.destinationId) !== String(request.destinationId)) throw new AppError('DEST-002', 404);
         request.createdHospitalityPlaceId = place.id;
         const access = await this.destinationPartnerPortalService.ensureAccessForApprovedRequest({
           request,
@@ -950,6 +983,33 @@ export class DestinationService {
     const saved = await this.repository.savePartnerRequest(request);
     (saved as any).partnerActivationToken = partnerActivationToken;
     return this.toPublicPartnerRequest(saved);
+  }
+
+  async adminResendPartnerInvite(requestId: string, reviewedBy?: string) {
+    const request = await this.repository.findPartnerRequestById(requestId);
+    if (!request) throw new AppError('DEST-010', 404);
+    if (String(request.status || '').toLowerCase() !== 'approved' || !request.createdPartnerAccountId) {
+      throw new AppError('DPARTNER-009', 400);
+    }
+
+    const resourceName = request.createdHospitalityPlace?.name
+      || request.createdListing?.title
+      || request.name
+      || 'seu cadastro';
+    const invite = await this.destinationPartnerPortalService.resendInviteForApprovedRequest({
+      accountId: request.createdPartnerAccountId,
+      request,
+      resourceName,
+      reviewedBy,
+    });
+
+    (request as any).partnerActivationToken = invite.activationToken;
+    (request as any).partnerActivationUrl = invite.activationUrl;
+    (request as any).partnerInviteSent = invite.inviteSent;
+    (request as any).partnerAlreadyActive = invite.alreadyActive;
+    (request as any).partnerLoginUrl = invite.loginUrl;
+    (request as any).partnerInviteExpiresAt = invite.expiresAt;
+    return this.toPublicPartnerRequest(request);
   }
 
   async adminReviewStoreRequest(requestId: string, payload: any, reviewedBy?: string) {
@@ -1441,6 +1501,9 @@ export class DestinationService {
       bannerUrl: request.bannerUrl || null,
       imageUrl: request.imageUrl || null,
       deliveryInstructions: request.deliveryInstructions || null,
+      requestSource: request.requestSource || null,
+      claimedHospitalityPlaceId: request.claimedHospitalityPlaceId || null,
+      claimedListingId: request.claimedListingId || null,
       responsibleName: request.responsibleName,
       responsibleEmail: request.responsibleEmail,
       responsiblePhone: request.responsiblePhone || null,
@@ -1451,6 +1514,11 @@ export class DestinationService {
       createdListingId: request.createdListingId || null,
       createdPartnerAccountId: request.createdPartnerAccountId || null,
       partnerActivationToken: request.partnerActivationToken || undefined,
+      partnerActivationUrl: request.partnerActivationUrl || undefined,
+      partnerInviteSent: request.partnerInviteSent,
+      partnerAlreadyActive: request.partnerAlreadyActive,
+      partnerLoginUrl: request.partnerLoginUrl || undefined,
+      partnerInviteExpiresAt: request.partnerInviteExpiresAt || undefined,
       destination: request.destination ? this.toPublicDestination(request.destination) : null,
       createdAt: request.createdAt instanceof Date ? request.createdAt.toISOString() : request.createdAt,
       reviewedAt: request.reviewedAt instanceof Date ? request.reviewedAt.toISOString() : request.reviewedAt || null,

@@ -32,6 +32,9 @@ const initialForm = {
   bannerFile: '',
   imageFile: '',
   deliveryInstructions: '',
+  requestSource: '',
+  claimedHospitalityPlaceId: '',
+  claimedListingId: '',
   responsibleName: '',
   responsibleEmail: '',
   responsiblePhone: '',
@@ -210,6 +213,7 @@ export function DestinationPartnerRequestPage() {
       destinationState: read('destinationState').toUpperCase().slice(0, 2),
       partnerType: 'HOSPITALITY',
       placeType: read('placeType') || 'CHALE',
+      placeId: read('placeId'),
       name: read('name'),
       description: read('description'),
       zipCode: read('zipCode'),
@@ -274,6 +278,8 @@ export function DestinationPartnerRequestPage() {
           websiteUrl: hospitalityClaim?.websiteUrl || current.websiteUrl,
           logoUrl: hospitalityClaim?.logoUrl || current.logoUrl,
           bannerUrl: hospitalityClaim?.bannerUrl || current.bannerUrl,
+          requestSource: hospitalityClaim ? 'hospitality_place_claim' : current.requestSource,
+          claimedHospitalityPlaceId: hospitalityClaim?.placeId || current.claimedHospitalityPlaceId,
           message: hospitalityClaim?.message || current.message,
         }));
       })
@@ -493,6 +499,8 @@ export function DestinationPartnerRequestPage() {
         destinationState,
         city: form.city || destinationCity,
         state: form.state || destinationState,
+        requestSource: form.requestSource || (hospitalityClaim ? 'hospitality_place_claim' : ''),
+        claimedHospitalityPlaceId: form.claimedHospitalityPlaceId || hospitalityClaim?.placeId || '',
       });
       setSuccess(payload);
       setForm((current) => ({
@@ -527,7 +535,9 @@ export function DestinationPartnerRequestPage() {
             </p>
             <h1 className="mt-5 text-3xl font-black leading-none tracking-[-0.04em]">Cadastre sua responsabilidade no destino.</h1>
             <p className="mt-4 text-sm font-semibold leading-relaxed text-white/72">
-              Chalés, pousadas e prestadores entram por aprovação da plataforma. Depois de aprovado, aparecem no destino público.
+              {hospitalityClaim
+                ? 'Este convite já veio com o perfil preenchido. Confirme seus dados de responsável para assumir e atualizar a página.'
+                : 'Leva menos de 1 minuto para pedir entrada. Depois da aprovação você completa fotos, endereço e detalhes no portal.'}
             </p>
             <div className="mt-6 grid gap-3">
               <div className="rounded-2xl bg-white/10 p-4">

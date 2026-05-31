@@ -2505,6 +2505,9 @@ export async function runMigrations() {
       banner_url TEXT,
       image_url TEXT,
       delivery_instructions TEXT,
+      request_source TEXT,
+      claimed_hospitality_place_id UUID REFERENCES hospitality_places(id) ON DELETE SET NULL,
+      claimed_listing_id UUID REFERENCES destination_listings(id) ON DELETE SET NULL,
       responsible_name TEXT NOT NULL,
       responsible_email TEXT NOT NULL,
       responsible_phone TEXT,
@@ -2522,6 +2525,58 @@ export async function runMigrations() {
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_destination_partner_requests_status_created
     ON destination_partner_requests(status, created_at DESC);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_partner_requests
+    ADD COLUMN IF NOT EXISTS request_source TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_partner_requests
+    ADD COLUMN IF NOT EXISTS claimed_hospitality_place_id UUID;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_partner_requests
+    ADD COLUMN IF NOT EXISTS claimed_listing_id UUID;
+  `);
+  await AppDataSource.query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'destination_partner_requests_claimed_hospitality_place_fkey'
+      ) THEN
+        ALTER TABLE destination_partner_requests
+        ADD CONSTRAINT destination_partner_requests_claimed_hospitality_place_fkey
+        FOREIGN KEY (claimed_hospitality_place_id)
+        REFERENCES hospitality_places(id)
+        ON DELETE SET NULL;
+      END IF;
+    END $$;
+  `);
+  await AppDataSource.query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'destination_partner_requests_claimed_listing_fkey'
+      ) THEN
+        ALTER TABLE destination_partner_requests
+        ADD CONSTRAINT destination_partner_requests_claimed_listing_fkey
+        FOREIGN KEY (claimed_listing_id)
+        REFERENCES destination_listings(id)
+        ON DELETE SET NULL;
+      END IF;
+    END $$;
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_partner_requests_claimed_place
+    ON destination_partner_requests(claimed_hospitality_place_id)
+    WHERE claimed_hospitality_place_id IS NOT NULL;
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_partner_requests_claimed_listing
+    ON destination_partner_requests(claimed_listing_id)
+    WHERE claimed_listing_id IS NOT NULL;
   `);
   await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS destination_partner_accounts (

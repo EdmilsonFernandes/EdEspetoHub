@@ -601,6 +601,7 @@ export function SuperAdminDestinations() {
   const [invitePlace, setInvitePlace] = useState<any | null>(null);
   const [inviteFeedback, setInviteFeedback] = useState('');
   const [inviteBatchLoading, setInviteBatchLoading] = useState('');
+  const [partnerInviteLinks, setPartnerInviteLinks] = useState<Record<string, string>>({});
 
   const load = async () => {
     if (!localStorage.getItem('superAdminToken')) {
@@ -1460,6 +1461,30 @@ export function SuperAdminDestinations() {
       await refreshAdminData(selectedDestinationId);
     } catch (err: any) {
       setError(err?.message || 'Não foi possível revisar solicitação.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const resendPartnerInvite = async (request: any) => {
+    setSaving(true);
+    setError('');
+    try {
+      const payload = await destinationService.adminResendPartnerInvite(request.id);
+      const activationUrl = payload?.partnerActivationUrl || payload?.activationUrl || '';
+      const loginUrl = payload?.partnerLoginUrl || '';
+      if (activationUrl) {
+        setPartnerInviteLinks((current) => ({ ...current, [request.id]: activationUrl }));
+        await copyTextToClipboard(activationUrl, `Link de ativação de ${request.name} copiado.`);
+      } else if (loginUrl) {
+        await copyTextToClipboard(loginUrl, `${request.name} já ativou a conta. Link do portal copiado.`);
+      } else {
+        setInviteFeedback('Convite reenviado, mas o link não foi retornado pelo servidor.');
+        window.setTimeout(() => setInviteFeedback(''), 2600);
+      }
+      await refreshAdminData(selectedDestinationId);
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível reenviar o convite do parceiro.');
     } finally {
       setSaving(false);
     }
@@ -2369,6 +2394,12 @@ export function SuperAdminDestinations() {
           {request.message || request.description ? (
             <p className="mt-2 line-clamp-2 text-xs font-semibold opacity-80">{request.message || request.description}</p>
           ) : null}
+          {request.claimedHospitalityPlaceId || request.claimedListingId ? (
+            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#153A4C]">
+              <LinkSimpleHorizontal size={12} weight="bold" />
+              Assumir perfil existente
+            </div>
+          ) : null}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span className="rounded-full bg-white/82 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em]">
@@ -2384,6 +2415,20 @@ export function SuperAdminDestinations() {
         () => reviewPartner(request.id, 'approved'),
         () => reviewPartner(request.id, 'rejected')
       )}
+      {!isPendingRequest(request.status) && String(request.status || '').toLowerCase() === 'approved' && request.createdPartnerAccountId ? (
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <button type="button" disabled={saving} onClick={() => resendPartnerInvite(request)} className={actionButtonClass('primary')}>
+            <PaperPlaneTilt size={13} weight="bold" />
+            Reenviar convite
+          </button>
+          {partnerInviteLinks[request.id] ? (
+            <button type="button" onClick={() => copyTextToClipboard(partnerInviteLinks[request.id], 'Link de ativação copiado.')} className={actionButtonClass('neutral')}>
+              <CopySimple size={13} weight="bold" />
+              Copiar link
+            </button>
+          ) : null}
+        </div>
+      ) : null}
     </article>
   );
   const renderStoreRequestCard = (request: any) => (
@@ -3722,6 +3767,11 @@ export function SuperAdminDestinations() {
                 </div>
               </div>
             </section>
+            {inviteFeedback ? (
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700">
+                {inviteFeedback}
+              </div>
+            ) : null}
 
             {requestBoard.length ? (
               <div className="grid gap-4">

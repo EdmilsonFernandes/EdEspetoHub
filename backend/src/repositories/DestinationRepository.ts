@@ -428,6 +428,8 @@ export class DestinationRepository {
       .innerJoinAndSelect('request.destination', 'destination')
       .leftJoinAndSelect('request.createdHospitalityPlace', 'createdHospitalityPlace')
       .leftJoinAndSelect('request.createdListing', 'createdListing')
+      .leftJoinAndSelect('request.claimedHospitalityPlace', 'claimedHospitalityPlace')
+      .leftJoinAndSelect('request.claimedListing', 'claimedListing')
       .orderBy('request.created_at', 'DESC');
     if (status) qb.andWhere('request.status = :status', { status });
     return qb.getMany();
@@ -436,7 +438,7 @@ export class DestinationRepository {
   findPartnerRequestById(id: string) {
     return this.partnerRequestRepository.findOne({
       where: { id },
-      relations: [ 'destination', 'createdHospitalityPlace', 'createdListing' ],
+      relations: [ 'destination', 'createdHospitalityPlace', 'createdListing', 'claimedHospitalityPlace', 'claimedListing' ],
     });
   }
 

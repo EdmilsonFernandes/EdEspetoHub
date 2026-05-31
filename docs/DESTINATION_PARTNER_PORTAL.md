@@ -30,7 +30,7 @@ O parceiro não pode alterar campos estratégicos:
 1. Parceiro solicita entrada pelo fluxo público de destinos.
 2. O backend envia aviso interno para análise do Já no Caminho.
 3. Super Admin revisa a solicitação.
-4. Ao aprovar, o backend cria o chalé/pousada ou serviço/restaurante.
+4. Ao aprovar, o backend cria o chalé/pousada ou serviço/restaurante, ou apenas concede acesso se a solicitação veio de um convite para assumir perfil existente.
 5. O backend cria ou reaproveita uma conta em `destination_partner_accounts`.
 6. O backend cria a permissão em `destination_partner_permissions`.
 7. O backend gera convite em `destination_partner_invites`.
@@ -43,6 +43,54 @@ O parceiro não pode alterar campos estratégicos:
 - `/parceiro`: login e painel do parceiro.
 - `/parceiro/ativar?token=...`: ativação do convite e criação de senha.
 - Super Admin continua gerenciando aprovações em `Destinos`.
+
+## Convite para assumir perfil existente
+
+Quando o Super Admin já cadastrou um chalé/pousada manualmente, o convite público de hospedagem envia o usuário para `/destinos/cadastrar` com:
+
+- `source=hospitality_place_claim`;
+- `placeId`;
+- dados públicos já preenchidos.
+
+O backend grava esses dados em:
+
+- `destination_partner_requests.request_source`;
+- `destination_partner_requests.claimed_hospitality_place_id`;
+- `destination_partner_requests.claimed_listing_id`, reservado para serviços/listings.
+
+Ao aprovar uma solicitação com `claimed_hospitality_place_id`, o sistema não cria outro chalé. Ele vincula a conta do parceiro ao registro existente e registra `created_hospitality_place_id` com o mesmo ID. Isso evita duplicidade de perfil público.
+
+No Super Admin, solicitações desse tipo aparecem com o selo **Assumir perfil existente**.
+
+## Reenvio de convite
+
+Depois da aprovação, o Super Admin pode reenviar o convite do parceiro. O endpoint invalida convites antigos ainda não usados, gera um novo link com validade de 14 dias e tenta enviar o e-mail novamente.
+
+Rota backend/BFF:
+
+- `POST /api/admin/destination-partner-requests/:requestId/invite/resend`
+
+Comportamento:
+
+- se a conta ainda não foi ativada, gera um novo link de ativação;
+- se o e-mail falhar, o Super Admin ainda recebe o link para copiar e enviar manualmente;
+- se a conta já está ativa, retorna o link do portal `/parceiro`.
+
+O link de ativação é sensível e só é retornado para Super Admin autenticado.
+
+## Parceiro virar loja
+
+No portal `/parceiro`, serviços/restaurantes vinculados a `DESTINATION_LISTING` exibem o CTA **Quero receber pedidos**.
+
+Esse botão abre `/create` com `source=destination_listing_claim` e dados já preenchidos:
+
+- nome do serviço como nome da loja;
+- descrição;
+- telefone/WhatsApp;
+- cidade/UF;
+- vínculo com o destino/listing.
+
+O cadastro de loja continua seguindo o fluxo normal de lojista. O vínculo definitivo entre loja e listing ainda deve ser validado pelo Super Admin para evitar tomada indevida de perfil.
 
 ## Backend
 
@@ -64,6 +112,7 @@ Rotas:
 - `GET /api/destination-partner/resources`
 - `PATCH /api/destination-partner/hospitality-places/:placeId`
 - `PATCH /api/destination-partner/listings/:listingId`
+- `POST /api/admin/destination-partner-requests/:requestId/invite/resend`
 
 Role JWT:
 

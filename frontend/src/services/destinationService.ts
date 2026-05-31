@@ -221,6 +221,10 @@ export const destinationService = {
     return superAdminRequest(`/admin/destination-partner-requests/${encodeURIComponent(requestId)}/review`, { method: 'PATCH', body: payload });
   },
 
+  adminResendPartnerInvite(requestId: string) {
+    return superAdminRequest(`/admin/destination-partner-requests/${encodeURIComponent(requestId)}/invite/resend`, { method: 'POST', body: {} });
+  },
+
   adminReviewStoreRequest(requestId: string, payload: any) {
     return superAdminRequest(`/admin/destination-store-requests/${encodeURIComponent(requestId)}/review`, { method: 'PATCH', body: payload });
   },

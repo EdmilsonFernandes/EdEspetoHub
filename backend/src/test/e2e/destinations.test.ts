@@ -586,6 +586,94 @@ describe('Destination Hub', () => {
     expect(updatedPublicPlace.description).toBe('Descrição atualizada pelo parceiro.');
   });
 
+  it('lets an invited hospitality owner claim an existing profile without duplicating it', async () => {
+    const suffix = Date.now();
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        name: `Destino Claim Hospedagem ${suffix}`,
+        slug: `destino-claim-hospedagem-${suffix}`,
+        city: 'São Bento do Sapucaí',
+        state: 'SP',
+      });
+
+    expect(destinationRes.status).toBe(201);
+
+    const placeRes = await api
+      .post('/api/admin/hospitality-places')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        name: `Chalé Já Cadastrado ${suffix}`,
+        slug: `chale-ja-cadastrado-${suffix}`,
+        type: 'CHALE',
+        address: 'Estrada da Serra, 100',
+        whatsapp: '5512999999999',
+      });
+
+    expect(placeRes.status).toBe(201);
+
+    const requestRes = await api.post('/api/public/destination-partner-requests').send({
+      destinationId: destinationRes.body.id,
+      partnerType: 'HOSPITALITY',
+      placeType: 'CHALE',
+      name: placeRes.body.name,
+      requestSource: 'hospitality_place_claim',
+      claimedHospitalityPlaceId: placeRes.body.id,
+      responsibleName: 'Dono do Chalé',
+      responsibleEmail: testEmail('destino-claim-hospedagem'),
+      responsiblePhone: '11999999999',
+      whatsapp: '5512999999999',
+      message: 'Quero assumir este perfil.',
+    });
+
+    expect(requestRes.status, JSON.stringify(requestRes.body)).toBe(201);
+    expect(requestRes.body.claimedHospitalityPlaceId).toBe(placeRes.body.id);
+
+    const reviewRes = await api
+      .patch(`/api/admin/destination-partner-requests/${requestRes.body.id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ status: 'approved' });
+
+    expect(reviewRes.status, JSON.stringify(reviewRes.body)).toBe(200);
+    expect(reviewRes.body.createdHospitalityPlaceId).toBe(placeRes.body.id);
+    expect(reviewRes.body.partnerActivationToken).toBeTruthy();
+
+    const placeRows = await AppDataSource.query(
+      `SELECT id FROM hospitality_places WHERE destination_id = $1 ORDER BY created_at ASC`,
+      [destinationRes.body.id]
+    );
+    expect(placeRows).toHaveLength(1);
+    expect(placeRows[0].id).toBe(placeRes.body.id);
+
+    const resendRes = await api
+      .post(`/api/admin/destination-partner-requests/${requestRes.body.id}/invite/resend`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({});
+
+    expect(resendRes.status, JSON.stringify(resendRes.body)).toBe(200);
+    expect(resendRes.body.partnerActivationToken).toBeTruthy();
+    expect(resendRes.body.partnerActivationUrl).toContain('/parceiro/ativar?token=');
+
+    const oldActivateRes = await api.post('/api/destination-partner/auth/activate').send({
+      token: reviewRes.body.partnerActivationToken,
+      password: 'senha123',
+    });
+    expect(oldActivateRes.status).toBe(400);
+
+    const activateRes = await api.post('/api/destination-partner/auth/activate').send({
+      token: resendRes.body.partnerActivationToken,
+      password: 'senha123',
+    });
+
+    expect(activateRes.status, JSON.stringify(activateRes.body)).toBe(200);
+    expect(activateRes.body.resources[0]).toEqual(expect.objectContaining({
+      resourceType: 'HOSPITALITY_PLACE',
+    }));
+    expect(activateRes.body.resources[0].item.id).toBe(placeRes.body.id);
+  });
+
   it('accepts service partner requests and lets the partner update only safe listing fields', async () => {
     const suffix = Date.now();
     const destinationRes = await api
