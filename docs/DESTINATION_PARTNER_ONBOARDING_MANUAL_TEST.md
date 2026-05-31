@@ -37,6 +37,7 @@ docker exec janocaminho-postgres psql -U postgres -d espetinho -c "SELECT 'users
 3. Validar o topo da tela:
    - título `Onboarding de parceiros`;
    - cards `Pendentes`, `Validação de posse`, `Sem ativar`, `Ativos`;
+   - filtros rápidos `Todos`, `Pendentes`, `Validação de posse`, `Sem ativar`, `Ativos`, `Recusados`;
    - grupos por destino/cidade.
 
 Resultado esperado: a tela mostra onde há pendência, quem está tentando assumir perfil existente e quem ainda não ativou o portal.
@@ -57,12 +58,21 @@ Validar no card:
 - selo `Assumir perfil existente`;
 - bloco `Verificação obrigatória`;
 - texto orientando confirmar titularidade pelo contato oficial.
+- botão `Detalhes e validação`.
 
-9. Clique `Aprovar` e cancele a confirmação do navegador.
+9. Clique `Detalhes e validação`.
+
+Resultado esperado:
+
+- abre um modal comparando `Cadastro atual` versus `Enviado na solicitação`;
+- campos diferentes aparecem destacados;
+- aparecem status, responsável, e-mail, convite e ativação.
+
+10. No card ou modal, clique `Aprovar` e cancele a confirmação do navegador.
 
 Resultado esperado: a solicitação continua pendente.
 
-10. Clique `Aprovar` novamente e confirme.
+11. Clique `Aprovar` novamente e confirme.
 
 Resultado esperado:
 
@@ -151,6 +161,18 @@ Resultado esperado:
 - abre `/create`;
 - dados principais do serviço/restaurante vêm pré-preenchidos;
 - o vínculo final como loja continua dependendo da validação do Super Admin.
+
+## Banco local e import
+
+O banco local não deve ser zerado em validações comuns. Use o dump de produção já importado e rode apenas rebuild/migrations.
+
+Só reimporte produção quando:
+
+- o usuário pedir explicitamente;
+- o banco local estiver zerado/incoerente;
+- houver mudança real de schema/tabelas e for necessário validar migração com dump recente.
+
+Antes de qualquer import destrutivo, salvar backup local em `.local-db-dumps/`.
 
 ## Regressão obrigatória
 

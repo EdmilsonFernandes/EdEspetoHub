@@ -56,6 +56,8 @@ docker exec janocaminho-postgres psql -U postgres -d espetinho -c "SELECT 'users
 
 Se `users`, `stores` ou `products` vierem zerados/baixos sem intenção explícita, parar e avisar que o ambiente provavelmente está sem dump/seed correto antes de investigar bug de login ou UI.
 
+Não apagar, dropar, recriar ou reimportar o banco local automaticamente durante validação comum. Rebuild local Docker deve preservar o volume/banco existente. Só fazer import de produção ou `DROP DATABASE` quando o usuário pedir explicitamente, quando o banco local estiver incoerente/zerado, ou quando houver mudança real de schema que exija validar migração em dump recente. Antes de qualquer import destrutivo, gerar backup local em `.local-db-dumps/`.
+
 ### ANDROID / AAB
 - se a mudança tocar código nativo mobile, Capacitor, plugins nativos, `MainActivity`, `AndroidManifest`, `build.gradle`, `capacitor.config`, `res/` Android ou qualquer fluxo que exija novo binário Android → gerar novo `AAB`
 - ao gerar novo `AAB`, subir sempre:

@@ -92,6 +92,8 @@ A tela de solicitações também destaca:
 - parceiros aprovados aguardando ativação;
 - parceiros com portal ativo.
 
+Também há filtros rápidos e modal de detalhes para comparar dados atuais do cadastro com os dados enviados pelo solicitante antes da aprovação.
+
 ## Parceiro virar loja
 
 No portal `/parceiro`, serviços/restaurantes vinculados a `DESTINATION_LISTING` exibem o CTA **Quero receber pedidos**.
