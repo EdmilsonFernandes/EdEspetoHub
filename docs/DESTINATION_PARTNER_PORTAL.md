@@ -185,6 +185,10 @@ O portal mostra um checklist de publicação para reduzir suporte operacional: i
 
 ## Validação
 
+Teste manual:
+
+- `docs/DESTINATION_PARTNER_ONBOARDING_MANUAL_TEST.md`
+
 Backend:
 
 ```bash

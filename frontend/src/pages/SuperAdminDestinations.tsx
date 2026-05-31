@@ -2353,7 +2353,7 @@ export function SuperAdminDestinations() {
   const tabs = [
     { id: 'dashboard', label: 'Resumo', icon: Compass },
     { id: 'cadastro', label: 'Cadastro', icon: Plus },
-    { id: 'requests', label: 'Solicitações', icon: WarningCircle, badge: metrics.pending },
+    { id: 'requests', label: 'Parceiros', icon: WarningCircle, badge: metrics.pending },
   ];
   const superAdminGroups = [
     { id: 'operacional', label: 'Operação', subtitle: 'Resumo, lojas e receita', icon: ChartBar, target: 'executive' },
@@ -3792,17 +3792,17 @@ export function SuperAdminDestinations() {
                 <div>
                   <p className="inline-flex items-center gap-2 rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
                     <WarningCircle size={14} weight="fill" />
-                    Central de solicitações
+                    Gestão de parceiros
                   </p>
-                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-slate-950">Fila por cidade, hospedagem e serviço</h2>
+                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-slate-950">Onboarding de parceiros</h2>
                   <p className="mt-1 max-w-2xl text-sm font-semibold text-slate-500">
-                    A aprovação continua usando a regra atual. A tela só organiza a operação para enxergar pendências por destino sem perder contexto.
+                    Acompanhe pendências, validações de posse, convites não ativados e parceiros já liberados por destino.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:min-w-[430px] lg:grid-cols-4">
                   {[
                     { label: 'Pendentes', value: partnerOnboardingMetrics.pending, icon: ClockCountdown, tone: 'text-amber-700 bg-amber-50' },
-                    { label: 'Assumir perfil', value: partnerOnboardingMetrics.claimPending, icon: ShieldCheck, tone: 'text-[#153A4C] bg-[#336886]/10' },
+                    { label: 'Validação de posse', value: partnerOnboardingMetrics.claimPending, icon: ShieldCheck, tone: 'text-[#153A4C] bg-[#336886]/10' },
                     { label: 'Sem ativar', value: partnerOnboardingMetrics.invited, icon: PaperPlaneTilt, tone: 'text-sky-700 bg-sky-50' },
                     { label: 'Ativos', value: partnerOnboardingMetrics.active, icon: CheckCircle, tone: 'text-emerald-700 bg-emerald-50' },
                   ].map((item) => {
