@@ -575,6 +575,91 @@ describe('Destination Hub', () => {
     expect(updatedPublicPlace.description).toBe('Descrição atualizada pelo parceiro.');
   });
 
+  it('accepts service partner requests and lets the partner update only safe listing fields', async () => {
+    const suffix = Date.now();
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        name: `Destino Serviço Parceiro ${suffix}`,
+        slug: `destino-servico-parceiro-${suffix}`,
+        city: 'São Bento do Sapucaí',
+        state: 'SP',
+      });
+
+    expect(destinationRes.status).toBe(201);
+
+    const requestRes = await api.post('/api/public/destination-partner-requests').send({
+      destinationId: destinationRes.body.id,
+      partnerType: 'SERVICE_PROVIDER',
+      category: 'SERVICO',
+      name: `Restaurante Parceiro ${suffix}`,
+      responsibleName: 'João Serviço',
+      responsibleEmail: testEmail('destino-servico-parceiro'),
+      responsiblePhone: '11977776666',
+      whatsapp: '11977776666',
+      description: 'Restaurante inicial.',
+    });
+
+    expect(requestRes.status, JSON.stringify(requestRes.body)).toBe(201);
+    expect(requestRes.body.status).toBe('pending');
+
+    const reviewRes = await api
+      .patch(`/api/admin/destination-partner-requests/${requestRes.body.id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ status: 'approved' });
+
+    expect(reviewRes.status, JSON.stringify(reviewRes.body)).toBe(200);
+    expect(reviewRes.body.status).toBe('approved');
+    expect(reviewRes.body.createdListingId).toBeTruthy();
+    expect(reviewRes.body.createdPartnerAccountId).toBeTruthy();
+    expect(reviewRes.body.partnerActivationToken).toBeTruthy();
+
+    const activateRes = await api.post('/api/destination-partner/auth/activate').send({
+      token: reviewRes.body.partnerActivationToken,
+      password: 'senha123',
+    });
+
+    expect(activateRes.status, JSON.stringify(activateRes.body)).toBe(200);
+    expect(activateRes.body.resources[0]).toEqual(expect.objectContaining({
+      resourceType: 'DESTINATION_LISTING',
+    }));
+
+    const resourcesRes = await api
+      .get('/api/destination-partner/resources')
+      .set('Authorization', `Bearer ${activateRes.body.token}`);
+
+    expect(resourcesRes.status, JSON.stringify(resourcesRes.body)).toBe(200);
+    expect(resourcesRes.body.resources).toHaveLength(1);
+    expect(resourcesRes.body.resources[0].item.title).toBe(`Restaurante Parceiro ${suffix}`);
+
+    const updateRes = await api
+      .patch(`/api/destination-partner/listings/${reviewRes.body.createdListingId}`)
+      .set('Authorization', `Bearer ${activateRes.body.token}`)
+      .send({
+        title: `Restaurante Parceiro Atualizado ${suffix}`,
+        description: 'Cardápio e atendimento atualizados pelo parceiro.',
+        whatsapp: '11966665555',
+        category: 'PASSEIO',
+        featured: true,
+        active: false,
+        sortOrder: 999,
+      });
+
+    expect(updateRes.status, JSON.stringify(updateRes.body)).toBe(200);
+    expect(updateRes.body.title).toBe(`Restaurante Parceiro Atualizado ${suffix}`);
+    expect(updateRes.body.description).toBe('Cardápio e atendimento atualizados pelo parceiro.');
+    expect(updateRes.body.whatsapp).toBe('11966665555');
+    expect(updateRes.body.category).toBe('SERVICO');
+    expect(updateRes.body.featured).toBe(false);
+    expect(updateRes.body.active).toBe(true);
+
+    const publicRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}`);
+    const listing = publicRes.body.listings.find((item: any) => item.id === reviewRes.body.createdListingId);
+    expect(listing.title).toBe(`Restaurante Parceiro Atualizado ${suffix}`);
+    expect(listing.category).toBe('SERVICO');
+  });
+
   it('accepts partner requests for a city that is not public yet', async () => {
     const suffix = Date.now();
     const requestRes = await api.post('/api/public/destination-partner-requests').send({

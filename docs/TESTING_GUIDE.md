@@ -60,6 +60,7 @@ Os testes ficam em `frontend/tests/e2e`. Eles validam UI e navegação crítica,
 | `admin-queue-ux.spec.ts` | UX da fila do lojista: abre detalhe do pedido, picker de produto com imagem/categoria/preço, detalhe centralizado no web, agrupamento por mesa e chips/modal de item avulso, couvert e taxa de serviço. |
 | `client-orders-account.spec.ts` | UI do cliente: filtros de pedidos com contadores, preview de imagem do item, conta do cliente, endereço principal e telefone mascarado na edição de perfil. |
 | `destination-whatsapp-location.spec.ts` | Fluxo visual de destinos/chalés: WhatsApp com endereço/mapa da hospedagem, contexto da hospedagem carregado para lojas oficiais e tela de rota com mapa, logos, distância e navegação sem voltar duplicado. |
+| `destination-partner-portal.spec.ts` | Portal do parceiro de destinos: ativação por convite, login, listagem de cadastros liberados e salvamento de campos operacionais seguros com API mockada. |
 | `hub-marketplace.spec.ts` | Home/Hub do marketplace: carregamento de lojas, filtros principais, dados de card, itens em destaque, link "Ver mais" e busca na tela de destaques. |
 
 ### Unitários Relevantes
@@ -71,6 +72,7 @@ Além dos E2E, existem unitários cobrindo partes sensíveis que não devem vira
 | Precificação/pedidos | Cálculos de preço, promoções e regras internas de `OrderService`. |
 | Pagamentos/reembolso | Validações do `OrderPaymentService`, especialmente refund e payloads sem cobrar pagamento real. |
 | Segurança/riscos | Email descartável, bloqueios de cliente e regras antifraude. |
+| Portal parceiro de destinos | Sessão frontend, login, ativação, rotas protegidas com `authMode: partner` e atualização de chalé/serviço pelo service do portal. |
 | Turismo/seeds | Massa de dados de turismo para Gonçalves e São Bento. |
 | Upload/storage | Regras de caminho público/privado de imagens. |
 
