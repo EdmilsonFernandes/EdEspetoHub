@@ -160,6 +160,7 @@ Backend API (chamanoespeto-api :4000)
 - Campos estratégicos continuam exclusivos do Super Admin: ativo/inativo, destino, categoria, prioridade/sortOrder, destaque, monetização e vínculos.
 - Toda rota nova do portal deve passar pelo BFF em `/api/destination-partner/...`.
 - Convites para assumir chalé/pousada existente devem gravar `claimed_hospitality_place_id` na solicitação e, na aprovação, conceder permissão ao registro existente em vez de criar outro perfil público.
+- Solicitação para assumir perfil existente é sensível: aprovação deve enviar `claimVerified: true`, exibir alerta antifraude ao Super Admin e nunca liberar segundo parceiro ativo no mesmo recurso sem revisão manual.
 - Reenvio de convite do parceiro aprovado usa `POST /api/admin/destination-partner-requests/:requestId/invite/resend`; ele invalida convites antigos não usados e retorna link apenas para Super Admin autenticado.
 - Serviço/restaurante no portal pode abrir `/create` pré-preenchido com `source=destination_listing_claim`; o vínculo final com a loja continua dependendo de validação do Super Admin.
 - Mudança nesse fluxo deve validar `cd backend && yarn test`, `npm --prefix apis run build`, `npm --prefix frontend run test:unit` e `npm --prefix frontend run build`.

@@ -183,6 +183,8 @@ Fluxos comerciais suportados:
 - convite para assumir perfil já cadastrado sem duplicar chalé/pousada;
 - reenvio de convite pelo Super Admin com novo link de ativação;
 - CTA no portal para serviço/restaurante virar loja usando `/create` pré-preenchido, mantendo validação final pelo Super Admin.
+- proteção contra claim indevido: aprovação exige confirmação explícita, o Super Admin vê alerta de titularidade e o backend bloqueia segundo parceiro ativo no mesmo cadastro.
+- checklist no portal para o parceiro completar imagem, descrição, contato, endereço e localização.
 
 ## E-mails e templates
 

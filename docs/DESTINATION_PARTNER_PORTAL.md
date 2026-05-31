@@ -60,7 +60,14 @@ O backend grava esses dados em:
 
 Ao aprovar uma solicitação com `claimed_hospitality_place_id`, o sistema não cria outro chalé. Ele vincula a conta do parceiro ao registro existente e registra `created_hospitality_place_id` com o mesmo ID. Isso evita duplicidade de perfil público.
 
-No Super Admin, solicitações desse tipo aparecem com o selo **Assumir perfil existente**.
+No Super Admin, solicitações desse tipo aparecem com o selo **Assumir perfil existente** e um alerta de verificação de titularidade.
+
+Proteções contra claim malicioso:
+
+- a aprovação via API exige `claimVerified: true` para solicitações que tentam assumir perfil existente;
+- a tela do Super Admin pede confirmação explícita antes de aprovar;
+- o backend bloqueia liberar um segundo parceiro ativo para o mesmo chalé/pousada ou serviço;
+- antes de aprovar, o operador deve confirmar o responsável pelo WhatsApp/e-mail oficial já cadastrado no perfil público.
 
 ## Reenvio de convite
 
@@ -77,6 +84,13 @@ Comportamento:
 - se a conta já está ativa, retorna o link do portal `/parceiro`.
 
 O link de ativação é sensível e só é retornado para Super Admin autenticado.
+
+A tela de solicitações também destaca:
+
+- pendentes;
+- claims de perfil existente;
+- parceiros aprovados aguardando ativação;
+- parceiros com portal ativo.
 
 ## Parceiro virar loja
 
@@ -166,6 +180,8 @@ Destinatários do aviso interno:
 O parceiro só consegue editar recurso com permissão ativa em `destination_partner_permissions`.
 
 O update do portal ignora campos sensíveis mesmo que sejam enviados no payload, como `active`, `sortOrder`, `featured`, `destinationId` ou vínculos.
+
+O portal mostra um checklist de publicação para reduzir suporte operacional: imagem principal, descrição, contato, endereço e coordenadas.
 
 ## Validação
 

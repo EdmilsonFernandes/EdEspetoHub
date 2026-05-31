@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bed, Buildings, ChartBar, ChatCircleText, CheckCircle, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, Sparkle, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { Bed, Buildings, ChartBar, ChatCircleText, CheckCircle, ClockCountdown, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, ShieldCheck, Sparkle, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
@@ -296,6 +296,23 @@ const partnerTypeLabel = (request: any) => {
   };
   return labels[placeType] || 'Hospedagem';
 };
+
+const isPartnerClaimRequest = (request: any) => Boolean(request?.claimedHospitalityPlaceId || request?.claimedListingId);
+const partnerAccountStatus = (request: any) => String(request?.createdPartnerAccount?.status || '').toLowerCase();
+const partnerAccessLabel = (request: any) => {
+  if (String(request?.status || '').toLowerCase() !== 'approved') return '';
+  const status = partnerAccountStatus(request);
+  if (status === 'active') return 'Portal ativo';
+  if (request?.createdPartnerAccountId) return 'Aguardando ativação';
+  return 'Conta pendente';
+};
+const claimedResourceLabel = (request: any) => (
+  request?.claimedHospitalityPlace?.name
+  || request?.claimedListing?.title
+  || request?.claimedHospitalityPlaceId
+  || request?.claimedListingId
+  || 'perfil existente'
+);
 
 const formatRequestDate = (value: any) => {
   if (!value) return '';
@@ -899,6 +916,17 @@ export function SuperAdminDestinations() {
     };
   }, [catalog?.metrics, data]);
 
+  const partnerOnboardingMetrics = useMemo(() => {
+    const partnerRequests = data.partnerRequests || [];
+    const approved = partnerRequests.filter((request: any) => String(request.status || '').toLowerCase() === 'approved');
+    return {
+      pending: partnerRequests.filter((request: any) => isPendingRequest(request.status)).length,
+      claimPending: partnerRequests.filter((request: any) => isPendingRequest(request.status) && isPartnerClaimRequest(request)).length,
+      invited: approved.filter((request: any) => request.createdPartnerAccountId && partnerAccountStatus(request) !== 'active').length,
+      active: approved.filter((request: any) => partnerAccountStatus(request) === 'active').length,
+    };
+  }, [data.partnerRequests]);
+
   const requestBoard = useMemo(() => {
     const destinationById = new Map<string, any>();
     const placeById = new Map<string, any>();
@@ -1453,11 +1481,18 @@ export function SuperAdminDestinations() {
     }
   };
 
-  const reviewPartner = async (requestId: string, status: 'approved' | 'rejected') => {
+  const reviewPartner = async (request: any, status: 'approved' | 'rejected') => {
+    const isClaim = isPartnerClaimRequest(request);
+    if (status === 'approved' && isClaim) {
+      const confirmed = window.confirm(
+        `Esta solicitação vai liberar acesso para editar "${claimedResourceLabel(request)}".\n\nAntes de aprovar, confirme por WhatsApp/e-mail oficial do cadastro que esta pessoa é realmente responsável pelo perfil. Deseja continuar?`
+      );
+      if (!confirmed) return;
+    }
     setSaving(true);
     setError('');
     try {
-      await destinationService.adminReviewPartnerRequest(requestId, { status });
+      await destinationService.adminReviewPartnerRequest(request.id, { status, claimVerified: status === 'approved' && isClaim ? true : undefined });
       await refreshAdminData(selectedDestinationId);
     } catch (err: any) {
       setError(err?.message || 'Não foi possível revisar solicitação.');
@@ -2394,10 +2429,25 @@ export function SuperAdminDestinations() {
           {request.message || request.description ? (
             <p className="mt-2 line-clamp-2 text-xs font-semibold opacity-80">{request.message || request.description}</p>
           ) : null}
-          {request.claimedHospitalityPlaceId || request.claimedListingId ? (
+          {isPartnerClaimRequest(request) ? (
             <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#153A4C]">
               <LinkSimpleHorizontal size={12} weight="bold" />
               Assumir perfil existente
+            </div>
+          ) : null}
+          {isPartnerClaimRequest(request) ? (
+            <div className="mt-2 rounded-2xl border border-amber-200 bg-white/72 p-3 text-[11px] font-bold leading-relaxed text-amber-800">
+              <span className="mb-1 flex items-center gap-1 font-black uppercase tracking-[0.08em]">
+                <ShieldCheck size={13} weight="fill" />
+                Verificação obrigatória
+              </span>
+              Vai liberar edição de <strong>{claimedResourceLabel(request)}</strong>. Confirme titularidade pelo contato oficial do cadastro antes de aprovar.
+            </div>
+          ) : null}
+          {partnerAccessLabel(request) ? (
+            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/78 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-600">
+              <CheckCircle size={12} weight={partnerAccountStatus(request) === 'active' ? 'fill' : 'duotone'} />
+              {partnerAccessLabel(request)}
             </div>
           ) : null}
         </div>
@@ -2412,8 +2462,8 @@ export function SuperAdminDestinations() {
       </div>
       {renderRequestActions(
         request,
-        () => reviewPartner(request.id, 'approved'),
-        () => reviewPartner(request.id, 'rejected')
+        () => reviewPartner(request, 'approved'),
+        () => reviewPartner(request, 'rejected')
       )}
       {!isPendingRequest(request.status) && String(request.status || '').toLowerCase() === 'approved' && request.createdPartnerAccountId ? (
         <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -3749,16 +3799,19 @@ export function SuperAdminDestinations() {
                     A aprovação continua usando a regra atual. A tela só organiza a operação para enxergar pendências por destino sem perder contexto.
                   </p>
                 </div>
-                <div className="grid grid-cols-3 gap-2 sm:min-w-[360px]">
+                <div className="grid grid-cols-2 gap-2 sm:min-w-[430px] lg:grid-cols-4">
                   {[
-                    { label: 'Hospedagens', value: (data.partnerRequests || []).filter((request: any) => String(request.partnerType || '').toUpperCase() !== 'SERVICE_PROVIDER').length, icon: Bed },
-                    { label: 'Serviços', value: (data.partnerRequests || []).filter((request: any) => String(request.partnerType || '').toUpperCase() === 'SERVICE_PROVIDER').length, icon: Sparkle },
-                    { label: 'Lojas', value: (data.storeRequests || []).length, icon: Buildings },
+                    { label: 'Pendentes', value: partnerOnboardingMetrics.pending, icon: ClockCountdown, tone: 'text-amber-700 bg-amber-50' },
+                    { label: 'Assumir perfil', value: partnerOnboardingMetrics.claimPending, icon: ShieldCheck, tone: 'text-[#153A4C] bg-[#336886]/10' },
+                    { label: 'Sem ativar', value: partnerOnboardingMetrics.invited, icon: PaperPlaneTilt, tone: 'text-sky-700 bg-sky-50' },
+                    { label: 'Ativos', value: partnerOnboardingMetrics.active, icon: CheckCircle, tone: 'text-emerald-700 bg-emerald-50' },
                   ].map((item) => {
                     const Icon = item.icon;
                     return (
                       <div key={item.label} className="rounded-[1.25rem] border border-white bg-white/82 p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.35)]">
-                        <Icon size={17} weight="duotone" className="text-[#336886]" />
+                        <span className={`inline-grid h-8 w-8 place-items-center rounded-xl ${item.tone}`}>
+                          <Icon size={17} weight="duotone" />
+                        </span>
                         <p className="mt-2 text-xl font-black text-slate-950">{item.value}</p>
                         <p className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">{item.label}</p>
                       </div>

@@ -903,6 +903,10 @@ export class DestinationService {
     const request = await this.repository.findPartnerRequestById(requestId);
     if (!request) throw new AppError('DEST-010', 404);
     const status = this.normalizeReviewStatus(payload?.status);
+    const isClaimRequest = Boolean(request.claimedHospitalityPlaceId || request.claimedListingId);
+    if (status === 'approved' && request.status !== 'approved' && isClaimRequest && payload?.claimVerified !== true) {
+      throw new AppError('DPARTNER-010', 400);
+    }
     let partnerActivationToken: string | null | undefined;
     if (status === 'approved' && request.status !== 'approved') {
       if (String(request.partnerType || '').toUpperCase() === 'SERVICE_PROVIDER') {
@@ -939,6 +943,7 @@ export class DestinationService {
         request.createdPartnerAccountId = access.accountId;
         partnerActivationToken = access.activationToken;
         (request as any).createdListing = undefined;
+        (request as any).createdPartnerAccount = undefined;
       } else {
         const claimedPlaceId = toOptionalText(request.claimedHospitalityPlaceId);
         const place = claimedPlaceId
@@ -974,6 +979,7 @@ export class DestinationService {
         request.createdPartnerAccountId = access.accountId;
         partnerActivationToken = access.activationToken;
         (request as any).createdHospitalityPlace = undefined;
+        (request as any).createdPartnerAccount = undefined;
       }
     }
     request.status = status;
@@ -1504,6 +1510,18 @@ export class DestinationService {
       requestSource: request.requestSource || null,
       claimedHospitalityPlaceId: request.claimedHospitalityPlaceId || null,
       claimedListingId: request.claimedListingId || null,
+      claimedHospitalityPlace: request.claimedHospitalityPlace ? {
+        id: request.claimedHospitalityPlace.id,
+        name: request.claimedHospitalityPlace.name,
+        whatsapp: request.claimedHospitalityPlace.whatsapp || null,
+        phone: request.claimedHospitalityPlace.phone || null,
+      } : null,
+      claimedListing: request.claimedListing ? {
+        id: request.claimedListing.id,
+        title: request.claimedListing.title,
+        whatsapp: request.claimedListing.whatsapp || null,
+        phone: request.claimedListing.phone || null,
+      } : null,
       responsibleName: request.responsibleName,
       responsibleEmail: request.responsibleEmail,
       responsiblePhone: request.responsiblePhone || null,
@@ -1513,6 +1531,13 @@ export class DestinationService {
       createdHospitalityPlaceId: request.createdHospitalityPlaceId || null,
       createdListingId: request.createdListingId || null,
       createdPartnerAccountId: request.createdPartnerAccountId || null,
+      createdPartnerAccount: request.createdPartnerAccount ? {
+        id: request.createdPartnerAccount.id,
+        email: request.createdPartnerAccount.email,
+        status: request.createdPartnerAccount.status,
+        activatedAt: request.createdPartnerAccount.activatedAt instanceof Date ? request.createdPartnerAccount.activatedAt.toISOString() : request.createdPartnerAccount.activatedAt || null,
+        lastLoginAt: request.createdPartnerAccount.lastLoginAt instanceof Date ? request.createdPartnerAccount.lastLoginAt.toISOString() : request.createdPartnerAccount.lastLoginAt || null,
+      } : null,
       partnerActivationToken: request.partnerActivationToken || undefined,
       partnerActivationUrl: request.partnerActivationUrl || undefined,
       partnerInviteSent: request.partnerInviteSent,

@@ -67,6 +67,21 @@ const completionScore = (item: any, type: string) => {
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 };
 
+const onboardingChecklist = (resource: DestinationPartnerResource | null | undefined, form: typeof blankForm) => {
+  const item = resource?.item || {};
+  const isHospitality = resource?.resourceType === 'HOSPITALITY_PLACE';
+  return [
+    {
+      label: isHospitality ? 'Logo ou banner' : 'Foto do serviço',
+      done: Boolean(isHospitality ? (item.logoUrl || item.bannerUrl || form.logoFile || form.bannerFile) : (item.imageUrl || form.imageFile)),
+    },
+    { label: 'Descrição clara', done: String(form.description || '').trim().length >= 20 },
+    { label: 'WhatsApp ou telefone', done: Boolean(form.whatsapp || form.phone) },
+    { label: 'Endereço completo', done: Boolean(form.address && form.city && form.state && form.zipCode) },
+    { label: 'Localização no mapa', done: item.lat != null && item.lng != null },
+  ];
+};
+
 const resourceTitle = (resource?: DestinationPartnerResource | null) => {
   if (!resource) return '';
   return resource.resourceType === 'HOSPITALITY_PLACE'
@@ -219,6 +234,7 @@ export function DestinationPartnerPortal() {
     [resources, selectedId]
   );
   const storeSignupUrl = useMemo(() => buildStoreSignupUrl(selectedResource), [selectedResource]);
+  const checklist = useMemo(() => onboardingChecklist(selectedResource, form), [selectedResource?.permissionId, selectedResource?.item, form]);
 
   useEffect(() => {
     if (!session?.token) return;
@@ -382,6 +398,26 @@ export function DestinationPartnerPortal() {
                   {completionScore(selectedResource.item, selectedResource.resourceType)}% completo
                 </div>
               </div>
+
+              <section className="rounded-[1.6rem] border border-[#336886]/10 bg-[linear-gradient(135deg,rgba(51,104,134,0.08),rgba(255,255,255,0.82))] p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Checklist de publicação</p>
+                    <h3 className="mt-1 text-base font-black text-slate-950">Deixe sua página pronta para converter.</h3>
+                  </div>
+                  <span className="rounded-full bg-white/88 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-600">
+                    {checklist.filter((item) => item.done).length}/{checklist.length} concluídos
+                  </span>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-5">
+                  {checklist.map((item) => (
+                    <div key={item.label} className={`rounded-2xl border px-3 py-2 text-xs font-black ${item.done ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white/78 text-slate-500'}`}>
+                      <CheckCircle size={15} weight={item.done ? 'fill' : 'duotone'} className="mb-1" />
+                      {item.label}
+                    </div>
+                  ))}
+                </div>
+              </section>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block sm:col-span-2">

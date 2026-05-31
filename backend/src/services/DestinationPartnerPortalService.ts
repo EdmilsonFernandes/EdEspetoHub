@@ -170,6 +170,21 @@ export class DestinationPartnerPortalService {
     reviewedBy?: string | null;
   }) {
     const { account, isNew } = await this.ensureAccount(input.request);
+    const existingOwner = await this.permissionRepository.findOne({
+      where: {
+        resourceType: input.resourceType,
+        resourceId: input.resourceId,
+        status: ACTIVE_PERMISSION,
+      },
+    });
+
+    if (existingOwner && existingOwner.accountId !== account.id) {
+      throw new AppError('DPARTNER-011', 409, {
+        resourceType: input.resourceType,
+        resourceId: input.resourceId,
+      });
+    }
+
     const existingPermission = await this.permissionRepository.findOne({
       where: {
         accountId: account.id,
