@@ -48,7 +48,7 @@ Os testes ficam em `backend/src/test/e2e` e rodam contra banco de teste local, r
 | `motoboy-store-managed.test.ts` | Motoboy criado/gerenciado pela loja com acesso próprio por username/senha; bloqueio de liberação sem KYC e liberação após documentos aprovados. |
 | `customer-addresses.test.ts` | Endereços do cliente: criação, troca de endereço principal e promoção automática de outro endereço ao excluir o principal. |
 | `subscription.test.ts` | Assinatura/plano: plano ativo permite produto, plano expirado bloqueia pedido, reativação restaura acesso, listagem de planos e status da assinatura da loja. |
-| `destinations.test.ts` | Destinos/chalés/serviços: criação de destino real, hospedagem, listing, vínculo com loja, conflito de slug, destinos inativos no admin, solicitações de parceria e aprovação/link de loja. |
+| `destinations.test.ts` | Destinos/chalés/serviços: criação de destino real, hospedagem, listing, vínculo com loja, conflito de slug, destinos inativos no admin, solicitações de parceria, aprovação/link de loja e portal do parceiro com ativação, permissão e edição segura. |
 
 ### Frontend Playwright E2E
 

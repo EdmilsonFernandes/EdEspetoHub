@@ -1183,6 +1183,98 @@ WHERE hp.slug = :'place_slug'
 ORDER BY dlhp.sort_order, dl.featured DESC, dl.sort_order, dl.title;
 ```
 
+Contas do Portal do Parceiro de Destinos:
+
+```sql
+\set email 'parceiro@email.com'
+
+SELECT
+  dpa.id,
+  dpa.name,
+  dpa.email,
+  dpa.phone,
+  dpa.status,
+  dpa.must_change_password,
+  dpa.invited_at,
+  dpa.activated_at,
+  dpa.last_login_at,
+  dpa.created_at
+FROM destination_partner_accounts dpa
+WHERE lower(dpa.email) = lower(:'email')
+ORDER BY dpa.created_at DESC;
+```
+
+Recursos que um parceiro pode editar:
+
+```sql
+\set email 'parceiro@email.com'
+
+SELECT
+  dpa.email,
+  dpp.resource_type,
+  dpp.permission,
+  dpp.status AS permissao_status,
+  COALESCE(hp.name, dl.title) AS recurso,
+  COALESCE(hp.slug, dl.id::text) AS recurso_ref,
+  COALESCE(hp.active, dl.active) AS recurso_ativo,
+  dpp.created_at
+FROM destination_partner_permissions dpp
+JOIN destination_partner_accounts dpa ON dpa.id = dpp.account_id
+LEFT JOIN hospitality_places hp
+  ON dpp.resource_type = 'HOSPITALITY_PLACE'
+ AND hp.id = dpp.resource_id
+LEFT JOIN destination_listings dl
+  ON dpp.resource_type = 'DESTINATION_LISTING'
+ AND dl.id = dpp.resource_id
+WHERE lower(dpa.email) = lower(:'email')
+ORDER BY dpp.created_at DESC;
+```
+
+Convites de ativacao pendentes ou expirados:
+
+```sql
+\set email 'parceiro@email.com'
+
+SELECT
+  dpi.id,
+  dpa.email,
+  dpi.expires_at,
+  dpi.used_at,
+  dpi.created_at,
+  CASE
+    WHEN dpi.used_at IS NOT NULL THEN 'usado'
+    WHEN dpi.expires_at < NOW() THEN 'expirado'
+    ELSE 'pendente'
+  END AS status_convite
+FROM destination_partner_invites dpi
+JOIN destination_partner_accounts dpa ON dpa.id = dpi.account_id
+WHERE lower(dpa.email) = lower(:'email')
+ORDER BY dpi.created_at DESC
+LIMIT 20;
+```
+
+Auditoria de alteracoes feitas pelo parceiro:
+
+```sql
+\set email 'parceiro@email.com'
+
+SELECT
+  dpal.created_at,
+  dpa.email,
+  dpal.action,
+  dpal.resource_type,
+  dpal.resource_id,
+  dpal.ip_address,
+  left(COALESCE(dpal.user_agent, ''), 120) AS user_agent,
+  jsonb_pretty(dpal.before_json) AS antes,
+  jsonb_pretty(dpal.after_json) AS depois
+FROM destination_partner_audit_logs dpal
+LEFT JOIN destination_partner_accounts dpa ON dpa.id = dpal.account_id
+WHERE lower(dpa.email) = lower(:'email')
+ORDER BY dpal.created_at DESC
+LIMIT 50;
+```
+
 ## 17. Pagamentos de pedido
 
 Pagamentos PIX/cartao de pedidos.

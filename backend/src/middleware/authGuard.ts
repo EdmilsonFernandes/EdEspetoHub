@@ -38,6 +38,7 @@ export type UserRole =
   | 'CHURRASQUEIRO'   // legacy alias — kept for existing JWTs/DB rows
   | 'SUPER_ADMIN'
   | 'CONDOMINIUM_ADMIN'
+  | 'DESTINATION_PARTNER'
   | 'MOTOBOY'
   | 'STORE_OWNER'
   | 'CUSTOMER';

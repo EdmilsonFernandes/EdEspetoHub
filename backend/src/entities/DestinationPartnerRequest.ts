@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { DestinationListing } from './DestinationListing';
+import { DestinationPartnerAccount } from './DestinationPartnerAccount';
 import { HospitalityPlace } from './HospitalityPlace';
 import { TravelDestination } from './TravelDestination';
 
@@ -114,6 +115,13 @@ export class DestinationPartnerRequest {
 
   @Column({ name: 'created_listing_id', type: 'uuid', nullable: true })
   createdListingId?: string | null;
+
+  @ManyToOne(() => DestinationPartnerAccount, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'created_partner_account_id' })
+  createdPartnerAccount?: DestinationPartnerAccount | null;
+
+  @Column({ name: 'created_partner_account_id', type: 'uuid', nullable: true })
+  createdPartnerAccountId?: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

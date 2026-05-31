@@ -152,6 +152,15 @@ Backend API (chamanoespeto-api :4000)
   - consulta de contagem do banco local definida em "Validação de dados após deploy/local Docker"
 - Se a mudança afetar navegação, filtros, destaque, lojas, pedidos ativos ou UX mobile do Hub, rodar também `npm --prefix frontend run test:e2e`.
 
+### Portal do parceiro de destinos
+
+- Parceiros de chalés, pousadas, serviços e restaurantes usam portal separado em `/parceiro`; não misturar com fluxo de lojista/admin.
+- Backend real fica em `DestinationPartnerPortalService`, com JWT role `DESTINATION_PARTNER`.
+- O parceiro só pode editar campos seguros do próprio recurso: nome/título, descrição, contato, endereço, coordenadas e imagens.
+- Campos estratégicos continuam exclusivos do Super Admin: ativo/inativo, destino, categoria, prioridade/sortOrder, destaque, monetização e vínculos.
+- Toda rota nova do portal deve passar pelo BFF em `/api/destination-partner/...`.
+- Mudança nesse fluxo deve validar `cd backend && yarn test`, `npm --prefix apis run build`, `npm --prefix frontend run test:unit` e `npm --prefix frontend run build`.
+
 ### Onde implementar algo novo
 
 - **Nova rota que o frontend consome**: registrar no BFF (`apis/src/domains/proxy/proxy.routes.ts` se for proxy, ou criar controller+processor se tiver lógica própria).

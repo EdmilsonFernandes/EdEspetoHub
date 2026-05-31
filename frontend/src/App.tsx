@@ -80,6 +80,8 @@ const DestinationsPage = lazyPage(loadDestinationsPage, 'DestinationsPage');
 const DestinationDetailPage = lazyPage(loadDestinationDetailPage, 'DestinationDetailPage');
 const DestinationPartnerRequestPage = lazyPage(loadDestinationPartnerRequestPage, 'DestinationPartnerRequestPage');
 const DestinationInviteRedirectPage = lazyPage(loadDestinationInviteRedirectPage, 'DestinationInviteRedirectPage');
+const DestinationPartnerPortal = lazyPage(() => import('./pages/DestinationPartnerPortal'), 'DestinationPartnerPortal');
+const DestinationPartnerActivate = lazyPage(() => import('./pages/DestinationPartnerActivate'), 'DestinationPartnerActivate');
 const HospitalityPlacePage = lazyPage(loadHospitalityPlacePage, 'HospitalityPlacePage');
 const HospitalityServiceRoutePage = lazyPage(loadHospitalityServiceRoutePage, 'HospitalityServiceRoutePage');
 const TermsOfUse = lazyPage(() => import('./pages/TermsOfUse'), 'TermsOfUse');
@@ -138,6 +140,8 @@ function App() {
               <Route path="/hub/destaques" element={<HubHighlightsPage />} />
               <Route path="/destinos" element={<DestinationsPage />} />
               <Route path="/destinos/cadastrar" element={<DestinationPartnerRequestPage />} />
+              <Route path="/parceiro" element={<DestinationPartnerPortal />} />
+              <Route path="/parceiro/ativar" element={<DestinationPartnerActivate />} />
               <Route path="/destinos/:destinationSlug" element={<DestinationDetailPage />} />
               <Route path="/destinos/:destinationSlug/chales/:placeSlug" element={<HospitalityPlacePage />} />
               <Route path="/destinos/:destinationSlug/chales/:placeSlug/rota" element={<HospitalityServiceRoutePage />} />
