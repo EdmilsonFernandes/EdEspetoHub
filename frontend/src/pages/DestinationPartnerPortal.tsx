@@ -22,6 +22,7 @@ import {
   destinationPartnerPortalService,
   DestinationPartnerResource,
 } from '../services/destinationPartnerPortalService';
+import { buildListingClaimUrl } from '../utils/destinationListingClaim';
 import { inputAssistProps, textareaAssistProps } from '../utils/inputAssist';
 
 const blankForm = {
@@ -66,6 +67,21 @@ const completionScore = (item: any, type: string) => {
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 };
 
+const onboardingChecklist = (resource: DestinationPartnerResource | null | undefined, form: typeof blankForm) => {
+  const item = resource?.item || {};
+  const isHospitality = resource?.resourceType === 'HOSPITALITY_PLACE';
+  return [
+    {
+      label: isHospitality ? 'Logo ou banner' : 'Foto do serviço',
+      done: Boolean(isHospitality ? (item.logoUrl || item.bannerUrl || form.logoFile || form.bannerFile) : (item.imageUrl || form.imageFile)),
+    },
+    { label: 'Descrição clara', done: String(form.description || '').trim().length >= 20 },
+    { label: 'WhatsApp ou telefone', done: Boolean(form.whatsapp || form.phone) },
+    { label: 'Endereço completo', done: Boolean(form.address && form.city && form.state && form.zipCode) },
+    { label: 'Localização no mapa', done: item.lat != null && item.lng != null },
+  ];
+};
+
 const resourceTitle = (resource?: DestinationPartnerResource | null) => {
   if (!resource) return '';
   return resource.resourceType === 'HOSPITALITY_PLACE'
@@ -101,6 +117,22 @@ const buildForm = (resource?: DestinationPartnerResource | null) => {
     lng: item.lng ?? '',
     deliveryInstructions: item.deliveryInstructions || '',
   };
+};
+
+const buildStoreSignupUrl = (resource?: DestinationPartnerResource | null) => {
+  if (!resource || resource.resourceType !== 'DESTINATION_LISTING') return '';
+  const listing = resource.item || {};
+  const destination = listing.destination || {};
+  const linkedPlaceIds = [
+    ...(Array.isArray(listing.hospitalityPlaceIds) ? listing.hospitalityPlaceIds : []),
+    ...(Array.isArray(listing.hospitalityPlaceLinks) ? listing.hospitalityPlaceLinks.map((link: any) => link?.hospitalityPlaceId || link?.hospitalityPlace?.id) : []),
+    ...(Array.isArray(listing.hospitalityPlaces) ? listing.hospitalityPlaces.map((place: any) => place?.id) : []),
+    listing.hospitalityPlaceId,
+  ].map((id) => String(id || '').trim()).filter(Boolean);
+  return buildListingClaimUrl(destination, listing, {
+    deliveryMode: linkedPlaceIds.length ? 'selected' : 'all',
+    placeIds: Array.from(new Set(linkedPlaceIds)),
+  });
 };
 
 function PartnerLogin({ onLoggedIn }: { onLoggedIn: (session: any) => void }) {
@@ -201,6 +233,8 @@ export function DestinationPartnerPortal() {
     () => resources.find((resource) => resource.permissionId === selectedId) || resources[0] || null,
     [resources, selectedId]
   );
+  const storeSignupUrl = useMemo(() => buildStoreSignupUrl(selectedResource), [selectedResource]);
+  const checklist = useMemo(() => onboardingChecklist(selectedResource, form), [selectedResource?.permissionId, selectedResource?.item, form]);
 
   useEffect(() => {
     if (!session?.token) return;
@@ -365,6 +399,26 @@ export function DestinationPartnerPortal() {
                 </div>
               </div>
 
+              <section className="rounded-[1.6rem] border border-[#336886]/10 bg-[linear-gradient(135deg,rgba(51,104,134,0.08),rgba(255,255,255,0.82))] p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Checklist de publicação</p>
+                    <h3 className="mt-1 text-base font-black text-slate-950">Deixe sua página pronta para converter.</h3>
+                  </div>
+                  <span className="rounded-full bg-white/88 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-600">
+                    {checklist.filter((item) => item.done).length}/{checklist.length} concluídos
+                  </span>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-5">
+                  {checklist.map((item) => (
+                    <div key={item.label} className={`rounded-2xl border px-3 py-2 text-xs font-black ${item.done ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white/78 text-slate-500'}`}>
+                      <CheckCircle size={15} weight={item.done ? 'fill' : 'duotone'} className="mb-1" />
+                      {item.label}
+                    </div>
+                  ))}
+                </div>
+              </section>
+
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block sm:col-span-2">
                   <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Nome público</span>
@@ -461,6 +515,12 @@ export function DestinationPartnerPortal() {
                   <ArrowSquareOut size={17} weight="bold" />
                   Ver página pública
                 </a>
+                {storeSignupUrl ? (
+                  <a href={storeSignupUrl} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 transition hover:bg-emerald-100">
+                    <Buildings size={17} weight="duotone" />
+                    Quero receber pedidos
+                  </a>
+                ) : null}
                 <button type="submit" disabled={saving} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.65)] transition active:scale-[0.98] disabled:opacity-60">
                   {saving ? <Buildings size={17} weight="duotone" /> : <FloppyDisk size={17} weight="duotone" />}
                   {saving ? 'Salvando...' : 'Salvar alterações'}

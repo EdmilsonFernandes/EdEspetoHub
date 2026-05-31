@@ -256,6 +256,7 @@ export function createProxyRoutes(): Router {
     r.patch('/admin/destination-listings/:listingId', authRequired, forward);
     r.post('/admin/hospitality-places/:placeId/stores', authRequired, forward);
     r.patch('/admin/destination-partner-requests/:requestId/review', authRequired, forward);
+    r.post('/admin/destination-partner-requests/:requestId/invite/resend', authRequired, forward);
     r.patch('/admin/destination-store-requests/:requestId/review', authRequired, forward);
     r.get('/admin/motoboys/kyc/audit', authRequired, forward);
     r.get('/admin/motoboys/kyc/pending', authRequired, forward);

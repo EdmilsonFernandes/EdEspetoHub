@@ -78,6 +78,23 @@ export class DestinationPartnerRequest {
   @Column({ name: 'delivery_instructions', type: 'text', nullable: true })
   deliveryInstructions?: string | null;
 
+  @Column({ name: 'request_source', type: 'text', nullable: true })
+  requestSource?: string | null;
+
+  @ManyToOne(() => HospitalityPlace, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'claimed_hospitality_place_id' })
+  claimedHospitalityPlace?: HospitalityPlace | null;
+
+  @Column({ name: 'claimed_hospitality_place_id', type: 'uuid', nullable: true })
+  claimedHospitalityPlaceId?: string | null;
+
+  @ManyToOne(() => DestinationListing, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'claimed_listing_id' })
+  claimedListing?: DestinationListing | null;
+
+  @Column({ name: 'claimed_listing_id', type: 'uuid', nullable: true })
+  claimedListingId?: string | null;
+
   @Column({ name: 'responsible_name' })
   responsibleName!: string;
 

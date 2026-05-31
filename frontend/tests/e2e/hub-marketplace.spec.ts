@@ -202,7 +202,7 @@ test.describe('Hub marketplace', () => {
 
     await expect(page).toHaveURL(/\/hub\/destaques/);
     await expect(page.getByRole('banner')).toContainText('Destaques de hoje');
-    await expect(page.getByText('Escolha o item. A loja certa abre para você.')).toBeVisible();
+    await expect(page.getByText('Escolha pelo que deu vontade')).toBeVisible();
     await page.getByPlaceholder('O que deu vontade agora?').fill('medalhao');
     await expect(page.getByRole('link', { name: /Medalhao Premium/ }).first()).toBeVisible();
     await expect(page.getByText('por Gustavao Espetos E2E')).toBeVisible();

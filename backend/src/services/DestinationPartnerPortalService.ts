@@ -79,6 +79,11 @@ export class DestinationPartnerPortalService {
     return crypto.randomBytes(32).toString('hex');
   }
 
+  private buildActivationUrl(activationToken: string) {
+    const baseUrl = (env.appUrl || 'https://janocaminho.com.br').replace(/\/$/, '');
+    return `${baseUrl}/parceiro/ativar?token=${encodeURIComponent(activationToken)}`;
+  }
+
   private buildSession(account: DestinationPartnerAccount, resources?: any[]) {
     const token = jwt.sign(
       {
@@ -97,6 +102,14 @@ export class DestinationPartnerPortalService {
   }
 
   private async createInvite(account: DestinationPartnerAccount, createdBy?: string | null) {
+    await this.inviteRepository
+      .createQueryBuilder()
+      .update(DestinationPartnerInvite)
+      .set({ usedAt: new Date() })
+      .where('account_id = :accountId', { accountId: account.id })
+      .andWhere('used_at IS NULL')
+      .execute();
+
     const token = this.generateToken();
     const invite = await this.inviteRepository.save(
       this.inviteRepository.create({
@@ -115,7 +128,7 @@ export class DestinationPartnerPortalService {
       email: account.email,
       name: account.name,
       resourceName: resourceName || 'seu cadastro',
-      activationUrl: `${baseUrl}/parceiro/ativar?token=${encodeURIComponent(activationToken)}`,
+      activationUrl: this.buildActivationUrl(activationToken),
       loginUrl: `${baseUrl}/parceiro`,
     });
   }
@@ -157,6 +170,21 @@ export class DestinationPartnerPortalService {
     reviewedBy?: string | null;
   }) {
     const { account, isNew } = await this.ensureAccount(input.request);
+    const existingOwner = await this.permissionRepository.findOne({
+      where: {
+        resourceType: input.resourceType,
+        resourceId: input.resourceId,
+        status: ACTIVE_PERMISSION,
+      },
+    });
+
+    if (existingOwner && existingOwner.accountId !== account.id) {
+      throw new AppError('DPARTNER-011', 409, {
+        resourceType: input.resourceType,
+        resourceId: input.resourceId,
+      });
+    }
+
     const existingPermission = await this.permissionRepository.findOne({
       where: {
         accountId: account.id,
@@ -206,6 +234,61 @@ export class DestinationPartnerPortalService {
       accountId: account.id,
       inviteSent,
       activationToken: env.nodeEnv !== 'production' ? activationToken : undefined,
+    };
+  }
+
+  async resendInviteForApprovedRequest(input: {
+    accountId: string;
+    request?: PartnerRequestLike | null;
+    resourceName?: string | null;
+    reviewedBy?: string | null;
+  }) {
+    const account = await this.accountRepository.findOne({ where: { id: input.accountId } });
+    if (!account) throw new AppError('DPARTNER-001', 404);
+
+    if (account.status === 'active' && account.passwordHash) {
+      return {
+        accountId: account.id,
+        inviteSent: false,
+        alreadyActive: true,
+        loginUrl: `${(env.appUrl || 'https://janocaminho.com.br').replace(/\/$/, '')}/parceiro`,
+      };
+    }
+
+    account.status = 'invited';
+    account.invitedAt = new Date();
+    account.mustChangePassword = true;
+    await this.accountRepository.save(account);
+
+    const inviteResult = await this.createInvite(account, input.reviewedBy);
+    let inviteSent = false;
+    try {
+      await this.sendInviteEmail(account, inviteResult.token, input.resourceName || input.request?.name || null);
+      inviteSent = true;
+    } catch (error) {
+      this.log.warn('Destination partner invite resend email failed', { accountId: account.id, error });
+    }
+
+    await this.auditRepository.save(
+      this.auditRepository.create({
+        accountId: account.id,
+        action: 'invite_resent_by_admin',
+        resourceType: null,
+        resourceId: null,
+        metadata: {
+          requestId: input.request?.id || null,
+          inviteSent,
+        },
+      })
+    );
+
+    return {
+      accountId: account.id,
+      inviteSent,
+      alreadyActive: false,
+      activationToken: env.nodeEnv !== 'production' ? inviteResult.token : undefined,
+      activationUrl: this.buildActivationUrl(inviteResult.token),
+      expiresAt: inviteResult.invite.expiresAt.toISOString(),
     };
   }
 

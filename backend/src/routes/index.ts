@@ -177,6 +177,7 @@ routes.post('/admin/destination-listings', requireAuth, requireRole('SUPER_ADMIN
 routes.patch('/admin/destination-listings/:listingId', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminUpdateListing);
 routes.post('/admin/hospitality-places/:placeId/stores', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminLinkStore);
 routes.patch('/admin/destination-partner-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminReviewPartnerRequest);
+routes.post('/admin/destination-partner-requests/:requestId/invite/resend', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminResendPartnerInvite);
 routes.patch('/admin/destination-store-requests/:requestId/review', requireAuth, requireRole('SUPER_ADMIN'), DestinationController.adminReviewStoreRequest);
 routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);
 routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);

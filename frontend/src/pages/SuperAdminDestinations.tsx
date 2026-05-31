@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bed, Buildings, ChartBar, ChatCircleText, CheckCircle, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, Sparkle, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { Bed, Buildings, ChartBar, ChatCircleText, CheckCircle, ClockCountdown, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, ShieldCheck, Sparkle, Trash, UploadSimple, WarningCircle, X } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
@@ -295,6 +295,47 @@ const partnerTypeLabel = (request: any) => {
     OUTRO: 'Hospedagem',
   };
   return labels[placeType] || 'Hospedagem';
+};
+
+const isPartnerClaimRequest = (request: any) => Boolean(request?.claimedHospitalityPlaceId || request?.claimedListingId);
+const partnerAccountStatus = (request: any) => String(request?.createdPartnerAccount?.status || '').toLowerCase();
+const partnerAccessLabel = (request: any) => {
+  if (String(request?.status || '').toLowerCase() !== 'approved') return '';
+  const status = partnerAccountStatus(request);
+  if (status === 'active') return 'Portal ativo';
+  if (request?.createdPartnerAccountId) return 'Aguardando ativação';
+  return 'Conta pendente';
+};
+const claimedResourceLabel = (request: any) => (
+  request?.claimedHospitalityPlace?.name
+  || request?.claimedListing?.title
+  || request?.claimedHospitalityPlaceId
+  || request?.claimedListingId
+  || 'perfil existente'
+);
+const claimCurrentResource = (request: any) => request?.claimedHospitalityPlace || request?.claimedListing || null;
+const requestAccessStatus = (request: any) => {
+  const status = String(request?.status || 'pending').toLowerCase();
+  if (isPendingRequest(status)) return 'pending';
+  if (status === 'rejected') return 'rejected';
+  if (status !== 'approved') return status;
+  if (partnerAccountStatus(request) === 'active') return 'active';
+  if (request?.createdPartnerAccountId) return 'invited';
+  return 'approved';
+};
+const partnerRequestMatchesFilter = (request: any, filter: string) => {
+  if (filter === 'all') return true;
+  if (filter === 'pending') return isPendingRequest(request?.status);
+  if (filter === 'claim') return isPendingRequest(request?.status) && isPartnerClaimRequest(request);
+  if (filter === 'invited') return requestAccessStatus(request) === 'invited';
+  if (filter === 'active') return requestAccessStatus(request) === 'active';
+  if (filter === 'rejected') return String(request?.status || '').toLowerCase() === 'rejected';
+  return true;
+};
+const compactValue = (value: any) => String(value || '').trim() || 'Não informado';
+const requestSubmittedField = (request: any, field: string) => {
+  if (field === 'title') return request?.name;
+  return request?.[field];
 };
 
 const formatRequestDate = (value: any) => {
@@ -601,6 +642,9 @@ export function SuperAdminDestinations() {
   const [invitePlace, setInvitePlace] = useState<any | null>(null);
   const [inviteFeedback, setInviteFeedback] = useState('');
   const [inviteBatchLoading, setInviteBatchLoading] = useState('');
+  const [partnerInviteLinks, setPartnerInviteLinks] = useState<Record<string, string>>({});
+  const [partnerRequestFilter, setPartnerRequestFilter] = useState<'all' | 'pending' | 'claim' | 'invited' | 'active' | 'rejected'>('all');
+  const [selectedPartnerRequest, setSelectedPartnerRequest] = useState<any | null>(null);
 
   const load = async () => {
     if (!localStorage.getItem('superAdminToken')) {
@@ -898,6 +942,26 @@ export function SuperAdminDestinations() {
     };
   }, [catalog?.metrics, data]);
 
+  const partnerOnboardingMetrics = useMemo(() => {
+    const partnerRequests = data.partnerRequests || [];
+    const approved = partnerRequests.filter((request: any) => String(request.status || '').toLowerCase() === 'approved');
+    return {
+      pending: partnerRequests.filter((request: any) => isPendingRequest(request.status)).length,
+      claimPending: partnerRequests.filter((request: any) => isPendingRequest(request.status) && isPartnerClaimRequest(request)).length,
+      invited: approved.filter((request: any) => request.createdPartnerAccountId && partnerAccountStatus(request) !== 'active').length,
+      active: approved.filter((request: any) => partnerAccountStatus(request) === 'active').length,
+    };
+  }, [data.partnerRequests]);
+
+  const partnerFilterOptions = useMemo(() => [
+    { id: 'all', label: 'Todos', count: (data.partnerRequests || []).length + (data.storeRequests || []).length },
+    { id: 'pending', label: 'Pendentes', count: partnerOnboardingMetrics.pending + (data.storeRequests || []).filter((request: any) => isPendingRequest(request.status)).length },
+    { id: 'claim', label: 'Validação de posse', count: partnerOnboardingMetrics.claimPending },
+    { id: 'invited', label: 'Sem ativar', count: partnerOnboardingMetrics.invited },
+    { id: 'active', label: 'Ativos', count: partnerOnboardingMetrics.active },
+    { id: 'rejected', label: 'Recusados', count: [...(data.partnerRequests || []), ...(data.storeRequests || [])].filter((request: any) => String(request.status || '').toLowerCase() === 'rejected').length },
+  ], [data.partnerRequests, data.storeRequests, partnerOnboardingMetrics]);
+
   const requestBoard = useMemo(() => {
     const destinationById = new Map<string, any>();
     const placeById = new Map<string, any>();
@@ -926,6 +990,7 @@ export function SuperAdminDestinations() {
     };
 
     (data.partnerRequests || []).forEach((request: any) => {
+      if (!partnerRequestMatchesFilter(request, partnerRequestFilter)) return;
       const destination = request.destination || destinationById.get(String(request.destinationId || '')) || {};
       const key = String(destination.id || request.destinationId || destination.name || request.destinationName || request.city || 'sem-destino');
       const group = ensureGroup(key, {
@@ -941,6 +1006,7 @@ export function SuperAdminDestinations() {
     });
 
     (data.storeRequests || []).forEach((request: any) => {
+      if (!partnerRequestMatchesFilter(request, partnerRequestFilter)) return;
       const place = request.hospitalityPlace || placeById.get(String(request.hospitalityPlaceId || '')) || {};
       const destination = request.destination || place.destination || destinationById.get(String(request.destinationId || place.destinationId || '')) || {};
       const key = String(destination.id || request.destinationId || place.destinationId || destination.name || request.destinationName || place.destination?.name || 'sem-destino');
@@ -979,7 +1045,7 @@ export function SuperAdminDestinations() {
         if (right.pending !== left.pending) return right.pending - left.pending;
         return String(left.name).localeCompare(String(right.name), 'pt-BR');
       });
-  }, [data.destinations, data.partnerRequests, data.places, data.storeRequests]);
+  }, [data.destinations, data.partnerRequests, data.places, data.storeRequests, partnerRequestFilter]);
 
   const stateOptions = useMemo(() => {
     if (Array.isArray(catalog?.states) && catalog.states.length) return catalog.states;
@@ -1452,14 +1518,46 @@ export function SuperAdminDestinations() {
     }
   };
 
-  const reviewPartner = async (requestId: string, status: 'approved' | 'rejected') => {
+  const reviewPartner = async (request: any, status: 'approved' | 'rejected') => {
+    const isClaim = isPartnerClaimRequest(request);
+    if (status === 'approved' && isClaim) {
+      const confirmed = window.confirm(
+        `Esta solicitação vai liberar acesso para editar "${claimedResourceLabel(request)}".\n\nAntes de aprovar, confirme por WhatsApp/e-mail oficial do cadastro que esta pessoa é realmente responsável pelo perfil. Deseja continuar?`
+      );
+      if (!confirmed) return;
+    }
     setSaving(true);
     setError('');
     try {
-      await destinationService.adminReviewPartnerRequest(requestId, { status });
+      await destinationService.adminReviewPartnerRequest(request.id, { status, claimVerified: status === 'approved' && isClaim ? true : undefined });
       await refreshAdminData(selectedDestinationId);
+      setSelectedPartnerRequest(null);
     } catch (err: any) {
       setError(err?.message || 'Não foi possível revisar solicitação.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const resendPartnerInvite = async (request: any) => {
+    setSaving(true);
+    setError('');
+    try {
+      const payload = await destinationService.adminResendPartnerInvite(request.id);
+      const activationUrl = payload?.partnerActivationUrl || payload?.activationUrl || '';
+      const loginUrl = payload?.partnerLoginUrl || '';
+      if (activationUrl) {
+        setPartnerInviteLinks((current) => ({ ...current, [request.id]: activationUrl }));
+        await copyTextToClipboard(activationUrl, `Link de ativação de ${request.name} copiado.`);
+      } else if (loginUrl) {
+        await copyTextToClipboard(loginUrl, `${request.name} já ativou a conta. Link do portal copiado.`);
+      } else {
+        setInviteFeedback('Convite reenviado, mas o link não foi retornado pelo servidor.');
+        window.setTimeout(() => setInviteFeedback(''), 2600);
+      }
+      await refreshAdminData(selectedDestinationId);
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível reenviar o convite do parceiro.');
     } finally {
       setSaving(false);
     }
@@ -2293,7 +2391,7 @@ export function SuperAdminDestinations() {
   const tabs = [
     { id: 'dashboard', label: 'Resumo', icon: Compass },
     { id: 'cadastro', label: 'Cadastro', icon: Plus },
-    { id: 'requests', label: 'Solicitações', icon: WarningCircle, badge: metrics.pending },
+    { id: 'requests', label: 'Parceiros', icon: WarningCircle, badge: metrics.pending },
   ];
   const superAdminGroups = [
     { id: 'operacional', label: 'Operação', subtitle: 'Resumo, lojas e receita', icon: ChartBar, target: 'executive' },
@@ -2369,6 +2467,27 @@ export function SuperAdminDestinations() {
           {request.message || request.description ? (
             <p className="mt-2 line-clamp-2 text-xs font-semibold opacity-80">{request.message || request.description}</p>
           ) : null}
+          {isPartnerClaimRequest(request) ? (
+            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#153A4C]">
+              <LinkSimpleHorizontal size={12} weight="bold" />
+              Assumir perfil existente
+            </div>
+          ) : null}
+          {isPartnerClaimRequest(request) ? (
+            <div className="mt-2 rounded-2xl border border-amber-200 bg-white/72 p-3 text-[11px] font-bold leading-relaxed text-amber-800">
+              <span className="mb-1 flex items-center gap-1 font-black uppercase tracking-[0.08em]">
+                <ShieldCheck size={13} weight="fill" />
+                Verificação obrigatória
+              </span>
+              Vai liberar edição de <strong>{claimedResourceLabel(request)}</strong>. Confirme titularidade pelo contato oficial do cadastro antes de aprovar.
+            </div>
+          ) : null}
+          {partnerAccessLabel(request) ? (
+            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/78 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-600">
+              <CheckCircle size={12} weight={partnerAccountStatus(request) === 'active' ? 'fill' : 'duotone'} />
+              {partnerAccessLabel(request)}
+            </div>
+          ) : null}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span className="rounded-full bg-white/82 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em]">
@@ -2379,11 +2498,31 @@ export function SuperAdminDestinations() {
           ) : null}
         </div>
       </div>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <button type="button" onClick={() => setSelectedPartnerRequest(request)} className={actionButtonClass('neutral')}>
+          <Eye size={13} weight="bold" />
+          Detalhes e validação
+        </button>
+      </div>
       {renderRequestActions(
         request,
-        () => reviewPartner(request.id, 'approved'),
-        () => reviewPartner(request.id, 'rejected')
+        () => reviewPartner(request, 'approved'),
+        () => reviewPartner(request, 'rejected')
       )}
+      {!isPendingRequest(request.status) && String(request.status || '').toLowerCase() === 'approved' && request.createdPartnerAccountId ? (
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <button type="button" disabled={saving} onClick={() => resendPartnerInvite(request)} className={actionButtonClass('primary')}>
+            <PaperPlaneTilt size={13} weight="bold" />
+            Reenviar convite
+          </button>
+          {partnerInviteLinks[request.id] ? (
+            <button type="button" onClick={() => copyTextToClipboard(partnerInviteLinks[request.id], 'Link de ativação copiado.')} className={actionButtonClass('neutral')}>
+              <CopySimple size={13} weight="bold" />
+              Copiar link
+            </button>
+          ) : null}
+        </div>
+      ) : null}
     </article>
   );
   const renderStoreRequestCard = (request: any) => (
@@ -2441,6 +2580,125 @@ export function SuperAdminDestinations() {
           )}
         </div>
       </section>
+    );
+  };
+  const renderPartnerRequestDetailModal = () => {
+    const request = selectedPartnerRequest;
+    if (!request) return null;
+    const current = claimCurrentResource(request);
+    const currentNameField = request?.claimedListing ? 'title' : 'name';
+    const lineAddress = (source: any) => [source?.address, source?.addressNumber, source?.district].filter(Boolean).join(', ');
+    const lineCity = (source: any) => [source?.city, source?.state].filter(Boolean).join(' · ');
+    const rows = [
+      { label: 'Nome público', current: current?.[currentNameField], submitted: requestSubmittedField(request, 'title') },
+      { label: 'WhatsApp', current: current?.whatsapp, submitted: request.whatsapp },
+      { label: 'Telefone', current: current?.phone, submitted: request.phone || request.responsiblePhone },
+      { label: 'Endereço', current: lineAddress(current), submitted: lineAddress(request) },
+      { label: 'Cidade/UF', current: lineCity(current), submitted: lineCity(request) },
+      { label: 'Instagram', current: current?.instagramUrl, submitted: request.instagramUrl },
+      { label: 'Site', current: current?.websiteUrl, submitted: request.websiteUrl },
+      { label: 'Descrição', current: current?.description, submitted: request.description },
+    ];
+    const account = request.createdPartnerAccount || {};
+    return (
+      <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-3 py-4 backdrop-blur-sm sm:items-center">
+        <div className="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-[2rem] bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.75)]">
+          <div className="flex items-start justify-between gap-4 border-b border-slate-100 bg-[radial-gradient(circle_at_0%_0%,rgba(51,104,134,0.18),transparent_34%),linear-gradient(135deg,#ffffff,#f8fafc)] p-5">
+            <div className="min-w-0">
+              <p className="inline-flex items-center gap-2 rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                <ShieldCheck size={14} weight="fill" />
+                Detalhes e validação
+              </p>
+              <h3 className="mt-3 break-words text-2xl font-black tracking-[-0.04em] text-slate-950">{request.name}</h3>
+              <p className="mt-1 text-sm font-semibold text-slate-500">
+                Revise contato, titularidade e divergências antes de liberar edição do perfil público.
+              </p>
+            </div>
+            <button type="button" onClick={() => setSelectedPartnerRequest(null)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-600">
+              <X size={18} weight="bold" />
+            </button>
+          </div>
+
+          <div className="max-h-[calc(92vh-8rem)] overflow-y-auto p-5">
+            <div className="grid gap-3 md:grid-cols-4">
+              {[
+                { label: 'Status', value: requestStatusLabel(request.status) },
+                { label: 'Acesso', value: partnerAccessLabel(request) || 'Ainda não liberado' },
+                { label: 'Responsável', value: request.responsibleName || 'Não informado' },
+                { label: 'E-mail', value: request.responsibleEmail || account.email || 'Não informado' },
+              ].map((item) => (
+                <div key={item.label} className="rounded-[1.25rem] border border-slate-100 bg-slate-50 p-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{item.label}</p>
+                  <p className="mt-1 break-words text-sm font-black text-slate-800">{item.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {isPartnerClaimRequest(request) ? (
+              <div className="mt-4 rounded-[1.45rem] border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+                <p className="flex items-center gap-2 font-black uppercase tracking-[0.08em]">
+                  <ShieldCheck size={17} weight="fill" />
+                  Conferência antifraude obrigatória
+                </p>
+                <p className="mt-2">
+                  Antes de aprovar, confirme com o contato oficial do cadastro atual que <strong>{request.responsibleName || request.responsibleEmail}</strong> pode assumir <strong>{claimedResourceLabel(request)}</strong>.
+                </p>
+              </div>
+            ) : null}
+
+            <div className="mt-4 overflow-hidden rounded-[1.45rem] border border-slate-200">
+              <div className="grid grid-cols-[0.9fr_1fr_1fr] gap-0 bg-slate-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                <span>Campo</span>
+                <span>Cadastro atual</span>
+                <span>Enviado na solicitação</span>
+              </div>
+              {rows.map((row) => {
+                const changed = compactValue(row.current) !== compactValue(row.submitted);
+                return (
+                  <div key={row.label} className={`grid grid-cols-1 gap-2 border-t border-slate-100 px-3 py-3 text-sm md:grid-cols-[0.9fr_1fr_1fr] ${changed ? 'bg-amber-50/55' : 'bg-white'}`}>
+                    <p className="font-black text-slate-700">{row.label}</p>
+                    <p className="break-words font-semibold text-slate-500">{compactValue(row.current)}</p>
+                    <p className="break-words font-semibold text-slate-900">{compactValue(row.submitted)}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {[
+                { label: 'Criada em', value: formatRequestDate(request.createdAt) || 'Não informado' },
+                { label: 'Convite enviado', value: formatRequestDate(account.invitedAt) || (request.createdPartnerAccountId ? 'Gerado' : 'Ainda não') },
+                { label: 'Ativação', value: formatRequestDate(account.activatedAt) || (partnerAccountStatus(request) === 'active' ? 'Ativo' : 'Pendente') },
+              ].map((item) => (
+                <div key={item.label} className="rounded-[1.25rem] border border-slate-100 bg-white p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.35)]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{item.label}</p>
+                  <p className="mt-1 text-sm font-black text-slate-800">{item.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+              {isPendingRequest(request.status) ? (
+                <>
+                  <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'rejected')} className={actionButtonClass('danger')}>
+                    Recusar
+                  </button>
+                  <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'approved')} className={actionButtonClass('success')}>
+                    <CheckCircle size={13} weight="fill" />
+                    Aprovar com conferência
+                  </button>
+                </>
+              ) : null}
+              {!isPendingRequest(request.status) && String(request.status || '').toLowerCase() === 'approved' && request.createdPartnerAccountId ? (
+                <button type="button" disabled={saving} onClick={() => resendPartnerInvite(request)} className={actionButtonClass('primary')}>
+                  <PaperPlaneTilt size={13} weight="bold" />
+                  Reenviar convite
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -3697,23 +3955,26 @@ export function SuperAdminDestinations() {
                 <div>
                   <p className="inline-flex items-center gap-2 rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
                     <WarningCircle size={14} weight="fill" />
-                    Central de solicitações
+                    Gestão de parceiros
                   </p>
-                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-slate-950">Fila por cidade, hospedagem e serviço</h2>
+                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-slate-950">Onboarding de parceiros</h2>
                   <p className="mt-1 max-w-2xl text-sm font-semibold text-slate-500">
-                    A aprovação continua usando a regra atual. A tela só organiza a operação para enxergar pendências por destino sem perder contexto.
+                    Acompanhe pendências, validações de posse, convites não ativados e parceiros já liberados por destino.
                   </p>
                 </div>
-                <div className="grid grid-cols-3 gap-2 sm:min-w-[360px]">
+                <div className="grid grid-cols-2 gap-2 sm:min-w-[430px] lg:grid-cols-4">
                   {[
-                    { label: 'Hospedagens', value: (data.partnerRequests || []).filter((request: any) => String(request.partnerType || '').toUpperCase() !== 'SERVICE_PROVIDER').length, icon: Bed },
-                    { label: 'Serviços', value: (data.partnerRequests || []).filter((request: any) => String(request.partnerType || '').toUpperCase() === 'SERVICE_PROVIDER').length, icon: Sparkle },
-                    { label: 'Lojas', value: (data.storeRequests || []).length, icon: Buildings },
+                    { label: 'Pendentes', value: partnerOnboardingMetrics.pending, icon: ClockCountdown, tone: 'text-amber-700 bg-amber-50' },
+                    { label: 'Validação de posse', value: partnerOnboardingMetrics.claimPending, icon: ShieldCheck, tone: 'text-[#153A4C] bg-[#336886]/10' },
+                    { label: 'Sem ativar', value: partnerOnboardingMetrics.invited, icon: PaperPlaneTilt, tone: 'text-sky-700 bg-sky-50' },
+                    { label: 'Ativos', value: partnerOnboardingMetrics.active, icon: CheckCircle, tone: 'text-emerald-700 bg-emerald-50' },
                   ].map((item) => {
                     const Icon = item.icon;
                     return (
                       <div key={item.label} className="rounded-[1.25rem] border border-white bg-white/82 p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.35)]">
-                        <Icon size={17} weight="duotone" className="text-[#336886]" />
+                        <span className={`inline-grid h-8 w-8 place-items-center rounded-xl ${item.tone}`}>
+                          <Icon size={17} weight="duotone" />
+                        </span>
                         <p className="mt-2 text-xl font-black text-slate-950">{item.value}</p>
                         <p className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">{item.label}</p>
                       </div>
@@ -3722,6 +3983,35 @@ export function SuperAdminDestinations() {
                 </div>
               </div>
             </section>
+            <section className="rounded-[1.55rem] border border-slate-200 bg-white/86 p-2 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.45)]">
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {partnerFilterOptions.map((option) => {
+                  const active = partnerRequestFilter === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setPartnerRequestFilter(option.id as any)}
+                      className={`shrink-0 rounded-2xl border px-3.5 py-2 text-xs font-black transition ${
+                        active
+                          ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_28px_-22px_rgba(21,58,76,0.72)]'
+                          : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-white'
+                      }`}
+                    >
+                      {option.label}
+                      <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${active ? 'bg-white/18 text-white' : 'bg-white text-slate-500'}`}>
+                        {option.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+            {inviteFeedback ? (
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700">
+                {inviteFeedback}
+              </div>
+            ) : null}
 
             {requestBoard.length ? (
               <div className="grid gap-4">
@@ -3789,6 +4079,8 @@ export function SuperAdminDestinations() {
           </div>
         ) : null}
       </div>
+
+      {renderPartnerRequestDetailModal()}
 
       {activeInviteItem && activeInvitePayload ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-3 py-4 backdrop-blur-sm sm:items-center">

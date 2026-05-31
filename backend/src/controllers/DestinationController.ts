@@ -197,6 +197,18 @@ export class DestinationController {
     }
   }
 
+  static async adminResendPartnerInvite(req: Request, res: Response) {
+    try {
+      const payload = await destinationService.adminResendPartnerInvite(
+        String(req.params.requestId || ''),
+        req.auth?.sub
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   static async adminReviewStoreRequest(req: Request, res: Response) {
     try {
       const payload = await destinationService.adminReviewStoreRequest(

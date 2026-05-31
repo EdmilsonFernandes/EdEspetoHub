@@ -857,5 +857,51 @@ BEGIN
   IF to_regclass('public.destination_partner_requests') IS NOT NULL THEN
     ALTER TABLE destination_partner_requests
     ADD COLUMN IF NOT EXISTS created_partner_account_id UUID;
+    ALTER TABLE destination_partner_requests
+    ADD COLUMN IF NOT EXISTS request_source TEXT;
+    ALTER TABLE destination_partner_requests
+    ADD COLUMN IF NOT EXISTS claimed_hospitality_place_id UUID;
+    ALTER TABLE destination_partner_requests
+    ADD COLUMN IF NOT EXISTS claimed_listing_id UUID;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF to_regclass('public.destination_partner_requests') IS NOT NULL THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_constraint
+      WHERE conname = 'destination_partner_requests_claimed_hospitality_place_fkey'
+    ) THEN
+      ALTER TABLE destination_partner_requests
+      ADD CONSTRAINT destination_partner_requests_claimed_hospitality_place_fkey
+      FOREIGN KEY (claimed_hospitality_place_id)
+      REFERENCES hospitality_places(id)
+      ON DELETE SET NULL;
+    END IF;
+
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_constraint
+      WHERE conname = 'destination_partner_requests_claimed_listing_fkey'
+    ) THEN
+      ALTER TABLE destination_partner_requests
+      ADD CONSTRAINT destination_partner_requests_claimed_listing_fkey
+      FOREIGN KEY (claimed_listing_id)
+      REFERENCES destination_listings(id)
+      ON DELETE SET NULL;
+    END IF;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF to_regclass('public.destination_partner_requests') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS idx_destination_partner_requests_claimed_place
+      ON destination_partner_requests(claimed_hospitality_place_id)
+      WHERE claimed_hospitality_place_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS idx_destination_partner_requests_claimed_listing
+      ON destination_partner_requests(claimed_listing_id)
+      WHERE claimed_listing_id IS NOT NULL;
   END IF;
 END $$;
