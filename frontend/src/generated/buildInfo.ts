@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "6429db22",
-  "versionLabel": "v0.1.9.6429db22",
-  "versionInternal": "0.1.9+20260530.213818.6429db22",
-  "buildId": "0.1.9+20260530.213818.6429db22-20260530.213818-6429db22",
-  "builtAt": "2026-05-30T21:38:18.432Z",
-  "commitHash": "6429db2275d0d71771ed86fcaa6771f4064a6070",
-  "shortHash": "6429db22",
-  "branch": "main",
+  "versionDisplaySuffix": "103809e3",
+  "versionLabel": "v0.1.9.103809e3",
+  "versionInternal": "0.1.9+20260531.143141.103809e3",
+  "buildId": "0.1.9+20260531.143141.103809e3-20260531.143141-103809e3",
+  "builtAt": "2026-05-31T14:31:41.391Z",
+  "commitHash": "103809e3be98a107b2fdf6ec8f2976bda3e45f0c",
+  "shortHash": "103809e3",
+  "branch": "feature/destination-partner-portal",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "103809e3be98a107b2fdf6ec8f2976bda3e45f0c",
+      "shortHash": "103809e3",
+      "dateIso": "2026-05-31T10:22:19-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(destinations): add partner self-service portal",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/103809e3be98a107b2fdf6ec8f2976bda3e45f0c"
+    },
+    {
+      "hash": "d0fbbd4d9169ce371b87e17589970d75144936b6",
+      "shortHash": "d0fbbd4d",
+      "dateIso": "2026-05-30T18:39:47-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(checkout): collapse payment selector only for professional users to ensure 100% safety for client online checkout",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d0fbbd4d9169ce371b87e17589970d75144936b6"
+    },
     {
       "hash": "6429db2275d0d71771ed86fcaa6771f4064a6070",
       "shortHash": "6429db22",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Polish destination service stay badges",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/46effe3a9ae421aab763715d7e4576b56bea79ae"
-    },
-    {
-      "hash": "89c5381cb3b3a1bc9b93206019cd9ec375419731",
-      "shortHash": "89c5381c",
-      "dateIso": "2026-05-28T12:29:45-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Allow destination services in multiple stays",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/89c5381cb3b3a1bc9b93206019cd9ec375419731"
-    },
-    {
-      "hash": "fc464c24edae11c059c134fc18a471c344160435",
-      "shortHash": "fc464c24",
-      "dateIso": "2026-05-28T00:08:44-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve storefront loading and address distances",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fc464c24edae11c059c134fc18a471c344160435"
     }
   ]
 } as const;
