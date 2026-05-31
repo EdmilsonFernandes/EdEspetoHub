@@ -782,3 +782,80 @@ CREATE TABLE IF NOT EXISTS promo_pushes (
 
 CREATE INDEX IF NOT EXISTS idx_promo_pushes_store ON promo_pushes(store_id);
 CREATE INDEX IF NOT EXISTS idx_promo_pushes_status ON promo_pushes(status);
+
+-- Portal de parceiros de destinos, chalés e serviços
+CREATE TABLE IF NOT EXISTS destination_partner_accounts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT,
+  phone TEXT,
+  status TEXT NOT NULL DEFAULT 'invited',
+  must_change_password BOOLEAN NOT NULL DEFAULT TRUE,
+  invited_at TIMESTAMPTZ,
+  activated_at TIMESTAMPTZ,
+  last_login_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_destination_partner_accounts_status
+ON destination_partner_accounts(status, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS destination_partner_invites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  account_id UUID NOT NULL REFERENCES destination_partner_accounts(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  used_at TIMESTAMPTZ,
+  created_by UUID,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_destination_partner_invites_account
+ON destination_partner_invites(account_id, used_at, expires_at);
+
+CREATE TABLE IF NOT EXISTS destination_partner_permissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  account_id UUID NOT NULL REFERENCES destination_partner_accounts(id) ON DELETE CASCADE,
+  resource_type TEXT NOT NULL,
+  resource_id UUID NOT NULL,
+  permission TEXT NOT NULL DEFAULT 'OWNER',
+  status TEXT NOT NULL DEFAULT 'active',
+  created_from_request_id UUID,
+  created_by UUID,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_destination_partner_permissions_resource UNIQUE (account_id, resource_type, resource_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_destination_partner_permissions_resource
+ON destination_partner_permissions(resource_type, resource_id, status);
+
+CREATE INDEX IF NOT EXISTS idx_destination_partner_permissions_account
+ON destination_partner_permissions(account_id, status);
+
+CREATE TABLE IF NOT EXISTS destination_partner_audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  account_id UUID REFERENCES destination_partner_accounts(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  resource_type TEXT,
+  resource_id UUID,
+  before_json JSONB DEFAULT '{}'::jsonb,
+  after_json JSONB DEFAULT '{}'::jsonb,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  ip_address TEXT,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_destination_partner_audit_logs_account
+ON destination_partner_audit_logs(account_id, created_at DESC);
+
+DO $$
+BEGIN
+  IF to_regclass('public.destination_partner_requests') IS NOT NULL THEN
+    ALTER TABLE destination_partner_requests
+    ADD COLUMN IF NOT EXISTS created_partner_account_id UUID;
+  END IF;
+END $$;

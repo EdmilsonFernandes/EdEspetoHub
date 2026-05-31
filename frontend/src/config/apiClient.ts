@@ -49,6 +49,17 @@ const getMotoboyToken = (): string | null => {
   }
 };
 
+const getDestinationPartnerToken = (): string | null => {
+  try {
+    const raw = localStorage.getItem('destinationPartnerSession');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.token ?? null;
+  } catch {
+    return null;
+  }
+};
+
 const buildUrl = (path: string) =>
 {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
@@ -139,24 +150,29 @@ const getAdminRole = (): string =>
 
 const resolveAuthToken = (
   path: string,
-  authMode: 'auto' | 'none' | 'admin' | 'customer' | 'motoboy' | 'superadmin' = 'auto'
+  authMode: 'auto' | 'none' | 'admin' | 'customer' | 'motoboy' | 'superadmin' | 'partner' = 'auto'
 ) => {
   const isMotoboyRoute = path.startsWith('/motoboy') || path.startsWith('motoboy');
   const isCustomerRoute = path.startsWith('/customer') || path.startsWith('customer');
+  const isDestinationPartnerRoute = path.startsWith('/destination-partner') || path.startsWith('destination-partner');
 
   const motoboyToken = getMotoboyToken();
   const adminToken = getAdminToken();
   const customerToken = getCustomerToken();
+  const destinationPartnerToken = getDestinationPartnerToken();
 
   if (authMode === 'none') return null;
   if (authMode === 'admin') return adminToken;
   if (authMode === 'customer') return customerToken;
   if (authMode === 'motoboy') return motoboyToken;
   if (authMode === 'superadmin') return getSuperAdminToken();
+  if (authMode === 'partner') return destinationPartnerToken;
 
   let token = adminToken || customerToken;
   if (isMotoboyRoute) {
     token = motoboyToken;
+  } else if (isDestinationPartnerRoute) {
+    token = destinationPartnerToken;
   } else if (isCustomerRoute) {
     token = customerToken || adminToken;
   }
@@ -186,7 +202,8 @@ const request = async (path: string, options: any = {}) =>
     | 'admin'
     | 'customer'
     | 'motoboy'
-    | 'superadmin';
+    | 'superadmin'
+    | 'partner';
   const skipAutoLogout = Boolean(options?.skipAutoLogout);
   const token = resolveAuthToken(path, authMode);
 
@@ -262,7 +279,8 @@ const rawRequest = async (path: string, options: any = {}) =>
     | 'admin'
     | 'customer'
     | 'motoboy'
-    | 'superadmin';
+    | 'superadmin'
+    | 'partner';
   const token = resolveAuthToken(path, authMode);
 
   const finalOptions: any = {

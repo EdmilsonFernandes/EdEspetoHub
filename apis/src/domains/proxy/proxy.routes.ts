@@ -16,7 +16,9 @@ async function forward(req: Request, res: Response, _next: NextFunction): Promis
             default: res.status(405).json({ data: null, error: { code: 'METHOD_NOT_ALLOWED', message: `${req.method} not supported` } }); return;
         }
         const status =
-            req.method === 'POST' && !path.startsWith('/public/email/unsubscribe/one-click')
+            req.method === 'POST'
+            && !path.startsWith('/public/email/unsubscribe/one-click')
+            && !path.startsWith('/destination-partner/auth/')
                 ? 201
                 : 200;
         res.status(status).json(data);
@@ -44,6 +46,13 @@ export function createProxyRoutes(): Router {
     r.post('/payments/:paymentId/renew', forward);
     // Maps (public)
     r.post('/maps/geocode', forward); r.post('/maps/route', forward);
+    // Destination partner self-service
+    r.post('/destination-partner/auth/login', forward);
+    r.post('/destination-partner/auth/activate', forward);
+    r.get('/destination-partner/me', authRequired, forward);
+    r.get('/destination-partner/resources', authRequired, forward);
+    r.patch('/destination-partner/hospitality-places/:placeId', authRequired, forward);
+    r.patch('/destination-partner/listings/:listingId', authRequired, forward);
     // Legal (public)
     r.get('/legal/terms', forward); r.get('/legal/lgpd', forward);
     // Public platform / discovery

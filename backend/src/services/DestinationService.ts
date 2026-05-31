@@ -24,6 +24,11 @@ import { GeoLocationService } from './GeoLocationService';
 import { OrderReviewService } from './OrderReviewService';
 import { SubscriptionService } from './SubscriptionService';
 import { ZipCodeLookupResult, ZipCodeLookupService } from './ZipCodeLookupService';
+import {
+  DestinationPartnerPortalService,
+  RESOURCE_DESTINATION_LISTING,
+  RESOURCE_HOSPITALITY_PLACE,
+} from './DestinationPartnerPortalService';
 
 export class DestinationService {
   private repository = new DestinationRepository();
@@ -31,6 +36,7 @@ export class DestinationService {
   private orderReviewService = new OrderReviewService();
   private geoLocationService = new GeoLocationService();
   private zipCodeLookupService = new ZipCodeLookupService();
+  private destinationPartnerPortalService = new DestinationPartnerPortalService();
   private log = logger.child({ scope: 'DestinationService' });
 
   async listPublicDestinations(location?: DestinationLocationContext) {
@@ -820,6 +826,7 @@ export class DestinationService {
     const request = await this.repository.findPartnerRequestById(requestId);
     if (!request) throw new AppError('DEST-010', 404);
     const status = this.normalizeReviewStatus(payload?.status);
+    let partnerActivationToken: string | null | undefined;
     if (status === 'approved' && request.status !== 'approved') {
       if (String(request.partnerType || '').toUpperCase() === 'SERVICE_PROVIDER') {
         const listing = await this.adminSaveListing({
@@ -841,6 +848,15 @@ export class DestinationService {
           active: true,
         });
         request.createdListingId = listing.id;
+        const access = await this.destinationPartnerPortalService.ensureAccessForApprovedRequest({
+          request,
+          resourceType: RESOURCE_DESTINATION_LISTING,
+          resourceId: listing.id,
+          resourceName: listing.title,
+          reviewedBy,
+        });
+        request.createdPartnerAccountId = access.accountId;
+        partnerActivationToken = access.activationToken;
         (request as any).createdListing = undefined;
       } else {
         const place = await this.adminSaveHospitalityPlace({
@@ -863,6 +879,15 @@ export class DestinationService {
           active: true,
         });
         request.createdHospitalityPlaceId = place.id;
+        const access = await this.destinationPartnerPortalService.ensureAccessForApprovedRequest({
+          request,
+          resourceType: RESOURCE_HOSPITALITY_PLACE,
+          resourceId: place.id,
+          resourceName: place.name,
+          reviewedBy,
+        });
+        request.createdPartnerAccountId = access.accountId;
+        partnerActivationToken = access.activationToken;
         (request as any).createdHospitalityPlace = undefined;
       }
     }
@@ -871,6 +896,7 @@ export class DestinationService {
     request.reviewedBy = reviewedBy || null;
     request.reviewedAt = new Date();
     const saved = await this.repository.savePartnerRequest(request);
+    (saved as any).partnerActivationToken = partnerActivationToken;
     return this.toPublicPartnerRequest(saved);
   }
 
@@ -1371,6 +1397,8 @@ export class DestinationService {
       reviewNote: request.reviewNote || null,
       createdHospitalityPlaceId: request.createdHospitalityPlaceId || null,
       createdListingId: request.createdListingId || null,
+      createdPartnerAccountId: request.createdPartnerAccountId || null,
+      partnerActivationToken: request.partnerActivationToken || undefined,
       destination: request.destination ? this.toPublicDestination(request.destination) : null,
       createdAt: request.createdAt instanceof Date ? request.createdAt.toISOString() : request.createdAt,
       reviewedAt: request.reviewedAt instanceof Date ? request.reviewedAt.toISOString() : request.reviewedAt || null,

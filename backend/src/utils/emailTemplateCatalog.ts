@@ -306,6 +306,25 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     `,
   },
   {
+    key: 'destination_partner_invite',
+    name: 'Convite do parceiro de destinos',
+    category: 'account',
+    description: 'Enviado quando uma solicitação de chalé, pousada, serviço ou restaurante é aprovada.',
+    subject: 'Seu acesso de parceiro foi liberado - Já no Caminho',
+    preheader: 'Crie sua senha para atualizar fotos, contatos e informações do seu cadastro.',
+    variables: ['PARTNER_NAME', 'RESOURCE_NAME', 'ACTIVATION_URL', 'LOGIN_URL'],
+    textBody: 'Olá, {{PARTNER_NAME}}.\n\nSeu acesso para gerenciar {{RESOURCE_NAME}} foi liberado no Já no Caminho.\n\nCrie sua senha neste link: {{ACTIVATION_URL}}\n\nDepois, acesse: {{LOGIN_URL}}',
+    htmlBody: `
+      <h1 style="margin: 0 0 10px; font-size: 28px; line-height: 1.12; color: #0f172a;">Seu acesso de parceiro foi liberado</h1>
+      <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.7;">Olá, {{PARTNER_NAME}}. Agora você pode manter <strong>{{RESOURCE_NAME}}</strong> atualizado no Já no Caminho.</p>
+      <div style="margin: 0 0 20px; padding: 16px; border-radius: 18px; background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a; line-height: 1.7;">
+        Atualize fotos, descrição, WhatsApp, Instagram, endereço e instruções úteis para o cliente encontrar você.
+      </div>
+      <a href="{{ACTIVATION_URL}}" style="display: inline-block; padding: 13px 18px; border-radius: 14px; background: #153A4C; color: #ffffff; text-decoration: none; font-weight: 800;">Criar minha senha</a>
+      <p style="margin: 18px 0 0; color: #64748b; font-size: 12px; line-height: 1.7;">Depois da ativação, acesse o portal em: {{LOGIN_URL}}</p>
+    `,
+  },
+  {
     key: 'store_delivery_code_lock_alert',
     name: 'Alerta de código de entrega bloqueado',
     category: 'security',

@@ -441,6 +441,21 @@ export class EmailService {
     });
   }
 
+  async sendDestinationPartnerInvite(payload: {
+    email: string;
+    name?: string | null;
+    resourceName?: string | null;
+    activationUrl: string;
+    loginUrl: string;
+  }) {
+    await this.sendTemplate(payload.email, 'destination_partner_invite', {
+      PARTNER_NAME: payload.name || 'Parceiro',
+      RESOURCE_NAME: payload.resourceName || 'seu cadastro',
+      ACTIVATION_URL: payload.activationUrl,
+      LOGIN_URL: payload.loginUrl,
+    });
+  }
+
   async sendStoreDeliveryCodeLockAlert(payload: {
     to: string;
     storeName: string;

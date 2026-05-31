@@ -36,6 +36,7 @@ import { CustomerAccountController } from '../controllers/CustomerAccountControl
 import { FeaturedProductController } from '../controllers/FeaturedProductController';
 import { CondominiumController } from '../controllers/CondominiumController';
 import { DestinationController } from '../controllers/DestinationController';
+import { DestinationPartnerPortalController } from '../controllers/DestinationPartnerPortalController';
 import { StorePaymentAccountController } from '../controllers/StorePaymentAccountController';
 import { MotoboyPaymentAccountController } from '../controllers/MotoboyPaymentAccountController';
 import { MapsController } from '../controllers/MapsController';
@@ -71,6 +72,12 @@ routes.post('/auth/verify-email', authRecoveryRateLimit, AuthController.verifyEm
 routes.get('/auth/verify-email', authRecoveryRateLimit, AuthController.verifyEmail);
 routes.post('/auth/resend-verification', authRecoveryRateLimit, AuthController.resendVerification);
 routes.post('/auth/change-password', requireAuth, AuthController.changePassword);
+routes.post('/destination-partner/auth/login', authLoginRateLimit, DestinationPartnerPortalController.login);
+routes.post('/destination-partner/auth/activate', authRecoveryRateLimit, DestinationPartnerPortalController.activate);
+routes.get('/destination-partner/me', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPartnerPortalController.me);
+routes.get('/destination-partner/resources', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPartnerPortalController.me);
+routes.patch('/destination-partner/hospitality-places/:placeId', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPartnerPortalController.updateHospitalityPlace);
+routes.patch('/destination-partner/listings/:listingId', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPartnerPortalController.updateListing);
 routes.post('/customer/auth/register', CustomerAccountController.register);
 routes.post('/customer/auth/login', authLoginRateLimit, CustomerAccountController.login);
 routes.post('/customer/auth/verify-email-code', authRecoveryRateLimit, CustomerAccountController.verifyEmailCode);

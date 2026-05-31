@@ -525,12 +525,54 @@ describe('Destination Hub', () => {
     expect(reviewRes.status).toBe(200);
     expect(reviewRes.body.status).toBe('approved');
     expect(reviewRes.body.createdHospitalityPlaceId).toBeTruthy();
+    expect(reviewRes.body.createdPartnerAccountId).toBeTruthy();
+    expect(reviewRes.body.partnerActivationToken).toBeTruthy();
 
     const publicRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}`);
     expect(publicRes.status).toBe(200);
     expect(
       publicRes.body.hospitalityPlaces.some((place: any) => place.id === reviewRes.body.createdHospitalityPlaceId)
     ).toBe(true);
+
+    const activateRes = await api.post('/api/destination-partner/auth/activate').send({
+      token: reviewRes.body.partnerActivationToken,
+      password: 'senha123',
+    });
+
+    expect(activateRes.status, JSON.stringify(activateRes.body)).toBe(200);
+    expect(activateRes.body.token).toBeTruthy();
+    expect(activateRes.body.resources).toHaveLength(1);
+
+    const meRes = await api
+      .get('/api/destination-partner/me')
+      .set('Authorization', `Bearer ${activateRes.body.token}`);
+
+    expect(meRes.status, JSON.stringify(meRes.body)).toBe(200);
+    expect(meRes.body.resources[0]).toEqual(expect.objectContaining({
+      resourceType: 'HOSPITALITY_PLACE',
+    }));
+
+    const updateRes = await api
+      .patch(`/api/destination-partner/hospitality-places/${reviewRes.body.createdHospitalityPlaceId}`)
+      .set('Authorization', `Bearer ${activateRes.body.token}`)
+      .send({
+        name: `Pousada Sol Atualizada ${suffix}`,
+        description: 'Descrição atualizada pelo parceiro.',
+        whatsapp: '11988887777',
+        active: false,
+        sortOrder: 999,
+      });
+
+    expect(updateRes.status, JSON.stringify(updateRes.body)).toBe(200);
+    expect(updateRes.body.name).toBe(`Pousada Sol Atualizada ${suffix}`);
+    expect(updateRes.body.description).toBe('Descrição atualizada pelo parceiro.');
+    expect(updateRes.body.active).toBe(true);
+
+    const publicAfterUpdateRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}`);
+    const updatedPublicPlace = publicAfterUpdateRes.body.hospitalityPlaces.find(
+      (place: any) => place.id === reviewRes.body.createdHospitalityPlaceId
+    );
+    expect(updatedPublicPlace.description).toBe('Descrição atualizada pelo parceiro.');
   });
 
   it('accepts partner requests for a city that is not public yet', async () => {

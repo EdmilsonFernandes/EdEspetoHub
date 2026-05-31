@@ -16,6 +16,7 @@ O projeto roda como monorepo e hoje tem quatro servicos principais em producao:
 - **Motoboy**: fila de entregas, entrega atual, ganhos, perfil, documentos e repasse/recebimento de gorjetas.
 - **Super Admin**: gestao de lojas, planos, usuarios, KYC de motoboy, destinos, banners da home, e-mails, seguranca e configuracoes globais.
 - **Destinos turisticos**: cidades, chale/pousada, servicos locais, lojas que atendem hospedagens e convites comerciais.
+- **Portal do parceiro de destinos**: chalés, pousadas, serviços e restaurantes aprovados podem atualizar dados próprios com permissão limitada.
 - **Condominios**: vitrines por condominio/evento, lojas participantes e fluxo normal de pedido.
 
 ## Arquitetura atual
@@ -161,6 +162,21 @@ A ordem publica dos destinos turisticos e controlada no Super Admin em `Destinos
 - `destination_listing_hospitality_places.sort_order`: prioridade do mesmo servico dentro de uma hospedagem especifica.
 
 Use numeros menores para aparecer primeiro. O vinculo por hospedagem permite monetizar destaque por chale sem duplicar o cadastro do servico.
+
+## Portal do parceiro de destinos
+
+O parceiro aprovado pelo Super Admin recebe convite por e-mail para acessar `/parceiro` e manter dados públicos básicos do próprio cadastro.
+
+Documentacao detalhada: `docs/DESTINATION_PARTNER_PORTAL.md`.
+
+Arquivos principais:
+
+- `backend/src/services/DestinationPartnerPortalService.ts`
+- `backend/src/controllers/DestinationPartnerPortalController.ts`
+- `frontend/src/pages/DestinationPartnerPortal.tsx`
+- `frontend/src/pages/DestinationPartnerActivate.tsx`
+
+O parceiro pode editar fotos, descrição, contato e endereço. Campos estratégicos continuam exclusivos do Super Admin, como ativo/inativo, destino, categoria, ordem/prioridade, destaque e vínculos.
 
 ## E-mails e templates
 
