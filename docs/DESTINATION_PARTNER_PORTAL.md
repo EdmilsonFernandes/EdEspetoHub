@@ -28,14 +28,15 @@ O parceiro não pode alterar campos estratégicos:
 ## Fluxo Operacional
 
 1. Parceiro solicita entrada pelo fluxo público de destinos.
-2. Super Admin revisa a solicitação.
-3. Ao aprovar, o backend cria o chalé/pousada ou serviço/restaurante.
-4. O backend cria ou reaproveita uma conta em `destination_partner_accounts`.
-5. O backend cria a permissão em `destination_partner_permissions`.
-6. O backend gera convite em `destination_partner_invites`.
-7. O parceiro recebe e-mail para criar senha.
-8. O parceiro acessa `/parceiro` e edita apenas os campos liberados.
-9. Alterações ficam auditadas em `destination_partner_audit_logs`.
+2. O backend envia aviso interno para análise do Já no Caminho.
+3. Super Admin revisa a solicitação.
+4. Ao aprovar, o backend cria o chalé/pousada ou serviço/restaurante.
+5. O backend cria ou reaproveita uma conta em `destination_partner_accounts`.
+6. O backend cria a permissão em `destination_partner_permissions`.
+7. O backend gera convite em `destination_partner_invites`.
+8. O parceiro recebe e-mail para criar senha.
+9. O parceiro acessa `/parceiro` e edita apenas os campos liberados.
+10. Alterações ficam auditadas em `destination_partner_audit_logs`.
 
 ## Telas
 
@@ -91,17 +92,25 @@ Sessão local:
 
 ## E-mail
 
-Template gerenciado:
+Templates gerenciados:
 
+- `destination_partner_request_notification`: aviso interno quando uma solicitação nova é criada ou reenviada enquanto ainda está pendente.
 - `destination_partner_invite`
 
 Cadastro base:
 
 - `backend/src/utils/emailTemplateCatalog.ts`
 
-Envio:
+Envios:
 
+- `EmailService.sendDestinationPartnerRequestNotification`
 - `EmailService.sendDestinationPartnerInvite`
+
+Destinatários do aviso interno:
+
+- `AUDIT_NOTIFICATION_EMAIL`, com fallback `edmls2008@gmail.com`;
+- `NOTIFY_ON_SIGNUP_EMAILS`, quando configurado;
+- `contato@janocaminho.com.br`.
 
 ## Segurança
 

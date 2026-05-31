@@ -74,6 +74,19 @@ describe('EmailService managed template variables', () => {
       city: 'Sao Jose dos Campos',
       state: 'SP',
     });
+    await service.sendDestinationPartnerRequestNotification({
+      to: 'admin@teste.com',
+      partnerType: 'SERVICE_PROVIDER',
+      resourceName: 'Restaurante Teste',
+      destinationName: 'São Bento do Sapucaí',
+      responsibleName: 'Responsavel Teste',
+      responsibleEmail: 'responsavel@teste.com',
+      responsiblePhone: '(12) 97777-0000',
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      message: 'Tenho interesse em aparecer no app.',
+      requestId: 'request-1',
+    });
     await service.sendCondominiumAccessCredentials({
       email: 'condominio@teste.com',
       responsibleName: 'Responsavel Teste',

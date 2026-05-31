@@ -517,6 +517,17 @@ describe('Destination Hub', () => {
     expect(requestRes.status).toBe(201);
     expect(requestRes.body.status).toBe('pending');
 
+    const notificationLogs = await AppDataSource.query(
+      `SELECT to_email, status
+         FROM email_send_logs
+        WHERE template_key = $1
+          AND metadata->>'requestId' = $2`,
+      ['destination_partner_request_notification', requestRes.body.id]
+    );
+    const notifiedEmails = notificationLogs.map((row: any) => String(row.to_email || '').toLowerCase());
+    expect(notifiedEmails).toContain(String(env.email.auditInbox || 'edmls2008@gmail.com').toLowerCase());
+    expect(notifiedEmails).toContain('contato@janocaminho.com.br');
+
     const reviewRes = await api
       .patch(`/api/admin/destination-partner-requests/${requestRes.body.id}/review`)
       .set('Authorization', `Bearer ${platformToken}`)

@@ -407,6 +407,48 @@ export class EmailService {
     );
   }
 
+  async sendDestinationPartnerRequestNotification(payload: {
+    to?: string;
+    partnerType: string;
+    resourceName: string;
+    destinationName?: string | null;
+    responsibleName: string;
+    responsibleEmail: string;
+    responsiblePhone?: string | null;
+    city?: string | null;
+    state?: string | null;
+    message?: string | null;
+    requestId?: string;
+  }) {
+    const targets = this.getNotificationRecipients(payload.to || env.email.auditInbox);
+    if (!targets.length) return;
+    const baseUrl = (env.appUrl || 'https://janocaminho.com.br').replace(/\/$/, '');
+    const partnerType = String(payload.partnerType || '').toUpperCase();
+    const typeLabel = partnerType === 'HOSPITALITY'
+      ? 'Chalé, pousada ou hospedagem'
+      : 'Serviço, restaurante ou comércio';
+
+    await Promise.all(
+      targets.map((target) =>
+        this.sendTemplate(target, 'destination_partner_request_notification', {
+          REQUEST_TYPE_LABEL: typeLabel,
+          RESOURCE_NAME: payload.resourceName,
+          DESTINATION_NAME: payload.destinationName || '-',
+          RESPONSIBLE_NAME: payload.responsibleName,
+          RESPONSIBLE_EMAIL: payload.responsibleEmail,
+          RESPONSIBLE_PHONE: payload.responsiblePhone || '-',
+          LOCATION: [payload.city, payload.state].filter(Boolean).join(' - ') || '-',
+          MESSAGE: payload.message || '-',
+          ADMIN_URL: `${baseUrl}/superadmin/destinations`,
+        }, {
+          requestId: payload.requestId || null,
+          partnerType,
+          resourceName: payload.resourceName,
+        })
+      )
+    );
+  }
+
   async sendCondominiumAccessCredentials(payload: {
     email: string;
     responsibleName: string;

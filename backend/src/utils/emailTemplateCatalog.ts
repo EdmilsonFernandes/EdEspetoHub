@@ -268,6 +268,33 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     `,
   },
   {
+    key: 'destination_partner_request_notification',
+    name: 'Solicitação de parceiro de destinos',
+    category: 'internal',
+    description: 'Aviso interno quando chalé, pousada, serviço ou restaurante solicita entrada em destinos.',
+    subject: 'Nova solicitação em destinos - {{RESOURCE_NAME}}',
+    preheader: 'Parceiro pediu análise no Já no Caminho.',
+    variables: ['REQUEST_TYPE_LABEL', 'RESOURCE_NAME', 'DESTINATION_NAME', 'RESPONSIBLE_NAME', 'RESPONSIBLE_EMAIL', 'RESPONSIBLE_PHONE', 'LOCATION', 'MESSAGE', 'ADMIN_URL'],
+    textBody: 'Nova solicitação em destinos.\nTipo: {{REQUEST_TYPE_LABEL}}\nNome: {{RESOURCE_NAME}}\nDestino: {{DESTINATION_NAME}}\nResponsável: {{RESPONSIBLE_NAME}}\nE-mail: {{RESPONSIBLE_EMAIL}}\nWhatsApp: {{RESPONSIBLE_PHONE}}\nLocal: {{LOCATION}}\nMensagem: {{MESSAGE}}\nAnalisar: {{ADMIN_URL}}',
+    htmlBody: `
+      <h1 style="margin: 0 0 10px; font-size: 26px; color: #0f172a;">Nova solicitação em destinos</h1>
+      <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.7;">Um parceiro pediu para aparecer no Já no Caminho. Revise os dados no Super Admin antes de aprovar.</p>
+      <div style="padding: 16px; border-radius: 18px; background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a; line-height: 1.8;">
+        <div><strong>Tipo:</strong> {{REQUEST_TYPE_LABEL}}</div>
+        <div><strong>Nome:</strong> {{RESOURCE_NAME}}</div>
+        <div><strong>Destino:</strong> {{DESTINATION_NAME}}</div>
+        <div><strong>Responsável:</strong> {{RESPONSIBLE_NAME}}</div>
+        <div><strong>E-mail:</strong> {{RESPONSIBLE_EMAIL}}</div>
+        <div><strong>WhatsApp:</strong> {{RESPONSIBLE_PHONE}}</div>
+        <div><strong>Local:</strong> {{LOCATION}}</div>
+      </div>
+      <div style="margin-top: 14px; padding: 14px; border-radius: 16px; background: #eef6f8; border: 1px solid rgba(51,104,134,0.16); color: #153A4C; line-height: 1.7;">
+        <strong>Mensagem:</strong> {{MESSAGE}}
+      </div>
+      <a href="{{ADMIN_URL}}" style="display: inline-block; margin-top: 18px; padding: 13px 18px; border-radius: 14px; background: #153A4C; color: #ffffff; text-decoration: none; font-weight: 800;">Analisar no Super Admin</a>
+    `,
+  },
+  {
     key: 'condominium_access_credentials',
     name: 'Credenciais de condomínio',
     category: 'security',

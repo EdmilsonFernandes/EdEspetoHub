@@ -29,6 +29,7 @@ import {
   RESOURCE_DESTINATION_LISTING,
   RESOURCE_HOSPITALITY_PLACE,
 } from './DestinationPartnerPortalService';
+import { EmailService } from './EmailService';
 
 export class DestinationService {
   private repository = new DestinationRepository();
@@ -37,7 +38,32 @@ export class DestinationService {
   private geoLocationService = new GeoLocationService();
   private zipCodeLookupService = new ZipCodeLookupService();
   private destinationPartnerPortalService = new DestinationPartnerPortalService();
+  private emailService = new EmailService();
   private log = logger.child({ scope: 'DestinationService' });
+
+  private async notifyPartnerRequestByEmail(payload: {
+    requestId?: string;
+    partnerType: string;
+    resourceName: string;
+    destinationName?: string | null;
+    responsibleName: string;
+    responsibleEmail: string;
+    responsiblePhone?: string | null;
+    city?: string | null;
+    state?: string | null;
+    message?: string | null;
+  }) {
+    try {
+      await this.emailService.sendDestinationPartnerRequestNotification(payload);
+    } catch (error) {
+      this.log.error('Destination partner request notification failed', {
+        requestId: payload.requestId || null,
+        resourceName: payload.resourceName,
+        responsibleEmail: payload.responsibleEmail,
+        error,
+      });
+    }
+  }
 
   async listPublicDestinations(location?: DestinationLocationContext) {
     const destinations = await this.repository.listActiveDestinations();
@@ -163,7 +189,21 @@ export class DestinationService {
     }
 
     const existing = await this.repository.findPendingPartnerRequestByEmailAndName(responsibleEmail, name, destination.id);
-    if (existing) return this.toPublicPartnerRequest(existing);
+    if (existing) {
+      await this.notifyPartnerRequestByEmail({
+        requestId: existing.id,
+        partnerType: existing.partnerType || partnerType,
+        resourceName: existing.name || name,
+        destinationName: destination.name || destination.city || null,
+        responsibleName: existing.responsibleName || responsibleName,
+        responsibleEmail,
+        responsiblePhone: existing.responsiblePhone || responsiblePhone,
+        city: existing.city || destination.city || null,
+        state: existing.state || destination.state || null,
+        message: existing.message || payload?.message || null,
+      });
+      return this.toPublicPartnerRequest(existing);
+    }
 
     const baseSlug = normalizeDestinationSlug(payload?.slug || name) || 'parceiro';
     const logoUrl = await saveBase64Image(payload?.logoFile, `destination-partner-logo-${baseSlug}`, 'destinations');
@@ -195,6 +235,18 @@ export class DestinationService {
       responsiblePhone,
       message: toOptionalText(payload?.message),
       status: 'pending',
+    });
+    await this.notifyPartnerRequestByEmail({
+      requestId: saved.id,
+      partnerType,
+      resourceName: saved.name || name,
+      destinationName: destination.name || destination.city || null,
+      responsibleName,
+      responsibleEmail,
+      responsiblePhone,
+      city: saved.city || destination.city || null,
+      state: saved.state || destination.state || null,
+      message: saved.message || null,
     });
     return this.toPublicPartnerRequest({ ...saved, destination });
   }
