@@ -149,7 +149,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     navigate('/');
   };
 
-  const goToAccessPortal = () => navigate('/entrar');
+  const goToAccessPortal = () => navigate('/cliente?mode=login');
   const goToCondominiumRequest = () => navigate('/condominio/solicitar');
   const goToHospitalitySolution = () => {
     if (location.pathname === '/' && typeof document !== 'undefined') {
@@ -286,7 +286,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                         <div className="mt-2 border-t border-white/6 px-3.5 pb-2 pt-3">
                           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Condomínio</p>
                           <p className="mt-2 text-xs font-medium leading-5 text-slate-400">
-                            Responsaveis ja cadastrados entram pelo botao <span className="font-black text-white">Entrar</span>. Novos condominios comecam pela solicitacao.
+                            Responsaveis ja cadastrados entram em <span className="font-black text-white">Entrar &gt; Sou profissional</span>. Novos condominios comecam pela solicitacao.
                           </p>
                           <button
                             type="button"
@@ -625,7 +625,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   Instagram @janocaminho
                 </a>
                 <button onClick={goToAccessPortal} className="block hover:text-white transition-colors">
-                  Entrar na plataforma
+                  Entrar no app
                 </button>
               </div>
             </div>

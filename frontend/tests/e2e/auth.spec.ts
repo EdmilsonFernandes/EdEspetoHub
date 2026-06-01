@@ -15,6 +15,27 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
     await expect(page).toHaveTitle(/Já no Caminho|Plataforma/i);
   });
 
+  test('entrada principal abre cliente e acessos profissionais ficam secundários', async ({ page }) => {
+    await page.goto('/');
+    await waitForAppIntro(page);
+
+    await page.getByRole('button', { name: /^Entrar$/ }).last().click();
+    await expect(page).toHaveURL(/\/cliente\?mode=login/);
+    await expect(page.getByRole('banner')).toContainText('Área do cliente');
+
+    await page.getByRole('button', { name: /Sou profissional/i }).click();
+    const dialog = page.getByRole('dialog', { name: /Entrar como operação/i });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Lojista/i })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Entregador/i })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Parceiro/i })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Condomínio/i })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Acesso interno/i })).toBeVisible();
+
+    await dialog.getByRole('button', { name: /Lojista/i }).click();
+    await expect(page).toHaveURL(/\/admin/);
+  });
+
   test('mostra header padrao e valida login do cliente sem envio silencioso', async ({ page }) => {
     await page.goto('/cliente?hub=1');
     await waitForAppIntro(page);
@@ -76,9 +97,16 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
     await expect.poll(() => page.evaluate(() => (window as any).__forgotCalls)).toBe(0);
 
     await expect(page.getByRole('heading', { name: 'Crie sua nova senha' })).toBeVisible();
-    await page.locator('#new-password').fill('senha-nova-123');
-    await page.locator('#confirm-password').fill('senha-nova-123');
-    await page.getByRole('button', { name: 'Enviar código por e-mail' }).click({ force: true });
+    const newPasswordInput = page.locator('#new-password');
+    const confirmPasswordInput = page.locator('#confirm-password');
+    const sendCodeButton = page.getByRole('button', { name: 'Enviar código por e-mail' });
+
+    await newPasswordInput.fill('senha-nova-123');
+    await expect(newPasswordInput).toHaveValue('senha-nova-123');
+    await confirmPasswordInput.fill('senha-nova-123');
+    await expect(confirmPasswordInput).toHaveValue('senha-nova-123');
+    await expect(sendCodeButton).toBeEnabled();
+    await sendCodeButton.click();
 
     await expect(page.getByText('Enviamos um código para seu e-mail')).toBeVisible();
     await expect.poll(() => page.evaluate(() => (window as any).__forgotCalls)).toBe(1);
