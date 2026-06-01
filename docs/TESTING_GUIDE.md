@@ -61,6 +61,7 @@ Os testes ficam em `frontend/tests/e2e`. Eles validam UI e navegação crítica,
 | `client-orders-account.spec.ts` | UI do cliente: filtros de pedidos com contadores, preview de imagem do item, conta do cliente, endereço principal e telefone mascarado na edição de perfil. |
 | `destination-whatsapp-location.spec.ts` | Fluxo visual de destinos/chalés: WhatsApp com endereço/mapa da hospedagem, contexto da hospedagem carregado para lojas oficiais e tela de rota com mapa, logos, distância e navegação sem voltar duplicado. |
 | `destination-partner-portal.spec.ts` | Portal do parceiro de destinos: ativação por convite, login, listagem de cadastros liberados e salvamento de campos operacionais seguros com API mockada. |
+| `superadmin-destinations-partners.spec.ts` | Super Admin de destinos: filtros de onboarding, modal de validação de posse, comparação de cadastro atual vs solicitação e exigência de registro de conferência antes da aprovação. |
 | `hub-marketplace.spec.ts` | Home/Hub do marketplace: carregamento de lojas, filtros principais, dados de card, itens em destaque, link "Ver mais" e busca na tela de destaques. |
 
 ### Unitários Relevantes

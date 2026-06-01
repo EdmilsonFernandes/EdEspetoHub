@@ -907,6 +907,10 @@ export class DestinationService {
     if (status === 'approved' && request.status !== 'approved' && isClaimRequest && payload?.claimVerified !== true) {
       throw new AppError('DPARTNER-010', 400);
     }
+    const reviewNote = toOptionalText(payload?.reviewNote);
+    if (status === 'approved' && request.status !== 'approved' && isClaimRequest && String(reviewNote || '').trim().length < 12) {
+      throw new AppError('DPARTNER-012', 400);
+    }
     let partnerActivationToken: string | null | undefined;
     if (status === 'approved' && request.status !== 'approved') {
       if (String(request.partnerType || '').toUpperCase() === 'SERVICE_PROVIDER') {
@@ -983,7 +987,7 @@ export class DestinationService {
       }
     }
     request.status = status;
-    request.reviewNote = toOptionalText(payload?.reviewNote);
+    request.reviewNote = reviewNote;
     request.reviewedBy = reviewedBy || null;
     request.reviewedAt = new Date();
     const saved = await this.repository.savePartnerRequest(request);

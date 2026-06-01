@@ -645,6 +645,7 @@ export function SuperAdminDestinations() {
   const [partnerInviteLinks, setPartnerInviteLinks] = useState<Record<string, string>>({});
   const [partnerRequestFilter, setPartnerRequestFilter] = useState<'all' | 'pending' | 'claim' | 'invited' | 'active' | 'rejected'>('all');
   const [selectedPartnerRequest, setSelectedPartnerRequest] = useState<any | null>(null);
+  const [partnerReviewNotes, setPartnerReviewNotes] = useState<Record<string, string>>({});
 
   const load = async () => {
     if (!localStorage.getItem('superAdminToken')) {
@@ -1518,8 +1519,14 @@ export function SuperAdminDestinations() {
     }
   };
 
-  const reviewPartner = async (request: any, status: 'approved' | 'rejected') => {
+  const reviewPartner = async (request: any, status: 'approved' | 'rejected', reviewNote = '') => {
     const isClaim = isPartnerClaimRequest(request);
+    const normalizedReviewNote = String(reviewNote || '').trim();
+    if (status === 'approved' && isClaim && normalizedReviewNote.length < 12) {
+      setError('Registre como a titularidade foi conferida antes de aprovar este parceiro.');
+      setSelectedPartnerRequest(request);
+      return;
+    }
     if (status === 'approved' && isClaim) {
       const confirmed = window.confirm(
         `Esta solicitação vai liberar acesso para editar "${claimedResourceLabel(request)}".\n\nAntes de aprovar, confirme por WhatsApp/e-mail oficial do cadastro que esta pessoa é realmente responsável pelo perfil. Deseja continuar?`
@@ -1529,9 +1536,18 @@ export function SuperAdminDestinations() {
     setSaving(true);
     setError('');
     try {
-      await destinationService.adminReviewPartnerRequest(request.id, { status, claimVerified: status === 'approved' && isClaim ? true : undefined });
+      await destinationService.adminReviewPartnerRequest(request.id, {
+        status,
+        claimVerified: status === 'approved' && isClaim ? true : undefined,
+        reviewNote: normalizedReviewNote || undefined,
+      });
       await refreshAdminData(selectedDestinationId);
       setSelectedPartnerRequest(null);
+      setPartnerReviewNotes((current) => {
+        const next = { ...current };
+        delete next[request.id];
+        return next;
+      });
     } catch (err: any) {
       setError(err?.message || 'Não foi possível revisar solicitação.');
     } finally {
@@ -2506,7 +2522,7 @@ export function SuperAdminDestinations() {
       </div>
       {renderRequestActions(
         request,
-        () => reviewPartner(request, 'approved'),
+        () => (isPartnerClaimRequest(request) ? setSelectedPartnerRequest(request) : reviewPartner(request, 'approved')),
         () => reviewPartner(request, 'rejected')
       )}
       {!isPendingRequest(request.status) && String(request.status || '').toLowerCase() === 'approved' && request.createdPartnerAccountId ? (
@@ -2600,6 +2616,7 @@ export function SuperAdminDestinations() {
       { label: 'Descrição', current: current?.description, submitted: request.description },
     ];
     const account = request.createdPartnerAccount || {};
+    const reviewNoteValue = partnerReviewNotes[request.id] ?? request.reviewNote ?? '';
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-3 py-4 backdrop-blur-sm sm:items-center">
         <div className="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-[2rem] bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.75)]">
@@ -2646,6 +2663,34 @@ export function SuperAdminDestinations() {
               </div>
             ) : null}
 
+            {isPendingRequest(request.status) ? (
+              <label className="mt-4 block rounded-[1.45rem] border border-slate-200 bg-white p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.35)]">
+                <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
+                  <ShieldCheck size={15} weight="fill" />
+                  Registro da conferência
+                </span>
+                <textarea
+                  value={reviewNoteValue}
+                  onChange={(event) => setPartnerReviewNotes((current) => ({ ...current, [request.id]: event.target.value }))}
+                  rows={3}
+                  placeholder={isPartnerClaimRequest(request)
+                    ? 'Ex.: confirmei pelo WhatsApp oficial do cadastro em 31/05 e o responsável autorizou o acesso.'
+                    : 'Observação interna opcional sobre a aprovação ou recusa.'}
+                  className="mt-3 min-h-24 w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886] focus:bg-white focus:ring-4 focus:ring-[#336886]/10"
+                />
+                <span className="mt-2 block text-[11px] font-bold text-slate-500">
+                  {isPartnerClaimRequest(request)
+                    ? 'Obrigatório para assumir perfil existente. Esse texto fica salvo no histórico da solicitação.'
+                    : 'Opcional, mas recomendado para manter a operação auditável.'}
+                </span>
+              </label>
+            ) : request.reviewNote ? (
+              <div className="mt-4 rounded-[1.45rem] border border-slate-200 bg-slate-50 p-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Registro da conferência</p>
+                <p className="mt-2 whitespace-pre-wrap text-sm font-semibold text-slate-700">{request.reviewNote}</p>
+              </div>
+            ) : null}
+
             <div className="mt-4 overflow-hidden rounded-[1.45rem] border border-slate-200">
               <div className="grid grid-cols-[0.9fr_1fr_1fr] gap-0 bg-slate-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
                 <span>Campo</span>
@@ -2680,10 +2725,10 @@ export function SuperAdminDestinations() {
             <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
               {isPendingRequest(request.status) ? (
                 <>
-                  <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'rejected')} className={actionButtonClass('danger')}>
+                  <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'rejected', reviewNoteValue)} className={actionButtonClass('danger')}>
                     Recusar
                   </button>
-                  <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'approved')} className={actionButtonClass('success')}>
+                  <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'approved', reviewNoteValue)} className={actionButtonClass('success')}>
                     <CheckCircle size={13} weight="fill" />
                     Aprovar com conferência
                   </button>
@@ -3440,6 +3485,7 @@ export function SuperAdminDestinations() {
                 <label className="grid gap-1.5">
                   <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Ordem na Home</span>
                   <input type="number" min="0" value={destinationForm.sortOrder} onChange={(event) => updateDestination('sortOrder', event.target.value)} placeholder="0" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                  <span className="px-1 text-[11px] font-bold text-slate-500">Menor número aparece antes. Útil para campanhas e cidades patrocinadas no futuro.</span>
                 </label>
                 <select value={String(destinationForm.active !== false)} onChange={(event) => updateDestination('active', event.target.value === 'true')} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
                   <option value="true">Ativo no público</option>
@@ -3558,6 +3604,7 @@ export function SuperAdminDestinations() {
                 <label className="grid gap-1.5">
                   <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Prioridade na lista</span>
                   <input type="number" min="0" value={placeForm.sortOrder} onChange={(event) => updatePlace('sortOrder', event.target.value)} placeholder="0" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                  <span className="px-1 text-[11px] font-bold text-slate-500">Base para destaque comercial: menor número sobe a hospedagem sem mudar o cadastro.</span>
                 </label>
                 <select value={String(placeForm.active !== false)} onChange={(event) => updatePlace('active', event.target.value === 'true')} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
                   <option value="true">Ativo no público</option>
@@ -3916,6 +3963,7 @@ export function SuperAdminDestinations() {
                 <label className="grid gap-1.5">
                   <span className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Prioridade geral</span>
                   <input type="number" min="0" value={listingForm.sortOrder} onChange={(event) => updateListing('sortOrder', event.target.value)} placeholder="0" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
+                  <span className="px-1 text-[11px] font-bold text-slate-500">Use para ordenar parceiros. Em cada chalé, a aba de vínculos permite prioridade específica.</span>
                 </label>
                 <select value={String(listingForm.active !== false)} onChange={(event) => updateListing('active', event.target.value === 'true')} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none">
                   <option value="true">Ativo no público</option>

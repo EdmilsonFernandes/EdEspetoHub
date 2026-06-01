@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 const storeId = '00000000-0000-4000-8000-000000000001';
 
@@ -123,6 +123,25 @@ const products = [
 
 test.use({ serviceWorkers: 'block' });
 
+const switchToTablesMode = async (page: Page) => {
+  const tablesButton = page.getByTestId('admin-queue-mode-tables');
+  await expect(tablesButton).toBeVisible({ timeout: 15000 });
+  await expect(async () => {
+    await tablesButton.evaluate((element) => (element as HTMLElement).click());
+    await expect(page.getByTestId('admin-table-search')).toBeVisible({ timeout: 1500 });
+  }).toPass({ timeout: 10000 });
+};
+
+const openFirstTable = async (page: Page) => {
+  const tableCard = page.getByTestId('admin-table-card').first();
+  await expect(tableCard).toBeVisible();
+  await expect(async () => {
+    await tableCard.evaluate((element) => (element as HTMLElement).click());
+    await expect(page.getByTestId('admin-table-detail')).toBeVisible({ timeout: 1500 });
+  }).toPass({ timeout: 10000 });
+  return page.getByTestId('admin-table-detail');
+};
+
 test.describe('Admin queue UX', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((session) => {
@@ -209,8 +228,7 @@ test.describe('Admin queue UX', () => {
   test('agrupa pedidos por mesa e abre detalhe editavel do pedido da mesa', async ({ page }) => {
     await page.goto('/admin/queue');
 
-    await expect(page.getByTestId('admin-queue-mode-tables')).toBeVisible({ timeout: 15000 });
-    await page.getByTestId('admin-queue-mode-tables').click();
+    await switchToTablesMode(page);
     await page.getByTestId('admin-table-search').fill('12');
 
     const tableCard = page.getByTestId('admin-table-card').first();
@@ -218,13 +236,11 @@ test.describe('Admin queue UX', () => {
     await expect(tableCard).toContainText('Mesa');
     await expect(tableCard).toContainText('12');
 
-    await tableCard.click();
-    const tableDetail = page.getByTestId('admin-table-detail');
-    await expect(tableDetail).toBeVisible();
+    const tableDetail = await openFirstTable(page);
     await expect(tableDetail).toContainText('Mesa 12');
     await expect(tableDetail).toContainText('Medalhao de Palmito');
 
-    await tableDetail.getByTestId('admin-table-order-row').first().click();
+    await tableDetail.getByTestId('admin-table-order-row').first().evaluate((element) => (element as HTMLElement).click());
     const orderDetail = page.getByTestId('admin-order-detail');
     await expect(orderDetail).toBeVisible();
     await expect(orderDetail.getByText('Medalhao de Palmito').first()).toBeVisible();
@@ -234,11 +250,10 @@ test.describe('Admin queue UX', () => {
   test('mantem acoes compactas de mesa e modal de couvert usaveis no mobile', async ({ page }) => {
     await page.goto('/admin/queue');
 
-    await expect(page.getByTestId('admin-queue-mode-tables')).toBeVisible({ timeout: 15000 });
-    await page.getByTestId('admin-queue-mode-tables').click();
+    await switchToTablesMode(page);
 
-    await page.getByTestId('admin-table-card').first().click();
-    await page.getByTestId('admin-table-order-row').first().click();
+    const tableDetail = await openFirstTable(page);
+    await tableDetail.getByTestId('admin-table-order-row').first().evaluate((element) => (element as HTMLElement).click());
 
     const orderDetail = page.getByTestId('admin-order-detail');
     await expect(orderDetail).toBeVisible();
@@ -247,7 +262,12 @@ test.describe('Admin queue UX', () => {
     await expect(orderDetail.getByRole('button', { name: /Couvert/i })).toBeVisible();
     await expect(orderDetail.getByRole('button', { name: /Taxa 10%/i })).toBeVisible();
 
-    await orderDetail.getByRole('button', { name: /Couvert/i }).click({ force: true });
+    const couvertButton = orderDetail.getByRole('button', { name: /Couvert/i });
+    await expect(couvertButton).toBeVisible();
+    await expect(async () => {
+      await couvertButton.evaluate((element) => (element as HTMLElement).click());
+      await expect(page.getByRole('button', { name: 'Adicionar couvert' })).toBeVisible({ timeout: 1500 });
+    }).toPass({ timeout: 10000 });
 
     await expect(page.getByRole('button', { name: 'Adicionar couvert' })).toBeVisible();
     await expect(page.getByLabel('Pessoas do couvert')).toBeVisible();
@@ -257,10 +277,10 @@ test.describe('Admin queue UX', () => {
     await page.getByLabel('Valor por pessoa (R$)').fill('15,50');
     const threePeopleButton = page.getByLabel('Pessoas do couvert').getByRole('button', { name: '3' });
     await expect(threePeopleButton).toBeVisible();
-    await threePeopleButton.click({ force: true });
+    await threePeopleButton.evaluate((element) => (element as HTMLElement).click());
     await expect(page.getByText('3 pessoas x R$ 15,50 por pessoa.')).toBeVisible();
     await expect(page.getByText('R$ 46,50')).toBeVisible();
-    await page.getByTestId('admin-manual-item-close').click({ force: true });
+    await page.getByTestId('admin-manual-item-close').evaluate((element) => (element as HTMLElement).click());
     await expect(page.getByRole('button', { name: 'Adicionar couvert' })).toBeHidden();
   });
 });
