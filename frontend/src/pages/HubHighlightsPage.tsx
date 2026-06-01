@@ -401,8 +401,8 @@ export function HubHighlightsPage() {
           </div>
         </div>
 
-        {/* Carrossel de Pílulas de Categoria Minimalistas */}
-        <div className="relative z-10 mb-4 -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1.5 pt-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Grade compacta: todos os filtros ficam visíveis sem scroll horizontal no mobile. */}
+        <div data-testid="highlight-category-filters" className="relative z-10 mb-4 grid grid-cols-[repeat(auto-fit,minmax(4.55rem,1fr))] gap-2">
           {categoryFilters.map((option) => {
             const CategoryIcon = option.icon;
             const active = selectedCategory === option.key;
@@ -411,25 +411,38 @@ export function HubHighlightsPage() {
                 key={option.key}
                 type="button"
                 onClick={() => setSelectedCategory(option.key)}
-                className={`jnc-hub-touch shrink-0 snap-start flex items-center gap-1.5 rounded-full px-3.5 py-1.5 border text-xs font-black transition-all duration-300 shadow-sm ${
+                className={`jnc-hub-touch group/filter relative flex min-h-[4.15rem] min-w-0 flex-col items-center justify-center overflow-hidden rounded-[1.1rem] border px-1.5 py-2 text-center transition-all duration-300 ${
                   active
-                    ? "bg-[#153A4C] border-[#153A4C] text-white shadow-[0_8px_16px_-8px_rgba(21,58,76,0.6)]"
-                    : "bg-white border-slate-200/80 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                    ? 'border-[#153A4C] bg-[linear-gradient(145deg,#153A4C_0%,#336886_76%,#5FD35A_165%)] text-white shadow-[0_14px_24px_-14px_rgba(21,58,76,0.62)]'
+                    : 'border-white/85 bg-white/88 text-slate-600 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/35 hover:border-[#336886]/18 hover:bg-white'
                 }`}
               >
-                <CategoryIcon
-                  size={14}
-                  weight={active ? 'fill' : 'bold'}
-                  className={active ? 'text-white' : 'text-[#336886]'}
-                />
-                <span className="tracking-tight">{option.label}</span>
-                {option.count > 0 && (
-                  <span className={`rounded-full px-1.5 py-0.5 text-[8.5px] font-black leading-none ${
-                    active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                <span className={`pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/filter:opacity-100 ${
+                  active ? 'bg-white/6' : 'bg-[radial-gradient(circle_at_50%_0%,rgba(95,211,90,0.12),transparent_58%)]'
+                }`} />
+                <span className={`relative grid h-8 w-8 place-items-center rounded-full transition-all duration-300 ${
+                  active
+                    ? 'bg-white/18 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]'
+                    : 'bg-[#edf5fa] text-[#336886] group-hover/filter:bg-[#336886]/10'
+                }`}>
+                  <CategoryIcon
+                    size={15}
+                    weight={active ? 'fill' : 'bold'}
+                    className={active ? 'text-white' : 'text-[#336886]'}
+                  />
+                  {option.count > 0 ? (
+                    <span className={`absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[8px] font-black leading-none ${
+                      active ? 'bg-white text-[#153A4C]' : 'bg-[#153A4C] text-white'
+                    }`}>
+                      {option.count > 99 ? '99+' : option.count}
+                    </span>
+                  ) : null}
+                </span>
+                <span className={`relative mt-1 max-w-full truncate text-[9.5px] font-black uppercase leading-none tracking-[0.06em] ${
+                  active ? 'text-white' : 'text-slate-600'
                   }`}>
-                    {option.count}
-                  </span>
-                )}
+                  {option.label}
+                </span>
               </button>
             );
           })}

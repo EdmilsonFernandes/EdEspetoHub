@@ -205,6 +205,13 @@ test.describe('Hub marketplace', () => {
     await expect(page).toHaveURL(/\/hub\/destaques/);
     await expect(page.getByRole('banner')).toContainText('Destaques de hoje');
     await expect(page.getByText('Escolha pelo que deu vontade')).toBeVisible();
+    const filterGrid = page.getByTestId('highlight-category-filters');
+    await expect(filterGrid).toBeVisible();
+    await expect(filterGrid).toContainText('Todos');
+    await expect(filterGrid).toContainText('Pratos');
+    await expect(
+      filterGrid.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)
+    ).resolves.toBe(true);
     await page.getByPlaceholder('O que deu vontade agora?').fill('medalhao');
     await expect(page.getByRole('link', { name: /Medalhao Premium/ }).first()).toBeVisible();
     await expect(page.getByText('por Gustavao Espetos E2E')).toBeVisible();
