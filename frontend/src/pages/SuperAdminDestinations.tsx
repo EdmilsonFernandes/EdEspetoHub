@@ -962,8 +962,8 @@ export function SuperAdminDestinations() {
           district: String(addressData?.district || current.district || ''),
           city: String(addressData?.city || current.city || ''),
           state: String(addressData?.state || current.state || '').toUpperCase().slice(0, 2),
-          lat: current.lat || (addressData?.latitude != null ? String(addressData.latitude) : ''),
-          lng: current.lng || (addressData?.longitude != null ? String(addressData.longitude) : ''),
+          lat: '',
+          lng: '',
         }));
       } catch {
         if (active) setPlaceZipLookupError('CEP não encontrado. Preencha manualmente.');
@@ -999,8 +999,8 @@ export function SuperAdminDestinations() {
           district: String(addressData?.district || current.district || ''),
           city: String(addressData?.city || current.city || ''),
           state: String(addressData?.state || current.state || '').toUpperCase().slice(0, 2),
-          lat: current.lat || (addressData?.latitude != null ? String(addressData.latitude) : ''),
-          lng: current.lng || (addressData?.longitude != null ? String(addressData.longitude) : ''),
+          lat: '',
+          lng: '',
         }));
       } catch {
         if (active) setListingZipLookupError('CEP não encontrado. Preencha manualmente.');
@@ -1230,8 +1230,17 @@ export function SuperAdminDestinations() {
       slug: slugifyDestinationName(city),
     }));
   };
-  const updatePlace = (key: string, value: any) => setPlaceForm((current) => ({ ...current, [key]: value }));
-  const updateListing = (key: string, value: any) => setListingForm((current) => ({ ...current, [key]: value }));
+  const addressCoordinateKeys = new Set(['zipCode', 'address', 'addressNumber', 'district', 'city', 'state']);
+  const updatePlace = (key: string, value: any) => setPlaceForm((current) => ({
+    ...current,
+    [key]: value,
+    ...(addressCoordinateKeys.has(key) ? { lat: '', lng: '' } : {}),
+  }));
+  const updateListing = (key: string, value: any) => setListingForm((current) => ({
+    ...current,
+    [key]: value,
+    ...(addressCoordinateKeys.has(key) ? { lat: '', lng: '' } : {}),
+  }));
   const updateStoreLink = (key: string, value: any) => setStoreLinkForm((current) => ({ ...current, [key]: value }));
 
   const listingDestinationPlaces = useMemo(

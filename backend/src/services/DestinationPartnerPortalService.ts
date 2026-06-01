@@ -10,6 +10,7 @@ import { DestinationPartnerInvite } from '../entities/DestinationPartnerInvite';
 import { DestinationPartnerPermission } from '../entities/DestinationPartnerPermission';
 import { HospitalityPlace } from '../entities/HospitalityPlace';
 import { AppError } from '../errors/AppError';
+import { isApproximateGeoPrecision, sameCoordinatePair } from '../utils/geoQuality';
 import { saveBase64Image } from '../utils/imageStorage';
 import { logger } from '../utils/logger';
 import { EmailService } from './EmailService';
@@ -352,7 +353,7 @@ export class DestinationPartnerPortalService {
     const place = await this.placeRepository.findOne({ where: { id: placeId }, relations: [ 'destination' ] });
     if (!place) throw new AppError('DPARTNER-006', 404);
     const before = this.toPublicPlace(place);
-    const patch = await this.sanitizePlacePayload(payload, place.id);
+    const patch = await this.sanitizePlacePayload(payload, place);
     Object.assign(place, patch);
     const saved = await this.placeRepository.save(place);
     await this.audit(accountId, 'hospitality_place_updated', RESOURCE_HOSPITALITY_PLACE, placeId, before, this.toPublicPlace(saved), meta);
@@ -367,7 +368,7 @@ export class DestinationPartnerPortalService {
     });
     if (!listing) throw new AppError('DPARTNER-006', 404);
     const before = this.toPublicListing(listing);
-    const patch = await this.sanitizeListingPayload(payload, listing.id);
+    const patch = await this.sanitizeListingPayload(payload, listing);
     Object.assign(listing, patch);
     const saved = await this.listingRepository.save(listing);
     await this.audit(accountId, 'destination_listing_updated', RESOURCE_DESTINATION_LISTING, listingId, before, this.toPublicListing(saved), meta);
@@ -434,7 +435,69 @@ export class DestinationPartnerPortalService {
     return resources;
   }
 
-  private async sanitizePlacePayload(payload: any, placeId: string) {
+  private addressChangedFromPayload(payload: any, current: any) {
+    const checks: Array<[string, unknown]> = [
+      ['address', current?.address ?? null],
+      ['addressNumber', current?.addressNumber ?? null],
+      ['district', current?.district ?? null],
+      ['city', current?.city ?? null],
+      ['state', current?.state ?? null],
+      ['zipCode', current?.zipCode ?? null],
+    ];
+    return checks.some(([key, currentValue]) => {
+      if (!Object.prototype.hasOwnProperty.call(payload || {}, key)) return false;
+      const nextValue = key === 'state'
+        ? (String(payload[key] || '').trim().toUpperCase().slice(0, 2) || null)
+        : key === 'zipCode'
+          ? normalizeZipCode(payload[key])
+          : toOptionalText(payload[key]);
+      return nextValue !== (currentValue ?? null);
+    });
+  }
+
+  private applyGeoQualityForPartnerPatch<T extends Partial<HospitalityPlace | DestinationListing>>(
+    patch: T,
+    payload: any,
+    current: HospitalityPlace | DestinationListing
+  ) {
+    const hasLatInput = Object.prototype.hasOwnProperty.call(payload || {}, 'lat');
+    const hasLngInput = Object.prototype.hasOwnProperty.call(payload || {}, 'lng');
+    const addressChanged = this.addressChangedFromPayload(payload, current);
+    const submittedLat = hasLatInput ? (patch as any).lat : (current as any).lat;
+    const submittedLng = hasLngInput ? (patch as any).lng : (current as any).lng;
+    const submittedExistingCoordinate = sameCoordinatePair(submittedLat, submittedLng, (current as any).lat, (current as any).lng);
+
+    if (addressChanged && (!hasLatInput || !hasLngInput || submittedExistingCoordinate)) {
+      (patch as any).lat = null;
+      (patch as any).lng = null;
+      (patch as any).geoSource = 'unknown';
+      (patch as any).geoPrecision = 'unknown';
+      (patch as any).geoVerified = false;
+      (patch as any).geocodedAt = null;
+      (patch as any).formattedAddress = null;
+      return patch;
+    }
+
+    if ((hasLatInput || hasLngInput) && (patch as any).lat != null && (patch as any).lng != null) {
+      (patch as any).geoSource = 'manual_pin';
+      (patch as any).geoPrecision = 'exact';
+      (patch as any).geoVerified = true;
+      (patch as any).geocodedAt = new Date();
+      (patch as any).formattedAddress = null;
+    }
+
+    if ((hasLatInput || hasLngInput) && ((patch as any).lat == null || (patch as any).lng == null)) {
+      (patch as any).geoSource = 'unknown';
+      (patch as any).geoPrecision = 'unknown';
+      (patch as any).geoVerified = false;
+      (patch as any).geocodedAt = null;
+      (patch as any).formattedAddress = null;
+    }
+
+    return patch;
+  }
+
+  private async sanitizePlacePayload(payload: any, place: HospitalityPlace) {
     const patch: Partial<HospitalityPlace> = {};
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'name')) {
       const name = String(payload.name || '').trim();
@@ -461,14 +524,15 @@ export class DestinationPartnerPortalService {
     if (Array.isArray(payload?.bannerUrls)) {
       patch.bannerUrls = payload.bannerUrls.map((item: unknown) => String(item || '').trim()).filter(Boolean).slice(0, 6);
     }
-    const logoUrl = await saveBase64Image(payload?.logoFile, `partner-place-logo-${placeId}`, 'destinations');
-    const bannerUrl = await saveBase64Image(payload?.bannerFile, `partner-place-banner-${placeId}`, 'destinations');
+    this.applyGeoQualityForPartnerPatch(patch, payload, place);
+    const logoUrl = await saveBase64Image(payload?.logoFile, `partner-place-logo-${place.id}`, 'destinations');
+    const bannerUrl = await saveBase64Image(payload?.bannerFile, `partner-place-banner-${place.id}`, 'destinations');
     if (logoUrl) patch.logoUrl = logoUrl;
     if (bannerUrl) patch.bannerUrl = bannerUrl;
     return patch;
   }
 
-  private async sanitizeListingPayload(payload: any, listingId: string) {
+  private async sanitizeListingPayload(payload: any, listing: DestinationListing) {
     const patch: Partial<DestinationListing> = {};
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'title')) {
       const title = String(payload.title || '').trim();
@@ -490,7 +554,8 @@ export class DestinationPartnerPortalService {
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'websiteUrl')) patch.websiteUrl = toOptionalText(payload.websiteUrl) as any;
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'ctaType')) patch.ctaType = toOptionalText(payload.ctaType) as any;
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'ctaUrl')) patch.ctaUrl = toOptionalText(payload.ctaUrl) as any;
-    const imageUrl = await saveBase64Image(payload?.imageFile, `partner-listing-image-${listingId}`, 'destinations');
+    this.applyGeoQualityForPartnerPatch(patch, payload, listing);
+    const imageUrl = await saveBase64Image(payload?.imageFile, `partner-listing-image-${listing.id}`, 'destinations');
     if (imageUrl) patch.imageUrl = imageUrl;
     return patch;
   }
@@ -558,6 +623,12 @@ export class DestinationPartnerPortalService {
       zipCode: place.zipCode || null,
       lat: place.lat != null ? Number(place.lat) : null,
       lng: place.lng != null ? Number(place.lng) : null,
+      geoSource: place.geoSource || 'unknown',
+      geoPrecision: place.geoPrecision || 'unknown',
+      geoVerified: place.geoVerified === true,
+      geoApproximate: isApproximateGeoPrecision(place.geoPrecision),
+      geocodedAt: place.geocodedAt || null,
+      formattedAddress: place.formattedAddress || null,
       phone: place.phone || null,
       whatsapp: place.whatsapp || null,
       instagramUrl: place.instagramUrl || null,
@@ -596,6 +667,12 @@ export class DestinationPartnerPortalService {
       zipCode: listing.zipCode || null,
       lat: listing.lat != null ? Number(listing.lat) : null,
       lng: listing.lng != null ? Number(listing.lng) : null,
+      geoSource: listing.geoSource || 'unknown',
+      geoPrecision: listing.geoPrecision || 'unknown',
+      geoVerified: listing.geoVerified === true,
+      geoApproximate: isApproximateGeoPrecision(listing.geoPrecision),
+      geocodedAt: listing.geocodedAt || null,
+      formattedAddress: listing.formattedAddress || null,
       phone: listing.phone || null,
       whatsapp: listing.whatsapp || null,
       instagramUrl: listing.instagramUrl || null,

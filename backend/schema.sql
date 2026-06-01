@@ -82,6 +82,14 @@ ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS address TEXT;
 ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS city TEXT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS state TEXT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS lat NUMERIC(10,7);
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS lng NUMERIC(10,7);
+ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS pix_key TEXT;
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS contact_email TEXT;
@@ -105,6 +113,26 @@ ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS delivery_radius_km NUMERIC(10,2);
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS geo_source TEXT DEFAULT 'unknown';
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS geo_precision TEXT DEFAULT 'unknown';
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS geo_verified BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS geocoded_at TIMESTAMPTZ;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS formatted_address TEXT;
+UPDATE store_settings
+SET geo_source = 'imported',
+    geo_precision = 'street',
+    geo_verified = FALSE
+WHERE lat IS NOT NULL
+  AND lng IS NOT NULL
+  AND COALESCE(geo_precision, 'unknown') = 'unknown'
+  AND lat BETWEEN -34 AND 6
+  AND lng BETWEEN -74 AND -34
+  AND NOT (ABS(lat) < 0.000001 AND ABS(lng) < 0.000001);
 
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -865,6 +893,118 @@ BEGIN
     ADD COLUMN IF NOT EXISTS claimed_listing_id UUID;
     ALTER TABLE destination_partner_requests
     ADD COLUMN IF NOT EXISTS store_id UUID;
+  END IF;
+END $$;
+
+ALTER TABLE IF EXISTS customer_addresses
+ADD COLUMN IF NOT EXISTS geo_source TEXT DEFAULT 'unknown';
+ALTER TABLE IF EXISTS customer_addresses
+ADD COLUMN IF NOT EXISTS geo_precision TEXT DEFAULT 'unknown';
+ALTER TABLE IF EXISTS customer_addresses
+ADD COLUMN IF NOT EXISTS geo_verified BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS customer_addresses
+ADD COLUMN IF NOT EXISTS geocoded_at TIMESTAMPTZ;
+ALTER TABLE IF EXISTS customer_addresses
+ADD COLUMN IF NOT EXISTS formatted_address TEXT;
+DO $$
+BEGIN
+  IF to_regclass('public.customer_addresses') IS NOT NULL THEN
+    UPDATE customer_addresses
+    SET geo_source = 'imported',
+        geo_precision = 'street',
+        geo_verified = FALSE
+    WHERE lat IS NOT NULL
+      AND lng IS NOT NULL
+      AND COALESCE(geo_precision, 'unknown') = 'unknown'
+      AND lat BETWEEN -34 AND 6
+      AND lng BETWEEN -74 AND -34
+      AND NOT (ABS(lat) < 0.000001 AND ABS(lng) < 0.000001);
+  END IF;
+END $$;
+
+ALTER TABLE IF EXISTS hospitality_places
+ADD COLUMN IF NOT EXISTS geo_source TEXT DEFAULT 'unknown';
+ALTER TABLE IF EXISTS hospitality_places
+ADD COLUMN IF NOT EXISTS geo_precision TEXT DEFAULT 'unknown';
+ALTER TABLE IF EXISTS hospitality_places
+ADD COLUMN IF NOT EXISTS geo_verified BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS hospitality_places
+ADD COLUMN IF NOT EXISTS geocoded_at TIMESTAMPTZ;
+ALTER TABLE IF EXISTS hospitality_places
+ADD COLUMN IF NOT EXISTS formatted_address TEXT;
+DO $$
+BEGIN
+  IF to_regclass('public.hospitality_places') IS NOT NULL AND to_regclass('public.travel_destinations') IS NOT NULL THEN
+    UPDATE hospitality_places hp
+    SET geo_source = 'city_fallback',
+        geo_precision = 'city',
+        geo_verified = FALSE
+    FROM travel_destinations td
+    WHERE td.id = hp.destination_id
+      AND hp.lat IS NOT NULL
+      AND hp.lng IS NOT NULL
+      AND td.lat IS NOT NULL
+      AND td.lng IS NOT NULL
+      AND COALESCE(hp.geo_precision, 'unknown') = 'unknown'
+      AND hp.lat = td.lat
+      AND hp.lng = td.lng;
+
+    UPDATE hospitality_places hp
+    SET geo_source = 'imported',
+        geo_precision = 'street',
+        geo_verified = FALSE
+    FROM travel_destinations td
+    WHERE td.id = hp.destination_id
+      AND hp.lat IS NOT NULL
+      AND hp.lng IS NOT NULL
+      AND COALESCE(hp.geo_precision, 'unknown') = 'unknown'
+      AND hp.lat BETWEEN -34 AND 6
+      AND hp.lng BETWEEN -74 AND -34
+      AND NOT (ABS(hp.lat) < 0.000001 AND ABS(hp.lng) < 0.000001)
+      AND NOT (td.lat IS NOT NULL AND td.lng IS NOT NULL AND hp.lat = td.lat AND hp.lng = td.lng);
+  END IF;
+END $$;
+
+ALTER TABLE IF EXISTS destination_listings
+ADD COLUMN IF NOT EXISTS geo_source TEXT DEFAULT 'unknown';
+ALTER TABLE IF EXISTS destination_listings
+ADD COLUMN IF NOT EXISTS geo_precision TEXT DEFAULT 'unknown';
+ALTER TABLE IF EXISTS destination_listings
+ADD COLUMN IF NOT EXISTS geo_verified BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS destination_listings
+ADD COLUMN IF NOT EXISTS geocoded_at TIMESTAMPTZ;
+ALTER TABLE IF EXISTS destination_listings
+ADD COLUMN IF NOT EXISTS formatted_address TEXT;
+DO $$
+BEGIN
+  IF to_regclass('public.destination_listings') IS NOT NULL AND to_regclass('public.travel_destinations') IS NOT NULL THEN
+    UPDATE destination_listings dl
+    SET geo_source = 'city_fallback',
+        geo_precision = 'city',
+        geo_verified = FALSE
+    FROM travel_destinations td
+    WHERE td.id = dl.destination_id
+      AND dl.lat IS NOT NULL
+      AND dl.lng IS NOT NULL
+      AND td.lat IS NOT NULL
+      AND td.lng IS NOT NULL
+      AND COALESCE(dl.geo_precision, 'unknown') = 'unknown'
+      AND dl.lat = td.lat
+      AND dl.lng = td.lng;
+
+    UPDATE destination_listings dl
+    SET geo_source = 'imported',
+        geo_precision = 'street',
+        geo_verified = FALSE
+    FROM travel_destinations td
+    WHERE td.id = dl.destination_id
+      AND dl.lat IS NOT NULL
+      AND dl.lng IS NOT NULL
+      AND COALESCE(dl.geo_precision, 'unknown') = 'unknown'
+      AND dl.lat BETWEEN -34 AND 6
+      AND dl.lng BETWEEN -74 AND -34
+      AND NOT (ABS(dl.lat) < 0.000001 AND ABS(dl.lng) < 0.000001)
+      AND NOT (td.lat IS NOT NULL AND td.lng IS NOT NULL AND dl.lat = td.lat AND dl.lng = td.lng);
   END IF;
 END $$;
 

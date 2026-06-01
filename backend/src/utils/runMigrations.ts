@@ -119,6 +119,38 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS lng NUMERIC(10,7);
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS geo_source TEXT DEFAULT 'unknown';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS geo_precision TEXT DEFAULT 'unknown';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS geo_verified BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS geocoded_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS formatted_address TEXT;
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET geo_source = 'imported',
+        geo_precision = 'street',
+        geo_verified = FALSE
+    WHERE lat IS NOT NULL
+      AND lng IS NOT NULL
+      AND COALESCE(geo_precision, 'unknown') = 'unknown'
+      AND lat BETWEEN -34 AND 6
+      AND lng BETWEEN -74 AND -34
+      AND NOT (ABS(lat) < 0.000001 AND ABS(lng) < 0.000001);
+  `);
+  await AppDataSource.query(`
     UPDATE store_settings ss
     SET address = u.address
     FROM stores s
@@ -1508,6 +1540,38 @@ export async function runMigrations() {
     ALTER TABLE IF EXISTS customer_addresses
     ADD COLUMN IF NOT EXISTS lng NUMERIC(10,7);
   `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS customer_addresses
+    ADD COLUMN IF NOT EXISTS geo_source TEXT DEFAULT 'unknown';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS customer_addresses
+    ADD COLUMN IF NOT EXISTS geo_precision TEXT DEFAULT 'unknown';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS customer_addresses
+    ADD COLUMN IF NOT EXISTS geo_verified BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS customer_addresses
+    ADD COLUMN IF NOT EXISTS geocoded_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS customer_addresses
+    ADD COLUMN IF NOT EXISTS formatted_address TEXT;
+  `);
+  await AppDataSource.query(`
+    UPDATE customer_addresses
+    SET geo_source = 'imported',
+        geo_precision = 'street',
+        geo_verified = FALSE
+    WHERE lat IS NOT NULL
+      AND lng IS NOT NULL
+      AND COALESCE(geo_precision, 'unknown') = 'unknown'
+      AND lat BETWEEN -34 AND 6
+      AND lng BETWEEN -74 AND -34
+      AND NOT (ABS(lat) < 0.000001 AND ABS(lng) < 0.000001);
+  `);
   // Rebrand migration (idempotent): update legacy brand/domain mentions in persisted text settings.
   await AppDataSource.query(`
     UPDATE site_settings
@@ -2325,6 +2389,11 @@ export async function runMigrations() {
       zip_code TEXT,
       lat NUMERIC(10,7),
       lng NUMERIC(10,7),
+      geo_source TEXT DEFAULT 'unknown',
+      geo_precision TEXT DEFAULT 'unknown',
+      geo_verified BOOLEAN NOT NULL DEFAULT FALSE,
+      geocoded_at TIMESTAMPTZ,
+      formatted_address TEXT,
       phone TEXT,
       whatsapp TEXT,
       instagram_url TEXT,
@@ -2351,6 +2420,56 @@ export async function runMigrations() {
   await AppDataSource.query(`
     ALTER TABLE hospitality_places
     ADD COLUMN IF NOT EXISTS district TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE hospitality_places
+    ADD COLUMN IF NOT EXISTS geo_source TEXT DEFAULT 'unknown';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE hospitality_places
+    ADD COLUMN IF NOT EXISTS geo_precision TEXT DEFAULT 'unknown';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE hospitality_places
+    ADD COLUMN IF NOT EXISTS geo_verified BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE hospitality_places
+    ADD COLUMN IF NOT EXISTS geocoded_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE hospitality_places
+    ADD COLUMN IF NOT EXISTS formatted_address TEXT;
+  `);
+  await AppDataSource.query(`
+    UPDATE hospitality_places hp
+    SET geo_source = 'city_fallback',
+        geo_precision = 'city',
+        geo_verified = FALSE
+    FROM travel_destinations td
+    WHERE td.id = hp.destination_id
+      AND hp.lat IS NOT NULL
+      AND hp.lng IS NOT NULL
+      AND td.lat IS NOT NULL
+      AND td.lng IS NOT NULL
+      AND COALESCE(hp.geo_precision, 'unknown') = 'unknown'
+      AND hp.lat = td.lat
+      AND hp.lng = td.lng;
+  `);
+  await AppDataSource.query(`
+    UPDATE hospitality_places hp
+    SET geo_source = 'imported',
+        geo_precision = 'street',
+        geo_verified = FALSE
+    FROM travel_destinations td
+    WHERE td.id = hp.destination_id
+      AND hp.lat IS NOT NULL
+      AND hp.lng IS NOT NULL
+      AND COALESCE(hp.geo_precision, 'unknown') = 'unknown'
+      AND hp.lat BETWEEN -34 AND 6
+      AND hp.lng BETWEEN -74 AND -34
+      AND NOT (ABS(hp.lat) < 0.000001 AND ABS(hp.lng) < 0.000001)
+      AND NOT (td.lat IS NOT NULL AND td.lng IS NOT NULL AND hp.lat = td.lat AND hp.lng = td.lng);
   `);
   await AppDataSource.query(`
     UPDATE hospitality_places
@@ -2409,6 +2528,11 @@ export async function runMigrations() {
       zip_code TEXT,
       lat NUMERIC(10,7),
       lng NUMERIC(10,7),
+      geo_source TEXT DEFAULT 'unknown',
+      geo_precision TEXT DEFAULT 'unknown',
+      geo_verified BOOLEAN NOT NULL DEFAULT FALSE,
+      geocoded_at TIMESTAMPTZ,
+      formatted_address TEXT,
       phone TEXT,
       whatsapp TEXT,
       instagram_url TEXT,
@@ -2445,6 +2569,56 @@ export async function runMigrations() {
   await AppDataSource.query(`
     ALTER TABLE destination_listings
     ADD COLUMN IF NOT EXISTS zip_code TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_listings
+    ADD COLUMN IF NOT EXISTS geo_source TEXT DEFAULT 'unknown';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_listings
+    ADD COLUMN IF NOT EXISTS geo_precision TEXT DEFAULT 'unknown';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_listings
+    ADD COLUMN IF NOT EXISTS geo_verified BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_listings
+    ADD COLUMN IF NOT EXISTS geocoded_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_listings
+    ADD COLUMN IF NOT EXISTS formatted_address TEXT;
+  `);
+  await AppDataSource.query(`
+    UPDATE destination_listings dl
+    SET geo_source = 'city_fallback',
+        geo_precision = 'city',
+        geo_verified = FALSE
+    FROM travel_destinations td
+    WHERE td.id = dl.destination_id
+      AND dl.lat IS NOT NULL
+      AND dl.lng IS NOT NULL
+      AND td.lat IS NOT NULL
+      AND td.lng IS NOT NULL
+      AND COALESCE(dl.geo_precision, 'unknown') = 'unknown'
+      AND dl.lat = td.lat
+      AND dl.lng = td.lng;
+  `);
+  await AppDataSource.query(`
+    UPDATE destination_listings dl
+    SET geo_source = 'imported',
+        geo_precision = 'street',
+        geo_verified = FALSE
+    FROM travel_destinations td
+    WHERE td.id = dl.destination_id
+      AND dl.lat IS NOT NULL
+      AND dl.lng IS NOT NULL
+      AND COALESCE(dl.geo_precision, 'unknown') = 'unknown'
+      AND dl.lat BETWEEN -34 AND 6
+      AND dl.lng BETWEEN -74 AND -34
+      AND NOT (ABS(dl.lat) < 0.000001 AND ABS(dl.lng) < 0.000001)
+      AND NOT (td.lat IS NOT NULL AND td.lng IS NOT NULL AND dl.lat = td.lat AND dl.lng = td.lng);
   `);
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_destination_listings_place

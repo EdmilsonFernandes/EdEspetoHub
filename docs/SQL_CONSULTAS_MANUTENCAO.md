@@ -1133,6 +1133,9 @@ SELECT
   hp.whatsapp,
   hp.lat,
   hp.lng,
+  hp.geo_source,
+  hp.geo_precision,
+  hp.geo_verified,
   hp.active,
   hp.sort_order
 FROM hospitality_places hp
@@ -1153,12 +1156,82 @@ SELECT
   dl.whatsapp,
   dl.lat,
   dl.lng,
+  dl.geo_source,
+  dl.geo_precision,
+  dl.geo_verified,
   dl.active,
   dl.sort_order
 FROM destination_listings dl
 JOIN travel_destinations td ON td.id = dl.destination_id
 WHERE td.slug = :'destination_slug'
 ORDER BY tipo_registro, sort_order, nome;
+```
+
+Diagnostico de qualidade geografica de hospedagens e servicos:
+
+```sql
+\set destination_slug 'sao-bento-do-sapucai'
+
+WITH recursos AS (
+  SELECT
+    'hospedagem' AS tipo_registro,
+    hp.id,
+    hp.name AS nome,
+    hp.address,
+    hp.address_number,
+    hp.city,
+    hp.state,
+    hp.zip_code,
+    hp.lat,
+    hp.lng,
+    hp.geo_source,
+    hp.geo_precision,
+    hp.geo_verified,
+    td.lat AS destino_lat,
+    td.lng AS destino_lng
+  FROM hospitality_places hp
+  JOIN travel_destinations td ON td.id = hp.destination_id
+  WHERE td.slug = :'destination_slug'
+  UNION ALL
+  SELECT
+    'servico' AS tipo_registro,
+    dl.id,
+    dl.title AS nome,
+    dl.address,
+    dl.address_number,
+    dl.city,
+    dl.state,
+    dl.zip_code,
+    dl.lat,
+    dl.lng,
+    dl.geo_source,
+    dl.geo_precision,
+    dl.geo_verified,
+    td.lat AS destino_lat,
+    td.lng AS destino_lng
+  FROM destination_listings dl
+  JOIN travel_destinations td ON td.id = dl.destination_id
+  WHERE td.slug = :'destination_slug'
+)
+SELECT
+  tipo_registro,
+  nome,
+  city,
+  state,
+  zip_code,
+  lat,
+  lng,
+  geo_source,
+  geo_precision,
+  geo_verified,
+  CASE
+    WHEN lat IS NULL OR lng IS NULL THEN 'sem coordenada'
+    WHEN geo_precision IN ('city', 'zip', 'unknown') THEN 'aproximada'
+    WHEN lat = destino_lat AND lng = destino_lng THEN 'igual ao centro do destino'
+    ELSE 'ok'
+  END AS diagnostico
+FROM recursos
+ORDER BY diagnostico DESC, tipo_registro, nome;
 ```
 
 Prioridade de servicos por chale/pousada:

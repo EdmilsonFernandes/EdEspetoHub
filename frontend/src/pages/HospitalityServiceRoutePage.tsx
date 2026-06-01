@@ -156,6 +156,8 @@ const estimateMinutes = (distanceKm?: number | null) => {
   return `${Math.max(4, Math.round(Number(distanceKm) * 4.4 + 2))} min aprox.`;
 };
 
+const isApproximatePoint = (point: any) => Boolean(point?.geoApproximate || ['zip', 'city', 'unknown'].includes(String(point?.geoPrecision || '').toLowerCase()));
+
 const pointFallbackImage = (point: any, kind: 'service' | 'place') =>
   getStoreAvatarUrl(point?.slug || point?.id || point?.name, point?.name || (kind === 'service' ? 'Serviço' : 'Hospedagem'));
 
@@ -184,6 +186,11 @@ const PointCard = ({ point, label, kind, icon: Icon, imageUrl, accent = '#336886
         <p className="mt-1 line-clamp-2 text-xs font-semibold leading-relaxed text-slate-600">
           {point.address || (kind === 'service' ? 'Endereço do serviço não informado.' : 'Endereço da hospedagem não informado.')}
         </p>
+        {isApproximatePoint(point) ? (
+          <p className="mt-2 inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-700">
+            Localização aproximada
+          </p>
+        ) : null}
       </div>
     </div>
   </div>
@@ -236,6 +243,8 @@ export function HospitalityServiceRoutePage() {
     }),
     lat: serviceFromPayload?.lat || searchParams.get('serviceLat') || '',
     lng: serviceFromPayload?.lng || searchParams.get('serviceLng') || '',
+    geoApproximate: serviceFromPayload?.geoApproximate,
+    geoPrecision: serviceFromPayload?.geoPrecision,
   }), [destination.city, destination.state, searchParams, serviceFromPayload]);
   const placePoint = useMemo(() => ({
     name: searchParams.get('placeName') || place.name || 'Hospedagem',
@@ -249,7 +258,9 @@ export function HospitalityServiceRoutePage() {
     }),
     lat: place.lat || searchParams.get('placeLat') || '',
     lng: place.lng || searchParams.get('placeLng') || '',
-  }), [destination.city, destination.state, place.address, place.addressNumber, place.city, place.district, place.lat, place.lng, place.name, place.state, place.zipCode, searchParams]);
+    geoApproximate: place.geoApproximate,
+    geoPrecision: place.geoPrecision,
+  }), [destination.city, destination.state, place.address, place.addressNumber, place.city, place.district, place.geoApproximate, place.geoPrecision, place.lat, place.lng, place.name, place.state, place.zipCode, searchParams]);
   const serviceImageUrl = useMemo(() => (
     resolveAssetUrl(
       serviceFromPayload?.logoUrl ||
@@ -274,6 +285,7 @@ export function HospitalityServiceRoutePage() {
   const wazeUrl = useMemo(() => buildWazeUrl(placePoint), [placePoint]);
   const wazeNativeUrl = useMemo(() => buildWazeNativeUrl(placePoint, wazeUrl), [placePoint, wazeUrl]);
   const canShowMap = hasCoords(servicePoint) && hasCoords(placePoint);
+  const routeIsApproximate = isApproximatePoint(servicePoint) || isApproximatePoint(placePoint);
   const missingCoordinates = [
     !hasCoords(servicePoint) ? 'serviço' : null,
     !hasCoords(placePoint) ? 'hospedagem' : null,
@@ -314,10 +326,11 @@ export function HospitalityServiceRoutePage() {
                 <div className="rounded-[1.15rem] border border-[#336886]/12 bg-white/82 p-3 text-[#153A4C] shadow-sm">
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Distância</p>
                   <p className="mt-1 text-sm font-black">{formatDistance(distanceKm)}</p>
+                  {routeIsApproximate ? <p className="mt-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-700">aproximada</p> : null}
                 </div>
                 <div className="rounded-[1.15rem] border border-[#5FD35A]/20 bg-[#5FD35A]/12 p-3 text-[#153A4C] ring-1 ring-white/70">
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Tempo</p>
-                  <p className="mt-1 text-sm font-black">{estimateMinutes(distanceKm) || 'Abrir mapa'}</p>
+                  <p className="mt-1 text-sm font-black">{routeIsApproximate ? 'Abrir mapa' : estimateMinutes(distanceKm) || 'Abrir mapa'}</p>
                 </div>
               </div>
             </div>

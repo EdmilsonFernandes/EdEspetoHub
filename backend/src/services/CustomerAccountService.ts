@@ -21,6 +21,7 @@ import { GeoLocationService } from './GeoLocationService';
 import { buildOrderTimelineJson } from '../utils/orderTimeline';
 import { AuditNotificationService } from './AuditNotificationService';
 import { MfaService } from './MfaService';
+import { sameCoordinatePair } from '../utils/geoQuality';
 
 type CustomerMfaLoginOptions = {
   deviceId?: string | null;
@@ -927,6 +928,13 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
       const hasExplicitLng = input?.lng !== undefined;
       const nextLat = this.parseCoordinate(input?.lat);
       const nextLng = this.parseCoordinate(input?.lng);
+      const explicitCoordinatesAreStale =
+        addressFieldsChanged &&
+        hasExplicitLat &&
+        hasExplicitLng &&
+        sameCoordinatePair(nextLat, nextLng, address.lat, address.lng);
+      const shouldUseExplicitLat = hasExplicitLat && !explicitCoordinatesAreStale;
+      const shouldUseExplicitLng = hasExplicitLng && !explicitCoordinatesAreStale;
 
       if (input?.label !== undefined) address.label = input.label ? String(input.label).trim() : undefined;
       if (input?.recipientName !== undefined) {
@@ -948,10 +956,10 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
       }
       if (input?.city !== undefined) address.city = String(input.city || '').trim();
       if (input?.state !== undefined) address.state = String(input.state || '').trim().toUpperCase().slice(0, 2);
-      if (hasExplicitLat) {
+      if (shouldUseExplicitLat) {
         address.lat = nextLat !== null ? Number(nextLat) : null;
       }
-      if (hasExplicitLng) {
+      if (shouldUseExplicitLng) {
         address.lng = nextLng !== null ? Number(nextLng) : null;
       }
 
@@ -960,7 +968,7 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
         address.isDefault = true;
       }
 
-      if (addressFieldsChanged || hasExplicitLat || hasExplicitLng) {
+      if (addressFieldsChanged || shouldUseExplicitLat || shouldUseExplicitLng) {
         this.assertRequiredAddressFields({
           cep: address.cep,
           street: address.street,
@@ -968,9 +976,9 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
           city: address.city,
           state: address.state,
         });
-        if (!hasExplicitLat) address.lat = null;
-        if (!hasExplicitLng) address.lng = null;
-        if (!hasExplicitLat || !hasExplicitLng) {
+        if (!shouldUseExplicitLat) address.lat = null;
+        if (!shouldUseExplicitLng) address.lng = null;
+        if (!shouldUseExplicitLat || !shouldUseExplicitLng) {
           const coordinates = await this.resolveAddressCoordinates({
             cep: address.cep,
             street: address.street,
@@ -981,8 +989,8 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
             state: address.state,
           });
           if (coordinates) {
-            if (!hasExplicitLat) address.lat = coordinates.lat;
-            if (!hasExplicitLng) address.lng = coordinates.lng;
+            if (!shouldUseExplicitLat) address.lat = coordinates.lat;
+            if (!shouldUseExplicitLng) address.lng = coordinates.lng;
           }
         }
       }

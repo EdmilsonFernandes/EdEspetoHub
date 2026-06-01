@@ -61,6 +61,21 @@ export class HospitalityPlace {
   @Column('numeric', { precision: 10, scale: 7, nullable: true })
   lng?: number | null;
 
+  @Column({ name: 'geo_source', type: 'text', nullable: true, default: 'unknown' })
+  geoSource?: string | null;
+
+  @Column({ name: 'geo_precision', type: 'text', nullable: true, default: 'unknown' })
+  geoPrecision?: string | null;
+
+  @Column({ name: 'geo_verified', type: 'boolean', default: false })
+  geoVerified!: boolean;
+
+  @Column({ name: 'geocoded_at', type: 'timestamptz', nullable: true })
+  geocodedAt?: Date | null;
+
+  @Column({ name: 'formatted_address', type: 'text', nullable: true })
+  formattedAddress?: string | null;
+
   @Column({ type: 'text', nullable: true })
   phone?: string | null;
 

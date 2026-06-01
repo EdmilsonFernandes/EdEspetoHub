@@ -2,6 +2,7 @@ import { AppDataSource } from '../config/database';
 import { GeoLocationService } from '../services/GeoLocationService';
 import { runMigrations } from '../utils/runMigrations';
 import { logger } from '../utils/logger';
+import { hasUsableBrazilCoordinatePair, isApproximateGeoPrecision, sameCoordinatePair } from '../utils/geoQuality';
 
 type Candidate = {
   id: string;
@@ -13,6 +14,10 @@ type Candidate = {
   city?: string | null;
   state?: string | null;
   zipCode?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  geoSource?: string | null;
+  geoPrecision?: string | null;
   destinationLat?: number | null;
   destinationLng?: number | null;
 };
@@ -35,14 +40,6 @@ const buildAddress = (row: Candidate) =>
     String(row.zipCode || '').replace(/\D/g, '').slice(0, 8) || null,
   ].filter(Boolean).join(', ');
 
-const hasCoordinatePair = (lat?: number | null, lng?: number | null) =>
-  lat !== null &&
-  lat !== undefined &&
-  lng !== null &&
-  lng !== undefined &&
-  Number.isFinite(Number(lat)) &&
-  Number.isFinite(Number(lng));
-
 const loadCandidates = async (): Promise<Candidate[]> => {
   const rows = await AppDataSource.query(`
     SELECT
@@ -55,11 +52,20 @@ const loadCandidates = async (): Promise<Candidate[]> => {
       hp.city,
       hp.state,
       hp.zip_code AS "zipCode",
+      hp.lat,
+      hp.lng,
+      hp.geo_source AS "geoSource",
+      hp.geo_precision AS "geoPrecision",
       td.lat AS "destinationLat",
       td.lng AS "destinationLng"
     FROM hospitality_places hp
     JOIN travel_destinations td ON td.id = hp.destination_id
-    WHERE (hp.lat IS NULL OR hp.lng IS NULL)
+    WHERE (
+        hp.lat IS NULL
+        OR hp.lng IS NULL
+        OR COALESCE(hp.geo_precision, 'unknown') IN ('unknown', 'city')
+        OR (hp.lat = td.lat AND hp.lng = td.lng)
+      )
       AND COALESCE(hp.address, hp.city, hp.state, hp.zip_code) IS NOT NULL
     UNION ALL
     SELECT
@@ -72,29 +78,58 @@ const loadCandidates = async (): Promise<Candidate[]> => {
       dl.city,
       dl.state,
       dl.zip_code AS "zipCode",
+      dl.lat,
+      dl.lng,
+      dl.geo_source AS "geoSource",
+      dl.geo_precision AS "geoPrecision",
       td.lat AS "destinationLat",
       td.lng AS "destinationLng"
     FROM destination_listings dl
     JOIN travel_destinations td ON td.id = dl.destination_id
-    WHERE (dl.lat IS NULL OR dl.lng IS NULL)
+    WHERE (
+        dl.lat IS NULL
+        OR dl.lng IS NULL
+        OR COALESCE(dl.geo_precision, 'unknown') IN ('unknown', 'city')
+        OR (dl.lat = td.lat AND dl.lng = td.lng)
+      )
       AND COALESCE(dl.address, dl.city, dl.state, dl.zip_code) IS NOT NULL
     ORDER BY kind, name;
   `);
   return rows as Candidate[];
 };
 
-const updateCoordinates = async (candidate: Candidate, lat: number, lng: number) => {
+const updateCoordinates = async (
+  candidate: Candidate,
+  lat: number,
+  lng: number,
+  quality: { source: string; precision: string; formattedAddress?: string | null }
+) => {
   const table = candidate.kind === 'hospitality_place' ? 'hospitality_places' : 'destination_listings';
   await AppDataSource.query(
-    `UPDATE ${table} SET lat = $1, lng = $2, updated_at = NOW() WHERE id = $3;`,
-    [lat, lng, candidate.id]
+    `
+      UPDATE ${table}
+      SET lat = $1,
+          lng = $2,
+          geo_source = $3,
+          geo_precision = $4,
+          geo_verified = FALSE,
+          geocoded_at = NOW(),
+          formatted_address = $5,
+          updated_at = NOW()
+      WHERE id = $6;
+    `,
+    [lat, lng, quality.source, quality.precision, quality.formattedAddress || null, candidate.id]
   );
 };
 
 const applyDestinationFallback = async (candidate: Candidate, shouldApply: boolean) => {
-  if (!hasCoordinatePair(candidate.destinationLat, candidate.destinationLng)) return false;
+  if (!hasUsableBrazilCoordinatePair(candidate.destinationLat, candidate.destinationLng)) return false;
   if (shouldApply) {
-    await updateCoordinates(candidate, Number(candidate.destinationLat), Number(candidate.destinationLng));
+    await updateCoordinates(candidate, Number(candidate.destinationLat), Number(candidate.destinationLng), {
+      source: 'city_fallback',
+      precision: 'city',
+      formattedAddress: buildAddress(candidate),
+    });
   }
   log.info('Destination coordinate resolved from destination fallback', {
     mode: shouldApply ? 'apply' : 'dry-run',
@@ -102,6 +137,7 @@ const applyDestinationFallback = async (candidate: Candidate, shouldApply: boole
     name: candidate.name,
     lat: Number(candidate.destinationLat),
     lng: Number(candidate.destinationLng),
+    precision: 'city',
   });
   return true;
 };
@@ -118,10 +154,21 @@ const run = async () => {
   for (const candidate of candidates) {
     const address = buildAddress(candidate);
     if (!address) continue;
+    const hasExistingPreciseCoordinate =
+      hasUsableBrazilCoordinatePair(candidate.lat, candidate.lng) &&
+      !isApproximateGeoPrecision(candidate.geoPrecision) &&
+      !sameCoordinatePair(candidate.lat, candidate.lng, candidate.destinationLat, candidate.destinationLng);
+    if (hasExistingPreciseCoordinate) continue;
+    const hasStreetLevelAddress = Boolean(text(candidate.address));
+    if (!hasStreetLevelAddress) {
+      if (await applyDestinationFallback(candidate, shouldApply)) resolved += 1;
+      else failed += 1;
+      continue;
+    }
 
     try {
       const geocoded = await geoLocationService.geocodeAddress(address);
-      if (!geocoded) {
+      if (!geocoded || !hasUsableBrazilCoordinatePair(geocoded.lat, geocoded.lng)) {
         if (await applyDestinationFallback(candidate, shouldApply)) {
           resolved += 1;
           continue;
@@ -133,7 +180,11 @@ const run = async () => {
 
       resolved += 1;
       if (shouldApply) {
-        await updateCoordinates(candidate, Number(geocoded.lat), Number(geocoded.lng));
+        await updateCoordinates(candidate, Number(geocoded.lat), Number(geocoded.lng), {
+          source: 'geocoder',
+          precision: 'street',
+          formattedAddress: geocoded.formattedAddress || address,
+        });
       }
       log.info('Destination coordinate resolved', {
         mode: shouldApply ? 'apply' : 'dry-run',
@@ -141,6 +192,7 @@ const run = async () => {
         name: candidate.name,
         lat: Number(geocoded.lat),
         lng: Number(geocoded.lng),
+        precision: 'street',
       });
     } catch (error) {
       if (await applyDestinationFallback(candidate, shouldApply)) {

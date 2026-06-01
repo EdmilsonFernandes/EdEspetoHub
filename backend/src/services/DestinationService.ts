@@ -20,6 +20,12 @@ import {
 } from '../utils/hospitalityMedia';
 import { saveBase64Image } from '../utils/imageStorage';
 import { logger } from '../utils/logger';
+import {
+  buildGeoQuality,
+  hasUsableBrazilCoordinatePair,
+  isApproximateGeoPrecision,
+  sameCoordinatePair,
+} from '../utils/geoQuality';
 import { GeoLocationService } from './GeoLocationService';
 import { OrderReviewService } from './OrderReviewService';
 import { SubscriptionService } from './SubscriptionService';
@@ -30,6 +36,16 @@ import {
   RESOURCE_HOSPITALITY_PLACE,
 } from './DestinationPartnerPortalService';
 import { EmailService } from './EmailService';
+
+type ResolvedDestinationCoordinates = {
+  lat: number | null;
+  lng: number | null;
+  geoSource: string;
+  geoPrecision: string;
+  geoVerified: boolean;
+  geocodedAt: Date | null;
+  formattedAddress: string | null;
+};
 
 export class DestinationService {
   private repository = new DestinationRepository();
@@ -596,18 +612,63 @@ export class DestinationService {
   }
 
   private hasCoordinatePair(lat?: number | null, lng?: number | null) {
-    const isValidCoordinate = (value?: number | null) =>
-      value !== null &&
-      value !== undefined &&
-      String(value).trim() !== '' &&
-      Number.isFinite(Number(value));
-    return isValidCoordinate(lat) && isValidCoordinate(lng);
+    return hasUsableBrazilCoordinatePair(lat, lng);
   }
 
   private destinationFallbackCoordinates(destination?: { lat?: number | null; lng?: number | null } | null) {
     return this.hasCoordinatePair(destination?.lat, destination?.lng)
       ? { lat: Number(destination?.lat), lng: Number(destination?.lng) }
       : { lat: null, lng: null };
+  }
+
+  private coordinateQuality(
+    lat: number | null,
+    lng: number | null,
+    quality?: Parameters<typeof buildGeoQuality>[0]
+  ): ResolvedDestinationCoordinates {
+    const normalized = buildGeoQuality(quality);
+    return {
+      lat,
+      lng,
+      geoSource: normalized.geoSource,
+      geoPrecision: normalized.geoPrecision,
+      geoVerified: normalized.geoVerified,
+      geocodedAt: normalized.geocodedAt ? new Date(normalized.geocodedAt) : null,
+      formattedAddress: normalized.formattedAddress || null,
+    };
+  }
+
+  private existingCoordinateQuality(current?: any | null): ResolvedDestinationCoordinates {
+    const lat = this.hasCoordinatePair(current?.lat, current?.lng) ? Number(current.lat) : null;
+    const lng = this.hasCoordinatePair(current?.lat, current?.lng) ? Number(current.lng) : null;
+    return this.coordinateQuality(lat, lng, {
+      geoSource: current?.geoSource || 'unknown',
+      geoPrecision: current?.geoPrecision || 'unknown',
+      geoVerified: current?.geoVerified === true,
+      geocodedAt: current?.geocodedAt || null,
+      formattedAddress: current?.formattedAddress || null,
+    });
+  }
+
+  private submittedCoordinatesForAddressChange(payload: any, current: any | null, addressChanged: boolean) {
+    const hasLatInput = Object.prototype.hasOwnProperty.call(payload || {}, 'lat');
+    const hasLngInput = Object.prototype.hasOwnProperty.call(payload || {}, 'lng');
+    if (!hasLatInput && !hasLngInput) {
+      return {
+        lat: addressChanged ? null : current?.lat ?? null,
+        lng: addressChanged ? null : current?.lng ?? null,
+        hasCoordinateInput: false,
+      };
+    }
+
+    const lat = hasLatInput ? toNullableNumber(payload.lat) : current?.lat ?? null;
+    const lng = hasLngInput ? toNullableNumber(payload.lng) : current?.lng ?? null;
+    const isStaleExistingPair = Boolean(addressChanged && current && sameCoordinatePair(lat, lng, current.lat, current.lng));
+    return {
+      lat: isStaleExistingPair ? null : lat,
+      lng: isStaleExistingPair ? null : lng,
+      hasCoordinateInput: !isStaleExistingPair,
+    };
   }
 
   private async resolveDestinationCoordinates(payload: {
@@ -622,10 +683,17 @@ export class DestinationService {
     fallbackLat?: number | null;
     fallbackLng?: number | null;
     scope: string;
-  }) {
+  }): Promise<ResolvedDestinationCoordinates> {
     const lat = payload.lat ?? null;
     const lng = payload.lng ?? null;
-    if (this.hasCoordinatePair(lat, lng)) return { lat, lng };
+    if (this.hasCoordinatePair(lat, lng)) {
+      return this.coordinateQuality(Number(lat), Number(lng), {
+        geoSource: 'manual_pin',
+        geoPrecision: 'exact',
+        geoVerified: true,
+        geocodedAt: new Date(),
+      });
+    }
 
     const zipLookup = await this.lookupZipCode(payload.zipCode);
     const baseAddress = this.buildDestinationGeocodeAddress(payload);
@@ -651,13 +719,22 @@ export class DestinationService {
       city: payload.city || zipLookup?.city,
       state: payload.state || zipLookup?.state,
     });
-    const candidates = this.uniqueGeocodeCandidates([baseAddress, zipAddress, zipAddressWithoutCode, cityAddress]);
+    const hasStreetLevelAddress = Boolean(toOptionalText(payload.address) || toOptionalText(zipLookup?.street));
+    const candidates = hasStreetLevelAddress
+      ? this.uniqueGeocodeCandidates([baseAddress, zipAddress, zipAddressWithoutCode, cityAddress])
+      : [];
 
     for (const address of candidates) {
       try {
         const geocoded = await this.geoLocationService.geocodeAddress(address);
         if (geocoded && this.hasCoordinatePair(geocoded.lat, geocoded.lng)) {
-          return { lat: Number(geocoded.lat), lng: Number(geocoded.lng) };
+          return this.coordinateQuality(Number(geocoded.lat), Number(geocoded.lng), {
+            geoSource: 'geocoder',
+            geoPrecision: 'street',
+            geoVerified: false,
+            geocodedAt: new Date(),
+            formattedAddress: geocoded.formattedAddress || address,
+          });
         }
       } catch (error) {
         this.log.warn('Destination geocode failed', { scope: payload.scope, address, error });
@@ -665,14 +742,30 @@ export class DestinationService {
     }
 
     if (this.zipLookupHasCoordinates(zipLookup)) {
-      return { lat: Number(zipLookup?.latitude), lng: Number(zipLookup?.longitude) };
+      return this.coordinateQuality(Number(zipLookup?.latitude), Number(zipLookup?.longitude), {
+        geoSource: 'zip_code',
+        geoPrecision: 'zip',
+        geoVerified: false,
+        geocodedAt: new Date(),
+        formattedAddress: zipAddress || baseAddress || null,
+      });
     }
 
     if (this.hasCoordinatePair(payload.fallbackLat, payload.fallbackLng)) {
-      return { lat: Number(payload.fallbackLat), lng: Number(payload.fallbackLng) };
+      return this.coordinateQuality(Number(payload.fallbackLat), Number(payload.fallbackLng), {
+        geoSource: 'city_fallback',
+        geoPrecision: 'city',
+        geoVerified: false,
+        formattedAddress: baseAddress || null,
+      });
     }
 
-    return { lat, lng };
+    return this.coordinateQuality(null, null, {
+      geoSource: 'unknown',
+      geoPrecision: 'unknown',
+      geoVerified: false,
+      formattedAddress: baseAddress || null,
+    });
   }
 
   async adminSaveDestination(payload: any, destinationId?: string) {
@@ -783,15 +876,18 @@ export class DestinationService {
       (payload?.zipCode !== undefined && zipCode !== (current?.zipCode ?? null))
     );
     const fallbackCoordinates = this.destinationFallbackCoordinates(destination);
-    const coordinates = await this.resolveDestinationCoordinates({
+    const submittedCoordinates = this.submittedCoordinatesForAddressChange(payload, current, addressChanged);
+    const coordinates = (!addressChanged && !submittedCoordinates.hasCoordinateInput && this.hasCoordinatePair(current?.lat, current?.lng))
+      ? this.existingCoordinateQuality(current)
+      : await this.resolveDestinationCoordinates({
       address,
       addressNumber,
       district,
       city,
       state,
       zipCode,
-      lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : addressChanged ? null : current?.lat ?? null,
-      lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : addressChanged ? null : current?.lng ?? null,
+      lat: submittedCoordinates.lat,
+      lng: submittedCoordinates.lng,
       fallbackLat: fallbackCoordinates.lat,
       fallbackLng: fallbackCoordinates.lng,
       scope: 'hospitality_place',
@@ -811,6 +907,11 @@ export class DestinationService {
       zipCode,
       lat: coordinates.lat,
       lng: coordinates.lng,
+      geoSource: coordinates.geoSource,
+      geoPrecision: coordinates.geoPrecision,
+      geoVerified: coordinates.geoVerified,
+      geocodedAt: coordinates.geocodedAt,
+      formattedAddress: coordinates.formattedAddress,
       phone: payload?.phone !== undefined ? toOptionalText(payload.phone) : current?.phone ?? null,
       whatsapp: payload?.whatsapp !== undefined ? toOptionalText(payload.whatsapp) : current?.whatsapp ?? null,
       instagramUrl: payload?.instagramUrl !== undefined ? toOptionalText(payload.instagramUrl) : current?.instagramUrl ?? null,
@@ -857,15 +958,18 @@ export class DestinationService {
       (payload?.zipCode !== undefined && zipCode !== (current?.zipCode ?? null))
     );
     const fallbackCoordinates = this.destinationFallbackCoordinates(destination);
-    const coordinates = await this.resolveDestinationCoordinates({
+    const submittedCoordinates = this.submittedCoordinatesForAddressChange(payload, current, addressChanged);
+    const coordinates = (!addressChanged && !submittedCoordinates.hasCoordinateInput && this.hasCoordinatePair(current?.lat, current?.lng))
+      ? this.existingCoordinateQuality(current)
+      : await this.resolveDestinationCoordinates({
       address,
       addressNumber,
       district,
       city,
       state,
       zipCode,
-      lat: payload?.lat !== undefined ? toNullableNumber(payload.lat) : addressChanged ? null : current?.lat ?? null,
-      lng: payload?.lng !== undefined ? toNullableNumber(payload.lng) : addressChanged ? null : current?.lng ?? null,
+      lat: submittedCoordinates.lat,
+      lng: submittedCoordinates.lng,
       fallbackLat: fallbackCoordinates.lat,
       fallbackLng: fallbackCoordinates.lng,
       scope: 'destination_listing',
@@ -887,6 +991,11 @@ export class DestinationService {
       zipCode,
       lat: coordinates.lat,
       lng: coordinates.lng,
+      geoSource: coordinates.geoSource,
+      geoPrecision: coordinates.geoPrecision,
+      geoVerified: coordinates.geoVerified,
+      geocodedAt: coordinates.geocodedAt,
+      formattedAddress: coordinates.formattedAddress,
       phone: payload?.phone !== undefined ? toOptionalText(payload.phone) : current?.phone ?? null,
       whatsapp: payload?.whatsapp !== undefined ? toOptionalText(payload.whatsapp) : current?.whatsapp ?? null,
       instagramUrl: payload?.instagramUrl !== undefined ? toOptionalText(payload.instagramUrl) : current?.instagramUrl ?? null,
@@ -1660,6 +1769,12 @@ export class DestinationService {
       zipCode: place.zipCode || null,
       lat: place.lat != null ? Number(place.lat) : null,
       lng: place.lng != null ? Number(place.lng) : null,
+      geoSource: place.geoSource || 'unknown',
+      geoPrecision: place.geoPrecision || 'unknown',
+      geoVerified: place.geoVerified === true,
+      geoApproximate: isApproximateGeoPrecision(place.geoPrecision),
+      geocodedAt: place.geocodedAt || null,
+      formattedAddress: place.formattedAddress || null,
       phone: place.phone || null,
       whatsapp: place.whatsapp || null,
       instagramUrl: place.instagramUrl || null,
@@ -1786,6 +1901,12 @@ export class DestinationService {
       zipCode: listing.zipCode || null,
       lat: listing.lat != null ? Number(listing.lat) : null,
       lng: listing.lng != null ? Number(listing.lng) : null,
+      geoSource: listing.geoSource || 'unknown',
+      geoPrecision: listing.geoPrecision || 'unknown',
+      geoVerified: listing.geoVerified === true,
+      geoApproximate: isApproximateGeoPrecision(listing.geoPrecision),
+      geocodedAt: listing.geocodedAt || null,
+      formattedAddress: listing.formattedAddress || null,
       phone: listing.phone || null,
       whatsapp: listing.whatsapp || null,
       instagramUrl: listing.instagramUrl || null,

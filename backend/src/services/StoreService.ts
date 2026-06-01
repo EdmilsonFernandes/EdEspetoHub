@@ -27,6 +27,7 @@ import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegme
 import { resolvePlanFeatures } from '../config/planFeatures';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
+import { sameCoordinatePair } from '../utils/geoQuality';
 import { GeoLocationService } from './GeoLocationService';
 /**
  * Provides StoreService functionality.
@@ -286,6 +287,11 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
     if (!geo) return store;
     store.settings.lat = geo.lat;
     store.settings.lng = geo.lng;
+    store.settings.geoSource = 'geocoder';
+    store.settings.geoPrecision = 'street';
+    store.settings.geoVerified = false;
+    store.settings.geocodedAt = new Date();
+    store.settings.formattedAddress = address;
     await this.storeRepository.save(store);
     return store;
   }
@@ -311,6 +317,11 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
 
     store.settings.lat = geo.lat;
     store.settings.lng = geo.lng;
+    store.settings.geoSource = 'geocoder';
+    store.settings.geoPrecision = 'street';
+    store.settings.geoVerified = false;
+    store.settings.geocodedAt = new Date();
+    store.settings.formattedAddress = address;
     await this.storeRepository.save(store);
     return store;
   }
@@ -410,6 +421,10 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
       const requestedLng = this.parseCoordinate(input.lng);
       let resolvedLat = Number.isFinite(Number(requestedLat)) ? Number(requestedLat) : null;
       let resolvedLng = Number.isFinite(Number(requestedLng)) ? Number(requestedLng) : null;
+      let resolvedGeoSource = this.isUsableStoreCoordinatePair(resolvedLat, resolvedLng) ? 'manual_pin' : 'unknown';
+      let resolvedGeoPrecision = this.isUsableStoreCoordinatePair(resolvedLat, resolvedLng) ? 'exact' : 'unknown';
+      let resolvedGeoVerified = this.isUsableStoreCoordinatePair(resolvedLat, resolvedLng);
+      let resolvedGeocodedAt: Date | null = resolvedGeoVerified ? new Date() : null;
       if (!this.isUsableStoreCoordinatePair(resolvedLat, resolvedLng)) {
         const geocoded = await this.geocodeAddress(
           this.buildGeocodeAddress({
@@ -422,6 +437,10 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
         if (geocoded) {
           resolvedLat = geocoded.lat;
           resolvedLng = geocoded.lng;
+          resolvedGeoSource = 'geocoder';
+          resolvedGeoPrecision = 'street';
+          resolvedGeoVerified = false;
+          resolvedGeocodedAt = new Date();
         }
       }
       this.assertResolvedCoordinates(resolvedLat, resolvedLng);
@@ -439,6 +458,11 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
         state: trimmedState || null,
         lat: resolvedLat,
         lng: resolvedLng,
+        geoSource: resolvedGeoSource,
+        geoPrecision: resolvedGeoPrecision,
+        geoVerified: resolvedGeoVerified,
+        geocodedAt: resolvedGeocodedAt,
+        formattedAddress: null,
         primaryColor: input.primaryColor || segmentPreset.primaryColor,
         secondaryColor: input.secondaryColor || segmentPreset.secondaryColor,
         pixKey: normalizedPix ?? null,
@@ -686,25 +710,49 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
 
       const nextLat = this.parseCoordinate(data.lat);
       const nextLng = this.parseCoordinate(data.lng);
+      const currentLat = this.parseCoordinate(store.settings.lat);
+      const currentLng = this.parseCoordinate(store.settings.lng);
       const locationTextChanged =
         data.address !== undefined ||
         data.city !== undefined ||
         data.state !== undefined;
+      const submittedCoordinatesAreStale =
+        locationTextChanged &&
+        data.lat !== undefined &&
+        data.lng !== undefined &&
+        sameCoordinatePair(nextLat, nextLng, currentLat, currentLng);
       const shouldRefreshCoordinates =
         locationTextChanged ||
         data.lat !== undefined ||
         data.lng !== undefined;
 
-      if (data.lat !== undefined) {
+      if (data.lat !== undefined && !submittedCoordinatesAreStale) {
         store.settings.lat = Number.isFinite(Number(nextLat)) ? Number(nextLat) : null;
       }
-      if (data.lng !== undefined) {
+      if (data.lng !== undefined && !submittedCoordinatesAreStale) {
         store.settings.lng = Number.isFinite(Number(nextLng)) ? Number(nextLng) : null;
+      }
+      if (submittedCoordinatesAreStale) {
+        store.settings.lat = null;
+        store.settings.lng = null;
+        store.settings.geoSource = 'unknown';
+        store.settings.geoPrecision = 'unknown';
+        store.settings.geoVerified = false;
+        store.settings.geocodedAt = null;
+        store.settings.formattedAddress = null;
       }
       if (shouldRefreshCoordinates) {
         const hasExplicitUsableCoordinates =
           (data.lat !== undefined || data.lng !== undefined) &&
+          !submittedCoordinatesAreStale &&
           this.isUsableStoreCoordinatePair(store.settings.lat, store.settings.lng);
+        if (hasExplicitUsableCoordinates) {
+          store.settings.geoSource = 'manual_pin';
+          store.settings.geoPrecision = 'exact';
+          store.settings.geoVerified = true;
+          store.settings.geocodedAt = new Date();
+          store.settings.formattedAddress = null;
+        }
         if (!hasExplicitUsableCoordinates && (locationTextChanged || !this.isUsableStoreCoordinatePair(store.settings.lat, store.settings.lng))) {
           const geocoded = await this.geocodeAddress(
             this.buildGeocodeAddress({
@@ -717,6 +765,11 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
           if (geocoded) {
             store.settings.lat = geocoded.lat;
             store.settings.lng = geocoded.lng;
+            store.settings.geoSource = 'geocoder';
+            store.settings.geoPrecision = 'street';
+            store.settings.geoVerified = false;
+            store.settings.geocodedAt = new Date();
+            store.settings.formattedAddress = null;
           }
         }
         this.assertResolvedCoordinates(store.settings.lat as number | null, store.settings.lng as number | null);

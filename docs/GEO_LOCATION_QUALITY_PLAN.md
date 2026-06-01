@@ -186,3 +186,11 @@ Frontend:
 Manter custo zero como padrao.
 
 Nao implementar API paga agora. A prioridade e corrigir bug, registrar qualidade da coordenada, melhorar UX de confirmacao manual e limpar dados ruins com backfill controlado.
+
+## Implementado inicialmente
+
+- Metadados `geo_source`, `geo_precision`, `geo_verified`, `geocoded_at` e `formatted_address` foram adicionados para `hospitality_places`, `destination_listings`, `store_settings` e `customer_addresses`.
+- Edicao de CEP/endereco no Super Admin de destinos limpa `lat`/`lng` antigos para o backend resolver novamente.
+- Backend ignora coordenadas antigas reenviadas quando o endereco/CEP muda e classifica a origem da coordenada como `manual_pin`, `geocoder`, `zip_code`, `city_fallback` ou `unknown`.
+- Rotas publicas de hospedagem/servico recebem `geoApproximate` e evitam vender tempo estimado como preciso quando algum ponto e aproximado.
+- Backfill `backend/src/scripts/backfillDestinationCoordinates.ts` continua controlado por dry-run por padrao e agora tambem identifica registros com coordenada generica igual ao destino ou precisao aproximada.
