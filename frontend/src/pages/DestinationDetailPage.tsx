@@ -132,6 +132,20 @@ const itemMatchesSearch = (item: any, query: string, extra: string[] = []) => {
   return haystack.includes(normalizedQuery);
 };
 
+const preserveViewportPosition = (mutate: () => void) => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    mutate();
+    return;
+  }
+
+  const top = window.scrollY || document.documentElement.scrollTop || 0;
+  const left = window.scrollX || document.documentElement.scrollLeft || 0;
+  mutate();
+  window.requestAnimationFrame(() => {
+    window.scrollTo({ top, left, behavior: 'auto' });
+  });
+};
+
 const buildDestinationListingAction = ({ listing, destination, isNativePlatform }: any) => {
   const ctaUrl = String(listing?.ctaUrl || '').trim();
   const rawContact = listing?.whatsapp || listing?.phone || (/^https?:\/\//i.test(ctaUrl) ? '' : ctaUrl);
@@ -522,7 +536,11 @@ export function DestinationDetailPage() {
             {filteredPlaces.length > visiblePlaces.length ? (
               <button
                 type="button"
-                onClick={() => setPlaceLimit((current) => current + 6)}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  preserveViewportPosition(() => setPlaceLimit((current) => current + 6));
+                }}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm"
               >
                 Ver mais hospedagens ({filteredPlaces.length - visiblePlaces.length})
@@ -647,7 +665,11 @@ export function DestinationDetailPage() {
                 {filteredListings.length > visibleListings.length ? (
                   <button
                     type="button"
-                    onClick={() => setListingLimit((current) => current + 10)}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      preserveViewportPosition(() => setListingLimit((current) => current + 10));
+                    }}
                     className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm"
                   >
                     Ver mais serviços ({filteredListings.length - visibleListings.length})
