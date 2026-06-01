@@ -163,6 +163,12 @@ A ordem publica dos destinos turisticos e controlada no Super Admin em `Destinos
 
 Use numeros menores para aparecer primeiro. O vinculo por hospedagem permite monetizar destaque por chale sem duplicar o cadastro do servico.
 
+## Qualidade geografica de CEP e coordenadas
+
+Distancias e rotas de chales, pousadas, servicos, restaurantes e lojas devem tratar `lat/lng` com nivel de confianca. CEP generico de cidade nao deve ser salvo ou exibido como ponto preciso.
+
+Plano tecnico e fases de evolucao: `docs/GEO_LOCATION_QUALITY_PLAN.md`.
+
 ## Portal do parceiro de destinos
 
 O parceiro aprovado pelo Super Admin recebe convite por e-mail para acessar `/parceiro` e manter dados públicos básicos do próprio cadastro.

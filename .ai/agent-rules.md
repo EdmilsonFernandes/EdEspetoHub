@@ -168,6 +168,14 @@ Backend API (chamanoespeto-api :4000)
 - Quando a loja criada por `destination_listing_claim` confirma e-mail, o backend deve criar solicitação pendente com `store_id` + `claimed_listing_id`; ao aprovar, o serviço/listing antigo fica `active=false` e a loja passa a ser vinculada aos chalés/pousadas escolhidos.
 - Mudança nesse fluxo deve validar `cd backend && yarn test`, `npm --prefix apis run build`, `npm --prefix frontend run test:unit` e `npm --prefix frontend run build`.
 
+### CEP, geolocalizacao e coordenadas
+
+- Plano de referencia: `docs/GEO_LOCATION_QUALITY_PLAN.md`.
+- Nao adicionar dependencia obrigatoria de Google Maps Platform, Mapbox pago, HERE pago ou outro provedor pago sem pedido explicito do usuario.
+- Provedores pagos, se um dia forem usados, devem ficar atras de `env`/feature flag, com limite de uso, fallback gratuito e documentacao de custo.
+- CEP generico ou fallback de cidade nao deve ser tratado como coordenada precisa. Se usar fallback, registrar/propagar como localizacao aproximada.
+- Mudancas em cadastro/edicao de endereco, chale, servico, restaurante, loja, rota ou distancia devem preservar coordenadas manuais confirmadas e invalidar coordenadas antigas quando endereco/CEP mudar sem novo pin confirmado.
+
 ### Onde implementar algo novo
 
 - **Nova rota que o frontend consome**: registrar no BFF (`apis/src/domains/proxy/proxy.routes.ts` se for proxy, ou criar controller+processor se tiver lógica própria).
