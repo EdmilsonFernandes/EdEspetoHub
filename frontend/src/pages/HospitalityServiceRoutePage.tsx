@@ -193,11 +193,6 @@ const PointCard = ({ point, label, kind, icon: Icon, imageUrl, accent = '#336886
         <p className="mt-1 line-clamp-2 text-xs font-semibold leading-relaxed text-slate-600">
           {point.address || (kind === 'service' ? 'Endereço do serviço não informado.' : 'Endereço da hospedagem não informado.')}
         </p>
-        {isApproximatePoint(point) ? (
-          <p className="mt-2 inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-700">
-            Localização aproximada
-          </p>
-        ) : null}
       </div>
     </div>
   </div>
@@ -331,13 +326,12 @@ export function HospitalityServiceRoutePage() {
               </div>
               <div className="grid grid-cols-2 gap-2 sm:min-w-[15rem]">
                 <div className="rounded-[1.15rem] border border-[#336886]/12 bg-white/82 p-3 text-[#153A4C] shadow-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Distância</p>
-                  <p className="mt-1 text-sm font-black">{formatDistance(distanceKm)}</p>
-                  {routeIsApproximate ? <p className="mt-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-700">aproximada</p> : null}
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">{routeIsApproximate ? 'Rota' : 'Distância'}</p>
+                  <p className="mt-1 text-sm font-black">{routeIsApproximate ? 'Abrir no mapa' : formatDistance(distanceKm)}</p>
                 </div>
                 <div className="rounded-[1.15rem] border border-[#5FD35A]/20 bg-[#5FD35A]/12 p-3 text-[#153A4C] ring-1 ring-white/70">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Tempo</p>
-                  <p className="mt-1 text-sm font-black">{routeIsApproximate ? 'Abrir mapa' : estimateMinutes(distanceKm) || 'Abrir mapa'}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">{routeIsApproximate ? 'Navegação' : 'Tempo'}</p>
+                  <p className="mt-1 text-sm font-black">{routeIsApproximate ? 'Maps ou Waze' : estimateMinutes(distanceKm) || 'Abrir mapa'}</p>
                 </div>
               </div>
             </div>
@@ -347,38 +341,30 @@ export function HospitalityServiceRoutePage() {
               <PointCard point={placePoint} label="Destino do hóspede" kind="place" icon={HouseLine} imageUrl={placeImageUrl} accent="#5FD35A" />
             </div>
 
-            <div className="mt-5">
-              {canShowMap ? (
-                <RouteMapView
-                  origin={toCoords(servicePoint)}
-                  destination={toCoords(placePoint)}
-                  compact
-                  originLabel="Serviço"
-                  destinationLabel="Chalé"
-                  mapActionLabel="Abrir rota"
-                />
-              ) : routeIsApproximate ? (
-                <div className="rounded-[1.35rem] border border-amber-200 bg-[linear-gradient(135deg,rgba(255,251,235,0.96),rgba(255,255,255,0.9))] p-4 text-sm font-semibold leading-relaxed text-amber-900 shadow-[0_18px_46px_-38px_rgba(180,83,9,0.42)]">
-                  <p className="flex items-center gap-2 font-black">
-                    <WarningCircle size={18} weight="duotone" />
-                    CEP amplo: rota confirmada pelo Maps/Waze.
-                  </p>
-                  <p className="mt-1">
-                    Este ponto pode usar CEP de cidade ou região. Para evitar rota errada, abrimos o mapa usando o endereço completo informado, não a coordenada aproximada salva.
-                  </p>
-                </div>
-              ) : (
-                <div className="rounded-[1.35rem] border border-amber-200 bg-amber-50/80 p-4 text-sm font-semibold leading-relaxed text-amber-900">
-                  <p className="flex items-center gap-2 font-black">
-                    <WarningCircle size={18} weight="duotone" />
-                    Coordenada pendente em {missingCoordinates.join(' e ')}.
-                  </p>
-                  <p className="mt-1">
-                    O desenho da rota aparece quando os dois pontos têm latitude e longitude. Os botões abaixo ainda abrem a rota pelo endereço cadastrado.
-                  </p>
-                </div>
-              )}
-            </div>
+            {canShowMap || !routeIsApproximate ? (
+              <div className="mt-5">
+                {canShowMap ? (
+                  <RouteMapView
+                    origin={toCoords(servicePoint)}
+                    destination={toCoords(placePoint)}
+                    compact
+                    originLabel="Serviço"
+                    destinationLabel="Chalé"
+                    mapActionLabel="Abrir rota"
+                  />
+                ) : (
+                  <div className="rounded-[1.35rem] border border-amber-200 bg-amber-50/80 p-4 text-sm font-semibold leading-relaxed text-amber-900">
+                    <p className="flex items-center gap-2 font-black">
+                      <WarningCircle size={18} weight="duotone" />
+                      Endereço pendente em {missingCoordinates.join(' e ')}.
+                    </p>
+                    <p className="mt-1">
+                      Complete o endereço para abrir a rota no app de mapas.
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : null}
 
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               {googleDirectionsUrl ? (
