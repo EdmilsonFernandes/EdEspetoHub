@@ -220,11 +220,19 @@ const PointCard = ({ point, label, kind, icon: Icon, imageUrl, accent = '#336886
 export function HospitalityServiceRoutePage() {
   const { destinationSlug = '', placeSlug = '' } = useParams();
   const [searchParams] = useSearchParams();
+  const routeSearchKey = searchParams.toString();
   const [payload, setPayload] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState('');
   const [routeEstimate, setRouteEstimate] = useState<any>(null);
+
+  useEffect(() => {
+    const scrollToTop = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    scrollToTop();
+    const frame = window.requestAnimationFrame(scrollToTop);
+    return () => window.cancelAnimationFrame(frame);
+  }, [destinationSlug, placeSlug, routeSearchKey]);
 
   useEffect(() => {
     let active = true;
