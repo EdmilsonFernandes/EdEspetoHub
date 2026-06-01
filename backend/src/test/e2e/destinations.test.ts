@@ -1,10 +1,31 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { env } from '../../config/env';
 import { AppDataSource } from '../../config/database';
 import { activateSubscription, api, loginAdmin, registerStore, testEmail, verifyEmailDirectly } from '../helpers';
 
 const superAdminToken = () => jwt.sign({ sub: '00000000-0000-0000-0000-000000000001', role: 'SUPER_ADMIN' }, env.jwtSecret);
+
+async function findLatestStoreVerificationCode(email: string) {
+  const rows = await AppDataSource.query(
+    `
+      SELECT ev.token_hash
+      FROM email_verifications ev
+      INNER JOIN users u ON u.id = ev.user_id
+      WHERE LOWER(u.email) = LOWER($1)
+      ORDER BY ev.created_at DESC
+      LIMIT 1
+    `,
+    [email]
+  );
+  const tokenHash = rows[0]?.token_hash;
+  for (let index = 0; index <= 9999; index += 1) {
+    const code = String(index).padStart(4, '0');
+    if (crypto.createHash('sha256').update(code).digest('hex') === tokenHash) return code;
+  }
+  throw new Error(`Verification code not found for ${email}`);
+}
 
 describe('Destination Hub', () => {
   let adminToken = '';
@@ -828,7 +849,7 @@ describe('Destination Hub', () => {
     expect(publicListRes.body.some((destination: any) => destination.id === requestRes.body.destinationId)).toBe(false);
   });
 
-  it('keeps a claimed destination listing pending until admin validation links the store', async () => {
+  it('keeps a claimed destination listing pending until admin approval converts the service into a store link', async () => {
     const suffix = Date.now();
     const destinationRes = await api
       .post('/api/admin/destinations')
@@ -888,6 +909,15 @@ describe('Destination Hub', () => {
     });
 
     expect(claimedStore.res.status).toBe(201);
+    const verificationCode = await findLatestStoreVerificationCode(claimedStore.email);
+    const verifyRes = await api
+      .post('/api/auth/verify-email')
+      .send({ email: claimedStore.email, token: verificationCode });
+
+    expect(verifyRes.status, JSON.stringify(verifyRes.body)).toBe(200);
+    expect(verifyRes.body.destinationClaimStatus).toBe('pending_review');
+    expect(verifyRes.body.destinationClaimRequestId).toBeTruthy();
+
     const attributionRows = await AppDataSource.query(
       `SELECT acquisition_attribution FROM store_settings WHERE store_id = $1`,
       [claimedStore.body.store.id]
@@ -899,6 +929,34 @@ describe('Destination Hub', () => {
       destinationHospitalityPlaceIds: [placeRes.body.id],
       destinationHospitalityPlaceNames: [placeRes.body.name],
     }));
+
+    const claimRows = await AppDataSource.query(
+      `
+        SELECT id, status, request_source, claimed_listing_id, store_id
+        FROM destination_partner_requests
+        WHERE store_id = $1 AND claimed_listing_id = $2
+      `,
+      [claimedStore.body.store.id, listingRes.body.id]
+    );
+    expect(claimRows).toHaveLength(1);
+    expect(claimRows[0]).toEqual(expect.objectContaining({
+      status: 'pending',
+      request_source: 'store_signup_destination_claim',
+      claimed_listing_id: listingRes.body.id,
+      store_id: claimedStore.body.store.id,
+    }));
+
+    const storeRequestRows = await AppDataSource.query(
+      `
+        SELECT status, store_id, hospitality_place_id, message
+        FROM destination_store_requests
+        WHERE store_id = $1 AND hospitality_place_id = $2
+      `,
+      [claimedStore.body.store.id, placeRes.body.id]
+    );
+    expect(storeRequestRows).toHaveLength(1);
+    expect(storeRequestRows[0].status).toBe('pending');
+    expect(storeRequestRows[0].message).toContain(claimRows[0].id);
 
     const publicRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}`);
     expect(publicRes.status).toBe(200);
@@ -913,24 +971,48 @@ describe('Destination Hub', () => {
     expect(claimedStore.body.store.id).toBeTruthy();
 
     const validationRes = await api
-      .patch(`/api/admin/destination-listings/${listingRes.body.id}`)
+      .patch(`/api/admin/destination-partner-requests/${claimRows[0].id}/review`)
       .set('Authorization', `Bearer ${platformToken}`)
-      .send({ storeId: claimedStore.body.store.id });
+      .send({
+        status: 'approved',
+        claimVerified: true,
+        reviewNote: 'Posse conferida por contato direto antes de converter o serviço em loja.',
+      });
 
     expect(validationRes.status).toBe(200);
-    expect(validationRes.body.storeId).toBe(claimedStore.body.store.id);
+    expect(validationRes.body.status).toBe('approved');
     expect(validationRes.body.store).toEqual(expect.objectContaining({
       id: claimedStore.body.store.id,
       slug: claimedStore.body.store.slug,
     }));
+    expect(validationRes.body.createdPartnerAccountId).toBeNull();
+
+    const convertedRows = await AppDataSource.query(
+      `SELECT active, store_id FROM destination_listings WHERE id = $1`,
+      [listingRes.body.id]
+    );
+    expect(convertedRows[0]).toEqual(expect.objectContaining({
+      active: false,
+      store_id: claimedStore.body.store.id,
+    }));
+
+    const approvedStoreRequestRows = await AppDataSource.query(
+      `SELECT status, reviewed_at FROM destination_store_requests WHERE store_id = $1 AND hospitality_place_id = $2`,
+      [claimedStore.body.store.id, placeRes.body.id]
+    );
+    expect(approvedStoreRequestRows[0].status).toBe('approved');
+    expect(approvedStoreRequestRows[0].reviewed_at).toBeTruthy();
 
     const validatedPublicRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}`);
     expect(validatedPublicRes.status).toBe(200);
-    const validatedListing = validatedPublicRes.body.listings.find((listing: any) => listing.id === listingRes.body.id);
-    expect(validatedListing).toEqual(expect.objectContaining({
-      storeId: claimedStore.body.store.id,
-    }));
-    expect(validatedListing.store).toEqual(expect.objectContaining({
+    expect(validatedPublicRes.body.listings.some((listing: any) => listing.id === listingRes.body.id)).toBe(false);
+
+    const placePublicRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}/hospitality/${placeRes.body.slug}`);
+    expect(placePublicRes.status).toBe(200);
+    expect(placePublicRes.body.listings.some((listing: any) => listing.id === listingRes.body.id)).toBe(false);
+    expect(placePublicRes.body.stores.some((link: any) => link.store?.id === claimedStore.body.store.id)).toBe(true);
+    const linkedStore = placePublicRes.body.stores.find((link: any) => link.store?.id === claimedStore.body.store.id)?.store;
+    expect(linkedStore).toEqual(expect.objectContaining({
       id: claimedStore.body.store.id,
       slug: claimedStore.body.store.slug,
       name: listingRes.body.title,

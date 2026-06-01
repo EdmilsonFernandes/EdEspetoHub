@@ -10,6 +10,7 @@ import {
 import { DestinationListing } from './DestinationListing';
 import { DestinationPartnerAccount } from './DestinationPartnerAccount';
 import { HospitalityPlace } from './HospitalityPlace';
+import { Store } from './Store';
 import { TravelDestination } from './TravelDestination';
 
 @Entity({ name: 'destination_partner_requests' })
@@ -94,6 +95,13 @@ export class DestinationPartnerRequest {
 
   @Column({ name: 'claimed_listing_id', type: 'uuid', nullable: true })
   claimedListingId?: string | null;
+
+  @ManyToOne(() => Store, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'store_id' })
+  store?: Store | null;
+
+  @Column({ name: 'store_id', type: 'uuid', nullable: true })
+  storeId?: string | null;
 
   @Column({ name: 'responsible_name' })
   responsibleName!: string;

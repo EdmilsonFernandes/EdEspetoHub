@@ -1262,7 +1262,12 @@ export function CreateStore() {
     setStoreVerifyMessage('');
     try {
       const result = await authService.verifyEmail({ email, token: storeVerificationCode });
-      setStoreVerifyMessage('Loja confirmada com sucesso. Redirecionando...');
+      const claimPending = result?.destinationClaimStatus === 'pending_review';
+      setStoreVerifyMessage(
+        claimPending
+          ? 'Loja confirmada. A solicitação para assumir o serviço foi enviada para análise.'
+          : 'Loja confirmada com sucesso. Redirecionando...'
+      );
       setStoreVerifyPrompt(null);
       if (result?.redirectUrl) {
         try {
@@ -1272,7 +1277,7 @@ export function CreateStore() {
           // no-op: login prefill is only a convenience.
         }
         const redirectTarget = String(result.redirectUrl).startsWith('/admin')
-          ? `/admin?identifier=${encodeURIComponent(email)}&verified=1`
+          ? `/admin?identifier=${encodeURIComponent(email)}&verified=1${claimPending ? '&destinationClaim=pending' : ''}`
           : result.redirectUrl;
         window.setTimeout(() => navigate(redirectTarget), 800);
       }

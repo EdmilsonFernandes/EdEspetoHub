@@ -2489,6 +2489,12 @@ export function SuperAdminDestinations() {
               Assumir perfil existente
             </div>
           ) : null}
+          {request.store ? (
+            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-emerald-700">
+              <Buildings size={12} weight="fill" />
+              Converte em loja: {request.store.name}
+            </div>
+          ) : null}
           {isPartnerClaimRequest(request) ? (
             <div className="mt-2 rounded-2xl border border-amber-200 bg-white/72 p-3 text-[11px] font-bold leading-relaxed text-amber-800">
               <span className="mb-1 flex items-center gap-1 font-black uppercase tracking-[0.08em]">
@@ -2643,6 +2649,7 @@ export function SuperAdminDestinations() {
                 { label: 'Acesso', value: partnerAccessLabel(request) || 'Ainda não liberado' },
                 { label: 'Responsável', value: request.responsibleName || 'Não informado' },
                 { label: 'E-mail', value: request.responsibleEmail || account.email || 'Não informado' },
+                ...(request.store ? [{ label: 'Loja criada', value: request.store.name || request.store.slug || request.storeId }] : []),
               ].map((item) => (
                 <div key={item.label} className="rounded-[1.25rem] border border-slate-100 bg-slate-50 p-3">
                   <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{item.label}</p>

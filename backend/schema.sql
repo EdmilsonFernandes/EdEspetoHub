@@ -863,6 +863,8 @@ BEGIN
     ADD COLUMN IF NOT EXISTS claimed_hospitality_place_id UUID;
     ALTER TABLE destination_partner_requests
     ADD COLUMN IF NOT EXISTS claimed_listing_id UUID;
+    ALTER TABLE destination_partner_requests
+    ADD COLUMN IF NOT EXISTS store_id UUID;
   END IF;
 END $$;
 
@@ -890,6 +892,17 @@ BEGIN
       REFERENCES destination_listings(id)
       ON DELETE SET NULL;
     END IF;
+
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_constraint
+      WHERE conname = 'destination_partner_requests_store_fkey'
+    ) THEN
+      ALTER TABLE destination_partner_requests
+      ADD CONSTRAINT destination_partner_requests_store_fkey
+      FOREIGN KEY (store_id)
+      REFERENCES stores(id)
+      ON DELETE SET NULL;
+    END IF;
   END IF;
 END $$;
 
@@ -903,5 +916,9 @@ BEGIN
     CREATE INDEX IF NOT EXISTS idx_destination_partner_requests_claimed_listing
       ON destination_partner_requests(claimed_listing_id)
       WHERE claimed_listing_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS idx_destination_partner_requests_store
+      ON destination_partner_requests(store_id)
+      WHERE store_id IS NOT NULL;
   END IF;
 END $$;
