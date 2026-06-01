@@ -878,6 +878,44 @@ export const CartView = ({
       </div>
     </div>
   );
+  const renderCustomerOrderNoteSummaryCard = () => {
+    const note = customerOrderNoteValue.trim();
+
+    return (
+      <div
+        className={`rounded-2xl border p-4 shadow-sm ${
+          note
+            ? "border-amber-100 bg-[linear-gradient(135deg,#fffaf0_0%,#ffffff_100%)]"
+            : "border-slate-100 bg-white"
+        }`}
+        data-testid="customer-order-note-summary"
+      >
+        <div className="flex items-start gap-3">
+          <span
+            className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
+              note ? "bg-amber-500/10 text-amber-700" : "bg-slate-100 text-slate-500"
+            }`}
+          >
+            <NotePencil size={18} weight="duotone" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+              Observação para a loja
+            </p>
+            {note ? (
+              <p className="mt-2 rounded-[1rem] border border-white/70 bg-white/78 px-3 py-2 text-sm font-semibold leading-relaxed text-slate-800 shadow-[0_12px_24px_-22px_rgba(15,23,42,0.25)]">
+                {note}
+              </p>
+            ) : (
+              <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">
+                Sem comentários para este pedido.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const renderPaymentMethodCard = (method: any, tone: "online" | "local") => {
     const methodMeta = getPaymentMethodMeta(method.id);
@@ -2423,7 +2461,7 @@ export const CartView = ({
             </div>
           </div>
 
-          {renderCustomerOrderNoteCard()}
+          {renderCustomerOrderNoteSummaryCard()}
 
           {/* Entrega / Retirada */}
           {showCustomerFulfillmentInsights && (

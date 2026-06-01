@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Capacitor } from '@capacitor/core';
 
 type RouteCoords = {
   lat: number;
@@ -25,6 +26,23 @@ const clamp = (value: number, min: number, max: number) => {
 };
 
 const lerp = (start: number, end: number, amount: number) => start + (end - start) * amount;
+
+const openRouteInSystemBrowser = async (url: string) => {
+  if (!url) return;
+
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const { Browser } = await import('@capacitor/browser');
+      await Browser.open({ url });
+      return;
+    } catch {
+      // Fallback handled below.
+    }
+  }
+
+  const opened = window.open(url, '_blank', 'noopener,noreferrer');
+  if (!opened) window.location.assign(url);
+};
 
 const buildMapLayout = (origin: RouteCoords, destination: RouteCoords) => {
   const minLat = Math.min(Number(origin.lat), Number(destination.lat));
@@ -146,7 +164,7 @@ export function RouteMapView({
             type="button"
             onClick={() => {
               const geoUrl = `https://www.google.com/maps/dir/?api=1&origin=${Number(origin.lat).toFixed(6)},${Number(origin.lng).toFixed(6)}&destination=${Number(destination.lat).toFixed(6)},${Number(destination.lng).toFixed(6)}&travelmode=driving`;
-              window.open(geoUrl, '_system') || window.open(geoUrl, '_blank');
+              void openRouteInSystemBrowser(geoUrl);
             }}
             className="rounded-2xl border border-amber-300/80 bg-[linear-gradient(135deg,#fff7e7,#f7d58d)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-amber-900 shadow-[0_18px_30px_-24px_rgba(180,83,9,0.62)] transition-transform hover:-translate-y-0.5 active:scale-[0.96]"
           >
