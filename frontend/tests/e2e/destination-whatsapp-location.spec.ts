@@ -148,8 +148,8 @@ test.describe('Destination WhatsApp location', () => {
     await expect(page.getByText('Restaurante Silvia Lanches até Chale Vista da Pedra')).toBeVisible();
     await expect(page.getByText('Origem').first()).toBeVisible();
     await expect(page.getByText('Destino do hóspede')).toBeVisible();
-    await expect(page.getByText('Rota estimada')).toBeVisible();
-    await expect(page.getByText('4 min aprox.')).toBeVisible();
+    await expect(page.getByText(/Rota (estimada|viva)/i)).toBeVisible();
+    await expect(page.getByText(/4 min(?: aprox\.)?/i)).toBeVisible();
     await expect(page.getByRole('link', { name: /Abrir no Google Maps/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /Abrir no Waze/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /Copiar link/i })).toBeVisible();

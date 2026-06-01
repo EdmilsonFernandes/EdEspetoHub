@@ -341,6 +341,8 @@ export function HospitalityServiceRoutePage() {
     if (typeof window === 'undefined') return '';
     return window.location.href;
   }, []);
+  const linkCopied = copied === 'Link da rota copiado.';
+  const addressCopied = copied === 'Endereço do chalé copiado.';
   const copyText = async (value: string, feedback: string) => {
     if (!value) return;
     try {
@@ -419,9 +421,10 @@ export function HospitalityServiceRoutePage() {
                     origin={toCoords(servicePoint)}
                     destination={toCoords(placePoint)}
                     compact
-                    originLabel="Serviço"
-                    destinationLabel="Chalé"
+                    originLabel={servicePoint.name || 'Serviço'}
+                    destinationLabel={placePoint.name || 'Chalé'}
                     mapActionLabel="Abrir rota"
+                    premiumMotion
                   />
                 ) : (
                   <div className="rounded-[1.35rem] border border-amber-200 bg-amber-50/80 p-4 text-sm font-semibold leading-relaxed text-amber-900">
@@ -456,22 +459,30 @@ export function HospitalityServiceRoutePage() {
               <button
                 type="button"
                 onClick={() => copyText(currentRouteUrl, 'Link da rota copiado.')}
-                className="jnc-hub-touch inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-slate-200/80 bg-white/65 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm hover:-translate-y-0.5 hover:border-slate-300"
+                className={`jnc-hub-touch inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] shadow-sm transition-all hover:-translate-y-0.5 ${
+                  linkCopied
+                    ? 'border-[#5FD35A]/35 bg-[#5FD35A]/16 text-[#153A4C]'
+                    : 'border-slate-200/80 bg-white/65 text-slate-600 hover:border-slate-300'
+                }`}
               >
-                <ClipboardText size={16} weight="duotone" />
-                Copiar link
+                {linkCopied ? <CheckCircle size={16} weight="fill" /> : <ClipboardText size={16} weight="duotone" />}
+                {linkCopied ? 'Copiado' : 'Copiar link'}
               </button>
               <button
                 type="button"
                 onClick={() => copyText(placePoint.address, 'Endereço do chalé copiado.')}
-                className="jnc-hub-touch inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-slate-200/80 bg-white/65 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm hover:-translate-y-0.5 hover:border-slate-300"
+                className={`jnc-hub-touch inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] shadow-sm transition-all hover:-translate-y-0.5 ${
+                  addressCopied
+                    ? 'border-[#5FD35A]/35 bg-[#5FD35A]/16 text-[#153A4C]'
+                    : 'border-slate-200/80 bg-white/65 text-slate-600 hover:border-slate-300'
+                }`}
               >
-                <HouseLine size={16} weight="duotone" />
-                Copiar endereço
+                {addressCopied ? <CheckCircle size={16} weight="fill" /> : <HouseLine size={16} weight="duotone" />}
+                {addressCopied ? 'Copiado' : 'Copiar endereço'}
               </button>
             </div>
             {copied ? (
-              <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#5FD35A]/14 px-3 py-2 text-xs font-black text-[#2d5f7b]">
+              <p aria-live="polite" className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#5FD35A]/14 px-3 py-2 text-xs font-black text-[#2d5f7b]">
                 <CheckCircle size={15} weight="fill" />
                 {copied}
               </p>
