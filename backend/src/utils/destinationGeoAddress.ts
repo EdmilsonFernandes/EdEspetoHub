@@ -20,6 +20,44 @@ const text = (value: unknown) => {
   return normalized || null;
 };
 
+const normalizeComparableText = (value: unknown) => String(value || '')
+  .replace(/\s{2,}/g, ' ')
+  .trim()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, ' ')
+  .trim();
+
+const stripDistrictPrefix = (value: string) => value.replace(/^(bairro do|bairro da|bairro de|bairro)\s+/i, '').trim();
+
+const streetHasExplicitNumber = (street: string | null) => {
+  if (!street) return false;
+  return (
+    /,\s*(?:n[ºo]\.?\s*)?\d+[a-z]?(?:\b|[^a-z0-9])/i.test(street) ||
+    /\bn[ºo]\.?\s*\d+[a-z]?\b/i.test(street) ||
+    /\bn[uú]mero\s*\d+[a-z]?\b/i.test(street) ||
+    /\s+\d+[a-z]?\s*$/.test(street.trim())
+  );
+};
+
+const streetWithNumber = (street: string | null, number: string | null) => (
+  street && number && !streetHasExplicitNumber(street) ? `${street}, ${number}` : street
+);
+
+const districtAlreadyInStreet = (street: string | null, district: string | null) => {
+  if (!street || !district) return false;
+  const normalizedStreet = normalizeComparableText(street);
+  const normalizedDistrict = normalizeComparableText(stripDistrictPrefix(district));
+  return normalizedDistrict.length >= 3 && normalizedStreet.includes(normalizedDistrict);
+};
+
+const districtForAddress = (payload: DestinationGeoAddressInput) => {
+  const street = text(payload.address);
+  const district = text(payload.district);
+  return district && !districtAlreadyInStreet(street, district) ? district : null;
+};
+
 const stateCode = (value: unknown) => {
   const normalized = String(value || '').trim().toUpperCase();
   return normalized ? normalized.slice(0, 2) : null;
@@ -56,9 +94,10 @@ const streetLines = (payload: DestinationGeoAddressInput) => {
   const street = text(payload.address);
   const number = text(payload.addressNumber);
   if (!street) return [];
+  const line = streetWithNumber(street, number);
   return unique([
-    number ? `${street}, ${number}` : street,
-    number ? `${number} ${street}` : null,
+    line,
+    number && !streetHasExplicitNumber(street) ? `${number} ${street}` : null,
   ]);
 };
 
@@ -69,9 +108,8 @@ export const buildDestinationGeocodeAddress = (
   const includeZip = options?.includeZip !== false;
   const includeCountry = Boolean(options?.includeCountry);
   return [
-    text(payload.address),
-    text(payload.addressNumber),
-    text(payload.district),
+    streetWithNumber(text(payload.address), text(payload.addressNumber)),
+    districtForAddress(payload),
     text(payload.city),
     stateCode(payload.state),
     includeZip ? zipCode(payload.zipCode) : null,
@@ -95,7 +133,7 @@ export const buildDestinationGeocodeCandidates = (
     return unique([
       ...lines.map((streetLine) => [
         streetLine,
-        text(source.district),
+        districtForAddress(source),
         city,
         state,
         includeZip ? zipCode(source.zipCode) : null,

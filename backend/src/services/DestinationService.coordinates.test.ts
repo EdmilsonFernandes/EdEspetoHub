@@ -100,6 +100,48 @@ describe('DestinationService coordinate resolver', () => {
     );
   });
 
+  it('does not send duplicate or conflicting address numbers to geocoding', async () => {
+    const service = makeService();
+    vi.spyOn(service.zipCodeLookupService, 'lookup').mockResolvedValue({
+      zipCode: '12490000',
+      street: null,
+      district: null,
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      ibgeCode: null,
+      latitude: null,
+      longitude: null,
+      provider: 'test',
+    });
+    const geocodeSpy = vi.spyOn(service.geoLocationService, 'geocodeAddress').mockResolvedValue(null);
+
+    await service.resolveDestinationCoordinates({
+      address: 'Rua Santa Edwiges, 100 - Quilombo',
+      addressNumber: '900',
+      district: 'Bairro do Quilombo',
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      zipCode: '12490-000',
+      lat: null,
+      lng: null,
+      scope: 'hospitality_place',
+    });
+
+    expect(geocodeSpy).toHaveBeenCalledTimes(2);
+    expect(geocodeSpy).toHaveBeenNthCalledWith(
+      1,
+      'Rua Santa Edwiges, 100 - Quilombo, São Bento do Sapucaí, SP, Brasil'
+    );
+    expect(geocodeSpy).toHaveBeenNthCalledWith(
+      2,
+      'Rua Santa Edwiges, 100 - Quilombo, São Bento do Sapucaí, SP, 12490000, Brasil'
+    );
+    for (const [address] of geocodeSpy.mock.calls) {
+      expect(address).not.toMatch(/,\s*900(?:,|$)/);
+      expect(address).not.toContain('Bairro do Quilombo');
+    }
+  });
+
   it('uses CEP coordinates as fallback when geocoding does not resolve the address', async () => {
     const service = makeService();
     vi.spyOn(service.zipCodeLookupService, 'lookup').mockResolvedValue({

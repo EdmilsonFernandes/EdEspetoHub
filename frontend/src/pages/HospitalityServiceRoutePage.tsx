@@ -7,7 +7,7 @@ import { PublicDestinationShell } from '../components/Destinations/PublicDestina
 import { RouteMapView } from '../components/RouteMapView';
 import { destinationService } from '../services/destinationService';
 import { mapsService } from '../services/mapsService';
-import { buildDestinationAddressLine } from '../utils/destinationWhatsApp';
+import { buildDestinationAddressLine, buildDestinationRouteAddressLine } from '../utils/destinationWhatsApp';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 
@@ -41,7 +41,7 @@ const haversineKm = (origin: any, destination: any) => {
 const isApproximatePoint = (point: any) => Boolean(point?.geoApproximate || ['zip', 'city', 'unknown'].includes(String(point?.geoPrecision || '').toLowerCase()));
 
 const mapPointQuery = (point: any) => {
-  const address = String(point?.address || '').trim();
+  const address = String(point?.routeAddress || point?.address || '').trim();
   if (isApproximatePoint(point) && address) return address;
   if (hasCoords(point)) {
     const coords = toCoords(point);
@@ -81,7 +81,7 @@ const buildGoogleNativeUrl = (origin: any, destination: any, fallbackUrl: string
 };
 
 const buildWazeUrl = (destination: any) => {
-  const address = String(destination?.address || '').trim();
+  const address = String(destination?.routeAddress || destination?.address || '').trim();
   if (isApproximatePoint(destination) && address) {
     return `https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes`;
   }
@@ -95,7 +95,7 @@ const buildWazeUrl = (destination: any) => {
 const buildWazeNativeUrl = (destination: any, fallbackUrl: string) => {
   if (!fallbackUrl || Capacitor.getPlatform() !== 'android') return '';
   let params = '';
-  const address = String(destination?.address || '').trim();
+  const address = String(destination?.routeAddress || destination?.address || '').trim();
   if (isApproximatePoint(destination) && address) {
     params = `q=${encodeURIComponent(address)}&navigate=yes`;
   } else if (hasCoords(destination)) {
@@ -256,6 +256,14 @@ export function HospitalityServiceRoutePage() {
       state: searchParams.get('serviceState') || serviceFromPayload?.state || destination.state || '',
       zipCode: searchParams.get('serviceZipCode') || serviceFromPayload?.zipCode || '',
     }),
+    routeAddress: buildDestinationRouteAddressLine({
+      address: searchParams.get('serviceAddress') || serviceFromPayload?.address || '',
+      addressNumber: searchParams.get('serviceAddressNumber') || serviceFromPayload?.addressNumber || '',
+      district: searchParams.get('serviceDistrict') || serviceFromPayload?.district || '',
+      city: searchParams.get('serviceCity') || serviceFromPayload?.city || destination.city || '',
+      state: searchParams.get('serviceState') || serviceFromPayload?.state || destination.state || '',
+      zipCode: searchParams.get('serviceZipCode') || serviceFromPayload?.zipCode || '',
+    }),
     lat: serviceFromPayload?.lat || searchParams.get('serviceLat') || '',
     lng: serviceFromPayload?.lng || searchParams.get('serviceLng') || '',
     geoApproximate: serviceFromPayload?.geoApproximate,
@@ -264,6 +272,14 @@ export function HospitalityServiceRoutePage() {
   const placePoint = useMemo(() => ({
     name: searchParams.get('placeName') || place.name || 'Hospedagem',
     address: buildDestinationAddressLine({
+      address: searchParams.get('placeAddress') || place.address || '',
+      addressNumber: searchParams.get('placeAddressNumber') || place.addressNumber || '',
+      district: searchParams.get('placeDistrict') || place.district || '',
+      city: searchParams.get('placeCity') || place.city || destination.city || '',
+      state: searchParams.get('placeState') || place.state || destination.state || '',
+      zipCode: searchParams.get('placeZipCode') || place.zipCode || '',
+    }),
+    routeAddress: buildDestinationRouteAddressLine({
       address: searchParams.get('placeAddress') || place.address || '',
       addressNumber: searchParams.get('placeAddressNumber') || place.addressNumber || '',
       district: searchParams.get('placeDistrict') || place.district || '',

@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildDestinationAddressLine,
   buildPhoneCallUrl,
   buildDestinationInquiryMessage,
+  buildDestinationRouteAddressLine,
   buildHospitalityServiceRouteUrl,
   buildWhatsAppUrl,
   normalizeBrazilianContactPhone,
@@ -33,6 +35,39 @@ describe('destinationWhatsApp', () => {
     const url = buildWhatsAppUrl('12997000000', 'Pedido pelo app', true);
 
     expect(url).toBe('https://api.whatsapp.com/send?phone=5512997000000&text=Pedido%20pelo%20app');
+  });
+
+  it('does not duplicate a conflicting number already present in the destination address', () => {
+    expect(buildDestinationAddressLine({
+      address: 'Rua Santa Edwiges, 100 - Quilombo',
+      addressNumber: '900',
+      district: 'Bairro do Quilombo',
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      zipCode: '12490000',
+    })).toBe('Rua Santa Edwiges, 100 - Quilombo · São Bento do Sapucaí - SP · CEP 12490-000');
+  });
+
+  it('builds a route address without broad CEP for external map apps', () => {
+    expect(buildDestinationRouteAddressLine({
+      address: 'R. Pintora Adelaide Azevedo Mello',
+      addressNumber: '361',
+      district: 'Centro',
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      zipCode: '12490-000',
+    })).toBe('R. Pintora Adelaide Azevedo Mello, 361, Centro, São Bento do Sapucaí, SP, Brasil');
+  });
+
+  it('builds a clean route query when the hospitality address already contains number and district', () => {
+    expect(buildDestinationRouteAddressLine({
+      address: 'Rua Santa Edwiges, 100 - Quilombo',
+      addressNumber: '900',
+      district: 'Bairro do Quilombo',
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      zipCode: '12490-000',
+    })).toBe('Rua Santa Edwiges, 100 - Quilombo, São Bento do Sapucaí, SP, Brasil');
   });
 
   it('creates a message with destination, place and selected service context', () => {

@@ -48,6 +48,56 @@ const normalizeCoordinate = (value?: string | number | null) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+type DestinationAddressLineInput = {
+  address?: string | null;
+  addressNumber?: string | number | null;
+  district?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zipCode?: string | null;
+};
+
+const normalizeInlineText = (value?: string | number | null) => String(value || '').replace(/\s+/g, ' ').trim();
+
+const normalizeZipCodeForDisplay = (value?: string | null) => {
+  const raw = normalizeInlineText(value);
+  const digits = raw.replace(/\D/g, '');
+  return digits.length === 8 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : raw;
+};
+
+const normalizeComparableText = (value?: string | number | null) => normalizeInlineText(value)
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, ' ')
+  .trim();
+
+const stripDistrictPrefix = (value: string) => value.replace(/^(bairro do|bairro da|bairro de|bairro)\s+/i, '').trim();
+
+const streetHasExplicitNumber = (street: string) => {
+  if (!street) return false;
+  return (
+    /,\s*(?:n[ºo]\.?\s*)?\d+[a-z]?(?:\b|[^a-z0-9])/i.test(street) ||
+    /\bn[ºo]\.?\s*\d+[a-z]?\b/i.test(street) ||
+    /\bn[uú]mero\s*\d+[a-z]?\b/i.test(street) ||
+    /\s+\d+[a-z]?\s*$/.test(street.trim())
+  );
+};
+
+const streetWithNumber = (street: string, number: string) => (
+  street && number && !streetHasExplicitNumber(street) ? `${street}, nº ${number}` : street
+);
+
+const streetWithRouteNumber = (street: string, number: string) => (
+  street && number && !streetHasExplicitNumber(street) ? `${street}, ${number}` : street
+);
+
+const districtAlreadyInStreet = (street: string, district: string) => {
+  const normalizedStreet = normalizeComparableText(street);
+  const normalizedDistrict = normalizeComparableText(stripDistrictPrefix(district));
+  return normalizedDistrict.length >= 3 && normalizedStreet.includes(normalizedDistrict);
+};
+
 export const buildDestinationAddressLine = ({
   address,
   addressNumber,
@@ -55,26 +105,31 @@ export const buildDestinationAddressLine = ({
   city,
   state,
   zipCode,
-}: {
-  address?: string | null;
-  addressNumber?: string | number | null;
-  district?: string | null;
-  city?: string | null;
-  state?: string | null;
-  zipCode?: string | null;
-}) => {
-  const street = String(address || '').trim();
-  const number = String(addressNumber || '').trim();
-  const districtText = String(district || '').trim();
-  const cityState = [city, state].map((value) => String(value || '').trim()).filter(Boolean).join(' - ');
-  const zip = String(zipCode || '').trim();
+}: DestinationAddressLineInput, options?: { includeZip?: boolean }) => {
+  const street = normalizeInlineText(address);
+  const number = normalizeInlineText(addressNumber);
+  const districtText = normalizeInlineText(district);
+  const districtLine = districtText && !districtAlreadyInStreet(street, districtText) ? districtText : '';
+  const cityState = [city, state].map((value) => normalizeInlineText(value)).filter(Boolean).join(' - ');
+  const zip = normalizeZipCodeForDisplay(zipCode);
   return [
-    [street, number ? `nº ${number}` : ''].filter(Boolean).join(', '),
-    districtText,
+    streetWithNumber(street, number),
+    districtLine,
     cityState,
-    zip ? `CEP ${zip}` : '',
+    options?.includeZip === false || !zip ? '' : `CEP ${zip}`,
   ].filter(Boolean).join(' · ');
 };
+
+export const buildDestinationRouteAddressLine = (payload: DestinationAddressLineInput) =>
+  [
+    streetWithRouteNumber(normalizeInlineText(payload.address), normalizeInlineText(payload.addressNumber)),
+    normalizeInlineText(payload.district) && !districtAlreadyInStreet(normalizeInlineText(payload.address), normalizeInlineText(payload.district))
+      ? normalizeInlineText(payload.district)
+      : '',
+    normalizeInlineText(payload.city),
+    normalizeInlineText(payload.state),
+    'Brasil',
+  ].filter(Boolean).join(', ');
 
 export const buildDestinationMapUrl = ({
   address,
