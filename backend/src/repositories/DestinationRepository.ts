@@ -452,6 +452,20 @@ export class DestinationRepository {
     });
   }
 
+  findLatestListingClaimRequestByStoreId(storeId: string) {
+    return this.partnerRequestRepository
+      .createQueryBuilder('request')
+      .innerJoinAndSelect('request.destination', 'destination')
+      .leftJoinAndSelect('request.claimedListing', 'claimedListing')
+      .leftJoinAndSelect('request.store', 'store')
+      .leftJoinAndSelect('store.settings', 'requestStoreSettings')
+      .where('request.store_id = :storeId', { storeId })
+      .andWhere('request.claimed_listing_id IS NOT NULL')
+      .andWhere('request.request_source = :source', { source: 'store_signup_destination_claim' })
+      .orderBy('request.created_at', 'DESC')
+      .getOne();
+  }
+
   findPendingPartnerRequestByEmailAndName(email: string, name: string, destinationId: string) {
     return this.partnerRequestRepository
       .createQueryBuilder('request')
@@ -513,6 +527,10 @@ export class DestinationRepository {
 
   findStoreById(storeId: string) {
     return this.storeRepository.findOne({ where: { id: storeId }, relations: [ 'settings' ] });
+  }
+
+  saveStore(store: Store) {
+    return this.storeRepository.save(store);
   }
 
   listAllStoresForAdmin() {

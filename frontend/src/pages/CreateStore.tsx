@@ -166,6 +166,13 @@ const normalizeClaimPlaceIds = (value = '') =>
     .map((item) => item.trim())
     .filter(Boolean);
 
+const normalizeLocationComparable = (value = '') =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+
 export function CreateStore() {
   const ATTRIBUTION_KEY = 'jnk_attribution_v1';
   const isNativePlatform = Capacitor.isNativePlatform();
@@ -189,6 +196,9 @@ export function CreateStore() {
       storeName: read('storeName') || read('listingTitle'),
       description: read('description'),
       address: read('address'),
+      addressNumber: read('addressNumber'),
+      district: read('district'),
+      zipCode: read('zipCode'),
       city: read('city'),
       state: read('state').toUpperCase(),
       phone: read('phone'),
@@ -467,6 +477,10 @@ export function CreateStore() {
         destinationClaim.description ||
         STORE_SEGMENT_PRESETS[destinationClaim.segment || 'outros']?.description ||
         '',
+      cep: prev.cep || normalizeCep(destinationClaim.zipCode || ''),
+      street: prev.street || destinationClaim.address,
+      neighborhood: prev.neighborhood || destinationClaim.district,
+      number: prev.number || destinationClaim.addressNumber,
       city: prev.city || destinationClaim.city,
       state: prev.state || destinationClaim.state,
       phone: prev.phone || normalizeClaimPhone(destinationClaim.phone),
@@ -635,13 +649,32 @@ export function CreateStore() {
     setCepError('');
     try {
       const data = await addressLookupService.lookupZipCode(rawCep);
+      const resolvedCity = String(data.city || '').trim();
+      const resolvedState = String(data.state || '').trim().toUpperCase();
+      if (destinationClaim) {
+        const expectedCity = String(destinationClaim.city || '').trim();
+        const expectedState = String(destinationClaim.state || '').trim().toUpperCase();
+        const stateMismatch = Boolean(expectedState && resolvedState && resolvedState !== expectedState);
+        const cityMismatch = Boolean(
+          expectedCity &&
+          resolvedCity &&
+          normalizeLocationComparable(resolvedCity) !== normalizeLocationComparable(expectedCity)
+        );
+        if (stateMismatch || cityMismatch) {
+          setCepError(
+            `Esse CEP pertence a ${resolvedCity || 'outra cidade'}${resolvedState ? `/${resolvedState}` : ''}. Este convite é de ${expectedCity || 'outro destino'}${expectedState ? `/${expectedState}` : ''}. Confira o CEP do serviço antes de continuar.`
+          );
+          setCepAutofilled(false);
+          return;
+        }
+      }
       setRegisterForm((prev) => ({
         ...prev,
         cep: normalizeCep(rawCep),
         street: data.street || '',
         neighborhood: data.district || '',
-        city: data.city || '',
-        state: String(data.state || '').toUpperCase(),
+        city: resolvedCity,
+        state: resolvedState,
         lat: data.latitude ?? prev.lat ?? null,
         lng: data.longitude ?? prev.lng ?? null,
       }));
@@ -857,6 +890,30 @@ export function CreateStore() {
           termsCheckboxRef.current.focus();
         }
         return;
+      }
+      if (destinationClaim) {
+        const expectedCity = String(destinationClaim.city || '').trim();
+        const expectedState = String(destinationClaim.state || '').trim().toUpperCase();
+        const currentCity = String(registerForm.city || '').trim();
+        const currentState = String(registerForm.state || '').trim().toUpperCase();
+        const stateMismatch = Boolean(expectedState && currentState && currentState !== expectedState);
+        const cityMismatch = Boolean(
+          expectedCity &&
+          currentCity &&
+          normalizeLocationComparable(currentCity) !== normalizeLocationComparable(expectedCity)
+        );
+        if (stateMismatch || cityMismatch) {
+          const message = `Este convite é de ${expectedCity || 'outro destino'}${expectedState ? `/${expectedState}` : ''}. Use um endereço dessa cidade para solicitar a posse do serviço.`;
+          setStoreError('');
+          setCepError(message);
+          showValidationFeedback({
+            message,
+            fields: { cep: true, city: true, state: true },
+            items: ['Conferir o CEP/endereço do serviço antes de continuar.'],
+          });
+          setCurrentStep(2);
+          return;
+        }
       }
       setIsRegistering(true);
 
@@ -1268,6 +1325,10 @@ export function CreateStore() {
           ? 'Loja confirmada. A solicitação para assumir o serviço foi enviada para análise.'
           : 'Loja confirmada com sucesso. Redirecionando...'
       );
+      if (claimPending) {
+        setStoreCodeDigits(['', '', '', '']);
+        return;
+      }
       setStoreVerifyPrompt(null);
       if (result?.redirectUrl) {
         try {

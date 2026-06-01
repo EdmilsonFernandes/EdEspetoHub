@@ -103,13 +103,51 @@ const formatDistance = (value?: number | null) => {
   return km < 1 ? `${Math.max(80, Math.round(km * 1000))} m em linha reta` : `${km.toFixed(1).replace('.', ',')} km em linha reta`;
 };
 
+const openRouteInBrowser = async (url: string) => {
+  try {
+    const { Browser } = await import('@capacitor/browser');
+    await Browser.open({ url });
+    return;
+  } catch {
+    // Fallback handled below.
+  }
+
+  const opened = window.open(url, '_blank', 'noopener,noreferrer');
+  if (!opened) window.location.assign(url);
+};
+
 const openExternalRoute = (url: string, nativeUrl?: string) => (event: any) => {
   event.preventDefault();
   if (!url) return;
+
   if (Capacitor.isNativePlatform()) {
-    window.location.href = nativeUrl || url;
+    if (Capacitor.getPlatform() === 'android' && nativeUrl) {
+      let fallbackTimer = window.setTimeout(() => {
+        void openRouteInBrowser(url);
+      }, 700);
+
+      let clearFallback = () => {};
+      const clearWhenHidden = () => {
+        if (document.hidden) clearFallback();
+      };
+      clearFallback = () => {
+        window.clearTimeout(fallbackTimer);
+        document.removeEventListener('visibilitychange', clearWhenHidden);
+        window.removeEventListener('pagehide', clearFallback);
+        window.removeEventListener('blur', clearFallback);
+      };
+
+      document.addEventListener('visibilitychange', clearWhenHidden, { once: true });
+      window.addEventListener('pagehide', clearFallback, { once: true });
+      window.addEventListener('blur', clearFallback, { once: true });
+      window.location.assign(nativeUrl);
+      return;
+    }
+
+    void openRouteInBrowser(url);
     return;
   }
+
   window.open(url, '_blank', 'noopener,noreferrer');
 };
 

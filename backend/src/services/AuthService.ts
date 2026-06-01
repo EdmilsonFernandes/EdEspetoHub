@@ -949,6 +949,11 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     await this.notifySignup(result.user, result.store, result.acquisitionAttribution);
     this.log.info('Register success', { userId: result.user.id, storeId: result.store.id });
 
+    const isDestinationListingClaimSignup =
+      result.acquisitionAttribution &&
+      typeof result.acquisitionAttribution === 'object' &&
+      String((result.acquisitionAttribution as any).source || '') === 'destination_listing_claim';
+
     const token = jwt.sign(
       { sub: result.user.id, storeId: result.store.id },
       env.jwtSecret,
@@ -962,11 +967,15 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         id: result.store.id,
         slug: result.store.slug,
       },
-      storeStatus: result.store.open ? 'ACTIVE' : 'PENDING_PAYMENT',
+      storeStatus: isDestinationListingClaimSignup
+        ? 'PENDING_REVIEW'
+        : result.store.open
+          ? 'ACTIVE'
+          : 'PENDING_PAYMENT',
       subscriptionStatus: result.subscription.status,
       trialExpiresAt: result.subscription.endDate,
       payment: null,
-      token,
+      token: isDestinationListingClaimSignup ? null : token,
       redirectUrl: `/verify-email`,
       next: 'VERIFY_EMAIL_CODE',
       emailMasked: this.maskEmail(result.user.email),
@@ -1003,6 +1012,12 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     }
 
     const firstStore = user.stores?.[ 0 ];
+    if (firstStore) {
+      const destinationClaimBlock = await this.destinationService.getStoreListingClaimAccessBlock(firstStore.id);
+      if (destinationClaimBlock) {
+        throw new AppError('AUTH-029', 409, destinationClaimBlock);
+      }
+    }
     const sanitizedUser = this.sanitizeSessionUser(user);
 
     const sanitizedStore = firstStore
@@ -1154,6 +1169,10 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         emailMasked: this.maskEmail(loginUser.email),
         resendCooldownSec: 60,
       });
+    }
+    const destinationClaimBlock = await this.destinationService.getStoreListingClaimAccessBlock(store.id);
+    if (destinationClaimBlock) {
+      throw new AppError('AUTH-029', 409, destinationClaimBlock);
     }
     const currentSubscription = await this.subscriptionService.getCurrentByStore(store.id);
     const isActive = Boolean(store?.settings?.planExempt) || this.subscriptionService.isActiveSubscription(currentSubscription);
@@ -1551,10 +1570,6 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
     }
 
     if (subscription.status === 'TRIAL') {
-      if (!store.open) {
-        store.open = true;
-        await AppDataSource.getRepository(Store).save(store);
-      }
       let destinationClaim: any = null;
       try {
         destinationClaim = await this.destinationService.createListingClaimFromVerifiedStore(store.id, {
@@ -1569,16 +1584,18 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
           error,
         });
       }
-      try {
-        await this.emailService.sendActivationEmail(verifiedUser.email, store.slug);
-      } catch (error) {
+      if (!destinationClaim && !store.open) {
+        store.open = true;
+        await AppDataSource.getRepository(Store).save(store);
+      }
+      void this.emailService.sendActivationEmail(verifiedUser.email, store.slug).catch((error) => {
         this.log.error('Store activation email failed after verification', {
           userId: verifiedUser.id,
           storeId: store.id,
           email: verifiedUser.email,
           error,
         });
-      }
+      });
       return {
         code: 'AUTH-S004',
         redirectUrl: '/admin',
