@@ -27,6 +27,21 @@ async function findLatestStoreVerificationCode(email: string) {
   throw new Error(`Verification code not found for ${email}`);
 }
 
+async function waitForEmailLog(templateKey: string, requestId: string) {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const rows = await AppDataSource.query(
+      `SELECT to_email, status
+         FROM email_send_logs
+        WHERE template_key = $1
+          AND metadata->>'requestId' = $2`,
+      [templateKey, requestId]
+    );
+    if (rows.length) return rows;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return [];
+}
+
 describe('Destination Hub', () => {
   let adminToken = '';
   let storeId = '';
@@ -963,6 +978,9 @@ describe('Destination Hub', () => {
       claimed_listing_id: listingRes.body.id,
       store_id: claimedStore.body.store.id,
     }));
+
+    const claimPendingLogs = await waitForEmailLog('destination_store_claim_pending', claimRows[0].id);
+    expect(claimPendingLogs.map((row: any) => String(row.to_email || '').toLowerCase())).toContain(claimedStore.email);
 
     const storeRequestRows = await AppDataSource.query(
       `

@@ -498,6 +498,39 @@ export class EmailService {
     });
   }
 
+  async sendDestinationStoreClaimPending(payload: {
+    email: string;
+    responsibleName?: string | null;
+    storeName?: string | null;
+    listingName?: string | null;
+    destinationName?: string | null;
+    placeNames?: string[];
+    requestId?: string | null;
+  }) {
+    const responsibleName = payload.responsibleName || 'Parceiro';
+    const storeName = payload.storeName || 'sua loja';
+    const listingName = payload.listingName || 'o serviço solicitado';
+    const destinationName = payload.destinationName || 'destinos';
+    const placeNames = Array.isArray(payload.placeNames) && payload.placeNames.length
+      ? payload.placeNames.join(', ')
+      : 'Conforme seleção enviada no cadastro';
+
+    await this.sendTemplate(payload.email, 'destination_store_claim_pending', {
+      RESPONSIBLE_NAME: responsibleName,
+      STORE_NAME: storeName,
+      LISTING_NAME: listingName,
+      DESTINATION_NAME: destinationName,
+      PLACE_NAMES: placeNames,
+      SUPPORT_EMAIL: this.getSupportEmail(),
+    }, {
+      requestId: payload.requestId || null,
+      storeName,
+      listingName,
+      destinationName,
+      status: 'pending',
+    });
+  }
+
   async sendDestinationStoreClaimReviewed(payload: {
     email: string;
     responsibleName?: string | null;

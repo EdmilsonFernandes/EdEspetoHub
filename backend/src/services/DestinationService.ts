@@ -974,9 +974,11 @@ export class DestinationService {
     });
 
     const targetPlaceIds = await this.resolveListingClaimTargetPlaceIds(attribution, listing);
+    const targetPlaceNames: string[] = [];
     for (const placeId of targetPlaceIds) {
       const place = await this.repository.findPlaceById(placeId);
       if (!place || place.active === false || String(place.destinationId) !== String(listing.destinationId)) continue;
+      if (place.name) targetPlaceNames.push(String(place.name));
       const existingLink = await this.repository.findStoreLink(place.id, store.id);
       if (existingLink?.active) continue;
       const existingRequest = await this.repository.findStoreRequestByStoreAndPlace(store.id, place.id);
@@ -996,6 +998,14 @@ export class DestinationService {
       });
     }
 
+    if (!targetPlaceNames.length && Array.isArray(attribution?.destinationHospitalityPlaceNames)) {
+      targetPlaceNames.push(
+        ...attribution.destinationHospitalityPlaceNames
+          .map((name: any) => String(name || '').trim())
+          .filter(Boolean)
+      );
+    }
+
     void this.notifyPartnerRequestByEmail({
       requestId: saved.id,
       partnerType: saved.partnerType,
@@ -1009,6 +1019,23 @@ export class DestinationService {
       message: saved.message || null,
     }).catch((error) => {
       this.log.error('Destination listing claim notification failed', {
+        requestId: saved.id,
+        storeId: store.id,
+        listingId: listing.id,
+        error,
+      });
+    });
+
+    void this.emailService.sendDestinationStoreClaimPending({
+      email: responsibleEmail,
+      responsibleName: saved.responsibleName,
+      storeName: store.name,
+      listingName: listing.title || saved.name,
+      destinationName: listing.destination?.name || listing.destination?.city || null,
+      placeNames: Array.from(new Set(targetPlaceNames)),
+      requestId: saved.id,
+    }).catch((error) => {
+      this.log.error('Destination listing claim pending email failed', {
         requestId: saved.id,
         storeId: store.id,
         listingId: listing.id,

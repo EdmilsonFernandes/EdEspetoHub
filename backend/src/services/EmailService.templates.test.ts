@@ -87,6 +87,15 @@ describe('EmailService managed template variables', () => {
       message: 'Tenho interesse em aparecer no app.',
       requestId: 'request-1',
     });
+    await service.sendDestinationStoreClaimPending({
+      email: 'loja@teste.com',
+      responsibleName: 'Responsavel Teste',
+      storeName: 'Loja Teste',
+      listingName: 'Restaurante Teste',
+      destinationName: 'São Bento do Sapucaí',
+      placeNames: ['Chalé Teste'],
+      requestId: 'request-claim-pending',
+    });
     await service.sendDestinationStoreClaimReviewed({
       email: 'loja@teste.com',
       responsibleName: 'Responsavel Teste',

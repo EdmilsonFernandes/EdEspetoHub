@@ -1588,14 +1588,16 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
         store.open = true;
         await AppDataSource.getRepository(Store).save(store);
       }
-      void this.emailService.sendActivationEmail(verifiedUser.email, store.slug).catch((error) => {
-        this.log.error('Store activation email failed after verification', {
-          userId: verifiedUser.id,
-          storeId: store.id,
-          email: verifiedUser.email,
-          error,
+      if (!destinationClaim) {
+        void this.emailService.sendActivationEmail(verifiedUser.email, store.slug).catch((error) => {
+          this.log.error('Store activation email failed after verification', {
+            userId: verifiedUser.id,
+            storeId: store.id,
+            email: verifiedUser.email,
+            error,
+          });
         });
-      });
+      }
       return {
         code: 'AUTH-S004',
         redirectUrl: '/admin',

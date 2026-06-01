@@ -185,6 +185,9 @@ Templates gerenciados:
 
 - `destination_partner_request_notification`: aviso interno quando uma solicitação nova é criada ou reenviada enquanto ainda está pendente.
 - `destination_partner_invite`
+- `destination_store_claim_pending`: aviso ao lojista quando a loja criada a partir de um serviço fica aguardando análise.
+- `destination_store_claim_approved`
+- `destination_store_claim_rejected`
 
 Cadastro base:
 
@@ -194,6 +197,8 @@ Envios:
 
 - `EmailService.sendDestinationPartnerRequestNotification`
 - `EmailService.sendDestinationPartnerInvite`
+- `EmailService.sendDestinationStoreClaimPending`
+- `EmailService.sendDestinationStoreClaimReviewed`
 
 Destinatários do aviso interno:
 

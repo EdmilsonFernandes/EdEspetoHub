@@ -352,6 +352,27 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     `,
   },
   {
+    key: 'destination_store_claim_pending',
+    name: 'Loja aguardando análise para assumir serviço',
+    category: 'account',
+    description: 'Enviado ao lojista quando a loja confirma e-mail e a conversão de serviço em loja fica pendente no Super Admin.',
+    subject: 'Recebemos sua solicitação - {{LISTING_NAME}}',
+    preheader: 'Sua loja foi confirmada e agora passa por análise de posse.',
+    variables: ['RESPONSIBLE_NAME', 'STORE_NAME', 'LISTING_NAME', 'DESTINATION_NAME', 'PLACE_NAMES', 'SUPPORT_EMAIL'],
+    textBody: 'Olá, {{RESPONSIBLE_NAME}}.\n\nRecebemos a solicitação da loja {{STORE_NAME}} para assumir {{LISTING_NAME}} em {{DESTINATION_NAME}}.\n\nHospedagens informadas: {{PLACE_NAMES}}\n\nA equipe Já no Caminho vai validar a titularidade antes de liberar o acesso da loja. Você receberá um novo e-mail quando a análise for aprovada ou se precisarmos ajustar alguma informação.\n\nDúvidas: {{SUPPORT_EMAIL}}',
+    htmlBody: `
+      <h1 style="margin: 0 0 10px; font-size: 28px; line-height: 1.12; color: #0f172a;">Solicitação recebida</h1>
+      <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.7;">Olá, {{RESPONSIBLE_NAME}}. Confirmamos o e-mail da loja <strong>{{STORE_NAME}}</strong> e recebemos sua solicitação para assumir <strong>{{LISTING_NAME}}</strong> em <strong>{{DESTINATION_NAME}}</strong>.</p>
+      <div style="margin: 0 0 16px; padding: 16px; border-radius: 18px; background: #eef6f8; border: 1px solid rgba(51,104,134,0.16); color: #153A4C; line-height: 1.7;">
+        <strong>Hospedagens informadas:</strong><br />{{PLACE_NAMES}}
+      </div>
+      <div style="margin: 0 0 18px; padding: 16px; border-radius: 18px; background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; line-height: 1.7;">
+        Para proteger os parceiros do destino, a equipe Já no Caminho valida a titularidade antes de liberar o acesso da loja. Você receberá um novo e-mail quando a análise for aprovada ou se precisarmos ajustar alguma informação.
+      </div>
+      <p style="margin: 0; color: #64748b; font-size: 13px; line-height: 1.7;">Dúvidas? Responda este e-mail ou fale com {{SUPPORT_EMAIL}}.</p>
+    `,
+  },
+  {
     key: 'destination_store_claim_approved',
     name: 'Loja aprovada para assumir serviço',
     category: 'account',

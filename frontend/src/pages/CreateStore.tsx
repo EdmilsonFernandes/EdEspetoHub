@@ -251,6 +251,8 @@ export function CreateStore() {
   const [destinationClaimPlacesLoading, setDestinationClaimPlacesLoading] = useState(false);
   const [destinationClaimPlacesError, setDestinationClaimPlacesError] = useState('');
   const [destinationClaimPlaceSearch, setDestinationClaimPlaceSearch] = useState('');
+  const [showAllDestinationClaimPlaces, setShowAllDestinationClaimPlaces] = useState(false);
+  const [destinationClaimIntroDismissed, setDestinationClaimIntroDismissed] = useState(false);
   const [destinationClaimDeliveryMode, setDestinationClaimDeliveryMode] = useState<'selected' | 'all' | 'none'>('selected');
   const [selectedDestinationClaimPlaceIds, setSelectedDestinationClaimPlaceIds] = useState<string[]>([]);
   const [cityLookupError, setCityLookupError] = useState('');
@@ -457,8 +459,12 @@ export function CreateStore() {
   };
 
   const closeStoreVerificationModal = () => {
+    const shouldGoToHub = Boolean(storeReviewPendingInfo);
     setStoreVerifyPrompt(null);
     setStoreReviewPendingInfo(null);
+    if (shouldGoToHub) {
+      navigate('/hub', { replace: true });
+    }
   };
 
   useEffect(() => {
@@ -500,10 +506,14 @@ export function CreateStore() {
       setSelectedDestinationClaimPlaceIds([]);
       setDestinationClaimPlaces([]);
       setDestinationClaimPlacesError('');
+      setShowAllDestinationClaimPlaces(false);
+      setDestinationClaimIntroDismissed(false);
       return;
     }
     setDestinationClaimDeliveryMode(destinationClaim.deliveryMode || 'selected');
     setSelectedDestinationClaimPlaceIds(destinationClaim.placeIds || []);
+    setShowAllDestinationClaimPlaces(false);
+    setDestinationClaimIntroDismissed(false);
   }, [destinationClaim?.destinationListingId]);
 
   useEffect(() => {
@@ -587,6 +597,19 @@ export function CreateStore() {
     const selected = new Set(selectedDestinationClaimPlaceIds.map(String));
     return (destinationClaimPlaces || []).filter((place: any) => selected.has(String(place.id)));
   }, [destinationClaimPlaces, selectedDestinationClaimPlaceIds]);
+
+  const visibleDestinationClaimPlaces = React.useMemo(() => {
+    const base = filteredDestinationClaimPlaces.slice(0, 80);
+    if (showAllDestinationClaimPlaces || destinationClaimPlaceSearch.trim()) return base;
+    const selected = new Set(selectedDestinationClaimPlaceIds.map(String));
+    const selectedFirst = base.filter((place: any) => selected.has(String(place.id)));
+    const rest = base.filter((place: any) => !selected.has(String(place.id)));
+    return [...selectedFirst, ...rest].slice(0, 6);
+  }, [destinationClaimPlaceSearch, filteredDestinationClaimPlaces, selectedDestinationClaimPlaceIds, showAllDestinationClaimPlaces]);
+
+  const hasHiddenDestinationClaimPlaces =
+    !destinationClaimPlaceSearch.trim() &&
+    filteredDestinationClaimPlaces.length > visibleDestinationClaimPlaces.length;
 
   const toggleDestinationClaimPlace = (placeId: string) => {
     setSelectedDestinationClaimPlaceIds((current) => {
@@ -1602,6 +1625,7 @@ export function CreateStore() {
         ? storeSectionRef.current
         : planSectionRef.current;
     if (!target) return;
+    setDestinationClaimIntroDismissed(true);
     setCurrentStep(stepId);
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -1866,8 +1890,8 @@ export function CreateStore() {
                     {destinationClaimPlacesError ? (
                       <p className="mt-2 rounded-2xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700">{destinationClaimPlacesError}</p>
                     ) : null}
-                    <div className="mt-3 grid max-h-none grid-cols-2 gap-2 overflow-visible pr-0 max-[360px]:grid-cols-1 sm:max-h-[34rem] sm:grid-cols-2 sm:gap-3 sm:overflow-y-auto sm:pr-1">
-                      {filteredDestinationClaimPlaces.slice(0, 80).map((place: any) => {
+                    <div className="mt-3 grid grid-cols-2 gap-2 overflow-visible pr-0 max-[360px]:grid-cols-1 sm:grid-cols-2 sm:gap-3">
+                      {visibleDestinationClaimPlaces.map((place: any) => {
                         const checked = selectedDestinationClaimPlaceIds.includes(String(place.id));
                         const imageUrl = resolveAssetUrl(getDestinationClaimPlaceImage(place));
                         const address = formatDestinationClaimPlaceAddress(place);
@@ -1876,13 +1900,13 @@ export function CreateStore() {
                             key={place.id}
                             type="button"
                             onClick={() => toggleDestinationClaimPlace(String(place.id))}
-                            className={`group relative flex min-h-[12rem] w-full flex-col overflow-hidden rounded-[1.1rem] border p-2 text-left transition active:scale-[0.99] sm:min-h-0 sm:flex-row sm:items-stretch sm:gap-3 sm:rounded-[1.25rem] ${
+                            className={`group relative flex min-h-[9.5rem] w-full flex-col overflow-hidden rounded-[1.1rem] border p-2 text-left transition active:scale-[0.99] sm:min-h-0 sm:flex-row sm:items-stretch sm:gap-3 sm:rounded-[1.25rem] ${
                               checked
                                 ? 'border-[#153A4C]/35 bg-[#eef5f7] shadow-[0_18px_34px_-28px_rgba(21,58,76,0.58)]'
                                 : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-[0_16px_30px_-28px_rgba(15,23,42,0.45)]'
                             }`}
                           >
-                            <span className="relative h-24 w-full shrink-0 overflow-hidden rounded-[0.95rem] bg-[linear-gradient(135deg,#e8f2f5,#f8fafc)] sm:h-20 sm:w-24 sm:rounded-[1rem]">
+                            <span className="relative h-20 w-full shrink-0 overflow-hidden rounded-[0.95rem] bg-[linear-gradient(135deg,#e8f2f5,#f8fafc)] sm:h-20 sm:w-24 sm:rounded-[1rem]">
                               {imageUrl ? (
                                 <img src={imageUrl} alt={place.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" loading="lazy" />
                               ) : (
@@ -1922,13 +1946,33 @@ export function CreateStore() {
                         Nenhum chalé encontrado nesta busca. Você pode continuar e o time ajusta depois.
                       </p>
                     ) : null}
+                    {hasHiddenDestinationClaimPlaces ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllDestinationClaimPlaces(true)}
+                        className="mt-3 w-full rounded-2xl border border-[#336886]/16 bg-white px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-[0_16px_28px_-24px_rgba(15,23,42,0.38)] transition active:scale-[0.99]"
+                      >
+                        Ver mais {filteredDestinationClaimPlaces.length - visibleDestinationClaimPlaces.length} hospedagem(ns)
+                      </button>
+                    ) : showAllDestinationClaimPlaces && !destinationClaimPlaceSearch.trim() && filteredDestinationClaimPlaces.length > 6 ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllDestinationClaimPlaces(false)}
+                        className="mt-3 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-slate-600 transition active:scale-[0.99]"
+                      >
+                        Mostrar menos
+                      </button>
+                    ) : null}
                     <div className="mt-3 flex flex-col gap-2 rounded-2xl bg-slate-50 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-xs font-semibold leading-relaxed text-slate-500 sm:max-w-md">
                         Depois de escolher os chalés, continue para preencher os dados da loja.
                       </p>
                       <button
                         type="button"
-                        onClick={() => personalSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                        onClick={() => {
+                          setDestinationClaimIntroDismissed(true);
+                          personalSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }}
                         className="w-full rounded-2xl bg-[#153A4C] px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-white shadow-[0_16px_28px_-20px_rgba(21,58,76,0.72)] sm:w-auto sm:rounded-full sm:py-2"
                       >
                         Continuar cadastro
@@ -2956,7 +3000,7 @@ export function CreateStore() {
               </label>
             </div>
 
-            <div className="fixed bottom-0 left-0 z-50 w-full rounded-t-[1.6rem] border border-b-0 border-white/70 bg-white/92 p-2.5 pb-[max(env(safe-area-inset-bottom),0.25rem)] shadow-[0_-24px_70px_-34px_rgba(15,23,42,0.6)] backdrop-blur-xl md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
+            <div className={`${destinationClaim && !destinationClaimIntroDismissed ? 'hidden md:block' : ''} fixed bottom-0 left-0 z-50 w-full rounded-t-[1.6rem] border border-b-0 border-white/70 bg-white/92 p-2.5 pb-[max(env(safe-area-inset-bottom),0.25rem)] shadow-[0_-24px_70px_-34px_rgba(15,23,42,0.6)] backdrop-blur-xl md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]`}>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                 <div className="hidden sm:block text-[11px] text-slate-500">
                   Passo <span className="font-semibold text-slate-700">{currentStep}/4</span> — quase lá!
