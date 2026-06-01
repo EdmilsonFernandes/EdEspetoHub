@@ -183,6 +183,16 @@ export const env = {
       process.env.ENABLE_OPENSTREETMAP_GEOCODING_FALLBACK === 'true' ||
       process.env.ENABLE_GOOGLE_GEOCODING_FALLBACK === 'true',
   },
+  geocoding: {
+    providerOrder: listEnv('GEOCODING_PROVIDER_ORDER').length
+      ? listEnv('GEOCODING_PROVIDER_ORDER').map((value) => value.toLowerCase())
+      : ['geoapify', 'locationiq', 'photon', 'openstreetmap'],
+    timeoutMs: numberEnv('GEOCODING_PROVIDER_TIMEOUT_MS', 8000, 1000),
+    geoapifyApiKey: process.env.GEOAPIFY_API_KEY || '',
+    locationIqApiKey: process.env.LOCATIONIQ_API_KEY || '',
+    photonEnabled: process.env.ENABLE_PHOTON_GEOCODING_FALLBACK !== 'false',
+    openStreetMapEnabled: process.env.ENABLE_OPENSTREETMAP_GEOCODING_FALLBACK !== 'false',
+  },
   whatsapp: {
     notifyUrl: process.env.WHATSAPP_NOTIFY_URL || '',
   },

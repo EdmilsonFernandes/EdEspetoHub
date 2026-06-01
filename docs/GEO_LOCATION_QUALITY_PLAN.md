@@ -39,6 +39,8 @@ Permitido:
 
 - CEP via provedores gratuitos ja existentes no projeto;
 - OpenStreetMap/Nominatim com respeito a rate limit;
+- Photon/Komoot como fallback gratuito de busca por nome/endereco, com cache e uso moderado;
+- Geoapify ou LocationIQ como fallback opcional por chave de API em `env`, respeitando free tier/atribuicao/limite de cada provedor;
 - bibliotecas/SDKs open source ou gratuitas para mapa, mascara, validacao e UX;
 - selecao manual de pin no mapa;
 - cache local/persistente para evitar chamadas repetidas;
@@ -52,6 +54,27 @@ Opcional futuro, somente com aprovacao:
 - Google Routes/Distance Matrix.
 
 Se qualquer provedor pago for adicionado no futuro, deve ficar atras de `env`/feature flag, com limite de uso, fallback gratuito e documentacao de custo.
+
+## Cadeia atual de geocoding
+
+O backend usa `GeoLocationService` como ponto unico de geocoding. A ordem padrao e:
+
+```text
+geoapify -> locationiq -> photon -> openstreetmap
+```
+
+Regras:
+
+- `Geoapify` so roda quando `GEOAPIFY_API_KEY` estiver configurada.
+- `LocationIQ` so roda quando `LOCATIONIQ_API_KEY` estiver configurada.
+- `Photon` fica habilitado por padrao como fallback gratuito, mas pode ser desligado com `ENABLE_PHOTON_GEOCODING_FALLBACK=false`.
+- `OpenStreetMap/Nominatim` continua como fallback final e pode ser desligado com `ENABLE_OPENSTREETMAP_GEOCODING_FALLBACK=false`.
+- `GEOCODING_PROVIDER_ORDER` permite trocar a ordem sem alterar codigo.
+- `GEOCODING_PROVIDER_TIMEOUT_MS` controla timeout por chamada externa.
+- Todo resultado passa por limite geografico aproximado do Brasil antes de ser aceito.
+- O cache em memoria evita repetir chamadas identicas no mesmo processo.
+
+Mesmo com varios provedores gratuitos, endereco rural/turistico com CEP amplo pode continuar impreciso. Nesses casos, o caminho correto e o Super Admin ou parceiro confirmar o pin manualmente.
 
 ## Modelo de confianca recomendado
 
@@ -196,3 +219,4 @@ Nao implementar API paga agora. A prioridade e corrigir bug, registrar qualidade
 - Backfill `backend/src/scripts/backfillDestinationCoordinates.ts` continua controlado por dry-run por padrao e agora tambem identifica registros com coordenada generica igual ao destino ou precisao aproximada.
 - Geocoding de destinos agora prioriza endereco completo sem CEP primeiro, incluindo rua, numero, bairro, cidade, UF e Brasil. O CEP entra depois como apoio, para evitar que CEP amplo de cidade turistica force o ponto para o centro da cidade.
 - A tela publica de rota nao exibe alerta tecnico para usuario final quando a coordenada e aproximada; ela abre Google Maps/Waze com o endereco completo e so mostra mapa/distancia interna quando a coordenada e confiavel.
+- O geocoding do backend agora suporta fallback por Geoapify, LocationIQ, Photon e OpenStreetMap, com provedores comerciais somente quando a chave estiver configurada em `env`.

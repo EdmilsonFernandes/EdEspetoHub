@@ -169,6 +169,8 @@ Distancias e rotas de chales, pousadas, servicos, restaurantes e lojas devem tra
 
 Plano tecnico e fases de evolucao: `docs/GEO_LOCATION_QUALITY_PLAN.md`.
 
+O backend concentra geocoding em `backend/src/services/GeoLocationService.ts`. A ordem padrao de provedores e `geoapify,locationiq,photon,openstreetmap`; Geoapify e LocationIQ so rodam quando as chaves `GEOAPIFY_API_KEY` e `LOCATIONIQ_API_KEY` forem configuradas. Photon e OpenStreetMap funcionam como fallback gratuito com cache/limite, mas local rural/turistico com CEP amplo ainda deve ter pin manual confirmado no Super Admin quando a precisao for baixa.
+
 ## Portal do parceiro de destinos
 
 O parceiro aprovado pelo Super Admin recebe convite por e-mail para acessar `/parceiro` e manter dados públicos básicos do próprio cadastro.
