@@ -67,12 +67,19 @@ Resultado esperado:
 - abre um modal comparando `Cadastro atual` versus `Enviado na solicitação`;
 - campos diferentes aparecem destacados;
 - aparecem status, responsável, e-mail, convite e ativação.
+- para solicitação de posse, o campo `Registro da conferência` é obrigatório antes de aprovar.
 
-10. No card ou modal, clique `Aprovar` e cancele a confirmação do navegador.
+10. Tente aprovar uma solicitação de posse sem preencher o registro.
+
+Resultado esperado: a tela informa que precisa registrar como a titularidade foi conferida.
+
+11. Preencha algo objetivo, por exemplo `Confirmado pelo WhatsApp oficial cadastrado no perfil`.
+
+12. No modal, clique `Aprovar com conferência` e cancele a confirmação do navegador.
 
 Resultado esperado: a solicitação continua pendente.
 
-11. Clique `Aprovar` novamente e confirme.
+13. Clique `Aprovar com conferência` novamente e confirme.
 
 Resultado esperado:
 

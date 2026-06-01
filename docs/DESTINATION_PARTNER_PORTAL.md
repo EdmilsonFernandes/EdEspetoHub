@@ -65,6 +65,7 @@ No Super Admin, solicitações desse tipo aparecem com o selo **Assumir perfil e
 Proteções contra claim malicioso:
 
 - a aprovação via API exige `claimVerified: true` para solicitações que tentam assumir perfil existente;
+- a aprovação de claim também exige `reviewNote`, registrando como a titularidade foi conferida;
 - a tela do Super Admin pede confirmação explícita antes de aprovar;
 - o backend bloqueia liberar um segundo parceiro ativo para o mesmo chalé/pousada ou serviço;
 - antes de aprovar, o operador deve confirmar o responsável pelo WhatsApp/e-mail oficial já cadastrado no perfil público.
@@ -107,6 +108,14 @@ Esse botão abre `/create` com `source=destination_listing_claim` e dados já pr
 - vínculo com o destino/listing.
 
 O cadastro de loja continua seguindo o fluxo normal de lojista. O vínculo definitivo entre loja e listing ainda deve ser validado pelo Super Admin para evitar tomada indevida de perfil.
+
+## Monetização e curadoria
+
+O portal do parceiro não libera campos comerciais. Prioridade, destaque, ativo/inativo, categoria, destino e vínculos continuam no Super Admin porque esses campos permitem monetização, curadoria e controle editorial.
+
+Guia operacional:
+
+- `docs/DESTINATION_MONETIZATION_PLAYBOOK.md`
 
 ## Backend
 

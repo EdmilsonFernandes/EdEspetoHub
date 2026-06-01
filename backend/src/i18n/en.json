@@ -121,6 +121,7 @@
   "DPARTNER-009": "Service or restaurant name is required.",
   "DPARTNER-010": "Confirm ownership before approving this profile claim request.",
   "DPARTNER-011": "This record already has an active partner. Review the current access before granting another account.",
+  "DPARTNER-012": "Record how ownership was verified before approving this partner.",
   "REVIEW-003": "This order has no tip available for payout.",
   "REVIEW-004": "The tip has not been paid by the customer yet.",
   "REVIEW-005": "This tip was already received directly by the courier."

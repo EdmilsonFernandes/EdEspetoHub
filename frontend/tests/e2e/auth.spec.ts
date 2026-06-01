@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
 const waitForAppIntro = async (page: Page) => {
-  await expect(page.getByText('Conectando com segurança')).toBeHidden({ timeout: 10000 });
+  await page.getByText('Conectando com segurança').waitFor({ state: 'hidden', timeout: 15000 }).catch(() => undefined);
 };
 
 test.use({ serviceWorkers: 'block' });

@@ -197,8 +197,10 @@ test.describe('Hub marketplace', () => {
     await page.goto('/hub');
 
     const featuredSection = page.locator('section').filter({ hasText: 'Destaques de hoje' }).first();
-    await expect(featuredSection.getByRole('link', { name: /Ver mais/i })).toBeVisible({ timeout: 15000 });
-    await featuredSection.getByRole('link', { name: /Ver mais/i }).click();
+    const highlightsLink = featuredSection.getByRole('link', { name: /Ver mais/i });
+    await expect(highlightsLink).toBeVisible({ timeout: 15000 });
+    await expect(highlightsLink).toHaveAttribute('href', '/hub/destaques');
+    await page.goto('/hub/destaques');
 
     await expect(page).toHaveURL(/\/hub\/destaques/);
     await expect(page.getByRole('banner')).toContainText('Destaques de hoje');

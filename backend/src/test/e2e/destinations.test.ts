@@ -639,14 +639,24 @@ describe('Destination Hub', () => {
     expect(unsafeReviewRes.status, JSON.stringify(unsafeReviewRes.body)).toBe(400);
     expect(unsafeReviewRes.body.code).toBe('DPARTNER-010');
 
-    const reviewRes = await api
+    const reviewWithoutAuditNoteRes = await api
       .patch(`/api/admin/destination-partner-requests/${requestRes.body.id}/review`)
       .set('Authorization', `Bearer ${platformToken}`)
       .send({ status: 'approved', claimVerified: true });
 
+    expect(reviewWithoutAuditNoteRes.status, JSON.stringify(reviewWithoutAuditNoteRes.body)).toBe(400);
+    expect(reviewWithoutAuditNoteRes.body.code).toBe('DPARTNER-012');
+
+    const claimReviewNote = 'Confirmado pelo WhatsApp oficial cadastrado no perfil.';
+    const reviewRes = await api
+      .patch(`/api/admin/destination-partner-requests/${requestRes.body.id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ status: 'approved', claimVerified: true, reviewNote: claimReviewNote });
+
     expect(reviewRes.status, JSON.stringify(reviewRes.body)).toBe(200);
     expect(reviewRes.body.createdHospitalityPlaceId).toBe(placeRes.body.id);
     expect(reviewRes.body.partnerActivationToken).toBeTruthy();
+    expect(reviewRes.body.reviewNote).toBe(claimReviewNote);
 
     const placeRows = await AppDataSource.query(
       `SELECT id FROM hospitality_places WHERE destination_id = $1 ORDER BY created_at ASC`,
@@ -700,7 +710,7 @@ describe('Destination Hub', () => {
     const duplicatedOwnerRes = await api
       .patch(`/api/admin/destination-partner-requests/${secondClaimRes.body.id}/review`)
       .set('Authorization', `Bearer ${platformToken}`)
-      .send({ status: 'approved', claimVerified: true });
+      .send({ status: 'approved', claimVerified: true, reviewNote: 'Confirmado pelo contato oficial informado.' });
 
     expect(duplicatedOwnerRes.status, JSON.stringify(duplicatedOwnerRes.body)).toBe(409);
     expect(duplicatedOwnerRes.body.code).toBe('DPARTNER-011');
