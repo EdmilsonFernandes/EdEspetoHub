@@ -4,7 +4,7 @@ import { DestinationService } from './DestinationService';
 const makeService = () => new DestinationService() as any;
 
 describe('DestinationService coordinate resolver', () => {
-  it('tries CEP-normalized address candidates before leaving coordinates empty', async () => {
+  it('tries full address candidates without letting broad CEP dominate the search', async () => {
     const service = makeService();
     const zipLookupSpy = vi.spyOn(service.zipCodeLookupService, 'lookup').mockResolvedValue({
       zipCode: '12249007',
@@ -48,8 +48,55 @@ describe('DestinationService coordinate resolver', () => {
     expect(zipLookupSpy).toHaveBeenCalledWith('12249007');
     expect(geocodeSpy).toHaveBeenCalledTimes(2);
     expect(geocodeSpy).toHaveBeenNthCalledWith(
+      1,
+      'Estrada Humberto Saboya de Albuquerque, 1700, Centro (São Francisco Xavier), São José dos Campos, SP, Brasil'
+    );
+    expect(geocodeSpy).toHaveBeenNthCalledWith(
       2,
-      'Estrada Humberto Saboya de Albuquerque, 1700, São Francisco Xavier, São José dos Campos, SP, 12249007'
+      '1700 Estrada Humberto Saboya de Albuquerque, Centro (São Francisco Xavier), São José dos Campos, SP, Brasil'
+    );
+  });
+
+  it('prefers manually edited street and district over CEP provider fields', async () => {
+    const service = makeService();
+    vi.spyOn(service.zipCodeLookupService, 'lookup').mockResolvedValue({
+      zipCode: '12490000',
+      street: 'Centro',
+      district: 'Centro',
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      ibgeCode: null,
+      latitude: null,
+      longitude: null,
+      provider: 'test',
+    });
+    const geocodeSpy = vi.spyOn(service.geoLocationService, 'geocodeAddress').mockResolvedValue({
+      lat: -22.68301,
+      lng: -45.72491,
+      formattedAddress: 'Rua Projetada, Quilombo, São Bento do Sapucaí - SP',
+    });
+
+    const coordinates = await service.resolveDestinationCoordinates({
+      address: 'Rua Projetada',
+      addressNumber: '42',
+      district: 'Quilombo',
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      zipCode: '12490-000',
+      lat: null,
+      lng: null,
+      scope: 'destination_listing',
+    });
+
+    expect(coordinates).toEqual(expect.objectContaining({
+      lat: -22.68301,
+      lng: -45.72491,
+      geoSource: 'geocoder',
+      geoPrecision: 'street',
+    }));
+    expect(geocodeSpy).toHaveBeenCalledTimes(1);
+    expect(geocodeSpy).toHaveBeenCalledWith(
+      'Rua Projetada, 42, Quilombo, São Bento do Sapucaí, SP, Brasil'
     );
   });
 

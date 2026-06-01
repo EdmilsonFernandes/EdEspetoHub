@@ -194,3 +194,5 @@ Nao implementar API paga agora. A prioridade e corrigir bug, registrar qualidade
 - Backend ignora coordenadas antigas reenviadas quando o endereco/CEP muda e classifica a origem da coordenada como `manual_pin`, `geocoder`, `zip_code`, `city_fallback` ou `unknown`.
 - Rotas publicas de hospedagem/servico recebem `geoApproximate` e evitam vender tempo estimado como preciso quando algum ponto e aproximado.
 - Backfill `backend/src/scripts/backfillDestinationCoordinates.ts` continua controlado por dry-run por padrao e agora tambem identifica registros com coordenada generica igual ao destino ou precisao aproximada.
+- Geocoding de destinos agora prioriza endereco completo sem CEP primeiro, incluindo rua, numero, bairro, cidade, UF e Brasil. O CEP entra depois como apoio, para evitar que CEP amplo de cidade turistica force o ponto para o centro da cidade.
+- A tela publica de rota nao exibe alerta tecnico para usuario final quando a coordenada e aproximada; ela abre Google Maps/Waze com o endereco completo e so mostra mapa/distancia interna quando a coordenada e confiavel.

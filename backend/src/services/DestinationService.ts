@@ -26,6 +26,10 @@ import {
   isApproximateGeoPrecision,
   sameCoordinatePair,
 } from '../utils/geoQuality';
+import {
+  buildDestinationGeocodeAddress as buildGeoAddressLine,
+  buildDestinationGeocodeCandidates,
+} from '../utils/destinationGeoAddress';
 import { GeoLocationService } from './GeoLocationService';
 import { OrderReviewService } from './OrderReviewService';
 import { SubscriptionService } from './SubscriptionService';
@@ -573,27 +577,7 @@ export class DestinationService {
     state?: string | null;
     zipCode?: string | null;
   }) {
-    return [
-      toOptionalText(payload.address),
-      toOptionalText(payload.addressNumber),
-      toOptionalText(payload.district),
-      toOptionalText(payload.city),
-      this.normalizeStateCode(payload.state),
-      this.normalizeZipCode(payload.zipCode),
-    ].filter(Boolean).join(', ');
-  }
-
-  private uniqueGeocodeCandidates(candidates: Array<string | null | undefined>) {
-    const seen = new Set<string>();
-    return candidates
-      .map((candidate) => String(candidate || '').trim())
-      .filter((candidate) => {
-        if (!candidate) return false;
-        const key = candidate.toLocaleLowerCase('pt-BR');
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
+    return buildGeoAddressLine(payload);
   }
 
   private async lookupZipCode(zipCode?: string | null): Promise<ZipCodeLookupResult | null> {
@@ -697,31 +681,9 @@ export class DestinationService {
 
     const zipLookup = await this.lookupZipCode(payload.zipCode);
     const baseAddress = this.buildDestinationGeocodeAddress(payload);
-    const zipAddress = zipLookup ? this.buildDestinationGeocodeAddress({
-      address: zipLookup.street || payload.address,
-      addressNumber: payload.addressNumber,
-      district: zipLookup.district || payload.district,
-      city: zipLookup.city || payload.city,
-      state: zipLookup.state || payload.state,
-      zipCode: zipLookup.zipCode || payload.zipCode,
-    }) : null;
-    const zipAddressWithoutCode = zipLookup ? this.buildDestinationGeocodeAddress({
-      address: zipLookup.street || payload.address,
-      addressNumber: payload.addressNumber,
-      district: zipLookup.district || payload.district,
-      city: zipLookup.city || payload.city,
-      state: zipLookup.state || payload.state,
-    }) : null;
-    const cityAddress = this.buildDestinationGeocodeAddress({
-      address: payload.address,
-      addressNumber: payload.addressNumber,
-      district: payload.district,
-      city: payload.city || zipLookup?.city,
-      state: payload.state || zipLookup?.state,
-    });
     const hasStreetLevelAddress = Boolean(toOptionalText(payload.address) || toOptionalText(zipLookup?.street));
     const candidates = hasStreetLevelAddress
-      ? this.uniqueGeocodeCandidates([baseAddress, zipAddress, zipAddressWithoutCode, cityAddress])
+      ? buildDestinationGeocodeCandidates(payload, zipLookup)
       : [];
 
     for (const address of candidates) {
@@ -747,7 +709,7 @@ export class DestinationService {
         geoPrecision: 'zip',
         geoVerified: false,
         geocodedAt: new Date(),
-        formattedAddress: zipAddress || baseAddress || null,
+        formattedAddress: baseAddress || null,
       });
     }
 

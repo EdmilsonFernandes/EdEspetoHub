@@ -6,6 +6,7 @@ import { CheckCircle, ClipboardText, Clock, HouseLine, NavigationArrow, Storefro
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { RouteMapView } from '../components/RouteMapView';
 import { destinationService } from '../services/destinationService';
+import { mapsService } from '../services/mapsService';
 import { buildDestinationAddressLine } from '../utils/destinationWhatsApp';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -109,7 +110,18 @@ const buildWazeNativeUrl = (destination: any, fallbackUrl: string) => {
 const formatDistance = (value?: number | null) => {
   if (!Number.isFinite(Number(value))) return 'Distância indisponível';
   const km = Number(value);
-  return km < 1 ? `${Math.max(80, Math.round(km * 1000))} m em linha reta` : `${km.toFixed(1).replace('.', ',')} km em linha reta`;
+  return km < 1 ? `${Math.max(80, Math.round(km * 1000))} m aprox.` : `${km.toFixed(1).replace('.', ',')} km aprox.`;
+};
+
+const formatRouteDistance = (value?: number | null) => {
+  if (!Number.isFinite(Number(value))) return '';
+  const km = Number(value);
+  return km < 1 ? `${Math.max(80, Math.round(km * 1000))} m` : `${km.toFixed(1).replace('.', ',')} km`;
+};
+
+const formatRouteDuration = (value?: number | null) => {
+  if (!Number.isFinite(Number(value))) return '';
+  return `${Math.max(1, Math.round(Number(value)))} min`;
 };
 
 const openRouteInBrowser = async (url: string) => {
@@ -205,6 +217,7 @@ export function HospitalityServiceRoutePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState('');
+  const [routeEstimate, setRouteEstimate] = useState<any>(null);
 
   useEffect(() => {
     let active = true;
@@ -309,6 +322,27 @@ export function HospitalityServiceRoutePage() {
     }
   };
 
+  useEffect(() => {
+    let active = true;
+    setRouteEstimate(null);
+    if (!canShowMap) return () => {
+      active = false;
+    };
+
+    mapsService
+      .route(toCoords(servicePoint), toCoords(placePoint))
+      .then((route) => {
+        if (active) setRouteEstimate(route || null);
+      })
+      .catch(() => {
+        if (active) setRouteEstimate(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [canShowMap, servicePoint, placePoint]);
+
   return (
     <PublicDestinationShell active="place" backTo={placePublicPath} backLabel="Voltar" contextLabel="Rota da hospedagem">
       <main className="min-h-screen bg-[radial-gradient(circle_at_12%_0%,rgba(51,104,134,0.16),transparent_34%),linear-gradient(135deg,#f6f2e9,#eef5f1_58%,#eadfc8)] px-4 pb-10 pt-3 sm:pt-5">
@@ -327,11 +361,15 @@ export function HospitalityServiceRoutePage() {
               <div className="grid grid-cols-2 gap-2 sm:min-w-[15rem]">
                 <div className="rounded-[1.15rem] border border-[#336886]/12 bg-white/82 p-3 text-[#153A4C] shadow-sm">
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">{routeIsApproximate ? 'Rota' : 'Distância'}</p>
-                  <p className="mt-1 text-sm font-black">{routeIsApproximate ? 'Abrir no mapa' : formatDistance(distanceKm)}</p>
+                  <p className="mt-1 text-sm font-black">
+                    {routeIsApproximate ? 'Abrir no mapa' : formatRouteDistance(routeEstimate?.distanceKm) || formatDistance(distanceKm)}
+                  </p>
                 </div>
                 <div className="rounded-[1.15rem] border border-[#5FD35A]/20 bg-[#5FD35A]/12 p-3 text-[#153A4C] ring-1 ring-white/70">
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">{routeIsApproximate ? 'Navegação' : 'Tempo'}</p>
-                  <p className="mt-1 text-sm font-black">{routeIsApproximate ? 'Maps ou Waze' : estimateMinutes(distanceKm) || 'Abrir mapa'}</p>
+                  <p className="mt-1 text-sm font-black">
+                    {routeIsApproximate ? 'Maps ou Waze' : formatRouteDuration(routeEstimate?.durationMin) || estimateMinutes(distanceKm) || 'Abrir mapa'}
+                  </p>
                 </div>
               </div>
             </div>

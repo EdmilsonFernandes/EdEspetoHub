@@ -3,6 +3,7 @@ import { GeoLocationService } from '../services/GeoLocationService';
 import { runMigrations } from '../utils/runMigrations';
 import { logger } from '../utils/logger';
 import { hasUsableBrazilCoordinatePair, isApproximateGeoPrecision, sameCoordinatePair } from '../utils/geoQuality';
+import { buildDestinationGeocodeAddress, buildDestinationGeocodeCandidates } from '../utils/destinationGeoAddress';
 
 type Candidate = {
   id: string;
@@ -30,15 +31,7 @@ const text = (value: unknown) => {
   return normalized || null;
 };
 
-const buildAddress = (row: Candidate) =>
-  [
-    text(row.address),
-    text(row.addressNumber),
-    text(row.district),
-    text(row.city),
-    text(row.state)?.toUpperCase().slice(0, 2),
-    String(row.zipCode || '').replace(/\D/g, '').slice(0, 8) || null,
-  ].filter(Boolean).join(', ');
+const buildAddress = (row: Candidate) => buildDestinationGeocodeAddress(row);
 
 const loadCandidates = async (): Promise<Candidate[]> => {
   const rows = await AppDataSource.query(`
@@ -167,7 +160,16 @@ const run = async () => {
     }
 
     try {
-      const geocoded = await geoLocationService.geocodeAddress(address);
+      const candidates = buildDestinationGeocodeCandidates(candidate);
+      let geocoded = null;
+      let resolvedAddress = address;
+      for (const candidateAddress of candidates) {
+        geocoded = await geoLocationService.geocodeAddress(candidateAddress);
+        if (geocoded && hasUsableBrazilCoordinatePair(geocoded.lat, geocoded.lng)) {
+          resolvedAddress = candidateAddress;
+          break;
+        }
+      }
       if (!geocoded || !hasUsableBrazilCoordinatePair(geocoded.lat, geocoded.lng)) {
         if (await applyDestinationFallback(candidate, shouldApply)) {
           resolved += 1;
@@ -183,7 +185,7 @@ const run = async () => {
         await updateCoordinates(candidate, Number(geocoded.lat), Number(geocoded.lng), {
           source: 'geocoder',
           precision: 'street',
-          formattedAddress: geocoded.formattedAddress || address,
+          formattedAddress: geocoded.formattedAddress || resolvedAddress,
         });
       }
       log.info('Destination coordinate resolved', {
@@ -193,6 +195,7 @@ const run = async () => {
         lat: Number(geocoded.lat),
         lng: Number(geocoded.lng),
         precision: 'street',
+        address: resolvedAddress,
       });
     } catch (error) {
       if (await applyDestinationFallback(candidate, shouldApply)) {
