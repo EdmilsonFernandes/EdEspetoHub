@@ -982,6 +982,7 @@ export function SuperAdminDestinations() {
           name: fallback.name || fallback.destinationName || 'Destino não informado',
           city: fallback.city || '',
           state: fallback.state || '',
+          destination: fallback.destination || null,
           partnerHospitality: [],
           partnerServices: [],
           storeRequests: [],
@@ -998,6 +999,7 @@ export function SuperAdminDestinations() {
         name: destination.name || request.destinationName || request.city || 'Destino não informado',
         city: destination.city || request.city || '',
         state: destination.state || request.state || '',
+        destination,
       });
       if (String(request.partnerType || '').toUpperCase() === 'SERVICE_PROVIDER') {
         group.partnerServices.push(request);
@@ -1015,6 +1017,7 @@ export function SuperAdminDestinations() {
         name: destination.name || request.destinationName || place.destination?.name || 'Destino não informado',
         city: destination.city || request.city || '',
         state: destination.state || request.state || '',
+        destination,
       });
       group.storeRequests.push({ ...request, hospitalityPlace: request.hospitalityPlace || place });
     });
@@ -1527,11 +1530,10 @@ export function SuperAdminDestinations() {
       setSelectedPartnerRequest(request);
       return;
     }
-    if (status === 'approved' && isClaim) {
-      const confirmed = window.confirm(
-        `Esta solicitação vai liberar acesso para editar "${claimedResourceLabel(request)}".\n\nAntes de aprovar, confirme por WhatsApp/e-mail oficial do cadastro que esta pessoa é realmente responsável pelo perfil. Deseja continuar?`
-      );
-      if (!confirmed) return;
+    if (status === 'rejected' && isClaim && normalizedReviewNote.length < 12) {
+      setError('Informe o motivo da recusa para o parceiro entender o que precisa ajustar.');
+      setSelectedPartnerRequest(request);
+      return;
     }
     setSaving(true);
     setError('');
@@ -2529,7 +2531,7 @@ export function SuperAdminDestinations() {
       {renderRequestActions(
         request,
         () => (isPartnerClaimRequest(request) ? setSelectedPartnerRequest(request) : reviewPartner(request, 'approved')),
-        () => reviewPartner(request, 'rejected')
+        () => (isPartnerClaimRequest(request) ? setSelectedPartnerRequest(request) : reviewPartner(request, 'rejected'))
       )}
       {!isPendingRequest(request.status) && String(request.status || '').toLowerCase() === 'approved' && request.createdPartnerAccountId ? (
         <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -2594,7 +2596,7 @@ export function SuperAdminDestinations() {
             {pendingCount ? `${pendingCount} pend.` : `${items.length} total`}
           </span>
         </div>
-        <div className="mt-3 grid gap-2.5">
+        <div className={`mt-3 grid gap-2.5 ${items.length > 8 ? 'max-h-[min(64vh,34rem)] overflow-y-auto pr-1' : ''}`}>
           {items.length ? items.map(renderCard) : (
             <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-sm font-semibold text-slate-500">
               Nenhuma solicitação nesta categoria.
@@ -2623,6 +2625,15 @@ export function SuperAdminDestinations() {
     ];
     const account = request.createdPartnerAccount || {};
     const reviewNoteValue = partnerReviewNotes[request.id] ?? request.reviewNote ?? '';
+    const storeSummary = request.store || {};
+    const resourceSummary = request.claimedListing || request.claimedHospitalityPlace || {};
+    const storeName = storeSummary.name || request.name || 'Loja solicitante';
+    const resourceName = resourceSummary.title || resourceSummary.name || claimedResourceLabel(request);
+    const storeLogoUrl = resolveAssetUrl(storeSummary?.settings?.logoUrl || request.logoUrl || request.imageUrl || '') || getStoreAvatarUrl(storeSummary.slug || request.storeId, storeName);
+    const resourceImageUrl = imageFor(resourceSummary || request);
+    const requestedPlaces = Array.isArray(request.requestedHospitalityPlaces) && request.requestedHospitalityPlaces.length
+      ? request.requestedHospitalityPlaces
+      : (Array.isArray(request.requestedHospitalityPlaceNames) ? request.requestedHospitalityPlaceNames : []).map((name: string, index: number) => ({ id: `${name}-${index}`, name }));
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-3 py-4 backdrop-blur-sm sm:items-center">
         <div className="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-[2rem] bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.75)]">
@@ -2643,6 +2654,52 @@ export function SuperAdminDestinations() {
           </div>
 
           <div className="max-h-[calc(92vh-8rem)] overflow-y-auto p-5">
+            {isPartnerClaimRequest(request) ? (
+              <div className="mb-4 grid gap-3 md:grid-cols-[1fr_1fr_1.1fr]">
+                <div className="rounded-[1.45rem] border border-slate-100 bg-white p-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.35)]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Loja solicitante</p>
+                  <div className="mt-3 flex items-center gap-3">
+                    <img src={storeLogoUrl} alt={storeName} className="h-14 w-14 shrink-0 rounded-2xl object-cover ring-1 ring-slate-100" />
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-black text-slate-950">{storeName}</p>
+                      <p className="truncate text-xs font-semibold text-slate-500">{request.responsibleEmail || account.email || 'E-mail não informado'}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-[1.45rem] border border-amber-100 bg-amber-50/70 p-3 shadow-[0_18px_40px_-34px_rgba(180,83,9,0.4)]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-amber-700">Perfil que será assumido</p>
+                  <div className="mt-3 flex items-center gap-3">
+                    <img src={resourceImageUrl} alt={resourceName} className="h-14 w-14 shrink-0 rounded-2xl object-cover ring-1 ring-white" />
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-black text-slate-950">{resourceName}</p>
+                      <p className="truncate text-xs font-semibold text-amber-800">{request.destination?.name || request.destination?.city || 'Destino não informado'}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-[1.45rem] border border-[#336886]/10 bg-[#EEF6F4] p-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">Chalés vinculados na solicitação</p>
+                  {requestedPlaces.length ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {requestedPlaces.slice(0, 6).map((place: any) => {
+                        const placeLogo = logoFor(place);
+                        return (
+                          <span key={place.id || place.name} className="inline-flex max-w-full items-center gap-2 rounded-full bg-white/86 px-2.5 py-1.5 text-xs font-black text-slate-700 shadow-sm">
+                            <img src={placeLogo} alt={place.name} className="h-6 w-6 shrink-0 rounded-full object-cover" />
+                            <span className="truncate">{place.name}</span>
+                          </span>
+                        );
+                      })}
+                      {requestedPlaces.length > 6 ? (
+                        <span className="rounded-full bg-white/80 px-2.5 py-1.5 text-xs font-black text-[#336886]">+{requestedPlaces.length - 6}</span>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm font-semibold text-slate-500">Sem chalé específico retornado. Confira o cadastro e o histórico antes de aprovar.</p>
+                  )}
+                </div>
+              </div>
+            ) : null}
+
             <div className="grid gap-3 md:grid-cols-4">
               {[
                 { label: 'Status', value: requestStatusLabel(request.status) },
@@ -2733,7 +2790,7 @@ export function SuperAdminDestinations() {
               {isPendingRequest(request.status) ? (
                 <>
                   <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'rejected', reviewNoteValue)} className={actionButtonClass('danger')}>
-                    Recusar
+                    Recusar com motivo
                   </button>
                   <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'approved', reviewNoteValue)} className={actionButtonClass('success')}>
                     <CheckCircle size={13} weight="fill" />
@@ -4075,10 +4132,16 @@ export function SuperAdminDestinations() {
                     <div className="rounded-[1.55rem] border border-white bg-white p-4 shadow-[0_14px_36px_-32px_rgba(15,23,42,0.42)]">
                       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                         <div className="flex min-w-0 items-center gap-3">
-                          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.15rem] bg-[#153A4C] text-white shadow-[0_16px_34px_-24px_rgba(15,23,42,0.68)]">
-                            <MapTrifold size={22} weight="duotone" />
-                          </span>
+                          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.25rem] bg-[#153A4C] shadow-[0_16px_34px_-24px_rgba(15,23,42,0.68)]">
+                            <img
+                              src={imageFor(group.destination || group)}
+                              alt={group.name}
+                              className="h-full w-full object-cover"
+                            />
+                            <span className="absolute inset-0 bg-gradient-to-br from-slate-950/5 to-slate-950/28" />
+                          </div>
                           <div className="min-w-0">
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Fila por destino</p>
                             <p className="truncate text-lg font-black tracking-[-0.03em] text-slate-950">{group.name}</p>
                             <p className="text-xs font-bold text-slate-500">
                               {[group.city, group.state].filter(Boolean).join(' · ') || 'Destino aguardando validação'}
@@ -4086,7 +4149,8 @@ export function SuperAdminDestinations() {
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black text-slate-600">{group.total} solicitação(ões)</span>
+                          <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black text-slate-600">{group.total} na fila</span>
+                          <span className="rounded-full bg-[#EEF6F4] px-3 py-1 text-[11px] font-black text-[#153A4C]">{group.partnerHospitality.length} chalés · {group.partnerServices.length} serviços · {group.storeRequests.length} lojas</span>
                           <span className={`rounded-full px-3 py-1 text-[11px] font-black ${
                             group.pending ? 'bg-amber-100 text-amber-700' : 'bg-emerald-50 text-emerald-700'
                           }`}>

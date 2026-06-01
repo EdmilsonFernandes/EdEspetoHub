@@ -728,6 +728,14 @@ describe('Destination Hub', () => {
 
     expect(secondClaimRes.status, JSON.stringify(secondClaimRes.body)).toBe(201);
 
+    const rejectWithoutReasonRes = await api
+      .patch(`/api/admin/destination-partner-requests/${secondClaimRes.body.id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ status: 'rejected' });
+
+    expect(rejectWithoutReasonRes.status, JSON.stringify(rejectWithoutReasonRes.body)).toBe(400);
+    expect(rejectWithoutReasonRes.body.code).toBe('DPARTNER-014');
+
     const duplicatedOwnerRes = await api
       .patch(`/api/admin/destination-partner-requests/${secondClaimRes.body.id}/review`)
       .set('Authorization', `Bearer ${platformToken}`)
@@ -735,6 +743,14 @@ describe('Destination Hub', () => {
 
     expect(duplicatedOwnerRes.status, JSON.stringify(duplicatedOwnerRes.body)).toBe(409);
     expect(duplicatedOwnerRes.body.code).toBe('DPARTNER-011');
+
+    const rejectWithReasonRes = await api
+      .patch(`/api/admin/destination-partner-requests/${secondClaimRes.body.id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ status: 'rejected', reviewNote: 'Responsável não comprovou a titularidade do chalé.' });
+
+    expect(rejectWithReasonRes.status, JSON.stringify(rejectWithReasonRes.body)).toBe(200);
+    expect(rejectWithReasonRes.body.status).toBe('rejected');
   });
 
   it('accepts service partner requests and lets the partner update only safe listing fields', async () => {
@@ -1016,6 +1032,15 @@ describe('Destination Hub', () => {
       slug: claimedStore.body.store.slug,
     }));
     expect(validationRes.body.createdPartnerAccountId).toBeNull();
+
+    const claimApprovalLogs = await AppDataSource.query(
+      `SELECT to_email, status
+         FROM email_send_logs
+        WHERE template_key = $1
+          AND metadata->>'requestId' = $2`,
+      ['destination_store_claim_approved', claimRows[0].id]
+    );
+    expect(claimApprovalLogs.map((row: any) => String(row.to_email || '').toLowerCase())).toContain(claimedStore.email);
 
     const approvedAdminLoginRes = await api
       .post('/api/auth/admin-login')

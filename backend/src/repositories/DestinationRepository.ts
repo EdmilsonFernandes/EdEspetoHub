@@ -433,6 +433,7 @@ export class DestinationRepository {
       .leftJoinAndSelect('request.claimedListing', 'claimedListing')
       .leftJoinAndSelect('request.store', 'store')
       .leftJoinAndSelect('store.settings', 'requestStoreSettings')
+      .leftJoinAndSelect('store.owner', 'requestStoreOwner')
       .orderBy('request.created_at', 'DESC');
     if (status) qb.andWhere('request.status = :status', { status });
     return qb.getMany();
@@ -441,14 +442,14 @@ export class DestinationRepository {
   findPartnerRequestById(id: string) {
     return this.partnerRequestRepository.findOne({
       where: { id },
-      relations: [ 'destination', 'createdHospitalityPlace', 'createdListing', 'createdPartnerAccount', 'claimedHospitalityPlace', 'claimedListing', 'store', 'store.settings' ],
+      relations: [ 'destination', 'createdHospitalityPlace', 'createdListing', 'createdPartnerAccount', 'claimedHospitalityPlace', 'claimedListing', 'store', 'store.settings', 'store.owner' ],
     });
   }
 
   findPendingPartnerRequestByStoreAndListing(storeId: string, listingId: string) {
     return this.partnerRequestRepository.findOne({
       where: { storeId, claimedListingId: listingId, status: 'pending' },
-      relations: [ 'destination', 'claimedListing', 'store', 'store.settings' ],
+      relations: [ 'destination', 'claimedListing', 'store', 'store.settings', 'store.owner' ],
     });
   }
 
@@ -459,6 +460,7 @@ export class DestinationRepository {
       .leftJoinAndSelect('request.claimedListing', 'claimedListing')
       .leftJoinAndSelect('request.store', 'store')
       .leftJoinAndSelect('store.settings', 'requestStoreSettings')
+      .leftJoinAndSelect('store.owner', 'requestStoreOwner')
       .where('request.store_id = :storeId', { storeId })
       .andWhere('request.claimed_listing_id IS NOT NULL')
       .andWhere('request.request_source = :source', { source: 'store_signup_destination_claim' })
@@ -526,7 +528,7 @@ export class DestinationRepository {
   }
 
   findStoreById(storeId: string) {
-    return this.storeRepository.findOne({ where: { id: storeId }, relations: [ 'settings' ] });
+    return this.storeRepository.findOne({ where: { id: storeId }, relations: [ 'settings', 'owner' ] });
   }
 
   saveStore(store: Store) {

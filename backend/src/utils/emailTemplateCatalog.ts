@@ -352,6 +352,42 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     `,
   },
   {
+    key: 'destination_store_claim_approved',
+    name: 'Loja aprovada para assumir serviço',
+    category: 'account',
+    description: 'Enviado ao lojista quando o Super Admin aprova a conversão de serviço de destino em loja.',
+    subject: 'Sua loja foi aprovada em {{DESTINATION_NAME}} - Já no Caminho',
+    preheader: 'O perfil {{LISTING_NAME}} agora está vinculado à sua loja.',
+    variables: ['RESPONSIBLE_NAME', 'STORE_NAME', 'LISTING_NAME', 'DESTINATION_NAME', 'PLACE_NAMES', 'ADMIN_URL'],
+    textBody: 'Olá, {{RESPONSIBLE_NAME}}.\n\nA loja {{STORE_NAME}} foi aprovada para assumir {{LISTING_NAME}} em {{DESTINATION_NAME}}.\n\nHospedagens vinculadas: {{PLACE_NAMES}}\n\nAcesse o painel da loja: {{ADMIN_URL}}',
+    htmlBody: `
+      <h1 style="margin: 0 0 10px; font-size: 28px; line-height: 1.12; color: #0f172a;">Loja aprovada</h1>
+      <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.7;">Olá, {{RESPONSIBLE_NAME}}. A loja <strong>{{STORE_NAME}}</strong> foi aprovada para assumir <strong>{{LISTING_NAME}}</strong> em <strong>{{DESTINATION_NAME}}</strong>.</p>
+      <div style="margin: 0 0 20px; padding: 16px; border-radius: 18px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #14532d; line-height: 1.7;">
+        <strong>Hospedagens vinculadas:</strong><br />{{PLACE_NAMES}}
+      </div>
+      <a href="{{ADMIN_URL}}" style="display: inline-block; padding: 13px 18px; border-radius: 14px; background: #153A4C; color: #ffffff; text-decoration: none; font-weight: 800;">Abrir painel da loja</a>
+    `,
+  },
+  {
+    key: 'destination_store_claim_rejected',
+    name: 'Loja recusada para assumir serviço',
+    category: 'account',
+    description: 'Enviado ao lojista quando o Super Admin recusa a conversão de serviço de destino em loja.',
+    subject: 'Sua solicitação precisa de ajuste - Já no Caminho',
+    preheader: 'A solicitação para assumir {{LISTING_NAME}} foi analisada.',
+    variables: ['RESPONSIBLE_NAME', 'STORE_NAME', 'LISTING_NAME', 'DESTINATION_NAME', 'REVIEW_NOTE', 'SUPPORT_EMAIL'],
+    textBody: 'Olá, {{RESPONSIBLE_NAME}}.\n\nA solicitação da loja {{STORE_NAME}} para assumir {{LISTING_NAME}} em {{DESTINATION_NAME}} foi recusada.\n\nMotivo informado: {{REVIEW_NOTE}}\n\nSe achar que houve engano, responda este e-mail ou fale com {{SUPPORT_EMAIL}}.',
+    htmlBody: `
+      <h1 style="margin: 0 0 10px; font-size: 28px; line-height: 1.12; color: #0f172a;">Solicitação analisada</h1>
+      <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.7;">Olá, {{RESPONSIBLE_NAME}}. A solicitação da loja <strong>{{STORE_NAME}}</strong> para assumir <strong>{{LISTING_NAME}}</strong> em <strong>{{DESTINATION_NAME}}</strong> foi recusada.</p>
+      <div style="margin: 0 0 20px; padding: 16px; border-radius: 18px; background: #fff7ed; border: 1px solid #fed7aa; color: #7c2d12; line-height: 1.7;">
+        <strong>Motivo informado:</strong><br />{{REVIEW_NOTE}}
+      </div>
+      <p style="margin: 0; color: #64748b; font-size: 13px; line-height: 1.7;">Se achar que houve engano, responda este e-mail ou fale com {{SUPPORT_EMAIL}}.</p>
+    `,
+  },
+  {
     key: 'store_delivery_code_lock_alert',
     name: 'Alerta de código de entrega bloqueado',
     category: 'security',

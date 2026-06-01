@@ -17,7 +17,7 @@ import { inputAssistProps, textareaAssistProps } from '../utils/inputAssist';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatDestinationClaimPlaceAddress, getDestinationClaimPlaceImage, resolveDestinationClaimPlaces } from '../utils/destinationClaimPlaces';
 import { FormSection } from '../components/common/FormSection';
-import { Bed, Buildings, CheckCircle, CopySimple, CreditCard, EnvelopeSimple, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, RocketLaunch, Storefront, UserCircle, WarningCircle } from '@phosphor-icons/react';
+import { Bed, Buildings, CheckCircle, CopySimple, CreditCard, EnvelopeSimple, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, RocketLaunch, ShieldCheck, Storefront, UserCircle, WarningCircle } from '@phosphor-icons/react';
 
 const BRAZIL_DDDS = [
   '11', '12', '13', '14', '15', '16', '17', '18', '19',
@@ -259,6 +259,7 @@ export function CreateStore() {
     document: '',
     storeName: '',
   });
+  const [storeReviewPendingInfo, setStoreReviewPendingInfo] = useState<any | null>(null);
   const platformLogo = '/janocaminho.jpg';
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
@@ -453,6 +454,11 @@ export function CreateStore() {
     } catch (error) {
       console.error('Falha ao copiar URL da loja', error);
     }
+  };
+
+  const closeStoreVerificationModal = () => {
+    setStoreVerifyPrompt(null);
+    setStoreReviewPendingInfo(null);
   };
 
   useEffect(() => {
@@ -1005,6 +1011,7 @@ export function CreateStore() {
 
       if (result?.next === 'VERIFY_EMAIL_CODE') {
         const targetEmail = result.email || registerForm.email.trim().toLowerCase();
+        setStoreReviewPendingInfo(null);
         setStoreVerifyPrompt({
           email: targetEmail,
           emailMasked: result.emailMasked,
@@ -1326,7 +1333,24 @@ export function CreateStore() {
           : 'Loja confirmada com sucesso. Redirecionando...'
       );
       if (claimPending) {
+        const placeSource = destinationClaimDeliveryMode === 'all'
+          ? destinationClaimPlaces
+          : destinationClaimDeliveryMode === 'selected'
+            ? selectedDestinationClaimPlaces
+            : [];
+        setStoreReviewPendingInfo({
+          requestId: result?.destinationClaimRequestId || '',
+          email,
+          emailMasked: storeVerifyPrompt?.emailMasked || email,
+          storeName: registerForm.storeName || destinationClaim?.storeName || 'Sua loja',
+          listingTitle: destinationClaim?.listingTitle || destinationClaim?.storeName || registerForm.storeName || 'Serviço solicitado',
+          destinationName: destinationClaim?.destinationName || [registerForm.city, registerForm.state].filter(Boolean).join(' - '),
+          placeNames: placeSource.map((place: any) => String(place?.name || '')).filter(Boolean),
+          places: placeSource.slice(0, 4),
+          logoUrl: logoPreviewUrl || resolveAssetUrl(registerForm.logoFile || '') || '',
+        });
         setStoreCodeDigits(['', '', '', '']);
+        setStoreResendCooldown(0);
         return;
       }
       setStoreVerifyPrompt(null);
@@ -1356,6 +1380,7 @@ export function CreateStore() {
 
   useEffect(() => {
     if (!storeVerifyPrompt) return;
+    if (storeReviewPendingInfo) return;
     if (storeVerificationCode.length !== 4 || storeCodeLoading) return;
     if (storeVerificationCode === lastAutoSubmittedStoreCode) return;
     const codeToSubmit = storeVerificationCode;
@@ -1364,7 +1389,7 @@ export function CreateStore() {
       void handleVerifyStoreCode();
     }, 180);
     return () => window.clearTimeout(timer);
-  }, [storeVerificationCode, storeCodeLoading, storeVerifyPrompt, lastAutoSubmittedStoreCode]);
+  }, [storeVerificationCode, storeCodeLoading, storeVerifyPrompt, storeReviewPendingInfo, lastAutoSubmittedStoreCode]);
 
   const handleResendStoreCode = async () => {
     const email = String(storeVerifyPrompt?.email || registerForm.email || '').trim().toLowerCase();
@@ -3064,21 +3089,29 @@ export function CreateStore() {
               <div className="relative flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-start gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/12 shadow-[0_18px_36px_-24px_rgba(15,23,42,0.75)]">
-                    <EnvelopeSimple size={23} weight="duotone" />
+                    {storeReviewPendingInfo ? <ShieldCheck size={23} weight="duotone" /> : <EnvelopeSimple size={23} weight="duotone" />}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/65">Ativação da loja</p>
-                    <h3 className="mt-1 text-2xl font-black leading-tight tracking-[-0.03em]">Confirme seu e-mail</h3>
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/65">{storeReviewPendingInfo ? 'Análise do Já no Caminho' : 'Ativação da loja'}</p>
+                    <h3 className="mt-1 text-2xl font-black leading-tight tracking-[-0.03em]">{storeReviewPendingInfo ? 'Solicitação enviada' : 'Confirme seu e-mail'}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-white/80">
-                      Enviamos um código de 4 dígitos no e-mail{' '}
-                      <span className="font-black text-white">{storeVerifyPrompt.emailMasked || storeVerifyPrompt.email}</span>
-                      {' '}para ativar sua loja.
+                      {storeReviewPendingInfo ? (
+                        <>
+                          Sua loja foi confirmada e a posse do serviço agora vai ser validada pela equipe.
+                        </>
+                      ) : (
+                        <>
+                          Enviamos um código de 4 dígitos no e-mail{' '}
+                          <span className="font-black text-white">{storeVerifyPrompt.emailMasked || storeVerifyPrompt.email}</span>
+                          {' '}para ativar sua loja.
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setStoreVerifyPrompt(null)}
+                  onClick={closeStoreVerificationModal}
                   className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 transition hover:bg-white/16"
                 >
                   Fechar
@@ -3087,6 +3120,81 @@ export function CreateStore() {
             </div>
 
             <div className="space-y-5 overflow-y-auto px-6 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-5">
+              {storeReviewPendingInfo ? (
+                <>
+                  <div className="rounded-[1.7rem] border border-emerald-200 bg-emerald-50/90 p-4 text-emerald-900 shadow-[0_18px_42px_-34px_rgba(16,185,129,0.7)]">
+                    <div className="flex items-start gap-3">
+                      <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/80 bg-white shadow-sm">
+                        {storeReviewPendingInfo.logoUrl ? (
+                          <img src={storeReviewPendingInfo.logoUrl} alt={storeReviewPendingInfo.storeName} className="h-full w-full object-cover" />
+                        ) : (
+                          <Storefront size={24} weight="duotone" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">Loja confirmada</p>
+                        <h4 className="mt-1 break-words text-lg font-black text-slate-950">{storeReviewPendingInfo.storeName}</h4>
+                        <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-600">
+                          Quer assumir <strong className="text-slate-950">{storeReviewPendingInfo.listingTitle}</strong>
+                          {storeReviewPendingInfo.destinationName ? <> em <strong className="text-slate-950">{storeReviewPendingInfo.destinationName}</strong></> : null}.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[1.6rem] border border-slate-200 bg-white/86 p-4">
+                    <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">
+                      <Bed size={15} weight="fill" />
+                      Chalés e pousadas selecionados
+                    </p>
+                    {Array.isArray(storeReviewPendingInfo.places) && storeReviewPendingInfo.places.length ? (
+                      <div className="mt-3 grid gap-2">
+                        {storeReviewPendingInfo.places.map((place: any) => {
+                          const imageUrl = resolveAssetUrl(getDestinationClaimPlaceImage(place));
+                          return (
+                            <div key={place.id || place.name} className="flex items-center gap-3 rounded-2xl bg-slate-50 p-2">
+                              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-2xl bg-white">
+                                {imageUrl ? (
+                                  <img src={imageUrl} alt={place.name} className="h-full w-full object-cover" />
+                                ) : (
+                                  <div className="grid h-full w-full place-items-center text-[#336886]">
+                                    <MapPinLine size={20} weight="duotone" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-black text-slate-900">{place.name}</p>
+                                <p className="truncate text-xs font-semibold text-slate-500">{formatDestinationClaimPlaceAddress(place) || 'Hospedagem selecionada'}</p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : storeReviewPendingInfo.placeNames?.length ? (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {storeReviewPendingInfo.placeNames.map((name: string) => (
+                          <span key={name} className="rounded-full bg-[#EEF6F4] px-3 py-1.5 text-xs font-black text-[#153A4C]">{name}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-sm font-semibold text-slate-500">A equipe vai revisar os vínculos informados no cadastro.</p>
+                    )}
+                  </div>
+
+                  <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50/90 p-4 text-sm font-semibold leading-relaxed text-slate-600">
+                    Você receberá um e-mail quando a análise for aprovada ou se precisar ajustar alguma informação. Enquanto isso, o acesso da loja fica protegido para evitar que alguém assuma um serviço indevidamente.
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={closeStoreVerificationModal}
+                    className="w-full rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99]"
+                  >
+                    Entendi, vou aguardar a análise
+                  </button>
+                </>
+              ) : (
+                <>
               <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                 <div className="flex items-center justify-between gap-2">
                   {storeCodeDigits.map((digit, index) => (
@@ -3143,6 +3251,8 @@ export function CreateStore() {
                   {storeResendLoading ? 'Reenviando...' : storeResendCooldown > 0 ? `Reenviar em ${storeResendCooldown}s` : 'Reenviar código'}
                 </button>
               </div>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -498,6 +498,60 @@ export class EmailService {
     });
   }
 
+  async sendDestinationStoreClaimReviewed(payload: {
+    email: string;
+    responsibleName?: string | null;
+    storeName?: string | null;
+    listingName?: string | null;
+    destinationName?: string | null;
+    placeNames?: string[];
+    reviewNote?: string | null;
+    approved: boolean;
+    requestId?: string | null;
+  }) {
+    const baseUrl = (env.appUrl || 'https://janocaminho.com.br').replace(/\/$/, '');
+    const responsibleName = payload.responsibleName || 'Parceiro';
+    const storeName = payload.storeName || 'sua loja';
+    const listingName = payload.listingName || 'o serviço solicitado';
+    const destinationName = payload.destinationName || 'destinos';
+    const placeNames = Array.isArray(payload.placeNames) && payload.placeNames.length
+      ? payload.placeNames.join(', ')
+      : 'Conforme seleção aprovada no cadastro';
+
+    if (payload.approved) {
+      await this.sendTemplate(payload.email, 'destination_store_claim_approved', {
+        RESPONSIBLE_NAME: responsibleName,
+        STORE_NAME: storeName,
+        LISTING_NAME: listingName,
+        DESTINATION_NAME: destinationName,
+        PLACE_NAMES: placeNames,
+        ADMIN_URL: `${baseUrl}/admin`,
+      }, {
+        requestId: payload.requestId || null,
+        storeName,
+        listingName,
+        destinationName,
+        approved: true,
+      });
+      return;
+    }
+
+    await this.sendTemplate(payload.email, 'destination_store_claim_rejected', {
+      RESPONSIBLE_NAME: responsibleName,
+      STORE_NAME: storeName,
+      LISTING_NAME: listingName,
+      DESTINATION_NAME: destinationName,
+      REVIEW_NOTE: payload.reviewNote || 'Não foi possível confirmar a titularidade com os dados enviados.',
+      SUPPORT_EMAIL: this.getSupportEmail(),
+    }, {
+      requestId: payload.requestId || null,
+      storeName,
+      listingName,
+      destinationName,
+      approved: false,
+    });
+  }
+
   async sendStoreDeliveryCodeLockAlert(payload: {
     to: string;
     storeName: string;

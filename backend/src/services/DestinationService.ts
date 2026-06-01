@@ -295,6 +295,16 @@ export class DestinationService {
       acc.get(placeId)?.push(link);
       return acc;
     }, new Map<string, any[]>());
+    const storeRequestsByPartnerRequest = new Map<string, any[]>();
+    for (const request of partnerRequests) {
+      const requestId = String(request?.id || '');
+      if (!requestId) continue;
+      const linkedRequests = storeRequests.filter((storeRequest: any) =>
+        String(storeRequest?.storeId || '') === String(request?.storeId || '') &&
+        String(storeRequest?.message || '').includes(requestId)
+      );
+      if (linkedRequests.length) storeRequestsByPartnerRequest.set(requestId, linkedRequests);
+    }
 
     return {
       destinations: destinations.map((destination) => this.toPublicDestination(destination)),
@@ -304,7 +314,10 @@ export class DestinationService {
         storeLinks: (linksByPlace.get(place.id) || []).map((link) => this.toPublicStoreLink(link)),
       })),
       listings: listings.map((listing) => this.toPublicListing(listing)),
-      partnerRequests: partnerRequests.map((request) => this.toPublicPartnerRequest(request)),
+      partnerRequests: partnerRequests.map((request) => this.toPublicPartnerRequest({
+        ...request,
+        requestedStoreRequests: storeRequestsByPartnerRequest.get(String(request?.id || '')) || [],
+      })),
       storeRequests: storeRequests.map((request) => this.toPublicStoreRequest(request)),
       stores: stores.map((store: any) => this.toPublicStoreSummary(store)),
     };
@@ -1081,17 +1094,58 @@ export class DestinationService {
     (request as any).store = store;
   }
 
+  private claimHospitalityPlaceNames(request: any) {
+    const fromLinkedRequests = (Array.isArray(request?.requestedStoreRequests) ? request.requestedStoreRequests : [])
+      .map((item: any) => item?.hospitalityPlace?.name)
+      .filter(Boolean);
+    const attribution = request?.store?.settings?.acquisitionAttribution || {};
+    const fromAttribution = Array.isArray(attribution?.destinationHospitalityPlaceNames)
+      ? attribution.destinationHospitalityPlaceNames
+      : [];
+    return Array.from(new Set([...fromLinkedRequests, ...fromAttribution].map((item) => String(item || '').trim()).filter(Boolean)));
+  }
+
+  private async notifyStoreListingClaimReviewed(request: any, approved: boolean, reviewNote?: string | null) {
+    const email = toOptionalText(request?.store?.owner?.email || request?.responsibleEmail || request?.store?.settings?.contactEmail);
+    if (!email) return;
+    try {
+      await this.emailService.sendDestinationStoreClaimReviewed({
+        email,
+        responsibleName: request?.store?.owner?.fullName || request?.responsibleName || request?.store?.name || null,
+        storeName: request?.store?.name || request?.name || null,
+        listingName: request?.claimedListing?.title || request?.name || null,
+        destinationName: request?.destination?.name || request?.destination?.city || null,
+        placeNames: this.claimHospitalityPlaceNames(request),
+        reviewNote,
+        approved,
+        requestId: request?.id || null,
+      });
+    } catch (error) {
+      this.log.error('Destination store claim review email failed', {
+        requestId: request?.id,
+        storeId: request?.storeId,
+        claimedListingId: request?.claimedListingId,
+        approved,
+        error,
+      });
+    }
+  }
+
   async adminReviewPartnerRequest(requestId: string, payload: any, reviewedBy?: string) {
     const request = await this.repository.findPartnerRequestById(requestId);
     if (!request) throw new AppError('DEST-010', 404);
     const status = this.normalizeReviewStatus(payload?.status);
     const isClaimRequest = Boolean(request.claimedHospitalityPlaceId || request.claimedListingId);
+    const previousStatus = String(request.status || '').toLowerCase();
     if (status === 'approved' && request.status !== 'approved' && isClaimRequest && payload?.claimVerified !== true) {
       throw new AppError('DPARTNER-010', 400);
     }
     const reviewNote = toOptionalText(payload?.reviewNote);
     if (status === 'approved' && request.status !== 'approved' && isClaimRequest && String(reviewNote || '').trim().length < 12) {
       throw new AppError('DPARTNER-012', 400);
+    }
+    if (status === 'rejected' && request.status !== 'rejected' && isClaimRequest && String(reviewNote || '').trim().length < 12) {
+      throw new AppError('DPARTNER-014', 400);
     }
     let partnerActivationToken: string | null | undefined;
     if (status === 'approved' && request.status !== 'approved') {
@@ -1177,6 +1231,15 @@ export class DestinationService {
     request.reviewedBy = reviewedBy || null;
     request.reviewedAt = new Date();
     const saved = await this.repository.savePartnerRequest(request);
+    if (
+      previousStatus !== status &&
+      isClaimRequest &&
+      request.storeId &&
+      request.claimedListingId &&
+      (status === 'approved' || status === 'rejected')
+    ) {
+      await this.notifyStoreListingClaimReviewed(request, status === 'approved', reviewNote);
+    }
     (saved as any).partnerActivationToken = partnerActivationToken;
     return this.toPublicPartnerRequest(saved);
   }
@@ -1676,6 +1739,15 @@ export class DestinationService {
   }
 
   private toPublicPartnerRequest(request: any) {
+    const requestedHospitalityPlaces = (Array.isArray(request?.requestedStoreRequests) ? request.requestedStoreRequests : [])
+      .map((item: any) => item?.hospitalityPlace)
+      .filter(Boolean);
+    const requestedPlaceIdsFromAttribution = Array.isArray(request?.store?.settings?.acquisitionAttribution?.destinationHospitalityPlaceIds)
+      ? request.store.settings.acquisitionAttribution.destinationHospitalityPlaceIds
+      : [];
+    const requestedPlaceNamesFromAttribution = Array.isArray(request?.store?.settings?.acquisitionAttribution?.destinationHospitalityPlaceNames)
+      ? request.store.settings.acquisitionAttribution.destinationHospitalityPlaceNames
+      : [];
     return {
       id: request.id,
       destinationId: request.destinationId,
@@ -1712,6 +1784,9 @@ export class DestinationService {
         city: request.claimedHospitalityPlace.city || null,
         state: request.claimedHospitalityPlace.state || null,
         zipCode: request.claimedHospitalityPlace.zipCode || null,
+        logoUrl: request.claimedHospitalityPlace.logoUrl || null,
+        bannerUrl: request.claimedHospitalityPlace.bannerUrl || null,
+        imageUrl: request.claimedHospitalityPlace.imageUrl || request.claimedHospitalityPlace.bannerUrl || request.claimedHospitalityPlace.logoUrl || null,
         whatsapp: request.claimedHospitalityPlace.whatsapp || null,
         phone: request.claimedHospitalityPlace.phone || null,
         instagramUrl: request.claimedHospitalityPlace.instagramUrl || null,
@@ -1727,11 +1802,18 @@ export class DestinationService {
         city: request.claimedListing.city || null,
         state: request.claimedListing.state || null,
         zipCode: request.claimedListing.zipCode || null,
+        category: request.claimedListing.category || null,
+        imageUrl: request.claimedListing.imageUrl || null,
+        logoUrl: request.claimedListing.logoUrl || request.claimedListing.imageUrl || null,
+        bannerUrl: request.claimedListing.bannerUrl || request.claimedListing.imageUrl || null,
         whatsapp: request.claimedListing.whatsapp || null,
         phone: request.claimedListing.phone || null,
         instagramUrl: request.claimedListing.instagramUrl || null,
         websiteUrl: request.claimedListing.websiteUrl || null,
       } : null,
+      requestedHospitalityPlaces: requestedHospitalityPlaces.map((place: any) => this.toPublicPlace(place)),
+      requestedHospitalityPlaceIds: requestedPlaceIdsFromAttribution.map((item: any) => String(item || '').trim()).filter(Boolean),
+      requestedHospitalityPlaceNames: requestedPlaceNamesFromAttribution.map((item: any) => String(item || '').trim()).filter(Boolean),
       responsibleName: request.responsibleName,
       responsibleEmail: request.responsibleEmail,
       responsiblePhone: request.responsiblePhone || null,

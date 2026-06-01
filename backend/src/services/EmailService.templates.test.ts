@@ -87,6 +87,27 @@ describe('EmailService managed template variables', () => {
       message: 'Tenho interesse em aparecer no app.',
       requestId: 'request-1',
     });
+    await service.sendDestinationStoreClaimReviewed({
+      email: 'loja@teste.com',
+      responsibleName: 'Responsavel Teste',
+      storeName: 'Loja Teste',
+      listingName: 'Restaurante Teste',
+      destinationName: 'São Bento do Sapucaí',
+      placeNames: ['Chalé Teste'],
+      reviewNote: 'Titularidade conferida.',
+      approved: true,
+      requestId: 'request-claim-1',
+    });
+    await service.sendDestinationStoreClaimReviewed({
+      email: 'loja@teste.com',
+      responsibleName: 'Responsavel Teste',
+      storeName: 'Loja Teste',
+      listingName: 'Restaurante Teste',
+      destinationName: 'São Bento do Sapucaí',
+      reviewNote: 'Não foi possível confirmar a titularidade.',
+      approved: false,
+      requestId: 'request-claim-2',
+    });
     await service.sendCondominiumAccessCredentials({
       email: 'condominio@teste.com',
       responsibleName: 'Responsavel Teste',
