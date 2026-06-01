@@ -358,20 +358,22 @@ export function HospitalityServiceRoutePage() {
                   Compartilhe esta referência para o restaurante, serviço ou motoboy localizar a hospedagem com menos dúvida na entrega.
                 </p>
               </div>
+              {canShowMap ? (
               <div className="grid grid-cols-2 gap-2 sm:min-w-[15rem]">
                 <div className="rounded-[1.15rem] border border-[#336886]/12 bg-white/82 p-3 text-[#153A4C] shadow-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">{routeIsApproximate ? 'Rota' : 'Distância'}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Distância</p>
                   <p className="mt-1 text-sm font-black">
-                    {routeIsApproximate ? 'Abrir no mapa' : formatRouteDistance(routeEstimate?.distanceKm) || formatDistance(distanceKm)}
+                    {formatRouteDistance(routeEstimate?.distanceKm) || formatDistance(distanceKm)}
                   </p>
                 </div>
                 <div className="rounded-[1.15rem] border border-[#5FD35A]/20 bg-[#5FD35A]/12 p-3 text-[#153A4C] ring-1 ring-white/70">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">{routeIsApproximate ? 'Navegação' : 'Tempo'}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Tempo</p>
                   <p className="mt-1 text-sm font-black">
-                    {routeIsApproximate ? 'Maps ou Waze' : formatRouteDuration(routeEstimate?.durationMin) || estimateMinutes(distanceKm) || 'Abrir mapa'}
+                    {formatRouteDuration(routeEstimate?.durationMin) || estimateMinutes(distanceKm) || 'Abrir mapa'}
                   </p>
                 </div>
               </div>
+              ) : null}
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -419,11 +421,11 @@ export function HospitalityServiceRoutePage() {
               ) : null}
             </div>
 
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"
                 onClick={() => copyText(currentRouteUrl, 'Link da rota copiado.')}
-                className="jnc-hub-touch inline-flex min-h-11 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-slate-300"
+                className="jnc-hub-touch inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-slate-200/80 bg-white/65 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm hover:-translate-y-0.5 hover:border-slate-300"
               >
                 <ClipboardText size={16} weight="duotone" />
                 Copiar link
@@ -431,7 +433,7 @@ export function HospitalityServiceRoutePage() {
               <button
                 type="button"
                 onClick={() => copyText(placePoint.address, 'Endereço do chalé copiado.')}
-                className="jnc-hub-touch inline-flex min-h-11 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-slate-300"
+                className="jnc-hub-touch inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-slate-200/80 bg-white/65 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm hover:-translate-y-0.5 hover:border-slate-300"
               >
                 <HouseLine size={16} weight="duotone" />
                 Copiar endereço
