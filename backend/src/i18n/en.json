@@ -125,6 +125,7 @@
   "DPARTNER-012": "Record how ownership was verified before approving this partner.",
   "DPARTNER-013": "This service is already linked to another store. Review the record before approving.",
   "DPARTNER-014": "Inform the rejection reason so the partner knows what to adjust.",
+  "DPARTNER-015": "This hospitality place is part of a larger request to convert a service into a store. Review the main request.",
   "REVIEW-003": "This order has no tip available for payout.",
   "REVIEW-004": "The tip has not been paid by the customer yet.",
   "REVIEW-005": "This tip was already received directly by the courier."

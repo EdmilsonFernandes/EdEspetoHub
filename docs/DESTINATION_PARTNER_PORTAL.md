@@ -114,6 +114,8 @@ Ao confirmar o e-mail da loja criada por esse fluxo, o backend cria automaticame
 - uma solicitação pendente em `destination_partner_requests` com `store_id`, `claimed_listing_id` e `request_source = 'store_signup_destination_claim'`;
 - solicitações pendentes em `destination_store_requests` para os chalés/pousadas escolhidos no cadastro.
 
+Essas solicitações de `destination_store_requests` são filhas técnicas da conversão do serviço em loja. A operação correta no Super Admin é revisar a solicitação principal em `destination_partner_requests`, uma única vez, com conferência de titularidade e observação de auditoria. Não se deve aprovar chalé por chalé nesse fluxo.
+
 Na aprovação dessa solicitação pelo Super Admin:
 
 - o serviço/listing antigo é marcado como `active = false`;
@@ -121,6 +123,8 @@ Na aprovação dessa solicitação pelo Super Admin:
 - os vínculos em `hospitality_place_store_links` são criados/reativados para os chalés aprovados;
 - as solicitações de vínculo geradas automaticamente são marcadas como aprovadas;
 - não é criada conta em `destination_partner_accounts`, porque o responsável passa a operar pela conta normal de lojista.
+
+Na recusa, as solicitações-filhas pendentes também são recusadas e o lojista recebe e-mail com o motivo informado pelo Super Admin.
 
 Assim, o serviço some da lista de serviços e a loja aparece na seção de lojas que atendem o chalé.
 

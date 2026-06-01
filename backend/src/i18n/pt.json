@@ -125,6 +125,7 @@
   "DPARTNER-012": "Registre como a titularidade foi conferida antes de aprovar este parceiro.",
   "DPARTNER-013": "Este serviço já está vinculado a outra loja. Revise o cadastro antes de aprovar.",
   "DPARTNER-014": "Informe o motivo da recusa para que o parceiro saiba o que ajustar.",
+  "DPARTNER-015": "Essa hospedagem faz parte de uma solicitação maior para transformar serviço em loja. Revise pela solicitação principal.",
   "REVIEW-003": "Este pedido não possui gorjeta para repasse.",
   "REVIEW-004": "A gorjeta ainda não foi paga pelo cliente.",
   "REVIEW-005": "Esta gorjeta já foi recebida diretamente pelo entregador."

@@ -288,6 +288,13 @@ const requestStatusLabel = (status?: string) => {
 };
 
 const isPendingRequest = (status?: string) => String(status || 'pending').toLowerCase() === 'pending';
+const claimStoreRequestParentId = (request: any) => {
+  const explicit = String(request?.parentPartnerRequestId || '').trim();
+  if (explicit) return explicit;
+  const match = String(request?.message || '').match(/\bClaim\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/i);
+  return match?.[1] || '';
+};
+const isClaimScopedStoreRequest = (request: any) => Boolean(claimStoreRequestParentId(request));
 
 const partnerTypeLabel = (request: any) => {
   const partnerType = String(request?.partnerType || '').toUpperCase();
@@ -307,6 +314,12 @@ const partnerTypeLabel = (request: any) => {
 const isPartnerClaimRequest = (request: any) => Boolean(request?.claimedHospitalityPlaceId || request?.claimedListingId);
 const partnerAccountStatus = (request: any) => String(request?.createdPartnerAccount?.status || '').toLowerCase();
 const partnerAccessLabel = (request: any) => {
+  if (request?.storeId && request?.claimedListingId) {
+    const status = String(request?.status || 'pending').toLowerCase();
+    if (status === 'approved') return 'Loja liberada';
+    if (status === 'rejected') return 'Solicitação recusada';
+    return 'Loja protegida até análise';
+  }
   if (String(request?.status || '').toLowerCase() !== 'approved') return '';
   const status = partnerAccountStatus(request);
   if (status === 'active') return 'Portal ativo';
@@ -1005,7 +1018,9 @@ export function SuperAdminDestinations() {
   const metrics = useMemo(() => {
     if (catalog?.metrics) return catalog.metrics;
     const pendingPartner = (data.partnerRequests || []).filter((request: any) => String(request.status || 'pending') === 'pending').length;
-    const pendingStores = (data.storeRequests || []).filter((request: any) => String(request.status || 'pending') === 'pending').length;
+    const pendingStores = (data.storeRequests || [])
+      .filter((request: any) => !isClaimScopedStoreRequest(request))
+      .filter((request: any) => String(request.status || 'pending') === 'pending').length;
     return {
       destinations: (data.destinations || []).length,
       places: (data.places || []).length,
@@ -1026,23 +1041,24 @@ export function SuperAdminDestinations() {
   }, [data.partnerRequests]);
 
   const partnerFilterOptions = useMemo(() => [
-    { id: 'all', label: 'Todos', count: (data.partnerRequests || []).length + (data.storeRequests || []).length },
-    { id: 'pending', label: 'Pendentes', count: partnerOnboardingMetrics.pending + (data.storeRequests || []).filter((request: any) => isPendingRequest(request.status)).length },
+    { id: 'all', label: 'Todos', count: (data.partnerRequests || []).length + (data.storeRequests || []).filter((request: any) => !isClaimScopedStoreRequest(request)).length },
+    { id: 'pending', label: 'Pendentes', count: partnerOnboardingMetrics.pending + (data.storeRequests || []).filter((request: any) => !isClaimScopedStoreRequest(request) && isPendingRequest(request.status)).length },
     { id: 'claim', label: 'Validação de posse', count: partnerOnboardingMetrics.claimPending },
     { id: 'invited', label: 'Sem ativar', count: partnerOnboardingMetrics.invited },
     { id: 'active', label: 'Ativos', count: partnerOnboardingMetrics.active },
-    { id: 'rejected', label: 'Recusados', count: [...(data.partnerRequests || []), ...(data.storeRequests || [])].filter((request: any) => String(request.status || '').toLowerCase() === 'rejected').length },
+    { id: 'rejected', label: 'Recusados', count: [...(data.partnerRequests || []), ...(data.storeRequests || []).filter((request: any) => !isClaimScopedStoreRequest(request))].filter((request: any) => String(request.status || '').toLowerCase() === 'rejected').length },
   ], [data.partnerRequests, data.storeRequests, partnerOnboardingMetrics]);
 
   const partnerRequestStateOptions = useMemo(() => {
     const counts = new Map<string, number>();
-    [...(data.partnerRequests || []), ...(data.storeRequests || [])].forEach((request: any) => {
+    const visibleStoreRequests = (data.storeRequests || []).filter((request: any) => !isClaimScopedStoreRequest(request));
+    [...(data.partnerRequests || []), ...visibleStoreRequests].forEach((request: any) => {
       const state = requestBoardState(request);
       if (!state) return;
       counts.set(state, (counts.get(state) || 0) + 1);
     });
     return [
-      { id: 'all', label: 'Todos', count: (data.partnerRequests || []).length + (data.storeRequests || []).length },
+      { id: 'all', label: 'Todos', count: (data.partnerRequests || []).length + visibleStoreRequests.length },
       ...Array.from(counts.entries())
         .sort(([left], [right]) => left.localeCompare(right, 'pt-BR'))
         .map(([state, count]) => ({ id: state, label: state, count })),
@@ -1055,7 +1071,7 @@ export function SuperAdminDestinations() {
       counts.all += 1;
       counts[requestBoardType(request, 'partner')] += 1;
     });
-    (data.storeRequests || []).forEach((request: any) => {
+    (data.storeRequests || []).filter((request: any) => !isClaimScopedStoreRequest(request)).forEach((request: any) => {
       counts.all += 1;
       counts[requestBoardType(request, 'store')] += 1;
     });
@@ -1113,7 +1129,7 @@ export function SuperAdminDestinations() {
       }
     });
 
-    (data.storeRequests || []).forEach((request: any) => {
+    (data.storeRequests || []).filter((request: any) => !isClaimScopedStoreRequest(request)).forEach((request: any) => {
       if (!requestBoardMatchesAdvancedFilters(request, 'store', partnerRequestFilter, partnerRequestStateFilter, partnerRequestTypeFilter, partnerRequestSearch)) return;
       const place = request.hospitalityPlace || placeById.get(String(request.hospitalityPlaceId || '')) || {};
       const destination = request.destination || place.destination || destinationById.get(String(request.destinationId || place.destinationId || '')) || {};
@@ -1648,6 +1664,10 @@ export function SuperAdminDestinations() {
         claimVerified: status === 'approved' && isClaim ? true : undefined,
         reviewNote: normalizedReviewNote || undefined,
       });
+      const actionLabel = status === 'approved' ? 'aprovada' : 'recusada';
+      const emailTarget = request.responsibleEmail || request.createdPartnerAccount?.email || request.store?.owner?.email || 'o parceiro';
+      setInviteFeedback(`Solicitação ${actionLabel}. O aviso por e-mail foi enviado para ${emailTarget}.`);
+      window.setTimeout(() => setInviteFeedback(''), 4200);
       await refreshAdminData(selectedDestinationId);
       setSelectedPartnerRequest(null);
       setPartnerReviewNotes((current) => {
@@ -2612,16 +2632,18 @@ export function SuperAdminDestinations() {
           {request.store ? (
             <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-emerald-700">
               <Buildings size={12} weight="fill" />
-              Converte em loja: {request.store.name}
+              Serviço virando loja: {request.store.name}
             </div>
           ) : null}
           {isPartnerClaimRequest(request) ? (
             <div className="mt-2 rounded-2xl border border-amber-200 bg-white/72 p-3 text-[11px] font-bold leading-relaxed text-amber-800">
               <span className="mb-1 flex items-center gap-1 font-black uppercase tracking-[0.08em]">
                 <ShieldCheck size={13} weight="fill" />
-                Verificação obrigatória
+                {request.storeId && request.claimedListingId ? 'Aprovação única da conversão' : 'Verificação obrigatória'}
               </span>
-              Vai liberar edição de <strong>{claimedResourceLabel(request)}</strong>. Confirme titularidade pelo contato oficial do cadastro antes de aprovar.
+              {request.storeId && request.claimedListingId
+                ? <>Aprovar aqui libera a loja nos chalés selecionados e evita aprovar vínculo por vínculo.</>
+                : <>Vai liberar edição de <strong>{claimedResourceLabel(request)}</strong>. Confirme titularidade pelo contato oficial do cadastro antes de aprovar.</>}
             </div>
           ) : null}
           {partnerAccessLabel(request) ? (
@@ -2783,10 +2805,13 @@ export function SuperAdminDestinations() {
     ];
     const account = request.createdPartnerAccount || {};
     const reviewNoteValue = partnerReviewNotes[request.id] ?? request.reviewNote ?? '';
+    const reviewNoteTrimmedLength = String(reviewNoteValue || '').trim().length;
     const storeSummary = request.store || {};
     const resourceSummary = request.claimedListing || request.claimedHospitalityPlace || {};
     const storeName = storeSummary.name || request.name || 'Loja solicitante';
     const resourceName = resourceSummary.title || resourceSummary.name || claimedResourceLabel(request);
+    const isStoreListingClaim = Boolean(request.storeId && request.claimedListingId);
+    const currentRequestStatus = String(request.status || 'pending').toLowerCase();
     const storeLogoUrl = resolveAssetUrl(storeSummary?.settings?.logoUrl || request.logoUrl || request.imageUrl || '') || getStoreAvatarUrl(storeSummary.slug || request.storeId, storeName);
     const resourceImageUrl = imageFor(resourceSummary || request);
     const requestedPlaces = Array.isArray(request.requestedHospitalityPlaces) && request.requestedHospitalityPlaces.length
@@ -2803,7 +2828,9 @@ export function SuperAdminDestinations() {
               </p>
               <h3 className="mt-3 break-words text-2xl font-black tracking-[-0.04em] text-slate-950">{request.name}</h3>
               <p className="mt-1 text-sm font-semibold text-slate-500">
-                Revise contato, titularidade e divergências antes de liberar edição do perfil público.
+                {request.storeId && request.claimedListingId
+                  ? 'Uma única aprovação converte o serviço em loja e libera todos os chalés selecionados.'
+                  : 'Revise contato, titularidade e divergências antes de liberar edição do perfil público.'}
               </p>
             </div>
             <button type="button" onClick={() => setSelectedPartnerRequest(null)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-600">
@@ -2861,7 +2888,7 @@ export function SuperAdminDestinations() {
             <div className="grid gap-3 md:grid-cols-4">
               {[
                 { label: 'Status', value: requestStatusLabel(request.status) },
-                { label: 'Acesso', value: partnerAccessLabel(request) || 'Ainda não liberado' },
+                { label: isStoreListingClaim ? 'Decisão' : 'Acesso', value: partnerAccessLabel(request) || 'Ainda não liberado' },
                 { label: 'Responsável', value: request.responsibleName || 'Não informado' },
                 { label: 'E-mail', value: request.responsibleEmail || account.email || 'Não informado' },
                 ...(request.store ? [{ label: 'Loja criada', value: request.store.name || request.store.slug || request.storeId }] : []),
@@ -2880,7 +2907,9 @@ export function SuperAdminDestinations() {
                   Conferência antifraude obrigatória
                 </p>
                 <p className="mt-2">
-                  Antes de aprovar, confirme com o contato oficial do cadastro atual que <strong>{request.responsibleName || request.responsibleEmail}</strong> pode assumir <strong>{claimedResourceLabel(request)}</strong>.
+                  {request.storeId && request.claimedListingId
+                    ? <>Antes de aprovar, confirme que <strong>{storeName}</strong> realmente pode assumir <strong>{claimedResourceLabel(request)}</strong>. A aprovação libera a loja nos chalés selecionados e desativa o serviço antigo.</>
+                    : <>Antes de aprovar, confirme com o contato oficial do cadastro atual que <strong>{request.responsibleName || request.responsibleEmail}</strong> pode assumir <strong>{claimedResourceLabel(request)}</strong>.</>}
                 </p>
               </div>
             ) : null}
@@ -2895,15 +2924,19 @@ export function SuperAdminDestinations() {
                   value={reviewNoteValue}
                   onChange={(event) => setPartnerReviewNotes((current) => ({ ...current, [request.id]: event.target.value }))}
                   rows={3}
+                  maxLength={600}
                   placeholder={isPartnerClaimRequest(request)
                     ? 'Ex.: confirmei pelo WhatsApp oficial do cadastro em 31/05 e o responsável autorizou o acesso.'
                     : 'Observação interna opcional sobre a aprovação ou recusa.'}
                   className="mt-3 min-h-24 w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886] focus:bg-white focus:ring-4 focus:ring-[#336886]/10"
                 />
-                <span className="mt-2 block text-[11px] font-bold text-slate-500">
-                  {isPartnerClaimRequest(request)
-                    ? 'Obrigatório para assumir perfil existente. Esse texto fica salvo no histórico da solicitação.'
-                    : 'Opcional, mas recomendado para manter a operação auditável.'}
+                <span className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-slate-500">
+                  <span className={isPartnerClaimRequest(request) && reviewNoteTrimmedLength < 12 ? 'text-amber-700' : ''}>
+                    {isPartnerClaimRequest(request)
+                      ? `Obrigatório: escreva pelo menos 12 caracteres (${reviewNoteTrimmedLength}/12).`
+                      : 'Opcional, mas recomendado para manter a operação auditável.'}
+                  </span>
+                  <span>{String(reviewNoteValue || '').length}/600</span>
                 </span>
               </label>
             ) : request.reviewNote ? (
@@ -2932,11 +2965,27 @@ export function SuperAdminDestinations() {
             </div>
 
             <div className="mt-4 grid gap-3 md:grid-cols-3">
-              {[
-                { label: 'Criada em', value: formatRequestDate(request.createdAt) || 'Não informado' },
-                { label: 'Convite enviado', value: formatRequestDate(account.invitedAt) || (request.createdPartnerAccountId ? 'Gerado' : 'Ainda não') },
-                { label: 'Ativação', value: formatRequestDate(account.activatedAt) || (partnerAccountStatus(request) === 'active' ? 'Ativo' : 'Pendente') },
-              ].map((item) => (
+              {(
+                isStoreListingClaim
+                  ? [
+                      { label: 'Criada em', value: formatRequestDate(request.createdAt) || 'Não informado' },
+                      {
+                        label: 'Análise',
+                        value:
+                          currentRequestStatus === 'approved'
+                            ? `Aprovada em ${formatRequestDate(request.reviewedAt) || 'data não registrada'}`
+                            : currentRequestStatus === 'rejected'
+                              ? `Recusada em ${formatRequestDate(request.reviewedAt) || 'data não registrada'}`
+                              : 'Aguardando Super Admin',
+                      },
+                      { label: 'Chalés selecionados', value: requestedPlaces.length ? `${requestedPlaces.length} vínculo(s) nesta solicitação` : 'Não informado' },
+                    ]
+                  : [
+                      { label: 'Criada em', value: formatRequestDate(request.createdAt) || 'Não informado' },
+                      { label: 'Convite enviado', value: formatRequestDate(account.invitedAt) || (request.createdPartnerAccountId ? 'Gerado' : 'Ainda não') },
+                      { label: 'Ativação', value: formatRequestDate(account.activatedAt) || (partnerAccountStatus(request) === 'active' ? 'Ativo' : 'Pendente') },
+                    ]
+              ).map((item) => (
                 <div key={item.label} className="rounded-[1.25rem] border border-slate-100 bg-white p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.35)]">
                   <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{item.label}</p>
                   <p className="mt-1 text-sm font-black text-slate-800">{item.value}</p>

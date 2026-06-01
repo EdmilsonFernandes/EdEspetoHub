@@ -296,9 +296,11 @@ export class DestinationService {
       return acc;
     }, new Map<string, any[]>());
     const storeRequestsByPartnerRequest = new Map<string, any[]>();
+    const partnerRequestsById = new Map<string, any>();
     for (const request of partnerRequests) {
       const requestId = String(request?.id || '');
       if (!requestId) continue;
+      partnerRequestsById.set(requestId, request);
       const linkedRequests = storeRequests.filter((storeRequest: any) =>
         String(storeRequest?.storeId || '') === String(request?.storeId || '') &&
         String(storeRequest?.message || '').includes(requestId)
@@ -318,7 +320,16 @@ export class DestinationService {
         ...request,
         requestedStoreRequests: storeRequestsByPartnerRequest.get(String(request?.id || '')) || [],
       })),
-      storeRequests: storeRequests.map((request) => this.toPublicStoreRequest(request)),
+      storeRequests: storeRequests.map((request) => {
+        const parentPartnerRequestId = this.listingClaimRequestIdFromStoreRequest(request);
+        const parentPartnerRequest = parentPartnerRequestId ? partnerRequestsById.get(parentPartnerRequestId) : null;
+        return this.toPublicStoreRequest({
+          ...request,
+          parentPartnerRequestId: parentPartnerRequest?.id || parentPartnerRequestId || null,
+          parentPartnerRequestStatus: parentPartnerRequest?.status || null,
+          parentPartnerRequestName: parentPartnerRequest?.name || parentPartnerRequest?.claimedListing?.title || null,
+        });
+      }),
       stores: stores.map((store: any) => this.toPublicStoreSummary(store)),
     };
   }
@@ -1121,6 +1132,27 @@ export class DestinationService {
     (request as any).store = store;
   }
 
+  private async rejectStoreListingClaim(request: any, reviewedBy?: string, reviewNote?: string | null) {
+    const storeId = toOptionalText(request?.storeId);
+    const requestId = toOptionalText(request?.id);
+    if (!storeId || !requestId) return;
+    const scopedRequests = await this.repository.listStoreRequestsByStoreAndMessageToken(storeId, requestId);
+    for (const storeRequest of scopedRequests) {
+      if (String(storeRequest.status || '').toLowerCase() === 'approved') continue;
+      storeRequest.status = 'rejected';
+      storeRequest.reviewNote = reviewNote || 'Solicitação principal recusada na validação de posse.';
+      storeRequest.reviewedBy = reviewedBy || null;
+      storeRequest.reviewedAt = new Date();
+      await this.repository.saveStoreRequest(storeRequest);
+    }
+  }
+
+  private listingClaimRequestIdFromStoreRequest(request: any) {
+    const message = String(request?.message || '');
+    const match = message.match(/\bClaim\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/i);
+    return match?.[1] || null;
+  }
+
   private claimHospitalityPlaceNames(request: any) {
     const fromLinkedRequests = (Array.isArray(request?.requestedStoreRequests) ? request.requestedStoreRequests : [])
       .map((item: any) => item?.hospitalityPlace?.name)
@@ -1252,6 +1284,13 @@ export class DestinationService {
         (request as any).createdHospitalityPlace = undefined;
         (request as any).createdPartnerAccount = undefined;
       }
+    } else if (
+      status === 'rejected' &&
+      request.status !== 'rejected' &&
+      request.storeId &&
+      request.claimedListingId
+    ) {
+      await this.rejectStoreListingClaim(request, reviewedBy, reviewNote);
     }
     request.status = status;
     request.reviewNote = reviewNote;
@@ -1301,6 +1340,10 @@ export class DestinationService {
   async adminReviewStoreRequest(requestId: string, payload: any, reviewedBy?: string) {
     const request = await this.repository.findStoreRequestById(requestId);
     if (!request) throw new AppError('DEST-011', 404);
+    const parentPartnerRequestId = this.listingClaimRequestIdFromStoreRequest(request);
+    if (parentPartnerRequestId) {
+      throw new AppError('DPARTNER-015', 400, { parentPartnerRequestId });
+    }
     const status = this.normalizeReviewStatus(payload?.status);
     if (status === 'approved') {
       await this.repository.upsertStoreLink(request.hospitalityPlaceId, request.storeId, {
@@ -1882,6 +1925,9 @@ export class DestinationService {
       deliveryFee: request.deliveryFee != null ? Number(request.deliveryFee) : null,
       estimatedMinutes: request.estimatedMinutes != null ? Number(request.estimatedMinutes) : null,
       reviewNote: request.reviewNote || null,
+      parentPartnerRequestId: request.parentPartnerRequestId || null,
+      parentPartnerRequestStatus: request.parentPartnerRequestStatus || null,
+      parentPartnerRequestName: request.parentPartnerRequestName || null,
       store: request.store ? this.toPublicStoreSummary(request.store) : null,
       hospitalityPlace: request.hospitalityPlace ? this.toPublicPlace(request.hospitalityPlace) : null,
       destination: request.hospitalityPlace?.destination ? this.toPublicDestination(request.hospitalityPlace.destination) : null,

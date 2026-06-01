@@ -550,6 +550,7 @@ export class EmailService {
     const placeNames = Array.isArray(payload.placeNames) && payload.placeNames.length
       ? payload.placeNames.join(', ')
       : 'Conforme seleção aprovada no cadastro';
+    const adminUrl = `${baseUrl}/admin?identifier=${encodeURIComponent(payload.email)}`;
 
     if (payload.approved) {
       await this.sendTemplate(payload.email, 'destination_store_claim_approved', {
@@ -558,7 +559,7 @@ export class EmailService {
         LISTING_NAME: listingName,
         DESTINATION_NAME: destinationName,
         PLACE_NAMES: placeNames,
-        ADMIN_URL: `${baseUrl}/admin`,
+        ADMIN_URL: adminUrl,
       }, {
         requestId: payload.requestId || null,
         storeName,

@@ -907,6 +907,19 @@ describe('Destination Hub', () => {
 
     expect(placeRes.status).toBe(201);
 
+    const secondPlaceRes = await api
+      .post('/api/admin/hospitality-places')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        name: `Pousada Captada ${suffix}`,
+        slug: `pousada-captada-${suffix}`,
+        type: 'POUSADA',
+        address: 'Rua do convite, 20',
+      });
+
+    expect(secondPlaceRes.status).toBe(201);
+
     const listingRes = await api
       .post('/api/admin/destination-listings')
       .set('Authorization', `Bearer ${platformToken}`)
@@ -934,8 +947,8 @@ describe('Destination Hub', () => {
         destinationName: destinationRes.body.name,
         listingTitle: listingRes.body.title,
         destinationDeliveryMode: 'selected',
-        destinationHospitalityPlaceIds: [placeRes.body.id],
-        destinationHospitalityPlaceNames: [placeRes.body.name],
+        destinationHospitalityPlaceIds: [placeRes.body.id, secondPlaceRes.body.id],
+        destinationHospitalityPlaceNames: [placeRes.body.name, secondPlaceRes.body.name],
       },
     });
 
@@ -959,8 +972,8 @@ describe('Destination Hub', () => {
       source: 'destination_listing_claim',
       destinationListingId: listingRes.body.id,
       destinationDeliveryMode: 'selected',
-      destinationHospitalityPlaceIds: [placeRes.body.id],
-      destinationHospitalityPlaceNames: [placeRes.body.name],
+      destinationHospitalityPlaceIds: [placeRes.body.id, secondPlaceRes.body.id],
+      destinationHospitalityPlaceNames: [placeRes.body.name, secondPlaceRes.body.name],
     }));
 
     const claimRows = await AppDataSource.query(
@@ -984,15 +997,33 @@ describe('Destination Hub', () => {
 
     const storeRequestRows = await AppDataSource.query(
       `
-        SELECT status, store_id, hospitality_place_id, message
+        SELECT id, status, store_id, hospitality_place_id, message
         FROM destination_store_requests
-        WHERE store_id = $1 AND hospitality_place_id = $2
+        WHERE store_id = $1
+        ORDER BY created_at ASC
       `,
-      [claimedStore.body.store.id, placeRes.body.id]
+      [claimedStore.body.store.id]
     );
-    expect(storeRequestRows).toHaveLength(1);
-    expect(storeRequestRows[0].status).toBe('pending');
-    expect(storeRequestRows[0].message).toContain(claimRows[0].id);
+    expect(storeRequestRows).toHaveLength(2);
+    expect(storeRequestRows.map((row: any) => row.hospitality_place_id).sort()).toEqual([placeRes.body.id, secondPlaceRes.body.id].sort());
+    expect(storeRequestRows.every((row: any) => row.status === 'pending')).toBe(true);
+    expect(storeRequestRows.every((row: any) => String(row.message || '').includes(claimRows[0].id))).toBe(true);
+
+    const overviewBeforeReviewRes = await api
+      .get('/api/admin/destinations/manage')
+      .set('Authorization', `Bearer ${platformToken}`);
+    expect(overviewBeforeReviewRes.status).toBe(200);
+    const overviewClaim = overviewBeforeReviewRes.body.partnerRequests.find((request: any) => request.id === claimRows[0].id);
+    expect(overviewClaim.requestedHospitalityPlaces.map((place: any) => place.id).sort()).toEqual([placeRes.body.id, secondPlaceRes.body.id].sort());
+    const overviewChildRequests = overviewBeforeReviewRes.body.storeRequests.filter((request: any) => request.parentPartnerRequestId === claimRows[0].id);
+    expect(overviewChildRequests).toHaveLength(2);
+
+    const childReviewRes = await api
+      .patch(`/api/admin/destination-store-requests/${storeRequestRows[0].id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ status: 'approved' });
+    expect(childReviewRes.status).toBe(400);
+    expect(childReviewRes.body.code).toBe('DPARTNER-015');
 
     const pendingStoreRows = await AppDataSource.query(
       `SELECT open FROM stores WHERE id = $1`,
@@ -1051,13 +1082,7 @@ describe('Destination Hub', () => {
     }));
     expect(validationRes.body.createdPartnerAccountId).toBeNull();
 
-    const claimApprovalLogs = await AppDataSource.query(
-      `SELECT to_email, status
-         FROM email_send_logs
-        WHERE template_key = $1
-          AND metadata->>'requestId' = $2`,
-      ['destination_store_claim_approved', claimRows[0].id]
-    );
+    const claimApprovalLogs = await waitForEmailLog('destination_store_claim_approved', claimRows[0].id);
     expect(claimApprovalLogs.map((row: any) => String(row.to_email || '').toLowerCase())).toContain(claimedStore.email);
 
     const approvedAdminLoginRes = await api
@@ -1090,11 +1115,12 @@ describe('Destination Hub', () => {
     expect(approvedStoreRows[0].open).toBe(true);
 
     const approvedStoreRequestRows = await AppDataSource.query(
-      `SELECT status, reviewed_at FROM destination_store_requests WHERE store_id = $1 AND hospitality_place_id = $2`,
-      [claimedStore.body.store.id, placeRes.body.id]
+      `SELECT status, reviewed_at FROM destination_store_requests WHERE store_id = $1 ORDER BY created_at ASC`,
+      [claimedStore.body.store.id]
     );
-    expect(approvedStoreRequestRows[0].status).toBe('approved');
-    expect(approvedStoreRequestRows[0].reviewed_at).toBeTruthy();
+    expect(approvedStoreRequestRows).toHaveLength(2);
+    expect(approvedStoreRequestRows.every((row: any) => row.status === 'approved')).toBe(true);
+    expect(approvedStoreRequestRows.every((row: any) => row.reviewed_at)).toBe(true);
 
     const validatedPublicRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}`);
     expect(validatedPublicRes.status).toBe(200);
@@ -1110,5 +1136,118 @@ describe('Destination Hub', () => {
       slug: claimedStore.body.store.slug,
       name: listingRes.body.title,
     }));
+
+    const secondPlacePublicRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}/hospitality/${secondPlaceRes.body.slug}`);
+    expect(secondPlacePublicRes.status).toBe(200);
+    expect(secondPlacePublicRes.body.stores.some((link: any) => link.store?.id === claimedStore.body.store.id)).toBe(true);
+  });
+
+  it('rejects a destination listing store claim as one review and notifies the store owner', async () => {
+    const suffix = `${Date.now()}-reject`;
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        name: `Destino Recusa ${suffix}`,
+        slug: `destino-recusa-${suffix}`,
+        city: 'São Bento do Sapucaí',
+        state: 'SP',
+      });
+    expect(destinationRes.status).toBe(201);
+
+    const placeRes = await api
+      .post('/api/admin/hospitality-places')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        name: `Chalé Recusa ${suffix}`,
+        slug: `chale-recusa-${suffix}`,
+        type: 'CHALE',
+        address: 'Estrada da recusa, 10',
+      });
+    expect(placeRes.status).toBe(201);
+
+    const listingRes = await api
+      .post('/api/admin/destination-listings')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        title: `Serviço Recusa ${suffix}`,
+        category: 'RESTAURANTE_VISITAR',
+        whatsapp: '5512988888888',
+        ctaType: 'WHATSAPP',
+        ctaUrl: '5512988888888',
+      });
+    expect(listingRes.status).toBe(201);
+
+    const claimedStore = await registerStore({
+      storeName: listingRes.body.title,
+      city: 'São Bento do Sapucaí',
+      state: 'SP',
+      acquisitionAttribution: {
+        source: 'destination_listing_claim',
+        destinationListingId: listingRes.body.id,
+        destinationId: destinationRes.body.id,
+        destinationSlug: destinationRes.body.slug,
+        destinationName: destinationRes.body.name,
+        listingTitle: listingRes.body.title,
+        destinationDeliveryMode: 'selected',
+        destinationHospitalityPlaceIds: [placeRes.body.id],
+        destinationHospitalityPlaceNames: [placeRes.body.name],
+      },
+    });
+    expect(claimedStore.res.status).toBe(201);
+
+    const verificationCode = await findLatestStoreVerificationCode(claimedStore.email);
+    const verifyRes = await api
+      .post('/api/auth/verify-email')
+      .send({ email: claimedStore.email, token: verificationCode });
+    expect(verifyRes.status).toBe(200);
+
+    const claimRows = await AppDataSource.query(
+      `
+        SELECT id, status
+        FROM destination_partner_requests
+        WHERE store_id = $1 AND claimed_listing_id = $2
+      `,
+      [claimedStore.body.store.id, listingRes.body.id]
+    );
+    expect(claimRows).toHaveLength(1);
+
+    const rejectionRes = await api
+      .patch(`/api/admin/destination-partner-requests/${claimRows[0].id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({
+        status: 'rejected',
+        reviewNote: 'Não foi possível confirmar a titularidade pelo contato oficial informado.',
+      });
+    expect(rejectionRes.status, JSON.stringify(rejectionRes.body)).toBe(200);
+    expect(rejectionRes.body.status).toBe('rejected');
+
+    const claimRejectionLogs = await waitForEmailLog('destination_store_claim_rejected', claimRows[0].id);
+    expect(claimRejectionLogs.map((row: any) => String(row.to_email || '').toLowerCase())).toContain(claimedStore.email);
+
+    const childRequestRows = await AppDataSource.query(
+      `SELECT status, review_note, reviewed_at FROM destination_store_requests WHERE store_id = $1`,
+      [claimedStore.body.store.id]
+    );
+    expect(childRequestRows).toHaveLength(1);
+    expect(childRequestRows[0].status).toBe('rejected');
+    expect(childRequestRows[0].reviewed_at).toBeTruthy();
+
+    const listingRows = await AppDataSource.query(
+      `SELECT active, store_id FROM destination_listings WHERE id = $1`,
+      [listingRes.body.id]
+    );
+    expect(listingRows[0]).toEqual(expect.objectContaining({
+      active: true,
+      store_id: null,
+    }));
+
+    const blockedAdminLoginRes = await api
+      .post('/api/auth/admin-login')
+      .send({ identifier: claimedStore.email, password: claimedStore.password });
+    expect(blockedAdminLoginRes.status).toBe(409);
+    expect(blockedAdminLoginRes.body.code).toBe('AUTH-029');
   });
 });
