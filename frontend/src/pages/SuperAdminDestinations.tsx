@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bed, Buildings, ChartBar, ChatCircleText, CheckCircle, ClockCountdown, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, ShieldCheck, Sparkle, Trash, UploadSimple, WarningCircle, X } from '@phosphor-icons/react';
+import { Bed, Buildings, CaretDown, ChartBar, ChatCircleText, CheckCircle, ClockCountdown, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, ShieldCheck, Sparkle, Trash, UploadSimple, WarningCircle, X } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
@@ -713,6 +713,8 @@ export function SuperAdminDestinations() {
   const [partnerRequestStateFilter, setPartnerRequestStateFilter] = useState('all');
   const [partnerRequestTypeFilter, setPartnerRequestTypeFilter] = useState<'all' | 'hospitality' | 'service' | 'store' | 'claim'>('all');
   const [partnerRequestSearch, setPartnerRequestSearch] = useState('');
+  const [expandedRequestGroups, setExpandedRequestGroups] = useState<Record<string, boolean>>({});
+  const [expandedRequestSections, setExpandedRequestSections] = useState<Record<string, boolean>>({});
   const [selectedPartnerRequest, setSelectedPartnerRequest] = useState<any | null>(null);
   const [partnerReviewNotes, setPartnerReviewNotes] = useState<Record<string, string>>({});
 
@@ -2691,14 +2693,35 @@ export function SuperAdminDestinations() {
       )}
     </article>
   );
-  const renderRequestSection = (title: string, subtitle: string, icon: any, items: any[], renderCard: (request: any) => any) => {
+  const renderRequestSection = (
+    title: string,
+    subtitle: string,
+    icon: any,
+    items: any[],
+    renderCard: (request: any) => any,
+    options: any = {}
+  ) => {
     const Icon = icon;
     const pendingCount = items.filter((request) => isPendingRequest(request.status)).length;
+    const isOpen = options.open === true;
+    const totalCount = items.length;
     return (
-      <section className="rounded-[1.45rem] border border-slate-100 bg-white/78 p-3 shadow-[0_16px_36px_-30px_rgba(15,23,42,0.35)]">
-        <div className="flex items-start justify-between gap-3">
+      <section className={`rounded-[1.45rem] border p-2.5 transition-all ${
+        isOpen
+          ? 'border-[#336886]/18 bg-white shadow-[0_18px_42px_-34px_rgba(15,23,42,0.48)]'
+          : 'border-slate-100 bg-white/72 shadow-[0_14px_32px_-30px_rgba(15,23,42,0.28)]'
+      }`}>
+        <button
+          type="button"
+          onClick={options.onToggle}
+          aria-expanded={isOpen}
+          aria-label={`${isOpen ? 'Recolher' : 'Abrir'} ${title}${options.groupName ? ` de ${options.groupName}` : ''}`}
+          className="flex w-full items-start justify-between gap-3 rounded-[1.2rem] px-1.5 py-1 text-left transition active:scale-[0.99]"
+        >
           <div className="flex min-w-0 items-start gap-2.5">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-[#EEF6F4] text-[#336886]">
+            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-2xl transition ${
+              isOpen ? 'bg-[#153A4C] text-white' : 'bg-[#EEF6F4] text-[#336886]'
+            }`}>
               <Icon size={18} weight="duotone" />
             </span>
             <div className="min-w-0">
@@ -2706,19 +2729,38 @@ export function SuperAdminDestinations() {
               <p className="mt-0.5 text-xs font-semibold text-slate-500">{subtitle}</p>
             </div>
           </div>
-          <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${
-            pendingCount ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'
-          }`}>
-            {pendingCount ? `${pendingCount} pend.` : `${items.length} total`}
-          </span>
-        </div>
-        <div className={`mt-3 grid gap-2.5 ${items.length > 8 ? 'max-h-[min(64vh,34rem)] overflow-y-auto pr-1' : ''}`}>
-          {items.length ? items.map(renderCard) : (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-sm font-semibold text-slate-500">
-              Nenhuma solicitação nesta categoria.
-            </div>
-          )}
-        </div>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-500">
+              {totalCount} total
+            </span>
+            <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${
+              pendingCount ? 'bg-amber-100 text-amber-700' : 'bg-emerald-50 text-emerald-700'
+            }`}>
+              {pendingCount ? `${pendingCount} pend.` : 'Ok'}
+            </span>
+            <CaretDown size={16} weight="bold" className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          </div>
+        </button>
+        {isOpen ? (
+          <div className={`mt-3 grid gap-2.5 ${items.length > 8 ? 'max-h-[min(64vh,34rem)] overflow-y-auto pr-1' : ''}`}>
+            {items.length ? items.map(renderCard) : (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-sm font-semibold text-slate-500">
+                Nenhuma solicitação nesta categoria.
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="mt-2 flex flex-wrap items-center gap-2 px-1.5 pb-1">
+            <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">
+              Toque para abrir
+            </span>
+            {pendingCount ? (
+              <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-amber-700">
+                Priorizar pendências
+              </span>
+            ) : null}
+          </div>
+        )}
       </section>
     );
   };
@@ -2930,7 +2972,7 @@ export function SuperAdminDestinations() {
   return (
     <AdminLayout contextLabel="Destinos" showHeader={false}>
       <div className="space-y-5">
-        <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/82 backdrop-blur-2xl border-b border-slate-200/70 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.45)]">
+        <div className="hidden lg:block sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/82 backdrop-blur-2xl border-b border-slate-200/70 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.45)]">
           <div className="rounded-[1.7rem] border border-white/80 bg-white/86 p-2.5 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.5)] ring-1 ring-slate-100/80 backdrop-blur-xl">
             <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
               {superAdminGroups.map(({ id, label, subtitle, icon: Icon, target }) => {
@@ -4298,64 +4340,105 @@ export function SuperAdminDestinations() {
 
             {requestBoard.length ? (
               <div className="grid gap-4">
-                {requestBoard.map((group) => (
-                  <article key={group.id} className="overflow-hidden rounded-[1.9rem] border border-slate-200 bg-slate-50/70 p-3 shadow-[0_22px_56px_-44px_rgba(15,23,42,0.48)]">
-                    <div className="rounded-[1.55rem] border border-white bg-white p-4 shadow-[0_14px_36px_-32px_rgba(15,23,42,0.42)]">
-                      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                        <div className="flex min-w-0 items-center gap-3">
-                          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.25rem] bg-[#153A4C] shadow-[0_16px_34px_-24px_rgba(15,23,42,0.68)]">
-                            <img
-                              src={imageFor(group.destination || group)}
-                              alt={group.name}
-                              className="h-full w-full object-cover"
-                            />
-                            <span className="absolute inset-0 bg-gradient-to-br from-slate-950/5 to-slate-950/28" />
+                {requestBoard.map((group) => {
+                  const defaultGroupOpen = requestBoard.length === 1;
+                  const groupOpen = expandedRequestGroups[group.id] ?? defaultGroupOpen;
+                  const hospitalityKey = `${group.id}:hospitality`;
+                  const servicesKey = `${group.id}:services`;
+                  const storesKey = `${group.id}:stores`;
+                  const sectionOpen = (key: string) => expandedRequestSections[key] === true;
+                  const toggleSection = (key: string) => setExpandedRequestSections((current) => ({ ...current, [key]: !(current[key] === true) }));
+                  return (
+                    <article key={group.id} className={`overflow-hidden rounded-[1.9rem] border p-3 transition-all ${
+                      groupOpen
+                        ? 'border-[#336886]/16 bg-[#EEF6F4]/45 shadow-[0_24px_64px_-44px_rgba(21,58,76,0.55)]'
+                        : 'border-slate-200 bg-slate-50/70 shadow-[0_18px_44px_-38px_rgba(15,23,42,0.36)]'
+                    }`}>
+                      <button
+                        type="button"
+                        onClick={() => setExpandedRequestGroups((current) => ({ ...current, [group.id]: !(current[group.id] ?? defaultGroupOpen) }))}
+                        aria-expanded={groupOpen}
+                        aria-label={`${groupOpen ? 'Recolher' : 'Abrir'} solicitações de ${group.name}`}
+                        className="w-full rounded-[1.55rem] border border-white bg-white p-4 text-left shadow-[0_14px_36px_-32px_rgba(15,23,42,0.42)] transition active:scale-[0.99]"
+                      >
+                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.25rem] bg-[#153A4C] shadow-[0_16px_34px_-24px_rgba(15,23,42,0.68)]">
+                              <img
+                                src={imageFor(group.destination || group)}
+                                alt={group.name}
+                                className="h-full w-full object-cover"
+                              />
+                              <span className="absolute inset-0 bg-gradient-to-br from-slate-950/5 to-slate-950/28" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Fila por destino</p>
+                              <p className="truncate text-lg font-black tracking-[-0.03em] text-slate-950">{group.name}</p>
+                              <p className="text-xs font-bold text-slate-500">
+                                {[group.city, group.state].filter(Boolean).join(' · ') || 'Destino aguardando validação'}
+                              </p>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Fila por destino</p>
-                            <p className="truncate text-lg font-black tracking-[-0.03em] text-slate-950">{group.name}</p>
-                            <p className="text-xs font-bold text-slate-500">
-                              {[group.city, group.state].filter(Boolean).join(' · ') || 'Destino aguardando validação'}
-                            </p>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black text-slate-600">{group.total} na fila</span>
+                            <span className="rounded-full bg-[#EEF6F4] px-3 py-1 text-[11px] font-black text-[#153A4C]">{group.partnerHospitality.length} chalés · {group.partnerServices.length} serviços · {group.storeRequests.length} lojas</span>
+                            <span className={`rounded-full px-3 py-1 text-[11px] font-black ${
+                              group.pending ? 'bg-amber-100 text-amber-700' : 'bg-emerald-50 text-emerald-700'
+                            }`}>
+                              {group.pending ? `${group.pending} pendente(s)` : 'Sem pendência'}
+                            </span>
+                            <span className={`grid h-8 w-8 place-items-center rounded-full border transition ${
+                              groupOpen ? 'border-[#336886]/20 bg-[#153A4C] text-white' : 'border-slate-100 bg-white text-slate-400'
+                            }`}>
+                              <CaretDown size={16} weight="bold" className={`transition-transform ${groupOpen ? 'rotate-180' : ''}`} />
+                            </span>
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black text-slate-600">{group.total} na fila</span>
-                          <span className="rounded-full bg-[#EEF6F4] px-3 py-1 text-[11px] font-black text-[#153A4C]">{group.partnerHospitality.length} chalés · {group.partnerServices.length} serviços · {group.storeRequests.length} lojas</span>
-                          <span className={`rounded-full px-3 py-1 text-[11px] font-black ${
-                            group.pending ? 'bg-amber-100 text-amber-700' : 'bg-emerald-50 text-emerald-700'
-                          }`}>
-                            {group.pending ? `${group.pending} pendente(s)` : 'Sem pendência'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                      </button>
 
-                    <div className="mt-3 grid gap-3 xl:grid-cols-3">
-                      {renderRequestSection(
-                        'Chalés e pousadas',
-                        'Solicitações de hospedagem que viram página pública.',
-                        Bed,
-                        group.partnerHospitality,
-                        renderPartnerRequestCard
-                      )}
-                      {renderRequestSection(
-                        'Serviços e lugares',
-                        'Prestadores, restaurantes e experiências locais.',
-                        Sparkle,
-                        group.partnerServices,
-                        renderPartnerRequestCard
-                      )}
-                      {renderRequestSection(
-                        'Lojas para chalés',
-                        'Lojistas pedindo para atender uma hospedagem.',
-                        Buildings,
-                        group.storeRequests,
-                        renderStoreRequestCard
-                      )}
-                    </div>
-                  </article>
-                ))}
+                      {groupOpen ? (
+                        <div className="mt-3 grid gap-3 xl:grid-cols-3">
+                          {renderRequestSection(
+                            'Chalés e pousadas',
+                            'Solicitações de hospedagem que viram página pública.',
+                            Bed,
+                            group.partnerHospitality,
+                            renderPartnerRequestCard,
+                            {
+                              groupName: group.name,
+                              open: sectionOpen(hospitalityKey),
+                              onToggle: () => toggleSection(hospitalityKey),
+                            }
+                          )}
+                          {renderRequestSection(
+                            'Serviços e lugares',
+                            'Prestadores, restaurantes e experiências locais.',
+                            Sparkle,
+                            group.partnerServices,
+                            renderPartnerRequestCard,
+                            {
+                              groupName: group.name,
+                              open: sectionOpen(servicesKey),
+                              onToggle: () => toggleSection(servicesKey),
+                            }
+                          )}
+                          {renderRequestSection(
+                            'Lojas para chalés',
+                            'Lojistas pedindo para atender uma hospedagem.',
+                            Buildings,
+                            group.storeRequests,
+                            renderStoreRequestCard,
+                            {
+                              groupName: group.name,
+                              open: sectionOpen(storesKey),
+                              onToggle: () => toggleSection(storesKey),
+                            }
+                          )}
+                        </div>
+                      ) : null}
+                    </article>
+                  );
+                })}
               </div>
             ) : (
               <div className="rounded-[1.75rem] border border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">

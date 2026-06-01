@@ -179,6 +179,7 @@ test.describe('Super Admin destinations partners', () => {
 
     await expect(page.getByText('Onboarding de parceiros')).toBeVisible();
     await page.getByRole('button', { name: /Validação de posse/i }).click();
+    await page.getByRole('button', { name: /Abrir Chalés e pousadas de São Francisco Xavier/i }).click();
     await expect(page.getByText('Amerê Chalés Oficial')).toBeVisible();
 
     await page.getByRole('button', { name: /Detalhes e validação/i }).click();
@@ -206,7 +207,13 @@ test.describe('Super Admin destinations partners', () => {
     await page.goto('/superadmin/destinations');
     await page.getByRole('button', { name: /Parceiros/i }).click();
 
+    await expect(page.getByRole('button', { name: /solicitações de São Francisco Xavier/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /solicitações de Gonçalves/i })).toBeVisible();
+    await page.getByRole('button', { name: /solicitações de São Francisco Xavier/i }).click();
+    await page.getByRole('button', { name: /Abrir Chalés e pousadas de São Francisco Xavier/i }).click();
     await expect(page.getByText('Amerê Chalés Oficial')).toBeVisible();
+    await page.getByRole('button', { name: /solicitações de Gonçalves/i }).click();
+    await page.getByRole('button', { name: /Abrir Serviços e lugares de Gonçalves/i }).click();
     await expect(page.getByText('Bistrô da Mantiqueira')).toBeVisible();
 
     await page.getByRole('button', { name: /^MG/i }).click();
