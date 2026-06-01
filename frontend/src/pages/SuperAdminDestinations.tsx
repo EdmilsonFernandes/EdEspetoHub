@@ -256,6 +256,13 @@ const slugifyDestinationName = (value = '') =>
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
 
+const normalizeSearchText = (value: any) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
 const formatPhoneBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
   if (digits.length <= 2) return digits;
@@ -330,6 +337,65 @@ const partnerRequestMatchesFilter = (request: any, filter: string) => {
   if (filter === 'invited') return requestAccessStatus(request) === 'invited';
   if (filter === 'active') return requestAccessStatus(request) === 'active';
   if (filter === 'rejected') return String(request?.status || '').toLowerCase() === 'rejected';
+  return true;
+};
+const requestBoardState = (request: any) =>
+  String(
+    request?.destination?.state ||
+      request?.hospitalityPlace?.destination?.state ||
+      request?.claimedHospitalityPlace?.destination?.state ||
+      request?.claimedListing?.destination?.state ||
+      request?.hospitalityPlace?.state ||
+      request?.claimedHospitalityPlace?.state ||
+      request?.state ||
+      ''
+  )
+    .toUpperCase()
+    .replace(/[^A-Z]/g, '')
+    .slice(0, 2);
+const requestBoardType = (request: any, source: 'partner' | 'store') => {
+  if (source === 'store') return 'store';
+  if (isPartnerClaimRequest(request)) return 'claim';
+  return String(request?.partnerType || '').toUpperCase() === 'SERVICE_PROVIDER' ? 'service' : 'hospitality';
+};
+const requestBoardSearchable = (request: any) =>
+  [
+    request?.name,
+    request?.title,
+    request?.responsibleName,
+    request?.responsibleEmail,
+    request?.responsiblePhone,
+    request?.phone,
+    request?.whatsapp,
+    request?.city,
+    request?.state,
+    request?.destinationName,
+    request?.destination?.name,
+    request?.destination?.city,
+    request?.destination?.state,
+    request?.hospitalityPlace?.name,
+    request?.hospitalityPlace?.city,
+    request?.hospitalityPlace?.state,
+    request?.claimedHospitalityPlace?.name,
+    request?.claimedListing?.title,
+    request?.store?.name,
+    request?.storeName,
+    request?.message,
+  ].filter(Boolean).join(' ');
+const requestBoardMatchesAdvancedFilters = (
+  request: any,
+  source: 'partner' | 'store',
+  statusFilterValue: string,
+  stateFilterValue: string,
+  typeFilterValue: string,
+  queryValue: string
+) => {
+  if (!partnerRequestMatchesFilter(request, statusFilterValue)) return false;
+  const normalizedState = String(stateFilterValue || 'all').toUpperCase();
+  if (normalizedState !== 'ALL' && requestBoardState(request) !== normalizedState) return false;
+  if (typeFilterValue && typeFilterValue !== 'all' && requestBoardType(request, source) !== typeFilterValue) return false;
+  const query = normalizeSearchText(queryValue);
+  if (query && !normalizeSearchText(requestBoardSearchable(request)).includes(query)) return false;
   return true;
 };
 const compactValue = (value: any) => String(value || '').trim() || 'Não informado';
@@ -644,6 +710,9 @@ export function SuperAdminDestinations() {
   const [inviteBatchLoading, setInviteBatchLoading] = useState('');
   const [partnerInviteLinks, setPartnerInviteLinks] = useState<Record<string, string>>({});
   const [partnerRequestFilter, setPartnerRequestFilter] = useState<'all' | 'pending' | 'claim' | 'invited' | 'active' | 'rejected'>('all');
+  const [partnerRequestStateFilter, setPartnerRequestStateFilter] = useState('all');
+  const [partnerRequestTypeFilter, setPartnerRequestTypeFilter] = useState<'all' | 'hospitality' | 'service' | 'store' | 'claim'>('all');
+  const [partnerRequestSearch, setPartnerRequestSearch] = useState('');
   const [selectedPartnerRequest, setSelectedPartnerRequest] = useState<any | null>(null);
   const [partnerReviewNotes, setPartnerReviewNotes] = useState<Record<string, string>>({});
 
@@ -963,6 +1032,40 @@ export function SuperAdminDestinations() {
     { id: 'rejected', label: 'Recusados', count: [...(data.partnerRequests || []), ...(data.storeRequests || [])].filter((request: any) => String(request.status || '').toLowerCase() === 'rejected').length },
   ], [data.partnerRequests, data.storeRequests, partnerOnboardingMetrics]);
 
+  const partnerRequestStateOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    [...(data.partnerRequests || []), ...(data.storeRequests || [])].forEach((request: any) => {
+      const state = requestBoardState(request);
+      if (!state) return;
+      counts.set(state, (counts.get(state) || 0) + 1);
+    });
+    return [
+      { id: 'all', label: 'Todos', count: (data.partnerRequests || []).length + (data.storeRequests || []).length },
+      ...Array.from(counts.entries())
+        .sort(([left], [right]) => left.localeCompare(right, 'pt-BR'))
+        .map(([state, count]) => ({ id: state, label: state, count })),
+    ];
+  }, [data.partnerRequests, data.storeRequests]);
+
+  const partnerRequestTypeOptions = useMemo(() => {
+    const counts = { all: 0, hospitality: 0, service: 0, store: 0, claim: 0 };
+    (data.partnerRequests || []).forEach((request: any) => {
+      counts.all += 1;
+      counts[requestBoardType(request, 'partner')] += 1;
+    });
+    (data.storeRequests || []).forEach((request: any) => {
+      counts.all += 1;
+      counts[requestBoardType(request, 'store')] += 1;
+    });
+    return [
+      { id: 'all', label: 'Tudo', count: counts.all },
+      { id: 'hospitality', label: 'Chalés', count: counts.hospitality },
+      { id: 'service', label: 'Serviços', count: counts.service },
+      { id: 'store', label: 'Lojas', count: counts.store },
+      { id: 'claim', label: 'Posse', count: counts.claim },
+    ].filter((option) => option.id === 'all' || option.count > 0);
+  }, [data.partnerRequests, data.storeRequests]);
+
   const requestBoard = useMemo(() => {
     const destinationById = new Map<string, any>();
     const placeById = new Map<string, any>();
@@ -992,7 +1095,7 @@ export function SuperAdminDestinations() {
     };
 
     (data.partnerRequests || []).forEach((request: any) => {
-      if (!partnerRequestMatchesFilter(request, partnerRequestFilter)) return;
+      if (!requestBoardMatchesAdvancedFilters(request, 'partner', partnerRequestFilter, partnerRequestStateFilter, partnerRequestTypeFilter, partnerRequestSearch)) return;
       const destination = request.destination || destinationById.get(String(request.destinationId || '')) || {};
       const key = String(destination.id || request.destinationId || destination.name || request.destinationName || request.city || 'sem-destino');
       const group = ensureGroup(key, {
@@ -1009,7 +1112,7 @@ export function SuperAdminDestinations() {
     });
 
     (data.storeRequests || []).forEach((request: any) => {
-      if (!partnerRequestMatchesFilter(request, partnerRequestFilter)) return;
+      if (!requestBoardMatchesAdvancedFilters(request, 'store', partnerRequestFilter, partnerRequestStateFilter, partnerRequestTypeFilter, partnerRequestSearch)) return;
       const place = request.hospitalityPlace || placeById.get(String(request.hospitalityPlaceId || '')) || {};
       const destination = request.destination || place.destination || destinationById.get(String(request.destinationId || place.destinationId || '')) || {};
       const key = String(destination.id || request.destinationId || place.destinationId || destination.name || request.destinationName || place.destination?.name || 'sem-destino');
@@ -1049,7 +1152,7 @@ export function SuperAdminDestinations() {
         if (right.pending !== left.pending) return right.pending - left.pending;
         return String(left.name).localeCompare(String(right.name), 'pt-BR');
       });
-  }, [data.destinations, data.partnerRequests, data.places, data.storeRequests, partnerRequestFilter]);
+  }, [data.destinations, data.partnerRequests, data.places, data.storeRequests, partnerRequestFilter, partnerRequestSearch, partnerRequestStateFilter, partnerRequestTypeFilter]);
 
   const stateOptions = useMemo(() => {
     if (Array.isArray(catalog?.states) && catalog.states.length) return catalog.states;
@@ -2412,18 +2515,31 @@ export function SuperAdminDestinations() {
     { id: 'requests', label: 'Parceiros', icon: WarningCircle, badge: metrics.pending },
   ];
   const superAdminGroups = [
-    { id: 'operacional', label: 'Operação', subtitle: 'Resumo, lojas e receita', icon: ChartBar, target: 'executive' },
-    { id: 'plataforma', label: 'Plataforma', subtitle: 'Push, destinos e segurança', icon: Megaphone, target: 'push' },
-    { id: 'tecnico', label: 'Técnico', subtitle: 'Logs, eventos e versões', icon: Cpu, target: 'logs' },
+    { id: 'overview', label: 'Visão geral', subtitle: 'Saúde da plataforma', icon: ChartBar, target: 'executive' },
+    { id: 'operation', label: 'Operação', subtitle: 'Lojas e financeiro', icon: Buildings, target: 'stores' },
+    { id: 'ecosystem', label: 'Ecossistema', subtitle: 'Destinos e chalés', icon: Compass, target: 'destinations' },
+    { id: 'marketing', label: 'Marketing', subtitle: 'Push e campanhas', icon: Megaphone, target: 'push' },
+    { id: 'trust', label: 'Confiança', subtitle: 'KYC e segurança', icon: ShieldCheck, target: 'security' },
+    { id: 'technical', label: 'Técnico', subtitle: 'Logs e versões', icon: Cpu, target: 'logs' },
   ];
   const superAdminPlatformSections = [
+    { id: 'condominiums', label: 'Condomínios', icon: Buildings },
     { id: 'push', label: 'Push', icon: Megaphone },
     { id: 'destinations', label: 'Destinos', icon: Compass },
+    { id: 'home-config', label: 'Banners', icon: ImageSquare },
     { id: 'kyc', label: 'KYC', icon: CheckCircle },
     { id: 'security', label: 'Segurança', icon: WarningCircle },
   ];
   const openSuperAdminSection = (sectionId: string) => {
     if (sectionId === 'destinations') return;
+    if (sectionId === 'condominiums') {
+      navigate('/superadmin/condominiums');
+      return;
+    }
+    if (sectionId === 'home-config') {
+      navigate('/superadmin/home-config');
+      return;
+    }
     sessionStorage.setItem('superadmin:activeSection', sectionId);
     navigate('/superadmin');
   };
@@ -2816,9 +2932,9 @@ export function SuperAdminDestinations() {
       <div className="space-y-5">
         <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/82 backdrop-blur-2xl border-b border-slate-200/70 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.45)]">
           <div className="rounded-[1.7rem] border border-white/80 bg-white/86 p-2.5 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.5)] ring-1 ring-slate-100/80 backdrop-blur-xl">
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
               {superAdminGroups.map(({ id, label, subtitle, icon: Icon, target }) => {
-                const isActiveGroup = id === 'plataforma';
+                const isActiveGroup = id === 'ecosystem';
                 return (
                   <button
                     key={id}
@@ -4096,6 +4212,61 @@ export function SuperAdminDestinations() {
               </div>
             </section>
             <section className="rounded-[1.55rem] border border-slate-200 bg-white/86 p-2 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.45)]">
+              <div className="grid gap-2 p-1 md:grid-cols-[minmax(220px,1fr)_auto] md:items-center">
+                <label className="relative block">
+                  <MagnifyingGlass size={16} weight="bold" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#336886]" />
+                  <input
+                    value={partnerRequestSearch}
+                    onChange={(event) => setPartnerRequestSearch(event.target.value)}
+                    placeholder="Buscar cidade, parceiro, e-mail, loja ou chalé..."
+                    className="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm font-bold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#336886]/35 focus:bg-white focus:ring-4 focus:ring-[#336886]/10"
+                  />
+                </label>
+                <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                  {partnerRequestStateOptions.map((option) => {
+                    const active = String(partnerRequestStateFilter).toUpperCase() === String(option.id).toUpperCase();
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => setPartnerRequestStateFilter(option.id)}
+                        className={`shrink-0 rounded-2xl border px-3.5 py-2 text-xs font-black transition ${
+                          active
+                            ? 'border-[#336886] bg-[#EEF6F4] text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(21,58,76,0.55)]'
+                            : 'border-slate-200 bg-white text-slate-500 hover:text-slate-800'
+                        }`}
+                      >
+                        {option.label}
+                        <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${active ? 'bg-white text-[#153A4C]' : 'bg-slate-50 text-slate-400'}`}>
+                          {option.count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="mt-2 flex gap-2 overflow-x-auto no-scrollbar px-1 pb-1">
+                {partnerRequestTypeOptions.map((option) => {
+                  const active = partnerRequestTypeFilter === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setPartnerRequestTypeFilter(option.id as any)}
+                      className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] transition ${
+                        active
+                          ? 'border-[#153A4C] bg-[#153A4C] text-white'
+                          : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-white hover:text-slate-800'
+                      }`}
+                    >
+                      {option.label}
+                      <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[9px] ${active ? 'bg-white/16 text-white' : 'bg-white text-slate-400'}`}>
+                        {option.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {partnerFilterOptions.map((option) => {
                   const active = partnerRequestFilter === option.id;

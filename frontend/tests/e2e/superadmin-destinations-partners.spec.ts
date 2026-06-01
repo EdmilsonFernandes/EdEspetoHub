@@ -11,6 +11,17 @@ const destination = {
   listingsCount: 1,
 };
 
+const minasDestination = {
+  id: 'dest-mg-e2e',
+  name: 'Gonçalves',
+  slug: 'goncalves',
+  city: 'Gonçalves',
+  state: 'MG',
+  active: true,
+  placesCount: 0,
+  listingsCount: 1,
+};
+
 const claimedPlace = {
   id: 'place-amere-e2e',
   destinationId: destination.id,
@@ -62,18 +73,37 @@ const partnerRequest = {
   reviewedAt: null,
 };
 
+const serviceRequest = {
+  id: 'req-service-mg-e2e',
+  destinationId: minasDestination.id,
+  destination: minasDestination,
+  partnerType: 'SERVICE_PROVIDER',
+  category: 'RESTAURANTE',
+  name: 'Bistrô da Mantiqueira',
+  description: 'Restaurante local interessado em atender hospedagens.',
+  city: 'Gonçalves',
+  state: 'MG',
+  responsibleName: 'Responsável Mantiqueira',
+  responsibleEmail: 'mantiqueira@example.com',
+  responsiblePhone: '5535999999999',
+  message: 'Quero entrar como serviço.',
+  status: 'pending',
+  requestSource: 'destination_listing_interest',
+  createdAt: '2026-05-31T13:00:00.000Z',
+};
+
 const overviewPayload = {
-  destinations: [destination],
+  destinations: [destination, minasDestination],
   places: [claimedPlace],
   listings: [],
-  partnerRequests: [partnerRequest],
+  partnerRequests: [partnerRequest, serviceRequest],
   storeRequests: [],
   stores: [],
 };
 
 const summaryPayload = {
-  destinations: [destination],
-  states: ['SP'],
+  destinations: [destination, minasDestination],
+  states: ['SP', 'MG'],
   categories: [],
   pagination: {
     page: 1,
@@ -170,5 +200,28 @@ test.describe('Super Admin destinations partners', () => {
       claimVerified: true,
       reviewNote: 'Confirmado pelo WhatsApp oficial cadastrado no perfil.',
     });
+  });
+
+  test('filtra solicitações por estado, tipo e busca sem sair do mobile board', async ({ page }) => {
+    await page.goto('/superadmin/destinations');
+    await page.getByRole('button', { name: /Parceiros/i }).click();
+
+    await expect(page.getByText('Amerê Chalés Oficial')).toBeVisible();
+    await expect(page.getByText('Bistrô da Mantiqueira')).toBeVisible();
+
+    await page.getByRole('button', { name: /^MG/i }).click();
+    await expect(page.getByText('Bistrô da Mantiqueira')).toBeVisible();
+    await expect(page.getByText('Amerê Chalés Oficial')).toBeHidden();
+
+    await page.getByRole('button', { name: /^Serviços/i }).click();
+    await expect(page.getByText('Bistrô da Mantiqueira')).toBeVisible();
+
+    await page.getByPlaceholder(/Buscar cidade, parceiro/i).fill('amerê');
+    await expect(page.getByText('Nenhuma solicitação cadastrada')).toBeVisible();
+
+    await page.getByPlaceholder(/Buscar cidade, parceiro/i).fill('');
+    await page.getByRole('button', { name: /^Todos/i }).first().click();
+    await page.getByRole('button', { name: /^Tudo/i }).click();
+    await expect(page.getByText('Amerê Chalés Oficial')).toBeVisible();
   });
 });

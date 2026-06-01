@@ -1,12 +1,20 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Buildings, ChartBar, ChefHat, Compass, CurrencyDollar, DotsThreeCircle, EnvelopeSimple, ImageSquare, Megaphone, Package, RocketLaunch, ShieldCheck, SignOut, Storefront, UserCircle, X } from '@phosphor-icons/react';
+import { ChartBar, ChefHat, CurrencyDollar, DotsThreeCircle, Package, SignOut, UserCircle } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
 import { loadAdminDashboardPage, loadAdminQueuePage, loadStorePage } from '../../utils/adminRoutePrefetch';
-
-const SUPER_ADMIN_ACTIVE_SECTION_KEY = 'superadmin:activeSection';
+import { ContextSideDrawer } from '../common/ContextSideDrawer';
+import { PlatformTrustFooter } from '../common/PlatformTrustFooter';
+import {
+  filterSuperAdminNavigationItems,
+  getSuperAdminGroup,
+  isSuperAdminNavigationItemActive,
+  SUPER_ADMIN_ACTIVE_SECTION_KEY,
+  SUPER_ADMIN_NAV_GROUPS,
+  type SuperAdminNavigationItem,
+} from '../../navigation/superAdminNavigation';
 
 export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => void } = {}) {
   const navigate = useNavigate();
@@ -36,6 +44,7 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
   const [hiddenByCart, setHiddenByCart] = useState(false);
   const [optimisticActiveId, setOptimisticActiveId] = useState('');
   const [superMoreOpen, setSuperMoreOpen] = useState(false);
+  const [superMenuSearch, setSuperMenuSearch] = useState('');
   const [superActiveSection, setSuperActiveSection] = useState(() => {
     if (typeof window === 'undefined') return 'executive';
     return String(sessionStorage.getItem(SUPER_ADMIN_ACTIVE_SECTION_KEY) || 'executive');
@@ -342,21 +351,21 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
       {
         id: 'super-operation',
         label: 'Operação',
-        icon: Storefront,
+        icon: SUPER_ADMIN_NAV_GROUPS.find((group) => group.id === 'operation')?.icon || ChartBar,
         active: path === '/superadmin' && ['rankings', 'stores', 'payments'].includes(superActiveSection),
         onClick: () => openSuperAdminSection('stores'),
       },
       {
-        id: 'super-platform',
-        label: 'Plataforma',
-        icon: Megaphone,
+        id: 'super-marketing',
+        label: 'Marketing',
+        icon: SUPER_ADMIN_NAV_GROUPS.find((group) => group.id === 'marketing')?.icon || ChartBar,
         active:
-          path === '/superadmin' && ['push', 'kyc', 'security'].includes(superActiveSection),
+          path === '/superadmin' && ['push'].includes(superActiveSection),
         onClick: () => openSuperAdminSection('push'),
       },
       {
         id: 'super-more',
-        label: 'Mais',
+        label: 'Menu',
         icon: DotsThreeCircle,
         active:
           superMoreOpen ||
@@ -368,88 +377,75 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
         onClick: () => setSuperMoreOpen((prev) => !prev),
       },
     ];
-    const superMoreItems = [
-      { id: 'super-condominiums', label: 'Condomínios', subtitle: 'Acessos e feiras', icon: Buildings, href: '/superadmin/condominiums', active: path.startsWith('/superadmin/condominiums') },
-      { id: 'super-destinations', label: 'Destinos', subtitle: 'Chalés e serviços', icon: Compass, href: '/superadmin/destinations', active: path.startsWith('/superadmin/destinations') },
-      { id: 'super-home-config', label: 'Banners da Home', subtitle: 'Home e popup', icon: ImageSquare, href: '/superadmin/home-config', active: path.startsWith('/superadmin/home-config') },
-      { id: 'super-email', label: 'E-mails', subtitle: 'Templates e descadastro', icon: EnvelopeSimple, href: '/superadmin/email-templates', active: path.startsWith('/superadmin/email-templates') },
-      { id: 'super-kyc', label: 'KYC entregadores', subtitle: 'Documentos e decisão', icon: ShieldCheck, section: 'kyc', active: path === '/superadmin' && superActiveSection === 'kyc' },
-      { id: 'super-security', label: 'Segurança', subtitle: 'Clientes e bloqueios', icon: ShieldCheck, section: 'security', active: path === '/superadmin' && superActiveSection === 'security' },
-      { id: 'super-versions', label: 'Versões', subtitle: 'Build e commits', icon: RocketLaunch, section: 'versions', active: path === '/superadmin' && superActiveSection === 'versions' },
-      { id: 'super-logout', label: 'Sair', subtitle: 'Encerrar sessão', icon: SignOut, danger: true },
+    const openSuperAdminNavigationItem = (item: SuperAdminNavigationItem) => {
+      setSuperMoreOpen(false);
+      if (item.section) {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(SUPER_ADMIN_ACTIVE_SECTION_KEY, item.section);
+          window.dispatchEvent(new CustomEvent('superadmin:set-section', { detail: { section: item.section } }));
+        }
+        setSuperActiveSection(item.section);
+      }
+      if (item.route) {
+        navigate(item.route);
+        return;
+      }
+      if (item.section && path !== '/superadmin') navigate('/superadmin');
+    };
+    const superMenuActions = [
+      ...filterSuperAdminNavigationItems(superMenuSearch).map((item) => {
+        const Icon = item.icon;
+        const group = getSuperAdminGroup(item.group);
+        const active = isSuperAdminNavigationItemActive(item, path, superActiveSection);
+        return {
+          section: group?.label || 'Super Admin',
+          id: item.id,
+          label: item.label,
+          description: item.description,
+          icon: <Icon size={22} weight={active ? 'fill' : 'duotone'} />,
+          badge: active ? 'Atual' : undefined,
+          badgeTone: 'brand' as const,
+          onClick: () => openSuperAdminNavigationItem(item),
+        };
+      }),
+      {
+        section: 'Conta',
+        id: 'super-logout',
+        label: 'Sair',
+        description: 'Encerrar sessão do Super Admin neste aparelho.',
+        icon: <SignOut size={22} weight="duotone" />,
+        tone: 'danger' as const,
+        onClick: () => {
+          localStorage.removeItem('superAdminToken');
+          localStorage.removeItem('superAdminUser');
+          window.location.assign('/superadmin');
+        },
+      },
     ];
 
     if (hiddenByOverlay) return null;
 
     return (
       <>
-        {superMoreOpen ? (
-          <div className="fixed inset-0 z-[240] bg-slate-950/35 backdrop-blur-[2px]" onClick={() => setSuperMoreOpen(false)}>
-            <div
-              className="absolute inset-x-2 bottom-[calc(env(safe-area-inset-bottom)+5.9rem)] mx-auto max-w-md overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/95 p-3 shadow-[0_26px_70px_-34px_rgba(15,23,42,0.58)] backdrop-blur-2xl"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="mb-2 flex items-center justify-between gap-3 px-1">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Super Admin</p>
-                  <p className="text-sm font-black text-slate-950">Mais opções</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSuperMoreOpen(false)}
-                  className="grid h-9 w-9 place-items-center rounded-full border border-slate-100 bg-slate-50 text-slate-500 active:scale-95"
-                  aria-label="Fechar mais opções"
-                >
-                  <X size={16} weight="bold" />
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {superMoreItems.map((item: any) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        if (item.danger) {
-                          localStorage.removeItem('superAdminToken');
-                          localStorage.removeItem('superAdminUser');
-                          window.location.assign('/superadmin');
-                          return;
-                        }
-                        if (item.href) {
-                          setSuperMoreOpen(false);
-                          navigate(item.href);
-                          return;
-                        }
-                        if (item.section) openSuperAdminSection(item.section);
-                      }}
-                      className={`min-h-[76px] rounded-2xl border p-3 text-left transition active:scale-[0.98] ${
-                        item.active
-                          ? 'border-[#336886]/20 bg-[#336886]/8 text-[#153A4C]'
-                          : item.danger
-                            ? 'border-rose-100 bg-rose-50/80 text-rose-600'
-                            : 'border-slate-100 bg-slate-50/80 text-slate-700 hover:bg-white'
-                      }`}
-                    >
-                      <span className={`mb-2 grid h-8 w-8 place-items-center rounded-xl ${
-                        item.active
-                          ? 'bg-[#153A4C] text-white'
-                          : item.danger
-                            ? 'bg-rose-100 text-rose-600'
-                            : 'bg-white text-[#336886]'
-                      }`}>
-                        <Icon size={17} weight={item.active ? 'fill' : 'duotone'} />
-                      </span>
-                      <span className="block text-xs font-black leading-tight">{item.label}</span>
-                      <span className={`mt-0.5 block text-[10px] font-semibold leading-tight ${item.danger ? 'text-rose-500/75' : 'text-slate-400'}`}>{item.subtitle}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        ) : null}
+        <ContextSideDrawer
+          isOpen={superMoreOpen}
+          onClose={() => setSuperMoreOpen(false)}
+          side="left"
+          theme="client"
+          eyebrow="Master Console"
+          title="Super Admin"
+          subtitle="Busque ou navegue por módulos sem perder o contexto."
+          leading={<img src="/janocaminho.jpg" alt="Já no Caminho" className="h-10 w-10 rounded-[0.95rem] bg-white object-cover" />}
+          badges={[
+            { label: 'Operação', tone: 'brand' },
+            { label: 'Mobile first', tone: 'neutral' },
+          ]}
+          searchValue={superMenuSearch}
+          searchPlaceholder="Buscar módulo, ex: push, destino, e-mail..."
+          onSearchChange={setSuperMenuSearch}
+          actions={superMenuActions}
+          footer={<PlatformTrustFooter compact mode="default" align="left" />}
+        />
 
         <nav
           className="fixed inset-x-0 bottom-0 z-[220] pointer-events-none transition-transform duration-300 ease-in-out flex justify-center"

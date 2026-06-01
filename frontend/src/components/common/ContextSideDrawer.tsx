@@ -33,6 +33,9 @@ type ContextSideDrawerProps = {
   footer?: ReactNode;
   side?: 'left' | 'right';
   theme?: 'client' | 'store' | 'motoboy' | 'default';
+  searchValue?: string;
+  searchPlaceholder?: string;
+  onSearchChange?: (value: string) => void;
 };
 
 export function ContextSideDrawer({
@@ -49,6 +52,9 @@ export function ContextSideDrawer({
   footer,
   side = 'right',
   theme = 'default',
+  searchValue,
+  searchPlaceholder,
+  onSearchChange,
 }: ContextSideDrawerProps) {
   useEffect(() => {
     if (!isOpen) return;
@@ -172,6 +178,7 @@ export function ContextSideDrawer({
 
   return (
     <div
+      aria-hidden={!isOpen}
       className={`fixed inset-0 z-[10040] transition-opacity duration-300 ${
         isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
       }`}
@@ -237,6 +244,20 @@ export function ContextSideDrawer({
             </button>
           </div>
         </div>
+
+        {onSearchChange ? (
+          <div className={`border-b px-4 py-3 ${themeClasses.headerBorder}`}>
+            <label className="block">
+              <span className="sr-only">{searchPlaceholder || 'Buscar'}</span>
+              <input
+                value={searchValue || ''}
+                onChange={(event) => onSearchChange(event.target.value)}
+                placeholder={searchPlaceholder || 'Buscar'}
+                className="h-11 w-full rounded-2xl border border-slate-200/80 bg-white/88 px-3 text-sm font-bold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#336886]/35 focus:ring-4 focus:ring-[#336886]/10"
+              />
+            </label>
+          </div>
+        ) : null}
 
         <SmartDrawerScrollArea
           className="flex-1"

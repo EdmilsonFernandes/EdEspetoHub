@@ -275,34 +275,52 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
 };
 
 const SUPER_ADMIN_SECTIONS = [
-  { id: 'executive', label: 'Resumo',     icon: ChartBar,          group: 'operacional' },
-  { id: 'rankings',  label: 'Rankings',   icon: TrendUp,           group: 'operacional' },
-  { id: 'stores',    label: 'Lojas',      icon: Storefront,        group: 'operacional' },
-  { id: 'payments',  label: 'Pagamentos', icon: CurrencyDollar,    group: 'operacional' },
-  { id: 'push',      label: 'Push',       icon: Megaphone,         group: 'plataforma'  },
-  { id: 'destinations', label: 'Destinos', icon: Compass,           group: 'plataforma'  },
-  { id: 'kyc',       label: 'KYC',        icon: IdentificationCard,group: 'plataforma'  },
-  { id: 'security',  label: 'Segurança',  icon: ShieldCheck,       group: 'plataforma'  },
-  { id: 'logs',      label: 'Logs',       icon: GitCommit,         group: 'tecnico'     },
-  { id: 'events',    label: 'Eventos',    icon: Sparkle,           group: 'tecnico'     },
-  { id: 'versions',  label: 'Versões',    icon: RocketLaunch,      group: 'tecnico'     },
+  { id: 'executive', label: 'Resumo',     icon: ChartBar,          group: 'overview' },
+  { id: 'rankings',  label: 'Rankings',   icon: TrendUp,           group: 'overview' },
+  { id: 'stores',    label: 'Lojas',      icon: Storefront,        group: 'operation' },
+  { id: 'payments',  label: 'Pagamentos', icon: CurrencyDollar,    group: 'operation' },
+  { id: 'destinations', label: 'Destinos', icon: Compass,           group: 'ecosystem' },
+  { id: 'push',      label: 'Push',       icon: Megaphone,         group: 'marketing' },
+  { id: 'kyc',       label: 'KYC',        icon: IdentificationCard,group: 'trust' },
+  { id: 'security',  label: 'Segurança',  icon: ShieldCheck,       group: 'trust' },
+  { id: 'logs',      label: 'Logs',       icon: GitCommit,         group: 'technical' },
+  { id: 'events',    label: 'Eventos',    icon: Sparkle,           group: 'technical' },
+  { id: 'versions',  label: 'Versões',    icon: RocketLaunch,      group: 'technical' },
 ];
 
 const SUPER_ADMIN_SECTION_GROUPS = [
   {
-    id: 'operacional',
-    label: 'Operação',
-    subtitle: 'Resumo, lojas e receita',
+    id: 'overview',
+    label: 'Visão geral',
+    subtitle: 'Saúde da plataforma',
     icon: ChartBar,
   },
   {
-    id: 'plataforma',
-    label: 'Plataforma',
-    subtitle: 'Push, destinos e segurança',
+    id: 'operation',
+    label: 'Operação',
+    subtitle: 'Lojas e financeiro',
+    icon: Storefront,
+  },
+  {
+    id: 'ecosystem',
+    label: 'Ecossistema',
+    subtitle: 'Destinos e chalés',
+    icon: Compass,
+  },
+  {
+    id: 'marketing',
+    label: 'Marketing',
+    subtitle: 'Push e campanhas',
     icon: Megaphone,
   },
   {
-    id: 'tecnico',
+    id: 'trust',
+    label: 'Confiança',
+    subtitle: 'KYC e segurança',
+    icon: ShieldCheck,
+  },
+  {
+    id: 'technical',
     label: 'Técnico',
     subtitle: 'Logs, eventos e versões',
     icon: Cpu,
@@ -1706,7 +1724,7 @@ export function SuperAdmin() {
 
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/82 backdrop-blur-2xl border-b border-slate-200/70 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.45)]">
         <div className="rounded-[1.7rem] border border-white/80 bg-white/86 p-2.5 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.5)] ring-1 ring-slate-100/80 backdrop-blur-xl">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
             {SUPER_ADMIN_SECTION_GROUPS.map(({ id, label, subtitle, icon: Icon }) => {
               const isActiveGroup = activeSuperAdminGroup === id;
               return (
