@@ -983,7 +983,7 @@ export class DestinationService {
       });
     }
 
-    await this.notifyPartnerRequestByEmail({
+    void this.notifyPartnerRequestByEmail({
       requestId: saved.id,
       partnerType: saved.partnerType,
       resourceName: saved.name,
@@ -994,9 +994,28 @@ export class DestinationService {
       city: saved.city || null,
       state: saved.state || null,
       message: saved.message || null,
+    }).catch((error) => {
+      this.log.error('Destination listing claim notification failed', {
+        requestId: saved.id,
+        storeId: store.id,
+        listingId: listing.id,
+        error,
+      });
     });
 
     return this.toPublicPartnerRequest({ ...saved, destination: listing.destination, claimedListing: listing, store });
+  }
+
+  async getStoreListingClaimAccessBlock(storeId: string) {
+    const request = await this.repository.findLatestListingClaimRequestByStoreId(String(storeId || '').trim());
+    if (!request) return null;
+    if (String(request.status || '').toLowerCase() === 'approved') return null;
+    return {
+      requestId: request.id,
+      status: request.status,
+      resourceName: request.name || request.claimedListing?.title || 'serviço',
+      destinationName: request.destination?.name || request.destination?.city || null,
+    };
   }
 
   private async resolveListingClaimTargetPlaceIds(attribution: any, listing: any): Promise<string[]> {
@@ -1053,6 +1072,10 @@ export class DestinationService {
     listing.storeId = store.id;
     listing.active = false;
     await this.repository.saveListing(listing);
+    if (!store.open) {
+      store.open = true;
+      await this.repository.saveStore(store);
+    }
     request.createdListingId = listing.id;
     (request as any).createdListing = undefined;
     (request as any).store = store;

@@ -909,6 +909,8 @@ describe('Destination Hub', () => {
     });
 
     expect(claimedStore.res.status).toBe(201);
+    expect(claimedStore.body.token).toBeNull();
+    expect(claimedStore.body.storeStatus).toBe('PENDING_REVIEW');
     const verificationCode = await findLatestStoreVerificationCode(claimedStore.email);
     const verifyRes = await api
       .post('/api/auth/verify-email')
@@ -958,6 +960,34 @@ describe('Destination Hub', () => {
     expect(storeRequestRows[0].status).toBe('pending');
     expect(storeRequestRows[0].message).toContain(claimRows[0].id);
 
+    const pendingStoreRows = await AppDataSource.query(
+      `SELECT open FROM stores WHERE id = $1`,
+      [claimedStore.body.store.id]
+    );
+    expect(pendingStoreRows[0].open).toBe(false);
+
+    const blockedGenericLoginRes = await api
+      .post('/api/auth/login')
+      .send({ email: claimedStore.email, password: claimedStore.password });
+    expect(blockedGenericLoginRes.status).toBe(409);
+    expect(blockedGenericLoginRes.body.code).toBe('AUTH-029');
+
+    const blockedAdminLoginRes = await api
+      .post('/api/auth/admin-login')
+      .send({ identifier: claimedStore.email, password: claimedStore.password });
+    expect(blockedAdminLoginRes.status).toBe(409);
+    expect(blockedAdminLoginRes.body.code).toBe('AUTH-029');
+
+    const staleAdminToken = jwt.sign(
+      { sub: claimedStore.body.user.id, storeId: claimedStore.body.store.id, role: 'ADMIN' },
+      env.jwtSecret
+    );
+    const staleTokenStoreRouteRes = await api
+      .get(`/api/stores/${claimedStore.body.store.id}/products`)
+      .set('Authorization', `Bearer ${staleAdminToken}`);
+    expect(staleTokenStoreRouteRes.status).toBe(409);
+    expect(staleTokenStoreRouteRes.body.code).toBe('AUTH-029');
+
     const publicRes = await api.get(`/api/public/destinations/${destinationRes.body.slug}`);
     expect(publicRes.status).toBe(200);
     const claimedListing = publicRes.body.listings.find((listing: any) => listing.id === listingRes.body.id);
@@ -987,6 +1017,20 @@ describe('Destination Hub', () => {
     }));
     expect(validationRes.body.createdPartnerAccountId).toBeNull();
 
+    const approvedAdminLoginRes = await api
+      .post('/api/auth/admin-login')
+      .send({ identifier: claimedStore.email, password: claimedStore.password });
+    expect(approvedAdminLoginRes.status).toBe(200);
+    expect(approvedAdminLoginRes.body.store).toEqual(expect.objectContaining({
+      id: claimedStore.body.store.id,
+      slug: claimedStore.body.store.slug,
+    }));
+
+    const approvedTokenStoreRouteRes = await api
+      .get(`/api/stores/${claimedStore.body.store.id}/products`)
+      .set('Authorization', `Bearer ${staleAdminToken}`);
+    expect(approvedTokenStoreRouteRes.status).toBe(200);
+
     const convertedRows = await AppDataSource.query(
       `SELECT active, store_id FROM destination_listings WHERE id = $1`,
       [listingRes.body.id]
@@ -995,6 +1039,12 @@ describe('Destination Hub', () => {
       active: false,
       store_id: claimedStore.body.store.id,
     }));
+
+    const approvedStoreRows = await AppDataSource.query(
+      `SELECT open FROM stores WHERE id = $1`,
+      [claimedStore.body.store.id]
+    );
+    expect(approvedStoreRows[0].open).toBe(true);
 
     const approvedStoreRequestRows = await AppDataSource.query(
       `SELECT status, reviewed_at FROM destination_store_requests WHERE store_id = $1 AND hospitality_place_id = $2`,

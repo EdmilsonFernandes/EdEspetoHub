@@ -974,7 +974,10 @@ export function HospitalityPlacePage() {
         categoryLabel={categoryLabel(selectedListing?.category)}
         imageUrl={selectedListingMediaUrl}
         hasImage={selectedListingHasImage}
-        claimHref={selectedListing ? buildListingClaimUrl(destination, selectedListing) : ''}
+        claimHref={selectedListing ? buildListingClaimUrl(destination, selectedListing, {
+          deliveryMode: 'selected',
+          placeIds: [place.id],
+        }) : ''}
         primaryAction={selectedListingAction}
         routeAction={selectedListingRouteHref ? { href: selectedListingRouteHref, label: 'Ver rota até meu chalé', kind: 'route', external: false } : null}
         instagramUrl={selectedListingInstagramUrl}

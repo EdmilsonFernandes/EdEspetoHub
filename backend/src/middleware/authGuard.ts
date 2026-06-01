@@ -27,6 +27,7 @@
 
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { AppDataSource } from '../config/database';
 import { env } from '../config/env';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
@@ -94,21 +95,50 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) =>
  */
 export const requireRole = (...roles: UserRole[]) =>
 {
-  return (req: Request, res: Response, next: NextFunction) =>
+  return async (req: Request, res: Response, next: NextFunction) =>
   {
-    const normalizeRole = (value?: UserRole) => {
-      if (!value) return '';
-      if (value === 'CHURRASQUEIRO') return 'OPERATOR'; // legacy
-      if (value === 'LOJISTA') return 'OPERATOR';
-      return value;
-    };
-    const role = normalizeRole(req.auth?.role);
-    const allowed = roles.map(normalizeRole);
-    if (!role || !allowed.includes(role))
-    {
-      return respondWithError(req, res, new AppError('AUTH-003', 403), 403);
+    try {
+      const normalizeRole = (value?: UserRole) => {
+        if (!value) return '';
+        if (value === 'CHURRASQUEIRO') return 'OPERATOR'; // legacy
+        if (value === 'LOJISTA') return 'OPERATOR';
+        return value;
+      };
+      const role = normalizeRole(req.auth?.role);
+      const allowed = roles.map(normalizeRole);
+      if (!role || !allowed.includes(role))
+      {
+        return respondWithError(req, res, new AppError('AUTH-003', 403), 403);
+      }
+
+      const protectsStoreAdmin = allowed.some((allowedRole) => [ 'ADMIN', 'OPERATOR', 'STORE_OWNER' ].includes(allowedRole));
+      if (protectsStoreAdmin && req.auth?.storeId) {
+        const pendingClaims = await AppDataSource.query(
+          `
+            SELECT id, status
+            FROM destination_partner_requests
+            WHERE store_id = $1
+              AND claimed_listing_id IS NOT NULL
+              AND request_source = 'store_signup_destination_claim'
+              AND status <> 'approved'
+            ORDER BY created_at DESC
+            LIMIT 1
+          `,
+          [ req.auth.storeId ]
+        );
+        const pendingClaim = pendingClaims?.[0];
+        if (pendingClaim) {
+          return respondWithError(req, res, new AppError('AUTH-029', 409, {
+            requestId: pendingClaim.id,
+            status: pendingClaim.status,
+          }), 409);
+        }
+      }
+
+      return next();
+    } catch (error) {
+      return respondWithError(req, res, error, 403);
     }
-    return next();
   };
 };
 
