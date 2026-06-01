@@ -165,6 +165,7 @@ Backend API (chamanoespeto-api :4000)
 - Solicitação para assumir perfil existente é sensível: aprovação deve enviar `claimVerified: true`, exibir alerta antifraude ao Super Admin e nunca liberar segundo parceiro ativo no mesmo recurso sem revisão manual.
 - Reenvio de convite do parceiro aprovado usa `POST /api/admin/destination-partner-requests/:requestId/invite/resend`; ele invalida convites antigos não usados e retorna link apenas para Super Admin autenticado.
 - Serviço/restaurante no portal pode abrir `/create` pré-preenchido com `source=destination_listing_claim`; o vínculo final com a loja continua dependendo de validação do Super Admin.
+- Quando a loja criada por `destination_listing_claim` confirma e-mail, o backend deve criar solicitação pendente com `store_id` + `claimed_listing_id`; ao aprovar, o serviço/listing antigo fica `active=false` e a loja passa a ser vinculada aos chalés/pousadas escolhidos.
 - Mudança nesse fluxo deve validar `cd backend && yarn test`, `npm --prefix apis run build`, `npm --prefix frontend run test:unit` e `npm --prefix frontend run build`.
 
 ### Onde implementar algo novo

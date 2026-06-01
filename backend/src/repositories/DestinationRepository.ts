@@ -431,6 +431,8 @@ export class DestinationRepository {
       .leftJoinAndSelect('request.createdPartnerAccount', 'createdPartnerAccount')
       .leftJoinAndSelect('request.claimedHospitalityPlace', 'claimedHospitalityPlace')
       .leftJoinAndSelect('request.claimedListing', 'claimedListing')
+      .leftJoinAndSelect('request.store', 'store')
+      .leftJoinAndSelect('store.settings', 'requestStoreSettings')
       .orderBy('request.created_at', 'DESC');
     if (status) qb.andWhere('request.status = :status', { status });
     return qb.getMany();
@@ -439,7 +441,14 @@ export class DestinationRepository {
   findPartnerRequestById(id: string) {
     return this.partnerRequestRepository.findOne({
       where: { id },
-      relations: [ 'destination', 'createdHospitalityPlace', 'createdListing', 'createdPartnerAccount', 'claimedHospitalityPlace', 'claimedListing' ],
+      relations: [ 'destination', 'createdHospitalityPlace', 'createdListing', 'createdPartnerAccount', 'claimedHospitalityPlace', 'claimedListing', 'store', 'store.settings' ],
+    });
+  }
+
+  findPendingPartnerRequestByStoreAndListing(storeId: string, listingId: string) {
+    return this.partnerRequestRepository.findOne({
+      where: { storeId, claimedListingId: listingId, status: 'pending' },
+      relations: [ 'destination', 'claimedListing', 'store', 'store.settings' ],
     });
   }
 
@@ -483,6 +492,19 @@ export class DestinationRepository {
       where: { storeId, hospitalityPlaceId: placeId },
       relations: [ 'hospitalityPlace', 'hospitalityPlace.destination' ],
     });
+  }
+
+  listStoreRequestsByStoreAndMessageToken(storeId: string, token: string) {
+    return this.storeRequestRepository
+      .createQueryBuilder('request')
+      .innerJoinAndSelect('request.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .innerJoinAndSelect('request.hospitalityPlace', 'hospitalityPlace')
+      .leftJoinAndSelect('hospitalityPlace.destination', 'destination')
+      .where('request.store_id = :storeId', { storeId })
+      .andWhere('request.message ILIKE :token', { token: `%${token}%` })
+      .orderBy('request.created_at', 'ASC')
+      .getMany();
   }
 
   saveStoreRequest(payload: Partial<DestinationStoreRequest>) {

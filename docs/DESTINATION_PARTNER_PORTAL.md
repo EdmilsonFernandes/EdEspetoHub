@@ -109,6 +109,21 @@ Esse botão abre `/create` com `source=destination_listing_claim` e dados já pr
 
 O cadastro de loja continua seguindo o fluxo normal de lojista. O vínculo definitivo entre loja e listing ainda deve ser validado pelo Super Admin para evitar tomada indevida de perfil.
 
+Ao confirmar o e-mail da loja criada por esse fluxo, o backend cria automaticamente:
+
+- uma solicitação pendente em `destination_partner_requests` com `store_id`, `claimed_listing_id` e `request_source = 'store_signup_destination_claim'`;
+- solicitações pendentes em `destination_store_requests` para os chalés/pousadas escolhidos no cadastro.
+
+Na aprovação dessa solicitação pelo Super Admin:
+
+- o serviço/listing antigo é marcado como `active = false`;
+- `destination_listings.store_id` passa a apontar para a nova loja, preservando auditoria da conversão;
+- os vínculos em `hospitality_place_store_links` são criados/reativados para os chalés aprovados;
+- as solicitações de vínculo geradas automaticamente são marcadas como aprovadas;
+- não é criada conta em `destination_partner_accounts`, porque o responsável passa a operar pela conta normal de lojista.
+
+Assim, o serviço some da lista de serviços e a loja aparece na seção de lojas que atendem o chalé.
+
 ## Monetização e curadoria
 
 O portal do parceiro não libera campos comerciais. Prioridade, destaque, ativo/inativo, categoria, destino e vínculos continuam no Super Admin porque esses campos permitem monetização, curadoria e controle editorial.

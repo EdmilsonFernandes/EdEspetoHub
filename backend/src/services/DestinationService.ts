@@ -899,6 +899,165 @@ export class DestinationService {
     return this.toPublicStoreLink(link);
   }
 
+  async createListingClaimFromVerifiedStore(storeId: string, owner?: { fullName?: string | null; email?: string | null; phone?: string | null } | null) {
+    const store = await this.repository.findStoreById(String(storeId || '').trim());
+    const attribution = store?.settings?.acquisitionAttribution as any;
+    if (!store || !attribution || String(attribution.source || '') !== 'destination_listing_claim') return null;
+
+    const listingId = toOptionalText(attribution.destinationListingId || attribution.listingId);
+    if (!listingId) return null;
+
+    const listing = await this.repository.findListingById(listingId);
+    if (!listing || String(listing.destinationId) !== String(attribution.destinationId || listing.destinationId)) {
+      this.log.warn('Destination listing claim ignored: listing not found or destination mismatch', {
+        storeId: store.id,
+        listingId,
+        destinationId: attribution.destinationId || null,
+      });
+      return null;
+    }
+
+    if (listing.storeId && String(listing.storeId) !== String(store.id)) {
+      this.log.warn('Destination listing claim ignored: listing already linked to another store', {
+        storeId: store.id,
+        listingId: listing.id,
+        linkedStoreId: listing.storeId,
+      });
+      return null;
+    }
+
+    const existing = await this.repository.findPendingPartnerRequestByStoreAndListing(store.id, listing.id);
+    if (existing) return this.toPublicPartnerRequest(existing);
+
+    const responsibleEmail = toOptionalText(owner?.email || store.settings?.contactEmail);
+    if (!responsibleEmail) return null;
+
+    const saved = await this.repository.savePartnerRequest({
+      destinationId: listing.destinationId,
+      partnerType: 'SERVICE_PROVIDER',
+      category: listing.category || 'SERVICO',
+      name: listing.title || store.name,
+      slug: normalizeDestinationSlug(listing.title || store.name),
+      description: listing.description || store.settings?.description || null,
+      address: listing.address || store.settings?.address || null,
+      city: listing.city || store.settings?.city || listing.destination?.city || null,
+      state: listing.state || store.settings?.state || listing.destination?.state || null,
+      zipCode: listing.zipCode || store.settings?.postalOriginZip || null,
+      phone: listing.phone || owner?.phone || null,
+      whatsapp: listing.whatsapp || owner?.phone || null,
+      instagramUrl: listing.instagramUrl || null,
+      websiteUrl: listing.websiteUrl || null,
+      logoUrl: store.settings?.logoUrl || null,
+      bannerUrl: store.settings?.bannerUrl || null,
+      imageUrl: listing.imageUrl || store.settings?.bannerUrl || store.settings?.logoUrl || null,
+      requestSource: 'store_signup_destination_claim',
+      claimedListingId: listing.id,
+      storeId: store.id,
+      responsibleName: toOptionalText(owner?.fullName) || store.name,
+      responsibleEmail,
+      responsiblePhone: toOptionalText(owner?.phone),
+      message: `Loja criada a partir do serviço "${listing.title}". Validar posse antes de converter o serviço em loja.`,
+      status: 'pending',
+    });
+
+    const targetPlaceIds = await this.resolveListingClaimTargetPlaceIds(attribution, listing);
+    for (const placeId of targetPlaceIds) {
+      const place = await this.repository.findPlaceById(placeId);
+      if (!place || place.active === false || String(place.destinationId) !== String(listing.destinationId)) continue;
+      const existingLink = await this.repository.findStoreLink(place.id, store.id);
+      if (existingLink?.active) continue;
+      const existingRequest = await this.repository.findStoreRequestByStoreAndPlace(store.id, place.id);
+      await this.repository.saveStoreRequest({
+        ...(existingRequest || {}),
+        storeId: store.id,
+        hospitalityPlaceId: place.id,
+        status: 'pending',
+        message: `Solicitação automática ao assumir o serviço "${listing.title}". Claim ${saved.id}.`,
+        deliveryEnabled: true,
+        pickupEnabled: false,
+        deliveryFee: null,
+        estimatedMinutes: null,
+        reviewNote: null,
+        reviewedBy: null,
+        reviewedAt: null,
+      });
+    }
+
+    await this.notifyPartnerRequestByEmail({
+      requestId: saved.id,
+      partnerType: saved.partnerType,
+      resourceName: saved.name,
+      destinationName: listing.destination?.name || listing.destination?.city || null,
+      responsibleName: saved.responsibleName,
+      responsibleEmail: saved.responsibleEmail,
+      responsiblePhone: saved.responsiblePhone || null,
+      city: saved.city || null,
+      state: saved.state || null,
+      message: saved.message || null,
+    });
+
+    return this.toPublicPartnerRequest({ ...saved, destination: listing.destination, claimedListing: listing, store });
+  }
+
+  private async resolveListingClaimTargetPlaceIds(attribution: any, listing: any): Promise<string[]> {
+    const mode = String(attribution?.destinationDeliveryMode || '').trim().toLowerCase();
+    const selectedIds = Array.isArray(attribution?.destinationHospitalityPlaceIds)
+      ? attribution.destinationHospitalityPlaceIds.map((id: any) => String(id || '').trim()).filter(Boolean)
+      : [];
+    if (mode === 'selected' && selectedIds.length) return Array.from(new Set(selectedIds));
+    if (mode === 'all') {
+      const places = await this.repository.listPlacesByDestinationId(listing.destinationId);
+      return places.map((place: any) => String(place.id)).filter(Boolean);
+    }
+    const listingPlaceIds = this.listingHospitalityPlaceIds(listing);
+    return Array.from(new Set(listingPlaceIds));
+  }
+
+  private async approveStoreListingClaim(request: any, listing: any, reviewedBy?: string, reviewNote?: string | null) {
+    const storeId = toOptionalText(request.storeId);
+    if (!storeId) throw new AppError('STORE-001', 404);
+    const store = await this.repository.findStoreById(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    if (!listing || String(listing.destinationId) !== String(request.destinationId)) throw new AppError('DEST-012', 404);
+    if (listing.storeId && String(listing.storeId) !== String(store.id)) throw new AppError('DPARTNER-013', 409);
+
+    const scopedRequests = await this.repository.listStoreRequestsByStoreAndMessageToken(store.id, request.id);
+    let targetPlaceIds = scopedRequests.map((item: any) => String(item.hospitalityPlaceId)).filter(Boolean);
+    if (!targetPlaceIds.length) targetPlaceIds = this.listingHospitalityPlaceIds(listing);
+
+    for (const storeRequest of scopedRequests) {
+      await this.repository.upsertStoreLink(storeRequest.hospitalityPlaceId, store.id, {
+        deliveryEnabled: storeRequest.deliveryEnabled !== false,
+        pickupEnabled: storeRequest.pickupEnabled === true,
+        deliveryFee: storeRequest.deliveryFee ?? null,
+        estimatedMinutes: storeRequest.estimatedMinutes ?? null,
+        notes: storeRequest.message || null,
+      });
+      storeRequest.status = 'approved';
+      storeRequest.reviewNote = reviewNote || 'Aprovado junto com a conversão do serviço em loja.';
+      storeRequest.reviewedBy = reviewedBy || null;
+      storeRequest.reviewedAt = new Date();
+      await this.repository.saveStoreRequest(storeRequest);
+    }
+
+    if (!scopedRequests.length) {
+      for (const placeId of Array.from(new Set(targetPlaceIds))) {
+        await this.repository.upsertStoreLink(placeId, store.id, {
+          deliveryEnabled: true,
+          pickupEnabled: false,
+          notes: `Convertido do serviço "${listing.title}".`,
+        });
+      }
+    }
+
+    listing.storeId = store.id;
+    listing.active = false;
+    await this.repository.saveListing(listing);
+    request.createdListingId = listing.id;
+    (request as any).createdListing = undefined;
+    (request as any).store = store;
+  }
+
   async adminReviewPartnerRequest(requestId: string, payload: any, reviewedBy?: string) {
     const request = await this.repository.findPartnerRequestById(requestId);
     if (!request) throw new AppError('DEST-010', 404);
@@ -936,18 +1095,22 @@ export class DestinationService {
               active: true,
             });
         if (!listing || String(listing.destinationId) !== String(request.destinationId)) throw new AppError('DEST-012', 404);
-        request.createdListingId = listing.id;
-        const access = await this.destinationPartnerPortalService.ensureAccessForApprovedRequest({
-          request,
-          resourceType: RESOURCE_DESTINATION_LISTING,
-          resourceId: listing.id,
-          resourceName: listing.title,
-          reviewedBy,
-        });
-        request.createdPartnerAccountId = access.accountId;
-        partnerActivationToken = access.activationToken;
-        (request as any).createdListing = undefined;
-        (request as any).createdPartnerAccount = undefined;
+        if (request.storeId && claimedListingId) {
+          await this.approveStoreListingClaim(request, listing, reviewedBy, reviewNote);
+        } else {
+          request.createdListingId = listing.id;
+          const access = await this.destinationPartnerPortalService.ensureAccessForApprovedRequest({
+            request,
+            resourceType: RESOURCE_DESTINATION_LISTING,
+            resourceId: listing.id,
+            resourceName: listing.title,
+            reviewedBy,
+          });
+          request.createdPartnerAccountId = access.accountId;
+          partnerActivationToken = access.activationToken;
+          (request as any).createdListing = undefined;
+          (request as any).createdPartnerAccount = undefined;
+        }
       } else {
         const claimedPlaceId = toOptionalText(request.claimedHospitalityPlaceId);
         const place = claimedPlaceId
@@ -1514,6 +1677,8 @@ export class DestinationService {
       requestSource: request.requestSource || null,
       claimedHospitalityPlaceId: request.claimedHospitalityPlaceId || null,
       claimedListingId: request.claimedListingId || null,
+      storeId: request.storeId || null,
+      store: request.store ? this.toPublicStoreSummary(request.store) : null,
       claimedHospitalityPlace: request.claimedHospitalityPlace ? {
         id: request.claimedHospitalityPlace.id,
         name: request.claimedHospitalityPlace.name,

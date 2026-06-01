@@ -1183,6 +1183,56 @@ WHERE hp.slug = :'place_slug'
 ORDER BY dlhp.sort_order, dl.featured DESC, dl.sort_order, dl.title;
 ```
 
+Solicitacoes para converter servico/restaurante de destino em loja:
+
+```sql
+\set email 'lojista@email.com'
+
+SELECT
+  dpr.id AS solicitacao_id,
+  dpr.status,
+  dpr.request_source,
+  u.email AS lojista_email,
+  s.name AS loja,
+  dl.title AS servico_original,
+  dl.active AS servico_original_ativo,
+  dpr.review_note,
+  dpr.created_at,
+  dpr.reviewed_at
+FROM destination_partner_requests dpr
+JOIN stores s ON s.id = dpr.store_id
+JOIN users u ON u.id = s.owner_id
+LEFT JOIN destination_listings dl ON dl.id = dpr.claimed_listing_id
+WHERE lower(u.email) = lower(:'email')
+  AND dpr.request_source = 'store_signup_destination_claim'
+ORDER BY dpr.created_at DESC;
+```
+
+Chales/pousadas que a loja pediu para atender pelo fluxo de destino:
+
+```sql
+\set store_slug 'braga-lanches'
+
+SELECT
+  dsr.status,
+  hp.name AS hospedagem,
+  td.name AS destino,
+  dsr.message,
+  dsr.review_note,
+  hpsl.active AS vinculo_ativo,
+  dsr.created_at,
+  dsr.reviewed_at
+FROM destination_store_requests dsr
+JOIN stores s ON s.id = dsr.store_id
+JOIN hospitality_places hp ON hp.id = dsr.hospitality_place_id
+JOIN travel_destinations td ON td.id = hp.destination_id
+LEFT JOIN hospitality_place_store_links hpsl
+  ON hpsl.store_id = dsr.store_id
+ AND hpsl.hospitality_place_id = dsr.hospitality_place_id
+WHERE s.slug = :'store_slug'
+ORDER BY dsr.created_at DESC;
+```
+
 Contas do Portal do Parceiro de Destinos:
 
 ```sql

@@ -122,6 +122,7 @@
   "DPARTNER-010": "Confirme a titularidade antes de aprovar a solicitação para assumir este perfil.",
   "DPARTNER-011": "Este cadastro já tem um parceiro ativo. Revise o acesso atual antes de liberar outra conta.",
   "DPARTNER-012": "Registre como a titularidade foi conferida antes de aprovar este parceiro.",
+  "DPARTNER-013": "Este serviço já está vinculado a outra loja. Revise o cadastro antes de aprovar.",
   "REVIEW-003": "Este pedido não possui gorjeta para repasse.",
   "REVIEW-004": "A gorjeta ainda não foi paga pelo cliente.",
   "REVIEW-005": "Esta gorjeta já foi recebida diretamente pelo entregador."

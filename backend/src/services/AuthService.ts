@@ -47,6 +47,7 @@ import { CustomerSecurityService } from './CustomerSecurityService';
 import { AuditNotificationService } from './AuditNotificationService';
 import { MfaService } from './MfaService';
 import { resolveFounderVipPromotion } from '../utils/founderVipPromotion';
+import { DestinationService } from './DestinationService';
 
 type MfaLoginOptions = {
   deviceId?: string | null;
@@ -121,6 +122,7 @@ export class AuthService
   private securityService = new CustomerSecurityService();
   private auditNotificationService = new AuditNotificationService();
   private mfaService = new MfaService();
+  private destinationService = new DestinationService();
 
   private async resolveStoreSignupPromotion(existingStoresCount: number, fallbackTrialDays: number) {
     const [enabledValue, limitValue, daysValue, labelValue] = await Promise.all([
@@ -1553,8 +1555,36 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
         store.open = true;
         await AppDataSource.getRepository(Store).save(store);
       }
-      await this.emailService.sendActivationEmail(verifiedUser.email, store.slug);
-      return { code: 'AUTH-S004', redirectUrl: '/admin' };
+      let destinationClaim: any = null;
+      try {
+        destinationClaim = await this.destinationService.createListingClaimFromVerifiedStore(store.id, {
+          fullName: verifiedUser.fullName,
+          email: verifiedUser.email,
+          phone: verifiedUser.phone,
+        });
+      } catch (error) {
+        this.log.error('Destination listing claim creation failed after store verification', {
+          userId: verifiedUser.id,
+          storeId: store.id,
+          error,
+        });
+      }
+      try {
+        await this.emailService.sendActivationEmail(verifiedUser.email, store.slug);
+      } catch (error) {
+        this.log.error('Store activation email failed after verification', {
+          userId: verifiedUser.id,
+          storeId: store.id,
+          email: verifiedUser.email,
+          error,
+        });
+      }
+      return {
+        code: 'AUTH-S004',
+        redirectUrl: '/admin',
+        destinationClaimStatus: destinationClaim ? 'pending_review' : undefined,
+        destinationClaimRequestId: destinationClaim?.id || undefined,
+      };
     }
 
     let latestPayment = await this.paymentRepository.findLatestByStoreId(store.id);

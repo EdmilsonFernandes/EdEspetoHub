@@ -2508,6 +2508,7 @@ export async function runMigrations() {
       request_source TEXT,
       claimed_hospitality_place_id UUID REFERENCES hospitality_places(id) ON DELETE SET NULL,
       claimed_listing_id UUID REFERENCES destination_listings(id) ON DELETE SET NULL,
+      store_id UUID REFERENCES stores(id) ON DELETE SET NULL,
       responsible_name TEXT NOT NULL,
       responsible_email TEXT NOT NULL,
       responsible_phone TEXT,
@@ -2537,6 +2538,10 @@ export async function runMigrations() {
   await AppDataSource.query(`
     ALTER TABLE destination_partner_requests
     ADD COLUMN IF NOT EXISTS claimed_listing_id UUID;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE destination_partner_requests
+    ADD COLUMN IF NOT EXISTS store_id UUID;
   `);
   await AppDataSource.query(`
     DO $$
@@ -2577,6 +2582,26 @@ export async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_destination_partner_requests_claimed_listing
     ON destination_partner_requests(claimed_listing_id)
     WHERE claimed_listing_id IS NOT NULL;
+  `);
+  await AppDataSource.query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'destination_partner_requests_store_fkey'
+      ) THEN
+        ALTER TABLE destination_partner_requests
+        ADD CONSTRAINT destination_partner_requests_store_fkey
+        FOREIGN KEY (store_id)
+        REFERENCES stores(id)
+        ON DELETE SET NULL;
+      END IF;
+    END $$;
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_partner_requests_store
+    ON destination_partner_requests(store_id)
+    WHERE store_id IS NOT NULL;
   `);
   await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS destination_partner_accounts (
