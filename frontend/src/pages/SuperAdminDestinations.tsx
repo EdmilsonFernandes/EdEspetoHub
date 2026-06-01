@@ -102,6 +102,10 @@ const emptyPlace = {
   bannerFiles: ['', '', '', ''],
   lat: '',
   lng: '',
+  geoSource: 'unknown',
+  geoPrecision: 'unknown',
+  geoVerified: false,
+  geoApproximate: true,
   deliveryInstructions: '',
   active: true,
   sortOrder: 0,
@@ -131,6 +135,10 @@ const emptyListing = {
   state: '',
   lat: '',
   lng: '',
+  geoSource: 'unknown',
+  geoPrecision: 'unknown',
+  geoVerified: false,
+  geoApproximate: true,
   whatsapp: '',
   websiteUrl: '',
   instagramUrl: '',
@@ -293,6 +301,38 @@ const claimStoreRequestParentId = (request: any) => {
   if (explicit) return explicit;
   const match = String(request?.message || '').match(/\bClaim\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/i);
   return match?.[1] || '';
+};
+
+const geoQualityUi = (value: any) => {
+  const precision = String(value?.geoPrecision || '').toLowerCase();
+  const verified = value?.geoVerified === true;
+  const hasCoordinates = Boolean(String(value?.lat || '').trim() && String(value?.lng || '').trim());
+  if (!hasCoordinates) {
+    return {
+      label: 'Resolver ao salvar',
+      description: 'O sistema tentará localizar pelo endereço completo. Complete rua, número e bairro para evitar ponto genérico.',
+      className: 'border-amber-200 bg-amber-50 text-amber-800',
+    };
+  }
+  if (verified || precision === 'exact') {
+    return {
+      label: 'Ponto confirmado',
+      description: 'Coordenada precisa. Boa para rota, distância e WhatsApp de atendimento.',
+      className: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+    };
+  }
+  if (precision === 'street') {
+    return {
+      label: 'Endereço localizado',
+      description: 'Boa confiança, mas em cidade pequena ainda vale conferir o ponto se rua/CEP forem genéricos.',
+      className: 'border-[#336886]/18 bg-[#336886]/8 text-[#24576a]',
+    };
+  }
+  return {
+    label: 'Localização aproximada',
+    description: 'CEP ou centro da cidade. Para credibilidade de rota, confirme rua/número ou ajuste o ponto manualmente.',
+    className: 'border-amber-200 bg-amber-50 text-amber-800',
+  };
 };
 const isClaimScopedStoreRequest = (request: any) => Boolean(claimStoreRequestParentId(request));
 
@@ -639,6 +679,7 @@ const DestinationAddressFields = ({
   hint,
 }: any) => {
   const hasCoordinates = Boolean(String(value?.lat || '').trim() && String(value?.lng || '').trim());
+  const quality = geoQualityUi(value);
 
   return (
     <div className="sm:col-span-2 rounded-[1.5rem] border border-slate-200 bg-white p-3">
@@ -649,8 +690,8 @@ const DestinationAddressFields = ({
             {hint || 'Digite o CEP para preencher automaticamente. Se não encontrar, preencha manualmente.'}
           </p>
         </div>
-        <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${hasCoordinates ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-          {hasCoordinates ? 'Coordenada salva' : 'Coordenada ao salvar'}
+        <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${quality.className}`}>
+          {quality.label}
         </span>
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-[160px_minmax(0,1fr)_120px]">
@@ -666,8 +707,14 @@ const DestinationAddressFields = ({
         <input value={value.state || ''} onChange={(event) => update('state', event.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2))} placeholder="UF" autoComplete="address-level1" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
       </div>
       <p className="mt-2 px-1 text-[11px] font-semibold text-slate-500">
-        Latitude/longitude ficam ocultas para o cliente e são usadas só para mapa, Waze e Google Maps.
+        {quality.description}
       </p>
+      {hasCoordinates ? (
+        <div className="mt-2 flex flex-wrap items-center gap-2 px-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+          <span>Fonte: {String(value.geoSource || 'unknown')}</span>
+          <span>Precisão: {String(value.geoPrecision || 'unknown')}</span>
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -964,6 +1011,10 @@ export function SuperAdminDestinations() {
           state: String(addressData?.state || current.state || '').toUpperCase().slice(0, 2),
           lat: '',
           lng: '',
+          geoSource: 'unknown',
+          geoPrecision: 'unknown',
+          geoVerified: false,
+          geoApproximate: true,
         }));
       } catch {
         if (active) setPlaceZipLookupError('CEP não encontrado. Preencha manualmente.');
@@ -1001,6 +1052,10 @@ export function SuperAdminDestinations() {
           state: String(addressData?.state || current.state || '').toUpperCase().slice(0, 2),
           lat: '',
           lng: '',
+          geoSource: 'unknown',
+          geoPrecision: 'unknown',
+          geoVerified: false,
+          geoApproximate: true,
         }));
       } catch {
         if (active) setListingZipLookupError('CEP não encontrado. Preencha manualmente.');
@@ -1234,12 +1289,12 @@ export function SuperAdminDestinations() {
   const updatePlace = (key: string, value: any) => setPlaceForm((current) => ({
     ...current,
     [key]: value,
-    ...(addressCoordinateKeys.has(key) ? { lat: '', lng: '' } : {}),
+    ...(addressCoordinateKeys.has(key) ? { lat: '', lng: '', geoSource: 'unknown', geoPrecision: 'unknown', geoVerified: false, geoApproximate: true } : {}),
   }));
   const updateListing = (key: string, value: any) => setListingForm((current) => ({
     ...current,
     [key]: value,
-    ...(addressCoordinateKeys.has(key) ? { lat: '', lng: '' } : {}),
+    ...(addressCoordinateKeys.has(key) ? { lat: '', lng: '', geoSource: 'unknown', geoPrecision: 'unknown', geoVerified: false, geoApproximate: true } : {}),
   }));
   const updateStoreLink = (key: string, value: any) => setStoreLinkForm((current) => ({ ...current, [key]: value }));
 

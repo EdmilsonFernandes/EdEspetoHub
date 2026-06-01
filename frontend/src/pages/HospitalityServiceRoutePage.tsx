@@ -37,12 +37,16 @@ const haversineKm = (origin: any, destination: any) => {
   return earthRadiusKm * (2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)));
 };
 
+const isApproximatePoint = (point: any) => Boolean(point?.geoApproximate || ['zip', 'city', 'unknown'].includes(String(point?.geoPrecision || '').toLowerCase()));
+
 const mapPointQuery = (point: any) => {
+  const address = String(point?.address || '').trim();
+  if (isApproximatePoint(point) && address) return address;
   if (hasCoords(point)) {
     const coords = toCoords(point);
     return `${coords.lat.toFixed(6)},${coords.lng.toFixed(6)}`;
   }
-  return String(point?.address || '').trim();
+  return address;
 };
 
 const buildGoogleDirectionsUrl = (origin: any, destination: any) => {
@@ -76,22 +80,27 @@ const buildGoogleNativeUrl = (origin: any, destination: any, fallbackUrl: string
 };
 
 const buildWazeUrl = (destination: any) => {
+  const address = String(destination?.address || '').trim();
+  if (isApproximatePoint(destination) && address) {
+    return `https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes`;
+  }
   if (hasCoords(destination)) {
     const coords = toCoords(destination);
     return `https://waze.com/ul?ll=${coords.lat.toFixed(6)}%2C${coords.lng.toFixed(6)}&navigate=yes`;
   }
-  const address = String(destination?.address || '').trim();
   return address ? `https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes` : '';
 };
 
 const buildWazeNativeUrl = (destination: any, fallbackUrl: string) => {
   if (!fallbackUrl || Capacitor.getPlatform() !== 'android') return '';
   let params = '';
-  if (hasCoords(destination)) {
+  const address = String(destination?.address || '').trim();
+  if (isApproximatePoint(destination) && address) {
+    params = `q=${encodeURIComponent(address)}&navigate=yes`;
+  } else if (hasCoords(destination)) {
     const coords = toCoords(destination);
     params = `ll=${coords.lat.toFixed(6)}%2C${coords.lng.toFixed(6)}&navigate=yes`;
   } else {
-    const address = String(destination?.address || '').trim();
     if (address) params = `q=${encodeURIComponent(address)}&navigate=yes`;
   }
   return params ? `intent://?${params}#Intent;scheme=waze;package=com.waze;S.browser_fallback_url=${encodeURIComponent(fallbackUrl)};end` : '';
@@ -155,8 +164,6 @@ const estimateMinutes = (distanceKm?: number | null) => {
   if (!Number.isFinite(Number(distanceKm))) return '';
   return `${Math.max(4, Math.round(Number(distanceKm) * 4.4 + 2))} min aprox.`;
 };
-
-const isApproximatePoint = (point: any) => Boolean(point?.geoApproximate || ['zip', 'city', 'unknown'].includes(String(point?.geoPrecision || '').toLowerCase()));
 
 const pointFallbackImage = (point: any, kind: 'service' | 'place') =>
   getStoreAvatarUrl(point?.slug || point?.id || point?.name, point?.name || (kind === 'service' ? 'Serviço' : 'Hospedagem'));
@@ -284,8 +291,8 @@ export function HospitalityServiceRoutePage() {
   const googleNativeUrl = useMemo(() => buildGoogleNativeUrl(servicePoint, placePoint, googleDirectionsUrl), [googleDirectionsUrl, servicePoint, placePoint]);
   const wazeUrl = useMemo(() => buildWazeUrl(placePoint), [placePoint]);
   const wazeNativeUrl = useMemo(() => buildWazeNativeUrl(placePoint, wazeUrl), [placePoint, wazeUrl]);
-  const canShowMap = hasCoords(servicePoint) && hasCoords(placePoint);
   const routeIsApproximate = isApproximatePoint(servicePoint) || isApproximatePoint(placePoint);
+  const canShowMap = hasCoords(servicePoint) && hasCoords(placePoint) && !routeIsApproximate;
   const missingCoordinates = [
     !hasCoords(servicePoint) ? 'serviço' : null,
     !hasCoords(placePoint) ? 'hospedagem' : null,
@@ -350,6 +357,16 @@ export function HospitalityServiceRoutePage() {
                   destinationLabel="Chalé"
                   mapActionLabel="Abrir rota"
                 />
+              ) : routeIsApproximate ? (
+                <div className="rounded-[1.35rem] border border-amber-200 bg-[linear-gradient(135deg,rgba(255,251,235,0.96),rgba(255,255,255,0.9))] p-4 text-sm font-semibold leading-relaxed text-amber-900 shadow-[0_18px_46px_-38px_rgba(180,83,9,0.42)]">
+                  <p className="flex items-center gap-2 font-black">
+                    <WarningCircle size={18} weight="duotone" />
+                    CEP amplo: rota confirmada pelo Maps/Waze.
+                  </p>
+                  <p className="mt-1">
+                    Este ponto pode usar CEP de cidade ou região. Para evitar rota errada, abrimos o mapa usando o endereço completo informado, não a coordenada aproximada salva.
+                  </p>
+                </div>
               ) : (
                 <div className="rounded-[1.35rem] border border-amber-200 bg-amber-50/80 p-4 text-sm font-semibold leading-relaxed text-amber-900">
                   <p className="flex items-center gap-2 font-black">
