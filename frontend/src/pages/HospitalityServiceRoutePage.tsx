@@ -42,12 +42,15 @@ const isApproximatePoint = (point: any) => Boolean(point?.geoApproximate || ['zi
 
 const mapPointQuery = (point: any) => {
   const address = String(point?.routeAddress || point?.address || '').trim();
-  if (isApproximatePoint(point) && address) return address;
+  const name = String(point?.name || '').trim();
+  if (isApproximatePoint(point) && address) {
+    return [name, address].filter(Boolean).join(', ');
+  }
   if (hasCoords(point)) {
     const coords = toCoords(point);
     return `${coords.lat.toFixed(6)},${coords.lng.toFixed(6)}`;
   }
-  return address;
+  return [name, address].filter(Boolean).join(', ');
 };
 
 const buildGoogleDirectionsUrl = (origin: any, destination: any) => {
@@ -82,27 +85,31 @@ const buildGoogleNativeUrl = (origin: any, destination: any, fallbackUrl: string
 
 const buildWazeUrl = (destination: any) => {
   const address = String(destination?.routeAddress || destination?.address || '').trim();
+  const name = String(destination?.name || '').trim();
   if (isApproximatePoint(destination) && address) {
-    return `https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes`;
+    return `https://waze.com/ul?q=${encodeURIComponent([name, address].filter(Boolean).join(', '))}&navigate=yes`;
   }
   if (hasCoords(destination)) {
     const coords = toCoords(destination);
     return `https://waze.com/ul?ll=${coords.lat.toFixed(6)}%2C${coords.lng.toFixed(6)}&navigate=yes`;
   }
-  return address ? `https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes` : '';
+  const query = [name, address].filter(Boolean).join(', ');
+  return query ? `https://waze.com/ul?q=${encodeURIComponent(query)}&navigate=yes` : '';
 };
 
 const buildWazeNativeUrl = (destination: any, fallbackUrl: string) => {
   if (!fallbackUrl || Capacitor.getPlatform() !== 'android') return '';
   let params = '';
   const address = String(destination?.routeAddress || destination?.address || '').trim();
+  const name = String(destination?.name || '').trim();
+  const query = [name, address].filter(Boolean).join(', ');
   if (isApproximatePoint(destination) && address) {
-    params = `q=${encodeURIComponent(address)}&navigate=yes`;
+    params = `q=${encodeURIComponent(query)}&navigate=yes`;
   } else if (hasCoords(destination)) {
     const coords = toCoords(destination);
     params = `ll=${coords.lat.toFixed(6)}%2C${coords.lng.toFixed(6)}&navigate=yes`;
   } else {
-    if (address) params = `q=${encodeURIComponent(address)}&navigate=yes`;
+    if (query) params = `q=${encodeURIComponent(query)}&navigate=yes`;
   }
   return params ? `intent://?${params}#Intent;scheme=waze;package=com.waze;S.browser_fallback_url=${encodeURIComponent(fallbackUrl)};end` : '';
 };
