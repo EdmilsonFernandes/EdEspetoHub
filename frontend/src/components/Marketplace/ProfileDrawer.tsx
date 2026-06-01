@@ -289,7 +289,7 @@ export function ProfileDrawer({
   const hasActiveContext = activeContext !== 'guest';
   const visibleAccessProfiles = hasActiveContext
     ? accessProfiles.filter((item) => item.id !== activeContext)
-    : accessProfiles;
+    : accessProfiles.filter((item) => item.id !== 'client');
 
   const currentIdentity =
     activeContext === 'client'
@@ -618,7 +618,10 @@ export function ProfileDrawer({
                 {/* Entrar */}
                 <button
                   type="button"
-                  onClick={() => { setAccessPickerMode('login'); setHighlightFirstAccess(false); setAccessPickerOpen(true); }}
+                  onClick={() => {
+                    onLogin();
+                    onClose();
+                  }}
                   className="relative flex flex-col items-start overflow-hidden rounded-[1.3rem] bg-[linear-gradient(135deg,#0d526c_0%,#17384a_100%)] p-3.5 text-white shadow-[0_12px_24px_-16px_rgba(21,58,76,0.45)] transition-all active:scale-[0.97]"
                 >
                   <div className="pointer-events-none absolute -right-3 -top-3 h-16 w-16 rounded-full bg-white/8 blur-2xl" />
@@ -632,7 +635,10 @@ export function ProfileDrawer({
                 {/* Criar conta */}
                 <button
                   type="button"
-                  onClick={() => { setAccessPickerMode('register'); setHighlightFirstAccess(true); setAccessPickerOpen(true); }}
+                  onClick={() => {
+                    onRegisterClient();
+                    onClose();
+                  }}
                   className="relative flex flex-col items-start overflow-hidden rounded-[1.3rem] border border-slate-200 bg-white p-3.5 text-slate-800 shadow-[0_4px_14px_-8px_rgba(15,23,42,0.1)] transition-all active:scale-[0.97] hover:border-[#336886]/20 hover:shadow-[0_6px_18px_-8px_rgba(51,104,134,0.15)]"
                 >
                   <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886]">
@@ -642,6 +648,21 @@ export function ProfileDrawer({
                   <p className="mt-1 text-[9.5px] font-semibold text-slate-400 leading-tight">Sou novo aqui</p>
                 </button>
               </div>
+
+              <button
+                type="button"
+                onClick={() => { setAccessPickerMode('login'); setHighlightFirstAccess(false); setAccessPickerOpen(true); }}
+                className="group flex w-full items-center gap-3 rounded-[1.25rem] border border-[#d7e7ef]/80 bg-[#f4fafc]/84 px-3.5 py-3 text-left shadow-[0_14px_30px_-26px_rgba(21,58,76,0.28)] transition-all active:scale-[0.98]"
+              >
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(21,58,76,0.36)]">
+                  <Storefront size={19} weight="duotone" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[12px] font-black uppercase tracking-[0.12em] text-[#153A4C]">Sou profissional</span>
+                  <span className="mt-0.5 block text-[11px] font-semibold leading-4 text-slate-500">Lojista, entregador ou operação</span>
+                </span>
+                <CaretRight size={15} weight="bold" className="shrink-0 text-[#336886]/60 transition-transform group-active:translate-x-0.5" />
+              </button>
             </div>
           )}
         </div>

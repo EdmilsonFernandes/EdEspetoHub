@@ -23,8 +23,8 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
     await expect(page).toHaveURL(/\/cliente\?mode=login/);
     await expect(page.getByRole('banner')).toContainText('Área do cliente');
 
-    await page.getByRole('button', { name: /Sou profissional/i }).click();
-    const dialog = page.getByRole('dialog', { name: /Entrar como operação/i });
+    await page.getByRole('button', { name: /Acesso profissional/i }).click();
+    const dialog = page.getByRole('dialog', { name: /Acessos profissionais/i });
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('button', { name: /Lojista/i })).toBeVisible();
     await expect(dialog.getByRole('button', { name: /Entregador/i })).toBeVisible();
@@ -32,8 +32,17 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
     await expect(dialog.getByRole('button', { name: /Condomínio/i })).toBeVisible();
     await expect(dialog.getByRole('button', { name: /Acesso interno/i })).toBeVisible();
 
-    await dialog.getByRole('button', { name: /Lojista/i }).click();
+    await dialog.getByRole('button', { name: /Lojista/i }).click({ force: true });
     await expect(page).toHaveURL(/\/admin/);
+  });
+
+  test('rota entrar nao abre seletor de perfis e cai direto no cliente', async ({ page }) => {
+    await page.goto('/entrar');
+    await waitForAppIntro(page);
+
+    await expect(page).toHaveURL(/\/cliente\?mode=login/);
+    await expect(page.getByRole('banner')).toContainText('Área do cliente');
+    await expect(page.getByText('Escolha como deseja entrar')).toHaveCount(0);
   });
 
   test('mostra header padrao e valida login do cliente sem envio silencioso', async ({ page }) => {

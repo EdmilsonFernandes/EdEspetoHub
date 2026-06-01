@@ -112,9 +112,15 @@ test.describe('Portal do parceiro de destinos', () => {
     await page.getByRole('button', { name: /Entrar no portal/i }).click();
 
     await expect(page.getByRole('heading', { name: 'Chalé Serra' })).toBeVisible();
-    await page.getByLabel('Nome público').fill('Chalé Serra Atualizado');
-    await page.getByLabel('WhatsApp').fill('11988887777');
-    await page.getByLabel('Instruções de entrega').fill('Entrar pela portaria lateral.');
+    const publicNameInput = page.getByLabel('Nome público');
+    const whatsappInput = page.getByLabel('WhatsApp');
+    const deliveryInstructionsInput = page.getByLabel('Instruções de entrega');
+    await publicNameInput.clear();
+    await publicNameInput.fill('Chalé Serra Atualizado');
+    await whatsappInput.clear();
+    await whatsappInput.fill('11988887777');
+    await deliveryInstructionsInput.clear();
+    await deliveryInstructionsInput.fill('Entrar pela portaria lateral.');
     await page.getByRole('button', { name: /Salvar alterações/i }).click();
 
     await expect(page.getByText('Informações salvas.')).toBeVisible();

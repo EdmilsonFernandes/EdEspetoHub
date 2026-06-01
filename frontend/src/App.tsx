@@ -12,7 +12,6 @@ import { NativeAppNavigator } from './components/common/NativeAppNavigator';
 import { OfflineAlert } from './components/common/OfflineAlert';
 import { PremiumSplashScreen } from './components/common/PremiumSplashScreen';
 import { AppRobotLoader } from './components/common/AppRobotLoader';
-import { AccessPortal } from './pages/AccessPortal';
 import { AdminLogin } from './pages/AdminLogin';
 import { ClientAuth } from './pages/ClientAuth';
 import { CondominiumLogin } from './pages/CondominiumLogin';
@@ -156,8 +155,8 @@ function App() {
               <Route path="/guia" element={<SystemGuidePage />} />
               <Route path="/docs" element={<Navigate to="/guia" replace />} />
               <Route path="/create" element={<CreateStore />} />
-              <Route path="/entrar" element={<AccessPortal />} />
-              <Route path="/login" element={<Navigate to="/entrar" replace />} />
+              <Route path="/entrar" element={<Navigate to="/cliente?mode=login" replace />} />
+              <Route path="/login" element={<Navigate to="/cliente?mode=login" replace />} />
               <Route path="/cliente" element={<ClientAuth />} />
               <Route path="/cliente/login" element={<Navigate to="/cliente?mode=login" replace />} />
               <Route path="/cliente/cadastro" element={<Navigate to="/cliente?mode=register" replace />} />

@@ -209,4 +209,20 @@ test.describe('Hub marketplace', () => {
     await expect(page.getByRole('link', { name: /Medalhao Premium/ }).first()).toBeVisible();
     await expect(page.getByText('por Gustavao Espetos E2E')).toBeVisible();
   });
+
+  test('menu do hub prioriza login de cliente e deixa profissional como secundario', async ({ page }) => {
+    await page.goto('/hub');
+
+    await expect(page.getByText('Gustavao Espetos E2E')).toBeVisible({ timeout: 15000 });
+    await page.getByLabel('Abrir menu de perfil').first().click();
+    await expect(page.getByText('Acesse sua conta')).toBeVisible();
+
+    await page.getByRole('button', { name: /Sou profissional/i }).click();
+    await expect(page.getByRole('button', { name: /^Lojista/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Entregador/i })).toBeVisible();
+    await page.getByLabel('Fechar escolha de acesso').click({ force: true });
+
+    await page.locator('aside').getByRole('button', { name: /^Entrar/i }).click({ force: true });
+    await expect(page).toHaveURL(/\/cliente\?mode=login/);
+  });
 });

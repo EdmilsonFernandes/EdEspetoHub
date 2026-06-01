@@ -286,7 +286,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                         <div className="mt-2 border-t border-white/6 px-3.5 pb-2 pt-3">
                           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Condomínio</p>
                           <p className="mt-2 text-xs font-medium leading-5 text-slate-400">
-                            Responsaveis ja cadastrados entram em <span className="font-black text-white">Entrar &gt; Sou profissional</span>. Novos condominios comecam pela solicitacao.
+                            Responsaveis ja cadastrados entram em <span className="font-black text-white">Entrar &gt; Acesso profissional</span>. Novos condominios comecam pela solicitacao.
                           </p>
                           <button
                             type="button"
