@@ -540,15 +540,15 @@ const categoryVisuals: Record<string, { icon: typeof Storefront; label: string }
 };
 
 const CATEGORY_COLORS: Record<string, { active: string; inactive: string; icon: string }> = {
-  Restaurante: { active: 'bg-amber-500 shadow-[0_16px_32px_-10px_rgba(245,158,11,0.65),0_4px_12px_-4px_rgba(245,158,11,0.4)]', inactive: 'border border-amber-100 bg-amber-50/80', icon: 'text-amber-500' },
-  Hamburguer: { active: 'bg-orange-500 shadow-[0_16px_32px_-10px_rgba(249,115,22,0.65),0_4px_12px_-4px_rgba(249,115,22,0.4)]', inactive: 'border border-orange-100 bg-orange-50/80', icon: 'text-orange-500' },
-  Lanche:     { active: 'bg-orange-400 shadow-[0_16px_32px_-10px_rgba(249,115,22,0.58),0_4px_12px_-4px_rgba(249,115,22,0.35)]', inactive: 'border border-orange-100 bg-orange-50/80', icon: 'text-orange-400' },
-  Pizza:      { active: 'bg-rose-500 shadow-[0_16px_32px_-10px_rgba(244,63,94,0.65),0_4px_12px_-4px_rgba(244,63,94,0.4)]',    inactive: 'border border-rose-100 bg-rose-50/80',   icon: 'text-rose-500' },
-  Bebidas:    { active: 'bg-violet-500 shadow-[0_16px_32px_-10px_rgba(139,92,246,0.65),0_4px_12px_-4px_rgba(139,92,246,0.4)]', inactive: 'border border-violet-100 bg-violet-50/80', icon: 'text-violet-500' },
-  Mercado:    { active: 'bg-emerald-600 shadow-[0_16px_32px_-10px_rgba(5,150,105,0.65),0_4px_12px_-4px_rgba(5,150,105,0.4)]', inactive: 'border border-emerald-100 bg-emerald-50/80', icon: 'text-emerald-600' },
-  Farmacia:   { active: 'bg-teal-500 shadow-[0_16px_32px_-10px_rgba(20,184,166,0.65),0_4px_12px_-4px_rgba(20,184,166,0.4)]',  inactive: 'border border-teal-100 bg-teal-50/80',   icon: 'text-teal-500' },
-  Doces:      { active: 'bg-pink-500 shadow-[0_16px_32px_-10px_rgba(236,72,153,0.65),0_4px_12px_-4px_rgba(236,72,153,0.4)]',  inactive: 'border border-pink-100 bg-pink-50/80',   icon: 'text-pink-500' },
-  Empório:    { active: 'bg-lime-600 shadow-[0_16px_32px_-10px_rgba(101,163,13,0.65),0_4px_12px_-4px_rgba(101,163,13,0.4)]',  inactive: 'border border-lime-100 bg-lime-50/80',   icon: 'text-lime-600' },
+  Restaurante: { active: 'bg-amber-500 shadow-[0_18px_34px_-24px_rgba(245,158,11,0.58)]', inactive: 'border border-amber-100/75 bg-white/78', icon: 'text-amber-500' },
+  Hamburguer: { active: 'bg-orange-500 shadow-[0_18px_34px_-24px_rgba(249,115,22,0.56)]', inactive: 'border border-orange-100/75 bg-white/78', icon: 'text-orange-500' },
+  Lanche:     { active: 'bg-orange-400 shadow-[0_18px_34px_-24px_rgba(249,115,22,0.50)]', inactive: 'border border-orange-100/75 bg-white/78', icon: 'text-orange-400' },
+  Pizza:      { active: 'bg-rose-500 shadow-[0_18px_34px_-24px_rgba(244,63,94,0.56)]',    inactive: 'border border-rose-100/75 bg-white/78',   icon: 'text-rose-500' },
+  Bebidas:    { active: 'bg-violet-500 shadow-[0_18px_34px_-24px_rgba(139,92,246,0.56)]', inactive: 'border border-violet-100/75 bg-white/78', icon: 'text-violet-500' },
+  Mercado:    { active: 'bg-emerald-600 shadow-[0_18px_34px_-24px_rgba(5,150,105,0.54)]', inactive: 'border border-emerald-100/75 bg-white/78', icon: 'text-emerald-600' },
+  Farmacia:   { active: 'bg-teal-500 shadow-[0_18px_34px_-24px_rgba(20,184,166,0.54)]',  inactive: 'border border-teal-100/75 bg-white/78',   icon: 'text-teal-500' },
+  Doces:      { active: 'bg-pink-500 shadow-[0_18px_34px_-24px_rgba(236,72,153,0.54)]',  inactive: 'border border-pink-100/75 bg-white/78',   icon: 'text-pink-500' },
+  Empório:    { active: 'bg-lime-600 shadow-[0_18px_34px_-24px_rgba(101,163,13,0.52)]',  inactive: 'border border-lime-100/75 bg-white/78',   icon: 'text-lime-600' },
 };
 
 const readCustomerSession = () => {
@@ -1927,13 +1927,13 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.055),transparent_40%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.035),transparent_42%),linear-gradient(180deg,#ECF3F8_0%,#E7EFF5_48%,#E2EBF2_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.045),transparent_42%),radial-gradient(ellipse_at_bottom_left,rgba(95,211,90,0.035),transparent_46%),linear-gradient(180deg,#F8FAFB_0%,#F4F7F8_48%,#F1F5F6_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Elemento Decorativo de Fundo (Premium Look) */}
       <div className="jnc-safe-area-glass pointer-events-none fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top)]" />
-      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-white/80 via-slate-50/35 to-transparent" />
-      <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-white/45 blur-[130px] pointer-events-none -z-10" />
-      <div className="fixed top-[-10%] right-[-10%] h-[44%] w-[52%] bg-slate-200/35 blur-[110px] rounded-full pointer-events-none -z-10" />
-      <div className="fixed bottom-[5%] right-[5%] h-[22%] w-[28%] bg-white/35 blur-[100px] pointer-events-none -z-10" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-white/82 via-slate-50/26 to-transparent" />
+      <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-white/42 blur-[140px] pointer-events-none -z-10" />
+      <div className="fixed top-[-10%] right-[-10%] h-[44%] w-[52%] bg-[#d7e7ef]/28 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="fixed bottom-[5%] right-[5%] h-[22%] w-[28%] bg-white/32 blur-[110px] pointer-events-none -z-10" />
 
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
@@ -2173,7 +2173,7 @@ export function MarketplacePage() {
                       onPointerEnter={warmupDestination}
                       onFocus={warmupDestination}
                       onTouchStart={warmupDestination}
-                      className={`jnc-hub-touch jnc-hub-lift group relative flex shrink-0 overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_22px_54px_-40px_rgba(15,23,42,0.46)] ring-1 ring-slate-200/70 ${index === 0 ? 'h-[11.4rem] w-[18.75rem]' : 'h-[10.75rem] w-[15.75rem]'}`}
+                      className={`jnc-hub-touch jnc-hub-lift group relative flex shrink-0 overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_26px_62px_-48px_rgba(15,23,42,0.42)] ring-1 ring-white/70 ${index === 0 ? 'h-[11.4rem] w-[18.75rem]' : 'h-[10.75rem] w-[15.75rem]'}`}
                     >
                       <img
                         src={resolveDestinationAssetUrl(destination)}
@@ -2182,7 +2182,7 @@ export function MarketplacePage() {
                         decoding="async"
                         className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
                       />
-                      <div className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.42)_42%,rgba(15,23,42,0.82)_100%)]" />
+                      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04)_0%,rgba(15,23,42,0)_34%,rgba(15,23,42,0.30)_66%,rgba(15,23,42,0.78)_100%)]" />
                       <div className="jnc-hub-glass-badge absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.13em] text-[#153A4C] ring-1 ring-[#d7e7ef]/70">
                         <MapPinLine size={10} weight="fill" className="shrink-0 text-[#336886]" />
                         <span className="truncate">{formatDestinationMatchLabel(destination)}</span>
@@ -2192,11 +2192,11 @@ export function MarketplacePage() {
                           {destination.name}
                         </p>
                         <div className="mt-2 flex items-center justify-between gap-2">
-                          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/18 bg-white/16 px-2.5 py-1 text-[9.5px] font-black uppercase tracking-[0.1em] text-white shadow-[0_12px_24px_-20px_rgba(15,23,42,0.55)] backdrop-blur-md">
+                          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/18 px-2.5 py-1 text-[9.5px] font-black uppercase tracking-[0.1em] text-white shadow-[0_14px_28px_-22px_rgba(15,23,42,0.58)] backdrop-blur-xl">
                             <Sparkle size={10} weight="fill" className="shrink-0 text-lime-200" />
                             <span className="truncate">{countLabel}</span>
                           </span>
-                          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/18 text-white backdrop-blur-md transition group-hover:translate-x-0.5">
+                          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/18 bg-white/20 text-white backdrop-blur-xl transition group-hover:translate-x-0.5">
                             <CaretRight size={12} weight="bold" />
                           </span>
                         </div>
@@ -2215,7 +2215,7 @@ export function MarketplacePage() {
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               {selectedCondominium ? (
-                <div className="relative overflow-hidden rounded-[1.8rem] border border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+                <div className="relative overflow-hidden rounded-[1.8rem] border border-white/82 bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(250,252,253,0.88)_100%)] shadow-[0_24px_56px_-46px_rgba(15,23,42,0.26)] ring-1 ring-slate-200/45 backdrop-blur-2xl">
                   <div className="absolute inset-0">
                     {selectedCondominiumBannerUrl ? (
                       <img
@@ -2288,7 +2288,7 @@ export function MarketplacePage() {
                           ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
                           : hasUpcomingCondominiumEvent
                             ? 'bg-sky-50 text-sky-700 ring-1 ring-sky-100'
-                            : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200/80'
+                            : 'bg-slate-100/80 text-slate-600 ring-1 ring-slate-200/70'
                       }`}>
                         <CalendarBlank size={11} weight="fill" />
                         {isCondominiumEventLive ? 'Ao vivo' : hasUpcomingCondominiumEvent ? 'Agendado' : 'Sem agenda'}
@@ -2384,7 +2384,7 @@ export function MarketplacePage() {
                                           ? 'bg-emerald-500 text-white'
                                           : eventState === 'upcoming'
                                             ? 'bg-sky-100 text-sky-700'
-                                            : 'bg-slate-100 text-slate-600'
+                                            : 'bg-slate-100/80 text-slate-600'
                                       }`}>
                                         {statusLabel}
                                       </span>
@@ -2700,21 +2700,21 @@ export function MarketplacePage() {
         className="fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 transition-transform duration-300 lg:hidden"
         style={{ transform: isBottomNavVisible && !condominiumPickerOpen ? 'translateY(0)' : 'translateY(100%)' }}
       >
-        <div className="mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+        <div className="mx-auto max-w-none rounded-none border border-b-0 border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(250,252,253,0.88)_100%)] px-2 pt-2 shadow-[0_-22px_54px_-42px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/45 backdrop-blur-2xl">
           <div className="grid min-h-[4.65rem] grid-cols-5 items-center gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
           <button
             type="button"
             onClick={handleHomeHubNavigation}
             className={`group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
               quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium
-                ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12'
+                ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.10)_0%,rgba(51,104,134,0.045)_100%)] text-[#2d5f7b] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.38)] ring-1 ring-[#336886]/10'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
               quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium
-                ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
-                : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+                ? 'bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)]'
+                : 'bg-slate-100/80 text-slate-600 group-hover:bg-slate-200/80'
             }`}>
               <House size={16} weight={quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium ? 'fill' : 'duotone'} />
             </span>
@@ -2726,7 +2726,7 @@ export function MarketplacePage() {
             onClick={handleOpenPedidos}
             className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
               <Receipt size={16} weight="duotone" />
             </span>
             <span>Pedidos</span>
@@ -2736,14 +2736,14 @@ export function MarketplacePage() {
             onClick={() => setCondominiumPickerOpen(true)}
             className={`group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
               selectedCondominium || condominiumPickerOpen
-                ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12'
+                ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.10)_0%,rgba(51,104,134,0.045)_100%)] text-[#2d5f7b] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.38)] ring-1 ring-[#336886]/10'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
               selectedCondominium || condominiumPickerOpen
-                ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
-                : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+                ? 'bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)]'
+                : 'bg-slate-100/80 text-slate-600 group-hover:bg-slate-200/80'
             }`}>
               <Buildings size={16} weight={selectedCondominium || condominiumPickerOpen ? 'fill' : 'duotone'} />
             </span>
@@ -2754,7 +2754,7 @@ export function MarketplacePage() {
             onClick={() => navigate('/destinos')}
             className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
               <Mountains size={16} weight="duotone" />
             </span>
             <span>Destinos</span>
@@ -2764,7 +2764,7 @@ export function MarketplacePage() {
             onClick={() => setProfileDrawerOpen(true)}
             className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
               <UserCircle size={16} weight="duotone" />
             </span>
             <span>Perfil</span>
@@ -3160,7 +3160,7 @@ export function MarketplacePage() {
                                     </div>
                                   </div>
                                   <span className={`relative shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.08em] ${
-                                    active ? 'bg-[#336886]/10 text-[#336886]' : 'bg-slate-100 text-slate-600'
+                                    active ? 'bg-[#336886]/10 text-[#336886]' : 'bg-slate-100/80 text-slate-600'
                                   }`}>
                                     {active ? 'Aqui' : 'Ver mais'}
                                     {!active && <CaretRight size={9} weight="bold" />}
@@ -3179,7 +3179,7 @@ export function MarketplacePage() {
             </div>
 
             <nav className="fixed bottom-0 left-0 right-0 z-[230] px-0 pb-0 lg:hidden">
-              <div className="mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+              <div className="mx-auto max-w-none rounded-none border border-b-0 border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(250,252,253,0.88)_100%)] px-2 pt-2 shadow-[0_-22px_54px_-42px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/45 backdrop-blur-2xl">
                 <div className="grid min-h-[4.65rem] max-w-[760px] grid-cols-5 items-center gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
                 <button
                   type="button"
@@ -3189,7 +3189,7 @@ export function MarketplacePage() {
                   }}
                   className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
                 >
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
                     <House size={16} weight="duotone" />
                   </span>
                   <span>Início</span>
@@ -3203,16 +3203,16 @@ export function MarketplacePage() {
                   }}
                   className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
                 >
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
                     <Receipt size={16} weight="duotone" />
                   </span>
                   <span>Pedidos</span>
                 </button>
                 <button
                   type="button"
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(51,104,134,0.10)_0%,rgba(51,104,134,0.045)_100%)] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-[#2d5f7b] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.38)] ring-1 ring-[#336886]/10 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03]"
                 >
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)]">
                     <Buildings size={16} weight="fill" />
                   </span>
                   <span>Agenda</span>
@@ -3225,7 +3225,7 @@ export function MarketplacePage() {
                   }}
                   className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
                 >
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
                     <Mountains size={16} weight="duotone" />
                   </span>
                   <span>Destinos</span>
@@ -3238,7 +3238,7 @@ export function MarketplacePage() {
                   }}
                   className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
                 >
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
                     <UserCircle size={16} weight="duotone" />
                   </span>
                   <span>Perfil</span>

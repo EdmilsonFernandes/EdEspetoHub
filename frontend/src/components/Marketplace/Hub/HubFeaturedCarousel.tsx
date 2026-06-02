@@ -79,14 +79,14 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
 
       <div className="relative mt-2.5">
         {hasOverflow ? (
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 rounded-r-[1.45rem] bg-[linear-gradient(90deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0.86)_62%,rgba(255,255,255,0.98)_100%)]" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 rounded-r-[1.45rem] bg-[linear-gradient(90deg,rgba(255,255,255,0)_0%,rgba(250,252,253,0.84)_62%,rgba(250,252,253,0.98)_100%)]" />
         ) : null}
         <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto no-scrollbar px-1 pb-1 pr-7">
           {loading
             ? Array.from({ length: 3 }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="relative overflow-hidden h-[112px] min-w-[268px] rounded-[1.45rem] bg-white p-2.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.18)] ring-1 ring-slate-100/80 flex gap-3 sm:min-w-[292px]"
+                  className="relative overflow-hidden h-[112px] min-w-[268px] rounded-[1.45rem] bg-white p-2.5 shadow-[0_20px_46px_-38px_rgba(15,23,42,0.16)] ring-1 ring-slate-100/80 flex gap-3 sm:min-w-[292px]"
                 >
                   <div className="relative h-[92px] w-[92px] shrink-0 rounded-[1.2rem] bg-slate-100 overflow-hidden">
                     <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
@@ -123,18 +123,18 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                     onClick={() => onStageProduct(item)}
                     className={`jnc-hub-touch jnc-hub-lift jnc-hub-card group flex min-h-[112px] min-w-[268px] snap-start gap-3 rounded-[1.45rem] p-2.5 sm:min-w-[292px] border transition-all duration-300 ${
                       item.sponsored
-                        ? 'border-amber-200/70 bg-[linear-gradient(135deg,rgba(254,243,199,0.25)_0%,#ffffff_60%,#ffffff_100%)] shadow-[0_14px_34px_-26px_rgba(245,158,11,0.22)]'
-                        : 'border-slate-100 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.04)]'
+                        ? 'border-amber-200/60 bg-[linear-gradient(135deg,rgba(254,243,199,0.20)_0%,#ffffff_58%,#ffffff_100%)] shadow-[0_20px_46px_-38px_rgba(245,158,11,0.24)]'
+                        : 'border-slate-100/80 bg-white shadow-[0_18px_42px_-36px_rgba(15,23,42,0.16)]'
                     }`}
                   >
-                    <div className="relative h-[92px] w-[92px] shrink-0 overflow-hidden rounded-[1.2rem] bg-slate-100 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.36)] ring-1 ring-white/80">
+                    <div className="relative h-[92px] w-[92px] shrink-0 overflow-hidden rounded-[1.2rem] bg-slate-100 shadow-[0_20px_38px_-32px_rgba(15,23,42,0.30)] ring-1 ring-white/80">
                       <img
                         src={item.imageUrl}
                         alt={item.name}
                         loading={index < 2 ? 'eager' : 'lazy'}
                         fetchPriority={index < 2 ? 'high' : 'auto'}
                         decoding="async"
-                        className="h-full w-full object-cover drop-shadow-[0_10px_18px_rgba(15,23,42,0.10)] transition-transform duration-700 group-hover:scale-105"
+                        className="h-full w-full object-cover drop-shadow-[0_12px_20px_rgba(15,23,42,0.09)] transition-transform duration-700 group-hover:scale-105"
                         onError={(event) => {
                           (event.target as HTMLImageElement).src =
                             item.storeLogo || getStoreAvatarUrl(item.storeSlug, item.storeName);
@@ -143,7 +143,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                       
                       <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
                       
-                      <div className="absolute inset-x-0 bottom-0 h-9 bg-gradient-to-t from-black/22 to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 h-9 bg-gradient-to-t from-black/24 to-transparent" />
                       
                       <div className="absolute right-1.5 top-1.5 z-20">
                         {item.sponsored ? (
@@ -158,7 +158,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                         )}
                       </div>
 
-                      <div className="absolute bottom-1 right-1 z-20 h-6 w-6 overflow-hidden rounded-full border-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.15)] bg-white">
+                      <div className="absolute bottom-1 right-1 z-20 h-6 w-6 overflow-hidden rounded-full border-2 border-white bg-white shadow-[0_8px_16px_-10px_rgba(15,23,42,0.36)]">
                         <img
                           src={item.storeLogo || getStoreAvatarUrl(item.storeSlug, item.storeName)}
                           alt={item.storeName}
@@ -179,7 +179,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                           {currency.format(item.price)}
                         </span>
                         
-                        <span className="inline-flex h-7 items-center gap-1 rounded-full bg-[#edf5fa] px-2 text-[#336886] transition-all duration-300 group-hover:bg-[#336886] group-hover:text-white group-hover:px-3 group-hover:shadow-[0_4px_12px_rgba(51,104,134,0.25)]">
+                        <span className="inline-flex h-7 items-center gap-1 rounded-full bg-[#edf5fa]/82 px-2 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.76)] transition-all duration-300 group-hover:bg-[#336886] group-hover:px-3 group-hover:text-white group-hover:shadow-[0_12px_22px_-16px_rgba(51,104,134,0.42)]">
                           <span className="max-w-0 scale-0 opacity-0 text-[9px] font-black uppercase tracking-wider transition-all duration-300 group-hover:max-w-[40px] group-hover:scale-100 group-hover:opacity-100">Pedir</span>
                           <CaretRight size={11} weight="bold" />
                         </span>

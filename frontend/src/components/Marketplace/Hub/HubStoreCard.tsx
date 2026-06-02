@@ -95,7 +95,7 @@ export function HubStoreCard({
         className={`jnc-hub-touch jnc-hub-lift group overflow-hidden rounded-[1.45rem] animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-backwards ${
           store.isOpen
             ? 'jnc-hub-card md:hover:border-[#336886]/20'
-            : 'border-slate-200/80 bg-slate-50/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)] grayscale-[25%] opacity-85 filter blur-[0.4px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
+            : 'border-slate-200/70 bg-slate-50/86 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.14)] grayscale-[25%] opacity-85 filter blur-[0.4px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
         }`}
       >
         <div className="relative">
@@ -194,13 +194,13 @@ export function HubStoreCard({
       onFocus={warmupStoreRoute}
       onTouchStart={warmupStoreRoute}
       style={{ animationDelay: `${index * 36}ms` }}
-        className={`jnc-hub-touch jnc-hub-lift group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-3.5 rounded-[1.45rem] px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards ${
+        className={`jnc-hub-touch jnc-hub-lift group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-4 rounded-[1.45rem] px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards ${
         store.isOpen && !isUnavailableForRegion
           ? 'jnc-hub-surface-soft md:hover:bg-white md:hover:border-[#336886]/20'
-          : 'border-slate-100/80 bg-slate-50/72 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.16)] ring-1 ring-slate-200/35 grayscale-[18%] opacity-85 filter blur-[0.25px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
+          : 'border-slate-100/80 bg-slate-50/74 shadow-[0_16px_32px_-28px_rgba(15,23,42,0.16)] ring-1 ring-slate-200/35 grayscale-[18%] opacity-85 filter blur-[0.25px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
       }`}
     >
-      <div className="relative h-[4.45rem] w-[4.45rem] shrink-0 overflow-hidden rounded-[1.28rem] bg-white shadow-[0_16px_28px_-24px_rgba(15,23,42,0.46)] ring-1 ring-slate-200/70">
+      <div className="relative h-[4.45rem] w-[4.45rem] shrink-0 overflow-hidden rounded-[1.28rem] bg-white shadow-[0_18px_34px_-28px_rgba(15,23,42,0.34)] ring-1 ring-slate-200/70">
         <img
           src={store.logo}
           alt=""
@@ -239,7 +239,7 @@ export function HubStoreCard({
             {isUnavailableForRegion ? 'Fora da entrega' : store.isOpen ? 'Aberto' : 'Fechado'}
           </span>
         </div>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-semibold text-slate-500">
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-[0.4375rem] gap-y-1 text-[11px] font-semibold text-slate-500">
           <span>{store.etaMin}–{store.etaMax} min</span>
           <span className="text-slate-200">·</span>
           <span>{resolvedDistanceLabel}</span>
@@ -253,7 +253,7 @@ export function HubStoreCard({
               return (
                 <span
                   key={`${store.id}-${badge.key}`}
-                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.08em] ${getCompactBadgeClass(badge.key)} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1.5 text-[8.5px] font-black uppercase tracking-[0.08em] ${getCompactBadgeClass(badge.key)} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
                 >
                   {Icon ? <Icon size={9} weight="duotone" /> : null}
                   {badge.label}
