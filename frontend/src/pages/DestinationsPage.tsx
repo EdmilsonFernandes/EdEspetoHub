@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Buildings, Compass, MagnifyingGlass, MapTrifold, Mountains, Sparkle, X } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
+import { DestinationPartnerCta } from '../components/Destinations/DestinationPartnerCta';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -295,6 +296,8 @@ export function DestinationsPage() {
             Nenhuma cidade encontrada para essa busca.
           </p>
         ) : null}
+
+        <DestinationPartnerCta className="mt-6" />
       </section>
     </PublicDestinationShell>
   );
