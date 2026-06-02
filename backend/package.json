@@ -18,6 +18,8 @@
     "seed:destination:goncalves:dist": "node dist/scripts/seedGoncalvesTourismPdf.js",
     "seed:destination:sao-francisco-xavier": "ts-node src/scripts/seedSaoFranciscoXavierTourismMap.ts",
     "seed:destination:sao-francisco-xavier:dist": "node dist/scripts/seedSaoFranciscoXavierTourismMap.js",
+    "seed:destination:monte-verde": "ts-node src/scripts/seedMonteVerdeTourismMap.ts",
+    "seed:destination:monte-verde:dist": "node dist/scripts/seedMonteVerdeTourismMap.js",
     "backfill:destination-coordinates": "ts-node src/scripts/backfillDestinationCoordinates.ts",
     "backfill:destination-coordinates:dist": "node dist/scripts/backfillDestinationCoordinates.js",
     "seed:condominium-users": "ts-node src/scripts/seedCondominiumUsers.ts",
