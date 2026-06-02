@@ -24,6 +24,8 @@
     "seed:destination:santo-antonio-pinhal:dist": "node dist/scripts/seedSantoAntonioPinhalTourismMap.js",
     "seed:destination:monteiro-lobato": "ts-node src/scripts/seedMonteiroLobatoTourismMap.ts",
     "seed:destination:monteiro-lobato:dist": "node dist/scripts/seedMonteiroLobatoTourismMap.js",
+    "seed:destination:cunha": "ts-node src/scripts/seedCunhaTourismMap.ts",
+    "seed:destination:cunha:dist": "node dist/scripts/seedCunhaTourismMap.js",
     "backfill:destination-coordinates": "ts-node src/scripts/backfillDestinationCoordinates.ts",
     "backfill:destination-coordinates:dist": "node dist/scripts/backfillDestinationCoordinates.js",
     "seed:condominium-users": "ts-node src/scripts/seedCondominiumUsers.ts",
