@@ -198,6 +198,16 @@ export function DestinationDetailPage() {
   const isNativePlatform = Capacitor.isNativePlatform();
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    };
+    window.requestAnimationFrame(scrollToTop);
+    const timeoutId = window.setTimeout(scrollToTop, 80);
+    return () => window.clearTimeout(timeoutId);
+  }, [destinationSlug]);
+
+  useEffect(() => {
     let active = true;
     setLoading(true);
     setError('');
@@ -216,6 +226,16 @@ export function DestinationDetailPage() {
       active = false;
     };
   }, [destinationSlug]);
+
+  useEffect(() => {
+    if (loading || typeof window === 'undefined') return;
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    };
+    window.requestAnimationFrame(scrollToTop);
+    const timeoutId = window.setTimeout(scrollToTop, 180);
+    return () => window.clearTimeout(timeoutId);
+  }, [loading, destinationSlug]);
 
   const destination = payload?.destination || {};
   const places = Array.isArray(payload?.hospitalityPlaces) ? payload.hospitalityPlaces : [];

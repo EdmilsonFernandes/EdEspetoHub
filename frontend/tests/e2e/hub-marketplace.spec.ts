@@ -197,7 +197,7 @@ test.describe('Hub marketplace', () => {
     await page.goto('/hub');
 
     const featuredSection = page.locator('section').filter({ hasText: 'Destaques de hoje' }).first();
-    const highlightsLink = featuredSection.getByRole('link', { name: /Ver mais/i });
+    const highlightsLink = featuredSection.getByRole('link', { name: /Ver todos/i });
     await expect(highlightsLink).toBeVisible({ timeout: 15000 });
     await expect(highlightsLink).toHaveAttribute('href', '/hub/destaques');
     await page.goto('/hub/destaques');

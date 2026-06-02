@@ -33,6 +33,26 @@ export function DestinationsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedState, setSelectedState] = useState<string>('ALL');
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    };
+    window.requestAnimationFrame(scrollToTop);
+    const timeoutId = window.setTimeout(scrollToTop, 80);
+    return () => window.clearTimeout(timeoutId);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (loading || typeof window === 'undefined') return;
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    };
+    window.requestAnimationFrame(scrollToTop);
+    const timeoutId = window.setTimeout(scrollToTop, 180);
+    return () => window.clearTimeout(timeoutId);
+  }, [loading, location.pathname, location.search]);
+
   const states = useMemo(() => {
     const list = new Set<string>();
     destinations.forEach((d) => {

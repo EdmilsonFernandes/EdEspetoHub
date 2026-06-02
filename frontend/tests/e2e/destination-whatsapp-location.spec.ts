@@ -81,6 +81,19 @@ test.use({ serviceWorkers: 'block' });
 
 test.describe('Destination WhatsApp location', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/api/public/destinations', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{
+          ...destinationPayload.destination,
+          placesCount: destinationPayload.hospitalityPlaces.length,
+          listingsCount: destinationPayload.listings.length,
+          bannerUrl: '/janocaminho.jpg',
+        }]),
+      });
+    });
+
     await page.route('**/api/public/destinations/sao-bento', async (route) => {
       await route.fulfill({
         status: 200,
@@ -154,5 +167,22 @@ test.describe('Destination WhatsApp location', () => {
     await expect(page.getByRole('link', { name: /Abrir no Waze/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /Copiar link/i })).toBeVisible();
     await expect(page.getByText('Voltar para o chalé')).toHaveCount(0);
+  });
+
+  test('abre a lista de cidades no topo ao voltar para destinos', async ({ page }) => {
+    await page.goto('/destinos/sao-bento');
+    await expect(page.getByText('Chale Vista da Pedra')).toBeVisible();
+
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 })
+      .toBeGreaterThan(50);
+
+    await page.getByRole('button', { name: /^Destinos$/i }).click();
+    await expect(page).toHaveURL(/\/destinos$/);
+    await expect(page.getByText('Escolha uma cidade turística')).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 })
+      .toBeLessThan(8);
   });
 });
