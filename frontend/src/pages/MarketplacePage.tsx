@@ -2058,8 +2058,8 @@ export function MarketplacePage() {
           {debouncedQuery.length < 2 && !selectedCondominium && (homeDestinationHighlights.length > 0 || condominiums.length > 0) && (
             <section className="jnc-hub-surface order-2 overflow-hidden rounded-[1.55rem] p-2.5">
               <div className="mb-2 flex items-center justify-between gap-2 px-1">
-                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Explore também</span>
-                <span className="text-[10px] font-bold text-slate-400">atalhos</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Atalhos rápidos</span>
+                <span className="text-[10px] font-bold text-slate-400">explore</span>
               </div>
               <div className={`grid gap-2.5 sm:gap-3 ${homeDestinationHighlights.length > 0 && condominiums.length > 0 ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2'}`}>
                 {condominiums.length > 0 ? (
@@ -2078,7 +2078,7 @@ export function MarketplacePage() {
                       </span>
                       <span className="min-w-0">
                         <span className="block truncate text-[11px] font-black text-slate-900 sm:text-sm">Feiras</span>
-                        <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">Condomínios</span>
+                        <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">Agendas no app</span>
                       </span>
                     </div>
 
@@ -2108,7 +2108,7 @@ export function MarketplacePage() {
                       </span>
                       <span className="min-w-0">
                         <span className="block truncate text-[11px] font-black text-slate-900 sm:text-sm">Destinos</span>
-                        <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">Chalés e serviços</span>
+                        <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">Hospedagens e delivery</span>
                       </span>
                     </div>
 
@@ -2138,20 +2138,20 @@ export function MarketplacePage() {
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
                     <Mountains size={12} weight="duotone" />
-                    Explore a região
+                    Guia da região
                   </p>
                   <h2 className="mt-1 text-base font-black leading-tight tracking-[-0.03em] text-slate-950 sm:text-lg">
-                    Chalés, comida e serviços perto de você
+                    Descubra a região sem sair do app
                   </h2>
                   <p className="mt-1 max-w-[18rem] text-xs font-semibold leading-relaxed text-slate-500">
-                    Descubra onde ficar, pedir e passear sem sair do app.
+                    Chalés, delivery, passeios e serviços organizados por cidade.
                   </p>
                 </div>
                 <Link
                   to={destinationListHref}
                   className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]"
                 >
-                  Ver destinos
+                  Ver guia
                   <CaretRight size={10} weight="bold" />
                 </Link>
               </div>
@@ -2494,9 +2494,13 @@ export function MarketplacePage() {
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h2 className="text-[1.05rem] font-black leading-tight tracking-[-0.035em] text-slate-950 sm:text-lg">
-                  {isHomeStorePreview ? 'Lojas' : 'Escolha a loja para pedir'}
+                  {isHomeStorePreview ? 'Lojas para pedir agora' : 'Escolha a loja para pedir'}
                 </h2>
-                {!loading && !error && filteredStores.length > 0 && !isHomeStorePreview ? (
+                {isHomeStorePreview ? (
+                  <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                    Restaurantes, mercados e serviços prontos para pedir.
+                  </p>
+                ) : !loading && !error && filteredStores.length > 0 ? (
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
                     {productSearchLoading && debouncedQuery
                       ? 'Buscando também nos cardápios...'
@@ -2628,7 +2632,7 @@ export function MarketplacePage() {
                     onClick={() => setIsHomeStoreListExpanded(true)}
                     className="jnc-hub-touch jnc-hub-pill inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886]"
                   >
-                    Ver mais lojas
+                    Ver todas as lojas
                     <span className="rounded-full bg-[#336886]/8 px-2 py-0.5 text-[10px]">+{hiddenHomeStoreCount}</span>
                   </button>
                 </div>
