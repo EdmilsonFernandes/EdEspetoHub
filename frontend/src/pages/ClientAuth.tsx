@@ -578,6 +578,25 @@ export function ClientAuth() {
               </div>
             </div>
           ) : null}
+          {mode === 'login' ? (
+            <button
+              type="button"
+              onClick={() => setProfessionalAccessOpen(true)}
+              className="group relative flex w-full items-center gap-3 overflow-hidden rounded-[1.35rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(238,247,250,0.92))] px-3.5 py-3 text-left shadow-[0_18px_38px_-30px_rgba(21,58,76,0.38)] transition-all hover:border-[#336886]/25 hover:bg-white active:scale-[0.99]"
+            >
+              <span className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-[#5FD35A]/12 blur-2xl" />
+              <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.46)]">
+                <Storefront size={19} weight="duotone" />
+              </span>
+              <span className="relative min-w-0 flex-1">
+                <span className="block text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">Acesso profissional</span>
+                <span className="mt-0.5 block text-sm font-black leading-4 tracking-[-0.02em] text-slate-900">Lojista, entregador ou parceiro</span>
+              </span>
+              <span className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#336886]/10 bg-white/80 text-[#336886] transition group-hover:translate-x-0.5">
+                <ArrowRight size={15} weight="bold" />
+              </span>
+            </button>
+          ) : null}
           <div className="flex gap-2 rounded-[1.1rem] border border-slate-200 bg-slate-100 p-1.5">
             <button
               type="button"
@@ -741,27 +760,6 @@ export function ClientAuth() {
             >
               {loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : 'Entrar'}
             </button>
-
-            {mode === 'login' ? (
-              <button
-                type="button"
-                onClick={() => setProfessionalAccessOpen(true)}
-                className="group relative flex w-full items-center gap-3 overflow-hidden rounded-[1.35rem] border border-[#d7e7ef]/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(239,248,251,0.88))] px-3.5 py-3.5 text-left shadow-[0_18px_38px_-30px_rgba(21,58,76,0.38)] transition-all hover:border-[#336886]/25 hover:bg-white active:scale-[0.99]"
-              >
-                <span className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-[#5FD35A]/12 blur-2xl" />
-                <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.46)]">
-                  <Storefront size={19} weight="duotone" />
-                </span>
-                <span className="relative min-w-0 flex-1">
-                  <span className="block text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Acesso profissional</span>
-                  <span className="mt-1 block text-sm font-black leading-4 tracking-[-0.02em] text-slate-900">Sou lojista, entregador ou parceiro</span>
-                  <span className="mt-1 block text-[11px] font-semibold leading-4 text-slate-500">Abrir painel da operação, entregas ou gestão.</span>
-                </span>
-                <span className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#336886]/10 bg-white/80 text-[#336886] transition group-hover:translate-x-0.5">
-                  <ArrowRight size={15} weight="bold" />
-                </span>
-              </button>
-            ) : null}
 
             {mode === 'login' && biometricAvailable ? (
               <div className="space-y-1.5">

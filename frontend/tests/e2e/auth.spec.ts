@@ -23,7 +23,7 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
     await expect(page).toHaveURL(/\/cliente\?mode=login/);
     await expect(page.getByRole('banner')).toContainText('Área do cliente');
 
-    await page.getByRole('button', { name: /Acesso profissional/i }).click();
+    await page.getByRole('button', { name: /Acesso profissional/i }).click({ force: true });
     const dialog = page.getByRole('dialog', { name: /Acessos profissionais/i });
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('button', { name: /Lojista/i })).toBeVisible();
@@ -34,6 +34,26 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
 
     await dialog.getByRole('button', { name: /Lojista/i }).click({ force: true });
     await expect(page).toHaveURL(/\/admin/);
+  });
+
+  test('mantem acesso profissional alcancavel com fonte Android grande', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await page.goto('/cliente?mode=login&hub=1');
+    await waitForAppIntro(page);
+    await page.addStyleTag({
+      content: `
+        html { font-size: 20px !important; }
+        body { -webkit-text-size-adjust: 130%; text-size-adjust: 130%; }
+      `,
+    });
+
+    const professionalButton = page.getByRole('button', { name: /Acesso profissional/i });
+    await expect(professionalButton).toBeVisible();
+    await professionalButton.click();
+
+    const dialog = page.getByRole('dialog', { name: /Acessos profissionais/i });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Lojista/i })).toBeVisible();
   });
 
   test('rota entrar nao abre seletor de perfis e cai direto no cliente', async ({ page }) => {

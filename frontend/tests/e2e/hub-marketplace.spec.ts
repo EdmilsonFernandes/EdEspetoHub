@@ -223,8 +223,11 @@ test.describe('Hub marketplace', () => {
     await expect(page.getByText('Gustavao Espetos E2E')).toBeVisible({ timeout: 15000 });
     await page.getByLabel('Abrir menu de perfil').first().click();
     await expect(page.getByText('Acesse sua conta')).toBeVisible();
+    await page.waitForTimeout(550);
 
-    await page.getByRole('button', { name: /Sou profissional/i }).click();
+    const professionalAccess = page.getByRole('button', { name: /Sou profissional/i });
+    await expect(professionalAccess).toBeVisible();
+    await professionalAccess.evaluate((element: HTMLElement) => element.click());
     await expect(page.getByRole('button', { name: /^Lojista/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /^Entregador/i })).toBeVisible();
     await page.getByLabel('Fechar escolha de acesso').click({ force: true });

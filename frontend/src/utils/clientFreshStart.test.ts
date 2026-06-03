@@ -10,6 +10,7 @@ describe('clientFreshStart', () => {
   it('preserva chaves solicitadas durante limpeza não bloqueante do login', async () => {
     localStorage.setItem('adminSession', '{"token":"token"}');
     localStorage.setItem('auth:last-admin-identifier', 'loja@teste.com');
+    localStorage.setItem('storeCheckoutDraft:loja-teste:staff', '{"cart":{"a":{"qty":1}}}');
     localStorage.setItem('stale-key', 'remove-me');
     sessionStorage.setItem('admin:activeTab', 'fila');
     sessionStorage.setItem('temp-flow', 'remove-me');
@@ -23,6 +24,7 @@ describe('clientFreshStart', () => {
 
     expect(localStorage.getItem('adminSession')).toBe('{"token":"token"}');
     expect(localStorage.getItem('auth:last-admin-identifier')).toBe('loja@teste.com');
+    expect(localStorage.getItem('storeCheckoutDraft:loja-teste:staff')).toBe('{"cart":{"a":{"qty":1}}}');
     expect(localStorage.getItem('stale-key')).toBeNull();
     expect(sessionStorage.getItem('admin:activeTab')).toBe('fila');
     expect(sessionStorage.getItem('temp-flow')).toBeNull();

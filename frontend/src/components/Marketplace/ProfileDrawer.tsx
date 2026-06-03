@@ -605,12 +605,12 @@ export function ProfileDrawer({
               ) : null}
             </div>
           ) : (
-            <div className="space-y-3.5">
+            <div className="space-y-2.5">
               {/* Saudação */}
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]/70">Já no Caminho</p>
-                <h2 className="mt-0.5 text-[1.15rem] font-black tracking-tight text-slate-900 leading-snug">Acesse sua conta</h2>
-                <p className="mt-0.5 text-[11.5px] font-medium text-slate-500">Entre para acompanhar pedidos, endereços e favoritos.</p>
+                <h2 className="mt-0.5 text-[1.05rem] font-black tracking-tight text-slate-900 leading-snug">Acesse sua conta</h2>
+                <p className="mt-0.5 text-[11px] font-medium text-slate-500">Pedidos, endereços e favoritos.</p>
               </div>
 
               {/* Dois CTAs lado a lado */}
@@ -622,10 +622,10 @@ export function ProfileDrawer({
                     onLogin();
                     onClose();
                   }}
-                  className="relative flex flex-col items-start overflow-hidden rounded-[1.3rem] bg-[linear-gradient(135deg,#0d526c_0%,#17384a_100%)] p-3.5 text-white shadow-[0_12px_24px_-16px_rgba(21,58,76,0.45)] transition-all active:scale-[0.97]"
+                  className="relative flex flex-col items-start overflow-hidden rounded-[1.25rem] bg-[linear-gradient(135deg,#0d526c_0%,#17384a_100%)] p-3 text-white shadow-[0_12px_24px_-16px_rgba(21,58,76,0.45)] transition-all active:scale-[0.97]"
                 >
                   <div className="pointer-events-none absolute -right-3 -top-3 h-16 w-16 rounded-full bg-white/8 blur-2xl" />
-                  <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/15">
+                  <div className="mb-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/15">
                     <ArrowRight size={15} weight="bold" />
                   </div>
                   <p className="text-[13px] font-black leading-none">Entrar</p>
@@ -639,9 +639,9 @@ export function ProfileDrawer({
                     onRegisterClient();
                     onClose();
                   }}
-                  className="relative flex flex-col items-start overflow-hidden rounded-[1.3rem] border border-slate-200 bg-white p-3.5 text-slate-800 shadow-[0_4px_14px_-8px_rgba(15,23,42,0.1)] transition-all active:scale-[0.97] hover:border-[#336886]/20 hover:shadow-[0_6px_18px_-8px_rgba(51,104,134,0.15)]"
+                  className="relative flex flex-col items-start overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white p-3 text-slate-800 shadow-[0_4px_14px_-8px_rgba(15,23,42,0.1)] transition-all active:scale-[0.97] hover:border-[#336886]/20 hover:shadow-[0_6px_18px_-8px_rgba(51,104,134,0.15)]"
                 >
-                  <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886]">
+                  <div className="mb-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886]">
                     <RocketLaunch size={15} weight="duotone" />
                   </div>
                   <p className="text-[13px] font-black leading-none text-slate-900">Criar conta</p>
@@ -652,14 +652,14 @@ export function ProfileDrawer({
               <button
                 type="button"
                 onClick={() => { setAccessPickerMode('login'); setHighlightFirstAccess(false); setAccessPickerOpen(true); }}
-                className="group flex w-full items-center gap-3 rounded-[1.25rem] border border-[#d7e7ef]/80 bg-[#f4fafc]/84 px-3.5 py-3 text-left shadow-[0_14px_30px_-26px_rgba(21,58,76,0.28)] transition-all active:scale-[0.98]"
+                className="group flex w-full items-center gap-3 rounded-[1.2rem] border border-[#d7e7ef]/80 bg-[#f4fafc]/84 px-3 py-2.5 text-left shadow-[0_14px_30px_-26px_rgba(21,58,76,0.28)] transition-all active:scale-[0.98]"
               >
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(21,58,76,0.36)]">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(21,58,76,0.36)]">
                   <Storefront size={19} weight="duotone" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[12px] font-black uppercase tracking-[0.12em] text-[#153A4C]">Sou profissional</span>
-                  <span className="mt-0.5 block text-[11px] font-semibold leading-4 text-slate-500">Lojista, entregador ou operação</span>
+                  <span className="block text-[11px] font-black uppercase tracking-[0.12em] text-[#153A4C]">Sou profissional</span>
+                  <span className="mt-0.5 block text-[10.5px] font-semibold leading-4 text-slate-500">Lojista, entregador ou operação</span>
                 </span>
                 <CaretRight size={15} weight="bold" className="shrink-0 text-[#336886]/60 transition-transform group-active:translate-x-0.5" />
               </button>

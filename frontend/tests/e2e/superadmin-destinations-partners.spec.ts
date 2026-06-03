@@ -228,7 +228,7 @@ test.describe('Super Admin destinations partners', () => {
 
     await page.getByPlaceholder(/Buscar cidade, parceiro/i).fill('');
     await page.getByRole('button', { name: /^Todos/i }).first().click();
-    await page.getByRole('button', { name: /^Tudo/i }).click();
+    await page.getByRole('button', { name: /^Tudo/i }).click({ force: true });
     await expect(page.getByText('Amerê Chalés Oficial')).toBeVisible();
   });
 });

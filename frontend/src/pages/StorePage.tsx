@@ -53,6 +53,11 @@ import { buildDestinationInquiryMessage, prettifyDestinationLabel } from '../uti
 import { reconcileCartStock } from '../utils/cartStock';
 import { normalizeCustomerOrderNote } from '../utils/customerOrderNote';
 import { inputAssistProps } from '../utils/inputAssist';
+import {
+  buildStoreCheckoutDraftKey,
+  createStoreCheckoutDraft,
+  normalizeStoreCheckoutDraft,
+} from '../utils/storeCheckoutDraft';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
@@ -491,6 +496,12 @@ export function StorePage() {
     () => `checkoutCustomer:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
   );
+  const checkoutDraftContext = isStoreAdmin ? 'staff' : 'public';
+  const checkoutDraftStorageKey = useMemo(
+    () => buildStoreCheckoutDraftKey(storeSlug || defaultBranding.espetoId, checkoutDraftContext),
+    [checkoutDraftContext, storeSlug]
+  );
+  const restoredCheckoutDraftKeysRef = useRef<Record<string, boolean>>({});
   const readCustomerSessionSnapshot = useCallback((candidate?: any | null) => {
     const session = candidate && typeof candidate === 'object' ? candidate : null;
     if (session?.token) {
@@ -833,6 +844,43 @@ export function StorePage() {
     () => validCartItems.reduce((acc: number, item: any) => acc + Number(item?.qty || 0), 0),
     [validCartItems]
   );
+  const clearCheckoutDraft = useCallback(() => {
+    try {
+      localStorage.removeItem(checkoutDraftStorageKey);
+    } catch {
+      // localStorage can fail in restricted webviews.
+    }
+  }, [checkoutDraftStorageKey]);
+  const persistCheckoutDraft = useCallback((viewOverride?: string) => {
+    if (!storeSlug || cartItemsCount <= 0) return false;
+    try {
+      const draft = createStoreCheckoutDraft({
+        cart,
+        customer,
+        paymentMethod,
+        deliveryMode,
+        selectedPostalServiceCode,
+        view: viewOverride || view,
+        context: checkoutDraftContext,
+      });
+      if (!draft) return false;
+      localStorage.setItem(checkoutDraftStorageKey, JSON.stringify(draft));
+      return true;
+    } catch {
+      return false;
+    }
+  }, [
+    cart,
+    cartItemsCount,
+    checkoutDraftContext,
+    checkoutDraftStorageKey,
+    customer,
+    deliveryMode,
+    paymentMethod,
+    selectedPostalServiceCode,
+    storeSlug,
+    view,
+  ]);
   const cartItemsTotal = cartPricing.discountedSubtotal;
   const suggestedProducts = useMemo(
     () => products.filter((p: any) => !cart[p.id] && p.active !== false).slice(0, 10),
@@ -877,6 +925,59 @@ export function StorePage() {
     if (nextPaymentMethod === paymentMethod) return;
     setPaymentMethod(nextPaymentMethod);
   }, [availablePaymentMethods, isProfessionalCheckoutUser, paymentMethod]);
+
+  useEffect(() => {
+    if (!storeSlug) return;
+    if (restoredCheckoutDraftKeysRef.current[checkoutDraftStorageKey]) return;
+    restoredCheckoutDraftKeysRef.current[checkoutDraftStorageKey] = true;
+
+    try {
+      const draft = normalizeStoreCheckoutDraft(localStorage.getItem(checkoutDraftStorageKey));
+      if (!draft) {
+        localStorage.removeItem(checkoutDraftStorageKey);
+        return;
+      }
+
+      setCart((prev: Record<string, any>) => {
+        const hasCurrentItems = Object.values(prev || {}).some((item: any) => Number(item?.qty || 0) > 0);
+        return hasCurrentItems ? prev : draft.cart;
+      });
+      setCustomer((prev: Record<string, any>) => ({
+        ...prev,
+        ...(draft.customer || {}),
+      }));
+      if (draft.paymentMethod) setPaymentMethod(draft.paymentMethod);
+      if (draft.deliveryMode) setDeliveryMode(draft.deliveryMode as any);
+      setSelectedPostalServiceCode(draft.selectedPostalServiceCode || '');
+      setView('cart');
+      showToast('Pedido em andamento restaurado neste aparelho.', 'success', { durationMs: 2600 });
+    } catch {
+      try {
+        localStorage.removeItem(checkoutDraftStorageKey);
+      } catch {
+        // no-op
+      }
+    }
+  }, [checkoutDraftStorageKey, showToast, storeSlug]);
+
+  useEffect(() => {
+    if (!storeSlug) return;
+    if (!restoredCheckoutDraftKeysRef.current[checkoutDraftStorageKey]) return;
+    if (cartItemsCount > 0) {
+      persistCheckoutDraft(view === 'success' ? 'cart' : view);
+      return;
+    }
+    if (view === 'cart') {
+      clearCheckoutDraft();
+    }
+  }, [
+    cartItemsCount,
+    checkoutDraftStorageKey,
+    clearCheckoutDraft,
+    persistCheckoutDraft,
+    storeSlug,
+    view,
+  ]);
   const isCondominiumCheckout = Boolean(condominiumCheckoutContext?.condominium?.slug);
   const condominiumFulfillmentMode = String(customer?.condominiumFulfillmentMode || 'pickup_at_stall');
   const condominiumApartmentFee = useMemo(() => {
@@ -2439,6 +2540,7 @@ export function StorePage() {
   };
 
   const clearCart = () => {
+    clearCheckoutDraft();
     setCart({});
   };
 
@@ -2545,6 +2647,21 @@ export function StorePage() {
       setCheckoutSlow(true);
     }, CHECKOUT_SLOW_FEEDBACK_MS);
     try {
+    persistCheckoutDraft('cart');
+    const latestAdminSession = !isStoreAdmin && !customerSession?.token ? readAdminSessionSnapshot() : null;
+    const latestAdminStoreSlug = String(latestAdminSession?.store?.slug || '').trim();
+    const currentStoreSlug = String(storeSlug || '').trim();
+    const recoveredStoreAdminSession =
+      Boolean(latestAdminSession?.token) &&
+      Boolean(latestAdminStoreSlug) &&
+      Boolean(currentStoreSlug) &&
+      latestAdminStoreSlug === currentStoreSlug;
+    if (recoveredStoreAdminSession) {
+      syncAdminSession(latestAdminSession);
+    }
+    const checkoutIsStoreAdmin = Boolean(isStoreAdmin || recoveredStoreAdminSession);
+    const checkoutCanUseAdminPrintFlow = Boolean(canUseAdminPrintFlow || recoveredStoreAdminSession);
+    const checkoutIsProfessionalCheckoutUser = Boolean(isProfessionalCheckoutUser || recoveredStoreAdminSession);
     const isSubscriptionActive =
       storePlanExempt ||
       subscriptionStatus &&
@@ -2563,7 +2680,7 @@ export function StorePage() {
       showToast('A feira deste condomínio não está aceitando pedidos agora.', 'warning');
       return;
     }
-    const isStaffTableOrder = customer.type === 'table' && canUseAdminPrintFlow;
+    const isStaffTableOrder = customer.type === 'table' && checkoutCanUseAdminPrintFlow;
     const normalizedTable = String(customer.table || '').trim();
     const effectiveCustomerName =
       String(customer.name || '').trim() ||
@@ -2575,7 +2692,7 @@ export function StorePage() {
       return;
     }
 
-    if (!isStoreAdmin && !isDemo && !customerSession?.token) {
+    if (!checkoutIsStoreAdmin && !isDemo && !customerSession?.token) {
       const rememberedEmail = (() => {
         try {
           return String(localStorage.getItem(CUSTOMER_REMEMBER_EMAIL_KEY) || '').trim();
@@ -2600,7 +2717,7 @@ export function StorePage() {
       return;
     }
 
-    const requiresPhone = !customerSession?.token && !isStoreAdmin;
+    const requiresPhone = !customerSession?.token && !checkoutIsStoreAdmin;
     const phoneDigits = String(customer.phone || '').replace(/\D/g, '');
     if (!effectiveCustomerName || (requiresPhone && phoneDigits.length < 10)) {
       showToast(requiresPhone ? 'Preencha nome e telefone para continuar.' : 'Preencha seu nome para continuar.', 'warning');
@@ -2650,7 +2767,7 @@ export function StorePage() {
       return;
     }
 
-    const payment = resolveOrderPaymentMethodForCheckout(paymentMethod, isProfessionalCheckoutUser);
+    const payment = resolveOrderPaymentMethodForCheckout(paymentMethod, checkoutIsProfessionalCheckoutUser);
     const cashTendered =
       payment === 'dinheiro' && extra?.cashTendered !== undefined && extra?.cashTendered !== null
         ? Number(extra.cashTendered)
@@ -2722,7 +2839,7 @@ export function StorePage() {
         cookingPoint: item.cookingPoint,
         passSkewer: item.passSkewer,
         selectedModifiers: item.selectedModifiers || [],
-        isPrinted: Boolean(canUseAdminPrintFlow),
+        isPrinted: Boolean(checkoutCanUseAdminPrintFlow),
       })),
     };
 
@@ -2748,12 +2865,13 @@ export function StorePage() {
     if (isDemo) {
       const demoId = `demo-${Date.now()}`;
       reconcileLocalStockAfterCheckout(validCartItems);
+      clearCheckoutDraft();
       setCart({});
       setCustomer({ ...initialCustomer, name: String(customerSession?.user?.fullName || '').trim(), phone: String(customerSession?.user?.phone || '').trim() });
       setDeliveryMode('distance');
       setPostalQuote(null);
       setSelectedPostalServiceCode('');
-      setPaymentMethod(resolveCheckoutPaymentSelection(defaultPaymentMethod, availablePaymentMethods, isProfessionalCheckoutUser));
+      setPaymentMethod(resolveCheckoutPaymentSelection(defaultPaymentMethod, availablePaymentMethods, checkoutIsProfessionalCheckoutUser));
       setLastOrder({
         id: demoId,
         type: customer.type,
@@ -2769,10 +2887,10 @@ export function StorePage() {
         queueRank: null,
         createdAt: Date.now(),
       });
-      if (canUseAdminPrintFlow) {
+      if (checkoutCanUseAdminPrintFlow) {
         setShowPrintPrompt(true);
       }
-      if (!customerSession?.token) {
+      if (!customerSession?.token && !checkoutIsStoreAdmin) {
         localStorage.setItem(
           checkoutCustomerStorageKey,
           JSON.stringify({ name: effectiveCustomerName, phone: customer.phone })
@@ -2819,15 +2937,15 @@ export function StorePage() {
           createdAt: Date.now(),
         })
       );
-      setView(isStoreAdmin ? 'menu' : 'success');
-      if (isStoreAdmin) {
+      setView(checkoutIsStoreAdmin ? 'menu' : 'success');
+      if (checkoutIsStoreAdmin) {
         showOrderNotice(demoId);
       }
       return;
     }
 
       const createOrderAuthMode =
-        isStoreAdmin
+        checkoutIsStoreAdmin
           ? 'admin'
           : customerSession?.token
             ? 'customer'
@@ -2848,7 +2966,7 @@ export function StorePage() {
       const backendCode = String(error?.code || error?.error?.code || '').trim().toUpperCase();
       if (backendCode === 'REQUEST_TIMEOUT') {
         showErrorNotice(
-          isStoreAdmin
+          checkoutIsStoreAdmin
             ? 'A conexão demorou demais. Confira a fila antes de tentar novamente para evitar pedido duplicado.'
             : 'A conexão demorou demais. Confira seus pedidos antes de tentar novamente para evitar pedido duplicado.'
         );
@@ -2856,7 +2974,7 @@ export function StorePage() {
       }
       if (backendCode === 'NETWORK_ERROR') {
         showErrorNotice(
-          isStoreAdmin
+          checkoutIsStoreAdmin
             ? 'Sua internet caiu durante o envio. Confira a fila antes de tentar novamente.'
             : 'Sua internet caiu durante o envio. Confira seus pedidos antes de tentar novamente.'
         );
@@ -2890,7 +3008,7 @@ export function StorePage() {
     ].slice(0, 50);
     setCustomers(nextCustomers);
     localStorage.setItem(customersStorageKey, JSON.stringify(nextCustomers));
-    if (!customerSession?.token) {
+    if (!customerSession?.token && !checkoutIsStoreAdmin) {
       localStorage.setItem(
         checkoutCustomerStorageKey,
         JSON.stringify({ name: effectiveCustomerName, phone: customer.phone })
@@ -2906,7 +3024,7 @@ export function StorePage() {
           ? `${window.location.origin}/pedido/${createdOrder.id}?ot=${encodeURIComponent(String(createdOrder.accessToken))}`
           : `${window.location.origin}/pedido/${createdOrder.id}`
         : '';
-    const shouldNotifyOwner = !isStoreAdmin && !customerSession?.token && (customer.type === 'pickup' || customer.type === 'table');
+    const shouldNotifyOwner = !checkoutIsStoreAdmin && !customerSession?.token && (customer.type === 'pickup' || customer.type === 'table');
     if (shouldNotifyOwner) {
       const itemsList = validCartItems
         .map((item: any) => `• ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
@@ -2958,12 +3076,13 @@ export function StorePage() {
         .catch(() => {});
     }
 
+    clearCheckoutDraft();
     setCart({});
     setCustomer({ ...initialCustomer, name: String(customerSession?.user?.fullName || '').trim(), phone: String(customerSession?.user?.phone || '').trim() });
     setDeliveryMode('distance');
     setPostalQuote(null);
     setSelectedPostalServiceCode('');
-    setPaymentMethod(resolveCheckoutPaymentSelection(defaultPaymentMethod, availablePaymentMethods, isProfessionalCheckoutUser));
+    setPaymentMethod(resolveCheckoutPaymentSelection(defaultPaymentMethod, availablePaymentMethods, checkoutIsProfessionalCheckoutUser));
       setLastOrder({
         id: createdOrder?.id,
         type: customer.type,
@@ -2981,7 +3100,7 @@ export function StorePage() {
       queueRank: createdOrder?.queueRank ?? createdOrder?.queuePosition ?? null,
       createdAt: Date.now(),
     });
-    if (canUseAdminPrintFlow) {
+    if (checkoutCanUseAdminPrintFlow) {
       setShowPrintPrompt(true);
     }
     if (customer.type === 'table' && customer.table) {
@@ -2991,7 +3110,7 @@ export function StorePage() {
         return [ ...prev, normalized ];
       });
     }
-    if (createdOrder?.id && !isStoreAdmin) {
+    if (createdOrder?.id && !checkoutIsStoreAdmin) {
       const entry = {
         id: createdOrder.id,
         createdAt: Date.now(),
@@ -3033,7 +3152,7 @@ export function StorePage() {
       createdOrder?.payment?.paymentLink && createdOrder?.status === 'awaiting_payment'
     );
     const isMpCardPayment = isAwaitingMpPayment && (payment === 'credito' || payment === 'debito');
-    if (isStoreAdmin) {
+    if (checkoutIsStoreAdmin) {
       setView('menu');
     } else if (isMpCardPayment) {
       const mpUrl = createdOrder.payment.paymentLink;
@@ -3055,7 +3174,7 @@ export function StorePage() {
       'success',
       { durationMs: 3000 }
     );
-    if (isStoreAdmin) {
+    if (checkoutIsStoreAdmin) {
       showOrderNotice(createdOrder?.id);
     }
     } finally {

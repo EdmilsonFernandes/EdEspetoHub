@@ -19,6 +19,10 @@ const PRESERVED_LOCAL_STORAGE_KEYS = new Set([
   LAST_BUILD_ID_KEY,
 ]);
 
+const PRESERVED_LOCAL_STORAGE_PREFIXES = [
+  'storeCheckoutDraft:',
+];
+
 const clearNonHttpOnlyCookies = () => {
   if (typeof document === 'undefined') return;
   const raw = document.cookie || '';
@@ -41,6 +45,7 @@ const clearStorage = (options?: Pick<ClientFreshStartOptions, 'preserveLocalStor
     keys.forEach((key) => {
       if (key === LAST_CACHE_CLEAR_AT_KEY) return;
       if (preservedLocalStorageKeys.has(key)) return;
+      if (PRESERVED_LOCAL_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix))) return;
       localStorage.removeItem(key);
     });
   }
