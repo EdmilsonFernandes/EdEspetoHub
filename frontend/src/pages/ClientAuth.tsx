@@ -578,25 +578,6 @@ export function ClientAuth() {
               </div>
             </div>
           ) : null}
-          {mode === 'login' ? (
-            <button
-              type="button"
-              onClick={() => setProfessionalAccessOpen(true)}
-              className="group relative flex w-full items-center gap-3 overflow-hidden rounded-[1.35rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(238,247,250,0.92))] px-3.5 py-3 text-left shadow-[0_18px_38px_-30px_rgba(21,58,76,0.38)] transition-all hover:border-[#336886]/25 hover:bg-white active:scale-[0.99]"
-            >
-              <span className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-[#5FD35A]/12 blur-2xl" />
-              <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.46)]">
-                <Storefront size={19} weight="duotone" />
-              </span>
-              <span className="relative min-w-0 flex-1">
-                <span className="block text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">Acesso profissional</span>
-                <span className="mt-0.5 block text-sm font-black leading-4 tracking-[-0.02em] text-slate-900">Lojista, entregador ou parceiro</span>
-              </span>
-              <span className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#336886]/10 bg-white/80 text-[#336886] transition group-hover:translate-x-0.5">
-                <ArrowRight size={15} weight="bold" />
-              </span>
-            </button>
-          ) : null}
           <div className="flex gap-2 rounded-[1.1rem] border border-slate-200 bg-slate-100 p-1.5">
             <button
               type="button"
@@ -781,6 +762,29 @@ export function ClientAuth() {
             ) : null}
             <AuthMascotPanel variant="client" mode={mode} />
           </form>
+
+          {mode === 'login' ? (
+            <div className="border-t border-slate-100/90 pt-3">
+              <button
+                type="button"
+                onClick={() => setProfessionalAccessOpen(true)}
+                className="group relative flex w-full items-center gap-3 overflow-hidden rounded-[1.25rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(238,247,250,0.90))] px-3.5 py-3 text-left shadow-[0_16px_34px_-30px_rgba(21,58,76,0.34)] transition-all hover:border-[#336886]/25 hover:bg-white active:scale-[0.99]"
+              >
+                <span className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-[#5FD35A]/12 blur-2xl" />
+                <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.42)]">
+                  <Storefront size={19} weight="duotone" />
+                </span>
+                <span className="relative min-w-0 flex-1">
+                  <span className="block text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">Acesso profissional</span>
+                  <span className="mt-0.5 block text-sm font-black leading-4 tracking-[-0.02em] text-slate-900">Sou profissional</span>
+                  <span className="mt-0.5 block text-[11px] font-semibold leading-4 text-slate-500">Lojista, entregador, parceiro ou gestão.</span>
+                </span>
+                <span className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#336886]/10 bg-white/80 text-[#336886] transition group-hover:translate-x-0.5">
+                  <ArrowRight size={15} weight="bold" />
+                </span>
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
       <ConfirmationModal
@@ -795,7 +799,7 @@ export function ClientAuth() {
         icon={<LockKey size={32} weight="duotone" />}
       />
       {professionalAccessOpen ? (
-        <div className="fixed inset-0 z-[130] flex items-end justify-center bg-[radial-gradient(circle_at_50%_0%,rgba(51,104,134,0.22),transparent_36%),rgba(2,6,23,0.52)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md sm:items-center sm:px-4 sm:py-6 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[130] grid place-items-center bg-[radial-gradient(circle_at_50%_0%,rgba(51,104,134,0.22),transparent_36%),rgba(2,6,23,0.52)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md sm:px-4 sm:py-6 animate-in fade-in duration-200">
           <button
             type="button"
             aria-label="Fechar acessos profissionais"
@@ -806,12 +810,11 @@ export function ClientAuth() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="professional-access-title"
-            className="relative max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-[2rem] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,248,251,0.96)_62%,rgba(236,244,248,0.94))] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_38px_120px_-38px_rgba(15,23,42,0.78)] ring-1 ring-white/40 animate-in slide-in-from-bottom-4 zoom-in-95 duration-300 sm:p-5"
+            className="relative flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.25rem)] w-full max-w-lg flex-col overflow-hidden rounded-[1.85rem] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,248,251,0.96)_62%,rgba(236,244,248,0.94))] p-3.5 shadow-[0_38px_120px_-38px_rgba(15,23,42,0.78)] ring-1 ring-white/40 animate-in zoom-in-95 duration-200 sm:p-5"
           >
-            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-300/70 sm:hidden" />
             <div className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#336886]/14 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-14 left-2 h-40 w-40 rounded-full bg-emerald-300/16 blur-3xl" />
-            <div className="relative flex items-start justify-between gap-3">
+            <div className="relative flex shrink-0 items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="inline-flex items-center gap-2 rounded-full border border-[#336886]/10 bg-white/78 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#153A4C] shadow-[0_12px_28px_-24px_rgba(21,58,76,0.38)]">
                   <span className="grid h-6 w-6 place-items-center overflow-hidden rounded-full border border-white bg-white">
@@ -819,10 +822,10 @@ export function ClientAuth() {
                   </span>
                   Perfis da plataforma
                 </div>
-                <h2 id="professional-access-title" className="mt-3 text-[1.65rem] font-black leading-none tracking-[-0.045em] text-slate-950 sm:text-3xl">
+                <h2 id="professional-access-title" className="mt-2.5 text-[1.35rem] font-black leading-none tracking-[-0.04em] text-slate-950 sm:text-3xl">
                   Acessos profissionais
                 </h2>
-                <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
+                <p className="mt-1 text-[12px] font-semibold leading-5 text-slate-500 sm:text-sm sm:leading-6">
                   Loja, entrega, parceiro e gestão ficam aqui. Cliente continua entrando pela tela principal.
                 </p>
               </div>
@@ -836,33 +839,35 @@ export function ClientAuth() {
               </button>
             </div>
 
-            <div className="relative mt-4 grid gap-2.5 sm:grid-cols-2">
-              {professionalAccessOptions.map((option) => {
-                const Icon = option.icon;
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => {
-                      setProfessionalAccessOpen(false);
-                      navigate(option.route);
-                    }}
-                    className={`group flex w-full items-center gap-3 rounded-[1.35rem] border border-white/75 bg-white/88 p-3 text-left shadow-[0_18px_38px_-32px_rgba(15,23,42,0.38)] ring-1 ring-slate-900/[0.03] transition hover:-translate-y-0.5 hover:border-[#336886]/18 hover:bg-white hover:shadow-[0_24px_54px_-36px_rgba(21,58,76,0.48)] active:scale-[0.99] sm:flex-col sm:items-start sm:p-3.5 ${option.id === 'interno' ? 'sm:col-span-2 sm:flex-row sm:items-center' : ''}`}
-                  >
-                    <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl border shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] ${option.tone}`}>
-                      <Icon size={23} weight="duotone" />
-                    </span>
-                    <span className="min-w-0 flex-1 sm:w-full">
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="block text-base font-black tracking-[-0.02em] text-slate-950">{option.title}</span>
-                        <ArrowRight size={17} weight="bold" className="hidden shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#336886] sm:block" />
+            <div className="relative mt-3 min-h-0 overflow-y-auto overscroll-contain pr-1">
+              <div className="grid gap-2 sm:grid-cols-2">
+                {professionalAccessOptions.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => {
+                        setProfessionalAccessOpen(false);
+                        navigate(option.route);
+                      }}
+                      className={`group flex w-full items-center gap-2.5 rounded-[1.2rem] border border-white/75 bg-white/88 p-2.5 text-left shadow-[0_18px_38px_-32px_rgba(15,23,42,0.38)] ring-1 ring-slate-900/[0.03] transition hover:border-[#336886]/18 hover:bg-white hover:shadow-[0_24px_54px_-36px_rgba(21,58,76,0.48)] active:scale-[0.99] sm:hover:-translate-y-0.5 sm:flex-col sm:items-start sm:p-3.5 ${option.id === 'interno' ? 'sm:col-span-2 sm:flex-row sm:items-center' : ''}`}
+                    >
+                      <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl border shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] sm:h-12 sm:w-12 ${option.tone}`}>
+                        <Icon size={21} weight="duotone" />
                       </span>
-                      <span className="mt-0.5 block text-xs font-semibold leading-5 text-slate-500">{option.description}</span>
-                    </span>
-                    <ArrowRight size={18} weight="bold" className="shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#336886] sm:hidden" />
-                  </button>
-                );
-              })}
+                      <span className="min-w-0 flex-1 sm:w-full">
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="block text-sm font-black tracking-[-0.02em] text-slate-950 sm:text-base">{option.title}</span>
+                          <ArrowRight size={17} weight="bold" className="hidden shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#336886] sm:block" />
+                        </span>
+                        <span className="mt-0.5 block text-[11px] font-semibold leading-4 text-slate-500 sm:text-xs sm:leading-5">{option.description}</span>
+                      </span>
+                      <ArrowRight size={17} weight="bold" className="shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#336886] sm:hidden" />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
           </section>

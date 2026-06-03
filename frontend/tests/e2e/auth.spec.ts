@@ -47,13 +47,25 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
       `,
     });
 
-    const professionalButton = page.getByRole('button', { name: /Acesso profissional/i });
+    const professionalButton = page.getByRole('button', { name: /Sou profissional/i });
     await expect(professionalButton).toBeVisible();
+    await professionalButton.scrollIntoViewIfNeeded();
+    await expect(professionalButton).toBeInViewport();
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1))
+      .toBe(true);
     await professionalButton.click();
 
     const dialog = page.getByRole('dialog', { name: /Acessos profissionais/i });
     await expect(dialog).toBeVisible();
+    await expect(dialog).toBeInViewport();
     await expect(dialog.getByRole('button', { name: /Lojista/i })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Entregador/i })).toBeVisible();
+    await dialog.getByRole('button', { name: /Acesso interno/i }).scrollIntoViewIfNeeded();
+    await expect(dialog.getByRole('button', { name: /Acesso interno/i })).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1))
+      .toBe(true);
   });
 
   test('rota entrar nao abre seletor de perfis e cai direto no cliente', async ({ page }) => {

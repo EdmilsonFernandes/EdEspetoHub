@@ -32,11 +32,11 @@ export function AuthLayout({
     ? 'min-h-[calc(100dvh-4.35rem)] sm:min-h-[calc(100vh-8.1rem)] lg:min-h-[calc(100vh-3rem)]'
     : 'min-h-[calc(100dvh-1.5rem)] sm:min-h-[calc(100vh-3rem)]';
   const contentAlignmentClass = showHeader
-    ? 'items-start pt-[clamp(0.75rem,5dvh,3rem)] lg:items-center lg:pt-0'
+    ? 'items-start pt-1.5 sm:pt-4 lg:items-center lg:pt-0'
     : 'items-center';
 
   return (
-    <div className={`min-h-[100dvh] overflow-x-clip bg-[#E2EBF2] px-4 ${spacingClass} relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
+    <div className={`min-h-[100dvh] overflow-x-clip overflow-y-auto bg-[#E2EBF2] px-4 ${spacingClass} relative ${isNativePlatform ? 'ds-native-nav-content' : ''}`}>
       {showHeader ? (
         <AppGlassHeader
           title={title}
