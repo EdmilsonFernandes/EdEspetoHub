@@ -24,6 +24,13 @@ const store = {
     cashEnabled: true,
     manualPixEnabled: false,
     onlineEnabled: true,
+    methods: {
+      pixOnline: true,
+      creditOnline: true,
+      debitOnline: true,
+      manualPix: false,
+      cash: true,
+    },
   },
 };
 
@@ -137,5 +144,37 @@ test.describe('Store checkout layout', () => {
     expect(cardBox).not.toBeNull();
     expect(actionBox).not.toBeNull();
     expect((cardBox!.y + cardBox!.height)).toBeLessThanOrEqual(actionBox!.y - 8);
+  });
+
+  test('edita observacao e troca pagamento por sheet no checkout mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 700 });
+    await page.goto(`/${storeSlug}`);
+
+    await expect(page.getByText('Pedido em andamento restaurado neste aparelho.')).toBeVisible({ timeout: 15000 });
+    await page.getByTestId('customer-order-note-card').click();
+
+    const noteSheet = page.getByTestId('customer-order-note-sheet');
+    await expect(noteSheet).toBeVisible();
+    await noteSheet.getByTestId('customer-order-note-input').fill('Sem cebola e avisar ao chegar');
+    await noteSheet.getByRole('button', { name: /Salvar observação/i }).click();
+    await expect(noteSheet).toBeHidden();
+    await expect(page.getByTestId('customer-order-note-card')).toContainText('Sem cebola e avisar ao chegar');
+
+    await page.getByRole('button', { name: /Continuar/i }).click();
+    await page.getByRole('button', { name: /Continuar/i }).click();
+
+    const paymentSummary = page.getByTestId('checkout-payment-summary-card');
+    await expect(paymentSummary).toContainText('Dinheiro');
+    await paymentSummary.getByRole('button', { name: /Trocar/i }).click();
+
+    const paymentSheet = page.getByTestId('checkout-payment-method-sheet');
+    await expect(paymentSheet).toBeVisible();
+    await paymentSheet.getByRole('button', { name: /^Pix\b/i }).first().click();
+    await expect(paymentSheet).toBeHidden();
+    await expect(paymentSummary).toContainText('Pix');
+
+    await page.getByRole('button', { name: /Revisar pedido/i }).click();
+    await expect(page.getByTestId('customer-order-note-summary')).toContainText('Sem cebola e avisar ao chegar');
+    await expect(page.getByTestId('checkout-review-payment-card')).toContainText('Pix');
   });
 });

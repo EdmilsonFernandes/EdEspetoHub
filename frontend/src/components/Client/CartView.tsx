@@ -77,6 +77,13 @@ const PROFESSIONAL_PAYMENT_METHODS = [
   { id: "dinheiro", label: "Dinheiro", description: "Pagamento no atendimento", group: "local" },
 ];
 
+const CUSTOMER_ORDER_NOTE_SUGGESTIONS = [
+  "Sem cebola",
+  "Sem ketchup",
+  "Interfone 101",
+  "Avisar ao chegar",
+];
+
 export const CartView = ({
   cart,
   customer,
@@ -176,12 +183,14 @@ export const CartView = ({
   const [showOutOfRangeSheet, setShowOutOfRangeSheet] = useState(false);
   const [showEmptyCartSheet, setShowEmptyCartSheet] = useState(false);
   const [showFarPickupSheet, setShowFarPickupSheet] = useState(false);
+  const [showPaymentSheet, setShowPaymentSheet] = useState(false);
+  const [showCustomerNoteSheet, setShowCustomerNoteSheet] = useState(false);
+  const [customerNoteDraft, setCustomerNoteDraft] = useState("");
   const [confirmedFarPickupContext, setConfirmedFarPickupContext] = useState("");
   const [hasTriedCheckout, setHasTriedCheckout] = useState(false);
   const [showOptionalPhoneFields, setShowOptionalPhoneFields] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState(1);
   const [isEditingTable, setIsEditingTable] = useState(false);
-  const [isEditingPayment, setIsEditingPayment] = useState(false);
   const previousCartItemsCountRef = useRef<number>(cartItems.length);
   const cepLookupLockRef = useRef(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
@@ -299,6 +308,10 @@ export const CartView = ({
       { online: [], local: [] } as Record<string, any[]>
     );
   }, [resolvedPaymentMethods]);
+  const selectedPaymentMethod = useMemo(
+    () => resolvedPaymentMethods.find((method) => method.id === paymentMethod) || resolvedPaymentMethods[0] || null,
+    [paymentMethod, resolvedPaymentMethods]
+  );
 
   const cashValidation = useMemo(() => {
     if (!isCash) return { blocked: false, reason: "" };
@@ -844,40 +857,52 @@ export const CartView = ({
   const handleCustomerOrderNoteChange = (value: string) => {
     onChangeCustomer({ ...customer, customerNote: limitCustomerOrderNoteInput(value) });
   };
-  const renderCustomerOrderNoteCard = () => (
-    <div
-      className="rounded-[1.75rem] border border-amber-200 bg-[linear-gradient(135deg,#ffffff_0%,#fffdf9_100%)] p-4 shadow-[0_16px_36px_-32px_rgba(217,119,6,0.3)] hover:border-amber-300/80 transition-all duration-300"
-      data-testid="customer-order-note-card"
-    >
-      <div className="flex items-start gap-3.5">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/20">
-          <NotePencil size={19} weight="duotone" className="text-amber-600 animate-pulse" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-800">
-            Observações do Pedido
-          </p>
-          <p className="mt-0.5 text-[11.5px] leading-relaxed text-slate-500 font-medium">
-            Alguma preferência ou restrição? Escreva aqui (ex: ponto da carne, sem cebola, interfone).
-          </p>
+  const openCustomerNoteSheet = () => {
+    setCustomerNoteDraft(customerOrderNoteValue);
+    setShowCustomerNoteSheet(true);
+  };
+  const applyCustomerNoteSuggestion = (suggestion: string) => {
+    setCustomerNoteDraft((current) => {
+      const next = current.trim() ? `${current.trim()}; ${suggestion}` : suggestion;
+      return limitCustomerOrderNoteInput(next);
+    });
+  };
+  const saveCustomerNoteDraft = () => {
+    handleCustomerOrderNoteChange(customerNoteDraft);
+    setShowCustomerNoteSheet(false);
+  };
+  const renderCustomerOrderNoteCard = () => {
+    const note = customerOrderNoteValue.trim();
+
+    return (
+      <button
+        type="button"
+        onClick={openCustomerNoteSheet}
+        className="group w-full rounded-[1.55rem] border border-amber-100 bg-[linear-gradient(135deg,#ffffff_0%,#fffaf0_100%)] p-3.5 text-left shadow-[0_18px_38px_-34px_rgba(217,119,6,0.35)] transition-all duration-300 hover:border-amber-200 active:scale-[0.99]"
+        data-testid="customer-order-note-card"
+      >
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/14">
+            <NotePencil size={18} weight="duotone" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-800">
+                Observação para a loja
+              </p>
+              <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
+                {note ? "Editar" : "Adicionar"}
+              </span>
+            </div>
+            <p className={`mt-1 line-clamp-2 text-[12.5px] font-semibold leading-snug ${note ? "text-slate-800" : "text-slate-500"}`}>
+              {note || "Sem observação. Toque se quiser pedir sem cebola, avisar interfone ou deixar uma orientação."}
+            </p>
+          </div>
+          <ArrowLeft size={16} weight="bold" className="shrink-0 rotate-180 text-slate-300 transition-transform group-hover:translate-x-0.5" />
         </div>
-      </div>
-      <textarea
-        {...textareaAssistProps.notes}
-        value={customerOrderNoteValue}
-        onChange={(event) => handleCustomerOrderNoteChange(event.target.value)}
-        maxLength={CUSTOMER_ORDER_NOTE_MAX_LENGTH}
-        rows={3}
-        placeholder="Adicione observações aqui..."
-        className="mt-3.5 min-h-[84px] w-full resize-none rounded-xl border border-slate-200/90 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10"
-        data-testid="customer-order-note-input"
-      />
-      <div className="mt-2 flex items-center justify-between gap-3 text-[10.5px] font-bold text-slate-400">
-        <span>Essa mensagem será enviada junto com o pedido.</span>
-        <span className="shrink-0 tabular-nums bg-slate-100 rounded-full px-2 py-0.5">{customerOrderNoteValue.length}/{CUSTOMER_ORDER_NOTE_MAX_LENGTH}</span>
-      </div>
-    </div>
-  );
+      </button>
+    );
+  };
   const renderCustomerOrderNoteSummaryCard = () => {
     const note = customerOrderNoteValue.trim();
 
@@ -899,9 +924,18 @@ export const CartView = ({
             <NotePencil size={18} weight="duotone" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
-              Observação para a loja
-            </p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+                Observação para a loja
+              </p>
+              <button
+                type="button"
+                onClick={openCustomerNoteSheet}
+                className="jnc-hub-touch shrink-0 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]"
+              >
+                {note ? "Editar" : "Adicionar"}
+              </button>
+            </div>
             {note ? (
               <p className="mt-2 rounded-[1rem] border border-white/70 bg-white/78 px-3 py-2 text-sm font-semibold leading-relaxed text-slate-800 shadow-[0_12px_24px_-22px_rgba(15,23,42,0.25)]">
                 {note}
@@ -916,6 +950,116 @@ export const CartView = ({
       </div>
     );
   };
+
+  const renderSelectedPaymentSummaryCard = () => {
+    const currentPaymentId = paymentMethod || selectedPaymentMethod?.id || "dinheiro";
+    const methodMeta = getPaymentMethodMeta(currentPaymentId);
+    const methodLabel = selectedPaymentMethod?.id === currentPaymentId ? selectedPaymentMethod.label : methodMeta.label;
+    const methodDescription =
+      selectedPaymentMethod?.id === currentPaymentId
+        ? selectedPaymentMethod.description
+        : isOnlinePaymentMethod
+        ? "Via Mercado Pago"
+        : isManualPix
+        ? "Chave exibida após confirmar"
+        : "Pagamento no atendimento";
+    const badgeLabel = isOnlinePaymentMethod ? "Seguro" : isManualPix ? "Pix da loja" : "Direto";
+    const badgeClass = isOnlinePaymentMethod
+      ? "border-[#336886]/12 bg-[#eef7fb] text-[#336886]"
+      : isManualPix
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : "border-slate-200 bg-slate-50 text-slate-600";
+
+    return (
+      <div
+        className="relative overflow-hidden rounded-[1.55rem] border border-white/80 bg-white p-3.5 shadow-[0_20px_46px_-38px_rgba(15,23,42,0.35)]"
+        data-testid="checkout-payment-summary-card"
+      >
+        <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-[#336886]/18 to-transparent" />
+        <div className="flex items-center gap-3">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] border border-slate-100 bg-slate-50">
+            {methodMeta.icon ? (
+              <img src={methodMeta.icon} alt={methodMeta.label} className="h-7 w-7 object-contain" loading="lazy" />
+            ) : (
+              <CreditCard size={18} weight="duotone" className="text-slate-500" />
+            )}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-black tracking-tight text-slate-950 sm:text-base">{methodLabel}</p>
+              <span className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] ${badgeClass}`}>
+                {badgeLabel}
+              </span>
+            </div>
+            <p className="mt-1 text-[11.5px] font-semibold leading-snug text-slate-500">
+              {isCash && cashNeedsChange && cashTenderedValue !== null && cashTenderedValue >= totalWithFee
+                ? `Troco para ${formatCurrency(cashTenderedValue)}`
+                : methodDescription}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setShowPaymentSheet(true);
+            }}
+            className="jnc-hub-touch shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886] transition hover:bg-[#336886]/10"
+          >
+            Trocar
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderCashChangePanel = () => (
+    <div className="rounded-[1.45rem] border border-amber-100 bg-[linear-gradient(135deg,#ffffff_0%,#fff8eb_100%)] p-3.5 shadow-[0_18px_38px_-34px_rgba(245,158,11,0.38)]">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-black text-slate-900">Troco</p>
+          <p className="mt-0.5 text-[11px] font-semibold leading-snug text-slate-500">
+            Informe só se for pagar com uma nota maior.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setCashNeedsChange((prev) => !prev)}
+          className={`jnc-hub-touch shrink-0 rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] ${
+            cashNeedsChange
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-slate-200 bg-white text-slate-600"
+          }`}
+        >
+          {cashNeedsChange ? "Com troco" : "Sem troco"}
+        </button>
+      </div>
+
+      {cashNeedsChange && (
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700">Vou pagar com</label>
+            <input
+              value={cashTenderedInput}
+              onChange={(event) => setCashTenderedInput(event.target.value)}
+              inputMode="decimal"
+              placeholder="0,00"
+              className={`${premiumInputClass} text-sm`}
+            />
+          </div>
+          <div className="rounded-[1.15rem] border border-slate-100 bg-white px-3 py-2.5 shadow-sm sm:min-w-[145px]">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Troco</p>
+            <p className="mt-1 text-base font-black text-slate-950 tabular-nums">
+              {cashChangeDue !== null && cashChangeDue >= 0 ? formatCurrency(cashChangeDue) : formatCurrency(0)}
+            </p>
+          </div>
+          {cashValidation.blocked && (
+            <p className="sm:col-span-2 text-[11px] font-semibold leading-snug text-rose-600">
+              {cashValidation.reason}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
 
   const renderPaymentMethodCard = (method: any, tone: "online" | "local") => {
     const methodMeta = getPaymentMethodMeta(method.id);
@@ -932,7 +1076,7 @@ export const CartView = ({
         type="button"
         onClick={() => {
           onChangePayment(method.id);
-          setIsEditingPayment(false);
+          setShowPaymentSheet(false);
         }}
         className={`jnc-hub-touch group relative overflow-hidden rounded-[1.35rem] border p-3.5 text-left active:scale-[0.985] ${
           selected
@@ -2211,184 +2355,38 @@ export const CartView = ({
 
       {/* Forma de Pagamento */}
       {(!useMultiStepFlow || checkoutStep === 3) && (
-        <div className="relative mb-4 overflow-hidden rounded-[2rem] border border-white/80 bg-[radial-gradient(circle_at_top_right,rgba(95,211,90,0.18),transparent_28%),linear-gradient(145deg,rgba(255,255,255,0.98),rgba(239,247,249,0.92))] p-4 shadow-[0_30px_70px_-52px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-6">
-          <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#336886]/28 to-transparent" />
-          <div className="relative z-10 mb-4 flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.2rem] bg-white text-[#336886] shadow-[0_18px_36px_-28px_rgba(51,104,134,0.48)] ring-1 ring-[#336886]/10">
-                <Wallet size={22} weight="duotone" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
-                  Pagamento
-                </p>
-                <h2 className="text-base font-black tracking-tight text-slate-950 sm:text-lg">
-                  Escolha como pagar
-                </h2>
-                <p className="mt-0.5 text-[11px] leading-snug text-slate-500 sm:text-xs">
-                  Pix, cartão ou direto com a loja. Simples e sem confusão.
-                </p>
-              </div>
-            </div>
-            <div className="hidden h-12 w-12 shrink-0 place-items-center rounded-[1.25rem] border border-white/80 bg-white/86 shadow-[0_20px_40px_-30px_rgba(15,23,42,0.36)] min-[380px]:grid">
-              <div className="relative h-8 w-8">
-                <span className="absolute left-1 top-1 h-6 w-6 rounded-[0.8rem] border border-[#336886]/14 bg-[#eaf6f8]" />
-                <span className="absolute left-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#336886]" />
-                <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#336886]" />
-                <span className="absolute bottom-2 left-1/2 h-1 w-3 -translate-x-1/2 rounded-full bg-[#5FD35A]" />
-              </div>
+        <div className="relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-[radial-gradient(circle_at_top_right,rgba(95,211,90,0.14),transparent_26%),linear-gradient(145deg,rgba(255,255,255,0.98),rgba(241,247,249,0.92))] p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
+          <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#336886]/22 to-transparent" />
+          <div className="relative z-10 mb-3 flex items-center gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.1rem] bg-white text-[#336886] shadow-[0_16px_30px_-24px_rgba(51,104,134,0.44)] ring-1 ring-[#336886]/10">
+              <Wallet size={21} weight="duotone" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
+                Pagamento
+              </p>
+              <h2 className="text-base font-black tracking-tight text-slate-950">
+                Forma escolhida
+              </h2>
             </div>
           </div>
-
-          {paymentMethod && !isEditingPayment && isProfessionalUser ? (
-            <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm flex items-center justify-between gap-3.5 animate-in fade-in zoom-in-95 duration-200">
-              <div className="flex items-center gap-3">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.05rem] border border-slate-200 bg-slate-50">
-                  {(() => {
-                    const meta = getPaymentMethodMeta(paymentMethod);
-                    return meta.icon ? (
-                      <img src={meta.icon} alt={meta.label} className="h-6 w-6 object-contain" />
-                    ) : (
-                      <CreditCard size={18} weight="duotone" className="text-slate-500" />
-                    );
-                  })()}
-                </span>
+          <div className="relative z-10 space-y-3">
+            {renderSelectedPaymentSummaryCard()}
+            {isCash && renderCashChangePanel()}
+            {isManualPix && (
+              <div className="flex items-center gap-3 rounded-[1.25rem] border border-emerald-200/80 bg-emerald-50/80 p-3 shadow-[0_16px_34px_-28px_rgba(32,122,82,0.36)]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-emerald-200 bg-white">
+                  <img src={getPaymentMethodMeta("pix_loja").icon} alt="Pix da loja" className="h-6 w-6 object-contain" />
+                </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 leading-none">Forma de Pagamento</p>
-                  <p className="mt-1 text-sm font-bold text-slate-800 capitalize">
-                    {getPaymentMethodMeta(paymentMethod).label}
+                  <p className="text-[11px] font-black text-emerald-700">Pix da loja</p>
+                  <p className="text-[10px] leading-tight text-slate-500">
+                    A chave Pix da loja será exibida após confirmar o pedido.
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsEditingPayment(true)}
-                className="jnc-hub-touch text-xs font-black uppercase tracking-wider text-[#336886] hover:text-[#153A4C]"
-              >
-                Alterar
-              </button>
-            </div>
-          ) : (
-            <div className="relative z-10 space-y-3">
-              {paymentGroups.online.length > 0 && (
-                <section className="rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(232,244,248,0.82))] p-3.5 shadow-[0_22px_50px_-44px_rgba(51,104,134,0.32)] sm:p-4">
-                  <div className="mb-3 flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">
-                        Pagar online
-                      </p>
-                      <p className="mt-1 text-[11px] leading-snug text-slate-500">
-                        Confirmação processada com segurança antes do envio.
-                      </p>
-                    </div>
-                    <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/92 px-2.5 py-1.5 text-[10px] font-black text-slate-600 shadow-[0_14px_26px_-22px_rgba(51,104,134,0.34)]">
-                      {mercadoPagoMeta.icon ? (
-                        <img src={mercadoPagoMeta.icon} alt={mercadoPagoMeta.label} className="h-4 w-4 object-contain" />
-                      ) : (
-                        <ShieldCheck size={12} weight="duotone" className="text-emerald-600" />
-                      )}
-                      <span>Seguro</span>
-                    </div>
-                  </div>
-                  <div className={`grid gap-2.5 ${paymentGroups.online.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
-                    {paymentGroups.online.map((method) => renderPaymentMethodCard(method, "online"))}
-                  </div>
-                </section>
-              )}
-
-              {paymentGroups.local.length > 0 && (
-                <section className="rounded-[1.55rem] border border-emerald-200/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(238,250,241,0.82))] p-3.5 shadow-[0_22px_50px_-44px_rgba(32,122,82,0.28)] sm:p-4">
-                  <div className="mb-3 flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-700">
-                        Pagar na loja
-                      </p>
-                      <p className="mt-1 text-[11px] leading-snug text-slate-500">
-                        Combine no atendimento, na entrega ou na retirada.
-                      </p>
-                    </div>
-                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-white/90 px-2.5 py-1.5 text-[10px] font-black text-emerald-700">
-                      <ShieldCheck size={12} weight="duotone" />
-                      Direto
-                    </span>
-                  </div>
-                  <div className={`grid gap-2.5 ${paymentGroups.local.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
-                    {paymentGroups.local.map((method) => renderPaymentMethodCard(method, "local"))}
-                  </div>
-                </section>
-              )}
-            </div>
-          )}
-
-          {isManualPix && (
-            <div className="relative z-10 mt-4 flex items-center gap-3 rounded-[1.35rem] border border-emerald-200/80 bg-emerald-50/80 p-3 shadow-[0_16px_34px_-28px_rgba(32,122,82,0.36)]">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-emerald-200 bg-white">
-                <img src={getPaymentMethodMeta("pix_loja").icon} alt="Pix da loja" className="h-7 w-7 object-contain" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[11px] font-black text-emerald-700">Pix da loja</p>
-                <p className="text-[10px] leading-tight text-slate-500">
-                  A chave Pix da loja será exibida após confirmar o pedido.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {(!useMultiStepFlow || checkoutStep === 3) && isCash && (
-        <div className="relative overflow-hidden bg-gradient-to-br from-white via-amber-50/35 to-white rounded-2xl border border-amber-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] space-y-3 shadow-[0_28px_56px_-44px_rgba(245,158,11,0.4)]">
-          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400/80 via-amber-500/60 to-white" />
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm sm:text-base font-extrabold text-slate-800">Troco</p>
-              <p className="text-[11px] sm:text-xs text-slate-500">
-                Se for pagar com uma nota maior, informe aqui para o entregador levar o troco certinho.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setCashNeedsChange((prev) => !prev)}
-              className={`btn-press px-3 py-1.5 rounded-full text-[11px] font-extrabold border ${
-                cashNeedsChange
-                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                  : "bg-white/70 text-slate-700 border-slate-200"
-              }`}
-            >
-              {cashNeedsChange ? "Precisa de troco" : "Sem troco"}
-            </button>
+            )}
           </div>
-
-          {cashNeedsChange && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Vou pagar com (R$)</label>
-                <input
-                  value={cashTenderedInput}
-                  onChange={(event) => setCashTenderedInput(event.target.value)}
-                  inputMode="decimal"
-                  placeholder="0,00"
-                  className={`${premiumInputClass} text-sm`}
-                />
-                <p className="text-[11px] text-slate-500">
-                  Total do pedido:{" "}
-                  <span className="font-bold text-slate-700">{formatCurrency(totalWithFee || 0)}</span>
-                </p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500 font-extrabold">Troco</p>
-                <p className="mt-2 text-lg font-black text-slate-900 tabular-nums">
-                  {cashChangeDue !== null && cashChangeDue >= 0 ? formatCurrency(cashChangeDue) : formatCurrency(0)}
-                </p>
-                {cashValidation.blocked && (
-                  <p className="mt-1 text-[11px] text-rose-600 font-semibold">{cashValidation.reason}</p>
-                )}
-                {!cashValidation.blocked && cashTenderedValue !== null && cashTenderedValue >= totalWithFee && (
-                  <p className="mt-1 text-[11px] text-emerald-700 font-semibold">Entregador leva troco certinho.</p>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -2716,6 +2714,178 @@ export const CartView = ({
           </>
         )}
       </div>
+
+      {showPaymentSheet && (
+        <div className="fixed inset-0 z-[78]" data-testid="checkout-payment-method-sheet">
+          <button
+            type="button"
+            onClick={() => {
+              setShowPaymentSheet(false);
+            }}
+            className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]"
+            aria-label="Fechar formas de pagamento"
+          />
+          <div className="absolute bottom-0 left-0 right-0 mx-auto max-h-[calc(100dvh-4rem)] max-w-lg overflow-hidden rounded-t-[2rem] border border-white/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_-28px_60px_-30px_rgba(15,23,42,0.55)]">
+            <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/92 px-4 pb-3 pt-4 backdrop-blur-xl">
+              <div className="mx-auto mb-3 h-1.5 w-11 rounded-full bg-slate-200" />
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Pagamento</p>
+                  <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Escolha como pagar</h3>
+                  <p className="mt-1 text-xs font-semibold leading-snug text-slate-500">
+                    Toque em uma opção. O pedido continua igual, só muda a forma de pagamento.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPaymentSheet(false);
+                  }}
+                  className="jnc-hub-touch grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-sm font-black text-slate-600 shadow-sm"
+                  aria-label="Fechar"
+                >
+                  X
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
+              {paymentGroups.online.length > 0 && (
+                <section className="rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(232,244,248,0.86))] p-3.5 shadow-[0_22px_50px_-44px_rgba(51,104,134,0.32)]">
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">
+                        Pagar online
+                      </p>
+                      <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                        Processado com segurança antes do pedido seguir para a loja.
+                      </p>
+                    </div>
+                    <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/92 px-2.5 py-1.5 text-[10px] font-black text-slate-600 shadow-[0_14px_26px_-22px_rgba(51,104,134,0.34)]">
+                      {mercadoPagoMeta.icon ? (
+                        <img src={mercadoPagoMeta.icon} alt={mercadoPagoMeta.label} className="h-4 w-4 object-contain" />
+                      ) : (
+                        <ShieldCheck size={12} weight="duotone" className="text-emerald-600" />
+                      )}
+                      <span>Seguro</span>
+                    </div>
+                  </div>
+                  <div className={`grid gap-2.5 ${paymentGroups.online.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
+                    {paymentGroups.online.map((method) => renderPaymentMethodCard(method, "online"))}
+                  </div>
+                </section>
+              )}
+
+              {paymentGroups.local.length > 0 && (
+                <section className="rounded-[1.55rem] border border-emerald-200/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(238,250,241,0.86))] p-3.5 shadow-[0_22px_50px_-44px_rgba(32,122,82,0.28)]">
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-700">
+                        Pagar na entrega, retirada ou balcão
+                      </p>
+                      <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                        Ideal para dinheiro, Pix da loja ou pagamento presencial.
+                      </p>
+                    </div>
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-white/90 px-2.5 py-1.5 text-[10px] font-black text-emerald-700">
+                      <ShieldCheck size={12} weight="duotone" />
+                      Direto
+                    </span>
+                  </div>
+                  <div className={`grid gap-2.5 ${paymentGroups.local.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
+                    {paymentGroups.local.map((method) => renderPaymentMethodCard(method, "local"))}
+                  </div>
+                </section>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCustomerNoteSheet && (
+        <div className="fixed inset-0 z-[79]" data-testid="customer-order-note-sheet">
+          <button
+            type="button"
+            onClick={() => setShowCustomerNoteSheet(false)}
+            className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]"
+            aria-label="Fechar observação"
+          />
+          <div className="absolute bottom-0 left-0 right-0 mx-auto max-h-[calc(100dvh-4rem)] max-w-lg overflow-hidden rounded-t-[2rem] border border-white/80 bg-[linear-gradient(180deg,#ffffff_0%,#fffaf0_100%)] shadow-[0_-28px_60px_-30px_rgba(15,23,42,0.55)]">
+            <div className="border-b border-amber-100 bg-white/92 px-4 pb-3 pt-4 backdrop-blur-xl">
+              <div className="mx-auto mb-3 h-1.5 w-11 rounded-full bg-amber-200/80" />
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-amber-800">Observação</p>
+                  <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Algum detalhe do pedido?</h3>
+                  <p className="mt-1 text-xs font-semibold leading-snug text-slate-500">
+                    Use apenas para preferências do preparo ou orientação rápida para a loja.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCustomerNoteSheet(false)}
+                  className="jnc-hub-touch grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-sm font-black text-slate-600 shadow-sm"
+                  aria-label="Fechar"
+                >
+                  X
+                </button>
+              </div>
+            </div>
+            <div className="space-y-4 overflow-y-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
+              <div className="flex flex-wrap gap-2">
+                {CUSTOMER_ORDER_NOTE_SUGGESTIONS.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => applyCustomerNoteSuggestion(suggestion)}
+                    className="jnc-hub-touch rounded-full border border-amber-200 bg-white px-3 py-2 text-[11px] font-black text-amber-800 shadow-sm"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+              <div>
+                <textarea
+                  {...textareaAssistProps.notes}
+                  value={customerNoteDraft}
+                  onChange={(event) => setCustomerNoteDraft(limitCustomerOrderNoteInput(event.target.value))}
+                  maxLength={CUSTOMER_ORDER_NOTE_MAX_LENGTH}
+                  rows={5}
+                  placeholder="Ex: sem cebola, interfone 101, avisar ao chegar..."
+                  className="min-h-[132px] w-full resize-none rounded-[1.3rem] border border-amber-200/70 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10"
+                  data-testid="customer-order-note-input"
+                />
+                <div className="mt-2 flex items-center justify-between gap-3 text-[10.5px] font-bold text-slate-400">
+                  <span>Essa mensagem será enviada junto com o pedido.</span>
+                  <span className="shrink-0 tabular-nums rounded-full bg-white px-2 py-0.5 shadow-sm">
+                    {customerNoteDraft.length}/{CUSTOMER_ORDER_NOTE_MAX_LENGTH}
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomerNoteDraft("");
+                    handleCustomerOrderNoteChange("");
+                    setShowCustomerNoteSheet(false);
+                  }}
+                  className="jnc-hub-touch rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700"
+                >
+                  Remover observação
+                </button>
+                <button
+                  type="button"
+                  onClick={saveCustomerNoteDraft}
+                  className="jnc-hub-touch rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)]"
+                >
+                  Salvar observação
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showOutOfRangeSheet && (
         <div className="fixed inset-0 z-[70]">
