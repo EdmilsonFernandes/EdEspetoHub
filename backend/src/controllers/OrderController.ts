@@ -534,6 +534,10 @@ static async markItemsAsPrinted(req: Request, res: Response) {
         statusTimeline: order.statusTimeline || [],
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
+        refundStatus: orderPayment?.refundStatus || null,
+        refundAmount: orderPayment?.refundAmount || null,
+        refundReason: orderPayment?.refundReason || null,
+        refundedAt: orderPayment?.refundedAt || null,
         payment: orderPayment
           ? {
               id: orderPayment.id,
@@ -549,6 +553,7 @@ static async markItemsAsPrinted(req: Request, res: Response) {
               refundStatus: orderPayment.refundStatus || null,
               refundAmount: orderPayment.refundAmount || null,
               refundReason: orderPayment.refundReason || null,
+              refundedAt: orderPayment.refundedAt || null,
             }
           : null,
         canceledAt: order.canceledAt || null,
@@ -673,6 +678,9 @@ static async markItemsAsPrinted(req: Request, res: Response) {
         shouldAttachPublicEta(order)
           ? await orderEtaServiceV2.calculateForOrder(order, queuePosition, correlationId)
           : null;
+      const orderPayment = await AppDataSource.getRepository(OrderPayment).findOne({
+        where: { orderId: order.id } as any,
+      });
 
       return res.json({
         id: order.id,
@@ -699,6 +707,26 @@ static async markItemsAsPrinted(req: Request, res: Response) {
           : null,
         createdAt: order.createdAt,
         storeId: order.store?.id || null,
+        paymentMethod: order.paymentMethod,
+        paymentStatus: order.paymentStatus,
+        refundStatus: orderPayment?.refundStatus || null,
+        refundAmount: orderPayment?.refundAmount || null,
+        refundReason: orderPayment?.refundReason || null,
+        refundedAt: orderPayment?.refundedAt || null,
+        payment: orderPayment
+          ? {
+              id: orderPayment.id,
+              status: orderPayment.paymentStatus,
+              provider: orderPayment.provider,
+              providerId: orderPayment.providerId || null,
+              paidAt: orderPayment.paidAt || null,
+              failedAt: orderPayment.failedAt || null,
+              refundStatus: orderPayment.refundStatus || null,
+              refundAmount: orderPayment.refundAmount || null,
+              refundReason: orderPayment.refundReason || null,
+              refundedAt: orderPayment.refundedAt || null,
+            }
+          : null,
         queuePosition,
         queueSize,
         timeline: [

@@ -14,6 +14,7 @@ import { buildPixPayload } from '../utils/pixPayload';
 import { RouteMapView } from '../components/RouteMapView';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { getOrderItemLineTotal, getOrderItemOriginalLineTotal, getOrderItemQuantity } from '../utils/orderItems';
+import { getOrderRefundSnapshot } from '../utils/orderRefund';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
@@ -685,6 +686,10 @@ export function OrderTracking() {
   })();
   const hasOnlinePayment = ONLINE_PAYMENT_METHODS.has(normalizedPaymentMethod);
   const isPaymentApproved = paymentStatusNormalized === 'PAID';
+  const refundSnapshot = getOrderRefundSnapshot(order);
+  const refundStatusNormalized = refundSnapshot.status;
+  const refundAmountValue = refundSnapshot.amount;
+  const refundReasonValue = refundSnapshot.reason;
   const showMercadoPagoApproved = isPaymentApproved && [ 'mercado_pago', 'mercadopago' ].includes(normalizedPaymentProvider);
   const shouldHidePixPaymentBlockBase =
     isPixPayment &&
@@ -2041,22 +2046,22 @@ export function OrderTracking() {
                       ) : null}
                     </div>
 
-                    {(isCancelled && hasOnlinePayment && isPaymentApproved && !order?.refundStatus) ||
-                    (isCancelled && order?.refundStatus === 'REFUNDED') ||
-                    (isCancelled && order?.refundStatus === 'PARTIALLY_REFUNDED') ||
-                    (isCancelled && order?.refundStatus === 'DENIED') ? (
+                    {(isCancelled && hasOnlinePayment && isPaymentApproved && !refundStatusNormalized) ||
+                    (isCancelled && refundStatusNormalized === 'REFUNDED') ||
+                    (isCancelled && refundStatusNormalized === 'PARTIALLY_REFUNDED') ||
+                    (isCancelled && refundStatusNormalized === 'DENIED') ? (
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {isCancelled && hasOnlinePayment && isPaymentApproved && !order?.refundStatus && (
+                      {isCancelled && hasOnlinePayment && isPaymentApproved && !refundStatusNormalized && (
                         <TrackingMetaCard label="Reembolso" value="Em análise" detail="O estabelecimento está processando a devolução" accent="default" />
                       )}
-                      {isCancelled && order?.refundStatus === 'REFUNDED' && (
-                        <TrackingMetaCard label="Reembolso" value="Processado" detail={order?.refundAmount ? `${formatCurrency(order.refundAmount)} devolvido` : 'Valor total devolvido'} accent="success" />
+                      {isCancelled && refundStatusNormalized === 'REFUNDED' && (
+                        <TrackingMetaCard label="Reembolso" value="Processado" detail={refundAmountValue ? `${formatCurrency(refundAmountValue)} devolvido` : 'Valor total devolvido'} accent="success" />
                       )}
-                      {isCancelled && order?.refundStatus === 'PARTIALLY_REFUNDED' && (
-                        <TrackingMetaCard label="Reembolso" value="Parcial" detail={order?.refundAmount ? `${formatCurrency(order.refundAmount)} devolvido` : 'Valor parcial devolvido'} accent="warning" />
+                      {isCancelled && refundStatusNormalized === 'PARTIALLY_REFUNDED' && (
+                        <TrackingMetaCard label="Reembolso" value="Parcial" detail={refundAmountValue ? `${formatCurrency(refundAmountValue)} devolvido` : 'Valor parcial devolvido'} accent="warning" />
                       )}
-                      {isCancelled && order?.refundStatus === 'DENIED' && (
-                        <TrackingMetaCard label="Reembolso" value="Não aprovado" detail={order?.refundReason || 'Entre em contato com o estabelecimento'} accent="warning" />
+                      {isCancelled && refundStatusNormalized === 'DENIED' && (
+                        <TrackingMetaCard label="Reembolso" value="Não aprovado" detail={refundReasonValue || 'Entre em contato com o estabelecimento'} accent="warning" />
                       )}
                     </div>
                     ) : null}
