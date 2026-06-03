@@ -406,7 +406,7 @@ export function HospitalityPlacePage() {
   const spotlightProviders = allSpotlightProviders.slice(0, 10);
   const hiddenSpotlightCount = Math.max(0, allSpotlightProviders.length - spotlightProviders.length);
   const highlightedProviderCardClass =
-    'jnc-provider-card-highlighted bg-[linear-gradient(135deg,rgba(95,211,90,0.13),#ffffff_46%,rgba(51,104,134,0.10))]';
+    'jnc-provider-card-highlighted !border-[#5FD35A]/55 bg-[linear-gradient(135deg,rgba(95,211,90,0.16),#ffffff_46%,rgba(51,104,134,0.12))] !shadow-[0_28px_70px_-42px_rgba(51,104,134,0.58)] ring-2 ring-[#5FD35A]/24';
   const scrollToProviderTarget = (targetId: string, providerName = '') => {
     if (!targetId || typeof window === 'undefined' || typeof document === 'undefined') return;
     setServiceFilter('all');
@@ -669,7 +669,7 @@ export function HospitalityPlacePage() {
                       key={option.id}
                       type="button"
                       onClick={() => setServiceFilter(option.id)}
-                      className={`jnc-hub-touch inline-flex min-h-[3.25rem] min-w-0 flex-col items-center justify-center gap-1 rounded-[1.15rem] border px-2 py-2 text-center text-[10px] font-black uppercase tracking-[0.06em] transition-all duration-300 sm:min-h-0 sm:flex-row sm:gap-2 sm:rounded-full sm:px-3.5 sm:text-[11px] ${
+                      className={`jnc-hub-touch relative inline-flex min-h-[3rem] min-w-0 flex-col items-center justify-center gap-1 rounded-[1.05rem] border px-2 py-2 pr-5 text-center text-[10px] font-black uppercase tracking-[0.06em] transition-all duration-300 sm:min-h-0 sm:flex-row sm:gap-2 sm:rounded-full sm:px-3.5 sm:pr-9 sm:text-[11px] ${
                         active
                           ? 'border-transparent bg-[#336886] text-white shadow-[0_12px_24px_-10px_rgba(51,104,134,0.65)]'
                           : 'border-slate-200 bg-white/78 text-slate-600 shadow-sm hover:bg-white hover:text-slate-900'
@@ -677,7 +677,7 @@ export function HospitalityPlacePage() {
                     >
                       <Icon size={14} weight={active ? 'fill' : 'duotone'} className="shrink-0" />
                       <span className="max-w-full truncate">{option.label}</span>
-                      <span className={`rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{option.count}</span>
+                      <span className={`absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none sm:top-1/2 sm:-translate-y-1/2 ${active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{option.count}</span>
                     </button>
                   );
                 })}

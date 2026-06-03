@@ -2413,7 +2413,7 @@ export function MarketplacePage() {
 
           {/* Seção Categorias Premium Squircle */}
           <section className="order-4 relative" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-            <p className="mb-1.5 px-1 text-[9px] font-black uppercase tracking-[0.24em] text-slate-500/85">Categorias</p>
+            <p className="mb-1.5 px-1 text-[9px] font-black uppercase tracking-[0.24em] text-slate-500/90">Categorias</p>
             <div className="-mx-4 grid grid-flow-col auto-cols-[minmax(54px,1fr)] snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <button
                 type="button"
@@ -2425,7 +2425,7 @@ export function MarketplacePage() {
                 }`}>
                   <List size={17} weight="duotone" className={segmentFilter === 'all' ? 'scale-[0.95] text-white' : 'text-slate-600'} />
                 </div>
-                <span className={`text-center text-[8.5px] font-extrabold uppercase tracking-[0.08em] transition-colors ${
+                <span className={`text-center text-[9px] font-black uppercase tracking-[0.08em] transition-colors ${
                   segmentFilter === 'all' ? 'text-[#336886]' : 'text-slate-600'
                 }`}>Todos</span>
               </button>
@@ -2454,7 +2454,7 @@ export function MarketplacePage() {
                         }`}
                       />
                     </div>
-                    <span className={`text-center text-[8.5px] font-extrabold uppercase tracking-[0.08em] transition-colors ${
+                    <span className={`text-center text-[9px] font-black uppercase tracking-[0.08em] transition-colors ${
                       active ? (colors ? colors.icon : 'text-[#336886]') : 'text-slate-600'
                     }`}>{item.label}</span>
                   </button>

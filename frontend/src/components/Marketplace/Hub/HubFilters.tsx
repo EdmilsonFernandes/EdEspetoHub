@@ -174,7 +174,7 @@ export function HubFilterSheet({
                   Encontre mais rápido
                 </Drawer.Title>
                 <Drawer.Description className="mt-1 text-[12px] font-semibold leading-relaxed text-slate-500">
-                  Escolha um atalho ou refine por categoria sem perder a ordem das lojas.
+                  Use atalhos para chegar nas lojas certas sem mexer na ordem do app.
                 </Drawer.Description>
               </div>
               <button
@@ -187,17 +187,17 @@ export function HubFilterSheet({
               </button>
             </div>
 
-            <div className="mt-4 rounded-[1.55rem] border border-[#336886]/10 bg-[#edf5fa]/72 px-4 py-3 text-[#153A4C] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+            <div className="mt-4 rounded-[1.35rem] border border-[#336886]/10 bg-[#edf5fa]/68 px-3.5 py-3 text-[#153A4C] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]/75">Resultado atual</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]/75">Agora na lista</p>
                   <p className="mt-0.5 truncate text-sm font-black text-[#153A4C]">
                     {filteredStoresCount} loja{filteredStoresCount === 1 ? '' : 's'} encontrada{filteredStoresCount === 1 ? '' : 's'}
                   </p>
                 </div>
                 <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-black text-[#336886] ring-1 ring-white/80">
                   <CheckCircle size={12} weight="fill" />
-                  {activeFilterCount > 0 ? `${activeFilterCount} ativo${activeFilterCount === 1 ? '' : 's'}` : 'Livre'}
+                  {activeFilterCount > 0 ? `${activeFilterCount} ativo${activeFilterCount === 1 ? '' : 's'}` : 'Sem filtro'}
                 </span>
               </div>
               {selectedQuickFilterOption || segmentFilter !== 'all' || debouncedQuery ? (
@@ -224,7 +224,7 @@ export function HubFilterSheet({
                   </button>
                 ) : null}
               </div>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2">
                 {HUB_QUICK_FILTER_OPTIONS.map((filter) => {
                   const Icon = filter.icon;
                   const active = quickFilter === filter.key;
@@ -237,7 +237,7 @@ export function HubFilterSheet({
                         onOpenChange(false);
                         if (!active) onScrollStoresIntoView();
                       }}
-                      className={`jnc-hub-touch min-h-[5.2rem] rounded-[1.35rem] p-3 text-left ${
+                      className={`jnc-hub-touch min-h-[4.75rem] rounded-[1.25rem] p-3 text-left ${
                         active
                           ? 'jnc-hub-pill-active'
                           : 'jnc-hub-card text-slate-700'
@@ -272,7 +272,7 @@ export function HubFilterSheet({
                   </button>
                 ) : null}
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -280,7 +280,7 @@ export function HubFilterSheet({
                     onOpenChange(false);
                     onScrollStoresIntoView();
                   }}
-                  className={`jnc-hub-touch min-w-0 rounded-[1.1rem] px-2 py-2.5 text-center text-[11px] font-black ${
+                  className={`jnc-hub-touch min-w-0 rounded-[1.05rem] px-2 py-2.5 text-center text-[11px] font-black ${
                     segmentFilter === 'all'
                       ? 'jnc-hub-pill-active'
                       : 'jnc-hub-pill text-slate-600'
@@ -300,7 +300,7 @@ export function HubFilterSheet({
                         onOpenChange(false);
                         onScrollStoresIntoView();
                       }}
-                      className={`jnc-hub-touch min-w-0 rounded-[1.1rem] px-2 py-2.5 text-center ${
+                      className={`jnc-hub-touch min-w-0 rounded-[1.05rem] px-2 py-2.5 text-center ${
                         active
                           ? 'jnc-hub-pill-active'
                           : 'jnc-hub-pill text-slate-600'

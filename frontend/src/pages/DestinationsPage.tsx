@@ -134,7 +134,7 @@ export function DestinationsPage() {
         <div className="relative mx-auto max-w-6xl">
           <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="min-w-0">
-              <p className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-white">
+              <p className="inline-flex items-center gap-2 rounded-full bg-[#153A4C] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-[0_14px_28px_-20px_rgba(21,58,76,0.46)] ring-1 ring-white/25">
                 <Mountains size={14} weight="duotone" />
                 Destinos turísticos
               </p>
@@ -145,13 +145,13 @@ export function DestinationsPage() {
                 Encontre hospedagens, comida, passeios e serviços próximos em poucos toques.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-2 rounded-[1.35rem] border border-white/82 bg-white/80 p-2 shadow-[0_20px_48px_-36px_rgba(15,23,42,0.42)] ring-1 ring-white/20 backdrop-blur-xl lg:min-w-[20rem]">
+            <div className="grid grid-cols-3 gap-2 rounded-[1.35rem] border border-white/82 bg-white/72 p-2 shadow-[0_20px_48px_-38px_rgba(15,23,42,0.36)] ring-1 ring-white/30 backdrop-blur-xl lg:min-w-[20rem]">
               {[
                 { value: stats.cities, label: 'cidades' },
                 { value: stats.places, label: 'hospedagens' },
                 { value: stats.listings, label: 'serviços' },
               ].map((stat) => (
-                <div key={stat.label} className="rounded-[1rem] bg-white/92 px-3 py-2.5 text-center ring-1 ring-slate-200/40 shadow-sm">
+                <div key={stat.label} className="rounded-[1rem] bg-white/90 px-3 py-2.5 text-center ring-1 ring-slate-200/35 shadow-[0_12px_26px_-22px_rgba(15,23,42,0.24)]">
                   <p className="text-xl font-black tracking-[-0.04em] text-[#153A4C]">{stat.value}</p>
                   <p className="mt-1 whitespace-normal break-words text-[10px] font-black uppercase leading-tight tracking-[0.12em] text-slate-500">{stat.label}</p>
                 </div>
@@ -284,7 +284,7 @@ export function DestinationsPage() {
                       <Sparkle size={14} weight="duotone" />
                       {destination.listingsCount || 0} serviços
                     </span>
-                    <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#153A4C] px-3 py-1.5 text-xs font-black text-white transition-all duration-300 group-hover:bg-[#5FD35A] group-hover:shadow-[0_6px_16px_-4px_rgba(95,211,90,0.48)]">
+                    <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#336886] px-3 py-1.5 text-xs font-black text-white transition-all duration-300 group-hover:bg-[#153A4C] group-hover:shadow-[0_10px_22px_-14px_rgba(51,104,134,0.52)]">
                       Explorar
                       <Compass size={14} weight="bold" className="transition-transform duration-500 group-hover:rotate-45" />
                     </span>

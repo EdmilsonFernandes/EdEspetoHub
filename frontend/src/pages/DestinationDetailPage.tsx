@@ -376,10 +376,10 @@ export function DestinationDetailPage() {
                         setActiveCategory(category.value);
                         if (category.value === 'TODOS') setSearchTerm('');
                       }}
-                      className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition ${activeCategory === category.value ? 'bg-[#336886] text-white shadow-[0_16px_30px_-20px_rgba(51,104,134,0.62)]' : 'border border-white/70 bg-white/72 text-slate-600 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.36)] backdrop-blur hover:bg-white hover:text-[#153A4C]'}`}
+                      className={`relative inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full py-2 pl-3.5 pr-9 text-[11px] font-black uppercase tracking-[0.08em] transition ${activeCategory === category.value ? 'bg-[#336886] text-white shadow-[0_16px_30px_-20px_rgba(51,104,134,0.62)]' : 'border border-white/70 bg-white/72 text-slate-600 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.36)] backdrop-blur hover:bg-white hover:text-[#153A4C]'}`}
                     >
                       <span className="max-w-[7.25rem] truncate">{category.label}</span>
-                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${activeCategory === category.value ? 'bg-white/16 text-white/80' : 'bg-slate-100 text-slate-500'}`}>{category.count}</span>
+                      <span className={`absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full px-1.5 py-0.5 text-[10px] ${activeCategory === category.value ? 'bg-white/16 text-white/80' : 'bg-slate-100 text-slate-500'}`}>{category.count}</span>
                     </button>
                   ))}
                 </div>
@@ -562,7 +562,7 @@ export function DestinationDetailPage() {
                   event.stopPropagation();
                   preserveViewportPosition(() => setPlaceLimit((current) => current + 6));
                 }}
-                  className="jnc-hub-touch w-full rounded-2xl border border-[#336886]/12 bg-white px-4 py-3 text-sm font-black text-[#336886] shadow-[0_14px_30px_-24px_rgba(51,104,134,0.32)]"
+                  className="jnc-hub-touch w-full rounded-2xl border border-[#336886]/12 bg-white px-4 py-3 text-sm font-black text-[#336886] shadow-[0_14px_30px_-24px_rgba(51,104,134,0.32)] hover:bg-[#336886] hover:text-white"
               >
                 Ver mais hospedagens ({filteredPlaces.length - visiblePlaces.length})
               </button>
@@ -691,7 +691,7 @@ export function DestinationDetailPage() {
                       event.stopPropagation();
                       preserveViewportPosition(() => setListingLimit((current) => current + 10));
                     }}
-                    className="jnc-hub-touch w-full rounded-2xl border border-[#336886]/12 bg-white px-4 py-3 text-sm font-black text-[#336886] shadow-[0_14px_30px_-24px_rgba(51,104,134,0.32)]"
+                    className="jnc-hub-touch w-full rounded-2xl border border-[#336886]/12 bg-white px-4 py-3 text-sm font-black text-[#336886] shadow-[0_14px_30px_-24px_rgba(51,104,134,0.32)] hover:bg-[#336886] hover:text-white"
                   >
                     Ver mais serviços ({filteredListings.length - visibleListings.length})
                   </button>

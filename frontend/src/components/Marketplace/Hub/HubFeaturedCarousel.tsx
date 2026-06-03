@@ -62,7 +62,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
         <div className="min-w-0">
           <p className="mb-0.5 inline-flex items-center gap-1.5 text-[8.5px] font-black uppercase tracking-[0.2em] text-[#336886]">
             <Sparkle size={9} weight="fill" />
-            Vitrine do app
+            Destaques locais
           </p>
           <h2 className="text-[15px] font-black tracking-[-0.035em] text-slate-950">{title}</h2>
           <p className="mt-0.5 line-clamp-1 text-[10px] font-bold text-slate-500">{subtitle}</p>

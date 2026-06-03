@@ -58,11 +58,29 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
 
     const dialog = page.getByRole('dialog', { name: /Acessos profissionais/i });
     await expect(dialog).toBeVisible();
-    await expect(dialog).toBeInViewport();
+    await expect
+      .poll(() =>
+        dialog.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.top >= -1 && rect.left >= 0 && rect.bottom <= window.innerHeight + 1 && rect.right <= window.innerWidth + 1;
+        })
+      )
+      .toBe(true);
     await expect(dialog.getByRole('button', { name: /Lojista/i })).toBeVisible();
     await expect(dialog.getByRole('button', { name: /Entregador/i })).toBeVisible();
-    await dialog.getByRole('button', { name: /Acesso interno/i }).scrollIntoViewIfNeeded();
-    await expect(dialog.getByRole('button', { name: /Acesso interno/i })).toBeVisible();
+    const internalAccessButton = dialog.getByRole('button', { name: /Acesso interno/i });
+    await internalAccessButton.evaluate((element) => {
+      element.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
+    await expect(internalAccessButton).toBeVisible();
+    await expect
+      .poll(() =>
+        internalAccessButton.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight + 1 && rect.right <= window.innerWidth + 1;
+        })
+      )
+      .toBe(true);
     await expect
       .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1))
       .toBe(true);

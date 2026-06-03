@@ -692,7 +692,7 @@ export function ProfileDrawer({
                   action.onClick();
                   onClose();
                 }}
-                className={`flex w-full items-center gap-3 rounded-[1.25rem] border px-3 py-3 transition-all active:scale-[0.98] ${
+                className={`group flex w-full items-center gap-3 rounded-[1.25rem] border px-3 py-3 pr-2.5 transition-all active:scale-[0.98] ${
                   action.tone === 'danger'
                     ? 'border-rose-100/70 bg-white text-rose-600 shadow-[0_12px_24px_-22px_rgba(225,29,72,0.25)] hover:border-rose-100 hover:bg-rose-50/72'
                     : 'border-transparent text-slate-800 hover:border-white/80 hover:bg-white/88'
@@ -713,6 +713,9 @@ export function ProfileDrawer({
                     </span>
                   ) : null}
                 </div>
+                {action.tone === 'danger' ? null : (
+                  <CaretRight size={15} weight="bold" className="shrink-0 text-slate-300 transition-transform group-active:translate-x-0.5" />
+                )}
               </button>
               </div>
             ))}
@@ -808,16 +811,16 @@ export function ProfileDrawer({
       )}
 
       {accessPickerOpen && (
-        <div className="absolute inset-0 z-[10] flex items-center justify-center bg-slate-950/36 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-[10px] animate-in fade-in duration-200" onClick={() => setAccessPickerOpen(false)}>
+        <div className="absolute inset-0 z-[10] flex items-end justify-center bg-slate-950/36 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-[10px] animate-in fade-in duration-200 sm:items-center" onClick={() => setAccessPickerOpen(false)}>
           <div
-            className="relative w-full max-w-[345px] overflow-hidden rounded-[1.75rem] border border-white/86 bg-[linear-gradient(180deg,rgba(255,255,255,0.985)_0%,rgba(248,250,252,0.98)_100%)] p-4 shadow-[0_26px_68px_-30px_rgba(15,23,42,0.72)] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200"
+            className="relative max-h-[calc(100vh-2rem)] w-full max-w-[345px] overflow-y-auto overscroll-contain rounded-[1.75rem] border border-white/86 bg-[linear-gradient(180deg,rgba(255,255,255,0.985)_0%,rgba(248,250,252,0.98)_100%)] p-4 shadow-[0_26px_68px_-30px_rgba(15,23,42,0.72)] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
               <div className="absolute -left-12 top-4 h-28 w-28 rounded-full bg-[#336886]/8 blur-3xl" />
               <div className="absolute -right-10 bottom-4 h-28 w-28 rounded-full bg-emerald-200/28 blur-3xl" />
             </div>
-            <div className="relative mb-4 flex items-start justify-between gap-3">
+            <div className="relative mb-3.5 flex items-start justify-between gap-3">
               <div className="min-w-0 pr-2">
                 <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500">
                   {hasActiveContext ? 'Outros acessos' : 'Escolha sua área'}
@@ -844,7 +847,7 @@ export function ProfileDrawer({
             </div>
 
             {(hasActiveContext || accessPickerMode === 'login') ? (
-              <div className="relative grid gap-3">
+              <div className="relative grid gap-2.5">
                 {visibleAccessProfiles.map((item) => {
                   const classes = getAccessCardClasses(item);
                   const stateLabel = item.current
@@ -863,10 +866,10 @@ export function ProfileDrawer({
                         item.action();
                         onClose();
                       }}
-                      className={`group relative flex min-h-[4.6rem] w-full items-center gap-3.5 overflow-hidden rounded-[1.35rem] border px-3.5 py-3 text-left transition-all duration-150 ease-out active:scale-[0.985] sm:hover:-translate-y-0.5 ${classes.shell}`}
+                      className={`group relative flex min-h-[4.15rem] w-full items-center gap-3 overflow-hidden rounded-[1.25rem] border px-3 py-2.5 text-left transition-all duration-150 ease-out active:scale-[0.985] sm:hover:-translate-y-0.5 ${classes.shell}`}
                     >
                       <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.16),transparent_72%)]" />
-                      <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-[1.05rem] border shadow-[inset_0_1px_0_rgba(255,255,255,0.52)] ${classes.icon}`}>
+                      <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-[1rem] border shadow-[inset_0_1px_0_rgba(255,255,255,0.52)] ${classes.icon}`}>
                         {item.icon}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -876,9 +879,9 @@ export function ProfileDrawer({
                             {stateLabel}
                           </span>
                         </div>
-                        <p className={`mt-1 truncate text-[10.5px] font-semibold ${classes.subtitle}`}>{item.subtitle}</p>
+                        <p className={`mt-0.5 truncate text-[10.5px] font-semibold ${classes.subtitle}`}>{item.subtitle}</p>
                       </div>
-                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full border transition-transform group-hover:translate-x-0.5 group-active:translate-x-0.5 ${classes.caret}`}>
+                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border transition-transform group-hover:translate-x-0.5 group-active:translate-x-0.5 ${classes.caret}`}>
                         <CaretRight size={16} weight="bold" />
                       </span>
                     </button>

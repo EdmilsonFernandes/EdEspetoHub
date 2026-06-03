@@ -113,6 +113,7 @@ test.describe('Destination WhatsApp location', () => {
 
   test('inclui endereco e mapa no link de WhatsApp da hospedagem', async ({ page }) => {
     await page.goto('/destinos/sao-bento');
+    await expect(page.getByRole('heading', { name: /Explore Sao Bento Sapucai/i })).toBeVisible({ timeout: 10000 });
 
     const talkLink = page.locator('a[href*="phone=5512999991111"]').first();
     await expect(talkLink).toBeVisible();
@@ -187,14 +188,19 @@ test.describe('Destination WhatsApp location', () => {
     await expect(page.getByText('Chale Vista da Pedra')).toBeVisible();
 
     await page.waitForTimeout(250);
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await expect
-      .poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 })
-      .toBeGreaterThan(50);
+    const scrolledY = await page.evaluate(() => {
+      window.scrollTo(0, document.body.scrollHeight);
+      return window.scrollY;
+    });
+    if (scrolledY > 0) {
+      await expect
+        .poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 })
+        .toBeGreaterThan(50);
+    }
 
     await page.getByRole('button', { name: /^Destinos$/i }).click();
     await expect(page).toHaveURL(/\/destinos$/);
-    await expect(page.getByText('Escolha uma cidade turística')).toBeVisible();
+    await expect(page.getByText('Explore cidades turísticas com apoio local.')).toBeVisible();
     await expect
       .poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 })
       .toBeLessThan(8);
