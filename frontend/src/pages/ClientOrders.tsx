@@ -1549,16 +1549,16 @@ export function ClientOrders() {
           <section className="mb-5 overflow-hidden rounded-[1.8rem] border border-white/85 bg-white/78 p-3 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.26)] ring-1 ring-[#d7e7ef]/55 backdrop-blur-xl">
             <div className="flex items-center justify-between gap-3 px-1">
               <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Filtrar pedidos</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Pedidos</p>
                 <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
-                  Escolha uma visão sem esconder o histórico.
+                  Toque para alternar a visão.
                 </p>
               </div>
               <span className="inline-flex shrink-0 rounded-full bg-[#edf5fa] px-2.5 py-1 text-[11px] font-black text-[#336886] ring-1 ring-[#cfe0ea]">
                 {filteredOrders.length}/{orders.length}
               </span>
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="mt-3 grid grid-cols-4 gap-1.5 sm:gap-2">
               {orderFilters.map((filter) => {
                 const isSelected = statusFilter === filter.key;
                 return (
@@ -1566,7 +1566,7 @@ export function ClientOrders() {
                     key={filter.key}
                     type="button"
                     onClick={() => setStatusFilter(filter.key)}
-                    className={`jnc-hub-touch inline-flex min-h-[3.15rem] min-w-0 items-center justify-between gap-2 rounded-[1.2rem] border px-3 py-2 text-left ${
+                    className={`jnc-hub-touch inline-flex min-h-[4.35rem] min-w-0 flex-col items-center justify-center rounded-[1.15rem] border px-1.5 py-2 text-center transition-all sm:min-h-[4.1rem] sm:px-2 ${
                       isSelected
                         ? 'border-[#153A4C] bg-[linear-gradient(135deg,#153A4C_0%,#336886_100%)] text-white shadow-[0_16px_30px_-22px_rgba(21,58,76,0.62)]'
                         : 'border-white/90 bg-white/82 text-slate-700 shadow-[0_12px_26px_-24px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/55'
@@ -1575,20 +1575,20 @@ export function ClientOrders() {
                     aria-label={`${filter.label}: ${filter.count} pedido${filter.count === 1 ? '' : 's'}`}
                     title={filter.label}
                   >
-                    <span className={`flex min-w-0 items-center gap-2 ${isSelected ? 'text-white' : filter.toneClass}`}>
+                    <span className={`flex min-w-0 flex-col items-center gap-1 ${isSelected ? 'text-white' : filter.toneClass}`}>
                       <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${
                         isSelected ? 'bg-white/15 text-white ring-1 ring-white/18' : 'bg-slate-50 text-current ring-1 ring-slate-200/70'
                       }`}>
                         {filter.icon}
                       </span>
-                      <span className="min-w-0">
-                        <span className="block truncate text-[12px] font-black leading-tight">{filter.label}</span>
-                        <span className={`block text-[10px] font-semibold leading-tight ${isSelected ? 'text-white/68' : 'text-slate-400'}`}>
-                          {filter.key === 'all' ? 'Tudo' : filter.shortLabel}
+                      <span className="min-w-0 max-w-full">
+                        <span className="block max-w-full truncate text-[10px] font-black leading-tight sm:text-[11px]">
+                          <span className="sm:hidden">{filter.shortLabel}</span>
+                          <span className="hidden sm:inline">{filter.label}</span>
                         </span>
                       </span>
                     </span>
-                    <span className={`inline-flex min-w-[1.65rem] shrink-0 items-center justify-center rounded-full px-2 py-1 text-[11px] font-black leading-none ${
+                    <span className={`mt-1 inline-flex min-w-[1.55rem] shrink-0 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black leading-none ${
                       isSelected
                         ? 'bg-white text-[#153A4C] shadow-[0_8px_16px_-12px_rgba(15,23,42,0.45)]'
                         : 'bg-slate-100/90 text-slate-600 ring-1 ring-white/80'

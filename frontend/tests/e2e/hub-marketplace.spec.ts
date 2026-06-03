@@ -220,7 +220,7 @@ test.describe('Hub marketplace', () => {
   test('menu do hub prioriza login de cliente e deixa profissional como secundario', async ({ page }) => {
     await page.goto('/hub');
 
-    await expect(page.getByText('Gustavao Espetos E2E')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('link', { name: /Gustavao Espetos E2E 4\.9/i })).toBeVisible({ timeout: 15000 });
     await page.getByLabel('Abrir menu de perfil').first().click();
     await expect(page.getByText('Acesse sua conta')).toBeVisible();
     await page.waitForTimeout(550);

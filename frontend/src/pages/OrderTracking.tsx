@@ -780,12 +780,6 @@ export function OrderTracking() {
     if (!Number.isFinite(start.getTime())) return null;
     return addBusinessDays(start, postalEstimatedDays);
   }, [isPostalDelivery, postalEstimatedDays, postalBaseMs]);
-  const postalRemainingDays = useMemo(() => {
-    if (!isPostalDelivery || isReady || !postalExpectedDeliveryDate) return null;
-    const diffMs = postalExpectedDeliveryDate.getTime() - Date.now();
-    if (!Number.isFinite(diffMs)) return null;
-    return Math.max(0, Math.ceil(diffMs / (24 * 60 * 60 * 1000)));
-  }, [isPostalDelivery, isReady, postalExpectedDeliveryDate]);
   const estimateMinutes = etaTotalMinutes;
   const deliveryFeeValue = hasDeliveryFee ? Number(order?.deliveryFee || 0) : null;
   const cancelledFlowDetail = useMemo(() => {
@@ -1413,6 +1407,91 @@ export function OrderTracking() {
   const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
   const itemsToRender = Array.isArray(order?.items) ? order.items : [];
   const [itemsExpanded, setItemsExpanded] = useState(itemsToRender.length <= 3);
+  const quickItemsCount = itemsToRender.reduce((sum, item) => sum + getOrderItemQuantity(item), 0);
+  const quickEtaSummary = (() => {
+    if (isTerminal && elapsedMs > 0) {
+      return {
+        label: 'Tempo total',
+        value: formatDuration(elapsedMs),
+        detail: isCancelled ? 'Até o cancelamento' : 'Até a conclusão',
+      };
+    }
+    if (isEstimateDelayed) {
+      return {
+        label: 'Previsão',
+        value: 'Em atraso',
+        detail: 'A loja foi avisada pelo fluxo do pedido.',
+      };
+    }
+    if (isPostalDelivery && postalExpectedDeliveryDate) {
+      return {
+        label: 'Entrega',
+        value: postalExpectedDeliveryDate.toLocaleDateString('pt-BR'),
+        detail: postalEstimatedDays ? `${postalEstimatedDays} dia(s) úteis` : 'Previsão postal',
+      };
+    }
+    if (remainingEstimateMinutes !== null) {
+      return {
+        label: etaPhaseLabel,
+        value: `~${remainingEstimateMinutes} min`,
+        detail: etaWindowMin && etaWindowMax ? `Janela ${etaWindowMin}-${etaWindowMax} min` : etaForecastLabel,
+      };
+    }
+    if (estimatedReadyAt && !isTerminal) {
+      return {
+        label: etaForecastLabel,
+        value: isPostalDelivery ? estimatedReadyAt.toLocaleDateString('pt-BR') : formatEtaMoment(estimatedReadyAt),
+        detail: etaForecastPrefix,
+      };
+    }
+    if (etaWindowMin && etaWindowMax && !isTerminal) {
+      return {
+        label: 'Previsão',
+        value: `${etaWindowMin}-${etaWindowMax} min`,
+        detail: etaForecastLabel,
+      };
+    }
+    return {
+      label: 'Previsão',
+      value: isTerminal ? 'Concluído' : 'Acompanhe ao vivo',
+      detail: isTerminal ? orderLifecycleLabel : 'Atualiza automaticamente',
+    };
+  })();
+  const quickFulfillmentDetail = isDelivery
+    ? (deliveryAddressLabel ? 'Entrega no endereço' : 'Entrega')
+    : order?.type === 'table'
+    ? `Mesa ${order?.table || '-'}`
+    : 'Retirada na loja';
+  const orderQuickFacts = [
+    {
+      key: 'total',
+      label: 'Total',
+      value: formatCurrency(order?.total || 0),
+      detail: `${quickItemsCount || itemsToRender.length} ${quickItemsCount === 1 ? 'item' : 'itens'}`,
+      icon: <Package size={15} weight="duotone" />,
+    },
+    {
+      key: 'payment',
+      label: 'Pagamento',
+      value: paymentMeta?.label || 'A confirmar',
+      detail: isPaymentApproved ? 'Confirmado' : paymentSummaryDetail,
+      icon: paymentMeta?.icon ? <img src={paymentMeta.icon} alt="" className="h-4 w-4 object-contain" /> : <CreditCard size={15} weight="duotone" />,
+    },
+    {
+      key: 'eta',
+      label: quickEtaSummary.label,
+      value: quickEtaSummary.value,
+      detail: quickEtaSummary.detail,
+      icon: <Clock size={15} weight="duotone" />,
+    },
+    {
+      key: 'type',
+      label: 'Atendimento',
+      value: typeLabel,
+      detail: quickFulfillmentDetail,
+      icon: isDelivery ? <MapPin size={15} weight="duotone" /> : <Package size={15} weight="duotone" />,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f4f8fb_0%,#ebf2f7_100%)] pb-[var(--jnk-client-bottom-nav-height,0px)] pt-[calc(env(safe-area-inset-top)+4.55rem)]">
@@ -1525,6 +1604,24 @@ export function OrderTracking() {
                         Ao vivo
                       </span>
                     )}
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
+                      {orderQuickFacts.map((fact) => (
+                        <div key={fact.key} className="min-w-0 rounded-[1.15rem] border border-white/80 bg-white/78 px-3 py-2.5 shadow-[0_18px_34px_-30px_rgba(51,104,134,0.24)] ring-1 ring-[#d6e4ed]/60 backdrop-blur">
+                          <div className="flex items-center gap-2">
+                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl border border-[#d6e4ed] bg-[#f4f9fc] text-[#336886]">
+                              {fact.icon}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="truncate text-[9px] font-black uppercase tracking-[0.14em] text-slate-400">{fact.label}</p>
+                              <p className="truncate text-[13px] font-black leading-tight text-slate-950">{fact.value}</p>
+                            </div>
+                          </div>
+                          {fact.detail ? (
+                            <p className="mt-1 truncate text-[10px] font-semibold leading-tight text-slate-500">{fact.detail}</p>
+                          ) : null}
+                        </div>
+                      ))}
                     </div>
                     {isCancelled && (
                       <div className="mt-3 rounded-2xl border border-rose-200/70 bg-rose-50/80 px-4 py-3">
@@ -1699,11 +1796,7 @@ export function OrderTracking() {
                     </div>
                   </div>
                 </div>
-                {(isReady && elapsedMs > 0) ||
-                (remainingEstimateMinutes !== null && !isTerminal) ||
-                (!isPostalDelivery && etaWindowMin && etaWindowMax && !isTerminal) ||
-                (isPostalDelivery && !isTerminal && (postalRemainingDays !== null || Boolean(postalExpectedDeliveryDate))) ||
-                isEstimateDelayed ? (
+                {(isReady && elapsedMs > 0) || isEstimateDelayed ? (
                   <div className="mb-4 grid gap-2 sm:grid-cols-2">
                     {isReady && elapsedMs > 0 ? (
                       <TrackingMetaCard
@@ -1711,30 +1804,6 @@ export function OrderTracking() {
                         value={formatDuration(elapsedMs)}
                         detail="Tempo até a conclusão do pedido"
                         accent="success"
-                      />
-                    ) : null}
-                    {isPostalDelivery && !isReady && postalRemainingDays !== null ? (
-                      <TrackingMetaCard
-                        label="Prazo restante"
-                        value={`~${postalRemainingDays} dia(s)`}
-                        detail={postalExpectedDeliveryDate ? `Entrega prevista até ${postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}` : 'Estimativa atual para envio'}
-                        accent="primary"
-                      />
-                    ) : null}
-                    {remainingEstimateMinutes !== null && !isReady ? (
-                      <TrackingMetaCard
-                        label={`${etaPhaseLabel} restante`}
-                        value={`~${remainingEstimateMinutes} min`}
-                        detail={etaWindowMin && etaWindowMax ? `Janela prevista: ${etaWindowMin}–${etaWindowMax} min` : etaForecastLabel}
-                        accent={isEstimateDelayed ? 'warning' : 'primary'}
-                      />
-                    ) : null}
-                    {remainingEstimateMinutes === null && !isPostalDelivery && etaWindowMin && etaWindowMax && !isReady ? (
-                      <TrackingMetaCard
-                        label="Janela prevista"
-                        value={`${etaWindowMin}–${etaWindowMax} min`}
-                        detail={etaForecastLabel}
-                        accent="primary"
                       />
                     ) : null}
                     {isEstimateDelayed ? (
