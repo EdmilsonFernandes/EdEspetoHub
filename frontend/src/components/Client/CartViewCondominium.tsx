@@ -227,7 +227,7 @@ export const CartViewCondominium = ({
   };
 
   return (
-    <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
+    <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "pb-[calc(var(--jnk-native-nav-height,0px)+env(safe-area-inset-bottom)+12rem)]" : "pb-[calc(env(safe-area-inset-bottom)+12rem)]"}`}>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[max(env(safe-area-inset-top),0.85rem)] bg-[linear-gradient(180deg,rgba(238,245,247,0.98),rgba(238,245,247,0.74))]" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4 sm:mb-6`}>
@@ -532,7 +532,7 @@ export const CartViewCondominium = ({
       )}
 
       {/* Botão Finalizar */}
-      <div className={`fixed left-0 right-0 z-50 border-t border-slate-100 bg-white/90 p-4 backdrop-blur-md ${isNativePlatform ? "ds-native-nav-dock" : "bottom-0"}`}>
+      <div className={`fixed left-0 right-0 z-50 border-t border-slate-100 bg-white/90 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.9rem)] backdrop-blur-md ${isNativePlatform ? "ds-native-nav-dock" : "bottom-0"}`}>
         <div className="mx-auto max-w-lg rounded-[1.65rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(248,250,252,0.94))] p-3 shadow-[0_18px_34px_-26px_rgba(15,23,42,0.22)]">
         {checkoutLoading && checkoutSlow && (
           <p className="mb-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[11px] font-bold leading-snug text-amber-800">

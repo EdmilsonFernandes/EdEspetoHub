@@ -991,7 +991,7 @@ export const CartView = ({
   };
 
   return (
-    <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg pb-32" : "pb-44"}`}>
+    <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "pb-[calc(var(--jnk-native-nav-height,0px)+env(safe-area-inset-bottom)+14rem)]" : "pb-[calc(env(safe-area-inset-bottom)+14rem)]"}`}>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[max(env(safe-area-inset-top),0.85rem)] bg-[linear-gradient(180deg,rgba(238,245,247,0.98),rgba(238,245,247,0.74))]" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4 sm:mb-6`}>
@@ -2515,7 +2515,7 @@ export const CartView = ({
           )}
 
           {/* Pagamento */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm" data-testid="checkout-review-payment-card">
             <div className="flex items-center gap-3">
               <span className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
                 isOnlinePaymentMethod ? 'bg-sky-50 text-[#009ee3]' : isManualPix ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
@@ -2552,7 +2552,7 @@ export const CartView = ({
       )}
 
       {/* Botão Finalizar */}
-      <div className={`fixed left-0 right-0 w-full box-border p-4 border-t border-slate-100 bg-white/90 backdrop-blur-md max-w-lg mx-auto z-50 shadow-[0_-14px_28px_-22px_rgba(15,23,42,0.28)] ${isNativePlatform ? "ds-native-nav-dock" : "bottom-0"}`}>
+      <div className={`fixed left-0 right-0 w-full box-border border-t border-slate-100 bg-white/90 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.9rem)] backdrop-blur-md max-w-lg mx-auto z-50 shadow-[0_-14px_28px_-22px_rgba(15,23,42,0.28)] ${isNativePlatform ? "ds-native-nav-dock" : "bottom-0"}`} data-testid="checkout-fixed-action">
         {useMultiStepFlow ? (
           <>
             {checkoutStep >= 3 && (
