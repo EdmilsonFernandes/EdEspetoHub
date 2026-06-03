@@ -121,6 +121,19 @@ Backend API (chamanoespeto-api :4000)
 
 ### Padrão UX/UI para novas telas
 
+- Toda tela, componente, fluxo de navegação e interação deve seguir padrões reconhecidos de produtos líderes como Airbnb, Uber, iFood, Nubank, Mercado Livre, Booking, Google Maps e Spotify.
+- Antes de implementar qualquer mudança visual, revisar a tela existente e justificar a decisão por princípios de UX/UI, não por gosto pessoal.
+- Referências primárias para decisões de design:
+  - Material Design 3 (`https://m3.material.io`): Android UX, componentes, navegação, cards, listas, bottom sheets, acessibilidade, design tokens e layouts responsivos.
+  - Apple Human Interface Guidelines (`https://developer.apple.com/design/human-interface-guidelines/`): iOS UX, navegação, gestos, interações mobile, hierarquia visual e padrões nativos.
+  - Nielsen Norman Group (`https://www.nngroup.com`): usabilidade, heurísticas, pesquisa com usuários e UX mobile.
+  - Laws of UX (`https://lawsofux.com`): Hick's Law, Fitts's Law, Jakob's Law, Miller's Law e redução de carga cognitiva.
+  - Baymard Institute (`https://baymard.com`): busca, filtros, descoberta de produtos, checkout e padrões de ecommerce.
+  - Mobbin (`https://mobbin.com`): referências reais de implementação de Airbnb, Uber, iFood e outros apps de mercado.
+- Ao alterar UI, buscar padrões de mercado antes de criar solução própria: bottom sheet para escolhas secundárias, cards compactos para resumo, CTA único por etapa, feedback imediato, estados vazios claros e navegação previsível.
+- Reduzir ruído visual: evitar textos técnicos, duplicidade de informação, cards grandes sem necessidade, botões redundantes e ações escondidas sem sinalização.
+- Aplicar princípios de mobile first: área de toque confortável, safe area, botões fixos sem sobrepor conteúdo, scroll previsível, leitura rápida e bom comportamento com fonte Android/iOS aumentada.
+- Toda tela de checkout, busca, filtros, cardápio, pedidos, destinos, chalés, serviços, conta e login deve ser pensada para conversão e clareza: o usuário precisa entender a próxima ação em poucos segundos.
 - Antes de criar qualquer tela nova no frontend, localizar e reutilizar o shell/template existente mais próximo do fluxo.
 - Toda tela nova navegável deve manter a identidade visual do app: paleta, raio de borda, tipografia, espaçamento, ícones e padrão de botões já usados no módulo.
 - Telas novas do app do cliente, destinos, chalés, serviços, pedidos e subtelas públicas acessadas pelo app devem preservar o menu inferior do cliente. Em web/mobile use `ClientBottomNav`; no app nativo garanta que `NativeAppNavigator` não fique escondido por estado global antigo (`jnk:cart-visibility` / `jnc:native-nav-visibility`).
