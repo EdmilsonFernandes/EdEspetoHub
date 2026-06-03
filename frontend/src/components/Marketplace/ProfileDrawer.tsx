@@ -669,11 +669,11 @@ export function ProfileDrawer({
 
         <SmartDrawerScrollArea
           className="flex-1"
-          contentClassName="px-4 py-4 space-y-6"
+          contentClassName="px-4 py-3.5 space-y-4"
           tone={drawerScrollTone}
         >
-          <nav className="space-y-2">
-            <p className="mb-3 text-[11px] font-bold tracking-tight text-slate-400 px-1">
+          <nav className="space-y-1.5">
+            <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
               {activeContext === 'client'
                 ? 'Sua conta'
                 : activeContext === 'store'
@@ -692,23 +692,23 @@ export function ProfileDrawer({
                   action.onClick();
                   onClose();
                 }}
-                className={`flex w-full items-center gap-4 rounded-[1.45rem] border px-3.5 py-3.5 transition-all active:scale-[0.97] ${
+                className={`flex w-full items-center gap-3 rounded-[1.25rem] border px-3 py-3 transition-all active:scale-[0.98] ${
                   action.tone === 'danger'
-                    ? 'border-rose-100/70 bg-rose-50/58 text-rose-700 shadow-[0_14px_28px_-24px_rgba(225,29,72,0.35)] hover:border-rose-100 hover:bg-rose-50/82'
-                    : 'border-transparent text-slate-800 hover:border-white/80 hover:bg-white/90'
+                    ? 'border-rose-100/70 bg-white text-rose-600 shadow-[0_12px_24px_-22px_rgba(225,29,72,0.25)] hover:border-rose-100 hover:bg-rose-50/72'
+                    : 'border-transparent text-slate-800 hover:border-white/80 hover:bg-white/88'
                 }`}
               >
-                <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-[1.1rem] border border-white/70 shadow-[0_14px_24px_-20px_rgba(15,23,42,0.22)] transition-colors ${
+                <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-[1rem] border border-white/70 shadow-[0_12px_22px_-19px_rgba(15,23,42,0.22)] transition-colors ${
                   action.tone === 'danger'
-                    ? 'bg-rose-100/78 text-rose-500'
+                    ? 'bg-rose-50 text-rose-500'
                     : `${action.bgColor || 'bg-slate-100'} ${action.iconColor || 'text-slate-500'}`
                 }`}>
                   {action.icon}
                 </div>
                 <div className="min-w-0 flex-1 text-left">
-                  <span className={`block text-[15px] leading-tight ${action.tone === 'danger' ? 'font-black text-rose-700' : 'font-semibold'}`}>{action.label}{action.badge ? <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">{action.badge > 9 ? "9+" : action.badge}</span> : null}</span>
+                  <span className={`block text-[14px] leading-tight ${action.tone === 'danger' ? 'font-black text-rose-600' : 'font-bold'}`}>{action.label}{action.badge ? <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">{action.badge > 9 ? "9+" : action.badge}</span> : null}</span>
                   {getActionHelper(action.id) ? (
-                    <span className={`mt-0.5 block text-[11px] font-semibold ${action.tone === 'danger' ? 'text-rose-700/46' : 'text-slate-500'}`}>
+                    <span className={`mt-0.5 block text-[10.5px] font-semibold leading-snug ${action.tone === 'danger' ? 'text-rose-500/60' : 'text-slate-500'}`}>
                       {getActionHelper(action.id)}
                     </span>
                   ) : null}

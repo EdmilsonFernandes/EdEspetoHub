@@ -122,6 +122,9 @@ export function DestinationsPage() {
       .toLowerCase()
       .includes(query));
   }, [destinations, searchTerm, selectedState]);
+  const destinationResultLabel = filteredDestinations.length === 1
+    ? '1 cidade encontrada'
+    : `${filteredDestinations.length} cidades encontradas`;
 
   return (
     <PublicDestinationShell active="destinations" backTo="/hub" backLabel="Voltar" contextLabel="Destinos turísticos">
@@ -136,10 +139,10 @@ export function DestinationsPage() {
                 Destinos turísticos
               </p>
               <h1 className="mt-2 max-w-3xl text-2xl font-black leading-[1.02] tracking-[-0.05em] text-slate-950 sm:text-4xl">
-                Escolha uma cidade turística e veja o que explorar.
+                Explore cidades turísticas com apoio local.
               </h1>
               <p className="mt-2 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
-                Chalés, pousadas, comida, passeios e serviços locais em um guia direto para sua viagem.
+                Encontre hospedagens, comida, passeios e serviços próximos em poucos toques.
               </p>
             </div>
             <div className="grid grid-cols-3 gap-2 rounded-[1.35rem] border border-white/82 bg-white/80 p-2 shadow-[0_20px_48px_-36px_rgba(15,23,42,0.42)] ring-1 ring-white/20 backdrop-blur-xl lg:min-w-[20rem]">
@@ -214,7 +217,7 @@ export function DestinationsPage() {
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Cidades disponíveis</p>
             <h2 className="mt-1 text-2xl font-black tracking-[-0.03em] text-slate-950">
-              {searchTerm ? `${filteredDestinations.length} resultado(s)` : 'Escolha uma cidade'}
+              {searchTerm || selectedState !== 'ALL' ? destinationResultLabel : 'Escolha uma cidade'}
             </h2>
             <p className="mt-1 max-w-xl text-sm font-semibold text-slate-500">Toque em uma cidade para ver hospedagens, comida, passeios e serviços.</p>
           </div>

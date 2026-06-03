@@ -576,10 +576,10 @@ export function HospitalityPlacePage() {
                     Parceiros do chalé
                   </p>
                   <h2 className="mt-1 text-[1.1rem] font-black tracking-[-0.035em] text-slate-950 sm:text-xl">
-                    Quem atende este chalé
+                    Rede local do chalé
                   </h2>
                   <p className="mt-0.5 text-xs font-semibold leading-relaxed text-slate-500 sm:text-sm">
-                    Toque no logo para ir direto ao serviço abaixo.
+                    Toque em uma marca para encontrar o serviço na lista.
                   </p>
                 </div>
                 <div className="min-w-0 sm:flex sm:items-center sm:justify-end sm:gap-3">
@@ -651,7 +651,7 @@ export function HospitalityPlacePage() {
                     <ShoppingBagOpen size={15} weight="duotone" />
                     Atendem este chalé
                   </p>
-                  <h2 className="mt-1 text-2xl font-bold tracking-[-0.035em] text-slate-950">Delivery e serviços para este chalé</h2>
+                  <h2 className="mt-1 text-2xl font-bold tracking-[-0.035em] text-slate-950">Comer, comprar e resolver por aqui</h2>
                   <p className="mt-1 max-w-2xl text-sm font-medium leading-relaxed text-slate-600">
                     A referência da hospedagem já acompanha o pedido ou a mensagem para facilitar a entrega.
                   </p>
@@ -660,29 +660,23 @@ export function HospitalityPlacePage() {
                   {deliveryOptionLabel} a {place.name}.
                 </p>
               </div>
-              <div className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1">
+              <div className="mt-3 grid grid-cols-3 gap-2">
                 {serviceFilterOptions.map((option: any) => {
                   const Icon = option.icon;
                   const active = serviceFilter === option.id;
-                  const filterStyles: Record<string, string> = {
-                    all: 'bg-[#336886] text-white shadow-[0_12px_24px_-10px_rgba(51,104,134,0.65)] border-transparent',
-                    app: 'bg-amber-600 text-white shadow-[0_12px_24px_-10px_rgba(217,119,6,0.65)] border-transparent',
-                    direct: 'bg-emerald-600 text-white shadow-[0_12px_24px_-10px_rgba(5,150,105,0.65)] border-transparent',
-                  };
-                  const activeClass = filterStyles[option.id] || filterStyles.all;
                   return (
                     <button
                       key={option.id}
                       type="button"
                       onClick={() => setServiceFilter(option.id)}
-                      className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition-all duration-300 ${
+                      className={`jnc-hub-touch inline-flex min-h-[3.25rem] min-w-0 flex-col items-center justify-center gap-1 rounded-[1.15rem] border px-2 py-2 text-center text-[10px] font-black uppercase tracking-[0.06em] transition-all duration-300 sm:min-h-0 sm:flex-row sm:gap-2 sm:rounded-full sm:px-3.5 sm:text-[11px] ${
                         active
-                          ? activeClass
-                          : 'border-slate-200 bg-white/70 text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm'
+                          ? 'border-transparent bg-[#336886] text-white shadow-[0_12px_24px_-10px_rgba(51,104,134,0.65)]'
+                          : 'border-slate-200 bg-white/78 text-slate-600 shadow-sm hover:bg-white hover:text-slate-900'
                       }`}
                     >
-                      <Icon size={14} weight={option.id === 'direct' ? 'fill' : 'duotone'} className={option.id === 'direct' && !active ? 'text-emerald-600' : ''} />
-                      {option.label}
+                      <Icon size={14} weight={active ? 'fill' : 'duotone'} className="shrink-0" />
+                      <span className="max-w-full truncate">{option.label}</span>
                       <span className={`rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{option.count}</span>
                     </button>
                   );

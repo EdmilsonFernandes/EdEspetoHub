@@ -1617,7 +1617,7 @@ export function ClientOrders() {
                   </span>
                   <div>
                     <h2 className="text-sm font-semibold text-slate-800">Em andamento</h2>
-                    <p className="text-[11px] text-slate-400">Priorize estes pedidos primeiro.</p>
+                    <p className="text-[11px] text-slate-400">Acompanhe estes pedidos primeiro.</p>
                   </div>
                 </div>
                 <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-emerald-600 ring-1 ring-emerald-100 shadow-[0_10px_20px_-18px_rgba(16,185,129,0.5)]">
@@ -1745,11 +1745,11 @@ export function ClientOrders() {
             </div>
 
             <p className="mt-3 text-sm text-slate-500">
-              Esse pedido já passou do prazo previsto. Se quiser, você pode enviar um motivo e cancelar pelo app.
+              Se precisar cancelar, envie um motivo simples para a loja entender o que aconteceu.
             </p>
 
             <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-              A loja recebe esse motivo para entender o cancelamento.
+              A loja recebe esse motivo junto com o cancelamento.
             </div>
 
             <textarea
@@ -1767,7 +1767,7 @@ export function ClientOrders() {
                 onClick={() => setCancelModal({ order: null, reason: '', submitting: false })}
                 className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100"
               >
-                Agora nao
+                Agora não
               </button>
               <button
                 type="button"

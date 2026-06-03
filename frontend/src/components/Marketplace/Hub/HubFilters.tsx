@@ -117,7 +117,8 @@ export function HubFilterBar({
           aria-label="Abrir filtros"
         >
           <SlidersHorizontal size={14} weight="bold" />
-          <span className="inline">Mais</span>
+          <span className="hidden min-[390px]:inline">Filtros</span>
+          <span className="min-[390px]:hidden">Mais</span>
           {hiddenFilterCount > 0 ? (
             <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#153A4C] px-1 text-[9px] font-black text-white ring-2 ring-white">
               {hiddenFilterCount}

@@ -334,7 +334,7 @@ export function DestinationDetailPage() {
                 <div className="min-w-0 max-w-3xl">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Explore a região</p>
                   <h1 className="mt-2 text-2xl font-black leading-[0.98] tracking-[-0.045em] text-slate-950 sm:text-4xl">
-                    O que vamos descobrir em {destination.name}?
+                    Explore {destination.name}
                   </h1>
                   <p className="mt-2 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
                     {destination.heroSubtitle || destination.description || 'Hospedagens, comida, passeios e serviços perto de você, sem complicar.'}
@@ -352,8 +352,8 @@ export function DestinationDetailPage() {
                 </div>
               </div>
 
-              <div className="grid min-w-0 gap-3 rounded-[1.7rem] border border-white/55 bg-white/40 p-2.5 shadow-[0_22px_62px_-50px_rgba(15,23,42,0.42)] ring-1 ring-white/35 backdrop-blur-xl lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-                <label className="group flex min-h-[54px] min-w-0 max-w-full items-center gap-3 rounded-[1.35rem] bg-white/88 px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition focus-within:bg-white focus-within:ring-4 focus-within:ring-[#336886]/12">
+              <div className="grid min-w-0 gap-2.5 rounded-[1.55rem] border border-white/55 bg-white/42 p-2 shadow-[0_22px_62px_-50px_rgba(15,23,42,0.42)] ring-1 ring-white/35 backdrop-blur-xl lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                <label className="group flex min-h-[50px] min-w-0 max-w-full items-center gap-3 rounded-[1.2rem] bg-white/90 px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition focus-within:bg-white focus-within:ring-4 focus-within:ring-[#336886]/12">
                   <MagnifyingGlass size={18} weight="bold" className="text-[#336886]" />
                   <input
                     value={searchTerm}
@@ -396,9 +396,9 @@ export function DestinationDetailPage() {
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Hospedagens</p>
-                <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">Onde você está hospedado?</h2>
+                <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">Escolha sua hospedagem</h2>
                 <p className="mt-1 max-w-xl text-sm font-semibold leading-relaxed text-slate-500">
-                  Primeiro escolha o chalé ou pousada. Depois mostramos quem entrega, atende ou resolve algo perto dali.
+                  Toque no chalé ou pousada para ver quem entrega, atende e resolve algo perto dali.
                 </p>
               </div>
               <Bed size={28} weight="duotone" className="shrink-0 text-[#336886]" />
@@ -562,7 +562,7 @@ export function DestinationDetailPage() {
                   event.stopPropagation();
                   preserveViewportPosition(() => setPlaceLimit((current) => current + 6));
                 }}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm"
+                  className="jnc-hub-touch w-full rounded-2xl border border-[#336886]/12 bg-white px-4 py-3 text-sm font-black text-[#336886] shadow-[0_14px_30px_-24px_rgba(51,104,134,0.32)]"
               >
                 Ver mais hospedagens ({filteredPlaces.length - visiblePlaces.length})
               </button>
@@ -576,7 +576,7 @@ export function DestinationDetailPage() {
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">{showPlacesSection ? 'Ainda explorando?' : 'Região'}</p>
-                  <h2 className="mt-1 text-xl font-black">{showPlacesSection ? 'Comida, compras e serviços da cidade' : 'Comer, comprar e fazer'}</h2>
+                  <h2 className="mt-1 text-xl font-black">{showPlacesSection ? 'Serviços e lugares da cidade' : 'Comer, comprar e fazer'}</h2>
                   <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">
                     {showPlacesSection
                       ? 'Veja opções da região antes de escolher uma hospedagem. Ao entrar em um chalé, mostramos quem atende ali.'
@@ -691,7 +691,7 @@ export function DestinationDetailPage() {
                       event.stopPropagation();
                       preserveViewportPosition(() => setListingLimit((current) => current + 10));
                     }}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm"
+                    className="jnc-hub-touch w-full rounded-2xl border border-[#336886]/12 bg-white px-4 py-3 text-sm font-black text-[#336886] shadow-[0_14px_30px_-24px_rgba(51,104,134,0.32)]"
                   >
                     Ver mais serviços ({filteredListings.length - visibleListings.length})
                   </button>
