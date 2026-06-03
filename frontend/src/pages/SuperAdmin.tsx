@@ -1555,7 +1555,7 @@ export function SuperAdmin() {
 
   return (
     <AdminLayout contextLabel="Plataforma" showHeader={false}>
-      <div className="relative z-20 overflow-visible rounded-3xl border border-slate-200 bg-white/80 backdrop-blur px-4 py-4 sm:px-6 sm:py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="relative z-20 flex flex-col gap-4 overflow-visible rounded-[2rem] border border-white/80 bg-white/86 px-4 py-4 shadow-[0_28px_76px_-52px_rgba(15,23,42,0.5)] ring-1 ring-white/70 backdrop-blur-xl sm:px-6 sm:py-5 md:flex-row md:items-center md:justify-between">
         <div className="absolute -right-20 -top-16 w-64 h-64 rounded-full bg-brand-primary/10 blur-3xl" />
         <div className="absolute right-24 -bottom-20 w-56 h-56 rounded-full bg-emerald-400/10 blur-3xl" />
         <div className="relative flex items-center gap-4">
@@ -1608,7 +1608,7 @@ export function SuperAdmin() {
           <button
             type="button"
             onClick={() => setProfileMenuOpen((prev) => !prev)}
-            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/92 px-2 py-1.5 shadow-sm transition hover:border-slate-300 hover:bg-white"
+            className="flex items-center gap-2 rounded-full border border-white/80 bg-white/92 px-2 py-1.5 shadow-[0_12px_32px_-26px_rgba(15,23,42,0.45)] ring-1 ring-slate-100/80 transition hover:border-[#336886]/20 hover:bg-white"
             aria-haspopup="menu"
             aria-expanded={profileMenuOpen}
             title="Abrir menu de perfil"
@@ -1623,14 +1623,19 @@ export function SuperAdmin() {
             <CaretDown size={14} className={`text-slate-500 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
           </button>
           {profileMenuOpen && (
-            <div className="absolute right-0 top-[calc(100%+8px)] z-[70] w-[260px] rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_24px_40px_-24px_rgba(15,23,42,0.45)]">
-              <div className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                <span className="text-xs font-semibold text-slate-600">Auto-refresh</span>
+            <div className="absolute right-0 top-[calc(100%+10px)] z-[70] w-[285px] overflow-hidden rounded-[1.65rem] border border-white/80 bg-white/94 p-2.5 shadow-[0_30px_76px_-44px_rgba(15,23,42,0.6)] ring-1 ring-slate-100/80 backdrop-blur-xl">
+              <div className="pointer-events-none absolute -right-14 -top-14 h-32 w-32 rounded-full bg-[#336886]/12 blur-3xl" />
+              <div className="relative mb-2 rounded-[1.25rem] border border-[#336886]/10 bg-[linear-gradient(135deg,rgba(51,104,134,0.08),rgba(255,255,255,0.88))] px-3 py-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]/70">Sessão master</p>
+                <p className="mt-1 truncate text-sm font-black text-slate-950">{superAdminUser || 'Admin Já no Caminho'}</p>
+              </div>
+              <div className="relative flex items-center justify-between gap-2 rounded-[1.15rem] border border-slate-100 bg-slate-50/78 px-3 py-2.5">
+                <span className="text-xs font-black text-slate-600">Auto-refresh</span>
                 <button
                   type="button"
                   onClick={() => setAutoRefresh((prev) => !prev)}
                   className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors ${
-                    autoRefresh ? 'bg-brand-primary' : 'bg-slate-300'
+                    autoRefresh ? 'bg-[#153A4C]' : 'bg-slate-300'
                   }`}
                   title={autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
                 >
@@ -1647,7 +1652,7 @@ export function SuperAdmin() {
                   setProfileMenuOpen(false);
                   navigate('/superadmin/home-config');
                 }}
-                className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="relative mt-2 flex w-full items-center gap-2 rounded-[1.1rem] px-3 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-[#eef6f8] hover:text-[#153A4C]"
               >
                 <ImageSquare size={16} weight="duotone" />
                 Configuração da Home
@@ -1658,7 +1663,7 @@ export function SuperAdmin() {
                   setProfileMenuOpen(false);
                   navigate('/superadmin/email-templates');
                 }}
-                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="relative mt-1 flex w-full items-center gap-2 rounded-[1.1rem] px-3 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-[#eef6f8] hover:text-[#153A4C]"
               >
                 <EnvelopeSimple size={16} weight="duotone" />
                 E-mails e templates
@@ -1669,7 +1674,7 @@ export function SuperAdmin() {
                   setProfileMenuOpen(false);
                   navigate('/superadmin/condominiums');
                 }}
-                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="relative mt-1 flex w-full items-center gap-2 rounded-[1.1rem] px-3 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-[#eef6f8] hover:text-[#153A4C]"
               >
                 <Buildings size={16} weight="duotone" />
                 Condomínios e acessos
@@ -1680,7 +1685,7 @@ export function SuperAdmin() {
                   setProfileMenuOpen(false);
                   navigate('/superadmin/destinations');
                 }}
-                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="relative mt-1 flex w-full items-center gap-2 rounded-[1.1rem] px-3 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-[#eef6f8] hover:text-[#153A4C]"
               >
                 <Compass size={16} weight="duotone" />
                 Destinos turísticos
@@ -1691,7 +1696,7 @@ export function SuperAdmin() {
                   setProfileMenuOpen(false);
                   loadOverview(token);
                 }}
-                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="relative mt-1 flex w-full items-center gap-2 rounded-[1.1rem] px-3 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-[#eef6f8] hover:text-[#153A4C]"
               >
                 <ArrowClockwise size={16} weight="duotone" />
                 Atualizar dados
@@ -1702,7 +1707,7 @@ export function SuperAdmin() {
                   setProfileMenuOpen(false);
                   setMfaPanelOpen(true);
                 }}
-                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="relative mt-1 flex w-full items-center gap-2 rounded-[1.1rem] px-3 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-[#eef6f8] hover:text-[#153A4C]"
               >
                 <ShieldCheck size={16} weight="duotone" />
                 MFA e dispositivos
@@ -1713,7 +1718,7 @@ export function SuperAdmin() {
                   setProfileMenuOpen(false);
                   handleLogout();
                 }}
-                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
+                className="relative mt-2 flex w-full items-center justify-center gap-2 rounded-[1.1rem] border border-rose-100 bg-rose-50/70 px-3 py-2.5 text-sm font-black text-rose-700 transition hover:bg-rose-100"
               >
                 Sair
               </button>
@@ -1780,7 +1785,7 @@ export function SuperAdmin() {
       </div>
 
       <div
-        className={`rounded-2xl border px-4 py-3.5 bg-gradient-to-r ${(
+        className={`rounded-[1.35rem] border px-4 py-3.5 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.38)] ring-1 ring-white/70 bg-gradient-to-r ${(
           SECTION_META[activeSection] || SECTION_META.executive
         ).tone}`}
       >

@@ -1122,10 +1122,10 @@ export const MenuView = ({
 
       <div
         ref={stickySearchContainerRef}
-        className={`sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-slate-100 bg-white/95 shadow-[0_4px_18px_-10px_rgba(15,23,42,0.12)] backdrop-blur-xl`}
+        className={`sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-white/70 bg-white/92 shadow-[0_10px_32px_-26px_rgba(15,23,42,0.26)] backdrop-blur-2xl`}
       >
         <div className="mx-auto w-full max-w-6xl px-4 pt-3 pb-2">
-          <div className="relative flex items-center gap-2.5 rounded-[1.2rem] border border-slate-200/80 bg-white px-3.5 shadow-[0_2px_10px_-4px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow] duration-200 focus-within:border-slate-300 focus-within:shadow-[0_4px_16px_-6px_rgba(15,23,42,0.14)]">
+          <div className="relative flex items-center gap-2.5 rounded-[1.25rem] border border-white/80 bg-white/88 px-3.5 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)] ring-1 ring-slate-100/80 transition-[border-color,box-shadow] duration-200 focus-within:border-[#336886]/20 focus-within:bg-white focus-within:shadow-[0_18px_42px_-34px_rgba(15,23,42,0.32)]">
             <span
               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[0.65rem]"
               style={{ backgroundColor: `${catalogPrimaryColor}18`, color: catalogPrimaryColor }}
@@ -1152,13 +1152,13 @@ export const MenuView = ({
         </div>
         {filteredGrouped.length > 1 && (
           <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-3">
-            <div className="flex w-full items-stretch gap-2 rounded-[1.65rem] border border-white/85 bg-white/76 p-1.5 shadow-[0_16px_36px_-30px_rgba(15,23,42,0.32),inset_0_1px_0_rgba(255,255,255,0.82)] ring-1 ring-slate-900/[0.025] backdrop-blur-xl">
+            <div className="flex w-full items-stretch gap-2 rounded-[1.65rem] border border-white/85 bg-white/70 p-1.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.32),inset_0_1px_0_rgba(255,255,255,0.82)] ring-1 ring-slate-900/[0.025] backdrop-blur-xl">
               {useCompactCategoryCarousel && (
                 <button
                   type="button"
                   aria-label="Abrir categorias"
                   onClick={() => setIsCategorySheetOpen(true)}
-                  className="inline-flex w-[3.65rem] shrink-0 flex-col items-center justify-center gap-1 rounded-[1.25rem] border border-white/90 bg-white text-slate-700 shadow-[0_14px_28px_-22px_rgba(15,23,42,0.36)] ring-1 ring-slate-100 transition-all active:scale-95"
+                  className="inline-flex w-[3.45rem] shrink-0 flex-col items-center justify-center gap-1 rounded-[1.2rem] border border-white/90 bg-white text-slate-700 shadow-[0_14px_28px_-22px_rgba(15,23,42,0.36)] ring-1 ring-slate-100 transition-all active:scale-95"
                 >
                   <List size={17} weight="bold" style={{ color: catalogPrimaryColor }} />
                   <span className="text-[9px] font-black uppercase tracking-[0.08em] text-slate-400">Menu</span>
@@ -1186,8 +1186,8 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={`jnc-hub-touch group relative flex min-h-[3.45rem] flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border px-2 py-1.5 text-center snap-start ${
-                        useCompactCategoryCarousel ? "w-[5.95rem] shrink-0 sm:min-w-0" : "w-full min-w-0"
+                      className={`jnc-hub-touch group relative flex min-h-[3.3rem] flex-col items-center justify-center overflow-hidden rounded-[1.12rem] border px-2 py-1.5 text-center snap-start transition-all duration-200 ${
+                        useCompactCategoryCarousel ? "w-[5.55rem] shrink-0 sm:min-w-0" : "w-full min-w-0"
                       } ${isActive ? 'shadow-[0_18px_34px_-22px_rgba(15,23,42,0.38)]' : 'shadow-[0_10px_24px_-22px_rgba(15,23,42,0.28)] hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-24px_rgba(15,23,42,0.34)]'}`}
                       style={
                         isActive
@@ -1202,7 +1202,7 @@ export const MenuView = ({
                     >
                       {isActive ? <span className="pointer-events-none absolute -right-5 -top-5 h-14 w-14 rounded-full bg-white/16 blur-xl" /> : null}
                       <span
-                        className={`relative inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-transform duration-300 group-hover:scale-105 ${isActive ? "border-white/24 bg-white/16 text-current" : `${meta.tone} bg-opacity-70`}`}
+                        className={`relative inline-flex h-[1.35rem] w-[1.35rem] shrink-0 items-center justify-center rounded-full border transition-transform duration-300 group-hover:scale-105 ${isActive ? "border-white/24 bg-white/16 text-current" : `${meta.tone} bg-opacity-70`}`}
                       >
                         <Icon size={13} weight={isActive ? "fill" : "duotone"} />
                       </span>

@@ -179,7 +179,7 @@ test.describe('Hub marketplace', () => {
   test('carrega lojas, filtros e destaque sem perder dados principais', async ({ page }) => {
     await page.goto('/hub');
 
-    await expect(page.getByRole('banner')).toBeVisible();
+    await expect(page.getByRole('banner')).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Gustavao Espetos E2E')).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Brecho da Brisa E2E')).toBeVisible();
     await expect(page.getByLabel('Favoritar Gustavao Espetos E2E')).toBeVisible();

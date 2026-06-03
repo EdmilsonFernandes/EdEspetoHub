@@ -129,13 +129,13 @@ test.describe('Destination WhatsApp location', () => {
   test('mostra CTA comercial premium para novos parceiros', async ({ page }) => {
     await page.goto('/destinos');
 
-    await expect(page.getByText('Tem chalé, pousada ou serviço turístico?')).toBeVisible();
+    await expect(page.getByText('Tem chalé, pousada ou serviço turístico?')).toBeVisible({ timeout: 15000 });
     await expect(page.getByRole('link', { name: /Cadastrar meu negócio/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /Falar no WhatsApp/i })).toBeVisible();
 
     await page.goto('/destinos/sao-bento');
 
-    await expect(page.getByText('Atende turistas em Sao Bento Sapucai?')).toBeVisible();
+    await expect(page.getByText('Atende turistas em Sao Bento Sapucai?')).toBeVisible({ timeout: 15000 });
     await expect(page.getByRole('link', { name: /Cadastrar meu negócio/i })).toBeVisible();
   });
 

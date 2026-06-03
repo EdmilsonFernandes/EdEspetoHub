@@ -4109,66 +4109,73 @@ export function StorePage() {
         )}
         {!showInactiveState && !showClosedState && view === 'menu' && products.length === 0 && productsLoading ? (
           <div className="mx-auto min-h-[68vh] w-full max-w-5xl px-4 py-8">
-            <div className="rounded-[2rem] border border-white/80 bg-white/85 p-5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.26)] backdrop-blur-xl">
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_28px_72px_-46px_rgba(15,23,42,0.35)] ring-1 ring-white/70 backdrop-blur-xl">
+              <div className="pointer-events-none absolute -right-12 -top-14 h-36 w-36 rounded-full bg-[#336886]/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-amber-300/12 blur-3xl" />
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-2xl bg-slate-100 animate-pulse" />
+                <div className="relative h-12 w-12 animate-pulse rounded-2xl bg-[linear-gradient(135deg,#edf6fb,#ffffff)] ring-1 ring-slate-100" />
                 <div className="min-w-0 flex-1 space-y-2">
-                  <div className="h-4 w-44 rounded-full bg-slate-100 animate-pulse" />
-                  <div className="h-3 w-32 rounded-full bg-slate-100 animate-pulse" />
+                  <div className="h-4 w-44 animate-pulse rounded-full bg-slate-100" />
+                  <div className="h-3 w-32 animate-pulse rounded-full bg-slate-100" />
                 </div>
               </div>
               <div className="mt-6 space-y-3">
                 {[0, 1, 2].map((item) => (
-                  <div key={item} className="flex items-center gap-4 rounded-[1.5rem] border border-slate-100 bg-white p-3">
-                    <div className="h-20 w-20 rounded-2xl bg-slate-100 animate-pulse" />
+                  <div key={item} className="relative flex items-center gap-4 overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white/92 p-3 shadow-[0_16px_38px_-34px_rgba(15,23,42,0.32)]">
+                    <div className="h-20 w-20 animate-pulse rounded-2xl bg-[linear-gradient(135deg,#eef5f7,#ffffff)] ring-1 ring-slate-100" />
                     <div className="min-w-0 flex-1 space-y-2">
-                      <div className="h-4 w-3/4 rounded-full bg-slate-100 animate-pulse" />
-                      <div className="h-3 w-11/12 rounded-full bg-slate-100 animate-pulse" />
-                      <div className="h-4 w-24 rounded-full bg-slate-100 animate-pulse" />
+                      <div className="h-4 w-3/4 animate-pulse rounded-full bg-slate-100" />
+                      <div className="h-3 w-11/12 animate-pulse rounded-full bg-slate-100" />
+                      <div className="h-4 w-24 animate-pulse rounded-full bg-slate-100" />
                     </div>
                   </div>
                 ))}
               </div>
-              <p className="mt-5 text-center text-sm font-bold text-slate-600">
+              <p className="relative mt-5 text-center text-sm font-bold text-slate-600">
                 {productsSlow ? 'Internet lenta. Ainda estamos carregando o cardápio...' : 'Carregando cardápio...'}
               </p>
             </div>
           </div>
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length === 0 && productsLoadError ? (
           <div className="min-h-[70vh] flex items-center justify-center px-4">
-            <div className="max-w-md rounded-[2rem] border border-white/80 bg-white/90 p-6 text-center shadow-[0_24px_54px_-36px_rgba(15,23,42,0.3)] backdrop-blur-xl">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-2xl">📶</div>
+            <div className="max-w-md rounded-[2rem] border border-white/80 bg-white/90 p-6 text-center shadow-[0_24px_54px_-36px_rgba(15,23,42,0.3)] ring-1 ring-white/70 backdrop-blur-xl">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 shadow-[0_16px_34px_-28px_rgba(245,158,11,0.5)]">
+                <WarningCircle size={28} weight="duotone" />
+              </div>
               <h2 className="text-xl font-black text-slate-900">Não carregou o cardápio</h2>
               <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">{productsLoadError}</p>
               <button
                 type="button"
                 onClick={() => setProductsRetryKey((value) => value + 1)}
-                className="mt-5 w-full rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow-[0_16px_32px_-24px_rgba(15,23,42,0.55)] active:scale-[0.98]"
+                className="mt-5 w-full rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white shadow-[0_16px_32px_-24px_rgba(21,58,76,0.65)] transition active:scale-[0.98]"
               >
                 Tentar carregar novamente
               </button>
             </div>
           </div>
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length === 0 ? (
-          <div className="min-h-[80vh] flex items-center justify-center">
-            <div className="text-center px-4">
-              <div className="mb-4">
-                <div className="text-6xl">🍖</div>
+          <div className="flex min-h-[80vh] items-center justify-center px-4">
+            <div className="relative w-full max-w-lg overflow-hidden rounded-[2.1rem] border border-white/80 bg-white/90 p-5 text-center shadow-[0_30px_84px_-54px_rgba(15,23,42,0.48)] ring-1 ring-white/70 backdrop-blur-xl sm:p-7">
+              <div className="pointer-events-none absolute -right-16 -top-14 h-44 w-44 rounded-full bg-[#336886]/12 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-20 left-8 h-48 w-48 rounded-full bg-emerald-300/14 blur-3xl" />
+              <div className="relative mx-auto mb-4 grid h-20 w-20 place-items-center rounded-[1.65rem] border border-white/80 bg-[linear-gradient(135deg,#153A4C_0%,#336886_65%,#5FD35A_140%)] text-white shadow-[0_20px_44px_-28px_rgba(21,58,76,0.72)]">
+                <Package size={38} weight="duotone" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loja ainda não configurada</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+              <p className="relative text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]/75">Vitrine em preparação</p>
+              <h2 className="relative mt-2 text-2xl font-black tracking-[-0.03em] text-slate-950">Loja ainda não configurada</h2>
+              <p className="relative mx-auto mt-2 mb-6 max-w-md text-sm font-semibold leading-6 text-slate-600">
                 Falta cadastrar os produtos para a vitrine aparecer. Se você é o responsável pela loja, clique abaixo para configurar.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="relative flex flex-col justify-center gap-3 sm:flex-row">
                 <button
                   onClick={openProductsSetup}
-                  className="px-6 py-3 rounded-lg bg-brand-gradient text-white font-semibold hover:opacity-90 transition-all"
+                  className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#153A4C] px-6 py-3 text-sm font-black text-white shadow-[0_18px_36px_-24px_rgba(21,58,76,0.68)] transition active:scale-[0.98]"
                 >
                   Cadastrar produtos
                 </button>
                 <button
                   onClick={() => navigate('/')}
-                  className="px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
+                  className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-slate-200 bg-white/88 px-6 py-3 text-sm font-black text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-[0.98]"
                 >
                   Voltar para início
                 </button>

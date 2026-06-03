@@ -514,11 +514,18 @@ export function CondominiumDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#EEF2F7] px-4 py-6">
+      <div className="min-h-screen bg-[linear-gradient(180deg,#e8f2f6_0%,#f8fafc_16rem,#f8fafc_100%)] px-4 py-6">
         <div className="mx-auto max-w-6xl space-y-4">
-          <div className="h-40 animate-pulse rounded-[2rem] bg-white" />
+          <div className="relative h-40 overflow-hidden rounded-[2rem] border border-white/80 bg-white/88 shadow-[0_28px_72px_-50px_rgba(15,23,42,0.42)] ring-1 ring-white/70">
+            <div className="absolute -right-12 -top-16 h-40 w-40 animate-pulse rounded-full bg-[#336886]/10 blur-3xl" />
+            <div className="absolute left-5 top-6 h-16 w-16 animate-pulse rounded-[1.4rem] bg-slate-100" />
+            <div className="absolute left-28 top-8 h-5 w-48 animate-pulse rounded-full bg-slate-100" />
+            <div className="absolute left-28 top-16 h-4 w-72 max-w-[52vw] animate-pulse rounded-full bg-slate-100" />
+          </div>
           <div className="grid gap-3 sm:grid-cols-4">
-            {[1, 2, 3, 4].map((item) => <div key={item} className="h-24 animate-pulse rounded-3xl bg-white" />)}
+            {[1, 2, 3, 4].map((item) => (
+              <div key={item} className="h-24 animate-pulse rounded-3xl border border-white/80 bg-white/86 shadow-[0_18px_48px_-40px_rgba(15,23,42,0.38)]" />
+            ))}
           </div>
         </div>
       </div>
@@ -535,14 +542,16 @@ export function CondominiumDashboard() {
         maxWidthClassName="max-w-7xl"
       />
       <div className="mx-auto max-w-7xl space-y-5">
-        <header className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-[0_30px_80px_-52px_rgba(15,23,42,0.45)]">
+        <header className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 shadow-[0_32px_88px_-54px_rgba(15,23,42,0.48)] ring-1 ring-white/70 backdrop-blur-xl">
           <div className="absolute inset-0">
             {bannerUrl ? (
-              <img src={bannerUrl} alt={condominium.name || 'Condomínio'} className="h-full w-full object-cover opacity-20" />
+              <img src={bannerUrl} alt={condominium.name || 'Condomínio'} className="h-full w-full object-cover opacity-24" />
             ) : (
               <div className="h-full w-full bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.18),transparent_34%),linear-gradient(135deg,#ffffff_0%,#eef6ff_100%)]" />
             )}
           </div>
+          <div className="pointer-events-none absolute -right-16 -top-16 h-52 w-52 rounded-full bg-[#336886]/12 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-8 h-56 w-56 rounded-full bg-emerald-300/14 blur-3xl" />
           <div className="relative flex flex-col gap-5 p-5 sm:p-7 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center">
               <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[1.5rem] border-[5px] border-white bg-white shadow-[0_18px_40px_-24px_rgba(15,23,42,0.55)]">
@@ -563,7 +572,7 @@ export function CondominiumDashboard() {
                 <button
                   type="button"
                   onClick={() => navigate(`/hub?condominio=${encodeURIComponent(condominium.slug)}`)}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white/86 px-4 py-3 text-sm font-black text-slate-700 shadow-sm"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/80 bg-white/88 px-4 py-3 text-sm font-black text-slate-700 shadow-sm ring-1 ring-slate-100/80 transition hover:bg-white active:scale-[0.98]"
                 >
                   Ver no Hub <ArrowSquareOut size={15} weight="bold" />
                 </button>
@@ -571,7 +580,7 @@ export function CondominiumDashboard() {
               <button
                 type="button"
                 onClick={logout}
-                className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(15,23,42,0.65)]"
+                className="inline-flex items-center gap-2 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.72)] transition active:scale-[0.98]"
               >
                 Sair <DoorOpen size={15} weight="bold" />
               </button>
@@ -583,10 +592,11 @@ export function CondominiumDashboard() {
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {metrics.map((metric) => (
-            <div key={metric.label} className="rounded-3xl border border-slate-200/70 bg-white p-4 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.45)]">
-              <span className={`inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${metric.tone}`}>visão rápida</span>
-              <p className="mt-4 text-3xl font-black tracking-tight text-slate-950">{metric.value}</p>
-              <p className="mt-1 text-sm font-semibold text-slate-500">{metric.label}</p>
+            <div key={metric.label} className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/90 p-4 shadow-[0_22px_58px_-42px_rgba(15,23,42,0.45)] ring-1 ring-slate-100/70 backdrop-blur-xl">
+              <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[#336886]/8 blur-2xl" />
+              <span className={`relative inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${metric.tone}`}>visão rápida</span>
+              <p className="relative mt-4 text-3xl font-black tracking-tight text-slate-950">{metric.value}</p>
+              <p className="relative mt-1 text-sm font-semibold text-slate-500">{metric.label}</p>
             </div>
           ))}
         </section>
@@ -606,7 +616,7 @@ export function CondominiumDashboard() {
                   </p>
                 </div>
               </div>
-              <button onClick={() => setActiveTab('solicitacoes')} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white">
+              <button onClick={() => setActiveTab('solicitacoes')} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.72)] transition active:scale-[0.98]">
                 Ver solicitações <CaretRight size={16} weight="bold" />
               </button>
             </div>
@@ -625,8 +635,8 @@ export function CondominiumDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`rounded-[1.35rem] border px-4 py-3 text-left transition ${
-                  active ? 'border-slate-950 bg-slate-950 text-white shadow-[0_18px_34px_-24px_rgba(15,23,42,0.65)]' : 'border-slate-200 bg-white text-slate-700'
+                className={`rounded-[1.35rem] border px-4 py-3 text-left transition active:scale-[0.99] ${
+                  active ? 'border-[#153A4C]/20 bg-[linear-gradient(135deg,#153A4C_0%,#336886_100%)] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.72)]' : 'border-white/80 bg-white/88 text-slate-700 shadow-[0_14px_36px_-32px_rgba(15,23,42,0.38)] hover:bg-white'
                 }`}
               >
                 <p className={`text-[11px] font-black uppercase tracking-[0.16em] ${active ? 'text-white/70' : 'text-slate-400'}`}>{tab.label}</p>
