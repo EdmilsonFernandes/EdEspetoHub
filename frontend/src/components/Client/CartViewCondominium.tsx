@@ -410,8 +410,8 @@ export const CartViewCondominium = ({
         </div>
       </div>
 
-      <div className="mb-4 rounded-[2rem] border border-amber-100 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(255,251,235,0.78))] p-4 shadow-[0_20px_40px_-34px_rgba(245,158,11,0.3)] sm:p-6">
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-700">Observação para a loja</p>
+      <div className="mb-4 rounded-[2rem] border border-[#336886]/10 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.25)] sm:p-6">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Observação para a loja</p>
         <p className="mt-1 text-xs leading-relaxed text-slate-500">
           Opcional. Avise algo simples sobre preparo, retirada ou entrega no apartamento.
         </p>
@@ -422,7 +422,7 @@ export const CartViewCondominium = ({
           maxLength={CUSTOMER_ORDER_NOTE_MAX_LENGTH}
           rows={3}
           placeholder="Ex: sem ketchup. Chamar no interfone quando chegar."
-          className="mt-3 min-h-[88px] w-full resize-none rounded-2xl border border-amber-100 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-amber-300 focus:bg-white focus:ring-2 focus:ring-amber-100"
+          className="mt-3 min-h-[88px] w-full resize-none rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#336886]/45 focus:bg-white focus:ring-2 focus:ring-[#336886]/10"
           data-testid="customer-order-note-input"
         />
         <div className="mt-2 flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-500">

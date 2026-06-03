@@ -878,16 +878,16 @@ export const CartView = ({
       <button
         type="button"
         onClick={openCustomerNoteSheet}
-        className="group w-full rounded-[1.55rem] border border-amber-100 bg-[linear-gradient(135deg,#ffffff_0%,#fffaf0_100%)] p-3.5 text-left shadow-[0_18px_38px_-34px_rgba(217,119,6,0.35)] transition-all duration-300 hover:border-amber-200 active:scale-[0.99]"
+        className="group w-full rounded-[1.55rem] border border-[#336886]/10 bg-white p-3.5 text-left shadow-[0_18px_38px_-34px_rgba(15,23,42,0.28)] transition-all duration-300 hover:border-[#336886]/18 active:scale-[0.99]"
         data-testid="customer-order-note-card"
       >
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/14">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] bg-[#336886]/8 text-[#336886] ring-1 ring-[#336886]/12">
             <NotePencil size={18} weight="duotone" />
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-800">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
                 Observação para a loja
               </p>
               <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
@@ -910,7 +910,7 @@ export const CartView = ({
       <div
         className={`rounded-2xl border p-4 shadow-sm ${
           note
-            ? "border-amber-100 bg-[linear-gradient(135deg,#fffaf0_0%,#ffffff_100%)]"
+            ? "border-[#336886]/10 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)]"
             : "border-slate-100 bg-white"
         }`}
         data-testid="customer-order-note-summary"
@@ -918,7 +918,7 @@ export const CartView = ({
         <div className="flex items-start gap-3">
           <span
             className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
-              note ? "bg-amber-500/10 text-amber-700" : "bg-slate-100 text-slate-500"
+              note ? "bg-[#336886]/8 text-[#336886]" : "bg-slate-100 text-slate-500"
             }`}
           >
             <NotePencil size={18} weight="duotone" />
