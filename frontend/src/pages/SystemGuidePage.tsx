@@ -290,18 +290,20 @@ function GuideBrandScene({ line, activeTitle }: { line: string; activeTitle: str
             <img src="/janocaminho.jpg" alt="Já no Caminho" className="relative h-[66px] w-[66px] rounded-[1.18rem] object-contain p-1" />
           </motion.div>
 
-          <div className="absolute bottom-5 left-1/2 h-[54px] w-[286px] -translate-x-1/2 overflow-hidden rounded-full border border-[#153A4C]/10 bg-white/54 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.7)] backdrop-blur-xl">
+          <div className="absolute bottom-[34px] left-1/2 h-[52px] w-[286px] -translate-x-1/2 overflow-visible rounded-full border border-[#153A4C]/10 bg-white/54 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.7)] backdrop-blur-xl">
+            <div className="absolute inset-0 overflow-hidden rounded-full">
+              <motion.div
+                className="absolute left-0 top-1/2 h-[3px] w-[620px] -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#336886_0_24px,transparent_24px_46px)] opacity-55"
+                animate={{ x: [0, -92] }}
+                transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
+              />
+            </div>
             <motion.div
-              className="absolute left-0 top-1/2 h-[3px] w-[620px] -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#336886_0_24px,transparent_24px_46px)] opacity-55"
-              animate={{ x: [0, -92] }}
-              transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
-            />
-            <motion.div
-              className="absolute left-8 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center overflow-hidden rounded-[0.86rem] bg-white p-1 shadow-[0_0_26px_rgba(95,211,90,0.6)] ring-2 ring-[#5FD35A]/55"
+              className="absolute left-8 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[0.78rem] bg-white p-1 shadow-[0_0_24px_rgba(95,211,90,0.62)] ring-2 ring-[#5FD35A]/55"
               animate={{ x: [0, 164, 0] }}
               transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <img src="/janocaminho.jpg" alt="" className="h-full w-full rounded-[0.58rem] object-contain" />
+              <img src="/janocaminho.jpg" alt="" className="h-full w-full rounded-[0.52rem] object-contain" />
             </motion.div>
             <div className="absolute left-[78px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_18px_rgba(95,211,90,0.82)]" />
             <div className="absolute right-[68px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#336886] shadow-[0_0_18px_rgba(51,104,134,0.62)]" />

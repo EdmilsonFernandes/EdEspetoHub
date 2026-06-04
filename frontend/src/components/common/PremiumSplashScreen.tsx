@@ -133,15 +133,15 @@ export function PremiumSplashScreen() {
             />
           </div>
 
-          <div className="absolute bottom-10 left-1/2 h-[62px] w-[306px] -translate-x-1/2 overflow-visible">
-            <div className="absolute left-1/2 top-1/2 h-[46px] w-[286px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[999px] border border-white/10 bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] backdrop-blur">
+          <div className="absolute bottom-12 left-1/2 h-[62px] w-[306px] -translate-x-1/2 overflow-visible">
+            <div className="absolute left-1/2 top-1/2 h-[48px] w-[286px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[999px] border border-white/10 bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] backdrop-blur">
               <div className="splash-route absolute left-0 top-1/2 h-[3px] w-[620px] -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#8EC5DD_0_24px,transparent_24px_46px)] opacity-60" />
             </div>
-            <div className="splash-route-rider absolute left-[42px] top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center overflow-hidden rounded-[0.86rem] bg-white p-1 shadow-[0_0_26px_rgba(95,211,90,0.66)] ring-2 ring-[#5FD35A]/60">
+            <div className="splash-route-rider absolute left-[42px] top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[0.78rem] bg-white p-1 shadow-[0_0_24px_rgba(95,211,90,0.66)] ring-2 ring-[#5FD35A]/60">
               <img
                 src="/janocaminho.jpg"
                 alt=""
-                className="h-full w-full rounded-[0.58rem] object-contain"
+                className="h-full w-full rounded-[0.52rem] object-contain"
               />
             </div>
             <div className="splash-pin absolute left-[82px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_20px_rgba(95,211,90,0.9)]" />
