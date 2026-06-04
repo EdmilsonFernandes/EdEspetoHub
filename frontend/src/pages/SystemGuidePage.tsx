@@ -11,7 +11,6 @@ import {
   DeviceMobile,
   EnvelopeSimple,
   ForkKnife,
-  Gear,
   Handshake,
   HouseLine,
   ListChecks,
@@ -38,7 +37,7 @@ type Journey = {
   eyebrow: string;
   description: string;
   icon: GuideIcon;
-  robotLine: string;
+  brandLine: string;
   highlights: string[];
   flow: string[];
 };
@@ -52,9 +51,9 @@ type Feature = {
 
 const metrics = [
   { value: '50', label: 'primeiras lojas com campanha fundador' },
-  { value: '3 meses', label: 'VIP promocional para acelerar adesão' },
-  { value: '1 app', label: 'cliente, lojista, operador, entregador e destinos' },
-  { value: '0% comissão', label: 'modelo pensado para loja ganhar tração' },
+  { value: '3 meses', label: 'VIP promocional para começar vendendo' },
+  { value: '1 app', label: 'cliente, loja, entregador, chalés e feiras' },
+  { value: '0% comissão', label: 'mais margem para a loja crescer' },
 ];
 
 const journeys: Journey[] = [
@@ -62,247 +61,268 @@ const journeys: Journey[] = [
     id: 'cliente',
     title: 'Cliente',
     eyebrow: 'Pedir sem esforço',
-    description: 'O cliente entra no Hub, encontra lojas, chalés, feiras e pedidos ativos com uma jornada simples e mobile first.',
+    description: 'O cliente entra no app, encontra lojas, chalés, feiras e pedidos ativos com uma jornada simples.',
     icon: UserCircle,
-    robotLine: 'Eu mostro lojas, destaques, pedidos ativos e notificações sem o cliente precisar entender termos técnicos.',
+    brandLine: 'O cliente vê onde pedir, o que está perto, acompanha o pedido e recebe avisos claros.',
     highlights: [
-      'Hub com busca, filtros compactos, lojas próximas, itens em destaque e destinos turísticos.',
-      'Checkout com observação, endereço, retirada, entrega, mesa, Pix, cartão e pagamento direto com a loja.',
-      'Meus pedidos com status, reembolso, avaliação, imagem do item e mensagens humanizadas.',
-      'Notificações no app e fallback por e-mail para status quando o cliente usa web.',
+      'Busca por lojas, produtos, destinos, feiras e serviços locais em uma tela fácil de navegar.',
+      'Pedido com observação, endereço, retirada, entrega, mesa, Pix, cartão ou pagamento direto com a loja.',
+      'Meus pedidos com status, reembolso, avaliação, foto do item e mensagens fáceis de entender.',
+      'Avisos no app e por e-mail para o cliente não perder nenhuma atualização importante.',
     ],
     flow: ['Descobrir', 'Escolher', 'Revisar', 'Pedir', 'Acompanhar'],
   },
   {
     id: 'lojista',
     title: 'Lojista e operador',
-    eyebrow: 'Operação rápida',
-    description: 'Painel para vender, operar fila, criar pedidos de mesa, imprimir cupom e gerenciar loja sem depender de suporte.',
+    eyebrow: 'Venda e operação',
+    description: 'Painel para vender, montar cardápio, receber pedido, atender mesa e imprimir cupom sem complicação.',
     icon: Storefront,
-    robotLine: 'Na operação eu priorizo velocidade: fila, impressão, itens avulsos, couvert e taxa sem travar atendimento.',
+    brandLine: 'A loja recebe pedido, ajusta itens, imprime e atende mesa, retirada ou entrega sem travar o balcão.',
     highlights: [
-      'Dashboard, cardápio, produtos, categorias, promoções, estoque, horários e tipos de pedido.',
-      'Fila de pedidos com detalhe em modal, adicionar item do catálogo, item avulso, couvert artístico e taxa de serviço.',
-      'Impressão térmica direta via Bluetooth no Android, com RawBT como fallback quando necessário.',
-      'Campanha fundador, trial, planos, Mercado Pago conectado e modo convencional com pagamento na loja.',
+      'Painel com cardápio, produtos, categorias, promoções, estoque, horários e formas de atendimento.',
+      'Fila de pedidos com detalhe rápido, item do cardápio, item avulso, couvert artístico e taxa de serviço.',
+      'Impressão pelo app Android quando a impressora estiver pareada no celular da operação.',
+      'Campanha fundador, período grátis, planos, Mercado Pago conectado e pagamento direto na loja.',
     ],
     flow: ['Cadastrar', 'Configurar', 'Receber', 'Preparar', 'Imprimir'],
   },
   {
-    id: 'motoboy',
+    id: 'entregador',
     title: 'Entregador',
     eyebrow: 'Entrega controlada',
-    description: 'Fluxo de motoboy com KYC, vínculo com loja, aceite concorrente e confirmação por código.',
+    description: 'Fluxo de entrega com cadastro, vínculo com a loja, aceite seguro e confirmação pelo código do cliente.',
     icon: Scooter,
-    robotLine: 'Eu evito corrida duplicada: dois motoboys veem a entrega, mas só um consegue aceitar.',
+    brandLine: 'A entrega só é finalizada quando o entregador informa o código que o cliente recebeu.',
     highlights: [
-      'Cadastro com CNH, selfie, CRLV, verificação assistida e aprovação por KYC.',
-      'Fila de entregas disponíveis, entrega atual, histórico e ganhos.',
-      'Aceite concorrente protegido para impedir dois entregadores no mesmo pedido.',
-      'Retirada na loja, rota até o cliente e finalização com código de confirmação.',
+      'Cadastro do entregador com documentos e conferência antes de liberar a operação.',
+      'Entregas disponíveis, entrega atual, histórico e ganhos em uma área simples.',
+      'Proteção para impedir que dois entregadores assumam o mesmo pedido.',
+      'Retirada na loja, caminho até o cliente e finalização com código de confirmação.',
     ],
-    flow: ['Aprovar', 'Aceitar', 'Retirar', 'Entregar', 'Receber'],
+    flow: ['Aprovar', 'Aceitar', 'Retirar', 'Entregar', 'Confirmar código'],
   },
   {
     id: 'destinos',
     title: 'Destinos e chalés',
-    eyebrow: 'Experiência turística',
-    description: 'Cidades, chalés, pousadas, serviços locais e restaurantes conectados com rota até a hospedagem.',
+    eyebrow: 'Turismo local',
+    description: 'Cidades, chalés, pousadas, restaurantes e serviços conectados para ajudar o hóspede durante a estadia.',
     icon: MapTrifold,
-    robotLine: 'Aqui eu viro concierge: mostro onde ficar, onde pedir e como chegar até o chalé.',
+    brandLine: 'O hóspede vê o chalé, encontra serviços da região e envia a referência da hospedagem pelo WhatsApp.',
     highlights: [
-      'Cidades turísticas com hospedagens, serviços, lojas vinculadas, busca por estado e contadores clicáveis.',
-      'Chalé com rede local, logos dos parceiros, filtro por logo e destaque visual no serviço selecionado.',
-      'WhatsApp para serviço com referência da hospedagem, endereço do chalé e link de rota.',
-      'Portal do parceiro em /parceiro para chalés, pousadas e serviços atualizarem dados seguros.',
+      'Cidades turísticas com hospedagens, serviços, lojas vinculadas, busca por estado e atalhos por quantidade.',
+      'Chalé com rede local, logos dos parceiros, filtro por logo e destaque no serviço escolhido.',
+      'WhatsApp para serviço com nome, endereço da hospedagem e link para abrir a rota no mapa.',
+      'Área do parceiro para chalés, pousadas e serviços manterem fotos, contatos e endereço atualizados.',
     ],
     flow: ['Visitar', 'Escolher chalé', 'Ver rede local', 'Chamar serviço', 'Abrir rota'],
   },
   {
-    id: 'condominio',
+    id: 'feiras',
     title: 'Feiras e condomínios',
     eyebrow: 'Venda local organizada',
-    description: 'Agenda de feiras, vitrines por condomínio e acesso controlado para moradores e parceiros.',
+    description: 'Agenda de feiras, vitrines por condomínio e acesso fácil para moradores e parceiros.',
     icon: Buildings,
-    robotLine: 'Eu organizo a feira para o morador ver agenda, lojas e pedidos sem perder contexto.',
+    brandLine: 'O morador vê agenda, lojas participantes e pode pedir sem sair do fluxo do app.',
     highlights: [
-      'Cards rápidos na Home para Feiras e Visite, com menu inferior renomeado para linguagem mais clara.',
-      'Hub por condomínio com lojas participantes, agendas próximas e fluxo de pedido normal.',
-      'Cadastro e gestão de condomínios no painel com filtros e UX mobile first.',
-      'Base pronta para ampliar eventos e monetização por destaque regional.',
+      'Atalhos rápidos para Feiras e Visite na tela inicial do app.',
+      'Vitrine por condomínio com lojas participantes e pedido pelo mesmo fluxo do app.',
+      'Agenda para mostrar eventos próximos e melhorar descoberta pelos moradores.',
+      'Base preparada para ampliar eventos, parceiros e visibilidade regional.',
     ],
     flow: ['Ver agenda', 'Entrar no condomínio', 'Escolher loja', 'Pedir', 'Acompanhar'],
   },
   {
-    id: 'superadmin',
-    title: 'Super Admin',
-    eyebrow: 'Controle da plataforma',
-    description: 'Gestão central para operar crescimento: lojas, parceiros, destinos, e-mails, push, planos, KYC e auditoria.',
-    icon: ShieldCheck,
-    robotLine: 'Eu separo operação de estratégia: aprovar parceiros, monetizar destaque e manter tudo auditável.',
+    id: 'parceiros',
+    title: 'Parceiros locais',
+    eyebrow: 'Mais clientes na região',
+    description: 'Serviços, restaurantes, pousadas e chalés aparecem para turistas e moradores no momento certo.',
+    icon: Handshake,
+    brandLine: 'A região ganha uma vitrine local para mostrar onde comer, comprar, visitar e pedir entrega.',
     highlights: [
-      'Menu vertical organizado por grupos, filtros por estado/cidade e solicitações de parceiros com antifraude.',
-      'Templates de e-mail no banco, preview, logs, descadastro de marketing e variáveis seguras.',
-      'Push global/promocional com rotas internas, URL externa e fallback para tela de notificações.',
-      'Prioridade de destinos, chalés, serviços e vínculos para preparar monetização por destaque.',
+      'Restaurantes e serviços podem aparecer vinculados aos chalés que atendem.',
+      'O parceiro aprovado consegue manter dados básicos atualizados sem depender de troca de mensagem.',
+      'Convites por WhatsApp e e-mail ajudam a trazer novos cadastros com menos atrito.',
+      'Destaques e prioridade deixam a base pronta para vender mais visibilidade no futuro.',
     ],
-    flow: ['Configurar', 'Aprovar', 'Auditar', 'Comunicar', 'Monetizar'],
+    flow: ['Receber convite', 'Confirmar dados', 'Aparecer no app', 'Atender', 'Crescer'],
   },
 ];
 
 const features: Feature[] = [
   {
     title: 'Campanha fundador',
-    description: 'Primeiras lojas com 3 meses VIP, cards de plano bloqueados no onboarding e status no painel.',
+    description: 'Primeiras lojas com 3 meses VIP para começar a vender com menos barreira.',
     icon: RocketLaunch,
     accent: 'from-lime-300/30 to-emerald-500/10 text-lime-700',
   },
   {
-    title: 'Portal do parceiro',
-    description: 'Chalés e serviços aprovados atualizam fotos, endereço e contatos sem mexer em campos estratégicos.',
+    title: 'Área do parceiro',
+    description: 'Chalés e serviços aprovados atualizam fotos, endereço e contatos próprios.',
     icon: Handshake,
     accent: 'from-sky-300/30 to-cyan-500/10 text-sky-700',
   },
   {
-    title: 'Impressão Bluetooth',
-    description: 'Configuração no app Android para imprimir direto e manter RawBT como plano B operacional.',
+    title: 'Impressão pelo app',
+    description: 'A loja configura a impressora pareada no Android e imprime o pedido direto na operação.',
     icon: Printer,
     accent: 'from-orange-300/30 to-amber-500/10 text-orange-700',
   },
   {
-    title: 'Geo e rotas melhores',
-    description: 'CEP, endereço, lat/lng, provedores gratuitos e fallback com qualidade para destinos turísticos.',
+    title: 'Endereço e rota',
+    description: 'Chalés, lojas e serviços mostram referência de entrega e abrem rota no mapa do celular.',
     icon: MapPin,
     accent: 'from-emerald-300/30 to-teal-500/10 text-emerald-700',
   },
   {
     title: 'E-mails profissionais',
-    description: 'Templates no Super Admin, logo oficial, variáveis, logs, testes e descadastro para marketing.',
+    description: 'Mensagens com logo oficial para convites, senha, aprovação, avisos e parceiros.',
     icon: EnvelopeSimple,
     accent: 'from-rose-300/30 to-pink-500/10 text-rose-700',
   },
   {
-    title: 'Push com rota inteligente',
-    description: 'Notificações podem abrir pedido, conta, loja, destino, URL externa ou detalhe da mensagem.',
+    title: 'Avisos que levam ao lugar certo',
+    description: 'Notificações podem abrir pedido, conta, loja, destino, site externo ou detalhe da mensagem.',
     icon: BellRinging,
     accent: 'from-violet-300/30 to-indigo-500/10 text-violet-700',
   },
   {
-    title: 'Checkout lapidado',
-    description: 'Pedido salvo, observação clara, pagamento por bottom sheet e recuperação quando a sessão cai.',
+    title: 'Pedido protegido',
+    description: 'Se a sessão cair, o pedido fica salvo no aparelho para o cliente não perder a sacola.',
     icon: QrCode,
     accent: 'from-slate-300/30 to-slate-500/10 text-slate-700',
   },
   {
-    title: 'Operação em mesa',
-    description: 'Mesa, retirada e entrega no mesmo motor, com couvert, taxa de serviço e item manual.',
+    title: 'Atendimento em mesa',
+    description: 'Mesa, retirada e entrega no mesmo fluxo, com couvert, taxa de serviço e item manual.',
     icon: ForkKnife,
     accent: 'from-yellow-300/30 to-lime-500/10 text-yellow-700',
   },
 ];
 
 const platformModules = [
-  { title: 'Hub/Home', icon: HouseLine, items: ['Lojas próximas', 'Destaques', 'Destinos', 'Feiras'] },
-  { title: 'Vitrine online', icon: Package, items: ['Categorias sticky', 'Carrinho salvo', 'Checkout', 'Pagamento'] },
+  { title: 'Início do app', icon: HouseLine, items: ['Lojas próximas', 'Destaques', 'Visite', 'Feiras'] },
+  { title: 'Cardápio digital', icon: Package, items: ['Categorias', 'Sacola salva', 'Revisão', 'Pagamento'] },
   { title: 'Fila e operação', icon: ListChecks, items: ['Pedidos', 'Mesa', 'Impressão', 'Histórico'] },
-  { title: 'Financeiro', icon: CreditCard, items: ['Mercado Pago', 'Planos', 'Trial', 'Reembolso'] },
-  { title: 'Destinos', icon: Compass, items: ['Cidades', 'Chalés', 'Rotas', 'Parceiros'] },
-  { title: 'Segurança', icon: ShieldCheck, items: ['MFA', 'KYC', 'Auditoria', 'Antifraude'] },
-  { title: 'Mobile/App', icon: DeviceMobile, items: ['Push', 'Bluetooth', 'Safe area', 'Offline UX'] },
-  { title: 'Configurações', icon: Gear, items: ['Home', 'E-mails', 'Banners', 'Prioridade'] },
+  { title: 'Financeiro', icon: CreditCard, items: ['Mercado Pago', 'Planos', 'Período grátis', 'Reembolso'] },
+  { title: 'Visite', icon: Compass, items: ['Cidades', 'Chalés', 'Rotas', 'Parceiros'] },
+  { title: 'Confiança', icon: ShieldCheck, items: ['Código na entrega', 'Documentos', 'Acesso seguro', 'Avisos claros'] },
+  { title: 'App Android', icon: DeviceMobile, items: ['Notificações', 'Impressora', 'Menu simples', 'Acesso rápido'] },
+  { title: 'Crescimento', icon: ChartLineUp, items: ['Campanhas', 'Convites', 'Destaques', 'Prioridade'] },
 ];
 
 const guideTimeline = [
-  { title: 'Descobrir', text: 'Cliente acha loja, item, feira, cidade ou chalé pelo Hub.', icon: Sparkle },
-  { title: 'Converter', text: 'Vitrine e checkout guiam o usuário com CTA único e linguagem simples.', icon: CheckCircle },
+  { title: 'Descobrir', text: 'Cliente acha loja, item, feira, cidade ou chalé pelo app.', icon: Sparkle },
+  { title: 'Pedir', text: 'Cardápio e revisão do pedido mostram a próxima ação sem confundir.', icon: CheckCircle },
   { title: 'Operar', text: 'Lojista recebe, edita, imprime e finaliza sem travar atendimento.', icon: ForkKnife },
-  { title: 'Entregar', text: 'Motoboy aceita, retira, entrega e confirma com segurança.', icon: Scooter },
-  { title: 'Comunicar', text: 'Push, e-mail e WhatsApp mantêm cliente e parceiro informados.', icon: WhatsappLogo },
-  { title: 'Monetizar', text: 'Planos, VIP fundador, destaque e prioridade preparam crescimento.', icon: ChartLineUp },
+  { title: 'Entregar', text: 'Entregador aceita, retira e só finaliza com o código do cliente.', icon: Scooter },
+  { title: 'Comunicar', text: 'Notificações, e-mail e WhatsApp mantêm cliente e parceiro informados.', icon: WhatsappLogo },
+  { title: 'Crescer', text: 'Planos, campanha fundador, destaque e prioridade ajudam a vender mais.', icon: ChartLineUp },
 ];
 
-function GuideRobot({ line, activeTitle }: { line: string; activeTitle: string }) {
+function GuideBrandScene({ line, activeTitle }: { line: string; activeTitle: string }) {
   return (
     <div className="relative min-h-[420px] overflow-hidden rounded-[2.2rem] border border-white/60 bg-white/70 p-5 shadow-[0_28px_80px_-38px_rgba(21,58,76,0.55)] backdrop-blur-2xl">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(95,211,90,0.24),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(51,104,134,0.20),transparent_34%),linear-gradient(145deg,rgba(255,255,255,0.88),rgba(245,249,247,0.72))]" />
-      <motion.div
-        aria-hidden="true"
-        className="absolute left-6 top-7 h-2 w-28 rounded-full bg-[#5FD35A]/50 blur-[2px]"
-        animate={{ x: [0, 24, 0], opacity: [0.35, 0.9, 0.35] }}
-        transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        aria-hidden="true"
-        className="absolute bottom-14 left-8 right-8 h-20 rounded-[2rem] border border-dashed border-[#336886]/20"
-        animate={{ rotate: [0, -1.5, 0, 1.5, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-      />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(95,211,90,0.24),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(51,104,134,0.20),transparent_34%),linear-gradient(145deg,rgba(255,255,255,0.9),rgba(245,249,247,0.72))]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.10] [background-image:linear-gradient(rgba(21,58,76,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(21,58,76,0.16)_1px,transparent_1px)] [background-size:34px_34px]" />
 
       <div className="relative z-10 flex h-full min-h-[380px] flex-col justify-between">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.26em] text-[#336886]/70">Guia interativo</p>
-            <h2 className="mt-2 text-2xl font-black tracking-tight text-[#153A4C]">Robô no comando</h2>
+            <p className="text-[11px] font-black uppercase tracking-[0.26em] text-[#336886]/70">Guia visual</p>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-[#153A4C]">Já no Caminho</h2>
           </div>
           <span className="rounded-full bg-[#153A4C] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-lg shadow-[#153A4C]/20">
-            Ao vivo
+            Interativo
           </span>
         </div>
 
-        <div className="relative mx-auto mt-6 flex w-full max-w-[280px] flex-col items-center">
-          <motion.div
-            className="relative h-7 w-24"
-            animate={{ y: [0, -5, 0] }}
-            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <div className="absolute left-1/2 top-0 h-7 w-1 -translate-x-1/2 rounded-full bg-[#336886]" />
-            <motion.div
-              className="absolute left-1/2 top-0 h-4 w-4 -translate-x-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_28px_rgba(95,211,90,0.75)]"
-              animate={{ scale: [1, 1.25, 1] }}
-              transition={{ duration: 1.6, repeat: Infinity }}
+        <div className="relative mx-auto mt-6 h-[250px] w-full max-w-[330px]">
+          <div className="absolute left-1/2 top-4 h-[210px] w-[210px] -translate-x-1/2 rounded-full border border-[#153A4C]/10" />
+          <div className="absolute left-1/2 top-0 h-[240px] w-[240px] -translate-x-1/2 rounded-full border border-dashed border-[#336886]/12" />
+          <svg className="absolute left-1/2 top-[35px] h-[170px] w-[305px] -translate-x-1/2 overflow-visible" viewBox="0 0 305 170" fill="none">
+            <path
+              d="M18 124 C72 48 124 150 168 72 C202 15 236 58 286 26"
+              stroke="rgba(51,104,134,0.36)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray="11 13"
             />
-          </motion.div>
+            <motion.path
+              d="M18 124 C72 48 124 150 168 72 C202 15 236 58 286 26"
+              stroke="rgba(95,211,90,0.68)"
+              strokeWidth="7"
+              strokeLinecap="round"
+              strokeDasharray="1 33"
+              animate={{ strokeDashoffset: [0, -170] }}
+              transition={{ duration: 2.1, repeat: Infinity, ease: 'linear' }}
+            />
+          </svg>
+
+          {[
+            { label: 'Lojas', icon: Storefront, className: 'left-0 top-[86px]' },
+            { label: 'Chalés', icon: MapPin, className: 'left-[42px] top-3' },
+            { label: 'Feiras', icon: Buildings, className: 'right-[38px] top-5' },
+            { label: 'Entregas', icon: Scooter, className: 'right-0 top-[95px]' },
+          ].map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <motion.div
+                key={item.label}
+                className={`absolute ${item.className} flex min-h-10 items-center gap-1.5 rounded-2xl border border-white/70 bg-white/76 px-3 text-[#336886] shadow-[0_16px_35px_-28px_rgba(21,58,76,0.72)] backdrop-blur-xl`}
+                animate={{ y: [0, -7, 0] }}
+                transition={{ duration: 2.2, repeat: Infinity, delay: index * 0.16, ease: 'easeInOut' }}
+              >
+                <Icon size={16} weight="duotone" />
+                <span className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-600">{item.label}</span>
+              </motion.div>
+            );
+          })}
+
           <motion.div
-            className="relative h-32 w-40 rounded-[2.2rem] border-[6px] border-white bg-[#153A4C] shadow-[0_26px_50px_-28px_rgba(21,58,76,0.95)]"
-            animate={{ y: [0, -8, 0], rotate: [0, -1, 0, 1, 0] }}
-            transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute left-1/2 top-[70px] flex h-[96px] w-[96px] -translate-x-1/2 items-center justify-center rounded-[1.85rem] border-[5px] border-white bg-[#153A4C] shadow-[0_30px_65px_-32px_rgba(21,58,76,0.95)]"
+            animate={{ y: [0, -9, 0], scale: [1, 1.025, 1] }}
+            transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
           >
-            <div className="absolute inset-3 rounded-[1.55rem] bg-gradient-to-b from-[#336886] to-[#153A4C]" />
+            <div className="absolute inset-2 rounded-[1.28rem] bg-[#336886]/30 blur-xl" />
+            <span className="absolute -top-3 left-1/2 h-5 w-[2px] -translate-x-1/2 rounded-full bg-[#5FD35A]/80" />
+            <span className="absolute -top-4 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_18px_rgba(95,211,90,0.9)]" />
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="relative h-[66px] w-[66px] rounded-[1.18rem] object-contain p-1" />
+          </motion.div>
+
+          <div className="absolute bottom-5 left-1/2 h-[54px] w-[286px] -translate-x-1/2 overflow-hidden rounded-full border border-[#153A4C]/10 bg-white/54 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.7)] backdrop-blur-xl">
             <motion.div
-              className="absolute left-9 top-12 h-4 w-4 rounded-full bg-[#5FD35A] shadow-[0_0_18px_rgba(95,211,90,0.9)]"
-              animate={{ scaleY: [1, 0.25, 1] }}
-              transition={{ duration: 3.4, repeat: Infinity, repeatDelay: 1.2 }}
+              className="absolute left-0 top-1/2 h-[3px] w-[620px] -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#336886_0_24px,transparent_24px_46px)] opacity-55"
+              animate={{ x: [0, -92] }}
+              transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
             />
             <motion.div
-              className="absolute right-9 top-12 h-4 w-4 rounded-full bg-[#5FD35A] shadow-[0_0_18px_rgba(95,211,90,0.9)]"
-              animate={{ scaleY: [1, 0.25, 1] }}
-              transition={{ duration: 3.4, repeat: Infinity, repeatDelay: 1.2 }}
-            />
-            <div className="absolute bottom-9 left-1/2 h-2 w-16 -translate-x-1/2 rounded-full bg-white/80" />
-            <div className="absolute -left-8 top-16 h-4 w-10 rounded-full bg-[#5FD35A]/80 shadow-lg shadow-[#5FD35A]/30" />
-            <div className="absolute -right-8 top-16 h-4 w-10 rounded-full bg-[#5FD35A]/80 shadow-lg shadow-[#5FD35A]/30" />
-          </motion.div>
-          <motion.div
-            className="mt-2 h-24 w-52 rounded-[2rem] border-[6px] border-white bg-gradient-to-b from-[#336886] to-[#153A4C] shadow-[0_26px_60px_-35px_rgba(21,58,76,0.9)]"
-            animate={{ y: [0, -5, 0] }}
-            transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <div className="mx-auto mt-5 h-5 w-24 rounded-full bg-white/18" />
-            <div className="mx-auto mt-3 grid w-32 grid-cols-3 gap-2">
-              <div className="h-2 rounded-full bg-[#5FD35A]" />
-              <div className="h-2 rounded-full bg-white/45" />
-              <div className="h-2 rounded-full bg-white/25" />
-            </div>
-          </motion.div>
+              className="absolute left-8 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center overflow-hidden rounded-[0.86rem] bg-white p-1 shadow-[0_0_26px_rgba(95,211,90,0.6)] ring-2 ring-[#5FD35A]/55"
+              animate={{ x: [0, 164, 0] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <img src="/janocaminho.jpg" alt="" className="h-full w-full rounded-[0.58rem] object-contain" />
+            </motion.div>
+            <div className="absolute left-[78px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_18px_rgba(95,211,90,0.82)]" />
+            <div className="absolute right-[68px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#336886] shadow-[0_0_18px_rgba(51,104,134,0.62)]" />
+          </div>
+
+          <div className="absolute bottom-0 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/70 bg-white/72 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600 shadow-[0_16px_35px_-30px_rgba(21,58,76,0.75)] backdrop-blur-xl">
+            <ForkKnife size={12} weight="duotone" className="text-[#336886]" />
+            pedidos
+            <span className="h-1 w-1 rounded-full bg-slate-400" />
+            <Sparkle size={12} weight="duotone" className="text-[#5FD35A]" />
+            experiências locais
+          </div>
         </div>
 
         <div className="mt-7 rounded-[1.5rem] border border-white/70 bg-white/82 p-4 shadow-[0_18px_45px_-32px_rgba(21,58,76,0.55)]">
           <div className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-[#5FD35A]/20 text-[#153A4C]">
-              <Sparkle size={16} weight="fill" />
-            </span>
+            <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl bg-[#153A4C] p-1">
+              <img src="/janocaminho.jpg" alt="" className="h-full w-full rounded-lg object-contain" />
+            </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]/70">Foco atual</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]/70">Agora no guia</p>
               <p className="text-sm font-black text-[#153A4C]">{activeTitle}</p>
             </div>
           </div>
@@ -348,7 +368,7 @@ export function SystemGuidePage() {
                 transition={{ duration: 0.35 }}
               >
                 <Sparkle size={13} weight="fill" className="text-[#5FD35A]" />
-                Guia 2026 atualizado
+                Guia atualizado
               </motion.div>
 
               <motion.h1
@@ -357,7 +377,7 @@ export function SystemGuidePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, delay: 0.05 }}
               >
-                Entenda o Já no Caminho em uma experiência viva.
+                Veja como o Já no Caminho ajuda a vender mais.
               </motion.h1>
 
               <motion.p
@@ -366,9 +386,9 @@ export function SystemGuidePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, delay: 0.12 }}
               >
-                Um guia interativo para mostrar como cliente, lojista, operador, motoboy, chalé, serviço e Super Admin
-                usam a plataforma sem perder contexto. Atualizado com Hub refatorado, destinos, portal parceiro,
-                impressão Bluetooth, e-mails, push e campanha fundador.
+                Um guia interativo para mostrar como clientes, lojas, entregadores, chalés, restaurantes e serviços
+                usam o Já no Caminho no dia a dia. Agora com cardápio digital, destinos, área do parceiro,
+                impressão pelo app, mensagens profissionais e campanha fundador.
               </motion.p>
 
               <motion.div
@@ -430,7 +450,7 @@ export function SystemGuidePage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.12 }}
             >
-              <GuideRobot line={activeJourney.robotLine} activeTitle={activeJourney.title} />
+              <GuideBrandScene line={activeJourney.brandLine} activeTitle={activeJourney.title} />
             </motion.div>
           </div>
         </section>
@@ -438,11 +458,11 @@ export function SystemGuidePage() {
         <section className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#336886]/70">Escolha seu papel</p>
-              <h2 className="mt-2 text-3xl font-black tracking-tight text-[#153A4C]">O guia muda junto com o usuário</h2>
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#336886]/70">Escolha seu perfil</p>
+              <h2 className="mt-2 text-3xl font-black tracking-tight text-[#153A4C]">O guia muda conforme a necessidade</h2>
             </div>
             <p className="max-w-md text-sm font-medium leading-relaxed text-slate-500">
-              Clique em um perfil para o robô explicar a jornada e mostrar as partes da plataforma que mais importam.
+              Clique em um perfil para ver como o Já no Caminho ajuda cada pessoa na prática.
             </p>
           </div>
 
@@ -522,7 +542,7 @@ export function SystemGuidePage() {
                   </div>
 
                   <div className="rounded-[1.5rem] border border-[#153A4C]/8 bg-[#153A4C] p-4 text-white">
-                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/55">Fluxo resumido</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/55">Como funciona</p>
                     <div className="mt-4 flex flex-wrap items-center gap-2">
                       {activeJourney.flow.map((step, index) => (
                         <div key={step} className="flex items-center gap-2">
@@ -547,7 +567,7 @@ export function SystemGuidePage() {
               <h2 className="mt-2 text-3xl font-black tracking-tight text-[#153A4C]">O que já está no produto</h2>
             </div>
             <p className="max-w-md text-sm font-medium leading-relaxed text-slate-500">
-              Esta página deixou de ser um manual antigo: agora mostra as features que foram adicionadas e lapidadas no app.
+              Esta página mostra os recursos de forma simples para quem quer vender, atender melhor ou atrair hóspedes.
             </p>
           </div>
 
@@ -579,10 +599,10 @@ export function SystemGuidePage() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#336886]/70">Mapa da plataforma</p>
-                <h2 className="mt-2 text-3xl font-black tracking-tight text-[#153A4C]">Módulos sem linguagem técnica</h2>
+                <h2 className="mt-2 text-3xl font-black tracking-tight text-[#153A4C]">Tudo conectado no mesmo app</h2>
               </div>
               <p className="max-w-sm text-sm font-medium leading-relaxed text-slate-500">
-                Cada bloco usa nome de produto para facilitar apresentação comercial e onboarding de parceiros.
+                A ideia é simples: o cliente encontra, a loja vende, o entregador confirma e o parceiro aparece melhor.
               </p>
             </div>
 
@@ -614,7 +634,7 @@ export function SystemGuidePage() {
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="mb-6">
             <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#336886]/70">Jornada ponta a ponta</p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight text-[#153A4C]">Do primeiro clique até monetizar</h2>
+            <h2 className="mt-2 text-3xl font-black tracking-tight text-[#153A4C]">Do primeiro clique até vender melhor</h2>
           </div>
 
           <div className="grid gap-3 lg:grid-cols-6">
@@ -647,11 +667,11 @@ export function SystemGuidePage() {
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#5FD35A]">Próximo passo</p>
                 <h2 className="mt-3 max-w-2xl text-3xl font-black leading-tight tracking-tight sm:text-4xl">
-                  Use este guia para apresentar o app para lojistas, chalés, serviços e parceiros.
+                  Traga sua loja, chalé ou serviço para o Já no Caminho.
                 </h2>
                 <p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-white/70">
-                  A página mostra o valor comercial do Já no Caminho sem parecer documentação técnica. O robô orienta,
-                  os cards explicam e os CTAs levam direto para criação de loja, Hub e destinos.
+                  O app ajuda clientes, turistas e moradores a descobrirem negócios locais, fazerem pedidos e entrarem
+                  em contato com quem atende a região.
                 </p>
               </div>
               <div className="flex flex-col gap-3">
