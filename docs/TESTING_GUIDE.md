@@ -63,6 +63,7 @@ Os testes ficam em `frontend/tests/e2e`. Eles validam UI e navegação crítica,
 | `destination-partner-portal.spec.ts` | Portal do parceiro de destinos: ativação por convite, login, listagem de cadastros liberados e salvamento de campos operacionais seguros com API mockada. |
 | `superadmin-destinations-partners.spec.ts` | Super Admin de destinos: filtros de onboarding, modal de validação de posse, comparação de cadastro atual vs solicitação e exigência de registro de conferência antes da aprovação. |
 | `hub-marketplace.spec.ts` | Home/Hub do marketplace: carregamento de lojas, filtros principais, dados de card, itens em destaque, link "Ver mais" e busca na tela de destaques. |
+| `store-checkout-layout.spec.ts` | Checkout visual da vitrine: restauração de sacola, observação, troca de pagamento por bottom sheet, retirada, entrega com endereço salvo/taxa, mesa e bloqueio de entrega fora do raio antes de criar pedido. |
 
 ### Unitários Relevantes
 
@@ -83,7 +84,7 @@ Estas áreas ainda merecem testes adicionais antes de chamar a cobertura de "mui
 
 | Lacuna | Recomendação |
 | --- | --- |
-| Checkout visual completo do cliente em navegador | Criar Playwright com cenário local/mockado: abrir loja, adicionar itens, escolher retirada/entrega, revisar pedido, confirmar e abrir tracking. |
+| Checkout com pagamento online sandbox/webhook | O checkout visual de retirada, entrega e mesa já está coberto por Playwright mockado. Ainda falta contrato sandbox para Mercado Pago: status `awaiting_payment`, webhook aprovado/expirado, falha e reembolso sem pagamento real. |
 | Pagamento Mercado Pago real | Não usar pagamento real em E2E comum. Criar sandbox/mock para payload, status `awaiting_payment`, webhook aprovado/expirado e falha. |
 | Push notification ponta a ponta | Testar backend por contrato/payload e mockar provedor. Push real em dispositivo deve ser checklist manual/release, não E2E automático. |
 | Impressão RawBT/Android | Cobrir fallback/intent por unitário ou teste de integração do adaptador. Impressão Bluetooth real deve ficar em checklist manual de release/AAB. |
