@@ -15,6 +15,7 @@ import { RouteMapView } from '../components/RouteMapView';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { getOrderItemLineTotal, getOrderItemOriginalLineTotal, getOrderItemQuantity } from '../utils/orderItems';
 import { getOrderRefundSnapshot } from '../utils/orderRefund';
+import { getFriendlyCancellationReason } from '../utils/orderCancellation';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
@@ -690,6 +691,7 @@ export function OrderTracking() {
   const refundStatusNormalized = refundSnapshot.status;
   const refundAmountValue = refundSnapshot.amount;
   const refundReasonValue = refundSnapshot.reason;
+  const friendlyCancellationReason = getFriendlyCancellationReason(order?.canceledReason);
   const showMercadoPagoApproved = isPaymentApproved && [ 'mercado_pago', 'mercadopago' ].includes(normalizedPaymentProvider);
   const shouldHidePixPaymentBlockBase =
     isPixPayment &&
@@ -1631,7 +1633,7 @@ export function OrderTracking() {
                     {isCancelled && (
                       <div className="mt-3 rounded-2xl border border-rose-200/70 bg-rose-50/80 px-4 py-3">
                         <p className="text-sm font-medium text-rose-900 leading-relaxed">
-                          {order?.canceledReason || "Sentimos muito! Este pedido foi cancelado."}
+                          {friendlyCancellationReason}
                         </p>
                       </div>
                     )}
@@ -2052,13 +2054,13 @@ export function OrderTracking() {
                     (isCancelled && refundStatusNormalized === 'DENIED') ? (
                     <div className="grid gap-3 sm:grid-cols-2">
                       {isCancelled && hasOnlinePayment && isPaymentApproved && !refundStatusNormalized && (
-                        <TrackingMetaCard label="Reembolso" value="Em análise" detail="O estabelecimento está processando a devolução" accent="default" />
+                        <TrackingMetaCard label="Reembolso" value="Em andamento" detail={isPixPayment ? "O estorno do Pix está sendo processado. Geralmente o valor retorna em até 2 horas." : "A devolução foi solicitada ao provedor de pagamento."} accent="default" />
                       )}
                       {isCancelled && refundStatusNormalized === 'REFUNDED' && (
-                        <TrackingMetaCard label="Reembolso" value="Processado" detail={refundAmountValue ? `${formatCurrency(refundAmountValue)} devolvido` : 'Valor total devolvido'} accent="success" />
+                        <TrackingMetaCard label="Reembolso" value="Processado" detail={refundAmountValue ? `${formatCurrency(refundAmountValue)} devolvido para a forma de pagamento` : 'Valor total devolvido'} accent="success" />
                       )}
                       {isCancelled && refundStatusNormalized === 'PARTIALLY_REFUNDED' && (
-                        <TrackingMetaCard label="Reembolso" value="Parcial" detail={refundAmountValue ? `${formatCurrency(refundAmountValue)} devolvido` : 'Valor parcial devolvido'} accent="warning" />
+                        <TrackingMetaCard label="Reembolso" value="Parcial" detail={refundAmountValue ? `${formatCurrency(refundAmountValue)} devolvido para a forma de pagamento` : 'Valor parcial devolvido'} accent="warning" />
                       )}
                       {isCancelled && refundStatusNormalized === 'DENIED' && (
                         <TrackingMetaCard label="Reembolso" value="Não aprovado" detail={refundReasonValue || 'Entre em contato com o estabelecimento'} accent="warning" />

@@ -71,10 +71,10 @@ const buildPhoneFromParts = (ddd = "", local = "") => {
 };
 
 const PROFESSIONAL_PAYMENT_METHODS = [
-  { id: "debito_presencial", label: "Débito", description: "Pagamento no atendimento", group: "local" },
-  { id: "credito_presencial", label: "Crédito", description: "Pagamento no atendimento", group: "local" },
-  { id: "pix_presencial", label: "Pix", description: "Pagamento confirmado no atendimento", group: "local" },
-  { id: "dinheiro", label: "Dinheiro", description: "Pagamento no atendimento", group: "local" },
+  { id: "debito_presencial", label: "Débito", description: "Pague na entrega, retirada ou mesa.", group: "local" },
+  { id: "credito_presencial", label: "Crédito", description: "Pague na entrega, retirada ou mesa.", group: "local" },
+  { id: "pix_presencial", label: "Pix", description: "A loja confirma o Pix no atendimento.", group: "local" },
+  { id: "dinheiro", label: "Dinheiro", description: "Pague em dinheiro na entrega, retirada ou mesa.", group: "local" },
 ];
 
 const CUSTOMER_ORDER_NOTE_SUGGESTIONS = [
@@ -272,7 +272,7 @@ export const CartView = ({
       { id: "pix", label: "Pix", description: "Via Mercado Pago", group: "online" },
       { id: "debito", label: "Débito", description: "Via Mercado Pago", group: "online" },
       { id: "credito", label: "Crédito", description: "Via Mercado Pago", group: "online" },
-      { id: "dinheiro", label: "Dinheiro", description: "Pagamento no atendimento", group: "local" },
+      { id: "dinheiro", label: "Dinheiro", description: "Pague na entrega, retirada ou mesa.", group: "local" },
     ],
     []
   );
@@ -291,12 +291,12 @@ export const CartView = ({
       next.push({ id: "debito", label: "Débito", description: "Via Mercado Pago", group: "online" });
     }
     if (methods.manualPix) {
-      next.push({ id: "pix_loja", label: "Pix da loja", description: "Chave exibida após confirmar", group: "local" });
+      next.push({ id: "pix_loja", label: "Pix da loja", description: "A chave aparece após confirmar o pedido.", group: "local" });
     }
     if (methods.cash !== false) {
-      next.push({ id: "dinheiro", label: "Dinheiro", description: "Pagamento no atendimento", group: "local" });
+      next.push({ id: "dinheiro", label: "Dinheiro", description: "Pague na entrega, retirada ou mesa.", group: "local" });
     }
-    return next.length ? next : [ { id: "dinheiro", label: "Dinheiro", description: "Pagamento no atendimento", group: "local" } ];
+    return next.length ? next : [ { id: "dinheiro", label: "Dinheiro", description: "Pague na entrega, retirada ou mesa.", group: "local" } ];
   }, [fallbackPaymentMethods, isProfessionalUser, paymentSummary]);
   const paymentGroups = useMemo(() => {
     return resolvedPaymentMethods.reduce(
@@ -895,7 +895,7 @@ export const CartView = ({
               </span>
             </div>
             <p className={`mt-1 line-clamp-2 text-[12.5px] font-semibold leading-snug ${note ? "text-slate-800" : "text-slate-500"}`}>
-              {note || "Sem observação. Toque se quiser pedir sem cebola, avisar interfone ou deixar uma orientação."}
+              {note || "Toque para adicionar preferências de preparo ou entrega."}
             </p>
           </div>
           <ArrowLeft size={16} weight="bold" className="shrink-0 rotate-180 text-slate-300 transition-transform group-hover:translate-x-0.5" />
@@ -942,7 +942,7 @@ export const CartView = ({
               </p>
             ) : (
               <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">
-                Sem comentários para este pedido.
+                Nenhuma observação adicionada.
               </p>
             )}
           </div>
@@ -961,9 +961,13 @@ export const CartView = ({
         : isOnlinePaymentMethod
         ? "Via Mercado Pago"
         : isManualPix
-        ? "Chave exibida após confirmar"
-        : "Pagamento no atendimento";
-    const badgeLabel = isOnlinePaymentMethod ? "Seguro" : isManualPix ? "Pix da loja" : "Direto";
+        ? "A chave aparece após confirmar o pedido."
+        : customer.type === "pickup"
+        ? "Você paga ao retirar o pedido."
+        : customer.type === "table"
+        ? "Você paga no atendimento da mesa."
+        : "Você paga quando receber o pedido.";
+    const badgeLabel = isOnlinePaymentMethod ? "Seguro" : isManualPix ? "Pix da loja" : customer.type === "pickup" ? "Pague na retirada" : customer.type === "table" ? "Pague na mesa" : "Pague na entrega";
     const badgeClass = isOnlinePaymentMethod
       ? "border-[#336886]/12 bg-[#eef7fb] text-[#336886]"
       : isManualPix
@@ -2513,7 +2517,7 @@ export const CartView = ({
           )}
 
           {/* Pagamento */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm" data-testid="checkout-review-payment-card">
+          <div className="rounded-[1.55rem] border border-white/80 bg-white p-3.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.28)]" data-testid="checkout-review-payment-card">
             <div className="flex items-center gap-3">
               <span className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
                 isOnlinePaymentMethod ? 'bg-sky-50 text-[#009ee3]' : isManualPix ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
@@ -2538,11 +2542,17 @@ export const CartView = ({
                 {isCash && cashNeedsChange && cashTenderedValue !== null && cashTenderedValue >= totalWithFee ? (
                   <p className="mt-1 text-xs text-slate-500">Troco para {formatCurrency(cashTenderedValue)} • devolução {formatCurrency(cashChangeDue)}</p>
                 ) : null}
-                {isOnlinePaymentMethod ? (
-                  <p className="mt-1 text-xs text-slate-500">Cobrança segura via Mercado Pago.</p>
-                ) : isManualPix ? (
-                  <p className="mt-1 text-xs text-slate-500">A chave Pix da loja será exibida após confirmar o pedido.</p>
-                ) : null}
+                <p className="mt-1 text-xs text-slate-500">
+                  {isOnlinePaymentMethod
+                    ? 'Cobrança segura via Mercado Pago.'
+                    : isManualPix
+                    ? 'A chave Pix da loja será exibida após confirmar o pedido.'
+                    : customer.type === 'pickup'
+                    ? 'Você pagará assim que retirar o pedido.'
+                    : customer.type === 'table'
+                    ? 'Você pagará no atendimento da mesa.'
+                    : 'Você pagará quando receber o pedido.'}
+                </p>
               </div>
             </div>
           </div>
@@ -2555,7 +2565,7 @@ export const CartView = ({
           <>
             {checkoutStep >= 3 && (
               <p className="text-[11px] text-slate-400 text-center leading-relaxed mb-2">
-                Pedido processado pelo estabelecimento, responsável por produtos, preparo, preços e entrega.
+                Revise uma última vez. Depois disso, o pedido vai direto para a loja.
               </p>
             )}
             {checkoutLoading && checkoutSlow && (
@@ -2614,7 +2624,7 @@ export const CartView = ({
                 (checkoutStep === 4 && (checkoutLoading || checkoutDisabled || cashValidation.blocked))
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
                   : checkoutStep === 4
-                  ? isOnlinePaymentMethod ? "bg-[#009ee3] text-white cursor-pointer" : "bg-emerald-600 text-white cursor-pointer"
+                  ? "bg-[linear-gradient(135deg,#0f172a,#153A4C)] text-white cursor-pointer shadow-[0_20px_42px_-26px_rgba(21,58,76,0.56)]"
                   : checkoutStep === 3
                   ? "bg-[linear-gradient(135deg,#336886,#207A52)] text-white cursor-pointer shadow-[0_18px_36px_-24px_rgba(51,104,134,0.55)]"
                   : "bg-slate-900 text-white cursor-pointer"
@@ -2639,8 +2649,8 @@ export const CartView = ({
                     {checkoutLoading
                       ? checkoutLoadingLabel
                       : isOnlinePaymentMethod
-                      ? <><img src={mercadoPagoMeta.icon} alt="" className="h-5 w-5 object-contain brightness-0 invert" /> {isOnlinePix ? 'Gerar Pix via Mercado Pago' : 'Pagar via Mercado Pago'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
-                      : <>{isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {'Confirmar pedido'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
+                      ? <><img src={mercadoPagoMeta.icon} alt="" className="h-5 w-5 object-contain brightness-0 invert" /> Confirmar e gerar pagamento <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
+                      : <>{isOnlinePaymentMethod ? <ShieldCheck size={20} weight="duotone" /> : isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />} {isOnlinePaymentMethod ? 'Confirmar e gerar pagamento' : 'Enviar pedido para a loja'} <span className="opacity-70">•</span> {formatCurrency(totalWithFee)}</>
                     }
                   </>
               }
@@ -2722,10 +2732,10 @@ export const CartView = ({
             onClick={() => {
               setShowPaymentSheet(false);
             }}
-            className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-slate-950/42 backdrop-blur-md"
             aria-label="Fechar formas de pagamento"
           />
-          <div className="absolute bottom-0 left-0 right-0 mx-auto max-h-[calc(100dvh-4rem)] max-w-lg overflow-hidden rounded-t-[2rem] border border-white/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_-28px_60px_-30px_rgba(15,23,42,0.55)]">
+          <div className="absolute bottom-0 left-0 right-0 mx-auto max-h-[calc(100dvh-4rem)] max-w-lg overflow-hidden rounded-t-[2rem] border border-white/80 bg-white/92 shadow-[0_-28px_60px_-30px_rgba(15,23,42,0.55)] backdrop-blur-2xl animate-in slide-in-from-bottom-4 fade-in duration-200">
             <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/92 px-4 pb-3 pt-4 backdrop-blur-xl">
               <div className="mx-auto mb-3 h-1.5 w-11 rounded-full bg-slate-200" />
               <div className="flex items-start justify-between gap-3">
@@ -2733,7 +2743,7 @@ export const CartView = ({
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Pagamento</p>
                   <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Escolha como pagar</h3>
                   <p className="mt-1 text-xs font-semibold leading-snug text-slate-500">
-                    Toque em uma opção. O pedido continua igual, só muda a forma de pagamento.
+                    Escolha a forma de pagamento. Os itens do pedido continuam iguais.
                   </p>
                 </div>
                 <button
@@ -2784,12 +2794,12 @@ export const CartView = ({
                         Pagar na entrega, retirada ou balcão
                       </p>
                       <p className="mt-1 text-[11px] leading-snug text-slate-500">
-                        Ideal para dinheiro, Pix da loja ou pagamento presencial.
+                        Ideal para dinheiro, Pix da loja ou cartão na entrega, retirada ou mesa.
                       </p>
                     </div>
                     <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-white/90 px-2.5 py-1.5 text-[10px] font-black text-emerald-700">
                       <ShieldCheck size={12} weight="duotone" />
-                      Direto
+                      Presencial
                     </span>
                   </div>
                   <div className={`grid gap-2.5 ${paymentGroups.local.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
@@ -2807,18 +2817,18 @@ export const CartView = ({
           <button
             type="button"
             onClick={() => setShowCustomerNoteSheet(false)}
-            className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-slate-950/42 backdrop-blur-md"
             aria-label="Fechar observação"
           />
-          <div className="absolute bottom-0 left-0 right-0 mx-auto max-h-[calc(100dvh-4rem)] max-w-lg overflow-hidden rounded-t-[2rem] border border-white/80 bg-[linear-gradient(180deg,#ffffff_0%,#fffaf0_100%)] shadow-[0_-28px_60px_-30px_rgba(15,23,42,0.55)]">
-            <div className="border-b border-amber-100 bg-white/92 px-4 pb-3 pt-4 backdrop-blur-xl">
-              <div className="mx-auto mb-3 h-1.5 w-11 rounded-full bg-amber-200/80" />
+          <div className="absolute bottom-0 left-0 right-0 mx-auto max-h-[calc(100dvh-4rem)] max-w-lg overflow-hidden rounded-t-[2rem] border border-white/80 bg-white/92 shadow-[0_-28px_60px_-30px_rgba(15,23,42,0.55)] backdrop-blur-2xl animate-in slide-in-from-bottom-4 fade-in duration-200">
+            <div className="border-b border-[#336886]/10 bg-white/86 px-4 pb-3 pt-4 backdrop-blur-xl">
+              <div className="mx-auto mb-3 h-1.5 w-11 rounded-full bg-[#336886]/18" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-amber-800">Observação</p>
-                  <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Algum detalhe do pedido?</h3>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Observação</p>
+                  <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Quer pedir algum cuidado?</h3>
                   <p className="mt-1 text-xs font-semibold leading-snug text-slate-500">
-                    Use apenas para preferências do preparo ou orientação rápida para a loja.
+                    Exemplo: sem cebola, avisar no interfone ou entregar na portaria.
                   </p>
                 </div>
                 <button
@@ -2838,7 +2848,7 @@ export const CartView = ({
                     key={suggestion}
                     type="button"
                     onClick={() => applyCustomerNoteSuggestion(suggestion)}
-                    className="jnc-hub-touch rounded-full border border-amber-200 bg-white px-3 py-2 text-[11px] font-black text-amber-800 shadow-sm"
+                    className="jnc-hub-touch rounded-full border border-[#336886]/12 bg-white px-3 py-2 text-[11px] font-black text-[#336886] shadow-sm"
                   >
                     {suggestion}
                   </button>
@@ -2852,7 +2862,7 @@ export const CartView = ({
                   maxLength={CUSTOMER_ORDER_NOTE_MAX_LENGTH}
                   rows={5}
                   placeholder="Ex: sem cebola, interfone 101, avisar ao chegar..."
-                  className="min-h-[132px] w-full resize-none rounded-[1.3rem] border border-amber-200/70 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10"
+                  className="min-h-[132px] w-full resize-none rounded-[1.3rem] border border-[#336886]/16 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-[#336886]/45 focus:ring-4 focus:ring-[#336886]/10"
                   data-testid="customer-order-note-input"
                 />
                 <div className="mt-2 flex items-center justify-between gap-3 text-[10.5px] font-bold text-slate-400">
