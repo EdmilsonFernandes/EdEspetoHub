@@ -96,6 +96,15 @@ export function DestinationsPage() {
     places: destinations.reduce((sum, item) => sum + Number(item.placesCount || 0), 0),
     listings: destinations.reduce((sum, item) => sum + Number(item.listingsCount || 0), 0),
   }), [destinations]);
+  const scrollToDestinationsList = () => {
+    if (typeof document === 'undefined') return;
+    document.getElementById('destinos')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const destinationStats = [
+    { value: stats.cities, label: 'cidades', hint: 'Ver cidades' },
+    { value: stats.places, label: 'hospedagens', hint: 'Escolher cidade' },
+    { value: stats.listings, label: 'serviços', hint: 'Escolher cidade' },
+  ];
 
   const filteredDestinations = useMemo(() => {
     let result = destinations;
@@ -146,15 +155,18 @@ export function DestinationsPage() {
               </p>
             </div>
             <div className="grid grid-cols-3 gap-2 rounded-[1.35rem] border border-white/82 bg-white/72 p-2 shadow-[0_20px_48px_-38px_rgba(15,23,42,0.36)] ring-1 ring-white/30 backdrop-blur-xl lg:min-w-[20rem]">
-              {[
-                { value: stats.cities, label: 'cidades' },
-                { value: stats.places, label: 'hospedagens' },
-                { value: stats.listings, label: 'serviços' },
-              ].map((stat) => (
-                <div key={stat.label} className="rounded-[1rem] bg-white/90 px-3 py-2.5 text-center ring-1 ring-slate-200/35 shadow-[0_12px_26px_-22px_rgba(15,23,42,0.24)]">
+              {destinationStats.map((stat) => (
+                <button
+                  key={stat.label}
+                  type="button"
+                  onClick={scrollToDestinationsList}
+                  className="jnc-hub-touch group rounded-[1rem] bg-white/90 px-3 py-2.5 text-center shadow-[0_12px_26px_-22px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/35 transition hover:-translate-y-0.5 hover:ring-[#336886]/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#336886]/16"
+                  aria-label={`${stat.hint}: ${stat.value} ${stat.label}`}
+                >
                   <p className="text-xl font-black tracking-[-0.04em] text-[#153A4C]">{stat.value}</p>
                   <p className="mt-1 whitespace-normal break-words text-[10px] font-black uppercase leading-tight tracking-[0.12em] text-slate-500">{stat.label}</p>
-                </div>
+                  <p className="mt-1 hidden text-[9px] font-black uppercase tracking-[0.14em] text-[#336886]/70 sm:block">{stat.hint}</p>
+                </button>
               ))}
             </div>
           </div>

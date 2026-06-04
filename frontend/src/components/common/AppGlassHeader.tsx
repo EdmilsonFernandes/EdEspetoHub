@@ -51,7 +51,7 @@ export function AppGlassHeader({
     >
       {topSlot}
       <div className={`mx-auto ${maxWidthClassName} px-4`}>
-        <div className="flex min-h-[3.72rem] items-center justify-between gap-3">
+        <div className="flex min-h-[3.95rem] items-center justify-between gap-3">
           <button
             type="button"
             onClick={handleBack}
@@ -68,7 +68,7 @@ export function AppGlassHeader({
                 <p className="truncate text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]/82">{eyebrow}</p>
               </div>
             ) : null}
-            <h1 className="truncate text-[15px] font-black tracking-[-0.02em] text-[#153A4C]">{title}</h1>
+            <h1 className="mt-0.5 truncate text-[15px] font-black tracking-[-0.02em] text-[#153A4C]">{title}</h1>
             {subtitle ? <p className="mt-0.5 truncate text-[11px] font-semibold text-[#336886]/72">{subtitle}</p> : null}
           </div>
 

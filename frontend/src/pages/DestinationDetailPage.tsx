@@ -280,6 +280,21 @@ export function DestinationDetailPage() {
   const visibleListings = filteredListings.slice(0, listingLimit);
   const showPlacesSection = activeCategory === 'TODOS' || activeCategory === 'HOSPEDAGENS';
   const showListingsSection = activeCategory !== 'HOSPEDAGENS';
+  const jumpToDestinationSection = (sectionId: 'hospedagens' | 'servicos-cidade', nextCategory: string) => {
+    setActiveCategory(nextCategory);
+    if (nextCategory === 'HOSPEDAGENS') setPlaceLimit((current) => Math.max(current, 6));
+    if (nextCategory === 'TODOS') setListingLimit((current) => Math.max(current, 10));
+
+    const scroll = () => {
+      if (typeof document === 'undefined') return;
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    if (typeof window === 'undefined') {
+      scroll();
+      return;
+    }
+    window.requestAnimationFrame(() => window.setTimeout(scroll, 80));
+  };
   const showcaseSlides = useMemo(() => {
     const bannerSlides = banners.filter((banner: any) => hasConfiguredAsset(banner)).map((banner: any) => ({
       key: `banner-${banner.id}`,
@@ -341,14 +356,24 @@ export function DestinationDetailPage() {
                   </p>
                 </div>
                 <div className="flex min-w-0 flex-wrap gap-2 sm:justify-end">
-                  <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl">
+                  <button
+                    type="button"
+                    onClick={() => jumpToDestinationSection('hospedagens', 'HOSPEDAGENS')}
+                    className="jnc-hub-touch inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#336886]/16"
+                    aria-label={`Ver ${places.length} hospedagens`}
+                  >
                     <Bed size={16} weight="duotone" className="shrink-0" />
                     {places.length} hospedagens
-                  </span>
-                  <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => jumpToDestinationSection('servicos-cidade', 'TODOS')}
+                    className="jnc-hub-touch inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#336886]/16"
+                    aria-label={`Ver ${listings.length} serviços`}
+                  >
                     <ForkKnife size={16} weight="duotone" className="shrink-0" />
                     {listings.length} serviços
-                  </span>
+                  </button>
                 </div>
               </div>
 

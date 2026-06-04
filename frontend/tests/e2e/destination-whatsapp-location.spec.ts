@@ -139,6 +139,16 @@ test.describe('Destination WhatsApp location', () => {
     await expect(page.getByRole('link', { name: /Cadastrar meu negócio/i })).toBeVisible();
   });
 
+  test('usa os contadores do topo como atalhos para hospedagens e serviços', async ({ page }) => {
+    await page.goto('/destinos/sao-bento');
+
+    await page.getByRole('button', { name: /Ver 1 hospedagens/i }).click();
+    await expect(page.getByRole('heading', { name: /Escolha sua hospedagem/i })).toBeVisible();
+
+    await page.getByRole('button', { name: /Ver 1 serviços/i }).click();
+    await expect(page.getByRole('heading', { name: /Serviços e lugares da cidade/i })).toBeVisible();
+  });
+
   test('leva o contexto da hospedagem para lojas oficiais dentro do chale', async ({ page }) => {
     await page.goto('/destinos/sao-bento/chales/chale-vista');
 
