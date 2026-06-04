@@ -996,7 +996,7 @@ export function HospitalityPlacePage() {
                 </div>
 
                 {/* Animated CSS Mascot */}
-                <div className="hidden min-[360px]:flex jnc-partner-mascot relative h-[4.8rem] w-[4.8rem] shrink-0 items-center justify-center select-none z-10 mr-1">
+                <div className="pointer-events-none hidden sm:flex jnc-partner-mascot relative h-[4.8rem] w-[4.8rem] shrink-0 items-center justify-center select-none z-10 mr-1" aria-hidden="true">
                   <div className="absolute inset-[-5px] rounded-full border border-dashed border-[#5FD35A]/30 animate-[spin_16s_linear_infinite]" />
                   <div className="jnc-mascot-head relative h-full w-full rounded-[1.35rem] border border-white/20 bg-gradient-to-br from-[#1c4b62] via-[#153A4C] to-[#0f2a37] shadow-[0_14px_32px_rgba(21,58,76,0.6)] flex items-center justify-center">
                     <span className="absolute left-1/2 -top-1.5 h-2.5 w-[2px] -translate-x-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_8px_rgba(95,211,90,0.8)]" />
