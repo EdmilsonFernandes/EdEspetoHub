@@ -2651,48 +2651,39 @@ export function MarketplacePage() {
             />
           )}
 
-          {/* Banner: convite para lojistas */}
+          {/* CTA compacto para lojistas */}
           <section className="order-11 px-3 pb-2 pt-0">
             <button
               type="button"
               onClick={() => navigate('/create?plan=trial')}
-              className="jnc-hub-touch jnc-hub-lift jnc-hub-card-strong group relative w-full overflow-hidden rounded-[1.85rem] p-3.5 text-left"
+              className="jnc-hub-touch jnc-hub-lift group relative w-full overflow-hidden rounded-[1.5rem] border border-white/85 bg-white/82 px-3.5 py-3 text-left shadow-[0_18px_42px_-34px_rgba(15,23,42,0.34)] ring-1 ring-slate-200/45 backdrop-blur-xl"
             >
-              <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-[#5FD35A]/18 blur-3xl" />
-              <div className="pointer-events-none absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-[#336886]/8 blur-3xl" />
-              <div className="relative flex items-start gap-3.5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem] border border-[#336886]/12 bg-[linear-gradient(145deg,#ffffff,#edf7f2)] text-[#153A4C] shadow-[0_18px_34px_-28px_rgba(21,58,76,0.42)] ring-1 ring-white/90">
-                  <Storefront size={24} weight="duotone" className="text-[#336886]" />
+              <div className="pointer-events-none absolute -right-10 -top-12 h-24 w-24 rounded-full bg-[#5FD35A]/12 blur-3xl" />
+              <div className="pointer-events-none absolute -left-8 bottom-0 h-20 w-20 rounded-full bg-[#336886]/7 blur-3xl" />
+              <div className="relative flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.05rem] border border-[#336886]/10 bg-[#336886]/7 text-[#153A4C] shadow-[0_16px_30px_-26px_rgba(21,58,76,0.38)] ring-1 ring-white/80">
+                  <Storefront size={22} weight="duotone" className="text-[#336886]" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Venda pelo Já no Caminho</p>
-                    <span className="rounded-full bg-[#5FD35A]/18 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-emerald-700 ring-1 ring-emerald-100">
-                      Primeiras 50 lojas
+                    <p className="text-[0.92rem] font-black leading-tight tracking-[-0.03em] text-slate-950">
+                      Tem um negócio local?
+                    </p>
+                    <span className="rounded-full bg-[#5FD35A]/16 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-emerald-700 ring-1 ring-emerald-100/80">
+                      3 meses VIP
                     </span>
                   </div>
-                  <p className="mt-1 text-[1.02rem] font-black leading-tight tracking-[-0.035em] text-slate-950">
-                    3 meses VIP para começar a vender online
+                  <p className="mt-0.5 text-[11px] font-semibold leading-4 text-slate-500">
+                    Crie sua loja e venda online pelo app.
                   </p>
-                  <p className="mt-1 text-[11px] font-semibold leading-5 text-slate-500">
-                    Pedidos online, fila organizada e WhatsApp Business oficial em uma vitrine pronta.
-                  </p>
-                  <div className="mt-2.5 flex flex-wrap gap-1.5">
-                    {['sem comissão', 'app + web', 'pedidos em tempo real'].map((label) => (
-                      <span key={label} className="jnc-hub-pill rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-[0.09em] text-[#336886]">
-                        {label}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#153A4C] px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.09em] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.62)] transition group-hover:translate-x-0.5">
-                    Criar minha loja
-                    <CaretRight size={12} weight="bold" />
-                  </div>
                 </div>
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#153A4C] px-3 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-white shadow-[0_16px_30px_-24px_rgba(21,58,76,0.62)] transition group-hover:translate-x-0.5">
+                  Começar
+                  <CaretRight size={11} weight="bold" />
+                </span>
               </div>
             </button>
           </section>
-
           <section className="order-12 space-y-2 pb-2 sm:pb-4">
             <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas do app.</p>
             <PlatformTrustFooter mode="minimal" align="center" compact />

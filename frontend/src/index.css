@@ -1810,3 +1810,30 @@ body {
   .animate-pop {
     animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
+
+  /* Robozinho Premium Animado */
+  @keyframes jnc-mascot-float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-7px) rotate(1.5deg); }
+  }
+  @keyframes jnc-mascot-eye-blink {
+    0%, 88%, 100% { transform: scaleY(1); }
+    92% { transform: scaleY(0.15); }
+  }
+  .jnc-mascot-head {
+    animation: jnc-mascot-float 3.2s ease-in-out infinite;
+  }
+  .jnc-mascot-eye {
+    animation: jnc-mascot-eye-blink 3.8s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  /* Shimmer Sweep Animation para os Cards */
+  @keyframes jnc-glare-sweep-anim {
+    0% { transform: translateX(-120%) skewX(-20deg); }
+    100% { transform: translateX(120%) skewX(-20deg); }
+  }
+  .group:hover .jnc-glare-sweep {
+    animation: jnc-glare-sweep-anim 1.25s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  }
+

@@ -976,18 +976,36 @@ export function HospitalityPlacePage() {
                 <p className="mt-2 text-sm font-bold leading-relaxed text-slate-700">{place.deliveryInstructions}</p>
               </div>
             ) : null}
-            <Link to="/destinos/cadastrar#dados-parceiro" className="group relative block overflow-hidden rounded-[1.65rem] border border-[#153A4C]/10 bg-[radial-gradient(circle_at_14%_12%,rgba(132,204,22,0.2),transparent_32%),radial-gradient(circle_at_92%_20%,rgba(255,255,255,0.12),transparent_28%),linear-gradient(135deg,#153A4C_0%,#24576a_58%,#0f2f3f_100%)] p-4 text-white shadow-[0_18px_46px_-30px_rgba(21,58,76,0.82)] transition hover:-translate-y-0.5">
-              <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/20 blur-3xl" />
-              <div className="relative max-w-[17rem]">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12 ring-1 ring-white/14">
-                  <ForkKnife size={22} weight="duotone" />
-                </span>
-                <h3 className="mt-3 text-lg font-black leading-tight tracking-[-0.03em]">Quer aparecer neste chalé?</h3>
-                <p className="mt-1.5 text-sm font-semibold leading-6 text-white/76">Cadastre sua loja ou serviço para atender hóspedes pelo app ou WhatsApp.</p>
-                <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-black text-[#153A4C] shadow-[0_14px_28px_-20px_rgba(255,255,255,0.55)] transition group-hover:translate-x-0.5">
-                  Quero participar
-                  <ArrowRight size={12} weight="bold" />
-                </span>
+            <Link to="/destinos/cadastrar#dados-parceiro" className="group relative block overflow-hidden rounded-[2.2rem] border border-white/10 p-5 text-white shadow-[0_24px_54px_-30px_rgba(21,58,76,0.85)] bg-[radial-gradient(circle_at_14%_12%,rgba(95,211,90,0.15),transparent_40%),linear-gradient(135deg,#153A4C_0%,#1b465c_58%,#0b1e27_100%)] transition-all duration-300 hover:border-white/15 hover:shadow-[0_28px_64px_-24px_rgba(21,58,76,0.95)] hover:-translate-y-0.5 active:scale-[0.99]">
+              {/* Glare Sweep Line */}
+              <div className="jnc-glare-sweep pointer-events-none absolute inset-y-0 -left-[120%] w-[50%] bg-gradient-to-r from-transparent via-white/12 to-transparent -skew-x-20 z-20" />
+              
+              <div className="relative flex items-center justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12 ring-1 ring-white/14">
+                    <ForkKnife size={22} weight="duotone" className="text-white" />
+                  </span>
+                  <h3 className="mt-3 text-lg font-black leading-tight tracking-[-0.03em] text-white">Quer aparecer neste chalé?</h3>
+                  <p className="mt-1.5 text-xs font-semibold leading-relaxed text-slate-300">
+                    Cadastre seu negócio para atender hóspedes. Sem taxas ou comissão sobre vendas, apenas uma mensalidade justa!
+                  </p>
+                  <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-black text-[#153A4C] shadow-[0_12px_24px_-16px_rgba(255,255,255,0.45)] transition group-hover:translate-x-0.5">
+                    Quero participar
+                    <ArrowRight size={12} weight="bold" />
+                  </span>
+                </div>
+
+                {/* Animated CSS Mascot */}
+                <div className="hidden min-[360px]:flex jnc-partner-mascot relative h-[4.8rem] w-[4.8rem] shrink-0 items-center justify-center select-none z-10 mr-1">
+                  <div className="absolute inset-[-5px] rounded-full border border-dashed border-[#5FD35A]/30 animate-[spin_16s_linear_infinite]" />
+                  <div className="jnc-mascot-head relative h-full w-full rounded-[1.35rem] border border-white/20 bg-gradient-to-br from-[#1c4b62] via-[#153A4C] to-[#0f2a37] shadow-[0_14px_32px_rgba(21,58,76,0.6)] flex items-center justify-center">
+                    <span className="absolute left-1/2 -top-1.5 h-2.5 w-[2px] -translate-x-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_8px_rgba(95,211,90,0.8)]" />
+                    <span className="absolute left-1/2 -top-2.5 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_12px_rgba(95,211,90,1)]" />
+                    <span className="jnc-mascot-eye absolute left-[1.1rem] top-[1.3rem] h-2 w-2 rounded-full bg-[#5FD35A] shadow-[0_0_10px_rgba(95,211,90,0.95)]" />
+                    <span className="jnc-mascot-eye absolute right-[1.1rem] top-[1.3rem] h-2 w-2 rounded-full bg-[#5FD35A] shadow-[0_0_10px_rgba(95,211,90,0.95)]" />
+                    <span className="absolute bottom-[0.95rem] h-1.5 w-5 rounded-full border-b-2 border-white/60" />
+                  </div>
+                </div>
               </div>
             </Link>
           </aside>
