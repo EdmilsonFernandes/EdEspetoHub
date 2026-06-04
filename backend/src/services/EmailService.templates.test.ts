@@ -34,6 +34,14 @@ describe('EmailService managed template variables', () => {
     await service.sendActivationEmail('loja@teste.com', 'loja-teste');
     await service.sendCustomerWelcome('cliente@teste.com', 'Cliente Teste');
     await service.sendCustomerVerificationCode('cliente@teste.com', 'Cliente Teste', '1234');
+    await service.sendCustomerOrderStatusUpdate({
+      email: 'cliente@teste.com',
+      customerName: 'Cliente Teste',
+      storeName: 'Loja Teste',
+      orderId: '1234567890abcdef',
+      statusLabel: 'Pedido em preparo',
+      statusMessage: 'Loja Teste: Pedido #12345678 está sendo preparado.',
+    });
     await service.sendStoreVerificationCode('loja@teste.com', 'Loja Teste', '5678');
     await service.sendSubscriptionReminder('loja@teste.com', 'Loja Teste', 'loja-teste', 3);
     await service.sendPaymentPending('loja@teste.com', {

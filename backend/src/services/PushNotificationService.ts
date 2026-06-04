@@ -3,6 +3,7 @@ import fs from 'fs';
 import { AppDataSource } from '../config/database';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
+import { EmailService } from './EmailService';
 
 type CustomerPushPayload = {
   title: string;
@@ -37,6 +38,7 @@ const log = logger.child({ scope: 'PushNotificationService' });
  */
 export class PushNotificationService {
   private accessTokenCache: { token: string; expiresAt: number } | null = null;
+  private emailService = new EmailService();
 
   /**
    * Registers or reactivates a customer push token.
@@ -606,11 +608,105 @@ export class PushNotificationService {
   }
 
   /**
+   * Checks whether a customer has at least one active push token.
+   *
+   * @author Edmilson Lopes
+   */
+  async hasActiveCustomerTokens(userId: string) {
+    const normalizedUserId = String(userId || '').trim();
+    if (!normalizedUserId) return false;
+    const rows: Array<{ exists: boolean }> = await AppDataSource.query(
+      `
+        SELECT TRUE AS exists
+        FROM customer_push_tokens
+        WHERE user_id = $1
+          AND is_active = TRUE
+        LIMIT 1
+      `,
+      [normalizedUserId]
+    );
+    return rows.length > 0;
+  }
+
+  private resolveCustomerStatusLabel(status?: string | null) {
+    const normalized = String(status || '').trim().toLowerCase();
+    const labels: Record<string, string> = {
+      pending: 'Pedido recebido',
+      preparing: 'Pedido em preparo',
+      ready: 'Pedido pronto',
+      ready_for_delivery: 'Pedido pronto',
+      waiting_for_motoboy: 'Aguardando entregador',
+      dispatched: 'Pedido saiu para entrega',
+      in_delivery: 'Pedido saiu para entrega',
+      delivered: 'Pedido entregue',
+      finished: 'Pedido finalizado',
+      cancelled: 'Pedido cancelado',
+    };
+    return labels[normalized] || 'Pedido atualizado';
+  }
+
+  private async sendCustomerOrderEmailFallback(userId: string, payload: CustomerPushPayload) {
+    const normalizedUserId = String(userId || '').trim();
+    const orderId = String(payload.data?.orderId || '').trim();
+    if (!normalizedUserId || !orderId) return;
+
+    const hasActivePush = await this.hasActiveCustomerTokens(normalizedUserId);
+    if (hasActivePush) return;
+
+    const rows: Array<{
+      email?: string | null;
+      full_name?: string | null;
+      customer_name?: string | null;
+      status?: string | null;
+      store_name?: string | null;
+    }> = await AppDataSource.query(
+      `
+        SELECT
+          u.email,
+          u.full_name,
+          o.customer_name,
+          o.status,
+          s.name AS store_name
+        FROM orders o
+        INNER JOIN users u
+          ON u.id = o.customer_user_id
+        LEFT JOIN stores s
+          ON s.id = o.store_id
+        WHERE o.id = $1
+          AND o.customer_user_id = $2
+        LIMIT 1
+      `,
+      [orderId, normalizedUserId]
+    );
+
+    const row = rows?.[0];
+    const email = String(row?.email || '').trim();
+    if (!email) return;
+
+    await this.emailService.sendCustomerOrderStatusUpdate({
+      email,
+      customerName: row?.full_name || row?.customer_name || 'Cliente',
+      storeName: row?.store_name || 'Loja parceira',
+      orderId,
+      statusLabel: this.resolveCustomerStatusLabel(row?.status || payload.data?.status),
+      statusMessage: String((payload.data as any)?.fullBody || payload.body || 'Seu pedido foi atualizado.').trim(),
+    });
+  }
+
+  /**
    * Dispatches an order update push to all active tokens from one customer.
    *
    * @author Edmilson Lopes
    */
   async notifyCustomerOrderUpdate(userId: string, payload: CustomerPushPayload) {
+    void this.sendCustomerOrderEmailFallback(userId, payload).catch((error) => {
+      log.warn('Customer order email fallback failed', {
+        userId: String(userId || '').trim(),
+        orderId: String(payload?.data?.orderId || '').trim() || null,
+        error,
+      });
+    });
+
     // Persist notification in database
     try {
       const { Notification: NotifEntity } = require("../entities/Notification");

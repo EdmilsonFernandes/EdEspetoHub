@@ -162,10 +162,13 @@ test.describe('Destination WhatsApp location', () => {
     const dialog = page.getByRole('dialog', { name: /Detalhes de Restaurante Silvia Lanches/i });
     await expect(dialog).toBeVisible();
     await expect(dialog.getByText('Referência para entrega')).toBeVisible();
+    await expect(dialog.getByText(/\d+\s*m|0,\d\s*km/i)).toBeVisible();
     await expect(dialog.getByRole('link', { name: /Ver rota até meu chalé/i })).toBeVisible();
     await expect(dialog.getByRole('button', { name: /Copiar rota/i })).toBeVisible();
     await expect(dialog.getByText('Contato', { exact: true })).toBeVisible();
     await expect(dialog.getByRole('link', { name: /WhatsApp/i })).toBeVisible();
+    await expect(dialog.getByText('Resposta mais rápida')).toBeVisible();
+    await expect(dialog.getByText('Peça sem sair do Já no Caminho.')).toBeVisible();
     await expect(dialog.getByText('Lanches proximos ao chale')).toHaveCount(1);
   });
 

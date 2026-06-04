@@ -129,6 +129,35 @@ const categoryLabel = (value?: string | null) => {
   return 'Serviço';
 };
 
+const normalizeCoordinate = (value: any) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+};
+
+const haversineDistanceKm = (origin: any, destination: any) => {
+  const originLat = normalizeCoordinate(origin?.lat);
+  const originLng = normalizeCoordinate(origin?.lng);
+  const destinationLat = normalizeCoordinate(destination?.lat);
+  const destinationLng = normalizeCoordinate(destination?.lng);
+  if (originLat == null || originLng == null || destinationLat == null || destinationLng == null) return null;
+
+  const earthRadiusKm = 6371;
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const deltaLat = toRad(destinationLat - originLat);
+  const deltaLng = toRad(destinationLng - originLng);
+  const a =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(toRad(originLat)) * Math.cos(toRad(destinationLat)) * Math.sin(deltaLng / 2) ** 2;
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const formatRouteDistanceLabel = (distanceKm?: number | null) => {
+  if (!Number.isFinite(Number(distanceKm))) return '';
+  const distance = Number(distanceKm);
+  if (distance < 1) return `${Math.max(80, Math.round(distance * 1000 / 50) * 50)} m`;
+  return `${distance.toFixed(distance < 10 ? 1 : 0).replace('.', ',')} km`;
+};
+
 const siteLabel = (url?: string | null) => {
   const normalized = String(url || '').toLowerCase();
   if (normalized.includes('airbnb')) return 'Airbnb';
@@ -376,6 +405,14 @@ export function HospitalityPlacePage() {
   const selectedListingWebsiteUrl = externalUrl(selectedListing?.websiteUrl);
   const selectedListingMediaUrl = selectedListing ? cardMediaFor(selectedListing) : '';
   const selectedListingHasImage = Boolean(selectedListingMediaUrl);
+  const selectedListingRouteDistanceLabel = selectedListing
+    ? formatRouteDistanceLabel(
+        haversineDistanceKm(
+          { lat: selectedListing.lat, lng: selectedListing.lng },
+          { lat: place.lat, lng: place.lng }
+        )
+      )
+    : '';
   const allSpotlightProviders = [
     ...stores.map((entry: any, index: number) => {
       const store = entry.store || {};
@@ -974,6 +1011,7 @@ export function HospitalityPlacePage() {
         }) : ''}
         primaryAction={selectedListingAction}
         routeAction={selectedListingRouteHref ? { href: selectedListingRouteHref, label: 'Ver rota até meu chalé', kind: 'route', external: false } : null}
+        routeDistanceLabel={selectedListingRouteDistanceLabel}
         instagramUrl={selectedListingInstagramUrl}
         websiteUrl={selectedListingWebsiteUrl}
         websiteLabel={siteLabel(selectedListing?.websiteUrl)}

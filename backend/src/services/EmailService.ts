@@ -255,6 +255,30 @@ export class EmailService {
     });
   }
 
+  async sendCustomerOrderStatusUpdate(payload: {
+    email: string;
+    customerName?: string | null;
+    storeName?: string | null;
+    orderId: string;
+    statusLabel?: string | null;
+    statusMessage: string;
+  }) {
+    const baseUrl = (env.appUrl || 'https://janocaminho.com.br').replace(/\/$/, '');
+    const orderDisplayId = `#${String(payload.orderId || '').slice(0, 8)}`;
+    await this.sendTemplate(payload.email, 'customer_order_status_update', {
+      CUSTOMER_NAME: payload.customerName || 'Cliente',
+      STORE_NAME: payload.storeName || 'Loja parceira',
+      ORDER_DISPLAY_ID: orderDisplayId,
+      STATUS_LABEL: payload.statusLabel || 'Pedido atualizado',
+      STATUS_MESSAGE: payload.statusMessage,
+      ORDER_URL: `${baseUrl}/pedido/${payload.orderId}`,
+    }, {
+      orderId: payload.orderId,
+      storeName: payload.storeName || null,
+      statusLabel: payload.statusLabel || null,
+    });
+  }
+
   async sendStoreVerificationCode(email: string, fullName: string, code: string) {
     await this.sendTemplate(email, 'store_verification_code', {
       NAME: fullName || 'Lojista',

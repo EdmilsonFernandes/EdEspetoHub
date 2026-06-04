@@ -101,6 +101,13 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
     return () => window.removeEventListener('jnk:cart-visibility', handleCartVisibility);
   }, []);
 
+  useEffect(() => {
+    if (!path.startsWith('/admin') && !isSuperAdminPath) return;
+    setHiddenByCart(false);
+    setHiddenByOverlay(false);
+    setIsVisible(true);
+  }, [dashboardTab, isSuperAdminPath, path]);
+
   const effectiveVisibility = isVisible && !hiddenByCart;
   const storeSlug = useMemo(() => {
     const fromAuth = String(auth?.store?.slug || '').trim();

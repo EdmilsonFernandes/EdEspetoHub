@@ -43,9 +43,10 @@ const actionIcon = (kind?: string) => {
 
 const ContactAction = ({ action }: any) => {
   if (!action?.href) return null;
+  const isWhatsapp = action.kind === 'whatsapp';
   const className = action.kind === 'route'
     ? 'flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-[#336886]/12 bg-[#336886] px-4 py-3 text-sm font-extrabold text-white shadow-[0_18px_34px_-28px_rgba(51,104,134,0.68)] transition hover:-translate-y-0.5 active:scale-[0.98]'
-    : `inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition hover:-translate-y-0.5 active:scale-[0.98] ${actionClasses[action.kind] || actionClasses.site}`;
+    : `inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition hover:-translate-y-0.5 active:scale-[0.98] ${isWhatsapp ? 'py-2.5' : 'py-2'} ${actionClasses[action.kind] || actionClasses.site}`;
 
   const handleClick = async (event: any) => {
     if (action.kind === 'whatsapp') {
@@ -86,7 +87,12 @@ const ContactAction = ({ action }: any) => {
       className={className}
     >
       {actionIcon(action.kind)}
-      {action.label}
+      {isWhatsapp ? (
+        <span className="flex flex-col items-start leading-none">
+          <span>{action.label || 'WhatsApp'}</span>
+          <span className="mt-1 text-[10px] font-black uppercase tracking-[0.12em] text-white/78">Resposta mais rápida</span>
+        </span>
+      ) : action.label}
     </a>
   );
 };
@@ -128,6 +134,7 @@ export function PreStoreDetailSheet({
   websiteUrl,
   websiteLabel = 'Site',
   routeAction,
+  routeDistanceLabel,
   address,
 }: any) {
   const [routeCopied, setRouteCopied] = useState(false);
@@ -274,7 +281,7 @@ export function PreStoreDetailSheet({
                     </div>
                     <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-start gap-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
                       <span className="truncate">{listing.title || 'Serviço'}</span>
-                      <span className="text-[#336886]">rota</span>
+                      <span className="text-[#336886]">{routeDistanceLabel || 'rota'}</span>
                       <span className="truncate text-right">{placeName || 'Chalé'}</span>
                     </div>
                   </div>
@@ -328,6 +335,7 @@ export function PreStoreDetailSheet({
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#336886]">Como loja oficial</p>
                   <h3 className="mt-1 text-lg font-extrabold tracking-[-0.03em] text-slate-950">Cardápio digital no app</h3>
+                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">Peça sem sair do Já no Caminho.</p>
                 </div>
                 <Storefront size={25} weight="duotone" className="shrink-0 text-[#153A4C]" />
               </div>

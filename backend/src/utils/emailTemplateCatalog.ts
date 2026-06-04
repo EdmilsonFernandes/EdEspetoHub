@@ -147,6 +147,26 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     `,
   },
   {
+    key: 'customer_order_status_update',
+    name: 'Atualização de pedido do cliente',
+    category: 'transactional',
+    description: 'Fallback por e-mail quando cliente web não tem push ativo para acompanhar mudanças de status do pedido.',
+    subject: '{{STATUS_LABEL}} - Pedido {{ORDER_DISPLAY_ID}}',
+    preheader: '{{STORE_NAME}} atualizou seu pedido.',
+    variables: ['CUSTOMER_NAME', 'STORE_NAME', 'ORDER_DISPLAY_ID', 'STATUS_LABEL', 'STATUS_MESSAGE', 'ORDER_URL'],
+    textBody: 'Olá, {{CUSTOMER_NAME}}.\n\n{{STATUS_MESSAGE}}\n\nLoja: {{STORE_NAME}}\nPedido: {{ORDER_DISPLAY_ID}}\n\nAcompanhe aqui: {{ORDER_URL}}',
+    htmlBody: `
+      <h1 style="margin: 0 0 10px; font-size: 28px; line-height: 1.12; color: #0f172a;">{{STATUS_LABEL}}</h1>
+      <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.7;">Olá, {{CUSTOMER_NAME}}. {{STATUS_MESSAGE}}</p>
+      <div style="margin: 0 0 20px; padding: 16px; border-radius: 18px; background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a; line-height: 1.8;">
+        <div><strong>Loja:</strong> {{STORE_NAME}}</div>
+        <div><strong>Pedido:</strong> {{ORDER_DISPLAY_ID}}</div>
+      </div>
+      <a href="{{ORDER_URL}}" style="display: inline-block; padding: 13px 18px; border-radius: 14px; background: #153A4C; color: #ffffff; text-decoration: none; font-weight: 800;">Acompanhar pedido</a>
+      <p style="margin: 18px 0 0; color: #64748b; font-size: 12px; line-height: 1.7;">Você recebeu este aviso porque este pedido foi feito pela web e não há push ativo neste navegador.</p>
+    `,
+  },
+  {
     key: 'store_verification_code',
     name: 'Código de ativação da loja',
     category: 'security',
