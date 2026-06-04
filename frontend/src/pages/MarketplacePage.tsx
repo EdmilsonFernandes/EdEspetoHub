@@ -1927,13 +1927,13 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.045),transparent_42%),radial-gradient(ellipse_at_bottom_left,rgba(95,211,90,0.035),transparent_46%),linear-gradient(180deg,#F8FAFB_0%,#F4F7F8_48%,#F1F5F6_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.055),transparent_42%),radial-gradient(ellipse_at_bottom_left,rgba(95,211,90,0.04),transparent_46%),linear-gradient(180deg,#F4F7F8_0%,#EEF3F5_48%,#EAF0F2_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Elemento Decorativo de Fundo (Premium Look) */}
       <div className="jnc-safe-area-glass pointer-events-none fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top)]" />
-      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-white/82 via-slate-50/26 to-transparent" />
-      <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-white/42 blur-[140px] pointer-events-none -z-10" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-white/55 via-[#f7fafb]/18 to-transparent" />
+      <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-white/30 blur-[140px] pointer-events-none -z-10" />
       <div className="fixed top-[-10%] right-[-10%] h-[44%] w-[52%] bg-[#d7e7ef]/28 blur-[120px] rounded-full pointer-events-none -z-10" />
-      <div className="fixed bottom-[5%] right-[5%] h-[22%] w-[28%] bg-white/32 blur-[110px] pointer-events-none -z-10" />
+      <div className="fixed bottom-[5%] right-[5%] h-[22%] w-[28%] bg-white/22 blur-[110px] pointer-events-none -z-10" />
 
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
