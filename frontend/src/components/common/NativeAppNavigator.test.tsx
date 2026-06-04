@@ -50,7 +50,7 @@ describe('NativeAppNavigator', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('button', { name: /Destinos/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Visite/i })).toBeInTheDocument();
     expect(sessionStorage.getItem('jnk_native_nav_hidden_v1')).toBeNull();
   });
 
@@ -76,10 +76,10 @@ describe('NativeAppNavigator', () => {
       window.dispatchEvent(new CustomEvent('jnk:cart-visibility', { detail: { visible: true } }));
     });
 
-    expect(screen.queryByRole('button', { name: /^Destinos$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Visite$/i })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Ir para destinos/i }));
 
-    expect(screen.getByRole('button', { name: /^Destinos$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Visite$/i })).toBeInTheDocument();
   });
 });

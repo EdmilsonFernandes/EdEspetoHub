@@ -1,6 +1,6 @@
 import { memo, useRef, type RefObject } from 'react';
 import { Link } from 'react-router-dom';
-import { BellRinging, CaretDown, MagnifyingGlass, X, House, Receipt, Buildings, Mountains } from '@phosphor-icons/react';
+import { BellRinging, CaretDown, MagnifyingGlass, X, House, Receipt, MapTrifold, Tent } from '@phosphor-icons/react';
 import { HeaderAvatarTrigger } from '../HeaderAvatarTrigger';
 import { inputAssistProps } from '../../../utils/inputAssist';
 import { HubFilterBar, type HubQuickFilterKey } from './HubFilters';
@@ -304,8 +304,8 @@ export const HubHeader = memo(function HubHeader({
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                <Buildings size={14} weight={isCondominiumScope ? 'fill' : 'bold'} />
-                Agenda
+                <Tent size={14} weight={isCondominiumScope ? 'fill' : 'bold'} />
+                Feiras
               </button>
               <button
                 type="button"
@@ -320,8 +320,8 @@ export const HubHeader = memo(function HubHeader({
                 onClick={onDestinosClick}
                 className="jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 hover:text-[#336886] hover:bg-slate-100/70"
               >
-                <Mountains size={14} weight="bold" />
-                Destinos
+                <MapTrifold size={14} weight="bold" />
+                Visite
               </button>
             </nav>
 

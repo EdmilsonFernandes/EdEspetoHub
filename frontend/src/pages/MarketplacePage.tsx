@@ -6,6 +6,7 @@ import {
   MagnifyingGlass,
   Star,
   Storefront,
+  Tent,
   House,
   Receipt,
   List,
@@ -25,6 +26,7 @@ import {
   CalendarBlank,
   Clock,
   MapPinLine,
+  MapTrifold,
   Mountains,
   UserCircle,
   Warning,
@@ -70,8 +72,6 @@ import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { nativeBiometricService } from '../services/nativeBiometricService';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import destinationShortcutIcon from '../assets/icone-destinos.svg';
-import condominiumShortcutIcon from '../assets/icone-feiras.svg';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { DEFAULT_HOME_CONFIG, homeConfigService } from '../services/homeConfigService';
@@ -2073,12 +2073,12 @@ export function MarketplacePage() {
                     <div className="flex items-center gap-2.5 min-w-0 z-10">
                       <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[1rem] bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-[0_8px_16px_-8px_rgba(16,185,129,0.6)] ring-2 ring-white sm:h-10 sm:w-10 sm:rounded-[1.1rem]">
                         <span className="grid h-full w-full place-items-center rounded-[0.95rem] bg-emerald-50">
-                          <img src={condominiumShortcutIcon} alt="" className="h-6 w-6 object-cover sm:h-6.5 sm:w-6.5" loading="lazy" decoding="async" />
+                          <Tent size={22} weight="duotone" className="text-emerald-600" />
                         </span>
                       </span>
                       <span className="min-w-0">
                         <span className="block truncate text-[11px] font-black text-slate-900 sm:text-sm">Feiras</span>
-                        <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">Agendas no app</span>
+                        <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">Agenda do condomínio</span>
                       </span>
                     </div>
 
@@ -2103,12 +2103,12 @@ export function MarketplacePage() {
                     <div className="flex items-center gap-2.5 min-w-0 z-10">
                       <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[1rem] bg-gradient-to-tr from-[#336886] to-[#5a9cbf] p-0.5 shadow-[0_8px_16px_-8px_rgba(51,104,134,0.6)] ring-2 ring-white sm:h-10 sm:w-10 sm:rounded-[1.1rem]">
                         <span className="grid h-full w-full place-items-center rounded-[0.95rem] bg-[#edf5fa]">
-                          <img src={destinationShortcutIcon} alt="" className="h-6 w-6 object-cover sm:h-6.5 sm:w-6.5" loading="lazy" decoding="async" />
+                          <MapTrifold size={22} weight="duotone" className="text-[#336886]" />
                         </span>
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate text-[11px] font-black text-slate-900 sm:text-sm">Destinos</span>
-                        <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">Hospedagens e delivery</span>
+                        <span className="block truncate text-[11px] font-black text-slate-900 sm:text-sm">Visite</span>
+                        <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">Chalés e pousadas</span>
                       </span>
                     </div>
 
@@ -2749,9 +2749,9 @@ export function MarketplacePage() {
                 ? 'bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)]'
                 : 'bg-slate-100/80 text-slate-600 group-hover:bg-slate-200/80'
             }`}>
-              <Buildings size={16} weight={selectedCondominium || condominiumPickerOpen ? 'fill' : 'duotone'} />
+              <Tent size={16} weight={selectedCondominium || condominiumPickerOpen ? 'fill' : 'duotone'} />
             </span>
-            <span>Agenda</span>
+            <span>Feiras</span>
           </button>
           <button
             type="button"
@@ -2759,9 +2759,9 @@ export function MarketplacePage() {
             className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
-              <Mountains size={16} weight="duotone" />
+              <MapTrifold size={16} weight="duotone" />
             </span>
-            <span>Destinos</span>
+            <span>Visite</span>
           </button>
           <button
             type="button"
@@ -3217,9 +3217,9 @@ export function MarketplacePage() {
                   className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(51,104,134,0.10)_0%,rgba(51,104,134,0.045)_100%)] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-[#2d5f7b] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.38)] ring-1 ring-[#336886]/10 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)]">
-                    <Buildings size={16} weight="fill" />
+                    <Tent size={16} weight="fill" />
                   </span>
-                  <span>Agenda</span>
+                  <span>Feiras</span>
                 </button>
                 <button
                   type="button"
@@ -3230,9 +3230,9 @@ export function MarketplacePage() {
                   className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
-                    <Mountains size={16} weight="duotone" />
+                    <MapTrifold size={16} weight="duotone" />
                   </span>
-                  <span>Destinos</span>
+                  <span>Visite</span>
                 </button>
                 <button
                   type="button"

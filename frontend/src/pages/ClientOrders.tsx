@@ -21,13 +21,13 @@ import {
   Motorcycle,
   SpinnerGap,
   Storefront,
+  Tent,
   Timer,
   WarningCircle,
   WhatsappLogo,
   MagnifyingGlass,
   XCircle,
-  Buildings,
-  Mountains,
+  MapTrifold,
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
@@ -161,6 +161,34 @@ const formatSupportDateTime = (value?: string) => {
     hour: '2-digit',
     minute: '2-digit',
   });
+};
+
+const formatCancellationReasonForCustomer = (reason?: string) => {
+  const value = String(reason || '').trim();
+  if (!value) return '';
+
+  const normalized = value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+  if (/(acabou|cabou|indisponivel|estoque|faltou|sem item|semitem|tudo)/.test(normalized)) {
+    return 'A loja informou que não tinha todos os itens disponíveis no momento.';
+  }
+
+  if (/(desist|cliente|solicit|cancelou)/.test(normalized)) {
+    return 'Pedido cancelado conforme solicitação registrada no atendimento.';
+  }
+
+  if (/(horario|fechad|encerrad|expediente)/.test(normalized)) {
+    return 'A loja não conseguiu atender esse pedido no horário solicitado.';
+  }
+
+  if (!/\s/.test(value) && /^[a-z0-9_-]{8,}$/i.test(value)) {
+    return 'O pedido foi cancelado pela loja. Se precisar de detalhes, fale com o atendimento.';
+  }
+
+  return value;
 };
 
 const buildOrderSupportMessage = ({
@@ -595,7 +623,7 @@ function OrderCard({
   };
 
   const isCancelled = ['CANCELLED', 'REJECTED'].includes(normalizeStatus(order.status));
-  const cancellationReason = String(order.canceledReason || '').trim();
+  const cancellationReason = formatCancellationReasonForCustomer(order.canceledReason);
   const hasRefundInfo = Boolean(
     order.refundStatus ||
     (
@@ -618,7 +646,10 @@ function OrderCard({
 
   return (
     <>
-    <article className={`jnc-hub-touch jnc-hub-lift group relative overflow-hidden rounded-[28px] bg-white shadow-[0_18px_46px_-34px_rgba(15,23,42,0.28)] md:hover:border-[#336886]/18 ${isActive ? 'ring-1 ring-emerald-200/80' : isCancelled ? 'ring-1 ring-rose-100/80' : 'ring-1 ring-slate-100'}`}>
+    <article
+      aria-label={`Pedido #${orderDisplayId} em ${storeName}`}
+      className={`jnc-hub-touch jnc-hub-lift group relative overflow-hidden rounded-[28px] bg-white shadow-[0_18px_46px_-34px_rgba(15,23,42,0.28)] md:hover:border-[#336886]/18 ${isActive ? 'ring-1 ring-emerald-200/80' : isCancelled ? 'ring-1 ring-rose-100/80' : 'ring-1 ring-slate-100'}`}
+    >
       <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent z-20" />
       {/* Header do card */}
       <div
@@ -667,9 +698,6 @@ function OrderCard({
             <span className="text-[11px] text-slate-400">{orderMoment || orderDate || formatGroupDate(order.createdAt)}</span>
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
-              #{orderDisplayId}
-            </span>
             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] ${fulfillmentMeta.toneClass}`}>
               {fulfillmentMeta.label}
             </span>
@@ -787,14 +815,14 @@ function OrderCard({
                 {extraItems > 0 ? (
                   <>
                     <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-flex" />
-                    <span className="font-semibold text-[#336886]">+{extraItems} adicional{extraItems === 1 ? '' : 'is'}</span>
+                    <span className="font-semibold text-[#336886]">+{extraItems} {extraItems === 1 ? 'adicional' : 'adicionais'}</span>
                   </>
                 ) : null}
               </div>
               {isCancelled && cancellationReason ? (
                 <div className="mt-3 rounded-[1rem] border border-white/90 bg-white/72 px-3 py-2 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.28)]">
                   <p className="text-[11px] font-semibold leading-relaxed text-slate-500">
-                    <span className="text-slate-700">Motivo:</span> {cancellationReason}
+                    <span className="text-slate-700">Resumo do cancelamento:</span> {cancellationReason}
                   </p>
                 </div>
               ) : null}
@@ -838,15 +866,15 @@ function OrderCard({
       </div>
 
       {/* Rodapé com ações */}
-      <div className="flex items-center gap-2 border-t border-slate-100/80 bg-[linear-gradient(180deg,#ffffff_0%,#fbfdff_100%)] px-4 py-2.5">
+      <div className={`${isActive && isDelayed ? 'flex flex-col items-stretch gap-1.5' : 'flex items-center gap-2'} border-t border-slate-100/80 bg-[linear-gradient(180deg,#ffffff_0%,#fbfdff_100%)] px-4 py-2.5`}>
         {isActive && isDelayed ? (
           <>
-            <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f8fbfd,#e9f3f8)] py-2.5 text-[13px] font-black text-[#153A4C] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.32)] active:scale-[0.98] transition-all hover:-translate-y-0.5">
+            <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex w-full items-center justify-center gap-1.5 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-2.5 text-[13px] font-black text-white shadow-[0_14px_28px_-18px_rgba(21,58,76,0.52)] active:scale-[0.98] transition-all hover:-translate-y-0.5">
               <ChatCircleDots size={15} weight="duotone" />
               Falar com a loja
             </button>
             {canCancel && (
-              <button type="button" onClick={() => onCancelRequest(order)} className="inline-flex flex-1 items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 py-2.5 text-[13px] font-semibold text-rose-600 active:scale-[0.98] transition-transform">
+              <button type="button" onClick={() => onCancelRequest(order)} className="mx-auto inline-flex items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-bold text-rose-500 transition-colors hover:bg-rose-50 active:scale-[0.98]">
                 Solicitar cancelamento
               </button>
             )}
@@ -1525,7 +1553,7 @@ export function ClientOrders() {
     {
       key: 'cancelled',
       label: 'Cancelados',
-      shortLabel: 'Cancel.',
+      shortLabel: 'Cancelados',
       count: cancelledOrdersCount,
       icon: <XCircle size={13} weight="duotone" />,
       toneClass: 'text-rose-600',
@@ -1589,7 +1617,7 @@ export function ClientOrders() {
                         {filter.icon}
                       </span>
                       <span className="min-w-0 max-w-full">
-                        <span className="block max-w-full truncate text-[10px] font-black leading-tight sm:text-[11px]">
+                        <span className="block max-w-full whitespace-nowrap text-[9px] font-black leading-tight sm:text-[11px]">
                           <span className="sm:hidden">{filter.shortLabel}</span>
                           <span className="hidden sm:inline">{filter.label}</span>
                         </span>
@@ -1812,9 +1840,9 @@ export function ClientOrders() {
             className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
-              <Buildings size={16} weight="duotone" />
+              <Tent size={16} weight="duotone" />
             </span>
-            <span>Agenda</span>
+            <span>Feiras</span>
           </button>
           <button
             type="button"
@@ -1822,9 +1850,9 @@ export function ClientOrders() {
             className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
           >
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
-              <Mountains size={16} weight="duotone" />
+              <MapTrifold size={16} weight="duotone" />
             </span>
-            <span>Destinos</span>
+            <span>Visite</span>
           </button>
           <button
             type="button"

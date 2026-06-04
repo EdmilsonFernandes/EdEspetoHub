@@ -154,6 +154,21 @@ test.describe('Destination WhatsApp location', () => {
     expect(params.get('hospedagem_lng')).toBe('-45.7321');
   });
 
+  test('abre detalhe premium do serviço com rota e contato organizados', async ({ page }) => {
+    await page.goto('/destinos/sao-bento/chales/chale-vista');
+
+    await page.getByText('Restaurante Silvia Lanches').first().click();
+
+    const dialog = page.getByRole('dialog', { name: /Detalhes de Restaurante Silvia Lanches/i });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText('Referência para entrega')).toBeVisible();
+    await expect(dialog.getByRole('link', { name: /Ver rota até meu chalé/i })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Copiar rota/i })).toBeVisible();
+    await expect(dialog.getByText('Contato', { exact: true })).toBeVisible();
+    await expect(dialog.getByRole('link', { name: /WhatsApp/i })).toBeVisible();
+    await expect(dialog.getByText('Lanches proximos ao chale')).toHaveCount(1);
+  });
+
   test('abre a pagina do chale ao tocar no card da hospedagem sem derrubar a SPA', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (error) => {
@@ -198,7 +213,7 @@ test.describe('Destination WhatsApp location', () => {
         .toBeGreaterThan(50);
     }
 
-    await page.getByRole('button', { name: /^Destinos$/i }).click();
+    await page.getByRole('button', { name: /^Visite$/i }).click();
     await expect(page).toHaveURL(/\/destinos$/);
     await expect(page.getByText('Explore cidades turísticas com apoio local.')).toBeVisible();
     await expect

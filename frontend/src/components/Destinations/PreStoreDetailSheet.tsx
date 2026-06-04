@@ -26,7 +26,7 @@ const InstagramIcon = ({ className = 'h-4 w-4' }) => (
 );
 
 const actionClasses: Record<string, string> = {
-  whatsapp: 'border-emerald-100 bg-emerald-50 text-emerald-700',
+  whatsapp: 'border-emerald-500 bg-[linear-gradient(135deg,#16a34a,#22c55e)] text-white shadow-[0_18px_34px_-24px_rgba(22,163,74,0.72)]',
   phone: 'border-[#336886]/12 bg-white text-[#336886]',
   instagram: 'border-pink-100 bg-white text-slate-700',
   site: 'border-slate-200 bg-white text-slate-700',
@@ -44,8 +44,8 @@ const actionIcon = (kind?: string) => {
 const ContactAction = ({ action }: any) => {
   if (!action?.href) return null;
   const className = action.kind === 'route'
-    ? 'flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-[#336886]/12 bg-[#336886] px-4 py-3 text-sm font-black uppercase tracking-[0.1em] text-white shadow-[0_18px_34px_-28px_rgba(51,104,134,0.68)] transition hover:-translate-y-0.5 active:scale-[0.98]'
-    : `inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition hover:-translate-y-0.5 ${actionClasses[action.kind] || actionClasses.site}`;
+    ? 'flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-[#336886]/12 bg-[#336886] px-4 py-3 text-sm font-extrabold text-white shadow-[0_18px_34px_-28px_rgba(51,104,134,0.68)] transition hover:-translate-y-0.5 active:scale-[0.98]'
+    : `inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition hover:-translate-y-0.5 active:scale-[0.98] ${actionClasses[action.kind] || actionClasses.site}`;
 
   const handleClick = async (event: any) => {
     if (action.kind === 'whatsapp') {
@@ -90,6 +90,14 @@ const ContactAction = ({ action }: any) => {
     </a>
   );
 };
+
+const normalizeContent = (value?: string) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
 
 export const PreStoreCardSkeleton = ({ compact = false }: any) => (
   <article className={`overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white p-3 shadow-[0_16px_38px_-34px_rgba(15,23,42,0.42)] ${compact ? '' : 'min-h-[6.5rem]'}`}>
@@ -170,6 +178,15 @@ export function PreStoreDetailSheet({
     instagramUrl ? { href: instagramUrl, label: 'Instagram', kind: 'instagram', external: true } : null,
     websiteUrl ? { href: websiteUrl, label: websiteLabel, kind: 'site', external: true } : null,
   ].filter(Boolean);
+  const contactActions = actions.filter((action: any) => ['whatsapp', 'phone'].includes(action.kind));
+  const socialActions = actions.filter((action: any) => !['whatsapp', 'phone'].includes(action.kind));
+  const rawDescription = String(listing.description || '').trim();
+  const normalizedDescription = normalizeContent(rawDescription);
+  const normalizedAddress = normalizeContent(address);
+  const descriptionText =
+    rawDescription && normalizedDescription !== normalizedAddress
+      ? rawDescription
+      : `Contato local em ${destination?.city || destination?.name || 'este destino'}.`;
 
   return (
     <div className="fixed inset-0 z-[240] flex items-end bg-slate-950/38 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Detalhes de ${listing.title || 'serviço'}`}>
@@ -230,9 +247,7 @@ export function PreStoreDetailSheet({
                 ) : null}
               </div>
 
-              <p className="mt-3 text-sm font-medium leading-relaxed text-slate-600">
-                {listing.description || address || `Contato local em ${destination?.city || destination?.name || 'este destino'}.`}
-              </p>
+              <p className="mt-3 text-sm font-medium leading-relaxed text-slate-600">{descriptionText}</p>
 
               {address ? (
                 <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600">
@@ -247,7 +262,23 @@ export function PreStoreDetailSheet({
                     <NavigationArrow size={13} weight="fill" />
                     Referência para entrega
                   </p>
-                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-600">
+                  <div className="mt-3 rounded-[1.15rem] border border-white/80 bg-white/86 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+                    <div className="flex items-center gap-2">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#edf5fa] text-[#336886] ring-1 ring-[#cfe0ea]">
+                        <Storefront size={17} weight="duotone" />
+                      </span>
+                      <span className="h-0.5 flex-1 rounded-full bg-[linear-gradient(90deg,#336886_0%,rgba(51,104,134,0.16)_100%)]" />
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-100">
+                        <MapPinLine size={17} weight="duotone" />
+                      </span>
+                    </div>
+                    <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-start gap-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                      <span className="truncate">{listing.title || 'Serviço'}</span>
+                      <span className="text-[#336886]">rota</span>
+                      <span className="truncate text-right">{placeName || 'Chalé'}</span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-600">
                     Mostra a distância entre este serviço e a hospedagem para facilitar a chegada do motoboy.
                   </p>
                   <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
@@ -255,20 +286,37 @@ export function PreStoreDetailSheet({
                     <button
                       type="button"
                       onClick={copyRouteLink}
-                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.1em] text-slate-700 shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]"
+                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-700 shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]"
                     >
                       {routeCopied ? <CheckCircle size={16} weight="fill" /> : <ClipboardText size={16} weight="duotone" />}
-                      {routeCopied ? 'Copiado' : 'Copiar'}
+                      {routeCopied ? 'Copiado' : 'Copiar rota'}
                     </button>
                   </div>
                 </div>
               ) : null}
 
               {actions.length > 0 ? (
-                <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                  {actions.map((action: any) => (
-                    <ContactAction key={`${action.kind}-${action.href}`} action={action} />
-                  ))}
+                <div className="mt-4 space-y-3">
+                  {contactActions.length > 0 ? (
+                    <div>
+                      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Contato</p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {contactActions.map((action: any) => (
+                          <ContactAction key={`${action.kind}-${action.href}`} action={action} />
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  {socialActions.length > 0 ? (
+                    <div>
+                      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Canais oficiais</p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {socialActions.map((action: any) => (
+                          <ContactAction key={`${action.kind}-${action.href}`} action={action} />
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               ) : !routeAction?.href ? (
                 <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">Contato ainda não informado.</p>

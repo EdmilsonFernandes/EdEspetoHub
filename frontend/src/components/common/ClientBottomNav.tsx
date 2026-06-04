@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { Buildings, House, Mountains, Receipt, UserCircle } from '@phosphor-icons/react';
+import { House, MapTrifold, Receipt, Tent, UserCircle } from '@phosphor-icons/react';
 import { prefetchRouteByPath } from '../../utils/clientRoutePrefetch';
 
 type ClientBottomNavItem = 'home' | 'orders' | 'agenda' | 'destinations' | 'profile';
@@ -123,16 +123,16 @@ export function ClientBottomNav({
 
           <button type="button" onPointerEnter={warmupRoute('/hub')} onFocus={warmupRoute('/hub')} onTouchStart={warmupRoute('/hub')} onClick={openAgenda} className={itemClass('agenda')} aria-current={active === 'agenda' ? 'page' : undefined}>
             <span className={iconClass(active === 'agenda')}>
-              <Buildings size={16} weight={active === 'agenda' ? 'fill' : 'duotone'} />
+              <Tent size={16} weight={active === 'agenda' ? 'fill' : 'duotone'} />
             </span>
-            <span>Agenda</span>
+            <span>Feiras</span>
           </button>
 
           <button type="button" onPointerEnter={warmupRoute('/destinos')} onFocus={warmupRoute('/destinos')} onTouchStart={warmupRoute('/destinos')} onClick={() => navigate('/destinos')} className={itemClass('destinations')} aria-current={active === 'destinations' ? 'page' : undefined}>
             <span className={iconClass(active === 'destinations')}>
-              <Mountains size={16} weight={active === 'destinations' ? 'fill' : 'duotone'} />
+              <MapTrifold size={16} weight={active === 'destinations' ? 'fill' : 'duotone'} />
             </span>
-            <span>Destinos</span>
+            <span>Visite</span>
           </button>
 
           <button type="button" onPointerEnter={warmupRoute('/cliente/conta')} onFocus={warmupRoute('/cliente/conta')} onTouchStart={warmupRoute('/cliente/conta')} onClick={openProfile} className={itemClass('profile')} aria-current={active === 'profile' ? 'page' : undefined}>

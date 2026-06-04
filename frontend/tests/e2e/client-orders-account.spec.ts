@@ -217,8 +217,9 @@ test.describe('Cliente pedidos e conta', () => {
 
     await page.getByLabel('Cancelados: 1 pedido').click();
     await expect(page.getByText('Brecho da Brisa E2E')).toBeVisible();
-    await expect(page.getByText('Motivo:')).toBeVisible();
-    await expect(page.getByText('Cliente desistiu')).toBeVisible();
+    await expect(page.getByText('Resumo do cancelamento:')).toBeVisible();
+    await expect(page.getByText('Pedido cancelado conforme solicitação registrada no atendimento.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Cancelados: 1 pedido' })).toBeVisible();
 
     await page.getByLabel(/Ampliar imagem de Costela bovina/i).click();
     const dialog = page.getByRole('dialog', { name: /Imagem ampliada do pedido: Costela bovina/i });

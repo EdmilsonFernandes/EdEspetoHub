@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { Buildings, House, Mountains, Receipt, UserCircle } from '@phosphor-icons/react';
+import { House, MapTrifold, Receipt, Tent, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { nativeBiometricService } from '../../services/nativeBiometricService';
 import { prefetchRouteByPath } from '../../utils/clientRoutePrefetch';
@@ -239,9 +239,9 @@ export function NativeAppNavigator() {
               ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
               : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
           }`}>
-            <Buildings size={16} weight={isCondominium ? 'fill' : 'duotone'} />
+            <Tent size={16} weight={isCondominium ? 'fill' : 'duotone'} />
           </span>
-          Agenda
+          Feiras
         </button>
         <button
           type="button"
@@ -256,9 +256,9 @@ export function NativeAppNavigator() {
               ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
               : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
           }`}>
-            <Mountains size={16} weight={isDestinations ? 'fill' : 'duotone'} />
+            <MapTrifold size={16} weight={isDestinations ? 'fill' : 'duotone'} />
           </span>
-          Destinos
+          Visite
         </button>
         <button
           type="button"

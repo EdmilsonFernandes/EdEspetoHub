@@ -12,7 +12,7 @@ describe('ClientBottomNav', () => {
     );
 
     expect(screen.getByRole('navigation', { name: 'Navegação principal do cliente' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Destinos/i })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', { name: /Visite/i })).toHaveAttribute('aria-current', 'page');
   });
 
   it('uses a custom orders handler when provided', () => {

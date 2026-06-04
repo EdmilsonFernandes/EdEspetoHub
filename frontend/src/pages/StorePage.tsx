@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle, WarningCircle, X, Gear, Package, LockKey, Scooter, SignOut, Star, CreditCard, UsersThree, Mountains, Printer } from '@phosphor-icons/react';
+import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle, WarningCircle, X, Gear, Package, LockKey, Scooter, SignOut, Star, CreditCard, UsersThree, Mountains, Printer, Tent, MapTrifold } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
@@ -4913,9 +4913,9 @@ export function StorePage() {
                     ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
                     : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
                 }`}>
-                  <Buildings size={16} weight={condominiumSlugFromQuery ? 'fill' : 'duotone'} />
+                  <Tent size={16} weight={condominiumSlugFromQuery ? 'fill' : 'duotone'} />
                 </span>
-                Agenda
+                Feiras
               </button>
 
               <button
@@ -4924,9 +4924,9 @@ export function StorePage() {
                 className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
               >
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all duration-200 group-hover:bg-slate-200">
-                  <Mountains size={16} weight="duotone" />
+                  <MapTrifold size={16} weight="duotone" />
                 </span>
-                Destinos
+                Visite
               </button>
 
               <button
