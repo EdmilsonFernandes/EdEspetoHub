@@ -981,13 +981,7 @@ export const CartView = ({
       >
         <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-[#336886]/18 to-transparent" />
         <div className="flex items-center gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] border border-slate-100 bg-slate-50">
-            {methodMeta.icon ? (
-              <img src={methodMeta.icon} alt={methodMeta.label} className="h-7 w-7 object-contain" loading="lazy" />
-            ) : (
-              <CreditCard size={18} weight="duotone" className="text-slate-500" />
-            )}
-          </span>
+          {renderPaymentMethodIcon(currentPaymentId, { size: "md", selected: true, tone: isOnlinePaymentMethod ? "online" : "local" })}
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm font-black tracking-tight text-slate-950 sm:text-base">{methodLabel}</p>
@@ -1065,8 +1059,92 @@ export const CartView = ({
     </div>
   );
 
+  const getPaymentIconTheme = (methodId = "", tone: "online" | "local" = "local", selected = false) => {
+    const normalized = String(methodId || "").toLowerCase().replace(/[\s-]+/g, "_");
+
+    if (normalized.includes("pix")) {
+      return {
+        surface:
+          "border-[#32bcad]/25 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.98),transparent_34%),linear-gradient(135deg,#e8fffb_0%,#ffffff_54%,#dcf8f1_100%)] text-[#087b72] shadow-[0_18px_34px_-24px_rgba(50,188,173,0.62)]",
+        fallback: "text-[#087b72]",
+      };
+    }
+
+    if (normalized.includes("dinheiro") || normalized.includes("cash")) {
+      return {
+        surface:
+          "border-emerald-200/80 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.98),transparent_36%),linear-gradient(135deg,#ecfdf5_0%,#ffffff_56%,#dcfce7_100%)] text-emerald-700 shadow-[0_18px_34px_-24px_rgba(22,163,74,0.5)]",
+        fallback: "text-emerald-700",
+      };
+    }
+
+    if (normalized.includes("debito") || normalized.includes("debit")) {
+      return {
+        surface:
+          "border-[#5FD35A]/32 bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.98),transparent_35%),linear-gradient(135deg,#eefeea_0%,#ffffff_55%,#e5f7ef_100%)] text-[#207A52] shadow-[0_18px_34px_-24px_rgba(47,155,111,0.48)]",
+        fallback: "text-[#207A52]",
+      };
+    }
+
+    if (normalized.includes("credito") || normalized.includes("credit")) {
+      return {
+        surface:
+          "border-[#336886]/18 bg-[radial-gradient(circle_at_30%_22%,rgba(255,255,255,0.98),transparent_35%),linear-gradient(135deg,#eef7fb_0%,#ffffff_54%,#e8f1f4_100%)] text-[#153A4C] shadow-[0_18px_34px_-24px_rgba(51,104,134,0.5)]",
+        fallback: "text-[#153A4C]",
+      };
+    }
+
+    return tone === "online"
+      ? {
+          surface:
+            "border-[#336886]/18 bg-[radial-gradient(circle_at_30%_22%,rgba(255,255,255,0.98),transparent_35%),linear-gradient(135deg,#eef7fb_0%,#ffffff_55%,#e8f1f4_100%)] text-[#153A4C] shadow-[0_18px_34px_-24px_rgba(51,104,134,0.5)]",
+          fallback: "text-[#153A4C]",
+        }
+      : {
+          surface:
+            "border-slate-200/80 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.98),transparent_36%),linear-gradient(135deg,#f8fafc_0%,#ffffff_58%,#eef2f7_100%)] text-slate-600 shadow-[0_18px_34px_-26px_rgba(15,23,42,0.28)]",
+          fallback: "text-slate-600",
+        };
+  };
+
+  const renderPaymentMethodIcon = (
+    methodId = "",
+    options: { size?: "sm" | "md" | "lg"; selected?: boolean; tone?: "online" | "local"; className?: string } = {}
+  ) => {
+    const { size = "md", selected = false, tone = "local", className = "" } = options;
+    const methodMeta = getPaymentMethodMeta(methodId);
+    const theme = getPaymentIconTheme(methodId, tone, selected);
+    const sizeClass =
+      size === "lg"
+        ? "h-16 w-16 rounded-[1.35rem]"
+        : size === "sm"
+        ? "h-11 w-11 rounded-[1rem]"
+        : "h-[3.25rem] w-[3.25rem] rounded-[1.15rem]";
+    const imageClass = size === "lg" ? "h-11 w-11" : size === "sm" ? "h-7 w-7" : "h-9 w-9";
+    const fallbackSize = size === "lg" ? 28 : size === "sm" ? 19 : 23;
+
+    return (
+      <span
+        className={`relative flex shrink-0 items-center justify-center overflow-hidden border ${sizeClass} ${theme.surface} ${
+          selected ? "ring-2 ring-white/90 ring-offset-2 ring-offset-white" : ""
+        } ${className}`}
+      >
+        <span className="pointer-events-none absolute inset-x-2 top-1 h-4 rounded-full bg-white/55 blur-sm" />
+        {methodMeta.icon ? (
+          <img
+            src={methodMeta.icon}
+            alt={methodMeta.label}
+            className={`${imageClass} relative z-10 object-contain drop-shadow-[0_10px_12px_rgba(15,23,42,0.12)]`}
+            loading="lazy"
+          />
+        ) : (
+          <CreditCard size={fallbackSize} weight="duotone" className={`relative z-10 ${theme.fallback}`} />
+        )}
+      </span>
+    );
+  };
+
   const renderPaymentMethodCard = (method: any, tone: "online" | "local") => {
-    const methodMeta = getPaymentMethodMeta(method.id);
     const selected = paymentMethod === method.id;
     const accent = tone === "online" ? "#336886" : "#207A52";
     const selectedClasses =
@@ -1096,26 +1174,7 @@ export const CartView = ({
           />
         )}
         <div className="flex items-center gap-3">
-          <span
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.05rem] border transition-colors ${
-              selected
-                ? tone === "online"
-                  ? "border-[#336886]/16 bg-[#eef7fb]"
-                  : "border-emerald-200 bg-emerald-50"
-                : "border-slate-200 bg-slate-50"
-            }`}
-          >
-            {methodMeta.icon ? (
-              <img
-                src={methodMeta.icon}
-                alt={methodMeta.label}
-                className="h-7 w-7 object-contain"
-                loading="lazy"
-              />
-            ) : (
-              <CreditCard size={18} weight="duotone" className="text-slate-500" />
-            )}
-          </span>
+          {renderPaymentMethodIcon(method.id, { size: "md", selected, tone })}
           <div className="min-w-0 flex-1 space-y-1">
             <div className="flex items-center gap-2">
               <span className="truncate text-sm font-black tracking-tight text-slate-950 sm:text-[15px]">
@@ -2379,9 +2438,7 @@ export const CartView = ({
             {isCash && renderCashChangePanel()}
             {isManualPix && (
               <div className="flex items-center gap-3 rounded-[1.25rem] border border-emerald-200/80 bg-emerald-50/80 p-3 shadow-[0_16px_34px_-28px_rgba(32,122,82,0.36)]">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-emerald-200 bg-white">
-                  <img src={getPaymentMethodMeta("pix_loja").icon} alt="Pix da loja" className="h-6 w-6 object-contain" />
-                </div>
+                {renderPaymentMethodIcon("pix_loja", { size: "sm", selected: true, tone: "local" })}
                 <div className="min-w-0">
                   <p className="text-[11px] font-black text-emerald-700">Pix da loja</p>
                   <p className="text-[10px] leading-tight text-slate-500">
@@ -2518,23 +2575,14 @@ export const CartView = ({
 
           {/* Pagamento */}
           <div className="rounded-[1.55rem] border border-white/80 bg-white p-3.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.28)]" data-testid="checkout-review-payment-card">
-            <div className="flex items-center gap-3">
-              <span className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
-                isOnlinePaymentMethod ? 'bg-sky-50 text-[#009ee3]' : isManualPix ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
-              }`}>
-                <CreditCard size={18} weight="duotone" />
-              </span>
+            <div className="flex items-center gap-3.5">
+              {renderPaymentMethodIcon(paymentMethod, { size: "md", selected: true, tone: isOnlinePaymentMethod ? "online" : "local" })}
               <div className="min-w-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Pagamento</p>
                 {(() => {
                   const methodMeta = getPaymentMethodMeta(paymentMethod);
                   return (
                     <div className="mt-1 flex items-center gap-2">
-                      {methodMeta.icon ? (
-                        <img src={methodMeta.icon} alt={methodMeta.label} className="h-5 w-5 object-contain" />
-                      ) : (
-                        <CreditCard size={16} weight="duotone" className="text-slate-500" />
-                      )}
                       <span className="text-sm font-semibold text-slate-800 capitalize">{methodMeta.label}</span>
                     </div>
                   );
