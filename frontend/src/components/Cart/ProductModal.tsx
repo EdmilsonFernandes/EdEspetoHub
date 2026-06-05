@@ -154,11 +154,18 @@ export const ProductModal = ({
       >
         {/* Image + close button — altura adaptiva */}
         <div className="relative shrink-0">
+          <span
+            aria-hidden="true"
+            className="absolute left-1/2 top-2 z-10 h-1.5 w-12 -translate-x-1/2 rounded-full bg-white/80 shadow-[0_8px_18px_-14px_rgba(15,23,42,0.7)] sm:hidden"
+          />
           <button
+            type="button"
             onClick={handleClose}
-            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-black/35 text-white shadow-lg backdrop-blur-sm transition hover:bg-black/50 active:scale-95"
+            aria-label="Fechar detalhes do item"
+            className="absolute right-3 top-3 z-10 inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-white/35 bg-black/42 px-3 text-xs font-black uppercase tracking-[0.12em] text-white shadow-lg backdrop-blur-md transition hover:bg-black/55 active:scale-95"
           >
             <X size={16} weight="bold" />
+            <span>Fechar</span>
           </button>
 
           {product?.imageUrl ? (

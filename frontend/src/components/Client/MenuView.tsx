@@ -698,7 +698,18 @@ export const MenuView = ({
     return null;
   };
 
+  const getProductModalKey = (product) =>
+    product ? String(product.id ?? product.productId ?? product.name ?? '') : '';
+
   const openProductModal = (product) => {
+    if (
+      isModalOpen &&
+      getProductModalKey(selectedProduct) &&
+      getProductModalKey(selectedProduct) === getProductModalKey(product)
+    ) {
+      closeProductModal();
+      return;
+    }
     setSelectedProduct(product);
     setIsModalOpen(true);
   };
