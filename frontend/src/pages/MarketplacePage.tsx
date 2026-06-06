@@ -28,7 +28,7 @@ import {
   MapPinLine,
   MapTrifold,
   Mountains,
-  UserCircle,
+  ListPlus,
   Warning,
 } from '@phosphor-icons/react';
 import { condominiumService } from '../services/condominiumService';
@@ -641,7 +641,6 @@ export function MarketplacePage() {
   const [condominiumSearch, setCondominiumSearch] = useState('');
   const [condominiumAvailabilityModal, setCondominiumAvailabilityModal] = useState<CondominiumAvailabilityModalState | null>(null);
   const [condominiumPromoModal, setCondominiumPromoModal] = useState<CondominiumPromoModalState | null>(null);
-  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [pullDistance, setPullDistance] = useState(0);
   const [isHeaderElevated, setIsHeaderElevated] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
@@ -1008,7 +1007,6 @@ export function MarketplacePage() {
     const restoreHubHeader = () => {
       setHasEntered(true);
       setIsHeaderElevated(!isNativePlatform || (window.scrollY || 0) > 6);
-      setIsBottomNavVisible(true);
       setIsSearchEditing(false);
       if (searchInputRef.current) {
         searchInputRef.current.blur();
@@ -1034,21 +1032,15 @@ export function MarketplacePage() {
   useEffect(() => {
     if (!isNativePlatform) {
       setIsHeaderElevated(true);
-      setIsBottomNavVisible(true);
       return;
     }
-    let lastY = window.scrollY || 0;
     let ticking = false;
     const onScroll = () => {
       if (ticking) return;
       ticking = true;
       window.requestAnimationFrame(() => {
         const currentY = window.scrollY || 0;
-        const delta = currentY - lastY;
-        if (delta > 8 && currentY > 120) setIsBottomNavVisible(false);
-        if (delta < -8) setIsBottomNavVisible(true);
         setIsHeaderElevated(currentY > 8);
-        lastY = currentY;
         ticking = false;
       });
     };
@@ -2692,17 +2684,16 @@ export function MarketplacePage() {
       </div>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 transition-transform duration-300 lg:hidden"
-        style={{ transform: isBottomNavVisible && !condominiumPickerOpen ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 lg:hidden"
       >
-        <div className="mx-auto max-w-none rounded-none border border-b-0 border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(250,252,253,0.88)_100%)] px-2 pt-2 shadow-[0_-22px_54px_-42px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/45 backdrop-blur-2xl">
+        <div className="mx-auto max-w-none rounded-none border-t border-slate-200/75 bg-white/96 px-2 pt-2 shadow-[0_-14px_34px_-28px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
           <div className="grid min-h-[4.65rem] grid-cols-5 items-center gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
           <button
             type="button"
             onClick={handleHomeHubNavigation}
-            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
+            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
               quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium
-                ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.10)_0%,rgba(51,104,134,0.045)_100%)] text-[#2d5f7b] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.38)] ring-1 ring-[#336886]/10'
+                ? 'bg-[#eef5f7] text-[#2d5f7b] shadow-[0_12px_26px_-24px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/8'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -2719,7 +2710,7 @@ export function MarketplacePage() {
           <button
             type="button"
             onClick={handleOpenPedidos}
-            className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
           >
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
               <Receipt size={16} weight="duotone" />
@@ -2729,9 +2720,9 @@ export function MarketplacePage() {
           <button
             type="button"
             onClick={() => setCondominiumPickerOpen(true)}
-            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
+            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
               selectedCondominium || condominiumPickerOpen
-                ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.10)_0%,rgba(51,104,134,0.045)_100%)] text-[#2d5f7b] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.38)] ring-1 ring-[#336886]/10'
+                ? 'bg-[#eef5f7] text-[#2d5f7b] shadow-[0_12px_26px_-24px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/8'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -2747,7 +2738,7 @@ export function MarketplacePage() {
           <button
             type="button"
             onClick={() => navigate('/destinos')}
-            className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
           >
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
               <MapTrifold size={16} weight="duotone" />
@@ -2757,12 +2748,20 @@ export function MarketplacePage() {
           <button
             type="button"
             onClick={() => setProfileDrawerOpen(true)}
-            className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
+              profileDrawerOpen
+                ? 'bg-[#eef5f7] text-[#2d5f7b] shadow-[0_12px_26px_-24px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/8'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
           >
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
-              <UserCircle size={16} weight="duotone" />
+            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
+              profileDrawerOpen
+                ? 'bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)]'
+                : 'bg-slate-100/80 text-slate-600 group-hover:bg-slate-200/80'
+            }`}>
+              <ListPlus size={17} weight={profileDrawerOpen ? 'bold' : 'duotone'} />
             </span>
-            <span>Perfil</span>
+            <span>Mais</span>
           </button>
           </div>
         </div>
@@ -3174,7 +3173,7 @@ export function MarketplacePage() {
             </div>
 
             <nav className="fixed bottom-0 left-0 right-0 z-[230] px-0 pb-0 lg:hidden">
-              <div className="mx-auto max-w-none rounded-none border border-b-0 border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(250,252,253,0.88)_100%)] px-2 pt-2 shadow-[0_-22px_54px_-42px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/45 backdrop-blur-2xl">
+              <div className="mx-auto max-w-none rounded-none border-t border-slate-200/75 bg-white/96 px-2 pt-2 shadow-[0_-14px_34px_-28px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
                 <div className="grid min-h-[4.65rem] max-w-[760px] grid-cols-5 items-center gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
                 <button
                   type="button"
@@ -3182,7 +3181,7 @@ export function MarketplacePage() {
                     setCondominiumPickerOpen(false);
                     handleHomeHubNavigation();
                   }}
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
                     <House size={16} weight="duotone" />
@@ -3196,7 +3195,7 @@ export function MarketplacePage() {
                     setCondominiumPickerOpen(false);
                     handleOpenPedidos();
                   }}
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
                     <Receipt size={16} weight="duotone" />
@@ -3205,7 +3204,7 @@ export function MarketplacePage() {
                 </button>
                 <button
                   type="button"
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(51,104,134,0.10)_0%,rgba(51,104,134,0.045)_100%)] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-[#2d5f7b] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.38)] ring-1 ring-[#336886]/10 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] bg-[#eef5f7] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-[#2d5f7b] shadow-[0_12px_26px_-24px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/8 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)]">
                     <Tent size={16} weight="fill" />
@@ -3218,7 +3217,7 @@ export function MarketplacePage() {
                     setCondominiumPickerOpen(false);
                     navigate('/destinos');
                   }}
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
                     <MapTrifold size={16} weight="duotone" />
@@ -3231,12 +3230,12 @@ export function MarketplacePage() {
                     setCondominiumPickerOpen(false);
                     setProfileDrawerOpen(true);
                   }}
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.03]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
-                    <UserCircle size={16} weight="duotone" />
+                    <ListPlus size={17} weight="duotone" />
                   </span>
-                  <span>Perfil</span>
+                  <span>Mais</span>
                 </button>
                 </div>
               </div>

@@ -82,4 +82,15 @@ describe('NativeAppNavigator', () => {
 
     expect(screen.getByRole('button', { name: /^Visite$/i })).toBeInTheDocument();
   });
+
+  it('uses Mais as the account/profile entry point on eligible native pages', () => {
+    render(
+      <MemoryRouter initialEntries={['/destinos/goncalves']}>
+        <NativeAppNavigator />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole('button', { name: /^Mais$/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Perfil$/i })).not.toBeInTheDocument();
+  });
 });

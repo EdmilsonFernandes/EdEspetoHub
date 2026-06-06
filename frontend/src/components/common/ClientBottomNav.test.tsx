@@ -28,4 +28,15 @@ describe('ClientBottomNav', () => {
 
     expect(opened).toBe(true);
   });
+
+  it('uses Mais as the account/profile entry point', () => {
+    render(
+      <MemoryRouter>
+        <ClientBottomNav active="profile" />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole('button', { name: /Mais/i })).toHaveAttribute('aria-current', 'page');
+    expect(screen.queryByRole('button', { name: /Perfil/i })).not.toBeInTheDocument();
+  });
 });

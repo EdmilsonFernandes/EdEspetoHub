@@ -27,6 +27,7 @@ vi.mock('@phosphor-icons/react', () => {
     Fingerprint: Icon,
     Gear: Icon,
     House: Icon,
+    ListPlus: Icon,
     LockKey: Icon,
     MapTrifold: Icon,
     Mountains: Icon,
