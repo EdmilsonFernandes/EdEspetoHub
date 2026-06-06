@@ -11,6 +11,7 @@ import { bootstrapNativeApp, scheduleNativeAppReadySignal } from './mobile/nativ
 import { installStaleBuildRecovery } from './utils/staleBuildRecovery';
 
 const isNativePlatform = Capacitor.isNativePlatform();
+const SERVICE_WORKER_UPDATE_INTERVAL_MS = 15 * 60 * 1000;
 
 installStaleBuildRecovery();
 
@@ -39,19 +40,12 @@ if (!isNativePlatform) {
       if (!registration) return;
       window.setInterval(() => {
         void registration.update();
-      }, 60 * 1000);
+      }, SERVICE_WORKER_UPDATE_INTERVAL_MS);
     },
   });
 }
 
-if (!isNativePlatform && typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (refreshing) return;
-    refreshing = true;
-    window.location.reload();
-  });
-} else if (isNativePlatform) {
+if (isNativePlatform) {
   void unregisterServiceWorkersOnNative();
 }
 

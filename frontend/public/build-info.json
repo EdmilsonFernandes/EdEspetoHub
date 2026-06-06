@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "7d2e05a8",
-  "versionLabel": "v0.1.9.7d2e05a8",
-  "versionInternal": "0.1.9+20260606.210400.7d2e05a8",
-  "buildId": "0.1.9+20260606.210400.7d2e05a8-20260606.210400-7d2e05a8",
-  "builtAt": "2026-06-06T21:04:00.761Z",
-  "commitHash": "7d2e05a84f7568b33719ffd0268d4d918e2f5c67",
-  "shortHash": "7d2e05a8",
+  "versionDisplaySuffix": "3f3c887c",
+  "versionLabel": "v0.1.9.3f3c887c",
+  "versionInternal": "0.1.9+20260606.212019.3f3c887c",
+  "buildId": "0.1.9+20260606.212019.3f3c887c-20260606.212019-3f3c887c",
+  "builtAt": "2026-06-06T21:20:19.298Z",
+  "commitHash": "3f3c887c5e98234f193af078d96644a1c36be33c",
+  "shortHash": "3f3c887c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "3f3c887c5e98234f193af078d96644a1c36be33c",
+      "shortHash": "3f3c887c",
+      "dateIso": "2026-06-06T18:06:35-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix: use no captcha postal tracking fallback",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f3c887c5e98234f193af078d96644a1c36be33c"
+    },
     {
       "hash": "7d2e05a84f7568b33719ffd0268d4d918e2f5c67",
       "shortHash": "7d2e05a8",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(frontend): refine premium mobile ux surfaces",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/455df188e30800c0d6362eb07a0f2d7c653fdf43"
-    },
-    {
-      "hash": "3348bb937390f58d7c4931ccc56ed85622de790f",
-      "shortHash": "3348bb93",
-      "dateIso": "2026-06-03T13:50:49-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(frontend): refine client and destination UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3348bb937390f58d7c4931ccc56ed85622de790f"
     }
   ]
 }
