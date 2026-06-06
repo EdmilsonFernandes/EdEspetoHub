@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "0b6e49cf",
-  "versionLabel": "v0.1.9.0b6e49cf",
-  "versionInternal": "0.1.9+20260606.215044.0b6e49cf",
-  "buildId": "0.1.9+20260606.215044.0b6e49cf-20260606.215044-0b6e49cf",
-  "builtAt": "2026-06-06T21:50:44.488Z",
-  "commitHash": "0b6e49cfa62abc250f75ae7ecf3240031e31834d",
-  "shortHash": "0b6e49cf",
+  "versionDisplaySuffix": "2bad5990",
+  "versionLabel": "v0.1.9.2bad5990",
+  "versionInternal": "0.1.9+20260606.223405.2bad5990",
+  "buildId": "0.1.9+20260606.223405.2bad5990-20260606.223405-2bad5990",
+  "builtAt": "2026-06-06T22:34:05.280Z",
+  "commitHash": "2bad59903319c8534d92d04144665464fff4a865",
+  "shortHash": "2bad5990",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "2bad59903319c8534d92d04144665464fff4a865",
+      "shortHash": "2bad5990",
+      "dateIso": "2026-06-06T18:56:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix: smooth postal checkout flow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2bad59903319c8534d92d04144665464fff4a865"
+    },
     {
       "hash": "0b6e49cfa62abc250f75ae7ecf3240031e31834d",
       "shortHash": "0b6e49cf",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(order): show refunded payment status",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2d21e7782141f7beeddf8ee21f373fb298ed109b"
-    },
-    {
-      "hash": "d65a33877997c41e91c044e5bb5c3a6e2b842278",
-      "shortHash": "d65a3387",
-      "dateIso": "2026-06-03T17:21:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(frontend): polish partner-aligned surfaces",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d65a33877997c41e91c044e5bb5c3a6e2b842278"
     }
   ]
 } as const;

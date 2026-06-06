@@ -15,6 +15,7 @@ import {
   Clock,
   CreditCard,
   Package,
+  Receipt,
   Motorcycle,
   SpinnerGap,
   Storefront,
