@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getPostalStatusCopy, getPostalTrackingHeadline, sortPostalEventsDesc } from './postalTracking';
+import { getPostalEventSourceCopy, getPostalStatusCopy, getPostalTrackingHeadline, sortPostalEventsDesc } from './postalTracking';
 
 describe('postalTracking utils', () => {
   it('returns friendly copy for known postal statuses', () => {
@@ -19,5 +19,18 @@ describe('postalTracking utils', () => {
       { status: 'delivered', eventAt: '2026-01-02T10:00:00.000Z' },
     ]);
     expect(events[0].status).toBe('delivered');
+  });
+
+  it('translates technical event sources to customer-friendly copy', () => {
+    expect(getPostalEventSourceCopy('seller')).toMatchObject({
+      label: 'Loja',
+      description: 'Atualizado pelo vendedor.',
+    });
+    expect(getPostalEventSourceCopy('system')).toMatchObject({
+      label: 'Já no Caminho',
+    });
+    expect(getPostalEventSourceCopy('carrier')).toMatchObject({
+      label: 'Correios',
+    });
   });
 });

@@ -60,6 +60,29 @@ export const getPostalStatusCopy = (status?: string | null) => {
   };
 };
 
+export const getPostalEventSourceCopy = (source?: string | null) => {
+  const key = String(source || '').trim().toLowerCase();
+  if (key === 'carrier') {
+    return {
+      kind: 'carrier',
+      label: 'Correios',
+      description: 'Atualização do rastreio oficial.',
+    };
+  }
+  if (key === 'seller') {
+    return {
+      kind: 'seller',
+      label: 'Loja',
+      description: 'Atualizado pelo vendedor.',
+    };
+  }
+  return {
+    kind: 'system',
+    label: 'Já no Caminho',
+    description: 'Acompanhamento automático do pedido.',
+  };
+};
+
 export const sortPostalEventsDesc = (events: PostalTrackingEvent[]) =>
   (Array.isArray(events) ? events : [])
     .slice()

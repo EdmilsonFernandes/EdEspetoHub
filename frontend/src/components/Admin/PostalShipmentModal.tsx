@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Package, X } from '@phosphor-icons/react';
 
 type PostalShipmentPayload = {
@@ -66,8 +67,13 @@ export function PostalShipmentModal({ open, order, loading, onClose, onSubmit }:
     });
   };
 
-  return (
-    <div className="fixed inset-0 z-[360] flex items-end justify-center bg-slate-950/55 p-3 backdrop-blur-sm sm:items-center">
+  const modal = (
+    <div
+      className="fixed inset-0 z-[10000] flex items-end justify-center bg-slate-950/55 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:pb-3"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="postal-shipment-modal-title"
+    >
       <div className="w-full max-w-lg overflow-hidden rounded-[28px] border border-white/70 bg-white shadow-[0_30px_90px_-45px_rgba(15,23,42,0.75)]">
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 p-5">
           <div className="flex min-w-0 gap-3">
@@ -76,7 +82,7 @@ export function PostalShipmentModal({ open, order, loading, onClose, onSubmit }:
             </div>
             <div className="min-w-0">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Envio postal</p>
-              <h3 className="mt-1 text-lg font-black text-slate-950">Informar rastreio</h3>
+              <h3 id="postal-shipment-modal-title" className="mt-1 text-lg font-black text-slate-950">Informar rastreio</h3>
               <p className="mt-1 text-xs font-medium text-slate-500">
                 Pedido de {orderLabel}. O cliente verá essa atualização no acompanhamento do pedido.
               </p>
@@ -168,4 +174,6 @@ export function PostalShipmentModal({ open, order, loading, onClose, onSubmit }:
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }

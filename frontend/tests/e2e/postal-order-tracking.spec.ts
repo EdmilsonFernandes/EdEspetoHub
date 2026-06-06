@@ -92,7 +92,8 @@ test.describe('Pedido postal - acompanhamento do cliente', () => {
     await expect(page.getByText('AA123456789BR')).toBeVisible();
     await expect(page.getByText('Linha do tempo do envio')).toBeVisible();
     await expect(page.getByText('Loja').first()).toBeVisible();
-    await expect(page.getByRole('link', { name: /abrir rastreio oficial/i })).toBeVisible();
+    await expect(page.getByText('Atualizado pelo vendedor.').first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /abrir rastreio oficial/i })).toBeVisible();
   });
 
   test('mostra estado claro quando a loja ainda não informou o rastreio', async ({ page }) => {
