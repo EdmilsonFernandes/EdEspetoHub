@@ -20,6 +20,7 @@ import {
   getPostalEventSourceCopy,
   getPostalStatusCopy,
   getPostalTrackingHeadline,
+  getPostalTrackingExternalUrl,
   getPostalTrackingUnavailableCopy,
   sortPostalEventsDesc,
 } from '../utils/postalTracking';
@@ -718,6 +719,7 @@ export function OrderTracking() {
   const shipmentServiceName = String(shipment?.serviceName || '').trim();
   const shipmentTrackingCode = String(shipment?.trackingCode || '').trim();
   const shipmentTrackingUrl = String(shipment?.trackingUrl || '').trim();
+  const shipmentTrackingExternalUrl = getPostalTrackingExternalUrl(shipmentTrackingCode, shipmentTrackingUrl);
   const shipmentStatusNormalized = String(shipment?.shipmentStatus || '').trim().toLowerCase();
   const isShipmentPosted =
     shipmentStatusNormalized === 'posted' ||
@@ -910,8 +912,8 @@ export function OrderTracking() {
     }
   };
   const handleOpenShipmentTracking = async () => {
-    if (!shipmentTrackingUrl) return;
-    await openActionTarget({ href: shipmentTrackingUrl, external: true });
+    if (!shipmentTrackingExternalUrl) return;
+    await openActionTarget({ href: shipmentTrackingExternalUrl, external: true });
   };
   const cashTenderedValue =
     normalizedPaymentMethod === 'dinheiro' && order?.cashTendered !== null && order?.cashTendered !== undefined
@@ -2320,14 +2322,14 @@ export function OrderTracking() {
                                   </div>
                                 ) : null}
 
-                                {shipmentTrackingUrl ? (
+                                {shipmentTrackingExternalUrl ? (
                                   <button
                                     type="button"
                                     onClick={() => { void handleOpenShipmentTracking(); }}
                                     className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-black text-slate-500 shadow-sm transition hover:bg-slate-50 active:scale-[0.98] sm:w-auto"
                                   >
                                     <ArrowSquareOut size={14} weight="bold" />
-                                    Abrir site dos Correios
+                                    Ver rastreio sem captcha
                                   </button>
                                 ) : null}
                               </div>

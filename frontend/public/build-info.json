@@ -2,285 +2,285 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "0392f377",
-  "versionLabel": "v0.1.9.0392f377",
-  "versionInternal": "0.1.9+20260601.031042.0392f377",
-  "buildId": "0.1.9+20260601.031042.0392f377-20260601.031042-0392f377",
-  "builtAt": "2026-06-01T03:10:42.411Z",
-  "commitHash": "0392f3777c651f0a671c9e34481314bc64ce645f",
-  "shortHash": "0392f377",
-  "branch": "fix/destination-listing-store-claim",
+  "versionDisplaySuffix": "7d2e05a8",
+  "versionLabel": "v0.1.9.7d2e05a8",
+  "versionInternal": "0.1.9+20260606.210400.7d2e05a8",
+  "buildId": "0.1.9+20260606.210400.7d2e05a8-20260606.210400-7d2e05a8",
+  "builtAt": "2026-06-06T21:04:00.761Z",
+  "commitHash": "7d2e05a84f7568b33719ffd0268d4d918e2f5c67",
+  "shortHash": "7d2e05a8",
+  "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
     {
-      "hash": "0392f3777c651f0a671c9e34481314bc64ce645f",
-      "shortHash": "0392f377",
-      "dateIso": "2026-05-31T23:34:07-03:00",
-      "authorName": "Edmilson Lopes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Merge pull request #48 from EdmilsonFernandes/feature/destination-partner-onboarding",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0392f3777c651f0a671c9e34481314bc64ce645f"
-    },
-    {
-      "hash": "da42ec50abc285219fa9a68acbd87a218c64d49b",
-      "shortHash": "da42ec50",
-      "dateIso": "2026-05-31T23:29:02-03:00",
+      "hash": "7d2e05a84f7568b33719ffd0268d4d918e2f5c67",
+      "shortHash": "7d2e05a8",
+      "dateIso": "2026-06-06T17:28:07-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(destinations): harden partner claims and monetization docs",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/da42ec50abc285219fa9a68acbd87a218c64d49b"
+      "subject": "fix: improve postal tracking refresh UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7d2e05a84f7568b33719ffd0268d4d918e2f5c67"
     },
     {
-      "hash": "57eabe3ccdf4b8cf85826e8ea71d782d3cc7d1d0",
-      "shortHash": "57eabe3c",
-      "dateIso": "2026-05-31T19:45:19-03:00",
-      "authorName": "Edmilson Lopes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Merge pull request #47 from EdmilsonFernandes/feature/destination-partner-onboarding",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/57eabe3ccdf4b8cf85826e8ea71d782d3cc7d1d0"
-    },
-    {
-      "hash": "c50ee63991fc46a3f14f237bab75f5f63f00cc59",
-      "shortHash": "c50ee639",
-      "dateIso": "2026-05-31T19:27:26-03:00",
+      "hash": "9722ad559721d6efbd60c57c1e171e9b6217033b",
+      "shortHash": "9722ad55",
+      "dateIso": "2026-06-06T16:56:56-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "test(hub): align highlights e2e copy",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c50ee63991fc46a3f14f237bab75f5f63f00cc59"
+      "subject": "style: refine customer orders experience",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9722ad559721d6efbd60c57c1e171e9b6217033b"
     },
     {
-      "hash": "b8c0457a459e1af629fc1c040fd5d932d2bbab41",
-      "shortHash": "b8c0457a",
-      "dateIso": "2026-05-31T19:21:06-03:00",
+      "hash": "96d90d493e46b7605dbbbe8cfe80c68b32e7d813",
+      "shortHash": "96d90d49",
+      "dateIso": "2026-06-06T16:47:14-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(destinations): improve partner request review",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b8c0457a459e1af629fc1c040fd5d932d2bbab41"
+      "subject": "fix: resume pending customer email verification",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/96d90d493e46b7605dbbbe8cfe80c68b32e7d813"
     },
     {
-      "hash": "758f1deef47997a666ebe2a2c214ec296b51763c",
-      "shortHash": "758f1dee",
-      "dateIso": "2026-05-31T19:07:08-03:00",
+      "hash": "03a49e9178962cbb67aaf8ac6ac2d81cb6503ca0",
+      "shortHash": "03a49e91",
+      "dateIso": "2026-06-06T16:26:13-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(destinations): add partner onboarding test guide",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/758f1deef47997a666ebe2a2c214ec296b51763c"
+      "subject": "feat: monitor email delivery health",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/03a49e9178962cbb67aaf8ac6ac2d81cb6503ca0"
     },
     {
-      "hash": "4dd4c9ec29de4f829ae2e2d13b57243c246de4ce",
-      "shortHash": "4dd4c9ec",
-      "dateIso": "2026-05-31T18:58:45-03:00",
+      "hash": "9329e4f67c1a1f518e45cadc85b6b906e5f721ad",
+      "shortHash": "9329e4f6",
+      "dateIso": "2026-06-06T15:45:39-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(destinations): harden partner onboarding",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4dd4c9ec29de4f829ae2e2d13b57243c246de4ce"
+      "subject": "fix: tolerate signup email delivery failures",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9329e4f67c1a1f518e45cadc85b6b906e5f721ad"
     },
     {
-      "hash": "360a189950fa950d2bcec1c375fccacb5946aac7",
-      "shortHash": "360a1899",
-      "dateIso": "2026-05-31T18:42:24-03:00",
+      "hash": "9a7e8973d45906722944454481a24804a9316f36",
+      "shortHash": "9a7e8973",
+      "dateIso": "2026-06-06T15:15:56-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(destinations): streamline partner onboarding",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/360a189950fa950d2bcec1c375fccacb5946aac7"
+      "subject": "style: make postal tracking link secondary",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9a7e8973d45906722944454481a24804a9316f36"
     },
     {
-      "hash": "9873e86e56781fc3114b3b5c1b4f20aa710d5718",
-      "shortHash": "9873e86e",
-      "dateIso": "2026-05-31T15:02:31-03:00",
+      "hash": "f7898c81ea1b7c33a5ab12c6136759a40e76558f",
+      "shortHash": "f7898c81",
+      "dateIso": "2026-06-06T15:06:38-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(destinations): notify internal team on partner request",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9873e86e56781fc3114b3b5c1b4f20aa710d5718"
+      "subject": "fix: polish postal tracking timeline",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f7898c81ea1b7c33a5ab12c6136759a40e76558f"
     },
     {
-      "hash": "ce948e04b32fb030e241a776252d45b8adfa2dea",
-      "shortHash": "ce948e04",
-      "dateIso": "2026-05-31T14:56:20-03:00",
+      "hash": "13d3968b5f7727aec0ebbf27703bb6a65fc3d763",
+      "shortHash": "13d3968b",
+      "dateIso": "2026-06-06T12:06:53-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "test(destinations): cover partner portal flows",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ce948e04b32fb030e241a776252d45b8adfa2dea"
+      "subject": "fix: refine postal tracking experience",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/13d3968b5f7727aec0ebbf27703bb6a65fc3d763"
     },
     {
-      "hash": "f24d6bf2d97e53600c721634cbc4c1af6199ef8f",
-      "shortHash": "f24d6bf2",
-      "dateIso": "2026-05-31T11:35:40-03:00",
-      "authorName": "Edmilson Lopes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Merge pull request #46 from EdmilsonFernandes/feature/destination-partner-portal",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f24d6bf2d97e53600c721634cbc4c1af6199ef8f"
-    },
-    {
-      "hash": "ad8330f8d70e3c6416da7c42e95344875d92ce7f",
-      "shortHash": "ad8330f8",
-      "dateIso": "2026-05-31T11:34:36-03:00",
+      "hash": "d8a95ac512f3d30a8093f8ef131b762a9e841b45",
+      "shortHash": "d8a95ac5",
+      "dateIso": "2026-06-06T11:46:55-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: implement destination partner portal and update build info",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ad8330f8d70e3c6416da7c42e95344875d92ce7f"
+      "subject": "chore: add site rastreio validation link",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d8a95ac512f3d30a8093f8ef131b762a9e841b45"
     },
     {
-      "hash": "103809e3be98a107b2fdf6ec8f2976bda3e45f0c",
-      "shortHash": "103809e3",
-      "dateIso": "2026-05-31T10:22:19-03:00",
+      "hash": "d7c87a143d88f51e740894ffe6658862fbf3e61a",
+      "shortHash": "d7c87a14",
+      "dateIso": "2026-06-06T11:19:16-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(destinations): add partner self-service portal",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/103809e3be98a107b2fdf6ec8f2976bda3e45f0c"
+      "subject": "feat: add site rastreio tracking provider",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d7c87a143d88f51e740894ffe6658862fbf3e61a"
     },
     {
-      "hash": "d0fbbd4d9169ce371b87e17589970d75144936b6",
-      "shortHash": "d0fbbd4d",
-      "dateIso": "2026-05-30T18:39:47-03:00",
+      "hash": "13f5c466e91beb6ef75fb609bcd30f7bd058a445",
+      "shortHash": "13f5c466",
+      "dateIso": "2026-06-06T10:53:08-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(checkout): collapse payment selector only for professional users to ensure 100% safety for client online checkout",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d0fbbd4d9169ce371b87e17589970d75144936b6"
+      "subject": "style: refine client bottom navigation",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/13f5c466e91beb6ef75fb609bcd30f7bd058a445"
     },
     {
-      "hash": "6429db2275d0d71771ed86fcaa6771f4064a6070",
-      "shortHash": "6429db22",
-      "dateIso": "2026-05-30T18:32:44-03:00",
+      "hash": "eebe00c125671fb1a6bc419cc233814a8fc22ed2",
+      "shortHash": "eebe00c1",
+      "dateIso": "2026-06-06T10:21:47-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(filters): replace large category carousel with minimal row-level pills on highlights page",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6429db2275d0d71771ed86fcaa6771f4064a6070"
+      "subject": "feat: improve postal shipment tracking",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eebe00c125671fb1a6bc419cc233814a8fc22ed2"
     },
     {
-      "hash": "21e745b7d7da5a362c798cc3e2a2d92614f8be4d",
-      "shortHash": "21e745b7",
-      "dateIso": "2026-05-30T18:23:47-03:00",
+      "hash": "3fe02c4984ae499ba2c9c85bdf78b2e2f2b4cddf",
+      "shortHash": "3fe02c49",
+      "dateIso": "2026-06-05T10:00:39-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(checkout): collapse table selector on selection and add bottom padding to prevent checkout button overlapping info",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/21e745b7d7da5a362c798cc3e2a2d92614f8be4d"
+      "subject": "style(checkout): refine payment method icons",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3fe02c4984ae499ba2c9c85bdf78b2e2f2b4cddf"
     },
     {
-      "hash": "fae6204523d3b971107c3ed60bdb2d4edb3d4020",
-      "shortHash": "fae62045",
-      "dateIso": "2026-05-30T18:18:16-03:00",
+      "hash": "26885b31005980c4357d47d8aac17db2ac3d1b17",
+      "shortHash": "26885b31",
+      "dateIso": "2026-06-04T21:25:07-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(frontend): premium UI/UX enhancements on hub highlights carousel and listing page",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fae6204523d3b971107c3ed60bdb2d4edb3d4020"
+      "subject": "fix(storefront): make product modal easier to dismiss",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/26885b31005980c4357d47d8aac17db2ac3d1b17"
     },
     {
-      "hash": "401159c4a68da48cc7f1f6411c08a133e25b9992",
-      "shortHash": "401159c4",
-      "dateIso": "2026-05-30T18:09:37-03:00",
+      "hash": "b80715b0fdecbf872f5df42b28627acf1bebe13a",
+      "shortHash": "b80715b0",
+      "dateIso": "2026-06-04T15:35:45-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(frontend): premium UI/UX enhancements on storefront, checkout, and order tracking",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/401159c4a68da48cc7f1f6411c08a133e25b9992"
+      "subject": "fix(frontend): prevent brand rider clipping",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b80715b0fdecbf872f5df42b28627acf1bebe13a"
     },
     {
-      "hash": "867d56746e9176378bb4f764a43aedc51419bdfd",
-      "shortHash": "867d5674",
-      "dateIso": "2026-05-30T17:44:01-03:00",
+      "hash": "c2ff1875a3ca266abd5e2313e313c62959dbb2bd",
+      "shortHash": "c2ff1875",
+      "dateIso": "2026-06-04T14:30:46-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(frontend): add premium UI refinements and micro-interactions to destinations, chalets, and services",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/867d56746e9176378bb4f764a43aedc51419bdfd"
+      "subject": "fix(landing): simplify guide copy and brand scene",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c2ff1875a3ca266abd5e2313e313c62959dbb2bd"
     },
     {
-      "hash": "4d3437b72142b7cd2fd87eddbc0b67df3df27c5b",
-      "shortHash": "4d3437b7",
-      "dateIso": "2026-05-30T10:29:03-03:00",
+      "hash": "1a12fc040c7a62c0f1582c6f0852de8f8e352632",
+      "shortHash": "1a12fc04",
+      "dateIso": "2026-06-04T13:29:30-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(frontend): add premium hover glare shine to store cards and pulsing ring to header avatar notification",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4d3437b72142b7cd2fd87eddbc0b67df3df27c5b"
+      "subject": "feat(landing): modernize interactive guide",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1a12fc040c7a62c0f1582c6f0852de8f8e352632"
     },
     {
-      "hash": "a18f0dc8121dcfd4fa5c9ab09262a01ef89c7096",
-      "shortHash": "a18f0dc8",
-      "dateIso": "2026-05-30T10:16:21-03:00",
+      "hash": "99cf5f62681471a9fcf6ac72764bc639e1715c41",
+      "shortHash": "99cf5f62",
+      "dateIso": "2026-06-04T10:43:02-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(frontend): simplify featured banner layout on hub by removing outer wrapper card and generic title",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a18f0dc8121dcfd4fa5c9ab09262a01ef89c7096"
+      "subject": "style(destinations): add clickable counters and header spacing",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/99cf5f62681471a9fcf6ac72764bc639e1715c41"
     },
     {
-      "hash": "62b8993b71d4321014625b1e0842254a37c695e8",
-      "shortHash": "62b8993b",
-      "dateIso": "2026-05-30T09:32:46-03:00",
+      "hash": "38cb9e99260d933c470e4dd86427b4d04fa04025",
+      "shortHash": "38cb9e99",
+      "dateIso": "2026-06-04T10:13:45-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(frontend): slightly darken app page background gradient and surface variable to improve contrast with white cards",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/62b8993b71d4321014625b1e0842254a37c695e8"
+      "subject": "fix(destinations): prevent partner mascot blocking mobile",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/38cb9e99260d933c470e4dd86427b4d04fa04025"
     },
     {
-      "hash": "6249c751a36fff330ba8bfd6f152633bd136d965",
-      "shortHash": "6249c751",
-      "dateIso": "2026-05-30T07:50:43-03:00",
+      "hash": "e95579397caa5426cdaf68737a2bf1a263902f05",
+      "shortHash": "e9557939",
+      "dateIso": "2026-06-04T09:22:26-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style: organizar solicitacoes de destinos",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6249c751a36fff330ba8bfd6f152633bd136d965"
+      "subject": "feat(frontend): refactor partner recruitment cards with animated CSS mascot and updated copy",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e95579397caa5426cdaf68737a2bf1a263902f05"
     },
     {
-      "hash": "d74c2e6927de6a901d142d512f2586fbe9855235",
-      "shortHash": "d74c2e69",
-      "dateIso": "2026-05-30T07:34:31-03:00",
+      "hash": "1ec9db357df3b1c078315cc862c444310e5a4eca",
+      "shortHash": "1ec9db35",
+      "dateIso": "2026-06-04T08:59:49-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: reforcar abertura nativa do app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d74c2e6927de6a901d142d512f2586fbe9855235"
+      "subject": "style(hub): deepen marketplace canvas",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1ec9db357df3b1c078315cc862c444310e5a4eca"
     },
     {
-      "hash": "adfebee5869fc87448d99849b5625fb21890c55a",
-      "shortHash": "adfebee5",
-      "dateIso": "2026-05-29T17:13:14-03:00",
+      "hash": "b6bb66596db65eb5b5511c6131d9913ac19c2487",
+      "shortHash": "b6bb6659",
+      "dateIso": "2026-06-04T08:34:07-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style: ajustar tempo do splash do app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/adfebee5869fc87448d99849b5625fb21890c55a"
+      "subject": "style(hub): soften marketplace background",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b6bb66596db65eb5b5511c6131d9913ac19c2487"
     },
     {
-      "hash": "c90251ffa92eaf8312f23084c901e5c3a2f6d532",
-      "shortHash": "c90251ff",
-      "dateIso": "2026-05-29T16:57:57-03:00",
+      "hash": "54ea3c6552477dd26e4f6bb37704fd616b384677",
+      "shortHash": "54ea3c65",
+      "dateIso": "2026-06-04T08:21:21-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style: adicionar loader premium do app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c90251ffa92eaf8312f23084c901e5c3a2f6d532"
+      "subject": "feat(app): refine chalet route contact and email fallback",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/54ea3c6552477dd26e4f6bb37704fd616b384677"
     },
     {
-      "hash": "abdc8dbd2cabe6253cb89adb2813fda055ca5532",
-      "shortHash": "abdc8dbd",
-      "dateIso": "2026-05-29T14:53:30-03:00",
+      "hash": "e6fe12b8e69243b1b6e89fedfb14cfb57194981a",
+      "shortHash": "e6fe12b8",
+      "dateIso": "2026-06-03T23:43:12-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "perf: aquecer dados publicos do app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/abdc8dbd2cabe6253cb89adb2813fda055ca5532"
+      "subject": "style(app): refine client nav and order cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e6fe12b8e69243b1b6e89fedfb14cfb57194981a"
     },
     {
-      "hash": "ad58fbd883bac9e51f5530ca97a365a04fe40fc9",
-      "shortHash": "ad58fbd8",
-      "dateIso": "2026-05-29T14:22:47-03:00",
+      "hash": "93a54f2c2a6b9b139cafcc9f9d5cbbc8a916450d",
+      "shortHash": "93a54f2c",
+      "dateIso": "2026-06-03T22:52:05-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: remover split manual instavel do frontend",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ad58fbd883bac9e51f5530ca97a365a04fe40fc9"
+      "subject": "test(checkout): cover storefront order flows",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/93a54f2c2a6b9b139cafcc9f9d5cbbc8a916450d"
     },
     {
-      "hash": "1f573f137a9821644fb0cb2d4444d6f366188ec9",
-      "shortHash": "1f573f13",
-      "dateIso": "2026-05-29T14:01:59-03:00",
+      "hash": "54daf8775bf36e41783981351ee7c4775f77e92d",
+      "shortHash": "54daf877",
+      "dateIso": "2026-06-03T21:16:08-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "perf: separar vendors pesados do frontend",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1f573f137a9821644fb0cb2d4444d6f366188ec9"
+      "subject": "style(checkout): refine payment and cancellation copy",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/54daf8775bf36e41783981351ee7c4775f77e92d"
     },
     {
-      "hash": "4094c5d6c4f44063e14e8078704a5b9daac4c5f9",
-      "shortHash": "4094c5d6",
-      "dateIso": "2026-05-29T13:45:52-03:00",
+      "hash": "2d21e7782141f7beeddf8ee21f373fb298ed109b",
+      "shortHash": "2d21e778",
+      "dateIso": "2026-06-03T20:59:30-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "perf: preaquecer rotas criticas do app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4094c5d6c4f44063e14e8078704a5b9daac4c5f9"
+      "subject": "fix(order): show refunded payment status",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2d21e7782141f7beeddf8ee21f373fb298ed109b"
+    },
+    {
+      "hash": "d65a33877997c41e91c044e5bb5c3a6e2b842278",
+      "shortHash": "d65a3387",
+      "dateIso": "2026-06-03T17:21:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(frontend): polish partner-aligned surfaces",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d65a33877997c41e91c044e5bb5c3a6e2b842278"
+    },
+    {
+      "hash": "455df188e30800c0d6362eb07a0f2d7c653fdf43",
+      "shortHash": "455df188",
+      "dateIso": "2026-06-03T15:53:56-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(frontend): refine premium mobile ux surfaces",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/455df188e30800c0d6362eb07a0f2d7c653fdf43"
+    },
+    {
+      "hash": "3348bb937390f58d7c4931ccc56ed85622de790f",
+      "shortHash": "3348bb93",
+      "dateIso": "2026-06-03T13:50:49-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(frontend): refine client and destination UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3348bb937390f58d7c4931ccc56ed85622de790f"
     }
   ]
 }

@@ -9,6 +9,31 @@ export type PostalTrackingEvent = {
   createdAt?: string | Date | null;
 };
 
+const CORREIOS_TRACKING_CODE_RE = /^[A-Z]{2}\d{9}[A-Z]{2}$/;
+
+export const normalizePostalTrackingCode = (value?: string | null) =>
+  String(value || '')
+    .normalize('NFKC')
+    .replace(/\s+/g, '')
+    .replace(/[^a-zA-Z0-9._-]/g, '')
+    .toUpperCase()
+    .slice(0, 40);
+
+export const isCorreiosPostalTrackingCode = (value?: string | null) =>
+  CORREIOS_TRACKING_CODE_RE.test(normalizePostalTrackingCode(value));
+
+export const buildSiteCorreiosTrackingUrl = (trackingCode?: string | null) => {
+  const normalized = normalizePostalTrackingCode(trackingCode);
+  if (!isCorreiosPostalTrackingCode(normalized)) return '';
+  return `https://www.sitecorreios.com.br/${encodeURIComponent(normalized)}`;
+};
+
+export const getPostalTrackingExternalUrl = (trackingCode?: string | null, trackingUrl?: string | null) => {
+  const siteCorreiosUrl = buildSiteCorreiosTrackingUrl(trackingCode);
+  if (siteCorreiosUrl) return siteCorreiosUrl;
+  return String(trackingUrl || '').trim();
+};
+
 export const POSTAL_STATUS_COPY: Record<string, { label: string; description: string }> = {
   tracking_code_added: {
     label: 'Código informado',
@@ -130,8 +155,8 @@ export const getPostalTrackingUnavailableCopy = (reason?: string | null) => {
     normalized.includes('sem eventos')
   ) {
     return {
-      label: 'Ainda sem atualização dos Correios',
-      description: 'O código foi salvo, mas o integrador ainda não retornou movimentações para este objeto.',
+      label: 'Rastreio externo disponível',
+      description: 'O integrador ainda não trouxe a linha do tempo para o app. Você pode abrir a consulta sem captcha pelo link abaixo.',
     };
   }
 
