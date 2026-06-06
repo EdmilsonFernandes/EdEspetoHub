@@ -12,5 +12,8 @@ export default defineConfig({
     ],
     exclude: ['src/test/**'],
     testTimeout: 30_000,
+    pool: 'forks',
+    fileParallelism: false,
+    maxWorkers: 1,
   },
 });

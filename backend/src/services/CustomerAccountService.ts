@@ -47,6 +47,12 @@ type AddressInput = {
   isDefault?: boolean;
 };
 
+type EmailOtpDelivery = {
+  emailSent: boolean;
+  emailDeliveryStatus: 'sent' | 'failed';
+  cooldownSec: number;
+};
+
 export class CustomerAccountService {
   private emailService = new EmailService();
   private pushService = new PushNotificationService();
@@ -324,11 +330,12 @@ private async isOtpResendAllowed(userId: string, ipAddress?: string | null) {
 
     const cooldownRows = await AppDataSource.query(
       `
-      SELECT created_at
+      SELECT last_sent_at
       FROM customer_email_otps
       WHERE user_id = $1
-        AND created_at > $2
-      ORDER BY created_at DESC
+        AND last_sent_at IS NOT NULL
+        AND last_sent_at > $2
+      ORDER BY last_sent_at DESC
       LIMIT 1
       `,
       [userId, cooldownThreshold]
@@ -346,7 +353,7 @@ private async isOtpResendAllowed(userId: string, ipAddress?: string | null) {
    *
    * @author Edmilson Lopes
    */
-private async sendCustomerEmailOtp(user: User, meta?: { ipAddress?: string | null }) {
+private async sendCustomerEmailOtp(user: User, meta?: { ipAddress?: string | null }): Promise<EmailOtpDelivery> {
     const code = this.generateOtpCode();
     const codeHash = this.hashOtpCode(code);
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
@@ -364,7 +371,7 @@ private async sendCustomerEmailOtp(user: User, meta?: { ipAddress?: string | nul
       .where('user_id = :userId AND used_at IS NULL', { userId: user.id })
       .execute();
 
-    await otpRepo.save(
+    const otp = await otpRepo.save(
       otpRepo.create({
         user,
         codeHash,
@@ -372,11 +379,23 @@ private async sendCustomerEmailOtp(user: User, meta?: { ipAddress?: string | nul
         requestIp: this.getClientIp(meta?.ipAddress),
         resendCount: nextResendCount,
         attemptsCount: 0,
-        lastSentAt: new Date(),
+        lastSentAt: null,
       })
     );
 
-    await this.emailService.sendCustomerVerificationCode(user.email, user.fullName || 'Cliente', code);
+    try {
+      await this.emailService.sendCustomerVerificationCode(user.email, user.fullName || 'Cliente', code);
+      otp.lastSentAt = new Date();
+      await otpRepo.save(otp);
+      return { emailSent: true, emailDeliveryStatus: 'sent', cooldownSec: 60 };
+    } catch (error) {
+      this.log.error('Customer verification email failed after OTP creation', {
+        userId: user.id,
+        email: user.email,
+        error,
+      });
+      return { emailSent: false, emailDeliveryStatus: 'failed', cooldownSec: 0 };
+    }
   }
 
     /**
@@ -562,7 +581,7 @@ async register(
       lgpdAcceptedAt: new Date(),
     } as Partial<User>);
     const saved = await userRepo.save(user);
-    await this.sendCustomerEmailOtp(saved, meta);
+    const delivery = await this.sendCustomerEmailOtp(saved, meta);
     void this.notifySignupAdmin(saved);
 
     return {
@@ -570,7 +589,9 @@ async register(
       next: 'VERIFY_EMAIL_CODE',
       email: saved.email,
       emailMasked: this.maskEmail(saved.email),
-      cooldownSec: 60,
+      cooldownSec: delivery.cooldownSec,
+      emailSent: delivery.emailSent,
+      emailDeliveryStatus: delivery.emailDeliveryStatus,
     };
   }
 
@@ -728,11 +749,13 @@ async resendEmailCode(input: { email?: string }, meta?: { ipAddress?: string | n
       };
     }
 
-    await this.sendCustomerEmailOtp(user, meta);
+    const delivery = await this.sendCustomerEmailOtp(user, meta);
     return {
       next: 'VERIFY_EMAIL_CODE',
-      cooldownSec: 60,
+      cooldownSec: delivery.cooldownSec,
       emailMasked: this.maskEmail(user.email),
+      emailSent: delivery.emailSent,
+      emailDeliveryStatus: delivery.emailDeliveryStatus,
     };
   }
 

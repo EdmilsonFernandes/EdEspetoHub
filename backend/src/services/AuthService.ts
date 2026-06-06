@@ -57,6 +57,12 @@ type MfaLoginOptions = {
   ipAddress?: string | null;
 };
 
+type VerificationEmailDelivery = {
+  emailSent: boolean;
+  emailDeliveryStatus: 'sent' | 'failed';
+  cooldownSec: number;
+};
+
 const sanitizeAttributionStringArray = (value: unknown, limit = 80) => {
   if (Array.isArray(value)) {
     return value
@@ -334,11 +340,12 @@ private async isVerificationResendAllowed(userId: string, ipAddress?: string | n
 
     const cooldownRows = await AppDataSource.query(
       `
-      SELECT created_at
+      SELECT last_sent_at
       FROM email_verifications
       WHERE user_id = $1
-        AND created_at > $2
-      ORDER BY created_at DESC
+        AND last_sent_at IS NOT NULL
+        AND last_sent_at > $2
+      ORDER BY last_sent_at DESC
       LIMIT 1
       `,
       [userId, cooldownThreshold]
@@ -730,7 +737,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         return { user };
       });
 
-      await this.sendMotoboyVerificationEmail(result.user, meta?.ipAddress);
+      const delivery = await this.sendMotoboyVerificationEmail(result.user, meta?.ipAddress);
       void this.notifySignupAdmin({ type: 'motoboy', user: result.user });
       this.log.info('Register motoboy success', { userId: result.user.id });
 
@@ -753,6 +760,9 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         next: 'VERIFY_EMAIL',
         emailMasked: this.maskEmail(result.user.email),
         email: result.user.email,
+        cooldownSec: delivery.cooldownSec,
+        emailSent: delivery.emailSent,
+        emailDeliveryStatus: delivery.emailDeliveryStatus,
       };
     }
 
@@ -945,7 +955,7 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       return { user, store, subscription, acquisitionAttribution: attributionWithPromotion };
     });
 
-    await this.sendVerificationEmail(result.user, meta?.ipAddress);
+    const delivery = await this.sendVerificationEmail(result.user, meta?.ipAddress);
     await this.notifySignup(result.user, result.store, result.acquisitionAttribution);
     this.log.info('Register success', { userId: result.user.id, storeId: result.store.id });
 
@@ -980,6 +990,9 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       next: 'VERIFY_EMAIL_CODE',
       emailMasked: this.maskEmail(result.user.email),
       email: result.user.email,
+      cooldownSec: delivery.cooldownSec,
+      emailSent: delivery.emailSent,
+      emailDeliveryStatus: delivery.emailDeliveryStatus,
     };
   }
 
@@ -1331,16 +1344,16 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       return { code: 'AUTH-S002', next, cooldownSec: rate.cooldownSeconds };
     }
 
-    if (user.userRole === 'MOTOBOY') {
-      await this.sendMotoboyVerificationEmail(user, meta?.ipAddress);
-    } else {
-      await this.sendVerificationEmail(user, meta?.ipAddress);
-    }
+    const delivery = user.userRole === 'MOTOBOY'
+      ? await this.sendMotoboyVerificationEmail(user, meta?.ipAddress)
+      : await this.sendVerificationEmail(user, meta?.ipAddress);
     return {
       code: 'AUTH-S002',
       next,
-      cooldownSec: 60,
+      cooldownSec: delivery.cooldownSec,
       emailMasked: this.maskEmail(user.email),
+      emailSent: delivery.emailSent,
+      emailDeliveryStatus: delivery.emailDeliveryStatus,
     };
   }
 
@@ -1351,11 +1364,10 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
    */
   async dispatchVerificationEmail(user: User, meta?: { ipAddress?: string | null }) {
     if (user.userRole === 'MOTOBOY') {
-      await this.sendMotoboyVerificationEmail(user, meta?.ipAddress);
-      return;
+      return this.sendMotoboyVerificationEmail(user, meta?.ipAddress);
     }
 
-    await this.sendVerificationEmail(user, meta?.ipAddress);
+    return this.sendVerificationEmail(user, meta?.ipAddress);
   }
 
 
@@ -1704,7 +1716,7 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
-  private async sendVerificationEmail(user: User, ipAddress?: string | null) {
+  private async sendVerificationEmail(user: User, ipAddress?: string | null): Promise<VerificationEmailDelivery> {
     const code = this.generateEmailCode();
     const tokenHash = this.hashVerificationValue(code);
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
@@ -1722,18 +1734,30 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
       .where('user_id = :userId AND used_at IS NULL', { userId: user.id })
       .execute();
 
-    await verificationRepo.save(
+    const verification = await verificationRepo.save(
       verificationRepo.create({
         user,
         tokenHash,
         expiresAt,
         requestIp: this.getClientIp(ipAddress),
         resendCount: nextResendCount,
-        lastSentAt: new Date(),
+        lastSentAt: null,
       })
     );
 
-    await this.emailService.sendStoreVerificationCode(user.email, user.fullName || 'Lojista', code);
+    try {
+      await this.emailService.sendStoreVerificationCode(user.email, user.fullName || 'Lojista', code);
+      verification.lastSentAt = new Date();
+      await verificationRepo.save(verification);
+      return { emailSent: true, emailDeliveryStatus: 'sent', cooldownSec: 60 };
+    } catch (error) {
+      this.log.error('Store verification email failed after token creation', {
+        userId: user.id,
+        email: user.email,
+        error,
+      });
+      return { emailSent: false, emailDeliveryStatus: 'failed', cooldownSec: 0 };
+    }
   }
 
   /**
@@ -1742,7 +1766,7 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
-  private async sendMotoboyVerificationEmail(user: User, ipAddress?: string | null) {
+  private async sendMotoboyVerificationEmail(user: User, ipAddress?: string | null): Promise<VerificationEmailDelivery> {
     const token = jwt.sign(
       {
         sub: user.id,
@@ -1768,19 +1792,31 @@ async changePassword(userId: string, currentPassword: string, newPassword: strin
       .where('user_id = :userId AND used_at IS NULL', { userId: user.id })
       .execute();
 
-    await verificationRepo.save(
+    const verification = await verificationRepo.save(
       verificationRepo.create({
         user,
         tokenHash,
         expiresAt,
         requestIp: this.getClientIp(ipAddress),
         resendCount: nextResendCount,
-        lastSentAt: new Date(),
+        lastSentAt: null,
       })
     );
 
     const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
-    await this.emailService.sendMotoboyVerification(user.email, link, token);
+    try {
+      await this.emailService.sendMotoboyVerification(user.email, link, token);
+      verification.lastSentAt = new Date();
+      await verificationRepo.save(verification);
+      return { emailSent: true, emailDeliveryStatus: 'sent', cooldownSec: 60 };
+    } catch (error) {
+      this.log.error('Motoboy verification email failed after token creation', {
+        userId: user.id,
+        email: user.email,
+        error,
+      });
+      return { emailSent: false, emailDeliveryStatus: 'failed', cooldownSec: 0 };
+    }
   }
 
 

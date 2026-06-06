@@ -3439,8 +3439,15 @@ export function StorePage() {
             flow: 'register',
           });
           setCustomerVerifyCode('');
-          setCustomerResendCooldown(Number(response?.cooldownSec || 60));
-          setCustomerAccountNotice('Enviamos um código de 4 dígitos para concluir seu cadastro.');
+          {
+            const cooldown = Number(response?.cooldownSec);
+            setCustomerResendCooldown(Number.isFinite(cooldown) ? Math.max(0, cooldown) : 60);
+          }
+          setCustomerAccountNotice(
+            response?.emailDeliveryStatus === 'failed'
+              ? 'Sua conta foi criada, mas não conseguimos enviar o código agora. Toque em Reenviar código para tentar novamente.'
+              : 'Enviamos um código de 4 dígitos para concluir seu cadastro.'
+          );
           return;
         }
       } else {
@@ -3517,8 +3524,16 @@ export function StorePage() {
         emailMasked: response?.emailMasked || prev?.emailMasked || email,
       }));
       setCustomerVerifyCode('');
-      setCustomerResendCooldown(Number(response?.cooldownSec || 60));
-      setCustomerAccountNotice(response?.message || 'Novo código enviado para seu e-mail.');
+      {
+        const cooldown = Number(response?.cooldownSec);
+        setCustomerResendCooldown(Number.isFinite(cooldown) ? Math.max(0, cooldown) : 60);
+      }
+      if (response?.emailDeliveryStatus === 'failed') {
+        setCustomerAccountNotice('');
+        setCustomerAccountError('Não conseguimos enviar o código agora. Tente reenviar novamente em instantes.');
+      } else {
+        setCustomerAccountNotice(response?.message || 'Novo código enviado para seu e-mail.');
+      }
     } catch (error: any) {
       setCustomerAccountError(error?.message || 'Não foi possível reenviar o código agora.');
     } finally {

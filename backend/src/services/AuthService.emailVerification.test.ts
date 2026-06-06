@@ -33,8 +33,14 @@ describe('AuthService — email verification', () => {
           return { id: 'u1', email, emailVerified: false, userRole: 'STORE_OWNER' };
         },
       };
-      service.sendVerificationEmail = async () => { sentStore += 1; };
-      service.sendMotoboyVerificationEmail = async () => { sentMotoboy += 1; };
+      service.sendVerificationEmail = async () => {
+        sentStore += 1;
+        return { emailSent: true, emailDeliveryStatus: 'sent', cooldownSec: 60 };
+      };
+      service.sendMotoboyVerificationEmail = async () => {
+        sentMotoboy += 1;
+        return { emailSent: true, emailDeliveryStatus: 'sent', cooldownSec: 60 };
+      };
 
       (AppDataSource as any).query = async (sql: string) => {
         if (sql.includes('count(*)::int')) return [{ count: 0 }];
@@ -74,6 +80,49 @@ describe('AuthService — email verification', () => {
       const r = await service.resendVerificationEmail('store@example.com', { ipAddress: '127.0.0.1' });
       expect(r.code).toBe('AUTH-S002');
       expect(sentStore).toBe(0);
+    });
+
+    it('returns verification step when store email delivery fails', async () => {
+      const verifications: any[] = [];
+      service = new AuthService();
+      service.userRepository = {
+        findByEmail: async (email: string) => ({ id: 'u-email-fail', email, fullName: 'Loja Falha', emailVerified: false, userRole: 'STORE_OWNER' }),
+      };
+      service.emailService = {
+        sendStoreVerificationCode: async () => { throw new Error('SMTP EMESSAGE'); },
+      };
+
+      (AppDataSource as any).query = async (sql: string) => {
+        if (sql.includes('MAX(resend_count)')) return [{ max_count: 0 }];
+        if (sql.includes('count(*)::int')) return [{ count: 0 }];
+        if (sql.includes('LIMIT 1')) return [];
+        return [];
+      };
+      (AppDataSource as any).getRepository = () => ({
+        create: (payload: any) => ({ id: `v-${verifications.length + 1}`, ...payload }),
+        save: async (payload: any) => {
+          if (!verifications.find((row) => row.id === payload.id)) verifications.unshift(payload);
+          return payload;
+        },
+        createQueryBuilder: () => {
+          const builder: any = {
+            update: () => builder,
+            set: () => builder,
+            where: () => builder,
+            execute: async () => undefined,
+          };
+          return builder;
+        },
+      });
+
+      const r = await service.resendVerificationEmail('store@example.com', { ipAddress: '127.0.0.1' });
+
+      expect(r.code).toBe('AUTH-S002');
+      expect(r.next).toBe('VERIFY_EMAIL_CODE');
+      expect(r.emailDeliveryStatus).toBe('failed');
+      expect(r.emailSent).toBe(false);
+      expect(r.cooldownSec).toBe(0);
+      expect(verifications[0]?.lastSentAt).toBeNull();
     });
   });
 

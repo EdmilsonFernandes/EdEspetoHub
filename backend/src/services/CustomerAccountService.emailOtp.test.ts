@@ -101,6 +101,25 @@ describe('CustomerAccountService — email OTP', () => {
     expect(sentCode).toHaveLength(4);
   });
 
+  it('keeps customer registration valid when verification email fails', async () => {
+    service.emailService = {
+      sendCustomerVerificationCode: async () => { throw new Error('SMTP EMESSAGE'); },
+      sendCustomerWelcome: async () => { welcomeSent += 1; },
+    };
+
+    const result = await service.register({
+      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      termsAccepted: true, lgpdAccepted: true,
+    }, { ipAddress: '127.0.0.1' });
+
+    expect(result.next).toBe('VERIFY_EMAIL_CODE');
+    expect(result.emailDeliveryStatus).toBe('failed');
+    expect(result.emailSent).toBe(false);
+    expect(result.cooldownSec).toBe(0);
+    expect(userExists).toBe(true);
+    expect(otpRecords[0]?.lastSentAt).toBeNull();
+  });
+
   it('invalid code increments attempts and throws', async () => {
     await service.register({
       fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',

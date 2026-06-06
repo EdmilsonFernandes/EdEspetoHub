@@ -386,8 +386,15 @@ export function ClientAuth() {
           emailMasked: result?.emailMasked,
         });
         setVerifyFlowLabel('register');
-        setResendCooldown(Number(result?.cooldownSec || 60));
-        setMessage('Enviamos um código de 4 dígitos para concluir seu cadastro.');
+        {
+          const cooldown = Number(result?.cooldownSec);
+          setResendCooldown(Number.isFinite(cooldown) ? Math.max(0, cooldown) : 60);
+        }
+        setMessage(
+          result?.emailDeliveryStatus === 'failed'
+            ? 'Sua conta foi criada, mas não conseguimos enviar o código agora. Toque em Reenviar código para tentar novamente.'
+            : 'Enviamos um código de 4 dígitos para concluir seu cadastro.'
+        );
         return;
       }
 
@@ -434,8 +441,16 @@ export function ClientAuth() {
         emailMasked: result?.emailMasked || prev?.emailMasked || email,
       }));
       setLastAutoSubmittedCode('');
-      setResendCooldown(Number(result?.cooldownSec || 60));
-      setMessage(result?.message || 'Novo código enviado. Digite os 4 números para concluir o acesso.');
+      {
+        const cooldown = Number(result?.cooldownSec);
+        setResendCooldown(Number.isFinite(cooldown) ? Math.max(0, cooldown) : 60);
+      }
+      if (result?.emailDeliveryStatus === 'failed') {
+        setMessage('');
+        setError('Não conseguimos enviar o código agora. Tente reenviar novamente em instantes.');
+      } else {
+        setMessage(result?.message || 'Novo código enviado. Digite os 4 números para concluir o acesso.');
+      }
     } catch (e: any) {
       setError(e?.message || 'Não foi possível reenviar agora.');
     } finally {

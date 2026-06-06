@@ -1043,8 +1043,15 @@ export function CreateStore() {
         setStoreCodeDigits(['', '', '', '']);
         setLastAutoSubmittedStoreCode('');
         setStoreVerifyError('');
-        setStoreVerifyMessage(`Enviamos um código de 4 dígitos no e-mail ${result.emailMasked || targetEmail} para ativar sua loja.`);
-        setStoreResendCooldown(60);
+        setStoreVerifyMessage(
+          result?.emailDeliveryStatus === 'failed'
+            ? 'Sua loja foi criada, mas não conseguimos enviar o código agora. Toque em Reenviar código para tentar novamente.'
+            : `Enviamos um código de 4 dígitos no e-mail ${result.emailMasked || targetEmail} para ativar sua loja.`
+        );
+        {
+          const cooldown = Number(result?.cooldownSec);
+          setStoreResendCooldown(Number.isFinite(cooldown) ? Math.max(0, cooldown) : 60);
+        }
         return;
       }
 
@@ -1421,8 +1428,16 @@ export function CreateStore() {
     setStoreVerifyError('');
     try {
       const result = await authService.resendVerification(email);
-      setStoreVerifyMessage(`Novo código enviado para ${storeVerifyPrompt?.emailMasked || email}.`);
-      setStoreResendCooldown(Number(result?.cooldownSec || 60));
+      {
+        const cooldown = Number(result?.cooldownSec);
+        setStoreResendCooldown(Number.isFinite(cooldown) ? Math.max(0, cooldown) : 60);
+      }
+      if (result?.emailDeliveryStatus === 'failed') {
+        setStoreVerifyMessage('');
+        setStoreVerifyError('Não conseguimos enviar o código agora. Tente reenviar novamente em instantes.');
+      } else {
+        setStoreVerifyMessage(`Novo código enviado para ${storeVerifyPrompt?.emailMasked || email}.`);
+      }
     } catch (error: any) {
       setStoreVerifyError(error?.message || 'Não foi possível reenviar o código agora.');
     } finally {
