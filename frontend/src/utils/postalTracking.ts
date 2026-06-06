@@ -109,3 +109,52 @@ export const getPostalTrackingHeadline = (shipment: any, cancelled = false) => {
   }
   return getPostalStatusCopy(shipment?.shipmentStatus || 'posted');
 };
+
+export const getPostalTrackingUnavailableCopy = (reason?: string | null) => {
+  const normalized = String(reason || '')
+    .trim()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+
+  if (!normalized || normalized === 'carrier_provider_not_configured') {
+    return {
+      label: 'Rastreio integrado em preparação',
+      description: 'Assim que houver atualização disponível, ela aparece aqui no app.',
+    };
+  }
+
+  if (
+    normalized.includes('periodo invalido') ||
+    normalized.includes('empty_tracking_events') ||
+    normalized.includes('sem eventos')
+  ) {
+    return {
+      label: 'Ainda sem atualização dos Correios',
+      description: 'O código foi salvo, mas o integrador ainda não retornou movimentações para este objeto.',
+    };
+  }
+
+  if (
+    normalized.includes('credit') ||
+    normalized.includes('saldo') ||
+    normalized.includes('insufficient')
+  ) {
+    return {
+      label: 'Consulta temporariamente indisponível',
+      description: 'O acompanhamento interno está aguardando liberação do provedor de rastreio.',
+    };
+  }
+
+  if (normalized.includes('timeout') || normalized.includes('provider_error') || normalized.includes('http_')) {
+    return {
+      label: 'Não foi possível atualizar agora',
+      description: 'A consulta externa oscilou. Tente novamente em alguns minutos.',
+    };
+  }
+
+  return {
+    label: 'Atualização externa indisponível',
+    description: 'O pedido continua acompanhado pelo app e novas movimentações aparecerão aqui.',
+  };
+};

@@ -16,7 +16,13 @@ import { formatSelectedModifiers } from '../utils/productModifiers';
 import { getOrderItemLineTotal, getOrderItemOriginalLineTotal, getOrderItemQuantity } from '../utils/orderItems';
 import { getOrderRefundSnapshot } from '../utils/orderRefund';
 import { getFriendlyCancellationReason } from '../utils/orderCancellation';
-import { getPostalEventSourceCopy, getPostalStatusCopy, getPostalTrackingHeadline, sortPostalEventsDesc } from '../utils/postalTracking';
+import {
+  getPostalEventSourceCopy,
+  getPostalStatusCopy,
+  getPostalTrackingHeadline,
+  getPostalTrackingUnavailableCopy,
+  sortPostalEventsDesc,
+} from '../utils/postalTracking';
 import { openActionTarget } from '../utils/actionLink';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
@@ -458,6 +464,8 @@ export function OrderTracking() {
   const [tipPixCopied, setTipPixCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [trackingCodeCopied, setTrackingCodeCopied] = useState(false);
+  const [postalTrackingRefreshLoading, setPostalTrackingRefreshLoading] = useState(false);
+  const [postalTrackingRefreshError, setPostalTrackingRefreshError] = useState('');
   const [confirmReceiptLoading, setConfirmReceiptLoading] = useState(false);
   const [confirmReceiptError, setConfirmReceiptError] = useState('');
   const [reviewForm, setReviewForm] = useState({
@@ -852,10 +860,55 @@ export function OrderTracking() {
     () => sortPostalEventsDesc(Array.isArray(shipment?.events) ? shipment.events : []),
     [shipment?.events]
   );
+  const hasCarrierPostalEvent = postalTrackingEvents.some(
+    (event: any) => String(event?.source || '').trim().toLowerCase() === 'carrier'
+  );
+  const shipmentTrackingFallback = Boolean(shipment?.trackingFallback);
+  const shipmentTrackingUnavailableReason = String(
+    shipment?.trackingUnavailableReason ||
+      shipment?.trackingLastEvent?.unavailableReason ||
+      ''
+  ).trim();
+  const postalTrackingUnavailableCopy = useMemo(
+    () => getPostalTrackingUnavailableCopy(shipmentTrackingUnavailableReason),
+    [shipmentTrackingUnavailableReason]
+  );
   const postalTrackingHeadline = useMemo(
     () => getPostalTrackingHeadline(shipment, isCancelled),
     [shipment, isCancelled]
   );
+  const handleRefreshShipmentTracking = async () => {
+    if (!orderId || postalTrackingRefreshLoading) return;
+    setPostalTrackingRefreshLoading(true);
+    setPostalTrackingRefreshError('');
+    try {
+      orderService.clearPublicByIdCache(orderId);
+      const tracking = await orderService.getTrackingV2(orderId);
+      setOrder((prev: any) => {
+        if (!prev) return tracking;
+        return {
+          ...prev,
+          status: tracking?.status || prev.status,
+          paymentStatus: tracking?.paymentStatus ?? prev.paymentStatus,
+          refundStatus: tracking?.refundStatus ?? prev.refundStatus,
+          refundAmount: tracking?.refundAmount ?? prev.refundAmount,
+          refundReason: tracking?.refundReason ?? prev.refundReason,
+          refundedAt: tracking?.refundedAt ?? prev.refundedAt,
+          payment: tracking?.payment || prev.payment,
+          statusTimeline: tracking?.statusTimeline || tracking?.timeline || prev.statusTimeline,
+          timeline: tracking?.timeline || prev.timeline,
+          shipment: tracking?.shipment || prev.shipment,
+          eta: tracking?.eta || prev.eta,
+          travel: tracking?.travel || prev.travel,
+        };
+      });
+      orderService.clearPublicByIdCache(orderId);
+    } catch (err: any) {
+      setPostalTrackingRefreshError(err?.message || 'Não foi possível atualizar o rastreio agora.');
+    } finally {
+      setPostalTrackingRefreshLoading(false);
+    }
+  };
   const handleOpenShipmentTracking = async () => {
     if (!shipmentTrackingUrl) return;
     await openActionTarget({ href: shipmentTrackingUrl, external: true });
@@ -2226,19 +2279,57 @@ export function OrderTracking() {
                                 <CopySimple size={16} weight="bold" />
                               </button>
                             </div>
-                            {shipmentTrackingUrl && !isCancelled ? (
-                              <div className="mt-3 flex flex-col gap-2 rounded-2xl bg-slate-50/80 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
-                                <p className="text-[11px] font-semibold leading-4 text-slate-500">
-                                  Acompanhe por aqui. O site dos Correios pode pedir uma confirmação de segurança.
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={() => { void handleOpenShipmentTracking(); }}
-                                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black text-[#336886] shadow-sm transition hover:bg-slate-50 active:scale-[0.98]"
-                                >
-                                  <ArrowSquareOut size={14} weight="bold" />
-                                  Ver no site dos Correios
-                                </button>
+                            {!isCancelled ? (
+                              <div className="mt-3 rounded-2xl border border-[#d6e4ed] bg-[linear-gradient(135deg,#f7fbfd,#ffffff)] px-3 py-3 shadow-[0_16px_32px_-28px_rgba(51,104,134,0.22)]">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                  <div className="min-w-0">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                                      {hasCarrierPostalEvent ? 'Rastreio integrado' : 'Consulta pelo app'}
+                                    </p>
+                                    <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
+                                      {hasCarrierPostalEvent
+                                        ? 'As movimentações dos Correios aparecem aqui, sem sair do Já no Caminho.'
+                                        : 'Atualize para tentar buscar novas movimentações sem abrir o site dos Correios.'}
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => { void handleRefreshShipmentTracking(); }}
+                                    disabled={postalTrackingRefreshLoading}
+                                    className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#153A4C] px-4 py-2 text-[11px] font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.55)] transition hover:brightness-105 active:scale-[0.98] disabled:cursor-wait disabled:opacity-70"
+                                  >
+                                    {postalTrackingRefreshLoading ? (
+                                      <CircleNotch size={15} weight="bold" className="animate-spin" />
+                                    ) : (
+                                      <ArrowClockwise size={15} weight="bold" />
+                                    )}
+                                    {postalTrackingRefreshLoading ? 'Atualizando' : 'Atualizar rastreio'}
+                                  </button>
+                                </div>
+
+                                {shipmentTrackingFallback ? (
+                                  <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50/70 px-3 py-2.5">
+                                    <p className="text-xs font-black text-amber-900">{postalTrackingUnavailableCopy.label}</p>
+                                    <p className="mt-1 text-[11px] font-semibold leading-4 text-amber-800/85">{postalTrackingUnavailableCopy.description}</p>
+                                  </div>
+                                ) : null}
+
+                                {postalTrackingRefreshError ? (
+                                  <div className="mt-3 rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-700">
+                                    {postalTrackingRefreshError}
+                                  </div>
+                                ) : null}
+
+                                {shipmentTrackingUrl ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => { void handleOpenShipmentTracking(); }}
+                                    className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-black text-slate-500 shadow-sm transition hover:bg-slate-50 active:scale-[0.98] sm:w-auto"
+                                  >
+                                    <ArrowSquareOut size={14} weight="bold" />
+                                    Abrir site dos Correios
+                                  </button>
+                                ) : null}
                               </div>
                             ) : null}
                           </div>

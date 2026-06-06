@@ -41,14 +41,17 @@ SHIPPING_TRACKING_PROVIDER=siterastreio
 SITE_RASTREIO_API_KEY=
 SITE_RASTREIO_BASE_URL=https://api-labs.wonca.com.br/wonca.labs.v1.LabsService
 SITE_RASTREIO_TIMEOUT_MS=8000
+SHIPPING_TRACKING_REFRESH_STALE_MINUTES=180
 ```
 
 Observações:
 
 - Também é aceito `WONCA_API_KEY` como alias da chave.
 - O backend envia `POST /Track` com header `Authorization: Apikey <chave>`.
+- O backend não consulta o provedor a cada polling da tela. Ele grava `checkedAt` em `order_shipments.tracking_last_event` e respeita `SHIPPING_TRACKING_REFRESH_STALE_MINUTES` para evitar gasto excessivo de créditos.
 - Se a API retornar erro, timeout ou saldo insuficiente, o fluxo não quebra: a timeline interna continua aparecendo e o retorno inclui `trackingUnavailableReason`.
 - Em teste real com a chave do projeto, o provedor respondeu `insufficient credit balance`; isso indica credencial reconhecida sem crédito disponível no provedor.
+- Quando o provedor retorna mensagem como `Período inválido` ou sem eventos, a tela do cliente mostra uma mensagem amigável e mantém o link oficial dos Correios apenas como fallback.
 
 Para plugar outro provedor externo no futuro:
 

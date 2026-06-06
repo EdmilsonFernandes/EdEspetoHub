@@ -73,6 +73,28 @@ const serializeEvent = (event: OrderShipmentEvent) => ({
   createdAt: event.createdAt,
 });
 
+const getDateTime = (value?: Date | string | null) => {
+  if (!value) return null;
+  const parsed = value instanceof Date ? value : new Date(value);
+  return Number.isFinite(parsed.getTime()) ? parsed.getTime() : null;
+};
+
+const getProviderCheckedAt = (shipment?: OrderShipment | null) => {
+  const lastEvent = shipment?.trackingLastEvent || {};
+  return (
+    getDateTime((lastEvent as any)?.checkedAt) ||
+    getDateTime((lastEvent as any)?.providerCheckedAt) ||
+    getDateTime(shipment?.trackingLastAt) ||
+    null
+  );
+};
+
+const hasDeliveredCarrierEvent = (events: OrderShipmentEvent[]) =>
+  events.some((event) =>
+    String(event.source || '').toLowerCase() === 'carrier' &&
+    String(event.status || '').toLowerCase() === 'delivered'
+  );
+
 export class ShippingTrackingService {
   private readonly log = logger.child({ scope: 'ShippingTrackingService' });
   private readonly manualProvider = new ManualShippingTrackingProvider();
@@ -179,21 +201,44 @@ export class ShippingTrackingService {
     }
 
     const provider = this.resolveProvider();
+    const existingEvents = await this.listEvents(order.id);
+    const providerConfigured = provider.isConfigured();
+    const hasCarrierEvents = existingEvents.some((event) => String(event.source || '').toLowerCase() === 'carrier');
+    const checkedAt = getProviderCheckedAt(shipment);
+    const staleMs = env.shipping.trackingRefreshStaleMinutes * 60 * 1000;
+    const isFresh = Boolean(checkedAt && Date.now() - checkedAt < staleMs);
+    const terminalDelivered =
+      String(shipment.shipmentStatus || '').toLowerCase() === 'delivered' ||
+      Boolean(shipment.deliveredAt) ||
+      hasDeliveredCarrierEvent(existingEvents);
+
+    if (!providerConfigured || provider.name === 'manual' || isFresh || terminalDelivered) {
+      return {
+        summary: this.buildSummary(shipment, existingEvents),
+        events: existingEvents.map(serializeEvent),
+        provider: provider.name,
+        refreshed: false,
+        fallback: !hasCarrierEvents,
+        unavailableReason: providerConfigured
+          ? (shipment.trackingLastEvent as any)?.unavailableReason || null
+          : 'carrier_provider_not_configured',
+      };
+    }
+
     let providerResult = null as Awaited<ReturnType<ShippingTrackingProvider['fetchTracking']>> | null;
-    if (provider.isConfigured()) {
-      try {
-        providerResult = await provider.fetchTracking({
-          orderId: order.id,
-          trackingCode: shipment.trackingCode,
-          shipment,
-        });
-      } catch (error: any) {
-        this.log.warn('Shipping tracking provider failed', {
-          orderId: order.id,
-          provider: provider.name,
-          message: error?.message || 'unknown_error',
-        });
-      }
+    const providerCheckedAt = new Date();
+    try {
+      providerResult = await provider.fetchTracking({
+        orderId: order.id,
+        trackingCode: shipment.trackingCode,
+        shipment,
+      });
+    } catch (error: any) {
+      this.log.warn('Shipping tracking provider failed', {
+        orderId: order.id,
+        provider: provider.name,
+        message: error?.message || 'unknown_error',
+      });
     }
 
     if (providerResult?.events?.length) {
@@ -219,12 +264,28 @@ export class ShippingTrackingService {
             location: newest.location || null,
             eventAt: normalizeDate(newest.eventAt).toISOString(),
             provider: providerResult!.provider,
+            checkedAt: providerCheckedAt.toISOString(),
           };
           if (String(newest.status || '').toLowerCase() === 'delivered') {
             currentShipment.deliveredAt = currentShipment.deliveredAt || normalizeDate(newest.eventAt);
           }
           await shipmentRepo.save(currentShipment);
         }
+      });
+    } else {
+      await AppDataSource.transaction(async (manager) => {
+        const shipmentRepo = manager.getRepository(OrderShipment);
+        const currentShipment = await shipmentRepo.findOne({ where: { orderId: order.id } });
+        if (!currentShipment) return;
+        currentShipment.trackingLastEvent = {
+          ...(currentShipment.trackingLastEvent || {}),
+          status: 'tracking_unavailable',
+          title: 'Consulta de rastreio realizada',
+          provider: provider.name,
+          checkedAt: providerCheckedAt.toISOString(),
+          unavailableReason: providerResult?.unavailableReason || 'provider_unavailable',
+        };
+        await shipmentRepo.save(currentShipment);
       });
     }
 
