@@ -2204,6 +2204,21 @@ export function OrderTracking() {
                                 <CopySimple size={16} weight="bold" />
                               </button>
                             </div>
+                            {shipmentTrackingUrl && !isCancelled ? (
+                              <div className="mt-3 flex flex-col gap-2 rounded-2xl bg-slate-50/80 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+                                <p className="text-[11px] font-semibold leading-4 text-slate-500">
+                                  Acompanhe por aqui. O site dos Correios pode pedir uma confirmacao de seguranca.
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => { void handleOpenShipmentTracking(); }}
+                                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-black text-[#336886] shadow-sm transition hover:bg-slate-50 active:scale-[0.98]"
+                                >
+                                  <ArrowSquareOut size={14} weight="bold" />
+                                  Ver no site dos Correios
+                                </button>
+                              </div>
+                            ) : null}
                           </div>
                         ) : !isCancelled ? (
                           <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-white/70 px-4 py-3 text-sm font-semibold text-slate-500">
@@ -2287,16 +2302,6 @@ export function OrderTracking() {
                           </div>
                         ) : null}
 
-                        {shipmentTrackingUrl && !isCancelled ? (
-                          <button
-                            type="button"
-                            onClick={() => { void handleOpenShipmentTracking(); }}
-                            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm transition hover:bg-slate-50 active:scale-[0.98]"
-                          >
-                            <ArrowSquareOut size={17} weight="bold" />
-                            Abrir nos Correios
-                          </button>
-                        ) : null}
                       </div>
                     )}
 

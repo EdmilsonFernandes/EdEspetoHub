@@ -93,7 +93,7 @@ test.describe('Pedido postal - acompanhamento do cliente', () => {
     await expect(page.getByText('Atualizações do envio')).toBeVisible();
     await expect(page.getByText('Loja').first()).toBeVisible();
     await expect(page.getByText('Atualizado pela loja.').first()).toBeVisible();
-    await expect(page.getByRole('button', { name: /abrir nos correios/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /ver no site dos correios/i })).toBeVisible();
   });
 
   test('mostra estado claro quando a loja ainda não informou o rastreio', async ({ page }) => {
