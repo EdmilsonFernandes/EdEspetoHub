@@ -28,6 +28,15 @@ const publicTemplatePayload = (template: any) => ({
 });
 
 export class EmailAdminController {
+  static async health(_req: Request, res: Response) {
+    try {
+      const health = await templateService.getHealthOverview();
+      return res.json({ health });
+    } catch (error: any) {
+      return res.status(400).json({ message: error?.message || 'Não foi possível consultar a saúde dos e-mails.' });
+    }
+  }
+
   static async listTemplates(_req: Request, res: Response) {
     try {
       const templates = await templateService.listTemplates();

@@ -12,6 +12,7 @@ import {
 import { normalizeBrandingContent, renderPremiumEmailLayout } from '../utils/emailTemplateRenderer';
 import { SettingsService } from './SettingsService';
 import { EmailPreferenceService } from './EmailPreferenceService';
+import { EmailHealthService } from './EmailHealthService';
 
 type RenderManagedTemplateInput = {
   key: string;
@@ -49,6 +50,7 @@ export class EmailTemplateService {
   private sendLogRepository = AppDataSource.getRepository(EmailSendLog);
   private settingsService = new SettingsService();
   private preferenceService = new EmailPreferenceService();
+  private healthService = new EmailHealthService();
 
   private async legacyValue(definition: EmailTemplateDefinition, field: 'subject' | 'text' | 'html', fallback: string) {
     if (!definition.legacySettingPrefix) return fallback;
@@ -230,8 +232,25 @@ export class EmailTemplateService {
           metadata: input.metadata || {},
         })
       );
+      if (input.status === 'failed') {
+        void this.healthService
+          .recordFailure({
+            templateKey: input.templateKey || null,
+            category: input.category || null,
+            toEmail: input.toEmail,
+            subject: input.subject || null,
+            errorMessage: input.errorMessage || null,
+          })
+          .catch(() => {
+            // Falha no monitoramento nunca deve afetar o fluxo de e-mail.
+          });
+      }
     } catch {
       // E-mail nunca deve falhar apenas porque o log nao gravou.
     }
+  }
+
+  getHealthOverview() {
+    return this.healthService.getOverview();
   }
 }

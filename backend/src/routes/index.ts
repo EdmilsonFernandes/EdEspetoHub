@@ -350,6 +350,7 @@ routes.post('/public/email/unsubscribe', EmailPublicController.unsubscribe);
 routes.post('/public/email/unsubscribe/one-click', EmailPublicController.oneClickUnsubscribe);
 routes.get('/admin/home-config', requireAuth, requireRole('SUPER_ADMIN'), HomeConfigController.getAdmin);
 routes.put('/admin/home-config', requireAuth, requireRole('SUPER_ADMIN'), HomeConfigController.saveAdmin);
+routes.get('/admin/email/health', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.health);
 routes.get('/admin/email/templates', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.listTemplates);
 routes.get('/admin/email/templates/:key', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.getTemplate);
 routes.put('/admin/email/templates/:key', requireAuth, requireRole('SUPER_ADMIN'), EmailAdminController.saveTemplate);

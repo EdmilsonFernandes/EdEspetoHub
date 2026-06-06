@@ -213,6 +213,7 @@ export function createProxyRoutes(): Router {
     r.post('/admin/payments/:paymentId/reprocess', authRequired, forward);
     r.get('/admin/home-config', authRequired, forward);
     r.put('/admin/home-config', authRequired, forward);
+    r.get('/admin/email/health', authRequired, forward);
     r.get('/admin/email/templates', authRequired, forward);
     r.get('/admin/email/templates/:key', authRequired, forward);
     r.put('/admin/email/templates/:key', authRequired, forward);

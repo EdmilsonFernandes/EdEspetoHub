@@ -139,6 +139,10 @@ export const env = {
     notifyOnSignup: process.env.NOTIFY_ON_SIGNUP_EMAILS || '',
     auditInbox: process.env.AUDIT_NOTIFICATION_EMAIL || 'edmls2008@gmail.com',
   },
+  ops: {
+    alertWebhookUrl: process.env.OPS_ALERT_WEBHOOK_URL || process.env.OPERATIONS_ALERT_WEBHOOK_URL || '',
+    emailAlertThrottleMinutes: numberEnv('OPS_EMAIL_ALERT_THROTTLE_MINUTES', 30, 1),
+  },
   database: {
     host: process.env.PGHOST || 'localhost',
     port: process.env.PGPORT ? Number(process.env.PGPORT) : 5432,

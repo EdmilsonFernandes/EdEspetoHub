@@ -351,6 +351,11 @@ SMTP_PASS=<senha>
 SMTP_SECURE=false
 EMAIL_FROM=Jano Caminho <contato@janocaminho.com.br>
 
+# Alertas operacionais de e-mail (opcional, fora do SMTP)
+# Use webhook de Discord/Slack/Telegram bridge/etc. para saber quando o provedor bloquear envios.
+OPS_ALERT_WEBHOOK_URL=
+OPS_EMAIL_ALERT_THROTTLE_MINUTES=30
+
 # Firebase (Push Notifications)
 FCM_PROJECT_ID=ja-no-caminho-mobile
 FCM_SERVICE_ACCOUNT_PATH=/app/keys/firebase-adminsdk.json

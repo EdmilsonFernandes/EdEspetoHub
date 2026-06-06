@@ -31,6 +31,23 @@ export type EmailSuppressionPayload = {
   createdAt?: string | null;
 };
 
+export type EmailHealthPayload = {
+  status: 'healthy' | 'warning' | 'degraded';
+  severity: 'ok' | 'warning' | 'critical';
+  sentLastHour: number;
+  failedLastHour: number;
+  failedLast15Min: number;
+  latest?: {
+    templateKey?: string | null;
+    toEmail?: string | null;
+    status?: string | null;
+    errorMessage?: string | null;
+    createdAt?: string | null;
+  } | null;
+  lastAlert?: Record<string, unknown>;
+  suggestedAction?: string;
+};
+
 export type RenderedEmailPayload = {
   subject: string;
   preheader?: string;
@@ -70,6 +87,17 @@ const normalizeTemplate = (template: any): EmailTemplatePayload => ({
 });
 
 export const emailTemplateService = {
+  async getHealth() {
+    const payload = await apiClient.get('/admin/email/health', { authMode: 'superadmin' });
+    return (payload?.health || {
+      status: 'healthy',
+      severity: 'ok',
+      sentLastHour: 0,
+      failedLastHour: 0,
+      failedLast15Min: 0,
+    }) as EmailHealthPayload;
+  },
+
   async listTemplates() {
     const payload = await apiClient.get('/admin/email/templates', { authMode: 'superadmin' });
     return Array.isArray(payload?.templates) ? payload.templates.map(normalizeTemplate) : [];

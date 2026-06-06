@@ -9,10 +9,12 @@ import {
   Plus,
   ShieldCheck,
   Trash,
+  WarningCircle,
 } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import {
   EMAIL_CATEGORY_LABELS,
+  EmailHealthPayload,
   EmailSuppressionPayload,
   EmailTemplateCategory,
   EmailTemplatePayload,
@@ -65,6 +67,7 @@ export function SuperAdminEmailTemplates() {
   const [testEmail, setTestEmail] = useState('');
   const [manualEmail, setManualEmail] = useState('');
   const [manualReason, setManualReason] = useState('');
+  const [health, setHealth] = useState<EmailHealthPayload | null>(null);
   const [error, setError] = useState('');
 
   const selectedTemplate = useMemo(
@@ -77,12 +80,14 @@ export function SuperAdminEmailTemplates() {
     setLoading(true);
     setError('');
     try {
-      const [templateList, suppressionList] = await Promise.all([
+      const [templateList, suppressionList, healthOverview] = await Promise.all([
         emailTemplateService.listTemplates(),
         emailTemplateService.listSuppressions(),
+        emailTemplateService.getHealth(),
       ]);
       setTemplates(templateList);
       setSuppressions(suppressionList);
+      setHealth(healthOverview);
       const nextKey = selectedKey || templateList[0]?.key || '';
       setSelectedKey(nextKey);
       const selected = templateList.find((template: EmailTemplatePayload) => template.key === nextKey) || templateList[0] || null;
@@ -206,6 +211,66 @@ export function SuperAdminEmailTemplates() {
 
           {error ? (
             <div className="rounded-3xl border border-rose-100 bg-rose-50 p-4 text-sm font-bold text-rose-700">{error}</div>
+          ) : null}
+
+          {health ? (
+            <section
+              className={`rounded-[1.75rem] border p-4 shadow-[0_18px_48px_-38px_rgba(15,23,42,0.38)] backdrop-blur ${
+                health.status === 'healthy'
+                  ? 'border-emerald-100 bg-emerald-50/80'
+                  : health.status === 'warning'
+                    ? 'border-amber-100 bg-amber-50/85'
+                    : 'border-rose-100 bg-rose-50/90'
+              }`}
+            >
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
+                      health.status === 'healthy'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : health.status === 'warning'
+                          ? 'bg-amber-100 text-amber-700'
+                          : 'bg-rose-100 text-rose-700'
+                    }`}
+                  >
+                    {health.status === 'healthy' ? <ShieldCheck size={24} weight="duotone" /> : <WarningCircle size={24} weight="duotone" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Saúde do envio</p>
+                    <h2 className="mt-1 text-lg font-black text-slate-950">
+                      {health.status === 'healthy'
+                        ? 'E-mails operando normalmente'
+                        : health.status === 'warning'
+                          ? 'Falhas recentes no envio'
+                          : 'Atenção: provedor de e-mail pode estar bloqueando envios'}
+                    </h2>
+                    <p className="mt-1 max-w-3xl text-sm font-semibold leading-relaxed text-slate-600">
+                      {health.suggestedAction || 'Acompanhe os últimos envios e faça um teste antes de liberar novos cadastros.'}
+                    </p>
+                    {health.latest?.errorMessage ? (
+                      <p className="mt-2 max-w-3xl rounded-2xl bg-white/70 px-3 py-2 text-xs font-semibold leading-relaxed text-slate-600">
+                        Último erro: {health.latest.errorMessage}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center lg:min-w-[300px]">
+                  <div className="rounded-2xl bg-white/75 px-3 py-2">
+                    <p className="text-lg font-black text-slate-950">{health.sentLastHour}</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">enviados 1h</p>
+                  </div>
+                  <div className="rounded-2xl bg-white/75 px-3 py-2">
+                    <p className="text-lg font-black text-slate-950">{health.failedLastHour}</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">falhas 1h</p>
+                  </div>
+                  <div className="rounded-2xl bg-white/75 px-3 py-2">
+                    <p className="text-lg font-black text-slate-950">{health.failedLast15Min}</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">falhas 15m</p>
+                  </div>
+                </div>
+              </div>
+            </section>
           ) : null}
 
           <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
