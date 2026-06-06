@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowClockwise, ArrowSquareOut, Bicycle, CheckCircle, Clock, CircleNotch, CopySimple, CreditCard, MapPin, Package, Phone, Robot, SealCheck, Star, Storefront, User, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowClockwise, ArrowSquareOut, Bicycle, CheckCircle, Clock, CircleNotch, CopySimple, CreditCard, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
 import { Capacitor } from '@capacitor/core';
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
@@ -457,6 +457,7 @@ export function OrderTracking() {
   const [orderAccessToken, setOrderAccessToken] = useState('');
   const [tipPixCopied, setTipPixCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [trackingCodeCopied, setTrackingCodeCopied] = useState(false);
   const [confirmReceiptLoading, setConfirmReceiptLoading] = useState(false);
   const [confirmReceiptError, setConfirmReceiptError] = useState('');
   const [reviewForm, setReviewForm] = useState({
@@ -2163,12 +2164,12 @@ export function OrderTracking() {
 
                         <div className="mt-4 grid gap-2 sm:grid-cols-2">
                           <TrackingMetaCard
-                            label="Servico"
+                            label="Tipo de envio"
                             value={shipmentServiceName || shipmentServiceCode || 'A confirmar'}
-                            detail={postalEstimatedDays ? `${postalEstimatedDays} dia(s) uteis` : 'Prazo conforme postagem'}
+                            detail={postalEstimatedDays ? `${postalEstimatedDays} dia(s) uteis apos postagem` : 'Prazo conforme postagem'}
                           />
                           <TrackingMetaCard
-                            label="Previsao"
+                            label="Chega ate"
                             value={!isCancelled && postalExpectedDeliveryDate ? postalExpectedDeliveryDate.toLocaleDateString('pt-BR') : 'Acompanhe aqui'}
                             detail="Atualiza conforme o envio"
                           />
@@ -2176,7 +2177,14 @@ export function OrderTracking() {
 
                         {shipmentTrackingCode ? (
                           <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Codigo de rastreio</p>
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Codigo dos Correios</p>
+                              {trackingCodeCopied ? (
+                                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 ring-1 ring-emerald-100">
+                                  Copiado
+                                </span>
+                              ) : null}
+                            </div>
                             <div className="mt-1 flex items-center gap-2">
                               <p className="min-w-0 flex-1 break-all text-sm font-black tracking-[0.08em] text-slate-950">{shipmentTrackingCode}</p>
                               <button
@@ -2184,6 +2192,8 @@ export function OrderTracking() {
                                 onClick={async () => {
                                   try {
                                     await navigator.clipboard.writeText(shipmentTrackingCode);
+                                    setTrackingCodeCopied(true);
+                                    window.setTimeout(() => setTrackingCodeCopied(false), 1800);
                                   } catch (err) {
                                     console.error('Falha ao copiar rastreio', err);
                                   }
@@ -2203,38 +2213,70 @@ export function OrderTracking() {
 
                         {postalTrackingEvents.length ? (
                           <div className="mt-4 space-y-3">
-                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Linha do tempo do envio</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Atualizações do envio</p>
                             {postalTrackingEvents.slice(0, 6).map((event: any, index: number) => {
                               const copy = getPostalStatusCopy(event.status);
                               const sourceCopy = getPostalEventSourceCopy(event.source);
-                              const SourceIcon = sourceCopy.kind === 'carrier'
-                                ? Package
-                                : sourceCopy.kind === 'seller'
-                                  ? Storefront
-                                  : Robot;
+                              const isLatest = index === 0;
+                              const isCarrierEvent = sourceCopy.kind === 'carrier';
+                              const isSellerEvent = sourceCopy.kind === 'seller';
+                              const isSystemEvent = sourceCopy.kind === 'system';
                               const eventDate = event.eventAt || event.createdAt;
                               return (
-                                <div key={event.id || `${event.status}-${index}`} className="relative flex gap-3">
+                                <div key={event.id || `${event.status}-${index}`} className="relative grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3">
                                   <div className="flex flex-col items-center">
-                                    <span className={`flex h-8 w-8 items-center justify-center rounded-2xl border shadow-[0_14px_28px_-24px_rgba(15,23,42,0.8)] ${
-                                      index === 0 ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-500'
+                                    <span className={`relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border shadow-[0_16px_34px_-25px_rgba(15,23,42,0.7)] ${
+                                      isLatest
+                                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700 ring-4 ring-emerald-50/70'
+                                        : isCarrierEvent
+                                          ? 'border-amber-100 bg-[#fff8dd] text-[#336886]'
+                                          : 'border-slate-200 bg-white text-slate-500'
                                     }`}>
-                                      <SourceIcon size={16} weight="duotone" />
+                                      {isSellerEvent ? (
+                                        <img
+                                          src={storeLogo}
+                                          alt={storeName}
+                                          className="h-full w-full object-cover"
+                                          onError={(event) => {
+                                            if (!event.currentTarget.src.endsWith('/janocaminho.jpg')) {
+                                              event.currentTarget.src = '/janocaminho.jpg';
+                                              return;
+                                            }
+                                            event.currentTarget.style.display = 'none';
+                                          }}
+                                        />
+                                      ) : isSystemEvent ? (
+                                        <img
+                                          src="/janocaminho.jpg"
+                                          alt="Já no Caminho"
+                                          className="h-full w-full object-cover"
+                                          onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                                        />
+                                      ) : (
+                                        <Package size={18} weight="duotone" />
+                                      )}
+                                      {isLatest ? <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-400" /> : null}
                                     </span>
                                     {index < Math.min(postalTrackingEvents.length, 6) - 1 ? <span className="mt-1 h-full min-h-10 w-px bg-slate-200" /> : null}
                                   </div>
-                                  <div className={`min-w-0 flex-1 rounded-2xl border px-3 py-2.5 shadow-[0_16px_34px_-30px_rgba(15,23,42,0.38)] ${
-                                    index === 0 ? 'border-emerald-100 bg-white' : 'border-slate-100 bg-white/86'
+                                  <div className={`min-w-0 rounded-[1.15rem] border px-3.5 py-3 shadow-[0_18px_38px_-31px_rgba(15,23,42,0.36)] ${
+                                    isLatest ? 'border-emerald-100 bg-white' : 'border-slate-100 bg-white/88'
                                   }`}>
                                     <div className="flex flex-wrap items-start justify-between gap-2">
-                                      <p className="min-w-0 flex-1 text-sm font-black text-slate-900">{event.title || copy.label}</p>
-                                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-100">
+                                      <p className="min-w-0 flex-1 text-sm font-black leading-snug text-slate-950">{event.title || copy.label}</p>
+                                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black ring-1 ${
+                                        isCarrierEvent
+                                          ? 'bg-amber-50 text-[#336886] ring-amber-100'
+                                          : isSellerEvent
+                                            ? 'bg-slate-50 text-slate-600 ring-slate-100'
+                                            : 'bg-emerald-50 text-emerald-700 ring-emerald-100'
+                                      }`}>
                                         {sourceCopy.label}
                                       </span>
                                     </div>
-                                    <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{event.description || copy.description}</p>
-                                    <p className="mt-1 text-[11px] font-semibold text-slate-400">{sourceCopy.description}</p>
-                                    <div className="mt-1 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-400">
+                                    <p className="mt-1 text-xs font-medium leading-5 text-slate-600">{event.description || copy.description}</p>
+                                    <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] font-semibold text-slate-400">
+                                      <span className="rounded-full bg-slate-50 px-2 py-0.5 ring-1 ring-slate-100">{sourceCopy.description}</span>
                                       {eventDate ? <span>{formatDateTime(eventDate)}</span> : null}
                                       {event.location ? <span>{event.location}</span> : null}
                                     </div>
@@ -2252,7 +2294,7 @@ export function OrderTracking() {
                             className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm transition hover:bg-slate-50 active:scale-[0.98]"
                           >
                             <ArrowSquareOut size={17} weight="bold" />
-                            Abrir rastreio oficial
+                            Abrir nos Correios
                           </button>
                         ) : null}
                       </div>

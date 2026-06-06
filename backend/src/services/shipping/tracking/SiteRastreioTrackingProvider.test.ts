@@ -43,6 +43,43 @@ describe('SiteRastreioTrackingProvider', () => {
     });
   });
 
+  it('maps Correios events embedded as a json string by Site Rastreio/Wonca', () => {
+    const events = mapSiteRastreioPayloadToEvents({
+      carrier: 'CARRIER_CORREIOS',
+      json: JSON.stringify({
+        codObjeto: 'AA000000000BR',
+        eventos: [
+          {
+            codigo: 'CO',
+            tipo: '01',
+            descricao: 'Objeto coletado',
+            descricaoFrontEnd: 'Objeto coletado',
+            dtHrCriado: {
+              date: '2026-03-05 15:10:00.000000',
+              timezone_type: 3,
+              timezone: 'America/Sao_Paulo',
+            },
+            unidade: {
+              tipo: 'Unidade de Distribuição',
+              endereco: {
+                cidade: 'SAO PAULO',
+                uf: 'SP',
+              },
+            },
+          },
+        ],
+      }),
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      source: 'carrier',
+      status: 'posted',
+      title: 'Objeto coletado',
+      location: 'SAO PAULO / SP',
+    });
+  });
+
   it('returns provider unavailable instead of throwing when account has no credits', async () => {
     env.shipping.siteRastreioApiKey = 'test-key';
     env.shipping.siteRastreioBaseUrl = 'https://example.test';
@@ -107,5 +144,68 @@ describe('SiteRastreioTrackingProvider', () => {
       title: 'Objeto entregue ao destinatário',
       location: 'Gonçalves / MG',
     });
+  });
+
+  it('fetches and maps tracking events from provider json string responses', async () => {
+    env.shipping.siteRastreioApiKey = 'test-key';
+    env.shipping.siteRastreioBaseUrl = 'https://example.test';
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          json: JSON.stringify({
+            eventos: [
+              {
+                descricao: 'Objeto entregue ao destinatário',
+                dtHrCriado: { date: '2026-06-06 16:02:00.000000' },
+                unidade: { endereco: { cidade: 'GONCALVES', uf: 'MG' } },
+              },
+            ],
+          }),
+          carrier: 'CARRIER_CORREIOS',
+        }),
+      }))
+    );
+
+    const result = await new SiteRastreioTrackingProvider().fetchTracking({
+      orderId: 'order-1',
+      trackingCode: 'AA361812099BR',
+    });
+
+    expect(result.unavailableReason).toBeNull();
+    expect(result.events[0]).toMatchObject({
+      status: 'delivered',
+      title: 'Objeto entregue ao destinatário',
+      location: 'GONCALVES / MG',
+    });
+  });
+
+  it('returns provider message when Site Rastreio responds with an embedded error', async () => {
+    env.shipping.siteRastreioApiKey = 'test-key';
+    env.shipping.siteRastreioBaseUrl = 'https://example.test';
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          json: JSON.stringify({ erro: true, mensagem: 'Período inválido' }),
+          carrier: 'CARRIER_CORREIOS',
+        }),
+      }))
+    );
+
+    const result = await new SiteRastreioTrackingProvider().fetchTracking({
+      orderId: 'order-1',
+      trackingCode: 'AA361812099BR',
+    });
+
+    expect(result.events).toEqual([]);
+    expect(result.status).toBe('tracking_unavailable');
+    expect(result.unavailableReason).toBe('Período inválido');
   });
 });

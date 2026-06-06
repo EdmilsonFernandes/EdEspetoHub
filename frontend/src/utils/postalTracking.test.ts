@@ -24,7 +24,7 @@ describe('postalTracking utils', () => {
   it('translates technical event sources to customer-friendly copy', () => {
     expect(getPostalEventSourceCopy('seller')).toMatchObject({
       label: 'Loja',
-      description: 'Atualizado pelo vendedor.',
+      description: 'Atualizado pela loja.',
     });
     expect(getPostalEventSourceCopy('system')).toMatchObject({
       label: 'Já no Caminho',

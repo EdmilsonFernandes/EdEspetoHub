@@ -66,20 +66,20 @@ export const getPostalEventSourceCopy = (source?: string | null) => {
     return {
       kind: 'carrier',
       label: 'Correios',
-      description: 'Atualização do rastreio oficial.',
+      description: 'Rastreio oficial dos Correios.',
     };
   }
   if (key === 'seller') {
     return {
       kind: 'seller',
       label: 'Loja',
-      description: 'Atualizado pelo vendedor.',
+      description: 'Atualizado pela loja.',
     };
   }
   return {
     kind: 'system',
     label: 'Já no Caminho',
-    description: 'Acompanhamento automático do pedido.',
+    description: 'Acompanhamento automatico do pedido.',
   };
 };
 
