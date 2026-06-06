@@ -151,6 +151,8 @@ Pedidos de entrega com `orders.fulfillment_mode = 'postal'` usam uma extensao pr
 Configuração atual:
 
 - `SHIPPING_TRACKING_PROVIDER=manual` por padrão.
+- Para consultar Site Rastreio/Wonca, usar `SHIPPING_TRACKING_PROVIDER=siterastreio` e configurar `SITE_RASTREIO_API_KEY`.
+- Se o provedor externo falhar ou ficar sem crédito, o pedido continua exibindo a timeline interna e o link oficial de rastreio como fallback.
 - O provider pode ser trocado futuramente sem mudar tela ou regra de pedido.
 
 Guia tecnico: `docs/POSTAL_SHIPPING_TRACKING.md`.

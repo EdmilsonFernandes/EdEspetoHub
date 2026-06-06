@@ -34,7 +34,23 @@ SHIPPING_TRACKING_PROVIDER=manual
 
 Com `manual`, o sistema não depende de scraper nem de API instável. Ele entrega timeline interna, código de rastreio e link oficial dos Correios.
 
-Para plugar um provedor externo no futuro:
+Provider Site Rastreio/Wonca:
+
+```env
+SHIPPING_TRACKING_PROVIDER=siterastreio
+SITE_RASTREIO_API_KEY=
+SITE_RASTREIO_BASE_URL=https://api-labs.wonca.com.br/wonca.labs.v1.LabsService
+SITE_RASTREIO_TIMEOUT_MS=8000
+```
+
+Observações:
+
+- Também é aceito `WONCA_API_KEY` como alias da chave.
+- O backend envia `POST /Track` com header `Authorization: Apikey <chave>`.
+- Se a API retornar erro, timeout ou saldo insuficiente, o fluxo não quebra: a timeline interna continua aparecendo e o retorno inclui `trackingUnavailableReason`.
+- Em teste real com a chave do projeto, o provedor respondeu `insufficient credit balance`; isso indica credencial reconhecida sem crédito disponível no provedor.
+
+Para plugar outro provedor externo no futuro:
 
 1. Criar uma classe que implemente `ShippingTrackingProvider`.
 2. Mapear eventos externos para os status internos (`posted`, `in_transit`, `out_for_delivery`, `delivered`, `exception`).

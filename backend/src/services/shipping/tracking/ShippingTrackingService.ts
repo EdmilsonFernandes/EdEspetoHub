@@ -1,4 +1,4 @@
-import { EntityManager } from 'typeorm';
+import { EntityManager, IsNull } from 'typeorm';
 import { env } from '../../../config/env';
 import { AppDataSource } from '../../../config/database';
 import { Order } from '../../../entities/Order';
@@ -6,6 +6,7 @@ import { OrderShipment } from '../../../entities/OrderShipment';
 import { OrderShipmentEvent } from '../../../entities/OrderShipmentEvent';
 import { logger } from '../../../utils/logger';
 import { ManualShippingTrackingProvider } from './ManualShippingTrackingProvider';
+import { SiteRastreioTrackingProvider } from './SiteRastreioTrackingProvider';
 import { ShippingTrackingEventInput, ShippingTrackingProvider } from './types';
 
 const EVENT_LABELS: Record<string, { label: string; description: string }> = {
@@ -75,9 +76,13 @@ const serializeEvent = (event: OrderShipmentEvent) => ({
 export class ShippingTrackingService {
   private readonly log = logger.child({ scope: 'ShippingTrackingService' });
   private readonly manualProvider = new ManualShippingTrackingProvider();
+  private readonly siteRastreioProvider = new SiteRastreioTrackingProvider();
 
   private resolveProvider(): ShippingTrackingProvider {
     const provider = String(env.shipping.trackingProvider || 'manual').toLowerCase();
+    if (['siterastreio', 'site-rastreio', 'wonca'].includes(provider)) {
+      return this.siteRastreioProvider;
+    }
     if (provider !== 'manual') {
       this.log.warn('Shipping tracking provider not implemented, using manual fallback', { provider });
     }
@@ -129,15 +134,33 @@ export class ShippingTrackingService {
     const status = String(event.status || '').trim().toLowerCase();
     if (!status) return null;
     const label = this.getLabel(status);
+    const source = String(event.source || 'system').trim().toLowerCase();
+    const eventAt = normalizeDate(event.eventAt);
+    const title = String(event.title || label.label).trim() || label.label;
+    const location = String(event.location || '').trim() || null;
+
+    if (source === 'carrier') {
+      const existing = await eventRepo.findOne({
+        where: {
+          orderId,
+          source,
+          status,
+          title,
+          location: location ?? IsNull(),
+          eventAt,
+        },
+      });
+      if (existing) return existing;
+    }
 
     const entity = eventRepo.create({
       orderId,
-      source: String(event.source || 'system').trim().toLowerCase(),
+      source,
       status,
-      title: String(event.title || label.label).trim() || label.label,
+      title,
       description: event.description !== undefined ? event.description : label.description,
-      location: String(event.location || '').trim() || null,
-      eventAt: normalizeDate(event.eventAt),
+      location,
+      eventAt,
       rawPayload: event.rawPayload || null,
     });
     return eventRepo.save(entity);

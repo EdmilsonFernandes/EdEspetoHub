@@ -201,6 +201,11 @@ export const env = {
     strictProvider: process.env.SHIPPING_STRICT_PROVIDER === 'true',
     trackingProvider: String(process.env.SHIPPING_TRACKING_PROVIDER || 'manual').toLowerCase(),
     trackingRefreshStaleMinutes: numberEnv('SHIPPING_TRACKING_REFRESH_STALE_MINUTES', 180, 1),
+    siteRastreioApiKey: process.env.SITE_RASTREIO_API_KEY || process.env.WONCA_API_KEY || '',
+    siteRastreioBaseUrl:
+      process.env.SITE_RASTREIO_BASE_URL ||
+      'https://api-labs.wonca.com.br/wonca.labs.v1.LabsService',
+    siteRastreioTimeoutMs: numberEnv('SITE_RASTREIO_TIMEOUT_MS', 8000, 1000),
   },
   melhorEnvio: {
     baseUrl: process.env.MELHOR_ENVIO_BASE_URL || 'https://sandbox.melhorenvio.com.br',

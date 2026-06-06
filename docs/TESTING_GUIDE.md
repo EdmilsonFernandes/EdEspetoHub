@@ -78,6 +78,7 @@ Além dos E2E, existem unitários cobrindo partes sensíveis que não devem vira
 | Portal parceiro de destinos | Sessão frontend, login, ativação, rotas protegidas com `authMode: partner` e atualização de chalé/serviço pelo service do portal. |
 | Turismo/seeds | Massa de dados de turismo para Gonçalves e São Bento. |
 | Upload/storage | Regras de caminho público/privado de imagens. |
+| Rastreio postal | Validação de código, provider Site Rastreio/Wonca, mapeamento de eventos da transportadora e fallback para erro de crédito/indisponibilidade. |
 
 ### Lacunas Conhecidas
 
