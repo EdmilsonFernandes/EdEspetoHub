@@ -1577,16 +1577,16 @@ export function ClientOrders() {
           <section className="mb-5 overflow-hidden rounded-[1.8rem] border border-white/85 bg-white/78 p-3 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.26)] ring-1 ring-[#d7e7ef]/55 backdrop-blur-xl">
             <div className="flex items-center justify-between gap-3 px-1">
               <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Pedidos</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Filtrar pedidos</p>
                 <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
-                  Filtre sem perder o histórico.
+                  Encontre rápido por situação.
                 </p>
               </div>
-              <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-[#336886] ring-1 ring-[#cfe0ea] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.36)]">
-                {filteredOrders.length}/{orders.length}
+              <span className="inline-flex shrink-0 rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-[#336886] ring-1 ring-[#cfe0ea] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.36)]">
+                {filteredOrders.length} pedido{filteredOrders.length === 1 ? '' : 's'}
               </span>
             </div>
-            <div className="mt-3 grid grid-cols-4 gap-1.5 sm:gap-2">
+            <div className="mt-3 grid grid-cols-4 gap-2">
               {orderFilters.map((filter) => {
                 const isSelected = statusFilter === filter.key;
                 return (
@@ -1594,7 +1594,7 @@ export function ClientOrders() {
                     key={filter.key}
                     type="button"
                     onClick={() => setStatusFilter(filter.key)}
-                    className={`jnc-hub-touch relative inline-flex min-h-[3.9rem] min-w-0 flex-col items-center justify-center rounded-[1.05rem] border px-1.5 py-2 text-center transition-all sm:min-h-[4rem] sm:px-2 ${
+                    className={`jnc-hub-touch relative inline-flex min-h-[3.75rem] min-w-0 flex-col items-center justify-center rounded-[1.1rem] border px-1.5 py-2 text-center transition-all sm:min-h-[4rem] sm:px-2 ${
                       isSelected
                         ? 'border-[#153A4C] bg-[linear-gradient(135deg,#153A4C_0%,#336886_100%)] text-white shadow-[0_16px_30px_-22px_rgba(21,58,76,0.62)]'
                         : 'border-white/90 bg-white/82 text-slate-700 shadow-[0_12px_26px_-24px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/55'
@@ -1603,7 +1603,7 @@ export function ClientOrders() {
                     aria-label={`${filter.label}: ${filter.count} pedido${filter.count === 1 ? '' : 's'}`}
                     title={filter.label}
                   >
-                    <span className={`absolute right-1.5 top-1.5 inline-flex min-w-[1.35rem] shrink-0 items-center justify-center rounded-full px-1.5 py-0.5 text-[9px] font-black leading-none ${
+                    <span className={`absolute right-1.5 top-1.5 inline-flex min-w-[1.45rem] shrink-0 items-center justify-center rounded-full px-1.5 py-0.5 text-[9px] font-black leading-none ${
                       isSelected
                         ? 'bg-white text-[#153A4C] shadow-[0_8px_16px_-12px_rgba(15,23,42,0.45)]'
                         : 'bg-[#edf5fa]/86 text-[#336886] ring-1 ring-white/80'
@@ -1617,7 +1617,7 @@ export function ClientOrders() {
                         {filter.icon}
                       </span>
                       <span className="min-w-0 max-w-full">
-                        <span className="block max-w-full whitespace-nowrap text-[9px] font-black leading-tight sm:text-[11px]">
+                        <span className="block max-w-full whitespace-nowrap text-[9px] font-black leading-tight tracking-[-0.01em] sm:text-[11px]">
                           <span className="sm:hidden">{filter.shortLabel}</span>
                           <span className="hidden sm:inline">{filter.label}</span>
                         </span>

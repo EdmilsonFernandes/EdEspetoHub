@@ -40,7 +40,7 @@ const statusLabels: Record<string, string> = {
 
 const typeLabels: Record<string, string> = {
   delivery: 'Entrega',
-  pickup: 'Retirar',
+  pickup: 'Retirada',
   table: 'Comer no local',
 };
 
@@ -805,7 +805,7 @@ export function OrderTracking() {
     if (order?.type === 'table') return 'Pedido cancelado antes da finalização';
     return 'Pedido cancelado';
   }, [deliveryStatus, isCancelled, isDelivery, isPostalDelivery, isShipmentPosted, order?.type]);
-  const orderLifecycleLabel = isCancelled ? cancelledFlowDetail || 'Pedido cancelado' : isReady ? 'Pedido concluido' : 'Pedido em andamento';
+  const orderLifecycleLabel = isCancelled ? cancelledFlowDetail || 'Pedido cancelado' : isReady ? 'Pedido concluído' : 'Pedido em andamento';
   const mercadoPagoApprovalDetail = isCancelled
     ? 'Pago via Mercado Pago antes do cancelamento'
     : 'Confirmado pelo Mercado Pago';
@@ -826,6 +826,18 @@ export function OrderTracking() {
     : hasOnlinePayment
     ? 'Forma usada na compra online'
     : 'Forma escolhida para este pedido';
+  const paymentContextLabel = isPaymentApproved
+    ? 'Pago e confirmado'
+    : hasOnlinePayment
+    ? 'Pagamento online'
+    : normalizedPaymentMethod === 'dinheiro'
+    ? 'Pague no atendimento'
+    : 'Combinado com a loja';
+  const paymentIconToneClass = normalizedPaymentMethod === 'dinheiro'
+    ? 'border-amber-100 bg-[linear-gradient(135deg,#fff8e7,#ffffff)] text-amber-700'
+    : hasOnlinePayment
+    ? 'border-sky-100 bg-[linear-gradient(135deg,#ecfeff,#ffffff)] text-[#009ee3]'
+    : 'border-[#d6e4ed] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] text-[#336886]';
   const postalStatusLabel = isCancelled
     ? 'Cancelado'
     : isShipmentPosted
@@ -1922,7 +1934,10 @@ export function OrderTracking() {
                   className="rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] p-5 shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]"
                 >
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <p className="text-sm font-semibold text-stone-950">Itens do pedido</p>
+                    <div>
+                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Resumo do pedido</p>
+                      <p className="mt-0.5 text-sm font-black text-stone-950">Itens escolhidos</p>
+                    </div>
                     <span className="rounded-full border border-[#d6e4ed] bg-white/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">
                       {itemsToRender.length} {itemsToRender.length === 1 ? 'item' : 'itens'}
                     </span>
@@ -2015,29 +2030,36 @@ export function OrderTracking() {
                     </div>
                   ) : null}
                   <div className="mt-3 flex items-center justify-between border-t border-[#dce9f1] pt-4">
-                    <span className="text-lg font-bold text-slate-950">Total</span>
-                    <span className="text-lg font-bold tracking-tight text-[#153A4C]">
+                    <div>
+                      <span className="text-lg font-bold text-slate-950">Total</span>
+                      <p className="text-[11px] font-semibold text-slate-400">Valor final do pedido</p>
+                    </div>
+                    <span className="rounded-2xl bg-[#edf5fa] px-3 py-2 text-lg font-black tracking-tight text-[#153A4C] ring-1 ring-[#d6e4ed]">
                       {formatCurrency(order.total || 0)}
                     </span>
                   </div>
                 </div>
                 <div id="order-info-section" className="overflow-hidden rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]">
                   <div className="border-b border-[#dce9f1] px-5 py-4">
-                    <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Pagamento e entrega</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Como será atendido</p>
+                    <p className="mt-1 text-xs font-semibold text-slate-500">Pagamento, endereço e orientações importantes em um só lugar.</p>
                   </div>
                   <div className="space-y-4 px-4 py-4 sm:px-5">
                     <div className="rounded-[1.35rem] border border-[#d6e4ed] bg-[linear-gradient(135deg,#ffffff_0%,#f5fafd_58%,#edf6fb_100%)] p-4 shadow-[0_20px_40px_-32px_rgba(51,104,134,0.22)]">
                       <div className="flex items-start gap-3">
-                        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-[#d6e4ed] bg-white shadow-[0_14px_26px_-22px_rgba(51,104,134,0.4)]">
+                        <span className={`grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-[1.15rem] border shadow-[0_16px_30px_-22px_rgba(51,104,134,0.36)] ${paymentIconToneClass}`}>
                           {paymentMeta?.icon ? (
-                            <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-7 w-7 object-contain" />
+                            <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-8 w-8 object-contain drop-shadow-[0_8px_10px_rgba(15,23,42,0.10)]" />
                           ) : (
-                            <CreditCard size={22} weight="duotone" className="text-[#336886]" />
+                            <CreditCard size={24} weight="duotone" />
                           )}
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Pagamento</p>
+                            <span className="inline-flex rounded-full border border-[#d6e4ed] bg-white/85 px-2 py-0.5 text-[10px] font-black text-slate-600">
+                              {paymentContextLabel}
+                            </span>
                             {isPaymentApproved ? (
                               <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700">
                                 <SealCheck size={12} weight="fill" />
@@ -2110,7 +2132,7 @@ export function OrderTracking() {
                       {isDelivery && formatAddress(order.address || order.deliveryAddress) ? (
                         <TrackingInfoRow
                           icon={<MapPin size={16} weight="duotone" />}
-                          label="Endereco de entrega"
+                          label="Endereço de entrega"
                           value={formatAddress(order.address || order.deliveryAddress)}
                         />
                       ) : null}
@@ -2128,7 +2150,7 @@ export function OrderTracking() {
                           <TrackingMetaCard
                             label="Troco"
                             value={cashChangeValue && cashChangeValue > 0 ? formatCurrency(cashChangeValue) : 'Sem troco'}
-                            detail={cashChangeValue && cashChangeValue > 0 ? 'Troco previsto para o atendimento' : 'Nao ha troco para este pedido'}
+                            detail={cashChangeValue && cashChangeValue > 0 ? 'Troco previsto para o atendimento' : 'Não há troco para este pedido'}
                           />
                         </div>
                       </div>
@@ -2136,7 +2158,7 @@ export function OrderTracking() {
 
                     {isCondominiumOrder && (
                       <div className="rounded-[1.35rem] border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-emerald-900 shadow-[0_18px_36px_-30px_rgba(16,185,129,0.22)]">
-                        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Feira no condominio</p>
+                        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Feira no condomínio</p>
                         <p className="mt-1 font-black">{condominiumOrder?.condominiumName || (order as any)?.condominiumName}</p>
                         <p className="mt-1 text-xs font-semibold text-emerald-800">{condominiumFulfillmentLabel}</p>
                         {(condominiumUnit?.block || condominiumUnit?.tower || condominiumUnit?.apartment || condominiumUnit?.reference) && (
@@ -2166,10 +2188,10 @@ export function OrderTracking() {
                           <TrackingMetaCard
                             label="Tipo de envio"
                             value={shipmentServiceName || shipmentServiceCode || 'A confirmar'}
-                            detail={postalEstimatedDays ? `${postalEstimatedDays} dia(s) uteis apos postagem` : 'Prazo conforme postagem'}
+                            detail={postalEstimatedDays ? `${postalEstimatedDays} dia(s) úteis após postagem` : 'Prazo conforme postagem'}
                           />
                           <TrackingMetaCard
-                            label="Chega ate"
+                            label="Chega até"
                             value={!isCancelled && postalExpectedDeliveryDate ? postalExpectedDeliveryDate.toLocaleDateString('pt-BR') : 'Acompanhe aqui'}
                             detail="Atualiza conforme o envio"
                           />
@@ -2178,7 +2200,7 @@ export function OrderTracking() {
                         {shipmentTrackingCode ? (
                           <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
                             <div className="flex items-center justify-between gap-2">
-                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Codigo dos Correios</p>
+                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Código dos Correios</p>
                               {trackingCodeCopied ? (
                                 <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 ring-1 ring-emerald-100">
                                   Copiado
@@ -2199,7 +2221,7 @@ export function OrderTracking() {
                                   }
                                 }}
                                 className="rounded-full border border-slate-200 bg-slate-50 p-2 text-slate-600 transition hover:bg-white"
-                                aria-label="Copiar codigo de rastreio"
+                                aria-label="Copiar código de rastreio"
                               >
                                 <CopySimple size={16} weight="bold" />
                               </button>
@@ -2207,7 +2229,7 @@ export function OrderTracking() {
                             {shipmentTrackingUrl && !isCancelled ? (
                               <div className="mt-3 flex flex-col gap-2 rounded-2xl bg-slate-50/80 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
                                 <p className="text-[11px] font-semibold leading-4 text-slate-500">
-                                  Acompanhe por aqui. O site dos Correios pode pedir uma confirmacao de seguranca.
+                                  Acompanhe por aqui. O site dos Correios pode pedir uma confirmação de segurança.
                                 </p>
                                 <button
                                   type="button"
@@ -2222,7 +2244,7 @@ export function OrderTracking() {
                           </div>
                         ) : !isCancelled ? (
                           <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-white/70 px-4 py-3 text-sm font-semibold text-slate-500">
-                            A loja ainda vai informar o codigo de rastreio quando postar o pedido.
+                            A loja ainda vai informar o código de rastreio quando postar o pedido.
                           </div>
                         ) : null}
 
@@ -2309,7 +2331,7 @@ export function OrderTracking() {
                       isCancelled ? (
                         <div className="rounded-[1.35rem] border border-rose-200 bg-rose-50 p-4">
                           <span className="inline-flex items-center rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-bold text-rose-700">
-                            Pagamento nao concluido
+                            Pagamento não concluído
                           </span>
                         </div>
                       ) : (
@@ -2342,12 +2364,12 @@ export function OrderTracking() {
                                 }}
                                 className={`jnc-hub-touch mt-4 w-full rounded-xl border px-3 py-2 text-xs font-semibold shadow-sm active:scale-[0.98] ${pixCopied ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-amber-200 bg-white text-stone-700 hover:bg-amber-50/50'}`}
                               >
-                                {pixCopied ? 'Copiado!' : 'Copiar codigo Pix'}
+                                {pixCopied ? 'Copiado!' : 'Copiar código Pix'}
                               </button>
                             </>
                           ) : (
                             <div className="mt-3 text-xs text-stone-500">
-                              A chave Pix da loja ainda nao foi cadastrada.
+                              A chave Pix da loja ainda não foi cadastrada.
                             </div>
                           )}
                         </div>
