@@ -611,6 +611,9 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 <a href="/terms" className="block text-slate-400 hover:text-white transition-colors">
                   Termos e privacidade
                 </a>
+                <a href="https://www.siterastreio.com.br/" target="_blank" rel="noreferrer" className="block text-slate-400 hover:text-white transition-colors">
+                  Rastreamento
+                </a>
               </div>
             </div>
 
