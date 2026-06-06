@@ -16,6 +16,7 @@ import { formatSelectedModifiers } from '../utils/productModifiers';
 import { getOrderItemLineTotal, getOrderItemOriginalLineTotal, getOrderItemQuantity } from '../utils/orderItems';
 import { getOrderRefundSnapshot } from '../utils/orderRefund';
 import { getFriendlyCancellationReason } from '../utils/orderCancellation';
+import { getPostalStatusCopy, getPostalTrackingHeadline, sortPostalEventsDesc } from '../utils/postalTracking';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
@@ -833,6 +834,14 @@ export function OrderTracking() {
     : isShipmentPosted
     ? 'Objeto entregue aos Correios e aguardando movimentação.'
     : 'Pedido aguardando despacho da loja.';
+  const postalTrackingEvents = useMemo(
+    () => sortPostalEventsDesc(Array.isArray(shipment?.events) ? shipment.events : []),
+    [shipment?.events]
+  );
+  const postalTrackingHeadline = useMemo(
+    () => getPostalTrackingHeadline(shipment, isCancelled),
+    [shipment, isCancelled]
+  );
   const cashTenderedValue =
     normalizedPaymentMethod === 'dinheiro' && order?.cashTendered !== null && order?.cashTendered !== undefined
       ? Number(order.cashTendered)
@@ -2133,28 +2142,104 @@ export function OrderTracking() {
                     )}
 
                     {isPostalDelivery && (
-                      <div className="rounded-[1.35rem] border border-amber-100/80 bg-[linear-gradient(135deg,#fffdf7,#faf6ee)] p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
-                        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Envio postal</p>
-                        <div className="mt-3 space-y-2 text-sm text-stone-700">
-                          <p><span className="font-semibold">Status:</span> {postalStatusLabel}</p>
-                          <p className="text-stone-500">{postalStatusDetail}</p>
-                          <p><span className="font-semibold">Servico:</span> {shipmentServiceName || shipmentServiceCode || 'A confirmar'}</p>
-                          {!isCancelled && postalEstimatedDays ? <p><span className="font-semibold">Prazo estimado:</span> {postalEstimatedDays} dia(s) uteis</p> : null}
-                          {!isCancelled && postalExpectedDeliveryDate ? <p><span className="font-semibold">Previsao de entrega:</span> {postalExpectedDeliveryDate.toLocaleDateString('pt-BR')}</p> : null}
-                          {shipmentTrackingCode ? (
-                            <p className="break-all"><span className="font-semibold">Codigo:</span> {shipmentTrackingCode}</p>
-                          ) : !isCancelled ? (
-                            <p className="text-stone-500">Codigo de rastreio ainda nao informado.</p>
-                          ) : null}
+                      <div className="rounded-[1.35rem] border border-emerald-100 bg-[linear-gradient(135deg,#f7fff8,#ffffff_58%,#f9fafb)] p-4 shadow-[0_22px_46px_-34px_rgba(15,23,42,0.28)]">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-[0_18px_34px_-22px_rgba(15,23,42,0.9)]">
+                            <Package size={22} weight="duotone" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">Envio pelos Correios</p>
+                            <h3 className="mt-1 text-lg font-black text-slate-950">{postalTrackingHeadline.label || postalStatusLabel}</h3>
+                            <p className="mt-1 text-sm font-medium leading-5 text-slate-600">
+                              {postalTrackingHeadline.description || postalStatusDetail}
+                            </p>
+                          </div>
                         </div>
+
+                        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                          <TrackingMetaCard
+                            label="Servico"
+                            value={shipmentServiceName || shipmentServiceCode || 'A confirmar'}
+                            detail={postalEstimatedDays ? `${postalEstimatedDays} dia(s) uteis` : 'Prazo conforme postagem'}
+                          />
+                          <TrackingMetaCard
+                            label="Previsao"
+                            value={!isCancelled && postalExpectedDeliveryDate ? postalExpectedDeliveryDate.toLocaleDateString('pt-BR') : 'Acompanhe aqui'}
+                            detail="Atualiza conforme o envio"
+                          />
+                        </div>
+
+                        {shipmentTrackingCode ? (
+                          <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Codigo de rastreio</p>
+                            <div className="mt-1 flex items-center gap-2">
+                              <p className="min-w-0 flex-1 break-all text-sm font-black tracking-[0.08em] text-slate-950">{shipmentTrackingCode}</p>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    await navigator.clipboard.writeText(shipmentTrackingCode);
+                                  } catch (err) {
+                                    console.error('Falha ao copiar rastreio', err);
+                                  }
+                                }}
+                                className="rounded-full border border-slate-200 bg-slate-50 p-2 text-slate-600 transition hover:bg-white"
+                                aria-label="Copiar codigo de rastreio"
+                              >
+                                <CopySimple size={16} weight="bold" />
+                              </button>
+                            </div>
+                          </div>
+                        ) : !isCancelled ? (
+                          <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-white/70 px-4 py-3 text-sm font-semibold text-slate-500">
+                            A loja ainda vai informar o codigo de rastreio quando postar o pedido.
+                          </div>
+                        ) : null}
+
+                        {postalTrackingEvents.length ? (
+                          <div className="mt-4 space-y-3">
+                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Linha do tempo do envio</p>
+                            {postalTrackingEvents.slice(0, 6).map((event: any, index: number) => {
+                              const copy = getPostalStatusCopy(event.status);
+                              const sourceLabel = String(event.source || '').toLowerCase() === 'carrier'
+                                ? 'Correios'
+                                : String(event.source || '').toLowerCase() === 'seller'
+                                ? 'Loja'
+                                : 'Sistema';
+                              const eventDate = event.eventAt || event.createdAt;
+                              return (
+                                <div key={event.id || `${event.status}-${index}`} className="relative flex gap-3">
+                                  <div className="flex flex-col items-center">
+                                    <span className={`mt-1 h-2.5 w-2.5 rounded-full ${index === 0 ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                                    {index < Math.min(postalTrackingEvents.length, 6) - 1 ? <span className="mt-1 h-full min-h-10 w-px bg-slate-200" /> : null}
+                                  </div>
+                                  <div className="min-w-0 flex-1 rounded-2xl border border-slate-100 bg-white px-3 py-2.5">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <p className="text-sm font-black text-slate-900">{event.title || copy.label}</p>
+                                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                                        {sourceLabel}
+                                      </span>
+                                    </div>
+                                    <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{event.description || copy.description}</p>
+                                    <div className="mt-1 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-400">
+                                      {eventDate ? <span>{formatDateTime(eventDate)}</span> : null}
+                                      {event.location ? <span>{event.location}</span> : null}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : null}
+
                         {shipmentTrackingUrl && !isCancelled ? (
                           <a
                             href={shipmentTrackingUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="mt-3 inline-flex items-center rounded-xl border border-amber-200/80 bg-white px-3 py-2 text-xs font-semibold text-stone-700 transition hover:bg-amber-50"
+                            className="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm transition hover:bg-slate-50"
                           >
-                            Acompanhar entrega
+                            Abrir rastreio oficial
                           </a>
                         ) : null}
                       </div>

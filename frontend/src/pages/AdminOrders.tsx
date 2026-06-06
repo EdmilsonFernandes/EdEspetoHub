@@ -14,6 +14,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
 import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
+import { PostalShipmentModal } from '../components/Admin/PostalShipmentModal';
 
 export function AdminOrders() {
   const { auth, logout } = useAuth();
@@ -28,6 +29,7 @@ export function AdminOrders() {
   const [query, setQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [postalSavingId, setPostalSavingId] = useState<string | null>(null);
+  const [postalModalOrder, setPostalModalOrder] = useState<any | null>(null);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>(() => {
     if (typeof window === 'undefined') return 'cards';
     return localStorage.getItem('adminOrdersView') === 'table' ? 'table' : 'cards';
@@ -362,23 +364,18 @@ export function AdminOrders() {
     }
   };
 
-  const handlePostalTrackAndPost = async (order: any) => {
+  const handlePostalTrackAndPost = (order: any) => {
     if (!order?.id) return;
-    const currentCode = String(order?.shipment?.trackingCode || '').trim();
-    const trackingCode = String(window.prompt('Código de rastreio:', currentCode) || '').trim();
-    if (!trackingCode) return;
-    const currentUrl = String(order?.shipment?.trackingUrl || '').trim();
-    const trackingUrl = String(
-      window.prompt('Link de rastreio (opcional):', currentUrl) || ''
-    ).trim();
+    setPostalModalOrder(order);
+  };
+
+  const handlePostalShipmentSubmit = async (payload: any) => {
+    if (!postalModalOrder?.id) return;
     try {
-      setPostalSavingId(order.id);
-      await orderService.updatePostalShipment(order.id, {
-        trackingCode,
-        trackingUrl: trackingUrl || undefined,
-        markPosted: true,
-      });
+      setPostalSavingId(postalModalOrder.id);
+      await orderService.updatePostalShipment(postalModalOrder.id, payload);
       await refreshOrders();
+      setPostalModalOrder(null);
     } catch (error: any) {
       alert(error?.message || 'Não foi possível salvar o rastreio.');
     } finally {
@@ -1024,9 +1021,19 @@ export function AdminOrders() {
 	              </table>
 	            </div>
 	          )}
-        </div>
-        </div>
       </div>
+      </div>
+      </div>
+      <PostalShipmentModal
+        open={Boolean(postalModalOrder)}
+        order={postalModalOrder}
+        loading={Boolean(postalSavingId)}
+        onClose={() => {
+          if (!postalSavingId) setPostalModalOrder(null);
+        }}
+        onSubmit={handlePostalShipmentSubmit}
+      />
+
       {orderPaymentOpen && selectedOrder && (
         <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">
           <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-2xl">

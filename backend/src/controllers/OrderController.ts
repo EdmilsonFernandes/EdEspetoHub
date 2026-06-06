@@ -24,6 +24,7 @@ import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 import { env } from '../config/env';
 import { createOrderAccessToken } from '../utils/orderAccessToken';
+import { shippingTrackingService } from '../services/shipping/tracking/ShippingTrackingService';
 
 const orderService = new OrderService();
 const orderEtaServiceV2 = new OrderEtaServiceV2();
@@ -503,6 +504,10 @@ static async markItemsAsPrinted(req: Request, res: Response) {
               relations: [ 'user' ],
             })
           : null;
+      const isPostalTracking = String((order as any).fulfillmentMode || '').toLowerCase() === 'postal';
+      const postalTracking = isPostalTracking
+        ? await shippingTrackingService.refreshTracking(order as any, (order as any)?.shipment || null)
+        : null;
 
       const responsePayload: any = {
         id: order.id,
@@ -573,6 +578,11 @@ static async markItemsAsPrinted(req: Request, res: Response) {
               deliveredAt: (order as any).shipment.deliveredAt || null,
               trackingLastEvent: (order as any).shipment.trackingLastEvent || null,
               trackingLastAt: (order as any).shipment.trackingLastAt || null,
+              events: postalTracking?.events || [],
+              trackingSummary: postalTracking?.summary || null,
+              trackingProvider: postalTracking?.provider || null,
+              trackingFallback: postalTracking?.fallback ?? false,
+              trackingUnavailableReason: postalTracking?.unavailableReason || null,
             }
           : null,
         delivery: deliveryRow
@@ -681,6 +691,18 @@ static async markItemsAsPrinted(req: Request, res: Response) {
       const orderPayment = await AppDataSource.getRepository(OrderPayment).findOne({
         where: { orderId: order.id } as any,
       });
+      const isPostalTracking = String((order as any).fulfillmentMode || '').toLowerCase() === 'postal';
+      const postalTracking = isPostalTracking
+        ? await shippingTrackingService.refreshTracking(order as any, (order as any)?.shipment || null)
+        : null;
+      const orderTimeline = Array.isArray((order as any).statusTimeline) && (order as any).statusTimeline.length
+        ? (order as any).statusTimeline
+        : [
+            {
+              status: order.status,
+              at: order.createdAt,
+            },
+          ];
 
       return res.json({
         id: order.id,
@@ -729,12 +751,8 @@ static async markItemsAsPrinted(req: Request, res: Response) {
           : null,
         queuePosition,
         queueSize,
-        timeline: [
-          {
-            status: order.status,
-            at: order.createdAt,
-          },
-        ],
+        timeline: orderTimeline,
+        statusTimeline: orderTimeline,
         shipment: (order as any)?.shipment
           ? {
               provider: (order as any).shipment.provider || null,
@@ -748,6 +766,11 @@ static async markItemsAsPrinted(req: Request, res: Response) {
               deliveredAt: (order as any).shipment.deliveredAt || null,
               trackingLastEvent: (order as any).shipment.trackingLastEvent || null,
               trackingLastAt: (order as any).shipment.trackingLastAt || null,
+              events: postalTracking?.events || [],
+              trackingSummary: postalTracking?.summary || null,
+              trackingProvider: postalTracking?.provider || null,
+              trackingFallback: postalTracking?.fallback ?? false,
+              trackingUnavailableReason: postalTracking?.unavailableReason || null,
             }
           : null,
         eta: eta

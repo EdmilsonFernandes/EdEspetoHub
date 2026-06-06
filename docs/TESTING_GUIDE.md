@@ -39,7 +39,7 @@ Os testes ficam em `backend/src/test/e2e` e rodam contra banco de teste local, r
 | --- | --- |
 | `auth.test.ts` | Cadastro/login de lojista, cliente e motoboy; validações de registro; aceite de termos; email duplicado; login admin; autorização por role; MFA TOTP com dispositivo confiável; bloqueio por muitas tentativas inválidas. |
 | `products.test.ts` | CRUD de produtos do lojista; validação de campos obrigatórios; preço negativo; listagem por loja; atualização; isolamento entre lojas. |
-| `orders.test.ts` | Jornada do cliente no pedido: consulta de catálogo público, criação de pedido, rejeição por estoque insuficiente, fila da loja, observação do cliente, atualização de status, tracking público e rejeição de pedido sem item. |
+| `orders.test.ts` | Jornada do cliente no pedido: consulta de catálogo público, criação de pedido, rejeição por estoque insuficiente, fila da loja, observação do cliente, atualização de status, tracking público, entrega postal com/sem rastreio, validação de código postal e rejeição de pedido sem item. |
 | `operator-orders.test.ts` | Fluxo do lojista/operador: criação de pedido com múltiplos itens, pedido de mesa, fila operacional, transições de status, detalhe público, retirada, edição de itens, item operacional/manual com preço customizado, transição inválida, autenticação e isolamento entre lojas. |
 | `full-order-flow.test.ts` | Fluxo completo ponta a ponta: loja configura horário/tipo de pedido/produto, cliente cria retirada e entrega, motoboy é registrado/vinculado/aprovado, entrega é aceita/retirada/entregue, tracking, histórico e ganhos do motoboy. |
 | `delivery.test.ts` | Área do motoboy: perfil autenticado, fila de pedidos disponíveis, ganhos do dia, histórico e proteção de endpoints por token/role. |
@@ -63,6 +63,7 @@ Os testes ficam em `frontend/tests/e2e`. Eles validam UI e navegação crítica,
 | `destination-partner-portal.spec.ts` | Portal do parceiro de destinos: ativação por convite, login, listagem de cadastros liberados e salvamento de campos operacionais seguros com API mockada. |
 | `superadmin-destinations-partners.spec.ts` | Super Admin de destinos: filtros de onboarding, modal de validação de posse, comparação de cadastro atual vs solicitação e exigência de registro de conferência antes da aprovação. |
 | `hub-marketplace.spec.ts` | Home/Hub do marketplace: carregamento de lojas, filtros principais, dados de card, itens em destaque, link "Ver mais" e busca na tela de destaques. |
+| `postal-order-tracking.spec.ts` | Tela pública do pedido postal: card de rastreio dentro do app, código copiável, timeline postal e estado sem código informado. |
 | `store-checkout-layout.spec.ts` | Checkout visual da vitrine: restauração de sacola, observação, troca de pagamento por bottom sheet, retirada, entrega com endereço salvo/taxa, mesa e bloqueio de entrega fora do raio antes de criar pedido. |
 
 ### Unitários Relevantes

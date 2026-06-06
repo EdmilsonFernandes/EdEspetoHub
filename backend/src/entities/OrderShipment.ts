@@ -3,11 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Order } from './Order';
+import { OrderShipmentEvent } from './OrderShipmentEvent';
 
 @Entity({ name: 'order_shipments' })
 export class OrderShipment {
@@ -17,6 +19,9 @@ export class OrderShipment {
   @OneToOne(() => Order, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'order_id' })
   order?: Order;
+
+  @OneToMany(() => OrderShipmentEvent, (event) => event.shipment)
+  events?: OrderShipmentEvent[];
 
   @Column({ name: 'provider', type: 'text', nullable: true })
   provider?: string | null;
@@ -57,4 +62,3 @@ export class OrderShipment {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt!: Date;
 }
-

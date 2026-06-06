@@ -40,6 +40,12 @@ import { resolveMercadoPagoStatusDetailLabel, resolveMercadoPagoStatusLabel } fr
 import { logger } from '../utils/logger';
 import { appendOrderTimelineEntry, buildOrderTimelineJson } from '../utils/orderTimeline';
 import { normalizeCustomerOrderNote } from '../utils/orderCustomerNote';
+import { shippingTrackingService } from './shipping/tracking/ShippingTrackingService';
+import {
+  buildCorreiosTrackingUrl,
+  isValidTrackingCode,
+  normalizeTrackingCode,
+} from './shipping/tracking/trackingCode';
 /**
  * Provides OrderService functionality.
  *
@@ -882,6 +888,42 @@ private async attachShipmentSnapshot(orders: any[]) {
       });
     }
 
+    const eventRows: Array<any> = await AppDataSource.query(
+      `
+        SELECT
+          ose.id,
+          ose.order_id,
+          ose.source,
+          ose.status,
+          ose.title,
+          ose.description,
+          ose.location,
+          ose.event_at,
+          ose.created_at
+        FROM order_shipment_events ose
+        WHERE ose.order_id = ANY($1::uuid[])
+        ORDER BY ose.event_at DESC, ose.created_at DESC
+      `,
+      [ orderIds ]
+    );
+
+    for (const row of eventRows) {
+      const orderId = String(row?.order_id || '').trim();
+      const shipment = shipmentByOrderId.get(orderId);
+      if (!shipment) continue;
+      if (!Array.isArray(shipment.events)) shipment.events = [];
+      shipment.events.push({
+        id: row?.id || null,
+        source: row?.source || null,
+        status: row?.status || null,
+        title: row?.title || null,
+        description: row?.description || null,
+        location: row?.location || null,
+        eventAt: row?.event_at || null,
+        createdAt: row?.created_at || null,
+      });
+    }
+
     return orders.map((order: any) => {
       const orderId = String(order?.id || '').trim();
       return {
@@ -1237,6 +1279,14 @@ private async seedPostalShipmentFromCheckoutTx(
     };
 
     await shipmentRepo.save(shipment);
+    await shippingTrackingService.recordEventTx(manager, order.id, {
+      source: 'system',
+      status: 'pending_posting',
+      title: 'Pedido recebido pela loja',
+      description: 'A loja recebeu o pedido e vai preparar o envio pelos Correios.',
+      eventAt: new Date(),
+      rawPayload: { reason: 'checkout_postal_shipment_created' },
+    });
   }
 
 
@@ -1636,6 +1686,73 @@ private async seedPostalShipmentFromCheckoutTx(
         lockedOrder.canceledAt = null;
         lockedOrder.canceledReason = null;
       }
+      if (isPostalFlow && nextStatus !== currentStatus) {
+        const shipmentRepo = manager.getRepository(OrderShipment);
+        let postalShipment = await shipmentRepo.findOne({ where: { orderId: lockedOrder.id } });
+        if (!postalShipment) {
+          postalShipment = shipmentRepo.create({
+            orderId: lockedOrder.id,
+            provider: 'manual',
+            shipmentStatus: 'pending_posting',
+          });
+          await shipmentRepo.save(postalShipment);
+        }
+        const postalEventByStatus: Record<string, { status: string; title: string; description: string }> = {
+          preparing: {
+            status: 'pending_posting',
+            title: 'Pedido aceito pela loja',
+            description: 'A loja aceitou o pedido e iniciou a separação dos itens.',
+          },
+          ready: {
+            status: 'pending_posting',
+            title: 'Pedido pronto para postagem',
+            description: 'O pedido foi separado e está aguardando postagem.',
+          },
+          dispatched: {
+            status: 'posted',
+            title: 'Pedido postado',
+            description: 'A loja marcou o pedido como postado.',
+          },
+          delivered: {
+            status: 'delivered',
+            title: 'Pedido entregue',
+            description: 'A entrega postal foi marcada como concluída.',
+          },
+          finished: {
+            status: 'delivered',
+            title: 'Pedido finalizado',
+            description: 'O acompanhamento deste pedido foi finalizado.',
+          },
+          cancelled: {
+            status: 'exception',
+            title: 'Pedido cancelado',
+            description: String(reason || '').trim() || 'O pedido postal foi cancelado.',
+          },
+        };
+        const event = postalEventByStatus[nextStatus];
+        if (event) {
+          await shippingTrackingService.recordEventTx(manager, lockedOrder.id, {
+            source: 'seller',
+            ...event,
+            eventAt: new Date(),
+            rawPayload: { orderStatus: nextStatus },
+          });
+        }
+        if ([ 'dispatched', 'delivered', 'finished' ].includes(nextStatus)) {
+          const shipment = postalShipment;
+          if (shipment) {
+            if (nextStatus === 'dispatched') {
+              shipment.shipmentStatus = shipment.shipmentStatus === 'pending_posting' ? 'posted' : shipment.shipmentStatus;
+              shipment.postedAt = shipment.postedAt || new Date();
+            }
+            if (nextStatus === 'delivered' || nextStatus === 'finished') {
+              shipment.shipmentStatus = 'delivered';
+              shipment.deliveredAt = shipment.deliveredAt || new Date();
+            }
+            await shipmentRepo.save(shipment);
+          }
+        }
+      }
       if (nextStatus === 'cancelled' && lockedOrder.type === 'delivery') {
         await manager.query(
           `
@@ -1683,8 +1800,37 @@ async updateFulfillmentMode(
     if (normalizedMode === 'postal' && [ 'waiting_for_motoboy', 'in_delivery' ].includes(currentStatus)) {
       throw new AppError('ORDER-004', 400, { message: 'Não é possível mudar para postal em pedido já no fluxo de motoboy.' });
     }
-    (order as any).fulfillmentMode = normalizedMode;
-    return this.orderRepository.save(order);
+    const saved = await AppDataSource.transaction(async (manager) => {
+      const orderRepo = manager.getRepository(Order);
+      const shipmentRepo = manager.getRepository(OrderShipment);
+      const lockedOrder = await orderRepo.findOne({ where: { id: order.id } });
+      if (!lockedOrder) throw new AppError('ORDER-001', 404);
+      (lockedOrder as any).fulfillmentMode = normalizedMode;
+      const nextOrder = await orderRepo.save(lockedOrder);
+
+      if (normalizedMode === 'postal') {
+        let shipment = await shipmentRepo.findOne({ where: { orderId: order.id } });
+        if (!shipment) {
+          shipment = shipmentRepo.create({
+            orderId: order.id,
+            provider: 'manual',
+            shipmentStatus: 'pending_posting',
+          });
+          await shipmentRepo.save(shipment);
+          await shippingTrackingService.recordEventTx(manager, order.id, {
+            source: 'seller',
+            status: 'pending_posting',
+            title: 'Entrega postal ativada',
+            description: 'A loja selecionou envio postal para este pedido.',
+            eventAt: new Date(),
+            rawPayload: { reason: 'fulfillment_mode_changed_to_postal' },
+          });
+        }
+      }
+
+      return nextOrder;
+    });
+    return saved;
   }
 
     /**
@@ -1716,11 +1862,14 @@ async updatePostalShipment(
       throw new AppError('ORDER-004', 400, { message: 'Ative o modo postal antes de informar rastreio.' });
     }
 
-    const trackingCode = String(input?.trackingCode || '').trim();
+    const trackingCode = normalizeTrackingCode(input?.trackingCode);
     const trackingUrl = String(input?.trackingUrl || '').trim();
     const markPosted = Boolean(input?.markPosted);
     if (markPosted && !trackingCode) {
       throw new AppError('ORDER-005', 400, { message: 'Código de rastreio é obrigatório para marcar como postado.' });
+    }
+    if (trackingCode && !isValidTrackingCode(trackingCode)) {
+      throw new AppError('ORDER-005', 400, { message: 'Código de rastreio inválido. Confira as letras e números informados.' });
     }
 
     const result = await AppDataSource.transaction(async (manager) => {
@@ -1739,8 +1888,13 @@ async updatePostalShipment(
       if (input?.provider !== undefined) shipment.provider = String(input.provider || '').trim() || null;
       if (input?.serviceCode !== undefined) shipment.serviceCode = String(input.serviceCode || '').trim() || null;
       if (input?.serviceName !== undefined) shipment.serviceName = String(input.serviceName || '').trim() || null;
+      const previousTrackingCode = String(shipment.trackingCode || '').trim();
       if (input?.trackingCode !== undefined) shipment.trackingCode = trackingCode || null;
-      if (input?.trackingUrl !== undefined) shipment.trackingUrl = trackingUrl || null;
+      if (input?.trackingUrl !== undefined) {
+        shipment.trackingUrl = trackingUrl || null;
+      } else if (trackingCode && !shipment.trackingUrl) {
+        shipment.trackingUrl = buildCorreiosTrackingUrl(trackingCode);
+      }
 
       if (markPosted) {
         shipment.shipmentStatus = 'posted';
@@ -1749,12 +1903,40 @@ async updatePostalShipment(
 
       await shipmentRepo.save(shipment);
 
+      if (trackingCode && trackingCode !== previousTrackingCode) {
+        await shippingTrackingService.recordEventTx(manager, order.id, {
+          source: 'seller',
+          status: previousTrackingCode ? 'tracking_code_updated' : 'tracking_code_added',
+          title: previousTrackingCode ? 'Código de rastreio atualizado' : 'Código de rastreio informado',
+          description: previousTrackingCode
+            ? 'A loja atualizou o código usado para acompanhar o envio.'
+            : 'A loja informou o código para acompanhar o envio postal.',
+          eventAt: new Date(),
+          rawPayload: {
+            previousTrackingCode: previousTrackingCode || null,
+            trackingCode,
+          },
+        });
+      }
+
+      if (markPosted) {
+        await shippingTrackingService.recordEventTx(manager, order.id, {
+          source: 'seller',
+          status: 'posted',
+          title: 'Pedido postado',
+          description: 'A loja informou que o pedido foi entregue aos Correios.',
+          eventAt: shipment.postedAt || new Date(),
+          rawPayload: { trackingCode },
+        });
+      }
+
       const orderLock = await orderRepo.findOne({ where: { id: order.id } });
       if (!orderLock) throw new AppError('ORDER-001', 404);
 
       const currentStatus = String(orderLock.status || '').toLowerCase();
       if (markPosted && ![ 'delivered', 'finished', 'cancelled' ].includes(currentStatus)) {
         orderLock.status = 'dispatched';
+        orderLock.statusTimeline = appendOrderTimelineEntry(orderLock.statusTimeline, 'dispatched');
         await orderRepo.save(orderLock);
       }
 

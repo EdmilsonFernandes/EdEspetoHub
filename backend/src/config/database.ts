@@ -44,6 +44,7 @@ import { StoreLinkHit } from '../entities/StoreLinkHit';
 import { StoreUser } from '../entities/StoreUser';
 import { InventoryMovement } from '../entities/InventoryMovement';
 import { OrderShipment } from '../entities/OrderShipment';
+import { OrderShipmentEvent } from '../entities/OrderShipmentEvent';
 import { CustomerAddress } from '../entities/CustomerAddress';
 import { FeaturedProductRequest } from '../entities/FeaturedProductRequest';
 import { Notification } from '../entities/Notification';
@@ -91,7 +92,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress, FeaturedProductRequest, Condominium, StoreCondominium, CondominiumEvent, CondominiumEventStore, StoreCondominiumRequest, CondominiumUser, CondominiumAccessRequest, CustomerEmailOtp, StorePaymentAccount, MotoboyPaymentAccount, OrderPayment, ZipCodeCache, CustomerSecurityBlock, CustomerRiskEvent, PaymentAuditLog, TravelDestination, DestinationBanner, HospitalityPlace, HospitalityPlaceStoreLink, DestinationListing, DestinationListingHospitalityPlace, DestinationPartnerRequest, DestinationStoreRequest, DestinationPartnerAccount, DestinationPartnerInvite, DestinationPartnerPermission, DestinationPartnerAuditLog, MfaSetting, MfaChallenge, TrustedDevice, EmailTemplate, EmailTemplateVersion, EmailSuppression, EmailSendLog, PromoPush, Notification ],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderShipment, OrderShipmentEvent, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser, InventoryMovement, CustomerAddress, FeaturedProductRequest, Condominium, StoreCondominium, CondominiumEvent, CondominiumEventStore, StoreCondominiumRequest, CondominiumUser, CondominiumAccessRequest, CustomerEmailOtp, StorePaymentAccount, MotoboyPaymentAccount, OrderPayment, ZipCodeCache, CustomerSecurityBlock, CustomerRiskEvent, PaymentAuditLog, TravelDestination, DestinationBanner, HospitalityPlace, HospitalityPlaceStoreLink, DestinationListing, DestinationListingHospitalityPlace, DestinationPartnerRequest, DestinationStoreRequest, DestinationPartnerAccount, DestinationPartnerInvite, DestinationPartnerPermission, DestinationPartnerAuditLog, MfaSetting, MfaChallenge, TrustedDevice, EmailTemplate, EmailTemplateVersion, EmailSuppression, EmailSendLog, PromoPush, Notification ],
   migrations: [],
   logging: [ 'error' ],
   extra: {

@@ -575,6 +575,31 @@ export async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_order_shipments_status
     ON order_shipments(shipment_status);
   `);
+
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS order_shipment_events (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      order_id UUID NOT NULL REFERENCES order_shipments(order_id) ON DELETE CASCADE,
+      source TEXT NOT NULL,
+      status TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT,
+      location TEXT,
+      event_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      raw_payload JSONB,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_order_shipment_events_order_event_at
+    ON order_shipment_events(order_id, event_at DESC);
+  `);
+
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_order_shipment_events_order_source_status
+    ON order_shipment_events(order_id, source, status);
+  `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS products
     ADD COLUMN IF NOT EXISTS description TEXT;

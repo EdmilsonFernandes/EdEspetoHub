@@ -207,6 +207,42 @@ ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
 ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'PENDING';
 
+CREATE TABLE IF NOT EXISTS order_shipments (
+  order_id UUID PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
+  provider TEXT,
+  service_code TEXT,
+  service_name TEXT,
+  tracking_code TEXT,
+  tracking_url TEXT,
+  shipment_status TEXT NOT NULL DEFAULT 'pending_posting',
+  quote_payload JSONB,
+  tracking_last_event JSONB,
+  tracking_last_at TIMESTAMPTZ,
+  posted_at TIMESTAMPTZ,
+  delivered_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_shipments_tracking_code ON order_shipments(tracking_code);
+CREATE INDEX IF NOT EXISTS idx_order_shipments_status ON order_shipments(shipment_status);
+
+CREATE TABLE IF NOT EXISTS order_shipment_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES order_shipments(order_id) ON DELETE CASCADE,
+  source TEXT NOT NULL,
+  status TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  location TEXT,
+  event_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  raw_payload JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_shipment_events_order_event_at ON order_shipment_events(order_id, event_at DESC);
+CREATE INDEX IF NOT EXISTS idx_order_shipment_events_order_source_status ON order_shipment_events(order_id, source, status);
+
 CREATE TABLE IF NOT EXISTS order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,

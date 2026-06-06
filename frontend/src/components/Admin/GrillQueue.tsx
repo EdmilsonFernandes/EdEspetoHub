@@ -25,6 +25,7 @@ import {
   NotePencil,
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
+import { PostalShipmentModal } from "./PostalShipmentModal";
 import { storeService } from "../../services/storeService";
 import { productService } from "../../services/productService";
 import { motoboyAdminService } from "../../services/motoboyAdminService";
@@ -1118,6 +1119,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [completedPageSize, setCompletedPageSize] = useState(9);
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [confirmModal, setConfirmModal] = useState(null);
+  const [postalModalOrder, setPostalModalOrder] = useState<any | null>(null);
+  const [postalSubmitAfterSave, setPostalSubmitAfterSave] = useState<(() => void) | null>(null);
   const [pixCopied, setPixCopied] = useState(false);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
@@ -2295,13 +2298,22 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   };
 
-  const handlePostalMarkPosted = async (order: any) => {
+  const openPostalShipmentModal = (order: any, afterSave?: () => void) => {
+    if (!order?.id) return;
+    setPostalModalOrder(order);
+    setPostalSubmitAfterSave(() => afterSave || null);
+  };
+
+  const handlePostalMarkPosted = async (order: any, payload?: any, afterSave?: () => void) => {
     if (!order?.id) return false;
-    const currentCode = String(order?.shipment?.trackingCode || '').trim();
-    const trackingCode = String(window.prompt('Código de rastreio:', currentCode) || '').trim();
-    if (!trackingCode) return false;
+    const trackingCode = String(payload?.trackingCode || '').trim();
+    if (!trackingCode) {
+      openPostalShipmentModal(order, afterSave);
+      return false;
+    }
 
     const previousQueue = queue;
+    const shouldMarkPosted = payload?.markPosted !== false;
     try {
       setUpdating(order.id);
       setQueueFilter('all');
@@ -2310,11 +2322,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           item.id === order.id
             ? {
                 ...item,
-                status: 'dispatched',
+                status: shouldMarkPosted ? 'dispatched' : item.status,
                 shipment: {
                   ...(item.shipment || {}),
                   trackingCode,
-                  shipmentStatus: 'posted',
+                  trackingUrl: payload?.trackingUrl || item?.shipment?.trackingUrl || null,
+                  shipmentStatus: shouldMarkPosted ? 'posted' : item?.shipment?.shipmentStatus,
                 },
               }
             : item
@@ -2324,18 +2337,26 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         prev?.id === order.id
           ? {
               ...prev,
-              status: 'dispatched',
+              status: shouldMarkPosted ? 'dispatched' : prev.status,
               shipment: {
                 ...(prev.shipment || {}),
                 trackingCode,
-                shipmentStatus: 'posted',
+                trackingUrl: payload?.trackingUrl || prev?.shipment?.trackingUrl || null,
+                shipmentStatus: shouldMarkPosted ? 'posted' : prev?.shipment?.shipmentStatus,
               },
             }
           : prev
       );
-      await orderService.updatePostalShipment(order.id, { trackingCode, markPosted: true });
+      await orderService.updatePostalShipment(order.id, {
+        trackingCode,
+        trackingUrl: payload?.trackingUrl || undefined,
+        markPosted: shouldMarkPosted,
+      });
       setError('');
       void loadQueue();
+      setPostalModalOrder(null);
+      setPostalSubmitAfterSave(null);
+      if (afterSave) afterSave();
       return true;
     } catch (err) {
       console.error('Erro ao registrar postagem', err);
@@ -3627,13 +3648,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             Pedido postal pronto para postagem. Informe o rastreio ao postar.
           </div>
           <button
-            onClick={async () => {
+            onClick={() => {
               pulseCta(order.id + '-dispatch-postal');
-              const ok = await handlePostalMarkPosted(order);
-              if (ok) {
+              openPostalShipmentModal(order, () => {
                 closeOrderOverlays();
                 setActiveTab('queue');
-              }
+              });
             }}
             disabled={updating === order.id}
             style={ctaPulseId === order.id + '-dispatch-postal' ? { animation: 'btnPop 220ms ease' } : undefined}
@@ -3670,7 +3690,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             </div>
           ) : null}
           <button
-            onClick={() => { void handlePostalMarkPosted(order); }}
+            onClick={() => { openPostalShipmentModal(order); }}
             disabled={updating === order.id}
             className="w-full mb-2 px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-semibold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:bg-slate-50"
           >
@@ -4953,7 +4973,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         {isDispatched ? (
                           <button
                             type="button"
-                            onClick={() => { void handlePostalMarkPosted(order); }}
+                            onClick={() => { openPostalShipmentModal(order); }}
                             className="px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50"
                           >
                             Editar rastreio
@@ -5977,6 +5997,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         </div>,
         document.body
       )}
+      <PostalShipmentModal
+        open={Boolean(postalModalOrder)}
+        order={postalModalOrder}
+        loading={Boolean(updating)}
+        onClose={() => {
+          if (!updating) {
+            setPostalModalOrder(null);
+            setPostalSubmitAfterSave(null);
+          }
+        }}
+        onSubmit={(payload) => handlePostalMarkPosted(postalModalOrder, payload, postalSubmitAfterSave || undefined)}
+      />
 
     </div>
     </>

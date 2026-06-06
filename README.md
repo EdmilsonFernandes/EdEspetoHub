@@ -138,6 +138,23 @@ Configuracoes por loja em `store_settings`:
 - `order_types`: tipos de pedido aceitos pela loja (`delivery`, `pickup`, `table`).
 - `table_service_settings`: JSON do atendimento em mesa, com couvert artistico e taxa de servico opcionais. Quando ativo, a fila do lojista mostra botoes para aplicar no pedido e esses valores saem na impressao como itens do pedido.
 
+### Entrega postal e rastreio
+
+Pedidos de entrega com `orders.fulfillment_mode = 'postal'` usam uma extensao propria em `order_shipments`.
+
+- `order_shipments`: serviço postal escolhido, código/URL de rastreio, data de postagem, entrega e último evento conhecido.
+- `order_shipment_events`: timeline do envio postal exibida ao cliente, separando origem `seller`, `system` e `carrier`.
+- O vendedor informa ou edita o rastreio por `PATCH /api/orders/:orderId/postal`.
+- O acompanhamento público usa o mesmo payload do pedido e inclui `shipment.events` e `shipment.trackingSummary`.
+- A integração externa fica atrás de `ShippingTrackingProvider`; enquanto não houver provedor contratado/configurado, o sistema opera com eventos internos e link oficial dos Correios como fallback.
+
+Configuração atual:
+
+- `SHIPPING_TRACKING_PROVIDER=manual` por padrão.
+- O provider pode ser trocado futuramente sem mudar tela ou regra de pedido.
+
+Guia tecnico: `docs/POSTAL_SHIPPING_TRACKING.md`.
+
 Guia SQL de manutencao:
 
 - `docs/SQL_CONSULTAS_MANUTENCAO.md`

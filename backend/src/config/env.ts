@@ -199,6 +199,8 @@ export const env = {
   shipping: {
     provider: String(process.env.SHIPPING_PROVIDER || 'internal').toLowerCase(),
     strictProvider: process.env.SHIPPING_STRICT_PROVIDER === 'true',
+    trackingProvider: String(process.env.SHIPPING_TRACKING_PROVIDER || 'manual').toLowerCase(),
+    trackingRefreshStaleMinutes: numberEnv('SHIPPING_TRACKING_REFRESH_STALE_MINUTES', 180, 1),
   },
   melhorEnvio: {
     baseUrl: process.env.MELHOR_ENVIO_BASE_URL || 'https://sandbox.melhorenvio.com.br',

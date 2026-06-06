@@ -437,6 +437,45 @@ GROUP BY
   r.tip_amount, r.tip_status, r.tip_settlement_mode, r.tip_payout_status;
 ```
 
+Pedido postal com rastreio e eventos:
+
+```sql
+\set order_id '00000000-0000-0000-0000-000000000000'
+
+SELECT
+  o.id,
+  o.created_at,
+  o.status AS pedido_status,
+  o.fulfillment_mode,
+  s.name AS loja,
+  os.provider,
+  os.service_code,
+  os.service_name,
+  os.shipment_status,
+  os.tracking_code,
+  os.tracking_url,
+  os.posted_at,
+  os.delivered_at,
+  os.tracking_last_at,
+  jsonb_agg(
+    jsonb_build_object(
+      'origem', ose.source,
+      'status', ose.status,
+      'titulo', ose.title,
+      'descricao', ose.description,
+      'local', ose.location,
+      'quando', ose.event_at
+    )
+    ORDER BY ose.event_at DESC, ose.created_at DESC
+  ) FILTER (WHERE ose.id IS NOT NULL) AS eventos_rastreio
+FROM orders o
+JOIN stores s ON s.id = o.store_id
+LEFT JOIN order_shipments os ON os.order_id = o.id
+LEFT JOIN order_shipment_events ose ON ose.order_id = o.id
+WHERE o.id = :'order_id'::uuid
+GROUP BY o.id, s.name, os.order_id;
+```
+
 ## 7. Fila de pedidos da loja
 
 Pedidos recentes que aparecem na fila/admin.
