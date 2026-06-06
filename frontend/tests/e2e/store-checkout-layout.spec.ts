@@ -21,6 +21,8 @@ const store = {
     lng: -45.9009,
     deliveryRadiusKm: 5,
     deliveryFee: 6.5,
+    postalEnabled: true,
+    postalOriginZip: '12210000',
   },
   paymentSummary: {
     cashEnabled: true,
@@ -85,6 +87,20 @@ const farAddress = {
   lng: -38.5016,
 };
 
+const postalAddress = {
+  ...nearAddress,
+  id: 'address-postal-checkout-e2e',
+  label: 'Apartamento SP',
+  cep: '01310-000',
+  street: 'Avenida Paulista',
+  number: '1000',
+  neighborhood: 'Bela Vista',
+  city: 'Sao Paulo',
+  state: 'SP',
+  lat: -23.5617,
+  lng: -46.6559,
+};
+
 const buildCustomer = (overrides: Record<string, unknown> = {}) => ({
   name: 'Cliente Checkout E2E',
   phone: '(12) 99999-0000',
@@ -130,13 +146,27 @@ test.use({ serviceWorkers: 'block' });
 test.describe('Store checkout layout', () => {
   let customerAddresses: Record<string, unknown>[];
   let createdOrders: Record<string, any>[];
+  let postalQuoteRequests: Record<string, any>[];
+  let storeSettingsOverrides: Record<string, unknown>;
 
   test.beforeEach(async ({ page }) => {
     customerAddresses = [];
     createdOrders = [];
+    postalQuoteRequests = [];
+    storeSettingsOverrides = {};
 
     await page.route(`**/api/stores/slug/${storeSlug}`, async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(store) });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          ...store,
+          settings: {
+            ...store.settings,
+            ...storeSettingsOverrides,
+          },
+        }),
+      });
     });
     await page.route(`**/api/public/stores/slug/${storeSlug}/products**`, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([product]) });
@@ -191,6 +221,30 @@ test.describe('Store checkout layout', () => {
           paymentStatus: 'PENDING',
           accessToken: `access-${createdOrders.length}`,
           queuePosition: 1,
+        }),
+      });
+    });
+    await page.route(`**/api/stores/slug/${storeSlug}/postal/quote`, async (route) => {
+      const payload = route.request().postDataJSON();
+      postalQuoteRequests.push(payload);
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          provider: 'internal_postal_v1',
+          originZip: '12210000',
+          destinationZip: payload.destinationZip,
+          quote: {
+            services: [
+              {
+                serviceCode: 'PAC',
+                serviceName: 'PAC',
+                estimatedDays: 4,
+                price: 18.75,
+                currency: 'BRL',
+              },
+            ],
+          },
         }),
       });
     });
@@ -334,6 +388,55 @@ test.describe('Store checkout layout', () => {
     ]);
   });
 
+  test('calcula frete postal automaticamente e confirma pedido postal', async ({ page }) => {
+    customerAddresses = [postalAddress];
+    await seedCheckoutDraft(
+      page,
+      {
+        type: 'delivery',
+        cep: '01310-000',
+        street: 'Avenida Paulista',
+        number: '1000',
+        neighborhood: 'Bela Vista',
+        city: 'Sao Paulo',
+        state: 'SP',
+        address: 'Avenida Paulista, 1000 - Bela Vista, Sao Paulo/SP',
+      },
+      { deliveryMode: 'postal' }
+    );
+    await page.setViewportSize({ width: 390, height: 720 });
+    await openRestoredCheckout(page);
+
+    await page.getByRole('button', { name: /Continuar/i }).click();
+    await page.getByRole('button', { name: /Entrega\s+No endereço/i }).click();
+    await expect(page.getByRole('button', { name: /Envio postal\s+Correios/i })).toBeVisible();
+    await page.getByRole('button', { name: /Envio postal\s+Correios/i }).click();
+    await expect(page.getByText(/PAC/i).first()).toBeVisible({ timeout: 15000 });
+    await page.getByRole('button', { name: /^Continuar/i }).click();
+    await expect(page.getByTestId('checkout-payment-summary-card')).toBeVisible();
+    await page.getByRole('button', { name: /Revisar pedido/i }).click({ force: true });
+    await expect(page.getByTestId('checkout-review-payment-card')).toBeVisible();
+    await page.getByRole('button', { name: /Enviar pedido para a loja/i }).click({ force: true });
+    await expect.poll(() => createdOrders.length).toBe(1);
+
+    expect(postalQuoteRequests[0]).toMatchObject({
+      destinationZip: '01310000',
+      items: [expect.objectContaining({ productId: product.id, quantity: 1 })],
+    });
+    expect(createdOrders[0]).toMatchObject({
+      customerName: 'Cliente Checkout E2E',
+      type: 'delivery',
+      fulfillmentMode: 'postal',
+      deliveryFee: 18.75,
+      postalShipment: expect.objectContaining({
+        serviceCode: 'PAC',
+        serviceName: 'PAC',
+        price: 18.75,
+        destinationZip: '01310000',
+      }),
+    });
+  });
+
   test('confirma pedido de mesa preservando numero da mesa no payload', async ({ page }) => {
     await seedCheckoutDraft(page, { type: 'table', table: '7' });
     await page.setViewportSize({ width: 390, height: 700 });
@@ -353,6 +456,7 @@ test.describe('Store checkout layout', () => {
   });
 
   test('bloqueia entrega fora do raio antes de criar pedido', async ({ page }) => {
+    storeSettingsOverrides = { postalEnabled: false, postalOriginZip: '' };
     customerAddresses = [farAddress];
     await seedCheckoutDraft(page);
     await page.setViewportSize({ width: 390, height: 720 });

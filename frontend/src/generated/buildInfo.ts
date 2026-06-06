@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "3f3c887c",
-  "versionLabel": "v0.1.9.3f3c887c",
-  "versionInternal": "0.1.9+20260606.212019.3f3c887c",
-  "buildId": "0.1.9+20260606.212019.3f3c887c-20260606.212019-3f3c887c",
-  "builtAt": "2026-06-06T21:20:19.298Z",
-  "commitHash": "3f3c887c5e98234f193af078d96644a1c36be33c",
-  "shortHash": "3f3c887c",
+  "versionDisplaySuffix": "0b6e49cf",
+  "versionLabel": "v0.1.9.0b6e49cf",
+  "versionInternal": "0.1.9+20260606.215044.0b6e49cf",
+  "buildId": "0.1.9+20260606.215044.0b6e49cf-20260606.215044-0b6e49cf",
+  "builtAt": "2026-06-06T21:50:44.488Z",
+  "commitHash": "0b6e49cfa62abc250f75ae7ecf3240031e31834d",
+  "shortHash": "0b6e49cf",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "0b6e49cfa62abc250f75ae7ecf3240031e31834d",
+      "shortHash": "0b6e49cf",
+      "dateIso": "2026-06-06T18:23:39-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix: prevent web pwa auto reload during use",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0b6e49cfa62abc250f75ae7ecf3240031e31834d"
+    },
     {
       "hash": "3f3c887c5e98234f193af078d96644a1c36be33c",
       "shortHash": "3f3c887c",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(frontend): polish partner-aligned surfaces",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d65a33877997c41e91c044e5bb5c3a6e2b842278"
-    },
-    {
-      "hash": "455df188e30800c0d6362eb07a0f2d7c653fdf43",
-      "shortHash": "455df188",
-      "dateIso": "2026-06-03T15:53:56-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(frontend): refine premium mobile ux surfaces",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/455df188e30800c0d6362eb07a0f2d7c653fdf43"
     }
   ]
 } as const;

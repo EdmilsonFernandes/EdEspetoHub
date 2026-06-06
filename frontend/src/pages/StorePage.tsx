@@ -445,6 +445,7 @@ export function StorePage() {
   const [postalQuoteLoading, setPostalQuoteLoading] = useState(false);
   const [postalQuote, setPostalQuote] = useState<any | null>(null);
   const [selectedPostalServiceCode, setSelectedPostalServiceCode] = useState('');
+  const postalQuoteAutoKeyRef = useRef('');
   const [promoMessage, setPromoMessage] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'pickup', 'table' ]);
@@ -2366,6 +2367,7 @@ export function StorePage() {
 
   useEffect(() => {
     if (!isPostalDelivery) return;
+    postalQuoteAutoKeyRef.current = '';
     setPostalQuote(null);
     setSelectedPostalServiceCode('');
   }, [customer.cep, isPostalDelivery, cartItemsCount, storeSlug]);
@@ -2419,19 +2421,20 @@ export function StorePage() {
     );
   };
 
-  const handleCalculatePostalQuote = async () => {
+  const handleCalculatePostalQuote = useCallback(async (options?: { silent?: boolean }) => {
+    const silent = Boolean(options?.silent);
     if (!storeSlug) {
-      showToast('Loja não especificada.', 'error');
-      return;
+      if (!silent) showToast('Loja não especificada.', 'error');
+      return false;
     }
     const destinationZip = String(customer.cep || '').replace(/\D/g, '');
     if (destinationZip.length !== 8) {
-      showToast('Informe um CEP válido para cotar envio postal.', 'warning');
-      return;
+      if (!silent) showToast('Informe um CEP válido para cotar envio postal.', 'warning');
+      return false;
     }
     if (!validCartItems.length) {
-      showToast('Adicione ao menos 1 item para cotar frete postal.', 'warning');
-      return;
+      if (!silent) showToast('Adicione ao menos 1 item para cotar frete postal.', 'warning');
+      return false;
     }
     setPostalQuoteLoading(true);
     try {
@@ -2452,7 +2455,8 @@ export function StorePage() {
       } else {
         setSelectedPostalServiceCode('');
       }
-      showToast('Frete postal calculado.', 'success');
+      if (!silent) showToast('Frete postal calculado.', 'success');
+      return services.length > 0;
     } catch (error: any) {
       const message =
         error?.details?.message ||
@@ -2462,11 +2466,34 @@ export function StorePage() {
         'Não foi possível calcular o frete postal agora.';
       setPostalQuote(null);
       setSelectedPostalServiceCode('');
-      showToast(message, 'error');
+      if (!silent) showToast(message, 'error');
+      return false;
     } finally {
       setPostalQuoteLoading(false);
     }
-  };
+  }, [customer.cep, storeSlug, validCartItems, showToast]);
+
+  useEffect(() => {
+    if (!postalEnabled || !isPostalDelivery || postalQuoteLoading || selectedPostalService) return;
+    const destinationZip = String(customer.cep || '').replace(/\D/g, '');
+    if (!storeSlug || destinationZip.length !== 8 || !validCartItems.length) return;
+    const itemsSignature = validCartItems
+      .map((item: any) => `${String(item?.id || item?.productId || '')}:${Number(item?.qty || 1)}`)
+      .join('|');
+    const quoteKey = `${storeSlug}:${destinationZip}:${itemsSignature}`;
+    if (!itemsSignature || postalQuoteAutoKeyRef.current === quoteKey) return;
+    postalQuoteAutoKeyRef.current = quoteKey;
+    void handleCalculatePostalQuote({ silent: true });
+  }, [
+    customer.cep,
+    handleCalculatePostalQuote,
+    isPostalDelivery,
+    postalEnabled,
+    postalQuoteLoading,
+    selectedPostalService,
+    storeSlug,
+    validCartItems,
+  ]);
 
   const updateCart = (item, qty, options) => {
     const catalogItem = products.find((product: any) => String(product?.id || '') === String(item?.id || '')) || item;

@@ -795,19 +795,19 @@ export const CartView = ({
   const showRouteMap = !isPostalDelivery && Boolean(storeCoords?.lat && deliveryCoords?.lat);
   const showDeliveryStatus = isPostalDelivery
     ? Boolean(deliveryStatus)
-    : deliveryStatus && deliveryCheck?.status !== "ok" && deliveryCheck?.status !== "out";
+    : deliveryStatus && deliveryCheck?.status !== "ok" && (postalEnabled || deliveryCheck?.status !== "out");
   const showDeliveryDebug = false; // Hidden from end users; validation feedback shown via status banner
-  const hideOutOfRangeInlineReason = !isPostalDelivery && isDelivery && deliveryCheck?.status === "out";
+  const hideOutOfRangeInlineReason = !postalEnabled && !isPostalDelivery && isDelivery && deliveryCheck?.status === "out";
 
   useEffect(() => {
-    if (!isPostalDelivery && isDelivery && deliveryCheck?.status === "out") {
+    if (!postalEnabled && !isPostalDelivery && isDelivery && deliveryCheck?.status === "out") {
       setShowOutOfRangeSheet(true);
       return;
     }
-    if (!isDelivery) {
+    if (!isDelivery || isPostalDelivery || postalEnabled) {
       setShowOutOfRangeSheet(false);
     }
-  }, [isDelivery, deliveryCheck?.status, isPostalDelivery]);
+  }, [isDelivery, deliveryCheck?.status, isPostalDelivery, postalEnabled]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -1532,6 +1532,46 @@ export const CartView = ({
                 );
               })}
             </div>
+            {customer.type === "delivery" && postalEnabled && (
+              <div className="mt-3 rounded-[1.35rem] border border-slate-200 bg-white/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => onChangeDeliveryMode?.("distance")}
+                    className={`min-h-[52px] rounded-[1.05rem] px-3 py-2.5 text-left transition ${
+                      !isPostalDelivery
+                        ? "bg-slate-900 text-white shadow-[0_16px_30px_-24px_rgba(15,23,42,0.55)]"
+                        : "bg-slate-50 text-slate-600 hover:bg-white"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 text-xs font-black">
+                      <Truck size={15} weight="duotone" />
+                      Entrega local
+                    </span>
+                    <span className={`mt-0.5 block text-[10px] font-semibold ${!isPostalDelivery ? "text-white/72" : "text-slate-400"}`}>
+                      Motoboy ou loja
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onChangeDeliveryMode?.("postal")}
+                    className={`min-h-[52px] rounded-[1.05rem] px-3 py-2.5 text-left transition ${
+                      isPostalDelivery
+                        ? "bg-slate-900 text-white shadow-[0_16px_30px_-24px_rgba(15,23,42,0.55)]"
+                        : "bg-slate-50 text-slate-600 hover:bg-white"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 text-xs font-black">
+                      <PaperPlaneTilt size={15} weight="duotone" />
+                      Envio postal
+                    </span>
+                    <span className={`mt-0.5 block text-[10px] font-semibold ${isPostalDelivery ? "text-white/72" : "text-slate-400"}`}>
+                      Correios
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Retirada info */}
@@ -1592,32 +1632,6 @@ export const CartView = ({
                       </span>
                     ))}
                   </div>
-                </div>
-              )}
-              {postalEnabled && (
-                <div className={`${showCustomerFulfillmentInsights ? 'mt-4' : 'mt-0'} rounded-[1.2rem] border border-slate-200 bg-slate-100/80 p-1.5 grid grid-cols-2 gap-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]`}>
-                  <button
-                    type="button"
-                    onClick={() => onChangeDeliveryMode?.("distance")}
-                    className={`rounded-[1rem] px-3 py-2.5 text-xs font-black transition ${
-                      !isPostalDelivery
-                        ? "bg-white text-slate-900 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.45)]"
-                        : "bg-transparent text-slate-500 hover:bg-white/70"
-                    }`}
-                  >
-                    Entrega local
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onChangeDeliveryMode?.("postal")}
-                    className={`rounded-[1rem] px-3 py-2.5 text-xs font-black transition ${
-                      isPostalDelivery
-                        ? "bg-white text-slate-900 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.45)]"
-                        : "bg-transparent text-slate-500 hover:bg-white/70"
-                    }`}
-                  >
-                    Envio postal
-                  </button>
                 </div>
               )}
               {isEndCustomerLogged && !isLoggedDeliveryFlow && (
@@ -2635,6 +2649,10 @@ export const CartView = ({
                     onOpenAddressManager?.();
                     return;
                   }
+                  if (isPostalQuoteMode) {
+                    await Promise.resolve(onCalculatePostalQuote?.());
+                    return;
+                  }
                   if (isDeliveryValidationMode) {
                     const validated = await Promise.resolve(onValidateDeliveryAddress?.());
                     if (!validated) return;
@@ -2654,7 +2672,8 @@ export const CartView = ({
               disabled={checkoutStep === 2
                 ? (
                     checkoutLoading ||
-                    (customer.type === 'delivery' && (deliveryCheck?.status === 'out' || deliveryCheck?.status === 'loading')) ||
+                    (isPostalQuoteMode && postalQuoteLoading) ||
+                    (customer.type === 'delivery' && !isPostalDelivery && (deliveryCheck?.status === 'out' || deliveryCheck?.status === 'loading')) ||
                     (customer.type === 'table' && !String(customer.table || '').trim())
                   )
                 : checkoutStep === 3
@@ -2665,7 +2684,8 @@ export const CartView = ({
               className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
                 (checkoutStep === 2 && (
                   checkoutLoading ||
-                  (customer.type === 'delivery' && (deliveryCheck?.status === 'out' || deliveryCheck?.status === 'loading')) ||
+                  (isPostalQuoteMode && postalQuoteLoading) ||
+                  (customer.type === 'delivery' && !isPostalDelivery && (deliveryCheck?.status === 'out' || deliveryCheck?.status === 'loading')) ||
                   (customer.type === 'table' && !String(customer.table || '').trim())
                 )) ||
                 (checkoutStep === 3 && (checkoutDisabled || cashValidation.blocked)) ||
@@ -2685,6 +2705,8 @@ export const CartView = ({
                       ? 'Cadastrar endereço'
                       : checkoutStep === 2 && isDeliveryValidationMode
                       ? 'Validar endereço'
+                      : checkoutStep === 2 && isPostalQuoteMode
+                      ? (postalQuoteLoading ? 'Calculando frete...' : 'Calcular frete postal')
                       : 'Continuar'}
                     <ArrowLeft size={18} weight="bold" className="rotate-180" />
                   </>

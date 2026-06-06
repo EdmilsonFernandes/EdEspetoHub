@@ -5,6 +5,7 @@ import { Order } from '../../../entities/Order';
 import { OrderShipment } from '../../../entities/OrderShipment';
 import { OrderShipmentEvent } from '../../../entities/OrderShipmentEvent';
 import { logger } from '../../../utils/logger';
+import { appendOrderTimelineEntry } from '../../../utils/orderTimeline';
 import { ManualShippingTrackingProvider } from './ManualShippingTrackingProvider';
 import { SiteRastreioTrackingProvider } from './SiteRastreioTrackingProvider';
 import { ShippingTrackingEventInput, ShippingTrackingProvider } from './types';
@@ -99,6 +100,7 @@ export class ShippingTrackingService {
   private readonly log = logger.child({ scope: 'ShippingTrackingService' });
   private readonly manualProvider = new ManualShippingTrackingProvider();
   private readonly siteRastreioProvider = new SiteRastreioTrackingProvider();
+  private readonly orderTerminalStatuses = new Set([ 'cancelled', 'canceled', 'done', 'finished', 'delivered' ]);
 
   private resolveProvider(): ShippingTrackingProvider {
     const provider = String(env.shipping.trackingProvider || 'manual').toLowerCase();
@@ -116,6 +118,29 @@ export class ShippingTrackingService {
       label: 'Atualização do envio',
       description: 'Uma nova atualização foi registrada no acompanhamento postal.',
     };
+  }
+
+  private async markOrderDeliveredFromTrackingTx(
+    manager: EntityManager,
+    orderId: string,
+    deliveredAt?: Date | string | null
+  ) {
+    const orderRepo = manager.getRepository(Order);
+    const currentOrder = await orderRepo.findOne({ where: { id: orderId } });
+    if (!currentOrder) return;
+
+    const currentStatus = String(currentOrder.status || '').toLowerCase();
+    if (this.orderTerminalStatuses.has(currentStatus)) return;
+
+    currentOrder.status = 'delivered';
+    currentOrder.statusTimeline = appendOrderTimelineEntry(currentOrder.statusTimeline, 'delivered', deliveredAt) as any;
+    await orderRepo.save(currentOrder);
+  }
+
+  private async markOrderDeliveredFromTracking(orderId: string, deliveredAt?: Date | string | null) {
+    await AppDataSource.transaction((manager) =>
+      this.markOrderDeliveredFromTrackingTx(manager, orderId, deliveredAt)
+    );
   }
 
   buildSummary(shipment?: OrderShipment | null, events: OrderShipmentEvent[] = []) {
@@ -213,6 +238,13 @@ export class ShippingTrackingService {
       hasDeliveredCarrierEvent(existingEvents);
 
     if (!providerConfigured || provider.name === 'manual' || isFresh || terminalDelivered) {
+      if (terminalDelivered) {
+        const deliveredEvent = existingEvents.find((event) =>
+          String(event.source || '').toLowerCase() === 'carrier' &&
+          String(event.status || '').toLowerCase() === 'delivered'
+        );
+        await this.markOrderDeliveredFromTracking(order.id, shipment.deliveredAt || deliveredEvent?.eventAt || null);
+      }
       return {
         summary: this.buildSummary(shipment, existingEvents),
         events: existingEvents.map(serializeEvent),
@@ -268,6 +300,7 @@ export class ShippingTrackingService {
           };
           if (String(newest.status || '').toLowerCase() === 'delivered') {
             currentShipment.deliveredAt = currentShipment.deliveredAt || normalizeDate(newest.eventAt);
+            await this.markOrderDeliveredFromTrackingTx(manager, order.id, currentShipment.deliveredAt);
           }
           await shipmentRepo.save(currentShipment);
         }
