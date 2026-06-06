@@ -3444,8 +3444,12 @@ export function StorePage() {
             setCustomerResendCooldown(Number.isFinite(cooldown) ? Math.max(0, cooldown) : 60);
           }
           setCustomerAccountNotice(
-            response?.emailDeliveryStatus === 'failed'
+            response?.emailDeliveryStatus === 'failed' && response?.reason === 'ACCOUNT_PENDING_EMAIL_VERIFICATION'
+              ? 'Encontramos sua conta aguardando confirmação, mas não conseguimos enviar um novo código agora. Se você já recebeu um código, pode tentar usá-lo; se não, toque em Reenviar código em instantes.'
+              : response?.emailDeliveryStatus === 'failed'
               ? 'Sua conta foi criada, mas não conseguimos enviar o código agora. Toque em Reenviar código para tentar novamente.'
+              : response?.reason === 'ACCOUNT_PENDING_EMAIL_VERIFICATION'
+              ? 'Encontramos sua conta. Falta só confirmar o e-mail; enviamos um novo código para você continuar.'
               : 'Enviamos um código de 4 dígitos para concluir seu cadastro.'
           );
           return;

@@ -71,6 +71,12 @@ export function LandingPage() {
   });
   const [customerAuthLoading, setCustomerAuthLoading] = useState(false);
   const [customerAuthError, setCustomerAuthError] = useState('');
+  const [customerAuthNotice, setCustomerAuthNotice] = useState('');
+  const [customerVerifyPrompt, setCustomerVerifyPrompt] = useState<{ email: string; emailMasked?: string | null } | null>(null);
+  const [customerVerifyCode, setCustomerVerifyCode] = useState('');
+  const [customerVerifyLoading, setCustomerVerifyLoading] = useState(false);
+  const [customerResendLoading, setCustomerResendLoading] = useState(false);
+  const [customerResendCooldown, setCustomerResendCooldown] = useState(0);
   const [targetStoreSlug, setTargetStoreSlug] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -114,10 +120,17 @@ export function LandingPage() {
     }
   }, [featuredStores, targetStoreSlug]);
 
+  useEffect(() => {
+    if (customerResendCooldown <= 0) return;
+    const timer = window.setTimeout(() => setCustomerResendCooldown((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [customerResendCooldown]);
+
   const handleCustomerAuthSubmit = async () => {
     if (customerAuthLoading) return;
     setCustomerAuthLoading(true);
     setCustomerAuthError('');
+    setCustomerAuthNotice('');
     try {
       let result: any;
       if (customerAuthMode === 'register') {
@@ -132,6 +145,28 @@ export function LandingPage() {
           termsAccepted: Boolean(customerAuthForm.termsAccepted),
           lgpdAccepted: Boolean(customerAuthForm.lgpdAccepted),
         });
+        if (result?.next === 'VERIFY_EMAIL_CODE') {
+          const targetEmail = String(result?.email || customerAuthForm.email || '').trim().toLowerCase();
+          setCustomerVerifyPrompt({
+            email: targetEmail,
+            emailMasked: result?.emailMasked || targetEmail,
+          });
+          setCustomerVerifyCode('');
+          {
+            const cooldown = Number(result?.cooldownSec);
+            setCustomerResendCooldown(Number.isFinite(cooldown) ? Math.max(0, cooldown) : 60);
+          }
+          setCustomerAuthNotice(
+            result?.emailDeliveryStatus === 'failed' && result?.reason === 'ACCOUNT_PENDING_EMAIL_VERIFICATION'
+              ? 'Encontramos sua conta aguardando confirmação, mas não conseguimos enviar um novo código agora. Se você já recebeu um código, pode tentar usá-lo; se não, toque em Reenviar código em instantes.'
+              : result?.emailDeliveryStatus === 'failed'
+              ? 'Sua conta foi criada, mas o envio do código falhou agora. Toque em Reenviar código para tentar novamente.'
+              : result?.reason === 'ACCOUNT_PENDING_EMAIL_VERIFICATION'
+              ? 'Encontramos sua conta. Falta só confirmar o e-mail; enviamos um novo código para você continuar.'
+              : 'Enviamos um código de 4 dígitos para concluir seu cadastro.'
+          );
+          return;
+        }
       } else {
         result = await customerAccountService.login({
           email: String(customerAuthForm.email || '').trim(),
@@ -140,6 +175,7 @@ export function LandingPage() {
       }
       if (!result?.token) throw new Error('Não foi possível autenticar.');
       localStorage.setItem('customerSession', JSON.stringify(result));
+      setHasCustomerSession(true);
       const slug = String(targetStoreSlug || '').trim();
       if (slug) {
         navigate(`/${slug}`);
@@ -147,9 +183,77 @@ export function LandingPage() {
         navigate('/');
       }
     } catch (error: any) {
+      if (error?.code === 'AUTH-005') {
+        const targetEmail = String(error?.details?.email || customerAuthForm.email || '').trim().toLowerCase();
+        setCustomerVerifyPrompt({
+          email: targetEmail,
+          emailMasked: error?.details?.emailMasked || targetEmail,
+        });
+        setCustomerVerifyCode('');
+        setCustomerResendCooldown(Number(error?.details?.resendCooldownSec || 60));
+        setCustomerAuthNotice('Sua conta já existe e só falta confirmar o e-mail. Reenvie o código se precisar.');
+        return;
+      }
       setCustomerAuthError(error?.message || 'Falha ao autenticar cliente.');
     } finally {
       setCustomerAuthLoading(false);
+    }
+  };
+
+  const finishCustomerAuth = (result: any) => {
+    if (!result?.token) throw new Error('Não foi possível autenticar.');
+    localStorage.setItem('customerSession', JSON.stringify(result));
+    setHasCustomerSession(true);
+    setShowCustomerAuth(false);
+    setCustomerVerifyPrompt(null);
+    setCustomerVerifyCode('');
+    const slug = String(targetStoreSlug || '').trim();
+    navigate(slug ? `/${slug}` : '/');
+  };
+
+  const handleCustomerVerifyCode = async () => {
+    const email = String(customerVerifyPrompt?.email || customerAuthForm.email || '').trim().toLowerCase();
+    const code = String(customerVerifyCode || '').replace(/\D/g, '').slice(0, 4);
+    if (!email || code.length !== 4 || customerVerifyLoading) return;
+    setCustomerVerifyLoading(true);
+    setCustomerAuthError('');
+    setCustomerAuthNotice('');
+    try {
+      const result = await customerAccountService.verifyEmailCode({ email, code });
+      finishCustomerAuth(result);
+    } catch (error: any) {
+      setCustomerAuthError(error?.message || 'Código inválido ou expirado.');
+    } finally {
+      setCustomerVerifyLoading(false);
+    }
+  };
+
+  const handleCustomerResendVerification = async () => {
+    const email = String(customerVerifyPrompt?.email || customerAuthForm.email || '').trim().toLowerCase();
+    if (!email || customerResendLoading || customerResendCooldown > 0) return;
+    setCustomerResendLoading(true);
+    setCustomerAuthError('');
+    setCustomerAuthNotice('');
+    try {
+      const result = await customerAccountService.resendEmailCode(email);
+      setCustomerVerifyPrompt((prev) => ({
+        email,
+        emailMasked: result?.emailMasked || prev?.emailMasked || email,
+      }));
+      setCustomerVerifyCode('');
+      {
+        const cooldown = Number(result?.cooldownSec);
+        setCustomerResendCooldown(Number.isFinite(cooldown) ? Math.max(0, cooldown) : 60);
+      }
+      if (result?.emailDeliveryStatus === 'failed') {
+        setCustomerAuthError('Não conseguimos enviar o código agora. Tente reenviar novamente em instantes.');
+      } else {
+        setCustomerAuthNotice(result?.message || 'Novo código enviado para seu e-mail.');
+      }
+    } catch (error: any) {
+      setCustomerAuthError(error?.message || 'Não foi possível reenviar o código agora.');
+    } finally {
+      setCustomerResendLoading(false);
     }
   };
 
@@ -818,6 +922,83 @@ export function LandingPage() {
             </div>
 
             <div className="mt-5 space-y-3 text-slate-900">
+              {customerVerifyPrompt ? (
+                <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                      <EnvelopeSimple size={22} weight="duotone" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Confirmar e-mail</p>
+                      <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">
+                        Digite o código enviado para{' '}
+                        <span className="rounded-lg bg-white px-2 py-0.5 font-black text-slate-950">
+                          {customerVerifyPrompt.emailMasked || customerVerifyPrompt.email}
+                        </span>
+                        .
+                      </p>
+                    </div>
+                  </div>
+                  <input
+                    value={customerVerifyCode}
+                    onChange={(e) => setCustomerVerifyCode(String(e.target.value || '').replace(/\D/g, '').slice(0, 4))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        void handleCustomerVerifyCode();
+                      }
+                    }}
+                    placeholder="0000"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    autoCorrect="off"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center text-2xl font-black tracking-[0.35em] text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/15"
+                  />
+                  {customerAuthNotice ? (
+                    <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold leading-relaxed text-emerald-700">{customerAuthNotice}</p>
+                  ) : null}
+                  {customerAuthError ? (
+                    <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold leading-relaxed text-rose-600">{customerAuthError}</p>
+                  ) : null}
+                  <button
+                    type="button"
+                    disabled={customerVerifyCode.length !== 4 || customerVerifyLoading}
+                    onClick={handleCustomerVerifyCode}
+                    className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white transition-opacity disabled:opacity-60 hover:opacity-90"
+                  >
+                    {customerVerifyLoading ? 'Validando...' : 'Confirmar e entrar'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={customerResendLoading || customerResendCooldown > 0}
+                    onClick={handleCustomerResendVerification}
+                    className="w-full text-center text-xs font-black uppercase tracking-[0.12em] text-slate-500 transition-colors hover:text-slate-900 disabled:text-slate-300"
+                  >
+                    {customerResendLoading
+                      ? 'Reenviando...'
+                      : customerResendCooldown > 0
+                      ? `Reenviar em ${customerResendCooldown}s`
+                      : 'Reenviar código'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomerVerifyPrompt(null);
+                      setCustomerVerifyCode('');
+                      setCustomerAuthError('');
+                      setCustomerAuthNotice('');
+                    }}
+                    className="w-full text-center text-xs font-semibold text-slate-400 transition-colors hover:text-slate-700"
+                  >
+                    Voltar para login
+                  </button>
+                </div>
+              ) : null}
+
+              {!customerVerifyPrompt ? (
+                <>
               {customerAuthMode === 'register' && (
                 <div className="relative">
                   <User size={15} weight="duotone" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -952,6 +1133,8 @@ export function LandingPage() {
                   Esqueci minha senha
                 </button>
               )}
+                </>
+              ) : null}
             </div>
           </div>
         </div>

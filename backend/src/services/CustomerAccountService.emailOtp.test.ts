@@ -73,12 +73,12 @@ describe('CustomerAccountService — email OTP', () => {
         else otpRecords.unshift(payload);
         return payload;
       },
-      findOne: async () => otpRecords[0] || null,
+      findOne: async () => otpRecords.find((row) => !row.usedAt) || null,
       createQueryBuilder: () => {
         const builder: any = {
           update: () => builder, set: () => builder, where: () => builder,
           andWhere: () => builder, leftJoinAndSelect: () => builder, orderBy: () => builder,
-          getOne: async () => otpRecords[0] || null, execute: async () => undefined,
+          getOne: async () => otpRecords.find((row) => !row.usedAt) || null, execute: async () => undefined,
         };
         return builder;
       },
@@ -118,6 +118,51 @@ describe('CustomerAccountService — email OTP', () => {
     expect(result.cooldownSec).toBe(0);
     expect(userExists).toBe(true);
     expect(otpRecords[0]?.lastSentAt).toBeNull();
+    expect(otpRecords[0]?.usedAt).toBeTruthy();
+  });
+
+  it('retoma a confirmação quando cliente tenta cadastrar e-mail ainda não verificado', async () => {
+    await service.register({
+      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      termsAccepted: true, lgpdAccepted: true,
+    }, { ipAddress: '127.0.0.1' });
+
+    const result = await service.register({
+      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      termsAccepted: true, lgpdAccepted: true,
+    }, { ipAddress: '127.0.0.1' });
+
+    expect(result.next).toBe('VERIFY_EMAIL_CODE');
+    expect(result.reason).toBe('ACCOUNT_PENDING_EMAIL_VERIFICATION');
+    expect(result.emailDeliveryStatus).toBe('sent');
+    expect(sentCode).toHaveLength(4);
+    expect(otpRecords.length).toBe(2);
+  });
+
+  it('mantém código anterior válido quando tentativa de novo envio falha', async () => {
+    await service.register({
+      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      termsAccepted: true, lgpdAccepted: true,
+    }, { ipAddress: '127.0.0.1' });
+    const deliveredCode = sentCode;
+
+    service.emailService = {
+      sendCustomerVerificationCode: async () => { throw new Error('SMTP EMESSAGE'); },
+      sendCustomerWelcome: async () => { welcomeSent += 1; },
+    };
+
+    const retry = await service.register({
+      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      termsAccepted: true, lgpdAccepted: true,
+    }, { ipAddress: '127.0.0.1' });
+
+    expect(retry.reason).toBe('ACCOUNT_PENDING_EMAIL_VERIFICATION');
+    expect(retry.emailDeliveryStatus).toBe('failed');
+    expect(otpRecords[0]?.usedAt).toBeTruthy();
+
+    const result = await service.verifyEmailCode({ email: 'cliente@example.com', code: deliveredCode });
+    expect(result.token).toBeTruthy();
+    expect(savedUser.emailVerified).toBe(true);
   });
 
   it('invalid code increments attempts and throws', async () => {

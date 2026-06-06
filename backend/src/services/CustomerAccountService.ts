@@ -364,13 +364,6 @@ private async sendCustomerEmailOtp(user: User, meta?: { ipAddress?: string | nul
     );
     const nextResendCount = Number(maxCountRows?.[0]?.max_count || 0) + 1;
 
-    await otpRepo
-      .createQueryBuilder()
-      .update()
-      .set({ usedAt: new Date() })
-      .where('user_id = :userId AND used_at IS NULL', { userId: user.id })
-      .execute();
-
     const otp = await otpRepo.save(
       otpRepo.create({
         user,
@@ -385,6 +378,12 @@ private async sendCustomerEmailOtp(user: User, meta?: { ipAddress?: string | nul
 
     try {
       await this.emailService.sendCustomerVerificationCode(user.email, user.fullName || 'Cliente', code);
+      await otpRepo
+        .createQueryBuilder()
+        .update()
+        .set({ usedAt: new Date() })
+        .where('user_id = :userId AND used_at IS NULL AND id != :otpId', { userId: user.id, otpId: otp.id })
+        .execute();
       otp.lastSentAt = new Date();
       await otpRepo.save(otp);
       return { emailSent: true, emailDeliveryStatus: 'sent', cooldownSec: 60 };
@@ -394,6 +393,8 @@ private async sendCustomerEmailOtp(user: User, meta?: { ipAddress?: string | nul
         email: user.email,
         error,
       });
+      otp.usedAt = new Date();
+      await otpRepo.save(otp);
       return { emailSent: false, emailDeliveryStatus: 'failed', cooldownSec: 0 };
     }
   }
@@ -568,7 +569,22 @@ async register(
 
     const userRepo = AppDataSource.getRepository(User);
     const existing = await userRepo.findOne({ where: { email } });
-    if (existing) throw new AppError('AUTH-011', 409);
+    if (existing) {
+      if (existing.userRole === 'CUSTOMER' && existing.emailVerified !== true) {
+        const delivery = await this.sendCustomerEmailOtp(existing, meta);
+        return {
+          user: this.sanitizeUser(existing),
+          next: 'VERIFY_EMAIL_CODE',
+          reason: 'ACCOUNT_PENDING_EMAIL_VERIFICATION',
+          email: existing.email,
+          emailMasked: this.maskEmail(existing.email),
+          cooldownSec: delivery.cooldownSec,
+          emailSent: delivery.emailSent,
+          emailDeliveryStatus: delivery.emailDeliveryStatus,
+        };
+      }
+      throw new AppError('AUTH-011', 409);
+    }
 
     const user = userRepo.create({
       fullName,
