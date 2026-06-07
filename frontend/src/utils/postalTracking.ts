@@ -34,6 +34,56 @@ export const getPostalTrackingExternalUrl = (trackingCode?: string | null, track
   return String(trackingUrl || '').trim();
 };
 
+export const addPostalBusinessDays = (startDate: Date, businessDays: number) => {
+  const result = new Date(startDate);
+  let added = 0;
+  while (added < businessDays) {
+    result.setDate(result.getDate() + 1);
+    const day = result.getDay();
+    if (day !== 0 && day !== 6) added += 1;
+  }
+  return result;
+};
+
+export const getPostalEstimatedDays = (shipment: any) => {
+  const candidates = [
+    Number(shipment?.estimatedDays || 0),
+    Number(shipment?.estimated_days || 0),
+    Number(shipment?.quotePayload?.estimatedDays || 0),
+    Number(shipment?.quote_payload?.estimatedDays || 0),
+    Number(shipment?.quotePayload?.estimated_days || 0),
+    Number(shipment?.quote_payload?.estimated_days || 0),
+  ].filter((value) => Number.isFinite(value) && value > 0);
+  if (candidates.length) return Math.ceil(candidates[0]);
+
+  const serviceCode = String(shipment?.serviceCode || shipment?.service_code || '').trim().toUpperCase();
+  const serviceName = String(shipment?.serviceName || shipment?.service_name || '').trim().toUpperCase();
+  if (serviceCode.includes('SEDEX') || serviceName.includes('SEDEX')) return 4;
+  if (serviceCode.includes('PAC') || serviceName.includes('PAC')) return 8;
+  return null;
+};
+
+export const getPostalExpectedDeliveryDeadlineMs = (order: any, shipment: any) => {
+  const estimatedDays = getPostalEstimatedDays(shipment);
+  if (!estimatedDays) return null;
+
+  const postedAt = shipment?.postedAt || shipment?.posted_at;
+  const createdAt = order?.createdAt || order?.created_at;
+  const baseDate = new Date(postedAt || createdAt || '');
+  if (!Number.isFinite(baseDate.getTime())) return null;
+
+  const expected = addPostalBusinessDays(baseDate, estimatedDays);
+  expected.setHours(23, 59, 59, 999);
+  return expected.getTime();
+};
+
+export const isPostalShipmentDelayed = (order: any, shipment: any, nowMs = Date.now()) => {
+  const shipmentStatus = String(shipment?.shipmentStatus || shipment?.shipment_status || '').trim().toLowerCase();
+  if (shipment?.deliveredAt || shipment?.delivered_at || shipmentStatus === 'delivered') return false;
+  const deadlineMs = getPostalExpectedDeliveryDeadlineMs(order, shipment);
+  return Boolean(deadlineMs && nowMs > deadlineMs);
+};
+
 export const POSTAL_STATUS_COPY: Record<string, { label: string; description: string }> = {
   tracking_code_added: {
     label: 'Código informado',

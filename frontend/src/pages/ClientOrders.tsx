@@ -33,6 +33,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
+import { getPostalExpectedDeliveryDeadlineMs, isPostalShipmentDelayed } from '../utils/postalTracking';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AppImagePreviewDialog } from '../components/common/AppImagePreviewDialog';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
@@ -134,6 +135,13 @@ const getEtaDeadlineMs = (order: any, details?: any) => {
   const etaMinutes = Number(details?.eta?.windowMax || details?.eta?.totalMinutes || details?.eta?.windowMin || 0);
   if (!createdAt || !(etaMinutes > 0)) return null;
   return createdAt + etaMinutes * 60 * 1000;
+};
+
+const getPostalForecastLabel = (deadlineMs?: number | null) => {
+  if (!deadlineMs) return '';
+  const deadline = new Date(deadlineMs);
+  if (!Number.isFinite(deadline.getTime())) return '';
+  return `Entrega até ${deadline.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}`;
 };
 
 const isCustomerCancelableStatus = (status?: string) =>
@@ -421,11 +429,19 @@ const groupOrdersByDate = (orders: any[]) => {
 
 const getOrderFulfillmentMeta = (order: any) => {
   const normalizedType = String(order?.type || '').trim().toLowerCase();
+  const normalizedFulfillmentMode = String(order?.fulfillmentMode || order?.fulfillment_mode || '').trim().toLowerCase();
   const normalizedCondominiumMode = String(
     order?.condominiumOrder?.fulfillmentMode ||
     order?.condominiumFulfillmentMode ||
     ''
   ).trim().toLowerCase();
+
+  if (normalizedFulfillmentMode === 'postal') {
+    return {
+      label: 'Postal',
+      toneClass: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+    };
+  }
 
   if (
     normalizedType === 'delivery' ||
@@ -586,8 +602,12 @@ function OrderCard({
     formatOrderDisplayId(String(order?.id || '').trim(), String(order?.store?.slug || order?.storeSlug || '').trim()) ||
     String(order?.id || '').trim() ||
     '-';
-  const etaWindowLabel = getEtaWindowLabel(details?.eta);
-  const etaDeadlineMs = getEtaDeadlineMs(order, details);
+  const shipment = details?.shipment || order?.shipment || null;
+  const isPostalOrder = String(details?.fulfillmentMode || order?.fulfillmentMode || '').trim().toLowerCase() === 'postal';
+  const postalDeadlineMs = isPostalOrder ? getPostalExpectedDeliveryDeadlineMs(details || order, shipment) : null;
+  const localEtaWindowLabel = getEtaWindowLabel(details?.eta);
+  const etaWindowLabel = isPostalOrder ? getPostalForecastLabel(postalDeadlineMs) : localEtaWindowLabel;
+  const etaDeadlineMs = isPostalOrder ? postalDeadlineMs : getEtaDeadlineMs(order, details);
   const itemsCount = getOrderItemsCount(items);
   const fulfillmentMeta = getOrderFulfillmentMeta(order);
   const condominiumOrder = order?.condominiumOrder || (order?.condominiumId ? {
@@ -600,9 +620,12 @@ function OrderCard({
     condominiumFulfillment === 'apartment_delivery' || condominiumFulfillment === 'condominium_apartment'
       ? 'Entrega no apartamento'
       : 'Retirada na feira';
-  const isDelayed = Boolean(etaDeadlineMs && Date.now() > etaDeadlineMs);
+  const isDelayed = isPostalOrder
+    ? isPostalShipmentDelayed(details || order, shipment)
+    : Boolean(etaDeadlineMs && Date.now() > etaDeadlineMs);
   const canCancel = Boolean(
     isActive &&
+    !isPostalOrder &&
     isDelayed &&
     isCustomerCancelableStatus(order.status) &&
     etaDeadlineMs &&
@@ -761,7 +784,7 @@ function OrderCard({
             <div className="border-b border-slate-100 px-3 py-2">
               <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${isDelayed ? 'text-amber-600' : 'text-emerald-600'}`}>
                 <Timer size={11} weight="duotone" />
-                {isDelayed ? 'Atrasado' : `Previsão ${etaWindowLabel}`}
+                {isDelayed ? (isPostalOrder ? 'Envio postal em atraso' : 'Atrasado') : (isPostalOrder ? etaWindowLabel : `Previsão ${etaWindowLabel}`)}
               </span>
             </div>
           )}

@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "2bad5990",
-  "versionLabel": "v0.1.9.2bad5990",
-  "versionInternal": "0.1.9+20260606.223405.2bad5990",
-  "buildId": "0.1.9+20260606.223405.2bad5990-20260606.223405-2bad5990",
-  "builtAt": "2026-06-06T22:34:05.280Z",
-  "commitHash": "2bad59903319c8534d92d04144665464fff4a865",
-  "shortHash": "2bad5990",
+  "versionDisplaySuffix": "c5bdd4fc",
+  "versionLabel": "v0.1.9.c5bdd4fc",
+  "versionInternal": "0.1.9+20260607.102533.c5bdd4fc",
+  "buildId": "0.1.9+20260607.102533.c5bdd4fc-20260607.102533-c5bdd4fc",
+  "builtAt": "2026-06-07T10:25:33.860Z",
+  "commitHash": "c5bdd4fcc1b42ef7f8ac333903b81f70a8c21a72",
+  "shortHash": "c5bdd4fc",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "c5bdd4fcc1b42ef7f8ac333903b81f70a8c21a72",
+      "shortHash": "c5bdd4fc",
+      "dateIso": "2026-06-06T19:36:29-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix: restore orders receipt icon import",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c5bdd4fcc1b42ef7f8ac333903b81f70a8c21a72"
+    },
     {
       "hash": "2bad59903319c8534d92d04144665464fff4a865",
       "shortHash": "2bad5990",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(checkout): refine payment and cancellation copy",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/54daf8775bf36e41783981351ee7c4775f77e92d"
-    },
-    {
-      "hash": "2d21e7782141f7beeddf8ee21f373fb298ed109b",
-      "shortHash": "2d21e778",
-      "dateIso": "2026-06-03T20:59:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(order): show refunded payment status",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2d21e7782141f7beeddf8ee21f373fb298ed109b"
     }
   ]
 }

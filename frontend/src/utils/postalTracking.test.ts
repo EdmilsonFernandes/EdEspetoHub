@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
+  addPostalBusinessDays,
   buildSiteCorreiosTrackingUrl,
+  getPostalExpectedDeliveryDeadlineMs,
   getPostalEventSourceCopy,
+  getPostalEstimatedDays,
   getPostalStatusCopy,
   getPostalTrackingExternalUrl,
   getPostalTrackingHeadline,
   getPostalTrackingUnavailableCopy,
+  isPostalShipmentDelayed,
   sortPostalEventsDesc,
 } from './postalTracking';
 
@@ -55,5 +59,32 @@ describe('postalTracking utils', () => {
 
   it('explains provider empty response without suggesting invalid tracking code', () => {
     expect(getPostalTrackingUnavailableCopy('Período inválido').label).toBe('Rastreio externo disponível');
+  });
+
+  it('calculates postal ETA using business days', () => {
+    const start = new Date('2026-06-05T12:00:00.000Z'); // Friday
+    expect(addPostalBusinessDays(start, 2).toISOString().slice(0, 10)).toBe('2026-06-09');
+  });
+
+  it('does not mark future postal delivery as delayed', () => {
+    const order = { createdAt: '2026-06-05T12:00:00.000Z' };
+    const shipment = { postedAt: '2026-06-05T12:00:00.000Z', estimatedDays: 4, shipmentStatus: 'in_transit' };
+    const deadlineMs = getPostalExpectedDeliveryDeadlineMs(order, shipment);
+
+    expect(deadlineMs).toBeTruthy();
+    expect(new Date(deadlineMs as number).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })).toBe('11/06/2026');
+    expect(isPostalShipmentDelayed(order, shipment, new Date('2026-06-07T12:00:00.000Z').getTime())).toBe(false);
+  });
+
+  it('does not mark delivered postal orders as delayed', () => {
+    const order = { createdAt: '2026-06-01T12:00:00.000Z' };
+    const shipment = { postedAt: '2026-06-01T12:00:00.000Z', estimatedDays: 1, deliveredAt: '2026-06-03T12:00:00.000Z' };
+
+    expect(isPostalShipmentDelayed(order, shipment, new Date('2026-06-10T12:00:00.000Z').getTime())).toBe(false);
+  });
+
+  it('uses postal service fallback days when quote has no explicit ETA', () => {
+    expect(getPostalEstimatedDays({ serviceCode: 'PAC' })).toBe(8);
+    expect(getPostalEstimatedDays({ serviceName: 'SEDEX Hoje' })).toBe(4);
   });
 });
