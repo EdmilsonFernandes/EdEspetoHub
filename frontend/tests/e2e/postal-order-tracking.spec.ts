@@ -96,16 +96,19 @@ test.describe('Pedido postal - acompanhamento do cliente', () => {
 
     await page.goto('/pedido/postal-order-e2e');
 
-    await expect(page.getByText('Envio pelos Correios', { exact: true })).toBeVisible();
+    await expect(page.getByText('Rastreio postal', { exact: true })).toBeVisible();
     await expect(page.getByText('Pedido postado').first()).toBeVisible();
     await expect(page.getByText('AA123456789BR')).toBeVisible();
-    await expect(page.getByText('Atualizações do envio')).toBeVisible();
+    await expect(page.getByText('Histórico do envio')).toBeVisible();
+    await expect(page.getByText('Objeto em trânsito')).not.toBeVisible();
+    await page.getByRole('button', { name: /ver histórico/i }).click();
+    await expect(page.getByText('Objeto em trânsito')).toBeVisible();
     await expect(page.getByText('Correios').first()).toBeVisible();
     await expect(page.getByText('Rastreio integrado')).toBeVisible();
     await expect(page.getByText('Loja').first()).toBeVisible();
     await expect(page.getByText('Atualizado pela loja.').first()).toBeVisible();
-    await expect(page.getByRole('button', { name: /atualizar rastreio/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /abrir site dos correios/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Atualizar$/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /ver rastreio externo/i })).toBeVisible();
   });
 
   test('mostra estado claro quando a loja ainda não informou o rastreio', async ({ page }) => {
@@ -146,7 +149,7 @@ test.describe('Pedido postal - acompanhamento do cliente', () => {
 
     await page.goto('/pedido/postal-order-e2e');
 
-    await expect(page.getByText('Envio pelos Correios', { exact: true })).toBeVisible();
+    await expect(page.getByText('Rastreio postal', { exact: true })).toBeVisible();
     await expect(page.getByText('Aguardando postagem').first()).toBeVisible();
     await expect(page.getByText(/ainda vai informar o c[oó]digo de rastreio/i)).toBeVisible();
   });
@@ -229,8 +232,10 @@ test.describe('Pedido postal - acompanhamento do cliente', () => {
     await page.goto('/pedido/postal-order-e2e');
 
     await expect(page.getByText('OK819652779BR')).toBeVisible();
-    await expect(page.getByText('Ainda sem atualização dos Correios')).toBeVisible();
-    await page.getByRole('button', { name: /atualizar rastreio/i }).click();
+    await expect(page.getByText('Rastreio externo disponível')).toBeVisible();
+    await page.getByRole('button', { name: /^Atualizar$/i }).click();
+    await expect(page.getByText('Em trânsito').first()).toBeVisible();
+    await page.getByRole('button', { name: /ver histórico/i }).click();
     await expect(page.getByText('Objeto em trânsito')).toBeVisible();
     await expect(page.getByText('Rastreio integrado')).toBeVisible();
   });

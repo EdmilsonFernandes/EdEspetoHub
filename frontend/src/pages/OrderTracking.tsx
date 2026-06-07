@@ -467,6 +467,7 @@ export function OrderTracking() {
   const [trackingCodeCopied, setTrackingCodeCopied] = useState(false);
   const [postalTrackingRefreshLoading, setPostalTrackingRefreshLoading] = useState(false);
   const [postalTrackingRefreshError, setPostalTrackingRefreshError] = useState('');
+  const [postalHistoryExpanded, setPostalHistoryExpanded] = useState(false);
   const [confirmReceiptLoading, setConfirmReceiptLoading] = useState(false);
   const [confirmReceiptError, setConfirmReceiptError] = useState('');
   const [reviewForm, setReviewForm] = useState({
@@ -1983,6 +1984,239 @@ export function OrderTracking() {
                 </div>
               </div>
 
+              {isPostalDelivery && (
+                <section
+                  id="postal-tracking-section"
+                  className="overflow-hidden rounded-[1.65rem] border border-emerald-100 bg-[linear-gradient(135deg,#f7fff8,#ffffff_58%,#f4f8fb)] shadow-[0_24px_52px_-38px_rgba(15,23,42,0.28)] ring-1 ring-white/80"
+                >
+                  <div className="p-4 sm:p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-[0_18px_34px_-22px_rgba(15,23,42,0.9)]">
+                        <Package size={22} weight="duotone" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">Rastreio postal</p>
+                          {postalTrackingEvents.length ? (
+                            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-slate-500 ring-1 ring-slate-200">
+                              {postalTrackingEvents.length} {postalTrackingEvents.length === 1 ? 'atualização' : 'atualizações'}
+                            </span>
+                          ) : null}
+                        </div>
+                        <h3 className="mt-1 text-lg font-black leading-tight text-slate-950">{postalTrackingHeadline.label || postalStatusLabel}</h3>
+                        <p className="mt-1 text-sm font-medium leading-5 text-slate-600">
+                          {postalTrackingHeadline.description || postalStatusDetail}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                      <TrackingMetaCard
+                        label="Chega até"
+                        value={!isCancelled && postalExpectedDeliveryDate ? postalExpectedDeliveryDate.toLocaleDateString('pt-BR') : 'Acompanhe aqui'}
+                        detail="Previsão do envio postal"
+                      />
+                      <TrackingMetaCard
+                        label="Tipo de envio"
+                        value={shipmentServiceName || shipmentServiceCode || 'A confirmar'}
+                        detail={postalEstimatedDays ? `${postalEstimatedDays} dia(s) úteis após postagem` : 'Prazo conforme postagem'}
+                      />
+                      <TrackingMetaCard
+                        label="Última atualização"
+                        value={postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt ? formatTimeOfDay(new Date(postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt), { padHour: true }) : 'Aguardando'}
+                        detail={postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt ? formatDateTime(postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt) : 'A loja ou Correios atualizam aqui'}
+                      />
+                    </div>
+
+                    {shipmentTrackingCode ? (
+                      <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Código dos Correios</p>
+                          {trackingCodeCopied ? (
+                            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 ring-1 ring-emerald-100">
+                              Copiado
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="mt-1 flex items-center gap-2">
+                          <p className="min-w-0 flex-1 break-all text-sm font-black tracking-[0.08em] text-slate-950">{shipmentTrackingCode}</p>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(shipmentTrackingCode);
+                                setTrackingCodeCopied(true);
+                                window.setTimeout(() => setTrackingCodeCopied(false), 1800);
+                              } catch (err) {
+                                console.error('Falha ao copiar rastreio', err);
+                              }
+                            }}
+                            className="rounded-full border border-slate-200 bg-slate-50 p-2 text-slate-600 transition hover:bg-white"
+                            aria-label="Copiar código de rastreio"
+                          >
+                            <CopySimple size={16} weight="bold" />
+                          </button>
+                        </div>
+
+                        {!isCancelled ? (
+                          <div className="mt-3 rounded-2xl border border-[#d6e4ed] bg-[linear-gradient(135deg,#f7fbfd,#ffffff)] px-3 py-3 shadow-[0_16px_32px_-28px_rgba(51,104,134,0.22)]">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="min-w-0">
+                                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                                  {hasCarrierPostalEvent ? 'Rastreio integrado' : 'Consulta pelo app'}
+                                </p>
+                                <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
+                                  {hasCarrierPostalEvent
+                                    ? 'As movimentações aparecem aqui no Já no Caminho.'
+                                    : 'Atualize para buscar novas movimentações sem abrir o site dos Correios.'}
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => { void handleRefreshShipmentTracking(); }}
+                                disabled={postalTrackingRefreshLoading}
+                                className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#153A4C] px-4 py-2 text-[11px] font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.55)] transition hover:brightness-105 active:scale-[0.98] disabled:cursor-wait disabled:opacity-70"
+                              >
+                                {postalTrackingRefreshLoading ? (
+                                  <CircleNotch size={15} weight="bold" className="animate-spin" />
+                                ) : (
+                                  <ArrowClockwise size={15} weight="bold" />
+                                )}
+                                {postalTrackingRefreshLoading ? 'Atualizando' : 'Atualizar'}
+                              </button>
+                            </div>
+
+                            {shipmentTrackingFallback ? (
+                              <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50/70 px-3 py-2.5">
+                                <p className="text-xs font-black text-amber-900">{postalTrackingUnavailableCopy.label}</p>
+                                <p className="mt-1 text-[11px] font-semibold leading-4 text-amber-800/85">{postalTrackingUnavailableCopy.description}</p>
+                              </div>
+                            ) : null}
+
+                            {postalTrackingRefreshError ? (
+                              <div className="mt-3 rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-700">
+                                {postalTrackingRefreshError}
+                              </div>
+                            ) : null}
+
+                            {shipmentTrackingExternalUrl ? (
+                              <button
+                                type="button"
+                                onClick={() => { void handleOpenShipmentTracking(); }}
+                                className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-black text-slate-500 shadow-sm transition hover:bg-slate-50 active:scale-[0.98] sm:w-auto"
+                              >
+                                <ArrowSquareOut size={14} weight="bold" />
+                                Ver rastreio externo
+                              </button>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : !isCancelled ? (
+                      <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-white/70 px-4 py-3 text-sm font-semibold text-slate-500">
+                        A loja ainda vai informar o código de rastreio quando postar o pedido.
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {postalTrackingEvents.length ? (
+                    <div className="border-t border-emerald-100/80 bg-white/64 px-4 py-3 sm:px-5">
+                      <button
+                        type="button"
+                        onClick={() => setPostalHistoryExpanded((current) => !current)}
+                        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-[0_14px_28px_-24px_rgba(15,23,42,0.22)] active:scale-[0.99]"
+                        aria-expanded={postalHistoryExpanded}
+                      >
+                        <div>
+                          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Histórico do envio</p>
+                          <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                            {postalTrackingEvents.length} {postalTrackingEvents.length === 1 ? 'movimentação registrada' : 'movimentações registradas'}
+                          </p>
+                        </div>
+                        <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black text-slate-600">
+                          {postalHistoryExpanded ? 'Ocultar' : 'Ver histórico'}
+                        </span>
+                      </button>
+
+                      {postalHistoryExpanded ? (
+                        <div className="mt-4 space-y-3">
+                          {postalTrackingEvents.slice(0, 8).map((event: any, index: number) => {
+                            const copy = getPostalStatusCopy(event.status);
+                            const sourceCopy = getPostalEventSourceCopy(event.source);
+                            const isLatest = index === 0;
+                            const isCarrierEvent = sourceCopy.kind === 'carrier';
+                            const isSellerEvent = sourceCopy.kind === 'seller';
+                            const isSystemEvent = sourceCopy.kind === 'system';
+                            const eventDate = event.eventAt || event.createdAt;
+                            return (
+                              <div key={event.id || `${event.status}-${index}`} className="relative grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3">
+                                <div className="flex flex-col items-center">
+                                  <span className={`relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border shadow-[0_16px_34px_-25px_rgba(15,23,42,0.7)] ${
+                                    isLatest
+                                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700 ring-4 ring-emerald-50/70'
+                                      : isCarrierEvent
+                                        ? 'border-amber-100 bg-[#fff8dd] text-[#336886]'
+                                        : 'border-slate-200 bg-white text-slate-500'
+                                  }`}>
+                                    {isSellerEvent ? (
+                                      <img
+                                        src={storeLogo}
+                                        alt={storeName}
+                                        className="h-full w-full object-cover"
+                                        onError={(event) => {
+                                          if (!event.currentTarget.src.endsWith('/janocaminho.jpg')) {
+                                            event.currentTarget.src = '/janocaminho.jpg';
+                                            return;
+                                          }
+                                          event.currentTarget.style.display = 'none';
+                                        }}
+                                      />
+                                    ) : isSystemEvent ? (
+                                      <img
+                                        src="/janocaminho.jpg"
+                                        alt="Já no Caminho"
+                                        className="h-full w-full object-cover"
+                                        onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                                      />
+                                    ) : (
+                                      <Package size={18} weight="duotone" />
+                                    )}
+                                    {isLatest ? <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-400" /> : null}
+                                  </span>
+                                  {index < Math.min(postalTrackingEvents.length, 8) - 1 ? <span className="mt-1 h-full min-h-10 w-px bg-slate-200" /> : null}
+                                </div>
+                                <div className={`min-w-0 rounded-[1.15rem] border px-3.5 py-3 shadow-[0_18px_38px_-31px_rgba(15,23,42,0.36)] ${
+                                  isLatest ? 'border-emerald-100 bg-white' : 'border-slate-100 bg-white/88'
+                                }`}>
+                                  <div className="flex flex-wrap items-start justify-between gap-2">
+                                    <p className="min-w-0 flex-1 text-sm font-black leading-snug text-slate-950">{event.title || copy.label}</p>
+                                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black ring-1 ${
+                                      isCarrierEvent
+                                        ? 'bg-amber-50 text-[#336886] ring-amber-100'
+                                        : isSellerEvent
+                                          ? 'bg-slate-50 text-slate-600 ring-slate-100'
+                                          : 'bg-emerald-50 text-emerald-700 ring-emerald-100'
+                                    }`}>
+                                      {sourceCopy.label}
+                                    </span>
+                                  </div>
+                                  <p className="mt-1 text-xs font-medium leading-5 text-slate-600">{event.description || copy.description}</p>
+                                  <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] font-semibold text-slate-400">
+                                    <span className="rounded-full bg-slate-50 px-2 py-0.5 ring-1 ring-slate-100">{sourceCopy.description}</span>
+                                    {eventDate ? <span>{formatDateTime(eventDate)}</span> : null}
+                                    {event.location ? <span>{event.location}</span> : null}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </section>
+              )}
+
               <div className="grid sm:grid-cols-2 gap-4">
                 <div
                   id="order-items-section"
@@ -2221,202 +2455,6 @@ export function OrderTracking() {
                             {[condominiumUnit?.block && `Bloco/Torre ${condominiumUnit.block}`, condominiumUnit?.apartment && `Apto ${condominiumUnit.apartment}`, condominiumUnit?.reference].filter(Boolean).join(' | ')}
                           </p>
                         )}
-                      </div>
-                    )}
-
-                    {isPostalDelivery && (
-                      <div className="rounded-[1.35rem] border border-emerald-100 bg-[linear-gradient(135deg,#f7fff8,#ffffff_58%,#f9fafb)] p-4 shadow-[0_22px_46px_-34px_rgba(15,23,42,0.28)]">
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-[0_18px_34px_-22px_rgba(15,23,42,0.9)]">
-                            <Package size={22} weight="duotone" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">Envio pelos Correios</p>
-                            <h3 className="mt-1 text-lg font-black text-slate-950">{postalTrackingHeadline.label || postalStatusLabel}</h3>
-                            <p className="mt-1 text-sm font-medium leading-5 text-slate-600">
-                              {postalTrackingHeadline.description || postalStatusDetail}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                          <TrackingMetaCard
-                            label="Tipo de envio"
-                            value={shipmentServiceName || shipmentServiceCode || 'A confirmar'}
-                            detail={postalEstimatedDays ? `${postalEstimatedDays} dia(s) úteis após postagem` : 'Prazo conforme postagem'}
-                          />
-                          <TrackingMetaCard
-                            label="Chega até"
-                            value={!isCancelled && postalExpectedDeliveryDate ? postalExpectedDeliveryDate.toLocaleDateString('pt-BR') : 'Acompanhe aqui'}
-                            detail="Atualiza conforme o envio"
-                          />
-                        </div>
-
-                        {shipmentTrackingCode ? (
-                          <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Código dos Correios</p>
-                              {trackingCodeCopied ? (
-                                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 ring-1 ring-emerald-100">
-                                  Copiado
-                                </span>
-                              ) : null}
-                            </div>
-                            <div className="mt-1 flex items-center gap-2">
-                              <p className="min-w-0 flex-1 break-all text-sm font-black tracking-[0.08em] text-slate-950">{shipmentTrackingCode}</p>
-                              <button
-                                type="button"
-                                onClick={async () => {
-                                  try {
-                                    await navigator.clipboard.writeText(shipmentTrackingCode);
-                                    setTrackingCodeCopied(true);
-                                    window.setTimeout(() => setTrackingCodeCopied(false), 1800);
-                                  } catch (err) {
-                                    console.error('Falha ao copiar rastreio', err);
-                                  }
-                                }}
-                                className="rounded-full border border-slate-200 bg-slate-50 p-2 text-slate-600 transition hover:bg-white"
-                                aria-label="Copiar código de rastreio"
-                              >
-                                <CopySimple size={16} weight="bold" />
-                              </button>
-                            </div>
-                            {!isCancelled ? (
-                              <div className="mt-3 rounded-2xl border border-[#d6e4ed] bg-[linear-gradient(135deg,#f7fbfd,#ffffff)] px-3 py-3 shadow-[0_16px_32px_-28px_rgba(51,104,134,0.22)]">
-                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                  <div className="min-w-0">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
-                                      {hasCarrierPostalEvent ? 'Rastreio integrado' : 'Consulta pelo app'}
-                                    </p>
-                                    <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
-                                      {hasCarrierPostalEvent
-                                        ? 'As movimentações dos Correios aparecem aqui, sem sair do Já no Caminho.'
-                                        : 'Atualize para tentar buscar novas movimentações sem abrir o site dos Correios.'}
-                                    </p>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => { void handleRefreshShipmentTracking(); }}
-                                    disabled={postalTrackingRefreshLoading}
-                                    className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#153A4C] px-4 py-2 text-[11px] font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.55)] transition hover:brightness-105 active:scale-[0.98] disabled:cursor-wait disabled:opacity-70"
-                                  >
-                                    {postalTrackingRefreshLoading ? (
-                                      <CircleNotch size={15} weight="bold" className="animate-spin" />
-                                    ) : (
-                                      <ArrowClockwise size={15} weight="bold" />
-                                    )}
-                                    {postalTrackingRefreshLoading ? 'Atualizando' : 'Atualizar rastreio'}
-                                  </button>
-                                </div>
-
-                                {shipmentTrackingFallback ? (
-                                  <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50/70 px-3 py-2.5">
-                                    <p className="text-xs font-black text-amber-900">{postalTrackingUnavailableCopy.label}</p>
-                                    <p className="mt-1 text-[11px] font-semibold leading-4 text-amber-800/85">{postalTrackingUnavailableCopy.description}</p>
-                                  </div>
-                                ) : null}
-
-                                {postalTrackingRefreshError ? (
-                                  <div className="mt-3 rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-700">
-                                    {postalTrackingRefreshError}
-                                  </div>
-                                ) : null}
-
-                                {shipmentTrackingExternalUrl ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => { void handleOpenShipmentTracking(); }}
-                                    className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-black text-slate-500 shadow-sm transition hover:bg-slate-50 active:scale-[0.98] sm:w-auto"
-                                  >
-                                    <ArrowSquareOut size={14} weight="bold" />
-                                    Ver rastreio sem captcha
-                                  </button>
-                                ) : null}
-                              </div>
-                            ) : null}
-                          </div>
-                        ) : !isCancelled ? (
-                          <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-white/70 px-4 py-3 text-sm font-semibold text-slate-500">
-                            A loja ainda vai informar o código de rastreio quando postar o pedido.
-                          </div>
-                        ) : null}
-
-                        {postalTrackingEvents.length ? (
-                          <div className="mt-4 space-y-3">
-                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Atualizações do envio</p>
-                            {postalTrackingEvents.slice(0, 6).map((event: any, index: number) => {
-                              const copy = getPostalStatusCopy(event.status);
-                              const sourceCopy = getPostalEventSourceCopy(event.source);
-                              const isLatest = index === 0;
-                              const isCarrierEvent = sourceCopy.kind === 'carrier';
-                              const isSellerEvent = sourceCopy.kind === 'seller';
-                              const isSystemEvent = sourceCopy.kind === 'system';
-                              const eventDate = event.eventAt || event.createdAt;
-                              return (
-                                <div key={event.id || `${event.status}-${index}`} className="relative grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3">
-                                  <div className="flex flex-col items-center">
-                                    <span className={`relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border shadow-[0_16px_34px_-25px_rgba(15,23,42,0.7)] ${
-                                      isLatest
-                                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700 ring-4 ring-emerald-50/70'
-                                        : isCarrierEvent
-                                          ? 'border-amber-100 bg-[#fff8dd] text-[#336886]'
-                                          : 'border-slate-200 bg-white text-slate-500'
-                                    }`}>
-                                      {isSellerEvent ? (
-                                        <img
-                                          src={storeLogo}
-                                          alt={storeName}
-                                          className="h-full w-full object-cover"
-                                          onError={(event) => {
-                                            if (!event.currentTarget.src.endsWith('/janocaminho.jpg')) {
-                                              event.currentTarget.src = '/janocaminho.jpg';
-                                              return;
-                                            }
-                                            event.currentTarget.style.display = 'none';
-                                          }}
-                                        />
-                                      ) : isSystemEvent ? (
-                                        <img
-                                          src="/janocaminho.jpg"
-                                          alt="Já no Caminho"
-                                          className="h-full w-full object-cover"
-                                          onError={(event) => { event.currentTarget.style.display = 'none'; }}
-                                        />
-                                      ) : (
-                                        <Package size={18} weight="duotone" />
-                                      )}
-                                      {isLatest ? <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-400" /> : null}
-                                    </span>
-                                    {index < Math.min(postalTrackingEvents.length, 6) - 1 ? <span className="mt-1 h-full min-h-10 w-px bg-slate-200" /> : null}
-                                  </div>
-                                  <div className={`min-w-0 rounded-[1.15rem] border px-3.5 py-3 shadow-[0_18px_38px_-31px_rgba(15,23,42,0.36)] ${
-                                    isLatest ? 'border-emerald-100 bg-white' : 'border-slate-100 bg-white/88'
-                                  }`}>
-                                    <div className="flex flex-wrap items-start justify-between gap-2">
-                                      <p className="min-w-0 flex-1 text-sm font-black leading-snug text-slate-950">{event.title || copy.label}</p>
-                                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black ring-1 ${
-                                        isCarrierEvent
-                                          ? 'bg-amber-50 text-[#336886] ring-amber-100'
-                                          : isSellerEvent
-                                            ? 'bg-slate-50 text-slate-600 ring-slate-100'
-                                            : 'bg-emerald-50 text-emerald-700 ring-emerald-100'
-                                      }`}>
-                                        {sourceCopy.label}
-                                      </span>
-                                    </div>
-                                    <p className="mt-1 text-xs font-medium leading-5 text-slate-600">{event.description || copy.description}</p>
-                                    <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] font-semibold text-slate-400">
-                                      <span className="rounded-full bg-slate-50 px-2 py-0.5 ring-1 ring-slate-100">{sourceCopy.description}</span>
-                                      {eventDate ? <span>{formatDateTime(eventDate)}</span> : null}
-                                      {event.location ? <span>{event.location}</span> : null}
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : null}
-
                       </div>
                     )}
 
