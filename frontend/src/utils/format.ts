@@ -229,4 +229,29 @@ export const formatAddress = (value: unknown) => {
   return [line1, line2, line3, zipCode].filter(Boolean).join(' | ');
 };
 
+export const formatAddressLines = (value: unknown) => {
+  const formatted = formatAddress(value);
+  if (!formatted) {
+    return { primary: '', secondary: '', locality: '', zipCode: '' };
+  }
+
+  const parts = formatted
+    .split(/\s*\|\s*/g)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length <= 1) {
+    return { primary: formatted.replace(/\s*\|\s*/g, ', '), secondary: '', locality: '', zipCode: '' };
+  }
+
+  const zipIndex = parts.findIndex((part) => /(^|\b)cep\b|(?:\d{5}-?\d{3})/i.test(part));
+  const zipCode = zipIndex >= 0 ? parts[zipIndex].replace(/^cep\s*/i, 'CEP ') : '';
+  const withoutZip = zipIndex >= 0 ? parts.filter((_, index) => index !== zipIndex) : parts;
+  const primary = withoutZip[0] || '';
+  const locality = withoutZip.length > 1 ? withoutZip[withoutZip.length - 1] : '';
+  const secondary = withoutZip.length > 2 ? withoutZip.slice(1, -1).join(' · ') : '';
+
+  return { primary, secondary, locality, zipCode };
+};
+
 

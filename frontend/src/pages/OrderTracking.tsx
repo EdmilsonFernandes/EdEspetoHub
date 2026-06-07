@@ -6,7 +6,7 @@ import { Capacitor } from '@capacitor/core';
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
-import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId, formatTimeOfDay } from '../utils/format';
+import { formatAddress, formatAddressLines, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId, formatTimeOfDay } from '../utils/format';
 import { getPaymentMethodMeta, getPaymentProviderMeta, mercadoPagoHorizontal } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
@@ -685,7 +685,11 @@ export function OrderTracking() {
   const normalizedPaymentMethod = String(paymentValue || '').trim().toLowerCase();
   const orderDisplayId = formatOrderDisplayId(order?.id, storeSlug) || String(order?.id || '-');
   const orderCreatedAtLabel = order?.createdAt ? formatDateTime(order.createdAt) : '';
-  const deliveryAddressLabel = isDelivery ? formatAddress(order.address || order.deliveryAddress) : '';
+  const deliveryAddressLabel = isDelivery ? formatAddress(order?.address || order?.deliveryAddress) : '';
+  const deliveryAddressLines = useMemo(
+    () => formatAddressLines(order?.address || order?.deliveryAddress),
+    [order?.address, order?.deliveryAddress]
+  );
   const pixKey =
     order?.store?.settings?.pixKey ||
     order?.pixKey ||
@@ -1987,49 +1991,62 @@ export function OrderTracking() {
               {isPostalDelivery && (
                 <section
                   id="postal-tracking-section"
-                  className="overflow-hidden rounded-[1.65rem] border border-emerald-100 bg-[linear-gradient(135deg,#f7fff8,#ffffff_58%,#f4f8fb)] shadow-[0_24px_52px_-38px_rgba(15,23,42,0.28)] ring-1 ring-white/80"
+                  className="relative overflow-hidden rounded-[1.9rem] border border-white/90 bg-[radial-gradient(circle_at_12%_0%,rgba(95,211,90,0.20),transparent_34%),linear-gradient(135deg,#f7fff8_0%,#ffffff_50%,#edf6fb_100%)] shadow-[0_28px_68px_-42px_rgba(21,58,76,0.36)] ring-1 ring-[#d6e4ed]/65"
                 >
+                  <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[#336886]/12 blur-3xl" />
+                  <div className="pointer-events-none absolute -bottom-20 left-6 h-40 w-40 rounded-full bg-emerald-300/18 blur-3xl" />
                   <div className="p-4 sm:p-5">
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-[0_18px_34px_-22px_rgba(15,23,42,0.9)]">
+                    <div className="relative flex items-start gap-3">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem] bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_20px_38px_-22px_rgba(21,58,76,0.78)] ring-1 ring-white/70">
                         <Package size={22} weight="duotone" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">Rastreio postal</p>
+                          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Acompanhe seu envio</p>
                           {postalTrackingEvents.length ? (
-                            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-slate-500 ring-1 ring-slate-200">
+                            <span className="rounded-full bg-white/92 px-2.5 py-1 text-[10px] font-black text-slate-600 ring-1 ring-[#d6e4ed] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.28)]">
                               {postalTrackingEvents.length} {postalTrackingEvents.length === 1 ? 'atualização' : 'atualizações'}
                             </span>
                           ) : null}
                         </div>
-                        <h3 className="mt-1 text-lg font-black leading-tight text-slate-950">{postalTrackingHeadline.label || postalStatusLabel}</h3>
-                        <p className="mt-1 text-sm font-medium leading-5 text-slate-600">
+                        <h3 className="mt-1 text-xl font-black leading-tight tracking-[-0.03em] text-slate-950">{postalTrackingHeadline.label || postalStatusLabel}</h3>
+                        <p className="mt-1 text-sm font-semibold leading-5 text-slate-600">
                           {postalTrackingHeadline.description || postalStatusDetail}
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                      <TrackingMetaCard
-                        label="Chega até"
-                        value={!isCancelled && postalExpectedDeliveryDate ? postalExpectedDeliveryDate.toLocaleDateString('pt-BR') : 'Acompanhe aqui'}
-                        detail="Previsão do envio postal"
-                      />
-                      <TrackingMetaCard
-                        label="Tipo de envio"
-                        value={shipmentServiceName || shipmentServiceCode || 'A confirmar'}
-                        detail={postalEstimatedDays ? `${postalEstimatedDays} dia(s) úteis após postagem` : 'Prazo conforme postagem'}
-                      />
-                      <TrackingMetaCard
-                        label="Última atualização"
-                        value={postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt ? formatTimeOfDay(new Date(postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt), { padHour: true }) : 'Aguardando'}
-                        detail={postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt ? formatDateTime(postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt) : 'A loja ou Correios atualizam aqui'}
-                      />
+                    <div className="relative mt-4 grid gap-2.5 sm:grid-cols-[1.25fr_0.85fr_0.9fr]">
+                      <div className="relative overflow-hidden rounded-[1.45rem] border border-white/95 bg-white/92 px-4 py-3.5 shadow-[0_22px_44px_-34px_rgba(21,58,76,0.34)] ring-1 ring-[#d6e4ed]/70">
+                        <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-emerald-300/18 blur-2xl" />
+                        <p className="relative text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Previsão de entrega</p>
+                        <p className="relative mt-1.5 text-2xl font-black tracking-[-0.04em] text-slate-950">
+                          {!isCancelled && postalExpectedDeliveryDate ? postalExpectedDeliveryDate.toLocaleDateString('pt-BR') : 'Em breve'}
+                        </p>
+                        <p className="relative mt-1 text-xs font-semibold leading-5 text-slate-500">
+                          {postalEstimatedDays ? `${postalEstimatedDays} dias úteis após postagem` : 'A previsão aparece assim que a loja postar.'}
+                        </p>
+                      </div>
+                      <div className="rounded-[1.45rem] border border-white/95 bg-white/80 px-4 py-3.5 shadow-[0_18px_38px_-32px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/70">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Serviço</p>
+                        <p className="mt-1.5 text-base font-black leading-tight text-slate-950">
+                          {shipmentServiceName || shipmentServiceCode || 'A confirmar'}
+                        </p>
+                        <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">Modalidade escolhida para o envio</p>
+                      </div>
+                      <div className="rounded-[1.45rem] border border-white/95 bg-white/80 px-4 py-3.5 shadow-[0_18px_38px_-32px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/70">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Último movimento</p>
+                        <p className="mt-1.5 text-base font-black leading-tight text-slate-950">
+                          {postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt ? formatTimeOfDay(new Date(postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt), { padHour: true }) : 'Aguardando'}
+                        </p>
+                        <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">
+                          {postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt ? formatDateTime(postalTrackingEvents[0]?.eventAt || postalTrackingEvents[0]?.createdAt) : 'A loja ou Correios atualizam aqui'}
+                        </p>
+                      </div>
                     </div>
 
                     {shipmentTrackingCode ? (
-                      <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                      <div className="relative mt-3 rounded-[1.45rem] border border-white/95 bg-white/88 px-4 py-3.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/70">
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Código dos Correios</p>
                           {trackingCodeCopied ? (
@@ -2038,7 +2055,7 @@ export function OrderTracking() {
                             </span>
                           ) : null}
                         </div>
-                        <div className="mt-1 flex items-center gap-2">
+                        <div className="mt-2 flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50/70 px-3 py-2">
                           <p className="min-w-0 flex-1 break-all text-sm font-black tracking-[0.08em] text-slate-950">{shipmentTrackingCode}</p>
                           <button
                             type="button"
@@ -2422,7 +2439,21 @@ export function OrderTracking() {
                         <TrackingInfoRow
                           icon={<MapPin size={16} weight="duotone" />}
                           label="Endereço de entrega"
-                          value={formatAddress(order.address || order.deliveryAddress)}
+                          value={
+                            <div>
+                              <p>{deliveryAddressLines.primary || deliveryAddressLabel}</p>
+                              {(deliveryAddressLines.secondary || deliveryAddressLines.locality) && (
+                                <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">
+                                  {[deliveryAddressLines.secondary, deliveryAddressLines.locality].filter(Boolean).join(' · ')}
+                                </p>
+                              )}
+                              {deliveryAddressLines.zipCode && (
+                                <span className="mt-2 inline-flex rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-black text-slate-500">
+                                  {deliveryAddressLines.zipCode}
+                                </span>
+                              )}
+                            </div>
+                          }
                         />
                       ) : null}
                     </div>

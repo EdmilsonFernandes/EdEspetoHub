@@ -1551,7 +1551,7 @@ export function ClientOrders() {
       label: 'Todos',
       shortLabel: 'Todos',
       count: orders.length,
-      icon: <Receipt size={13} weight="duotone" />,
+      icon: <Receipt size={15} weight="duotone" />,
       toneClass: 'text-slate-500',
     },
     {
@@ -1559,7 +1559,7 @@ export function ClientOrders() {
       label: 'Em andamento',
       shortLabel: 'Agora',
       count: activeOrders.length,
-      icon: <Timer size={13} weight="duotone" />,
+      icon: <Timer size={15} weight="duotone" />,
       toneClass: 'text-emerald-600',
     },
     {
@@ -1567,7 +1567,7 @@ export function ClientOrders() {
       label: 'Finalizados',
       shortLabel: 'Feitos',
       count: deliveredOrdersCount,
-      icon: <CheckCircle size={13} weight="duotone" />,
+      icon: <CheckCircle size={15} weight="duotone" />,
       toneClass: 'text-sky-600',
     },
     {
@@ -1575,7 +1575,7 @@ export function ClientOrders() {
       label: 'Cancelados',
       shortLabel: 'Cancelados',
       count: cancelledOrdersCount,
-      icon: <XCircle size={13} weight="duotone" />,
+      icon: <XCircle size={15} weight="duotone" />,
       toneClass: 'text-rose-600',
     },
   ];
@@ -1614,33 +1614,41 @@ export function ClientOrders() {
                     key={filter.key}
                     type="button"
                     onClick={() => setStatusFilter(filter.key)}
-                    className={`jnc-hub-touch relative inline-flex min-h-[3.75rem] min-w-0 flex-col items-center justify-center rounded-[1.1rem] border px-1.5 py-2 text-center transition-all sm:min-h-[4rem] sm:px-2 ${
+                    className={`jnc-hub-touch relative inline-flex min-h-[4.35rem] min-w-0 flex-col items-stretch justify-between overflow-hidden rounded-[1.25rem] border px-2.5 py-2.5 text-left transition-all sm:min-h-[4.2rem] sm:px-3 ${
                       isSelected
-                        ? 'border-[#153A4C] bg-[linear-gradient(135deg,#153A4C_0%,#336886_100%)] text-white shadow-[0_16px_30px_-22px_rgba(21,58,76,0.62)]'
-                        : 'border-white/90 bg-white/82 text-slate-700 shadow-[0_12px_26px_-24px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/55'
+                        ? 'border-[#153A4C] bg-[radial-gradient(circle_at_20%_0%,rgba(95,211,90,0.24),transparent_36%),linear-gradient(135deg,#153A4C_0%,#336886_100%)] text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.64)]'
+                        : 'border-white/90 bg-white/86 text-slate-700 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.25)] ring-1 ring-slate-200/55'
                     }`}
                     aria-pressed={isSelected}
                     aria-label={`${filter.label}: ${filter.count} pedido${filter.count === 1 ? '' : 's'}`}
                     title={filter.label}
                   >
-                    <span className={`absolute right-1.5 top-1.5 inline-flex min-w-[1.45rem] shrink-0 items-center justify-center rounded-full px-1.5 py-0.5 text-[9px] font-black leading-none ${
-                      isSelected
-                        ? 'bg-white text-[#153A4C] shadow-[0_8px_16px_-12px_rgba(15,23,42,0.45)]'
-                        : 'bg-[#edf5fa]/86 text-[#336886] ring-1 ring-white/80'
-                    }`}>
-                      {filter.count}
-                    </span>
-                    <span className={`flex min-w-0 flex-col items-center gap-1 ${isSelected ? 'text-white' : filter.toneClass}`}>
-                      <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${
-                        isSelected ? 'bg-white/15 text-white ring-1 ring-white/18' : 'bg-slate-50 text-current ring-1 ring-slate-200/70'
+                    <span className={`pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r ${
+                      isSelected ? 'from-transparent via-white/45 to-transparent' : 'from-transparent via-[#336886]/14 to-transparent'
+                    }`} />
+                    <span className="flex items-center justify-between gap-1.5">
+                      <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${
+                        isSelected ? 'bg-white/15 text-white ring-1 ring-white/18' : `${filter.toneClass} bg-slate-50 ring-1 ring-slate-200/70`
                       }`}>
                         {filter.icon}
                       </span>
-                      <span className="min-w-0 max-w-full">
-                        <span className="block max-w-full whitespace-nowrap text-[9px] font-black leading-tight tracking-[-0.01em] sm:text-[11px]">
-                          <span className="sm:hidden">{filter.shortLabel}</span>
-                          <span className="hidden sm:inline">{filter.label}</span>
-                        </span>
+                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] ${
+                        isSelected ? 'bg-white/14 text-white/88 ring-1 ring-white/16' : 'bg-slate-50 text-slate-400 ring-1 ring-slate-200/70'
+                      }`}>
+                        {filter.key === 'active' ? 'Agora' : filter.key === 'all' ? 'Tudo' : filter.key === 'finished' ? 'Feitos' : 'Cancel.'}
+                      </span>
+                    </span>
+                    <span className="mt-1 min-w-0">
+                      <span className={`block text-[20px] font-black leading-none tracking-[-0.05em] sm:text-[22px] ${
+                        isSelected ? 'text-white' : 'text-slate-950'
+                      }`}>
+                        {filter.count}
+                      </span>
+                      <span className={`mt-1 block max-w-full truncate text-[9px] font-black leading-tight tracking-[-0.01em] sm:text-[11px] ${
+                        isSelected ? 'text-white/86' : 'text-slate-500'
+                      }`}>
+                        <span className="sm:hidden">{filter.shortLabel}</span>
+                        <span className="hidden sm:inline">{filter.label}</span>
                       </span>
                     </span>
                   </button>

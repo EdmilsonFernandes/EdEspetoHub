@@ -67,6 +67,7 @@ export class OrderService
   private readonly queueRecentStatuses = [ 'done', 'delivered', 'finished', 'cancelled' ];
   private readonly farPickupLocalOpenStatuses = [ 'pending', 'awaiting_payment', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy', 'in_delivery', 'dispatched' ];
   private readonly onSitePickupPaymentMethods = [ 'dinheiro', 'pix_loja', 'pix_presencial', 'debito_presencial', 'credito_presencial' ];
+  private readonly postalPrepaidPaymentMethods = [ 'pix', 'credito', 'crédito', 'debito', 'débito', 'credit_card', 'debit_card', 'cartao', 'cartão' ];
   private orderRepository = new OrderRepository();
   private storeRepository = new StoreRepository();
   private productRepository = new ProductRepository();
@@ -168,6 +169,10 @@ export class OrderService
 
   private isOnSitePickupPayment(method?: string | null) {
     return this.onSitePickupPaymentMethods.includes(this.normalizePaymentMethod(method));
+  }
+
+  private isPostalPrepaidPayment(method?: string | null) {
+    return this.postalPrepaidPaymentMethods.includes(this.normalizePaymentMethod(method));
   }
 
   private async getPreferredCustomerAddressCoords(userId: string) {
@@ -1797,6 +1802,9 @@ async updateFulfillmentMode(
     }
     const normalizedMode = String(mode || '').toLowerCase() === 'postal' ? 'postal' : 'distance';
     const currentStatus = String(order.status || '').toLowerCase();
+    if (normalizedMode === 'postal' && !this.isPostalPrepaidPayment(order.paymentMethod)) {
+      throw new AppError('ORDER-004', 400, { message: 'Envio postal exige pagamento online antecipado.' });
+    }
     if (normalizedMode === 'postal' && [ 'waiting_for_motoboy', 'in_delivery' ].includes(currentStatus)) {
       throw new AppError('ORDER-004', 400, { message: 'Não é possível mudar para postal em pedido já no fluxo de motoboy.' });
     }
@@ -2284,6 +2292,9 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       : input.type === 'delivery' && String((input as any).fulfillmentMode || '').toLowerCase() === 'postal'
         ? 'postal'
         : 'distance';
+    if (input.type === 'delivery' && normalizedFulfillmentMode === 'postal' && !this.isPostalPrepaidPayment(input.paymentMethod)) {
+      throw new AppError('ORDER-004', 400, { message: 'Envio postal exige pagamento online antecipado.' });
+    }
     const customerNote = normalizeCustomerOrderNote((input as any).customerNote);
 
     return this.orderRepository.create({

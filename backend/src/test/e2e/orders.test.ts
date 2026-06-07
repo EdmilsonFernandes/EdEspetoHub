@@ -185,6 +185,32 @@ describe('Pedido — Jornada E2E (cliente)', () => {
   it('cria pedido postal, informa rastreio e monta timeline do envio', async () => {
     if (!productId) return;
 
+    const cashPostalAttempt = await api
+      .post(`/api/stores/${storeId}/orders`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        customerName: 'Cliente Postal Dinheiro',
+        phone: '11999990003',
+        address: 'Rua Postal, 200 - Centro',
+        type: 'delivery',
+        fulfillmentMode: 'postal',
+        deliveryFee: 12.9,
+        paymentMethod: 'dinheiro',
+        items: [{ productId, quantity: 1 }],
+        postalShipment: {
+          provider: 'internal_postal_v1',
+          serviceCode: 'PAC',
+          serviceName: 'PAC',
+          estimatedDays: 5,
+          price: 12.9,
+          currency: 'BRL',
+          originZip: '01001000',
+          destinationZip: '12245000',
+        },
+      });
+    expect(cashPostalAttempt.status).toBe(400);
+    expect(String(cashPostalAttempt.body?.details?.message || cashPostalAttempt.body?.message || '')).toMatch(/pagamento online/i);
+
     const order = await api
       .post(`/api/stores/${storeId}/orders`)
       .set('Authorization', `Bearer ${adminToken}`)

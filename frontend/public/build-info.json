@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "f7915a6b",
-  "versionLabel": "v0.1.9.f7915a6b",
-  "versionInternal": "0.1.9+20260607.150301.f7915a6b",
-  "buildId": "0.1.9+20260607.150301.f7915a6b-20260607.150301-f7915a6b",
-  "builtAt": "2026-06-07T15:03:01.907Z",
-  "commitHash": "f7915a6b0133da622916f60128c0db782cd15ddd",
-  "shortHash": "f7915a6b",
+  "versionDisplaySuffix": "14b773a6",
+  "versionLabel": "v0.1.9.14b773a6",
+  "versionInternal": "0.1.9+20260607.155425.14b773a6",
+  "buildId": "0.1.9+20260607.155425.14b773a6-20260607.155425-14b773a6",
+  "builtAt": "2026-06-07T15:54:25.684Z",
+  "commitHash": "14b773a6040d6cb7c38810628a28524c0171d2c3",
+  "shortHash": "14b773a6",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "14b773a6040d6cb7c38810628a28524c0171d2c3",
+      "shortHash": "14b773a6",
+      "dateIso": "2026-06-07T12:07:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: compact postal order tracking details",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/14b773a6040d6cb7c38810628a28524c0171d2c3"
+    },
     {
       "hash": "f7915a6b0133da622916f60128c0db782cd15ddd",
       "shortHash": "f7915a6b",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style(app): refine client nav and order cards",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e6fe12b8e69243b1b6e89fedfb14cfb57194981a"
-    },
-    {
-      "hash": "93a54f2c2a6b9b139cafcc9f9d5cbbc8a916450d",
-      "shortHash": "93a54f2c",
-      "dateIso": "2026-06-03T22:52:05-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "test(checkout): cover storefront order flows",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/93a54f2c2a6b9b139cafcc9f9d5cbbc8a916450d"
     }
   ]
 }

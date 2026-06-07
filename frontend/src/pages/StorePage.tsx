@@ -220,6 +220,21 @@ const resolveOrderPaymentMethodForCheckout = (paymentMethod: string, forceProfes
   return PROFESSIONAL_PAYMENT_METHOD_MAP[current] || 'dinheiro';
 };
 
+const POSTAL_PREPAID_PAYMENT_METHODS = new Set([
+  'pix',
+  'credito',
+  'crédito',
+  'debito',
+  'débito',
+  'credit_card',
+  'debit_card',
+  'cartao',
+  'cartão',
+]);
+
+const isPostalPrepaidPaymentMethod = (paymentMethod?: string | null) =>
+  POSTAL_PREPAID_PAYMENT_METHODS.has(String(paymentMethod || '').trim().toLowerCase());
+
 const getOrderStatusTone = (status?: string) => {
   const normalized = String(status || '').trim().toLowerCase();
   const tones: Record<string, string> = {
@@ -901,10 +916,12 @@ export function StorePage() {
     const exact = services.find((service: any) => String(service?.serviceCode || '') === String(selectedPostalServiceCode || ''));
     return exact || services[0];
   }, [isPostalDelivery, postalQuote, selectedPostalServiceCode]);
-  const availablePaymentMethods = useMemo(
-    () => resolveCheckoutPaymentMethods(paymentSummary, isProfessionalCheckoutUser),
-    [paymentSummary, isProfessionalCheckoutUser]
-  );
+  const availablePaymentMethods = useMemo(() => {
+    const methods = resolveCheckoutPaymentMethods(paymentSummary, isProfessionalCheckoutUser && !isPostalDelivery);
+    return isPostalDelivery
+      ? methods.filter((method) => isPostalPrepaidPaymentMethod(method.id))
+      : methods;
+  }, [paymentSummary, isProfessionalCheckoutUser, isPostalDelivery]);
   const deliveryFeeValue = useMemo(() => {
     if (customer.type !== 'delivery') return 0;
     if (isPostalDelivery) {
@@ -921,7 +938,7 @@ export function StorePage() {
     const nextPaymentMethod = resolveCheckoutPaymentSelection(
       paymentMethod,
       availablePaymentMethods,
-      isProfessionalCheckoutUser
+      isProfessionalCheckoutUser && !isPostalDelivery
     );
     if (nextPaymentMethod === paymentMethod) return;
     setPaymentMethod(nextPaymentMethod);
@@ -1165,6 +1182,24 @@ export function StorePage() {
     }
     return { blocked: false, reason: '' };
   }, [customer.number, customer.type, customer.cep, customer.city, customer.state, deliveryCheck.status, deliveryRadiusValue, storeCoords, isPostalDelivery, selectedPostalService, storeCity, storeState]);
+
+  const postalPaymentValidation = useMemo(() => {
+    if (!isPostalDelivery) return { blocked: false, reason: '' };
+    if (!availablePaymentMethods.some((method) => isPostalPrepaidPaymentMethod(method.id))) {
+      return {
+        blocked: true,
+        reason: 'Envio postal exige pagamento online. Ative Pix ou cartão online nesta loja.',
+      };
+    }
+    const payment = resolveOrderPaymentMethodForCheckout(paymentMethod, false);
+    if (!isPostalPrepaidPaymentMethod(payment)) {
+      return {
+        blocked: true,
+        reason: 'Escolha Pix ou cartão online para finalizar envio postal.',
+      };
+    }
+    return { blocked: false, reason: '' };
+  }, [availablePaymentMethods, isPostalDelivery, paymentMethod]);
 
   const normalizeDeliveryCacheKey = useCallback((value: string) => {
     return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
@@ -2794,7 +2829,11 @@ export function StorePage() {
       return;
     }
 
-    const payment = resolveOrderPaymentMethodForCheckout(paymentMethod, checkoutIsProfessionalCheckoutUser);
+    const payment = resolveOrderPaymentMethodForCheckout(paymentMethod, checkoutIsProfessionalCheckoutUser && !isPostalDelivery);
+    if (!isCondominiumOrder && customer.type === 'delivery' && isPostalDelivery && !isPostalPrepaidPaymentMethod(payment)) {
+      showErrorNotice('Envio postal exige pagamento online. Escolha Pix ou cartão online.');
+      return;
+    }
     const cashTendered =
       payment === 'dinheiro' && extra?.cashTendered !== undefined && extra?.cashTendered !== null
         ? Number(extra.cashTendered)
@@ -4410,12 +4449,14 @@ export function StorePage() {
               setCustomerAccountNotice('');
               setShowCustomerAccount(true);
             }}
-            checkoutDisabled={!cartItemsCount || deliveryValidation.blocked || loggedDeliveryNeedsSavedAddress}
+            checkoutDisabled={!cartItemsCount || deliveryValidation.blocked || postalPaymentValidation.blocked || loggedDeliveryNeedsSavedAddress}
             checkoutDisabledReason={
               !cartItemsCount
                 ? 'Adicione pelo menos 1 item para continuar.'
                 : loggedDeliveryNeedsSavedAddress
                 ? 'Cadastre um endereço na sua conta para finalizar entrega.'
+                : postalPaymentValidation.blocked
+                ? postalPaymentValidation.reason
                 : deliveryValidation.reason
             }
             pricingSummary={{

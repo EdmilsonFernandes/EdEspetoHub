@@ -20,7 +20,7 @@ import {
   ShieldCheck,
   NotePencil,
 } from "@phosphor-icons/react";
-import { formatCurrency } from "../../utils/format";
+import { formatAddressLines, formatCurrency } from "../../utils/format";
 import { getPaymentMethodMeta, getPaymentProviderMeta } from "../../utils/paymentAssets";
 import { RouteMapView } from "../RouteMapView";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -76,6 +76,21 @@ const PROFESSIONAL_PAYMENT_METHODS = [
   { id: "pix_presencial", label: "Pix", description: "A loja confirma o Pix no atendimento.", group: "local" },
   { id: "dinheiro", label: "Dinheiro", description: "Pague em dinheiro na entrega, retirada ou mesa.", group: "local" },
 ];
+
+const POSTAL_PREPAID_PAYMENT_METHODS = new Set([
+  "pix",
+  "credito",
+  "crédito",
+  "debito",
+  "débito",
+  "credit_card",
+  "debit_card",
+  "cartao",
+  "cartão",
+]);
+
+const isPostalPrepaidPaymentMethod = (methodId = "") =>
+  POSTAL_PREPAID_PAYMENT_METHODS.has(String(methodId || "").trim().toLowerCase());
 
 const CUSTOMER_ORDER_NOTE_SUGGESTIONS = [
   "Sem cebola",
@@ -277,10 +292,14 @@ export const CartView = ({
     []
   );
   const resolvedPaymentMethods = useMemo(() => {
-    if (isProfessionalUser) return PROFESSIONAL_PAYMENT_METHODS;
+    if (isProfessionalUser && !isPostalDelivery) return PROFESSIONAL_PAYMENT_METHODS;
     const methods = paymentSummary?.methods || null;
-    if (!methods) return fallbackPaymentMethods;
     const next = [];
+    if (!methods) {
+      return isPostalDelivery
+        ? fallbackPaymentMethods.filter((method) => isPostalPrepaidPaymentMethod(method.id))
+        : fallbackPaymentMethods;
+    }
     if (methods.pixOnline) {
       next.push({ id: "pix", label: "Pix", description: "Via Mercado Pago", group: "online" });
     }
@@ -296,8 +315,11 @@ export const CartView = ({
     if (methods.cash !== false) {
       next.push({ id: "dinheiro", label: "Dinheiro", description: "Pague na entrega, retirada ou mesa.", group: "local" });
     }
-    return next.length ? next : [ { id: "dinheiro", label: "Dinheiro", description: "Pague na entrega, retirada ou mesa.", group: "local" } ];
-  }, [fallbackPaymentMethods, isProfessionalUser, paymentSummary]);
+    const resolved = next.length ? next : [ { id: "dinheiro", label: "Dinheiro", description: "Pague na entrega, retirada ou mesa.", group: "local" } ];
+    return isPostalDelivery
+      ? resolved.filter((method) => isPostalPrepaidPaymentMethod(method.id))
+      : resolved;
+  }, [fallbackPaymentMethods, isPostalDelivery, isProfessionalUser, paymentSummary]);
   const paymentGroups = useMemo(() => {
     return resolvedPaymentMethods.reduce(
       (acc, method) => {
@@ -313,6 +335,29 @@ export const CartView = ({
     [paymentMethod, resolvedPaymentMethods]
   );
 
+  useEffect(() => {
+    if (!isPostalDelivery || !resolvedPaymentMethods.length) return;
+    if (resolvedPaymentMethods.some((method) => method.id === paymentMethod)) return;
+    onChangePayment?.(resolvedPaymentMethods[0].id);
+  }, [isPostalDelivery, onChangePayment, paymentMethod, resolvedPaymentMethods]);
+
+  const postalPaymentValidation = useMemo(() => {
+    if (!isPostalDelivery) return { blocked: false, reason: "" };
+    if (!resolvedPaymentMethods.length) {
+      return {
+        blocked: true,
+        reason: "Envio postal exige pagamento online. Ative Pix ou cartão online nesta loja.",
+      };
+    }
+    if (!isPostalPrepaidPaymentMethod(paymentMethod)) {
+      return {
+        blocked: true,
+        reason: "Escolha Pix ou cartão online para finalizar o envio postal.",
+      };
+    }
+    return { blocked: false, reason: "" };
+  }, [isPostalDelivery, paymentMethod, resolvedPaymentMethods.length]);
+
   const cashValidation = useMemo(() => {
     if (!isCash) return { blocked: false, reason: "" };
     if (!cashNeedsChange) return { blocked: false, reason: "" };
@@ -322,6 +367,7 @@ export const CartView = ({
     }
     return { blocked: false, reason: "" };
   }, [isCash, cashNeedsChange, cashTenderedValue, totalWithFee]);
+  const paymentValidation = postalPaymentValidation.blocked ? postalPaymentValidation : cashValidation;
   const formatDistanceKm = (value) => {
     const normalized = normalizeNumber(value);
     if (normalized === null) return "-- km";
@@ -354,7 +400,9 @@ export const CartView = ({
   }, [isPostalDelivery, postalServices, selectedPostalServiceCode]);
   const isDeliveryAddressValidated = !isDelivery || isPostalDelivery || deliveryCheck?.status === "ok";
   const primaryCtaLabel =
-    isPostalDelivery && !selectedPostalService
+    isPostalDelivery && postalPaymentValidation.blocked
+      ? "Pagamento online necessário"
+      : isPostalDelivery && !selectedPostalService
       ? "Calcular frete postal"
       : isDelivery && !isDeliveryAddressValidated
       ? "Validar Endereço"
@@ -365,7 +413,7 @@ export const CartView = ({
     ? (cepLoading || checkoutLoading)
     : isPostalQuoteMode
     ? (checkoutLoading || postalQuoteLoading)
-    : (checkoutLoading || checkoutDisabled || cashValidation.blocked);
+    : (checkoutLoading || checkoutDisabled || paymentValidation.blocked);
   const checkoutLoadingLabel = checkoutSlow ? "Internet lenta... confirmando" : "Processando...";
 
   const [selectedDdd, setSelectedDdd] = useState(() => extractPhoneParts(customer.phone || "").ddd);
@@ -611,6 +659,10 @@ export const CartView = ({
 
   const normalizedStoreAddress = (storeAddress || "").toString().trim();
   const normalizedCustomerAddress = (customer.address || buildDeliveryAddress(customer) || "").toString().trim();
+  const customerAddressLines = useMemo(
+    () => formatAddressLines(normalizedCustomerAddress),
+    [normalizedCustomerAddress]
+  );
   const normalizeAddressForCompare = (value = "") =>
     value
       .toString()
@@ -952,6 +1004,33 @@ export const CartView = ({
   };
 
   const renderSelectedPaymentSummaryCard = () => {
+    if (isPostalDelivery && !resolvedPaymentMethods.length) {
+      return (
+        <div
+          className="relative overflow-hidden rounded-[1.55rem] border border-amber-200/80 bg-[linear-gradient(135deg,#ffffff_0%,#fff8eb_100%)] p-3.5 shadow-[0_20px_46px_-38px_rgba(245,158,11,0.45)]"
+          data-testid="checkout-payment-summary-card"
+        >
+          <div className="flex items-start gap-3">
+            <span className="inline-flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-[1.15rem] border border-amber-200 bg-white text-amber-700 shadow-[0_18px_34px_-26px_rgba(245,158,11,0.38)]">
+              <ShieldCheck size={23} weight="duotone" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-black tracking-tight text-slate-950 sm:text-base">
+                  Pagamento online necessário
+                </p>
+                <span className="inline-flex shrink-0 items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-amber-700">
+                  Envio postal
+                </span>
+              </div>
+              <p className="mt-1 text-[11.5px] font-semibold leading-snug text-slate-600">
+                Para Correios, ative Pix ou cartão online nesta loja antes de finalizar.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
     const currentPaymentId = paymentMethod || selectedPaymentMethod?.id || "dinheiro";
     const methodMeta = getPaymentMethodMeta(currentPaymentId);
     const methodLabel = selectedPaymentMethod?.id === currentPaymentId ? selectedPaymentMethod.label : methodMeta.label;
@@ -1917,14 +1996,26 @@ export const CartView = ({
                     </div>
 
                     {/* Destination address */}
-                    {customer.address && !isLoggedDeliveryFlow && (
+                    {normalizedCustomerAddress && !isLoggedDeliveryFlow && (
                       <div className="flex items-start gap-2.5 rounded-2xl border border-slate-100 bg-white px-3 py-3">
                         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-500">
                           <MapPinLine size={14} weight="fill" />
                         </div>
                         <div className="min-w-0">
                           <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Destino</p>
-                          <p className="mt-0.5 text-[13px] font-semibold leading-snug text-slate-900">{customer.address}</p>
+                          <p className="mt-0.5 text-[13px] font-black leading-snug text-slate-900">
+                            {customerAddressLines.primary || normalizedCustomerAddress}
+                          </p>
+                          {(customerAddressLines.secondary || customerAddressLines.locality) && (
+                            <p className="mt-0.5 text-[12px] font-semibold leading-snug text-slate-500">
+                              {[customerAddressLines.secondary, customerAddressLines.locality].filter(Boolean).join(' · ')}
+                            </p>
+                          )}
+                          {customerAddressLines.zipCode && (
+                            <span className="mt-2 inline-flex rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-black text-slate-500">
+                              {customerAddressLines.zipCode}
+                            </span>
+                          )}
                         </div>
                       </div>
                     )}
@@ -2554,9 +2645,16 @@ export const CartView = ({
                     {customer.type === 'delivery' ? 'Entrega' : customer.type === 'pickup' ? 'Retirada no local' : `Mesa ${customer.table || ''}`}
                   </p>
                   {customer.type === 'delivery' && (
-                    <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">
-                      {[customer.street, customer.number, customer.neighborhood, customer.city].filter(Boolean).join(', ') || customer.address || '—'}
-                    </p>
+                    <div className="mt-1">
+                      <p className="text-sm font-black leading-relaxed text-slate-800">
+                        {customerAddressLines.primary || normalizedCustomerAddress || 'Endereço a confirmar'}
+                      </p>
+                      {(customerAddressLines.secondary || customerAddressLines.locality) && (
+                        <p className="text-xs font-semibold leading-relaxed text-slate-500">
+                          {[customerAddressLines.secondary, customerAddressLines.locality].filter(Boolean).join(' · ')}
+                        </p>
+                      )}
+                    </div>
                   )}
                   {customer.type === 'pickup' && (
                     <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">{storeAddress || 'Retirada no balcão'}</p>
@@ -2677,9 +2775,9 @@ export const CartView = ({
                     (customer.type === 'table' && !String(customer.table || '').trim())
                   )
                 : checkoutStep === 3
-                ? (checkoutDisabled || cashValidation.blocked)
+                ? (checkoutDisabled || paymentValidation.blocked)
                 : checkoutStep === 4
-                ? (checkoutLoading || checkoutDisabled || cashValidation.blocked)
+                ? (checkoutLoading || checkoutDisabled || paymentValidation.blocked)
                 : false}
               className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
                 (checkoutStep === 2 && (
@@ -2688,8 +2786,8 @@ export const CartView = ({
                   (customer.type === 'delivery' && !isPostalDelivery && (deliveryCheck?.status === 'out' || deliveryCheck?.status === 'loading')) ||
                   (customer.type === 'table' && !String(customer.table || '').trim())
                 )) ||
-                (checkoutStep === 3 && (checkoutDisabled || cashValidation.blocked)) ||
-                (checkoutStep === 4 && (checkoutLoading || checkoutDisabled || cashValidation.blocked))
+                (checkoutStep === 3 && (checkoutDisabled || paymentValidation.blocked)) ||
+                (checkoutStep === 4 && (checkoutLoading || checkoutDisabled || paymentValidation.blocked))
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
                   : checkoutStep === 4
                   ? "bg-[linear-gradient(135deg,#0f172a,#153A4C)] text-white cursor-pointer shadow-[0_20px_42px_-26px_rgba(21,58,76,0.56)]"
@@ -2725,9 +2823,9 @@ export const CartView = ({
                   </>
               }
             </button>
-            {hasTriedCheckout && checkoutStep === 4 && (checkoutDisabled || cashValidation.blocked) && (checkoutDisabledReason || cashValidation.reason) && (
+            {hasTriedCheckout && checkoutStep === 4 && (checkoutDisabled || paymentValidation.blocked) && (checkoutDisabledReason || paymentValidation.reason) && (
               <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">
-                {cashValidation.blocked ? cashValidation.reason : checkoutDisabledReason}
+                {paymentValidation.blocked ? paymentValidation.reason : checkoutDisabledReason}
               </p>
             )}
           </>
@@ -2786,9 +2884,9 @@ export const CartView = ({
               {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
               {checkoutLoading ? checkoutLoadingLabel : primaryCtaLabel}
             </button>
-            {hasTriedCheckout && !isDeliveryValidationMode && (checkoutDisabled || cashValidation.blocked) && !hideOutOfRangeInlineReason && (checkoutDisabledReason || cashValidation.reason) && (
+            {hasTriedCheckout && !isDeliveryValidationMode && (checkoutDisabled || paymentValidation.blocked) && !hideOutOfRangeInlineReason && (checkoutDisabledReason || paymentValidation.reason) && (
               <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">
-                {cashValidation.blocked ? cashValidation.reason : checkoutDisabledReason}
+                {paymentValidation.blocked ? paymentValidation.reason : checkoutDisabledReason}
               </p>
             )}
           </>
@@ -2830,6 +2928,22 @@ export const CartView = ({
             </div>
 
             <div className="space-y-4 overflow-y-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
+              {paymentGroups.online.length === 0 && paymentGroups.local.length === 0 && isPostalDelivery && (
+                <section className="rounded-[1.55rem] border border-amber-200/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(255,248,235,0.92))] p-4 shadow-[0_22px_50px_-44px_rgba(245,158,11,0.34)]">
+                  <div className="flex items-start gap-3">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-amber-200 bg-white text-amber-700 shadow-[0_14px_28px_-24px_rgba(245,158,11,0.42)]">
+                      <ShieldCheck size={18} weight="duotone" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-slate-950">Envio postal precisa de pagamento online</p>
+                      <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-600">
+                        Correios não permite pagamento na entrega. Ative Pix ou cartão online na loja para liberar este fluxo.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              )}
+
               {paymentGroups.online.length > 0 && (
                 <section className="rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(232,244,248,0.86))] p-3.5 shadow-[0_22px_50px_-44px_rgba(51,104,134,0.32)]">
                   <div className="mb-3 flex items-start justify-between gap-3">

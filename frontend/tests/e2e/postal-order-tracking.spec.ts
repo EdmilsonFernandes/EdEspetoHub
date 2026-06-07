@@ -96,7 +96,7 @@ test.describe('Pedido postal - acompanhamento do cliente', () => {
 
     await page.goto('/pedido/postal-order-e2e');
 
-    await expect(page.getByText('Rastreio postal', { exact: true })).toBeVisible();
+    await expect(page.getByText('Acompanhe seu envio', { exact: true })).toBeVisible();
     await expect(page.getByText('Pedido postado').first()).toBeVisible();
     await expect(page.getByText('AA123456789BR')).toBeVisible();
     await expect(page.getByText('Histórico do envio')).toBeVisible();
@@ -149,7 +149,7 @@ test.describe('Pedido postal - acompanhamento do cliente', () => {
 
     await page.goto('/pedido/postal-order-e2e');
 
-    await expect(page.getByText('Rastreio postal', { exact: true })).toBeVisible();
+    await expect(page.getByText('Acompanhe seu envio', { exact: true })).toBeVisible();
     await expect(page.getByText('Aguardando postagem').first()).toBeVisible();
     await expect(page.getByText(/ainda vai informar o c[oó]digo de rastreio/i)).toBeVisible();
   });
