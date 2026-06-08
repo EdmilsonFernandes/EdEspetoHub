@@ -8,7 +8,14 @@ import { addressLookupService } from '../services/addressLookupService';
 import { authService } from '../services/authService';
 import { planService } from '../services/planService';
 import { destinationService } from '../services/destinationService';
-import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
+import {
+  BILLING_OPTIONS,
+  PLAN_TIERS,
+  getPlanFeatureLabel,
+  getPlanName,
+  resolveAnnualPromoTotal,
+  resolveMonthlyEquivalent,
+} from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatPhoneInput } from '../utils/format';
 import { normalizePixCode } from '../utils/pixPayload';
@@ -2808,7 +2815,7 @@ export function CreateStore() {
                     <p className="text-xs text-gray-500 mt-1">{durationLabel}</p>
                     <ul className="mt-3 text-xs text-gray-600 space-y-1">
                       {tier.features.map((feature) => (
-                        <li key={feature}>✓ {feature}</li>
+                        <li key={getPlanFeatureLabel(feature)}>✓ {getPlanFeatureLabel(feature)}</li>
                       ))}
                     </ul>
                     {tier.popular && (

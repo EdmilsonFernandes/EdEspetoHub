@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState, useRef, useEffect } from 'react';
 import { CaretDown } from '@phosphor-icons/react';
-import { BILLING_OPTIONS, PLAN_TIERS } from '../constants/planCatalog';
+import { BILLING_OPTIONS, PLAN_TIERS, getPlanFeatureBenefit, getPlanFeatureLabel } from '../constants/planCatalog';
 import { formatCurrency, formatDate } from '../utils/format';
 
 const PLAN_STYLES = {
@@ -111,9 +111,12 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
           </h4>
           <ul className="mt-3 space-y-2 text-xs text-gray-600">
             {(planDetails?.tier?.features || ['Plano indefinido.']).map((feature) => (
-              <li key={feature} className="flex items-start gap-2">
+              <li key={getPlanFeatureLabel(feature)} className="flex items-start gap-2">
                 <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                <span>{feature}</span>
+                <span>
+                  <span className="font-semibold text-gray-700">{getPlanFeatureLabel(feature)}</span>
+                  <span className="block text-gray-500">{getPlanFeatureBenefit(feature)}</span>
+                </span>
               </li>
             ))}
           </ul>

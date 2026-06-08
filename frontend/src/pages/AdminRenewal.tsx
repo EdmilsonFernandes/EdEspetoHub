@@ -5,7 +5,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { planService } from '../services/planService';
 import { subscriptionService } from '../services/subscriptionService';
-import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
+import {
+  BILLING_OPTIONS,
+  PLAN_TIERS,
+  getPlanFeatureBenefit,
+  getPlanFeatureLabel,
+  getPlanName,
+  resolveAnnualPromoTotal,
+  resolveMonthlyEquivalent,
+} from '../constants/planCatalog';
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 
 export function AdminRenewal() {
@@ -261,9 +269,12 @@ export function AdminRenewal() {
                     <p className="text-xs text-slate-500 mt-1">{durationLabel}</p>
                     <ul className="mt-3 text-xs text-slate-600 space-y-1.5">
                       {tier.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-1.5">
-                          <span className="mt-[1px] shrink-0 font-black text-emerald-500">✓</span>
-                          <span>{feature}</span>
+                        <li key={getPlanFeatureLabel(feature)} className="flex items-start gap-1.5">
+                          <span className="mt-[2px] shrink-0 font-black text-emerald-500">✓</span>
+                          <span className="leading-snug">
+                            <span className="font-bold text-slate-700">{getPlanFeatureLabel(feature)}</span>
+                            <span className="block text-slate-500">{getPlanFeatureBenefit(feature)}</span>
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -356,4 +367,3 @@ export function AdminRenewal() {
     </AdminLayout>
   );
 }
-
