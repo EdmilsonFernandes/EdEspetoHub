@@ -942,10 +942,11 @@ function OrderCard({
             <button
               type="button"
               onClick={() => onOpenHelp(order)}
-              className="inline-flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f8fbfd,#e9f3f8)] text-[#336886] shadow-[0_16px_30px_-22px_rgba(51,104,134,0.34)] active:scale-95 transition-all hover:-translate-y-0.5"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#cfe0ea]/70 bg-white/86 text-[#336886] shadow-[0_12px_24px_-22px_rgba(51,104,134,0.28)] transition-all active:scale-95 hover:-translate-y-0.5 hover:bg-[#f3f8fb]"
               title="Ajuda com este pedido"
+              aria-label="Ajuda com este pedido"
             >
-              <ChatCircleDots size={17} weight="duotone" />
+              <ChatCircleDots size={16} weight="duotone" />
             </button>
             <button
               type="button"
@@ -953,12 +954,12 @@ function OrderCard({
               onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
               onFocus={() => primeOrderTrackingNavigation(order.id)}
               onTouchStart={() => primeOrderTrackingNavigation(order.id)}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white py-2.5 text-[13px] font-semibold text-slate-700 active:scale-[0.98] transition-transform"
+              className="inline-flex shrink-0 items-center justify-center rounded-full px-2.5 py-2 text-[12px] font-black text-slate-500 transition-all active:scale-[0.98] hover:bg-slate-100 hover:text-slate-700"
             >
-              Ver detalhes
+              Detalhes
             </button>
             {canCancel && (
-              <button type="button" onClick={() => onCancelRequest(order)} className="inline-flex flex-1 items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 py-2.5 text-[13px] font-semibold text-rose-600 active:scale-[0.98] transition-transform">
+              <button type="button" onClick={() => onCancelRequest(order)} className="inline-flex shrink-0 items-center justify-center rounded-full px-2.5 py-2 text-[12px] font-black text-rose-500 transition-all active:scale-[0.98] hover:bg-rose-50">
                 Cancelar
               </button>
             )}
@@ -976,14 +977,14 @@ function OrderCard({
               <button
                 type="button"
                 onClick={handleRepeatOrder}
-                className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl py-2.5 text-[13px] font-bold transition-all active:scale-[0.98] ${
+                className={`ml-auto inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full px-3.5 py-2.5 text-[12px] font-black transition-all active:scale-[0.98] ${
                   isCancelled
-                    ? 'border border-[#cfe0ea] bg-white text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.34)] hover:-translate-y-0.5'
-                    : 'bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)]'
+                    ? 'border border-[#cfe0ea] bg-white text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.34)] hover:-translate-y-0.5 hover:bg-[#f7fbfd]'
+                    : 'bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_14px_28px_-18px_rgba(21,58,76,0.48)] hover:-translate-y-0.5'
                 }`}
               >
-                <ArrowClockwise size={14} weight="bold" />
-                Pedir de novo
+                <ArrowClockwise size={13} weight="bold" />
+                Pedir novamente
               </button>
             )}
           </>
