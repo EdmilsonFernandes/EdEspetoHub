@@ -1737,7 +1737,7 @@ export function ClientOrders() {
                         </span>
                       )}
                       {store.count > 1 ? (
-                        <span className="absolute -right-1 -top-1 rounded-full bg-[#5FD35A] px-1.5 py-0.5 text-[9px] font-black text-[#153A4C] ring-2 ring-white">
+                        <span className="absolute right-1 top-1 rounded-full border border-[#5FD35A]/35 bg-white/92 px-1.5 py-0.5 text-[8.5px] font-black leading-none text-[#153A4C] shadow-[0_8px_14px_-10px_rgba(21,58,76,0.45)] ring-1 ring-white/80 backdrop-blur-md">
                           {store.count}x
                         </span>
                       ) : null}
