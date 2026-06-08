@@ -386,6 +386,8 @@ export function AdminLogin() {
           email: targetEmail,
           emailMasked: error?.details?.emailMasked,
         });
+        setLoginError('Sua loja ainda precisa ser ativada. Reenvie o código ou toque em "Digitar código" para concluir o acesso.');
+        return;
       }
       setLoginError(message);
     }

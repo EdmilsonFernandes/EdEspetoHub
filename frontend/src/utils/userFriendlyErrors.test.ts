@@ -36,6 +36,12 @@ describe('userFriendlyErrors', () => {
     );
   });
 
+  it('nao confunde conta sem ativacao com senha errada', () => {
+    expect(normalizeUserFacingError(Object.assign(new Error('E-mail não verificado.'), { status: 401, code: 'AUTH-005' }))).toBe(
+      'Sua conta ainda precisa ser ativada. Reenvie o código e confirme o e-mail para continuar.'
+    );
+  });
+
   it('humaniza token ou sessao expirada', () => {
     expect(normalizeUserFacingError(Object.assign(new Error('jwt expired'), { status: 401 }))).toBe(
       'Sua sessão expirou. Entre novamente para continuar.'

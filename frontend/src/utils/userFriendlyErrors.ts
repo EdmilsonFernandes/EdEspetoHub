@@ -80,8 +80,13 @@ export const normalizeUserFacingError = (
   error: unknown,
   fallback = 'Não foi possível completar a operação agora. Tente novamente em instantes.'
 ) => {
+  const code = getErrorCode(error);
   const status = getErrorStatus(error);
   const message = getErrorMessage(error).trim();
+
+  if (code === 'AUTH-005') {
+    return 'Sua conta ainda precisa ser ativada. Reenvie o código e confirme o e-mail para continuar.';
+  }
 
   if (INVALID_CREDENTIALS_PATTERNS.some((pattern) => pattern.test(message))) {
     return 'E-mail, usuário ou senha incorretos. Confira os dados e tente de novo.';
