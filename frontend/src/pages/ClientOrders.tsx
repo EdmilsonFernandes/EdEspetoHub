@@ -274,6 +274,17 @@ const buildReorderPayload = (order: any) => {
   };
 };
 
+const queueOrderForReorder = (order: any, onOpenStore: (slug?: string) => void) => {
+  const storeSlug = String(order?.store?.slug || order?.storeSlug || '').trim();
+  const payload = buildReorderPayload(order);
+  if (!storeSlug || !payload.items.length) {
+    onOpenStore(storeSlug);
+    return;
+  }
+  localStorage.setItem(`reorder:${storeSlug}`, JSON.stringify(payload));
+  onOpenStore(storeSlug);
+};
+
 const isDeliverySupportOrder = (order: any) => {
   const normalizedType = String(order?.type || '').trim().toLowerCase();
   const normalizedCondominiumMode = String(
@@ -654,14 +665,7 @@ function OrderCard({
     Date.now() > etaDeadlineMs + DELAY_GRACE_MS
   );
   const handleRepeatOrder = () => {
-    const storeSlug = String(order?.store?.slug || '').trim();
-    const payload = buildReorderPayload(order);
-    if (!storeSlug || !payload.items.length) {
-      onOpenStore(order?.store?.slug);
-      return;
-    }
-    localStorage.setItem(`reorder:${storeSlug}`, JSON.stringify(payload));
-    onOpenStore(storeSlug);
+    queueOrderForReorder(order, onOpenStore);
   };
 
   const isCancelled = ['CANCELLED', 'REJECTED'].includes(normalizeStatus(order.status));
@@ -1400,7 +1404,6 @@ export function ClientOrders() {
     () => orders.filter((order) => isTerminalOrder(mergeOrderForStatus(order, orderDetails[order.id]))),
     [orders, orderDetails]
   );
-  const groupedPastOrders = useMemo(() => groupOrdersByDate(pastOrders), [pastOrders]);
   const activeOrderIds = useMemo(() => activeOrders.map((order) => String(order.id)).join('|'), [activeOrders]);
   const filteredOrders = useMemo(() => {
     if (statusFilter === 'active') return activeOrders;
@@ -1435,6 +1438,34 @@ export function ClientOrders() {
     () => orders.filter((order) => [ 'CANCELLED', 'REJECTED' ].includes(normalizeStatus(order.status))).length,
     [orders]
   );
+  const lastOrder = useMemo(() => orders[0] || null, [orders]);
+  const lastOrderMerged = useMemo(
+    () => (lastOrder ? mergeOrderForStatus(lastOrder, orderDetails[lastOrder.id]) : null),
+    [lastOrder, orderDetails]
+  );
+  const recentStoreShortcuts = useMemo(() => {
+    const bySlug = new Map<string, any>();
+    orders.forEach((order) => {
+      const slug = String(order?.store?.slug || order?.storeSlug || '').trim();
+      if (!slug) return;
+      const existing = bySlug.get(slug);
+      const total = Number(order?.total || 0);
+      if (existing) {
+        existing.count += 1;
+        existing.total += total;
+        return;
+      }
+      bySlug.set(slug, {
+        slug,
+        name: order?.store?.name || 'Loja parceira',
+        logoUrl: resolveAssetUrl(order?.store?.settings?.logoUrl || ''),
+        count: 1,
+        total,
+        order,
+      });
+    });
+    return Array.from(bySlug.values()).slice(0, 8);
+  }, [orders]);
   const customerDisplayName = useMemo(() => {
     try {
       const sessionRaw = localStorage.getItem('customerSession');
@@ -1518,7 +1549,7 @@ export function ClientOrders() {
       navigate('/hub');
       return;
     }
-    navigate(`/${slug}`);
+    navigate(`/${slug}`, { state: { storefrontMode: 'customer' } });
   };
 
   const submitCustomerCancellation = async () => {
@@ -1608,6 +1639,12 @@ export function ClientOrders() {
       toneClass: 'text-rose-600',
     },
   ];
+  const lastOrderIsActive = lastOrderMerged ? !isTerminalOrder(lastOrderMerged) : false;
+  const lastOrderStatusMeta = lastOrderMerged ? getStatusMeta(lastOrderMerged.status, lastOrderMerged.type) : null;
+  const lastOrderStoreName = lastOrderMerged?.store?.name || 'Loja parceira';
+  const lastOrderLogoUrl = resolveAssetUrl(lastOrderMerged?.store?.settings?.logoUrl || '');
+  const lastOrderTotal = Number(lastOrderMerged?.total || 0);
+  const lastOrderItemsCount = getOrderItemsCount(Array.isArray(lastOrderMerged?.items) ? lastOrderMerged.items : []);
 
   return (
     <main className="min-h-screen bg-[#E2EBF2] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[calc(env(safe-area-inset-top)+4.35rem)]">
@@ -1623,19 +1660,106 @@ export function ClientOrders() {
         />
 
         <div className="px-4 py-4">
-          <section className="mb-5 overflow-hidden rounded-[1.8rem] border border-white/85 bg-white/78 p-2.5 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.26)] ring-1 ring-[#d7e7ef]/55 backdrop-blur-xl">
-            <div className="flex items-center justify-between gap-3 px-1.5 pb-1">
-              <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Status do pedido</p>
-                <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
-                  Acompanhe rápido o que importa.
-                </p>
+          {statusFilter === 'all' && lastOrderMerged ? (
+            <section className="mb-4 overflow-hidden rounded-[1.85rem] border border-white/90 bg-white/82 p-3 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.28)] ring-1 ring-[#d7e7ef]/60 backdrop-blur-xl">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => openStore(lastOrderMerged?.store?.slug || lastOrderMerged?.storeSlug)}
+                  className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.25rem] border border-white bg-slate-100 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/70 active:scale-95"
+                  aria-label={`Abrir ${lastOrderStoreName}`}
+                >
+                  {lastOrderLogoUrl ? (
+                    <img src={lastOrderLogoUrl} alt={lastOrderStoreName} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
+                      {getStoreInitials(lastOrderStoreName)}
+                    </span>
+                  )}
+                </button>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Último pedido</p>
+                  <h2 className="mt-0.5 truncate text-[15px] font-black text-slate-950">{lastOrderStoreName}</h2>
+                  <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-500">
+                    {lastOrderStatusMeta ? (
+                      <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-black ${getOrderStatusBadgeClass(lastOrderMerged.status, lastOrderIsActive)}`}>
+                        {lastOrderIsActive ? <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> : lastOrderStatusMeta.icon}
+                        {lastOrderStatusMeta.label}
+                      </span>
+                    ) : null}
+                    <span>{lastOrderItemsCount || 1} {lastOrderItemsCount === 1 ? 'item' : 'itens'}</span>
+                    <span className="h-1 w-1 rounded-full bg-slate-300" />
+                    <span>{formatCurrency(lastOrderTotal)}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (lastOrderIsActive) {
+                      openOrderTracking(lastOrderMerged.id);
+                      return;
+                    }
+                    queueOrderForReorder(lastOrderMerged, openStore);
+                  }}
+                  onMouseEnter={() => lastOrderMerged?.id && primeOrderTrackingNavigation(lastOrderMerged.id)}
+                  onFocus={() => lastOrderMerged?.id && primeOrderTrackingNavigation(lastOrderMerged.id)}
+                  onTouchStart={() => lastOrderMerged?.id && primeOrderTrackingNavigation(lastOrderMerged.id)}
+                  className="shrink-0 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-3.5 py-2.5 text-[12px] font-black text-white shadow-[0_16px_30px_-22px_rgba(21,58,76,0.55)] active:scale-[0.98]"
+                >
+                  {lastOrderIsActive ? 'Acompanhar' : 'Pedir de novo'}
+                </button>
+              </div>
+            </section>
+          ) : null}
+
+          {statusFilter === 'all' && recentStoreShortcuts.length > 0 ? (
+            <section className="mb-4">
+              <div className="mb-2 flex items-center justify-between gap-3 px-1">
+                <div>
+                  <h2 className="text-[15px] font-black text-slate-900">Peça de novo</h2>
+                  <p className="text-[11px] font-semibold text-slate-400">Suas lojas recentes em um toque.</p>
+                </div>
+              </div>
+              <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1.5 no-scrollbar">
+                {recentStoreShortcuts.map((store) => (
+                  <button
+                    key={store.slug}
+                    type="button"
+                    onClick={() => openStore(store.slug)}
+                    className="jnc-hub-touch group flex w-[76px] shrink-0 flex-col items-center text-center"
+                  >
+                    <span className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-[1.45rem] border border-white bg-white shadow-[0_18px_34px_-26px_rgba(15,23,42,0.35)] ring-1 ring-slate-200/70 transition-transform group-active:scale-95">
+                      {store.logoUrl ? (
+                        <img src={store.logoUrl} alt={store.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
+                          {getStoreInitials(store.name)}
+                        </span>
+                      )}
+                      {store.count > 1 ? (
+                        <span className="absolute -right-1 -top-1 rounded-full bg-[#5FD35A] px-1.5 py-0.5 text-[9px] font-black text-[#153A4C] ring-2 ring-white">
+                          {store.count}x
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="mt-1.5 line-clamp-2 text-[11px] font-black leading-tight text-slate-700">{store.name}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          <section className="mb-5">
+            <div className="mb-2 flex items-center justify-between gap-3 px-1">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Pedidos</p>
+                <p className="text-xs font-semibold text-slate-500">Filtre sem perder o histórico.</p>
               </div>
               <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-black text-[#336886] ring-1 ring-[#cfe0ea] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.36)]">
-                {filteredOrders.length} pedido{filteredOrders.length === 1 ? '' : 's'}
+                {filteredOrders.length}
               </span>
             </div>
-            <div className="mt-2 grid grid-cols-4 gap-1.5 rounded-[1.45rem] border border-white/80 bg-white/58 p-1.5 ring-1 ring-slate-200/45">
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar">
               {orderFilters.map((filter) => {
                 const isSelected = statusFilter === filter.key;
                 return (
@@ -1643,35 +1767,25 @@ export function ClientOrders() {
                     key={filter.key}
                     type="button"
                     onClick={() => setStatusFilter(filter.key)}
-                    className={`jnc-hub-touch relative inline-flex min-h-[3.25rem] min-w-0 flex-col items-center justify-center overflow-hidden rounded-[1.05rem] border px-1.5 py-2 text-center transition-all sm:min-h-[3.35rem] sm:px-2 ${
+                    className={`jnc-hub-touch inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[12px] font-black transition-all active:scale-[0.98] ${
                       isSelected
-                        ? 'border-[#153A4C] bg-[radial-gradient(circle_at_20%_0%,rgba(95,211,90,0.24),transparent_36%),linear-gradient(135deg,#153A4C_0%,#336886_100%)] text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.64)]'
-                        : 'border-white/90 bg-white/86 text-slate-700 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.25)] ring-1 ring-slate-200/55'
+                        ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.56)]'
+                        : 'border-white/90 bg-white/88 text-slate-600 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60'
                     }`}
                     aria-pressed={isSelected}
                     aria-label={`${filter.label}: ${filter.count} pedido${filter.count === 1 ? '' : 's'}`}
                     title={filter.label}
                   >
-                    <span className={`pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r ${
-                      isSelected ? 'from-transparent via-white/45 to-transparent' : 'from-transparent via-[#336886]/14 to-transparent'
-                    }`} />
-                    <span className="flex min-w-0 items-center justify-center gap-1.5">
-                      <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${
-                        isSelected ? 'bg-white/15 text-white ring-1 ring-white/18' : `${filter.toneClass} bg-slate-50 ring-1 ring-slate-200/70`
-                      }`}>
-                        {filter.icon}
-                      </span>
-                      <span className={`inline-flex min-w-[1.45rem] shrink-0 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black leading-none tabular-nums ${
-                        isSelected ? 'bg-white/16 text-white ring-1 ring-white/16' : 'bg-slate-50 text-slate-700 ring-1 ring-slate-200/80'
-                      }`} aria-hidden="true">
-                        {filter.count}
-                      </span>
+                    <span className={`grid h-6 w-6 place-items-center rounded-full ${
+                      isSelected ? 'bg-white/14 text-white' : `${filter.toneClass} bg-slate-50 ring-1 ring-slate-200/70`
+                    }`}>
+                      {filter.icon}
                     </span>
-                    <span className={`mt-1 block max-w-full truncate text-[9.5px] font-black leading-tight tracking-[-0.01em] sm:text-[11px] ${
-                        isSelected ? 'text-white/86' : 'text-slate-500'
+                    <span>{filter.shortLabel}</span>
+                    <span className={`inline-flex min-w-[1.45rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black leading-none tabular-nums ${
+                        isSelected ? 'bg-white/16 text-white ring-1 ring-white/16' : 'bg-slate-50 text-slate-700 ring-1 ring-slate-200/80'
                       }`}>
-                      <span className="sm:hidden">{filter.shortLabel}</span>
-                      <span className="hidden sm:inline">{filter.label}</span>
+                      {filter.count}
                     </span>
                   </button>
                 );
