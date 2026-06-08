@@ -224,7 +224,7 @@ test.describe('Store checkout layout', () => {
         }),
       });
     });
-    await page.route(`**/api/stores/slug/${storeSlug}/postal/quote`, async (route) => {
+    await page.route('**/postal/quote**', async (route) => {
       const payload = route.request().postDataJSON();
       postalQuoteRequests.push(payload);
       await route.fulfill({
@@ -409,14 +409,15 @@ test.describe('Store checkout layout', () => {
 
     await page.getByRole('button', { name: /Continuar/i }).click();
     await page.getByRole('button', { name: /Entrega\s+No endereço/i }).click();
-    await expect(page.getByRole('button', { name: /Envio postal\s+Correios/i })).toBeVisible();
-    await page.getByRole('button', { name: /Envio postal\s+Correios/i }).click();
+    const postalModeButton = page.getByRole('button', { name: /Envio postal/i });
+    await expect(postalModeButton).toBeVisible();
+    await postalModeButton.click();
     await expect(page.getByText(/PAC/i).first()).toBeVisible({ timeout: 15000 });
     await page.getByRole('button', { name: /^Continuar/i }).click();
     await expect(page.getByTestId('checkout-payment-summary-card')).toBeVisible();
     await page.getByRole('button', { name: /Revisar pedido/i }).click({ force: true });
     await expect(page.getByTestId('checkout-review-payment-card')).toBeVisible();
-    await page.getByRole('button', { name: /Enviar pedido para a loja/i }).click({ force: true });
+    await page.getByRole('button', { name: /Confirmar e gerar pagamento/i }).click({ force: true });
     await expect.poll(() => createdOrders.length).toBe(1);
 
     expect(postalQuoteRequests[0]).toMatchObject({

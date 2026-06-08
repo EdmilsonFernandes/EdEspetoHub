@@ -930,24 +930,32 @@ export const CartView = ({
       <button
         type="button"
         onClick={openCustomerNoteSheet}
-        className="group w-full rounded-[1.55rem] border border-[#336886]/10 bg-white p-3.5 text-left shadow-[0_18px_38px_-34px_rgba(15,23,42,0.28)] transition-all duration-300 hover:border-[#336886]/18 active:scale-[0.99]"
+        className={`group w-full rounded-[1.55rem] border p-3 text-left transition-all duration-300 active:scale-[0.99] ${
+          note
+            ? "border-[#336886]/14 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)] shadow-[0_18px_38px_-34px_rgba(51,104,134,0.34)]"
+            : "border-slate-100 bg-white shadow-[0_18px_38px_-34px_rgba(15,23,42,0.25)] hover:border-[#336886]/16"
+        }`}
         data-testid="customer-order-note-card"
       >
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] bg-[#336886]/8 text-[#336886] ring-1 ring-[#336886]/12">
+          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] ring-1 ${
+            note ? "bg-[#336886]/10 text-[#336886] ring-[#336886]/12" : "bg-slate-50 text-slate-500 ring-slate-200/70"
+          }`}>
             <NotePencil size={18} weight="duotone" />
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
-                Observação para a loja
+              <p className="text-sm font-black tracking-tight text-slate-950">
+                {note ? "Observação adicionada" : "Alguma observação?"}
               </p>
-              <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">
-                {note ? "Editar" : "Adicionar"}
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${
+                note ? "bg-white text-[#336886] ring-1 ring-[#cfe0ea]" : "bg-[#336886]/8 text-[#336886] ring-1 ring-[#336886]/10"
+              }`}>
+                {note ? "Editar" : "+ Adicionar"}
               </span>
             </div>
             <p className={`mt-1 line-clamp-2 text-[12.5px] font-semibold leading-snug ${note ? "text-slate-800" : "text-slate-500"}`}>
-              {note || "Toque para adicionar preferências de preparo ou entrega."}
+              {note || "Ex: sem cebola, ponto da carne, interfone ou portaria."}
             </p>
           </div>
           <ArrowLeft size={16} weight="bold" className="shrink-0 rotate-180 text-slate-300 transition-transform group-hover:translate-x-0.5" />
@@ -960,7 +968,7 @@ export const CartView = ({
 
     return (
       <div
-        className={`rounded-2xl border p-4 shadow-sm ${
+        className={`rounded-[1.35rem] border p-3.5 shadow-sm ${
           note
             ? "border-[#336886]/10 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)]"
             : "border-slate-100 bg-white"
@@ -977,15 +985,15 @@ export const CartView = ({
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
-                Observação para a loja
+              <p className="text-sm font-black tracking-tight text-slate-950">
+                Observação do pedido
               </p>
               <button
                 type="button"
                 onClick={openCustomerNoteSheet}
-                className="jnc-hub-touch shrink-0 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]"
+                className="jnc-hub-touch shrink-0 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] ring-1 ring-[#336886]/10"
               >
-                {note ? "Editar" : "Adicionar"}
+                {note ? "Editar" : "+ Adicionar"}
               </button>
             </div>
             {note ? (
@@ -994,7 +1002,7 @@ export const CartView = ({
               </p>
             ) : (
               <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">
-                Nenhuma observação adicionada.
+                Sem observação. Toque para avisar uma preferência de preparo ou entrega.
               </p>
             )}
           </div>
@@ -1633,7 +1641,12 @@ export const CartView = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => onChangeDeliveryMode?.("postal")}
+                    onClick={() => {
+                      onChangeDeliveryMode?.("postal");
+                      window.setTimeout(() => {
+                        void onCalculatePostalQuote?.({ silent: true });
+                      }, 0);
+                    }}
                     className={`min-h-[52px] rounded-[1.05rem] px-3 py-2.5 text-left transition ${
                       isPostalDelivery
                         ? "bg-slate-900 text-white shadow-[0_16px_30px_-24px_rgba(15,23,42,0.55)]"
@@ -3010,47 +3023,60 @@ export const CartView = ({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Observação</p>
-                  <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Quer pedir algum cuidado?</h3>
+                  <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Alguma instrução para a loja?</h3>
                   <p className="mt-1 text-xs font-semibold leading-snug text-slate-500">
-                    Exemplo: sem cebola, avisar no interfone ou entregar na portaria.
+                    Use só para preferências simples de preparo ou entrega.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowCustomerNoteSheet(false)}
-                  className="jnc-hub-touch grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-sm font-black text-slate-600 shadow-sm"
+                  className="jnc-hub-touch inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white px-3 text-xs font-black text-slate-600 shadow-sm"
                   aria-label="Fechar"
                 >
-                  X
+                  Fechar
                 </button>
               </div>
             </div>
             <div className="space-y-4 overflow-y-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
-              <div className="flex flex-wrap gap-2">
+              <div>
+                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                  Atalhos rápidos
+                </p>
+                <div className="grid grid-cols-2 gap-2">
                 {CUSTOMER_ORDER_NOTE_SUGGESTIONS.map((suggestion) => (
                   <button
                     key={suggestion}
                     type="button"
                     onClick={() => applyCustomerNoteSuggestion(suggestion)}
-                    className="jnc-hub-touch rounded-full border border-[#336886]/12 bg-white px-3 py-2 text-[11px] font-black text-[#336886] shadow-sm"
+                    className={`jnc-hub-touch rounded-[1rem] border px-3 py-2 text-left text-[11px] font-black shadow-sm transition ${
+                      customerNoteDraft.toLowerCase().includes(suggestion.toLowerCase())
+                        ? "border-[#336886]/24 bg-[#336886]/8 text-[#153A4C] ring-1 ring-[#336886]/12"
+                        : "border-slate-200 bg-white text-[#336886] hover:border-[#336886]/18"
+                    }`}
                   >
-                    {suggestion}
+                    + {suggestion}
                   </button>
                 ))}
+                </div>
               </div>
-              <div>
+              <div className="rounded-[1.4rem] border border-slate-100 bg-slate-50/80 p-3 ring-1 ring-white/80">
+                <label htmlFor="customer-order-note-input" className="mb-2 block text-xs font-black text-slate-800">
+                  Escreva uma observação
+                </label>
                 <textarea
+                  id="customer-order-note-input"
                   {...textareaAssistProps.notes}
                   value={customerNoteDraft}
                   onChange={(event) => setCustomerNoteDraft(limitCustomerOrderNoteInput(event.target.value))}
                   maxLength={CUSTOMER_ORDER_NOTE_MAX_LENGTH}
                   rows={5}
-                  placeholder="Ex: sem cebola, interfone 101, avisar ao chegar..."
-                  className="min-h-[132px] w-full resize-none rounded-[1.3rem] border border-[#336886]/16 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-[#336886]/45 focus:ring-4 focus:ring-[#336886]/10"
+                  placeholder="Ex: tirar cebola, ponto bem passado, entregar na portaria."
+                  className="min-h-[118px] w-full resize-none rounded-[1.2rem] border border-white bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-[#336886]/45 focus:ring-4 focus:ring-[#336886]/10"
                   data-testid="customer-order-note-input"
                 />
                 <div className="mt-2 flex items-center justify-between gap-3 text-[10.5px] font-bold text-slate-400">
-                  <span>Essa mensagem será enviada junto com o pedido.</span>
+                  <span>Evite pedir item extra por aqui; use o cardápio para adicionais.</span>
                   <span className="shrink-0 tabular-nums rounded-full bg-white px-2 py-0.5 shadow-sm">
                     {customerNoteDraft.length}/{CUSTOMER_ORDER_NOTE_MAX_LENGTH}
                   </span>
@@ -3066,7 +3092,7 @@ export const CartView = ({
                   }}
                   className="jnc-hub-touch rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700"
                 >
-                  Remover observação
+                  {customerNoteDraft.trim() ? "Remover observação" : "Continuar sem observação"}
                 </button>
                 <button
                   type="button"

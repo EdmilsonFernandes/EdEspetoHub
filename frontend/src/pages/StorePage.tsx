@@ -455,6 +455,7 @@ export function StorePage() {
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
   const [postalEnabled, setPostalEnabled] = useState(false);
+  const [storeSettingsLoaded, setStoreSettingsLoaded] = useState(false);
   const [postalOriginZip, setPostalOriginZip] = useState('');
   const [deliveryMode, setDeliveryMode] = useState<'distance' | 'postal'>('distance');
   const [postalQuoteLoading, setPostalQuoteLoading] = useState(false);
@@ -1578,6 +1579,7 @@ export function StorePage() {
       if (!silent) {
         setIsLoading(true);
         setLoadError(null);
+        setStoreSettingsLoaded(false);
       }
 
       try {
@@ -1652,6 +1654,7 @@ export function StorePage() {
           }));
         }
       } finally {
+        setStoreSettingsLoaded(true);
         if (!silent) {
           setIsLoading(false);
         }
@@ -2395,10 +2398,11 @@ export function StorePage() {
       setSelectedPostalServiceCode('');
       return;
     }
+    if (!storeSettingsLoaded) return;
     if (!postalEnabled && deliveryMode !== 'distance') {
       setDeliveryMode('distance');
     }
-  }, [customer.type, postalEnabled, deliveryMode]);
+  }, [customer.type, deliveryMode, postalEnabled, storeSettingsLoaded]);
 
   useEffect(() => {
     if (!isPostalDelivery) return;

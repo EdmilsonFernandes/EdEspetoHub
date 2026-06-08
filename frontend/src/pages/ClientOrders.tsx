@@ -1594,19 +1594,19 @@ export function ClientOrders() {
         />
 
         <div className="px-4 py-4">
-          <section className="mb-5 overflow-hidden rounded-[1.8rem] border border-white/85 bg-white/78 p-3 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.26)] ring-1 ring-[#d7e7ef]/55 backdrop-blur-xl">
-            <div className="flex items-center justify-between gap-3 px-1">
+          <section className="mb-5 overflow-hidden rounded-[1.8rem] border border-white/85 bg-white/78 p-2.5 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.26)] ring-1 ring-[#d7e7ef]/55 backdrop-blur-xl">
+            <div className="flex items-center justify-between gap-3 px-1.5 pb-1">
               <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Filtrar pedidos</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Status do pedido</p>
                 <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
-                  Encontre rápido por situação.
+                  Acompanhe rápido o que importa.
                 </p>
               </div>
-              <span className="inline-flex shrink-0 rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-[#336886] ring-1 ring-[#cfe0ea] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.36)]">
+              <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-black text-[#336886] ring-1 ring-[#cfe0ea] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.36)]">
                 {filteredOrders.length} pedido{filteredOrders.length === 1 ? '' : 's'}
               </span>
             </div>
-            <div className="mt-3 grid grid-cols-4 gap-2">
+            <div className="mt-2 grid grid-cols-4 gap-1.5 rounded-[1.45rem] border border-white/80 bg-white/58 p-1.5 ring-1 ring-slate-200/45">
               {orderFilters.map((filter) => {
                 const isSelected = statusFilter === filter.key;
                 return (
@@ -1614,7 +1614,7 @@ export function ClientOrders() {
                     key={filter.key}
                     type="button"
                     onClick={() => setStatusFilter(filter.key)}
-                    className={`jnc-hub-touch relative inline-flex min-h-[4.35rem] min-w-0 flex-col items-stretch justify-between overflow-hidden rounded-[1.25rem] border px-2.5 py-2.5 text-left transition-all sm:min-h-[4.2rem] sm:px-3 ${
+                    className={`jnc-hub-touch relative inline-flex min-h-[3.25rem] min-w-0 flex-col items-center justify-center overflow-hidden rounded-[1.05rem] border px-1.5 py-2 text-center transition-all sm:min-h-[3.35rem] sm:px-2 ${
                       isSelected
                         ? 'border-[#153A4C] bg-[radial-gradient(circle_at_20%_0%,rgba(95,211,90,0.24),transparent_36%),linear-gradient(135deg,#153A4C_0%,#336886_100%)] text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.64)]'
                         : 'border-white/90 bg-white/86 text-slate-700 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.25)] ring-1 ring-slate-200/55'
@@ -1626,30 +1626,23 @@ export function ClientOrders() {
                     <span className={`pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r ${
                       isSelected ? 'from-transparent via-white/45 to-transparent' : 'from-transparent via-[#336886]/14 to-transparent'
                     }`} />
-                    <span className="flex items-center justify-between gap-1.5">
+                    <span className="flex min-w-0 items-center justify-center gap-1.5">
                       <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${
                         isSelected ? 'bg-white/15 text-white ring-1 ring-white/18' : `${filter.toneClass} bg-slate-50 ring-1 ring-slate-200/70`
                       }`}>
                         {filter.icon}
                       </span>
-                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] ${
-                        isSelected ? 'bg-white/14 text-white/88 ring-1 ring-white/16' : 'bg-slate-50 text-slate-400 ring-1 ring-slate-200/70'
-                      }`}>
-                        {filter.key === 'active' ? 'Agora' : filter.key === 'all' ? 'Tudo' : filter.key === 'finished' ? 'Feitos' : 'Cancel.'}
-                      </span>
-                    </span>
-                    <span className="mt-1 min-w-0">
-                      <span className={`block text-[20px] font-black leading-none tracking-[-0.05em] sm:text-[22px] ${
-                        isSelected ? 'text-white' : 'text-slate-950'
-                      }`}>
+                      <span className={`inline-flex min-w-[1.45rem] shrink-0 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black leading-none tabular-nums ${
+                        isSelected ? 'bg-white/16 text-white ring-1 ring-white/16' : 'bg-slate-50 text-slate-700 ring-1 ring-slate-200/80'
+                      }`} aria-hidden="true">
                         {filter.count}
                       </span>
-                      <span className={`mt-1 block max-w-full truncate text-[9px] font-black leading-tight tracking-[-0.01em] sm:text-[11px] ${
+                    </span>
+                    <span className={`mt-1 block max-w-full truncate text-[9.5px] font-black leading-tight tracking-[-0.01em] sm:text-[11px] ${
                         isSelected ? 'text-white/86' : 'text-slate-500'
                       }`}>
-                        <span className="sm:hidden">{filter.shortLabel}</span>
-                        <span className="hidden sm:inline">{filter.label}</span>
-                      </span>
+                      <span className="sm:hidden">{filter.shortLabel}</span>
+                      <span className="hidden sm:inline">{filter.label}</span>
                     </span>
                   </button>
                 );

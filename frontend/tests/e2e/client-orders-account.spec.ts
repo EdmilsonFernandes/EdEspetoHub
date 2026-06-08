@@ -210,7 +210,7 @@ test.describe('Cliente pedidos e conta', () => {
     await page.goto('/cliente/pedidos');
 
     await expect(page.getByRole('heading', { name: 'Meus Pedidos' })).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText('Filtre sem perder o histórico.')).toBeVisible();
+    await expect(page.getByText('Acompanhe rápido o que importa.')).toBeVisible();
     await expect(page.getByLabel('Todos: 3 pedidos')).toBeVisible();
     await expect(page.getByLabel('Em andamento: 1 pedido')).toBeVisible();
     await expect(page.getByLabel('Cancelados: 1 pedido')).toBeVisible();
