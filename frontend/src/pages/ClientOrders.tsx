@@ -46,6 +46,35 @@ const DELAY_GRACE_MS = 15 * 60 * 1000;
 
 const normalizeStatus = (status?: string) => String(status || '').trim().toUpperCase();
 
+const isPostalDeliveredFromShipment = (order: any) => {
+  const shipment = order?.shipment || {};
+  const fulfillmentMode = String(order?.fulfillmentMode || order?.fulfillment_mode || '').trim().toLowerCase();
+  if (fulfillmentMode !== 'postal') return false;
+  const shipmentStatus = String(shipment?.shipmentStatus || shipment?.shipment_status || '').trim().toLowerCase();
+  const summaryStatus = String(shipment?.trackingSummary?.status || '').trim().toLowerCase();
+  const events = Array.isArray(shipment?.events) ? shipment.events : [];
+  return Boolean(
+    shipment?.deliveredAt ||
+    shipment?.delivered_at ||
+    shipmentStatus === 'delivered' ||
+    summaryStatus === 'delivered' ||
+    events.some((event: any) => String(event?.status || '').trim().toLowerCase() === 'delivered')
+  );
+};
+
+const isTerminalOrder = (order: any) =>
+  TERMINAL_STATUSES.includes(normalizeStatus(order?.status)) || isPostalDeliveredFromShipment(order);
+
+const mergeOrderForStatus = (order: any, details?: any) =>
+  details
+    ? {
+        ...order,
+        ...details,
+        fulfillmentMode: details?.fulfillmentMode || details?.fulfillment_mode || order?.fulfillmentMode || order?.fulfillment_mode,
+        shipment: details?.shipment || order?.shipment,
+      }
+    : order;
+
 const formatGroupDate = (value?: string) => {
   if (!value) return '';
   const date = new Date(value);
@@ -608,6 +637,8 @@ function OrderCard({
   const localEtaWindowLabel = getEtaWindowLabel(details?.eta);
   const etaWindowLabel = isPostalOrder ? getPostalForecastLabel(postalDeadlineMs) : localEtaWindowLabel;
   const etaDeadlineMs = isPostalOrder ? postalDeadlineMs : getEtaDeadlineMs(order, details);
+  const orderStatusCandidate = mergeOrderForStatus(order, details);
+  const postalDelivered = isPostalDeliveredFromShipment(orderStatusCandidate);
   const itemsCount = getOrderItemsCount(items);
   const fulfillmentMeta = getOrderFulfillmentMeta(order);
   const condominiumOrder = order?.condominiumOrder || (order?.condominiumId ? {
@@ -621,7 +652,7 @@ function OrderCard({
       ? 'Entrega no apartamento'
       : 'Retirada na feira';
   const isDelayed = isPostalOrder
-    ? isPostalShipmentDelayed(details || order, shipment)
+    ? !postalDelivered && isPostalShipmentDelayed(orderStatusCandidate, shipment)
     : Boolean(etaDeadlineMs && Date.now() > etaDeadlineMs);
   const canCancel = Boolean(
     isActive &&
@@ -653,6 +684,7 @@ function OrderCard({
   );
   const statusBadgeClass = getOrderStatusBadgeClass(order.status, isActive);
   const canConfirmReceipt =
+    !isPostalOrder &&
     !isActive &&
     normalizeStatus(order.status) === 'DELIVERED' &&
     String(order?.type || '').trim().toLowerCase() === 'delivery' &&
@@ -1002,7 +1034,7 @@ function OrderHelpScreen({
       order,
       customerName,
       storeName,
-      isActive: !TERMINAL_STATUSES.includes(normalizeStatus(order?.status)),
+      isActive: !isTerminalOrder(order),
       topicTitle,
       topicMessage,
     });
@@ -1261,7 +1293,7 @@ export function ClientOrders() {
 
   const refreshActiveOrderDetails = useCallback(async (targetOrders: any[]) => {
     const active = (Array.isArray(targetOrders) ? targetOrders : []).filter(
-      (order) => !TERMINAL_STATUSES.includes(normalizeStatus(order.status))
+      (order) => !isTerminalOrder(order)
     );
     if (!active.length) {
       setOrderDetails({});
@@ -1370,37 +1402,43 @@ export function ClientOrders() {
   }, [loadOrders, navigate]);
 
   const activeOrders = useMemo(
-    () => orders.filter((order) => !TERMINAL_STATUSES.includes(normalizeStatus(order.status))),
-    [orders]
+    () => orders.filter((order) => !isTerminalOrder(mergeOrderForStatus(order, orderDetails[order.id]))),
+    [orders, orderDetails]
   );
   const pastOrders = useMemo(
-    () => orders.filter((order) => TERMINAL_STATUSES.includes(normalizeStatus(order.status))),
-    [orders]
+    () => orders.filter((order) => isTerminalOrder(mergeOrderForStatus(order, orderDetails[order.id]))),
+    [orders, orderDetails]
   );
   const groupedPastOrders = useMemo(() => groupOrdersByDate(pastOrders), [pastOrders]);
   const activeOrderIds = useMemo(() => activeOrders.map((order) => String(order.id)).join('|'), [activeOrders]);
   const filteredOrders = useMemo(() => {
     if (statusFilter === 'active') return activeOrders;
     if (statusFilter === 'finished') {
-      return orders.filter((order) => [ 'DELIVERED', 'FINISHED', 'DONE' ].includes(normalizeStatus(order.status)));
+      return orders.filter((order) => {
+        const candidate = mergeOrderForStatus(order, orderDetails[order.id]);
+        return [ 'DELIVERED', 'FINISHED', 'DONE' ].includes(normalizeStatus(candidate.status)) || isPostalDeliveredFromShipment(candidate);
+      });
     }
     if (statusFilter === 'cancelled') {
       return orders.filter((order) => [ 'CANCELLED', 'REJECTED' ].includes(normalizeStatus(order.status)));
     }
     return orders;
-  }, [activeOrders, orders, statusFilter]);
+  }, [activeOrders, orderDetails, orders, statusFilter]);
   const filteredPastOrders = useMemo(
-    () => filteredOrders.filter((order) => TERMINAL_STATUSES.includes(normalizeStatus(order.status))),
-    [filteredOrders]
+    () => filteredOrders.filter((order) => isTerminalOrder(mergeOrderForStatus(order, orderDetails[order.id]))),
+    [filteredOrders, orderDetails]
   );
   const filteredActiveOrders = useMemo(
-    () => filteredOrders.filter((order) => !TERMINAL_STATUSES.includes(normalizeStatus(order.status))),
-    [filteredOrders]
+    () => filteredOrders.filter((order) => !isTerminalOrder(mergeOrderForStatus(order, orderDetails[order.id]))),
+    [filteredOrders, orderDetails]
   );
   const groupedFilteredPastOrders = useMemo(() => groupOrdersByDate(filteredPastOrders), [filteredPastOrders]);
   const deliveredOrdersCount = useMemo(
-    () => orders.filter((order) => [ 'DELIVERED', 'FINISHED', 'DONE' ].includes(normalizeStatus(order.status))).length,
-    [orders]
+    () => orders.filter((order) => {
+      const candidate = mergeOrderForStatus(order, orderDetails[order.id]);
+      return [ 'DELIVERED', 'FINISHED', 'DONE' ].includes(normalizeStatus(candidate.status)) || isPostalDeliveredFromShipment(candidate);
+    }).length,
+    [orders, orderDetails]
   );
   const cancelledOrdersCount = useMemo(
     () => orders.filter((order) => [ 'CANCELLED', 'REJECTED' ].includes(normalizeStatus(order.status))).length,

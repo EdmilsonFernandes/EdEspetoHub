@@ -114,6 +114,15 @@ export function NativeAppNavigator() {
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
+    if (!isEligiblePath(location.pathname) || isStoreAdmin) return;
+    // Visibility events are screen-local. When React keeps the navigator mounted,
+    // stale hidden state from cart/checkout must not leak into the next route.
+    setIsHidden(false);
+    setHiddenByCart(false);
+  }, [currentPath, isStoreAdmin, location.pathname]);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
     const root = document.documentElement;
     const isVisible =
       Capacitor.isNativePlatform() &&

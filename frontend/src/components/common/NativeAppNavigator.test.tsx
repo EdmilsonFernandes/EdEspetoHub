@@ -34,6 +34,15 @@ function RouteChanger() {
   );
 }
 
+function AccountRouteChanger() {
+  const navigate = useNavigate();
+  return (
+    <button type="button" onClick={() => navigate('/cliente/conta')}>
+      Ir para conta
+    </button>
+  );
+}
+
 describe('NativeAppNavigator', () => {
   beforeEach(() => {
     sessionStorage.clear();
@@ -81,6 +90,25 @@ describe('NativeAppNavigator', () => {
     fireEvent.click(screen.getByRole('button', { name: /Ir para destinos/i }));
 
     expect(screen.getByRole('button', { name: /^Visite$/i })).toBeInTheDocument();
+  });
+
+  it('resets stale hidden state when route changes to another eligible client page', () => {
+    render(
+      <MemoryRouter initialEntries={['/loja-demo']}>
+        <NativeAppNavigator />
+        <AccountRouteChanger />
+      </MemoryRouter>
+    );
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent('jnc:native-nav-visibility', { detail: { hidden: true } }));
+    });
+
+    expect(screen.queryByRole('button', { name: /^Mais$/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Ir para conta/i }));
+
+    expect(screen.getByRole('button', { name: /^Mais$/i })).toBeInTheDocument();
   });
 
   it('uses Mais as the account/profile entry point on eligible native pages', () => {

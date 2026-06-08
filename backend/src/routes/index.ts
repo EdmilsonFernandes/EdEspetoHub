@@ -132,6 +132,7 @@ routes.post('/payments/:paymentId/renew', PaymentController.renewFromPayment);
 routes.get('/admin/overview', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.overview);
 routes.get('/admin/stores', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listStores);
 routes.get('/admin/queue-health', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.queueHealth);
+routes.get('/admin/system-health', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.systemHealth);
 routes.get('/admin/payment-events', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listPaymentEvents);
 routes.get('/admin/access-logs', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listAccessLogs);
 routes.get('/admin/customer-security/overview', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.customerSecurityOverview);

@@ -25,7 +25,8 @@ export function ConfirmPaymentModal({
   const [cashValue, setCashValue] = useState('');
   const normalizedMethod = (paymentMethod || '').toLowerCase();
   const isCash = normalizedMethod === 'cash' || normalizedMethod === 'dinheiro';
-  const isPix = normalizedMethod === 'pix';
+  const isPix = normalizedMethod === 'pix' || normalizedMethod === 'pix_loja' || normalizedMethod === 'pix_presencial';
+  const isManualPix = normalizedMethod === 'pix_loja' || normalizedMethod === 'pix_presencial';
 
   useEffect(() => {
     if (!isOpen) return;
@@ -100,9 +101,11 @@ export function ConfirmPaymentModal({
         {isPix && (pixKey || pixPayload) && (
           <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 space-y-3">
             <div>
-              <p className="text-sm font-extrabold text-slate-900">Pix</p>
+              <p className="text-sm font-extrabold text-slate-900">{isManualPix ? 'Pix da loja' : 'Pix'}</p>
               <p className="text-xs text-slate-600">
-                Mostre o QR Code para o cliente escanear, ou use o copia e cola.
+                {isManualPix
+                  ? 'Mostre a chave para o cliente e confirme somente depois de conferir o recebimento.'
+                  : 'Mostre o QR Code para o cliente escanear, ou use o copia e cola.'}
               </p>
             </div>
             {pixQrUrl && (
@@ -161,6 +164,18 @@ export function ConfirmPaymentModal({
                 </div>
               </details>
             ) : null}
+          </div>
+        )}
+
+        {!isCash && (
+          <div className={`rounded-2xl border p-3 text-xs font-semibold ${
+            isManualPix
+              ? 'border-amber-200 bg-amber-50 text-amber-800'
+              : 'border-slate-200 bg-slate-50 text-slate-600'
+          }`}>
+            {isManualPix
+              ? 'Este Pix não é validado automaticamente pelo sistema. Confirme apenas depois de verificar o pagamento no app do banco da loja.'
+              : 'Confirme o recebimento para liberar a conclusão da entrega.'}
           </div>
         )}
 

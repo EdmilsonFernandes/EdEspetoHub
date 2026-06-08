@@ -210,6 +210,7 @@ export const CartView = ({
   const cepLookupLockRef = useRef(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const cepInputRef = useRef<HTMLInputElement | null>(null);
+  const postalAutoQuoteKeyRef = useRef("");
   const premiumInputClass =
     "w-full rounded-2xl bg-slate-100/80 border border-slate-200/50 px-4 py-3 text-slate-800 placeholder:text-slate-400/85 outline-none focus:ring-4 focus:ring-[#336886]/10 focus:border-[#336886]/45 focus:bg-white transition-all duration-300 shadow-sm";
 
@@ -389,6 +390,14 @@ export const CartView = ({
   const postalServices = useMemo(
     () => (Array.isArray(postalQuote?.quote?.services) ? postalQuote.quote.services : []),
     [postalQuote]
+  );
+  const postalQuoteCartSignature = useMemo(
+    () =>
+      Object.values(cart)
+        .filter((item: any) => Number(item?.qty || 0) > 0)
+        .map((item: any) => `${String(item?.id || item?.productId || "")}:${Number(item?.qty || 1)}`)
+        .join("|"),
+    [cart]
   );
   const selectedPostalService = useMemo(() => {
     if (!isPostalDelivery) return null;
@@ -860,6 +869,28 @@ export const CartView = ({
       setShowOutOfRangeSheet(false);
     }
   }, [isDelivery, deliveryCheck?.status, isPostalDelivery, postalEnabled]);
+
+  useEffect(() => {
+    if (!postalEnabled || !isPostalDelivery || postalQuoteLoading || postalServices.length > 0) return;
+    const destinationZip = String(customer.cep || "").replace(/\D/g, "");
+    if (destinationZip.length !== 8 || !postalQuoteCartSignature) return;
+    const quoteKey = `${storeSlug || "store"}:${destinationZip}:${postalQuoteCartSignature}`;
+    if (postalAutoQuoteKeyRef.current === quoteKey) return;
+    postalAutoQuoteKeyRef.current = quoteKey;
+    const timer = window.setTimeout(() => {
+      void onCalculatePostalQuote?.({ silent: true });
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [
+    customer.cep,
+    isPostalDelivery,
+    onCalculatePostalQuote,
+    postalEnabled,
+    postalQuoteCartSignature,
+    postalQuoteLoading,
+    postalServices.length,
+    storeSlug,
+  ]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -3107,7 +3138,7 @@ export const CartView = ({
         </div>
       )}
 
-      {showOutOfRangeSheet && (
+      {showOutOfRangeSheet && !postalEnabled && !isPostalDelivery && (
         <div className="fixed inset-0 z-[70]">
           <button
             type="button"

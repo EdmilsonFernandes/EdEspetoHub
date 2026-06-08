@@ -219,6 +219,21 @@ describe('Auth — Registro e Login', () => {
       expect(res.headers['server-timing']).toMatch(/admin-overview;dur=\d+/);
       expect(res.body.summary?.generatedAt).toBeTruthy();
     });
+
+    it('super admin acessa saúde técnica do backend e banco', async () => {
+      const res = await api
+        .get('/api/admin/system-health')
+        .set('Authorization', `Bearer ${superAdminToken()}`);
+
+      expect(res.status).toBe(200);
+      expect(['healthy', 'warning', 'critical']).toContain(String(res.body?.status || ''));
+      expect(res.body?.process?.memory?.rssBytes).toBeGreaterThan(0);
+      expect(res.body?.database?.connected).toBe(true);
+      expect(res.body?.database?.connections?.total).toBeGreaterThan(0);
+      expect(res.body?.database?.connections?.max).toBeGreaterThan(0);
+      expect(res.body?.database?.stats).toHaveProperty('commits');
+      expect(Array.isArray(res.body?.warnings)).toBe(true);
+    });
   });
 
   describe('MFA TOTP', () => {

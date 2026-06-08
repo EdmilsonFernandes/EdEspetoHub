@@ -79,7 +79,20 @@ export const getPostalExpectedDeliveryDeadlineMs = (order: any, shipment: any) =
 
 export const isPostalShipmentDelayed = (order: any, shipment: any, nowMs = Date.now()) => {
   const shipmentStatus = String(shipment?.shipmentStatus || shipment?.shipment_status || '').trim().toLowerCase();
-  if (shipment?.deliveredAt || shipment?.delivered_at || shipmentStatus === 'delivered') return false;
+  const trackingSummaryStatus = String(shipment?.trackingSummary?.status || shipment?.tracking_summary?.status || '').trim().toLowerCase();
+  const events = Array.isArray(shipment?.events) ? shipment.events : [];
+  const hasDeliveredEvent = events.some((event: PostalTrackingEvent) =>
+    String(event?.status || '').trim().toLowerCase() === 'delivered'
+  );
+  if (
+    shipment?.deliveredAt ||
+    shipment?.delivered_at ||
+    shipmentStatus === 'delivered' ||
+    trackingSummaryStatus === 'delivered' ||
+    hasDeliveredEvent
+  ) {
+    return false;
+  }
   const deadlineMs = getPostalExpectedDeliveryDeadlineMs(order, shipment);
   return Boolean(deadlineMs && nowMs > deadlineMs);
 };

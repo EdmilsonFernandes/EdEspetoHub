@@ -151,7 +151,8 @@ export function MotoboyCurrent() {
 
   const pixInfo = useMemo(() => {
     const method = String(activeOrder?.paymentMethod || '').toLowerCase();
-    if (method !== 'pix') return { pixKey: null as string | null, pixPayload: null as string | null };
+    const isManualPix = method === 'pix_loja' || method === 'pix_presencial';
+    if (method !== 'pix' && !isManualPix) return { pixKey: null as string | null, pixPayload: null as string | null };
     const pixKey = String(activeOrder?.store?.settings?.pixKey || '').trim() || null;
     if (!pixKey) return { pixKey: null, pixPayload: null };
     const amount = Number(activeOrder?.total || 0);

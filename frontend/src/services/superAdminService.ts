@@ -71,6 +71,14 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
+  async fetchSystemHealth(token: string) {
+    const response = await safeFetch(buildUrl('/admin/system-health'), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return handleResponse(response);
+  },
   async broadcastPush(
     token: string,
     payload: { title: string; body: string; url?: string; topic?: string; limit?: number }

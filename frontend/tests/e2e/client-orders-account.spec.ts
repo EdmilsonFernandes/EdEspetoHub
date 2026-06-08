@@ -235,7 +235,7 @@ test.describe('Cliente pedidos e conta', () => {
     await expect(page.getByRole('heading', { name: 'Minha Conta' })).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Cliente E2E')).toBeVisible();
     await expect(page.getByText('cliente.e2e@janocaminho.test')).toBeVisible();
-    await expect(page.getByText('🇧🇷 +55')).toBeVisible();
+    await expect(page.getByText(/\+55/)).toBeVisible();
     await expect(page.getByText('Meus pedidos')).toBeVisible();
     await expect(page.getByRole('button', { name: /Meus endereços 1 endereço/i })).toBeVisible();
     await expect(page.getByText('Principal')).toBeVisible();

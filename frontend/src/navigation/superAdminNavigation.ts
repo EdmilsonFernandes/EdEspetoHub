@@ -185,6 +185,17 @@ export const SUPER_ADMIN_NAV_ITEMS: SuperAdminNavigationItem[] = [
     aliases: ['bloqueios', 'mfa', 'fraude'],
   },
   {
+    id: 'health',
+    label: 'Saúde técnica',
+    shortLabel: 'Saúde',
+    description: 'Banco, conexões, memória e sinais de gargalo.',
+    group: 'technical',
+    icon: Cpu,
+    section: 'health',
+    route: '/superadmin',
+    aliases: ['saude', 'cpu', 'memoria', 'banco', 'conexoes', 'performance'],
+  },
+  {
     id: 'logs',
     label: 'Logs',
     description: 'Acessos, auditoria e rastreamento operacional.',

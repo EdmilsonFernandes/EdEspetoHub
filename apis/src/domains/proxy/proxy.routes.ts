@@ -202,6 +202,7 @@ export function createProxyRoutes(): Router {
     r.get('/admin/overview', authRequired, forward);
     r.get('/admin/stores', authRequired, forward);
     r.get('/admin/queue-health', authRequired, forward);
+    r.get('/admin/system-health', authRequired, forward);
     r.get('/admin/payment-events', authRequired, forward);
     r.get('/admin/access-logs', authRequired, forward);
     r.get('/admin/customer-security/overview', authRequired, forward);

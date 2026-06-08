@@ -12,6 +12,7 @@
  */
 
 import { Request, Response } from 'express';
+import * as os from 'os';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { PaymentRepository } from '../repositories/PaymentRepository';
@@ -811,6 +812,147 @@ export class PlatformAdminController {
     } catch (error: any) {
       log.warn('Admin queue health failed', { storeId, storeSlug, repair, error });
       return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async systemHealth(_req: Request, res: Response) {
+    const startedAt = Date.now();
+    try {
+      const [
+        databaseRows,
+        connectionRows,
+        statRows,
+        settingRows,
+      ] = await Promise.all([
+        AppDataSource.query(`
+          SELECT
+            current_database() AS "databaseName",
+            pg_database_size(current_database())::bigint AS "databaseSizeBytes",
+            NOW() AS "checkedAt"
+        `),
+        AppDataSource.query(`
+          SELECT
+            COUNT(*)::int AS "total",
+            COUNT(*) FILTER (WHERE state = 'active')::int AS "active",
+            COUNT(*) FILTER (WHERE state = 'idle')::int AS "idle",
+            COUNT(*) FILTER (WHERE state = 'idle in transaction')::int AS "idleInTransaction",
+            COUNT(*) FILTER (WHERE wait_event IS NOT NULL)::int AS "waiting",
+            COALESCE(MAX(EXTRACT(EPOCH FROM (NOW() - query_start))) FILTER (WHERE state = 'active'), 0)::float AS "longestActiveSeconds"
+          FROM pg_stat_activity
+          WHERE datname = current_database()
+        `),
+        AppDataSource.query(`
+          SELECT
+            xact_commit::bigint AS "commits",
+            xact_rollback::bigint AS "rollbacks",
+            deadlocks::bigint AS "deadlocks",
+            temp_files::bigint AS "tempFiles",
+            blks_read::bigint AS "blocksRead",
+            blks_hit::bigint AS "blocksHit"
+          FROM pg_stat_database
+          WHERE datname = current_database()
+        `),
+        AppDataSource.query(`
+          SELECT setting::int AS "maxConnections"
+          FROM pg_settings
+          WHERE name = 'max_connections'
+        `),
+      ]);
+
+      const memory = process.memoryUsage();
+      const connection = connectionRows?.[0] || {};
+      const stats = statRows?.[0] || {};
+      const database = databaseRows?.[0] || {};
+      const maxConnections = Number(settingRows?.[0]?.maxConnections || 0);
+      const totalConnections = Number(connection.total || 0);
+      const activeConnections = Number(connection.active || 0);
+      const idleInTransaction = Number(connection.idleInTransaction || 0);
+      const waitingConnections = Number(connection.waiting || 0);
+      const longestActiveSeconds = Number(connection.longestActiveSeconds || 0);
+      const blocksRead = Number(stats.blocksRead || 0);
+      const blocksHit = Number(stats.blocksHit || 0);
+      const cacheHitRatio = blocksRead + blocksHit > 0 ? blocksHit / (blocksRead + blocksHit) : null;
+      const connectionUsage = maxConnections > 0 ? totalConnections / maxConnections : null;
+      const heapUsage = memory.heapTotal > 0 ? memory.heapUsed / memory.heapTotal : null;
+
+      const warnings: Array<{ severity: 'info' | 'warning' | 'critical'; message: string }> = [];
+      if (connectionUsage !== null && connectionUsage >= 0.8) {
+        warnings.push({ severity: 'critical', message: 'Uso de conexões do banco acima de 80%.' });
+      } else if (connectionUsage !== null && connectionUsage >= 0.6) {
+        warnings.push({ severity: 'warning', message: 'Uso de conexões do banco acima de 60%.' });
+      }
+      if (idleInTransaction > 0) {
+        warnings.push({ severity: 'warning', message: 'Há conexão ociosa presa em transação.' });
+      }
+      if (waitingConnections > 0) {
+        warnings.push({ severity: 'warning', message: 'Há conexão aguardando recurso no banco.' });
+      }
+      if (longestActiveSeconds >= 30) {
+        warnings.push({ severity: 'warning', message: 'Existe query ativa há mais de 30 segundos.' });
+      }
+      if (Number(stats.deadlocks || 0) > 0) {
+        warnings.push({ severity: 'warning', message: 'Deadlocks já foram registrados neste banco.' });
+      }
+      if (heapUsage !== null && heapUsage >= 0.9) {
+        warnings.push({ severity: 'warning', message: 'Uso de heap do backend acima de 90%.' });
+      }
+
+      const status = warnings.some((warning) => warning.severity === 'critical')
+        ? 'critical'
+        : warnings.length
+          ? 'warning'
+          : 'healthy';
+
+      return res.json({
+        status,
+        checkedAt: database.checkedAt || new Date().toISOString(),
+        durationMs: Date.now() - startedAt,
+        process: {
+          uptimeSeconds: Math.round(process.uptime()),
+          pid: process.pid,
+          nodeVersion: process.version,
+          environment: process.env.NODE_ENV || 'development',
+          memory: {
+            rssBytes: memory.rss,
+            heapUsedBytes: memory.heapUsed,
+            heapTotalBytes: memory.heapTotal,
+            externalBytes: memory.external,
+            heapUsage,
+          },
+          cpu: {
+            cores: os.cpus()?.length || null,
+            loadAverage: os.loadavg(),
+          },
+        },
+        database: {
+          connected: true,
+          name: database.databaseName || null,
+          sizeBytes: Number(database.databaseSizeBytes || 0),
+          connections: {
+            total: totalConnections,
+            active: activeConnections,
+            idle: Number(connection.idle || 0),
+            idleInTransaction,
+            waiting: waitingConnections,
+            max: maxConnections || null,
+            usage: connectionUsage,
+            longestActiveSeconds,
+          },
+          stats: {
+            commits: Number(stats.commits || 0),
+            rollbacks: Number(stats.rollbacks || 0),
+            deadlocks: Number(stats.deadlocks || 0),
+            tempFiles: Number(stats.tempFiles || 0),
+            blocksRead,
+            blocksHit,
+            cacheHitRatio,
+          },
+        },
+        warnings,
+      });
+    } catch (error: any) {
+      log.warn('Admin system health failed', { durationMs: Date.now() - startedAt, error });
+      return respondWithError(_req, res, error, 400);
     }
   }
 

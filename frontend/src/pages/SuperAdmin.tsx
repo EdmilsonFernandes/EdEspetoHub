@@ -159,6 +159,34 @@ const faceScoreLabel = (score: unknown) => {
   return `${pct.toFixed(1)}%`;
 };
 
+const formatBytes = (value?: number | string | null) => {
+  const bytes = Number(value || 0);
+  if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let amount = bytes;
+  let unit = 0;
+  while (amount >= 1024 && unit < units.length - 1) {
+    amount /= 1024;
+    unit += 1;
+  }
+  return `${amount.toFixed(unit === 0 ? 0 : 1)} ${units[unit]}`;
+};
+
+const formatPercent = (value?: number | null) => {
+  const pct = Number(value);
+  if (!Number.isFinite(pct)) return '-';
+  return `${Math.max(0, Math.min(100, pct * 100)).toFixed(1)}%`;
+};
+
+const formatSeconds = (value?: number | null) => {
+  const seconds = Number(value || 0);
+  if (!Number.isFinite(seconds) || seconds <= 0) return '0s';
+  if (seconds < 60) return `${seconds.toFixed(seconds >= 10 ? 0 : 1)}s`;
+  const minutes = seconds / 60;
+  if (minutes < 60) return `${minutes.toFixed(1)}min`;
+  return `${(minutes / 60).toFixed(1)}h`;
+};
+
 const getAttributionLabel = (store: any) => {
   const attribution = store?.settings?.acquisitionAttribution;
   if (!attribution || typeof attribution !== 'object') return 'Direto / não informado';
@@ -252,6 +280,11 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
     description: 'Fila de eventos e histórico técnico da plataforma.',
     tone: 'from-slate-700 to-slate-800 text-white border-slate-700',
   },
+  health: {
+    title: 'Saúde técnica',
+    description: 'Banco, conexões, memória e sinais de gargalo em tempo real.',
+    tone: 'from-[#153A4C] to-slate-900 text-white border-[#153A4C]',
+  },
   kyc: {
     title: 'KYC de entregadores',
     description: 'Validação documental, score facial e decisões da plataforma.',
@@ -285,6 +318,7 @@ const SUPER_ADMIN_SECTIONS = [
   { id: 'security',  label: 'Segurança',  icon: ShieldCheck,       group: 'trust' },
   { id: 'logs',      label: 'Logs',       icon: GitCommit,         group: 'technical' },
   { id: 'events',    label: 'Eventos',    icon: Sparkle,           group: 'technical' },
+  { id: 'health',    label: 'Saúde',      icon: Cpu,               group: 'technical' },
   { id: 'versions',  label: 'Versões',    icon: RocketLaunch,      group: 'technical' },
 ];
 
@@ -414,6 +448,9 @@ export function SuperAdmin() {
   const [accessLogMethod, setAccessLogMethod] = useState('all');
   const [accessLogStatus, setAccessLogStatus] = useState('all');
   const [accessLogStore, setAccessLogStore] = useState('all');
+  const [systemHealth, setSystemHealth] = useState<any | null>(null);
+  const [systemHealthLoading, setSystemHealthLoading] = useState(false);
+  const [systemHealthLastUpdatedAt, setSystemHealthLastUpdatedAt] = useState<string | null>(null);
   const [vipFilter, setVipFilter] = useState('all');
   const [sectionsOpen, setSectionsOpen] = useState({
     charts: true,
@@ -564,6 +601,22 @@ export function SuperAdmin() {
     }
   };
 
+  const loadSystemHealth = async (options: { silent?: boolean } = {}) => {
+    if (!token) return;
+    const silent = Boolean(options.silent);
+    if (!silent) setSystemHealthLoading(true);
+    try {
+      const data = await superAdminService.fetchSystemHealth(token);
+      setSystemHealth(data || null);
+      setSystemHealthLastUpdatedAt(new Date().toISOString());
+    } catch (err: any) {
+      showToast(err?.message || 'Não foi possível carregar a saúde técnica.', 'error');
+      if (!silent) setSystemHealth(null);
+    } finally {
+      if (!silent) setSystemHealthLoading(false);
+    }
+  };
+
   const toggleSection = (key: keyof typeof sectionsOpen) => {
     setSectionsOpen((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -573,6 +626,17 @@ export function SuperAdmin() {
       loadOverview(token);
     }
   }, [token]);
+
+  useEffect(() => {
+    if (!token || activeSection !== 'health') return;
+    void loadSystemHealth();
+  }, [token, activeSection]);
+
+  useEffect(() => {
+    if (!token || activeSection !== 'health' || !autoRefresh) return;
+    const interval = window.setInterval(() => void loadSystemHealth({ silent: true }), 20000);
+    return () => window.clearInterval(interval);
+  }, [token, activeSection, autoRefresh]);
 
   const loadKycQueue = async (authToken: string) => {
     setKycLoading(true);
@@ -2998,6 +3062,165 @@ export function SuperAdmin() {
           ) : (
             <div className="text-sm text-slate-500">Tabela de pagamentos oculta.</div>
           )}
+        </FormSection>
+
+        <FormSection
+          title="Saúde técnica"
+          subtitle="Sinais rápidos de backend, banco, conexões e memória."
+          variant="neutral"
+          className={`bg-gradient-to-br from-slate-50 via-white to-white ${
+            activeSection !== 'health' ? 'hidden' : ''
+          }`}
+          contentClassName="space-y-4"
+        >
+          <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.16),transparent_34%),linear-gradient(135deg,#ffffff_0%,#f8fafc_58%,#eef6ff_100%)] p-4 shadow-[0_28px_62px_-46px_rgba(15,23,42,0.42)]">
+            <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#5FD35A]/20 blur-3xl" />
+            <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className={`grid h-14 w-14 shrink-0 place-items-center rounded-[1.35rem] ${
+                  systemHealth?.status === 'healthy'
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : systemHealth?.status === 'critical'
+                      ? 'bg-rose-100 text-rose-700'
+                      : 'bg-amber-100 text-amber-700'
+                }`}>
+                  <Cpu size={25} weight="duotone" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Centro técnico</p>
+                  <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">
+                    {systemHealth?.status === 'healthy'
+                      ? 'Sistema saudável'
+                      : systemHealth?.status === 'critical'
+                        ? 'Atenção crítica'
+                        : systemHealth
+                          ? 'Monitorar sinais'
+                          : 'Saúde da plataforma'}
+                  </h2>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">
+                    {systemHealthLastUpdatedAt
+                      ? `Atualizado em ${formatReadableDateTime(systemHealthLastUpdatedAt)}`
+                      : 'Carregue as métricas para avaliar banco e backend.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => void loadSystemHealth()}
+                disabled={systemHealthLoading}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#336886]/12 bg-white px-4 py-3 text-sm font-black text-[#153A4C] shadow-[0_18px_42px_-32px_rgba(15,23,42,0.35)] transition active:scale-[0.98] disabled:opacity-60"
+              >
+                <ArrowClockwise size={16} weight="duotone" className={systemHealthLoading ? 'animate-spin' : ''} />
+                {systemHealthLoading ? 'Atualizando' : 'Atualizar saúde'}
+              </button>
+            </div>
+          </div>
+
+          {systemHealthLoading && !systemHealth ? (
+            <PlatformRobotLoader logoSrc={platformLogo} />
+          ) : null}
+
+          {systemHealth ? (
+            <>
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-[1.45rem] border border-slate-200 bg-white p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.26)]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Conexões do banco</p>
+                  <p className="mt-2 text-2xl font-black text-slate-950">
+                    {systemHealth.database?.connections?.total ?? 0}
+                    <span className="text-sm text-slate-400">/{systemHealth.database?.connections?.max ?? '-'}</span>
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    Uso {formatPercent(systemHealth.database?.connections?.usage)}
+                  </p>
+                </div>
+                <div className="rounded-[1.45rem] border border-slate-200 bg-white p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.26)]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Memória do backend</p>
+                  <p className="mt-2 text-2xl font-black text-slate-950">{formatBytes(systemHealth.process?.memory?.rssBytes)}</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    Heap {formatPercent(systemHealth.process?.memory?.heapUsage)}
+                  </p>
+                </div>
+                <div className="rounded-[1.45rem] border border-slate-200 bg-white p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.26)]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Cache hit do banco</p>
+                  <p className="mt-2 text-2xl font-black text-slate-950">{formatPercent(systemHealth.database?.stats?.cacheHitRatio)}</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    {formatBytes(systemHealth.database?.sizeBytes)} de dados
+                  </p>
+                </div>
+                <div className="rounded-[1.45rem] border border-slate-200 bg-white p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.26)]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Maior query ativa</p>
+                  <p className="mt-2 text-2xl font-black text-slate-950">
+                    {formatSeconds(systemHealth.database?.connections?.longestActiveSeconds)}
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    Uptime {formatSeconds(systemHealth.process?.uptimeSeconds)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-3 lg:grid-cols-[1.25fr,0.75fr]">
+                <div className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_18px_46px_-36px_rgba(15,23,42,0.28)]">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Banco de dados</p>
+                      <h3 className="mt-1 text-lg font-black text-slate-950">{systemHealth.database?.name || 'PostgreSQL'}</h3>
+                    </div>
+                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 ring-1 ring-emerald-100">
+                      Conectado
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    {[
+                      ['Ativas', systemHealth.database?.connections?.active ?? 0],
+                      ['Ociosas', systemHealth.database?.connections?.idle ?? 0],
+                      ['Presas em transação', systemHealth.database?.connections?.idleInTransaction ?? 0],
+                      ['Aguardando recurso', systemHealth.database?.connections?.waiting ?? 0],
+                      ['Commits', systemHealth.database?.stats?.commits ?? 0],
+                      ['Rollbacks', systemHealth.database?.stats?.rollbacks ?? 0],
+                      ['Deadlocks', systemHealth.database?.stats?.deadlocks ?? 0],
+                      ['Arquivos temp.', systemHealth.database?.stats?.tempFiles ?? 0],
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-2xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
+                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{label}</p>
+                        <p className="mt-1 text-sm font-black text-slate-900">{Number(value || 0).toLocaleString('pt-BR')}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_18px_46px_-36px_rgba(15,23,42,0.28)]">
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Alertas operacionais</p>
+                  <div className="mt-3 space-y-2">
+                    {(systemHealth.warnings || []).length ? (
+                      systemHealth.warnings.map((warning: any, index: number) => (
+                        <div
+                          key={`${warning.message}-${index}`}
+                          className={`rounded-2xl border px-3 py-2 text-xs font-bold ${
+                            warning.severity === 'critical'
+                              ? 'border-rose-200 bg-rose-50 text-rose-800'
+                              : 'border-amber-200 bg-amber-50 text-amber-800'
+                          }`}
+                        >
+                          {warning.message}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-3 py-3 text-xs font-bold text-emerald-800">
+                        Nenhum alerta técnico relevante neste momento.
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-4 rounded-2xl bg-slate-50 px-3 py-3 text-[11px] font-semibold text-slate-500 ring-1 ring-slate-100">
+                    Baseado em métricas internas do Node e estatísticas nativas do PostgreSQL. Use logs/eventos se algum alerta aparecer aqui.
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : !systemHealthLoading ? (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
+              Abra a leitura de saúde para conferir conexões, memória, CPU e sinais de gargalo.
+            </div>
+          ) : null}
         </FormSection>
 
         <FormSection

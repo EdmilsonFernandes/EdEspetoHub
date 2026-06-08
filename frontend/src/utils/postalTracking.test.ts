@@ -83,6 +83,23 @@ describe('postalTracking utils', () => {
     expect(isPostalShipmentDelayed(order, shipment, new Date('2026-06-10T12:00:00.000Z').getTime())).toBe(false);
   });
 
+  it('does not mark delivered provider summaries or events as delayed', () => {
+    const order = { createdAt: '2026-06-01T12:00:00.000Z' };
+    const now = new Date('2026-06-10T12:00:00.000Z').getTime();
+
+    expect(isPostalShipmentDelayed(order, {
+      postedAt: '2026-06-01T12:00:00.000Z',
+      estimatedDays: 1,
+      trackingSummary: { status: 'delivered' },
+    }, now)).toBe(false);
+
+    expect(isPostalShipmentDelayed(order, {
+      postedAt: '2026-06-01T12:00:00.000Z',
+      estimatedDays: 1,
+      events: [{ status: 'delivered', eventAt: '2026-06-03T12:00:00.000Z' }],
+    }, now)).toBe(false);
+  });
+
   it('uses postal service fallback days when quote has no explicit ETA', () => {
     expect(getPostalEstimatedDays({ serviceCode: 'PAC' })).toBe(8);
     expect(getPostalEstimatedDays({ serviceName: 'SEDEX Hoje' })).toBe(4);
