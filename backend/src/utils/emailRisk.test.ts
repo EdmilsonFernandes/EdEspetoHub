@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { extractEmailDomain, isDisposableEmailDomain, isAllowlistedEmail } from './emailRisk';
+import {
+  extractEmailDomain,
+  getEmailDomainTypoMessage,
+  getEmailDomainTypoSuggestion,
+  isAllowlistedEmail,
+  isDisposableEmailDomain,
+} from './emailRisk';
 
 describe('emailRisk', () => {
   describe('extractEmailDomain', () => {
@@ -32,6 +38,25 @@ describe('emailRisk', () => {
 
     it('detects extra domains', () => {
       expect(isDisposableEmailDomain('test@custom-temp.io', ['custom-temp.io'])).toBe(true);
+    });
+  });
+
+  describe('getEmailDomainTypoSuggestion', () => {
+    it('suggests correction for common provider typo', () => {
+      expect(getEmailDomainTypoSuggestion('cliente@gmail.come')).toEqual({
+        domain: 'gmail.come',
+        suggestedDomain: 'gmail.com',
+        suggestedEmail: 'cliente@gmail.com',
+      });
+    });
+
+    it('does not flag valid domains', () => {
+      expect(getEmailDomainTypoSuggestion('cliente@gmail.com')).toBeNull();
+      expect(getEmailDomainTypoSuggestion('contato@minhaloja.com.br')).toBeNull();
+    });
+
+    it('builds a human message', () => {
+      expect(getEmailDomainTypoMessage('cliente@gmial.com')).toContain('cliente@gmail.com');
     });
   });
 

@@ -24,6 +24,41 @@ export const extractEmailDomain = (email?: string | null) => {
   return normalized.split('@').pop()?.trim() || '';
 };
 
+const COMMON_EMAIL_DOMAIN_TYPOS: Record<string, string> = {
+  'gmail.come': 'gmail.com',
+  'gmail.con': 'gmail.com',
+  'gmail.com.br': 'gmail.com',
+  'gmai.com': 'gmail.com',
+  'gmial.com': 'gmail.com',
+  'hotmial.com': 'hotmail.com',
+  'hotmil.com': 'hotmail.com',
+  'outlok.com': 'outlook.com',
+  'outloo.com': 'outlook.com',
+  'yaho.com': 'yahoo.com',
+  'icloud.con': 'icloud.com',
+};
+
+export const getEmailDomainTypoSuggestion = (email?: string | null) => {
+  const normalized = String(email || '').trim().toLowerCase();
+  const domain = extractEmailDomain(normalized);
+  if (!domain) return null;
+  const suggestedDomain = COMMON_EMAIL_DOMAIN_TYPOS[domain];
+  if (!suggestedDomain) return null;
+
+  const localPart = normalized.split('@')[0]?.trim();
+  return {
+    domain,
+    suggestedDomain,
+    suggestedEmail: localPart ? `${localPart}@${suggestedDomain}` : suggestedDomain,
+  };
+};
+
+export const getEmailDomainTypoMessage = (email?: string | null) => {
+  const suggestion = getEmailDomainTypoSuggestion(email);
+  if (!suggestion) return '';
+  return `Confira o e-mail. Voce quis dizer ${suggestion.suggestedEmail}?`;
+};
+
 export const isDisposableEmailDomain = (email?: string | null, extraDomains: string[] = []) => {
   const domain = extractEmailDomain(email);
   if (!domain) return false;

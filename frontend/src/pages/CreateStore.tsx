@@ -23,6 +23,7 @@ import { BRAZIL_STATES, loadBrazilCitiesByState } from '../utils/brazilLocations
 import { inputAssistProps, textareaAssistProps } from '../utils/inputAssist';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatDestinationClaimPlaceAddress, getDestinationClaimPlaceImage, resolveDestinationClaimPlaces } from '../utils/destinationClaimPlaces';
+import { getEmailValidationMessage } from '../utils/emailValidation';
 import { FormSection } from '../components/common/FormSection';
 import { Bed, Buildings, CheckCircle, CopySimple, CreditCard, EnvelopeSimple, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, RocketLaunch, ShieldCheck, Storefront, UserCircle, WarningCircle } from '@phosphor-icons/react';
 
@@ -1098,10 +1099,7 @@ export function CreateStore() {
       .replace(/-+/g, '-');
 
   const validateEmail = (value = '') => {
-    const normalized = value.trim().toLowerCase();
-    if (!normalized) return 'Informe um e-mail valido.';
-    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
-    return isValid ? '' : 'Informe um e-mail valido.';
+    return getEmailValidationMessage(value);
   };
 
   const normalizeDigits = (value = '') => value.replace(/\D/g, '');

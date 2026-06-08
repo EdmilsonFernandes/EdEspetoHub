@@ -31,6 +31,12 @@ describe('Auth — Registro e Login', () => {
       expect(res.status).toBeGreaterThanOrEqual(400);
     });
 
+    it('rejeita dominio comum digitado errado no cadastro de lojista', async () => {
+      const { res } = await registerStore({ email: `lojista-${Date.now()}@gmail.come` });
+      expect(res.status).toBe(400);
+      expect(res.body?.details?.message).toContain('gmail.com');
+    });
+
     it('rejeita sem aceite de termos', async () => {
       const { res } = await registerStore({ termsAccepted: false });
       expect(res.status).toBeGreaterThanOrEqual(400);
@@ -176,6 +182,19 @@ describe('Auth — Registro e Login', () => {
         password: 'Test@123456',
       });
       expect(res.status).toBeGreaterThanOrEqual(400);
+    });
+
+    it('rejeita dominio comum digitado errado antes de criar conta', async () => {
+      const res = await api.post('/api/customer/auth/register').send({
+        fullName: 'Cliente Email Errado',
+        email: `cliente-${Date.now()}@gmail.come`,
+        password: 'Test@123456',
+        termsAccepted: true,
+        lgpdAccepted: true,
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body?.details?.message).toContain('gmail.com');
     });
   });
 

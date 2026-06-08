@@ -12,6 +12,7 @@ import { AuthMascotPanel } from '../components/Auth/AuthMascotPanel';
 import { persistTrustedMfaDevice } from '../utils/mfaDevice';
 import { inputAssistProps } from '../utils/inputAssist';
 import { MFA_CHALLENGE_EXPIRED_MESSAGE, isMfaChallengeExpiredError } from '../utils/mfaErrors';
+import { getEmailValidationMessage } from '../utils/emailValidation';
 
 const formatPhoneBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
@@ -27,7 +28,7 @@ const getModeFromSearch = (search: string) => {
   return mode === 'register' || mode === 'cadastro' ? 'register' : 'login';
 };
 
-const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(value || '').trim());
+const isValidEmail = (value: string) => !getEmailValidationMessage(value);
 
 const normalizeVerificationCodeError = (error: any) => {
   const rawMessage = String(error?.message || '').trim();
@@ -341,8 +342,11 @@ export function ClientAuth() {
 
     if (!emailValue) {
       nextFieldErrors.email = 'Informe seu e-mail ou usuário.';
-    } else if (!isValidEmail(emailValue)) {
-      nextFieldErrors.email = 'E-mail inválido.';
+    } else {
+      const emailValidationMessage = getEmailValidationMessage(emailValue);
+      if (emailValidationMessage) {
+        nextFieldErrors.email = emailValidationMessage;
+      }
     }
     if (!passwordValue) {
       nextFieldErrors.password = 'Informe sua senha.';
@@ -363,8 +367,9 @@ export function ClientAuth() {
     try {
       let result: any;
       if (mode === 'register') {
-        if (!isValidEmail(form.email)) {
-          throw new Error('Informe um e-mail válido.');
+        const emailValidationMessage = getEmailValidationMessage(form.email);
+        if (emailValidationMessage) {
+          throw new Error(emailValidationMessage);
         }
         if (!form.termsAccepted || !form.lgpdAccepted) {
           throw new Error('Aceite os termos de uso e a política de privacidade para criar sua conta.');

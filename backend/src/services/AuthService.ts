@@ -42,7 +42,7 @@ import { CondominiumUser } from '../entities/CondominiumUser';
 import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
 import { resolvePlanFeatures, resolvePlanTier } from '../config/planFeatures';
 import { StoreUserRepository } from '../repositories/StoreUserRepository';
-import { isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
+import { getEmailDomainTypoMessage, isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
 import { CustomerSecurityService } from './CustomerSecurityService';
 import { AuditNotificationService } from './AuditNotificationService';
 import { MfaService } from './MfaService';
@@ -388,6 +388,17 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new AppError('AUTH-006', 400);
     }
+    const emailTypoMessage = getEmailDomainTypoMessage(email);
+    if (emailTypoMessage) {
+      await this.securityService.recordRiskEvent({
+        email,
+        phone: input?.phone,
+        eventType: 'email_domain_typo_attempt',
+        score: 15,
+        metadata: { flow: 'store_preflight' },
+      });
+      throw new AppError('GEN-002', 400, { message: emailTypoMessage });
+    }
     if (
       isDisposableEmailDomain(email, env.security.disposableEmailDomains) &&
       !isAllowlistedEmail(email, env.security.allowlistedEmails)
@@ -652,6 +663,21 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     const normalizedEmail = userPayload.email
       .trim()
       .toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(normalizedEmail)) {
+      throw new AppError('AUTH-006', 400);
+    }
+    const emailTypoMessage = getEmailDomainTypoMessage(normalizedEmail);
+    if (emailTypoMessage) {
+      await this.securityService.recordRiskEvent({
+        email: normalizedEmail,
+        phone: userPayload.phone,
+        ipAddress: meta?.ipAddress,
+        eventType: 'email_domain_typo_attempt',
+        score: 15,
+        metadata: { flow: accountType === 'MOTOBOY' ? 'motoboy_register' : 'store_register' },
+      });
+      throw new AppError('GEN-002', 400, { message: emailTypoMessage });
+    }
     if (
       isDisposableEmailDomain(normalizedEmail, env.security.disposableEmailDomains) &&
       !isAllowlistedEmail(normalizedEmail, env.security.allowlistedEmails)

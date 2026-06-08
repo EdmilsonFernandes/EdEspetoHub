@@ -15,7 +15,7 @@ import { OrderService } from './OrderService';
 import { OrderEtaServiceV2 } from './OrderEtaServiceV2';
 import { logger } from '../utils/logger';
 import { ZipCodeLookupService } from './ZipCodeLookupService';
-import { isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
+import { getEmailDomainTypoMessage, isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
 import { CustomerSecurityService } from './CustomerSecurityService';
 import { GeoLocationService } from './GeoLocationService';
 import { buildOrderTimelineJson } from '../utils/orderTimeline';
@@ -543,6 +543,18 @@ async register(
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email)) {
       throw new AppError('GEN-002', 400, { message: 'Informe um e-mail válido.' });
+    }
+    const emailTypoMessage = getEmailDomainTypoMessage(email);
+    if (emailTypoMessage) {
+      await this.securityService.recordRiskEvent({
+        email,
+        phone,
+        ipAddress: meta?.ipAddress,
+        eventType: 'email_domain_typo_attempt',
+        score: 15,
+        metadata: { flow: 'customer_register' },
+      });
+      throw new AppError('GEN-002', 400, { message: emailTypoMessage });
     }
     if (
       isDisposableEmailDomain(email, env.security.disposableEmailDomains) &&
