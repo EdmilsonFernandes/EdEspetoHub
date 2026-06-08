@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { api, registerStore, loginAdmin, registerCustomer, loginCustomer, verifyEmailDirectly, activateSubscription, exemptStorePlan } from '../helpers';
+import { AppDataSource } from '../../config/database';
 
 describe('Pedido — Jornada E2E (cliente)', () => {
   let adminToken: string;
@@ -271,6 +272,88 @@ describe('Pedido — Jornada E2E (cliente)', () => {
     const eventStatuses = (tracking.body?.shipment?.events || []).map((event: any) => event.status);
     expect(eventStatuses).toContain('tracking_code_added');
     expect(eventStatuses).toContain('posted');
+  });
+
+  it('cliente confirma recebimento postal quando rastreio já marcou entregue', async () => {
+    if (!productId) return;
+
+    const customer = await registerCustomer({
+      fullName: 'Cliente Postal Recebimento',
+      termsAccepted: true,
+      lgpdAccepted: true,
+    });
+    await verifyEmailDirectly(customer.email);
+    const customerLogin = await loginCustomer(customer.email, customer.password);
+    expect(customerLogin.res.status).toBe(200);
+    expect(customerLogin.token).toBeTruthy();
+
+    const order = await api
+      .post(`/api/stores/${storeId}/orders`)
+      .set('Authorization', `Bearer ${customerLogin.token}`)
+      .send({
+        customerName: 'Cliente Postal Recebimento',
+        phone: '11999990004',
+        address: 'Rua Postal, 300 - Centro',
+        type: 'delivery',
+        fulfillmentMode: 'postal',
+        deliveryFee: 12.9,
+        paymentMethod: 'pix',
+        items: [{ productId, quantity: 1 }],
+        postalShipment: {
+          provider: 'internal_postal_v1',
+          serviceCode: 'PAC',
+          serviceName: 'PAC',
+          estimatedDays: 5,
+          price: 12.9,
+          currency: 'BRL',
+          originZip: '01001000',
+          destinationZip: '12245000',
+        },
+      });
+
+    expect(order.status, JSON.stringify(order.body)).toBe(201);
+    const orderId = String(order.body?.id || '');
+    expect(orderId).toBeTruthy();
+
+    const trackingCode = 'AD328626570BR';
+    const posted = await api
+      .patch(`/api/orders/${orderId}/postal`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ trackingCode, markPosted: true });
+    expect(posted.status).toBe(200);
+    expect(String(posted.body?.order?.status || '').toLowerCase()).toBe('dispatched');
+
+    await AppDataSource.query(
+      `
+        UPDATE order_shipments
+           SET shipment_status = 'delivered',
+               delivered_at = '2026-06-07T14:30:00.000Z',
+               updated_at = NOW()
+         WHERE order_id = $1
+      `,
+      [orderId]
+    );
+
+    const confirmed = await api
+      .post(`/api/customer/orders/${orderId}/confirm-received`)
+      .set('Authorization', `Bearer ${customerLogin.token}`)
+      .send({});
+
+    expect(confirmed.status, JSON.stringify(confirmed.body)).toBe(200);
+    expect(String(confirmed.body?.status || '').toLowerCase()).toBe('finished');
+    expect(confirmed.body?.customerReceivedAt).toBeTruthy();
+
+    const [row] = await AppDataSource.query(
+      'SELECT status, customer_received_at, status_timeline FROM orders WHERE id = $1',
+      [orderId]
+    );
+    expect(String(row?.status || '').toLowerCase()).toBe('finished');
+    expect(row?.customer_received_at).toBeTruthy();
+    const timelineStatuses = Array.isArray(row?.status_timeline)
+      ? row.status_timeline.map((entry: any) => String(entry?.status || '').toLowerCase())
+      : [];
+    expect(timelineStatuses).toContain('delivered');
+    expect(timelineStatuses).toContain('finished');
   });
 
   it('mantém pedido de retirada sem fluxo postal', async () => {

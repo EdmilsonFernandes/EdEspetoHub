@@ -9,6 +9,7 @@ import {
   getPostalTrackingExternalUrl,
   getPostalTrackingHeadline,
   getPostalTrackingUnavailableCopy,
+  isPostalShipmentDelivered,
   isPostalShipmentDelayed,
   sortPostalEventsDesc,
 } from './postalTracking';
@@ -86,6 +87,10 @@ describe('postalTracking utils', () => {
   it('does not mark delivered provider summaries or events as delayed', () => {
     const order = { createdAt: '2026-06-01T12:00:00.000Z' };
     const now = new Date('2026-06-10T12:00:00.000Z').getTime();
+
+    expect(isPostalShipmentDelivered({
+      trackingSummary: { status: 'delivered' },
+    })).toBe(true);
 
     expect(isPostalShipmentDelayed(order, {
       postedAt: '2026-06-01T12:00:00.000Z',

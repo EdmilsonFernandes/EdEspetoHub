@@ -1293,15 +1293,26 @@ async setDefaultAddress(userId: string, addressId: string) {
     const result = await AppDataSource.transaction(async (manager) => {
       const rows = await manager.query(
         `
-          SELECT id,
-                 type,
-                 status,
-                 customer_received_at,
-                 store_id
-            FROM orders
-           WHERE id = $1
-             AND customer_user_id = $2
-           FOR UPDATE
+          SELECT o.id,
+                 o.type,
+                 o.status,
+                 o.customer_received_at,
+                 o.store_id,
+                 o.fulfillment_mode,
+                 os.shipment_status,
+                 os.delivered_at AS shipment_delivered_at,
+                 EXISTS (
+                   SELECT 1
+                     FROM order_shipment_events ose
+                    WHERE ose.order_id = o.id
+                      AND LOWER(COALESCE(ose.status, '')) = 'delivered'
+                 ) AS has_delivered_shipment_event
+            FROM orders o
+       LEFT JOIN order_shipments os
+              ON os.order_id = o.id
+           WHERE o.id = $1
+             AND o.customer_user_id = $2
+           FOR UPDATE OF o
         `,
         [orderId, userId]
       );
@@ -1314,11 +1325,20 @@ async setDefaultAddress(userId: string, addressId: string) {
       }
 
       const normalizedStatus = String(order.status || '').trim().toLowerCase();
+      const fulfillmentMode = String(order.fulfillment_mode || '').trim().toLowerCase();
+      const shipmentStatus = String(order.shipment_status || '').trim().toLowerCase();
+      const postalShipmentDelivered =
+        fulfillmentMode === 'postal' &&
+        (
+          shipmentStatus === 'delivered' ||
+          Boolean(order.shipment_delivered_at) ||
+          Boolean(order.has_delivered_shipment_event)
+        );
       const customerReceivedAt = order.customer_received_at ? new Date(order.customer_received_at) : null;
       if (normalizedStatus === 'finished' && customerReceivedAt) {
         return order;
       }
-      if (![ 'delivered', 'finished', 'done' ].includes(normalizedStatus)) {
+      if (![ 'delivered', 'finished', 'done' ].includes(normalizedStatus) && !postalShipmentDelivered) {
         throw new AppError('ORDER-004', 400, { message: 'Este pedido ainda não está pronto para confirmação de recebimento.' });
       }
 
@@ -1332,22 +1352,28 @@ async setDefaultAddress(userId: string, addressId: string) {
            WHERE id = $1
            RETURNING id,
                      status,
-                     customer_received_at,
-                     customer_received_confirmed_by_user_id,
-                     store_id
+                     customer_received_at AS "customerReceivedAt",
+                     customer_received_confirmed_by_user_id AS "customerReceivedConfirmedByUserId",
+                     store_id AS "storeId"
         `,
         [orderId, userId]
       );
       try {
+        if (postalShipmentDelivered && ![ 'delivered', 'finished', 'done' ].includes(normalizedStatus)) {
+          await manager.query(
+            "UPDATE orders SET status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $1::jsonb WHERE id = $2",
+            [buildOrderTimelineJson('delivered', order.shipment_delivered_at || new Date()), orderId]
+          );
+        }
         await manager.query(
           "UPDATE orders SET status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $1::jsonb WHERE id = $2",
-          [buildOrderTimelineJson('finished', saved?.customer_received_at || new Date()), orderId]
+            [buildOrderTimelineJson('finished', saved?.customerReceivedAt || saved?.customer_received_at || new Date()), orderId]
         );
       } catch {}
       return saved || order;
     });
 
-    const storeId = String((result as any)?.store_id || '').trim();
+    const storeId = String((result as any)?.storeId || (result as any)?.store_id || '').trim();
     this.log.info('Customer confirmed order receipt', {
       orderId: String(result?.id || orderId),
       userId,
@@ -1376,14 +1402,16 @@ async setDefaultAddress(userId: string, addressId: string) {
         });
     }
 
+    const confirmedAt =
+      (result as any).customerReceivedAt ||
+      (result as any).customer_received_at ||
+      new Date().toISOString();
+
     return {
       ok: true,
       orderId: result.id,
-      status: result.status,
-      customerReceivedAt:
-        (result as any).customer_received_at ||
-        (result as any).customerReceivedAt ||
-        null,
+      status: (result as any).status || 'finished',
+      customerReceivedAt: confirmedAt,
     };
   }
 

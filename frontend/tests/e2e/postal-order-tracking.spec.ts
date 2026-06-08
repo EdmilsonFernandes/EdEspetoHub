@@ -239,4 +239,73 @@ test.describe('Pedido postal - acompanhamento do cliente', () => {
     await expect(page.getByText('Objeto em trânsito')).toBeVisible();
     await expect(page.getByText('Rastreio integrado')).toBeVisible();
   });
+
+  test('cliente confirma recebimento quando rastreio postal indica entrega', async ({ page }) => {
+    let confirmCalled = false;
+    await page.addInitScript(() => {
+      window.localStorage.setItem('customerSession', JSON.stringify({
+        token: 'customer-postal-token-e2e',
+        customer: { id: 'customer-postal-e2e', name: 'Cliente Postal E2E' },
+      }));
+    });
+
+    await page.route('**/api/orders/postal-order-e2e/public', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          ...baseOrder,
+          status: 'dispatched',
+          shipment: {
+            provider: 'internal_postal_v1',
+            serviceCode: 'PAC',
+            serviceName: 'PAC',
+            estimatedDays: 5,
+            trackingCode: 'AD328626570BR',
+            trackingUrl: 'https://www.sitecorreios.com.br/AD328626570BR',
+            shipmentStatus: 'delivered',
+            postedAt: '2026-05-01T13:00:00.000Z',
+            deliveredAt: '2026-05-03T15:40:00.000Z',
+            trackingSummary: {
+              status: 'delivered',
+              label: 'Entregue',
+              description: 'A encomenda foi entregue ao destinatário.',
+            },
+            events: [
+              {
+                id: 'event-delivered',
+                source: 'carrier',
+                status: 'delivered',
+                title: 'Objeto entregue',
+                description: 'A encomenda foi entregue ao destinatário.',
+                location: 'São José dos Campos / SP',
+                eventAt: '2026-05-03T15:40:00.000Z',
+              },
+            ],
+          },
+        }),
+      });
+    });
+
+    await page.route('**/api/customer/orders/postal-order-e2e/confirm-received', async (route) => {
+      confirmCalled = true;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          ok: true,
+          orderId: 'postal-order-e2e',
+          status: 'finished',
+          customerReceivedAt: '2026-05-03T16:00:00.000Z',
+        }),
+      });
+    });
+
+    await page.goto('/pedido/postal-order-e2e');
+
+    await expect(page.getByText('O rastreio indica entrega. Confirme apenas se você recebeu o pacote.')).toBeVisible();
+    await page.getByRole('button', { name: /recebi o pacote/i }).click();
+    expect(confirmCalled).toBe(true);
+    await expect(page.getByText('Pacote recebido pelo cliente')).toBeVisible();
+  });
 });

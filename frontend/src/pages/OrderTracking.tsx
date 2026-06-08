@@ -22,6 +22,7 @@ import {
   getPostalTrackingHeadline,
   getPostalTrackingExternalUrl,
   getPostalTrackingUnavailableCopy,
+  isPostalShipmentDelivered,
   sortPostalEventsDesc,
 } from '../utils/postalTracking';
 import { openActionTarget } from '../utils/actionLink';
@@ -128,6 +129,7 @@ const shouldStopOrderPolling = (order: any) => {
   const isPostalOrder = isDeliveryOrder && String(order?.fulfillmentMode || '').toLowerCase() === 'postal';
   const requiresCustomerReceipt = isDeliveryOrder && !isPostalOrder;
   const customerReceiptConfirmedAt = getCustomerReceiptConfirmedAt(order);
+  const postalDeliveredByTracking = isPostalOrder && isPostalShipmentDelivered(order?.shipment);
   const deliveredByCourier =
     deliveryStatus === 'DELIVERED' ||
     orderStatus === 'delivered' ||
@@ -137,6 +139,7 @@ const shouldStopOrderPolling = (order: any) => {
     orderStatus === 'done' ||
     orderStatus === 'cancelled' ||
     orderStatus === 'finished' ||
+    postalDeliveredByTracking ||
     (deliveredByCourier && (!requiresCustomerReceipt || Boolean(customerReceiptConfirmedAt)))
   );
 };
@@ -636,6 +639,8 @@ export function OrderTracking() {
   const storeLogo =
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/janocaminho.jpg';
   const isPostalDelivery = isDelivery && String((order as any)?.fulfillmentMode || '').toLowerCase() === 'postal';
+  const shipment = (order as any)?.shipment || null;
+  const isPostalShipmentDeliveredByTracking = isPostalDelivery && isPostalShipmentDelivered(shipment);
   const hasCustomerSession = useMemo(() => {
     if (typeof window === 'undefined') return false;
     try {
@@ -649,7 +654,7 @@ export function OrderTracking() {
   const statusLabel = useMemo(() => {
     if (normalizedStatus === 'cancelled') return 'Cancelado';
     if (isDelivery && !isPostalDelivery && hasCustomerReceiptConfirmation) return 'Recebido pelo cliente';
-    if (isPostalDelivery && (normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
+    if (isPostalDelivery && (isPostalShipmentDeliveredByTracking || normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
     if (isDelivery && !isPostalDelivery && hasCourierDeliveryConfirmation) return 'Entregue';
     if (isPostalDelivery && (normalizedStatus === 'dispatched' || normalizedStatus === 'waiting_for_motoboy' || normalizedStatus === 'in_delivery')) return 'Despachado';
     if (isPostalDelivery && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_delivery')) return 'Pronto para postagem';
@@ -665,13 +670,14 @@ export function OrderTracking() {
     if (order?.type === 'table' && normalizedStatus === 'done') return 'Pedido Pronto';
     if (order?.type === 'pickup' && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_pickup')) return 'Pronto para retirada';
     return statusLabels[normalizedStatus] || statusLabels[status] || status;
-  }, [isDelivery, isPostalDelivery, order?.type, status, normalizedStatus, deliveryStatus, hasCustomerReceiptConfirmation, hasCourierDeliveryConfirmation]);
+  }, [isDelivery, isPostalDelivery, isPostalShipmentDeliveredByTracking, order?.type, status, normalizedStatus, deliveryStatus, hasCustomerReceiptConfirmation, hasCourierDeliveryConfirmation]);
   const isCancelled = normalizedStatus === 'cancelled';
   const isReady =
     status === 'done' ||
     status === 'delivered' ||
     status === 'finished' ||
-    String((order as any)?.delivery?.status || '').toUpperCase() === 'DELIVERED';
+    String((order as any)?.delivery?.status || '').toUpperCase() === 'DELIVERED' ||
+    isPostalShipmentDeliveredByTracking;
   const isTerminal = isReady || isCancelled;
   const canRateDelivery = Boolean(reviewState?.features?.deliveryFeedbackEnabled ?? reviewState?.isDelivery ?? isDelivery);
   const canUseTipFlow = Boolean(reviewState?.features?.tipEnabled ?? canRateDelivery);
@@ -719,7 +725,6 @@ export function OrderTracking() {
     );
   const hasDeliveryFee =
     order?.deliveryFee !== null && order?.deliveryFee !== undefined && isDelivery;
-  const shipment = (order as any)?.shipment || null;
   const shipmentServiceCode = String(shipment?.serviceCode || '').trim().toUpperCase();
   const shipmentServiceName = String(shipment?.serviceName || '').trim();
   const shipmentTrackingCode = String(shipment?.trackingCode || '').trim();
@@ -745,8 +750,10 @@ export function OrderTracking() {
     hasCustomerSession &&
     !isAdminForStore &&
     isDelivery &&
-    !isPostalDelivery &&
-    [ 'delivered', 'finished', 'done' ].includes(normalizedStatus) &&
+    (
+      (!isPostalDelivery && [ 'delivered', 'finished', 'done' ].includes(normalizedStatus)) ||
+      (isPostalDelivery && (isPostalShipmentDeliveredByTracking || [ 'delivered', 'done' ].includes(normalizedStatus)))
+    ) &&
     !hasCustomerReceiptConfirmation && normalizedStatus !== 'finished';
 
   const handleConfirmReceipt = async () => {
@@ -855,11 +862,15 @@ export function OrderTracking() {
     : 'border-[#d6e4ed] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] text-[#336886]';
   const postalStatusLabel = isCancelled
     ? 'Cancelado'
+    : isPostalShipmentDeliveredByTracking
+    ? 'Entregue'
     : isShipmentPosted
     ? 'Postado'
     : 'Aguardando postagem';
   const postalStatusDetail = isCancelled
     ? (isShipmentPosted ? 'Pedido cancelado após a postagem.' : 'Pedido cancelado antes da postagem.')
+    : isPostalShipmentDeliveredByTracking
+    ? 'O rastreio informou que a encomenda foi entregue.'
     : isShipmentPosted
     ? 'Objeto entregue aos Correios e aguardando movimentação.'
     : 'Pedido aguardando despacho da loja.';
@@ -1048,6 +1059,15 @@ export function OrderTracking() {
     return null;
   }, [isDelivery, isReady, isPostalDelivery, postalExpectedDeliveryDate, routeEtaRemainingMinutes, remainingEstimateMinutes]);
   const storeWhatsappLink = buildWhatsAppContactUrl(storePhone, false, whatsappReceiptMessage);
+  const postalIssueWhatsappMessage = useMemo(() => {
+    const lines = [
+      `Olá, preciso de ajuda com o pedido ${orderDisplayId}.`,
+      shipmentTrackingCode ? `Código de rastreio: ${shipmentTrackingCode}.` : '',
+      'O rastreio indica entrega, mas eu não recebi o pacote.',
+    ].filter(Boolean);
+    return lines.join('\n');
+  }, [orderDisplayId, shipmentTrackingCode]);
+  const postalIssueWhatsappLink = buildWhatsAppContactUrl(storePhone, false, postalIssueWhatsappMessage);
   const openWhatsApp = () => {
     if (!storeWhatsappLink) return;
     if (Capacitor.isNativePlatform()) {
@@ -1057,6 +1077,16 @@ export function OrderTracking() {
       return;
     }
     window.open(storeWhatsappLink, '_blank', 'noopener,noreferrer');
+  };
+  const openPostalIssueWhatsApp = () => {
+    if (!postalIssueWhatsappLink) return;
+    if (Capacitor.isNativePlatform()) {
+      void import('@capacitor/browser')
+        .then(({ Browser }) => Browser.open({ url: postalIssueWhatsappLink }))
+        .catch(() => window.open(postalIssueWhatsappLink, '_blank', 'noopener,noreferrer'));
+      return;
+    }
+    window.open(postalIssueWhatsappLink, '_blank', 'noopener,noreferrer');
   };
   const handleRepeatOrder = () => {
     if (!storeSlug || !order?.items?.length) return;
@@ -1828,12 +1858,28 @@ export function OrderTracking() {
                       </div>
                     ) : null}
 
+                    {isPostalDelivery && hasCustomerReceiptConfirmation ? (
+                      <div className="mt-3 rounded-2xl border border-emerald-200 bg-[linear-gradient(135deg,#f4fbf6,#ffffff)] px-4 py-3 shadow-[0_18px_32px_-28px_rgba(16,185,129,0.22)]">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-700">Recebimento confirmado</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-900">Pacote recebido pelo cliente</p>
+                        <p className="mt-1 text-xs text-slate-600">
+                          Você confirmou o recebimento em {formatDateTime(customerReceivedAtValue)}. O pedido foi finalizado no Já no Caminho.
+                        </p>
+                      </div>
+                    ) : null}
+
                     {canConfirmReceipt ? (
                       <div className="mt-3 rounded-2xl border border-emerald-200 bg-[linear-gradient(135deg,#f6fdf8,#ffffff)] px-4 py-3 shadow-[0_18px_32px_-28px_rgba(16,185,129,0.22)]">
-                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-700">Recebimento</p>
-                        <p className="mt-1 text-sm font-semibold text-slate-900">Seu pedido chegou certinho?</p>
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-700">
+                          {isPostalDelivery ? 'Entrega postal' : 'Recebimento'}
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-slate-900">
+                          {isPostalDelivery ? 'O pacote chegou certinho?' : 'Seu pedido chegou certinho?'}
+                        </p>
                         <p className="mt-1 text-xs text-slate-600">
-                          Confirme o recebimento para finalizar o pedido e avisar a loja que a entrega foi concluída.
+                          {isPostalDelivery
+                            ? 'O rastreio indica entrega. Confirme apenas se você recebeu o pacote.'
+                            : 'Confirme o recebimento para finalizar o pedido e avisar a loja que a entrega foi concluída.'}
                         </p>
                         <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
                           <button
@@ -1843,8 +1889,18 @@ export function OrderTracking() {
                             className="jnc-hub-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_32px_-24px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98]"
                           >
                             {confirmReceiptLoading ? <CircleNotch size={16} className="animate-spin" /> : <SealCheck size={16} weight="fill" />}
-                            Confirmar recebimento
+                            {isPostalDelivery ? 'Recebi o pacote' : 'Confirmar recebimento'}
                           </button>
+                          {isPostalDelivery && postalIssueWhatsappLink ? (
+                            <button
+                              type="button"
+                              onClick={openPostalIssueWhatsApp}
+                              className="jnc-hub-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-600 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.25)] transition hover:bg-slate-50 active:scale-[0.98]"
+                            >
+                              <WhatsappLogo size={16} weight="fill" />
+                              Não recebi
+                            </button>
+                          ) : null}
                           {confirmReceiptError ? (
                             <p className="text-xs font-medium text-rose-600">{confirmReceiptError}</p>
                           ) : null}

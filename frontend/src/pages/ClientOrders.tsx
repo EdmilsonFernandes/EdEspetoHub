@@ -33,7 +33,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
-import { getPostalExpectedDeliveryDeadlineMs, isPostalShipmentDelayed } from '../utils/postalTracking';
+import { getPostalExpectedDeliveryDeadlineMs, isPostalShipmentDelayed, isPostalShipmentDelivered } from '../utils/postalTracking';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AppImagePreviewDialog } from '../components/common/AppImagePreviewDialog';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
@@ -50,16 +50,7 @@ const isPostalDeliveredFromShipment = (order: any) => {
   const shipment = order?.shipment || {};
   const fulfillmentMode = String(order?.fulfillmentMode || order?.fulfillment_mode || '').trim().toLowerCase();
   if (fulfillmentMode !== 'postal') return false;
-  const shipmentStatus = String(shipment?.shipmentStatus || shipment?.shipment_status || '').trim().toLowerCase();
-  const summaryStatus = String(shipment?.trackingSummary?.status || '').trim().toLowerCase();
-  const events = Array.isArray(shipment?.events) ? shipment.events : [];
-  return Boolean(
-    shipment?.deliveredAt ||
-    shipment?.delivered_at ||
-    shipmentStatus === 'delivered' ||
-    summaryStatus === 'delivered' ||
-    events.some((event: any) => String(event?.status || '').trim().toLowerCase() === 'delivered')
-  );
+  return isPostalShipmentDelivered(shipment);
 };
 
 const isTerminalOrder = (order: any) =>
