@@ -2058,13 +2058,14 @@ export function MarketplacePage() {
                   <button
                     type="button"
                     onClick={() => openCondominiumPicker('all')}
-                    className="jnc-hub-touch jnc-hub-lift group relative flex min-h-[5rem] items-center gap-2.5 overflow-hidden rounded-[1.35rem] border border-emerald-500/15 bg-gradient-to-br from-emerald-50/70 via-white to-emerald-500/5 px-3 py-2.5 text-left shadow-[0_16px_36px_-30px_rgba(16,185,129,0.34)] sm:min-h-[4.35rem] sm:gap-3 sm:px-4"
+                    className="jnc-hub-touch jnc-hub-lift group relative flex min-h-[5rem] items-center gap-2.5 overflow-hidden rounded-[1.35rem] border border-emerald-500/15 bg-gradient-to-br from-emerald-50/70 via-white to-emerald-500/5 px-3 py-2.5 text-left shadow-[0_16px_36px_-30px_rgba(16,185,129,0.34)] transition-all duration-300 ease-out hover:border-emerald-500/25 hover:shadow-[0_22px_46px_-34px_rgba(16,185,129,0.44)] active:scale-[0.985] sm:min-h-[4.35rem] sm:gap-3 sm:px-4"
                   >
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.08),transparent_50%)] pointer-events-none" />
+                    <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-80" />
                     
                     <div className="flex items-center gap-2.5 min-w-0 z-10">
                       <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[1rem] bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-[0_8px_16px_-8px_rgba(16,185,129,0.6)] ring-2 ring-white sm:h-10 sm:w-10 sm:rounded-[1.1rem]">
-                        <span className="grid h-full w-full place-items-center rounded-[0.95rem] bg-emerald-50">
+                        <span className="grid h-full w-full place-items-center rounded-[0.95rem] bg-emerald-50 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                           <Tent size={22} weight="duotone" className="text-emerald-600" />
                         </span>
                       </span>
@@ -2088,13 +2089,14 @@ export function MarketplacePage() {
                 {homeDestinationHighlights.length > 0 ? (
                   <Link
                     to={destinationListHref}
-                    className="jnc-hub-touch jnc-hub-lift group relative flex min-h-[5rem] items-center gap-2.5 overflow-hidden rounded-[1.35rem] border border-[#336886]/15 bg-gradient-to-br from-[#edf5fa]/50 via-white to-[#336886]/5 px-3 py-2.5 text-left shadow-[0_16px_36px_-30px_rgba(51,104,134,0.34)] sm:min-h-[4.35rem] sm:gap-3 sm:px-4"
+                    className="jnc-hub-touch jnc-hub-lift group relative flex min-h-[5rem] items-center gap-2.5 overflow-hidden rounded-[1.35rem] border border-[#336886]/15 bg-gradient-to-br from-[#edf5fa]/50 via-white to-[#336886]/5 px-3 py-2.5 text-left shadow-[0_16px_36px_-30px_rgba(51,104,134,0.34)] transition-all duration-300 ease-out hover:border-[#336886]/25 hover:shadow-[0_22px_46px_-34px_rgba(51,104,134,0.44)] active:scale-[0.985] sm:min-h-[4.35rem] sm:gap-3 sm:px-4"
                   >
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(51,104,134,0.06),transparent_50%)] pointer-events-none" />
+                    <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-80" />
 
                     <div className="flex items-center gap-2.5 min-w-0 z-10">
                       <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[1rem] bg-gradient-to-tr from-[#336886] to-[#5a9cbf] p-0.5 shadow-[0_8px_16px_-8px_rgba(51,104,134,0.6)] ring-2 ring-white sm:h-10 sm:w-10 sm:rounded-[1.1rem]">
-                        <span className="grid h-full w-full place-items-center rounded-[0.95rem] bg-[#edf5fa]">
+                        <span className="grid h-full w-full place-items-center rounded-[0.95rem] bg-[#edf5fa] transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                           <MapTrifold size={22} weight="duotone" className="text-[#336886]" />
                         </span>
                       </span>

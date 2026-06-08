@@ -1058,12 +1058,12 @@ export const MenuView = ({
     const tabButton = categoryTabRefs.current[activeCategoryKey];
     if (tabButton?.scrollIntoView) {
       tabButton.scrollIntoView({
-        behavior: "auto",
+        behavior: staffView ? "auto" : "smooth",
         block: "nearest",
         inline: "center",
       });
     }
-  }, [activeCategoryKey]);
+  }, [activeCategoryKey, staffView]);
 
   useEffect(() => {
     if (!showHeader) {
@@ -1136,7 +1136,8 @@ export const MenuView = ({
         className={`sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-white/70 bg-white/92 shadow-[0_10px_32px_-26px_rgba(15,23,42,0.26)] backdrop-blur-2xl`}
       >
         <div className="mx-auto w-full max-w-6xl px-4 pt-3 pb-2">
-          <div className="relative flex items-center gap-2.5 rounded-[1.25rem] border border-white/80 bg-white/88 px-3.5 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)] ring-1 ring-slate-100/80 transition-[border-color,box-shadow] duration-200 focus-within:border-[#336886]/20 focus-within:bg-white focus-within:shadow-[0_18px_42px_-34px_rgba(15,23,42,0.32)]">
+          <div className="relative flex items-center gap-2.5 overflow-hidden rounded-[1.25rem] border border-white/80 bg-white/88 px-3.5 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)] ring-1 ring-slate-100/80 transition-[border-color,box-shadow,transform] duration-300 focus-within:-translate-y-0.5 focus-within:border-[#336886]/20 focus-within:bg-white focus-within:shadow-[0_22px_48px_-34px_rgba(51,104,134,0.34)]">
+            <span className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
             <span
               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[0.65rem]"
               style={{ backgroundColor: `${catalogPrimaryColor}18`, color: catalogPrimaryColor }}
@@ -1475,11 +1476,12 @@ export const MenuView = ({
                 <div
                   key={item.id}
                   data-menu-card
-                  className={`jnc-hub-touch jnc-hub-lift group bg-white rounded-3xl border border-slate-100/70 p-4 sm:p-5 grid grid-cols-[minmax(0,1fr)_auto] gap-4 sm:gap-5 hover:border-slate-200/60 transition-all duration-300 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
+                  className={`jnc-hub-touch jnc-hub-lift group relative grid grid-cols-[minmax(0,1fr)_auto] gap-4 overflow-hidden rounded-3xl border border-slate-100/70 bg-white/96 p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.34)] ring-1 ring-white/75 transition-all duration-300 hover:border-slate-200/60 hover:shadow-[0_26px_58px_-44px_rgba(15,23,42,0.42)] active:scale-[0.992] sm:gap-5 sm:p-5 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
                   }}
                 >
+                  <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-90" />
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                     <div>
                       <button
@@ -1965,7 +1967,7 @@ export const MenuView = ({
                 }
                 onProceed?.();
               }}
-              className={`jnc-hub-touch group w-full px-5 py-4 rounded-[2.2rem] flex justify-between items-center ${
+              className={`jnc-hub-touch group relative isolate flex w-full items-center justify-between overflow-hidden rounded-[2.2rem] px-5 py-4 ${
                 cartPulse ? "scale-[1.04] shadow-[0_24px_50px_-12px_rgba(15,23,42,0.45)]" : "shadow-[0_20px_48px_-14px_rgba(15,23,42,0.35)] active:scale-[0.985]"
               }`}
               style={{
@@ -1973,6 +1975,8 @@ export const MenuView = ({
                 color: catalogPrimaryText,
               }}
             >
+              <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+              <span className="pointer-events-none absolute -left-16 top-0 h-full w-14 -skew-x-12 bg-white/18 opacity-0 transition-all duration-700 ease-out group-hover:left-[115%] group-hover:opacity-100" />
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative">
                   <span

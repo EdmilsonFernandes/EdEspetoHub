@@ -1987,7 +1987,16 @@ export function OrderTracking() {
                       const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
                       const isCurrent = stepIndex === currentIndex;
                       return (
-                        <div key={`mobile-line-${step.id}`} className="relative z-[1] flex items-center gap-3">
+                        <div
+                          key={`mobile-line-${step.id}`}
+                          className={`relative z-[1] -ml-2 flex items-center gap-3 rounded-[1.1rem] px-2 py-1.5 transition-all duration-300 ${
+                            isCurrent
+                              ? isCancelled
+                                ? 'bg-rose-50/80 shadow-[0_14px_28px_-24px_rgba(244,63,94,0.34)] ring-1 ring-rose-100'
+                                : 'bg-white/92 shadow-[0_16px_34px_-26px_rgba(51,104,134,0.30)] ring-1 ring-[#d6e4ed]/80'
+                              : ''
+                          }`}
+                        >
                           <span className="relative flex h-[22px] w-[22px] shrink-0 items-center justify-center">
                             {isCurrent && !isCancelled && !isTerminal && (
                               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 duration-1000" />

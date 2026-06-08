@@ -166,7 +166,7 @@ export const HubHeader = memo(function HubHeader({
 
             <div className="relative z-20">
               <div
-                className={`jnc-hub-card group relative isolate flex items-center gap-3 overflow-hidden px-3.5 transition-[border-color,box-shadow] duration-200 ease-out hover:border-[#336886]/15 focus-within:border-[#336886]/25 focus-within:shadow-[0_18px_40px_-28px_rgba(51,104,134,0.34)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${
+                className={`jnc-hub-card group relative isolate flex items-center gap-3 overflow-hidden px-3.5 transition-[border-color,box-shadow,transform] duration-300 ease-out hover:border-[#336886]/15 focus-within:-translate-y-0.5 focus-within:border-[#336886]/25 focus-within:shadow-[0_22px_54px_-34px_rgba(51,104,134,0.42)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${
                   isNativePlatform
                     ? 'min-h-[50px] rounded-[1.35rem]'
                     : 'min-h-[54px] rounded-[1.55rem]'
@@ -329,9 +329,10 @@ export const HubHeader = memo(function HubHeader({
             <div className="flex items-center gap-3.5 flex-1 max-w-[440px] justify-end">
               {/* Desktop Search Bar */}
               <div
-                className="jnc-hub-card relative flex items-center gap-2.5 hover:bg-white focus-within:bg-white px-3 py-1.5 rounded-[1.25rem] focus-within:ring-2 focus-within:ring-[#336886]/10 focus-within:border-[#336886]/25 transition-all duration-200 flex-1 max-w-[280px]"
+                className="jnc-hub-card relative flex max-w-[280px] flex-1 items-center gap-2.5 overflow-hidden rounded-[1.25rem] px-3 py-1.5 transition-all duration-300 hover:bg-white focus-within:-translate-y-0.5 focus-within:border-[#336886]/25 focus-within:bg-white focus-within:shadow-[0_18px_42px_-30px_rgba(51,104,134,0.34)] focus-within:ring-2 focus-within:ring-[#336886]/10"
                 onClick={() => desktopSearchInputRef.current?.focus()}
               >
+                <span className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
                 <MagnifyingGlass size={15} weight="bold" className="text-[#336886] shrink-0" />
                 <div className="relative min-w-0 flex-1 flex items-center h-full">
                   <input

@@ -1267,8 +1267,8 @@ export const CartView = ({
     const accent = tone === "online" ? "#336886" : "#207A52";
     const selectedClasses =
       tone === "online"
-        ? "border-[#336886]/70 bg-white text-slate-950 shadow-[0_20px_44px_-34px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/10"
-        : "border-emerald-400/80 bg-white text-slate-950 shadow-[0_20px_44px_-34px_rgba(32,122,82,0.42)] ring-2 ring-emerald-200/60";
+        ? "border-[#336886]/70 bg-white text-slate-950 shadow-[0_24px_54px_-34px_rgba(51,104,134,0.50),inset_0_1px_0_rgba(255,255,255,0.86)] ring-2 ring-[#336886]/10"
+        : "border-emerald-400/80 bg-white text-slate-950 shadow-[0_24px_54px_-34px_rgba(32,122,82,0.46),inset_0_1px_0_rgba(255,255,255,0.86)] ring-2 ring-emerald-200/60";
 
     return (
       <button
@@ -1278,7 +1278,7 @@ export const CartView = ({
           onChangePayment(method.id);
           setShowPaymentSheet(false);
         }}
-        className={`jnc-hub-touch group relative overflow-hidden rounded-[1.35rem] border p-3.5 text-left active:scale-[0.985] ${
+        className={`jnc-hub-touch group relative overflow-hidden rounded-[1.35rem] border p-3.5 text-left transition-all duration-300 ease-out active:scale-[0.985] ${
           selected
             ? selectedClasses
             : "border-slate-200/80 bg-white/88 text-slate-500 shadow-[0_14px_36px_-34px_rgba(15,23,42,0.3)] hover:-translate-y-0.5 hover:border-[#336886]/22 hover:bg-white hover:shadow-[0_22px_46px_-38px_rgba(51,104,134,0.32)]"
@@ -1291,6 +1291,7 @@ export const CartView = ({
             style={{ background: `linear-gradient(90deg, ${accent}, rgba(95,211,90,0.72))` }}
           />
         )}
+        <span className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
         <div className="flex items-center gap-3">
           {renderPaymentMethodIcon(method.id, { size: "md", selected, tone })}
           <div className="min-w-0 flex-1 space-y-1">
@@ -1309,6 +1310,12 @@ export const CartView = ({
             <p className="text-[11px] leading-snug text-slate-500">
               {method.description}
             </p>
+            {tone === "online" && (
+              <span className="inline-flex w-fit items-center gap-1 rounded-full border border-[#336886]/10 bg-[#edf5fa]/70 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                <ShieldCheck size={10} weight="fill" />
+                Protegido
+              </span>
+            )}
           </div>
         </div>
       </button>
@@ -2300,7 +2307,8 @@ export const CartView = ({
       {/* Resumo */}
       {(!useMultiStepFlow || checkoutStep === 1) && (
         <div className="space-y-4 mb-4 sm:mb-6">
-          <div className="relative overflow-hidden bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-sm">
+          <div className="relative overflow-hidden rounded-2xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 transition-all hover:-translate-y-0.5 hover:shadow-[0_30px_62px_-48px_rgba(15,23,42,0.38)] active:scale-[0.99] sm:p-6">
+        <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">
             {useMultiStepFlow ? 'Sua Sacola' : 'Resumo'}
@@ -2419,7 +2427,7 @@ export const CartView = ({
           </div>
         )}
 
-        <div className="flex justify-between items-center pt-4 sm:pt-6 mt-1 sm:mt-2">
+        <div className="mt-1 flex items-center justify-between border-t border-dashed border-slate-200 pt-4 sm:mt-2 sm:pt-6">
           <span className="text-gray-500 font-medium">Total a Pagar</span>
           <span className="text-2xl sm:text-3xl font-black text-gray-800">
             {formatCurrency(totalWithFee)}
@@ -2480,7 +2488,8 @@ export const CartView = ({
 
       {/* Compact pricing + Forma de Pagamento (multi-step step 3) */}
       {useMultiStepFlow && checkoutStep === 3 && (
-        <div className="relative overflow-hidden bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 shadow-sm">
+        <div className="relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 sm:p-6">
+          <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="font-black text-slate-900 text-base tracking-tight">Resumo do pedido</h2>
@@ -2540,7 +2549,7 @@ export const CartView = ({
               </div>
             ) : null}
           </div>
-          <div className="space-y-2 text-sm">
+          <div className="mt-4 space-y-2 border-t border-dashed border-slate-200 pt-3 text-sm">
             <div className="flex justify-between text-slate-600">
               <span>{totalCartUnits} {totalCartUnits === 1 ? 'item' : 'itens'}</span>
               <span className="font-semibold text-slate-800">{formatCurrency(total)}</span>
