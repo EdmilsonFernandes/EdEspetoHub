@@ -37,7 +37,7 @@ import {
 } from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
-import { formatCurrency, formatPlanName } from '../utils/format';
+import { formatCurrency, formatPlanName, formatReadableDateTime } from '../utils/format';
 import { exportToCsv } from '../utils/export';
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import Lottie from 'lottie-react';
@@ -281,9 +281,9 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
     tone: 'from-slate-700 to-slate-800 text-white border-slate-700',
   },
   health: {
-    title: 'Saúde técnica',
-    description: 'Banco, conexões, memória e sinais de gargalo em tempo real.',
-    tone: 'from-[#153A4C] to-slate-900 text-white border-[#153A4C]',
+    title: 'Status da plataforma',
+    description: 'Banco, conexões e memória com leitura rápida para agir antes de virar problema.',
+    tone: 'from-emerald-700 to-[#153A4C] text-white border-emerald-700',
   },
   kyc: {
     title: 'KYC de entregadores',
@@ -318,7 +318,7 @@ const SUPER_ADMIN_SECTIONS = [
   { id: 'security',  label: 'Segurança',  icon: ShieldCheck,       group: 'trust' },
   { id: 'logs',      label: 'Logs',       icon: GitCommit,         group: 'technical' },
   { id: 'events',    label: 'Eventos',    icon: Sparkle,           group: 'technical' },
-  { id: 'health',    label: 'Saúde',      icon: Cpu,               group: 'technical' },
+  { id: 'health',    label: 'Status',     icon: Cpu,               group: 'technical' },
   { id: 'versions',  label: 'Versões',    icon: RocketLaunch,      group: 'technical' },
 ];
 
@@ -326,7 +326,7 @@ const SUPER_ADMIN_SECTION_GROUPS = [
   {
     id: 'overview',
     label: 'Visão geral',
-    subtitle: 'Saúde da plataforma',
+    subtitle: 'Status da plataforma',
     icon: ChartBar,
   },
   {
@@ -610,7 +610,7 @@ export function SuperAdmin() {
       setSystemHealth(data || null);
       setSystemHealthLastUpdatedAt(new Date().toISOString());
     } catch (err: any) {
-      showToast(err?.message || 'Não foi possível carregar a saúde técnica.', 'error');
+      showToast(err?.message || 'Não foi possível carregar o status da plataforma.', 'error');
       if (!silent) setSystemHealth(null);
     } finally {
       if (!silent) setSystemHealthLoading(false);
@@ -1827,6 +1827,7 @@ export function SuperAdmin() {
           <div className="mt-2 flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
             {activeSuperAdminGroupSections.map(({ id, label, icon: Icon }) => {
               const isActive = activeSection === id;
+              const isHealthSection = id === 'health';
               return (
                 <button
                   key={id}
@@ -1834,8 +1835,12 @@ export function SuperAdmin() {
                   onClick={() => openSuperAdminSection(id)}
                   className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition-all active:scale-[0.98] ${
                     isActive
-                      ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_12px_28px_-20px_rgba(15,23,42,0.65)]'
-                      : 'border-slate-100 bg-white text-slate-500 hover:border-[#336886]/20 hover:text-[#153A4C]'
+                      ? isHealthSection
+                        ? 'border-emerald-600 bg-emerald-600 text-white shadow-[0_12px_28px_-20px_rgba(5,150,105,0.65)]'
+                        : 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_12px_28px_-20px_rgba(15,23,42,0.65)]'
+                      : isHealthSection
+                        ? 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:border-emerald-200 hover:bg-emerald-100/70'
+                        : 'border-slate-100 bg-white text-slate-500 hover:border-[#336886]/20 hover:text-[#153A4C]'
                   }`}
                   aria-pressed={isActive}
                 >
@@ -3065,8 +3070,8 @@ export function SuperAdmin() {
         </FormSection>
 
         <FormSection
-          title="Saúde técnica"
-          subtitle="Sinais rápidos de backend, banco, conexões e memória."
+          title="Status da plataforma"
+          subtitle="Leitura rápida de banco, conexões e memória para agir antes de virar problema."
           variant="neutral"
           className={`bg-gradient-to-br from-slate-50 via-white to-white ${
             activeSection !== 'health' ? 'hidden' : ''
@@ -3087,7 +3092,7 @@ export function SuperAdmin() {
                   <Cpu size={25} weight="duotone" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Centro técnico</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Observabilidade</p>
                   <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">
                     {systemHealth?.status === 'healthy'
                       ? 'Sistema saudável'
@@ -3095,7 +3100,7 @@ export function SuperAdmin() {
                         ? 'Atenção crítica'
                         : systemHealth
                           ? 'Monitorar sinais'
-                          : 'Saúde da plataforma'}
+                          : 'Status da plataforma'}
                   </h2>
                   <p className="mt-1 text-sm font-semibold text-slate-500">
                     {systemHealthLastUpdatedAt
@@ -3111,7 +3116,7 @@ export function SuperAdmin() {
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#336886]/12 bg-white px-4 py-3 text-sm font-black text-[#153A4C] shadow-[0_18px_42px_-32px_rgba(15,23,42,0.35)] transition active:scale-[0.98] disabled:opacity-60"
               >
                 <ArrowClockwise size={16} weight="duotone" className={systemHealthLoading ? 'animate-spin' : ''} />
-                {systemHealthLoading ? 'Atualizando' : 'Atualizar saúde'}
+                {systemHealthLoading ? 'Atualizando' : 'Atualizar status'}
               </button>
             </div>
           </div>
@@ -3218,7 +3223,7 @@ export function SuperAdmin() {
             </>
           ) : !systemHealthLoading ? (
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
-              Abra a leitura de saúde para conferir conexões, memória, CPU e sinais de gargalo.
+              Abra a leitura de status para conferir conexões, memória, CPU e sinais de gargalo.
             </div>
           ) : null}
         </FormSection>

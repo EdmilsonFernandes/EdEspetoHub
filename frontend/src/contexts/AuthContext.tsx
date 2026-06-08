@@ -112,7 +112,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (isOperationalAuthSession(parsed))
         {
-          clearNonAdminSessions();
           setAuthState(parsed);
           previousStoreRef.current = {
             id: parsed?.store?.id ? String(parsed.store.id) : '',

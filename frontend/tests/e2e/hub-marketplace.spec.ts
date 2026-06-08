@@ -113,6 +113,16 @@ const homeConfig = {
   },
 };
 
+const customerSession = {
+  token: 'customer-token-hub-e2e',
+  user: {
+    id: 'customer-hub-e2e',
+    fullName: 'Wekoya Cliente E2E',
+    phone: '(12) 98888-0000',
+    email: 'wekoya@e2e.test',
+  },
+};
+
 test.use({ serviceWorkers: 'block' });
 
 test.describe('Hub marketplace', () => {
@@ -163,6 +173,49 @@ test.describe('Hub marketplace', () => {
       });
     });
 
+    await page.route(/\/api\/stores\/slug\/([^/?]+)(\?.*)?$/, async (route) => {
+      const match = route.request().url().match(/\/api\/stores\/slug\/([^/?]+)/);
+      const slug = decodeURIComponent(match?.[1] || '');
+      const store = stores.find((entry) => entry.slug === slug);
+      await route.fulfill({
+        status: store ? 200 : 404,
+        contentType: 'application/json',
+        body: JSON.stringify(store || { message: 'Loja não encontrada' }),
+      });
+    });
+
+    await page.route(/\/api\/public\/stores\/slug\/([^/]+)\/categories(\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ id: 'cat-main-e2e', name: 'Principais', active: true }]),
+      });
+    });
+
+    await page.route(/\/api\/public\/stores\/slug\/([^/]+)\/highlights(\?.*)?$/, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+
+    await page.route(/\/api\/public\/stores\/slug\/([^/]+)\/tables\/status(\?.*)?$/, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+
+    await page.route(/\/api\/public\/stores\/slug\/([^/]+)\/track(\?.*)?$/, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    });
+
+    await page.route('**/api/customer/me', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(customerSession.user) });
+    });
+
+    await page.route('**/api/customer/addresses', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+
+    await page.route('**/api/customer/orders**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+
     await page.route(/\/api\/public\/stores\/discovery(\?.*)?$/, async (route) => {
       await route.fulfill({
         status: 200,
@@ -180,8 +233,8 @@ test.describe('Hub marketplace', () => {
     await page.goto('/hub');
 
     await expect(page.getByRole('banner')).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText('Gustavao Espetos E2E')).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText('Brecho da Brisa E2E')).toBeVisible();
+    await expect(page.getByRole('link', { name: /Gustavao Espetos E2E 4\.9/i })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('link', { name: /Brecho da Brisa E2E 4\.7/i })).toBeVisible();
     await expect(page.getByLabel('Favoritar Gustavao Espetos E2E')).toBeVisible();
     await expect(page.getByLabel('Aberto agora')).toBeVisible();
     await expect(page.getByLabel('Entrega grátis')).toBeVisible();
@@ -234,5 +287,34 @@ test.describe('Hub marketplace', () => {
 
     await page.locator('aside').getByRole('button', { name: /^Entrar/i }).click({ force: true });
     await expect(page).toHaveURL(/\/cliente\?mode=login/);
+  });
+
+  test('abre loja pelo hub em modo cliente mesmo com sessão lojista de outra loja', async ({ page }) => {
+    await page.goto('/hub');
+    await expect(page.getByRole('link', { name: /Brecho da Brisa E2E/i })).toBeVisible({ timeout: 15000 });
+
+    await page.evaluate(({ session }) => {
+      const adminSession = {
+        token: 'admin-gustavao-e2e',
+        user: { id: 'admin-gustavao-e2e', role: 'LOJISTA', email: 'gustavao@e2e.test' },
+        store: { id: 'store-gustavao-e2e', slug: 'gustavao-e2e', name: 'Gustavao Espetos E2E', settings: {} },
+      };
+      localStorage.setItem(
+        'adminSession',
+        JSON.stringify(adminSession)
+      );
+      localStorage.setItem('customerSession', JSON.stringify(session));
+      localStorage.setItem('customerSession:brecho-brisa-e2e', JSON.stringify(session));
+      window.dispatchEvent(new CustomEvent('jnc:customer-session-updated', { detail: session }));
+    }, { session: customerSession });
+
+    await page.getByRole('link', { name: /Brecho da Brisa E2E 4\.7/i }).click();
+
+    await expect(page).toHaveURL(/\/brecho-brisa-e2e/);
+    await expect(page.locator('h1').filter({ hasText: 'Brecho da Brisa E2E' }).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByLabel('Minha conta')).toBeVisible();
+    await expect(page.getByText('Painel Admin')).toHaveCount(0);
+    await expect(page.getByText(/^Painel$/)).toHaveCount(0);
+    await expect(page.getByText('Fila de Pedidos')).toHaveCount(0);
   });
 });

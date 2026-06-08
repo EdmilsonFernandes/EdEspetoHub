@@ -61,4 +61,20 @@ describe('AuthContext', () => {
     expect(localStorage.getItem('customerSession:loja-teste')).toBeNull();
     expect(localStorage.getItem('motoboySession')).toBeNull();
   });
+
+  it('preserva sessão de cliente ao apenas restaurar admin salvo no boot do app', () => {
+    localStorage.setItem('adminSession', JSON.stringify(adminSession));
+    localStorage.setItem('customerSession', JSON.stringify({ token: 'customer-token' }));
+    localStorage.setItem('customerSession:loja-teste', JSON.stringify({ token: 'customer-token' }));
+
+    render(
+      <AuthProvider>
+        <AuthProbe />
+      </AuthProvider>
+    );
+
+    expect(screen.getByTestId('role')).toHaveTextContent('LOJISTA');
+    expect(localStorage.getItem('customerSession')).toContain('customer-token');
+    expect(localStorage.getItem('customerSession:loja-teste')).toContain('customer-token');
+  });
 });

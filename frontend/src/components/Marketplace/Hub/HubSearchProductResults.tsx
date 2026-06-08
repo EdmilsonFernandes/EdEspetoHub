@@ -48,6 +48,7 @@ export const HubSearchProductResults = memo(function HubSearchProductResults({
           <Link
             key={`search-res-${item.storeSlug}-${item.id}`}
             to={targetPath}
+            state={{ storefrontMode: 'customer' }}
             onPointerEnter={warmupStore}
             onFocus={warmupStore}
             onTouchStart={warmupStore}

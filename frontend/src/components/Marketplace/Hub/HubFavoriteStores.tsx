@@ -65,6 +65,7 @@ export const HubFavoriteStores = memo(function HubFavoriteStores({
             <Link
               key={`favorite-${store.id}`}
               to={`/${store.slug}`}
+              state={{ storefrontMode: 'customer' }}
               className="jnc-hub-touch jnc-hub-lift jnc-hub-card group min-w-[168px] rounded-[1.45rem] p-2 sm:min-w-[186px]"
             >
               <img

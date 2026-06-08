@@ -58,6 +58,11 @@ import {
   createStoreCheckoutDraft,
   normalizeStoreCheckoutDraft,
 } from '../utils/storeCheckoutDraft';
+import {
+  isOperationalSessionForStore,
+  isOperationalStoreSession,
+  isPublicStorefrontNavigation,
+} from '../utils/storefrontSession';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 const PUBLIC_ORDER_ALERT_TTL_MS = 3 * 60 * 60 * 1000;
@@ -267,11 +272,10 @@ export function StorePage() {
   const location = useLocation();
   const { auth, logout: logoutAdminContext } = useAuth();
   const { showToast } = useToast();
+  const forcePublicStorefront = isPublicStorefrontNavigation(location.state);
   const readAdminSessionSnapshot = useCallback((candidate?: any | null) => {
     const session = candidate && typeof candidate === 'object' ? candidate : null;
-    const candidateRole = String(session?.user?.role || '').toUpperCase();
-    const candidateIsOperational = candidateRole === 'ADMIN' || candidateRole === 'OPERATOR' || candidateRole === 'LOJISTA';
-    if (session?.token && session?.user && candidateIsOperational && (session?.store?.id || session?.store?.slug)) {
+    if (isOperationalStoreSession(session)) {
       return session;
     }
     try {
@@ -280,9 +284,7 @@ export function StorePage() {
         return null;
       }
       const parsedSession = JSON.parse(savedSession);
-      const parsedRole = String(parsedSession?.user?.role || '').toUpperCase();
-      const parsedIsOperational = parsedRole === 'ADMIN' || parsedRole === 'OPERATOR' || parsedRole === 'LOJISTA';
-      if (parsedSession?.token && parsedSession?.user && parsedIsOperational && (parsedSession?.store?.id || parsedSession?.store?.slug)) {
+      if (isOperationalStoreSession(parsedSession)) {
         return parsedSession;
       }
     } catch {
@@ -291,11 +293,7 @@ export function StorePage() {
     return null;
   }, []);
   const [user, setUser] = useState(() => readAdminSessionSnapshot(auth));
-  const isStoreAdmin =
-    Boolean(user?.token) &&
-    Boolean(user?.store?.slug) &&
-    Boolean(storeSlug) &&
-    user.store.slug === storeSlug;
+  const isStoreAdmin = !forcePublicStorefront && isOperationalSessionForStore(user, storeSlug);
   const [adminAccountDrawerOpen, setAdminAccountDrawerOpen] = useState(false);
   const [customerSession, setCustomerSession] = useState<any | null>(null);
   const [customerAddresses, setCustomerAddresses] = useState<any[]>([]);
@@ -349,14 +347,12 @@ export function StorePage() {
   }, [readAdminSessionSnapshot]);
   const openAdminAccountDrawer = useCallback(() => {
     const session = readAdminSessionSnapshot();
-    const sessionStoreSlug = String(session?.store?.slug || '').trim();
-    const routeStoreSlug = String(storeSlug || '').trim();
-    if (!session?.token || !sessionStoreSlug || !routeStoreSlug || sessionStoreSlug !== routeStoreSlug) {
+    if (forcePublicStorefront || !isOperationalSessionForStore(session, storeSlug)) {
       return;
     }
     syncAdminSession(session);
     setAdminAccountDrawerOpen(true);
-  }, [readAdminSessionSnapshot, storeSlug, syncAdminSession]);
+  }, [forcePublicStorefront, readAdminSessionSnapshot, storeSlug, syncAdminSession]);
 
   useEffect(() => {
     const warning = location.state && (location.state as any).hubCoverageWarning;
@@ -2714,14 +2710,8 @@ export function StorePage() {
     }, CHECKOUT_SLOW_FEEDBACK_MS);
     try {
     persistCheckoutDraft('cart');
-    const latestAdminSession = !isStoreAdmin && !customerSession?.token ? readAdminSessionSnapshot() : null;
-    const latestAdminStoreSlug = String(latestAdminSession?.store?.slug || '').trim();
-    const currentStoreSlug = String(storeSlug || '').trim();
-    const recoveredStoreAdminSession =
-      Boolean(latestAdminSession?.token) &&
-      Boolean(latestAdminStoreSlug) &&
-      Boolean(currentStoreSlug) &&
-      latestAdminStoreSlug === currentStoreSlug;
+    const latestAdminSession = !forcePublicStorefront && !isStoreAdmin && !customerSession?.token ? readAdminSessionSnapshot() : null;
+    const recoveredStoreAdminSession = isOperationalSessionForStore(latestAdminSession, storeSlug);
     if (recoveredStoreAdminSession) {
       syncAdminSession(latestAdminSession);
     }

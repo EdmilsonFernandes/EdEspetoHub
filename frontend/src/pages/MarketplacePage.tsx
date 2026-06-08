@@ -2545,21 +2545,19 @@ export function MarketplacePage() {
                       !store.supportsPostal &&
                       [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase()));
                   const navigationDistanceKm = distanceByStore[store.id] ?? store.distanceKm ?? null;
-                  const storeNavigationState =
-                    shouldWarnCoverage || navigationDistanceKm !== null
+                  const storeNavigationState = {
+                    storefrontMode: 'customer',
+                    ...(shouldWarnCoverage
                       ? {
-                          ...(shouldWarnCoverage
-                            ? {
-                                hubCoverageWarning: {
-                                  message: isOutOfRegion
-                                    ? 'Essa loja está fora da área de entrega para o seu endereço atual. Você ainda pode ver a vitrine e conferir as opções disponíveis.'
-                                    : 'Essa loja ainda não atende o seu endereço principal com entrega. Você pode ver o cardápio e conferir outras opções como retirada.',
-                                },
-                              }
-                            : {}),
-                          hubDistanceKm: navigationDistanceKm,
+                          hubCoverageWarning: {
+                            message: isOutOfRegion
+                              ? 'Essa loja está fora da área de entrega para o seu endereço atual. Você ainda pode ver a vitrine e conferir as opções disponíveis.'
+                              : 'Essa loja ainda não atende o seu endereço principal com entrega. Você pode ver o cardápio e conferir outras opções como retirada.',
+                          },
                         }
-                      : undefined;
+                      : {}),
+                    ...(navigationDistanceKm !== null ? { hubDistanceKm: navigationDistanceKm } : {}),
+                  };
                   const primaryBadge = store.isOpen
                     ? getPrimaryStoreCardBadge(store, { condominiumScope: isCondominiumScope })
                     : null;

@@ -122,6 +122,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                   <Link
                     key={`${item.storeSlug}-${item.id}`}
                     to={featuredStorePath}
+                    state={{ storefrontMode: 'customer' }}
                     onPointerEnter={warmupStore}
                     onFocus={warmupStore}
                     onTouchStart={warmupStore}
