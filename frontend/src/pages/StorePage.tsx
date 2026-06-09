@@ -4087,13 +4087,13 @@ export function StorePage() {
                           src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.jpg'}
                           alt=""
                           aria-hidden="true"
-                          className="absolute inset-[-18px] h-[calc(100%+36px)] w-[calc(100%+36px)] scale-105 object-cover opacity-70 blur-xl"
+                          className="absolute inset-[-22px] h-[calc(100%+44px)] w-[calc(100%+44px)] scale-110 object-cover opacity-95 blur-md saturate-125"
                           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                         />
                         <img
                           src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.jpg'}
                           alt={closedStateStoreName}
-                          className="relative h-full w-full object-fill drop-shadow-[0_20px_34px_rgba(15,23,42,0.32)]"
+                          className="relative h-full w-full object-contain p-2 drop-shadow-[0_20px_34px_rgba(15,23,42,0.32)] sm:p-3"
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
                         />
                       </div>

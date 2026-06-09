@@ -332,13 +332,13 @@ const Header = ({
                     src={headerBanner}
                     alt=""
                     aria-hidden="true"
-                    className="absolute inset-[-18px] h-[calc(100%+36px)] w-[calc(100%+36px)] scale-105 object-cover opacity-70 blur-xl"
+                    className="absolute inset-[-22px] h-[calc(100%+44px)] w-[calc(100%+44px)] scale-110 object-cover opacity-95 blur-md saturate-125"
                     onError={(event) => { event.currentTarget.style.display = "none"; }}
                   />
                   <img
                     src={headerBanner}
                     alt={branding?.brandName ? `Banner de ${branding.brandName}` : "Banner da loja"}
-                    className="absolute inset-0 h-full w-full object-fill drop-shadow-[0_20px_34px_rgba(15,23,42,0.28)]"
+                    className="absolute inset-0 h-full w-full object-contain p-2 drop-shadow-[0_20px_34px_rgba(15,23,42,0.28)] sm:p-3"
                     onError={(event) => { event.currentTarget.style.display = "none"; }}
                   />
                 </>
@@ -1777,13 +1777,13 @@ export const MenuView = ({
                         src={resolveAssetUrl(branding?.bannerUrl || "")}
                         alt=""
                         aria-hidden="true"
-                        className="absolute inset-[-18px] h-[calc(100%+36px)] w-[calc(100%+36px)] scale-105 object-cover opacity-70 blur-xl"
+                        className="absolute inset-[-22px] h-[calc(100%+44px)] w-[calc(100%+44px)] scale-110 object-cover opacity-95 blur-md saturate-125"
                         onError={(event) => { event.currentTarget.style.display = "none"; }}
                       />
                       <img
                         src={resolveAssetUrl(branding?.bannerUrl || "")}
                         alt={branding?.brandName ? `Banner de ${branding.brandName}` : "Banner da loja"}
-                        className="absolute inset-0 h-full w-full object-fill drop-shadow-[0_18px_30px_rgba(15,23,42,0.3)]"
+                        className="absolute inset-0 h-full w-full object-contain p-2 drop-shadow-[0_18px_30px_rgba(15,23,42,0.3)]"
                         onError={(event) => { event.currentTarget.style.display = "none"; }}
                       />
                     </>
