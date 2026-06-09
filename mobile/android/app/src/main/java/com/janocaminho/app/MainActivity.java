@@ -95,7 +95,6 @@ public class MainActivity extends BridgeActivity {
     private static final long LAUNCH_OVERLAY_FADE_MS = 260L;
     private static final long LAUNCH_OVERLAY_MIN_VISIBLE_MS = 1600L;
     private static final long LAUNCH_OVERLAY_NETWORK_TIMEOUT_MS = 6500L;
-    private static final long LAUNCH_OVERLAY_AUTO_RETRY_MS = 4200L;
     private static final long RESUME_WEBVIEW_HEALTH_CHECK_DELAY_MS = 1800L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
     private static final int APP_UPDATE_REQUEST_CODE = 4403;
@@ -122,7 +121,6 @@ public class MainActivity extends BridgeActivity {
     private final Handler launchOverlayHandler = new Handler(Looper.getMainLooper());
     private Runnable launchOverlayTimeoutRunnable;
     private Runnable launchOverlayDismissRunnable;
-    private Runnable launchOverlayAutoRetryRunnable;
     private Runnable resumeWebViewHealthCheckRunnable;
     private ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
@@ -377,7 +375,6 @@ public class MainActivity extends BridgeActivity {
                     mainFrameLoadInProgress = true;
                     webAppReady = false;
                     pageFailedToLoad = false;
-                    cancelLaunchOverlayAutoRetry();
                     cancelResumeWebViewHealthCheck();
 
                     if (!launchOverlayDismissed) {
@@ -487,7 +484,6 @@ public class MainActivity extends BridgeActivity {
         unregisterNetworkMonitor();
         cancelLaunchOverlayDismiss();
         cancelLaunchOverlayTimeout();
-        cancelLaunchOverlayAutoRetry();
         cancelResumeWebViewHealthCheck();
         if (appUpdateManager != null && installStateUpdatedListener != null) {
             appUpdateManager.unregisterListener(installStateUpdatedListener);
@@ -509,7 +505,6 @@ public class MainActivity extends BridgeActivity {
         if (root != null) {
             root.setBackgroundColor(Color.parseColor("#0B1220"));
         }
-        setWebViewVisible(false);
 
         if (launchOverlay != null) {
             launchOverlay.setAlpha(1f);
@@ -773,10 +768,8 @@ public class MainActivity extends BridgeActivity {
         }
 
         cancelLaunchOverlayTimeout();
-        cancelLaunchOverlayAutoRetry();
         cancelLaunchOverlayDismiss();
         launchOverlayDismissed = true;
-        setWebViewVisible(true);
         launchOverlay.animate()
             .alpha(0f)
             .setDuration(LAUNCH_OVERLAY_FADE_MS)
@@ -795,12 +788,9 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void showLaunchOverlayLoading(String message) {
-        if (launchOverlay == null) return;
+        if (launchOverlay == null || launchOverlayDismissed) return;
 
         cancelLaunchOverlayDismiss();
-        cancelLaunchOverlayAutoRetry();
-        launchOverlayDismissed = false;
-        setWebViewVisible(false);
         if (launchOverlay.getVisibility() != View.VISIBLE || launchOverlayShownAtMs <= 0L) {
             launchOverlayShownAtMs = SystemClock.elapsedRealtime();
         }
@@ -830,12 +820,10 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void showLaunchOverlayRecovery(String message) {
-        if (launchOverlay == null) return;
+        if (launchOverlay == null || launchOverlayDismissed) return;
 
         cancelLaunchOverlayDismiss();
         cancelLaunchOverlayTimeout();
-        launchOverlayDismissed = false;
-        setWebViewVisible(false);
         if (launchOverlay.getVisibility() != View.VISIBLE || launchOverlayShownAtMs <= 0L) {
             launchOverlayShownAtMs = SystemClock.elapsedRealtime();
         }
@@ -862,8 +850,6 @@ public class MainActivity extends BridgeActivity {
         if (launchRetryButton != null) {
             launchRetryButton.setVisibility(View.VISIBLE);
         }
-
-        scheduleLaunchOverlayAutoRetry();
     }
 
     private void scheduleLaunchOverlayTimeout() {
@@ -895,39 +881,8 @@ public class MainActivity extends BridgeActivity {
         launchOverlayTimeoutRunnable = null;
     }
 
-    private void scheduleLaunchOverlayAutoRetry() {
-        cancelLaunchOverlayAutoRetry();
-        if (launchOverlayDismissed || mainFrameLoadInProgress || webAppReady || !pageFailedToLoad || !isDeviceOnline()) {
-            return;
-        }
-
-        launchOverlayAutoRetryRunnable = () -> {
-            launchOverlayAutoRetryRunnable = null;
-            if (isFinishing() || isDestroyed()) return;
-            if (launchOverlayDismissed || mainFrameLoadInProgress || webAppReady || !pageFailedToLoad) return;
-            retryInitialPageLoad();
-        };
-        launchOverlayHandler.postDelayed(launchOverlayAutoRetryRunnable, LAUNCH_OVERLAY_AUTO_RETRY_MS);
-    }
-
-    private void cancelLaunchOverlayAutoRetry() {
-        if (launchOverlayAutoRetryRunnable == null) return;
-        launchOverlayHandler.removeCallbacks(launchOverlayAutoRetryRunnable);
-        launchOverlayAutoRetryRunnable = null;
-    }
-
-    private void setWebViewVisible(boolean visible) {
-        if (bridge == null || bridge.getWebView() == null) return;
-        WebView webView = bridge.getWebView();
-        webView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-        if (visible) {
-            webView.setAlpha(1f);
-        }
-    }
-
     private void retryInitialPageLoad() {
         if (bridge == null || bridge.getWebView() == null) return;
-        cancelLaunchOverlayAutoRetry();
 
         String retryUrl = normalizeTrustedWebUrl(lastKnownUrl);
         if (retryUrl == null) {

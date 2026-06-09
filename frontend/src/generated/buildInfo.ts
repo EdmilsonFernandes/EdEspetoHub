@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "8bbe3e8c",
-  "versionLabel": "v0.1.9.8bbe3e8c",
-  "versionInternal": "0.1.9+20260609.161402.8bbe3e8c",
-  "buildId": "0.1.9+20260609.161402.8bbe3e8c-20260609.161402-8bbe3e8c",
-  "builtAt": "2026-06-09T16:14:02.909Z",
-  "commitHash": "8bbe3e8c68e23a382fef9a3867eed5e60a9c6294",
-  "shortHash": "8bbe3e8c",
+  "versionDisplaySuffix": "98502b96",
+  "versionLabel": "v0.1.9.98502b96",
+  "versionInternal": "0.1.9+20260609.175529.98502b96",
+  "buildId": "0.1.9+20260609.175529.98502b96-20260609.175529-98502b96",
+  "builtAt": "2026-06-09T17:55:29.105Z",
+  "commitHash": "98502b96f12c88cc6ea9aa6bc3892475eea0b323",
+  "shortHash": "98502b96",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "98502b96f12c88cc6ea9aa6bc3892475eea0b323",
+      "shortHash": "98502b96",
+      "dateIso": "2026-06-09T14:01:21-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Fix audit email layout",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/98502b96f12c88cc6ea9aa6bc3892475eea0b323"
+    },
+    {
+      "hash": "6820257901f9b47d9d1983c5c49cbab425a70a71",
+      "shortHash": "68202579",
+      "dateIso": "2026-06-09T13:16:34-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Auto retry native launch recovery",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6820257901f9b47d9d1983c5c49cbab425a70a71"
+    },
     {
       "hash": "8bbe3e8c68e23a382fef9a3867eed5e60a9c6294",
       "shortHash": "8bbe3e8c",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: improve postal tracking refresh UX",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7d2e05a84f7568b33719ffd0268d4d918e2f5c67"
-    },
-    {
-      "hash": "9722ad559721d6efbd60c57c1e171e9b6217033b",
-      "shortHash": "9722ad55",
-      "dateIso": "2026-06-06T16:56:56-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style: refine customer orders experience",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9722ad559721d6efbd60c57c1e171e9b6217033b"
-    },
-    {
-      "hash": "96d90d493e46b7605dbbbe8cfe80c68b32e7d813",
-      "shortHash": "96d90d49",
-      "dateIso": "2026-06-06T16:47:14-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: resume pending customer email verification",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/96d90d493e46b7605dbbbe8cfe80c68b32e7d813"
     }
   ]
 } as const;
