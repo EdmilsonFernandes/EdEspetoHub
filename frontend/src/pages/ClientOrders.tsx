@@ -23,6 +23,7 @@ import {
   WarningCircle,
   WhatsappLogo,
   MagnifyingGlass,
+  Star,
   XCircle,
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
@@ -479,8 +480,10 @@ const getOrderFulfillmentMeta = (order: any) => {
 
   if (normalizedFulfillmentMode === 'postal') {
     return {
-      label: 'Postal',
+      label: 'Envio postal',
+      icon: Package,
       toneClass: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+      textClass: 'text-slate-500',
     };
   }
 
@@ -491,20 +494,54 @@ const getOrderFulfillmentMeta = (order: any) => {
   ) {
     return {
       label: 'Entrega',
+      icon: Motorcycle,
       toneClass: 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100',
+      textClass: 'text-indigo-600',
     };
   }
 
   if (normalizedType === 'table') {
     return {
       label: 'Mesa',
+      icon: Receipt,
       toneClass: 'bg-amber-50 text-amber-700 ring-1 ring-amber-100',
+      textClass: 'text-amber-600',
     };
   }
 
   return {
     label: 'Retirada',
+    icon: Storefront,
     toneClass: 'bg-sky-50 text-sky-700 ring-1 ring-sky-100',
+    textClass: 'text-sky-600',
+  };
+};
+
+const getOrderStoreRatingMeta = (order: any) => {
+  const candidates = [
+    order?.store?.reviewSummary?.avgStoreRating,
+    order?.store?.avgStoreRating,
+    order?.store?.rating,
+    order?.storeRating,
+  ];
+  const rating = candidates
+    .map((value) => Number(value))
+    .find((value) => Number.isFinite(value) && value > 0);
+  if (!rating) return null;
+
+  const totalCandidates = [
+    order?.store?.reviewSummary?.totalReviews,
+    order?.store?.totalReviews,
+    order?.store?.reviewsCount,
+  ];
+  const totalReviews = totalCandidates
+    .map((value) => Number(value))
+    .find((value) => Number.isFinite(value) && value > 0);
+
+  return {
+    rating,
+    label: rating.toFixed(1),
+    totalLabel: totalReviews ? `${Math.round(totalReviews)} avaliações` : 'Nota da loja',
   };
 };
 
@@ -653,6 +690,8 @@ function OrderCard({
   const postalDelivered = isPostalDeliveredFromShipment(orderStatusCandidate);
   const itemsCount = getOrderItemsCount(items);
   const fulfillmentMeta = getOrderFulfillmentMeta(order);
+  const FulfillmentIcon = fulfillmentMeta.icon || Package;
+  const storeRatingMeta = getOrderStoreRatingMeta(order);
   const condominiumOrder = order?.condominiumOrder || (order?.condominiumId ? {
     condominiumName: order?.condominiumName,
     fulfillmentMode: order?.condominiumFulfillmentMode,
@@ -717,12 +756,12 @@ function OrderCard({
         onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
         onFocus={() => primeOrderTrackingNavigation(order.id)}
         onTouchStart={() => primeOrderTrackingNavigation(order.id)}
-        className="flex w-full items-center gap-3 px-4 pt-4 pb-2.5 text-left"
+        className="flex w-full items-start gap-3 px-4 pt-4 pb-3 text-left"
       >
         {/* Logo da loja */}
         <div
           onClick={(e) => { e.stopPropagation(); onOpenStore(order.store?.slug); }}
-          className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-2xl border-2 bg-slate-100 transition-transform active:scale-95 ${isActive ? 'border-emerald-300 shadow-[0_0_0_3px_rgba(52,211,153,0.15)]' : 'border-slate-200'}`}
+          className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-[1.1rem] border-2 bg-slate-100 transition-transform active:scale-95 ${isActive ? 'border-emerald-300 shadow-[0_0_0_3px_rgba(52,211,153,0.15)]' : 'border-slate-200'}`}
         >
           {logoUrl ? (
             <img src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
@@ -738,11 +777,17 @@ function OrderCard({
 
         {/* Nome + status */}
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <h3 className="truncate text-[14px] font-black text-slate-900">{storeName}</h3>
+            {storeRatingMeta ? (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-100 bg-amber-50/90 px-1.5 py-0.5 text-[10.5px] font-black text-amber-700 shadow-sm ring-1 ring-white/70" title={storeRatingMeta.totalLabel}>
+                <Star size={10} weight="fill" />
+                {storeRatingMeta.label}
+              </span>
+            ) : null}
           </div>
-          <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-1.5">
-            <span className={`inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-black shadow-sm ring-1 ${statusBadgeClass}`}>
+          <div className="mt-1 flex min-w-0 items-center gap-1.5">
+            <span className={`inline-flex max-w-[min(100%,10.5rem)] items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-black shadow-sm ring-1 ${statusBadgeClass}`}>
               {isActive ? (
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 duration-1000" />
@@ -751,11 +796,13 @@ function OrderCard({
               ) : statusMeta.icon}
               <span className="truncate">{statusMeta.label}</span>
             </span>
-            <span className="text-slate-300">·</span>
-            <span className="text-[11px] text-slate-400">{orderMoment || orderDate || formatGroupDate(order.createdAt)}</span>
+            <span className="min-w-0 truncate text-[11px] font-medium text-slate-400">{orderMoment || orderDate || formatGroupDate(order.createdAt)}</span>
           </div>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] ${fulfillmentMeta.toneClass}`}>
+          <div className="mt-1.5 flex min-w-0 items-center gap-1.5">
+            <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-100 ${fulfillmentMeta.textClass || 'text-slate-500'}`}>
+              <FulfillmentIcon size={11} weight="duotone" />
+            </span>
+            <span className="truncate text-[11px] font-bold text-slate-500">
               {fulfillmentMeta.label}
             </span>
           </div>
@@ -767,8 +814,8 @@ function OrderCard({
         </div>
 
         {/* Valor */}
-        <div className="shrink-0 text-right">
-          <p className="text-[15px] font-black text-slate-900">{formatCurrency(order.total || 0)}</p>
+        <div className="shrink-0 rounded-2xl bg-slate-50/88 px-2.5 py-1.5 text-right ring-1 ring-slate-100">
+          <p className="text-[14px] font-black tracking-tight text-slate-900">{formatCurrency(order.total || 0)}</p>
           {thumbnails.length > 0 && (
             <div className="mt-1 flex justify-end">
               {thumbnails.map((src, index) => (

@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "d39513a0",
-  "versionLabel": "v0.1.9.d39513a0",
-  "versionInternal": "0.1.9+20260609.205149.d39513a0",
-  "buildId": "0.1.9+20260609.205149.d39513a0-20260609.205149-d39513a0",
-  "builtAt": "2026-06-09T20:51:49.484Z",
-  "commitHash": "d39513a0007ae07bec13a65446c7a24c6b413b41",
-  "shortHash": "d39513a0",
+  "versionDisplaySuffix": "e7af1433",
+  "versionLabel": "v0.1.9.e7af1433",
+  "versionInternal": "0.1.9+20260609.215351.e7af1433",
+  "buildId": "0.1.9+20260609.215351.e7af1433-20260609.215351-e7af1433",
+  "builtAt": "2026-06-09T21:53:51.764Z",
+  "commitHash": "e7af1433f01852d709b66a7c5bd9ae60a4520cae",
+  "shortHash": "e7af1433",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "e7af1433f01852d709b66a7c5bd9ae60a4520cae",
+      "shortHash": "e7af1433",
+      "dateIso": "2026-06-09T17:58:55-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Reapply text assistance on input focus",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e7af1433f01852d709b66a7c5bd9ae60a4520cae"
+    },
     {
       "hash": "d39513a0007ae07bec13a65446c7a24c6b413b41",
       "shortHash": "d39513a0",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: smooth postal checkout flow",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2bad59903319c8534d92d04144665464fff4a865"
-    },
-    {
-      "hash": "0b6e49cfa62abc250f75ae7ecf3240031e31834d",
-      "shortHash": "0b6e49cf",
-      "dateIso": "2026-06-06T18:23:39-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: prevent web pwa auto reload during use",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0b6e49cfa62abc250f75ae7ecf3240031e31834d"
     }
   ]
 }

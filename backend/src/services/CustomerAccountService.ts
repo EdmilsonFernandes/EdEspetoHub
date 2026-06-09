@@ -22,6 +22,7 @@ import { buildOrderTimelineJson } from '../utils/orderTimeline';
 import { AuditNotificationService } from './AuditNotificationService';
 import { MfaService } from './MfaService';
 import { sameCoordinatePair } from '../utils/geoQuality';
+import { OrderReviewService } from './OrderReviewService';
 
 type CustomerMfaLoginOptions = {
   deviceId?: string | null;
@@ -63,6 +64,7 @@ export class CustomerAccountService {
   private geoLocationService = new GeoLocationService();
   private auditNotificationService = new AuditNotificationService();
   private mfaService = new MfaService();
+  private orderReviewService = new OrderReviewService();
   private log = logger.child({ scope: 'CustomerAccountService' });
     /**
    * Executes normalize email business logic.
@@ -1164,6 +1166,10 @@ async setDefaultAddress(userId: string, addressId: string) {
       }
     }
 
+    const storeReviewSummaryMap = await this.orderReviewService.publicSummariesByStoreIds(
+      Array.from(new Set(rows.map((order) => order.store?.id).filter(Boolean) as string[]))
+    );
+
     const data = rows.map((order) => ({
       id: order.id,
       createdAt: order.createdAt,
@@ -1209,6 +1215,12 @@ async setDefaultAddress(userId: string, addressId: string) {
             name: order.store.name,
             slug: order.store.slug,
             phone: order.store.owner?.phone || null,
+            reviewSummary: storeReviewSummaryMap.get(order.store.id) || {
+              totalReviews: 0,
+              avgStoreRating: 0,
+              totalDeliveryReviews: 0,
+              avgDeliveryRating: 0,
+            },
             settings: order.store.settings
               ? {
                   logoUrl: order.store.settings.logoUrl || null,
