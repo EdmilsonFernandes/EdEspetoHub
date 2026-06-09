@@ -172,22 +172,18 @@ export class AuditNotificationService {
     ].filter(Boolean);
 
     const html = `
-      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
-        <div style="max-width: 620px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 22px; overflow: hidden; background: #ffffff;">
-          <div style="padding: 22px 24px; background: linear-gradient(135deg, #153A4C 0%, #336886 100%);">
-            <p style="margin: 0; color: rgba(255,255,255,0.78); font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;">Auditoria automatica</p>
-            <h2 style="margin: 8px 0 0; color: #ffffff; font-size: 22px; line-height: 1.3;">${this.escapeHtml(details.title)}</h2>
-            <p style="margin: 8px 0 0; color: rgba(255,255,255,0.92); font-size: 14px;">Tipo do evento: ${this.escapeHtml(details.eventType)}</p>
-            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.78); font-size: 13px;">Ocorrido em: ${this.escapeHtml(occurredAt)}</p>
-          </div>
-          <div style="padding: 22px; background: #f8fafc;">
-            ${this.buildSection('Usuario', userEntries)}
-            ${this.buildSection('Loja', storeEntries)}
-            ${this.buildSection('Assinatura', subscriptionEntries)}
-            ${this.buildSection('Metadados', metadataEntries)}
-          </div>
-        </div>
+      <h1 style="margin: 0 0 10px; font-size: 26px; line-height: 1.18; color: #0f172a;">${this.escapeHtml(details.title)}</h1>
+      <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.7;">
+        Registro interno para acompanhamento operacional do Já no Caminho.
+      </p>
+      <div style="margin: 0 0 18px; padding: 14px 16px; border-radius: 18px; background: #ecfeff; border: 1px solid #bae6fd; color: #0f172a; line-height: 1.7;">
+        <div><strong>Tipo do evento:</strong> ${this.escapeHtml(details.eventType)}</div>
+        <div><strong>Ocorrido em:</strong> ${this.escapeHtml(occurredAt)}</div>
       </div>
+      ${this.buildSection('Usuario', userEntries)}
+      ${this.buildSection('Loja', storeEntries)}
+      ${this.buildSection('Assinatura', subscriptionEntries)}
+      ${this.buildSection('Metadados', metadataEntries)}
     `;
 
     await Promise.all(
@@ -197,6 +193,12 @@ export class AuditNotificationService {
           subject,
           text: textLines.join('\n'),
           html,
+          category: 'internal',
+          templateKey: `audit_${details.eventType.toLowerCase()}`,
+          metadata: {
+            eventType: details.eventType,
+            title: details.title,
+          },
         })
       )
     );

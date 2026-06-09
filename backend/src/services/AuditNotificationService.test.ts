@@ -45,12 +45,16 @@ describe('AuditNotificationService', () => {
     expect(sent).toHaveLength(1);
     expect(sent[0]).toMatchObject({
       to: 'edmls2008@gmail.com',
+      category: 'internal',
+      templateKey: 'audit_user_created',
     });
     expect(String(sent[0].subject || '')).toContain('Cadastro de motoboy criado pela loja');
     expect(String(sent[0].text || '')).toContain('Evento: USER_CREATED');
-    expect(String(sent[0].html || '')).toContain('Tipo do evento: USER_CREATED');
+    expect(String(sent[0].html || '')).toContain('Tipo do evento:');
+    expect(String(sent[0].html || '')).toContain('USER_CREATED');
     expect(String(sent[0].html || '')).toContain('motoboy@example.com');
     expect(String(sent[0].html || '')).toContain('loja-teste');
+    expect(String(sent[0].html || '')).not.toContain('font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;');
   });
 
   it('includes subscription amount and payment metadata in subscription events', async () => {
@@ -90,6 +94,10 @@ describe('AuditNotificationService', () => {
     });
 
     expect(sent).toHaveLength(1);
+    expect(sent[0]).toMatchObject({
+      category: 'internal',
+      templateKey: 'audit_subscription_confirmed',
+    });
     expect(String(sent[0].subject || '')).toContain('Assinatura confirmada');
     expect(String(sent[0].text || '')).toContain('Assinatura - Pagamento: payment-1');
     expect(String(sent[0].text || '')).toContain('Assinatura - Metodo: PIX');
