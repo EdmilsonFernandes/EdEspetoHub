@@ -181,6 +181,16 @@ const toStoreList = (payload: any): any[] => {
   return [];
 };
 
+const mergeStoresBySlug = (...groups: any[][]) => {
+  const seen = new Set<string>();
+  return groups.flat().filter((store) => {
+    const slug = String(store?.slug || '').trim().toLowerCase();
+    if (!slug || seen.has(slug)) return false;
+    seen.add(slug);
+    return true;
+  });
+};
+
 const normalizeStoreLogo = (store: any) => {
   const slug = String(store?.slug || '').trim();
   const name = String(store?.name || 'Loja').trim();
@@ -285,16 +295,17 @@ export function HubHighlightsPage() {
           .map(normalizeFeatured)
           .filter(Boolean) as HubHighlightItem[];
 
-        let storePayload = await storeService.discoverPortfolio().catch(() => null);
-        let stores = toStoreList(storePayload);
-        if (stores.length === 0) {
-          storePayload = await storeService.listPortfolio().catch(() => []);
-          stores = toStoreList(storePayload);
-        }
+        const [portfolioResult, discoveryResult] = await Promise.allSettled([
+          storeService.listPortfolio().catch(() => []),
+          storeService.discoverPortfolio().catch(() => []),
+        ]);
+        const portfolioStores = portfolioResult.status === 'fulfilled' ? toStoreList(portfolioResult.value) : [];
+        const discoveryStores = discoveryResult.status === 'fulfilled' ? toStoreList(discoveryResult.value) : [];
+        const stores = mergeStoresBySlug(portfolioStores, discoveryStores);
 
         const organicResponses = await Promise.allSettled(
           stores.slice(0, HIGHLIGHTS_STORE_SCAN_LIMIT).map(async (store) => {
-            const products = await productService.listPublicBySlug(String(store?.slug || ''));
+            const products = await productService.listPublicBySlug(String(store?.slug || ''), { forceRefresh: true, timeoutMs: 6500 });
             return (Array.isArray(products) ? products : [])
               .filter((product: any) => Boolean(product?.name) && Number(product?.price || product?.promoPrice || 0) > 0)
               .sort((a: any, b: any) => Number(Boolean(b?.isFeatured)) - Number(Boolean(a?.isFeatured)))

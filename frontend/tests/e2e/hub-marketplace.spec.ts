@@ -253,6 +253,15 @@ test.describe('Hub marketplace', () => {
     const highlightsLink = featuredSection.getByRole('link', { name: /Ver todos/i });
     await expect(highlightsLink).toBeVisible({ timeout: 15000 });
     await expect(highlightsLink).toHaveAttribute('href', '/hub/destaques');
+
+    await page.route(/\/api\/public\/stores\/discovery(\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ mode: 'deliverable', stores: [stores[1]] }),
+      });
+    });
+
     await page.goto('/hub/destaques');
 
     await expect(page).toHaveURL(/\/hub\/destaques/);
