@@ -165,27 +165,62 @@ export const applyTextInputAssistance = (root: ParentNode = document) => {
   if (typeof document === 'undefined') return;
   const elements = Array.from(root.querySelectorAll?.('input, textarea') || []) as Array<HTMLInputElement | HTMLTextAreaElement>;
   elements.forEach((element) => {
-    if (!shouldEnableTextInputAssistance(element)) return;
-    element.setAttribute('autocomplete', element.getAttribute('autocomplete') && element.getAttribute('autocomplete') !== 'off' ? String(element.getAttribute('autocomplete')) : 'on');
-    element.setAttribute('autocorrect', 'on');
-    element.setAttribute('autocapitalize', element.getAttribute('autocapitalize') || 'sentences');
-    element.setAttribute('spellcheck', 'true');
-    if (!element.getAttribute('inputmode')) element.setAttribute('inputmode', 'text');
+    applyTextInputAssistanceToElement(element);
   });
+};
+
+export const applyTextInputAssistanceToElement = (element: Element | null | undefined) => {
+  if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLTextAreaElement)) return;
+  if (!shouldEnableTextInputAssistance(element)) return;
+
+  const setAttributeIfChanged = (name: string, value: string) => {
+    if (element.getAttribute(name) !== value) element.setAttribute(name, value);
+  };
+
+  const currentAutoComplete = element.getAttribute('autocomplete');
+  setAttributeIfChanged(
+    'autocomplete',
+    currentAutoComplete && currentAutoComplete !== 'off' ? currentAutoComplete : 'on'
+  );
+  setAttributeIfChanged('autocorrect', 'on');
+  setAttributeIfChanged('autocapitalize', element.getAttribute('autocapitalize') || 'sentences');
+  setAttributeIfChanged('spellcheck', 'true');
+  if (!element.getAttribute('inputmode')) setAttributeIfChanged('inputmode', 'text');
 };
 
 export const installTextInputAssistance = () => {
   if (typeof window === 'undefined' || typeof document === 'undefined') return () => undefined;
   applyTextInputAssistance(document);
+  const reapplyFocusedField = (event: Event) => {
+    const target = event.target instanceof Element ? event.target : document.activeElement;
+    applyTextInputAssistanceToElement(target);
+    window.setTimeout(() => applyTextInputAssistanceToElement(target), 0);
+  };
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach((node) => {
           if (node instanceof Element) applyTextInputAssistance(node);
         });
+      } else if (mutation.type === 'attributes' && mutation.target instanceof Element) {
+        applyTextInputAssistanceToElement(mutation.target);
       }
     });
   });
-  observer.observe(document.body, { childList: true, subtree: true });
-  return () => observer.disconnect();
+  observer.observe(document.body, {
+    attributeFilter: ['autocomplete', 'autocorrect', 'autocapitalize', 'spellcheck', 'inputmode'],
+    attributes: true,
+    childList: true,
+    subtree: true,
+  });
+  document.addEventListener('pointerdown', reapplyFocusedField, true);
+  document.addEventListener('touchstart', reapplyFocusedField, true);
+  document.addEventListener('focusin', reapplyFocusedField, true);
+
+  return () => {
+    observer.disconnect();
+    document.removeEventListener('pointerdown', reapplyFocusedField, true);
+    document.removeEventListener('touchstart', reapplyFocusedField, true);
+    document.removeEventListener('focusin', reapplyFocusedField, true);
+  };
 };

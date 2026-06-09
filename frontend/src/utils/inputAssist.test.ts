@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { applyTextInputAssistance, inputAssistProps, shouldEnableTextInputAssistance, textareaAssistProps } from './inputAssist';
+import {
+  applyTextInputAssistance,
+  inputAssistProps,
+  installTextInputAssistance,
+  shouldEnableTextInputAssistance,
+  textareaAssistProps,
+} from './inputAssist';
 
 describe('inputAssistProps', () => {
   it('keeps suggestions enabled for common text and search fields', () => {
@@ -87,5 +93,25 @@ describe('inputAssistProps', () => {
     expect(input.getAttribute('autocapitalize')).toBe('sentences');
     expect(input.getAttribute('spellcheck')).toBe('true');
     expect(input.getAttribute('inputmode')).toBe('text');
+  });
+
+  it('reapplies assistance when a common field receives focus', () => {
+    const cleanup = installTextInputAssistance();
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.name = 'customerNote';
+    input.setAttribute('autocomplete', 'off');
+    input.setAttribute('autocorrect', 'off');
+    input.setAttribute('spellcheck', 'false');
+    document.body.appendChild(input);
+
+    input.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+    expect(input.getAttribute('autocomplete')).toBe('on');
+    expect(input.getAttribute('autocorrect')).toBe('on');
+    expect(input.getAttribute('spellcheck')).toBe('true');
+
+    cleanup();
+    input.remove();
   });
 });

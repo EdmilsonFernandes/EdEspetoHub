@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "6b9acbf4",
-  "versionLabel": "v0.1.9.6b9acbf4",
-  "versionInternal": "0.1.9+20260609.182434.6b9acbf4",
-  "buildId": "0.1.9+20260609.182434.6b9acbf4-20260609.182434-6b9acbf4",
-  "builtAt": "2026-06-09T18:24:34.361Z",
-  "commitHash": "6b9acbf4f32d43f557a1150ee72ce701b4e99f1e",
-  "shortHash": "6b9acbf4",
+  "versionDisplaySuffix": "d39513a0",
+  "versionLabel": "v0.1.9.d39513a0",
+  "versionInternal": "0.1.9+20260609.205149.d39513a0",
+  "buildId": "0.1.9+20260609.205149.d39513a0-20260609.205149-d39513a0",
+  "builtAt": "2026-06-09T20:51:49.484Z",
+  "commitHash": "d39513a0007ae07bec13a65446c7a24c6b413b41",
+  "shortHash": "d39513a0",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "d39513a0007ae07bec13a65446c7a24c6b413b41",
+      "shortHash": "d39513a0",
+      "dateIso": "2026-06-09T15:30:29-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Improve Android keyboard suggestions",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d39513a0007ae07bec13a65446c7a24c6b413b41"
+    },
     {
       "hash": "6b9acbf4f32d43f557a1150ee72ce701b4e99f1e",
       "shortHash": "6b9acbf4",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: prevent web pwa auto reload during use",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0b6e49cfa62abc250f75ae7ecf3240031e31834d"
-    },
-    {
-      "hash": "3f3c887c5e98234f193af078d96644a1c36be33c",
-      "shortHash": "3f3c887c",
-      "dateIso": "2026-06-06T18:06:35-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: use no captcha postal tracking fallback",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f3c887c5e98234f193af078d96644a1c36be33c"
     }
   ]
 } as const;
