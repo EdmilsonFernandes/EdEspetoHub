@@ -151,6 +151,7 @@ export function createProxyRoutes(): Router {
     r.post('/stores/:storeId/motoboys/:motoboyId/link', authRequired, forward);
     r.post('/stores/:storeId/motoboys/:motoboyId/unlink', authRequired, forward);
     r.post('/stores/:storeId/motoboys/:motoboyId/approve', authRequired, forward);
+    r.post('/stores/:storeId/motoboys/:motoboyId/password/reset', authRequired, forward);
     r.post('/stores/:storeId/motoboys/:motoboyId/suspend', authRequired, forward);
     r.get('/stores/:storeId/motoboy-requests', authRequired, forward);
     r.post('/stores/:storeId/motoboy-requests/:requestId/approve', authRequired, forward);

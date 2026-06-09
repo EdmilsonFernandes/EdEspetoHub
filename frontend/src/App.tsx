@@ -23,6 +23,7 @@ import './index.css';
 import { MotoboyLayout } from './layouts/MotoboyLayout';
 import { loadOrderTrackingPage } from './utils/orderTrackingPrefetch';
 import { isStaleBuildErrorMessage, recoverFromStaleBuild } from './utils/staleBuildRecovery';
+import { installTextInputAssistance } from './utils/inputAssist';
 import {
   loadAdminDashboardPage,
   loadAdminHighlightsPage,
@@ -123,6 +124,8 @@ const AppRouteWarmup = () => {
 };
 
 function App() {
+  useEffect(() => installTextInputAssistance(), []);
+
   return (
     <ThemeProvider>
       <PremiumSplashScreen />

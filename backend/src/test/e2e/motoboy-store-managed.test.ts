@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { api, loginAdmin, loginMotoboy, registerStore, seedApprovedMotoboyDocuments, testEmail, verifyEmailDirectly } from '../helpers';
+import { api, loginAdmin, loginMotoboy, registerMotoboy, registerStore, seedApprovedMotoboyDocuments, testEmail, verifyEmailDirectly } from '../helpers';
 
 describe('Motoboy — fluxo gerenciado pela loja', () => {
   let adminToken = '';
@@ -42,7 +42,7 @@ describe('Motoboy — fluxo gerenciado pela loja', () => {
         active: true,
       },
     });
-    expect(String(createRes.body?.motoboy?.status || '').toUpperCase()).toBe('PENDING_VERIFICATION');
+    expect(String(createRes.body?.motoboy?.status || '').toUpperCase()).toBe('ACTIVE');
 
     const firstLogin = await loginMotoboy(`  ${username}  `, temporaryPassword);
     expect(firstLogin.res.status).toBe(200);
@@ -73,7 +73,7 @@ describe('Motoboy — fluxo gerenciado pela loja', () => {
     expect(secondLogin.res.body.mustChangePassword).toBe(false);
   });
 
-  it('bloqueia liberar operação sem KYC e permite após documentos aprovados', async () => {
+  it('motoboy criado pela loja já entra ativo para a loja sem etapa de Super Admin', async () => {
     const createRes = await api
       .post(`/api/stores/${storeId}/motoboys`)
       .set('Authorization', `Bearer ${adminToken}`)
@@ -88,10 +88,46 @@ describe('Motoboy — fluxo gerenciado pela loja', () => {
     expect(createRes.status).toBe(201);
     const motoboyId = String(createRes.body?.motoboy?.id || '');
     expect(motoboyId).toBeTruthy();
+    expect(String(createRes.body?.motoboy?.status || '').toUpperCase()).toBe('ACTIVE');
+
+    const listed = await api
+      .get(`/api/stores/${storeId}/motoboys`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(listed.status).toBe(200);
+    const links = Array.isArray(listed.body) ? listed.body : [];
+    expect(links.some((link: any) => String(link?.motoboyId || '') === motoboyId && link.active === true)).toBe(true);
+  });
+
+  it('mantém KYC obrigatório para motoboy independente vinculado pela loja', async () => {
+    const storeRegistration = await registerStore();
+    await verifyEmailDirectly(storeRegistration.email);
+    const otherStoreId = String(storeRegistration.body.store?.id || '');
+    const otherLogin = await loginAdmin(storeRegistration.email, storeRegistration.password);
+    const otherAdminToken = String(otherLogin.token || '');
+
+    const motoboyRegistration = await registerMotoboy();
+    expect([200, 201]).toContain(motoboyRegistration.res.status);
+    await verifyEmailDirectly(motoboyRegistration.email);
+
+    const createRes = await api
+      .post(`/api/stores/${otherStoreId}/motoboys`)
+      .set('Authorization', `Bearer ${otherAdminToken}`)
+      .send({ email: motoboyRegistration.email });
+
+    expect(createRes.status).toBe(201);
+    const motoboyId = String(createRes.body?.id || '');
+    expect(motoboyId).toBeTruthy();
+
+    const linkRes = await api
+      .post(`/api/stores/${otherStoreId}/motoboys/${motoboyId}/link`)
+      .set('Authorization', `Bearer ${otherAdminToken}`)
+      .send({});
+    expect(linkRes.status).toBe(200);
 
     const blockedApprove = await api
-      .post(`/api/stores/${storeId}/motoboys/${motoboyId}/approve`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .post(`/api/stores/${otherStoreId}/motoboys/${motoboyId}/approve`)
+      .set('Authorization', `Bearer ${otherAdminToken}`)
       .send({});
 
     expect(blockedApprove.status).toBe(409);
@@ -100,8 +136,8 @@ describe('Motoboy — fluxo gerenciado pela loja', () => {
     await seedApprovedMotoboyDocuments(motoboyId);
 
     const approvedRes = await api
-      .post(`/api/stores/${storeId}/motoboys/${motoboyId}/approve`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .post(`/api/stores/${otherStoreId}/motoboys/${motoboyId}/approve`)
+      .set('Authorization', `Bearer ${otherAdminToken}`)
       .send({});
 
     expect(approvedRes.status).toBe(200);

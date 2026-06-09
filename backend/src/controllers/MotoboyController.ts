@@ -238,6 +238,7 @@ export class MotoboyController {
           motoboyId: link.motoboyId,
           busy: (busyMap.get(link.motoboyId) || 0) > 0,
           motoboyStatus: link.motoboy?.status,
+          motoboyCreatedByUserId: link.motoboy?.createdByUserId || null,
           motoboyUser: link.motoboy?.user
             ? {
                 id: link.motoboy.user.id,
@@ -580,6 +581,24 @@ export class MotoboyController {
       return res.json(motoboy);
     } catch (error: any) {
       log.warn('Motoboy approve failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Resets a store-managed motoboy temporary password.
+   */
+  static async resetStorePassword(req: Request, res: Response) {
+    try {
+      const result = await motoboyService.resetStoreManagedPassword(
+        req.params.storeId,
+        req.params.motoboyId,
+        req.auth?.sub || '',
+        req.body?.password
+      );
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Motoboy password reset failed', { error });
       return respondWithError(req, res, error, 400);
     }
   }

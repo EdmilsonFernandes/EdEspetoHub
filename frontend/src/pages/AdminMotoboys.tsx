@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Car, Camera, CheckCircle, CopySimple, IdentificationCard, WarningCircle, Clock, UsersThree, LinkSimpleHorizontal, MagnifyingGlass, FunnelSimple, UserPlus } from '@phosphor-icons/react';
+import { Car, Camera, CheckCircle, CopySimple, IdentificationCard, WarningCircle, Clock, UsersThree, LinkSimpleHorizontal, MagnifyingGlass, FunnelSimple, UserPlus, Key } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { motoboyAdminService } from '../services/motoboyAdminService';
@@ -8,6 +8,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
 import { FormSection } from '../components/common/FormSection';
 import { buildPixPayload } from '../utils/pixPayload';
+import { inputAssistProps } from '../utils/inputAssist';
 
 export function AdminMotoboys() {
   const { auth } = useAuth();
@@ -58,6 +59,14 @@ export function AdminMotoboys() {
   const [creatingMotoboy, setCreatingMotoboy] = useState(false);
   const [createdMotoboyAccess, setCreatedMotoboyAccess] = useState<any | null>(null);
   const [createWarning, setCreateWarning] = useState('');
+  const [resetPasswordModal, setResetPasswordModal] = useState<{
+    open: boolean;
+    link: any | null;
+    password: string;
+    confirmPassword: string;
+    loading: boolean;
+    result: any | null;
+  }>({ open: false, link: null, password: '', confirmPassword: '', loading: false, result: null });
   const [payoutModal, setPayoutModal] = useState<{
     open: boolean;
     row: any | null;
@@ -66,6 +75,7 @@ export function AdminMotoboys() {
     submitting: boolean;
   }>({ open: false, row: null, notes: '', proofFile: null, submitting: false });
   const storeId = auth?.store?.id || '';
+  const currentAdminUserId = String(auth?.user?.id || '').trim();
   const [approveConfirmOpen, setApproveConfirmOpen] = useState(false);
   const [approveConfirmRequestId, setApproveConfirmRequestId] = useState<string | null>(null);
   const [approveConfirmChecked, setApproveConfirmChecked] = useState(false);
@@ -640,6 +650,53 @@ export function AdminMotoboys() {
     }
   };
 
+  const openResetPasswordModal = (link: any) => {
+    setResetPasswordModal({
+      open: true,
+      link,
+      password: '',
+      confirmPassword: '',
+      loading: false,
+      result: null,
+    });
+  };
+
+  const closeResetPasswordModal = () => {
+    if (resetPasswordModal.loading) return;
+    setResetPasswordModal({
+      open: false,
+      link: null,
+      password: '',
+      confirmPassword: '',
+      loading: false,
+      result: null,
+    });
+  };
+
+  const submitResetPassword = async () => {
+    if (!storeId || !resetPasswordModal.link?.motoboyId || resetPasswordModal.loading) return;
+    const password = String(resetPasswordModal.password || '');
+    const confirmPassword = String(resetPasswordModal.confirmPassword || '');
+    if (password.length < 6) {
+      showToast('A senha temporária precisa ter pelo menos 6 caracteres.', 'error');
+      return;
+    }
+    if (password !== confirmPassword) {
+      showToast('A confirmação da senha temporária não confere.', 'error');
+      return;
+    }
+    setResetPasswordModal((prev) => ({ ...prev, loading: true, result: null }));
+    try {
+      const result = await motoboyAdminService.resetPassword(storeId, resetPasswordModal.link.motoboyId, password);
+      setResetPasswordModal((prev) => ({ ...prev, loading: false, result }));
+      showToast('Senha temporária redefinida.', 'success');
+      await loadMotoboys();
+    } catch (error: any) {
+      setResetPasswordModal((prev) => ({ ...prev, loading: false }));
+      showToast(error?.message || 'Não foi possível redefinir a senha.', 'error');
+    }
+  };
+
   const getFaceBadge = (doc: any) => {
     const face = doc?.metadata?.face;
     if (!face) return null;
@@ -934,7 +991,7 @@ export function AdminMotoboys() {
 
       <FormSection
         title="Motoboy próprio da loja"
-        subtitle="Crie o acesso inicial do entregador sem mexer no fluxo atual de cadastro independente."
+        subtitle="Crie o acesso inicial do entregador e libere a operação apenas para esta loja."
         variant="success"
       >
         <div className="grid gap-4 lg:grid-cols-[1.3fr_0.9fr]">
@@ -945,38 +1002,41 @@ export function AdminMotoboys() {
               </div>
               <div>
                 <p className="text-sm font-black text-slate-900">Conta criada pela loja</p>
-                <p className="text-xs text-slate-500">O entregador já fica vinculado à loja e entra com usuário ou e-mail.</p>
+                <p className="text-xs text-slate-500">O entregador entra com usuário ou e-mail, troca a senha no primeiro acesso e opera somente nos pedidos desta loja.</p>
               </div>
             </div>
 
             <div className="grid gap-3 md:grid-cols-2">
               <input
+                {...inputAssistProps.name}
                 value={createForm.fullName}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, fullName: event.target.value }))}
                 placeholder="Nome completo"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
               />
               <input
+                {...inputAssistProps.phoneNational}
                 value={createForm.phone}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, phone: event.target.value }))}
                 placeholder="Telefone"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
               />
               <input
+                {...inputAssistProps.email}
                 value={createForm.email}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, email: event.target.value }))}
                 placeholder="E-mail"
-                autoCapitalize="none"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
               />
               <input
+                {...inputAssistProps.username}
                 value={createForm.username}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, username: event.target.value }))}
                 placeholder="Usuário"
-                autoCapitalize="none"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
               />
               <input
+                {...inputAssistProps.newPassword}
                 type="password"
                 value={createForm.password}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, password: event.target.value }))}
@@ -984,6 +1044,7 @@ export function AdminMotoboys() {
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
               />
               <input
+                {...inputAssistProps.newPassword}
                 type="password"
                 value={createForm.confirmPassword}
                 onChange={(event) => setCreateForm((prev) => ({ ...prev, confirmPassword: event.target.value }))}
@@ -992,8 +1053,8 @@ export function AdminMotoboys() {
               />
             </div>
 
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
-              O vínculo já nasce ativo, mas o entregador só deve operar quando o KYC estiver aprovado.
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-900">
+              Esse acesso é liberado pela própria loja e fica restrito à sua operação. Para atuar como entregador independente da plataforma, o KYC continua obrigatório.
             </div>
 
             <button
@@ -1379,6 +1440,94 @@ export function AdminMotoboys() {
                 className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
               >
                 Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {resetPasswordModal.open && (
+        <div className="ds-sheet-backdrop z-[92]" role="dialog" onClick={closeResetPasswordModal}>
+          <div className="ds-sheet-panel max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[#f4fafc] text-[#336886]">
+                <Key size={20} weight="duotone" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Acesso do entregador</p>
+                <h3 className="mt-1 text-lg font-black text-slate-900">Redefinir senha temporária</h3>
+                <p className="mt-1 text-sm font-semibold text-slate-500">
+                  {resetPasswordModal.link?.motoboyUser?.fullName || 'Entregador'} vai trocar essa senha no próximo login.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3">
+              <input
+                {...inputAssistProps.newPassword}
+                type="password"
+                value={resetPasswordModal.password}
+                onChange={(event) => setResetPasswordModal((prev) => ({ ...prev, password: event.target.value, result: null }))}
+                placeholder="Nova senha temporária"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+              />
+              <input
+                {...inputAssistProps.newPassword}
+                type="password"
+                value={resetPasswordModal.confirmPassword}
+                onChange={(event) => setResetPasswordModal((prev) => ({ ...prev, confirmPassword: event.target.value, result: null }))}
+                placeholder="Confirmar senha temporária"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+              />
+            </div>
+
+            {resetPasswordModal.result ? (
+              <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900">
+                <p className="font-black">Senha redefinida.</p>
+                <p className="mt-1">O entregador entra com usuário/e-mail e essa senha temporária.</p>
+                <button
+                  type="button"
+                  onClick={() => copyText(
+                    [
+                      `Usuário: ${resetPasswordModal.result?.user?.username || '-'}`,
+                      `E-mail: ${resetPasswordModal.result?.user?.email || '-'}`,
+                      `Senha temporária: ${resetPasswordModal.result?.temporaryPassword || '-'}`,
+                    ].join('\n'),
+                    'Credenciais copiadas.'
+                  )}
+                  className="mt-3 w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-black text-emerald-800"
+                >
+                  Copiar novas credenciais
+                </button>
+                {!resetPasswordModal.result?.credentialsEmailSent ? (
+                  <p className="mt-2 text-[11px] font-semibold text-amber-700">
+                    O e-mail não foi enviado. Entregue as credenciais manualmente.
+                  </p>
+                ) : null}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-900">
+                Use uma senha provisória. Depois do login, o próprio entregador define a senha definitiva.
+              </div>
+            )}
+
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={closeResetPasswordModal}
+                disabled={resetPasswordModal.loading}
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 disabled:opacity-50"
+              >
+                Fechar
+              </button>
+              <button
+                type="button"
+                onClick={submitResetPassword}
+                disabled={resetPasswordModal.loading}
+                className="flex-1 rounded-xl bg-[#336886] px-4 py-2.5 text-xs font-black text-white shadow-[0_14px_32px_-18px_rgba(51,104,134,0.6)] disabled:opacity-60"
+              >
+                {resetPasswordModal.loading ? 'Redefinindo...' : 'Redefinir'}
               </button>
             </div>
           </div>
@@ -2069,6 +2218,16 @@ export function AdminMotoboys() {
                   >
                     Ver documentos
                   </button>
+                  {link.active && currentAdminUserId && String(link.motoboyCreatedByUserId || '') === currentAdminUserId ? (
+                    <button
+                      type="button"
+                      onClick={() => openResetPasswordModal(link)}
+                      className="btn-press w-full sm:w-auto px-3 py-2 rounded-xl border border-[#cfe0ea] bg-[#f4fafc] text-[11px] font-extrabold text-[#336886] inline-flex items-center justify-center gap-1.5"
+                    >
+                      <Key size={14} weight="duotone" />
+                      Redefinir senha
+                    </button>
+                  ) : null}
                   {!link.active && (
                     <button
                       type="button"

@@ -110,7 +110,8 @@ describe('MotoboyService — store managed courier flow', () => {
       },
       motoboy: {
         id: 'motoboy-1',
-        status: 'PENDING_VERIFICATION',
+        status: 'ACTIVE',
+        approvedByUserId: 'owner-1',
       },
       link: {
         id: 'link-1',
@@ -124,6 +125,72 @@ describe('MotoboyService — store managed courier flow', () => {
       email: 'motoboy@example.com',
       username: 'moto.loja',
       temporaryPassword: 'Temp@123',
+      storeName: 'Loja Teste',
+    });
+  });
+
+  it('resets store-managed courier password and forces password change', async () => {
+    const savedUsers: any[] = [];
+    const sentCredentials: any[] = [];
+    service.storeRepository = {
+      findByIdWithOwner: async () => ({
+        id: 'store-1',
+        name: 'Loja Teste',
+        owner: { id: 'owner-1' },
+      }),
+    };
+    service.motoboyStoreRepository = {
+      findActiveLink: async () => ({
+        id: 'link-1',
+        storeId: 'store-1',
+        motoboyId: 'motoboy-1',
+        active: true,
+      }),
+    };
+    service.motoboyRepository = {
+      findById: async () => ({
+        id: 'motoboy-1',
+        createdByUserId: 'owner-1',
+        user: {
+          id: 'user-1',
+          fullName: 'Motoboy da Loja',
+          email: 'motoboy@example.com',
+          username: 'moto.loja',
+          password: 'old',
+          mustChangePassword: false,
+        },
+      }),
+    };
+    service.userRepository = {
+      save: async (user: any) => {
+        savedUsers.push(user);
+        return user;
+      },
+    };
+    service.emailService = {
+      sendMotoboyStoreAccessCredentials: async (payload: any) => {
+        sentCredentials.push(payload);
+      },
+    };
+
+    const result = await service.resetStoreManagedPassword('store-1', 'motoboy-1', 'owner-1', 'Nova@123');
+
+    expect(savedUsers).toHaveLength(1);
+    expect(savedUsers[0].mustChangePassword).toBe(true);
+    expect(savedUsers[0].password).not.toBe('old');
+    expect(result).toMatchObject({
+      temporaryPassword: 'Nova@123',
+      credentialsEmailSent: true,
+      user: {
+        id: 'user-1',
+        username: 'moto.loja',
+        mustChangePassword: true,
+      },
+    });
+    expect(sentCredentials[0]).toMatchObject({
+      email: 'motoboy@example.com',
+      username: 'moto.loja',
+      temporaryPassword: 'Nova@123',
       storeName: 'Loja Teste',
     });
   });

@@ -23,6 +23,9 @@ export const motoboyAdminService = {
   async approve(storeId: string, motoboyId: string) {
     return apiClient.post(`/stores/${storeId}/motoboys/${motoboyId}/approve`, {});
   },
+  async resetPassword(storeId: string, motoboyId: string, password: string) {
+    return apiClient.post(`/stores/${storeId}/motoboys/${motoboyId}/password/reset`, { password });
+  },
   async suspend(storeId: string, motoboyId: string) {
     return apiClient.post(`/stores/${storeId}/motoboys/${motoboyId}/suspend`, {});
   },

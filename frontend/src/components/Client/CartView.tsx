@@ -92,11 +92,11 @@ const POSTAL_PREPAID_PAYMENT_METHODS = new Set([
 const isPostalPrepaidPaymentMethod = (methodId = "") =>
   POSTAL_PREPAID_PAYMENT_METHODS.has(String(methodId || "").trim().toLowerCase());
 
-const CUSTOMER_ORDER_NOTE_SUGGESTIONS = [
+const DEFAULT_CUSTOMER_ORDER_NOTE_SUGGESTIONS = [
   "Sem cebola",
-  "Sem ketchup",
-  "Interfone 101",
-  "Avisar ao chegar",
+  "Ponto da carne",
+  "Embalar separado",
+  "Sem talheres",
 ];
 
 export const CartView = ({
@@ -233,6 +233,46 @@ export const CartView = ({
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
   const isPostalDelivery = isDelivery && String(deliveryMode || "").toLowerCase() === "postal";
+  const customerOrderNoteCopy = useMemo(() => {
+    if (isPostalDelivery) {
+      return {
+        helper: "Use para complementar o envio do pacote, sem pedir itens extras.",
+        preview: "Ex: complemento do endereço, referência para entrega ou cuidado com o pacote.",
+        placeholder: "Ex: casa dos fundos, deixar na portaria, pacote frágil.",
+        suggestions: ["Pacote frágil", "Deixar na portaria", "Complemento do endereço", "Não dobrar embalagem"],
+      };
+    }
+    if (customer.type === "delivery") {
+      return {
+        helper: "Use para orientar a entrega ou uma preferência simples do pedido.",
+        preview: "Ex: referência do endereço, deixar na portaria ou preferência de preparo.",
+        placeholder: "Ex: deixar na portaria, não tocar campainha, sem cebola.",
+        suggestions: ["Deixar na portaria", "Não tocar campainha", "Sem cebola", "Avisar ao chegar"],
+      };
+    }
+    if (customer.type === "pickup") {
+      return {
+        helper: "Use para combinar retirada ou uma preferência simples de preparo.",
+        preview: "Ex: retirar no balcão, embalar separado ou ponto do preparo.",
+        placeholder: "Ex: retirar no balcão, embalar separado, ponto bem passado.",
+        suggestions: ["Retirar no balcão", "Embalar separado", "Sem talheres", "Ponto bem passado"],
+      };
+    }
+    if (customer.type === "table") {
+      return {
+        helper: "Use para uma preferência simples da mesa.",
+        preview: "Ex: ponto da carne, sem cebola, talher extra ou bebida sem gelo.",
+        placeholder: "Ex: ponto da carne, sem cebola, bebida sem gelo.",
+        suggestions: ["Ponto da carne", "Sem cebola", "Bebida sem gelo", "Talher extra"],
+      };
+    }
+    return {
+      helper: "Use para preferências simples do pedido.",
+      preview: "Ex: preferência de preparo, embalagem ou atendimento.",
+      placeholder: "Ex: preferência de preparo, embalagem ou atendimento.",
+      suggestions: DEFAULT_CUSTOMER_ORDER_NOTE_SUGGESTIONS,
+    };
+  }, [customer.type, isPostalDelivery]);
   const isOptionalPhoneMode = (customer.type === "table" || customer.type === "pickup") && !guestPhoneRequired;
   const isOnlinePix = paymentMethod === "pix";
   const isManualPix = paymentMethod === "pix_loja";
@@ -986,7 +1026,7 @@ export const CartView = ({
               </span>
             </div>
             <p className={`mt-1 line-clamp-2 text-[12.5px] font-semibold leading-snug ${note ? "text-slate-800" : "text-slate-500"}`}>
-              {note || "Ex: sem cebola, ponto da carne, interfone ou portaria."}
+              {note || customerOrderNoteCopy.preview}
             </p>
           </div>
           <ArrowLeft size={16} weight="bold" className="shrink-0 rotate-180 text-slate-300 transition-transform group-hover:translate-x-0.5" />
@@ -1033,7 +1073,7 @@ export const CartView = ({
               </p>
             ) : (
               <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">
-                Sem observação. Toque para avisar uma preferência de preparo ou entrega.
+                Sem observação. Toque para adicionar uma orientação simples ao pedido.
               </p>
             )}
           </div>
@@ -3065,7 +3105,7 @@ export const CartView = ({
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Observação</p>
                   <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Alguma instrução para a loja?</h3>
                   <p className="mt-1 text-xs font-semibold leading-snug text-slate-500">
-                    Use só para preferências simples de preparo ou entrega.
+                    {customerOrderNoteCopy.helper}
                   </p>
                 </div>
                 <button
@@ -3084,7 +3124,7 @@ export const CartView = ({
                   Atalhos rápidos
                 </p>
                 <div className="grid grid-cols-2 gap-2">
-                {CUSTOMER_ORDER_NOTE_SUGGESTIONS.map((suggestion) => (
+                {customerOrderNoteCopy.suggestions.map((suggestion) => (
                   <button
                     key={suggestion}
                     type="button"
@@ -3111,7 +3151,7 @@ export const CartView = ({
                   onChange={(event) => setCustomerNoteDraft(limitCustomerOrderNoteInput(event.target.value))}
                   maxLength={CUSTOMER_ORDER_NOTE_MAX_LENGTH}
                   rows={5}
-                  placeholder="Ex: tirar cebola, ponto bem passado, entregar na portaria."
+                  placeholder={customerOrderNoteCopy.placeholder}
                   className="min-h-[118px] w-full resize-none rounded-[1.2rem] border border-white bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-[#336886]/45 focus:ring-4 focus:ring-[#336886]/10"
                   data-testid="customer-order-note-input"
                 />

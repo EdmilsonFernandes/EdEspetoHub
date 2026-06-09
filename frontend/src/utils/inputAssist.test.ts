@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { inputAssistProps, textareaAssistProps } from './inputAssist';
+import { inputAssistProps, shouldEnableTextInputAssistance, textareaAssistProps } from './inputAssist';
 
 describe('inputAssistProps', () => {
   it('keeps suggestions enabled for common text and search fields', () => {
@@ -53,5 +53,22 @@ describe('inputAssistProps', () => {
       spellCheck: false,
       inputMode: 'numeric',
     });
+  });
+
+  it('enables global assistance only for non-sensitive text fields', () => {
+    const makeElement = (attrs: Record<string, string> = {}) => {
+      const input = document.createElement('input');
+      Object.entries(attrs).forEach(([key, value]) => {
+        if (key === 'type') input.type = value;
+        else input.setAttribute(key, value);
+      });
+      return input;
+    };
+
+    expect(shouldEnableTextInputAssistance(makeElement({ name: 'customerName', placeholder: 'Nome completo' }))).toBe(true);
+    expect(shouldEnableTextInputAssistance(makeElement({ name: 'addressComplement', placeholder: 'Complemento' }))).toBe(true);
+    expect(shouldEnableTextInputAssistance(makeElement({ type: 'password', name: 'password' }))).toBe(false);
+    expect(shouldEnableTextInputAssistance(makeElement({ name: 'email', autocomplete: 'email' }))).toBe(false);
+    expect(shouldEnableTextInputAssistance(makeElement({ name: 'otp', autocomplete: 'one-time-code' }))).toBe(false);
   });
 });

@@ -24,6 +24,8 @@ export const BrandingSettings = ({
   const bannerInputRef = useRef(null);
   const [storeCepLoading, setStoreCepLoading] = useState(false);
   const [storeCepError, setStoreCepError] = useState("");
+  const [logoUploadNotice, setLogoUploadNotice] = useState("");
+  const [bannerUploadNotice, setBannerUploadNotice] = useState("");
   const sectionTabs = [
     { key: "identity", label: "Identidade" },
     { key: "promo", label: "Promo" },
@@ -110,6 +112,45 @@ export const BrandingSettings = ({
   }, [branding.address, branding.city, branding.state]);
   const handleChange = (field, value) => {
     onChange((prev) => ({ ...prev, [field]: value }));
+  };
+  const readImageFile = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("Falha ao ler imagem."));
+      reader.onload = () => {
+        const dataUrl = String(reader.result || "");
+        const image = new Image();
+        image.onload = () =>
+          resolve({
+            dataUrl,
+            width: image.naturalWidth || image.width || 0,
+            height: image.naturalHeight || image.height || 0,
+          });
+        image.onerror = () => resolve({ dataUrl, width: 0, height: 0 });
+        image.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
+    });
+  const buildImageNotice = ({ kind, file, width, height }) => {
+    const sizeMb = Number(file?.size || 0) / (1024 * 1024);
+    const ratio = width && height ? width / height : 0;
+    if (kind === "logo") {
+      const warnings = [];
+      if (sizeMb > 2) warnings.push("arquivo acima de 2MB");
+      if (ratio && Math.abs(ratio - 1) > 0.18) warnings.push("use imagem quadrada");
+      if (width && height && (width < 600 || height < 600)) warnings.push("resolução baixa; recomendado 800x800px");
+      return warnings.length
+        ? `Atenção: ${warnings.join(", ")}. Pode funcionar, mas o logo pode perder qualidade.`
+        : `Logo dentro do padrão (${width}x${height}px).`;
+    }
+    const warnings = [];
+    const targetRatio = 1600 / 600;
+    if (sizeMb > 5) warnings.push("arquivo acima de 5MB");
+    if (ratio && Math.abs(ratio - targetRatio) > 0.5) warnings.push("proporção fora do recomendado 1600x600px");
+    if (width && height && (width < 1200 || height < 450)) warnings.push("resolução baixa para banner");
+    return warnings.length
+      ? `Atenção: ${warnings.join(", ")}. O app vai preservar a arte, mas pode sobrar fundo desfocado.`
+      : `Banner dentro do padrão (${width}x${height}px).`;
   };
   const handleAddressChange = (field, value) => {
     setAddressForm((prev) => {
@@ -290,7 +331,7 @@ export const BrandingSettings = ({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
                 <p className="text-sm text-gray-600 mb-1">Envie o logo da marca</p>
-                <p className="text-xs text-gray-500">PNG ou JPG até 5MB</p>
+                <p className="text-xs text-gray-500">Recomendado: 800x800px, quadrado, PNG/JPG/WebP até 2MB</p>
               </div>
               <input
                 ref={fileInputRef}
@@ -299,12 +340,10 @@ export const BrandingSettings = ({
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    handleChange("logoFile", reader.result);
-                    handleChange("logoUrl", reader.result);
-                  };
-                  reader.readAsDataURL(file);
+                  const result = await readImageFile(file);
+                  setLogoUploadNotice(buildImageNotice({ kind: "logo", file, width: result.width, height: result.height }));
+                  handleChange("logoFile", result.dataUrl);
+                  handleChange("logoUrl", result.dataUrl);
                 }}
                 className="hidden"
               />
@@ -321,6 +360,7 @@ export const BrandingSettings = ({
                   onClick={() => {
                     handleChange("logoFile", "");
                     handleChange("logoUrl", "");
+                    setLogoUploadNotice("");
                     if (fileInputRef.current) fileInputRef.current.value = "";
                   }}
                   className="absolute inset-0 bg-black/50 text-white text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:-translate-y-0.5 active:scale-95"
@@ -329,6 +369,14 @@ export const BrandingSettings = ({
                 </button>
               </div>
             )}
+          </div>
+          {logoUploadNotice ? (
+            <p className={`text-xs font-semibold ${logoUploadNotice.startsWith("Atenção") ? "text-amber-700" : "text-emerald-700"}`}>
+              {logoUploadNotice}
+            </p>
+          ) : null}
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+            <strong className="text-slate-800">Área segura:</strong> deixe margem nas bordas. O logo aparece em cards redondos/quadrados pequenos no app.
           </div>
         </div>
         <div className="space-y-3">
@@ -350,7 +398,7 @@ export const BrandingSettings = ({
             <label className="w-full cursor-pointer">
               <div className="border-2 border-dashed border-gray-300 rounded-2xl p-4 hover:border-brand-primary transition-colors text-center bg-white/70">
                 <p className="text-sm text-gray-600 mb-1">Envie o banner da loja</p>
-                <p className="text-xs text-gray-500">PNG ou JPG até 5MB</p>
+                <p className="text-xs text-gray-500">Recomendado: 1600x600px, JPG/PNG/WebP até 5MB. Texto sempre no centro.</p>
               </div>
               <input
                 ref={bannerInputRef}
@@ -359,19 +407,32 @@ export const BrandingSettings = ({
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    handleChange("bannerFile", reader.result);
-                    handleChange("bannerUrl", reader.result);
-                  };
-                  reader.readAsDataURL(file);
+                  const result = await readImageFile(file);
+                  setBannerUploadNotice(buildImageNotice({ kind: "banner", file, width: result.width, height: result.height }));
+                  handleChange("bannerFile", result.dataUrl);
+                  handleChange("bannerUrl", result.dataUrl);
                 }}
                 className="hidden"
               />
             </label>
+            {bannerUploadNotice ? (
+              <p className={`text-xs font-semibold ${bannerUploadNotice.startsWith("Atenção") ? "text-amber-700" : "text-emerald-700"}`}>
+                {bannerUploadNotice}
+              </p>
+            ) : null}
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+              <strong className="text-slate-800">Preview no app:</strong> a arte fica preservada no centro. Se a proporção fugir muito de 1600x600px, o fundo desfocado completa as laterais sem distorcer a imagem.
+            </div>
             <div className="w-full rounded-2xl overflow-hidden border border-gray-200 bg-gray-100 min-h-[140px] relative group">
               {bannerPreview ? (
-                <img src={bannerPreview} alt="Banner da loja" className="w-full h-[180px] object-cover" />
+                <div className="relative h-[180px] overflow-hidden bg-slate-900">
+                  <img src={bannerPreview} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-80 blur-lg saturate-125" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/18 via-white/8 to-slate-950/18" />
+                  <img src={bannerPreview} alt="Banner da loja" className="relative z-10 h-full w-full object-contain p-2" />
+                  <span className="absolute bottom-2 left-2 z-20 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm">
+                    Preview
+                  </span>
+                </div>
               ) : (
                 <div className="h-[180px] flex items-center justify-center text-xs text-gray-500">
                   Sem banner configurado
@@ -383,6 +444,7 @@ export const BrandingSettings = ({
                   onClick={() => {
                     handleChange("bannerFile", "");
                     handleChange("bannerUrl", "");
+                    setBannerUploadNotice("");
                     if (bannerInputRef.current) bannerInputRef.current.value = "";
                   }}
                   className="absolute inset-0 bg-black/45 text-white text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:-translate-y-0.5 active:scale-95"

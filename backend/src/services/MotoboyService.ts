@@ -852,10 +852,13 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
       } as User);
       const savedUser = await userRepo.save(user);
 
+      const approvedAt = new Date();
       const motoboy = motoboyRepo.create({
         userId: savedUser.id,
-        status: 'PENDING_VERIFICATION',
+        status: 'ACTIVE',
         createdByUserId,
+        approvedByUserId: createdByUserId,
+        approvedAt,
       } as Motoboy);
       const savedMotoboy = await motoboyRepo.save(motoboy);
 
@@ -890,6 +893,16 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
       performedByUserId: createdByUserId,
       metadata: {
         via: 'STORE_MANAGED_ACCOUNT',
+      },
+    });
+    await this.logAudit({
+      storeId: store.id,
+      motoboyId: created.motoboy?.id,
+      action: 'MOTOBOY_STORE_OPERATION_APPROVED',
+      performedByUserId: createdByUserId,
+      metadata: {
+        via: 'STORE_MANAGED_ACCOUNT',
+        scope: 'STORE_ONLY',
       },
     });
 
@@ -943,6 +956,66 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
       },
       motoboy: created.motoboy,
       link: created.link,
+    };
+  }
+
+  /**
+   * Issues a new temporary password for a courier linked to the store.
+   */
+  async resetStoreManagedPassword(storeId: string, motoboyId: string, userId: string, password: string) {
+    const store = await this.storeRepository.findByIdWithOwner(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    if (store.owner?.id !== userId) throw new AppError('AUTH-003', 403);
+
+    const temporaryPassword = String(password || '').trim();
+    if (temporaryPassword.length < 6) throw new AppError('AUTH-008', 400);
+
+    const link = await this.motoboyStoreRepository.findActiveLink(motoboyId, storeId);
+    if (!link) throw new AppError('MOTO-004', 404);
+
+    const motoboy = await this.motoboyRepository.findById(motoboyId);
+    if (!motoboy?.user) throw new AppError('MOTO-005', 404);
+    if (motoboy.createdByUserId !== userId) throw new AppError('AUTH-003', 403);
+
+    motoboy.user.password = await bcrypt.hash(temporaryPassword, 10);
+    (motoboy.user as any).mustChangePassword = true;
+    await this.userRepository.save(motoboy.user);
+
+    await this.logAudit({
+      storeId,
+      motoboyId,
+      action: 'MOTOBOY_STORE_PASSWORD_RESET',
+      performedByUserId: userId,
+      metadata: {
+        userId: motoboy.user.id,
+        username: motoboy.user.username || null,
+      },
+    });
+
+    let credentialsEmailSent = false;
+    try {
+      await this.emailService.sendMotoboyStoreAccessCredentials({
+        email: motoboy.user.email,
+        fullName: motoboy.user.fullName,
+        storeName: String(store?.name || 'sua loja'),
+        username: motoboy.user.username || motoboy.user.email,
+        temporaryPassword,
+      });
+      credentialsEmailSent = true;
+    } catch {
+      credentialsEmailSent = false;
+    }
+
+    return {
+      temporaryPassword,
+      credentialsEmailSent,
+      user: {
+        id: motoboy.user.id,
+        fullName: motoboy.user.fullName,
+        email: motoboy.user.email,
+        username: motoboy.user.username || null,
+        mustChangePassword: true,
+      },
     };
   }
 

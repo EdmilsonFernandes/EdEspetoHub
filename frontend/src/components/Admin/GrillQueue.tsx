@@ -88,6 +88,14 @@ const formatTableIdentifier = (value: any) => {
 
 const SYSTEM_LOGO_SRC = "/janocaminho.jpg";
 
+const STORE_CANCELLATION_REASON_OPTIONS = [
+  "Item indisponível",
+  "Loja sem operação no momento",
+  "Endereço fora da área de atendimento",
+  "Problema operacional",
+  "Outro motivo",
+];
+
 const QueueLoadingSkeleton = ({ variant = "queue" }: { variant?: "queue" | "sales" | "route" }) => {
   const isSales = variant === "sales";
   const rows = isSales ? 6 : 4;
@@ -1188,12 +1196,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     open: boolean;
     order: any | null;
     reason: string;
+    details: string;
     loading: boolean;
     error: string;
   }>({
     open: false,
     order: null,
     reason: '',
+    details: '',
     loading: false,
     error: '',
   });
@@ -2230,6 +2240,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       open: true,
       order,
       reason: '',
+      details: '',
       loading: false,
       error: '',
     });
@@ -2241,6 +2252,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       open: false,
       order: null,
       reason: '',
+      details: '',
       loading: false,
       error: '',
     });
@@ -2249,18 +2261,25 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const handleConfirmCancelOrder = async () => {
     if (!cancelOrderModal.order?.id) return;
     const reason = String(cancelOrderModal.reason || '').trim();
+    const details = String(cancelOrderModal.details || '').trim();
     if (!reason) {
-      setCancelOrderModal((prev) => ({ ...prev, error: 'Informe o motivo do cancelamento.' }));
+      setCancelOrderModal((prev) => ({ ...prev, error: 'Escolha o motivo do cancelamento.' }));
+      return;
+    }
+    if (reason === 'Outro motivo' && details.length < 3) {
+      setCancelOrderModal((prev) => ({ ...prev, error: 'Descreva rapidamente o motivo do cancelamento.' }));
       return;
     }
     setCancelOrderModal((prev) => ({ ...prev, loading: true, error: '' }));
-    const success = await handleAdvance(cancelOrderModal.order.id, 'cancelled', { reason });
+    const finalReason = details ? `${reason}: ${details}` : reason;
+    const success = await handleAdvance(cancelOrderModal.order.id, 'cancelled', { reason: finalReason });
     if (success) {
       setSelectedOrder((prev: any) => (prev?.id === cancelOrderModal.order?.id ? null : prev));
       setCancelOrderModal({
         open: false,
         order: null,
         reason: '',
+        details: '',
         loading: false,
         error: '',
       });
@@ -5908,11 +5927,30 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               <div className="p-4 space-y-3">
                 <div>
                   <label className="text-xs font-semibold text-slate-600">Motivo do cancelamento</label>
+                  <div className="mt-2 grid gap-2">
+                    {STORE_CANCELLATION_REASON_OPTIONS.map((option) => {
+                      const active = cancelOrderModal.reason === option;
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => setCancelOrderModal((prev) => ({ ...prev, reason: option, error: '' }))}
+                          className={`rounded-xl border px-3 py-2 text-left text-xs font-extrabold transition active:scale-[0.99] ${
+                            active
+                              ? 'border-[#336886]/30 bg-[#336886]/8 text-[#153A4C] ring-2 ring-[#336886]/10'
+                              : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-[#336886]/20'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <textarea
-                    value={cancelOrderModal.reason}
-                    onChange={(event) => setCancelOrderModal((prev) => ({ ...prev, reason: event.target.value, error: '' }))}
-                    placeholder="Ex.: cliente desistiu"
-                    rows={4}
+                    value={cancelOrderModal.details}
+                    onChange={(event) => setCancelOrderModal((prev) => ({ ...prev, details: event.target.value, error: '' }))}
+                    placeholder={cancelOrderModal.reason === 'Outro motivo' ? 'Conte rapidamente o motivo.' : 'Complemento opcional para o cliente.'}
+                    rows={3}
                     className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-rose-200"
                   />
                 </div>

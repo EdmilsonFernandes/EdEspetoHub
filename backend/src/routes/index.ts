@@ -370,6 +370,7 @@ routes.post('/stores/:storeId/motoboys', requireAuth, requireRole('ADMIN'), requ
 routes.post('/stores/:storeId/motoboys/:motoboyId/link', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.linkStore);
 routes.post('/stores/:storeId/motoboys/:motoboyId/unlink', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.unlinkStore);
 routes.post('/stores/:storeId/motoboys/:motoboyId/approve', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.approve);
+routes.post('/stores/:storeId/motoboys/:motoboyId/password/reset', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.resetStorePassword);
 routes.post('/stores/:storeId/motoboys/:motoboyId/suspend', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.suspend);
 routes.get('/stores/:storeId/motoboy-requests', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.listStoreRequestsForStore);
 routes.post(

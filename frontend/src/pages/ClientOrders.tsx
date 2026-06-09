@@ -56,6 +56,8 @@ const isPostalDeliveredFromShipment = (order: any) => {
 const isTerminalOrder = (order: any) =>
   TERMINAL_STATUSES.includes(normalizeStatus(order?.status)) || isPostalDeliveredFromShipment(order);
 
+const isCancelledOrder = (order: any) => ['CANCELLED', 'REJECTED'].includes(normalizeStatus(order?.status));
+
 const mergeOrderForStatus = (order: any, details?: any) =>
   details
     ? {
@@ -215,6 +217,14 @@ const formatCancellationReasonForCustomer = (reason?: string) => {
 
   return value;
 };
+
+const CUSTOMER_CANCELLATION_REASON_OPTIONS = [
+  'Pedi por engano',
+  'Quero alterar itens ou endereço',
+  'Tempo de espera alto',
+  'Problema com pagamento',
+  'Outro motivo',
+];
 
 const buildOrderSupportMessage = ({
   order,
@@ -1270,9 +1280,10 @@ export function ClientOrders() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'finished' | 'cancelled'>('all');
   const [orderDetails, setOrderDetails] = useState<Record<string, any>>({});
   const [helpOrder, setHelpOrder] = useState<any | null>(null);
-  const [cancelModal, setCancelModal] = useState<{ order: any | null; reason: string; submitting: boolean }>({
+  const [cancelModal, setCancelModal] = useState<{ order: any | null; reason: string; details: string; submitting: boolean }>({
     order: null,
     reason: '',
+    details: '',
     submitting: false,
   });
   const [confirmingReceiptOrderId, setConfirmingReceiptOrderId] = useState<string | null>(null);
@@ -1556,16 +1567,22 @@ export function ClientOrders() {
   const submitCustomerCancellation = async () => {
     if (!cancelModal.order || cancelModal.submitting) return;
     const reason = String(cancelModal.reason || '').trim();
-    if (reason.length < 3) {
-      showToast('Informe um motivo para a loja entender o cancelamento.', 'warning');
+    const details = String(cancelModal.details || '').trim();
+    if (!reason) {
+      showToast('Escolha o motivo do cancelamento.', 'warning');
       return;
     }
+    if (reason === 'Outro motivo' && details.length < 3) {
+      showToast('Descreva rapidamente o motivo do cancelamento.', 'warning');
+      return;
+    }
+    const finalReason = details ? `${reason}: ${details}` : reason;
 
     try {
       setCancelModal((prev) => ({ ...prev, submitting: true }));
-      await customerAccountService.cancelOrder(cancelModal.order.id, { reason });
+      await customerAccountService.cancelOrder(cancelModal.order.id, { reason: finalReason });
       showToast('Pedido cancelado com sucesso.', 'success');
-      setCancelModal({ order: null, reason: '', submitting: false });
+      setCancelModal({ order: null, reason: '', details: '', submitting: false });
       await loadOrders({ silent: true });
     } catch (error: any) {
       setCancelModal((prev) => ({ ...prev, submitting: false }));
@@ -1641,6 +1658,7 @@ export function ClientOrders() {
     },
   ];
   const lastOrderIsActive = lastOrderMerged ? !isTerminalOrder(lastOrderMerged) : false;
+  const lastOrderIsCancelled = lastOrderMerged ? isCancelledOrder(lastOrderMerged) : false;
   const lastOrderStatusMeta = lastOrderMerged ? getStatusMeta(lastOrderMerged.status, lastOrderMerged.type) : null;
   const lastOrderStoreName = lastOrderMerged?.store?.name || 'Loja parceira';
   const lastOrderLogoUrl = resolveAssetUrl(lastOrderMerged?.store?.settings?.logoUrl || '');
@@ -1700,6 +1718,10 @@ export function ClientOrders() {
                       openOrderTracking(lastOrderMerged.id);
                       return;
                     }
+                    if (lastOrderIsCancelled) {
+                      openOrderTracking(lastOrderMerged.id);
+                      return;
+                    }
                     queueOrderForReorder(lastOrderMerged, openStore);
                   }}
                   onMouseEnter={() => lastOrderMerged?.id && primeOrderTrackingNavigation(lastOrderMerged.id)}
@@ -1707,7 +1729,7 @@ export function ClientOrders() {
                   onTouchStart={() => lastOrderMerged?.id && primeOrderTrackingNavigation(lastOrderMerged.id)}
                   className="shrink-0 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-3.5 py-2.5 text-[12px] font-black text-white shadow-[0_16px_30px_-22px_rgba(21,58,76,0.55)] active:scale-[0.98]"
                 >
-                  {lastOrderIsActive ? 'Acompanhar' : 'Pedir de novo'}
+                  {lastOrderIsActive ? 'Acompanhar' : lastOrderIsCancelled ? 'Ver detalhes' : 'Pedir de novo'}
                 </button>
               </div>
             </section>
@@ -1824,7 +1846,7 @@ export function ClientOrders() {
                     order={order}
                     isActive
                     details={orderDetails[order.id]}
-                    onCancelRequest={(selectedOrder) => setCancelModal({ order: selectedOrder, reason: '', submitting: false })}
+                    onCancelRequest={(selectedOrder) => setCancelModal({ order: selectedOrder, reason: '', details: '', submitting: false })}
                     onConfirmReceipt={handleConfirmReceiptFromList}
                     confirmReceiptLoading={confirmingReceiptOrderId === String(order.id)}
                     onOpenHelp={setHelpOrder}
@@ -1930,7 +1952,7 @@ export function ClientOrders() {
               </div>
               <button
                 type="button"
-                onClick={() => setCancelModal({ order: null, reason: '', submitting: false })}
+                onClick={() => setCancelModal({ order: null, reason: '', details: '', submitting: false })}
                 className="rounded-2xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
               >
                 <XCircle size={20} weight="duotone" />
@@ -1938,26 +1960,46 @@ export function ClientOrders() {
             </div>
 
             <p className="mt-3 text-sm text-slate-500">
-              Se precisar cancelar, envie um motivo simples para a loja entender o que aconteceu.
+              Escolha o motivo principal. Isso ajuda a loja a entender rápido e evita mensagens confusas.
             </p>
 
             <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-700">
               A loja recebe esse motivo junto com o cancelamento.
             </div>
 
+            <div className="mt-4 grid grid-cols-1 gap-2">
+              {CUSTOMER_CANCELLATION_REASON_OPTIONS.map((option) => {
+                const active = cancelModal.reason === option;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setCancelModal((prev) => ({ ...prev, reason: option }))}
+                    className={`rounded-2xl border px-4 py-3 text-left text-sm font-black transition active:scale-[0.99] ${
+                      active
+                        ? 'border-[#336886]/30 bg-[#336886]/8 text-[#153A4C] ring-2 ring-[#336886]/10'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-[#336886]/20'
+                    }`}
+                  >
+                    {option}
+                  </button>
+                );
+              })}
+            </div>
+
             <textarea
               {...textareaAssistProps.notes}
-              value={cancelModal.reason}
-              onChange={(event) => setCancelModal((prev) => ({ ...prev, reason: event.target.value }))}
-              rows={4}
-              placeholder="Ex.: o prazo passou bastante e eu não consigo mais receber agora."
+              value={cancelModal.details}
+              onChange={(event) => setCancelModal((prev) => ({ ...prev, details: event.target.value }))}
+              rows={3}
+              placeholder={cancelModal.reason === 'Outro motivo' ? 'Conte rapidamente o que aconteceu.' : 'Complemento opcional para a loja.'}
               className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-rose-300 focus:bg-white"
             />
 
             <div className="mt-4 flex items-center justify-end gap-2">
               <button
                 type="button"
-                onClick={() => setCancelModal({ order: null, reason: '', submitting: false })}
+                onClick={() => setCancelModal({ order: null, reason: '', details: '', submitting: false })}
                 className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100"
               >
                 Agora não
