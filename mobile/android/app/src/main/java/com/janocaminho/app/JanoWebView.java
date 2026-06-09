@@ -28,9 +28,21 @@ public class JanoWebView extends WebView {
             return connection;
         }
 
-        outAttrs.inputType &= ~InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
-        outAttrs.inputType |= InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
-        outAttrs.inputType |= InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
+        int variation = outAttrs.inputType & InputType.TYPE_MASK_VARIATION;
+        int flags = outAttrs.inputType & InputType.TYPE_MASK_FLAGS;
+        flags &= ~InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+        flags |= InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
+        flags |= InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
+
+        // Alguns teclados Android ocultam sugestoes quando o WebView marca o campo
+        // como WEB_EDIT_TEXT/FILTER, mesmo com autocorrect ligado no HTML.
+        if (variation == InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
+            || variation == InputType.TYPE_TEXT_VARIATION_FILTER) {
+            variation = InputType.TYPE_TEXT_VARIATION_NORMAL;
+        }
+
+        outAttrs.inputType = InputType.TYPE_CLASS_TEXT | variation | flags;
+        outAttrs.imeOptions &= ~EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING;
         return connection;
     }
 

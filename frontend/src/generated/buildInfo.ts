@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "98502b96",
-  "versionLabel": "v0.1.9.98502b96",
-  "versionInternal": "0.1.9+20260609.175529.98502b96",
-  "buildId": "0.1.9+20260609.175529.98502b96-20260609.175529-98502b96",
-  "builtAt": "2026-06-09T17:55:29.105Z",
-  "commitHash": "98502b96f12c88cc6ea9aa6bc3892475eea0b323",
-  "shortHash": "98502b96",
+  "versionDisplaySuffix": "6b9acbf4",
+  "versionLabel": "v0.1.9.6b9acbf4",
+  "versionInternal": "0.1.9+20260609.182434.6b9acbf4",
+  "buildId": "0.1.9+20260609.182434.6b9acbf4-20260609.182434-6b9acbf4",
+  "builtAt": "2026-06-09T18:24:34.361Z",
+  "commitHash": "6b9acbf4f32d43f557a1150ee72ce701b4e99f1e",
+  "shortHash": "6b9acbf4",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "6b9acbf4f32d43f557a1150ee72ce701b4e99f1e",
+      "shortHash": "6b9acbf4",
+      "dateIso": "2026-06-09T15:00:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Rollback Android launch WebView visibility changes",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6b9acbf4f32d43f557a1150ee72ce701b4e99f1e"
+    },
     {
       "hash": "98502b96f12c88cc6ea9aa6bc3892475eea0b323",
       "shortHash": "98502b96",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: use no captcha postal tracking fallback",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f3c887c5e98234f193af078d96644a1c36be33c"
-    },
-    {
-      "hash": "7d2e05a84f7568b33719ffd0268d4d918e2f5c67",
-      "shortHash": "7d2e05a8",
-      "dateIso": "2026-06-06T17:28:07-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: improve postal tracking refresh UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7d2e05a84f7568b33719ffd0268d4d918e2f5c67"
     }
   ]
 } as const;
