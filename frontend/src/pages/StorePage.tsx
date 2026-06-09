@@ -4082,12 +4082,21 @@ export function StorePage() {
                 <div className="space-y-4">
                   <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.92)_0%,rgba(241,247,246,0.9)_54%,rgba(255,255,255,0.94)_100%)] shadow-[0_26px_60px_-38px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
                     <div className="relative h-40 overflow-hidden sm:h-48">
-                      <img
-                        src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.jpg'}
-                        alt={closedStateStoreName}
-                        className="h-full w-full object-cover"
-                        onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
-                      />
+                      <div className="absolute inset-0 bg-[#153A4C]">
+                        <img
+                          src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.jpg'}
+                          alt=""
+                          aria-hidden="true"
+                          className="absolute inset-[-18px] h-[calc(100%+36px)] w-[calc(100%+36px)] scale-105 object-cover opacity-70 blur-xl"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                        />
+                        <img
+                          src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.jpg'}
+                          alt={closedStateStoreName}
+                          className="relative h-full w-full object-contain drop-shadow-[0_20px_34px_rgba(15,23,42,0.32)]"
+                          onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
+                        />
+                      </div>
                       <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(7,13,25,0.72)_0%,rgba(9,16,32,0.54)_40%,rgba(15,23,42,0.24)_100%)]" />
                       <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
                         <div className="flex items-end gap-4">

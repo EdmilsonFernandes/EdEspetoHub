@@ -323,15 +323,27 @@ const Header = ({
           >
             <div
               ref={bannerRef}
-              className="absolute inset-0 bg-cover bg-center origin-center transition-all duration-100 ease-out"
-              style={
-                headerBanner
-                  ? {
-                      backgroundImage: `url(${headerBanner})`,
-                    }
-                  : { backgroundColor: headerPrimaryColor }
-              }
-            />
+              className="absolute inset-0 origin-center overflow-hidden transition-all duration-100 ease-out"
+              style={{ backgroundColor: headerPrimaryColor }}
+            >
+              {headerBanner ? (
+                <>
+                  <img
+                    src={headerBanner}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-[-18px] h-[calc(100%+36px)] w-[calc(100%+36px)] scale-105 object-cover opacity-70 blur-xl"
+                    onError={(event) => { event.currentTarget.style.display = "none"; }}
+                  />
+                  <img
+                    src={headerBanner}
+                    alt={branding?.brandName ? `Banner de ${branding.brandName}` : "Banner da loja"}
+                    className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_20px_34px_rgba(15,23,42,0.28)]"
+                    onError={(event) => { event.currentTarget.style.display = "none"; }}
+                  />
+                </>
+              ) : null}
+            </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/10" />
             <div className="absolute right-3 top-3 z-20 flex items-center gap-2">
               {onOpenCustomerAccount && (
@@ -1752,17 +1764,30 @@ export const MenuView = ({
           <div className="mx-auto max-w-3xl px-4 pb-8">
             <div className="overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-[0_24px_48px_-32px_rgba(15,23,42,0.28)]">
                 <div
-                  className="relative h-44 bg-slate-900"
+                  className="relative h-44 overflow-hidden bg-slate-900"
                   style={
                     resolveAssetUrl(branding?.bannerUrl || "")
-                      ? {
-                          backgroundImage: `url(${resolveAssetUrl(branding?.bannerUrl || "" )})`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                        }
+                      ? { backgroundColor: catalogPrimaryColor }
                       : { background: `linear-gradient(135deg, ${catalogPrimaryColor}, ${catalogSecondaryColor})` }
                   }
                 >
+                  {resolveAssetUrl(branding?.bannerUrl || "") ? (
+                    <>
+                      <img
+                        src={resolveAssetUrl(branding?.bannerUrl || "")}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-[-18px] h-[calc(100%+36px)] w-[calc(100%+36px)] scale-105 object-cover opacity-70 blur-xl"
+                        onError={(event) => { event.currentTarget.style.display = "none"; }}
+                      />
+                      <img
+                        src={resolveAssetUrl(branding?.bannerUrl || "")}
+                        alt={branding?.brandName ? `Banner de ${branding.brandName}` : "Banner da loja"}
+                        className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_18px_30px_rgba(15,23,42,0.3)]"
+                        onError={(event) => { event.currentTarget.style.display = "none"; }}
+                      />
+                    </>
+                  ) : null}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                 </div>
 
