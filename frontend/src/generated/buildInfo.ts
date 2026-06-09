@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "7abefc86",
-  "versionLabel": "v0.1.9.7abefc86",
-  "versionInternal": "0.1.9+20260609.160120.7abefc86",
-  "buildId": "0.1.9+20260609.160120.7abefc86-20260609.160120-7abefc86",
-  "builtAt": "2026-06-09T16:01:20.624Z",
-  "commitHash": "7abefc8677a167a3300be5f811dc01a5eba0aed9",
-  "shortHash": "7abefc86",
+  "versionDisplaySuffix": "8bbe3e8c",
+  "versionLabel": "v0.1.9.8bbe3e8c",
+  "versionInternal": "0.1.9+20260609.161402.8bbe3e8c",
+  "buildId": "0.1.9+20260609.161402.8bbe3e8c-20260609.161402-8bbe3e8c",
+  "builtAt": "2026-06-09T16:14:02.909Z",
+  "commitHash": "8bbe3e8c68e23a382fef9a3867eed5e60a9c6294",
+  "shortHash": "8bbe3e8c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "8bbe3e8c68e23a382fef9a3867eed5e60a9c6294",
+      "shortHash": "8bbe3e8c",
+      "dateIso": "2026-06-09T13:03:59-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Improve native launch recovery overlay",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8bbe3e8c68e23a382fef9a3867eed5e60a9c6294"
+    },
     {
       "hash": "7abefc8677a167a3300be5f811dc01a5eba0aed9",
       "shortHash": "7abefc86",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: resume pending customer email verification",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/96d90d493e46b7605dbbbe8cfe80c68b32e7d813"
-    },
-    {
-      "hash": "03a49e9178962cbb67aaf8ac6ac2d81cb6503ca0",
-      "shortHash": "03a49e91",
-      "dateIso": "2026-06-06T16:26:13-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat: monitor email delivery health",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/03a49e9178962cbb67aaf8ac6ac2d81cb6503ca0"
     }
   ]
 } as const;
