@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "9254f177",
-  "versionLabel": "v0.1.9.9254f177",
-  "versionInternal": "0.1.9+20260609.151023.9254f177",
-  "buildId": "0.1.9+20260609.151023.9254f177-20260609.151023-9254f177",
-  "builtAt": "2026-06-09T15:10:23.315Z",
-  "commitHash": "9254f17729ef932cddffa65ce6d00fbed9803df0",
-  "shortHash": "9254f177",
+  "versionDisplaySuffix": "7abefc86",
+  "versionLabel": "v0.1.9.7abefc86",
+  "versionInternal": "0.1.9+20260609.160120.7abefc86",
+  "buildId": "0.1.9+20260609.160120.7abefc86-20260609.160120-7abefc86",
+  "builtAt": "2026-06-09T16:01:20.624Z",
+  "commitHash": "7abefc8677a167a3300be5f811dc01a5eba0aed9",
+  "shortHash": "7abefc86",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "7abefc8677a167a3300be5f811dc01a5eba0aed9",
+      "shortHash": "7abefc86",
+      "dateIso": "2026-06-09T12:14:42-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Fix Android text suggestions in WebView",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7abefc8677a167a3300be5f811dc01a5eba0aed9"
+    },
     {
       "hash": "9254f17729ef932cddffa65ce6d00fbed9803df0",
       "shortHash": "9254f177",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat: monitor email delivery health",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/03a49e9178962cbb67aaf8ac6ac2d81cb6503ca0"
-    },
-    {
-      "hash": "9329e4f67c1a1f518e45cadc85b6b906e5f721ad",
-      "shortHash": "9329e4f6",
-      "dateIso": "2026-06-06T15:45:39-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: tolerate signup email delivery failures",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9329e4f67c1a1f518e45cadc85b6b906e5f721ad"
     }
   ]
 } as const;

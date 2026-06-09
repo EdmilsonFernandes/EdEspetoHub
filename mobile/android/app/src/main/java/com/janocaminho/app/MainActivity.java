@@ -505,6 +505,7 @@ public class MainActivity extends BridgeActivity {
         if (root != null) {
             root.setBackgroundColor(Color.parseColor("#0B1220"));
         }
+        setWebViewVisible(false);
 
         if (launchOverlay != null) {
             launchOverlay.setAlpha(1f);
@@ -770,6 +771,7 @@ public class MainActivity extends BridgeActivity {
         cancelLaunchOverlayTimeout();
         cancelLaunchOverlayDismiss();
         launchOverlayDismissed = true;
+        setWebViewVisible(true);
         launchOverlay.animate()
             .alpha(0f)
             .setDuration(LAUNCH_OVERLAY_FADE_MS)
@@ -791,6 +793,7 @@ public class MainActivity extends BridgeActivity {
         if (launchOverlay == null || launchOverlayDismissed) return;
 
         cancelLaunchOverlayDismiss();
+        setWebViewVisible(false);
         if (launchOverlay.getVisibility() != View.VISIBLE || launchOverlayShownAtMs <= 0L) {
             launchOverlayShownAtMs = SystemClock.elapsedRealtime();
         }
@@ -824,6 +827,7 @@ public class MainActivity extends BridgeActivity {
 
         cancelLaunchOverlayDismiss();
         cancelLaunchOverlayTimeout();
+        setWebViewVisible(false);
         if (launchOverlay.getVisibility() != View.VISIBLE || launchOverlayShownAtMs <= 0L) {
             launchOverlayShownAtMs = SystemClock.elapsedRealtime();
         }
@@ -879,6 +883,15 @@ public class MainActivity extends BridgeActivity {
         if (launchOverlayTimeoutRunnable == null) return;
         launchOverlayHandler.removeCallbacks(launchOverlayTimeoutRunnable);
         launchOverlayTimeoutRunnable = null;
+    }
+
+    private void setWebViewVisible(boolean visible) {
+        if (bridge == null || bridge.getWebView() == null) return;
+        WebView webView = bridge.getWebView();
+        webView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        if (visible) {
+            webView.setAlpha(1f);
+        }
     }
 
     private void retryInitialPageLoad() {
