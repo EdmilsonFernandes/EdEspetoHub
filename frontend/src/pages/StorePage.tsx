@@ -4093,7 +4093,7 @@ export function StorePage() {
                         <img
                           src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.jpg'}
                           alt={closedStateStoreName}
-                          className="relative h-full w-full object-contain drop-shadow-[0_20px_34px_rgba(15,23,42,0.32)]"
+                          className="relative h-full w-full object-fill drop-shadow-[0_20px_34px_rgba(15,23,42,0.32)]"
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
                         />
                       </div>

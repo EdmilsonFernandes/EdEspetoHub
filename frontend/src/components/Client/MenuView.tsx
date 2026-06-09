@@ -338,7 +338,7 @@ const Header = ({
                   <img
                     src={headerBanner}
                     alt={branding?.brandName ? `Banner de ${branding.brandName}` : "Banner da loja"}
-                    className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_20px_34px_rgba(15,23,42,0.28)]"
+                    className="absolute inset-0 h-full w-full object-fill drop-shadow-[0_20px_34px_rgba(15,23,42,0.28)]"
                     onError={(event) => { event.currentTarget.style.display = "none"; }}
                   />
                 </>
@@ -1783,7 +1783,7 @@ export const MenuView = ({
                       <img
                         src={resolveAssetUrl(branding?.bannerUrl || "")}
                         alt={branding?.brandName ? `Banner de ${branding.brandName}` : "Banner da loja"}
-                        className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_18px_30px_rgba(15,23,42,0.3)]"
+                        className="absolute inset-0 h-full w-full object-fill drop-shadow-[0_18px_30px_rgba(15,23,42,0.3)]"
                         onError={(event) => { event.currentTarget.style.display = "none"; }}
                       />
                     </>
