@@ -190,6 +190,44 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
     await expect(page.locator('#email')).toHaveAttribute('aria-invalid', 'true');
   });
 
+  test('login do lojista com conta pendente vira fluxo dedicado de ativacao', async ({ page }) => {
+    await page.addInitScript(() => {
+      const originalFetch = window.fetch.bind(window);
+      window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === 'string' ? input : input instanceof Request ? input.url : String(input);
+        if (url.includes('/auth/admin-login')) {
+          return new Response(
+            JSON.stringify({
+              code: 'AUTH-005',
+              message: 'E-mail não verificado.',
+              details: {
+                email: 'evmanutencao98@gmail.com',
+                emailMasked: 'ev************@gmail.com',
+              },
+            }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+        return originalFetch(input, init);
+      };
+    });
+
+    await page.goto('/admin?hub=1');
+    await waitForAppIntro(page);
+
+    await page.locator('#email').fill('evmanutencao98@gmail.com');
+    await page.locator('#password').fill('senha-correta-123');
+    await page.getByRole('button', { name: /Acessar Painel/i }).click();
+
+    await expect(page.getByRole('heading', { name: /Ative sua loja/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Confirmar código/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Reenviar código/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Usar outro e-mail/i })).toBeVisible();
+    await expect(page.getByText('Sua senha secreta')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Acessar Painel/i })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Usar biometria/i })).toHaveCount(0);
+  });
+
   test('mostra header padrao e valida login do entregador sem envio silencioso', async ({ page }) => {
     await page.goto('/motoboy/login?hub=1');
     await waitForAppIntro(page);

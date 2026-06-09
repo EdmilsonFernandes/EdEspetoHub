@@ -33,11 +33,16 @@ export function AdminLogin() {
   const { setBranding } = useTheme();
   const [loginForm, setLoginForm] = useState({ identifier: '', password: '' });
   const [loginError, setLoginError] = useState('');
+  const [loginMessage, setLoginMessage] = useState('');
   const [loginFieldErrors, setLoginFieldErrors] = useState<{ identifier?: string; password?: string }>({});
   const [pendingPayment, setPendingPayment] = useState(null);
   const [branding] = useState(getPersistedBranding());
   const [showPassword, setShowPassword] = useState(false);
   const [verifyPrompt, setVerifyPrompt] = useState<{ email?: string; emailMasked?: string } | null>(null);
+  const [activationCodeDigits, setActivationCodeDigits] = useState(['', '', '', '']);
+  const [activationLoading, setActivationLoading] = useState(false);
+  const [activationError, setActivationError] = useState('');
+  const [activationMessage, setActivationMessage] = useState('');
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
@@ -92,6 +97,7 @@ export function AdminLogin() {
     return params.toString() ? `?${params.toString()}` : '';
   })();
   const accessPortalPath = `/entrar${hubSuffix}`;
+  const activationCode = activationCodeDigits.join('');
 
   const finishAdminLogin = (sessionData: any) => {
     const redirectTab = sessionStorage.getItem('admin:redirectTab');
@@ -161,6 +167,7 @@ export function AdminLogin() {
     if (biometricLoading) return;
     setBiometricLoading(true);
     setLoginError('');
+    setLoginMessage('');
     setPendingPayment(null);
     setVerifyPrompt(null);
     try {
@@ -195,6 +202,7 @@ export function AdminLogin() {
 
   useEffect(() => {
     if (!biometricAvailable || biometricLoading || autoBiometricTried) return;
+    if (verifyPrompt) return;
     const hasTypedCredentials =
       !forceBiometric && (Boolean(String(loginForm.identifier || '').trim()) || Boolean(String(loginForm.password || '').trim()));
     if (hasTypedCredentials) return;
@@ -212,6 +220,7 @@ export function AdminLogin() {
     forceBiometric,
     loginForm.identifier,
     loginForm.password,
+    verifyPrompt,
   ]);
 
   useEffect(() => {
@@ -335,8 +344,12 @@ export function AdminLogin() {
   const handleLogin = async event => {
     event?.preventDefault();
     setLoginError('');
+    setLoginMessage('');
     setPendingPayment(null);
     setVerifyPrompt(null);
+    setActivationCodeDigits(['', '', '', '']);
+    setActivationError('');
+    setActivationMessage('');
     const identifierValue = String(loginForm.identifier || '').trim();
     const passwordValue = String(loginForm.password || '');
     const nextFieldErrors: { identifier?: string; password?: string } = {};
@@ -386,10 +399,115 @@ export function AdminLogin() {
           email: targetEmail,
           emailMasked: error?.details?.emailMasked,
         });
-        setLoginError('Sua loja ainda precisa ser ativada. Reenvie o código ou toque em "Digitar código" para concluir o acesso.');
+        setActivationCodeDigits(['', '', '', '']);
+        setActivationError('');
+        setActivationMessage('Digite o código recebido por e-mail para liberar o painel da loja.');
+        window.setTimeout(() => {
+          const input = document.getElementById('admin-activation-otp-0') as HTMLInputElement | null;
+          input?.focus();
+          input?.select?.();
+        }, 160);
         return;
       }
       setLoginError(message);
+    }
+  };
+
+  const normalizeActivationError = (error: any) => {
+    const rawMessage = String(error?.message || '').trim();
+    const normalized = rawMessage
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+    if (normalized.includes('expir')) return 'Código expirado. Reenvie um novo código e tente novamente.';
+    if (!rawMessage || normalized.includes('parametro') || normalized.includes('token') || normalized.includes('codigo')) {
+      return 'Código inválido. Confira os 4 dígitos recebidos no e-mail e tente novamente.';
+    }
+    return rawMessage;
+  };
+
+  const handleActivationDigitChange = (index: number, value: string) => {
+    const digitsOnly = String(value || '').replace(/\D/g, '');
+    if (!digitsOnly) {
+      setActivationCodeDigits((prev) => prev.map((digit, i) => (i === index ? '' : digit)));
+      return;
+    }
+    const nextDigits = digitsOnly.slice(0, 4 - index).split('');
+    setActivationCodeDigits((prev) => {
+      const next = [...prev];
+      nextDigits.forEach((digit, offset) => {
+        next[index + offset] = digit;
+      });
+      return next;
+    });
+    setActivationError('');
+    const nextIndex = Math.min(index + nextDigits.length, 3);
+    window.setTimeout(() => {
+      const input = document.getElementById(`admin-activation-otp-${nextIndex}`) as HTMLInputElement | null;
+      input?.focus();
+      input?.select?.();
+    }, 0);
+  };
+
+  const handleActivationKeyDown = (index: number, event: any) => {
+    if (event.key === 'Backspace' && !activationCodeDigits[index] && index > 0) {
+      event.preventDefault();
+      const input = document.getElementById(`admin-activation-otp-${index - 1}`) as HTMLInputElement | null;
+      input?.focus();
+      input?.select?.();
+    }
+    if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault();
+      (document.getElementById(`admin-activation-otp-${index - 1}`) as HTMLInputElement | null)?.focus();
+    }
+    if (event.key === 'ArrowRight' && index < 3) {
+      event.preventDefault();
+      (document.getElementById(`admin-activation-otp-${index + 1}`) as HTMLInputElement | null)?.focus();
+    }
+  };
+
+  const handleActivationPaste = (event: any) => {
+    const pasted = String(event.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 4);
+    if (!pasted) return;
+    event.preventDefault();
+    setActivationCodeDigits([pasted[0] || '', pasted[1] || '', pasted[2] || '', pasted[3] || '']);
+    setActivationError('');
+    const targetIndex = Math.min(Math.max(pasted.length - 1, 0), 3);
+    window.setTimeout(() => (document.getElementById(`admin-activation-otp-${targetIndex}`) as HTMLInputElement | null)?.focus(), 0);
+  };
+
+  const handleConfirmActivation = async () => {
+    const email = String(verifyPrompt?.email || loginForm.identifier || '').trim().toLowerCase();
+    if (!email || activationCode.length !== 4 || activationLoading) return;
+    setActivationLoading(true);
+    setActivationError('');
+    setActivationMessage('');
+    try {
+      await authService.verifyEmail({ email, token: activationCode });
+      setActivationMessage('Loja ativada. Estamos entrando no painel...');
+      if (loginForm.password) {
+        try {
+          const session = await authService.adminLogin(email, loginForm.password);
+          if (session?.mfaRequired) {
+            setMfaError('');
+            setMfaChallenge(session);
+            setVerifyPrompt(null);
+            return;
+          }
+          await completeAdminLoginFlow(session);
+          return;
+        } catch {
+          // Se o login automático falhar, a ativação continua válida e o usuário entra manualmente.
+        }
+      }
+      setVerifyPrompt(null);
+      setLoginForm((prev) => ({ ...prev, identifier: email }));
+      setLoginMessage('Loja ativada com sucesso. Entre com sua senha para acessar o painel.');
+      setLoginError('');
+    } catch (error: any) {
+      setActivationError(normalizeActivationError(error));
+    } finally {
+      setActivationLoading(false);
     }
   };
 
@@ -400,19 +518,35 @@ export function AdminLogin() {
   }, [resendCooldown]);
 
   const handleResendVerification = async () => {
-    const email = verifyPrompt?.email;
+    const email = String(verifyPrompt?.email || loginForm.identifier || '').trim().toLowerCase();
     if (!email || resendLoading || resendCooldown > 0) return;
     setResendLoading(true);
     setLoginError('');
+    setActivationError('');
+    setActivationMessage('');
     try {
       const response = await authService.resendVerification(email);
       setResendCooldown(Number(response?.cooldownSec || 60));
-      setLoginError(response?.message || 'Se o e-mail existir, enviaremos instruções.');
+      setActivationMessage(response?.message || `Novo código enviado para ${verifyPrompt?.emailMasked || email}.`);
     } catch (error: any) {
-      setLoginError(error?.message || 'Não foi possível reenviar agora.');
+      setActivationError(error?.message || 'Não foi possível reenviar agora.');
     } finally {
       setResendLoading(false);
     }
+  };
+
+  const handleUseAnotherEmail = () => {
+    setVerifyPrompt(null);
+    setActivationCodeDigits(['', '', '', '']);
+    setActivationError('');
+    setActivationMessage('');
+    setLoginError('');
+    setLoginMessage('Confira o e-mail usado no cadastro e tente entrar novamente.');
+    window.setTimeout(() => {
+      const input = document.getElementById('email') as HTMLInputElement | null;
+      input?.focus();
+      input?.select?.();
+    }, 120);
   };
 
   useEffect(() => {
@@ -486,43 +620,99 @@ export function AdminLogin() {
           </button>
         ) : null}
 
+        {verifyPrompt ? (
+          <div className="ds-card-elevated overflow-hidden border-white/40 bg-white/86 p-0 shadow-[0_30px_80px_-40px_rgba(13,79,102,0.5)] backdrop-blur-xl">
+            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0d4f66,#336886)] px-5 py-5 text-white sm:px-7 sm:py-7">
+              <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.24),transparent_70%)]" />
+              <div className="relative flex items-start gap-3">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/20 bg-white/14 shadow-[0_18px_36px_-24px_rgba(15,23,42,0.75)]">
+                  <ShieldCheck size={25} weight="duotone" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/65">Ativação segura</p>
+                  <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">Ative sua loja</h2>
+                  <p className="mt-2 text-sm font-semibold leading-relaxed text-white/80">
+                    Enviamos um código de 4 dígitos para{' '}
+                    <span className="font-black text-white">{verifyPrompt.emailMasked || verifyPrompt.email}</span>.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 px-5 py-5 sm:px-7 sm:py-6">
+              <div className="rounded-[1.6rem] border border-slate-200/80 bg-slate-50/80 p-4">
+                <div className="flex items-center justify-between gap-2">
+                  {activationCodeDigits.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`admin-activation-otp-${index}`}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                      autoCorrect="off"
+                      autoCapitalize="none"
+                      spellCheck={false}
+                      value={digit}
+                      onChange={(e) => handleActivationDigitChange(index, e.target.value)}
+                      onKeyDown={(e) => handleActivationKeyDown(index, e)}
+                      onPaste={handleActivationPaste}
+                      className="h-14 w-12 rounded-2xl border border-slate-200 bg-white text-center text-2xl font-black tracking-[0.1em] text-slate-900 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] outline-none transition focus:border-[#0d4f66] focus:bg-white focus:ring-4 focus:ring-[#0d4f66]/10 sm:h-16 sm:w-16"
+                    />
+                  ))}
+                </div>
+                <p className="mt-3 text-center text-[11px] font-bold leading-relaxed text-slate-500">
+                  O código expira em 30 minutos. Se não recebeu, reenvie.
+                </p>
+              </div>
+
+              {activationError ? (
+                <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-bold text-rose-700">
+                  <WarningCircle size={18} weight="fill" />
+                  <span>{activationError}</span>
+                </div>
+              ) : null}
+
+              {activationMessage ? (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-bold leading-relaxed text-emerald-700">
+                  {activationMessage}
+                </div>
+              ) : null}
+
+              <div className="grid gap-3">
+                <button
+                  type="button"
+                  onClick={handleConfirmActivation}
+                  disabled={activationCode.length !== 4 || activationLoading}
+                  className="ds-btn-shine h-12 rounded-2xl bg-[linear-gradient(135deg,#0d4f66,#336886)] text-base font-black text-white shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] transition-all active:scale-[0.98] disabled:opacity-60 sm:h-14"
+                >
+                  {activationLoading ? 'Validando código...' : 'Confirmar código'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading || resendCooldown > 0 || !String(verifyPrompt?.email || loginForm.identifier || '').trim()}
+                  className="h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50 active:scale-[0.98] disabled:opacity-60"
+                >
+                  {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleUseAnotherEmail}
+                  className="rounded-full px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                >
+                  Usar outro e-mail
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
         <form
           onSubmit={handleLogin}
           onFocusCapture={prefetchAdminLandingRoutes}
           autoComplete="on"
           className="ds-card-elevated p-4 space-y-3 bg-white/80 backdrop-blur-xl border-white/40 sm:p-7 sm:space-y-5 lg:p-8"
         >
-          {verifyPrompt && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-amber-900 text-xs space-y-3 backdrop-blur-sm">
-              <div className="flex items-center gap-2">
-                <WarningCircle size={18} weight="fill" className="text-amber-500" />
-                <p className="font-bold text-[13px]">Ativação Pendente</p>
-              </div>
-              <p className="font-medium text-amber-800/80 leading-relaxed">
-                {verifyPrompt.emailMasked
-                  ? `Enviamos um código para ${verifyPrompt.emailMasked}. Verifique sua caixa de entrada.`
-                  : 'Sua conta ainda não foi ativada. Verifique seu e-mail.'}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={handleResendVerification}
-                  disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
-                  className="flex-1 rounded-xl bg-amber-500 px-3 py-2.5 text-white font-bold disabled:opacity-50 transition-all hover:bg-amber-600 shadow-sm active:scale-95"
-                >
-                  {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate('/verify-email', { state: { email: verifyPrompt.email } })}
-                  className="flex-1 rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-amber-700 font-bold hover:bg-amber-50 transition-colors active:scale-95"
-                >
-                  Digitar código
-                </button>
-              </div>
-            </div>
-          )}
-
           <div className="space-y-3 sm:space-y-4">
             <div className="floating-field">
               <input
@@ -585,6 +775,13 @@ export function AdminLogin() {
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-50 text-[13px] font-semibold text-rose-600 border border-rose-100 animate-shake">
               <WarningCircle size={16} weight="fill" />
               <span>{loginError}</span>
+            </div>
+          ) : null}
+
+          {loginMessage ? (
+            <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-[13px] font-semibold text-emerald-700">
+              <ShieldCheck size={16} weight="fill" />
+              <span>{loginMessage}</span>
             </div>
           ) : null}
 
@@ -658,6 +855,7 @@ export function AdminLogin() {
           </div>
           <AuthMascotPanel variant="admin" />
         </form>
+        )}
 
         <a
           href="mailto:contato@janocaminho.com.br"
