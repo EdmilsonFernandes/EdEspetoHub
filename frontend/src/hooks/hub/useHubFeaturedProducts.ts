@@ -24,6 +24,11 @@ type HubFeaturedStore = {
   segment: string;
 };
 
+const HOME_FEATURED_STORE_SCAN_LIMIT = 12;
+const HOME_FEATURED_PRODUCTS_PER_STORE = 6;
+const HOME_FEATURED_POOL_LIMIT = 36;
+const HOME_FEATURED_WINDOW_SIZE = 8;
+
 export function useHubFeaturedProducts(stores: HubFeaturedStore[]) {
   const [featuredProducts, setFeaturedProducts] = useState<HubFeaturedProduct[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
@@ -73,7 +78,7 @@ export function useHubFeaturedProducts(stores: HubFeaturedStore[]) {
           }))
           .filter((item: HubFeaturedProduct) => item.storeSlug && item.price > 0);
 
-        const candidates = stores.slice(0, 4);
+        const candidates = stores.slice(0, HOME_FEATURED_STORE_SCAN_LIMIT);
         const responses = await Promise.allSettled(
           candidates.map(async (store) => {
             const products = await productService.listPublicBySlug(store.slug);
@@ -94,7 +99,7 @@ export function useHubFeaturedProducts(stores: HubFeaturedStore[]) {
                 sponsored: false,
               }))
               .sort((a, b) => Number(b.featured) - Number(a.featured))
-              .slice(0, 5);
+              .slice(0, HOME_FEATURED_PRODUCTS_PER_STORE);
             return valid;
           })
         );
@@ -112,7 +117,7 @@ export function useHubFeaturedProducts(stores: HubFeaturedStore[]) {
           (entry) => !sponsoredKeys.has(`${entry.storeSlug}::${entry.id}::${entry.name}`)
         );
         const shuffledOrganic = [...uniqueOrganic].sort(() => Math.random() - 0.5);
-        const merged = [...sponsoredEntries, ...shuffledOrganic].slice(0, 18);
+        const merged = [...sponsoredEntries, ...shuffledOrganic].slice(0, HOME_FEATURED_POOL_LIMIT);
         setFeaturedProducts(merged);
       } catch (_error) {
         if (!cancelled) setFeaturedProducts([]);
@@ -139,7 +144,7 @@ export function useHubFeaturedProducts(stores: HubFeaturedStore[]) {
     const items = Array.isArray(featuredProducts) ? featuredProducts : [];
     const sponsored = items.filter((item) => item.sponsored);
     const organic = items.filter((item) => !item.sponsored);
-    const windowSize = 8;
+    const windowSize = HOME_FEATURED_WINDOW_SIZE;
     if (items.length <= windowSize) return [...sponsored, ...organic];
     if (organic.length === 0) return sponsored.slice(0, windowSize);
 
@@ -159,6 +164,6 @@ export function useHubFeaturedProducts(stores: HubFeaturedStore[]) {
     displayedFeaturedProducts,
     genericHighlightLabel,
     hasSponsoredFeaturedProducts: displayedFeaturedProducts.some((item) => item.sponsored),
-    hasFeaturedCarouselOverflow: displayedFeaturedProducts.length > 3,
+    hasFeaturedCarouselOverflow: featuredProducts.length > displayedFeaturedProducts.length || displayedFeaturedProducts.length > 3,
   };
 }

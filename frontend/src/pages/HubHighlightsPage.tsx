@@ -55,6 +55,9 @@ type CategorizedHighlightItem = HubHighlightItem & {
   categoryKey: HighlightCategoryKey;
 };
 
+const HIGHLIGHTS_STORE_SCAN_LIMIT = 48;
+const HIGHLIGHTS_PRODUCTS_PER_STORE = 24;
+
 const currency = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
   currency: 'BRL',
@@ -290,12 +293,12 @@ export function HubHighlightsPage() {
         }
 
         const organicResponses = await Promise.allSettled(
-          stores.slice(0, 12).map(async (store) => {
+          stores.slice(0, HIGHLIGHTS_STORE_SCAN_LIMIT).map(async (store) => {
             const products = await productService.listPublicBySlug(String(store?.slug || ''));
             return (Array.isArray(products) ? products : [])
               .filter((product: any) => Boolean(product?.name) && Number(product?.price || product?.promoPrice || 0) > 0)
               .sort((a: any, b: any) => Number(Boolean(b?.isFeatured)) - Number(Boolean(a?.isFeatured)))
-              .slice(0, 4)
+              .slice(0, HIGHLIGHTS_PRODUCTS_PER_STORE)
               .map((product: any) => normalizeOrganicProduct(product, store))
               .filter(Boolean) as HubHighlightItem[];
           })
@@ -582,12 +585,6 @@ export function HubHighlightsPage() {
           </section>
         )}
 
-        <div className="mt-5 flex justify-center">
-          <Link to="/hub" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/86 px-4 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-slate-600 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.25)]">
-            Voltar para a home
-            <CaretRight size={12} weight="bold" />
-          </Link>
-        </div>
       </main>
 
       <ClientBottomNav active="home" />

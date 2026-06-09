@@ -265,6 +265,9 @@ test.describe('Hub marketplace', () => {
     await expect(
       filterGrid.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)
     ).resolves.toBe(true);
+    await expect(page.getByRole('link', { name: /Tulipa Especial/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Achado especial/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Voltar para a home/i })).toHaveCount(0);
     await page.getByPlaceholder('O que deu vontade agora?').fill('medalhao');
     await expect(page.getByRole('link', { name: /Medalhao Premium/ }).first()).toBeVisible();
     await expect(page.getByText('por Gustavao Espetos E2E')).toBeVisible();
