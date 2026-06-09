@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { inputAssistProps, shouldEnableTextInputAssistance, textareaAssistProps } from './inputAssist';
+import { applyTextInputAssistance, inputAssistProps, shouldEnableTextInputAssistance, textareaAssistProps } from './inputAssist';
 
 describe('inputAssistProps', () => {
   it('keeps suggestions enabled for common text and search fields', () => {
@@ -21,6 +21,7 @@ describe('inputAssistProps', () => {
       autoCorrect: 'on',
       autoCapitalize: 'sentences',
       spellCheck: true,
+      inputMode: 'text',
     });
   });
 
@@ -70,5 +71,21 @@ describe('inputAssistProps', () => {
     expect(shouldEnableTextInputAssistance(makeElement({ type: 'password', name: 'password' }))).toBe(false);
     expect(shouldEnableTextInputAssistance(makeElement({ name: 'email', autocomplete: 'email' }))).toBe(false);
     expect(shouldEnableTextInputAssistance(makeElement({ name: 'otp', autocomplete: 'one-time-code' }))).toBe(false);
+  });
+
+  it('forces text input mode for assisted common fields', () => {
+    const wrapper = document.createElement('div');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.name = 'customerNote';
+    wrapper.appendChild(input);
+
+    applyTextInputAssistance(wrapper);
+
+    expect(input.getAttribute('autocomplete')).toBe('on');
+    expect(input.getAttribute('autocorrect')).toBe('on');
+    expect(input.getAttribute('autocapitalize')).toBe('sentences');
+    expect(input.getAttribute('spellcheck')).toBe('true');
+    expect(input.getAttribute('inputmode')).toBe('text');
   });
 });

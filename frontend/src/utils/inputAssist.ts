@@ -129,12 +129,14 @@ export const textareaAssistProps = {
     autoCorrect: 'on',
     autoCapitalize: 'sentences',
     spellCheck: true,
+    inputMode: 'text',
   },
   description: {
     autoComplete: 'on',
     autoCorrect: 'on',
     autoCapitalize: 'sentences',
     spellCheck: true,
+    inputMode: 'text',
   },
 } as const;
 
@@ -168,6 +170,7 @@ export const applyTextInputAssistance = (root: ParentNode = document) => {
     element.setAttribute('autocorrect', 'on');
     element.setAttribute('autocapitalize', element.getAttribute('autocapitalize') || 'sentences');
     element.setAttribute('spellcheck', 'true');
+    if (!element.getAttribute('inputmode')) element.setAttribute('inputmode', 'text');
   });
 };
 
