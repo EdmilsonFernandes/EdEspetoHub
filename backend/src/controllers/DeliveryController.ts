@@ -46,4 +46,19 @@ export class DeliveryController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+  /**
+   * Store unlocks delivery confirmation code attempts after customer support validates the case.
+   */
+  static async resetConfirmationCode(req: Request, res: Response) {
+    try {
+      const storeId = req.auth?.storeId || '';
+      if (!storeId) return respondWithError(req, res, { code: 'AUTH-003', status: 403 }, 403);
+      const result = await deliveryService.resetConfirmationCodeByStore(req.params.deliveryId, storeId, req.body || {});
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Delivery code reset failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
 }

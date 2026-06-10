@@ -768,7 +768,9 @@ private async attachDeliverySnapshot(orders: any[]) {
           od.accepted_at,
           od.picked_up_at,
           od.in_transit_at,
-          od.delivered_at
+          od.delivered_at,
+          od.confirmation_code_attempts,
+          od.confirmation_code_blocked_at
         FROM order_deliveries od
         WHERE od.order_id = ANY($1::uuid[])
       `,
@@ -824,6 +826,8 @@ private async attachDeliverySnapshot(orders: any[]) {
         pickedUpAt: row?.picked_up_at || null,
         inTransitAt: row?.in_transit_at || null,
         deliveredAt: row?.delivered_at || null,
+        confirmationCodeAttempts: Number(row?.confirmation_code_attempts || 0),
+        confirmationCodeBlockedAt: row?.confirmation_code_blocked_at || null,
       });
     }
 

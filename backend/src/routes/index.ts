@@ -335,6 +335,7 @@ routes.get('/couriers/me/stats', requireAuth, MotoboyController.getStats);
 // Store operations
 routes.post('/deliveries/:deliveryId/cancel', requireAuth, requireRole('ADMIN'), DeliveryController.cancel);
 routes.post('/deliveries/:deliveryId/issues', requireAuth, requireRole('ADMIN'), DeliveryController.reportIssue);
+routes.post('/deliveries/:deliveryId/confirmation-code/reset', requireAuth, requireRole('ADMIN'), DeliveryController.resetConfirmationCode);
 routes.post('/motoboy/documents', requireAuth, MotoboyController.uploadDocument);
 routes.get('/motoboy/documents', requireAuth, MotoboyController.listOwnDocuments);
 routes.get('/motoboy/profile', requireAuth, MotoboyController.getProfile);

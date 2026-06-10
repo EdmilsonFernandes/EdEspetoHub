@@ -650,6 +650,76 @@ async cancelByStore(orderId: string, storeId: string, reason?: string | null) {
     });
   }
 
+  async resetConfirmationCodeByStore(
+    orderId: string,
+    storeId: string,
+    input: { reason?: string | null; details?: string | null } = {}
+  ) {
+    const reason = String(input.reason || 'Liberar nova tentativa').trim();
+    const details = String(input.details || '').trim();
+
+    return AppDataSource.transaction(async (manager) => {
+      const deliveryRepo = manager.getRepository(OrderDelivery);
+      const orderRepo = manager.getRepository(Order);
+
+      const order = await orderRepo
+        .createQueryBuilder('o')
+        .leftJoinAndSelect('o.store', 'store')
+        .setLock('pessimistic_write', undefined, ['o'])
+        .where('o.id = :orderId', { orderId })
+        .getOne();
+      if (!order) throw new AppError('ORDER-001', 404);
+      if (order.store?.id !== storeId) throw new AppError('AUTH-003', 403);
+      if (order.type !== 'delivery') throw new AppError('DELIV-003', 400);
+      if (String((order as any).fulfillmentMode || '').toLowerCase() === 'postal') throw new AppError('DELIV-003', 400);
+      if (String(order.status || '').toLowerCase() !== 'in_delivery') {
+        throw new AppError('DELIV-010', 400, { orderStatus: order.status });
+      }
+
+      const delivery = await deliveryRepo
+        .createQueryBuilder('od')
+        .setLock('pessimistic_write')
+        .where('od.order_id = :orderId', { orderId })
+        .getOne();
+      if (!delivery) throw new AppError('DELIV-007', 404);
+      if (!delivery.confirmationCode) throw new AppError('DELIV-CODE', 400, { message: 'Pedido sem codigo de confirmacao ativo.' });
+
+      const from = normalizeStatus(delivery.status);
+      if (![ 'PICKED_UP', 'IN_TRANSIT' ].includes(from)) {
+        throw new AppError('DELIV-010', 400, { status: from });
+      }
+
+      const previousAttempts = Number(delivery.confirmationCodeAttempts || 0);
+      const wasBlocked = Boolean(delivery.confirmationCodeBlockedAt);
+
+      delivery.confirmationCodeAttempts = 0;
+      delivery.confirmationCodeBlockedAt = null;
+      await deliveryRepo.save(delivery);
+
+      await this.insertEvent(manager, {
+        deliveryId: orderId,
+        actorType: 'STORE',
+        actorId: null,
+        fromStatus: from,
+        toStatus: 'CONFIRMATION_CODE_RESET',
+        metadata: {
+          reason,
+          details: details || null,
+          previousAttempts,
+          wasBlocked,
+        },
+      });
+
+      return {
+        ok: true,
+        orderId,
+        deliveryStatus: from,
+        confirmationCodeAttempts: 0,
+        confirmationCodeBlockedAt: null,
+      };
+    });
+  }
+
     /**
    * Executes stats business logic.
    *

@@ -1230,6 +1230,17 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     loading: false,
     error: '',
   });
+  const [deliveryCodeResetModal, setDeliveryCodeResetModal] = useState<{
+    open: boolean;
+    order: any | null;
+    loading: boolean;
+    error: string;
+  }>({
+    open: false,
+    order: null,
+    loading: false,
+    error: '',
+  });
   const [printSelectionModal, setPrintSelectionModal] = useState<{
     open: boolean;
     order: any | null;
@@ -2369,6 +2380,50 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         ...prev,
         loading: false,
         error: 'Não foi possível registrar a ocorrência agora.',
+      }));
+    }
+  };
+
+  const openDeliveryCodeResetModal = (order: any) => {
+    setDeliveryCodeResetModal({
+      open: true,
+      order,
+      loading: false,
+      error: '',
+    });
+  };
+
+  const closeDeliveryCodeResetModal = () => {
+    if (deliveryCodeResetModal.loading) return;
+    setDeliveryCodeResetModal({
+      open: false,
+      order: null,
+      loading: false,
+      error: '',
+    });
+  };
+
+  const handleResetDeliveryCode = async () => {
+    if (!deliveryCodeResetModal.order?.id) return;
+    try {
+      setDeliveryCodeResetModal((prev) => ({ ...prev, loading: true, error: '' }));
+      await orderService.resetDeliveryConfirmationCode(deliveryCodeResetModal.order.id, {
+        reason: 'Liberar nova tentativa pelo gestor',
+      });
+      setDeliveryCodeResetModal({
+        open: false,
+        order: null,
+        loading: false,
+        error: '',
+      });
+      setError('');
+      void loadQueue();
+    } catch (error) {
+      console.error('Erro ao liberar codigo da entrega', error);
+      setDeliveryCodeResetModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: 'Não foi possível liberar o código agora.',
       }));
     }
   };
@@ -5020,6 +5075,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             >
               {inRouteQueue.map((order) => {
                 const isDispatched = String(order?.status || '').toLowerCase() === 'dispatched';
+                const deliveryCodeBlockedAt = order?.delivery?.confirmationCodeBlockedAt || order?.delivery?.confirmation_code_blocked_at || null;
+                const deliveryCodeAttempts = Number(order?.delivery?.confirmationCodeAttempts ?? order?.delivery?.confirmation_code_attempts ?? 0);
+                const isDeliveryCodeBlocked = Boolean(deliveryCodeBlockedAt) && !isDispatched;
                 return (
                 <div
                   key={order.id}
@@ -5063,22 +5121,38 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   ) : null}
 
                   {formatAddress(order.address || order.deliveryAddress) ? (
-                    <div className="mt-3 text-xs text-slate-600">
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Entrega</p>
-                      <p className="font-semibold text-slate-700">{formatAddress(order.address || order.deliveryAddress)}</p>
+                    <div className="mt-3 rounded-2xl border border-white/70 bg-white/70 px-3 py-2 text-xs text-slate-600 shadow-[0_10px_26px_-24px_rgba(15,23,42,0.5)]">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Entrega</p>
+                      <p className="mt-1 break-words font-semibold leading-relaxed text-slate-700">{formatAddress(order.address || order.deliveryAddress)}</p>
                     </div>
                   ) : null}
 
-	                  <div className="mt-3 flex items-center justify-between gap-3 text-xs">
-	                    <div className="flex-1 min-w-0">
-	                      {renderMoneyBreakdown(order)}
-	                    </div>
-                      <div className="flex flex-wrap items-center justify-end gap-2">
+                  {isDeliveryCodeBlocked ? (
+                    <div className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">
+                      <p className="font-black">Código de entrega bloqueado</p>
+                      <p className="mt-0.5 font-semibold text-rose-700/85">
+                        {deliveryCodeAttempts || 3} tentativa(s) incorreta(s). Libere uma nova tentativa depois de confirmar o código com o cliente.
+                      </p>
+                    </div>
+                  ) : null}
+
+	                  <div className="mt-3 space-y-3 text-xs">
+	                    {renderMoneyBreakdown(order)}
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                        {isDeliveryCodeBlocked ? (
+                          <button
+                            type="button"
+                            onClick={() => openDeliveryCodeResetModal(order)}
+                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-rose-200 bg-rose-600 px-3 py-2 text-xs font-black text-white shadow-[0_12px_26px_-18px_rgba(225,29,72,0.65)] transition active:scale-[0.98] hover:bg-rose-700"
+                          >
+                            Liberar código
+                          </button>
+                        ) : null}
                         {isDispatched ? (
                           <button
                             type="button"
                             onClick={() => { openPostalShipmentModal(order); }}
-                            className="px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition active:scale-[0.98] hover:bg-slate-50"
                           >
                             Editar rastreio
                           </button>
@@ -5086,7 +5160,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                           <button
                             type="button"
                             onClick={() => openDeliveryIssueModal(order)}
-                            className="px-3 py-2 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-xs font-extrabold hover:bg-amber-100"
+                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-extrabold text-amber-800 transition active:scale-[0.98] hover:bg-amber-100"
                           >
                             Problema na entrega
                           </button>
@@ -5095,7 +5169,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                           href={`/pedido/${order.id}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="px-3 py-2 rounded-lg bg-slate-900 text-white text-xs font-bold"
+                          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white transition active:scale-[0.98] hover:bg-slate-800"
                         >
                           Acompanhar
                         </a>
@@ -6156,6 +6230,67 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   className="h-10 rounded-xl bg-amber-600 px-3 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-60"
                 >
                   {deliveryIssueModal.loading ? 'Registrando...' : 'Registrar ocorrência'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+      {deliveryCodeResetModal.open && createPortal(
+        <div className="fixed inset-0 z-[10031]">
+          <div
+            className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm"
+            onClick={closeDeliveryCodeResetModal}
+          />
+          <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-3 sm:p-4">
+            <div className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-black text-slate-900">Liberar nova tentativa</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Pedido #{formatOrderDisplayId(deliveryCodeResetModal.order?.id, storeSlug)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeDeliveryCodeResetModal}
+                  disabled={deliveryCodeResetModal.loading}
+                  className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  aria-label="Fechar liberação do código"
+                >
+                  <X size={16} weight="bold" />
+                </button>
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-800">
+                  O entregador errou o código 3 vezes e a entrega foi bloqueada por segurança.
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+                  Confirme o código com o cliente por telefone ou WhatsApp antes de liberar. Esta ação não finaliza o pedido, não cancela e não altera cobrança.
+                </div>
+                {deliveryCodeResetModal.error && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                    {deliveryCodeResetModal.error}
+                  </div>
+                )}
+              </div>
+              <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeDeliveryCodeResetModal}
+                  disabled={deliveryCodeResetModal.loading}
+                  className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Voltar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetDeliveryCode}
+                  disabled={deliveryCodeResetModal.loading}
+                  className="h-10 rounded-xl bg-rose-600 px-3 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-60"
+                >
+                  {deliveryCodeResetModal.loading ? 'Liberando...' : 'Liberar tentativa'}
                 </button>
               </div>
             </div>

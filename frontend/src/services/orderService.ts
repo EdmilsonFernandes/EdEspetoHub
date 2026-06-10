@@ -388,6 +388,16 @@ export const orderService = {
     return apiClient.post(`/deliveries/${id}/issues`, payload || {});
   },
 
+  async resetDeliveryConfirmationCode(
+    id: string,
+    payload?: {
+      reason?: string | null;
+      details?: string | null;
+    }
+  ) {
+    return apiClient.post(`/deliveries/${id}/confirmation-code/reset`, payload || {});
+  },
+
   async updateItems(id: string, items: any, total: number)
   {
     const normalizedItems = (items || []).map((item: any) => ({

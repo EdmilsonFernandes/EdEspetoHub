@@ -238,6 +238,31 @@ describe('Motoboy delivery security flow', () => {
       );
       expect(Number(deliveryRows?.[0]?.confirmation_code_attempts || 0)).toBe(3);
       expect(deliveryRows?.[0]?.confirmation_code_blocked_at).toBeTruthy();
+
+      const resetCode = await api
+        .post(`/api/deliveries/${deliveryOrderId}/confirmation-code/reset`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ reason: 'Cliente confirmou o codigo correto por suporte' });
+      expect(resetCode.status).toBe(200);
+      expect(resetCode.body?.ok).toBe(true);
+      expect(Number(resetCode.body?.confirmationCodeAttempts || -1)).toBe(0);
+
+      const resetRows = await AppDataSource.query(
+        `
+        SELECT confirmation_code_attempts, confirmation_code_blocked_at
+        FROM order_deliveries
+        WHERE order_id = $1
+        `,
+        [deliveryOrderId]
+      );
+      expect(Number(resetRows?.[0]?.confirmation_code_attempts || -1)).toBe(0);
+      expect(resetRows?.[0]?.confirmation_code_blocked_at).toBeFalsy();
+
+      const deliveredAfterReset = await api
+        .post(`/api/motoboy/orders/${deliveryOrderId}/delivered`)
+        .set('Authorization', `Bearer ${motoboyToken}`)
+        .send({ code: confirmationCode });
+      expect(deliveredAfterReset.status).toBe(200);
     },
     70_000
   );
