@@ -371,10 +371,10 @@ const buildProviderQuickActions = ({ item, destination, destinationSlug, place, 
   ].filter(Boolean);
 };
 
-const ProviderQuickActions = ({ actions, onOpen }: any) => {
+const ProviderQuickActions = ({ actions, onOpen, className = '' }: any) => {
   if (!actions?.length) return null;
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
       {actions.slice(0, 4).map((action: any) => {
         const Icon = action.icon;
         return (
@@ -911,27 +911,30 @@ export function HospitalityPlacePage() {
                       </>
                     ) : null}
                     {mediaUrl ? (
-                      <div
-                        className="relative aspect-square self-start overflow-hidden rounded-[1.35rem] group/image cursor-zoom-in shrink-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          setPreviewImage({ src: mediaUrl, title: store.name });
-                        }}
-                      >
-                        <SmartCardImage
-                          src={mediaUrl}
-                          alt={store.name}
-                          fit={hasCoverImage(store) ? 'cover' : 'contain'}
-                          className="h-full w-full"
+                      <div className="flex min-w-0 flex-col gap-2 self-start">
+                        <div
+                          className="relative aspect-square overflow-hidden rounded-[1.35rem] group/image cursor-zoom-in shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setPreviewImage({ src: mediaUrl, title: store.name });
+                          }}
                         >
-                          <div className="absolute left-2 top-2 rounded-full bg-white/82 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#153A4C] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.44)] ring-1 ring-white/75 backdrop-blur-xl z-20">
-                            App
-                          </div>
-                          <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
-                            <MagnifyingGlass size={22} weight="bold" className="text-white drop-shadow-md" />
-                          </div>
-                        </SmartCardImage>
+                          <SmartCardImage
+                            src={mediaUrl}
+                            alt={store.name}
+                            fit={hasCoverImage(store) ? 'cover' : 'contain'}
+                            className="h-full w-full"
+                          >
+                            <div className="absolute left-2 top-2 rounded-full bg-white/82 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#153A4C] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.44)] ring-1 ring-white/75 backdrop-blur-xl z-20">
+                              App
+                            </div>
+                            <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
+                              <MagnifyingGlass size={22} weight="bold" className="text-white drop-shadow-md" />
+                            </div>
+                          </SmartCardImage>
+                        </div>
+                        <ProviderQuickActions actions={quickActions} onOpen={openProviderQuickAction} className="justify-center px-0.5" />
                       </div>
                     ) : null}
                     <div className={`min-w-0 ${mediaUrl ? 'p-2.5' : 'p-3'}`}>
@@ -956,7 +959,7 @@ export function HospitalityPlacePage() {
                               </span>
                             ) : null}
                           </div>
-                          <ProviderQuickActions actions={quickActions} onOpen={openProviderQuickAction} />
+                          {!mediaUrl ? <ProviderQuickActions actions={quickActions} onOpen={openProviderQuickAction} /> : null}
                         </div>
                         <span className="shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover/card:bg-[#336886] group-hover/card:text-white group-hover/card:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
                           Abrir vitrine
@@ -1000,23 +1003,26 @@ export function HospitalityPlacePage() {
                       </>
                     ) : null}
                     {mediaUrl ? (
-                      <div
-                        className="relative aspect-square self-start overflow-hidden rounded-[1.35rem] group/image cursor-zoom-in shrink-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          setPreviewImage({ src: mediaUrl, title: listing.title });
-                        }}
-                      >
-                        <SmartCardImage
-                          src={mediaUrl}
-                          alt={listing.title}
-                          fit={hasCoverImage(listing) ? 'cover' : 'contain'}
-                          className="h-full w-full"
-                        />
-                        <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
-                          <MagnifyingGlass size={22} weight="bold" className="text-white drop-shadow-md" />
+                      <div className="flex min-w-0 flex-col gap-2 self-start">
+                        <div
+                          className="relative aspect-square overflow-hidden rounded-[1.35rem] group/image cursor-zoom-in shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setPreviewImage({ src: mediaUrl, title: listing.title });
+                          }}
+                        >
+                          <SmartCardImage
+                            src={mediaUrl}
+                            alt={listing.title}
+                            fit={hasCoverImage(listing) ? 'cover' : 'contain'}
+                            className="h-full w-full"
+                          />
+                          <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
+                            <MagnifyingGlass size={22} weight="bold" className="text-white drop-shadow-md" />
+                          </div>
                         </div>
+                        <ProviderQuickActions actions={quickActions} onOpen={openProviderQuickAction} className="justify-center px-0.5" />
                       </div>
                     ) : null}
                     <div className={`min-w-0 ${mediaUrl ? 'p-2.5' : 'p-3'}`}>
@@ -1037,7 +1043,7 @@ export function HospitalityPlacePage() {
                           {listing.address || 'Toque para ver detalhes e contatos'}
                         </span>
                         <div className="flex shrink-0 items-center gap-1.5">
-                          <ProviderQuickActions actions={quickActions} onOpen={openProviderQuickAction} />
+                          {!mediaUrl ? <ProviderQuickActions actions={quickActions} onOpen={openProviderQuickAction} /> : null}
                           <span className="rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover/card:bg-[#336886] group-hover/card:text-white group-hover/card:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
                             Detalhes
                           </span>

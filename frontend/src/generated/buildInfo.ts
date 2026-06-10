@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "ef790d1d",
-  "versionLabel": "v0.1.9.ef790d1d",
-  "versionInternal": "0.1.9+20260610.014219.ef790d1d",
-  "buildId": "0.1.9+20260610.014219.ef790d1d-20260610.014219-ef790d1d",
-  "builtAt": "2026-06-10T01:42:19.049Z",
-  "commitHash": "ef790d1d92a586614c21f58999ebdc36e148b7b8",
-  "shortHash": "ef790d1d",
+  "versionDisplaySuffix": "f0d50ad1",
+  "versionLabel": "v0.1.9.f0d50ad1",
+  "versionInternal": "0.1.9+20260610.020249.f0d50ad1",
+  "buildId": "0.1.9+20260610.020249.f0d50ad1-20260610.020249-f0d50ad1",
+  "builtAt": "2026-06-10T02:02:49.058Z",
+  "commitHash": "f0d50ad1c14f99b525658d126942fa1e07b805d2",
+  "shortHash": "f0d50ad1",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "f0d50ad1c14f99b525658d126942fa1e07b805d2",
+      "shortHash": "f0d50ad1",
+      "dateIso": "2026-06-09T22:51:10-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Polish destination and hub navigation UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f0d50ad1c14f99b525658d126942fa1e07b805d2"
+    },
     {
       "hash": "ef790d1d92a586614c21f58999ebdc36e148b7b8",
       "shortHash": "ef790d1d",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: prevent false postal delay badge",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f7915a6b0133da622916f60128c0db782cd15ddd"
-    },
-    {
-      "hash": "c5bdd4fcc1b42ef7f8ac333903b81f70a8c21a72",
-      "shortHash": "c5bdd4fc",
-      "dateIso": "2026-06-06T19:36:29-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: restore orders receipt icon import",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c5bdd4fcc1b42ef7f8ac333903b81f70a8c21a72"
     }
   ]
 } as const;
