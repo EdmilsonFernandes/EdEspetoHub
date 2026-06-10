@@ -640,6 +640,8 @@ export const MenuView = ({
   const categoryTabRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
   const categorySyncLockRef = React.useRef(false);
   const categorySyncLockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previousCartItemsCountRef = React.useRef(0);
+  const cartPulseTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const canOrder = isOrderingEnabled !== false && !preOrderBlocked;
   const effectiveCompactHeader = compactHeader || autoCompactHeader;
   const catalogPrimaryColor = branding?.primaryColor || "#f59e0b";
@@ -833,6 +835,15 @@ export const MenuView = ({
     [cart]
   );
 
+  useEffect(() => {
+    if (previousCartItemsCountRef.current === cartItemsCount) return;
+    previousCartItemsCountRef.current = cartItemsCount;
+    if (cartItemsCount <= 0) return;
+    if (cartPulseTimerRef.current) window.clearTimeout(cartPulseTimerRef.current);
+    setCartPulse(true);
+    cartPulseTimerRef.current = window.setTimeout(() => setCartPulse(false), 280);
+  }, [cartItemsCount]);
+
   const buildCartOptions = (entry: any) => ({
     cookingPoint: entry?.cookingPoint || "",
     passSkewer: Boolean(entry?.passSkewer),
@@ -967,6 +978,9 @@ export const MenuView = ({
       qtyControlIdleTimersRef.current = {};
       if (categorySyncLockTimerRef.current) {
         window.clearTimeout(categorySyncLockTimerRef.current);
+      }
+      if (cartPulseTimerRef.current) {
+        window.clearTimeout(cartPulseTimerRef.current);
       }
     };
   }, []);
@@ -1488,12 +1502,13 @@ export const MenuView = ({
                 <div
                   key={item.id}
                   data-menu-card
-                  className={`jnc-hub-touch jnc-hub-lift group relative grid grid-cols-[minmax(0,1fr)_auto] gap-4 overflow-hidden rounded-3xl border border-slate-100/70 bg-white/96 p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.34)] ring-1 ring-white/75 transition-all duration-300 hover:border-slate-200/60 hover:shadow-[0_26px_58px_-44px_rgba(15,23,42,0.42)] active:scale-[0.992] sm:gap-5 sm:p-5 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
+                  className={`jnc-hub-touch jnc-hub-lift group relative grid grid-cols-[minmax(0,1fr)_auto] gap-4 overflow-hidden rounded-3xl border border-slate-100/70 bg-white/96 p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.34)] ring-1 ring-white/75 transition-all duration-300 hover:border-slate-200/60 hover:shadow-[0_26px_58px_-44px_rgba(15,23,42,0.42)] active:scale-[0.985] sm:gap-5 sm:p-5 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
                   }}
                 >
                   <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-90" />
+                  <span className="jnc-glare-sweep opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                     <div>
                       <button
@@ -1962,7 +1977,7 @@ export const MenuView = ({
 
       {/* BOTÃO FLUTUANTE DA SACOLA E LIMPAR */}
       <div
-        className={`fixed left-1/2 z-[200] w-[94%] max-w-md -translate-x-1/2 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${Capacitor.isNativePlatform() ? "ds-native-nav-fab" : "bottom-8"} ${
+        className={`jnc-spring-transition fixed left-1/2 z-[200] w-[94%] max-w-md -translate-x-1/2 ${Capacitor.isNativePlatform() ? "ds-native-nav-fab" : "bottom-8"} ${
           cartItemsCount > 0 && canOrder && !isModalOpen ? "translate-y-0 opacity-100 scale-100" : "translate-y-12 opacity-0 scale-90 pointer-events-none"
         }`}
       >
@@ -2005,7 +2020,7 @@ export const MenuView = ({
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative">
                   <span
-                    className="h-8 w-8 rounded-xl text-[13px] font-black inline-flex items-center justify-center shadow-sm transition-transform group-hover:scale-110"
+                    className={`h-8 w-8 rounded-xl text-[13px] font-black inline-flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${cartPulse ? "animate-pop" : ""}`}
                     style={{ color: catalogPrimaryColor, backgroundColor: "#ffffff" }}
                   >
                     {cartItemsCount}

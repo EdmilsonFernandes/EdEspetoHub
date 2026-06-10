@@ -1633,7 +1633,7 @@ export function OrderTracking() {
         topSlot={(
           <div className="h-[2.5px] w-full overflow-hidden bg-[#dce9f1]/80">
             <div
-              className="relative h-full transition-all duration-700 ease-out overflow-hidden"
+              className={`relative h-full transition-all duration-700 ease-out overflow-hidden ${isCancelled ? "" : "jnc-progress-sweep"}`}
               style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#336886,#009ee3)' }}
             >
               <div className="jnc-animate-shimmer absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-white/40 to-transparent" />
@@ -1932,7 +1932,7 @@ export function OrderTracking() {
                 <div className="mb-4">
                   <div className="h-2 w-full overflow-hidden rounded-full bg-[#dce9f1]/80">
                     <div
-                      className="relative h-full transition-all duration-700 ease-out overflow-hidden"
+                      className={`relative h-full transition-all duration-700 ease-out overflow-hidden ${isCancelled ? "" : "jnc-progress-sweep"}`}
                       style={{
                         width: `${progress}%`,
                         backgroundImage: isCancelled
@@ -2006,7 +2006,7 @@ export function OrderTracking() {
                                 isCurrent
                                   ? isCancelled
                                     ? 'border-rose-500 bg-rose-500 text-white shadow-[0_0_0_4px_rgba(244,63,94,0.2)]'
-                                    : 'border-emerald-500 bg-emerald-500 text-white ring-4 ring-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.6)] scale-110'
+                                    : 'jnc-active-step-halo border-emerald-500 bg-emerald-500 text-white ring-4 ring-emerald-500/30 scale-110'
                                   : isCompleted
                                     ? isCancelled
                                       ? 'border-rose-200 bg-rose-100 text-rose-600'
@@ -2682,7 +2682,7 @@ export function OrderTracking() {
                                     key={`store-${n}`}
                                     type="button"
                                     onClick={() => setReviewForm((prev) => ({ ...prev, storeRating: n }))}
-                                    className={`h-8 w-8 rounded-lg border grid place-items-center transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-115 hover:rotate-12 active:scale-90 ${
+                                    className={`h-8 w-8 rounded-lg border grid place-items-center transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.2] hover:rotate-6 active:scale-95 ${
                                       Number(reviewForm.storeRating || 0) >= n
                                         ? 'bg-amber-50 border-amber-200 text-amber-600 scale-105'
                                         : 'bg-white border-slate-200 text-slate-400'
@@ -2704,7 +2704,7 @@ export function OrderTracking() {
                                       key={`delivery-${n}`}
                                       type="button"
                                       onClick={() => setReviewForm((prev) => ({ ...prev, deliveryRating: n }))}
-                                      className={`h-8 w-8 rounded-lg border grid place-items-center transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-115 hover:rotate-12 active:scale-90 ${
+                                      className={`h-8 w-8 rounded-lg border grid place-items-center transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.2] hover:rotate-6 active:scale-95 ${
                                         Number(reviewForm.deliveryRating || 0) >= n
                                           ? 'bg-amber-50 border-amber-200 text-amber-600 scale-105'
                                           : 'bg-white border-slate-200 text-slate-400'

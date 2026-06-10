@@ -1307,8 +1307,8 @@ export const CartView = ({
     const accent = tone === "online" ? "#336886" : "#207A52";
     const selectedClasses =
       tone === "online"
-        ? "border-[#336886]/70 bg-white text-slate-950 shadow-[0_24px_54px_-34px_rgba(51,104,134,0.50),inset_0_1px_0_rgba(255,255,255,0.86)] ring-2 ring-[#336886]/10"
-        : "border-emerald-400/80 bg-white text-slate-950 shadow-[0_24px_54px_-34px_rgba(32,122,82,0.46),inset_0_1px_0_rgba(255,255,255,0.86)] ring-2 ring-emerald-200/60";
+        ? "border-[#336886]/70 bg-white text-slate-950 shadow-[0_24px_54px_-34px_rgba(51,104,134,0.50),inset_0_1px_0_rgba(255,255,255,0.86),inset_0_2px_12px_rgba(51,104,134,0.06)] ring-2 ring-[#336886]/10"
+        : "border-emerald-400/80 bg-white text-slate-950 shadow-[0_24px_54px_-34px_rgba(32,122,82,0.46),inset_0_1px_0_rgba(255,255,255,0.86),inset_0_2px_12px_rgba(32,122,82,0.06)] ring-2 ring-emerald-200/60";
 
     return (
       <button
@@ -2347,7 +2347,7 @@ export const CartView = ({
       {/* Resumo */}
       {(!useMultiStepFlow || checkoutStep === 1) && (
         <div className="space-y-4 mb-4 sm:mb-6">
-          <div className="relative overflow-hidden rounded-2xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 transition-all hover:-translate-y-0.5 hover:shadow-[0_30px_62px_-48px_rgba(15,23,42,0.38)] active:scale-[0.99] sm:p-6">
+          <div className="jnc-receipt-card relative overflow-hidden rounded-2xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 transition-all hover:-translate-y-0.5 hover:shadow-[0_30px_62px_-48px_rgba(15,23,42,0.38)] active:scale-[0.99] sm:p-6">
         <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">
@@ -2528,7 +2528,7 @@ export const CartView = ({
 
       {/* Compact pricing + Forma de Pagamento (multi-step step 3) */}
       {useMultiStepFlow && checkoutStep === 3 && (
-        <div className="relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 sm:p-6">
+        <div className="jnc-receipt-card relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 sm:p-6">
           <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
