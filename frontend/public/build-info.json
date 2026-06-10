@@ -2,25 +2,16 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "7723d395",
-  "versionLabel": "v0.1.9.7723d395",
-  "versionInternal": "0.1.9+20260610.021944.7723d395",
-  "buildId": "0.1.9+20260610.021944.7723d395-20260610.021944-7723d395",
-  "builtAt": "2026-06-10T02:19:44.577Z",
-  "commitHash": "7723d395fef182378f1d26fce5e7fe732c713081",
-  "shortHash": "7723d395",
+  "versionDisplaySuffix": "6aee6a45",
+  "versionLabel": "v0.1.9.6aee6a45",
+  "versionInternal": "0.1.9+20260610.021115.6aee6a45",
+  "buildId": "0.1.9+20260610.021115.6aee6a45-20260610.021115-6aee6a45",
+  "builtAt": "2026-06-10T02:11:15.795Z",
+  "commitHash": "6aee6a45ecad1458409e06019348ae7983cf4fba",
+  "shortHash": "6aee6a45",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
-    {
-      "hash": "7723d395fef182378f1d26fce5e7fe732c713081",
-      "shortHash": "7723d395",
-      "dateIso": "2026-06-09T23:12:57-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Restore hospitality quick actions under text",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7723d395fef182378f1d26fce5e7fe732c713081"
-    },
     {
       "hash": "6aee6a45ecad1458409e06019348ae7983cf4fba",
       "shortHash": "6aee6a45",
@@ -281,6 +272,15 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: require prepaid postal checkout",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/06b72ee87e1d658e2159a355c3e43582bf9e92c8"
+    },
+    {
+      "hash": "14b773a6040d6cb7c38810628a28524c0171d2c3",
+      "shortHash": "14b773a6",
+      "dateIso": "2026-06-07T12:07:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style: compact postal order tracking details",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/14b773a6040d6cb7c38810628a28524c0171d2c3"
     }
   ]
 }
