@@ -2,16 +2,43 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "6aee6a45",
-  "versionLabel": "v0.1.9.6aee6a45",
-  "versionInternal": "0.1.9+20260610.021115.6aee6a45",
-  "buildId": "0.1.9+20260610.021115.6aee6a45-20260610.021115-6aee6a45",
-  "builtAt": "2026-06-10T02:11:15.795Z",
-  "commitHash": "6aee6a45ecad1458409e06019348ae7983cf4fba",
-  "shortHash": "6aee6a45",
+  "versionDisplaySuffix": "dde59e87",
+  "versionLabel": "v0.1.9.dde59e87",
+  "versionInternal": "0.1.9+20260610.022649.dde59e87",
+  "buildId": "0.1.9+20260610.022649.dde59e87-20260610.022649-dde59e87",
+  "builtAt": "2026-06-10T02:26:49.395Z",
+  "commitHash": "dde59e87ea67afdcf4774c7e3cb60da205765819",
+  "shortHash": "dde59e87",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "dde59e87ea67afdcf4774c7e3cb60da205765819",
+      "shortHash": "dde59e87",
+      "dateIso": "2026-06-09T23:26:29-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Revert \"Preserve home banner artwork fit\"",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dde59e87ea67afdcf4774c7e3cb60da205765819"
+    },
+    {
+      "hash": "b602146033d6fda9fe674644ac68c5b26f75150a",
+      "shortHash": "b6021460",
+      "dateIso": "2026-06-09T23:21:07-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Preserve home banner artwork fit",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b602146033d6fda9fe674644ac68c5b26f75150a"
+    },
+    {
+      "hash": "7723d395fef182378f1d26fce5e7fe732c713081",
+      "shortHash": "7723d395",
+      "dateIso": "2026-06-09T23:12:57-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Restore hospitality quick actions under text",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7723d395fef182378f1d26fce5e7fe732c713081"
+    },
     {
       "hash": "6aee6a45ecad1458409e06019348ae7983cf4fba",
       "shortHash": "6aee6a45",
@@ -254,33 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(admin): add system health and harden delivery flows",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0e5ff18a070005794a2b89c4342c7c320dba468d"
-    },
-    {
-      "hash": "e65abb83bd064cb73fe178a6fc494786823a2026",
-      "shortHash": "e65abb83",
-      "dateIso": "2026-06-08T04:46:42-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(app): refine order filters and checkout notes",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e65abb83bd064cb73fe178a6fc494786823a2026"
-    },
-    {
-      "hash": "06b72ee87e1d658e2159a355c3e43582bf9e92c8",
-      "shortHash": "06b72ee8",
-      "dateIso": "2026-06-07T13:04:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: require prepaid postal checkout",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/06b72ee87e1d658e2159a355c3e43582bf9e92c8"
-    },
-    {
-      "hash": "14b773a6040d6cb7c38810628a28524c0171d2c3",
-      "shortHash": "14b773a6",
-      "dateIso": "2026-06-07T12:07:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style: compact postal order tracking details",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/14b773a6040d6cb7c38810628a28524c0171d2c3"
     }
   ]
 }
