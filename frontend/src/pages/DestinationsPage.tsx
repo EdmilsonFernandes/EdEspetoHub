@@ -26,6 +26,14 @@ const destinationLocationLabel = (destination: any) => {
   return [destination.city, destination.state].filter(Boolean).join(' - ');
 };
 
+const destinationDisplayName = (destination: any) => {
+  const name = String(destination?.name || destination?.city || 'Destino').trim();
+  const state = String(destination?.state || '').trim().toUpperCase();
+  if (!state) return name;
+  const hasState = new RegExp(`(^|[\\s,\\-/()])${state}($|[\\s,\\-/()])`, 'i').test(name);
+  return hasState ? name : `${name} - ${state}`;
+};
+
 export function DestinationsPage() {
   const location = useLocation();
   const [destinations, setDestinations] = useState<any[]>([]);
@@ -264,46 +272,49 @@ export function DestinationsPage() {
 
         {!loading && (
           <div className="grid gap-4 md:grid-cols-2">
-            {filteredDestinations.map((destination) => (
-              <Link
-                key={destination.id}
-                to={`/destinos/${destination.slug}`}
-                onPointerEnter={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
-                onFocus={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
-                onTouchStart={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
-                className="jnc-hub-touch jnc-hub-lift group grid overflow-hidden rounded-[1.75rem] border border-slate-100 bg-gradient-to-br from-white to-slate-50/50 shadow-[0_12px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-100/50 sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)] md:hover:border-[#336886]/18"
-              >
-                <div className="relative h-36 overflow-hidden bg-slate-100 sm:h-full sm:min-h-[12.5rem]">
-                  <img src={destinationImage(destination)} alt={destination.name} className="absolute inset-0 h-full w-full object-cover transition-all duration-700 group-hover:scale-108" />
-                  <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                  <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/86 px-3 py-1 text-[11px] font-black text-slate-700 shadow-[0_6px_14px_-4px_rgba(15,23,42,0.12)] backdrop-blur-md">
-                    {destinationLocationLabel(destination)}
+            {filteredDestinations.map((destination) => {
+              const displayName = destinationDisplayName(destination);
+              return (
+                <Link
+                  key={destination.id}
+                  to={`/destinos/${destination.slug}`}
+                  onPointerEnter={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
+                  onFocus={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
+                  onTouchStart={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
+                  className="jnc-hub-touch jnc-hub-lift group grid overflow-hidden rounded-[1.75rem] border border-slate-100 bg-gradient-to-br from-white to-slate-50/50 shadow-[0_12px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-100/50 sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)] md:hover:border-[#336886]/18"
+                >
+                  <div className="relative h-36 overflow-hidden bg-slate-100 sm:h-full sm:min-h-[12.5rem]">
+                    <img src={destinationImage(destination)} alt={displayName} className="absolute inset-0 h-full w-full object-cover transition-all duration-700 group-hover:scale-108" />
+                    <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                    <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/86 px-3 py-1 text-[11px] font-black text-slate-700 shadow-[0_6px_14px_-4px_rgba(15,23,42,0.12)] backdrop-blur-md">
+                      {destinationLocationLabel(destination)}
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-col justify-between gap-4 p-4">
-                  <div>
-                    <h3 className="text-xl font-black tracking-[-0.04em] text-slate-900 transition-colors duration-200 group-hover:text-[#336886] sm:text-2xl">{destination.name}</h3>
-                    <p className="mt-2 line-clamp-2 text-sm font-semibold leading-relaxed text-slate-600">
-                      {destination.description || destination.heroSubtitle || 'Um destino pronto para receber sua próxima viagem.'}
-                    </p>
+                  <div className="flex flex-col justify-between gap-4 p-4">
+                    <div>
+                      <h3 className="text-xl font-black tracking-[-0.04em] text-slate-900 transition-colors duration-200 group-hover:text-[#336886] sm:text-2xl">{displayName}</h3>
+                      <p className="mt-2 line-clamp-2 text-sm font-semibold leading-relaxed text-slate-600">
+                        {destination.description || destination.heroSubtitle || 'Um destino pronto para receber sua próxima viagem.'}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="inline-flex min-w-0 flex-wrap items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black leading-tight text-slate-700">
+                        <Buildings size={14} weight="duotone" />
+                        <span className="whitespace-normal break-words">{destination.placesCount || 0} hospedagens</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-700">
+                        <Sparkle size={14} weight="duotone" />
+                        {destination.listingsCount || 0} serviços
+                      </span>
+                      <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#336886] px-3 py-1.5 text-xs font-black text-white transition-all duration-300 group-hover:bg-[#153A4C] group-hover:shadow-[0_10px_22px_-14px_rgba(51,104,134,0.52)]">
+                        Explorar
+                        <Compass size={14} weight="bold" className="transition-transform duration-500 group-hover:rotate-45" />
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex min-w-0 flex-wrap items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black leading-tight text-slate-700">
-                      <Buildings size={14} weight="duotone" />
-                      <span className="whitespace-normal break-words">{destination.placesCount || 0} hospedagens</span>
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-700">
-                      <Sparkle size={14} weight="duotone" />
-                      {destination.listingsCount || 0} serviços
-                    </span>
-                    <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#336886] px-3 py-1.5 text-xs font-black text-white transition-all duration-300 group-hover:bg-[#153A4C] group-hover:shadow-[0_10px_22px_-14px_rgba(51,104,134,0.52)]">
-                      Explorar
-                      <Compass size={14} weight="bold" className="transition-transform duration-500 group-hover:rotate-45" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         )}
         {!loading && !filteredDestinations.length ? (

@@ -48,12 +48,12 @@ type HubStoreCardProps = {
 };
 
 const getCompactBadgeClass = (badgeKey: string) => {
-  if (badgeKey === 'pickup') return 'border-[#d7e7ef] bg-[#edf5fa] text-[#336886]';
-  if (badgeKey === 'free_shipping' || badgeKey === 'delivery') return 'border-emerald-100 bg-emerald-50 text-emerald-700';
-  if (badgeKey === 'outside') return 'border-amber-100 bg-amber-50 text-amber-700';
-  if (badgeKey === 'postal') return 'border-violet-100 bg-violet-50 text-violet-700';
-  if (badgeKey === 'highlight') return 'border-rose-100 bg-rose-50 text-rose-600';
-  return 'border-slate-100 bg-slate-50 text-slate-500';
+  if (badgeKey === 'pickup') return 'bg-[#edf5fa] text-[#336886] ring-[#d7e7ef]';
+  if (badgeKey === 'free_shipping' || badgeKey === 'delivery') return 'bg-emerald-50 text-emerald-700 ring-emerald-100';
+  if (badgeKey === 'outside') return 'bg-amber-50 text-amber-700 ring-amber-100';
+  if (badgeKey === 'postal') return 'bg-violet-50 text-violet-700 ring-violet-100';
+  if (badgeKey === 'highlight') return 'bg-rose-50 text-rose-600 ring-rose-100';
+  return 'bg-slate-50 text-slate-500 ring-slate-100';
 };
 
 export function HubStoreCard({
@@ -78,6 +78,8 @@ export function HubStoreCard({
     onToggleFavorite(store.slug);
   };
   const isUnavailableForRegion = Boolean(store.isOutOfRegion);
+  const storeAvailable = store.isOpen && !isUnavailableForRegion;
+  const deliveryIsFree = deliveryFeeLabel.toLowerCase() === 'grátis';
   const warmupStoreRoute = () => {
     prefetchRouteByPath(to);
     prefetchStorefrontData(store.slug);
@@ -194,19 +196,19 @@ export function HubStoreCard({
       onFocus={warmupStoreRoute}
       onTouchStart={warmupStoreRoute}
       style={{ animationDelay: `${index * 36}ms` }}
-        className={`jnc-hub-touch jnc-hub-lift group grid grid-cols-[4.8rem_minmax(0,1fr)_2.05rem] items-center gap-4 rounded-[1.45rem] px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards ${
-        store.isOpen && !isUnavailableForRegion
-          ? 'jnc-hub-surface-soft md:hover:bg-white md:hover:border-[#336886]/20'
-          : 'border-slate-100/80 bg-slate-50/74 shadow-[0_16px_32px_-28px_rgba(15,23,42,0.16)] ring-1 ring-slate-200/35 grayscale-[18%] opacity-85 filter blur-[0.25px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
+      className={`jnc-hub-touch group grid grid-cols-[4.85rem_minmax(0,1fr)_2rem] items-center gap-3.5 rounded-[1.35rem] border px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards transition-all ${
+        storeAvailable
+          ? 'border-white/80 bg-white/95 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 md:hover:-translate-y-0.5 md:hover:border-[#336886]/14 md:hover:bg-white md:hover:shadow-[0_24px_52px_-38px_rgba(15,23,42,0.42)]'
+          : 'border-slate-100/80 bg-white/72 shadow-[0_14px_32px_-30px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/45 grayscale-[14%] opacity-85 filter blur-[0.15px] hover:grayscale-0 hover:opacity-100 hover:blur-none'
       }`}
     >
-      <div className="relative h-[4.45rem] w-[4.45rem] shrink-0 overflow-hidden rounded-[1.28rem] bg-white shadow-[0_18px_34px_-28px_rgba(15,23,42,0.34)] ring-1 ring-slate-200/70">
+      <div className="relative h-[4.55rem] w-[4.55rem] shrink-0 overflow-hidden rounded-[1.08rem] bg-white shadow-[0_16px_32px_-28px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/70">
         <img
           src={store.logo}
           alt=""
           loading="lazy"
           decoding="async"
-          className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${store.isOpen && !isUnavailableForRegion ? '' : 'grayscale opacity-55'}`}
+          className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${storeAvailable ? '' : 'grayscale opacity-55'}`}
           onError={(event) => {
             (event.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name);
           }}
@@ -217,17 +219,11 @@ export function HubStoreCard({
 
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-1.5">
-          <span
-            className={`h-2 w-2 shrink-0 rounded-full ${store.isOpen && !isUnavailableForRegion ? 'bg-emerald-500' : isUnavailableForRegion ? 'bg-slate-400' : 'bg-rose-500'}`}
-            style={{
-              boxShadow: store.isOpen && !isUnavailableForRegion ? '0 0 8px rgba(16,185,129,0.42)' : '0 0 8px rgba(100,116,139,0.28)',
-            }}
-          />
-          <h3 className={`min-w-0 truncate text-[14.5px] font-black leading-5 tracking-[-0.02em] ${store.isOpen && !isUnavailableForRegion ? 'text-slate-950' : 'text-slate-500'}`}>
+          <h3 className={`min-w-0 truncate text-[14.8px] font-black leading-5 tracking-[-0.035em] ${storeAvailable ? 'text-slate-950' : 'text-slate-500'}`}>
             {store.name}
           </h3>
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-semibold text-slate-500">
+        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] font-semibold leading-4 text-slate-500">
           {store.rating > 0 ? (
             <span className="inline-flex items-center gap-1">
               <Star size={11} weight="fill" className="text-amber-400" />
@@ -235,25 +231,25 @@ export function HubStoreCard({
             </span>
           ) : null}
           {store.rating > 0 ? <span className="text-slate-200">·</span> : null}
-          <span className={store.isOpen && !isUnavailableForRegion ? 'text-emerald-700' : isUnavailableForRegion ? 'text-slate-500' : 'text-rose-600'}>
+          <span className={`inline-flex items-center gap-1 ${storeAvailable ? 'text-emerald-700' : isUnavailableForRegion ? 'text-slate-500' : 'text-rose-600'}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${storeAvailable ? 'bg-emerald-500' : isUnavailableForRegion ? 'bg-slate-400' : 'bg-rose-500'}`} />
             {isUnavailableForRegion ? 'Fora da entrega' : store.isOpen ? 'Aberto' : 'Fechado'}
           </span>
-        </div>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-[0.4375rem] gap-y-1 text-[11px] font-semibold text-slate-500">
+          <span className="text-slate-200">·</span>
           <span>{store.etaMin}–{store.etaMax} min</span>
           <span className="text-slate-200">·</span>
           <span>{resolvedDistanceLabel}</span>
           <span className="text-slate-200">·</span>
-          <span>{deliveryFeeLabel}</span>
+          <span className={deliveryIsFree ? 'font-black text-emerald-700' : ''}>{deliveryFeeLabel}</span>
         </div>
         {store.isOpen && serviceBadges.length > 0 ? (
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className="mt-1.5 flex flex-wrap gap-1">
             {serviceBadges.map((badge) => {
               const Icon = badge.icon;
               return (
                 <span
                   key={`${store.id}-${badge.key}`}
-                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1.5 text-[8.5px] font-black uppercase tracking-[0.08em] ${getCompactBadgeClass(badge.key)} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
+                  className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9.5px] font-black leading-none ring-1 ${getCompactBadgeClass(badge.key)} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
                 >
                   {Icon ? <Icon size={9} weight="duotone" /> : null}
                   {badge.label}

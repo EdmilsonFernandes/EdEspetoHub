@@ -123,6 +123,26 @@ const AppRouteWarmup = () => {
   return null;
 };
 
+const AppRouteScrollToTop = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (location.hash) return;
+    if ((location.state as any)?.preserveScroll) return;
+
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    };
+
+    window.requestAnimationFrame(scrollToTop);
+    const timeoutId = window.setTimeout(scrollToTop, 80);
+    return () => window.clearTimeout(timeoutId);
+  }, [location.hash, location.pathname, location.search, location.state]);
+
+  return null;
+};
+
 function App() {
   useEffect(() => installTextInputAssistance(), []);
 
@@ -132,6 +152,7 @@ function App() {
       <ToastProvider>
         <Router>
           <AppRouteWarmup />
+          <AppRouteScrollToTop />
           <OfflineAlert />
           <NativePushPermissionBanner />
           <NativeAppNavigator />

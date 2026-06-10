@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { ArrowRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, MagnifyingGlass, MapPinLine, PhoneCall, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
@@ -278,6 +278,122 @@ const buildListingAction = ({ listing, destination, place, isNativePlatform }: a
   return null;
 };
 
+const internalRouteHref = (url?: string | null) =>
+  String(url || '').trim().replace(/^https?:\/\/[^/]+/i, '');
+
+const serviceRouteHref = ({ item, destination, destinationSlug, place, placeSlug, idKey = 'id' }: any) => internalRouteHref(buildHospitalityServiceRouteUrl({
+  destinationSlug: destination.slug || destinationSlug,
+  placeSlug: place.slug || placeSlug,
+  serviceId: item?.[idKey],
+  serviceName: item?.title || item?.name,
+  serviceAddress: item?.address || item?.settings?.address,
+  serviceAddressNumber: item?.addressNumber || item?.settings?.addressNumber || item?.settings?.number,
+  serviceDistrict: item?.district || item?.neighborhood || item?.settings?.district || item?.settings?.neighborhood,
+  serviceCity: item?.city || item?.settings?.city || destination.city,
+  serviceState: item?.state || item?.settings?.state || destination.state,
+  serviceZipCode: item?.zipCode || item?.cep || item?.settings?.zipCode || item?.settings?.cep,
+  serviceLat: item?.lat || item?.settings?.lat || item?.settings?.latitude,
+  serviceLng: item?.lng || item?.settings?.lng || item?.settings?.longitude,
+  placeName: place.name,
+  placeAddress: place.address,
+  placeAddressNumber: place.addressNumber,
+  placeDistrict: place.district,
+  placeCity: place.city || destination.city,
+  placeState: place.state || destination.state,
+  placeZipCode: place.zipCode,
+  placeLat: place.lat,
+  placeLng: place.lng,
+}));
+
+const storeContactPhone = (store: any) =>
+  store?.whatsapp ||
+  store?.phone ||
+  store?.owner?.phone ||
+  store?.user?.phone ||
+  store?.settings?.whatsapp ||
+  store?.settings?.phone ||
+  store?.settings?.contactPhone ||
+  '';
+
+const listingContactPhone = (listing: any) => {
+  const ctaUrl = String(listing?.ctaUrl || '').trim();
+  return listing?.whatsapp || listing?.phone || listing?.contactPhone || (/^https?:\/\//i.test(ctaUrl) ? '' : ctaUrl);
+};
+
+const buildQuickContactMessage = ({ destination, place, item, kind }: any) => buildDestinationInquiryMessage({
+  destinationName: destination.name,
+  city: destination.city,
+  state: destination.state,
+  itemName: item?.title || item?.name,
+  itemId: item?.id,
+  itemType: kind || String(item?.category || 'serviço').replace('_', ' '),
+  placeName: place.name,
+  placeAddress: place.address,
+  placeAddressNumber: place.addressNumber,
+  placeDistrict: place.district,
+  placeCity: place.city || destination.city,
+  placeState: place.state || destination.state,
+  placeZipCode: place.zipCode,
+  placeLat: place.lat,
+  placeLng: place.lng,
+  itemAddress: item?.address || item?.settings?.address,
+  itemAddressNumber: item?.addressNumber || item?.settings?.addressNumber || item?.settings?.number,
+  itemDistrict: item?.district || item?.neighborhood || item?.settings?.district || item?.settings?.neighborhood,
+  itemCity: item?.city || item?.settings?.city || destination.city,
+  itemState: item?.state || item?.settings?.state || destination.state,
+  itemZipCode: item?.zipCode || item?.cep || item?.settings?.zipCode || item?.settings?.cep,
+  itemLat: item?.lat || item?.settings?.lat || item?.settings?.latitude,
+  itemLng: item?.lng || item?.settings?.lng || item?.settings?.longitude,
+  destinationSlug: destination.slug,
+  placeSlug: place.slug,
+});
+
+const buildProviderQuickActions = ({ item, destination, destinationSlug, place, placeSlug, isNativePlatform, mode }: any) => {
+  const phone = mode === 'store' ? storeContactPhone(item) : listingContactPhone(item);
+  const message = buildQuickContactMessage({ destination, place, item, kind: mode === 'store' ? 'loja oficial' : categoryLabel(item?.category) });
+  const whatsappHref = buildWhatsAppUrl(phone, message, isNativePlatform);
+  const phoneHref = buildPhoneCallUrl(phone);
+  const instagramHref = instagramUrl(item?.instagramUrl || item?.instagram || item?.settings?.instagramUrl || item?.settings?.instagram);
+  const routeHref = serviceRouteHref({
+    item,
+    destination,
+    destinationSlug,
+    place,
+    placeSlug,
+    idKey: mode === 'store' ? '_skipStoreIdForQuery' : 'id',
+  });
+
+  return [
+    whatsappHref ? { href: whatsappHref, label: 'WhatsApp', kind: 'whatsapp', icon: WhatsappLogo, external: true } : null,
+    phoneHref ? { href: phoneHref, label: 'Ligar', kind: 'phone', icon: PhoneCall, external: false } : null,
+    instagramHref ? { href: instagramHref, label: 'Instagram', kind: 'instagram', icon: InstagramIcon, external: true } : null,
+    routeHref ? { href: routeHref, label: 'Rota', kind: 'route', icon: MapPinLine, external: false } : null,
+  ].filter(Boolean);
+};
+
+const ProviderQuickActions = ({ actions, onOpen }: any) => {
+  if (!actions?.length) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {actions.slice(0, 4).map((action: any) => {
+        const Icon = action.icon;
+        return (
+          <button
+            key={`${action.kind}-${action.href}`}
+            type="button"
+            onClick={(event) => onOpen(event, action)}
+            className="jnc-hub-touch inline-flex h-8 min-w-8 items-center justify-center rounded-full border border-slate-200/75 bg-white/92 px-2 text-[#336886] shadow-[0_10px_24px_-22px_rgba(15,23,42,0.35)] transition hover:-translate-y-0.5 hover:border-[#336886]/24 hover:bg-[#edf5fa] active:scale-95"
+            aria-label={action.label}
+            title={action.label}
+          >
+            {Icon ? <Icon size={14} weight={action.kind === 'whatsapp' ? 'fill' : 'duotone'} /> : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
 const handleListingCardKeyDown = (listing: any, setSelectedListing: any) => (event: any) => {
   if (event.key !== 'Enter' && event.key !== ' ') return;
   event.preventDefault();
@@ -286,6 +402,7 @@ const handleListingCardKeyDown = (listing: any, setSelectedListing: any) => (eve
 
 export function HospitalityPlacePage() {
   const { destinationSlug = '', placeSlug = '' } = useParams();
+  const navigate = useNavigate();
   const [payload, setPayload] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -400,7 +517,7 @@ export function HospitalityPlacePage() {
     placeLat: place.lat,
     placeLng: place.lng,
   }) : '';
-  const selectedListingRouteHref = selectedListingRouteUrl ? selectedListingRouteUrl.replace(/^https?:\/\/[^/]+/i, '') : '';
+  const selectedListingRouteHref = internalRouteHref(selectedListingRouteUrl);
   const selectedListingInstagramUrl = instagramUrl(selectedListing?.instagramUrl);
   const selectedListingWebsiteUrl = externalUrl(selectedListing?.websiteUrl);
   const selectedListingMediaUrl = selectedListing ? cardMediaFor(selectedListing) : '';
@@ -444,6 +561,17 @@ export function HospitalityPlacePage() {
   const hiddenSpotlightCount = Math.max(0, allSpotlightProviders.length - spotlightProviders.length);
   const highlightedProviderCardClass =
     'jnc-provider-card-highlighted !border-[#5FD35A]/55 bg-[linear-gradient(135deg,rgba(95,211,90,0.16),#ffffff_46%,rgba(51,104,134,0.12))] !shadow-[0_28px_70px_-42px_rgba(51,104,134,0.58)] ring-2 ring-[#5FD35A]/24';
+  const openProviderQuickAction = (event: any, action: any) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const href = String(action?.href || '').trim();
+    if (!href) return;
+    if (/^(tel:|mailto:)/i.test(href)) {
+      window.location.assign(href);
+      return;
+    }
+    void openActionTarget({ href, external: Boolean(action?.external) || /^https?:\/\//i.test(href) }, navigate);
+  };
   const scrollToProviderTarget = (targetId: string, providerName = '') => {
     if (!targetId || typeof window === 'undefined' || typeof document === 'undefined') return;
     setServiceFilter('all');
@@ -753,6 +881,15 @@ export function HospitalityPlacePage() {
                   prefetchRouteByPath(storePath);
                   prefetchStorefrontData(store.slug);
                 };
+                const quickActions = buildProviderQuickActions({
+                  item: store,
+                  destination,
+                  destinationSlug,
+                  place,
+                  placeSlug,
+                  isNativePlatform,
+                  mode: 'store',
+                });
                 return (
                   <Link
                     id={targetId}
@@ -804,22 +941,25 @@ export function HospitalityPlacePage() {
                       </p>
                       <h3 className="mt-1 line-clamp-2 text-lg font-semibold leading-snug tracking-[-0.025em] text-slate-950 transition-colors duration-200 group-hover/card:text-[#336886]">{store.name}</h3>
                       <p className="mt-1 line-clamp-4 text-sm font-medium leading-relaxed text-slate-600">{store.settings?.description || 'Pedido online para esta hospedagem.'}</p>
-                      <div className="mt-3 flex items-center justify-between gap-2">
-                        <div className="flex flex-wrap gap-2 min-w-0">
-                          {link.deliveryEnabled ? (
-                            <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] truncate">
-                              Entrega {link.deliveryFee != null ? formatCurrency(link.deliveryFee) : ''}
-                            </span>
-                          ) : null}
-                          {link.estimatedMinutes ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shrink-0">
-                              <Clock size={13} weight="duotone" />
-                              {link.estimatedMinutes} min
-                            </span>
-                          ) : null}
+                      <div className="mt-3 flex flex-wrap items-end justify-between gap-2">
+                        <div className="min-w-0 space-y-2">
+                          <div className="flex flex-wrap gap-2 min-w-0">
+                            {link.deliveryEnabled ? (
+                              <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] truncate">
+                                Entrega {link.deliveryFee != null ? formatCurrency(link.deliveryFee) : ''}
+                              </span>
+                            ) : null}
+                            {link.estimatedMinutes ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shrink-0">
+                                <Clock size={13} weight="duotone" />
+                                {link.estimatedMinutes} min
+                              </span>
+                            ) : null}
+                          </div>
+                          <ProviderQuickActions actions={quickActions} onOpen={openProviderQuickAction} />
                         </div>
                         <span className="shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover/card:bg-[#336886] group-hover/card:text-white group-hover/card:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
-                          Ver cardápio
+                          Abrir vitrine
                         </span>
                       </div>
                     </div>
@@ -830,6 +970,15 @@ export function HospitalityPlacePage() {
                 const mediaUrl = cardMediaFor(listing);
                 const targetId = providerListingTargetId(listing, index);
                 const highlighted = highlightedProviderTarget === targetId;
+                const quickActions = buildProviderQuickActions({
+                  item: listing,
+                  destination,
+                  destinationSlug,
+                  place,
+                  placeSlug,
+                  isNativePlatform,
+                  mode: 'listing',
+                });
                 return (
                   <article
                     id={targetId}
@@ -883,13 +1032,16 @@ export function HospitalityPlacePage() {
                         collapsedClassName="line-clamp-4"
                         threshold={150}
                       />
-                      <div className="mt-3 flex items-center justify-between gap-2">
+                      <div className="mt-3 flex flex-wrap items-end justify-between gap-2">
                         <span className="truncate text-[11px] font-semibold text-slate-500">
                           {listing.address || 'Toque para ver detalhes e contatos'}
                         </span>
-                        <span className="shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover/card:bg-[#336886] group-hover/card:text-white group-hover/card:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
-                          Ver detalhes
-                        </span>
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          <ProviderQuickActions actions={quickActions} onOpen={openProviderQuickAction} />
+                          <span className="rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover/card:bg-[#336886] group-hover/card:text-white group-hover/card:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
+                            Detalhes
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </article>

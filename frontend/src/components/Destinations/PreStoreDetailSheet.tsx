@@ -333,9 +333,9 @@ export function PreStoreDetailSheet({
             <div className="rounded-[1.5rem] border border-[#153A4C]/10 bg-white p-4 shadow-[0_16px_42px_-36px_rgba(21,58,76,0.45)]">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#336886]">Como loja oficial</p>
-                  <h3 className="mt-1 text-lg font-extrabold tracking-[-0.03em] text-slate-950">Cardápio digital no app</h3>
-                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">Peça sem sair do Já no Caminho.</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#336886]">Como parceiro oficial</p>
+                  <h3 className="mt-1 text-lg font-extrabold tracking-[-0.03em] text-slate-950">Vitrine digital no app</h3>
+                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">Venda, receba contatos ou pedidos sem tirar o hóspede do Já no Caminho.</p>
                 </div>
                 <Storefront size={25} weight="duotone" className="shrink-0 text-[#153A4C]" />
               </div>
@@ -369,7 +369,7 @@ export function PreStoreDetailSheet({
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-extrabold">É o seu negócio?</span>
                   <span className="mt-0.5 block text-xs font-medium leading-relaxed text-white/72">
-                    Ative seu cardápio digital, aceite pagamentos e receba pedidos online direto dos hóspedes.
+                    Ative sua vitrine digital, aceite pagamentos e receba pedidos ou contatos direto dos hóspedes.
                   </span>
                   <span className="mt-3 inline-flex rounded-full bg-white px-3 py-2 text-xs font-extrabold text-[#153A4C] sm:hidden">
                     Quero cadastrar meu negócio

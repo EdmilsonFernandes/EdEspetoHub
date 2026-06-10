@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "e7af1433",
-  "versionLabel": "v0.1.9.e7af1433",
-  "versionInternal": "0.1.9+20260609.215351.e7af1433",
-  "buildId": "0.1.9+20260609.215351.e7af1433-20260609.215351-e7af1433",
-  "builtAt": "2026-06-09T21:53:51.764Z",
-  "commitHash": "e7af1433f01852d709b66a7c5bd9ae60a4520cae",
-  "shortHash": "e7af1433",
+  "versionDisplaySuffix": "ef790d1d",
+  "versionLabel": "v0.1.9.ef790d1d",
+  "versionInternal": "0.1.9+20260610.014219.ef790d1d",
+  "buildId": "0.1.9+20260610.014219.ef790d1d-20260610.014219-ef790d1d",
+  "builtAt": "2026-06-10T01:42:19.049Z",
+  "commitHash": "ef790d1d92a586614c21f58999ebdc36e148b7b8",
+  "shortHash": "ef790d1d",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "ef790d1d92a586614c21f58999ebdc36e148b7b8",
+      "shortHash": "ef790d1d",
+      "dateIso": "2026-06-09T19:05:52-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Polish customer order cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ef790d1d92a586614c21f58999ebdc36e148b7b8"
+    },
     {
       "hash": "e7af1433f01852d709b66a7c5bd9ae60a4520cae",
       "shortHash": "e7af1433",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: restore orders receipt icon import",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c5bdd4fcc1b42ef7f8ac333903b81f70a8c21a72"
-    },
-    {
-      "hash": "2bad59903319c8534d92d04144665464fff4a865",
-      "shortHash": "2bad5990",
-      "dateIso": "2026-06-06T18:56:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: smooth postal checkout flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2bad59903319c8534d92d04144665464fff4a865"
     }
   ]
 }

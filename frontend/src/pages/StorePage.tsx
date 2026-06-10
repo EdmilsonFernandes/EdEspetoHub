@@ -756,13 +756,13 @@ export function StorePage() {
     ) : null;
   const publicStoreHeaderSubtitle =
     view === 'menu' && !publicStoreHeaderIsSolid
-      ? (storeName || branding?.brandName || 'Cardápio e pedidos')
+      ? (storeName || branding?.brandName || 'Vitrine e pedidos')
       : view === 'cart'
       ? 'Confira sua sacola'
       : view === 'success'
       ? 'Acompanhe o andamento'
       : storeOpenNow
-      ? 'Cardápio e pedidos'
+      ? 'Vitrine e pedidos'
       : 'Loja fechada agora';
   const publicStoreHeaderPadding = showPublicStoreAppHeader
     ? 'pt-[calc(env(safe-area-inset-top)+4.35rem)] sm:pt-[calc(env(safe-area-inset-top)+4.9rem)]'
@@ -1029,8 +1029,8 @@ export function StorePage() {
         }).format(startsAt)
       : '';
     return startsLabel
-      ? `Você pode explorar o cardápio agora, mas os pedidos desse condomínio abrem em ${startsLabel}.`
-      : 'Você pode explorar o cardápio agora, mas os pedidos desse condomínio ainda não foram liberados.';
+      ? `Você pode explorar a vitrine agora, mas os pedidos desse condomínio abrem em ${startsLabel}.`
+      : 'Você pode explorar a vitrine agora, mas os pedidos desse condomínio ainda não foram liberados.';
   }, [isCondominiumPreOrderPreview, condominiumCheckoutContext]);
   const deliveryAddress = useMemo(() => {
     if (customer.type !== 'delivery') return customer.address || '';
@@ -1736,7 +1736,7 @@ export function StorePage() {
           setProducts(fallback.data);
           setProductsLoadError('');
         } else {
-          setProductsLoadError('Não deu para carregar o cardápio agora. Verifique sua internet e tente novamente.');
+          setProductsLoadError('Não deu para carregar a vitrine agora. Verifique sua internet e tente novamente.');
         }
       } finally {
         window.clearTimeout(slowTimer);
@@ -3835,7 +3835,7 @@ export function StorePage() {
       <AppRobotLoader
         fullScreen
         title="Carregando loja"
-        subtitle="Preparando cardápio, fotos e dados da vitrine."
+        subtitle="Preparando vitrine, fotos e dados da loja."
       />
     );
   }
@@ -4127,7 +4127,7 @@ export function StorePage() {
                           {todayHoursLabel || 'Sem horário configurado para hoje'}
                         </p>
                         <p className="mt-1 text-sm text-slate-500">
-                          O cardápio continua visível, mas os pedidos voltam a abrir no próximo período da operação.
+                          A vitrine continua visível, mas os pedidos voltam a abrir no próximo período da operação.
                         </p>
                       </div>
 
@@ -4220,7 +4220,7 @@ export function StorePage() {
                 ))}
               </div>
               <p className="relative mt-5 text-center text-sm font-bold text-slate-600">
-                {productsSlow ? 'Internet lenta. Ainda estamos carregando o cardápio...' : 'Carregando cardápio...'}
+                {productsSlow ? 'Internet lenta. Ainda estamos carregando a vitrine...' : 'Carregando vitrine...'}
               </p>
             </div>
           </div>
@@ -4230,7 +4230,7 @@ export function StorePage() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 shadow-[0_16px_34px_-28px_rgba(245,158,11,0.5)]">
                 <WarningCircle size={28} weight="duotone" />
               </div>
-              <h2 className="text-xl font-black text-slate-900">Não carregou o cardápio</h2>
+              <h2 className="text-xl font-black text-slate-900">Não carregou a vitrine</h2>
               <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">{productsLoadError}</p>
               <button
                 type="button"

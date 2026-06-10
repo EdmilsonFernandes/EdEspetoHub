@@ -127,6 +127,14 @@ const resolveDestinationAssetUrl = (
 const formatDestinationRegionLine = (destination: HubDestination) =>
   [destination.city, destination.state].filter(Boolean).join(' - ');
 
+const formatDestinationDisplayName = (destination: HubDestination) => {
+  const name = String(destination?.name || destination?.city || 'Destino').trim();
+  const state = String(destination?.state || '').trim().toUpperCase();
+  if (!state) return name;
+  const hasState = new RegExp(`(^|[\\s,\\-/()])${state}($|[\\s,\\-/()])`, 'i').test(name);
+  return hasState ? name : `${name} - ${state}`;
+};
+
 const formatDestinationMatchLabel = (destination: HubDestination) => {
   const match = destination.destinationMatch;
   const distance = Number(match?.distanceKm);
@@ -2153,6 +2161,7 @@ export function MarketplacePage() {
                 {homeDestinationHighlights.map((destination, index) => {
                   const placesCount = Number(destination.placesCount || 0);
                   const listingsCount = Number(destination.listingsCount || 0);
+                  const displayName = formatDestinationDisplayName(destination);
                   const totalOptions = placesCount + listingsCount;
                   const countLabel = totalOptions > 0
                     ? `${totalOptions} opç${totalOptions === 1 ? 'ão' : 'ões'}`
@@ -2171,7 +2180,7 @@ export function MarketplacePage() {
                     >
                       <img
                         src={resolveDestinationAssetUrl(destination)}
-                        alt={String(destination.name || 'Destino')}
+                        alt={displayName}
                         loading={index === 0 ? 'eager' : 'lazy'}
                         decoding="async"
                         className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
@@ -2183,7 +2192,7 @@ export function MarketplacePage() {
                       </div>
                       <div className="relative mt-auto flex min-w-0 flex-1 flex-col justify-end p-3.5">
                         <p className="line-clamp-2 text-[18px] font-black leading-tight tracking-[-0.05em] text-white drop-shadow-sm">
-                          {destination.name}
+                          {displayName}
                         </p>
                         <div className="mt-2 flex items-center justify-between gap-2">
                           <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/18 px-2.5 py-1 text-[9.5px] font-black uppercase tracking-[0.1em] text-white shadow-[0_14px_28px_-22px_rgba(15,23,42,0.58)] backdrop-blur-xl">
