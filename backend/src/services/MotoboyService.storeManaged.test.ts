@@ -129,6 +129,87 @@ describe('MotoboyService — store managed courier flow', () => {
     });
   });
 
+  it('creates store-managed courier without exposing a technical e-mail when e-mail is omitted', async () => {
+    const created: Record<string, any> = {};
+    const sentCredentials: any[] = [];
+
+    service.storeRepository = {
+      findByIdWithOwner: async () => ({
+        id: 'store-1',
+        name: 'Loja Teste',
+        owner: { id: 'owner-1' },
+      }),
+    };
+    service.emailService = {
+      sendMotoboyStoreAccessCredentials: async (payload: any) => {
+        sentCredentials.push(payload);
+      },
+    };
+
+    (AppDataSource as any).transaction = async (callback: any) => {
+      const userRepository = {
+        findOne: async () => null,
+        create: (data: any) => data,
+        save: async (user: any) => {
+          const saved = { id: 'user-1', ...user };
+          created.user = saved;
+          return saved;
+        },
+      };
+      const motoboyRepository = {
+        create: (data: any) => data,
+        save: async (motoboy: any) => {
+          const saved = { id: 'motoboy-1', ...motoboy };
+          created.motoboy = saved;
+          return saved;
+        },
+        findOne: async () => ({
+          ...created.motoboy,
+          user: created.user,
+        }),
+      };
+      const linkRepository = {
+        create: (data: any) => data,
+        save: async (link: any) => {
+          const saved = { id: 'link-1', ...link };
+          created.link = saved;
+          return saved;
+        },
+      };
+
+      return callback({
+        query: async () => [],
+        getRepository: (entity: any) => {
+          if (entity === User) return userRepository;
+          if (entity === Motoboy) return motoboyRepository;
+          if (entity === MotoboyStore) return linkRepository;
+          throw new Error(`Unexpected repository request: ${String(entity?.name || entity)}`);
+        },
+      });
+    };
+
+    const result = await service.createProfile('store-1', 'owner-1', {
+      fullName: 'Motoboy Sem Email',
+      phone: '(11) 99888-7766',
+      username: 'Moto.Sem.Email',
+      password: 'Temp@123',
+    });
+
+    expect(created.user.email).toContain('@store-managed.janocaminho.local');
+    expect(result).toMatchObject({
+      createdAccount: true,
+      credentialsEmailSent: false,
+      user: {
+        id: 'user-1',
+        email: null,
+        username: 'moto.sem.email',
+        managedWithoutEmail: true,
+        mustChangePassword: true,
+      },
+    });
+    expect(sentCredentials).toHaveLength(0);
+  });
+
   it('resets store-managed courier password and forces password change', async () => {
     const savedUsers: any[] = [];
     const sentCredentials: any[] = [];

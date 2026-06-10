@@ -39,6 +39,8 @@ import { AuditNotificationService } from './AuditNotificationService';
  * @date 2026-01-29
  */
 export class MotoboyService {
+  private static readonly STORE_MANAGED_EMAIL_DOMAIN = 'store-managed.janocaminho.local';
+
   private motoboyRepository = new MotoboyRepository();
   private motoboyStoreRepository = new MotoboyStoreRepository();
   private storeRepository = new StoreRepository();
@@ -85,6 +87,34 @@ private normalizePlate(value?: string | null) {
   private isValidUsername(value?: string | null) {
     const normalized = this.normalizeUsername(value);
     return /^[a-z0-9._-]{3,30}$/.test(normalized);
+  }
+
+  private buildStoreManagedPlaceholderEmail(storeId: string, username: string) {
+    const storeToken = String(storeId || '')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(0, 12)
+      .toLowerCase();
+    const userToken = this.normalizeUsername(username).replace(/[^a-z0-9._-]/g, '').slice(0, 30);
+    return `motoboy.${storeToken}.${userToken}@${MotoboyService.STORE_MANAGED_EMAIL_DOMAIN}`;
+  }
+
+  public isStoreManagedPlaceholderEmail(email?: string | null) {
+    return String(email || '').trim().toLowerCase().endsWith(`@${MotoboyService.STORE_MANAGED_EMAIL_DOMAIN}`);
+  }
+
+  public sanitizeMotoboyUser(user?: User | null) {
+    if (!user) return null;
+    const managedWithoutEmail = this.isStoreManagedPlaceholderEmail(user.email);
+    return {
+      id: user.id,
+      fullName: user.fullName,
+      email: managedWithoutEmail ? null : user.email,
+      username: user.username || null,
+      phone: user.phone,
+      profileImageUrl: user.profileImageUrl || null,
+      mustChangePassword: Boolean((user as any).mustChangePassword),
+      managedWithoutEmail,
+    };
   }
 
   /**
@@ -306,7 +336,7 @@ private async logAudit(input: {
    */
 private async notifyMotoboyByEmail(motoboyId: string, subject: string, message: string) {
     const motoboy = await this.motoboyRepository.findById(motoboyId);
-    if (!motoboy?.user?.email) return;
+    if (!motoboy?.user?.email || this.isStoreManagedPlaceholderEmail(motoboy.user.email)) return;
     await this.emailService.send({
       to: motoboy.user.email,
       subject,
@@ -803,15 +833,15 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
     }
   ) {
     const fullName = String(payload?.fullName || '').trim();
-    const email = String(payload?.email || '').trim().toLowerCase();
+    const providedEmail = String(payload?.email || '').trim().toLowerCase();
     const phone = String(payload?.phone || '').trim();
     const username = this.normalizeUsername(payload?.username);
     const temporaryPassword = String(payload?.password || '').trim();
 
-    if (!fullName || !email || !phone || !username || !temporaryPassword) {
+    if (!fullName || !phone || !username || !temporaryPassword) {
       throw new AppError('GEN-002', 400);
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (providedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(providedEmail)) {
       throw new AppError('AUTH-006', 400);
     }
     if (!this.isValidUsername(username)) {
@@ -825,6 +855,8 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
     if (normalizedPhone.length < 10) {
       throw new AppError('AUTH-017', 400);
     }
+    const managedWithoutEmail = !providedEmail;
+    const email = providedEmail || this.buildStoreManagedPlaceholderEmail(store.id, username);
 
     const created = await AppDataSource.transaction(async (manager) => {
       const userRepo = manager.getRepository(User);
@@ -907,17 +939,19 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
     });
 
     let credentialsEmailSent = false;
-    try {
-      await this.emailService.sendMotoboyStoreAccessCredentials({
-        email,
-        fullName,
-        storeName: String(store?.name || 'sua loja'),
-        username,
-        temporaryPassword,
-      });
-      credentialsEmailSent = true;
-    } catch {
-      credentialsEmailSent = false;
+    if (!managedWithoutEmail) {
+      try {
+        await this.emailService.sendMotoboyStoreAccessCredentials({
+          email,
+          fullName,
+          storeName: String(store?.name || 'sua loja'),
+          username,
+          temporaryPassword,
+        });
+        credentialsEmailSent = true;
+      } catch {
+        credentialsEmailSent = false;
+      }
     }
 
     await this.auditNotificationService.notifyUserCreated({
@@ -925,7 +959,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
       user: {
         id: created.user.id,
         fullName: created.user.fullName,
-        email: created.user.email,
+        email: managedWithoutEmail ? null : created.user.email,
         phone: created.user.phone,
         username: created.user.username || null,
         role: created.user.userRole,
@@ -939,6 +973,7 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
         createdByUserId,
         motoboyId: created.motoboy?.id || null,
         credentialsEmailSent,
+        managedWithoutEmail,
       },
     });
 
@@ -949,10 +984,11 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
       user: {
         id: created.user.id,
         fullName: created.user.fullName,
-        email: created.user.email,
+        email: managedWithoutEmail ? null : created.user.email,
         username: created.user.username || null,
         phone: created.user.phone || null,
         mustChangePassword: Boolean((created.user as any).mustChangePassword),
+        managedWithoutEmail,
       },
       motoboy: created.motoboy,
       link: created.link,
@@ -993,17 +1029,20 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
     });
 
     let credentialsEmailSent = false;
-    try {
-      await this.emailService.sendMotoboyStoreAccessCredentials({
-        email: motoboy.user.email,
-        fullName: motoboy.user.fullName,
-        storeName: String(store?.name || 'sua loja'),
-        username: motoboy.user.username || motoboy.user.email,
-        temporaryPassword,
-      });
-      credentialsEmailSent = true;
-    } catch {
-      credentialsEmailSent = false;
+    const managedWithoutEmail = this.isStoreManagedPlaceholderEmail(motoboy.user.email);
+    if (!managedWithoutEmail) {
+      try {
+        await this.emailService.sendMotoboyStoreAccessCredentials({
+          email: motoboy.user.email,
+          fullName: motoboy.user.fullName,
+          storeName: String(store?.name || 'sua loja'),
+          username: motoboy.user.username || motoboy.user.email,
+          temporaryPassword,
+        });
+        credentialsEmailSent = true;
+      } catch {
+        credentialsEmailSent = false;
+      }
     }
 
     return {
@@ -1012,9 +1051,10 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
       user: {
         id: motoboy.user.id,
         fullName: motoboy.user.fullName,
-        email: motoboy.user.email,
+        email: managedWithoutEmail ? null : motoboy.user.email,
         username: motoboy.user.username || null,
         mustChangePassword: true,
+        managedWithoutEmail,
       },
     };
   }

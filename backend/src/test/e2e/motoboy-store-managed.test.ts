@@ -73,6 +73,70 @@ describe('Motoboy — fluxo gerenciado pela loja', () => {
     expect(secondLogin.res.body.mustChangePassword).toBe(false);
   });
 
+  it('loja cria motoboy sem e-mail e expõe acesso apenas por usuário', async () => {
+    const temporaryPassword = 'Temp@123';
+    const username = `moto.sem.email.${Date.now()}`;
+
+    const createRes = await api
+      .post(`/api/stores/${storeId}/motoboys`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        fullName: 'Motoboy Sem Email',
+        phone: '11988776644',
+        username,
+        password: temporaryPassword,
+      });
+
+    expect(createRes.status).toBe(201);
+    expect(createRes.body).toMatchObject({
+      createdAccount: true,
+      credentialsEmailSent: false,
+      user: {
+        email: null,
+        username,
+        managedWithoutEmail: true,
+        mustChangePassword: true,
+      },
+      link: {
+        storeId,
+        active: true,
+      },
+    });
+
+    const login = await loginMotoboy(username, temporaryPassword);
+    expect(login.res.status).toBe(200);
+    expect(login.user).toMatchObject({
+      email: null,
+      username,
+      role: 'MOTOBOY',
+      managedWithoutEmail: true,
+      mustChangePassword: true,
+    });
+
+    const listed = await api
+      .get(`/api/stores/${storeId}/motoboys`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(listed.status).toBe(200);
+    const link = (Array.isArray(listed.body) ? listed.body : []).find((row: any) => String(row?.motoboyId || '') === String(createRes.body?.motoboy?.id || ''));
+    expect(link?.motoboyUser).toMatchObject({
+      email: null,
+      username,
+      managedWithoutEmail: true,
+    });
+
+    const profile = await api
+      .get('/api/motoboy/profile')
+      .set('Authorization', `Bearer ${login.token}`);
+
+    expect(profile.status).toBe(200);
+    expect(profile.body?.user).toMatchObject({
+      email: null,
+      username,
+      managedWithoutEmail: true,
+    });
+  });
+
   it('motoboy criado pela loja já entra ativo para a loja sem etapa de Super Admin', async () => {
     const createRes = await api
       .post(`/api/stores/${storeId}/motoboys`)

@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "adac0392",
-  "versionLabel": "v0.1.9.adac0392",
-  "versionInternal": "0.1.9+20260610.023042.adac0392",
-  "buildId": "0.1.9+20260610.023042.adac0392-20260610.023042-adac0392",
-  "builtAt": "2026-06-10T02:30:42.185Z",
-  "commitHash": "adac03924eba3167b19fabbc3c61b5e5a13fbaca",
-  "shortHash": "adac0392",
+  "versionDisplaySuffix": "e499297c",
+  "versionLabel": "v0.1.9.e499297c",
+  "versionInternal": "0.1.9+20260610.124414.e499297c",
+  "buildId": "0.1.9+20260610.124414.e499297c-20260610.124414-e499297c",
+  "builtAt": "2026-06-10T12:44:14.444Z",
+  "commitHash": "e499297ca3bfc7e943c8706b0124808173bfdc64",
+  "shortHash": "e499297c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "e499297ca3bfc7e943c8706b0124808173bfdc64",
+      "shortHash": "e499297c",
+      "dateIso": "2026-06-09T23:31:58-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Use branded maps and Airbnb icons",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e499297ca3bfc7e943c8706b0124808173bfdc64"
+    },
     {
       "hash": "adac03924eba3167b19fabbc3c61b5e5a13fbaca",
       "shortHash": "adac0392",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "polish marketplace premium interactions",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d59493b03f703cb43e2ff2c81c35c3fdb5f8761d"
-    },
-    {
-      "hash": "97d31adf21a4ce5496401d38ca86084de255aada",
-      "shortHash": "97d31adf",
-      "dateIso": "2026-06-08T14:10:52-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: add postal receipt confirmation",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/97d31adf21a4ce5496401d38ca86084de255aada"
     }
   ]
 } as const;

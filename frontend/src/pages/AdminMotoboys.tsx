@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Car, Camera, CheckCircle, CopySimple, IdentificationCard, WarningCircle, Clock, UsersThree, LinkSimpleHorizontal, MagnifyingGlass, FunnelSimple, UserPlus, Key } from '@phosphor-icons/react';
+import { Car, Camera, CheckCircle, CopySimple, IdentificationCard, WarningCircle, Clock, UsersThree, LinkSimpleHorizontal, MagnifyingGlass, FunnelSimple, UserPlus, Key, Eye, EyeSlash } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { motoboyAdminService } from '../services/motoboyAdminService';
@@ -34,6 +34,7 @@ export function AdminMotoboys() {
   const [showInactive, setShowInactive] = useState(false);
   const [motoboyQuery, setMotoboyQuery] = useState('');
   const [motoboyFilter, setMotoboyFilter] = useState<'all' | 'free' | 'busy' | 'docs_pending' | 'inactive'>('all');
+  const [activeMotoboyTab, setActiveMotoboyTab] = useState<'team' | 'requests' | 'tips'>('team');
   const [reviewSummary, setReviewSummary] = useState<any | null>(null);
   const [motoboyReviewMap, setMotoboyReviewMap] = useState<Record<string, any>>({});
   const [tipsOverview, setTipsOverview] = useState({
@@ -57,6 +58,9 @@ export function AdminMotoboys() {
     confirmPassword: '',
   });
   const [creatingMotoboy, setCreatingMotoboy] = useState(false);
+  const [createMotoboyOpen, setCreateMotoboyOpen] = useState(false);
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
+  const [showCreateConfirmPassword, setShowCreateConfirmPassword] = useState(false);
   const [createdMotoboyAccess, setCreatedMotoboyAccess] = useState<any | null>(null);
   const [createWarning, setCreateWarning] = useState('');
   const [resetPasswordModal, setResetPasswordModal] = useState<{
@@ -67,6 +71,8 @@ export function AdminMotoboys() {
     loading: boolean;
     result: any | null;
   }>({ open: false, link: null, password: '', confirmPassword: '', loading: false, result: null });
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showResetConfirmPassword, setShowResetConfirmPassword] = useState(false);
   const [payoutModal, setPayoutModal] = useState<{
     open: boolean;
     row: any | null;
@@ -83,6 +89,18 @@ export function AdminMotoboys() {
   const requestsSectionRef = useRef<HTMLDivElement | null>(null);
   const linkedSectionRef = useRef<HTMLDivElement | null>(null);
   const linkedFiltersRef = useRef<HTMLDivElement | null>(null);
+  const activeMotoboysCount = motoboys.filter((link) => link.active).length;
+
+  const displayMotoboyEmail = (user: any) => {
+    if (user?.managedWithoutEmail) return 'Sem e-mail, gerenciado pela loja';
+    return user?.email || '-';
+  };
+
+  const motoboyTabs = [
+    { id: 'team' as const, label: 'Equipe', count: activeMotoboysCount, tone: 'emerald' },
+    { id: 'requests' as const, label: 'Solicitações', count: pendingRequests.length, tone: 'amber' },
+    { id: 'tips' as const, label: 'Gorjetas', count: tipsOverview.pendingTipOrders, tone: 'slate' },
+  ];
 
   const formatMotoboyStatus = (raw: any) => {
     const status = String(raw || '').toUpperCase();
@@ -298,6 +316,34 @@ export function AdminMotoboys() {
         <span className="opacity-90">{icon}</span>
         <span className="whitespace-nowrap">{type}: {label}</span>
         {statusIcon ? <span className="ml-0.5 opacity-90">{statusIcon}</span> : null}
+      </span>
+    );
+  };
+
+  const docStatusDot = (docs: any[], type: 'CNH' | 'SELFIE' | 'CRLV') => {
+    const { status } = docStatusForType(docs, type);
+    const icon =
+      type === 'CNH'
+        ? <IdentificationCard size={13} weight="duotone" />
+        : type === 'SELFIE'
+        ? <Camera size={13} weight="duotone" />
+        : <Car size={13} weight="duotone" />;
+    const cls =
+      status === 'APPROVED'
+        ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+        : status === 'REJECTED'
+        ? 'border-rose-200 bg-rose-50 text-rose-800'
+        : status === 'PENDING'
+        ? 'border-amber-200 bg-amber-50 text-amber-800'
+        : 'border-slate-200 bg-slate-50 text-slate-500';
+    const label = status === 'MISSING' ? 'faltando' : status === 'PENDING' ? 'em análise' : status === 'REJECTED' ? 'rejeitado' : 'ok';
+    return (
+      <span
+        className={`inline-flex h-7 min-w-7 items-center justify-center rounded-full border px-2 text-[10px] font-black ${cls}`}
+        title={`${type}: ${label}`}
+      >
+        {icon}
+        <span className="ml-1 hidden sm:inline">{type}</span>
       </span>
     );
   };
@@ -606,8 +652,12 @@ export function AdminMotoboys() {
     const password = String(createForm.password || '');
     const confirmPassword = String(createForm.confirmPassword || '');
 
-    if (!fullName || !phone || !email || !username || !password || !confirmPassword) {
-      showToast('Preencha nome, telefone, e-mail, usuário e senha temporária.', 'error');
+    if (!fullName || !phone || !username || !password || !confirmPassword) {
+      showToast('Preencha nome, telefone, usuário e senha temporária.', 'error');
+      return;
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showToast('Informe um e-mail válido ou deixe em branco.', 'error');
       return;
     }
     if (password.length < 6) {
@@ -625,12 +675,14 @@ export function AdminMotoboys() {
       const created = await motoboyAdminService.create(storeId, {
         fullName,
         phone,
-        email,
+        email: email || undefined,
         username,
         password,
       });
       setCreatedMotoboyAccess(created || null);
-      if (!created?.credentialsEmailSent) {
+      if (created?.user?.managedWithoutEmail) {
+        setCreateWarning('Entregador criado sem e-mail. Entregue usuário e senha temporária manualmente; a loja gerencia esse acesso.');
+      } else if (!created?.credentialsEmailSent) {
         setCreateWarning('Conta criada, mas o e-mail com as credenciais não foi enviado. Entregue os dados manualmente ao entregador.');
       }
       setCreateForm({
@@ -641,6 +693,7 @@ export function AdminMotoboys() {
         password: '',
         confirmPassword: '',
       });
+      setActiveMotoboyTab('team');
       showToast('Motoboy próprio criado com sucesso.', 'success');
       await loadMotoboys();
     } catch (error: any) {
@@ -651,6 +704,8 @@ export function AdminMotoboys() {
   };
 
   const openResetPasswordModal = (link: any) => {
+    setShowResetPassword(false);
+    setShowResetConfirmPassword(false);
     setResetPasswordModal({
       open: true,
       link,
@@ -663,6 +718,8 @@ export function AdminMotoboys() {
 
   const closeResetPasswordModal = () => {
     if (resetPasswordModal.loading) return;
+    setShowResetPassword(false);
+    setShowResetConfirmPassword(false);
     setResetPasswordModal({
       open: false,
       link: null,
@@ -910,30 +967,50 @@ export function AdminMotoboys() {
 
   return (
     <div className="space-y-6">
-      <div className="md:hidden sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2 shadow-sm">
-        <p className="text-[10px] font-black tracking-[0.18em] uppercase text-slate-500">Acesso rápido</p>
-        <div className="mt-2 grid grid-cols-3 gap-2">
+      <div className="sticky top-2 z-20 rounded-[1.6rem] border border-white/70 bg-white/90 backdrop-blur-xl px-3 py-3 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.55)]">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#336886]">Gestão de entregadores</p>
+            <h2 className="text-base sm:text-lg font-black text-slate-900 leading-tight">Equipe, solicitações e gorjetas</h2>
+            <p className="hidden sm:block text-xs text-slate-500 mt-0.5">Tela compacta para operação rápida no celular da loja.</p>
+          </div>
           <button
             type="button"
-            onClick={() => requestsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            className="btn-press rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-extrabold text-amber-800"
+            onClick={() => {
+              setCreateMotoboyOpen(true);
+              setShowCreatePassword(false);
+              setShowCreateConfirmPassword(false);
+            }}
+            className="btn-press shrink-0 rounded-2xl bg-[#336886] px-3.5 py-2.5 text-xs font-black text-white shadow-[0_18px_40px_-24px_rgba(51,104,134,0.7)] inline-flex items-center gap-2"
           >
-            Solicitações ({pendingRequests.length})
+            <UserPlus size={16} weight="duotone" />
+            Novo Motoboy
           </button>
-          <button
-            type="button"
-            onClick={() => linkedFiltersRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            className="btn-press rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-slate-700"
-          >
-            Filtros
-          </button>
-          <button
-            type="button"
-            onClick={() => linkedSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            className="btn-press rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-extrabold text-emerald-800"
-          >
-            Vinculados ({motoboys.length})
-          </button>
+        </div>
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {motoboyTabs.map((tab) => {
+            const active = activeMotoboyTab === tab.id;
+            const tone =
+              tab.tone === 'emerald'
+                ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                : tab.tone === 'amber'
+                ? 'text-amber-800 bg-amber-50 border-amber-200'
+                : 'text-slate-700 bg-slate-50 border-slate-200';
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveMotoboyTab(tab.id)}
+                className={[
+                  'btn-press shrink-0 rounded-2xl border px-3.5 py-2 text-xs font-black transition',
+                  active ? 'bg-slate-950 text-white border-slate-950 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.8)]' : tone,
+                ].join(' ')}
+              >
+                {tab.label}
+                <span className={active ? 'ml-2 text-white/75' : 'ml-2 opacity-70'}>{tab.count}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -993,6 +1070,7 @@ export function AdminMotoboys() {
         title="Motoboy próprio da loja"
         subtitle="Crie o acesso inicial do entregador e libere a operação apenas para esta loja."
         variant="success"
+        className="hidden"
       >
         <div className="grid gap-4 lg:grid-cols-[1.3fr_0.9fr]">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-4 shadow-[0_18px_42px_-30px_rgba(15,23,42,0.24)]">
@@ -1108,10 +1186,178 @@ export function AdminMotoboys() {
         </div>
       </FormSection>
 
+      {createMotoboyOpen ? (
+        <div
+          className="ds-sheet-backdrop z-[97]"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => {
+            if (creatingMotoboy) return;
+            setCreateMotoboyOpen(false);
+          }}
+        >
+          <div
+            className="ds-sheet-panel w-full max-w-2xl rounded-t-[2rem] sm:rounded-[2rem] max-h-[92dvh] overflow-y-auto p-4 sm:p-5"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="sm:hidden ds-sheet-handle" />
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50 text-emerald-700">
+                  <UserPlus size={20} weight="duotone" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Novo Motoboy</p>
+                  <h3 className="mt-1 text-lg font-black text-slate-900">Conta criada pela loja</h3>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    E-mail é opcional. Sem e-mail, o entregador entra por usuário e a loja gerencia o acesso.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCreateMotoboyOpen(false)}
+                disabled={creatingMotoboy}
+                className="btn-press shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 disabled:opacity-60"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <input
+                {...inputAssistProps.name}
+                value={createForm.fullName}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, fullName: event.target.value }))}
+                placeholder="Nome completo"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+              />
+              <input
+                {...inputAssistProps.phoneNational}
+                value={createForm.phone}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, phone: event.target.value }))}
+                placeholder="Telefone"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+              />
+              <label className="block sm:col-span-2">
+                <span className="mb-1 block text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">E-mail opcional</span>
+                <input
+                  {...inputAssistProps.email}
+                  value={createForm.email}
+                  onChange={(event) => setCreateForm((prev) => ({ ...prev, email: event.target.value }))}
+                  placeholder="Se deixar em branco, a loja gerencia o acesso"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+                />
+              </label>
+              <input
+                {...inputAssistProps.username}
+                value={createForm.username}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, username: event.target.value }))}
+                placeholder="Usuário de login"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+              />
+              <div className="relative">
+                <input
+                  {...inputAssistProps.newPassword}
+                  type={showCreatePassword ? 'text' : 'password'}
+                  value={createForm.password}
+                  onChange={(event) => setCreateForm((prev) => ({ ...prev, password: event.target.value }))}
+                  placeholder="Senha temporária"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCreatePassword((value) => !value)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl p-2 text-slate-500 hover:bg-white"
+                  aria-label={showCreatePassword ? 'Ocultar senha temporária' : 'Mostrar senha temporária'}
+                >
+                  {showCreatePassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  {...inputAssistProps.newPassword}
+                  type={showCreateConfirmPassword ? 'text' : 'password'}
+                  value={createForm.confirmPassword}
+                  onChange={(event) => setCreateForm((prev) => ({ ...prev, confirmPassword: event.target.value }))}
+                  placeholder="Confirmar senha temporária"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-800 outline-none transition focus:border-brand-primary focus:bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCreateConfirmPassword((value) => !value)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl p-2 text-slate-500 hover:bg-white"
+                  aria-label={showCreateConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
+                >
+                  {showCreateConfirmPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-900">
+              Esse acesso nasce ativo para esta loja. Se não houver e-mail, o entregador não recebe credenciais por e-mail e usa apenas usuário + senha.
+            </div>
+
+            {createdMotoboyAccess ? (
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.35)]">
+                <p className="text-sm font-black text-slate-900">Credenciais temporárias</p>
+                <div className="mt-2 grid gap-1 text-xs">
+                  <div><strong>Nome:</strong> {createdMotoboyAccess?.user?.fullName || '-'}</div>
+                  <div><strong>E-mail:</strong> {displayMotoboyEmail(createdMotoboyAccess?.user)}</div>
+                  <div><strong>Usuário:</strong> {createdMotoboyAccess?.user?.username || '-'}</div>
+                  <div><strong>Senha temporária:</strong> {createdMotoboyAccess?.temporaryPassword || '-'}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => copyText(
+                    [
+                      `Usuário: ${createdMotoboyAccess?.user?.username || '-'}`,
+                      createdMotoboyAccess?.user?.email ? `E-mail: ${createdMotoboyAccess.user.email}` : 'E-mail: sem e-mail, acesso gerenciado pela loja',
+                      `Senha temporária: ${createdMotoboyAccess?.temporaryPassword || '-'}`,
+                    ].join('\n'),
+                    'Credenciais copiadas.'
+                  )}
+                  className="btn-press mt-3 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-black text-slate-700 inline-flex items-center justify-center gap-2"
+                >
+                  <CopySimple size={18} weight="duotone" />
+                  Copiar credenciais
+                </button>
+              </div>
+            ) : null}
+
+            {createWarning ? (
+              <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+                {createWarning}
+              </div>
+            ) : null}
+
+            <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setCreateMotoboyOpen(false)}
+                disabled={creatingMotoboy}
+                className="btn-press rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 disabled:opacity-60"
+              >
+                Fechar
+              </button>
+              <button
+                type="button"
+                onClick={createStoreManagedMotoboy}
+                disabled={creatingMotoboy}
+                className="btn-press rounded-2xl bg-[#336886] px-4 py-3 text-sm font-black text-white shadow-[0_22px_48px_-32px_rgba(51,104,134,0.85)] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {creatingMotoboy ? 'Criando acesso...' : 'Criar motoboy próprio'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <FormSection
         title="Repasse de gorjetas"
         subtitle="Controle de pendentes e pagos com comprovante."
         variant="warning"
+        className={activeMotoboyTab === 'tips' ? '' : 'hidden'}
         actions={
           <button
             type="button"
@@ -1464,34 +1710,54 @@ export function AdminMotoboys() {
             </div>
 
             <div className="mt-4 grid gap-3">
-              <input
-                {...inputAssistProps.newPassword}
-                type="password"
-                value={resetPasswordModal.password}
-                onChange={(event) => setResetPasswordModal((prev) => ({ ...prev, password: event.target.value, result: null }))}
-                placeholder="Nova senha temporária"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
-              />
-              <input
-                {...inputAssistProps.newPassword}
-                type="password"
-                value={resetPasswordModal.confirmPassword}
-                onChange={(event) => setResetPasswordModal((prev) => ({ ...prev, confirmPassword: event.target.value, result: null }))}
-                placeholder="Confirmar senha temporária"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
-              />
+              <div className="relative">
+                <input
+                  {...inputAssistProps.newPassword}
+                  type={showResetPassword ? 'text' : 'password'}
+                  value={resetPasswordModal.password}
+                  onChange={(event) => setResetPasswordModal((prev) => ({ ...prev, password: event.target.value, result: null }))}
+                  placeholder="Nova senha temporária"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowResetPassword((value) => !value)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl p-2 text-slate-500 hover:bg-white"
+                  aria-label={showResetPassword ? 'Ocultar senha temporária' : 'Mostrar senha temporária'}
+                >
+                  {showResetPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  {...inputAssistProps.newPassword}
+                  type={showResetConfirmPassword ? 'text' : 'password'}
+                  value={resetPasswordModal.confirmPassword}
+                  onChange={(event) => setResetPasswordModal((prev) => ({ ...prev, confirmPassword: event.target.value, result: null }))}
+                  placeholder="Confirmar senha temporária"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowResetConfirmPassword((value) => !value)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl p-2 text-slate-500 hover:bg-white"
+                  aria-label={showResetConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
+                >
+                  {showResetConfirmPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
+                </button>
+              </div>
             </div>
 
             {resetPasswordModal.result ? (
               <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900">
                 <p className="font-black">Senha redefinida.</p>
-                <p className="mt-1">O entregador entra com usuário/e-mail e essa senha temporária.</p>
+                <p className="mt-1">O entregador entra com usuário{resetPasswordModal.result?.user?.email ? '/e-mail' : ''} e essa senha temporária.</p>
                 <button
                   type="button"
                   onClick={() => copyText(
                     [
                       `Usuário: ${resetPasswordModal.result?.user?.username || '-'}`,
-                      `E-mail: ${resetPasswordModal.result?.user?.email || '-'}`,
+                      resetPasswordModal.result?.user?.email ? `E-mail: ${resetPasswordModal.result.user.email}` : 'E-mail: sem e-mail, acesso gerenciado pela loja',
                       `Senha temporária: ${resetPasswordModal.result?.temporaryPassword || '-'}`,
                     ].join('\n'),
                     'Credenciais copiadas.'
@@ -1502,7 +1768,9 @@ export function AdminMotoboys() {
                 </button>
                 {!resetPasswordModal.result?.credentialsEmailSent ? (
                   <p className="mt-2 text-[11px] font-semibold text-amber-700">
-                    O e-mail não foi enviado. Entregue as credenciais manualmente.
+                    {resetPasswordModal.result?.user?.managedWithoutEmail
+                      ? 'Este acesso não tem e-mail. Entregue as credenciais manualmente.'
+                      : 'O e-mail não foi enviado. Entregue as credenciais manualmente.'}
                   </p>
                 ) : null}
               </div>
@@ -1823,7 +2091,7 @@ export function AdminMotoboys() {
         </div>
       </FormSection>
 
-      <div ref={requestsSectionRef} className="scroll-mt-24">
+      <div ref={requestsSectionRef} className={activeMotoboyTab === 'requests' ? 'scroll-mt-24' : 'hidden scroll-mt-24'}>
       <FormSection
         title="Solicitações de vínculo"
         subtitle="Motoboys que pediram para entrar na sua loja."
@@ -1858,17 +2126,17 @@ export function AdminMotoboys() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => linkedSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              onClick={() => setActiveMotoboyTab('team')}
               className="btn-press flex-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-extrabold text-emerald-800"
             >
               Ir para vinculados
             </button>
             <button
               type="button"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              onClick={() => setCreateMotoboyOpen(true)}
               className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700"
             >
-              Topo
+              Novo
             </button>
           </div>
         </div>
@@ -1904,7 +2172,7 @@ export function AdminMotoboys() {
                     <p className="text-sm font-black text-slate-900">
                       {request.motoboyUser?.fullName || 'Entregador'}
                     </p>
-                    <p className="text-xs text-slate-500">{request.motoboyUser?.email || '-'}</p>
+                    <p className="text-xs text-slate-500">{displayMotoboyEmail(request.motoboyUser)}</p>
                     {request.motoboyUser?.phone && (
                       <p className="text-xs text-slate-500">{request.motoboyUser.phone}</p>
                     )}
@@ -1968,7 +2236,7 @@ export function AdminMotoboys() {
       </FormSection>
       </div>
 
-      <div ref={linkedSectionRef} className="scroll-mt-24">
+      <div ref={linkedSectionRef} className={activeMotoboyTab === 'team' ? 'scroll-mt-24' : 'hidden scroll-mt-24'}>
       <FormSection
         title="Entregadores vinculados"
         subtitle="Status, documentos e vínculo por loja."
@@ -2024,7 +2292,7 @@ export function AdminMotoboys() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {[
                 { id: 'all', label: 'Todos' },
                 { id: 'free', label: 'Livres' },
@@ -2037,7 +2305,7 @@ export function AdminMotoboys() {
                   type="button"
                   onClick={() => setMotoboyFilter(f.id as any)}
                   className={[
-                    'btn-press px-3 py-1.5 rounded-full text-[11px] font-extrabold border',
+                    'btn-press shrink-0 px-3 py-1.5 rounded-full text-[11px] font-extrabold border',
                     motoboyFilter === f.id ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200',
                   ].join(' ')}
                 >
@@ -2048,7 +2316,7 @@ export function AdminMotoboys() {
                 type="button"
                 onClick={() => setShowInactive((prev) => !prev)}
                 className={[
-                  'btn-press px-3 py-1.5 rounded-full text-[11px] font-extrabold border flex items-center gap-2',
+                  'btn-press shrink-0 px-3 py-1.5 rounded-full text-[11px] font-extrabold border flex items-center gap-2',
                   showInactive ? 'bg-rose-50 text-rose-800 border-rose-200' : 'bg-white text-slate-700 border-slate-200',
                 ].join(' ')}
                 title="Alterna exibição de vínculos inativos no conjunto base"
@@ -2063,17 +2331,17 @@ export function AdminMotoboys() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => requestsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              onClick={() => setActiveMotoboyTab('requests')}
               className="btn-press flex-1 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-extrabold text-amber-800"
             >
               Ir para solicitações
             </button>
             <button
               type="button"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              onClick={() => setCreateMotoboyOpen(true)}
               className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700"
             >
-              Topo
+              Novo
             </button>
           </div>
         </div>
@@ -2097,19 +2365,19 @@ export function AdminMotoboys() {
             {filteredMotoboys.map((link) => (
               <div
                 key={link.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 overflow-hidden shadow-[0_18px_42px_-30px_rgba(15,23,42,0.24)] ds-interactive-card"
+                className="rounded-2xl border border-slate-200 bg-white p-3 flex flex-col gap-2.5 overflow-hidden shadow-[0_18px_42px_-30px_rgba(15,23,42,0.24)] ds-interactive-card"
                 style={{
                   borderLeftWidth: 6,
                   borderLeftColor: link.active ? (link.busy ? 'rgb(245 158 11)' : 'rgb(16 185 129)') : 'rgb(244 63 94)',
                 }}
               >
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex items-start gap-3 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                  <div className="flex items-start gap-2.5 min-w-0">
                     <AdaptiveAvatar
                       src={link.motoboyUser?.profileImageUrl ? resolveAssetUrl(link.motoboyUser.profileImageUrl) : ''}
                       alt={link.motoboyUser?.fullName || 'Entregador'}
                       fallbackText={String(link?.motoboyUser?.fullName || 'E')}
-                      sizeClassName="h-16 w-16"
+                      sizeClassName="h-12 w-12"
                       imageClassName="object-[center_18%]"
                       containerClassName="text-slate-800 bg-gradient-to-br from-slate-50 to-white shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]"
                     />
@@ -2117,12 +2385,12 @@ export function AdminMotoboys() {
                       <p className="text-sm font-black text-slate-900 break-words">
                       {link.motoboyUser?.fullName || 'Entregador'}
                     </p>
-                    <p className="text-xs text-slate-500 break-all">{link.motoboyUser?.email || '-'}</p>
+                    <p className="text-[11px] text-slate-500 break-all">{displayMotoboyEmail(link.motoboyUser)}</p>
                     {link.motoboyUser?.username ? (
                       <p className="text-[11px] font-semibold text-slate-600 break-all">Usuário: {link.motoboyUser.username}</p>
                     ) : null}
                     {link.motoboyUser?.phone && (
-                      <p className="text-xs text-slate-500 break-all">{link.motoboyUser.phone}</p>
+                      <p className="text-[11px] text-slate-500 break-all">{link.motoboyUser.phone}</p>
                     )}
                     {formatVehicleLine(link.motoboyProfile) ? (
                       <p className="text-[11px] text-slate-600 mt-1 break-words">{formatVehicleLine(link.motoboyProfile)}</p>
@@ -2137,7 +2405,7 @@ export function AdminMotoboys() {
                     ) : null}
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
                       {formatMotoboyStatus(link.motoboyStatus)}
                     </span>
@@ -2161,7 +2429,7 @@ export function AdminMotoboys() {
                     ) : null}
                   </div>
                 </div>
-                <div className="text-xs text-slate-500 flex flex-wrap gap-2">
+                <div className="text-[11px] text-slate-500 flex flex-wrap gap-2">
                   <span>Vínculo: {link.active ? 'Ativo' : 'Inativo'}</span>
                   {Number(pendingPayoutByMotoboy[link.motoboyId] || 0) > 0 ? (
                     <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-extrabold text-amber-800">
@@ -2170,8 +2438,11 @@ export function AdminMotoboys() {
                   ) : null}
                 </div>
                 {Array.isArray(documentsByMotoboy[link.motoboyId]) ? (
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {kycPill(documentsByMotoboy[link.motoboyId] || [])}
+                    {docStatusDot(documentsByMotoboy[link.motoboyId] || [], 'CNH')}
+                    {docStatusDot(documentsByMotoboy[link.motoboyId] || [], 'SELFIE')}
+                    {docStatusDot(documentsByMotoboy[link.motoboyId] || [], 'CRLV')}
                   </div>
                 ) : null}
                 {link.active && String(link.motoboyStatus || '').toUpperCase() !== 'ACTIVE' ? (
@@ -2192,24 +2463,6 @@ export function AdminMotoboys() {
                     </span>
                   </div>
                 ) : null}
-                {Array.isArray(documentsByMotoboy[link.motoboyId]) && (
-                  <div className="text-[11px] text-slate-500">
-                    {docsPendingCount(documentsByMotoboy[link.motoboyId]) > 0 ? (
-                      <span className="text-amber-700">
-                        Documentos pendentes: {docsPendingCount(documentsByMotoboy[link.motoboyId])}
-                      </span>
-                    ) : (
-                      <span className="text-emerald-700">Documentos aprovados.</span>
-                    )}
-                  </div>
-                )}
-                {Array.isArray(documentsByMotoboy[link.motoboyId]) && (
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
-                    {docChip(documentsByMotoboy[link.motoboyId] || [], 'CNH')}
-                    {docChip(documentsByMotoboy[link.motoboyId] || [], 'SELFIE')}
-                    {docChip(documentsByMotoboy[link.motoboyId] || [], 'CRLV')}
-                  </div>
-                )}
                 <div className="flex flex-wrap gap-2 pt-1">
                   <button
                     type="button"

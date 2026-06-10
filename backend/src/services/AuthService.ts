@@ -208,15 +208,17 @@ private async comparePasswordWithLegacy(rawPassword: string, user?: User | null)
    * @author Edmilson Lopes
    */
   private sanitizeSessionUser(user: User, roleOverride?: string) {
+    const managedWithoutEmail = String(user.email || '').trim().toLowerCase().endsWith('@store-managed.janocaminho.local');
     return {
       id: user.id,
       fullName: user.fullName,
-      email: user.email,
+      email: managedWithoutEmail ? null : user.email,
       username: user.username || null,
       phone: user.phone,
       address: user.address,
       role: roleOverride || user.userRole || 'STORE_OWNER',
       mustChangePassword: Boolean((user as any).mustChangePassword),
+      managedWithoutEmail,
     };
   }
 

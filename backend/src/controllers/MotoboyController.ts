@@ -239,17 +239,7 @@ export class MotoboyController {
           busy: (busyMap.get(link.motoboyId) || 0) > 0,
           motoboyStatus: link.motoboy?.status,
           motoboyCreatedByUserId: link.motoboy?.createdByUserId || null,
-          motoboyUser: link.motoboy?.user
-            ? {
-                id: link.motoboy.user.id,
-                fullName: link.motoboy.user.fullName,
-                email: link.motoboy.user.email,
-                username: link.motoboy.user.username || null,
-                phone: link.motoboy.user.phone,
-                profileImageUrl: link.motoboy.user.profileImageUrl || null,
-                mustChangePassword: Boolean((link.motoboy.user as any).mustChangePassword),
-              }
-            : null,
+          motoboyUser: motoboyService.sanitizeMotoboyUser(link.motoboy?.user || null),
           motoboyProfile: link.motoboy
             ? {
                 vehicleType: link.motoboy.vehicleType || null,
@@ -313,6 +303,9 @@ export class MotoboyController {
   static async getProfile(req: Request, res: Response) {
     try {
       const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
+      if (motoboy?.user) {
+        (motoboy as any).user = motoboyService.sanitizeMotoboyUser(motoboy.user);
+      }
       return res.json(motoboy);
     } catch (error) {
       return respondWithError(req, res, error, 400);
@@ -638,15 +631,7 @@ export class MotoboyController {
           createdAt: request.createdAt,
           motoboyId: request.motoboyId,
           motoboyStatus: request.motoboy?.status,
-          motoboyUser: request.motoboy?.user
-            ? {
-                id: request.motoboy.user.id,
-                fullName: request.motoboy.user.fullName,
-                email: request.motoboy.user.email,
-                phone: request.motoboy.user.phone,
-                profileImageUrl: request.motoboy.user.profileImageUrl || null,
-              }
-            : null,
+          motoboyUser: motoboyService.sanitizeMotoboyUser(request.motoboy?.user || null),
         }))
       );
     } catch (error: any) {

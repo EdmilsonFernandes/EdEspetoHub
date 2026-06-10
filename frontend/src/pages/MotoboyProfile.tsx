@@ -1191,6 +1191,7 @@ export function MotoboyProfile() {
   };
 
   const profileAccountStatus = formatMotoboyAccountStatus(profile?.status);
+  const profileManagedWithoutEmail = Boolean(profile?.user?.managedWithoutEmail);
   const tabItems = [
     { id: 'profile', label: 'Cadastro', icon: <ShieldCheck size={16} weight="duotone" /> },
     {
@@ -1660,7 +1661,14 @@ export function MotoboyProfile() {
             </div>
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">E-mail</p>
-              <p className="text-sm font-semibold text-slate-900 break-all">{profile?.user?.email || '-'}</p>
+              <p className="text-sm font-semibold text-slate-900 break-all">
+                {profileManagedWithoutEmail ? 'Sem e-mail, gerenciado pela loja' : profile?.user?.email || '-'}
+              </p>
+              {profileManagedWithoutEmail ? (
+                <p className="mt-1 text-[11px] font-semibold text-slate-500">
+                  A troca de e-mail fica bloqueada neste acesso. Fale com a loja se precisar alterar o login.
+                </p>
+              ) : null}
             </div>
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Telefone</p>
