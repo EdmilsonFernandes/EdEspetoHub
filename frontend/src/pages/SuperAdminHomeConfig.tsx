@@ -26,6 +26,10 @@ import { useToast } from '../contexts/ToastContext';
 import { resolveActionLabel } from '../utils/actionLink';
 
 const MAX_HOME_BANNERS = 4;
+const HOME_BANNER_RECOMMENDED_SIZE = '1600 x 640 px';
+const HOME_BANNER_SAFE_AREA = '1360 x 500 px centrais';
+const HOME_BANNER_ASPECT_LABEL = '2,5:1';
+const MARKETING_POPUP_RECOMMENDED_SIZE = '1200 x 1600 px';
 
 const PREVIEW_STORES = [
   { id: 'store-1', name: 'Espetinho do Lago', subtitle: 'Entrega e retirada', accent: 'from-[#153A4C] to-[#336886]' },
@@ -92,7 +96,7 @@ const createEmptyBanner = (index: number): HomeBannerDraft => ({
   actionLabel: '',
   order: index + 1,
   active: true,
-  fit: 'cover',
+  fit: 'contain',
 });
 
 const buildPreviewSlides = (config: HomeConfigPayload): PromoSlide[] =>
@@ -373,6 +377,10 @@ export function SuperAdminHomeConfig() {
                   <p className="mt-1 text-sm text-slate-500">
                     Até 4 banners. Hoje há <span className="font-black text-slate-900">{activeBannerCount}</span> ativos com imagem.
                   </p>
+                  <p className="mt-2 max-w-2xl rounded-2xl border border-[#d7e7ef] bg-[#edf5fa]/70 px-3 py-2 text-xs font-semibold leading-relaxed text-[#336886]">
+                    Formato real no Hub: <span className="font-black">{HOME_BANNER_RECOMMENDED_SIZE}</span> ({HOME_BANNER_ASPECT_LABEL}).
+                    Mantenha textos e logos dentro da área segura de <span className="font-black">{HOME_BANNER_SAFE_AREA}</span>.
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -411,7 +419,7 @@ export function SuperAdminHomeConfig() {
                       <div className="mt-4 grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
                         <div className="space-y-3">
                           <div className="overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white">
-                            <div className="aspect-[16/9] bg-slate-100">
+                            <div className="aspect-[16/6.4] bg-slate-100">
                               {previewImage ? (
                                 <img src={previewImage} alt={banner.title || `Banner ${index + 1}`} className={`h-full w-full ${banner.fit === 'contain' ? 'object-contain bg-slate-900/5' : 'object-cover'}`} />
                               ) : (
@@ -426,6 +434,11 @@ export function SuperAdminHomeConfig() {
                             Upload da imagem
                             <input type="file" accept="image/*" className="hidden" onChange={(event) => void handleBannerFile(index, event.target.files?.[0])} />
                           </label>
+                          <div className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-semibold leading-relaxed text-slate-500">
+                            <p><span className="font-black text-slate-700">Tamanho ideal:</span> {HOME_BANNER_RECOMMENDED_SIZE}</p>
+                            <p><span className="font-black text-slate-700">Sem corte:</span> use "Conter imagem" ou exporte exatamente em {HOME_BANNER_ASPECT_LABEL}.</p>
+                            <p><span className="font-black text-slate-700">Área segura:</span> deixe logo/texto longe das bordas.</p>
+                          </div>
                           {banner.imageUrl ? (
                             <button
                               type="button"
@@ -467,7 +480,7 @@ export function SuperAdminHomeConfig() {
                       <option value="cover">Preencher card (sem distorcer)</option>
                       <option value="contain">Conter imagem (mostrar tudo)</option>
                     </select>
-                    <p className="mt-1 text-[11px] font-semibold text-slate-400">Preencher usa corte inteligente com qualidade preservada; conter mostra a arte inteira.</p>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-400">Para banners com texto/logo, prefira "Conter imagem". "Preencher" só fica sem corte quando a arte já está em {HOME_BANNER_ASPECT_LABEL}.</p>
                   </label>
                           <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
                             <span className="text-sm font-black text-slate-800">Banner ativo</span>
@@ -487,6 +500,10 @@ export function SuperAdminHomeConfig() {
                 <h2 className="mt-1 text-lg font-black text-slate-900">Abertura inicial do app</h2>
                 <p className="mt-1 text-sm text-slate-500">
                   Se estiver ativo e com imagem, o app mostra o popup depois da entrada do usuário.
+                </p>
+                <p className="mt-2 max-w-2xl rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold leading-relaxed text-slate-500">
+                  Formato recomendado: <span className="font-black text-slate-700">{MARKETING_POPUP_RECOMMENDED_SIZE}</span> (3:4).
+                  Use "Conter imagem" quando a arte tiver texto perto das bordas.
                 </p>
               </div>
 
@@ -555,7 +572,7 @@ export function SuperAdminHomeConfig() {
                       <option value="cover">Preencher card (sem distorcer)</option>
                       <option value="contain">Conter imagem (mostrar tudo)</option>
                     </select>
-                    <p className="mt-1 text-[11px] font-semibold text-slate-400">Preencher usa corte inteligente com qualidade preservada; conter mostra a arte inteira.</p>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-400">O popup é vertical. Tamanho ideal: {MARKETING_POPUP_RECOMMENDED_SIZE}; conter evita cortar texto e logo.</p>
                   </label>
                   <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
                     <span className="text-sm font-black text-slate-800">Popup ativo</span>

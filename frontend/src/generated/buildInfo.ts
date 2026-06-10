@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "054a892d",
-  "versionLabel": "v0.1.9.054a892d",
-  "versionInternal": "0.1.9+20260610.172932.054a892d",
-  "buildId": "0.1.9+20260610.172932.054a892d-20260610.172932-054a892d",
-  "builtAt": "2026-06-10T17:29:32.193Z",
-  "commitHash": "054a892d6e69170098a582f64fdce5e9bab60f35",
-  "shortHash": "054a892d",
+  "versionDisplaySuffix": "765f67ca",
+  "versionLabel": "v0.1.9.765f67ca",
+  "versionInternal": "0.1.9+20260610.173606.765f67ca",
+  "buildId": "0.1.9+20260610.173606.765f67ca-20260610.173606-765f67ca",
+  "builtAt": "2026-06-10T17:36:06.900Z",
+  "commitHash": "765f67ca0d0d2e05bcc6b1ffb963f43d26ac686d",
+  "shortHash": "765f67ca",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "765f67ca0d0d2e05bcc6b1ffb963f43d26ac686d",
+      "shortHash": "765f67ca",
+      "dateIso": "2026-06-10T14:30:21-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Refine client micro interactions",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/765f67ca0d0d2e05bcc6b1ffb963f43d26ac686d"
+    },
     {
       "hash": "054a892d6e69170098a582f64fdce5e9bab60f35",
       "shortHash": "054a892d",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Polish client orders list layout",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c7e4298f54cfae6aa8631b504eb88c0f5c2b4082"
-    },
-    {
-      "hash": "c2b55aaeb16101274bf230f87290f6ce1a72eb7e",
-      "shortHash": "c2b55aae",
-      "dateIso": "2026-06-08T16:50:15-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve plan feature copy rendering",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c2b55aaeb16101274bf230f87290f6ce1a72eb7e"
     }
   ]
 } as const;
