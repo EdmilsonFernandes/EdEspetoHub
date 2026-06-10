@@ -91,7 +91,7 @@ export function ConfirmPaymentModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 px-4">
       <div className="w-full max-w-md max-h-[92vh] overflow-y-auto premium-card-glass p-5 space-y-4 shadow-xl motoboy-fade-up">
         <div>
           <h3 className="text-lg font-bold text-slate-800">Confirmar pagamento</h3>
@@ -197,6 +197,8 @@ export function ConfirmPaymentModal({
               value={cashValue}
               onChange={(event) => setCashValue(event.target.value)}
               placeholder="0,00"
+              inputMode="decimal"
+              autoComplete="off"
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
             />
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-[11px] text-slate-700">

@@ -305,7 +305,50 @@ export function MotoboyLayout() {
   ];
 
   return (
-    <div className="min-h-screen motoboy-bg pb-28">
+    <div className="min-h-screen motoboy-bg pb-28 lg:pb-8 lg:pl-24">
+      <aside
+        className="fixed bottom-4 left-4 top-4 z-[70] hidden w-20 flex-col items-center gap-3 rounded-[2rem] border border-white/70 bg-white/[0.78] p-2 shadow-[0_28px_70px_-44px_rgba(15,23,42,0.65)] backdrop-blur-2xl lg:flex"
+        aria-label="Navegação desktop do entregador"
+      >
+        <div className="grid h-12 w-12 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_16px_28px_-22px_rgba(15,23,42,0.45)]">
+          <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
+        </div>
+        <nav className="flex flex-1 flex-col items-center justify-center gap-2">
+          {tabs.map((tab) => {
+            const active = tab.id === 'profile' ? accountDrawerOpen || tab.match(pathname) : tab.match(pathname);
+            const showDot = tab.label === 'Fila' && queueBadge && !pathname.startsWith('/motoboy/available');
+            const className = [
+              'btn-press relative flex h-14 w-14 flex-col items-center justify-center rounded-2xl text-[10px] font-black transition-all',
+              active
+                ? 'bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_65%,#f59e0b))] text-white shadow-[0_18px_34px_-26px_rgba(239,68,68,0.8)]'
+                : 'bg-white/70 text-slate-700 hover:bg-slate-100',
+            ].join(' ');
+
+            const content = (
+              <>
+                {showDot && <span className="motoboy-dot" aria-hidden="true" />}
+                <span className={active ? 'text-white' : 'text-slate-700'}>{tab.icon}</span>
+                <span className="mt-0.5 max-w-full truncate px-1">{tab.label}</span>
+              </>
+            );
+
+            if (tab.to) {
+              return (
+                <Link key={tab.id} to={tab.to} className={className} aria-current={active ? 'page' : undefined}>
+                  {content}
+                </Link>
+              );
+            }
+
+            return (
+              <button key={tab.id} type="button" onClick={tab.onClick} className={className} aria-current={active ? 'page' : undefined}>
+                {content}
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+
       <Outlet />
 
       {requiresPasswordChange && (
@@ -409,7 +452,7 @@ export function MotoboyLayout() {
       )}
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-[70] motoboy-nav"
+        className="fixed bottom-0 left-0 right-0 z-[70] motoboy-nav lg:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         aria-label="Navegação do entregador"
       >

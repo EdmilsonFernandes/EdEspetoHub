@@ -19,9 +19,10 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function StatusBadge({ status }: { status?: string }) {
-  const label = STATUS_LABELS[status || ''] || status || 'Atualizando';
+  const normalizedStatus = String(status || '').trim().toLowerCase();
+  const label = STATUS_LABELS[normalizedStatus] || status || 'Atualizando';
   const tone =
-    STATUS_STYLES[status || ''] || { pill: 'bg-slate-50 text-slate-700 border-slate-200', dot: 'bg-slate-400' };
+    STATUS_STYLES[normalizedStatus] || { pill: 'bg-slate-50 text-slate-700 border-slate-200', dot: 'bg-slate-400' };
 
   return (
     <span

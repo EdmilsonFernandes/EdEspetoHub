@@ -96,7 +96,9 @@ export function MotoboyHome() {
   }, [lastUpdatedAt]);
 
   const needsAccountAttention = useMemo(() => {
-    return profile?.status !== 'ACTIVE' || pendingRequests > 0 || approvedStores === 0;
+    const profileStatus = String(profile?.status || '').toUpperCase();
+    const profileNeedsAttention = Boolean(profile?.status) && profileStatus !== 'ACTIVE';
+    return profileNeedsAttention || pendingRequests > 0 || approvedStores === 0;
   }, [approvedStores, pendingRequests, profile?.status]);
 
   const primaryState = useMemo(() => {
@@ -118,6 +120,20 @@ export function MotoboyHome() {
         actionPath: '/motoboy/delivery',
       };
     }
+    if (needsAccountAttention) {
+      return {
+        eyebrow: 'Antes de operar',
+        title: accountStatus.label,
+        description:
+          pendingRequests > 0
+            ? `${pendingRequests} solicitacao${pendingRequests === 1 ? '' : 'oes'} de loja aguardando resposta.`
+            : approvedStores === 0
+              ? 'Voce precisa de pelo menos uma loja aprovada para receber entregas.'
+              : 'Complete seu cadastro para liberar a operacao.',
+        actionLabel: 'Resolver cadastro',
+        actionPath: '/motoboy/profile',
+      };
+    }
     if (queueCount > 0) {
       return {
         eyebrow: 'Fila agora',
@@ -134,7 +150,7 @@ export function MotoboyHome() {
       actionLabel: 'Abrir fila',
       actionPath: '/motoboy/available',
     };
-  }, [activeOrder?.customerName, activeOrder?.store?.name, deliveryStatus, hasActive, loading, nextOrderLabel, queueCount]);
+  }, [accountStatus.label, activeOrder?.customerName, activeOrder?.store?.name, approvedStores, deliveryStatus, hasActive, loading, needsAccountAttention, nextOrderLabel, pendingRequests, queueCount]);
 
   return (
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
@@ -176,7 +192,7 @@ export function MotoboyHome() {
             >
               {primaryState.actionLabel} <ArrowRight size={18} weight="duotone" />
             </button>
-            {needsAccountAttention ? (
+            {needsAccountAttention && primaryState.actionPath !== '/motoboy/profile' ? (
               <button
                 type="button"
                 onClick={() => navigate('/motoboy/profile')}

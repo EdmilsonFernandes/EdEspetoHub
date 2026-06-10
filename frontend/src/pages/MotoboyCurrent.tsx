@@ -173,9 +173,9 @@ export function MotoboyCurrent() {
     const current = deliveryStatus === 'ACCEPTED' ? 0 : deliveryStatus === 'PICKED_UP' ? 1 : deliveryStatus === 'IN_TRANSIT' ? 2 : 0;
     const label =
       deliveryStatus === 'ACCEPTED'
-        ? 'Vá até a loja, retire o pedido e confirme quando estiver com ele.'
+        ? 'Vá até a loja. Ao confirmar a retirada, o cliente recebe o código e a entrega entra em rota.'
         : deliveryStatus === 'PICKED_UP'
-          ? 'Abra a rota para o cliente e siga com a entrega.'
+          ? 'Confirme a saída para o cliente para iniciar a rota no sistema.'
           : deliveryStatus === 'IN_TRANSIT'
             ? paymentIsPaid
               ? 'Chegou no cliente? Confirme a entrega com o codigo.'
@@ -321,6 +321,18 @@ export function MotoboyCurrent() {
     }
   };
 
+  const handleStartDelivery = async () => {
+    if (!activeOrder) return;
+    try {
+      await motoboyService.startDelivery(activeOrder.id);
+      showToast('Rota iniciada. Siga ate o cliente.', 'success');
+      void load();
+      window.setTimeout(openRoute, 150);
+    } catch (error: any) {
+      showToast(error?.message || 'Nao foi possivel iniciar a rota.', 'error');
+    }
+  };
+
   const formatRouteTime = (ms: number) => {
     const totalSec = Math.floor(ms / 1000);
     const min = Math.floor(totalSec / 60);
@@ -351,11 +363,10 @@ export function MotoboyCurrent() {
       />
 
       {earningsToday ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          <span className="font-semibold">Ganhos de hoje:</span>{' '}
-          {earningsToday.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}{' '}
-          <span className="text-xs text-emerald-700">
-            ({earningsToday.count} entrega{earningsToday.count === 1 ? '' : 's'})
+        <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/90 px-3 py-1.5 text-xs font-extrabold text-emerald-800 shadow-[0_14px_30px_-24px_rgba(5,150,105,0.5)]">
+          <CurrencyCircleDollar size={15} weight="duotone" />
+          <span className="truncate">
+            Hoje: {earningsToday.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} • {earningsToday.count} entrega{earningsToday.count === 1 ? '' : 's'}
           </span>
         </div>
       ) : null}
@@ -559,17 +570,17 @@ export function MotoboyCurrent() {
                 onClick={handlePickup}
                 className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
               >
-                Confirmar retirada do pedido
+                Retirei o pedido e vou sair para entrega
               </button>
             ) : null}
 
             {deliveryStatus === 'PICKED_UP' ? (
               <button
                 type="button"
-                onClick={openRoute}
+                onClick={handleStartDelivery}
                 className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,#0284c7,#0f766e)] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(2,132,199,0.6)]"
               >
-                Abrir rota para o cliente
+                Iniciar rota para o cliente
               </button>
             ) : null}
 

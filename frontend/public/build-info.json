@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "765f67ca",
-  "versionLabel": "v0.1.9.765f67ca",
-  "versionInternal": "0.1.9+20260610.173606.765f67ca",
-  "buildId": "0.1.9+20260610.173606.765f67ca-20260610.173606-765f67ca",
-  "builtAt": "2026-06-10T17:36:06.900Z",
-  "commitHash": "765f67ca0d0d2e05bcc6b1ffb963f43d26ac686d",
-  "shortHash": "765f67ca",
+  "versionDisplaySuffix": "b3b18027",
+  "versionLabel": "v0.1.9.b3b18027",
+  "versionInternal": "0.1.9+20260610.180615.b3b18027",
+  "buildId": "0.1.9+20260610.180615.b3b18027-20260610.180615-b3b18027",
+  "builtAt": "2026-06-10T18:06:15.634Z",
+  "commitHash": "b3b18027057e013fcc63c5506c38b236f5131a4a",
+  "shortHash": "b3b18027",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "b3b18027057e013fcc63c5506c38b236f5131a4a",
+      "shortHash": "b3b18027",
+      "dateIso": "2026-06-10T14:36:56-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Document home banner image specs",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b3b18027057e013fcc63c5506c38b236f5131a4a"
+    },
     {
       "hash": "765f67ca0d0d2e05bcc6b1ffb963f43d26ac686d",
       "shortHash": "765f67ca",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Polish reorder carousel badge",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a286d125d8c702608a9733b9692f171bc616cdf4"
-    },
-    {
-      "hash": "c7e4298f54cfae6aa8631b504eb88c0f5c2b4082",
-      "shortHash": "c7e4298f",
-      "dateIso": "2026-06-08T17:27:43-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish client orders list layout",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c7e4298f54cfae6aa8631b504eb88c0f5c2b4082"
     }
   ]
 }

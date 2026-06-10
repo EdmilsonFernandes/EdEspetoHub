@@ -104,26 +104,30 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
               <p className="text-xs text-slate-600 mt-2 break-words">{compactItemsLabel}</p>
             )}
             {compact && (
-              <div className="mt-2 space-y-1">
-                <p
-                  className="text-[11px] leading-relaxed text-slate-600 break-words line-clamp-2 sm:line-clamp-1"
-                  title={storeName || storeSlug || 'Loja'}
+              <div className="mt-3 grid gap-1.5">
+                <div
+                  className="rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2"
+                  title={storeAddress || storeName || storeSlug || 'Loja'}
                 >
-                  <span className="font-semibold text-slate-700">Loja:</span> {storeName || storeSlug || 'Loja'}
-                </p>
-                <p
-                  className="text-[11px] leading-relaxed text-slate-600 break-words line-clamp-3 sm:line-clamp-2"
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Retirada</p>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-700 break-words line-clamp-2">
+                    {storeName || storeSlug || 'Loja'}{storeAddress ? ` • ${storeAddress}` : ''}
+                  </p>
+                </div>
+                <div
+                  className="rounded-xl border border-slate-100 bg-white px-3 py-2"
                   title={compactAddress}
                 >
-                  <span className="font-semibold text-slate-700">Entrega:</span> {compactAddress}
-                </p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Entrega</p>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-700 break-words line-clamp-2">{compactAddress}</p>
+                </div>
               </div>
             )}
           </div>
           <div className="min-w-0 w-full sm:w-auto sm:max-w-[220px] text-left sm:text-right">
             <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 mb-1">Valores</p>
             {compact && isDelivery ? (
-              <p className="mb-1 text-xs font-extrabold text-emerald-700">
+              <p className="mb-2 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-extrabold text-emerald-700">
                 Voce recebe: {formatCurrency(showCourierEarnings ? deliveryGain : compactCourierGain)}
               </p>
             ) : null}

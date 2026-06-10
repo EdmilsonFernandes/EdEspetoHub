@@ -12,6 +12,7 @@ const MOTOBOY_AVAILABLE_ORDER_EVENT = 'jnc:motoboy-available-order';
 export function MotoboyAvailable() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [blocked, setBlocked] = useState(false);
   const [hasActive, setHasActive] = useState(false);
@@ -63,8 +64,10 @@ export function MotoboyAvailable() {
     } catch {}
   };
 
-  const loadOrders = useCallback(async () => {
-    setLoading(true);
+  const loadOrders = useCallback(async ({ silent = false }: { silent?: boolean } = {}) => {
+    if (silent) setRefreshing(true);
+    else setLoading(true);
+    const wasFirstLoad = firstLoadRef.current;
     try {
       const data = await motoboyService.listAvailableOrders();
       const nextOrders = Array.isArray(data) ? data : [];
@@ -74,7 +77,7 @@ export function MotoboyAvailable() {
       const newCount = nextIds.filter((id) => !prevIds.has(id)).length;
       orderIdsRef.current = nextIds;
       setOrders(nextOrders);
-      if (!firstLoadRef.current && hasNew && nextOrders.length > 0) {
+      if (!wasFirstLoad && hasNew && nextOrders.length > 0) {
         showToast('Novo pedido na fila.', 'info');
         setNewBanner({ count: Math.max(newCount, 1), at: Date.now() });
         localStorage.setItem('motoboy:queue_badge', '1');
@@ -99,20 +102,21 @@ export function MotoboyAvailable() {
         showToast(error?.message || 'Nao foi possivel carregar pedidos.', 'error');
       }
     } finally {
-      setLoading(false);
+      firstLoadRef.current = false;
+      if (silent) setRefreshing(false);
+      else setLoading(false);
     }
   }, [showToast]);
 
   useEffect(() => {
     void loadOrders();
-    firstLoadRef.current = false;
   }, [loadOrders]);
 
   useEffect(() => {
     let timer: number | null = null;
     const tick = async () => {
       if (document.visibilityState !== 'visible') return;
-      await loadOrders();
+      await loadOrders({ silent: true });
     };
     timer = window.setInterval(() => {
       void tick();
@@ -126,7 +130,7 @@ export function MotoboyAvailable() {
     const onForegroundPush = () => {
       setNewBanner({ count: 1, at: Date.now() });
       showToast('Tem entrega disponivel.', 'info');
-      void loadOrders();
+      void loadOrders({ silent: true });
     };
     window.addEventListener(MOTOBOY_AVAILABLE_ORDER_EVENT, onForegroundPush as EventListener);
     return () => window.removeEventListener(MOTOBOY_AVAILABLE_ORDER_EVENT, onForegroundPush as EventListener);
@@ -173,11 +177,17 @@ export function MotoboyAvailable() {
   const documentsByType = new Map(
     documents.map((doc: any) => [String(doc.docType || '').toUpperCase(), doc])
   );
-  const hasAllRequiredDocs = requiredDocs.every((key) => documentsByType.has(key));
-  const missingRequiredDocs = requiredDocs.filter((key) => !documentsByType.has(key)).length;
+  const hasApprovedDoc = (key: string) => {
+    const doc = documentsByType.get(key);
+    return String(doc?.status || '').toUpperCase() === 'APPROVED';
+  };
+  const hasAllRequiredDocs = requiredDocs.every((key) => hasApprovedDoc(key));
+  const missingRequiredDocs = requiredDocs.filter((key) => !hasApprovedDoc(key)).length;
   const approvedStores = requests.filter((req) => req.status === 'APPROVED');
   const accountStatus = formatMotoboyAccountStatus(profile?.status);
-  const canOperate = !blocked && hasAllRequiredDocs && approvedStores.length > 0;
+  const profileStatus = String(profile?.status || '').toUpperCase();
+  const profileAllowsOperation = profile?.status ? profileStatus === 'ACTIVE' : true;
+  const canOperate = !blocked && profileAllowsOperation && hasAllRequiredDocs && approvedStores.length > 0;
 
   const handleAccept = async (orderId: string) => {
     try {
@@ -239,10 +249,10 @@ export function MotoboyAvailable() {
         subtitle={hasActive ? 'Voce ja esta em rota. Termine a entrega atual primeiro.' : 'Veja o pedido e aceite rapido.'}
         rightAction={
           <button
-            onClick={loadOrders}
+            onClick={() => void loadOrders({ silent: true })}
             className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
           >
-            Atualizar
+            {refreshing ? 'Atualizando...' : 'Atualizar'}
           </button>
         }
       />
@@ -285,8 +295,10 @@ export function MotoboyAvailable() {
           <p className="mt-1 text-amber-800">
             {blocked
               ? 'Seu cadastro ainda esta em analise da plataforma.'
+              : !profileAllowsOperation
+                ? 'Seu cadastro de entregador ainda nao esta ativo.'
               : !hasAllRequiredDocs
-                ? `Faltam documentos obrigatorios. Hoje faltam ${missingRequiredDocs}.`
+                ? `Faltam documentos obrigatorios aprovados. Hoje faltam ${missingRequiredDocs}.`
                 : approvedStores.length === 0
                   ? 'Voce ainda nao tem loja aprovada para operar.'
                   : `${pendingCount} solicitacao${pendingCount === 1 ? '' : 'oes'} de loja aguardando resposta.`}
@@ -359,9 +371,10 @@ export function MotoboyAvailable() {
                   actions={
                     <button
                       onClick={() => handleAccept(order.id)}
-                      className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
+                      disabled={!canOperate || hasActive}
+                      className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Aceitar entrega
+                      {!canOperate ? 'Resolva o cadastro para aceitar' : 'Aceitar entrega'}
                     </button>
                   }
                 />

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ListChecks, Wallet } from '@phosphor-icons/react';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { formatCurrency } from '../utils/format';
 
@@ -40,11 +41,6 @@ export function MotoboyDone() {
     const v = Number(payload?.deliveryFee || 0);
     return Number.isFinite(v) ? v : 0;
   }, [payload?.deliveryFee]);
-
-  useEffect(() => {
-    const t = window.setTimeout(() => navigate('/motoboy/earnings'), 2200);
-    return () => window.clearTimeout(t);
-  }, [navigate]);
 
   const confetti = useMemo(() => {
     const colors = [ '#ef4444', '#f59e0b', '#22c55e', '#0ea5e9', '#a855f7' ];
@@ -125,14 +121,28 @@ export function MotoboyDone() {
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={() => navigate('/motoboy/earnings')}
-        className="btn-press w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up"
-        style={{ animationDelay: '140ms' }}
-      >
-        Ver ganhos
-      </button>
+      <div className="grid gap-2 sm:grid-cols-2 motoboy-fade-up" style={{ animationDelay: '140ms' }}>
+        <button
+          type="button"
+          onClick={() => navigate('/motoboy/available')}
+          className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
+        >
+          <span className="inline-flex items-center justify-center gap-2">
+            <ListChecks size={18} weight="duotone" />
+            Pegar próxima entrega
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/motoboy/earnings')}
+          className="btn-press w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
+        >
+          <span className="inline-flex items-center justify-center gap-2">
+            <Wallet size={18} weight="duotone" />
+            Ver ganhos
+          </span>
+        </button>
+      </div>
     </div>
   );
 }

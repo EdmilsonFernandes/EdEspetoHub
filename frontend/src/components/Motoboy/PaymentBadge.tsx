@@ -5,6 +5,8 @@ const STATUS_STYLES: Record<string, { pill: string; dot: string }> = {
 
 const METHOD_LABELS: Record<string, string> = {
   pix: 'Pix',
+  pix_loja: 'Pix da loja',
+  pix_presencial: 'Pix na entrega',
   cash: 'Dinheiro',
   dinheiro: 'Dinheiro',
   card: 'Cartão',
@@ -20,7 +22,7 @@ export function PaymentBadge({ method, status }: { method?: string; status?: str
       ? 'Pago'
       : normalizedMethod === 'cash' || normalizedMethod === 'dinheiro'
         ? 'Receber'
-        : normalizedMethod === 'pix'
+        : normalizedMethod === 'pix' || normalizedMethod === 'pix_loja' || normalizedMethod === 'pix_presencial'
           ? 'Aguardando'
           : 'Pendente';
   const methodLabel = METHOD_LABELS[normalizedMethod] || method || 'Pagamento';
