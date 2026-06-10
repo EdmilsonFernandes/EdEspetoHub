@@ -1307,8 +1307,8 @@ export const CartView = ({
     const accent = tone === "online" ? "#336886" : "#207A52";
     const selectedClasses =
       tone === "online"
-        ? "border-[#336886]/70 bg-white text-slate-950 shadow-[0_24px_54px_-34px_rgba(51,104,134,0.50),inset_0_1px_0_rgba(255,255,255,0.86),inset_0_2px_12px_rgba(51,104,134,0.06)] ring-2 ring-[#336886]/10"
-        : "border-emerald-400/80 bg-white text-slate-950 shadow-[0_24px_54px_-34px_rgba(32,122,82,0.46),inset_0_1px_0_rgba(255,255,255,0.86),inset_0_2px_12px_rgba(32,122,82,0.06)] ring-2 ring-emerald-200/60";
+        ? "jnc-payment-pressed border-[#336886]/70 text-slate-950 ring-2 ring-[#336886]/10"
+        : "jnc-payment-pressed border-emerald-400/80 text-slate-950 ring-2 ring-emerald-200/60";
 
     return (
       <button
@@ -2872,7 +2872,7 @@ export const CartView = ({
                 : checkoutStep === 4
                 ? (checkoutLoading || checkoutDisabled || paymentValidation.blocked)
                 : false}
-              className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
+              className={`relative w-full overflow-hidden font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
                 (checkoutStep === 2 && (
                   checkoutLoading ||
                   (isPostalQuoteMode && postalQuoteLoading) ||
@@ -2890,6 +2890,9 @@ export const CartView = ({
               }`}
               style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
             >
+              {checkoutStep === 4 ? (
+                <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+              ) : null}
               {checkoutStep < 3
                 ? <>
                     {isLoggedDeliveryFlow && !hasSavedAddress && checkoutStep === 2
@@ -2967,13 +2970,16 @@ export const CartView = ({
                 await handleCheckoutAttempt();
               }}
               disabled={primaryCtaDisabled}
-              className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
+              className={`relative w-full overflow-hidden font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
                 primaryCtaDisabled
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
                   : "bg-slate-900 text-white cursor-pointer"
               }`}
               style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
             >
+              {!primaryCtaDisabled ? (
+                <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+              ) : null}
               {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
               {checkoutLoading ? checkoutLoadingLabel : primaryCtaLabel}
             </button>

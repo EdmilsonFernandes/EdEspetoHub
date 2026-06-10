@@ -407,10 +407,13 @@ function TrackingMetaCard({
       : 'text-slate-900';
 
   return (
-    <div className="rounded-[1.2rem] border border-[#d6e4ed] bg-[linear-gradient(180deg,#ffffff_0%,#f5f9fc_100%)] px-4 py-3 shadow-[0_18px_36px_-30px_rgba(51,104,134,0.16)]">
-      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{label}</p>
-      <div className={`mt-1.5 text-sm font-black leading-tight ${accentClass}`}>{value}</div>
-      {detail ? <div className="mt-1 text-xs font-medium leading-5 text-slate-500">{detail}</div> : null}
+    <div className="group relative overflow-hidden rounded-[1.2rem] border border-[#d6e4ed] bg-[linear-gradient(180deg,#ffffff_0%,#f5f9fc_100%)] px-4 py-3 shadow-[0_18px_36px_-30px_rgba(51,104,134,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_-34px_rgba(51,104,134,0.22)]">
+      <span className="jnc-glare-sweep opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="relative z-[1]">
+        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{label}</p>
+        <div className={`mt-1.5 text-sm font-black leading-tight ${accentClass}`}>{value}</div>
+        {detail ? <div className="mt-1 text-xs font-medium leading-5 text-slate-500">{detail}</div> : null}
+      </div>
     </div>
   );
 }
@@ -2682,7 +2685,7 @@ export function OrderTracking() {
                                     key={`store-${n}`}
                                     type="button"
                                     onClick={() => setReviewForm((prev) => ({ ...prev, storeRating: n }))}
-                                    className={`h-8 w-8 rounded-lg border grid place-items-center transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.2] hover:rotate-6 active:scale-95 ${
+                                    className={`jnc-star-interactive h-8 w-8 rounded-lg border grid place-items-center ${
                                       Number(reviewForm.storeRating || 0) >= n
                                         ? 'bg-amber-50 border-amber-200 text-amber-600 scale-105'
                                         : 'bg-white border-slate-200 text-slate-400'
@@ -2704,7 +2707,7 @@ export function OrderTracking() {
                                       key={`delivery-${n}`}
                                       type="button"
                                       onClick={() => setReviewForm((prev) => ({ ...prev, deliveryRating: n }))}
-                                      className={`h-8 w-8 rounded-lg border grid place-items-center transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.2] hover:rotate-6 active:scale-95 ${
+                                      className={`jnc-star-interactive h-8 w-8 rounded-lg border grid place-items-center ${
                                         Number(reviewForm.deliveryRating || 0) >= n
                                           ? 'bg-amber-50 border-amber-200 text-amber-600 scale-105'
                                           : 'bg-white border-slate-200 text-slate-400'

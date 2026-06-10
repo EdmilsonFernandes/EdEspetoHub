@@ -1618,7 +1618,7 @@ export const MenuView = ({
                             <button
                               type="button"
                               onClick={handleIncrement}
-                              className="h-11 w-11 rounded-[1.15rem] shadow-[0_12px_28px_-6px_rgba(0,0,0,0.32)] border-[3px] border-white inline-flex items-center justify-center ring-1 ring-black/5 transition-all duration-300 active:scale-90 hover:scale-105"
+                              className="h-11 w-11 rounded-[1.15rem] shadow-[0_12px_28px_-6px_rgba(0,0,0,0.32)] border-[3px] border-white inline-flex items-center justify-center ring-1 ring-black/5 transition-transform duration-200 active:scale-90 hover:scale-110"
                               style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
                             >
                               <Plus size={18} weight="bold" />
@@ -1644,7 +1644,7 @@ export const MenuView = ({
                                   <button
                                     type="button"
                                     onClick={handleIncrement}
-                                    className="h-7 w-7 rounded-xl flex items-center justify-center active:opacity-90"
+                                    className="h-7 w-7 rounded-xl flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-90"
                                     style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
                                   >
                                     <Plus size={12} weight="bold" />
@@ -1654,7 +1654,7 @@ export const MenuView = ({
                                 <button
                                   type="button"
                                   onClick={() => openQtyControl(itemId)}
-                                  className="h-11 w-11 rounded-[1.15rem] shadow-[0_12px_28px_-6px_rgba(0,0,0,0.32)] border-[3px] border-white inline-flex items-center justify-center ring-1 ring-black/5 transition-all duration-300 active:scale-90 hover:scale-105"
+                                  className="h-11 w-11 rounded-[1.15rem] shadow-[0_12px_28px_-6px_rgba(0,0,0,0.32)] border-[3px] border-white inline-flex items-center justify-center ring-1 ring-black/5 transition-transform duration-200 active:scale-90 hover:scale-110"
                                   style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
                                 >
                                   <span className="text-sm font-black">{itemQty}</span>
