@@ -16,6 +16,7 @@ import {
 import { AdminLayout } from '../layouts/AdminLayout';
 import {
   DEFAULT_HOME_CONFIG,
+  HomeBannerFit,
   HomeBannerDraft,
   HomeConfigPayload,
   homeConfigService,
@@ -108,6 +109,40 @@ const buildPreviewSlides = (config: HomeConfigPayload): PromoSlide[] =>
       actionLabel: banner.actionLabel || '',
       fit: banner.fit || 'cover',
     }));
+
+const HomeArtworkPreview = ({
+  src,
+  alt,
+  fit,
+}: {
+  src: string;
+  alt: string;
+  fit: HomeBannerFit;
+}) => {
+  const preserveArtwork = fit === 'cover' || fit === 'contain';
+  const imagePaddingClass = fit === 'contain' ? 'p-2' : '';
+
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-slate-100">
+      {preserveArtwork ? (
+        <>
+          <img
+            src={src}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-30 blur-xl"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/10 via-white/10 to-slate-950/10" />
+        </>
+      ) : null}
+      <img
+        src={src}
+        alt={alt}
+        className={`relative z-[1] h-full w-full object-center ${preserveArtwork ? 'object-contain' : 'object-cover'} ${imagePaddingClass}`}
+      />
+    </div>
+  );
+};
 
 const sanitizeConfigBeforeSave = (config: HomeConfigPayload): HomeConfigPayload => ({
   homeBanners: config.homeBanners
@@ -411,9 +446,9 @@ export function SuperAdminHomeConfig() {
                       <div className="mt-4 grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
                         <div className="space-y-3">
                           <div className="overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white">
-                            <div className="aspect-[16/9] bg-slate-100">
+                            <div className="aspect-[16/6.4] bg-slate-100">
                               {previewImage ? (
-                                <img src={previewImage} alt={banner.title || `Banner ${index + 1}`} className={`h-full w-full ${banner.fit === 'contain' ? 'object-contain bg-slate-900/5' : 'object-cover'}`} />
+                                <HomeArtworkPreview src={previewImage} alt={banner.title || `Banner ${index + 1}`} fit={banner.fit} />
                               ) : (
                                 <div className="flex h-full items-center justify-center text-slate-400">
                                   <ImageSquare size={28} weight="duotone" />
@@ -464,10 +499,12 @@ export function SuperAdminHomeConfig() {
                   <label className="block">
                     <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Ajuste da imagem</span>
                     <select value={banner.fit} onChange={(event) => handleBannerChange(index, 'fit', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]">
-                      <option value="cover">Preencher card (sem distorcer)</option>
-                      <option value="contain">Conter imagem (mostrar tudo)</option>
+                      <option value="cover">Preencher seguro (sem cortar)</option>
+                      <option value="contain">Conter imagem (mais respiro)</option>
                     </select>
-                    <p className="mt-1 text-[11px] font-semibold text-slate-400">Preencher usa corte inteligente com qualidade preservada; conter mostra a arte inteira.</p>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-400">
+                      Ideal para banners gerados: 1600 x 640 px. O preencher seguro ocupa o card com fundo desfocado sem distorcer nem cortar texto/logo.
+                    </p>
                   </label>
                           <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
                             <span className="text-sm font-black text-slate-800">Banner ativo</span>
@@ -495,7 +532,11 @@ export function SuperAdminHomeConfig() {
                   <div className="overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white">
                     <div className="aspect-[3/4] bg-slate-100">
                       {config.marketingPopup.imageUrl ? (
-                        <img src={resolveAssetUrl(config.marketingPopup.imageUrl) || ''} alt={config.marketingPopup.title || 'Popup de marketing'} className={`h-full w-full ${config.marketingPopup.fit === 'contain' ? 'object-contain bg-slate-900/5' : 'object-cover'}`} />
+                        <HomeArtworkPreview
+                          src={resolveAssetUrl(config.marketingPopup.imageUrl) || ''}
+                          alt={config.marketingPopup.title || 'Popup de marketing'}
+                          fit={config.marketingPopup.fit}
+                        />
                       ) : (
                         <div className="flex h-full items-center justify-center text-slate-400">
                           <ImageSquare size={28} weight="duotone" />
@@ -552,10 +593,12 @@ export function SuperAdminHomeConfig() {
                   <label className="block">
                     <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Ajuste da imagem</span>
                     <select value={config.marketingPopup.fit} onChange={(event) => handlePopupChange('fit', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886]">
-                      <option value="cover">Preencher card (sem distorcer)</option>
-                      <option value="contain">Conter imagem (mostrar tudo)</option>
+                      <option value="cover">Preencher seguro (sem cortar)</option>
+                      <option value="contain">Conter imagem (mais respiro)</option>
                     </select>
-                    <p className="mt-1 text-[11px] font-semibold text-slate-400">Preencher usa corte inteligente com qualidade preservada; conter mostra a arte inteira.</p>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-400">
+                      Ideal para popup gerado: 1200 x 1600 px. O preencher seguro mantém a arte inteira e completa o fundo.
+                    </p>
                   </label>
                   <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
                     <span className="text-sm font-black text-slate-800">Popup ativo</span>
@@ -617,7 +660,11 @@ export function SuperAdminHomeConfig() {
                   <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[2rem] bg-slate-950/42 px-5 py-6 backdrop-blur-sm">
                     <div className="w-full max-w-[280px] overflow-hidden rounded-[1.8rem] border border-white/80 bg-white shadow-[0_26px_60px_-28px_rgba(15,23,42,0.68)]">
                       <div className="aspect-[3/4] bg-slate-950">
-                        <img src={resolveAssetUrl(config.marketingPopup.imageUrl) || ''} alt={config.marketingPopup.title || 'Popup de marketing'} className={`h-full w-full ${config.marketingPopup.fit === 'contain' ? 'object-contain bg-slate-900/5' : 'object-cover'}`} />
+                        <HomeArtworkPreview
+                          src={resolveAssetUrl(config.marketingPopup.imageUrl) || ''}
+                          alt={config.marketingPopup.title || 'Popup de marketing'}
+                          fit={config.marketingPopup.fit}
+                        />
                       </div>
                       {(config.marketingPopup.title || config.marketingPopup.description || config.marketingPopup.actionUrl) ? (
                         <div className="border-t border-slate-100 px-4 py-3">

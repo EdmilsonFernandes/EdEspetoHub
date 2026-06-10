@@ -28,6 +28,8 @@ export function HubMarketingPopup({
   onOpenAction,
 }: HubMarketingPopupProps) {
   if (!visible) return null;
+  const preserveArtwork = fit === 'cover' || fit === 'contain';
+  const imagePaddingClass = fit === 'contain' ? 'p-3' : '';
 
   return (
     <div
@@ -58,15 +60,29 @@ export function HubMarketingPopup({
           aria-label={title || 'Abrir popup de marketing do Já no Caminho'}
         >
           <div className="relative aspect-[3/4] bg-slate-950">
+            {preserveArtwork ? (
+              <>
+                <img
+                  src={imageUrl}
+                  alt=""
+                  aria-hidden="true"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-30 blur-xl"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-950/10 via-white/5 to-slate-950/18" />
+              </>
+            ) : null}
             <img
               src={imageUrl}
               alt={title || 'Banner de marketing do Já no Caminho'}
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              className={`absolute inset-0 h-full w-full ${fit === 'contain' ? 'object-contain bg-slate-900/5' : 'object-cover'}`}
+              className={`absolute inset-0 z-[1] h-full w-full object-center ${preserveArtwork ? 'object-contain' : 'object-cover'} ${imagePaddingClass}`}
             />
-            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/20 to-transparent opacity-80 transition-opacity duration-200 group-active:opacity-100" />
+            <div className="absolute inset-x-0 bottom-0 z-[2] h-20 bg-gradient-to-t from-slate-950/20 to-transparent opacity-80 transition-opacity duration-200 group-active:opacity-100" />
           </div>
           {title || description || actionUrl ? (
             <div className="border-t border-slate-100 px-5 py-4">

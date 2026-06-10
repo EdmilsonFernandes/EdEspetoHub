@@ -135,23 +135,34 @@ export function SegmentPromoCarousel({
               index === activeIndex ? 'opacity-100' : 'pointer-events-none opacity-0'
             }`}
           >
-            {slide.fit !== 'cover' && (
-              <>
-                <img
-                  src={slide.image}
-                  alt=""
-                  aria-hidden="true"
-                  className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-28 blur-xl"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/10 via-transparent to-slate-950/10" />
-              </>
-            )}
-            <img
-              src={slide.image}
-              alt={slide.imageAlt}
-              loading="lazy"
-              className={`relative z-[1] h-full w-full object-center ${slide.fit === 'cover' ? 'object-cover' : 'object-contain'}`}
-            />
+            {(() => {
+              const preserveArtwork = compact && slide.fit === 'cover';
+              const showBackdrop = preserveArtwork || slide.fit !== 'cover';
+              const imageFitClass = preserveArtwork || slide.fit !== 'cover' ? 'object-contain' : 'object-cover';
+              const imagePaddingClass = slide.fit === 'contain' ? 'p-2 sm:p-3' : '';
+
+              return (
+                <>
+                  {showBackdrop && (
+                    <>
+                      <img
+                        src={slide.image}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-30 blur-xl"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/10 via-white/5 to-slate-950/10" />
+                    </>
+                  )}
+                  <img
+                    src={slide.image}
+                    alt={slide.imageAlt}
+                    loading="lazy"
+                    className={`relative z-[1] h-full w-full object-center ${imageFitClass} ${imagePaddingClass}`}
+                  />
+                </>
+              );
+            })()}
             {slide.id !== 'mercado-pago' && (
               <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-slate-950/28 via-transparent to-transparent" />
             )}
