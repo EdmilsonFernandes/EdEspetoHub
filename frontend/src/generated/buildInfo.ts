@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "b3b18027",
-  "versionLabel": "v0.1.9.b3b18027",
-  "versionInternal": "0.1.9+20260610.180615.b3b18027",
-  "buildId": "0.1.9+20260610.180615.b3b18027-20260610.180615-b3b18027",
-  "builtAt": "2026-06-10T18:06:15.634Z",
-  "commitHash": "b3b18027057e013fcc63c5506c38b236f5131a4a",
-  "shortHash": "b3b18027",
+  "versionDisplaySuffix": "1a3dfeeb",
+  "versionLabel": "v0.1.9.1a3dfeeb",
+  "versionInternal": "0.1.9+20260610.182025.1a3dfeeb",
+  "buildId": "0.1.9+20260610.182025.1a3dfeeb-20260610.182025-1a3dfeeb",
+  "builtAt": "2026-06-10T18:20:25.774Z",
+  "commitHash": "1a3dfeebb9f38405fa41d08dccd06d3cad55d395",
+  "shortHash": "1a3dfeeb",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "1a3dfeebb9f38405fa41d08dccd06d3cad55d395",
+      "shortHash": "1a3dfeeb",
+      "dateIso": "2026-06-10T15:08:19-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Polish motoboy delivery flow UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1a3dfeebb9f38405fa41d08dccd06d3cad55d395"
+    },
     {
       "hash": "b3b18027057e013fcc63c5506c38b236f5131a4a",
       "shortHash": "b3b18027",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Polish client order card actions",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/28bc6e9a6ae9cdfdb4ea10fe01515e8d3ed1d6b9"
-    },
-    {
-      "hash": "a286d125d8c702608a9733b9692f171bc616cdf4",
-      "shortHash": "a286d125",
-      "dateIso": "2026-06-08T17:54:11-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish reorder carousel badge",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a286d125d8c702608a9733b9692f171bc616cdf4"
     }
   ]
 } as const;

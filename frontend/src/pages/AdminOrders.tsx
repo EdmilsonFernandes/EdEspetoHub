@@ -313,21 +313,21 @@ export function AdminOrders() {
   const renderMoneyBreakdown = (order: any, compact = false) => {
     const money = getOrderMoney(order);
     return (
-      <div className={compact ? 'w-full rounded-2xl border border-slate-100 bg-slate-50/70 p-2.5' : 'mt-2 w-full sm:mt-0 sm:w-auto'}>
-        <div className="flex flex-wrap gap-1.5 text-[10px] sm:text-[11px] font-semibold sm:flex-nowrap sm:justify-end">
-          <span className="flex flex-col whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5">
+      <div className={compact ? 'w-full rounded-2xl border border-slate-100 bg-slate-50/80 p-2.5' : 'mt-2 w-full max-w-full sm:mt-0 sm:w-auto'}>
+        <div className={compact ? 'grid grid-cols-3 gap-1.5 text-[10px] font-semibold' : 'flex max-w-full flex-wrap gap-1.5 text-[10px] font-semibold sm:justify-end sm:text-[11px]'}>
+          <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5">
             <span className="text-slate-500">Volume</span>
-            <span className="text-slate-800">
+            <span className="truncate text-slate-800">
               {money.itemCount} item{money.itemCount === 1 ? '' : 's'}
             </span>
           </span>
-          <span className="flex flex-col whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2 py-1.5">
+          <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-white px-2 py-1.5">
             <span className="text-slate-500">Frete</span>
-            <span className="text-slate-800">{money.fee > 0 ? formatCurrency(money.fee) : '—'}</span>
+            <span className="truncate text-slate-800">{money.fee > 0 ? formatCurrency(money.fee) : '—'}</span>
           </span>
-          <span className="flex flex-col whitespace-nowrap rounded-xl border border-slate-900/10 bg-white px-2.5 py-1.5 shadow-[0_6px_18px_-14px_rgba(15,23,42,0.45)]">
+          <span className="flex min-w-0 flex-col rounded-xl border border-slate-900/10 bg-white px-2.5 py-1.5 shadow-[0_6px_18px_-14px_rgba(15,23,42,0.45)]">
             <span className="text-slate-500">Total</span>
-            <span className="text-slate-900 font-black text-base leading-none">{formatCurrency(money.total)}</span>
+            <span className={`${compact ? 'text-sm' : 'text-base'} truncate font-black leading-none text-slate-900`}>{formatCurrency(money.total)}</span>
           </span>
         </div>
       </div>
@@ -642,29 +642,29 @@ export function AdminOrders() {
                       className={`overflow-hidden rounded-[22px] bg-white shadow-[0_4px_20px_-8px_rgba(15,23,42,0.15)] ring-1 ${statusAccent(order.status).includes('emerald') ? 'ring-emerald-100' : statusAccent(order.status).includes('amber') ? 'ring-amber-100' : statusAccent(order.status).includes('sky') ? 'ring-sky-100' : statusAccent(order.status).includes('rose') ? 'ring-rose-100' : 'ring-slate-100'} ds-interactive-card`}
                     >
                       {/* Header do card */}
-                      <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-3">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">#{shortId(order.id)}</span>
-                            <span className="text-[10px] text-slate-400">{formatDateTime(order.createdAt)}</span>
-                          </div>
-                          <p className="mt-0.5 truncate text-[15px] font-black text-slate-900">
-                            {order.customerName || order.name || 'Cliente'}
-                          </p>
-                          <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                            {(() => { const meta = orderTypeMeta(order); return (
-                              <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${meta.pill}`}>
-                                {meta.icon}<span>{meta.label}</span>
+                      <div className="flex flex-col gap-3 px-4 pt-4 pb-3">
+                        <div className="flex min-w-0 items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              <span className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">#{shortId(order.id)}</span>
+                              <span className="text-[10px] text-slate-400">{formatDateTime(order.createdAt)}</span>
+                            </div>
+                            <p className="mt-0.5 truncate text-[15px] font-black text-slate-900">
+                              {order.customerName || order.name || 'Cliente'}
+                            </p>
+                            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                              {(() => { const meta = orderTypeMeta(order); return (
+                                <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${meta.pill}`}>
+                                  {meta.icon}<span>{meta.label}</span>
+                                </span>
+                              ); })()}
+                              <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${statusStyles(order.status)}`}>
+                                {formatOrderStatus(order.status, order.type)}
                               </span>
-                            ); })()}
-                            <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${statusStyles(order.status)}`}>
-                              {formatOrderStatus(order.status, order.type)}
-                            </span>
+                            </div>
                           </div>
                         </div>
-                        <div className="shrink-0 text-right">
-                          {renderMoneyBreakdown(order, true)}
-                        </div>
+                        {renderMoneyBreakdown(order, true)}
                       </div>
 
                       {/* Pagamento + telefone */}
