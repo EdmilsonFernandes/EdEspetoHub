@@ -7,6 +7,7 @@ import { PublicDestinationShell } from '../components/Destinations/PublicDestina
 import { DestinationPartnerCta } from '../components/Destinations/DestinationPartnerCta';
 import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { AppImagePreviewDialog } from '../components/common/AppImagePreviewDialog';
+import { AirbnbIcon, isAirbnbUrlOrLabel } from '../components/common/BrandActionIcons';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -447,6 +448,8 @@ export function DestinationDetailPage() {
             <div className="grid min-w-0 gap-3 sm:grid-cols-2">
               {visiblePlaces.map((place: any) => {
                 const placeWebsiteUrl = externalUrl(place.websiteUrl);
+                const placeWebsiteLabel = siteLabel(place.websiteUrl);
+                const placeWebsiteIsAirbnb = isAirbnbUrlOrLabel(place.websiteUrl);
                 const placeInstagramUrl = instagramUrl(place.instagramUrl);
                 const whatsappMessage = buildDestinationInquiryMessage({
                   destinationName: destination.name,
@@ -566,8 +569,8 @@ export function DestinationDetailPage() {
                       ) : null}
                       {placeWebsiteUrl ? (
                         <a href={placeWebsiteUrl} onClick={openExternal(placeWebsiteUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-black text-slate-700">
-                          <GlobeHemisphereWest size={12} weight="duotone" />
-                          {siteLabel(place.websiteUrl)}
+                          {placeWebsiteIsAirbnb ? <AirbnbIcon className="h-3.5 w-3.5 rounded-[0.2rem]" /> : <GlobeHemisphereWest size={12} weight="duotone" />}
+                          {placeWebsiteLabel}
                         </a>
                       ) : null}
                       <span className="ml-auto inline-flex min-h-8 items-center rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886] transition group-hover:bg-[#336886] group-hover:text-white">

@@ -6,6 +6,7 @@ import { ArrowRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, Magn
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { AppImagePreviewDialog } from '../components/common/AppImagePreviewDialog';
+import { AirbnbIcon, GoogleMapsIcon, isAirbnbUrlOrLabel } from '../components/common/BrandActionIcons';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatCurrency } from '../utils/format';
@@ -367,7 +368,7 @@ const buildProviderQuickActions = ({ item, destination, destinationSlug, place, 
     whatsappHref ? { href: whatsappHref, label: 'WhatsApp', kind: 'whatsapp', icon: WhatsappLogo, external: true } : null,
     phoneHref ? { href: phoneHref, label: 'Ligar', kind: 'phone', icon: PhoneCall, external: false } : null,
     instagramHref ? { href: instagramHref, label: 'Instagram', kind: 'instagram', icon: InstagramIcon, external: true } : null,
-    routeHref ? { href: routeHref, label: 'Rota', kind: 'route', icon: MapPinLine, external: false } : null,
+    routeHref ? { href: routeHref, label: 'Rota', kind: 'route', icon: GoogleMapsIcon, external: false } : null,
   ].filter(Boolean);
 };
 
@@ -461,6 +462,8 @@ export function HospitalityPlacePage() {
     { id: 'direct', label: 'Contato direto', count: placeListings.length, icon: PhoneCall },
   ];
   const placeWebsiteUrl = externalUrl(place.websiteUrl);
+  const placeWebsiteLabel = siteLabel(place.websiteUrl);
+  const placeWebsiteIsAirbnb = isAirbnbUrlOrLabel(place.websiteUrl);
   const placeInstagramUrl = instagramUrl(place.instagramUrl);
   const placeContactMessage = buildDestinationInquiryMessage({
     destinationName: destination.name,
@@ -717,8 +720,8 @@ export function HospitalityPlacePage() {
                     ) : null}
                     {placeWebsiteUrl ? (
                       <a href={placeWebsiteUrl} onClick={openExternal(placeWebsiteUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/75 px-3 py-2 text-xs font-bold text-slate-700 shadow-sm">
-                        <HouseLine size={14} weight="duotone" />
-                        {siteLabel(place.websiteUrl)}
+                        {placeWebsiteIsAirbnb ? <AirbnbIcon className="h-4 w-4 rounded-[0.25rem]" /> : <HouseLine size={14} weight="duotone" />}
+                        {placeWebsiteLabel}
                       </a>
                     ) : null}
                     {placeInstagramUrl ? (

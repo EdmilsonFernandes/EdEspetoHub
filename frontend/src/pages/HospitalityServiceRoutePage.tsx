@@ -2,9 +2,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { CheckCircle, ClipboardText, Clock, HouseLine, NavigationArrow, Storefront, WarningCircle } from '@phosphor-icons/react';
+import { CheckCircle, ClipboardText, Clock, HouseLine, Storefront, WarningCircle } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { RouteMapView } from '../components/RouteMapView';
+import { GoogleMapsIcon } from '../components/common/BrandActionIcons';
 import { destinationService } from '../services/destinationService';
 import { mapsService } from '../services/mapsService';
 import { buildDestinationAddressLine, buildDestinationRouteAddressLine } from '../utils/destinationWhatsApp';
@@ -443,7 +444,7 @@ export function HospitalityServiceRoutePage() {
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               {googleDirectionsUrl ? (
                 <a href={googleDirectionsUrl} onClick={openExternalRoute(googleDirectionsUrl, googleNativeUrl)} target="_blank" rel="noreferrer" className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/16 bg-[#336886] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.62)] hover:-translate-y-0.5">
-                  <NavigationArrow size={17} weight="fill" />
+                  <GoogleMapsIcon className="h-6 w-6" />
                   Abrir no Google Maps
                 </a>
               ) : null}

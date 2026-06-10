@@ -9,7 +9,6 @@ import {
   ForkKnife,
   GlobeHemisphereWest,
   MapPinLine,
-  NavigationArrow,
   PhoneCall,
   ShoppingBagOpen,
   Sparkle,
@@ -20,6 +19,7 @@ import {
 } from '@phosphor-icons/react';
 import { openActionTarget } from '../../utils/actionLink';
 import { AppImagePreviewDialog } from '../common/AppImagePreviewDialog';
+import { AirbnbIcon, GoogleMapsIcon, isAirbnbUrlOrLabel } from '../common/BrandActionIcons';
 
 const InstagramIcon = ({ className = 'h-4 w-4' }) => (
   <img src="/insta.avif" alt="" className={`${className} rounded-full object-cover`} />
@@ -33,11 +33,15 @@ const actionClasses: Record<string, string> = {
   route: 'border-[#336886]/12 bg-[#336886] text-white',
 };
 
-const actionIcon = (kind?: string) => {
+const actionIcon = (action: any) => {
+  const kind = action?.kind;
   if (kind === 'whatsapp') return <WhatsappLogo size={16} weight="fill" />;
   if (kind === 'phone') return <PhoneCall size={16} weight="duotone" />;
   if (kind === 'instagram') return <InstagramIcon className="h-4 w-4" />;
-  if (kind === 'route') return <NavigationArrow size={18} weight="fill" />;
+  if (kind === 'route') return <GoogleMapsIcon className="h-5 w-5" />;
+  if (kind === 'site' && (isAirbnbUrlOrLabel(action?.href) || isAirbnbUrlOrLabel(action?.label))) {
+    return <AirbnbIcon className="h-4 w-4 rounded-[0.25rem]" />;
+  }
   return <GlobeHemisphereWest size={16} weight="duotone" />;
 };
 
@@ -72,7 +76,7 @@ const ContactAction = ({ action }: any) => {
   if (action.kind === 'route' && String(action.href || '').startsWith('/')) {
     return (
       <Link to={action.href} className={className}>
-        {actionIcon(action.kind)}
+        {actionIcon(action)}
         {action.label}
       </Link>
     );
@@ -86,7 +90,7 @@ const ContactAction = ({ action }: any) => {
       rel="noreferrer"
       className={className}
     >
-      {actionIcon(action.kind)}
+      {actionIcon(action)}
       {isWhatsapp ? (
         <span className="flex flex-col items-start leading-none">
           <span>{action.label || 'WhatsApp'}</span>
@@ -266,7 +270,7 @@ export function PreStoreDetailSheet({
               {routeAction?.href ? (
                 <div className="mt-4 rounded-[1.4rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(238,247,242,0.9))] p-3 text-slate-900 shadow-[0_18px_42px_-34px_rgba(51,104,134,0.42)] ring-1 ring-white/80">
                   <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
-                    <NavigationArrow size={13} weight="fill" />
+                    <GoogleMapsIcon className="h-4 w-4" />
                     Referência para entrega
                   </p>
                   <div className="mt-3 rounded-[1.15rem] border border-white/80 bg-white/86 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">

@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "dde59e87",
-  "versionLabel": "v0.1.9.dde59e87",
-  "versionInternal": "0.1.9+20260610.022649.dde59e87",
-  "buildId": "0.1.9+20260610.022649.dde59e87-20260610.022649-dde59e87",
-  "builtAt": "2026-06-10T02:26:49.395Z",
-  "commitHash": "dde59e87ea67afdcf4774c7e3cb60da205765819",
-  "shortHash": "dde59e87",
+  "versionDisplaySuffix": "adac0392",
+  "versionLabel": "v0.1.9.adac0392",
+  "versionInternal": "0.1.9+20260610.023042.adac0392",
+  "buildId": "0.1.9+20260610.023042.adac0392-20260610.023042-adac0392",
+  "builtAt": "2026-06-10T02:30:42.185Z",
+  "commitHash": "adac03924eba3167b19fabbc3c61b5e5a13fbaca",
+  "shortHash": "adac0392",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "adac03924eba3167b19fabbc3c61b5e5a13fbaca",
+      "shortHash": "adac0392",
+      "dateIso": "2026-06-09T23:27:56-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Update build info after banner revert",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/adac03924eba3167b19fabbc3c61b5e5a13fbaca"
+    },
     {
       "hash": "dde59e87ea67afdcf4774c7e3cb60da205765819",
       "shortHash": "dde59e87",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix: add postal receipt confirmation",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/97d31adf21a4ce5496401d38ca86084de255aada"
-    },
-    {
-      "hash": "0e5ff18a070005794a2b89c4342c7c320dba468d",
-      "shortHash": "0e5ff18a",
-      "dateIso": "2026-06-08T12:47:58-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(admin): add system health and harden delivery flows",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0e5ff18a070005794a2b89c4342c7c320dba468d"
     }
   ]
 }
