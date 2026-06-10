@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "f0d50ad1",
-  "versionLabel": "v0.1.9.f0d50ad1",
-  "versionInternal": "0.1.9+20260610.020249.f0d50ad1",
-  "buildId": "0.1.9+20260610.020249.f0d50ad1-20260610.020249-f0d50ad1",
-  "builtAt": "2026-06-10T02:02:49.058Z",
-  "commitHash": "f0d50ad1c14f99b525658d126942fa1e07b805d2",
-  "shortHash": "f0d50ad1",
+  "versionDisplaySuffix": "6aee6a45",
+  "versionLabel": "v0.1.9.6aee6a45",
+  "versionInternal": "0.1.9+20260610.021115.6aee6a45",
+  "buildId": "0.1.9+20260610.021115.6aee6a45-20260610.021115-6aee6a45",
+  "builtAt": "2026-06-10T02:11:15.795Z",
+  "commitHash": "6aee6a45ecad1458409e06019348ae7983cf4fba",
+  "shortHash": "6aee6a45",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "6aee6a45ecad1458409e06019348ae7983cf4fba",
+      "shortHash": "6aee6a45",
+      "dateIso": "2026-06-09T23:03:54-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Move hospitality quick actions under media",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6aee6a45ecad1458409e06019348ae7983cf4fba"
+    },
     {
       "hash": "f0d50ad1c14f99b525658d126942fa1e07b805d2",
       "shortHash": "f0d50ad1",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "style: compact postal order tracking details",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/14b773a6040d6cb7c38810628a28524c0171d2c3"
-    },
-    {
-      "hash": "f7915a6b0133da622916f60128c0db782cd15ddd",
-      "shortHash": "f7915a6b",
-      "dateIso": "2026-06-07T07:29:44-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix: prevent false postal delay badge",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f7915a6b0133da622916f60128c0db782cd15ddd"
     }
   ]
 } as const;
