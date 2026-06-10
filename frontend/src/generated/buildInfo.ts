@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "1a3dfeeb",
-  "versionLabel": "v0.1.9.1a3dfeeb",
-  "versionInternal": "0.1.9+20260610.182025.1a3dfeeb",
-  "buildId": "0.1.9+20260610.182025.1a3dfeeb-20260610.182025-1a3dfeeb",
-  "builtAt": "2026-06-10T18:20:25.774Z",
-  "commitHash": "1a3dfeebb9f38405fa41d08dccd06d3cad55d395",
-  "shortHash": "1a3dfeeb",
+  "versionDisplaySuffix": "e131a617",
+  "versionLabel": "v0.1.9.e131a617",
+  "versionInternal": "0.1.9+20260610.185018.e131a617",
+  "buildId": "0.1.9+20260610.185018.e131a617-20260610.185018-e131a617",
+  "builtAt": "2026-06-10T18:50:18.576Z",
+  "commitHash": "e131a617f51076f70582c97308ff1d907662c378",
+  "shortHash": "e131a617",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "e131a617f51076f70582c97308ff1d907662c378",
+      "shortHash": "e131a617",
+      "dateIso": "2026-06-10T15:21:55-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Fix admin order money layout",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e131a617f51076f70582c97308ff1d907662c378"
+    },
     {
       "hash": "1a3dfeebb9f38405fa41d08dccd06d3cad55d395",
       "shortHash": "1a3dfeeb",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Validate common email domain typos",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/15ff0d46d0f78cda2df9056232f8a2128ab944d6"
-    },
-    {
-      "hash": "28bc6e9a6ae9cdfdb4ea10fe01515e8d3ed1d6b9",
-      "shortHash": "28bc6e9a",
-      "dateIso": "2026-06-08T18:04:12-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish client order card actions",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/28bc6e9a6ae9cdfdb4ea10fe01515e8d3ed1d6b9"
     }
   ]
 } as const;

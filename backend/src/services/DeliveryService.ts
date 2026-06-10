@@ -584,6 +584,72 @@ async cancelByStore(orderId: string, storeId: string, reason?: string | null) {
     });
   }
 
+  async reportIssueByStore(
+    orderId: string,
+    storeId: string,
+    input: { reason?: string | null; details?: string | null; action?: string | null } = {}
+  ) {
+    const reason = String(input.reason || '').trim();
+    const details = String(input.details || '').trim();
+    const action = String(input.action || 'review').trim() || 'review';
+    if (!reason) throw new AppError('DELIV-009', 400);
+
+    return AppDataSource.transaction(async (manager) => {
+      const deliveryRepo = manager.getRepository(OrderDelivery);
+      const orderRepo = manager.getRepository(Order);
+
+      const order = await orderRepo
+        .createQueryBuilder('o')
+        .leftJoinAndSelect('o.store', 'store')
+        .setLock('pessimistic_write', undefined, ['o'])
+        .where('o.id = :orderId', { orderId })
+        .getOne();
+      if (!order) throw new AppError('ORDER-001', 404);
+      if (order.store?.id !== storeId) throw new AppError('AUTH-003', 403);
+      if (order.type !== 'delivery') throw new AppError('DELIV-003', 400);
+      if (String((order as any).fulfillmentMode || '').toLowerCase() === 'postal') throw new AppError('DELIV-003', 400);
+      if (String(order.status || '').toLowerCase() !== 'in_delivery') {
+        throw new AppError('DELIV-010', 400, { orderStatus: order.status });
+      }
+
+      const delivery = await deliveryRepo
+        .createQueryBuilder('od')
+        .setLock('pessimistic_write')
+        .where('od.order_id = :orderId', { orderId })
+        .getOne();
+      if (!delivery) throw new AppError('DELIV-007', 404);
+
+      const from = normalizeStatus(delivery.status);
+      if (![ 'PICKED_UP', 'IN_TRANSIT' ].includes(from)) {
+        throw new AppError('DELIV-010', 400, { status: from });
+      }
+
+      await this.insertEvent(manager, {
+        deliveryId: orderId,
+        actorType: 'STORE',
+        actorId: null,
+        fromStatus: from,
+        toStatus: 'ISSUE_REPORTED',
+        metadata: {
+          reason,
+          details: details || null,
+          action,
+        },
+      });
+
+      return {
+        ok: true,
+        orderId,
+        deliveryStatus: from,
+        issue: {
+          reason,
+          details: details || null,
+          action,
+        },
+      };
+    });
+  }
+
     /**
    * Executes stats business logic.
    *

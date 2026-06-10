@@ -31,5 +31,19 @@ export class DeliveryController {
       return respondWithError(req, res, error, 400);
     }
   }
-}
 
+  /**
+   * Store reports an in-route delivery issue without cancelling the order.
+   */
+  static async reportIssue(req: Request, res: Response) {
+    try {
+      const storeId = req.auth?.storeId || '';
+      if (!storeId) return respondWithError(req, res, { code: 'AUTH-003', status: 403 }, 403);
+      const result = await deliveryService.reportIssueByStore(req.params.deliveryId, storeId, req.body || {});
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Delivery issue report failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+}

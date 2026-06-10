@@ -2031,7 +2031,7 @@ export function MotoboyProfile() {
       {activeSection === 'payouts' && (
       <FormSection
         title="Recebimentos de gorjeta"
-        subtitle="Veja o que voce ja recebeu e o que a loja ainda vai pagar."
+        subtitle="Veja o que você já recebeu e o que a loja ainda vai pagar."
         variant="warning"
         contentClassName="space-y-3"
         actions={

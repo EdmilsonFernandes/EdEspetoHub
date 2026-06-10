@@ -96,6 +96,14 @@ const STORE_CANCELLATION_REASON_OPTIONS = [
   "Outro motivo",
 ];
 
+const DELIVERY_ISSUE_REASON_OPTIONS = [
+  "Cliente não localizado",
+  "Endereço incorreto",
+  "Cliente recusou",
+  "Problema no caminho",
+  "Outro motivo",
+];
+
 const QueueLoadingSkeleton = ({ variant = "queue" }: { variant?: "queue" | "sales" | "route" }) => {
   const isSales = variant === "sales";
   const rows = isSales ? 6 : 4;
@@ -1207,6 +1215,21 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     loading: false,
     error: '',
   });
+  const [deliveryIssueModal, setDeliveryIssueModal] = useState<{
+    open: boolean;
+    order: any | null;
+    reason: string;
+    details: string;
+    loading: boolean;
+    error: string;
+  }>({
+    open: false,
+    order: null,
+    reason: '',
+    details: '',
+    loading: false,
+    error: '',
+  });
   const [printSelectionModal, setPrintSelectionModal] = useState<{
     open: boolean;
     order: any | null;
@@ -2285,6 +2308,68 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       });
     } else {
       setCancelOrderModal((prev) => ({ ...prev, loading: false, error: 'Não foi possível cancelar o pedido agora.' }));
+    }
+  };
+
+  const openDeliveryIssueModal = (order: any) => {
+    setDeliveryIssueModal({
+      open: true,
+      order,
+      reason: '',
+      details: '',
+      loading: false,
+      error: '',
+    });
+  };
+
+  const closeDeliveryIssueModal = () => {
+    if (deliveryIssueModal.loading) return;
+    setDeliveryIssueModal({
+      open: false,
+      order: null,
+      reason: '',
+      details: '',
+      loading: false,
+      error: '',
+    });
+  };
+
+  const handleConfirmDeliveryIssue = async () => {
+    if (!deliveryIssueModal.order?.id) return;
+    const reason = String(deliveryIssueModal.reason || '').trim();
+    const details = String(deliveryIssueModal.details || '').trim();
+    if (!reason) {
+      setDeliveryIssueModal((prev) => ({ ...prev, error: 'Escolha o motivo da ocorrência.' }));
+      return;
+    }
+    if (reason === 'Outro motivo' && details.length < 3) {
+      setDeliveryIssueModal((prev) => ({ ...prev, error: 'Descreva rapidamente o que aconteceu.' }));
+      return;
+    }
+    try {
+      setDeliveryIssueModal((prev) => ({ ...prev, loading: true, error: '' }));
+      await orderService.reportDeliveryIssue(deliveryIssueModal.order.id, {
+        reason,
+        details: details || null,
+        action: 'review',
+      });
+      setDeliveryIssueModal({
+        open: false,
+        order: null,
+        reason: '',
+        details: '',
+        loading: false,
+        error: '',
+      });
+      setError('');
+      void loadQueue();
+    } catch (error) {
+      console.error('Erro ao registrar ocorrência de entrega', error);
+      setDeliveryIssueModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: 'Não foi possível registrar a ocorrência agora.',
+      }));
     }
   };
 
@@ -4988,7 +5073,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 	                    <div className="flex-1 min-w-0">
 	                      {renderMoneyBreakdown(order)}
 	                    </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
                         {isDispatched ? (
                           <button
                             type="button"
@@ -4997,7 +5082,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                           >
                             Editar rastreio
                           </button>
-                        ) : null}
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => openDeliveryIssueModal(order)}
+                            className="px-3 py-2 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-xs font-extrabold hover:bg-amber-100"
+                          >
+                            Problema na entrega
+                          </button>
+                        )}
                         <a
                           href={`/pedido/${order.id}`}
                           target="_blank"
@@ -5976,6 +6069,93 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   className="h-10 rounded-xl bg-rose-600 px-3 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-60"
                 >
                   {cancelOrderModal.loading ? 'Cancelando...' : 'Cancelar pedido'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+      {deliveryIssueModal.open && createPortal(
+        <div className="fixed inset-0 z-[10030]">
+          <div
+            className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm"
+            onClick={closeDeliveryIssueModal}
+          />
+          <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-3 sm:p-4">
+            <div className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-black text-slate-900">Problema na entrega</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Pedido #{formatOrderDisplayId(deliveryIssueModal.order?.id, storeSlug)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeDeliveryIssueModal}
+                  disabled={deliveryIssueModal.loading}
+                  className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  aria-label="Fechar ocorrência"
+                >
+                  <X size={16} weight="bold" />
+                </button>
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">
+                  Isso registra uma ocorrência operacional. O pedido continua em rota e não gera reembolso, estoque ou repasse automático.
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">O que aconteceu?</label>
+                  <div className="mt-2 grid gap-2">
+                    {DELIVERY_ISSUE_REASON_OPTIONS.map((option) => {
+                      const active = deliveryIssueModal.reason === option;
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => setDeliveryIssueModal((prev) => ({ ...prev, reason: option, error: '' }))}
+                          className={`rounded-xl border px-3 py-2 text-left text-xs font-extrabold transition active:scale-[0.99] ${
+                            active
+                              ? 'border-amber-300 bg-amber-50 text-amber-900 ring-2 ring-amber-100'
+                              : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-amber-200'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <textarea
+                    value={deliveryIssueModal.details}
+                    onChange={(event) => setDeliveryIssueModal((prev) => ({ ...prev, details: event.target.value, error: '' }))}
+                    placeholder={deliveryIssueModal.reason === 'Outro motivo' ? 'Explique rapidamente o problema.' : 'Complemento opcional para a loja acompanhar.'}
+                    rows={3}
+                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-amber-200"
+                  />
+                </div>
+                {deliveryIssueModal.error && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                    {deliveryIssueModal.error}
+                  </div>
+                )}
+              </div>
+              <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeDeliveryIssueModal}
+                  disabled={deliveryIssueModal.loading}
+                  className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Voltar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDeliveryIssue}
+                  disabled={deliveryIssueModal.loading}
+                  className="h-10 rounded-xl bg-amber-600 px-3 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-60"
+                >
+                  {deliveryIssueModal.loading ? 'Registrando...' : 'Registrar ocorrência'}
                 </button>
               </div>
             </div>

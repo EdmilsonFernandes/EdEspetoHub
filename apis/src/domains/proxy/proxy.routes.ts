@@ -163,6 +163,7 @@ export function createProxyRoutes(): Router {
     r.post('/stores/:storeId/delivery-billing/pay', authRequired, forward);
     // Delivery operations
     r.post('/deliveries/:deliveryId/cancel', authRequired, forward);
+    r.post('/deliveries/:deliveryId/issues', authRequired, forward);
     // Motoboy self-service
     r.get('/motoboy/orders/available', authRequired, forward);
     r.post('/motoboy/push/register', authRequired, forward);

@@ -105,7 +105,7 @@ export function MotoboyHome() {
     if (loading) {
       return {
         eyebrow: 'Atualizando',
-        title: 'Carregando sua operacao',
+        title: 'Carregando sua operação',
         description: 'Buscando sua fila, entrega atual e ganhos de hoje.',
         actionLabel: 'Aguarde',
         actionPath: '/motoboy/home',
@@ -126,10 +126,10 @@ export function MotoboyHome() {
         title: accountStatus.label,
         description:
           pendingRequests > 0
-            ? `${pendingRequests} solicitacao${pendingRequests === 1 ? '' : 'oes'} de loja aguardando resposta.`
+            ? `${pendingRequests} solicitação${pendingRequests === 1 ? '' : 'ões'} de loja aguardando resposta.`
             : approvedStores === 0
-              ? 'Voce precisa de pelo menos uma loja aprovada para receber entregas.'
-              : 'Complete seu cadastro para liberar a operacao.',
+              ? 'Você precisa de pelo menos uma loja aprovada para receber entregas.'
+              : 'Complete seu cadastro para liberar a operação.',
         actionLabel: 'Resolver cadastro',
         actionPath: '/motoboy/profile',
       };
@@ -138,7 +138,7 @@ export function MotoboyHome() {
       return {
         eyebrow: 'Fila agora',
         title: `${queueCount} pedido${queueCount === 1 ? '' : 's'} esperando`,
-        description: nextOrderLabel || 'Tem pedido novo para voce aceitar.',
+        description: nextOrderLabel || 'Tem pedido novo para você aceitar.',
         actionLabel: 'Abrir fila',
         actionPath: '/motoboy/available',
       };
@@ -205,20 +205,20 @@ export function MotoboyHome() {
         </div>
       </section>
 
-      {needsAccountAttention ? (
+      {needsAccountAttention && !hasActive ? (
         <section className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           <p className="font-extrabold">Conta: {accountStatus.label}</p>
           <p className="mt-1 text-amber-800">
             {pendingRequests > 0
-              ? `${pendingRequests} solicitacao${pendingRequests === 1 ? '' : 'oes'} de loja aguardando resposta.`
+              ? `${pendingRequests} solicitação${pendingRequests === 1 ? '' : 'ões'} de loja aguardando resposta.`
               : approvedStores === 0
-                ? 'Voce ainda precisa de uma loja aprovada para operar normalmente.'
+                ? 'Você ainda precisa de uma loja aprovada para operar normalmente.'
                 : 'Complete seu cadastro para liberar todas as entregas.'}
           </p>
         </section>
       ) : null}
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <section className="hidden gap-3 sm:grid sm:grid-cols-2 xl:grid-cols-3">
         <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Ganhos de hoje</p>
@@ -230,7 +230,7 @@ export function MotoboyHome() {
             {formatCurrency(Number(earningsToday?.total || 0))}
           </p>
           <p className="text-xs text-slate-600 mt-1">
-            {Number(earningsToday?.count || 0)} entrega{Number(earningsToday?.count || 0) === 1 ? '' : 's'} concluida{Number(earningsToday?.count || 0) === 1 ? '' : 's'} hoje
+            {Number(earningsToday?.count || 0)} entrega{Number(earningsToday?.count || 0) === 1 ? '' : 's'} concluída{Number(earningsToday?.count || 0) === 1 ? '' : 's'} hoje
           </p>
         </article>
 

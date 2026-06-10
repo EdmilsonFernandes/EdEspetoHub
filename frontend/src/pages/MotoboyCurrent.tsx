@@ -42,7 +42,6 @@ const getPersonAvatarUrl = (name?: string | null) =>
 
 export function MotoboyCurrent() {
   const [activeOrder, setActiveOrder] = useState<any | null>(null);
-  const [earningsToday, setEarningsToday] = useState<{ total: number; count: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [showPayment, setShowPayment] = useState(false);
@@ -64,17 +63,7 @@ export function MotoboyCurrent() {
     } catch {
       setActiveOrder(null);
     }
-    try {
-      const summary = await motoboyService.getEarningsToday();
-      setEarningsToday({
-        total: Number(summary?.total || 0),
-        count: Number(summary?.count || 0),
-      });
-    } catch {
-      setEarningsToday(null);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -178,9 +167,9 @@ export function MotoboyCurrent() {
           ? 'Confirme a saída para o cliente para iniciar a rota no sistema.'
           : deliveryStatus === 'IN_TRANSIT'
             ? paymentIsPaid
-              ? 'Chegou no cliente? Confirme a entrega com o codigo.'
-              : 'Receba o pagamento e finalize a entrega com o codigo do cliente.'
-            : 'Aguardando informacoes da entrega.';
+              ? 'Chegou no cliente? Confirme a entrega com o código.'
+              : 'Receba o pagamento e finalize com o código do cliente.'
+            : 'Aguardando informações da entrega.';
     return { current, label };
   }, [deliveryStatus, paymentIsPaid]);
 
@@ -189,7 +178,7 @@ export function MotoboyCurrent() {
       return {
         eyebrow: 'Retirada na loja',
         title: activeOrder?.store?.name || 'Retirada na loja',
-        address: pickupAddress || 'Endereco da loja indisponivel',
+        address: pickupAddress || 'Endereço da loja indisponível',
         actionLabel: 'Abrir rota para a loja',
         avatarUrl: storeAvatarUrl,
         avatarAlt: activeOrder?.store?.name || 'Loja',
@@ -199,7 +188,7 @@ export function MotoboyCurrent() {
     return {
       eyebrow: 'Destino da entrega',
       title: activeOrder?.customerName || 'Entrega ao cliente',
-      address: deliveryAddress || 'Endereco do cliente indisponivel',
+      address: deliveryAddress || 'Endereço do cliente indisponível',
       actionLabel: 'Abrir rota para o cliente',
       avatarUrl: customerAvatarUrl,
       avatarAlt: activeOrder?.customerName || 'Cliente',
@@ -217,8 +206,8 @@ export function MotoboyCurrent() {
 
   const openRoute = () => {
     const destination = activeStop.address;
-    if (!destination || destination.includes('indisponivel')) {
-      showToast('Endereco indisponivel para abrir rota.', 'warning');
+    if (!destination || destination.includes('indisponível')) {
+      showToast('Endereço indisponível para abrir rota.', 'warning');
       return;
     }
     const params = new URLSearchParams({ api: '1', query: destination });
@@ -227,10 +216,10 @@ export function MotoboyCurrent() {
 
   const handleCopyAddress = async () => {
     const text = activeStop.address;
-    if (!text || text.includes('indisponivel')) return;
+    if (!text || text.includes('indisponível')) return;
     try {
       await navigator.clipboard.writeText(text);
-      showToast('Endereco copiado.', 'success');
+      showToast('Endereço copiado.', 'success');
     } catch {
       try {
         const el = document.createElement('textarea');
@@ -239,9 +228,9 @@ export function MotoboyCurrent() {
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
-        showToast('Endereco copiado.', 'success');
+        showToast('Endereço copiado.', 'success');
       } catch {
-        showToast('Nao foi possivel copiar o endereco.', 'error');
+        showToast('Não foi possível copiar o endereço.', 'error');
       }
     }
   };
@@ -263,7 +252,7 @@ export function MotoboyCurrent() {
       setFinalizeAfterPayment(false);
       void load();
     } catch (error: any) {
-      showToast(error?.message || 'Nao foi possivel confirmar pagamento.', 'error');
+      showToast(error?.message || 'Não foi possível confirmar pagamento.', 'error');
     }
   };
 
@@ -274,7 +263,7 @@ export function MotoboyCurrent() {
       showToast('Pedido retirado. Agora siga para o cliente.', 'success');
       void load();
     } catch (error: any) {
-      showToast(error?.message || 'Nao foi possivel confirmar retirada.', 'error');
+      showToast(error?.message || 'Não foi possível confirmar retirada.', 'error');
     }
   };
 
@@ -292,7 +281,7 @@ export function MotoboyCurrent() {
       setCodeLocked(false);
       setShowCodeModal(true);
     } catch (error: any) {
-      showToast(error?.message || 'Nao foi possivel abrir a confirmacao.', 'error');
+      showToast(error?.message || 'Não foi possível abrir a confirmação.', 'error');
     }
   };
 
@@ -317,7 +306,7 @@ export function MotoboyCurrent() {
     } catch (error: any) {
       const blocked = Boolean(error?.details?.blocked) || String(error?.code || '') === 'MOTO-035';
       setCodeLocked(blocked);
-      setCodeError(error?.details?.message || error?.message || 'Codigo incorreto. Tente novamente.');
+      setCodeError(error?.details?.message || error?.message || 'Código incorreto. Tente novamente.');
     }
   };
 
@@ -325,11 +314,11 @@ export function MotoboyCurrent() {
     if (!activeOrder) return;
     try {
       await motoboyService.startDelivery(activeOrder.id);
-      showToast('Rota iniciada. Siga ate o cliente.', 'success');
+      showToast('Rota iniciada. Siga até o cliente.', 'success');
       void load();
       window.setTimeout(openRoute, 150);
     } catch (error: any) {
-      showToast(error?.message || 'Nao foi possivel iniciar a rota.', 'error');
+      showToast(error?.message || 'Não foi possível iniciar a rota.', 'error');
     }
   };
 
@@ -350,7 +339,7 @@ export function MotoboyCurrent() {
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader
         title="Entrega"
-        subtitle={loading ? 'Atualizando...' : activeOrder ? 'Foque na etapa atual e avance sem duvida.' : 'Nenhuma entrega ativa agora.'}
+        subtitle={loading ? 'Atualizando...' : activeOrder ? 'Siga a próxima ação da entrega.' : 'Nenhuma entrega ativa agora.'}
         rightAction={
           <button
             type="button"
@@ -361,15 +350,6 @@ export function MotoboyCurrent() {
           </button>
         }
       />
-
-      {earningsToday ? (
-        <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/90 px-3 py-1.5 text-xs font-extrabold text-emerald-800 shadow-[0_14px_30px_-24px_rgba(5,150,105,0.5)]">
-          <CurrencyCircleDollar size={15} weight="duotone" />
-          <span className="truncate">
-            Hoje: {earningsToday.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} • {earningsToday.count} entrega{earningsToday.count === 1 ? '' : 's'}
-          </span>
-        </div>
-      ) : null}
 
       {!activeOrder ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center text-sm text-slate-600 space-y-3">
@@ -438,13 +418,14 @@ export function MotoboyCurrent() {
                   >
                     <span className="inline-flex items-center gap-2">
                       <Copy size={14} weight="bold" />
-                      Copiar endereco
+                      Copiar endereço
                     </span>
                   </button>
                 </div>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-3">
+              <div className="rounded-2xl border border-slate-200 bg-white/80 px-3 py-3">
+                <div className="grid grid-cols-3 gap-2">
                 {STEP_ITEMS.map(({ label, hint, icon: Icon }, index) => {
                   const isCurrent = index === stepMeta.current;
                   const isDone = index < stepMeta.current;
@@ -452,33 +433,33 @@ export function MotoboyCurrent() {
                     <div
                       key={label}
                       className={[
-                        'rounded-2xl border px-3 py-3 text-left transition-all',
+                        'relative min-w-0 text-center',
                         isCurrent
-                          ? 'border-transparent bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] text-white shadow-[0_18px_34px_-26px_rgba(239,68,68,0.8)]'
+                          ? 'text-slate-950'
                           : isDone
-                            ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                            : 'border-slate-200 bg-white text-slate-500',
+                            ? 'text-emerald-800'
+                            : 'text-slate-500',
                       ].join(' ')}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-col items-center gap-1.5">
                         <span
                           className={[
-                            'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border',
+                            'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border',
                             isCurrent
-                              ? 'border-white/25 bg-white/15 text-white'
+                              ? 'border-[#336886] bg-[#336886] text-white shadow-[0_14px_26px_-18px_rgba(51,104,134,0.85)]'
                               : isDone
-                                ? 'border-emerald-200 bg-white text-emerald-700'
+                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                                 : 'border-slate-200 bg-slate-50 text-slate-500',
                           ].join(' ')}
                         >
-                          <Icon size={20} weight={isCurrent ? 'fill' : 'duotone'} />
+                          <Icon size={16} weight={isCurrent ? 'fill' : 'duotone'} />
                         </span>
-                        <span className="min-w-0">
-                          <span className="block text-sm font-extrabold">{label}</span>
+                        <span className="min-w-0 max-w-full">
+                          <span className="block truncate text-[11px] font-extrabold">{label}</span>
                           <span
                             className={[
-                              'mt-0.5 block text-[11px] font-semibold',
-                              isCurrent ? 'text-white/85' : isDone ? 'text-emerald-800/80' : 'text-slate-500',
+                              'mt-0.5 hidden truncate text-[10px] font-semibold sm:block',
+                              isCurrent ? 'text-slate-600' : isDone ? 'text-emerald-800/80' : 'text-slate-500',
                             ].join(' ')}
                           >
                             {hint}
@@ -488,10 +469,11 @@ export function MotoboyCurrent() {
                     </div>
                   );
                 })}
+                </div>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-3">
+              <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+                <div className="hidden rounded-xl border border-slate-200 bg-white px-3 py-3 sm:block">
                   <div className="flex items-start gap-3">
                     <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
                       <img
@@ -514,7 +496,7 @@ export function MotoboyCurrent() {
                     </div>
                   </div>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-3">
+                <div className="hidden rounded-xl border border-slate-200 bg-white px-3 py-3 sm:block">
                   <div className="flex items-start gap-3">
                     <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
                       <img
@@ -535,7 +517,7 @@ export function MotoboyCurrent() {
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-emerald-700">Voce recebe</p>
+                      <p className="text-[10px] uppercase tracking-[0.14em] text-emerald-700">Você recebe</p>
                       <p className="mt-1 text-lg font-black text-emerald-800">{formatCurrency(Number(activeOrder?.deliveryFee || 0))}</p>
                       <p className="mt-1 text-[11px] text-emerald-800/80">Frete desta entrega</p>
                     </div>
@@ -564,11 +546,14 @@ export function MotoboyCurrent() {
             </div>
           </div>
 
-          <div className="space-y-2 motoboy-fade-up" style={{ animationDelay: '90ms' }}>
+          <div
+            className="sticky bottom-[calc(env(safe-area-inset-bottom)+5.25rem)] z-30 space-y-2 rounded-[1.6rem] border border-white/80 bg-white/95 p-3 shadow-[0_22px_60px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl motoboy-fade-up sm:static sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-0"
+            style={{ animationDelay: '90ms' }}
+          >
             {deliveryStatus === 'ACCEPTED' ? (
               <button
                 onClick={handlePickup}
-                className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
+                className="btn-press w-full rounded-2xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-4 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
               >
                 Retirei o pedido e vou sair para entrega
               </button>
@@ -578,7 +563,7 @@ export function MotoboyCurrent() {
               <button
                 type="button"
                 onClick={handleStartDelivery}
-                className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,#0284c7,#0f766e)] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(2,132,199,0.6)]"
+                className="btn-press w-full rounded-2xl bg-[linear-gradient(120deg,#0284c7,#0f766e)] px-4 py-4 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(2,132,199,0.6)]"
               >
                 Iniciar rota para o cliente
               </button>
@@ -587,7 +572,7 @@ export function MotoboyCurrent() {
             {deliveryStatus === 'IN_TRANSIT' ? (
               <button
                 onClick={handleDelivered}
-                className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,#16a34a,#059669)] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
+                className="btn-press w-full rounded-2xl bg-[linear-gradient(120deg,#16a34a,#059669)] px-4 py-4 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
               >
                 {paymentIsPaid ? 'Confirmar entrega' : 'Receber e finalizar entrega'}
               </button>
@@ -596,7 +581,7 @@ export function MotoboyCurrent() {
             <button
               type="button"
               onClick={() => setShowDetails((value) => !value)}
-              className="btn-press w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
+              className="btn-press w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-700"
             >
               {showDetails ? 'Ocultar detalhes do pedido' : 'Ver detalhes do pedido'}
             </button>
@@ -627,9 +612,9 @@ export function MotoboyCurrent() {
       {showCodeModal ? (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm px-4">
           <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-600">Codigo do cliente</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-600">Código do cliente</p>
             <h3 className="mt-1 text-lg font-black text-slate-900">Confirme a entrega</h3>
-            <p className="mt-1 text-xs text-slate-500">Peça o codigo de 4 digitos ao cliente para concluir.</p>
+            <p className="mt-1 text-xs text-slate-500">Peça o código de 4 dígitos ao cliente para concluir.</p>
             <input
               type="text"
               inputMode="numeric"

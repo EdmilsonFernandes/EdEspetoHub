@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Clock, CurrencyCircleDollar, Wallet } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
@@ -14,13 +13,11 @@ export function MotoboyEarnings() {
   const [tipPayouts, setTipPayouts] = useState<any[]>([]);
   const [earningsToday, setEarningsToday] = useState<{ total: number; count: number }>({ total: 0, count: 0 });
   const [loading, setLoading] = useState(false);
-  const [pendingCount, setPendingCount] = useState(0);
   const [blocked, setBlocked] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [ordersPage, setOrdersPage] = useState(1);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
   const { showToast } = useToast();
-  const navigate = useNavigate();
 
   const load = async () => {
     try {
@@ -45,7 +42,7 @@ export function MotoboyEarnings() {
         setTipPayouts([]);
         setEarningsToday({ total: 0, count: 0 });
       } else {
-        showToast(error?.message || 'Nao foi possivel carregar ganhos.', 'error');
+        showToast(error?.message || 'Não foi possível carregar ganhos.', 'error');
       }
     } finally {
       setLoading(false);
@@ -55,19 +52,6 @@ export function MotoboyEarnings() {
   useEffect(() => {
     void load();
   }, [showToast]);
-
-  useEffect(() => {
-    const loadRequests = async () => {
-      try {
-        const data = await motoboyService.listStoreRequests();
-        const requests = Array.isArray(data) ? data : [];
-        setPendingCount(requests.filter((req) => req.status === 'PENDING').length);
-      } catch {
-        setPendingCount(0);
-      }
-    };
-    void loadRequests();
-  }, []);
 
   const totalToday = Number(earningsToday?.total || 0);
   const deliveriesTodayCount = Number(earningsToday?.count || 0);
@@ -139,7 +123,7 @@ export function MotoboyEarnings() {
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader
         title="Ganhos"
-        subtitle="Veja o que entrou para voce e o que ainda falta receber."
+        subtitle="Veja o que entrou para você e o que ainda falta receber."
         rightAction={
           <button
             type="button"
@@ -153,40 +137,23 @@ export function MotoboyEarnings() {
 
       {blocked ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          Seu cadastro esta em analise. Aguarde aprovacao para visualizar ganhos.
+          Seu cadastro está em análise. Aguarde aprovação para visualizar ganhos.
         </div>
-      ) : null}
-
-      {pendingCount > 0 ? (
-        <button
-          type="button"
-          onClick={() => navigate('/motoboy/profile')}
-          className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700"
-        >
-          {pendingCount} solicitacao{pendingCount === 1 ? '' : 'oes'} pendente{pendingCount === 1 ? '' : 's'} de loja
-        </button>
       ) : null}
 
       <section className="premium-card-glass p-4 sm:p-5 motoboy-fade-up">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Resumo rapido</p>
-            <p className="text-sm text-slate-700 mt-1">Atualizado as <span className="font-semibold">{lastUpdatedLabel}</span></p>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Resumo rápido</p>
+            <p className="text-sm text-slate-700 mt-1">Atualizado às <span className="font-semibold">{lastUpdatedLabel}</span></p>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('/motoboy/profile')}
-            className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
-          >
-            Abrir conta
-          </button>
         </div>
       </section>
 
       <section className="grid gap-3 sm:grid-cols-3">
         <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Hoje voce ganhou</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Hoje você ganhou</p>
             <p className="text-2xl font-black text-emerald-600 mt-2">{toCurrency(totalToday)}</p>
             <p className="text-xs text-slate-500 mt-1">{deliveriesTodayCount} entrega(s) hoje</p>
           </div>
@@ -197,9 +164,9 @@ export function MotoboyEarnings() {
 
         <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Ja caiu para voce</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Já caiu para você</p>
             <p className="text-2xl font-black text-emerald-700 mt-2">{toCurrency(totalReceived30d)}</p>
-            <p className="text-xs text-emerald-700/80 mt-1">Frete + gorjetas pagas dos ultimos 30 dias</p>
+            <p className="text-xs text-emerald-700/80 mt-1">Frete + gorjetas pagas dos últimos 30 dias</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/80 text-emerald-700 flex items-center justify-center border border-emerald-200">
             <CurrencyCircleDollar size={22} weight="duotone" />
@@ -219,7 +186,7 @@ export function MotoboyEarnings() {
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
-        Nos ultimos 30 dias, voce recebeu <span className="font-extrabold text-slate-900">{toCurrency(totalDeliveryFees30d)}</span> de frete e{' '}
+        Nos últimos 30 dias, você recebeu <span className="font-extrabold text-slate-900">{toCurrency(totalDeliveryFees30d)}</span> de frete e{' '}
         <span className="font-extrabold text-slate-900">{toCurrency(totalTipsPaid)}</span> de gorjetas pagas.
       </section>
 
@@ -227,7 +194,7 @@ export function MotoboyEarnings() {
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Ultimas entregas</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Últimas entregas</p>
               <p className="mt-1 text-[11px] text-slate-500">Seu ganho por entrega aparece logo no card.</p>
             </div>
             <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-slate-500">
@@ -243,7 +210,7 @@ export function MotoboyEarnings() {
             ) : orders.length === 0 ? (
               <div className="ds-empty-state text-center py-6">
                 <p className="text-base font-semibold text-slate-800">Nenhuma entrega finalizada ainda</p>
-                <p className="mt-1 text-xs text-slate-500">Quando concluir entregas, seus ganhos aparecerao aqui.</p>
+                <p className="mt-1 text-xs text-slate-500">Quando concluir entregas, seus ganhos aparecerão aqui.</p>
               </div>
             ) : (
               <div className="grid gap-4">
@@ -307,7 +274,7 @@ export function MotoboyEarnings() {
                         disabled={ordersPage >= totalOrdersPages}
                         className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-extrabold text-slate-700 disabled:opacity-45"
                       >
-                        Proxima
+                        Próxima
                       </button>
                     </div>
                   </div>
@@ -320,7 +287,7 @@ export function MotoboyEarnings() {
         <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Gorjetas</p>
-            <p className="mt-1 text-[11px] text-slate-500">Aqui aparece o que ja foi pago e o que ainda esta pendente.</p>
+            <p className="mt-1 text-[11px] text-slate-500">Aqui aparece o que já foi pago e o que ainda está pendente.</p>
           </div>
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
             Recebido: <span className="font-extrabold">{toCurrency(totalTipsPaid)}</span>
@@ -331,8 +298,8 @@ export function MotoboyEarnings() {
 
           {recentTipPayouts.length === 0 ? (
             <div className="ds-empty-state rounded-xl border border-slate-200 bg-slate-50 px-3 py-4 text-center">
-              <p className="text-sm font-semibold text-slate-800">Ainda nao ha gorjetas registradas</p>
-              <p className="mt-1 text-xs text-slate-500">As gorjetas pagas pelos clientes aparecerao neste historico.</p>
+              <p className="text-sm font-semibold text-slate-800">Ainda não há gorjetas registradas</p>
+              <p className="mt-1 text-xs text-slate-500">As gorjetas pagas pelos clientes aparecerão neste histórico.</p>
             </div>
           ) : (
             <div className="space-y-2">

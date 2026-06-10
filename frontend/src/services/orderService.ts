@@ -377,6 +377,17 @@ export const orderService = {
     return apiClient.patch(`/orders/${id}/postal`, payload || {});
   },
 
+  async reportDeliveryIssue(
+    id: string,
+    payload: {
+      reason: string;
+      details?: string | null;
+      action?: string | null;
+    }
+  ) {
+    return apiClient.post(`/deliveries/${id}/issues`, payload || {});
+  },
+
   async updateItems(id: string, items: any, total: number)
   {
     const normalizedItems = (items || []).map((item: any) => ({

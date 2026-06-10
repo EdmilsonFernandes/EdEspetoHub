@@ -99,7 +99,7 @@ export function MotoboyAvailable() {
         setBlocked(true);
         setOrders([]);
       } else {
-        showToast(error?.message || 'Nao foi possivel carregar pedidos.', 'error');
+        showToast(error?.message || 'Não foi possível carregar pedidos.', 'error');
       }
     } finally {
       firstLoadRef.current = false;
@@ -129,7 +129,7 @@ export function MotoboyAvailable() {
   useEffect(() => {
     const onForegroundPush = () => {
       setNewBanner({ count: 1, at: Date.now() });
-      showToast('Tem entrega disponivel.', 'info');
+      showToast('Tem entrega disponível.', 'info');
       void loadOrders({ silent: true });
     };
     window.addEventListener(MOTOBOY_AVAILABLE_ORDER_EVENT, onForegroundPush as EventListener);
@@ -207,7 +207,7 @@ export function MotoboyAvailable() {
       if (error?.status === 409) {
         showToast('Pedido ja foi aceito por outro motoboy.', 'warning');
       } else {
-        showToast(error?.message || 'Nao foi possivel aceitar o pedido.', 'error');
+        showToast(error?.message || 'Não foi possível aceitar o pedido.', 'error');
       }
     }
   };
@@ -246,7 +246,7 @@ export function MotoboyAvailable() {
 
       <MotoboyHeader
         title="Fila de entregas"
-        subtitle={hasActive ? 'Voce ja esta em rota. Termine a entrega atual primeiro.' : 'Veja o pedido e aceite rapido.'}
+        subtitle={hasActive ? 'Você já está em rota. Termine a entrega atual primeiro.' : 'Veja o pedido e aceite rápido.'}
         rightAction={
           <button
             onClick={() => void loadOrders({ silent: true })}
@@ -257,7 +257,7 @@ export function MotoboyAvailable() {
         }
       />
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]">
+      <section className="hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)] sm:block">
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
@@ -294,14 +294,14 @@ export function MotoboyAvailable() {
           <p className="font-extrabold">Antes de aceitar mais pedidos</p>
           <p className="mt-1 text-amber-800">
             {blocked
-              ? 'Seu cadastro ainda esta em analise da plataforma.'
+              ? 'Seu cadastro ainda está em análise da plataforma.'
               : !profileAllowsOperation
-                ? 'Seu cadastro de entregador ainda nao esta ativo.'
+                ? 'Seu cadastro de entregador ainda não está ativo.'
               : !hasAllRequiredDocs
-                ? `Faltam documentos obrigatorios aprovados. Hoje faltam ${missingRequiredDocs}.`
+                ? `Faltam documentos obrigatórios aprovados. Hoje faltam ${missingRequiredDocs}.`
                 : approvedStores.length === 0
-                  ? 'Voce ainda nao tem loja aprovada para operar.'
-                  : `${pendingCount} solicitacao${pendingCount === 1 ? '' : 'oes'} de loja aguardando resposta.`}
+                  ? 'Você ainda não tem loja aprovada para operar.'
+                  : `${pendingCount} solicitação${pendingCount === 1 ? '' : 'ões'} de loja aguardando resposta.`}
           </p>
           <button
             type="button"
@@ -348,7 +348,7 @@ export function MotoboyAvailable() {
         </div>
       ) : orders.length === 0 ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center text-sm text-slate-600" ref={listRef}>
-          Nenhum pedido disponivel agora. A fila atualiza automaticamente.
+          Nenhum pedido disponível agora. A fila atualiza automaticamente.
         </div>
       ) : (
         <section className="space-y-3" ref={listRef}>
