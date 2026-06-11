@@ -386,9 +386,9 @@ Antes de commitar qualquer alteração em `backend/`, rodar:
 cd backend && yarn test
 ```
 
-Resultado esperado: **todos os 141 testes passando (0 falhas)**.
+Resultado esperado: **todos os testes passando (0 falhas)**.
 
-`yarn test` roda unitários (91) + e2e (50) sequencialmente. Precisa de Postgres rodando.
+`yarn test` roda unitários + e2e sequencialmente. Precisa de Postgres rodando.
 
 Se algum teste falhar:
 1. Investigar a causa

@@ -1,20 +1,25 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-.env
 
-# dependencies
-/node_modules
-/server/node_modules
-/frontend/node_modules
-/backend/node_modules
+# ========================
+# Dependencies
+# ========================
+node_modules/
+**/node_modules/
 /.pnp
 .pnp.js
 
-# build artifacts
+# ========================
+# Build artifacts
+# ========================
 /build
-/frontend/build
-/backend/dist
+dist/
+.out/
+.next/
+frontend/build
 
-# testing
+# ========================
+# Testing
+# ========================
 /coverage
 /playwright-report/
 /test-results/
@@ -22,38 +27,6 @@
 /frontend/playwright-report/
 /frontend/test-results/
 /frontend/test-results-artifacts/
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-=======
-# ========================
-# Node / JS
-# ========================
-node_modules/
-**/node_modules/
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Lock files (opcional – escolha UM)
-# Se usar npm:
-yarn.lock
-
-# Se usar yarn:
-# package-lock.json
-
-# ========================
-# Build
-# ========================
-dist/
-build/
-.out/
-.next/
 
 # ========================
 # Environment
@@ -65,6 +38,9 @@ build/
 !.env.prod.secrets.example
 !backend/.env.example
 !backend/.env.docker.example
+
+!apis/.env.docker.example
+!apis/.env.example
 !server/.env.docker.example
 
 # ========================
@@ -80,28 +56,65 @@ build/
 # ========================
 logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# uploads
+# ========================
+# Lock files (opcional – escolha UM)
+# ========================
+# Se usar npm:
+yarn.lock
+# Se usar yarn:
+# package-lock.json
+
+# ========================
+# Uploads
+# ========================
 backend/uploads/products/
 
+# ========================
+# Mobile / Android
+# ========================
 mobile/cmdline-tools.zip
 mobile/.gradle-home/
 
-# service account keys
+# ========================
+# Security / Secrets
+# ========================
 backend/keys/
 *.p12
 *.pem
 *.jks
 
+# ========================
+# Binary artifacts
+# ========================
 *.apk
 *.aab
+frontend/public/downloads/
+frontend/dist/downloads/
 
-!frontend/public/marketing/promo-marketing-lite.jpg
-
-.claude/
-
-# Local production DB dumps for development restore only.
-# Never commit database dumps or exported production data.
+# ========================
+# Local DB dumps (nunca commitar dados de produção)
+# ========================
 .local-db-dumps/
 *.dump
 *.backup
+*.sql.gz
+
+# ========================
+# Temp / stray files
+# ========================
+temp_search.txt
+0.*
+
+# ========================
+# Marketing exceptions
+# ========================
+!frontend/public/marketing/promo-marketing-lite.jpg
+
+# ========================
+# AI / Tooling
+# ========================
+.claude/
