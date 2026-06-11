@@ -48,11 +48,12 @@ import { useHubImagePreload } from '../hooks/hub/useHubImagePreload';
 import { useHubLocation } from '../hooks/hub/useHubLocation';
 import { useHubSearchPlaceholder } from '../hooks/hub/useHubSearchPlaceholder';
 import { useHubStoreDistances } from '../hooks/hub/useHubStoreDistances';
+import { useScrollReveal } from '../hooks/hub/useScrollReveal';
 import { useHubStores } from '../hooks/hub/useHubStores';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
 import { HubFilterSheet, type HubQuickFilterKey } from '../components/Marketplace/Hub/HubFilters';
-import { HubHeader } from '../components/Marketplace/Hub/HubHeader';
+import { HubHeader, getTimeOfDay } from '../components/Marketplace/Hub/HubHeader';
 import { HubAnonymousActiveOrders } from '../components/Marketplace/Hub/HubAnonymousActiveOrders';
 import { HubStoreCard } from '../components/Marketplace/Hub/HubStoreCard';
 import { HubFeaturedCarousel } from '../components/Marketplace/Hub/HubFeaturedCarousel';
@@ -657,6 +658,8 @@ export function MarketplacePage() {
   const condominiumSearchInputRef = useRef<HTMLInputElement | null>(null);
   const storesSectionRef = useRef<HTMLElement | null>(null);
   const publicCondominiumLoadInFlightRef = useRef(false);
+  const destinationReveal = useScrollReveal();
+  const storesReveal = useScrollReveal();
   const openOrderTracking = useCallback((orderId?: string | null, accessToken?: string | null) => {
     const normalizedOrderId = String(orderId || '').trim();
     if (!normalizedOrderId) return;
@@ -2042,6 +2045,7 @@ export function MarketplacePage() {
           onPedidosClick={handleOpenPedidos}
           onDestinosClick={() => navigate('/destinos')}
           isCondominiumScope={isCondominiumScope}
+          timeOfDay={getTimeOfDay()}
         />
 
         <main className={`mx-auto flex max-w-[1200px] flex-col gap-4 px-4 sm:gap-5 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
@@ -2135,14 +2139,22 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
-            <section className="order-8 space-y-3">
+            <section
+              ref={destinationReveal.ref}
+              className="order-8 space-y-3"
+              style={{
+                opacity: destinationReveal.isRevealed ? 1 : 0,
+                transform: destinationReveal.isRevealed ? 'translateY(0)' : 'translateY(24px)',
+                transition: 'opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1)',
+              }}
+            >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
                     <Mountains size={12} weight="duotone" />
                     Guia da região
                   </p>
-                  <h2 className="mt-1 text-base font-black leading-tight tracking-[-0.03em] text-slate-950 sm:text-lg">
+                  <h2 className="mt-1 text-base font-black leading-tight tracking-[-0.03em] sm:text-lg bg-gradient-to-r from-[#153A4C] via-[#336886] to-[#5FD35A] bg-clip-text text-transparent">
                     Descubra a região sem sair do app
                   </h2>
                   <p className="mt-1 max-w-[18rem] text-xs font-semibold leading-relaxed text-slate-500">
@@ -2176,16 +2188,18 @@ export function MarketplacePage() {
                       onPointerEnter={warmupDestination}
                       onFocus={warmupDestination}
                       onTouchStart={warmupDestination}
-                      className={`jnc-hub-touch jnc-hub-lift group relative flex shrink-0 overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_26px_62px_-48px_rgba(15,23,42,0.42)] ring-1 ring-white/70 ${index === 0 ? 'h-[11.4rem] w-[18.75rem]' : 'h-[10.75rem] w-[15.75rem]'}`}
+                      className={`jnc-hub-touch jnc-hub-lift group relative flex shrink-0 overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_26px_62px_-48px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition-transform duration-300 active:scale-[0.98] ${index === 0 ? 'h-[11.4rem] w-[18.75rem]' : 'h-[10.75rem] w-[15.75rem]'}`}
                     >
                       <img
                         src={resolveDestinationAssetUrl(destination)}
                         alt={displayName}
                         loading={index === 0 ? 'eager' : 'lazy'}
                         decoding="async"
-                        className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04)_0%,rgba(15,23,42,0)_34%,rgba(15,23,42,0.30)_66%,rgba(15,23,42,0.78)_100%)]" />
+                      {/* Glass shimmer on hover */}
+                      <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent z-[1]" />
                       <div className="jnc-hub-glass-badge absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.13em] text-[#153A4C] ring-1 ring-[#d7e7ef]/70">
                         <MapPinLine size={10} weight="fill" className="shrink-0 text-[#336886]" />
                         <span className="truncate">{formatDestinationMatchLabel(destination)}</span>
@@ -2199,7 +2213,7 @@ export function MarketplacePage() {
                             <Sparkle size={10} weight="fill" className="shrink-0 text-lime-200" />
                             <span className="truncate">{countLabel}</span>
                           </span>
-                          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/18 bg-white/20 text-white backdrop-blur-xl transition group-hover:translate-x-0.5">
+                          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/18 bg-white/20 text-white backdrop-blur-xl transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-[#5FD35A]/30 group-hover:border-[#5FD35A]/40">
                             <CaretRight size={12} weight="bold" />
                           </span>
                         </div>
@@ -2493,7 +2507,18 @@ export function MarketplacePage() {
             />
           )}
 
-          <section ref={storesSectionRef} className="order-6 space-y-3.5" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+          <section
+            ref={(el) => {
+              storesSectionRef.current = el;
+              if (el) (storesReveal as any).ref.current = el;
+            }}
+            className="order-6 space-y-3.5"
+            style={{
+              opacity: storesReveal.isRevealed ? 1 : 0,
+              transform: storesReveal.isRevealed ? 'translateY(0)' : 'translateY(16px)',
+              transition: 'opacity 0.5s cubic-bezier(0.22,1,0.36,1), transform 0.5s cubic-bezier(0.22,1,0.36,1)',
+            }}
+          >
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h2 className="text-[1.05rem] font-black leading-tight tracking-[-0.035em] text-slate-950 sm:text-lg">

@@ -5,16 +5,70 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "e131a617",
-  "versionLabel": "v0.1.9.e131a617",
-  "versionInternal": "0.1.9+20260610.185018.e131a617",
-  "buildId": "0.1.9+20260610.185018.e131a617-20260610.185018-e131a617",
-  "builtAt": "2026-06-10T18:50:18.576Z",
-  "commitHash": "e131a617f51076f70582c97308ff1d907662c378",
-  "shortHash": "e131a617",
+  "versionDisplaySuffix": "8c9e3b16",
+  "versionLabel": "v0.1.9.8c9e3b16",
+  "versionInternal": "0.1.9+20260611.150331.8c9e3b16",
+  "buildId": "0.1.9+20260611.150331.8c9e3b16-20260611.150331-8c9e3b16",
+  "builtAt": "2026-06-11T15:03:31.874Z",
+  "commitHash": "8c9e3b16a9eb64f94f6350eefd393b01516af32e",
+  "shortHash": "8c9e3b16",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "8c9e3b16a9eb64f94f6350eefd393b01516af32e",
+      "shortHash": "8c9e3b16",
+      "dateIso": "2026-06-11T11:33:54-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore: clean gitignore, remove tracked temp files and stale test count",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8c9e3b16a9eb64f94f6350eefd393b01516af32e"
+    },
+    {
+      "hash": "63930e7a90a782c5be4ea86bfa872090825b4099",
+      "shortHash": "63930e7a",
+      "dateIso": "2026-06-10T22:52:38-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Add iPhone QR to hospitality poster",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/63930e7a90a782c5be4ea86bfa872090825b4099"
+    },
+    {
+      "hash": "07a9886c12366876a193b4ad3d73f70b9384ab6e",
+      "shortHash": "07a9886c",
+      "dateIso": "2026-06-10T21:55:32-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Refine maps icon in destination actions",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/07a9886c12366876a193b4ad3d73f70b9384ab6e"
+    },
+    {
+      "hash": "dabfbabc05a1276539cc885c3920782f1e330222",
+      "shortHash": "dabfbabc",
+      "dateIso": "2026-06-10T21:33:15-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Show delivery issue on admin route cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dabfbabc05a1276539cc885c3920782f1e330222"
+    },
+    {
+      "hash": "a8b6ec45e03d91f48db1287c60516d0913616a1d",
+      "shortHash": "a8b6ec45",
+      "dateIso": "2026-06-10T16:18:40-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Handle blocked delivery codes",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a8b6ec45e03d91f48db1287c60516d0913616a1d"
+    },
+    {
+      "hash": "58a615705bc7082da8703f737917805fb7458e45",
+      "shortHash": "58a61570",
+      "dateIso": "2026-06-10T15:51:46-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Improve delivery issue and motoboy UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/58a615705bc7082da8703f737917805fb7458e45"
+    },
     {
       "hash": "e131a617f51076f70582c97308ff1d907662c378",
       "shortHash": "e131a617",
@@ -230,60 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Fill storefront banners horizontally",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c9b97f5abd59e3a7e4c9e9b447289d112f6c86df"
-    },
-    {
-      "hash": "ed9f2da5674c3c19c95a19e395e85aa4d0675e0a",
-      "shortHash": "ed9f2da5",
-      "dateIso": "2026-06-08T22:19:28-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Use full portfolio on hub highlights page",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ed9f2da5674c3c19c95a19e395e85aa4d0675e0a"
-    },
-    {
-      "hash": "4253afb8eecea80514b7000b29dabf8ee5e989aa",
-      "shortHash": "4253afb8",
-      "dateIso": "2026-06-08T22:02:54-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve hub highlights listing",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4253afb8eecea80514b7000b29dabf8ee5e989aa"
-    },
-    {
-      "hash": "92d76c21794ce1a18cbac479d0e7789bf0a67394",
-      "shortHash": "92d76c21",
-      "dateIso": "2026-06-08T21:50:38-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve storefront banner fit",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/92d76c21794ce1a18cbac479d0e7789bf0a67394"
-    },
-    {
-      "hash": "5ff9284f1ebe5edd76147cab5b9b636c61569484",
-      "shortHash": "5ff9284f",
-      "dateIso": "2026-06-08T21:22:03-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine pending store activation login flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5ff9284f1ebe5edd76147cab5b9b636c61569484"
-    },
-    {
-      "hash": "74657e4d21d91177a53d8a1451f01f857455c306",
-      "shortHash": "74657e4d",
-      "dateIso": "2026-06-08T20:40:44-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Clarify pending activation login error",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/74657e4d21d91177a53d8a1451f01f857455c306"
-    },
-    {
-      "hash": "15ff0d46d0f78cda2df9056232f8a2128ab944d6",
-      "shortHash": "15ff0d46",
-      "dateIso": "2026-06-08T20:29:24-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Validate common email domain typos",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/15ff0d46d0f78cda2df9056232f8a2128ab944d6"
     }
   ]
 } as const;

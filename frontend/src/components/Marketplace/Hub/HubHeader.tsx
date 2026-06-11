@@ -1,9 +1,23 @@
 import { memo, useRef, type RefObject } from 'react';
 import { Link } from 'react-router-dom';
-import { BellRinging, CaretDown, MagnifyingGlass, X, House, Receipt, MapTrifold, Tent } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import { BellRinging, CaretDown, MagnifyingGlass, X, House, Receipt, MapTrifold, Tent, Sun, Moon, SunHorizon } from '@phosphor-icons/react';
 import { HeaderAvatarTrigger } from '../HeaderAvatarTrigger';
 import { inputAssistProps } from '../../../utils/inputAssist';
 import { HubFilterBar, type HubQuickFilterKey } from './HubFilters';
+
+export type TimeOfDay = 'morning' | 'afternoon' | 'evening';
+
+export function getTimeOfDay(): TimeOfDay {
+  const hour = new Date().getHours();
+  return hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+}
+
+const timeConfig: Record<TimeOfDay, { icon: typeof Sun; color: string; bg: string; glow: string }> = {
+  morning: { icon: Sun, color: 'text-amber-500', bg: 'bg-amber-50', glow: 'shadow-[0_0_12px_rgba(251,191,36,0.3)]' },
+  afternoon: { icon: SunHorizon, color: 'text-orange-500', bg: 'bg-orange-50', glow: 'shadow-[0_0_12px_rgba(249,115,22,0.3)]' },
+  evening: { icon: Moon, color: 'text-indigo-400', bg: 'bg-indigo-50', glow: 'shadow-[0_0_12px_rgba(129,140,248,0.3)]' },
+};
 
 type HubHeaderProps = {
   isNativePlatform: boolean;
@@ -14,6 +28,7 @@ type HubHeaderProps = {
   hubHeaderEyebrow: string;
   displayLocationLabel: string;
   hubNotificationCount: number;
+  timeOfDay?: TimeOfDay;
   searchInputRef: RefObject<HTMLInputElement | null>;
   query: string;
   isSearchEditing: boolean;
@@ -67,6 +82,7 @@ export const HubHeader = memo(function HubHeader({
   onPedidosClick,
   onDestinosClick,
   isCondominiumScope,
+  timeOfDay,
 }: HubHeaderProps) {
   const desktopSearchInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -115,6 +131,20 @@ export const HubHeader = memo(function HubHeader({
                 />
                 <div className="jnc-hub-surface-soft min-w-0 flex-1 rounded-[1.35rem] px-3 py-2">
                   <div className="mb-0.5 flex items-center gap-1.5">
+                    {timeOfDay && (() => {
+                      const cfg = timeConfig[timeOfDay];
+                      const TimeIcon = cfg.icon;
+                      return (
+                        <motion.span
+                          initial={{ scale: 0, rotate: -30 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.15 }}
+                          className={`inline-flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full ${cfg.bg} ${cfg.glow}`}
+                        >
+                          <TimeIcon size={10} weight="fill" className={cfg.color} />
+                        </motion.span>
+                      );
+                    })()}
                     <img
                       src="/janocaminho.jpg"
                       alt="Já no Caminho"

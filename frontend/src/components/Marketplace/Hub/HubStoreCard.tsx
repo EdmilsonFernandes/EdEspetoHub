@@ -1,9 +1,26 @@
 import { Link } from 'react-router-dom';
 import type { ComponentType, MouseEvent } from 'react';
+import { motion } from 'framer-motion';
 import { Heart, Star, Storefront } from '@phosphor-icons/react';
 import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
 import { prefetchRouteByPath } from '../../../utils/clientRoutePrefetch';
 import { prefetchStorefrontData } from '../../../utils/storefrontPrefetch';
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 18, scale: 0.97 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      delay: Math.min(i * 0.06, 0.48),
+      duration: 0.45,
+      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+    },
+  }),
+};
+
+const tapSpring = { whileTap: { scale: 0.97 }, transition: { type: 'spring' as const, stiffness: 400, damping: 17 } };
 
 type BadgeIcon = ComponentType<{ size?: number; weight?: any; className?: string }>;
 
@@ -87,14 +104,21 @@ export function HubStoreCard({
 
   if (selectedCondominium) {
     return (
+      <motion.div
+        custom={index}
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        {...tapSpring}
+        className="contents"
+      >
       <Link
         to={to}
         state={state}
         onPointerEnter={warmupStoreRoute}
         onFocus={warmupStoreRoute}
         onTouchStart={warmupStoreRoute}
-        style={{ animationDelay: `${index * 50}ms` }}
-        className={`jnc-hub-touch jnc-hub-lift group overflow-hidden rounded-[1.45rem] animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-backwards ${
+        className={`jnc-hub-touch jnc-hub-lift group overflow-hidden rounded-[1.45rem] ${
           store.isOpen
             ? 'jnc-hub-card md:hover:border-[#336886]/20'
             : 'border-slate-200/70 bg-slate-50/86 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.14)] grayscale-[25%] opacity-85 filter blur-[0.4px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
@@ -185,18 +209,26 @@ export function HubStoreCard({
           )}
         </div>
       </Link>
+      </motion.div>
     );
   }
 
   return (
+    <motion.div
+      custom={index}
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      {...tapSpring}
+      className="contents"
+    >
     <Link
       to={to}
       state={state}
       onPointerEnter={warmupStoreRoute}
       onFocus={warmupStoreRoute}
       onTouchStart={warmupStoreRoute}
-      style={{ animationDelay: `${index * 36}ms` }}
-      className={`jnc-hub-touch group grid grid-cols-[4.85rem_minmax(0,1fr)_2rem] items-center gap-3.5 rounded-[1.35rem] border px-2.5 py-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards transition-all ${
+      className={`jnc-hub-touch group grid grid-cols-[4.85rem_minmax(0,1fr)_2rem] items-center gap-3.5 rounded-[1.35rem] border px-2.5 py-2.5 transition-all ${
         storeAvailable
           ? 'border-white/80 bg-white/95 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 md:hover:-translate-y-0.5 md:hover:border-[#336886]/14 md:hover:bg-white md:hover:shadow-[0_24px_52px_-38px_rgba(15,23,42,0.42)]'
           : 'border-slate-100/80 bg-white/72 shadow-[0_14px_32px_-30px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/45 grayscale-[14%] opacity-85 filter blur-[0.15px] hover:grayscale-0 hover:opacity-100 hover:blur-none'
@@ -278,5 +310,6 @@ export function HubStoreCard({
         <Heart size={17} weight={isFavorite ? 'fill' : 'regular'} className={isFavorite ? 'animate-pop' : 'transition-transform duration-200 hover:scale-110'} />
       </button>
     </Link>
+    </motion.div>
   );
 }

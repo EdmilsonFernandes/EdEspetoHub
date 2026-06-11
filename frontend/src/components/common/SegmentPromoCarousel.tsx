@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { openActionTarget, resolveActionLabel, resolveActionTarget } from '../../utils/actionLink';
 
 export type PromoSlide = {
@@ -127,18 +128,20 @@ export function SegmentPromoCarousel({
 
   const content = (
     <>
-      <div className={`relative ${compact ? 'aspect-[16/6.4]' : 'aspect-[16/6.8] sm:aspect-[16/6.6]'}`}>
-        {activeSlides.map((slide, index) => (
-          <div
-            key={slide.id}
-            className={`absolute inset-0 flex items-center justify-center bg-slate-950/5 transition-all duration-700 ${
-              index === activeIndex ? 'opacity-100' : 'pointer-events-none opacity-0'
-            }`}
+      <div className={`relative overflow-hidden ${compact ? 'aspect-[16/6.4]' : 'aspect-[16/6.8] sm:aspect-[16/6.6]'}`}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSlide.id}
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0 flex items-center justify-center bg-slate-950/5"
           >
-            {slide.fit !== 'cover' && (
+            {currentSlide.fit !== 'cover' && (
               <>
                 <img
-                  src={slide.image}
+                  src={currentSlide.image}
                   alt=""
                   aria-hidden="true"
                   className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-28 blur-xl"
@@ -147,16 +150,30 @@ export function SegmentPromoCarousel({
               </>
             )}
             <img
-              src={slide.image}
-              alt={slide.imageAlt}
+              src={currentSlide.image}
+              alt={currentSlide.imageAlt}
               loading="lazy"
-              className={`relative z-[1] h-full w-full object-center ${slide.fit === 'cover' ? 'object-cover' : 'object-contain'}`}
+              className={`relative z-[1] h-full w-full object-center ${currentSlide.fit === 'cover' ? 'object-cover' : 'object-contain'}`}
             />
-            {slide.id !== 'mercado-pago' && (
-              <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-slate-950/28 via-transparent to-transparent" />
-            )}
+            <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-slate-950/35 via-transparent to-slate-950/8" />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Progress bar */}
+        {activeSlides.length > 1 && (
+          <div className="absolute inset-x-0 top-0 z-[4] flex gap-1 p-1.5">
+            {activeSlides.map((_, index) => (
+              <div key={index} className="h-[2.5px] flex-1 overflow-hidden rounded-full bg-white/30">
+                <motion.div
+                  className="h-full rounded-full bg-white"
+                  initial={{ width: index === activeIndex ? '0%' : '0%' }}
+                  animate={{ width: index === activeIndex ? '100%' : index < activeIndex ? '100%' : '0%' }}
+                  transition={index === activeIndex ? { duration: 8, ease: 'linear' } : { duration: 0 }}
+                />
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
 
       {hasConfiguredAction && currentActionLabel ? (
