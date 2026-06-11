@@ -2360,6 +2360,9 @@ export function MarketplacePage() {
                             const eventState = String(event?.state || '').trim().toLowerCase();
                             const logoUrl = resolveCondominiumAssetUrl(condominium, 'logo');
                             const bannerUrl = resolveCondominiumAssetUrl(condominium, 'banner') || logoUrl;
+                            const cardBackgroundImage = bannerUrl
+                              ? `linear-gradient(180deg,rgba(15,23,42,0.08)_0%,rgba(15,23,42,0.24)_45%,rgba(15,23,42,0.82)_100%),url("${String(bannerUrl).replace(/"/g, '%22')}")`
+                              : 'radial-gradient(circle_at_12%_0%,rgba(95,211,90,0.18),transparent_34%),linear-gradient(135deg,#153A4C,#285f76)';
                             const region = [condominium.city, condominium.state].map((item) => String(item || '').trim()).filter(Boolean).join(' - ');
                             const timeLabel = formatCondominiumPickerEventTime(event) || formatCondominiumEventTime(event);
                             const statusLabel = eventState === 'live' ? 'Ao vivo' : eventState === 'upcoming' ? 'Em breve' : 'Agenda';
@@ -2372,11 +2375,14 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleCondominiumSelection(slug, name, event)}
-                                className="group relative min-w-[16.25rem] overflow-hidden rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(248,250,252,0.98)_0%,rgba(255,255,255,0.99)_58%,rgba(240,249,255,0.78)_100%)] p-3.5 text-left shadow-[0_4px_20px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(15,23,42,0.08)] active:scale-[0.99]"
+                                className="group relative min-w-[16.25rem] overflow-hidden rounded-[1.35rem] bg-slate-900 bg-cover bg-center p-3.5 text-left text-white shadow-[0_18px_44px_-32px_rgba(15,23,42,0.55)] ring-1 ring-white/70 transition hover:-translate-y-0.5 hover:shadow-[0_24px_54px_-34px_rgba(15,23,42,0.66)] active:scale-[0.99]"
+                                style={{ backgroundImage: cardBackgroundImage }}
                               >
-                                <div className="pointer-events-none absolute -right-5 -top-6 h-16 w-16 rounded-full bg-[#336886]/10 blur-2xl transition group-hover:bg-[#336886]/16" />
+                                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_0%,rgba(95,211,90,0.18),transparent_36%)] opacity-90" />
+                                <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/45 to-transparent" />
+                                <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/12 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
                                 <div className="relative flex items-start gap-2.5">
-                                  <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-[1rem] bg-white shadow-[0_4px_14px_rgba(15,23,42,0.06)] ring-1 ring-white/80">
+                                  <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-[1rem] bg-white shadow-[0_14px_28px_-18px_rgba(0,0,0,0.5)] ring-2 ring-white/85">
                                     <img
                                       src={logoUrl || bannerUrl}
                                       alt={name}
@@ -2393,17 +2399,17 @@ export function MarketplacePage() {
                                     <div className="flex items-center gap-1.5">
                                       <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] ${
                                         eventState === 'live'
-                                          ? 'bg-emerald-500 text-white'
+                                          ? 'bg-[#5FD35A] text-[#153A4C] shadow-[0_10px_20px_-12px_rgba(95,211,90,0.65)]'
                                           : eventState === 'upcoming'
-                                            ? 'bg-sky-100 text-sky-700'
-                                            : 'bg-slate-100/80 text-slate-600'
+                                            ? 'bg-white/88 text-[#153A4C]'
+                                            : 'bg-white/18 text-white ring-1 ring-white/18'
                                       }`}>
                                         {statusLabel}
                                       </span>
-                                      <span className="min-w-0 truncate text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">{region || 'Operação local'}</span>
+                                      <span className="min-w-0 truncate text-[10px] font-bold uppercase tracking-[0.1em] text-white/72">{region || 'Operação local'}</span>
                                     </div>
-                                    <p className="mt-1 line-clamp-1 text-sm font-black text-[#0F172A]">{name}</p>
-                                    <p className="mt-0.5 inline-flex max-w-full items-center gap-1 text-[10px] font-bold text-slate-500">
+                                    <p className="mt-1 line-clamp-1 text-sm font-black text-white drop-shadow-sm">{name}</p>
+                                    <p className="mt-0.5 inline-flex max-w-full items-center gap-1 rounded-full bg-white/14 px-2 py-1 text-[10px] font-bold text-white/86 ring-1 ring-white/12 backdrop-blur-md">
                                       {eventState === 'live' ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" /> : <Clock size={10} weight="bold" className="shrink-0" />}
                                       <span className="truncate">{agendaLine}</span>
                                       <CaretRight size={10} weight="bold" className="shrink-0" />
@@ -2661,33 +2667,35 @@ export function MarketplacePage() {
             />
           )}
 
-          {/* CTA compacto para lojistas */}
+          {/* CTA compacto para lojistas — premium style */}
           <section className="order-11 px-3 pb-2 pt-0">
             <button
               type="button"
               onClick={() => navigate('/create?plan=trial')}
-              className="jnc-hub-touch jnc-hub-lift group relative w-full overflow-hidden rounded-[1.5rem] border border-white/85 bg-white/82 px-3.5 py-3 text-left shadow-[0_18px_42px_-34px_rgba(15,23,42,0.34)] ring-1 ring-slate-200/45 backdrop-blur-xl"
+              className="jnc-hub-touch group relative w-full overflow-hidden rounded-[1.5rem] px-3.5 py-3.5 text-left shadow-[0_22px_52px_-38px_rgba(21,58,76,0.32)]"
+              style={{ background: 'linear-gradient(135deg, #153A4C 0%, #1A5068 40%, #245F78 70%, #2A6E88 100%)' }}
             >
-              <div className="pointer-events-none absolute -right-10 -top-12 h-24 w-24 rounded-full bg-[#5FD35A]/12 blur-3xl" />
-              <div className="pointer-events-none absolute -left-8 bottom-0 h-20 w-20 rounded-full bg-[#336886]/7 blur-3xl" />
+              <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/28 to-transparent" />
+              <div className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#5FD35A]/[0.1] blur-3xl" />
+              <div className="pointer-events-none absolute -left-6 bottom-[-8px] h-24 w-24 rounded-full bg-[#5FD35A]/[0.08] blur-2xl" />
               <div className="relative flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.05rem] border border-[#336886]/10 bg-[#336886]/7 text-[#153A4C] shadow-[0_16px_30px_-26px_rgba(21,58,76,0.38)] ring-1 ring-white/80">
-                  <Storefront size={22} weight="duotone" className="text-[#336886]" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.05rem] bg-white/[0.12] text-white shadow-[0_12px_24px_-18px_rgba(0,0,0,0.3)] border border-white/[0.08]">
+                  <Storefront size={22} weight="duotone" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <p className="text-[0.92rem] font-black leading-tight tracking-[-0.03em] text-slate-950">
+                    <p className="text-[0.92rem] font-black leading-tight tracking-[-0.03em] text-white">
                       Tem um negócio local?
                     </p>
-                    <span className="rounded-full bg-[#5FD35A]/16 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-emerald-700 ring-1 ring-emerald-100/80">
+                    <span className="rounded-full bg-[#5FD35A] px-2.5 py-0.5 text-[8.5px] font-black uppercase tracking-[0.1em] text-[#153A4C] shadow-[0_6px_16px_-8px_rgba(95,211,90,0.5)]">
                       3 meses VIP
                     </span>
                   </div>
-                  <p className="mt-0.5 text-[11px] font-semibold leading-4 text-slate-500">
+                  <p className="mt-0.5 text-[11px] font-semibold leading-4 text-white/78">
                     Crie sua loja e venda online pelo app.
                   </p>
                 </div>
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#153A4C] px-3 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-white shadow-[0_16px_30px_-24px_rgba(21,58,76,0.62)] transition group-hover:translate-x-0.5">
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#5FD35A] px-3.5 py-2.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#153A4C] shadow-[0_12px_28px_-16px_rgba(95,211,90,0.55)] transition-all group-hover:translate-x-0.5 group-hover:shadow-[0_16px_32px_-14px_rgba(95,211,90,0.65)]">
                   Começar
                   <CaretRight size={11} weight="bold" />
                 </span>
@@ -2695,7 +2703,10 @@ export function MarketplacePage() {
             </button>
           </section>
           <section className="order-12 space-y-2 pb-2 sm:pb-4">
-            <p className="text-center text-xs font-semibold text-slate-500">Conectando você aos melhores lojistas do app.</p>
+            <div className="flex items-center justify-center gap-2">
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-3.5 w-3.5 rounded-[0.3rem] object-cover" />
+              <p className="text-[11px] font-bold text-slate-400">Conectando você aos melhores lojistas do app.</p>
+            </div>
             <PlatformTrustFooter mode="minimal" align="center" compact />
           </section>
         </main>
@@ -2711,19 +2722,19 @@ export function MarketplacePage() {
             onClick={handleHomeHubNavigation}
             className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
               quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium
-                ? 'bg-[#eef5f7] text-[#2d5f7b] shadow-[0_12px_26px_-24px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/8'
+                ? 'bg-[#f0fdf4] text-[#166534] shadow-[0_12px_26px_-24px_rgba(95,211,90,0.35)] ring-1 ring-[#5FD35A]/12'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
               quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium
-                ? 'bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)]'
+                ? 'bg-[#5FD35A] text-white shadow-[0_16px_32px_-24px_rgba(95,211,90,0.55)]'
                 : 'bg-slate-100/80 text-slate-600 group-hover:bg-slate-200/80'
             }`}>
               <House size={16} weight={quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium ? 'fill' : 'duotone'} />
             </span>
             <span>Início</span>
-                  <span className="h-[3px] w-4 rounded-full bg-[#336886]" />
+                  <span className="h-[3px] w-4 rounded-full bg-[#5FD35A]" />
           </button>
           <button
             type="button"
@@ -2740,13 +2751,13 @@ export function MarketplacePage() {
             onClick={() => setCondominiumPickerOpen(true)}
             className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
               selectedCondominium || condominiumPickerOpen
-                ? 'bg-[#eef5f7] text-[#2d5f7b] shadow-[0_12px_26px_-24px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/8'
+                ? 'bg-[#f0fdf4] text-[#166534] shadow-[0_12px_26px_-24px_rgba(95,211,90,0.35)] ring-1 ring-[#5FD35A]/12'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
               selectedCondominium || condominiumPickerOpen
-                ? 'bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)]'
+                ? 'bg-[#5FD35A] text-white shadow-[0_16px_32px_-24px_rgba(95,211,90,0.55)]'
                 : 'bg-slate-100/80 text-slate-600 group-hover:bg-slate-200/80'
             }`}>
               <Tent size={16} weight={selectedCondominium || condominiumPickerOpen ? 'fill' : 'duotone'} />
@@ -2768,13 +2779,13 @@ export function MarketplacePage() {
             onClick={() => setProfileDrawerOpen(true)}
             className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
               profileDrawerOpen
-                ? 'bg-[#eef5f7] text-[#2d5f7b] shadow-[0_12px_26px_-24px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/8'
+                ? 'bg-[#f0fdf4] text-[#166534] shadow-[0_12px_26px_-24px_rgba(95,211,90,0.35)] ring-1 ring-[#5FD35A]/12'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
               profileDrawerOpen
-                ? 'bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)]'
+                ? 'bg-[#5FD35A] text-white shadow-[0_16px_32px_-24px_rgba(95,211,90,0.55)]'
                 : 'bg-slate-100/80 text-slate-600 group-hover:bg-slate-200/80'
             }`}>
               <ListPlus size={17} weight={profileDrawerOpen ? 'bold' : 'duotone'} />
@@ -3205,7 +3216,7 @@ export function MarketplacePage() {
                     <House size={16} weight="duotone" />
                   </span>
                   <span>Início</span>
-                  <span className="h-[3px] w-4 rounded-full bg-[#336886]" />
+                  <span className="h-[3px] w-4 rounded-full bg-[#5FD35A]" />
                 </button>
                 <button
                   type="button"
@@ -3222,9 +3233,9 @@ export function MarketplacePage() {
                 </button>
                 <button
                   type="button"
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] bg-[#eef5f7] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-[#2d5f7b] shadow-[0_12px_26px_-24px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/8 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] bg-[#f0fdf4] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-[#166534] shadow-[0_12px_26px_-24px_rgba(95,211,90,0.35)] ring-1 ring-[#5FD35A]/12 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02]"
                 >
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)]">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#5FD35A] text-white shadow-[0_16px_32px_-24px_rgba(95,211,90,0.55)]">
                     <Tent size={16} weight="fill" />
                   </span>
                   <span>Feiras</span>
