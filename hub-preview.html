@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub Preview — Já no Caminho</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0f172a; color: #fff; }
+
+  .container { display: flex; gap: 24px; padding: 24px; max-width: 1400px; margin: 0 auto; flex-wrap: wrap; }
+  .phone { width: 375px; min-height: 812px; border-radius: 40px; overflow: hidden; position: relative; flex-shrink: 0; border: 3px solid rgba(255,255,255,0.1); }
+  .phone-label { text-align: center; padding: 16px; font-weight: 800; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ========== ATUAL ========== */
+  .hub-atual {
+    background: linear-gradient(180deg, #EFF5F8 0%, #F5F8FA 12%, #FAFBFC 35%, #FFFFFF 60%, #F8FAFB 100%);
+  }
+  .hub-atual .header {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px);
+    padding: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.65);
+  }
+  .hub-atual .header-row { display: flex; align-items: center; gap: 10px; }
+  .hub-atual .avatar { width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .hub-atual .greeting-box { flex: 1; background: #f1f5f9; border-radius: 16px; padding: 8px 12px; }
+  .hub-atual .eyebrow { font-size: 10px; font-weight: 900; letter-spacing: 0.2em; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
+  .hub-atual .location { font-size: 13px; font-weight: 800; color: #0f172a; }
+  .hub-atual .bell { width: 40px; height: 40px; border-radius: 14px; background: transparent; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .hub-atual .search {
+    margin-top: 10px;
+    background: white;
+    border-radius: 18px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 12px 30px -20px rgba(15,23,42,0.3);
+  }
+  .hub-atual .search-icon { color: #336886; font-size: 16px; }
+  .hub-atual .search-text { color: #94a3b8; font-size: 14px; font-weight: 600; }
+  .hub-atual .filters { display: flex; gap: 8px; padding: 10px 16px; }
+  .hub-atual .filter-pill {
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    background: white;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+
+  .hub-atual .content { padding: 16px; }
+  .hub-atual .section-title { font-size: 15px; font-weight: 900; color: #0f172a; margin-bottom: 12px; }
+
+  /* Banner */
+  .hub-atual .banner {
+    height: 120px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid white;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  }
+
+  /* Destinos */
+  .hub-atual .dest-row { display: flex; gap: 10px; overflow: hidden; margin-bottom: 16px; }
+  .hub-atual .dest-card {
+    min-width: 180px; height: 140px; border-radius: 20px; position: relative; overflow: hidden;
+    background: #1e293b;
+  }
+  .hub-atual .dest-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+  .hub-atual .dest-label { position: absolute; bottom: 10px; left: 10px; color: white; font-size: 13px; font-weight: 900; }
+  .hub-atual .dest-badge { position: absolute; top: 8px; left: 8px; background: rgba(255,255,255,0.9); padding: 3px 8px; border-radius: 8px; font-size: 8px; font-weight: 900; color: #153A4C; }
+
+  /* Categorias */
+  .hub-atual .cats { display: flex; gap: 12px; margin-bottom: 16px; overflow: hidden; }
+  .hub-atual .cat {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .hub-atual .cat-icon {
+    width: 40px; height: 40px; border-radius: 14px; background: white;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    border: 1px solid #f1f5f9; box-shadow: 0 8px 20px -16px rgba(15,23,42,0.3);
+  }
+  .hub-atual .cat-icon.active { background: #336886; border-color: #336886; }
+  .hub-atual .cat-label { font-size: 9px; font-weight: 900; color: #64748b; text-transform: uppercase; }
+
+  /* Store card */
+  .hub-atual .store {
+    display: grid; grid-template-columns: 60px 1fr 30px; gap: 12px; align-items: center;
+    background: white; border: 1px solid rgba(255,255,255,0.8); border-radius: 18px;
+    padding: 10px; margin-bottom: 8px;
+    box-shadow: 0 12px 30px -24px rgba(15,23,42,0.3);
+  }
+  .hub-atual .store-logo { width: 52px; height: 52px; border-radius: 14px; background: #f1f5f9; }
+  .hub-atual .store-name { font-size: 14px; font-weight: 900; color: #0f172a; }
+  .hub-atual .store-meta { font-size: 11px; font-weight: 600; color: #64748b; margin-top: 2px; }
+  .hub-atual .store-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 9px; font-weight: 900;
+    margin-top: 4px;
+  }
+  .hub-atual .badge-open { background: #ecfdf5; color: #059669; }
+  .hub-atual .badge-free { background: #ecfdf5; color: #059669; }
+  .hub-atual .heart { font-size: 16px; color: #e2e8f0; }
+
+  /* ========== PROPOSTA ========== */
+  .hub-proposta {
+    background: linear-gradient(180deg, #153A4C 0%, #1A4A5E 8%, #D6E8EF 18%, #EDF3F7 30%, #FFFFFF 55%, #F8FAFB 100%);
+  }
+  .hub-proposta .header {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(24px);
+    padding: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+  .hub-proposta .header-row { display: flex; align-items: center; gap: 10px; }
+  .hub-proposta .avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid rgba(95,211,90,0.5); }
+  .hub-proposta .greeting-box { flex: 1; background: rgba(255,255,255,0.1); border-radius: 16px; padding: 8px 12px; }
+  .hub-proposta .eyebrow { font-size: 10px; font-weight: 900; letter-spacing: 0.2em; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 6px; }
+  .hub-proposta .time-icon { display: inline-flex; width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.15); align-items: center; justify-content: center; font-size: 9px; }
+  .hub-proposta .location { font-size: 13px; font-weight: 800; color: white; }
+  .hub-proposta .bell { width: 40px; height: 40px; border-radius: 14px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; }
+  .hub-proposta .search {
+    margin-top: 10px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 18px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 18px 40px -24px rgba(21,58,76,0.35);
+  }
+  .hub-proposta .search-icon { color: #336886; font-size: 16px; }
+  .hub-proposta .search-text { color: #94a3b8; font-size: 14px; font-weight: 600; }
+  .hub-proposta .filters { display: flex; gap: 8px; padding: 10px 16px; }
+  .hub-proposta .filter-pill {
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .hub-proposta .filter-pill.active {
+    background: #5FD35A;
+    color: #153A4C;
+    border-color: #5FD35A;
+  }
+
+  .hub-proposta .content { padding: 16px; }
+  .hub-proposta .section-title { font-size: 15px; font-weight: 900; color: #0f172a; margin-bottom: 12px; }
+
+  /* Banner */
+  .hub-proposta .banner {
+    height: 120px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #153A4C, #336886);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px;
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    border: 1px solid rgba(51,104,134,0.3);
+    box-shadow: 0 16px 40px -20px rgba(21,58,76,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .hub-proposta .banner::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(135deg, transparent 40%, #5FD35A22 100%);
+  }
+  .hub-proposta .banner-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #5FD35A;
+    color: #153A4C;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Destinos */
+  .hub-proposta .dest-row { display: flex; gap: 10px; overflow: hidden; margin-bottom: 16px; }
+  .hub-proposta .dest-card {
+    min-width: 180px; height: 140px; border-radius: 20px; position: relative; overflow: hidden;
+    background: #1e293b;
+    box-shadow: 0 20px 50px -30px rgba(21,58,76,0.5);
+  }
+  .hub-proposta .dest-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+  .hub-proposta .dest-label { position: absolute; bottom: 10px; left: 10px; color: white; font-size: 13px; font-weight: 900; }
+  .hub-proposta .dest-badge { position: absolute; top: 8px; left: 8px; background: rgba(255,255,255,0.9); padding: 3px 8px; border-radius: 8px; font-size: 8px; font-weight: 900; color: #153A4C; }
+  .hub-proposta .dest-arrow {
+    position: absolute; bottom: 10px; right: 10px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(95,211,90,0.3); border: 1px solid rgba(95,211,90,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: white;
+  }
+
+  /* Categorias */
+  .hub-proposta .cats { display: flex; gap: 12px; margin-bottom: 16px; overflow: hidden; }
+  .hub-proposta .cat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .hub-proposta .cat-icon {
+    width: 40px; height: 40px; border-radius: 14px; background: white;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    border: 1px solid #f1f5f9; box-shadow: 0 8px 20px -16px rgba(15,23,42,0.3);
+  }
+  .hub-proposta .cat-icon.active { background: #5FD35A; border-color: #5FD35A; box-shadow: 0 8px 24px -12px rgba(95,211,90,0.5); }
+  .hub-proposta .cat-label { font-size: 9px; font-weight: 900; color: #64748b; text-transform: uppercase; }
+
+  /* Store card */
+  .hub-proposta .store {
+    display: grid; grid-template-columns: 60px 1fr 30px; gap: 12px; align-items: center;
+    background: white; border: 1px solid rgba(255,255,255,0.8); border-radius: 18px;
+    padding: 10px; margin-bottom: 8px;
+    box-shadow: 0 12px 30px -24px rgba(15,23,42,0.3);
+  }
+  .hub-proposta .store-logo { width: 52px; height: 52px; border-radius: 14px; background: #f1f5f9; }
+  .hub-proposta .store-name { font-size: 14px; font-weight: 900; color: #0f172a; }
+  .hub-proposta .store-meta { font-size: 11px; font-weight: 600; color: #64748b; margin-top: 2px; }
+  .hub-proposta .store-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 9px; font-weight: 900;
+    margin-top: 4px;
+  }
+  .hub-proposta .badge-open { background: #ecfdf5; color: #059669; }
+  .hub-proposta .badge-green { background: #5FD35A22; color: #2d8a2d; }
+  .hub-proposta .badge-sponsored { background: #5FD35A18; color: #3d9e3d; border: 1px solid #5FD35A33; }
+  .hub-proposta .heart { font-size: 16px; color: #e2e8f0; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 24px;
+    background: white;
+    border-top: 1px solid #f1f5f9;
+  }
+  .bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; font-weight: 800; color: #94a3b8; }
+  .bottom-nav .nav-item.active { color: #336886; }
+  .bottom-nav .nav-item.active-green { color: #5FD35A; }
+  .bottom-nav .nav-icon { font-size: 18px; }
+
+  /* Aurora blobs for proposta */
+  .hub-proposta .aurora-1 {
+    position: absolute; top: -5%; left: -10%; width: 50%; height: 40%;
+    background: radial-gradient(circle, rgba(95,211,90,0.08), transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .hub-proposta .aurora-2 {
+    position: absolute; top: 15%; right: -10%; width: 55%; height: 35%;
+    background: radial-gradient(circle, rgba(51,104,134,0.12), transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+
+  .note { color: #94a3b8; font-size: 12px; font-weight: 600; max-width: 375px; line-height: 1.6; margin-top: 8px; padding: 0 4px; }
+  .note strong { color: #e2e8f0; }
+
+  .diff-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 900;
+    margin-top: 6px;
+  }
+  .diff-new { background: #5FD35A22; color: #5FD35A; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- ATUAL -->
+  <div>
+    <div class="phone-label">🔴 ATUAL</div>
+    <div class="phone hub-atual">
+      <div class="header">
+        <div class="header-row">
+          <div class="avatar">👤</div>
+          <div class="greeting-box">
+            <div class="eyebrow">
+              <img src="https://janocaminho.com.br/janocaminho.jpg" style="width:14px;height:14px;border-radius:4px;object-fit:cover;">
+              BOA TARDE, CLIENTE
+            </div>
+            <div class="location">📍 São José dos Campos <span style="font-size:11px;">▼</span></div>
+          </div>
+          <div class="bell">🔔</div>
+        </div>
+        <div class="search">
+          <span class="search-icon">🔍</span>
+          <span class="search-text">Buscar espetinho, hamburguer...</span>
+        </div>
+      </div>
+      <div class="filters">
+        <span class="filter-pill" style="background:#336886;color:white;">Todos</span>
+        <span class="filter-pill">Aberto</span>
+        <span class="filter-pill">Grátis</span>
+        <span class="filter-pill">Perto</span>
+      </div>
+      <div class="content">
+        <div class="banner">Banner — fundo cinza claro, sutil</div>
+
+        <div class="section-title">Descubra a região</div>
+        <div class="dest-row">
+          <div class="dest-card" style="background:linear-gradient(135deg,#1e3a5f,#2d5a7b);">
+            <div class="dest-badge">📍 12 km</div>
+            <div class="dest-label">Campos do Jordão</div>
+          </div>
+          <div class="dest-card" style="background:linear-gradient(135deg,#1e3a5f,#2d5a7b);">
+            <div class="dest-label">São Luiz</div>
+          </div>
+        </div>
+
+        <div class="cats">
+          <div class="cat"><div class="cat-icon active" style="color:white;">☰</div><span class="cat-label" style="color:#336886;">Todos</span></div>
+          <div class="cat"><div class="cat-icon">🍔</div><span class="cat-label">Hamb.</span></div>
+          <div class="cat"><div class="cat-icon">🍕</div><span class="cat-label">Pizza</span></div>
+          <div class="cat"><div class="cat-icon">🍰</div><span class="cat-label">Doces</span></div>
+          <div class="cat"><div class="cat-icon">🛒</div><span class="cat-label">Mercado</span></div>
+        </div>
+
+        <div class="section-title">Lojas para pedir agora</div>
+        <div class="store">
+          <div class="store-logo"></div>
+          <div>
+            <div class="store-name">Espetinho do Zé</div>
+            <div class="store-meta">⭐ 4.8 · Aberto · 25-40 min · 2.3 km</div>
+            <span class="store-badge badge-open">Aberto agora</span>
+            <span class="store-badge badge-free">Grátis</span>
+          </div>
+          <div class="heart">🤍</div>
+        </div>
+        <div class="store">
+          <div class="store-logo"></div>
+          <div>
+            <div class="store-name">Hamburgueria Premium</div>
+            <div class="store-meta">⭐ 4.5 · Aberto · 30-50 min · 1.8 km</div>
+            <span class="store-badge badge-open">Aberto agora</span>
+          </div>
+          <div class="heart">🤍</div>
+        </div>
+        <div class="store">
+          <div class="store-logo"></div>
+          <div>
+            <div class="store-name">Pizzaria da Villa</div>
+            <div class="store-meta">⭐ 4.2 · Aberto · 40-60 min · 3.1 km</div>
+          </div>
+          <div class="heart">🤍</div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item active"><span class="nav-icon">🏠</span>Início</div>
+        <div class="nav-item"><span class="nav-icon">📋</span>Pedidos</div>
+        <div class="nav-item"><span class="nav-icon">⛺</span>Feiras</div>
+        <div class="nav-item"><span class="nav-icon">🗺️</span>Visite</div>
+        <div class="nav-item"><span class="nav-icon">☰</span>Mais</div>
+      </div>
+    </div>
+    <p class="note">Branco azulado uniforme. Sem destaque forte. Header igual ao conteúdo. Identidade <strong>toda na mesma temperatura</strong>.</p>
+  </div>
+
+  <!-- PROPOSTA -->
+  <div>
+    <div class="phone-label">🟢 PROPOSTA — Cores do Robô</div>
+    <div class="phone hub-proposta">
+      <div class="aurora-1"></div>
+      <div class="aurora-2"></div>
+      <div class="header">
+        <div class="header-row">
+          <div class="avatar">👤</div>
+          <div class="greeting-box">
+            <div class="eyebrow">
+              <span class="time-icon">🌅</span>
+              BOA TARDE, CLIENTE
+            </div>
+            <div class="location">📍 São José dos Campos <span style="font-size:11px;">▼</span></div>
+          </div>
+          <div class="bell">🔔</div>
+        </div>
+        <div class="search">
+          <span class="search-icon">🔍</span>
+          <span class="search-text">Buscar espetinho, hamburguer...</span>
+        </div>
+      </div>
+      <div class="filters">
+        <span class="filter-pill active">Todos</span>
+        <span class="filter-pill">Aberto</span>
+        <span class="filter-pill">Grátis</span>
+        <span class="filter-pill">Perto</span>
+      </div>
+      <div class="content">
+        <div class="banner">
+          <div>Banner com gradiente da marca</div>
+          <div class="banner-tag">✨ Destaque</div>
+        </div>
+
+        <div class="section-title" style="background:linear-gradient(to right,#153A4C,#336886,#5FD35A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Descubra a região</div>
+        <div class="dest-row">
+          <div class="dest-card" style="background:linear-gradient(135deg,#1e3a5f,#2d5a7b);">
+            <div class="dest-badge">📍 12 km</div>
+            <div class="dest-label">Campos do Jordão</div>
+            <div class="dest-arrow">→</div>
+          </div>
+          <div class="dest-card" style="background:linear-gradient(135deg,#1e3a5f,#2d5a7b);">
+            <div class="dest-label">São Luiz</div>
+            <div class="dest-arrow">→</div>
+          </div>
+        </div>
+
+        <div class="cats">
+          <div class="cat"><div class="cat-icon active" style="color:#153A4C;">☰</div><span class="cat-label" style="color:#5FD35A;font-weight:900;">Todos</span></div>
+          <div class="cat"><div class="cat-icon">🍔</div><span class="cat-label">Hamb.</span></div>
+          <div class="cat"><div class="cat-icon">🍕</div><span class="cat-label">Pizza</span></div>
+          <div class="cat"><div class="cat-icon">🍰</div><span class="cat-label">Doces</span></div>
+          <div class="cat"><div class="cat-icon">🛒</div><span class="cat-label">Mercado</span></div>
+        </div>
+
+        <div class="section-title">Lojas para pedir agora</div>
+        <div class="store">
+          <div class="store-logo"></div>
+          <div>
+            <div class="store-name">Espetinho do Zé</div>
+            <div class="store-meta">⭐ 4.8 · Aberto · 25-40 min · 2.3 km</div>
+            <span class="store-badge badge-open">Aberto agora</span>
+            <span class="store-badge badge-green">🟢 Grátis</span>
+            <span class="store-badge badge-sponsored">⭐ Patrocinado</span>
+          </div>
+          <div class="heart">🤍</div>
+        </div>
+        <div class="store">
+          <div class="store-logo"></div>
+          <div>
+            <div class="store-name">Hamburgueria Premium</div>
+            <div class="store-meta">⭐ 4.5 · Aberto · 30-50 min · 1.8 km</div>
+            <span class="store-badge badge-open">Aberto agora</span>
+          </div>
+          <div class="heart">🤍</div>
+        </div>
+        <div class="store">
+          <div class="store-logo"></div>
+          <div>
+            <div class="store-name">Pizzaria da Villa</div>
+            <div class="store-meta">⭐ 4.2 · Aberto · 40-60 min · 3.1 km</div>
+          </div>
+          <div class="heart">🤍</div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item active-green"><span class="nav-icon">🏠</span>Início</div>
+        <div class="nav-item"><span class="nav-icon">📋</span>Pedidos</div>
+        <div class="nav-item"><span class="nav-icon">⛺</span>Feiras</div>
+        <div class="nav-item"><span class="nav-icon">🗺️</span>Visite</div>
+        <div class="nav-item"><span class="nav-icon">☰</span>Mais</div>
+      </div>
+    </div>
+    <p class="note">
+      <strong>Header mergulha no azul do robô</strong> (#153A4C). <strong>Verde do capacete</strong> (#5FD35A) vira cor de ação: filtros ativos, badges, CTA. <strong>Nenhuma cor nova</strong> — só as que já existem no mascote, usadas com mais personalidade.
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

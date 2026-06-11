@@ -1930,16 +1930,16 @@ export function MarketplacePage() {
     <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[linear-gradient(180deg,#EFF5F8_0%,#F5F8FA_12%,#FAFBFC_35%,#FFFFFF_60%,#F8FAFB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Aurora Background — atmospheric depth with brand colors */}
       <div className="jnc-safe-area-glass pointer-events-none fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top)]" />
-      {/* Hero gradient band — marca o topo com a identidade */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[480px] bg-gradient-to-b from-[#336886]/[0.10] via-[#336886]/[0.04] to-transparent" />
+      {/* Hero gradient band — azul marinho do robô no topo */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[520px] bg-gradient-to-b from-[#153A4C]/[0.14] via-[#1A4A5E]/[0.06] to-transparent" />
       {/* Aurora blob 1 — azul principal, canto superior esquerdo, animado */}
-      <div className="jnc-hub-aurora-1 fixed left-[-10%] top-[-5%] h-[42%] w-[50%] rounded-full bg-[#336886]/[0.08] blur-[160px] pointer-events-none -z-10" />
+      <div className="jnc-hub-aurora-1 fixed left-[-10%] top-[-5%] h-[42%] w-[50%] rounded-full bg-[#153A4C]/[0.10] blur-[160px] pointer-events-none -z-10" />
       {/* Aurora blob 2 — azul claro, canto superior direito, animado */}
-      <div className="jnc-hub-aurora-2 fixed top-[-8%] right-[-8%] h-[45%] w-[52%] bg-[#6BA3C2]/[0.12] blur-[140px] rounded-full pointer-events-none -z-10" />
-      {/* Aurora blob 3 — verde acento, canto inferior esquerdo, animado */}
-      <div className="jnc-hub-aurora-3 fixed bottom-[2%] left-[5%] h-[24%] w-[30%] bg-[#5FD35A]/[0.05] blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="jnc-hub-aurora-2 fixed top-[-8%] right-[-8%] h-[45%] w-[52%] bg-[#336886]/[0.14] blur-[140px] rounded-full pointer-events-none -z-10" />
+      {/* Aurora blob 3 — verde do capacete, canto inferior esquerdo, animado */}
+      <div className="jnc-hub-aurora-3 fixed bottom-[2%] left-[5%] h-[24%] w-[30%] bg-[#5FD35A]/[0.06] blur-[120px] rounded-full pointer-events-none -z-10" />
       {/* Soft light bloom — center top */}
-      <div className="fixed left-[30%] top-[2%] h-[20%] w-[40%] bg-white/30 blur-[100px] pointer-events-none -z-10" />
+      <div className="fixed left-[30%] top-[2%] h-[20%] w-[40%] bg-white/20 blur-[100px] pointer-events-none -z-10" />
 
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${

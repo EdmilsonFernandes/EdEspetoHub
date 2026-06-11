@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "d8c6d8cc",
-  "versionLabel": "v0.1.9.d8c6d8cc",
-  "versionInternal": "0.1.9+20260611.151727.d8c6d8cc",
-  "buildId": "0.1.9+20260611.151727.d8c6d8cc-20260611.151727-d8c6d8cc",
-  "builtAt": "2026-06-11T15:17:27.280Z",
-  "commitHash": "d8c6d8ccbe4186a242397bb2d9af10b648ac3143",
-  "shortHash": "d8c6d8cc",
+  "versionDisplaySuffix": "d81aecf5",
+  "versionLabel": "v0.1.9.d81aecf5",
+  "versionInternal": "0.1.9+20260611.154353.d81aecf5",
+  "buildId": "0.1.9+20260611.154353.d81aecf5-20260611.154353-d81aecf5",
+  "builtAt": "2026-06-11T15:43:53.711Z",
+  "commitHash": "d81aecf5afa693a16e56c65f26db477c37c1bc60",
+  "shortHash": "d81aecf5",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "d81aecf5afa693a16e56c65f26db477c37c1bc60",
+      "shortHash": "d81aecf5",
+      "dateIso": "2026-06-11T12:19:04-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): revert scroll-reveal that broke destination visibility and caused layout gaps",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d81aecf5afa693a16e56c65f26db477c37c1bc60"
+    },
     {
       "hash": "d8c6d8ccbe4186a242397bb2d9af10b648ac3143",
       "shortHash": "d8c6d8cc",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Improve store motoboy onboarding and order UX",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9254f17729ef932cddffa65ce6d00fbed9803df0"
-    },
-    {
-      "hash": "c77096c03d32ac9283750afbe484e048e03f1abf",
-      "shortHash": "c77096c0",
-      "dateIso": "2026-06-08T22:43:15-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Preserve storefront banner artwork",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c77096c03d32ac9283750afbe484e048e03f1abf"
     }
   ]
 } as const;

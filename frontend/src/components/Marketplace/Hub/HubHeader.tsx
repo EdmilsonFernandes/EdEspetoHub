@@ -114,10 +114,10 @@ export const HubHeader = memo(function HubHeader({
         <div
           className={`${
             isNativePlatform ? 'space-y-2.5 rounded-[1.65rem] px-2.5 py-2.5' : 'space-y-3 rounded-[1.9rem] px-3 py-3'
-          } jnc-hub-surface relative overflow-hidden`}
+          } relative overflow-hidden bg-white/[0.07] border border-white/[0.06]`}
         >
-          <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#153A4C]/[0.06] blur-3xl" />
-          <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-slate-200/40 blur-3xl" />
+          <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#5FD35A]/[0.06] blur-3xl" />
+          <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-[#336886]/20 blur-3xl" />
 
           {/* MOBILE LAYOUT (hidden on desktop) */}
           <div className="lg:hidden space-y-2.5 md:space-y-3">
@@ -129,7 +129,7 @@ export const HubHeader = memo(function HubHeader({
                   hasNotification={!isCustomerLogged}
                   onClick={onOpenProfileDrawer}
                 />
-                <div className="jnc-hub-surface-soft min-w-0 flex-1 rounded-[1.35rem] px-3 py-2">
+                <div className="min-w-0 flex-1 rounded-[1.35rem] px-3 py-2">
                   <div className="mb-0.5 flex items-center gap-1.5">
                     {timeOfDay && (() => {
                       const cfg = timeConfig[timeOfDay];
@@ -150,13 +150,13 @@ export const HubHeader = memo(function HubHeader({
                       alt="Já no Caminho"
                       className="h-4 w-4 shrink-0 rounded-[0.4rem] object-cover shadow-[0_2px_6px_-2px_rgba(21,58,76,0.3)]"
                     />
-                    <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-white/55">
                       {hubHeaderEyebrow}
                     </p>
                   </div>
                   <button
                     type="button"
-                    className="jnc-hub-touch inline-flex w-full min-w-0 items-center justify-between gap-2 text-left text-[14px] font-black text-slate-950 hover:text-[#336886]"
+                    className="jnc-hub-touch inline-flex w-full min-w-0 items-center justify-between gap-2 text-left text-[14px] font-black text-white hover:text-white/80"
                     onClick={onToggleNearbyFilter}
                   >
                     <span className="flex min-w-0 items-center gap-1.5 truncate">
@@ -168,7 +168,7 @@ export const HubHeader = memo(function HubHeader({
                       )}
                       <span className="truncate">{displayLocationLabel}</span>
                     </span>
-                    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[#336886]">
+                    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/[0.10] text-white">
                       <CaretDown size={13} weight="bold" />
                     </span>
                   </button>
@@ -178,7 +178,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onHubNotificationClick}
-                className="jnc-hub-touch jnc-hub-pill relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] text-[#153A4C] hover:bg-white"
+                className="jnc-hub-touch jnc-hub-pill relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] text-white hover:bg-white/[0.08]"
                 aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
                 title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
@@ -196,7 +196,7 @@ export const HubHeader = memo(function HubHeader({
 
             <div className="relative z-20">
               <div
-                className={`jnc-hub-card group relative isolate flex items-center gap-3 overflow-hidden px-3.5 transition-[border-color,box-shadow,transform] duration-300 ease-out hover:border-[#336886]/15 focus-within:-translate-y-0.5 focus-within:border-[#336886]/25 focus-within:shadow-[0_22px_54px_-34px_rgba(51,104,134,0.42)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${
+                className={`group relative isolate flex items-center gap-3 overflow-hidden px-3.5 transition-[border-color,box-shadow,transform] duration-300 ease-out hover:border-[#336886]/15 focus-within:-translate-y-0.5 focus-within:border-[#336886]/25 focus-within:shadow-[0_22px_54px_-34px_rgba(51,104,134,0.42)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${
                   isNativePlatform
                     ? 'min-h-[50px] rounded-[1.35rem]'
                     : 'min-h-[54px] rounded-[1.55rem]'
@@ -225,7 +225,7 @@ export const HubHeader = memo(function HubHeader({
                     onBlur={() => onSearchEditingChange(false)}
                     placeholder={isSearchEditing ? 'Buscar loja, categoria ou produto' : ''}
                     enterKeyHint="search"
-                    className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-slate-950 outline-none transition-opacity duration-300 ${
+                    className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-slate-900 outline-none transition-opacity duration-300 ${
                       isNativePlatform ? 'min-h-[48px] text-[15px]' : 'min-h-[52px] text-[14px]'
                     }`}
                     style={{
@@ -246,7 +246,7 @@ export const HubHeader = memo(function HubHeader({
                         isNativePlatform ? 'text-[15px]' : 'text-[14px]'
                       }`}
                     >
-                      <span className="font-semibold text-slate-400 truncate">
+                      <span className="font-semibold text-white/50 truncate">
                         {searchPlaceholder}
                       </span>
                     </div>
@@ -281,18 +281,18 @@ export const HubHeader = memo(function HubHeader({
                   alt="Já no Caminho"
                   className="h-9 w-9 rounded-xl object-cover shadow-[0_4px_12px_rgba(15,23,42,0.15)] ring-1 ring-slate-100 group-hover:scale-105 transition-transform duration-300"
                 />
-                <span className="text-[15px] font-black tracking-tight text-slate-900 bg-gradient-to-r from-slate-900 to-slate-800 bg-clip-text text-transparent">
+                <span className="text-[15px] font-black tracking-tight text-white">
                   Já no Caminho
                 </span>
               </Link>
               
-              <div className="h-5 w-px bg-slate-200" />
+              <div className="h-5 w-px bg-white/20" />
               
               {/* Location Badge */}
               <button
                 type="button"
                 onClick={onToggleNearbyFilter}
-                className="jnc-hub-touch jnc-hub-pill inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300"
+                className="jnc-hub-touch jnc-hub-pill inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold text-white/70 hover:bg-white/10 hover:border-white/20"
               >
                 {quickFilter === 'nearby' ? (
                   <span className="relative flex h-2 w-2 shrink-0">
@@ -301,13 +301,13 @@ export const HubHeader = memo(function HubHeader({
                   </span>
                 ) : (
                   <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-slate-300" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-white/30" />
                   </span>
                 )}
                 <span className="truncate max-w-[160px]" title={displayLocationLabel}>
                   {displayLocationLabel}
                 </span>
-                <CaretDown size={11} weight="bold" className="text-[#336886]" />
+                <CaretDown size={11} weight="bold" className="text-white/60" />
               </button>
             </div>
 
@@ -316,10 +316,10 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onHomeClick}
-                className={`jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-slate-100/70 ${
+                className={`jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-white/10 ${
                   !isCondominiumScope
-                    ? 'text-[#336886] bg-slate-100 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] font-black'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'text-white bg-white/12 font-black'
+                    : 'text-white/50 hover:text-white/80'
                 }`}
               >
                 <House size={14} weight={!isCondominiumScope ? 'fill' : 'bold'} />
@@ -328,10 +328,10 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onAgendaClick}
-                className={`jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-slate-100/70 ${
+                className={`jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-white/10 ${
                   isCondominiumScope
-                    ? 'text-[#336886] bg-slate-100 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] font-black'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'text-white bg-white/12 font-black'
+                    : 'text-white/50 hover:text-white/80'
                 }`}
               >
                 <Tent size={14} weight={isCondominiumScope ? 'fill' : 'bold'} />
@@ -340,7 +340,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onPedidosClick}
-                className="jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 hover:text-[#336886] hover:bg-slate-100/70"
+                className="jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 hover:text-[#336886] hover:bg-white/10"
               >
                 <Receipt size={14} weight="bold" />
                 Pedidos
@@ -348,7 +348,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onDestinosClick}
-                className="jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 hover:text-[#336886] hover:bg-slate-100/70"
+                className="jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 hover:text-[#336886] hover:bg-white/10"
               >
                 <MapTrifold size={14} weight="bold" />
                 Visite
