@@ -133,7 +133,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                         : 'min-h-[112px] min-w-[268px] gap-3 rounded-[1.45rem] p-2.5 sm:min-w-[292px]'
                     } ${
                       item.sponsored
-                        ? 'border-amber-200/60 bg-[linear-gradient(135deg,rgba(254,243,199,0.24)_0%,#ffffff_58%,#ffffff_100%)] shadow-[0_24px_56px_-44px_rgba(245,158,11,0.28)]'
+                        ? 'border-[#5FD35A]/20 bg-[linear-gradient(135deg,rgba(95,211,90,0.06)_0%,#ffffff_58%,#ffffff_100%)] shadow-[0_24px_56px_-44px_rgba(95,211,90,0.18)]'
                         : isLead
                           ? 'border-[#d7e7ef]/80 bg-[radial-gradient(circle_at_96%_4%,rgba(95,211,90,0.10),transparent_34%),linear-gradient(135deg,#ffffff_0%,#f8fbfc_56%,rgba(237,245,250,0.90)_100%)] shadow-[0_26px_62px_-48px_rgba(21,58,76,0.34)]'
                           : 'border-slate-100/80 bg-white shadow-[0_18px_42px_-36px_rgba(15,23,42,0.16)]'
@@ -161,7 +161,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                       
                       <div className="absolute right-1.5 top-1.5 z-20">
                         {item.sponsored ? (
-                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] bg-amber-300/92 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.1em] text-slate-950 shadow-sm">
+                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] bg-[#5FD35A]/88 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.1em] text-[#153A4C] shadow-sm">
                             <Star size={9} weight="fill" /> {item.badge || 'Patrocinado'}
                           </span>
                         ) : (

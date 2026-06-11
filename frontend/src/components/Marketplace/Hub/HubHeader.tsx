@@ -107,13 +107,13 @@ export const HubHeader = memo(function HubHeader({
       <div
         className={`mx-auto max-w-[1200px] px-4 ${
           isNativePlatform
-            ? 'pb-2 pt-[max(0.55rem,calc(env(safe-area-inset-top)+0.1rem))]'
-            : 'pb-3 pt-[max(0.85rem,calc(env(safe-area-inset-top)+0.2rem))]'
+            ? 'pb-1.5 pt-[max(0.35rem,calc(env(safe-area-inset-top)+0.05rem))]'
+            : 'pb-2 pt-[max(0.55rem,calc(env(safe-area-inset-top)+0.1rem))]'
         }`}
       >
         <div
           className={`${
-            isNativePlatform ? 'space-y-2.5 rounded-[1.65rem] px-2.5 py-2.5' : 'space-y-3 rounded-[1.9rem] px-3 py-3'
+            isNativePlatform ? 'space-y-2 rounded-[1.45rem] px-2.5 py-2' : 'space-y-2 rounded-[1.65rem] px-3 py-2.5'
           } relative overflow-hidden bg-white/[0.07] border border-white/[0.06]`}
         >
           <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#5FD35A]/[0.06] blur-3xl" />

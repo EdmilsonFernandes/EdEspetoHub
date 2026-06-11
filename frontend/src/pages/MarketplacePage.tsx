@@ -1927,19 +1927,19 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[linear-gradient(180deg,#D6E4EC_0%,#E4EDF2_8%,#EDF3F7_16%,#F5F8FA_28%,#FAFBFC_42%,#FFFFFF_60%,#F8FAFB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[linear-gradient(180deg,#DAE8F0_0%,#E6EEF3_8%,#EEF4F7_16%,#F5F9FB_28%,#FAFBFC_42%,#FFFFFF_60%,#F8FAFB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Aurora Background — atmospheric depth with brand colors */}
       <div className="jnc-safe-area-glass pointer-events-none fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top)]" />
-      {/* Smooth transition band — navy → azul claro → branco (bridge between header and body) */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[560px]" style={{ background: 'linear-gradient(180deg, #153A4C 0%, #1A5268 4%, #2A6E88 8%, #4A8EA8 13%, #7AB4CC 18%, #A8D0DE 24%, #C8DDE6 30%, #E0EBF0 38%, transparent 52%)' }} />
-      {/* Aurora blob 1 — azul profundo, canto superior esquerdo, animado */}
-      <div className="jnc-hub-aurora-1 fixed left-[-8%] top-[-4%] h-[38%] w-[45%] rounded-full bg-[#153A4C]/[0.12] blur-[160px] pointer-events-none -z-10" />
-      {/* Aurora blob 2 — verde do capacete, canto superior direito, animado */}
-      <div className="jnc-hub-aurora-2 fixed top-[-6%] right-[-6%] h-[40%] w-[48%] bg-[#5FD35A]/[0.06] blur-[140px] rounded-full pointer-events-none -z-10" />
-      {/* Aurora blob 3 — azul claro, centro esquerdo baixo, animado */}
-      <div className="jnc-hub-aurora-3 fixed bottom-[5%] left-[8%] h-[20%] w-[26%] bg-[#336886]/[0.06] blur-[120px] rounded-full pointer-events-none -z-10" />
+      {/* Smooth transition band — header → body bridge */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[480px]" style={{ background: 'linear-gradient(180deg, #2A6078 0%, #3A7E96 4%, #4E96AE 8%, #72AEC2 13%, #96C4D4 18%, #B4D6E2 24%, #CEE4EC 30%, #E2EEF3 38%, transparent 50%)' }} />
+      {/* Aurora blob 1 — azul, canto superior esquerdo, animado */}
+      <div className="jnc-hub-aurora-1 fixed left-[-8%] top-[-4%] h-[36%] w-[42%] rounded-full bg-[#2A6078]/[0.10] blur-[160px] pointer-events-none -z-10" />
+      {/* Aurora blob 2 — verde, canto superior direito, animado */}
+      <div className="jnc-hub-aurora-2 fixed top-[-6%] right-[-6%] h-[38%] w-[45%] bg-[#5FD35A]/[0.04] blur-[140px] rounded-full pointer-events-none -z-10" />
+      {/* Aurora blob 3 — azul claro, inferior esquerdo, animado */}
+      <div className="jnc-hub-aurora-3 fixed bottom-[5%] left-[8%] h-[18%] w-[24%] bg-[#336886]/[0.04] blur-[120px] rounded-full pointer-events-none -z-10" />
       {/* Soft light bloom — center top */}
-      <div className="fixed left-[25%] top-[3%] h-[18%] w-[36%] bg-white/15 blur-[100px] pointer-events-none -z-10" />
+      <div className="fixed left-[25%] top-[3%] h-[16%] w-[32%] bg-white/12 blur-[100px] pointer-events-none -z-10" />
 
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${

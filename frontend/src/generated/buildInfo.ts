@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "faddfc65",
-  "versionLabel": "v0.1.9.faddfc65",
-  "versionInternal": "0.1.9+20260611.161209.faddfc65",
-  "buildId": "0.1.9+20260611.161209.faddfc65-20260611.161209-faddfc65",
-  "builtAt": "2026-06-11T16:12:09.660Z",
-  "commitHash": "faddfc6524b6674b924623999b965311a707113c",
-  "shortHash": "faddfc65",
+  "versionDisplaySuffix": "2219e36f",
+  "versionLabel": "v0.1.9.2219e36f",
+  "versionInternal": "0.1.9+20260611.162604.2219e36f",
+  "buildId": "0.1.9+20260611.162604.2219e36f-20260611.162604-2219e36f",
+  "builtAt": "2026-06-11T16:26:04.404Z",
+  "commitHash": "2219e36f6b368e6658983e4a9733a3f74363427e",
+  "shortHash": "2219e36f",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "2219e36f6b368e6658983e4a9733a3f74363427e",
+      "shortHash": "2219e36f",
+      "dateIso": "2026-06-11T13:14:01-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(hub): polish UX — smooth navy-to-white transition, fix search bar and button visibility",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2219e36f6b368e6658983e4a9733a3f74363427e"
+    },
     {
       "hash": "faddfc6524b6674b924623999b965311a707113c",
       "shortHash": "faddfc65",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Improve native launch recovery overlay",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8bbe3e8c68e23a382fef9a3867eed5e60a9c6294"
-    },
-    {
-      "hash": "7abefc8677a167a3300be5f811dc01a5eba0aed9",
-      "shortHash": "7abefc86",
-      "dateIso": "2026-06-09T12:14:42-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix Android text suggestions in WebView",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7abefc8677a167a3300be5f811dc01a5eba0aed9"
     }
   ]
 } as const;
