@@ -5078,6 +5078,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 const deliveryCodeBlockedAt = order?.delivery?.confirmationCodeBlockedAt || order?.delivery?.confirmation_code_blocked_at || null;
                 const deliveryCodeAttempts = Number(order?.delivery?.confirmationCodeAttempts ?? order?.delivery?.confirmation_code_attempts ?? 0);
                 const isDeliveryCodeBlocked = Boolean(deliveryCodeBlockedAt) && !isDispatched;
+                const deliveryIssue = order?.delivery?.lastIssue || order?.delivery?.last_issue || null;
+                const deliveryIssueReason = String(deliveryIssue?.reason || '').trim();
+                const deliveryIssueDetails = String(deliveryIssue?.details || '').trim();
+                const deliveryIssueAt = deliveryIssue?.createdAt || deliveryIssue?.created_at || null;
                 return (
                 <div
                   key={order.id}
@@ -5133,6 +5137,23 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       <p className="mt-0.5 font-semibold text-rose-700/85">
                         {deliveryCodeAttempts || 3} tentativa(s) incorreta(s). Libere uma nova tentativa depois de confirmar o código com o cliente.
                       </p>
+                    </div>
+                  ) : null}
+
+                  {deliveryIssueReason && !isDispatched ? (
+                    <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="font-black">Última ocorrência</p>
+                        {deliveryIssueAt ? (
+                          <span className="rounded-full bg-white/75 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                            {formatDateTime(deliveryIssueAt)}
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-1 font-semibold">{deliveryIssueReason}</p>
+                      {deliveryIssueDetails ? (
+                        <p className="mt-0.5 leading-relaxed text-amber-800/85">{deliveryIssueDetails}</p>
+                      ) : null}
                     </div>
                   ) : null}
 

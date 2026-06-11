@@ -813,6 +813,36 @@ private async attachDeliverySnapshot(orders: any[]) {
       });
     }
 
+    const issueRows: Array<any> = await AppDataSource.query(
+      `
+        SELECT DISTINCT ON (de.delivery_id)
+          de.delivery_id,
+          de.created_at,
+          de.metadata
+        FROM delivery_events de
+        WHERE de.delivery_id = ANY($1::uuid[])
+          AND de.to_status = 'ISSUE_REPORTED'
+        ORDER BY de.delivery_id, de.created_at DESC
+      `,
+      [orderIds]
+    );
+
+    const issueByOrderId = new Map<string, any>();
+    for (const row of issueRows) {
+      const orderId = String(row?.delivery_id || '').trim();
+      if (!orderId) continue;
+      const metadata =
+        row?.metadata && typeof row.metadata === 'object'
+          ? row.metadata
+          : {};
+      issueByOrderId.set(orderId, {
+        reason: String(metadata?.reason || 'Ocorrência registrada').trim(),
+        details: metadata?.details ? String(metadata.details).trim() : null,
+        action: metadata?.action ? String(metadata.action).trim() : null,
+        createdAt: row?.created_at || null,
+      });
+    }
+
     const deliveryByOrderId = new Map<string, any>();
     for (const row of deliveryRows) {
       const orderId = String(row?.order_id || '').trim();
@@ -828,6 +858,7 @@ private async attachDeliverySnapshot(orders: any[]) {
         deliveredAt: row?.delivered_at || null,
         confirmationCodeAttempts: Number(row?.confirmation_code_attempts || 0),
         confirmationCodeBlockedAt: row?.confirmation_code_blocked_at || null,
+        lastIssue: issueByOrderId.get(orderId) || null,
       });
     }
 
