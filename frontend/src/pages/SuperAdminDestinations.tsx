@@ -10,6 +10,7 @@ import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../utils/nativeImagePicker';
 import { BRAZIL_STATES, loadBrazilCitiesByState } from '../utils/brazilLocations';
 import {
+  buildHospitalityPlaceIosHubQrUrl,
   buildHospitalityPlaceSmartQrUrl,
   buildHospitalityPlacePosterFileName,
   escapePosterHtml,
@@ -2123,13 +2124,15 @@ export function SuperAdminDestinations() {
       (catalog.destinations || []).find((item: any) => String(item.id) === String(place?.destinationId));
     const placeName = String(place?.name || 'Hospedagem').trim();
     const destinationName = String(destination?.name || destination?.city || place?.city || 'Destino turístico').trim();
-    const targetUrl = buildHospitalityPlaceSmartQrUrl({
+    const androidTargetUrl = buildHospitalityPlaceSmartQrUrl({
       destinationSlug: destination?.slug || place?.destination?.slug || '',
       destinationName,
       placeSlug: place?.slug || '',
       placeName,
     });
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=720x720&margin=12&data=${encodeURIComponent(targetUrl)}`;
+    const iosTargetUrl = buildHospitalityPlaceIosHubQrUrl();
+    const androidQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=720x720&margin=12&data=${encodeURIComponent(androidTargetUrl)}`;
+    const iosQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=720x720&margin=12&data=${encodeURIComponent(iosTargetUrl)}`;
     const logoUrl = resolveAssetUrl(place?.logoUrl || '');
     const coverUrl = resolveAssetUrl(
       (Array.isArray(place?.bannerUrls) ? place.bannerUrls.find(Boolean) : '') ||
@@ -2147,8 +2150,10 @@ export function SuperAdminDestinations() {
       .toUpperCase() || 'JC';
     const safePlaceName = escapePosterHtml(placeName);
     const safeDestinationName = escapePosterHtml(destinationName);
-    const safeTargetUrl = escapePosterHtml(targetUrl);
-    const safeQrUrl = escapePosterHtml(qrUrl);
+    const safeAndroidTargetUrl = escapePosterHtml(androidTargetUrl);
+    const safeIosTargetUrl = escapePosterHtml(iosTargetUrl);
+    const safeAndroidQrUrl = escapePosterHtml(androidQrUrl);
+    const safeIosQrUrl = escapePosterHtml(iosQrUrl);
     const safeLogoUrl = escapePosterHtml(logoUrl || '');
     const safeCoverUrl = escapePosterHtml(coverUrl || '');
     const safeInitials = escapePosterHtml(initials);
@@ -2361,78 +2366,90 @@ export function SuperAdminDestinations() {
               align-self: start;
               border-radius: 28px;
               background: linear-gradient(180deg, #153A4C, #0f172a);
-              padding: 22px;
+              padding: 20px;
               color: #fff;
               text-align: center;
               box-shadow: 0 24px 55px rgba(21,58,76,0.28);
             }
-            .qr-box {
-              margin: 0 auto;
-              width: 256px;
-              max-width: 100%;
-              border-radius: 24px;
-              background: #fff;
-              padding: 14px;
+            .qr-card h2 {
+              margin: 0 0 8px;
+              font-size: 24px;
+              line-height: 1.05;
+              letter-spacing: -0.04em;
             }
-            .qr-box img {
+            .qr-card > p {
+              margin: 0 auto 16px;
+              max-width: 285px;
+              color: rgba(255,255,255,0.84);
+              font-size: 12px;
+              line-height: 1.42;
+              font-weight: 760;
+            }
+            .qr-options {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 12px;
+            }
+            .qr-option {
+              overflow: hidden;
+              border-radius: 21px;
+              background: #fff;
+              color: #0f172a;
+              padding: 10px;
+              text-align: left;
+              box-shadow: inset 0 0 0 1px rgba(226,232,240,0.9), 0 18px 32px rgba(0,0,0,0.16);
+            }
+            .qr-option__label {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              margin-bottom: 8px;
+              border-radius: 999px;
+              background: #f1f5f9;
+              padding: 5px 8px;
+              color: #153A4C;
+              font-size: 9px;
+              font-weight: 950;
+              letter-spacing: 0.12em;
+              text-transform: uppercase;
+            }
+            .qr-option__dot {
+              width: 7px;
+              height: 7px;
+              border-radius: 999px;
+              background: #5FD35A;
+              box-shadow: 0 0 0 4px rgba(95,211,90,0.14);
+            }
+            .qr-option__box {
+              border-radius: 16px;
+              background: #fff;
+              padding: 6px;
+              border: 1px solid #e2e8f0;
+            }
+            .qr-option__box img {
               display: block;
               width: 100%;
               aspect-ratio: 1;
               object-fit: contain;
             }
-            .qr-card h2 {
-              margin: 17px 0 5px;
-              font-size: 22px;
-              line-height: 1.05;
-              letter-spacing: -0.035em;
-            }
-            .qr-card p {
-              margin: 0;
-              color: rgba(255,255,255,0.86);
-              font-size: 12px;
-              line-height: 1.4;
-              font-weight: 750;
-            }
-            .play-badge {
-              display: inline-flex;
-              align-items: center;
-              gap: 9px;
-              margin: 15px auto 12px;
-              border: 1px solid rgba(255,255,255,0.14);
-              border-radius: 12px;
-              background: #050505;
-              padding: 8px 13px;
-              color: #fff;
-              text-align: left;
-              box-shadow: 0 12px 25px rgba(0,0,0,0.22);
-            }
-            .play-badge svg {
-              width: 25px;
-              height: 25px;
-              flex: 0 0 auto;
-            }
-            .play-badge small {
+            .qr-option small {
               display: block;
-              font-size: 7px;
-              line-height: 1;
-              letter-spacing: 0.08em;
-              text-transform: uppercase;
-              color: rgba(255,255,255,0.82);
-              font-weight: 800;
+              margin-top: 8px;
+              color: #64748b;
+              font-size: 9.5px;
+              line-height: 1.3;
+              font-weight: 820;
             }
-            .play-badge strong {
-              display: block;
-              margin-top: 2px;
-              font-size: 16px;
-              line-height: 1;
-              font-weight: 850;
+            .qr-option strong {
+              color: #0f172a;
+              font-weight: 950;
             }
             .ios-note {
-              margin-top: 10px !important;
+              margin: 14px 0 0 !important;
               border-top: 1px solid rgba(255,255,255,0.14);
-              padding-top: 10px;
+              padding-top: 12px;
               color: rgba(255,255,255,0.9) !important;
-              font-size: 11.5px !important;
+              font-size: 11px !important;
             }
             .footer {
               display: flex;
@@ -2458,6 +2475,7 @@ export function SuperAdminDestinations() {
               .screen-toolbar button { flex: 1 1 0; }
               .page { padding: 12px; border-radius: 24px; }
               .body { grid-template-columns: 1fr; padding: 22px; }
+              .qr-options { grid-template-columns: 1fr; }
               h1 { font-size: 36px; }
               .hero-content { padding: 24px; }
               .footer { margin: 0 22px 22px; flex-direction: column; align-items: flex-start; }
@@ -2506,7 +2524,7 @@ export function SuperAdminDestinations() {
                   <div>
                     <p class="eyebrow">Guia local para hóspedes</p>
                     <h1>Está hospedado no ${safePlaceName}?</h1>
-                    <p class="subtitle">Baixe o app e veja quem entrega aqui, serviços locais e lugares próximos para visitar em ${safeDestinationName}.</p>
+                    <p class="subtitle">Aponte a câmera, escolha seu celular e veja quem entrega aqui, serviços locais e lugares próximos para visitar em ${safeDestinationName}.</p>
                   </div>
                 </div>
               </section>
@@ -2535,35 +2553,30 @@ export function SuperAdminDestinations() {
                   </div>
                 </div>
                 <aside class="qr-card">
-                  <div class="qr-box">
-                    <img src="${safeQrUrl}" alt="QR Code para instalar o app Já no Caminho" />
+                  <h2>Escaneie no seu celular</h2>
+                  <p>Use o QR certo para abrir a experiência do Já no Caminho sem digitar endereço.</p>
+                  <div class="qr-options">
+                    <div class="qr-option">
+                      <div class="qr-option__label"><span class="qr-option__dot"></span>Android</div>
+                      <div class="qr-option__box">
+                        <img src="${safeAndroidQrUrl}" alt="QR Code Android para baixar o app Já no Caminho" />
+                      </div>
+                      <small><strong>Baixar app</strong><br />Abre a página do app na Google Play.</small>
+                    </div>
+                    <div class="qr-option">
+                      <div class="qr-option__label"><span class="qr-option__dot"></span>iPhone</div>
+                      <div class="qr-option__box">
+                        <img src="${safeIosQrUrl}" alt="QR Code iPhone para abrir o hub Já no Caminho no Safari" />
+                      </div>
+                      <small><strong>Abrir no Safari</strong><br />Acessa janocaminho.com.br/hub direto.</small>
+                    </div>
                   </div>
-                  <h2>Aponte a câmera e instale o app</h2>
-                  <div class="play-badge" aria-label="Disponível no Google Play">
-                    <svg viewBox="0 0 48 48" role="img" aria-hidden="true">
-                      <defs>
-                        <linearGradient id="playBlue" x1="0" x2="1" y1="0" y2="1">
-                          <stop offset="0" stop-color="#00A0FF" />
-                          <stop offset="1" stop-color="#00D1FF" />
-                        </linearGradient>
-                      </defs>
-                      <path fill="url(#playBlue)" d="M8 6.4v35.2c0 1.7 1.8 2.8 3.3 1.9L29.5 24 11.3 4.5C9.8 3.6 8 4.7 8 6.4Z" />
-                      <path fill="#00F076" d="m29.5 24 5.3-5.7L11.3 4.5 29.5 24Z" />
-                      <path fill="#FFEA00" d="m29.5 24-18.2 19.5 23.5-13.8L29.5 24Z" />
-                      <path fill="#FF3D00" d="m34.8 18.3-5.3 5.7 5.3 5.7 5.1-3c2.1-1.2 2.1-4.2 0-5.4l-5.1-3Z" />
-                    </svg>
-                    <span>
-                      <small>Disponível no</small>
-                      <strong>Google Play</strong>
-                    </span>
-                  </div>
-                  <p>Android: abre a Google Play para baixar o app.</p>
-                  <p class="ios-note">iPhone: abre o hub no Safari em <strong>janocaminho.com.br/hub</strong>. App iOS em breve.</p>
+                  <p class="ios-note">No iPhone, não precisa digitar o site: leia o QR iPhone e navegue pelo Hub.</p>
                 </aside>
               </section>
               <footer class="footer">
                 <span>Depois de instalar: abra <strong>Destinos</strong> e escolha <strong>${safePlaceName}</strong>.</span>
-                <code>Android: Google Play · iPhone: Safari</code>
+                <code>Android: app · iPhone: Hub no Safari</code>
               </footer>
             </article>
           </main>
@@ -2588,7 +2601,8 @@ export function SuperAdminDestinations() {
               window.setTimeout(() => window.handlePrintPoster(), 300);
             };
           </script>
-          <!-- QR target: ${safeTargetUrl} -->
+          <!-- Android QR target: ${safeAndroidTargetUrl} -->
+          <!-- iPhone QR target: ${safeIosTargetUrl} -->
         </body>
       </html>
     `);

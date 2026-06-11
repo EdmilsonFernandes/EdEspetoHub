@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildHospitalityPlaceInstallUrl,
+  buildHospitalityPlaceIosHubQrUrl,
   buildHospitalityPlacePlayStoreQrUrl,
   buildHospitalityPlacePosterFileName,
   buildHospitalityPlacePublicPath,
@@ -45,6 +46,11 @@ describe('destinationQrPoster', () => {
     expect(buildHospitalityPlacePlayStoreQrUrl()).toBe(JNC_GOOGLE_PLAY_URL);
     expect(buildHospitalityPlacePlayStoreQrUrl()).toContain('play.google.com/store/apps/details');
     expect(buildHospitalityPlacePlayStoreQrUrl()).toContain('id=com.janocaminho.app');
+  });
+
+  it('builds an iPhone QR target for the public hub', () => {
+    expect(buildHospitalityPlaceIosHubQrUrl()).toBe(JNC_IOS_HUB_URL);
+    expect(buildHospitalityPlaceIosHubQrUrl('https://janocaminho.com.br/')).toBe('https://janocaminho.com.br/hub');
   });
 
   it('builds a smart QR URL that can redirect by device', () => {

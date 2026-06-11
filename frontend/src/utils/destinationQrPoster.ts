@@ -50,6 +50,11 @@ export const buildHospitalityPlaceInstallUrl = (input: HospitalityQrPosterInput,
 
 export const buildHospitalityPlacePlayStoreQrUrl = () => JNC_GOOGLE_PLAY_URL;
 
+export const buildHospitalityPlaceIosHubQrUrl = (origin = JNC_PUBLIC_ORIGIN) => {
+  const base = String(origin || JNC_PUBLIC_ORIGIN).replace(/\/+$/, '') || JNC_PUBLIC_ORIGIN;
+  return `${base}/hub`;
+};
+
 export const buildHospitalityPlaceSmartQrUrl = (input: HospitalityQrPosterInput, origin = JNC_PUBLIC_ORIGIN) => {
   const installUrl = buildHospitalityPlaceInstallUrl(input, origin);
   return `${installUrl}&redirect=auto`;
