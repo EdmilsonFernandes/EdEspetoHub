@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "d81aecf5",
-  "versionLabel": "v0.1.9.d81aecf5",
-  "versionInternal": "0.1.9+20260611.154353.d81aecf5",
-  "buildId": "0.1.9+20260611.154353.d81aecf5-20260611.154353-d81aecf5",
-  "builtAt": "2026-06-11T15:43:53.711Z",
-  "commitHash": "d81aecf5afa693a16e56c65f26db477c37c1bc60",
-  "shortHash": "d81aecf5",
+  "versionDisplaySuffix": "faddfc65",
+  "versionLabel": "v0.1.9.faddfc65",
+  "versionInternal": "0.1.9+20260611.161209.faddfc65",
+  "buildId": "0.1.9+20260611.161209.faddfc65-20260611.161209-faddfc65",
+  "builtAt": "2026-06-11T16:12:09.660Z",
+  "commitHash": "faddfc6524b6674b924623999b965311a707113c",
+  "shortHash": "faddfc65",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "faddfc6524b6674b924623999b965311a707113c",
+      "shortHash": "faddfc65",
+      "dateIso": "2026-06-11T12:44:57-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(hub): apply robot mascot colors — navy header, green accent, aurora background",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/faddfc6524b6674b924623999b965311a707113c"
+    },
     {
       "hash": "d81aecf5afa693a16e56c65f26db477c37c1bc60",
       "shortHash": "d81aecf5",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Fix Android text suggestions in WebView",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7abefc8677a167a3300be5f811dc01a5eba0aed9"
-    },
-    {
-      "hash": "9254f17729ef932cddffa65ce6d00fbed9803df0",
-      "shortHash": "9254f177",
-      "dateIso": "2026-06-09T11:09:52-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve store motoboy onboarding and order UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9254f17729ef932cddffa65ce6d00fbed9803df0"
     }
   ]
 }

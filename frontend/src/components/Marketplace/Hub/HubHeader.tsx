@@ -196,7 +196,7 @@ export const HubHeader = memo(function HubHeader({
 
             <div className="relative z-20">
               <div
-                className={`group relative isolate flex items-center gap-3 overflow-hidden px-3.5 transition-[border-color,box-shadow,transform] duration-300 ease-out hover:border-[#336886]/15 focus-within:-translate-y-0.5 focus-within:border-[#336886]/25 focus-within:shadow-[0_22px_54px_-34px_rgba(51,104,134,0.42)] focus-within:ring-2 focus-within:ring-[#336886]/10 ${
+                className={`group relative isolate flex items-center gap-3 overflow-hidden px-3.5 transition-[border-color,box-shadow,transform] duration-300 ease-out hover:border-white/20 focus-within:-translate-y-0.5 focus-within:border-[#5FD35A]/25 focus-within:shadow-[0_22px_54px_-34px_rgba(95,211,90,0.28)] focus-within:ring-2 focus-within:ring-[#5FD35A]/15 ${
                   isNativePlatform
                     ? 'min-h-[50px] rounded-[1.35rem]'
                     : 'min-h-[54px] rounded-[1.55rem]'
@@ -207,7 +207,7 @@ export const HubHeader = memo(function HubHeader({
                 }}
               >
                 <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
-                <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] border border-[#336886]/10 bg-[#336886]/8 text-[#336886] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
+                <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-white/10 text-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
                   <MagnifyingGlass size={18} weight="bold" />
                 </div>
                 <div className="relative min-w-0 flex-1 flex items-center">
@@ -225,16 +225,16 @@ export const HubHeader = memo(function HubHeader({
                     onBlur={() => onSearchEditingChange(false)}
                     placeholder={isSearchEditing ? 'Buscar loja, categoria ou produto' : ''}
                     enterKeyHint="search"
-                    className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-slate-900 outline-none transition-opacity duration-300 ${
+                    className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-white outline-none transition-opacity duration-300 ${
                       isNativePlatform ? 'min-h-[48px] text-[15px]' : 'min-h-[52px] text-[14px]'
                     }`}
                     style={{
                       WebkitAppearance: 'none',
-                      caretColor: '#336886',
+                      caretColor: '#5FD35A',
                       backgroundColor: 'transparent',
                       boxShadow: 'none',
                       WebkitTextFillColor: 'inherit',
-                      color: '#0f172a',
+                      color: '#ffffff',
                       transform: 'translateZ(0)',
                     }}
                   />
@@ -260,7 +260,7 @@ export const HubHeader = memo(function HubHeader({
                       onDebouncedQueryChange('');
                       onSearchEditingChange(false);
                     }}
-                    className="jnc-hub-touch inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-700"
+                    className="jnc-hub-touch inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/50 hover:bg-white/20 hover:text-white/80"
                     aria-label="Limpar busca"
                     title="Limpar"
                   >
@@ -279,7 +279,7 @@ export const HubHeader = memo(function HubHeader({
                 <img
                   src="/janocaminho.jpg"
                   alt="Já no Caminho"
-                  className="h-9 w-9 rounded-xl object-cover shadow-[0_4px_12px_rgba(15,23,42,0.15)] ring-1 ring-slate-100 group-hover:scale-105 transition-transform duration-300"
+                  className="h-9 w-9 rounded-xl object-cover shadow-[0_4px_12px_rgba(15,23,42,0.15)] ring-1 ring-white/20 group-hover:scale-105 transition-transform duration-300"
                 />
                 <span className="text-[15px] font-black tracking-tight text-white">
                   Já no Caminho
@@ -340,7 +340,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onPedidosClick}
-                className="jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 hover:text-[#336886] hover:bg-white/10"
+                className="jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-white/50 hover:text-white hover:bg-white/10"
               >
                 <Receipt size={14} weight="bold" />
                 Pedidos
@@ -348,7 +348,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onDestinosClick}
-                className="jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 hover:text-[#336886] hover:bg-white/10"
+                className="jnc-hub-touch px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-white/50 hover:text-white hover:bg-white/10"
               >
                 <MapTrifold size={14} weight="bold" />
                 Visite
@@ -359,11 +359,11 @@ export const HubHeader = memo(function HubHeader({
             <div className="flex items-center gap-3.5 flex-1 max-w-[440px] justify-end">
               {/* Desktop Search Bar */}
               <div
-                className="jnc-hub-card relative flex max-w-[280px] flex-1 items-center gap-2.5 overflow-hidden rounded-[1.25rem] px-3 py-1.5 transition-all duration-300 hover:bg-white focus-within:-translate-y-0.5 focus-within:border-[#336886]/25 focus-within:bg-white focus-within:shadow-[0_18px_42px_-30px_rgba(51,104,134,0.34)] focus-within:ring-2 focus-within:ring-[#336886]/10"
+                className="jnc-hub-card relative flex max-w-[280px] flex-1 items-center gap-2.5 overflow-hidden rounded-[1.25rem] px-3 py-1.5 transition-all duration-300 hover:bg-white/12 focus-within:-translate-y-0.5 focus-within:border-[#5FD35A]/25 focus-within:bg-white/15 focus-within:shadow-[0_18px_42px_-30px_rgba(95,211,90,0.24)] focus-within:ring-2 focus-within:ring-[#5FD35A]/15"
                 onClick={() => desktopSearchInputRef.current?.focus()}
               >
                 <span className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
-                <MagnifyingGlass size={15} weight="bold" className="text-[#336886] shrink-0" />
+                <MagnifyingGlass size={15} weight="bold" className="text-white/60 shrink-0" />
                 <div className="relative min-w-0 flex-1 flex items-center h-full">
                   <input
                     {...inputAssistProps.search}
@@ -377,7 +377,7 @@ export const HubHeader = memo(function HubHeader({
                     onBlur={() => onSearchEditingChange(false)}
                     placeholder={isSearchEditing ? 'Buscar no app' : ''}
                     enterKeyHint="search"
-                    className="block w-full min-w-0 appearance-none bg-transparent font-bold text-slate-900 outline-none text-xs placeholder:text-slate-400 placeholder:font-semibold"
+                    className="block w-full min-w-0 appearance-none bg-transparent font-bold text-white outline-none text-xs placeholder:text-white/40 placeholder:font-semibold"
                   />
                   {!isSearchEditing && !query && (
                     <div
@@ -385,7 +385,7 @@ export const HubHeader = memo(function HubHeader({
                         searchPlaceholderVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
                       }`}
                     >
-                      <span className="font-bold text-slate-400 text-xs truncate">
+                      <span className="font-bold text-white/40 text-xs truncate">
                         {searchPlaceholder}
                       </span>
                     </div>
@@ -399,7 +399,7 @@ export const HubHeader = memo(function HubHeader({
                       onDebouncedQueryChange('');
                       onSearchEditingChange(false);
                     }}
-                    className="jnc-hub-touch inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-700"
+                    className="jnc-hub-touch inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/50 hover:bg-white/20 hover:text-white/80"
                   >
                     <X size={10} weight="bold" />
                   </button>
@@ -410,7 +410,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onHubNotificationClick}
-                className="jnc-hub-touch jnc-hub-pill relative flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[0.85rem] text-[#153A4C] hover:bg-slate-50 p-1.5"
+                className="jnc-hub-touch jnc-hub-pill relative flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[0.85rem] text-white hover:bg-white/10 p-1.5"
                 title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
                 <BellRinging size={15} weight={hubNotificationCount > 0 ? 'fill' : 'bold'} />

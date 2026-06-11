@@ -1927,19 +1927,19 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[linear-gradient(180deg,#EFF5F8_0%,#F5F8FA_12%,#FAFBFC_35%,#FFFFFF_60%,#F8FAFB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[linear-gradient(180deg,#D6E4EC_0%,#E4EDF2_8%,#EDF3F7_16%,#F5F8FA_28%,#FAFBFC_42%,#FFFFFF_60%,#F8FAFB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Aurora Background — atmospheric depth with brand colors */}
       <div className="jnc-safe-area-glass pointer-events-none fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top)]" />
-      {/* Hero gradient band — azul marinho do robô no topo */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[520px] bg-gradient-to-b from-[#153A4C]/[0.14] via-[#1A4A5E]/[0.06] to-transparent" />
-      {/* Aurora blob 1 — azul principal, canto superior esquerdo, animado */}
-      <div className="jnc-hub-aurora-1 fixed left-[-10%] top-[-5%] h-[42%] w-[50%] rounded-full bg-[#153A4C]/[0.10] blur-[160px] pointer-events-none -z-10" />
-      {/* Aurora blob 2 — azul claro, canto superior direito, animado */}
-      <div className="jnc-hub-aurora-2 fixed top-[-8%] right-[-8%] h-[45%] w-[52%] bg-[#336886]/[0.14] blur-[140px] rounded-full pointer-events-none -z-10" />
-      {/* Aurora blob 3 — verde do capacete, canto inferior esquerdo, animado */}
-      <div className="jnc-hub-aurora-3 fixed bottom-[2%] left-[5%] h-[24%] w-[30%] bg-[#5FD35A]/[0.06] blur-[120px] rounded-full pointer-events-none -z-10" />
+      {/* Smooth transition band — navy → azul claro → branco (bridge between header and body) */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[560px]" style={{ background: 'linear-gradient(180deg, #153A4C 0%, #1A5268 4%, #2A6E88 8%, #4A8EA8 13%, #7AB4CC 18%, #A8D0DE 24%, #C8DDE6 30%, #E0EBF0 38%, transparent 52%)' }} />
+      {/* Aurora blob 1 — azul profundo, canto superior esquerdo, animado */}
+      <div className="jnc-hub-aurora-1 fixed left-[-8%] top-[-4%] h-[38%] w-[45%] rounded-full bg-[#153A4C]/[0.12] blur-[160px] pointer-events-none -z-10" />
+      {/* Aurora blob 2 — verde do capacete, canto superior direito, animado */}
+      <div className="jnc-hub-aurora-2 fixed top-[-6%] right-[-6%] h-[40%] w-[48%] bg-[#5FD35A]/[0.06] blur-[140px] rounded-full pointer-events-none -z-10" />
+      {/* Aurora blob 3 — azul claro, centro esquerdo baixo, animado */}
+      <div className="jnc-hub-aurora-3 fixed bottom-[5%] left-[8%] h-[20%] w-[26%] bg-[#336886]/[0.06] blur-[120px] rounded-full pointer-events-none -z-10" />
       {/* Soft light bloom — center top */}
-      <div className="fixed left-[30%] top-[2%] h-[20%] w-[40%] bg-white/20 blur-[100px] pointer-events-none -z-10" />
+      <div className="fixed left-[25%] top-[3%] h-[18%] w-[36%] bg-white/15 blur-[100px] pointer-events-none -z-10" />
 
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
@@ -2640,10 +2640,10 @@ export function MarketplacePage() {
                   <button
                     type="button"
                     onClick={() => setIsHomeStoreListExpanded(true)}
-                    className="jnc-hub-touch jnc-hub-pill inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886]"
+                    className="jnc-hub-touch inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#153A4C] shadow-[0_8px_22px_-10px_rgba(21,58,76,0.22)] hover:shadow-[0_12px_28px_-10px_rgba(21,58,76,0.32)]"
                   >
                     Ver todas as lojas
-                    <span className="rounded-full bg-[#336886]/8 px-2 py-0.5 text-[10px]">+{hiddenHomeStoreCount}</span>
+                    <span className="rounded-full bg-[#5FD35A]/12 px-2 py-0.5 text-[10px] font-black text-[#336886]">+{hiddenHomeStoreCount}</span>
                   </button>
                 </div>
               ) : null}
