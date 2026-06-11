@@ -48,7 +48,6 @@ import { useHubImagePreload } from '../hooks/hub/useHubImagePreload';
 import { useHubLocation } from '../hooks/hub/useHubLocation';
 import { useHubSearchPlaceholder } from '../hooks/hub/useHubSearchPlaceholder';
 import { useHubStoreDistances } from '../hooks/hub/useHubStoreDistances';
-import { useScrollReveal } from '../hooks/hub/useScrollReveal';
 import { useHubStores } from '../hooks/hub/useHubStores';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
@@ -658,8 +657,6 @@ export function MarketplacePage() {
   const condominiumSearchInputRef = useRef<HTMLInputElement | null>(null);
   const storesSectionRef = useRef<HTMLElement | null>(null);
   const publicCondominiumLoadInFlightRef = useRef(false);
-  const destinationReveal = useScrollReveal();
-  const storesReveal = useScrollReveal();
   const openOrderTracking = useCallback((orderId?: string | null, accessToken?: string | null) => {
     const normalizedOrderId = String(orderId || '').trim();
     if (!normalizedOrderId) return;
@@ -1930,13 +1927,19 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.058),transparent_42%),radial-gradient(ellipse_at_bottom_left,rgba(95,211,90,0.042),transparent_46%),linear-gradient(180deg,#F0F5F7_0%,#E9EFF2_48%,#E3EAEE_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
-      {/* Elemento Decorativo de Fundo (Premium Look) */}
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[linear-gradient(180deg,#EFF5F8_0%,#F5F8FA_12%,#FAFBFC_35%,#FFFFFF_60%,#F8FAFB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
+      {/* Aurora Background — atmospheric depth with brand colors */}
       <div className="jnc-safe-area-glass pointer-events-none fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top)]" />
-      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-white/45 via-[#f7fafb]/14 to-transparent" />
-      <div className="fixed left-[-8%] top-[10%] h-[28%] w-[38%] rounded-full bg-white/24 blur-[140px] pointer-events-none -z-10" />
-      <div className="fixed top-[-10%] right-[-10%] h-[44%] w-[52%] bg-[#d7e7ef]/28 blur-[120px] rounded-full pointer-events-none -z-10" />
-      <div className="fixed bottom-[5%] right-[5%] h-[22%] w-[28%] bg-white/18 blur-[110px] pointer-events-none -z-10" />
+      {/* Hero gradient band — marca o topo com a identidade */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[480px] bg-gradient-to-b from-[#336886]/[0.10] via-[#336886]/[0.04] to-transparent" />
+      {/* Aurora blob 1 — azul principal, canto superior esquerdo, animado */}
+      <div className="jnc-hub-aurora-1 fixed left-[-10%] top-[-5%] h-[42%] w-[50%] rounded-full bg-[#336886]/[0.08] blur-[160px] pointer-events-none -z-10" />
+      {/* Aurora blob 2 — azul claro, canto superior direito, animado */}
+      <div className="jnc-hub-aurora-2 fixed top-[-8%] right-[-8%] h-[45%] w-[52%] bg-[#6BA3C2]/[0.12] blur-[140px] rounded-full pointer-events-none -z-10" />
+      {/* Aurora blob 3 — verde acento, canto inferior esquerdo, animado */}
+      <div className="jnc-hub-aurora-3 fixed bottom-[2%] left-[5%] h-[24%] w-[30%] bg-[#5FD35A]/[0.05] blur-[120px] rounded-full pointer-events-none -z-10" />
+      {/* Soft light bloom — center top */}
+      <div className="fixed left-[30%] top-[2%] h-[20%] w-[40%] bg-white/30 blur-[100px] pointer-events-none -z-10" />
 
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
@@ -2139,15 +2142,7 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
-            <section
-              ref={destinationReveal.ref}
-              className="order-8 space-y-3"
-              style={{
-                opacity: destinationReveal.isRevealed ? 1 : 0,
-                transform: destinationReveal.isRevealed ? 'translateY(0)' : 'translateY(24px)',
-                transition: 'opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1)',
-              }}
-            >
+            <section className="order-8 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
@@ -2507,18 +2502,7 @@ export function MarketplacePage() {
             />
           )}
 
-          <section
-            ref={(el) => {
-              storesSectionRef.current = el;
-              if (el) (storesReveal as any).ref.current = el;
-            }}
-            className="order-6 space-y-3.5"
-            style={{
-              opacity: storesReveal.isRevealed ? 1 : 0,
-              transform: storesReveal.isRevealed ? 'translateY(0)' : 'translateY(16px)',
-              transition: 'opacity 0.5s cubic-bezier(0.22,1,0.36,1), transform 0.5s cubic-bezier(0.22,1,0.36,1)',
-            }}
-          >
+          <section ref={storesSectionRef} className="order-6 space-y-3.5" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h2 className="text-[1.05rem] font-black leading-tight tracking-[-0.035em] text-slate-950 sm:text-lg">

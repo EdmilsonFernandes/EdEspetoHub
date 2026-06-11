@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "8c9e3b16",
-  "versionLabel": "v0.1.9.8c9e3b16",
-  "versionInternal": "0.1.9+20260611.150331.8c9e3b16",
-  "buildId": "0.1.9+20260611.150331.8c9e3b16-20260611.150331-8c9e3b16",
-  "builtAt": "2026-06-11T15:03:31.874Z",
-  "commitHash": "8c9e3b16a9eb64f94f6350eefd393b01516af32e",
-  "shortHash": "8c9e3b16",
+  "versionDisplaySuffix": "d8c6d8cc",
+  "versionLabel": "v0.1.9.d8c6d8cc",
+  "versionInternal": "0.1.9+20260611.151727.d8c6d8cc",
+  "buildId": "0.1.9+20260611.151727.d8c6d8cc-20260611.151727-d8c6d8cc",
+  "builtAt": "2026-06-11T15:17:27.280Z",
+  "commitHash": "d8c6d8ccbe4186a242397bb2d9af10b648ac3143",
+  "shortHash": "d8c6d8cc",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "d8c6d8ccbe4186a242397bb2d9af10b648ac3143",
+      "shortHash": "d8c6d8cc",
+      "dateIso": "2026-06-11T12:07:21-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(hub): premium micro-interactions, contextual greeting, animated carousel and scroll reveal",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d8c6d8ccbe4186a242397bb2d9af10b648ac3143"
+    },
     {
       "hash": "8c9e3b16a9eb64f94f6350eefd393b01516af32e",
       "shortHash": "8c9e3b16",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Preserve storefront banner artwork",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c77096c03d32ac9283750afbe484e048e03f1abf"
-    },
-    {
-      "hash": "c9b97f5abd59e3a7e4c9e9b447289d112f6c86df",
-      "shortHash": "c9b97f5a",
-      "dateIso": "2026-06-08T22:33:54-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fill storefront banners horizontally",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c9b97f5abd59e3a7e4c9e9b447289d112f6c86df"
     }
   ]
 } as const;

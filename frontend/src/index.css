@@ -396,6 +396,25 @@ body {
   animation: jnc-shimmer 2.5s infinite linear;
 }
 
+/* Hub Aurora Background — premium atmospheric gradient */
+@keyframes jnc-aurora-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.1); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
+}
+@keyframes jnc-aurora-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-25px, 20px) scale(1.08); }
+  66% { transform: translate(15px, -25px) scale(0.92); }
+}
+@keyframes jnc-aurora-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(20px, 10px) scale(1.06); }
+}
+.jnc-hub-aurora-1 { animation: jnc-aurora-1 18s ease-in-out infinite; }
+.jnc-hub-aurora-2 { animation: jnc-aurora-2 22s ease-in-out infinite; }
+.jnc-hub-aurora-3 { animation: jnc-aurora-3 15s ease-in-out infinite; }
+
 .client-marquee-track {
   animation: clientMarquee 32s linear infinite;
   will-change: transform;
