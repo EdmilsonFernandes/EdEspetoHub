@@ -50,6 +50,7 @@ const sampleReceiptPayload = {
     },
   ],
   totalLabel: 'R$ 0,00',
+  qrData: 'https://janocaminho.com.br/hub',
 };
 
 const stripPrinterCommands = (value: string) =>
@@ -820,6 +821,33 @@ export function ThermalPrinterSettingsCard() {
                 </span>
               </button>
             ))}
+          </div>
+
+          {/* Auto-print toggle */}
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-black uppercase tracking-wider text-slate-700">
+                Impressao automatica
+              </p>
+              <p className="mt-0.5 text-[11px] leading-snug text-slate-500">
+                Pedidos de clientes online sao impressos ao chegar na fila. Pedidos criados pelo admin nao sao afetados.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={Boolean(settings.autoPrintOnlineOrders)}
+              onClick={() => setSettings((prev) => ({ ...prev, autoPrintOnlineOrders: !prev.autoPrintOnlineOrders }))}
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#336886] ${
+                settings.autoPrintOnlineOrders ? 'bg-[#5FD35A]' : 'bg-slate-300'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
+                  settings.autoPrintOnlineOrders ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
         </div>
       </details>

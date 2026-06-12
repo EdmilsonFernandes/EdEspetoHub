@@ -316,6 +316,7 @@ public class ThermalPrinterPlugin extends Plugin {
         String address = sanitize(call.getString("address"));
         int copies = sanitizeCopies(call.getInt("copies", getPreferences().getInt(KEY_COPIES, DEFAULT_COPIES)));
         int feedLines = sanitizeFeedLines(call.getInt("feedLines", getPreferences().getInt(KEY_FEED_LINES, DEFAULT_FEED_LINES)));
+        String qrData = sanitize(call.getString("qrData", ""));
         if (text.trim().isEmpty()) {
             call.reject("Cupom vazio.", "EMPTY_RECEIPT");
             return;
@@ -333,6 +334,7 @@ public class ThermalPrinterPlugin extends Plugin {
         final String printerText = text;
         final int printerCopies = copies;
         final int printerFeedLines = feedLines;
+        final String printerQrData = qrData;
         final AtomicBoolean finished = new AtomicBoolean(false);
         final BluetoothSocket[] socketRef = new BluetoothSocket[1];
 
@@ -380,7 +382,7 @@ public class ThermalPrinterPlugin extends Plugin {
                     Thread.sleep(150L);
 
                     OutputStream output = socket.getOutputStream();
-                    byte[] bytes = toPrinterBytes(printerText, printerFeedLines);
+                    byte[] bytes = toPrinterBytes(printerText, printerFeedLines, printerQrData);
                     Log.d(TAG, "print: sending " + bytes.length + " bytes x" + printerCopies);
 
                     for (int copy = 0; copy < printerCopies; copy++) {
@@ -563,15 +565,51 @@ public class ThermalPrinterPlugin extends Plugin {
         }
     }
 
-    private byte[] toPrinterBytes(String text, int feedLines) throws Exception {
+    private byte[] toPrinterBytes(String text, int feedLines, String qrData) throws Exception {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        output.write(new byte[] { 0x1B, 0x40 });
+        output.write(new byte[] { 0x1B, 0x40 }); // ESC @ = Initialize printer
         String normalized = normalizePrinterText(text);
         output.write(normalized.getBytes(Charset.forName("ISO-8859-1")));
         for (int i = 0; i < feedLines; i++) {
-            output.write(0x0A);
+            output.write(0x0A); // LF
         }
-        output.write(new byte[] { 0x1D, 0x56, 0x42, 0x00 });
+        // QR Code (if qrData provided)
+        if (qrData != null && !qrData.trim().isEmpty()) {
+            output.write(new byte[] { 0x1B, 0x61, 0x01 }); // ESC a 1 = Center align
+            output.write(generateQrCodeBytes(qrData));
+            output.write(new byte[] { 0x1B, 0x61, 0x00 }); // ESC a 0 = Left align
+            output.write(0x0A); // Extra feed after QR
+        }
+        output.write(new byte[] { 0x1D, 0x56, 0x42, 0x00 }); // GS V B 0 = Full cut
+        return output.toByteArray();
+    }
+
+    private byte[] generateQrCodeBytes(String data) throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] dataBytes = data.getBytes(Charset.forName("ISO-8859-1"));
+
+        // Select QR Code Model 2
+        output.write(new byte[] { 0x1D, 0x28, 0x6B, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00 });
+
+        // Set module size (6 dots)
+        output.write(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, 0x06 });
+
+        // Set error correction level (M = medium)
+        output.write(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x31 });
+
+        // Store QR data
+        int len = dataBytes.length + 3;
+        output.write(new byte[] {
+            0x1D, 0x28, 0x6B,
+            (byte)(len & 0xFF), (byte)((len >> 8) & 0xFF),
+            0x31, 0x50, 0x30
+        });
+        output.write(dataBytes);
+
+        // Print QR code
+        output.write(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x51, 0x30 });
+
+        Log.d(TAG, "generateQrCodeBytes: data length=" + dataBytes.length);
         return output.toByteArray();
     }
 

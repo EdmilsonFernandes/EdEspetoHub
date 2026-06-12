@@ -46,6 +46,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { Button } from '../ui/Button';
 import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
+import { getStoredThermalPrinterSettings } from "../../utils/thermalPrinter";
 import { exportToCsv } from "../../utils/export";
 import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from "../../utils/orderNotificationSound";
 import {
@@ -1968,6 +1969,21 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         void playNewOrderSound();
         setNewOrderIds(incoming);
         window.setTimeout(() => setNewOrderIds([]), 4000);
+
+        // Auto-print: only for online customer orders when setting is enabled
+        const autoPrintEnabled = getStoredThermalPrinterSettings().autoPrintOnlineOrders;
+        if (autoPrintEnabled && hasPrintAccess) {
+          const newOrders = (data || []).filter((o: any) => incoming.includes(o.id));
+          const onlineOrders = newOrders.filter((o: any) =>
+            Boolean(String(o?.customerUserId || '').trim() || String(o?.guestPushId || '').trim())
+          );
+          for (const order of onlineOrders) {
+            const rank = nextIds.indexOf(order.id) + 1;
+            void executePrintOrder(order, rank).catch((autoPrintErr) => {
+              console.warn('[auto-print] falha ao imprimir pedido automaticamente', order.id, autoPrintErr);
+            });
+          }
+        }
       }
       previousIdsRef.current = nextIds;
       setQueue(data);

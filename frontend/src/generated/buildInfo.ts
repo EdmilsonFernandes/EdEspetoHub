@@ -5,16 +5,52 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "480117ae",
-  "versionLabel": "v0.1.9.480117ae",
-  "versionInternal": "0.1.9+20260612.205902.480117ae",
-  "buildId": "0.1.9+20260612.205902.480117ae-20260612.205902-480117ae",
-  "builtAt": "2026-06-12T20:59:02.541Z",
-  "commitHash": "480117aeda3d8d4f413868b2ca0689a3b5f618d8",
-  "shortHash": "480117ae",
+  "versionDisplaySuffix": "67dd57fd",
+  "versionLabel": "v0.1.9.67dd57fd",
+  "versionInternal": "0.1.9+20260612.222147.67dd57fd",
+  "buildId": "0.1.9+20260612.222147.67dd57fd-20260612.222147-67dd57fd",
+  "builtAt": "2026-06-12T22:21:47.261Z",
+  "commitHash": "67dd57fd603e11597e215233d6e96541fd3d0a4b",
+  "shortHash": "67dd57fd",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "67dd57fd603e11597e215233d6e96541fd3d0a4b",
+      "shortHash": "67dd57fd",
+      "dateIso": "2026-06-12T18:32:44-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(notifications): fallback order updates to email",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/67dd57fd603e11597e215233d6e96541fd3d0a4b"
+    },
+    {
+      "hash": "198f0049b8c776370f1a793b6ba0cb07645ab6c7",
+      "shortHash": "198f0049",
+      "dateIso": "2026-06-12T18:13:58-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(frontend): show cancelled orders in queue filter",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/198f0049b8c776370f1a793b6ba0cb07645ab6c7"
+    },
+    {
+      "hash": "d2bc3a30bc37f6677e06bdd44822991f7562f15d",
+      "shortHash": "d2bc3a30",
+      "dateIso": "2026-06-12T18:05:58-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(bluetooth): add BLUETOOTH_SCAN permission to fix print SecurityException",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d2bc3a30bc37f6677e06bdd44822991f7562f15d"
+    },
+    {
+      "hash": "d5584e109a78f66dc20803334d6062e2549426cf",
+      "shortHash": "d5584e10",
+      "dateIso": "2026-06-12T18:01:37-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(frontend): polish admin order history",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d5584e109a78f66dc20803334d6062e2549426cf"
+    },
     {
       "hash": "480117aeda3d8d4f413868b2ca0689a3b5f618d8",
       "shortHash": "480117ae",
@@ -248,42 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(deploy): ensure Redis starts on EC2 deploy + bump Android to v55",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/de835bffc8e62becdab6bbfc6bf9977696b288eb"
-    },
-    {
-      "hash": "6e8c38f6317a22ad1b1b83abdaeef91eb18bfdd1",
-      "shortHash": "6e8c38f6",
-      "dateIso": "2026-06-12T12:17:14-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): apply UI primitives to hospitality detail",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6e8c38f6317a22ad1b1b83abdaeef91eb18bfdd1"
-    },
-    {
-      "hash": "d057c98ea4142cdd3df3ec6ebf4e65aa9b61bf41",
-      "shortHash": "d057c98e",
-      "dateIso": "2026-06-12T12:14:52-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(bluetooth): request permission, filter only printers, validate BT enabled, add logs",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d057c98ea4142cdd3df3ec6ebf4e65aa9b61bf41"
-    },
-    {
-      "hash": "32bec8dd285fc632cbbd4b352c4f5acffc83ee17",
-      "shortHash": "32bec8dd",
-      "dateIso": "2026-06-12T11:54:47-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): apply UI primitives to destination detail",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/32bec8dd285fc632cbbd4b352c4f5acffc83ee17"
-    },
-    {
-      "hash": "8d0b85203bb15f139cb2649da86cea59aad69698",
-      "shortHash": "8d0b8520",
-      "dateIso": "2026-06-12T11:52:18-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(backend): update Dockerfile to node:22-alpine + npm install",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8d0b85203bb15f139cb2649da86cea59aad69698"
     }
   ]
 } as const;

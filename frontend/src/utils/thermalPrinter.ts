@@ -14,6 +14,7 @@ export type ThermalPrinterSettings = {
   copies: 1 | 2;
   headerMode: ThermalReceiptHeaderMode;
   feedLines: number;
+  autoPrintOnlineOrders?: boolean;
 };
 
 export type NativeThermalPrinterStatus = {
@@ -41,7 +42,7 @@ type ThermalPrinterPlugin = {
   clearPrinter(): Promise<{ savedPrinter?: NativeThermalPrinterStatus['savedPrinter'] }>;
   openBluetoothSettings(): Promise<void>;
   requestBluetoothPermission(): Promise<{ granted: boolean }>;
-  print(options: { text: string; address?: string; copies?: number; feedLines?: number }): Promise<NativeThermalPrinterPrintResult>;
+  print(options: { text: string; address?: string; copies?: number; feedLines?: number; qrData?: string }): Promise<NativeThermalPrinterPrintResult>;
 };
 
 export class NativeThermalPrinterError extends Error {
@@ -62,6 +63,7 @@ export const DEFAULT_THERMAL_PRINTER_SETTINGS: ThermalPrinterSettings = {
   copies: 1,
   headerMode: 'complete',
   feedLines: 3,
+  autoPrintOnlineOrders: false,
 };
 
 export const normalizeThermalPrinterSettings = (
@@ -214,7 +216,8 @@ export const openNativeBluetoothSettings = async () => {
 
 export const printNativeThermalReceipt = async (
   text: string,
-  settings?: Partial<ThermalPrinterSettings>
+  settings?: Partial<ThermalPrinterSettings>,
+  qrData?: string
 ) => {
   ensureNativeThermalPrinterAvailable('Impressão nativa disponível apenas no app Android.');
   console.log('[thermal-printer] printNativeThermalReceipt: checking status before print...');
@@ -253,5 +256,6 @@ export const printNativeThermalReceipt = async (
     address,
     copies: effectiveSettings.copies,
     feedLines: effectiveSettings.feedLines,
+    ...(qrData ? { qrData } : {}),
   });
 };
