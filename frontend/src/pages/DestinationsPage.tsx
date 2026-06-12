@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Buildings, Compass, MagnifyingGlass, MapTrifold, Mountains, Sparkle, X } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { DestinationPartnerCta } from '../components/Destinations/DestinationPartnerCta';
+import { Chip, EmptyState, SkeletonBlock, SurfaceCard } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -162,7 +163,7 @@ export function DestinationsPage() {
                 Encontre hospedagens, comida, passeios e serviços próximos em poucos toques.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-2 rounded-[1.35rem] border border-white/82 bg-white/72 p-2 shadow-[0_20px_48px_-38px_rgba(15,23,42,0.36)] ring-1 ring-white/30 backdrop-blur-xl lg:min-w-[20rem]">
+            <SurfaceCard padding="sm" className="grid grid-cols-3 gap-2 rounded-[1.35rem] border-white/82 bg-white/72 ring-1 ring-white/30 backdrop-blur-xl lg:min-w-[20rem]">
               {destinationStats.map((stat) => (
                 <button
                   key={stat.label}
@@ -176,10 +177,10 @@ export function DestinationsPage() {
                   <p className="mt-1 hidden text-[9px] font-black uppercase tracking-[0.14em] text-[#336886]/70 sm:block">{stat.hint}</p>
                 </button>
               ))}
-            </div>
+            </SurfaceCard>
           </div>
           {/* ... Search Term field ... */}
-          <div className="mt-4 rounded-[1.5rem] border border-white/80 bg-white/86 p-2 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.42)] backdrop-blur transition-all duration-300 focus-within:border-[#336886]/35 focus-within:shadow-[0_20px_48px_-30px_rgba(51,104,134,0.25)] focus-within:ring-2 focus-within:ring-[#336886]/10">
+          <SurfaceCard padding="sm" className="mt-4 rounded-[1.5rem] border-white/80 bg-white/86 backdrop-blur transition-all duration-300 focus-within:border-[#336886]/35 focus-within:shadow-[0_20px_48px_-30px_rgba(51,104,134,0.25)] focus-within:ring-2 focus-within:ring-[#336886]/10">
             <label className="flex min-h-[3.25rem] items-center gap-3 rounded-[1.15rem] bg-slate-50 px-4 ring-1 ring-slate-200/60 focus-within:ring-transparent transition-all">
               <MagnifyingGlass size={18} weight="bold" className="shrink-0 text-[#336886]/80" />
               <input
@@ -198,34 +199,28 @@ export function DestinationsPage() {
                 </button>
               ) : null}
             </label>
-          </div>
+          </SurfaceCard>
 
           {states.length > 0 && (
             <div className="mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1.5 pt-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <button
-                type="button"
+              <Chip
                 onClick={() => setSelectedState('ALL')}
-                className={`snap-start px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-300 active:scale-95 ${
-                  selectedState === 'ALL'
-                    ? 'bg-[linear-gradient(145deg,#153A4C_0%,#336886_60%,#5FD35A_145%)] text-white shadow-[0_10px_20px_-8px_rgba(21,58,76,0.48),0_4px_8px_-2px_rgba(95,211,90,0.3)] border border-white/20'
-                    : 'bg-white/86 text-slate-600 border border-white shadow-[0_8px_16px_-12px_rgba(15,23,42,0.18)] hover:-translate-y-0.5'
-                }`}
+                selected={selectedState === 'ALL'}
+                tone="brand"
+                className="snap-start px-4 py-1.5 tracking-wider shadow-[0_8px_16px_-12px_rgba(15,23,42,0.18)]"
               >
                 Todos
-              </button>
+              </Chip>
               {states.map((state) => (
-                <button
+                <Chip
                   key={state}
-                  type="button"
                   onClick={() => setSelectedState(state)}
-                  className={`snap-start px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-300 active:scale-95 ${
-                    selectedState === state
-                      ? 'bg-[linear-gradient(145deg,#153A4C_0%,#336886_60%,#5FD35A_145%)] text-white shadow-[0_10px_20px_-8px_rgba(21,58,76,0.48),0_4px_8px_-2px_rgba(95,211,90,0.3)] border border-white/20'
-                      : 'bg-white/86 text-slate-600 border border-white shadow-[0_8px_16px_-12px_rgba(15,23,42,0.18)] hover:-translate-y-0.5'
-                  }`}
+                  selected={selectedState === state}
+                  tone="brand"
+                  className="snap-start px-4 py-1.5 tracking-wider shadow-[0_8px_16px_-12px_rgba(15,23,42,0.18)]"
                 >
                   {state}
-                </button>
+                </Chip>
               ))}
             </div>
           )}
@@ -248,24 +243,25 @@ export function DestinationsPage() {
         {loading && (
           <div className="grid gap-4 md:grid-cols-2">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div
+              <SurfaceCard
                 key={index}
-                className="grid overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white/80 p-0 sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)] shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
+                padding="none"
+                className="grid rounded-[1.75rem] border-slate-100 bg-white/80 sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)]"
               >
-                <div className="h-36 sm:h-full sm:min-h-[12.5rem] ds-skeleton" />
+                <SkeletonBlock rounded="lg" className="h-36 rounded-none sm:h-full sm:min-h-[12.5rem]" />
                 <div className="flex flex-col justify-between gap-4 p-4">
                   <div className="space-y-3">
-                    <div className="h-6 w-7/12 rounded-full ds-skeleton" />
-                    <div className="h-4 w-10/12 rounded-full ds-skeleton" />
-                    <div className="h-4 w-8/12 rounded-full ds-skeleton" />
+                    <SkeletonBlock rounded="full" className="h-6 w-7/12" />
+                    <SkeletonBlock rounded="full" className="h-4 w-10/12" />
+                    <SkeletonBlock rounded="full" className="h-4 w-8/12" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="h-8 w-24 rounded-full ds-skeleton" />
-                    <div className="h-8 w-24 rounded-full ds-skeleton" />
-                    <div className="ml-auto h-8 w-24 rounded-full ds-skeleton" />
+                    <SkeletonBlock rounded="full" className="h-8 w-24" />
+                    <SkeletonBlock rounded="full" className="h-8 w-24" />
+                    <SkeletonBlock rounded="full" className="ml-auto h-8 w-24" />
                   </div>
                 </div>
-              </div>
+              </SurfaceCard>
             ))}
           </div>
         )}
@@ -318,9 +314,12 @@ export function DestinationsPage() {
           </div>
         )}
         {!loading && !filteredDestinations.length ? (
-          <p className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white/70 px-4 py-5 text-sm font-bold text-slate-500">
-            Nenhuma cidade encontrada para essa busca.
-          </p>
+          <EmptyState
+            className="mt-4"
+            icon={<MapTrifold size={30} weight="duotone" />}
+            title="Nenhuma cidade encontrada"
+            description="Tente buscar por outro nome, região ou limpe o filtro de estado."
+          />
         ) : null}
 
         <DestinationPartnerCta className="mt-6" />

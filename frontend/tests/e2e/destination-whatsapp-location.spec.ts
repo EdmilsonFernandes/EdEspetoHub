@@ -178,7 +178,7 @@ test.describe('Destination WhatsApp location', () => {
     await expect(dialog.getByText('Contato', { exact: true })).toBeVisible();
     await expect(dialog.getByRole('link', { name: /WhatsApp/i })).toBeVisible();
     await expect(dialog.getByText('Resposta mais rápida')).toBeVisible();
-    await expect(dialog.getByText('Peça sem sair do Já no Caminho.')).toBeVisible();
+    await expect(dialog.getByText('Venda, receba contatos ou pedidos sem tirar o hóspede do Já no Caminho.')).toBeVisible();
     await expect(dialog.getByText('Lanches proximos ao chale')).toHaveCount(1);
   });
 
