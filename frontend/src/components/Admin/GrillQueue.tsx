@@ -23,6 +23,7 @@ import {
   Buildings,
   Phone,
   NotePencil,
+  CheckCircle,
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { PostalShipmentModal } from "./PostalShipmentModal";
@@ -1140,6 +1141,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [postalSubmitAfterSave, setPostalSubmitAfterSave] = useState<(() => void) | null>(null);
   const [pixCopied, setPixCopied] = useState(false);
   const [error, setError] = useState('');
+  const [operationNotice, setOperationNotice] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
   const [ctaPulseId, setCtaPulseId] = useState<string | null>(null);
   const [newOrderIds, setNewOrderIds] = useState<string[]>([]);
@@ -2324,6 +2326,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   };
 
   const openDeliveryIssueModal = (order: any) => {
+    setOperationNotice('');
     setDeliveryIssueModal({
       open: true,
       order,
@@ -2374,6 +2377,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         error: '',
       });
       setError('');
+      setOperationNotice('Ocorrência registrada. O pedido continua em rota e a equipe já pode acompanhar pelo card.');
       void loadQueue();
     } catch (error) {
       console.error('Erro ao registrar ocorrência de entrega', error);
@@ -2386,6 +2390,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   };
 
   const openDeliveryCodeResetModal = (order: any) => {
+    setOperationNotice('');
     setDeliveryCodeResetModal({
       open: true,
       order,
@@ -2418,6 +2423,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         error: '',
       });
       setError('');
+      setOperationNotice('Nova tentativa liberada. Oriente o entregador a confirmar novamente com o cliente.');
       void loadQueue();
     } catch (error) {
       console.error('Erro ao liberar codigo da entrega', error);
@@ -5082,13 +5088,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 return (
                 <div
                   key={order.id}
-                  className={`relative w-full max-w-full p-3 rounded-2xl border border-l-4 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] ${
+                  className={`relative w-full max-w-full overflow-hidden rounded-[1.35rem] border border-l-4 p-3 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] ${
                     isDispatched
                       ? 'border-l-indigo-400 bg-gradient-to-br from-indigo-50/70 via-white to-indigo-50/30'
                       : 'border-l-blue-400 bg-gradient-to-br from-blue-50/70 via-white to-blue-50/30'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-[11px] font-semibold text-slate-500">
                         Pedido #{formatOrderDisplayId(order.id, storeSlug)}
@@ -5100,7 +5106,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       <p className="text-[11px] text-slate-400">{formatDateTime(order.createdAt)}</p>
                     </div>
                     <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-bold ${
                         isDispatched
                           ? 'bg-indigo-100 text-indigo-700 border-indigo-200'
                           : 'bg-blue-100 text-blue-700 border-blue-200'
@@ -5111,12 +5117,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     </span>
                   </div>
                   {isDispatched ? (
-                    <div className="mt-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
+                    <div className="mt-2 rounded-xl border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700">
                       Envio postal postado. Aguardando entrega da transportadora.
                     </div>
                   ) : null}
                   {isDispatched && order?.shipment?.trackingCode ? (
-                    <div className="mt-2 text-[11px] text-slate-700 bg-white border border-slate-200 rounded-lg px-2.5 py-1">
+                    <div className="mt-2 rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-700">
                       Código de rastreio: <span className="font-semibold">{order.shipment.trackingCode}</span>
                     </div>
                   ) : null}
@@ -5154,23 +5160,33 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     </div>
                   ) : null}
 
-	                  <div className="mt-3 space-y-3 text-xs">
-	                    {renderMoneyBreakdown(order)}
-                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="mt-3 space-y-3 text-xs">
+                    <div className="rounded-[1.15rem] border border-white/70 bg-white/75 p-2 shadow-[0_12px_26px_-24px_rgba(15,23,42,0.5)]">
+                      {renderMoneyBreakdown(order)}
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
                         {isDeliveryCodeBlocked ? (
                           <button
                             type="button"
                             onClick={() => openDeliveryCodeResetModal(order)}
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-rose-200 bg-rose-600 px-3 py-2 text-xs font-black text-white shadow-[0_12px_26px_-18px_rgba(225,29,72,0.65)] transition active:scale-[0.98] hover:bg-rose-700"
+                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-rose-200 bg-rose-600 px-3 py-2 text-xs font-black text-white shadow-[0_12px_26px_-18px_rgba(225,29,72,0.65)] transition hover:bg-rose-700 active:scale-[0.98]"
                           >
                             Liberar código
                           </button>
                         ) : null}
+                        <a
+                          href={`/pedido/${order.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white shadow-[0_12px_26px_-20px_rgba(15,23,42,0.65)] transition hover:bg-slate-800 active:scale-[0.98]"
+                        >
+                          Acompanhar
+                        </a>
                         {isDispatched ? (
                           <button
                             type="button"
                             onClick={() => { openPostalShipmentModal(order); }}
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition active:scale-[0.98] hover:bg-slate-50"
+                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50 active:scale-[0.98]"
                           >
                             Editar rastreio
                           </button>
@@ -5178,21 +5194,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                           <button
                             type="button"
                             onClick={() => openDeliveryIssueModal(order)}
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-extrabold text-amber-800 transition active:scale-[0.98] hover:bg-amber-100"
+                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-extrabold text-amber-800 transition hover:bg-amber-100 active:scale-[0.98]"
                           >
                             Problema na entrega
                           </button>
                         )}
-                        <a
-                          href={`/pedido/${order.id}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white transition active:scale-[0.98] hover:bg-slate-800"
-                        >
-                          Acompanhar
-                        </a>
                       </div>
-	                  </div>
+                  </div>
                 </div>
               )})}
             </div>
@@ -5501,8 +5509,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         </div>
       )}
 
+      {operationNotice && (
+        <div className="flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800 shadow-[0_12px_26px_-24px_rgba(5,150,105,0.6)]">
+          <CheckCircle size={17} weight="fill" className="mt-0.5 shrink-0 text-emerald-600" />
+          <span>{operationNotice}</span>
+        </div>
+      )}
       {error && (
-        <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</div>
       )}
       {soldItemsModalOpen && createPortal(
         <div className="fixed inset-0 z-[10010] bg-slate-900/45 backdrop-blur-sm p-3 sm:p-6">
