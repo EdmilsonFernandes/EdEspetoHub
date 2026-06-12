@@ -223,14 +223,26 @@ export const printNativeThermalReceipt = async (
   if (!status.enabled) {
     throw new NativeThermalPrinterError('BLUETOOTH_DISABLED', 'Bluetooth desligado. Ligue o Bluetooth e tente novamente.');
   }
-  if (!status.permissionGranted) {
-    throw new NativeThermalPrinterError('PERMISSION_DENIED', 'Permissão Bluetooth negada. Permita dispositivos próximos nas configurações do app.');
-  }
 
   const address = String(status?.savedPrinter?.address || '').trim();
   if (!address) {
     throw new NativeThermalPrinterError('NO_PRINTER', 'Nenhuma impressora configurada neste aparelho.');
   }
+
+  // If permission is not granted, request it BEFORE printing.
+  // The Java print() method also handles this, but requesting here gives
+  // the user a clear system dialog ("Permitir dispositivos próximos?").
+  if (!status.permissionGranted) {
+    console.log('[thermal-printer] printNativeThermalReceipt: permission not granted, requesting...');
+    const permResult = await ThermalPrinter.requestPermission();
+    if (!permResult.granted) {
+      throw new NativeThermalPrinterError(
+        'PERMISSION_DENIED',
+        'Permissão Bluetooth negada. Toque em "Permitir Bluetooth" ou abra as Configurações do app para conceder a permissão de Dispositivos Próximos.',
+      );
+    }
+  }
+
   console.log('[thermal-printer] printNativeThermalReceipt: printing to', address);
   const effectiveSettings = normalizeThermalPrinterSettings({
     ...getStoredThermalPrinterSettings(),

@@ -5,285 +5,285 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "91c0d386",
-  "versionLabel": "v0.1.9.91c0d386",
-  "versionInternal": "0.1.9+20260612.002230.91c0d386",
-  "buildId": "0.1.9+20260612.002230.91c0d386-20260612.002230-91c0d386",
-  "builtAt": "2026-06-12T00:22:30.602Z",
-  "commitHash": "91c0d386ba556e991fd9cd7d34e32390e4274a0a",
-  "shortHash": "91c0d386",
+  "versionDisplaySuffix": "0166d170",
+  "versionLabel": "v0.1.9.0166d170",
+  "versionInternal": "0.1.9+20260612.165914.0166d170",
+  "buildId": "0.1.9+20260612.165914.0166d170-20260612.165914-0166d170",
+  "builtAt": "2026-06-12T16:59:14.335Z",
+  "commitHash": "0166d17025bde7354bc20d93e9b448012650d15e",
+  "shortHash": "0166d170",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
     {
-      "hash": "91c0d386ba556e991fd9cd7d34e32390e4274a0a",
-      "shortHash": "91c0d386",
-      "dateIso": "2026-06-11T21:18:42-03:00",
+      "hash": "0166d17025bde7354bc20d93e9b448012650d15e",
+      "shortHash": "0166d170",
+      "dateIso": "2026-06-12T13:56:08-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Soften hub header and restore view-more CTAs",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/91c0d386ba556e991fd9cd7d34e32390e4274a0a"
+      "subject": "refactor(frontend): apply UI primitives to partner onboarding",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0166d17025bde7354bc20d93e9b448012650d15e"
     },
     {
-      "hash": "c2624702fd48b0f9d80f9e00b120c409e49b7dea",
-      "shortHash": "c2624702",
-      "dateIso": "2026-06-11T13:45:25-03:00",
+      "hash": "4b818ab2452c8f2d744c260455eed820288a029b",
+      "shortHash": "4b818ab2",
+      "dateIso": "2026-06-12T13:54:48-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish hub footer and condominium cards",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c2624702fd48b0f9d80f9e00b120c409e49b7dea"
+      "subject": "feat(admin): add device permissions section to admin dashboard",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4b818ab2452c8f2d744c260455eed820288a029b"
     },
     {
-      "hash": "58e07b3c737eed7b09f2982287d8fcea21ac0262",
-      "shortHash": "58e07b3c",
-      "dateIso": "2026-06-11T13:27:15-03:00",
+      "hash": "0b6d353636c4b3aaf1f94c4e8289a06ad92e4cae",
+      "shortHash": "0b6d3536",
+      "dateIso": "2026-06-12T13:32:38-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): compact header, lighter blue, green accents on sponsored/featured",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/58e07b3c737eed7b09f2982287d8fcea21ac0262"
+      "subject": "refactor(frontend): apply UI primitives to destination invites",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0b6d353636c4b3aaf1f94c4e8289a06ad92e4cae"
     },
     {
-      "hash": "2219e36f6b368e6658983e4a9733a3f74363427e",
-      "shortHash": "2219e36f",
-      "dateIso": "2026-06-11T13:14:01-03:00",
+      "hash": "69cf9f668126e46074ae22346b48a537cee24056",
+      "shortHash": "69cf9f66",
+      "dateIso": "2026-06-12T13:26:27-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): polish UX — smooth navy-to-white transition, fix search bar and button visibility",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2219e36f6b368e6658983e4a9733a3f74363427e"
+      "subject": "refactor(frontend): apply UI primitives to partner portal",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/69cf9f668126e46074ae22346b48a537cee24056"
     },
     {
-      "hash": "faddfc6524b6674b924623999b965311a707113c",
-      "shortHash": "faddfc65",
-      "dateIso": "2026-06-11T12:44:57-03:00",
+      "hash": "2ee080e02d0da289baca774c097e07fefb86c3cd",
+      "shortHash": "2ee080e0",
+      "dateIso": "2026-06-12T13:19:54-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): apply robot mascot colors — navy header, green accent, aurora background",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/faddfc6524b6674b924623999b965311a707113c"
+      "subject": "refactor(frontend): apply UI primitives to partner access",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2ee080e02d0da289baca774c097e07fefb86c3cd"
     },
     {
-      "hash": "d81aecf5afa693a16e56c65f26db477c37c1bc60",
-      "shortHash": "d81aecf5",
-      "dateIso": "2026-06-11T12:19:04-03:00",
+      "hash": "a7de14e43847d82c0c0a74955e322ba139366eef",
+      "shortHash": "a7de14e4",
+      "dateIso": "2026-06-12T13:13:43-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): revert scroll-reveal that broke destination visibility and caused layout gaps",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d81aecf5afa693a16e56c65f26db477c37c1bc60"
+      "subject": "refactor(frontend): apply UI primitives to destination partner request",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a7de14e43847d82c0c0a74955e322ba139366eef"
     },
     {
-      "hash": "d8c6d8ccbe4186a242397bb2d9af10b648ac3143",
-      "shortHash": "d8c6d8cc",
-      "dateIso": "2026-06-11T12:07:21-03:00",
+      "hash": "fd0682ae6106983ab331c94f420115cac65c5952",
+      "shortHash": "fd0682ae",
+      "dateIso": "2026-06-12T13:05:40-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): premium micro-interactions, contextual greeting, animated carousel and scroll reveal",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d8c6d8ccbe4186a242397bb2d9af10b648ac3143"
+      "subject": "docs: add Redis cache documentation to production server guide",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fd0682ae6106983ab331c94f420115cac65c5952"
     },
     {
-      "hash": "8c9e3b16a9eb64f94f6350eefd393b01516af32e",
-      "shortHash": "8c9e3b16",
-      "dateIso": "2026-06-11T11:33:54-03:00",
+      "hash": "8ea6d9a9dc7ed074c090a8353b63983129eda604",
+      "shortHash": "8ea6d9a9",
+      "dateIso": "2026-06-12T12:55:58-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore: clean gitignore, remove tracked temp files and stale test count",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8c9e3b16a9eb64f94f6350eefd393b01516af32e"
+      "subject": "refactor(frontend): apply UI primitives to destination service sheet",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8ea6d9a9dc7ed074c090a8353b63983129eda604"
     },
     {
-      "hash": "63930e7a90a782c5be4ea86bfa872090825b4099",
-      "shortHash": "63930e7a",
-      "dateIso": "2026-06-10T22:52:38-03:00",
+      "hash": "0655ac6d901665b5574287d7779e3aee70ad17d0",
+      "shortHash": "0655ac6d",
+      "dateIso": "2026-06-12T12:44:00-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Add iPhone QR to hospitality poster",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/63930e7a90a782c5be4ea86bfa872090825b4099"
+      "subject": "refactor(frontend): apply UI primitives to hospitality route",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0655ac6d901665b5574287d7779e3aee70ad17d0"
     },
     {
-      "hash": "07a9886c12366876a193b4ad3d73f70b9384ab6e",
-      "shortHash": "07a9886c",
-      "dateIso": "2026-06-10T21:55:32-03:00",
+      "hash": "de835bffc8e62becdab6bbfc6bf9977696b288eb",
+      "shortHash": "de835bff",
+      "dateIso": "2026-06-12T12:40:13-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine maps icon in destination actions",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/07a9886c12366876a193b4ad3d73f70b9384ab6e"
+      "subject": "fix(deploy): ensure Redis starts on EC2 deploy + bump Android to v55",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/de835bffc8e62becdab6bbfc6bf9977696b288eb"
     },
     {
-      "hash": "dabfbabc05a1276539cc885c3920782f1e330222",
-      "shortHash": "dabfbabc",
-      "dateIso": "2026-06-10T21:33:15-03:00",
+      "hash": "6e8c38f6317a22ad1b1b83abdaeef91eb18bfdd1",
+      "shortHash": "6e8c38f6",
+      "dateIso": "2026-06-12T12:17:14-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Show delivery issue on admin route cards",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dabfbabc05a1276539cc885c3920782f1e330222"
+      "subject": "refactor(frontend): apply UI primitives to hospitality detail",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6e8c38f6317a22ad1b1b83abdaeef91eb18bfdd1"
     },
     {
-      "hash": "a8b6ec45e03d91f48db1287c60516d0913616a1d",
-      "shortHash": "a8b6ec45",
-      "dateIso": "2026-06-10T16:18:40-03:00",
+      "hash": "d057c98ea4142cdd3df3ec6ebf4e65aa9b61bf41",
+      "shortHash": "d057c98e",
+      "dateIso": "2026-06-12T12:14:52-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Handle blocked delivery codes",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a8b6ec45e03d91f48db1287c60516d0913616a1d"
+      "subject": "fix(bluetooth): request permission, filter only printers, validate BT enabled, add logs",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d057c98ea4142cdd3df3ec6ebf4e65aa9b61bf41"
     },
     {
-      "hash": "58a615705bc7082da8703f737917805fb7458e45",
-      "shortHash": "58a61570",
-      "dateIso": "2026-06-10T15:51:46-03:00",
+      "hash": "32bec8dd285fc632cbbd4b352c4f5acffc83ee17",
+      "shortHash": "32bec8dd",
+      "dateIso": "2026-06-12T11:54:47-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve delivery issue and motoboy UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/58a615705bc7082da8703f737917805fb7458e45"
+      "subject": "refactor(frontend): apply UI primitives to destination detail",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/32bec8dd285fc632cbbd4b352c4f5acffc83ee17"
     },
     {
-      "hash": "e131a617f51076f70582c97308ff1d907662c378",
-      "shortHash": "e131a617",
-      "dateIso": "2026-06-10T15:21:55-03:00",
+      "hash": "8d0b85203bb15f139cb2649da86cea59aad69698",
+      "shortHash": "8d0b8520",
+      "dateIso": "2026-06-12T11:52:18-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix admin order money layout",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e131a617f51076f70582c97308ff1d907662c378"
+      "subject": "fix(backend): update Dockerfile to node:22-alpine + npm install",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8d0b85203bb15f139cb2649da86cea59aad69698"
     },
     {
-      "hash": "1a3dfeebb9f38405fa41d08dccd06d3cad55d395",
-      "shortHash": "1a3dfeeb",
-      "dateIso": "2026-06-10T15:08:19-03:00",
+      "hash": "af35d627734988b40bfffefe732a13601655f17b",
+      "shortHash": "af35d627",
+      "dateIso": "2026-06-12T11:32:05-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish motoboy delivery flow UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1a3dfeebb9f38405fa41d08dccd06d3cad55d395"
+      "subject": "refactor(frontend): apply UI primitives to destinations",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/af35d627734988b40bfffefe732a13601655f17b"
     },
     {
-      "hash": "b3b18027057e013fcc63c5506c38b236f5131a4a",
-      "shortHash": "b3b18027",
-      "dateIso": "2026-06-10T14:36:56-03:00",
+      "hash": "cf0bb4ce62419825c220663a51607814e5e4b949",
+      "shortHash": "cf0bb4ce",
+      "dateIso": "2026-06-12T11:28:41-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Document home banner image specs",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b3b18027057e013fcc63c5506c38b236f5131a4a"
+      "subject": "fix(backend): sync package-lock.json with ioredis dependency",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cf0bb4ce62419825c220663a51607814e5e4b949"
     },
     {
-      "hash": "765f67ca0d0d2e05bcc6b1ffb963f43d26ac686d",
-      "shortHash": "765f67ca",
-      "dateIso": "2026-06-10T14:30:21-03:00",
+      "hash": "3330af77c0fe9122bc258d973acde838f6a4d7b2",
+      "shortHash": "3330af77",
+      "dateIso": "2026-06-12T11:17:36-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Refine client micro interactions",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/765f67ca0d0d2e05bcc6b1ffb963f43d26ac686d"
+      "subject": "feat(backend): add Redis caching layer with invalidation strategy",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3330af77c0fe9122bc258d973acde838f6a4d7b2"
     },
     {
-      "hash": "054a892d6e69170098a582f64fdce5e9bab60f35",
-      "shortHash": "054a892d",
-      "dateIso": "2026-06-10T14:21:15-03:00",
+      "hash": "ca6cdbbe985320437b3d55252456e38241a6bce0",
+      "shortHash": "ca6cdbbe",
+      "dateIso": "2026-06-12T11:08:41-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish client premium interactions",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/054a892d6e69170098a582f64fdce5e9bab60f35"
+      "subject": "refactor(frontend): migrate hub highlights to UI primitives",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ca6cdbbe985320437b3d55252456e38241a6bce0"
     },
     {
-      "hash": "b306012b06bc01f0dfa21ca279123f3ee3ebefd5",
-      "shortHash": "b306012b",
-      "dateIso": "2026-06-10T09:54:37-03:00",
+      "hash": "7fa8e672ba7c08f5a346965af707686af4db91f3",
+      "shortHash": "7fa8e672",
+      "dateIso": "2026-06-12T10:53:35-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Melhora gestão mobile de motoboys",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b306012b06bc01f0dfa21ca279123f3ee3ebefd5"
+      "subject": "feat(frontend): add premium UI primitives",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7fa8e672ba7c08f5a346965af707686af4db91f3"
     },
     {
-      "hash": "e499297ca3bfc7e943c8706b0124808173bfdc64",
-      "shortHash": "e499297c",
-      "dateIso": "2026-06-09T23:31:58-03:00",
+      "hash": "25e3590b23d86750ee7d1f5c0414531e4628a85d",
+      "shortHash": "25e3590b",
+      "dateIso": "2026-06-12T10:35:31-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Use branded maps and Airbnb icons",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e499297ca3bfc7e943c8706b0124808173bfdc64"
+      "subject": "fix(thermal-printer): ASCII-safe normalizePrinterText + bump v1.0.54",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/25e3590b23d86750ee7d1f5c0414531e4628a85d"
     },
     {
-      "hash": "adac03924eba3167b19fabbc3c61b5e5a13fbaca",
-      "shortHash": "adac0392",
-      "dateIso": "2026-06-09T23:27:56-03:00",
+      "hash": "32b7485f97e77c9822f6cd61b49e7e9bdd406fa8",
+      "shortHash": "32b7485f",
+      "dateIso": "2026-06-12T10:22:25-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Update build info after banner revert",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/adac03924eba3167b19fabbc3c61b5e5a13fbaca"
+      "subject": "fix(thermal-printer): filter printer devices, real connection check, structured logs",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/32b7485f97e77c9822f6cd61b49e7e9bdd406fa8"
     },
     {
-      "hash": "dde59e87ea67afdcf4774c7e3cb60da205765819",
-      "shortHash": "dde59e87",
-      "dateIso": "2026-06-09T23:26:29-03:00",
+      "hash": "8c27da136ec598149b6fa6e939069973f421f05d",
+      "shortHash": "8c27da13",
+      "dateIso": "2026-06-12T10:00:43-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Revert \"Preserve home banner artwork fit\"",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dde59e87ea67afdcf4774c7e3cb60da205765819"
+      "subject": "fix(security): remove hardcoded pgAdmin credentials from docker-compose",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8c27da136ec598149b6fa6e939069973f421f05d"
     },
     {
-      "hash": "b602146033d6fda9fe674644ac68c5b26f75150a",
-      "shortHash": "b6021460",
-      "dateIso": "2026-06-09T23:21:07-03:00",
+      "hash": "aea166cf85eaec3d10858d083ab35c60237707fc",
+      "shortHash": "aea166cf",
+      "dateIso": "2026-06-12T09:44:45-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Preserve home banner artwork fit",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b602146033d6fda9fe674644ac68c5b26f75150a"
+      "subject": "Polish hub footer branding",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/aea166cf85eaec3d10858d083ab35c60237707fc"
     },
     {
-      "hash": "7723d395fef182378f1d26fce5e7fe732c713081",
-      "shortHash": "7723d395",
-      "dateIso": "2026-06-09T23:12:57-03:00",
+      "hash": "328e4dba583b8653a60f8e28499d3caa2cab59cd",
+      "shortHash": "328e4dba",
+      "dateIso": "2026-06-11T22:57:30-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Restore hospitality quick actions under text",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7723d395fef182378f1d26fce5e7fe732c713081"
+      "subject": "Polish hub highlights filter grid",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/328e4dba583b8653a60f8e28499d3caa2cab59cd"
     },
     {
-      "hash": "6aee6a45ecad1458409e06019348ae7983cf4fba",
-      "shortHash": "6aee6a45",
-      "dateIso": "2026-06-09T23:03:54-03:00",
+      "hash": "4a1e94159d572e6298abb94b017b00c72ab9df8c",
+      "shortHash": "4a1e9415",
+      "dateIso": "2026-06-11T22:36:32-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Move hospitality quick actions under media",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6aee6a45ecad1458409e06019348ae7983cf4fba"
+      "subject": "chore(frontend): trigger frontend image publish",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4a1e94159d572e6298abb94b017b00c72ab9df8c"
     },
     {
-      "hash": "f0d50ad1c14f99b525658d126942fa1e07b805d2",
-      "shortHash": "f0d50ad1",
-      "dateIso": "2026-06-09T22:51:10-03:00",
+      "hash": "6e51551950ea373fe1f5f5a35c25a30d88ee1a54",
+      "shortHash": "6e515519",
+      "dateIso": "2026-06-11T22:29:59-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish destination and hub navigation UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f0d50ad1c14f99b525658d126942fa1e07b805d2"
+      "subject": "chore: trigger frontend deploy",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6e51551950ea373fe1f5f5a35c25a30d88ee1a54"
     },
     {
-      "hash": "ef790d1d92a586614c21f58999ebdc36e148b7b8",
-      "shortHash": "ef790d1d",
-      "dateIso": "2026-06-09T19:05:52-03:00",
+      "hash": "b56d443d1b10fe0efcce82988b5119007191d3ca",
+      "shortHash": "b56d443d",
+      "dateIso": "2026-06-11T22:17:25-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish customer order cards",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ef790d1d92a586614c21f58999ebdc36e148b7b8"
+      "subject": "chore: trigger CI rebuild — clear stale cache",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b56d443d1b10fe0efcce82988b5119007191d3ca"
     },
     {
-      "hash": "e7af1433f01852d709b66a7c5bd9ae60a4520cae",
-      "shortHash": "e7af1433",
-      "dateIso": "2026-06-09T17:58:55-03:00",
+      "hash": "9e2d79a8fcb675d032c8c2aedfbec8e3e5781dcc",
+      "shortHash": "9e2d79a8",
+      "dateIso": "2026-06-11T22:16:41-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Reapply text assistance on input focus",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e7af1433f01852d709b66a7c5bd9ae60a4520cae"
+      "subject": "Fix native bottom nav build",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9e2d79a8fcb675d032c8c2aedfbec8e3e5781dcc"
     },
     {
-      "hash": "d39513a0007ae07bec13a65446c7a24c6b413b41",
-      "shortHash": "d39513a0",
-      "dateIso": "2026-06-09T15:30:29-03:00",
+      "hash": "bb10e08fe84cb84769f153641fa9fd9282744f06",
+      "shortHash": "bb10e08f",
+      "dateIso": "2026-06-11T22:02:25-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve Android keyboard suggestions",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d39513a0007ae07bec13a65446c7a24c6b413b41"
+      "subject": "style(bottom-nav): polish all 4 bottom navs to premium quality",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bb10e08fe84cb84769f153641fa9fd9282744f06"
     },
     {
-      "hash": "6b9acbf4f32d43f557a1150ee72ce701b4e99f1e",
-      "shortHash": "6b9acbf4",
-      "dateIso": "2026-06-09T15:00:45-03:00",
+      "hash": "bfa6674560c999c7d3f4e64688e306ca61b06487",
+      "shortHash": "bfa66745",
+      "dateIso": "2026-06-11T21:31:00-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "Rollback Android launch WebView visibility changes",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6b9acbf4f32d43f557a1150ee72ce701b4e99f1e"
+      "subject": "fix(thermal-printer): Bluetooth connection timeout, retry, warm-up + UX redesign",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bfa6674560c999c7d3f4e64688e306ca61b06487"
     }
   ]
 } as const;

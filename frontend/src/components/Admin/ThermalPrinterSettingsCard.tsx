@@ -350,8 +350,13 @@ export function ThermalPrinterSettingsCard() {
     } catch (error: any) {
       setTestPhase('failed');
       const code = String(error?.code || '');
-      if (code === 'PRINT_TIMEOUT') {
+      if (code === 'PERMISSION_DENIED') {
+        setPermissionDenied(true);
+        showToast('Permita dispositivos próximos para imprimir. Toque em "Permitir Bluetooth" abaixo.', 'warning');
+      } else if (code === 'PRINT_TIMEOUT') {
         showToast('A impressora demorou para responder. Confira se ela esta ligada e perto do celular.', 'warning');
+      } else if (code === 'BLUETOOTH_DISABLED') {
+        showToast('Bluetooth desligado. Ligue o Bluetooth e tente novamente.', 'warning');
       } else if (code === 'NO_PRINTER') {
         showToast('Escolha uma impressora antes de testar.', 'warning');
       } else {
@@ -387,21 +392,22 @@ export function ThermalPrinterSettingsCard() {
       if (result.granted) {
         setPermissionDenied(false);
         showToast('Permissão Bluetooth concedida!', 'success');
+        await refreshNativeStatus();
         await loadDevices();
       } else {
         setPermissionDenied(true);
-        showToast('Permita dispositivos próximos nas configurações do app (Configurações → Apps → Jano Caminho → Permissões).', 'warning');
+        showToast('Sem acesso ao Bluetooth. Abra Configurações → Apps → Jano Caminho → Permissões → Dispositivos próximos.', 'warning');
       }
     } catch (error: any) {
       console.warn('[thermal-printer] handleRequestPermission failed', error);
       setPermissionDenied(true);
-      showToast('Não foi possível obter permissão. Vá em Configurações → Apps → Permissões.', 'warning');
+      showToast('Sem acesso ao Bluetooth. Abra Configurações → Apps → Jano Caminho → Permissões → Dispositivos próximos.', 'warning');
     }
   };
 
   const savedAddress = String(status?.savedPrinter?.address || '');
-  const isConnected = Boolean(savedAddress) && status?.printerReachable !== false;
-  const printerReachable = status?.printerReachable === true;
+  const isBluetoothReady = Boolean(status?.enabled) && Boolean(status?.permissionGranted);
+  const isConnected = Boolean(savedAddress) && isBluetoothReady;
 
   const previewText = useMemo(
     () => stripPrinterCommands(buildRawBtText(sampleReceiptPayload, settings)).split('\n').slice(0, 18).join('\n'),
@@ -474,7 +480,7 @@ export function ThermalPrinterSettingsCard() {
             </p>
           </div>
         </div>
-        {isConnected && printerReachable ? (
+        {isConnected ? (
           <span className="flex items-center gap-2 shrink-0">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -482,10 +488,15 @@ export function ThermalPrinterSettingsCard() {
             </span>
             <span className="text-[11px] font-black uppercase tracking-[0.12em] text-emerald-700">Conectada</span>
           </span>
-        ) : savedAddress && !printerReachable ? (
+        ) : savedAddress && !status?.permissionGranted ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-rose-700">
+            <WarningCircle size={13} weight="fill" />
+            Sem permissão
+          </span>
+        ) : savedAddress && !status?.enabled ? (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-amber-700">
             <WarningCircle size={13} weight="fill" />
-            Offline
+            BT desligado
           </span>
         ) : (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-amber-700">
@@ -577,10 +588,10 @@ export function ThermalPrinterSettingsCard() {
             </div>
           )}
 
-          {/* Device list */}
-          {devices.length > 0 && (
+          {/* Device list — exclude saved printer to avoid showing it twice */}
+          {devices.filter(d => d.address !== savedAddress).length > 0 && (
             <div className="grid gap-2">
-              {devices.map((device) => {
+              {devices.filter(d => d.address !== savedAddress).map((device) => {
                 const selected = savedAddress === device.address;
                 const saving = savingAddress === device.address;
                 const likelyPrinter = device.isPrinter !== false;

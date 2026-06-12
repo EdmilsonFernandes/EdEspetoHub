@@ -71,16 +71,16 @@ public class ThermalPrinterPlugin extends Plugin {
             + " permission=" + hasPermission);
 
         String savedAddress = sanitize(getPreferences().getString(KEY_ADDRESS, ""));
-        if (!savedAddress.isEmpty() && adapter != null && adapter.isEnabled() && hasPermission) {
-            boolean reachable = checkPrinterReachable(adapter, savedAddress);
-            ret.put("printerReachable", reachable);
-            Log.d(TAG, "getStatus: saved=" + savedAddress + " reachable=" + reachable);
-        } else {
-            ret.put("printerReachable", false);
-            if (!hasPermission && !savedAddress.isEmpty()) {
-                Log.w(TAG, "getStatus: cannot check reachability — BLUETOOTH_CONNECT permission not granted");
-            }
-        }
+        // Reachability is NOT checked on every getStatus() call — socket connect is
+        // unreliable, slow, and can interfere with active BT connections.  The actual
+        // print path will discover reachability and surface a clear error if the
+        // printer is truly unreachable.
+        boolean optimisticReachable = !savedAddress.isEmpty()
+            && adapter != null
+            && adapter.isEnabled()
+            && hasPermission;
+        ret.put("printerReachable", optimisticReachable);
+        Log.d(TAG, "getStatus: saved=" + savedAddress + " optimisticReachable=" + optimisticReachable);
 
         call.resolve(ret);
     }
