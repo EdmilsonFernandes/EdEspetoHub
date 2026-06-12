@@ -175,6 +175,15 @@ const resolveHighlightCategoryKey = (item: HubHighlightItem): HighlightCategoryK
 const getHighlightCategoryOption = (key: HighlightCategoryKey) =>
   HIGHLIGHT_CATEGORY_OPTIONS.find((option) => option.key === key) || HIGHLIGHT_CATEGORY_OPTIONS[0];
 
+const getHighlightFilterGridClass = (count: number) => {
+  if (count <= 1) return 'grid-cols-1';
+  if (count === 2) return 'grid-cols-2';
+  if (count === 3) return 'grid-cols-3';
+  if (count === 4) return 'grid-cols-4';
+  if (count <= 6) return 'grid-cols-3';
+  return 'grid-cols-4';
+};
+
 const toStoreList = (payload: any): any[] => {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.stores)) return payload.stores;
@@ -354,6 +363,10 @@ export function HubHighlightsPage() {
       .filter((option) => option.key === 'all' || option.count > 0);
   }, [categorizedItems]);
 
+  const allCategoryFilter = categoryFilters.find((option) => option.key === 'all') || categoryFilters[0];
+  const secondaryCategoryFilters = categoryFilters.filter((option) => option.key !== 'all');
+  const secondaryFilterGridClass = getHighlightFilterGridClass(secondaryCategoryFilters.length);
+
   const filteredItems = useMemo(() => {
     const normalized = normalizeHighlightSearchText(query.trim());
     return categorizedItems.filter((item) => {
@@ -415,13 +428,46 @@ export function HubHighlightsPage() {
           </div>
         </div>
 
-        <div className="relative z-10 mb-4 -mx-4 overflow-hidden">
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-[linear-gradient(90deg,rgba(248,250,252,0)_0%,rgba(238,244,248,0.96)_100%)]" />
-          <div
-            data-testid="highlight-category-filters"
-            className="flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {categoryFilters.map((option) => {
+        <div
+          data-testid="highlight-category-filters"
+          className="relative z-10 mb-4 rounded-[1.35rem] border border-white/75 bg-white/72 p-2 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/30 backdrop-blur-xl"
+        >
+          {allCategoryFilter ? (
+            <button
+              type="button"
+              onClick={() => setSelectedCategory('all')}
+              className={`jnc-hub-touch flex w-full items-center gap-3 rounded-[1.05rem] border px-3 py-2.5 text-left transition-all duration-300 ${
+                selectedCategory === 'all'
+                  ? 'border-[#153A4C] bg-[linear-gradient(135deg,#153A4C_0%,#336886_82%,#5FD35A_170%)] text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.58)]'
+                  : 'border-slate-200/70 bg-white/82 text-slate-700 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.16)]'
+              }`}
+            >
+              <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${
+                selectedCategory === 'all' ? 'bg-white/18 text-white' : 'bg-[#edf5fa] text-[#336886]'
+              }`}>
+                <Sparkle size={16} weight="fill" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[11px] font-black uppercase leading-none tracking-[0.12em]">
+                  Todos os destaques
+                </span>
+                <span className={`mt-1 block text-[10px] font-bold leading-none ${
+                  selectedCategory === 'all' ? 'text-white/75' : 'text-slate-500'
+                }`}>
+                  Produtos e ofertas das lojas próximas
+                </span>
+              </span>
+              <span className={`inline-flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-[10px] font-black ${
+                selectedCategory === 'all' ? 'bg-white text-[#153A4C]' : 'bg-[#153A4C] text-white'
+              }`}>
+                {allCategoryFilter.count > 99 ? '99+' : allCategoryFilter.count}
+              </span>
+            </button>
+          ) : null}
+
+          {secondaryCategoryFilters.length > 0 ? (
+            <div className={`mt-2 grid gap-2 ${secondaryFilterGridClass}`}>
+              {secondaryCategoryFilters.map((option) => {
               const CategoryIcon = option.icon;
               const active = selectedCategory === option.key;
               return (
@@ -429,42 +475,39 @@ export function HubHighlightsPage() {
                   key={option.key}
                   type="button"
                   onClick={() => setSelectedCategory(option.key)}
-                  className={`jnc-hub-touch group/filter relative flex min-h-[4.15rem] w-[4.85rem] shrink-0 snap-start flex-col items-center justify-center overflow-hidden rounded-[1.1rem] border px-1.5 py-2 text-center transition-all duration-300 sm:w-[5.25rem] ${
+                  className={`jnc-hub-touch group/filter relative flex min-h-[3.45rem] min-w-0 flex-col items-center justify-center overflow-hidden rounded-[0.95rem] border px-1 py-1.5 text-center transition-all duration-300 ${
                     active
-                      ? 'border-[#153A4C] bg-[linear-gradient(145deg,#153A4C_0%,#336886_76%,#5FD35A_165%)] text-white shadow-[0_14px_24px_-14px_rgba(21,58,76,0.62)]'
-                      : 'border-white/85 bg-white/88 text-slate-600 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/35 hover:border-[#336886]/18 hover:bg-white'
+                      ? 'border-[#336886] bg-[#edf5fa] text-[#153A4C] shadow-[0_12px_22px_-18px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/20'
+                      : 'border-slate-200/65 bg-white/78 text-slate-600 shadow-[0_8px_16px_-16px_rgba(15,23,42,0.2)] hover:border-[#336886]/18 hover:bg-white'
                   }`}
                 >
-                  <span className={`pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/filter:opacity-100 ${
-                    active ? 'bg-white/6' : 'bg-[radial-gradient(circle_at_50%_0%,rgba(95,211,90,0.12),transparent_58%)]'
-                  }`} />
-                  <span className={`relative grid h-8 w-8 place-items-center rounded-full transition-all duration-300 ${
+                  <span className={`relative grid h-7 w-7 place-items-center rounded-full transition-all duration-300 ${
                     active
-                      ? 'bg-white/18 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]'
-                      : 'bg-[#edf5fa] text-[#336886] group-hover/filter:bg-[#336886]/10'
+                      ? 'bg-[#153A4C] text-white shadow-[0_8px_18px_-13px_rgba(21,58,76,0.5)]'
+                      : 'bg-[#f3f8fb] text-[#336886] group-hover/filter:bg-[#336886]/10'
                   }`}>
                     <CategoryIcon
-                      size={15}
+                      size={13}
                       weight={active ? 'fill' : 'bold'}
-                      className={active ? 'text-white' : 'text-[#336886]'}
                     />
                     {option.count > 0 ? (
-                      <span className={`absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[8px] font-black leading-none ${
-                        active ? 'bg-white text-[#153A4C]' : 'bg-[#153A4C] text-white'
+                      <span className={`absolute -right-1 -top-1 inline-flex h-3.5 min-w-3.5 items-center justify-center rounded-full px-0.5 text-[7px] font-black leading-none ${
+                        active ? 'bg-[#5FD35A] text-[#153A4C]' : 'bg-[#153A4C] text-white'
                       }`}>
                         {option.count > 99 ? '99+' : option.count}
                       </span>
                     ) : null}
                   </span>
-                  <span className={`relative mt-1 max-w-full truncate text-[9.5px] font-black uppercase leading-none tracking-[0.06em] ${
-                    active ? 'text-white' : 'text-slate-600'
+                  <span className={`relative mt-1 max-w-full truncate text-[8.5px] font-black uppercase leading-none tracking-[0.07em] ${
+                    active ? 'text-[#153A4C]' : 'text-slate-600'
                     }`}>
                     {option.label}
                   </span>
                 </button>
               );
             })}
-          </div>
+            </div>
+          ) : null}
         </div>
 
         <section className="mt-4 flex flex-wrap gap-2">

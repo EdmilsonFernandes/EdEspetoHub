@@ -271,10 +271,9 @@ test.describe('Hub marketplace', () => {
     await expect(filterGrid).toBeVisible();
     await expect(filterGrid).toContainText('Todos');
     await expect(filterGrid).toContainText('Pratos');
-    const filterButtonRows = await filterGrid.locator('button').evaluateAll((buttons) =>
-      buttons.map((button) => Math.round((button as HTMLElement).offsetTop))
-    );
-    expect(new Set(filterButtonRows).size).toBe(1);
+    await expect(
+      filterGrid.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)
+    ).resolves.toBe(true);
     await expect(page.getByRole('link', { name: /Tulipa Especial/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /Achado especial/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /Voltar para a home/i })).toHaveCount(0);
