@@ -8,6 +8,7 @@ import { DestinationPartnerCta } from '../components/Destinations/DestinationPar
 import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { AppImagePreviewDialog } from '../components/common/AppImagePreviewDialog';
 import { AirbnbIcon, isAirbnbUrlOrLabel } from '../components/common/BrandActionIcons';
+import { Button, EmptyState, SurfaceCard } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
@@ -342,7 +343,14 @@ export function DestinationDetailPage() {
               <PreStoreCardSkeleton />
             </div>
           ) : null}
-          {error ? <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
+          {error ? (
+            <EmptyState
+              className="mt-5"
+              icon={<Mountains size={30} weight="duotone" />}
+              title="Não conseguimos carregar este destino"
+              description={error}
+            />
+          ) : null}
 
           {!loading && !error ? (
             <div className="space-y-4 py-1.5 sm:py-3">
@@ -378,7 +386,7 @@ export function DestinationDetailPage() {
                 </div>
               </div>
 
-              <div className="grid min-w-0 gap-2.5 rounded-[1.55rem] border border-white/55 bg-white/42 p-2 shadow-[0_22px_62px_-50px_rgba(15,23,42,0.42)] ring-1 ring-white/35 backdrop-blur-xl lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+              <SurfaceCard padding="sm" className="grid min-w-0 gap-2.5 rounded-[1.55rem] border-white/55 bg-white/42 ring-1 ring-white/35 backdrop-blur-xl lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
                 <label className="group flex min-h-[50px] min-w-0 max-w-full items-center gap-3 rounded-[1.2rem] bg-white/90 px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition focus-within:bg-white focus-within:ring-4 focus-within:ring-[#336886]/12">
                   <MagnifyingGlass size={18} weight="bold" className="text-[#336886]" />
                   <input
@@ -409,7 +417,7 @@ export function DestinationDetailPage() {
                     </button>
                   ))}
                 </div>
-              </div>
+              </SurfaceCard>
             </div>
           ) : null}
         </div>
@@ -431,18 +439,22 @@ export function DestinationDetailPage() {
             </div>
 
             {places.length === 0 ? (
-              <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white/70 p-5">
-                <p className="text-sm font-bold text-slate-600">Nenhuma hospedagem aprovada ainda neste destino.</p>
-                <Link to="/destinos/cadastrar#dados-parceiro" className="mt-3 inline-flex rounded-full bg-[#153A4C] px-4 py-2 text-xs font-black text-white">
+              <EmptyState
+                icon={<Bed size={30} weight="duotone" />}
+                title="Nenhuma hospedagem aprovada ainda"
+                description="Quando chalés e pousadas forem aprovados, eles aparecem aqui com serviços e lojas vinculadas."
+                action={<Link to="/destinos/cadastrar#dados-parceiro" className="inline-flex rounded-full bg-[#153A4C] px-4 py-2 text-xs font-black text-white">
                   Cadastrar chalé ou pousada
-                </Link>
-              </div>
+                </Link>}
+              />
             ) : null}
 
             {places.length > 0 && filteredPlaces.length === 0 ? (
-              <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white/70 p-5">
-                <p className="text-sm font-bold text-slate-600">Nenhuma hospedagem bateu com a busca atual.</p>
-              </div>
+              <EmptyState
+                icon={<MagnifyingGlass size={30} weight="duotone" />}
+                title="Nenhuma hospedagem encontrada"
+                description="Tente limpar a busca ou procurar por outro nome."
+              />
             ) : null}
 
             <div className="grid min-w-0 gap-3 sm:grid-cols-2">
@@ -583,24 +595,25 @@ export function DestinationDetailPage() {
               })}
             </div>
             {filteredPlaces.length > visiblePlaces.length ? (
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                fullWidth
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
                   preserveViewportPosition(() => setPlaceLimit((current) => current + 6));
                 }}
-                  className="jnc-hub-touch w-full rounded-2xl border border-[#336886]/12 bg-white px-4 py-3 text-sm font-black text-[#336886] shadow-[0_14px_30px_-24px_rgba(51,104,134,0.32)] hover:bg-[#336886] hover:text-white"
               >
                 Ver mais hospedagens ({filteredPlaces.length - visiblePlaces.length})
-              </button>
+              </Button>
             ) : null}
           </div>
           ) : null}
 
           {showListingsSection ? (
           <aside id="servicos-cidade" className={showPlacesSection ? 'min-w-0 max-w-full scroll-mt-28 space-y-4' : 'min-w-0 max-w-full scroll-mt-28 space-y-4 lg:col-span-2'}>
-            <div className="min-w-0 max-w-full overflow-hidden rounded-[2rem] border border-white/85 bg-white/94 p-4 shadow-[0_22px_60px_-48px_rgba(15,23,42,0.36)] ring-1 ring-slate-900/[0.025] sm:p-5">
+            <SurfaceCard padding="lg" className="min-w-0 max-w-full rounded-[2rem] border-white/85 bg-white/94 ring-1 ring-slate-900/[0.025]">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">{showPlacesSection ? 'Ainda explorando?' : 'Região'}</p>
@@ -702,30 +715,35 @@ export function DestinationDetailPage() {
                   );
                 })}
                 {listings.length === 0 ? (
-                  <p className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">
-                    Nenhum serviço aprovado ainda.
-                  </p>
+                  <EmptyState
+                    icon={<Sparkle size={30} weight="duotone" />}
+                    title="Nenhum serviço aprovado ainda"
+                    description="Serviços, restaurantes e lojas úteis da cidade aparecem aqui quando forem aprovados."
+                  />
                 ) : null}
                 {listings.length > 0 && filteredListings.length === 0 ? (
-                  <p className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">
-                    Nenhum serviço bateu com a busca atual.
-                  </p>
+                  <EmptyState
+                    icon={<MagnifyingGlass size={30} weight="duotone" />}
+                    title="Nenhum serviço encontrado"
+                    description="Tente limpar a busca ou trocar a categoria selecionada."
+                  />
                 ) : null}
                 {filteredListings.length > visibleListings.length ? (
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
+                    fullWidth
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
                       preserveViewportPosition(() => setListingLimit((current) => current + 10));
                     }}
-                    className="jnc-hub-touch w-full rounded-2xl border border-[#336886]/12 bg-white px-4 py-3 text-sm font-black text-[#336886] shadow-[0_14px_30px_-24px_rgba(51,104,134,0.32)] hover:bg-[#336886] hover:text-white"
                   >
                     Ver mais serviços ({filteredListings.length - visibleListings.length})
-                  </button>
+                  </Button>
                 ) : null}
               </div>
-            </div>
+            </SurfaceCard>
 
             <DestinationPartnerCta cityName={destination.city || destination.name} />
           </aside>
