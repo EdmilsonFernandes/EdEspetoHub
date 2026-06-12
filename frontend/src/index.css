@@ -38,6 +38,22 @@
   --space-5: 20px;
   --space-6: 24px;
   --jnk-native-nav-height: 0px;
+  --jnc-brand-950: #0b1220;
+  --jnc-brand-900: #153A4C;
+  --jnc-brand-700: #336886;
+  --jnc-brand-500: #5FD35A;
+  --jnc-surface-page: #E2EBF2;
+  --jnc-surface-raised: #ffffff;
+  --jnc-surface-soft: #f5f9fb;
+  --jnc-border-soft: rgba(215, 231, 239, 0.78);
+  --jnc-text-strong: #0f172a;
+  --jnc-text-muted: #64748b;
+  --jnc-radius-control: 1rem;
+  --jnc-radius-card: 1.5rem;
+  --jnc-radius-sheet: 2rem;
+  --jnc-shadow-control: 0 14px 28px -22px rgba(15, 23, 42, 0.32);
+  --jnc-shadow-card: 0 24px 56px -44px rgba(15, 23, 42, 0.36);
+  --jnc-shadow-sheet: 0 -28px 76px -42px rgba(15, 23, 42, 0.68);
 }
 
 body {
@@ -154,6 +170,71 @@ body {
   box-shadow: 0 14px 30px -24px rgba(15, 23, 42, 0.34);
   -webkit-backdrop-filter: blur(16px) saturate(1.08);
   backdrop-filter: blur(16px) saturate(1.08);
+}
+
+.jnc-ds-touch {
+  touch-action: manipulation;
+  transform: translateZ(0);
+  transition:
+    transform 180ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease,
+    color 220ms ease,
+    opacity 180ms ease;
+}
+
+.jnc-ds-touch:active {
+  transform: scale(0.985) translateZ(0);
+}
+
+.jnc-ds-focus-ring {
+  outline: none;
+}
+
+.jnc-ds-focus-ring:focus-visible {
+  box-shadow:
+    0 0 0 3px rgba(51, 104, 134, 0.14),
+    var(--jnc-shadow-control);
+  border-color: rgba(51, 104, 134, 0.34);
+}
+
+.jnc-ds-surface {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.86);
+  border-radius: var(--jnc-radius-card);
+  box-shadow: var(--jnc-shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(20px) saturate(1.08);
+  backdrop-filter: blur(20px) saturate(1.08);
+}
+
+.jnc-ds-surface-soft {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--jnc-border-soft);
+  border-radius: var(--jnc-radius-card);
+  box-shadow: 0 18px 42px -36px rgba(15, 23, 42, 0.26);
+}
+
+.jnc-ds-page {
+  background:
+    radial-gradient(circle at 16% 0%, rgba(51, 104, 134, 0.10), transparent 32%),
+    linear-gradient(180deg, #e2ebf2 0%, #f5f9fb 42%, #ffffff 100%);
+  color: var(--jnc-text-strong);
+}
+
+.jnc-ds-bottom-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.jnc-ds-scroll-y {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.jnc-ds-no-select {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .jnc-app-glass-header {
