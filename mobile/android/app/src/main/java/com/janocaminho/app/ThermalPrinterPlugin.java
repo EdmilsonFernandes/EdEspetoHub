@@ -86,29 +86,29 @@ public class ThermalPrinterPlugin extends Plugin {
     }
 
     @PluginMethod
-    public void requestPermission(PluginCall call) {
+    public void requestBluetoothPermission(PluginCall call) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            Log.d(TAG, "requestPermission: SDK < 31, no runtime permission needed");
+            Log.d(TAG, "requestBluetoothPermission: SDK < 31, no runtime permission needed");
             JSObject ret = new JSObject();
             ret.put("granted", true);
             call.resolve(ret);
             return;
         }
         if (hasBluetoothConnectPermission()) {
-            Log.d(TAG, "requestPermission: already granted");
+            Log.d(TAG, "requestBluetoothPermission: already granted");
             JSObject ret = new JSObject();
             ret.put("granted", true);
             call.resolve(ret);
             return;
         }
-        Log.i(TAG, "requestPermission: requesting BLUETOOTH_CONNECT from user");
-        requestPermissionForAlias("bluetoothConnect", call, "requestPermissionCallback");
+        Log.i(TAG, "requestBluetoothPermission: requesting BLUETOOTH_CONNECT from user");
+        requestPermissionForAlias("bluetoothConnect", call, "bluetoothPermissionCallback");
     }
 
     @PermissionCallback
-    private void requestPermissionCallback(PluginCall call) {
+    private void bluetoothPermissionCallback(PluginCall call) {
         boolean granted = hasBluetoothConnectPermission();
-        Log.i(TAG, "requestPermissionCallback: granted=" + granted);
+        Log.i(TAG, "bluetoothPermissionCallback: granted=" + granted);
         JSObject ret = new JSObject();
         ret.put("granted", granted);
         call.resolve(ret);

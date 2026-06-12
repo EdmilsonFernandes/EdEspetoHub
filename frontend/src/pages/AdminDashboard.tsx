@@ -3102,11 +3102,20 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     {
       id: 'printer',
       title: 'Impressora térmica',
-      description: 'Configuração local por aparelho para admin e operador imprimirem sem sair do app.',
+      description: 'Impressora Bluetooth deste aparelho. Requer permissão de Dispositivos Próximos.',
       icon: Printer,
       badge: 'App Android',
       tone: 'neutral',
       action: () => setConfigSection('printer'),
+    },
+    {
+      id: 'permissions',
+      title: 'Permissões do dispositivo',
+      description: 'Câmera, notificações push, biometria e Bluetooth do app.',
+      icon: ShieldCheck,
+      badge: 'App Android',
+      tone: 'neutral',
+      action: () => setConfigSection('permissions'),
     },
     {
       id: 'hours',
@@ -3143,15 +3152,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       badge: 'Gerenciar',
       tone: 'neutral',
       action: () => setMfaPanelOpen(true),
-    },
-    {
-      id: 'permissions',
-      title: 'Permissões do dispositivo',
-      description: 'Câmera, notificações push, biometria e Bluetooth do app.',
-      icon: ShieldCheck,
-      badge: 'App Android',
-      tone: 'neutral',
-      action: () => setConfigSection('permissions'),
     },
   ];
   const activeConfigMeta = activeTab === 'config' && configSection !== 'hub'

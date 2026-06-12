@@ -5,16 +5,43 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "0166d170",
-  "versionLabel": "v0.1.9.0166d170",
-  "versionInternal": "0.1.9+20260612.165914.0166d170",
-  "buildId": "0.1.9+20260612.165914.0166d170-20260612.165914-0166d170",
-  "builtAt": "2026-06-12T16:59:14.335Z",
-  "commitHash": "0166d17025bde7354bc20d93e9b448012650d15e",
-  "shortHash": "0166d170",
+  "versionDisplaySuffix": "7d129b66",
+  "versionLabel": "v0.1.9.7d129b66",
+  "versionInternal": "0.1.9+20260612.183156.7d129b66",
+  "buildId": "0.1.9+20260612.183156.7d129b66-20260612.183156-7d129b66",
+  "builtAt": "2026-06-12T18:31:56.501Z",
+  "commitHash": "7d129b668bd92e774203ecabcb7a243b4ca2943a",
+  "shortHash": "7d129b66",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "7d129b668bd92e774203ecabcb7a243b4ca2943a",
+      "shortHash": "7d129b66",
+      "dateIso": "2026-06-12T14:22:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(bluetooth): overhaul printer UX — offline false, duplicate, permission flow",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7d129b668bd92e774203ecabcb7a243b4ca2943a"
+    },
+    {
+      "hash": "0a84ebec439717bb64a0dc1598f70cf5e7e1d6e5",
+      "shortHash": "0a84ebec",
+      "dateIso": "2026-06-12T14:07:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(deploy): re-home infrastructure containers with wrong compose project label",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0a84ebec439717bb64a0dc1598f70cf5e7e1d6e5"
+    },
+    {
+      "hash": "19c39979d250f1dd91b2e1c2ba736a3183fbf8ab",
+      "shortHash": "19c39979",
+      "dateIso": "2026-06-12T14:00:17-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): add missing ShieldCheck import for permissions card",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/19c39979d250f1dd91b2e1c2ba736a3183fbf8ab"
+    },
     {
       "hash": "0166d17025bde7354bc20d93e9b448012650d15e",
       "shortHash": "0166d170",
@@ -257,33 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore: trigger CI rebuild — clear stale cache",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b56d443d1b10fe0efcce82988b5119007191d3ca"
-    },
-    {
-      "hash": "9e2d79a8fcb675d032c8c2aedfbec8e3e5781dcc",
-      "shortHash": "9e2d79a8",
-      "dateIso": "2026-06-11T22:16:41-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix native bottom nav build",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9e2d79a8fcb675d032c8c2aedfbec8e3e5781dcc"
-    },
-    {
-      "hash": "bb10e08fe84cb84769f153641fa9fd9282744f06",
-      "shortHash": "bb10e08f",
-      "dateIso": "2026-06-11T22:02:25-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(bottom-nav): polish all 4 bottom navs to premium quality",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bb10e08fe84cb84769f153641fa9fd9282744f06"
-    },
-    {
-      "hash": "bfa6674560c999c7d3f4e64688e306ca61b06487",
-      "shortHash": "bfa66745",
-      "dateIso": "2026-06-11T21:31:00-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(thermal-printer): Bluetooth connection timeout, retry, warm-up + UX redesign",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bfa6674560c999c7d3f4e64688e306ca61b06487"
     }
   ]
 } as const;

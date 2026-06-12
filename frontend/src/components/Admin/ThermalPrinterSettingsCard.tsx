@@ -105,6 +105,7 @@ export function ThermalPrinterSettingsCard() {
   const [testPhase, setTestPhase] = useState<TestPhase>('idle');
   const [hasSearchedOnce, setHasSearchedOnce] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const [confirmedAlive, setConfirmedAlive] = useState(false);
   const isNativeAndroid = isAndroidNativeThermalPrinterRuntime();
   const hasNativePrinterPlugin = isNativeThermalPrinterPluginAvailable();
 
@@ -346,6 +347,7 @@ export function ThermalPrinterSettingsCard() {
       const text = buildRawBtText(sampleReceiptPayload, settings);
       await printNativeThermalReceipt(text, settings);
       setTestPhase('success');
+      setConfirmedAlive(true);
       setTimeout(() => setTestPhase('idle'), 4000);
     } catch (error: any) {
       setTestPhase('failed');
@@ -372,6 +374,7 @@ export function ThermalPrinterSettingsCard() {
       await clearNativeThermalPrinter();
       setStatus((prev) => ({ ...(prev || { available: true, enabled: true, permissionGranted: true }), savedPrinter: undefined as any }));
       setTestPhase('idle');
+      setConfirmedAlive(false);
       showToast('Impressora removida deste aparelho. O RawBT continua como fallback.', 'success');
     } catch (error: any) {
       showToast(error?.message || 'Nao foi possivel remover a impressora.', 'error');
@@ -480,13 +483,18 @@ export function ThermalPrinterSettingsCard() {
             </p>
           </div>
         </div>
-        {isConnected ? (
+        {isConnected && confirmedAlive ? (
           <span className="flex items-center gap-2 shrink-0">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
             </span>
             <span className="text-[11px] font-black uppercase tracking-[0.12em] text-emerald-700">Conectada</span>
+          </span>
+        ) : isConnected ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-blue-700">
+            <Printer size={13} weight="fill" />
+            Configurada
           </span>
         ) : savedAddress && !status?.permissionGranted ? (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-rose-700">
@@ -568,10 +576,14 @@ export function ThermalPrinterSettingsCard() {
             <div className="mb-3 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
-                  </span>
+                  {confirmedAlive ? (
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
+                    </span>
+                  ) : (
+                    <span className="inline-flex h-3 w-3 rounded-full bg-blue-400" />
+                  )}
                   <span className="text-sm font-black text-slate-900">
                     {status.savedPrinter.name || 'Impressora Bluetooth'}
                   </span>

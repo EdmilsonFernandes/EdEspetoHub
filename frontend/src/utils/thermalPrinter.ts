@@ -40,7 +40,7 @@ type ThermalPrinterPlugin = {
   saveSettings(options: Partial<ThermalPrinterSettings>): Promise<{ savedPrinter?: NativeThermalPrinterStatus['savedPrinter']; settings?: ThermalPrinterSettings }>;
   clearPrinter(): Promise<{ savedPrinter?: NativeThermalPrinterStatus['savedPrinter'] }>;
   openBluetoothSettings(): Promise<void>;
-  requestPermission(): Promise<{ granted: boolean }>;
+  requestBluetoothPermission(): Promise<{ granted: boolean }>;
   print(options: { text: string; address?: string; copies?: number; feedLines?: number }): Promise<NativeThermalPrinterPrintResult>;
 };
 
@@ -154,7 +154,7 @@ export const getNativeThermalPrinterStatus = async () => {
 export const requestNativeBluetoothPermission = async () => {
   ensureNativeThermalPrinterAvailable('Abra pelo app Android para configurar a impressora.');
   console.log('[thermal-printer] requestPermission: requesting BLUETOOTH_CONNECT...');
-  const result = await ThermalPrinter.requestPermission();
+  const result = await ThermalPrinter.requestBluetoothPermission();
   console.log('[thermal-printer] requestPermission: granted=' + result.granted);
   return result;
 };
@@ -234,7 +234,7 @@ export const printNativeThermalReceipt = async (
   // the user a clear system dialog ("Permitir dispositivos próximos?").
   if (!status.permissionGranted) {
     console.log('[thermal-printer] printNativeThermalReceipt: permission not granted, requesting...');
-    const permResult = await ThermalPrinter.requestPermission();
+    const permResult = await ThermalPrinter.requestBluetoothPermission();
     if (!permResult.granted) {
       throw new NativeThermalPrinterError(
         'PERMISSION_DENIED',

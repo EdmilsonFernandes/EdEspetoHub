@@ -14,7 +14,7 @@ import { Camera as CapCamera } from '@capacitor/camera';
 import { useToast } from '../../contexts/ToastContext';
 import { nativeBiometricService } from '../../services/nativeBiometricService';
 import { storePushService } from '../../services/storePushService';
-import { requestNativeBluetoothPermission } from '../../utils/thermalPrinter';
+import { getNativeThermalPrinterStatus, requestNativeBluetoothPermission } from '../../utils/thermalPrinter';
 
 export type PermissionRole = 'admin' | 'customer';
 
@@ -109,6 +109,15 @@ export function DevicePermissionsCard({ role, session, onOpenMfa }: DevicePermis
         setBiometricEnabled(false);
       }
     }
+
+    // Check Bluetooth permission status on mount
+    try {
+      if (Capacitor.isPluginAvailable('ThermalPrinter')) {
+        void getNativeThermalPrinterStatus().then((s) => {
+          setBluetoothPermission(s.permissionGranted ? 'granted' : 'denied');
+        }).catch(() => {});
+      }
+    } catch { /* ignore */ }
   }, [isNative, role, session]);
 
   const openAppSettings = async () => {
@@ -282,7 +291,9 @@ export function DevicePermissionsCard({ role, session, onOpenMfa }: DevicePermis
     {
       id: 'bluetooth',
       label: 'Bluetooth',
-      description: 'Conectar impressora térmica e acessórios.',
+      description: role === 'admin'
+        ? 'Conectar impressora térmica. Configure a impressora na seção Impressora.'
+        : 'Conectar acessórios Bluetooth.',
       status: bluetoothPermission,
       icon: <Bluetooth size={18} weight="duotone" className="text-[#336886]" />,
       checked: bluetoothPermission === 'granted',
