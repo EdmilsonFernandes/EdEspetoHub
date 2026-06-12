@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bed, Buildings, CaretDown, ChartBar, ChatCircleText, CheckCircle, ClockCountdown, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, ShieldCheck, Sparkle, Trash, UploadSimple, WarningCircle, X } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
-import { Chip, EmptyState, SectionHeader, SurfaceCard, TextField } from '../components/ui';
+import { Chip, EmptyState, SectionHeader, SurfaceCard, TextareaField, TextField } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -2896,31 +2896,61 @@ export function SuperAdminDestinations() {
     const requestedPlaces = Array.isArray(request.requestedHospitalityPlaces) && request.requestedHospitalityPlaces.length
       ? request.requestedHospitalityPlaces
       : (Array.isArray(request.requestedHospitalityPlaceNames) ? request.requestedHospitalityPlaceNames : []).map((name: string, index: number) => ({ id: `${name}-${index}`, name }));
+    const pendingRequest = isPendingRequest(request.status);
+    const reviewNoteRequired = pendingRequest && isPartnerClaimRequest(request);
+    const reviewNoteError = reviewNoteRequired && reviewNoteTrimmedLength < 12;
+    const changedRows = rows.filter((row) => compactValue(row.current) !== compactValue(row.submitted)).length;
+    const statusToneClass = currentRequestStatus === 'approved'
+      ? 'bg-emerald-100 text-emerald-700'
+      : currentRequestStatus === 'rejected'
+        ? 'bg-rose-100 text-rose-700'
+        : 'bg-amber-100 text-amber-700';
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-3 py-4 backdrop-blur-sm sm:items-center">
-        <div className="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-[2rem] bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.75)]">
-          <div className="flex items-start justify-between gap-4 border-b border-slate-100 bg-[radial-gradient(circle_at_0%_0%,rgba(51,104,134,0.18),transparent_34%),linear-gradient(135deg,#ffffff,#f8fafc)] p-5">
-            <div className="min-w-0">
-              <p className="inline-flex items-center gap-2 rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
-                <ShieldCheck size={14} weight="fill" />
-                Detalhes e validação
-              </p>
-              <h3 className="mt-3 break-words text-2xl font-black tracking-[-0.04em] text-slate-950">{request.name}</h3>
-              <p className="mt-1 text-sm font-semibold text-slate-500">
-                {request.storeId && request.claimedListingId
-                  ? 'Uma única aprovação converte o serviço em loja e libera todos os chalés selecionados.'
-                  : 'Revise contato, titularidade e divergências antes de liberar edição do perfil público.'}
-              </p>
+        <div role="dialog" aria-modal="true" aria-labelledby="partner-request-detail-title" className="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-t-[2rem] bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.75)] sm:rounded-[2rem]">
+          <div className="border-b border-slate-100 bg-[radial-gradient(circle_at_0%_0%,rgba(51,104,134,0.18),transparent_34%),linear-gradient(135deg,#ffffff,#f8fafc)] p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                    <ShieldCheck size={14} weight="fill" />
+                    Detalhes e validação
+                  </span>
+                  <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${statusToneClass}`}>
+                    {requestStatusLabel(request.status)}
+                  </span>
+                </div>
+                <h3 id="partner-request-detail-title" className="mt-3 break-words text-2xl font-black tracking-[-0.04em] text-slate-950">{request.name}</h3>
+                <p className="mt-1 max-w-2xl text-sm font-semibold leading-relaxed text-slate-500">
+                  {request.storeId && request.claimedListingId
+                    ? 'Valide uma vez para converter o serviço em loja, liberar os chalés selecionados e evitar análise repetida vínculo por vínculo.'
+                    : 'Revise titularidade, contato oficial e divergências antes de liberar edição do perfil público.'}
+                </p>
+              </div>
+              <button type="button" onClick={() => setSelectedPartnerRequest(null)} aria-label="Fechar detalhes da solicitação" className="jnc-ds-focus-ring grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 active:scale-[0.96]">
+                <X size={18} weight="bold" />
+              </button>
             </div>
-            <button type="button" onClick={() => setSelectedPartnerRequest(null)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-600">
-              <X size={18} weight="bold" />
-            </button>
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white bg-white/76 px-3 py-2.5 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.32)]">
+                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Tipo</p>
+                <p className="mt-1 text-sm font-black text-slate-800">{partnerTypeLabel(request)}</p>
+              </div>
+              <div className="rounded-2xl border border-white bg-white/76 px-3 py-2.5 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.32)]">
+                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Divergências</p>
+                <p className="mt-1 text-sm font-black text-slate-800">{changedRows ? `${changedRows} campo(s) diferentes` : 'Sem diferença crítica'}</p>
+              </div>
+              <div className="rounded-2xl border border-white bg-white/76 px-3 py-2.5 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.32)]">
+                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Criada em</p>
+                <p className="mt-1 text-sm font-black text-slate-800">{formatRequestDate(request.createdAt) || 'Não informado'}</p>
+              </div>
+            </div>
           </div>
 
-          <div className="max-h-[calc(92vh-8rem)] overflow-y-auto p-5">
+          <div className="max-h-[calc(92vh-10rem)] overflow-y-auto p-4 sm:p-5">
             {isPartnerClaimRequest(request) ? (
               <div className="mb-4 grid gap-3 md:grid-cols-[1fr_1fr_1.1fr]">
-                <div className="rounded-[1.45rem] border border-slate-100 bg-white p-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.35)]">
+                <SurfaceCard padding="sm" className="rounded-[1.45rem]">
                   <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Loja solicitante</p>
                   <div className="mt-3 flex items-center gap-3">
                     <img src={storeLogoUrl} alt={storeName} className="h-14 w-14 shrink-0 rounded-2xl object-cover ring-1 ring-slate-100" />
@@ -2929,8 +2959,8 @@ export function SuperAdminDestinations() {
                       <p className="truncate text-xs font-semibold text-slate-500">{request.responsibleEmail || account.email || 'E-mail não informado'}</p>
                     </div>
                   </div>
-                </div>
-                <div className="rounded-[1.45rem] border border-amber-100 bg-amber-50/70 p-3 shadow-[0_18px_40px_-34px_rgba(180,83,9,0.4)]">
+                </SurfaceCard>
+                <SurfaceCard tone="warning" padding="sm" className="rounded-[1.45rem]">
                   <p className="text-[10px] font-black uppercase tracking-[0.14em] text-amber-700">Perfil que será assumido</p>
                   <div className="mt-3 flex items-center gap-3">
                     <img src={resourceImageUrl} alt={resourceName} className="h-14 w-14 shrink-0 rounded-2xl object-cover ring-1 ring-white" />
@@ -2939,8 +2969,8 @@ export function SuperAdminDestinations() {
                       <p className="truncate text-xs font-semibold text-amber-800">{request.destination?.name || request.destination?.city || 'Destino não informado'}</p>
                     </div>
                   </div>
-                </div>
-                <div className="rounded-[1.45rem] border border-[#336886]/10 bg-[#EEF6F4] p-3">
+                </SurfaceCard>
+                <SurfaceCard tone="brand" padding="sm" className="rounded-[1.45rem]">
                   <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">Chalés vinculados na solicitação</p>
                   {requestedPlaces.length ? (
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -2960,7 +2990,7 @@ export function SuperAdminDestinations() {
                   ) : (
                     <p className="mt-3 text-sm font-semibold text-slate-500">Sem chalé específico retornado. Confira o cadastro e o histórico antes de aprovar.</p>
                   )}
-                </div>
+                </SurfaceCard>
               </div>
             ) : null}
 
@@ -2972,34 +3002,40 @@ export function SuperAdminDestinations() {
                 { label: 'E-mail', value: request.responsibleEmail || account.email || 'Não informado' },
                 ...(request.store ? [{ label: 'Loja criada', value: request.store.name || request.store.slug || request.storeId }] : []),
               ].map((item) => (
-                <div key={item.label} className="rounded-[1.25rem] border border-slate-100 bg-slate-50 p-3">
+                <SurfaceCard key={item.label} padding="sm" className="rounded-[1.25rem] bg-slate-50/72 shadow-none">
                   <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{item.label}</p>
                   <p className="mt-1 break-words text-sm font-black text-slate-800">{item.value}</p>
-                </div>
+                </SurfaceCard>
               ))}
             </div>
 
             {isPartnerClaimRequest(request) ? (
-              <div className="mt-4 rounded-[1.45rem] border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
-                <p className="flex items-center gap-2 font-black uppercase tracking-[0.08em]">
-                  <ShieldCheck size={17} weight="fill" />
-                  Conferência antifraude obrigatória
-                </p>
-                <p className="mt-2">
-                  {request.storeId && request.claimedListingId
-                    ? <>Antes de aprovar, confirme que <strong>{storeName}</strong> realmente pode assumir <strong>{claimedResourceLabel(request)}</strong>. A aprovação libera a loja nos chalés selecionados e desativa o serviço antigo.</>
-                    : <>Antes de aprovar, confirme com o contato oficial do cadastro atual que <strong>{request.responsibleName || request.responsibleEmail}</strong> pode assumir <strong>{claimedResourceLabel(request)}</strong>.</>}
-                </p>
-              </div>
+              <SurfaceCard tone="warning" padding="md" className="mt-4 rounded-[1.45rem] text-sm font-semibold text-amber-800">
+                <div className="flex items-start gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-amber-100 text-amber-700">
+                    <ShieldCheck size={18} weight="fill" />
+                  </span>
+                  <div>
+                    <p className="font-black uppercase tracking-[0.08em]">Conferência antifraude obrigatória</p>
+                    <p className="mt-1 leading-relaxed">
+                      {request.storeId && request.claimedListingId
+                        ? <>Antes de aprovar, confirme que <strong>{storeName}</strong> realmente pode assumir <strong>{claimedResourceLabel(request)}</strong>. A aprovação libera a loja nos chalés selecionados e desativa o serviço antigo.</>
+                        : <>Antes de aprovar, confirme com o contato oficial do cadastro atual que <strong>{request.responsibleName || request.responsibleEmail}</strong> pode assumir <strong>{claimedResourceLabel(request)}</strong>.</>}
+                    </p>
+                  </div>
+                </div>
+              </SurfaceCard>
             ) : null}
 
-            {isPendingRequest(request.status) ? (
-              <label className="mt-4 block rounded-[1.45rem] border border-slate-200 bg-white p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.35)]">
-                <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
-                  <ShieldCheck size={15} weight="fill" />
-                  Registro da conferência
-                </span>
-                <textarea
+            {pendingRequest ? (
+              <SurfaceCard as="section" padding="md" className="mt-4 rounded-[1.45rem]">
+                <TextareaField
+                  label={(
+                    <span className="inline-flex items-center gap-2">
+                      <ShieldCheck size={15} weight="fill" />
+                      Registro da conferência
+                    </span>
+                  )}
                   value={reviewNoteValue}
                   onChange={(event) => setPartnerReviewNotes((current) => ({ ...current, [request.id]: event.target.value }))}
                   rows={3}
@@ -3007,41 +3043,51 @@ export function SuperAdminDestinations() {
                   placeholder={isPartnerClaimRequest(request)
                     ? 'Ex.: confirmei pelo WhatsApp oficial do cadastro em 31/05 e o responsável autorizou o acesso.'
                     : 'Observação interna opcional sobre a aprovação ou recusa.'}
-                  className="mt-3 min-h-24 w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#336886] focus:bg-white focus:ring-4 focus:ring-[#336886]/10"
+                  error={reviewNoteError ? `Obrigatório: escreva pelo menos 12 caracteres (${reviewNoteTrimmedLength}/12).` : undefined}
+                  hint={!reviewNoteError ? (isPartnerClaimRequest(request) ? 'Este registro fica no histórico de validação da solicitação.' : 'Opcional, mas recomendado para manter a operação auditável.') : undefined}
+                  textareaClassName="bg-slate-50"
                 />
-                <span className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-slate-500">
-                  <span className={isPartnerClaimRequest(request) && reviewNoteTrimmedLength < 12 ? 'text-amber-700' : ''}>
-                    {isPartnerClaimRequest(request)
-                      ? `Obrigatório: escreva pelo menos 12 caracteres (${reviewNoteTrimmedLength}/12).`
-                      : 'Opcional, mas recomendado para manter a operação auditável.'}
-                  </span>
-                  <span>{String(reviewNoteValue || '').length}/600</span>
-                </span>
-              </label>
+                <div className="mt-2 flex justify-end text-[11px] font-bold text-slate-500">
+                  {String(reviewNoteValue || '').length}/600
+                </div>
+              </SurfaceCard>
             ) : request.reviewNote ? (
-              <div className="mt-4 rounded-[1.45rem] border border-slate-200 bg-slate-50 p-4">
+              <SurfaceCard tone="soft" padding="md" className="mt-4 rounded-[1.45rem]">
                 <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Registro da conferência</p>
                 <p className="mt-2 whitespace-pre-wrap text-sm font-semibold text-slate-700">{request.reviewNote}</p>
-              </div>
+              </SurfaceCard>
             ) : null}
 
-            <div className="mt-4 overflow-hidden rounded-[1.45rem] border border-slate-200">
-              <div className="grid grid-cols-[0.9fr_1fr_1fr] gap-0 bg-slate-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
-                <span>Campo</span>
-                <span>Cadastro atual</span>
-                <span>Enviado na solicitação</span>
+            <SurfaceCard as="section" padding="none" className="mt-4 rounded-[1.45rem]">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Comparação de dados</p>
+                  <p className="mt-0.5 text-sm font-black text-slate-800">Cadastro atual x informação enviada</p>
+                </div>
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${changedRows ? 'bg-amber-100 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                  {changedRows ? `${changedRows} diferença(s)` : 'Tudo igual'}
+                </span>
               </div>
               {rows.map((row) => {
                 const changed = compactValue(row.current) !== compactValue(row.submitted);
                 return (
-                  <div key={row.label} className={`grid grid-cols-1 gap-2 border-t border-slate-100 px-3 py-3 text-sm md:grid-cols-[0.9fr_1fr_1fr] ${changed ? 'bg-amber-50/55' : 'bg-white'}`}>
-                    <p className="font-black text-slate-700">{row.label}</p>
-                    <p className="break-words font-semibold text-slate-500">{compactValue(row.current)}</p>
-                    <p className="break-words font-semibold text-slate-900">{compactValue(row.submitted)}</p>
+                  <div key={row.label} className={`grid grid-cols-1 gap-2 border-t border-slate-100 px-4 py-3 text-sm md:grid-cols-[0.85fr_1fr_1fr] ${changed ? 'bg-amber-50/55' : 'bg-white'}`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2 w-2 shrink-0 rounded-full ${changed ? 'bg-amber-500' : 'bg-emerald-400'}`} />
+                      <p className="font-black text-slate-700">{row.label}</p>
+                    </div>
+                    <div>
+                      <p className="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 md:hidden">Cadastro atual</p>
+                      <p className="break-words font-semibold text-slate-500">{compactValue(row.current)}</p>
+                    </div>
+                    <div>
+                      <p className="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 md:hidden">Enviado</p>
+                      <p className="break-words font-semibold text-slate-900">{compactValue(row.submitted)}</p>
+                    </div>
                   </div>
                 );
               })}
-            </div>
+            </SurfaceCard>
 
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {(
@@ -3065,31 +3111,33 @@ export function SuperAdminDestinations() {
                       { label: 'Ativação', value: formatRequestDate(account.activatedAt) || (partnerAccountStatus(request) === 'active' ? 'Ativo' : 'Pendente') },
                     ]
               ).map((item) => (
-                <div key={item.label} className="rounded-[1.25rem] border border-slate-100 bg-white p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.35)]">
+                <SurfaceCard key={item.label} padding="sm" className="rounded-[1.25rem]">
                   <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{item.label}</p>
                   <p className="mt-1 text-sm font-black text-slate-800">{item.value}</p>
-                </div>
+                </SurfaceCard>
               ))}
             </div>
 
-            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-              {isPendingRequest(request.status) ? (
-                <>
-                  <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'rejected', reviewNoteValue)} className={actionButtonClass('danger')}>
-                    Recusar com motivo
+            <div className="sticky bottom-0 -mx-4 mt-5 border-t border-slate-100 bg-white/92 px-4 py-3 backdrop-blur-xl sm:-mx-5 sm:px-5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                {pendingRequest ? (
+                  <>
+                    <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'rejected', reviewNoteValue)} className={actionButtonClass('danger')}>
+                      Recusar com motivo
+                    </button>
+                    <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'approved', reviewNoteValue)} className={actionButtonClass('success')}>
+                      <CheckCircle size={13} weight="fill" />
+                      Aprovar com conferência
+                    </button>
+                  </>
+                ) : null}
+                {!pendingRequest && String(request.status || '').toLowerCase() === 'approved' && request.createdPartnerAccountId ? (
+                  <button type="button" disabled={saving} onClick={() => resendPartnerInvite(request)} className={actionButtonClass('primary')}>
+                    <PaperPlaneTilt size={13} weight="bold" />
+                    Reenviar convite
                   </button>
-                  <button type="button" disabled={saving} onClick={() => reviewPartner(request, 'approved', reviewNoteValue)} className={actionButtonClass('success')}>
-                    <CheckCircle size={13} weight="fill" />
-                    Aprovar com conferência
-                  </button>
-                </>
-              ) : null}
-              {!isPendingRequest(request.status) && String(request.status || '').toLowerCase() === 'approved' && request.createdPartnerAccountId ? (
-                <button type="button" disabled={saving} onClick={() => resendPartnerInvite(request)} className={actionButtonClass('primary')}>
-                  <PaperPlaneTilt size={13} weight="bold" />
-                  Reenviar convite
-                </button>
-              ) : null}
+                ) : null}
+              </div>
             </div>
           </div>
         </div>
