@@ -8,13 +8,15 @@ import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, fo
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
-import { Hash, Storefront, Truck, ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, UsersThree, CheckSquare, SquaresFour, Rows, Printer } from '@phosphor-icons/react';
+import { Hash, Storefront, Truck, ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, UsersThree, CheckSquare, SquaresFour, Rows, Printer, MapPin, Phone, MagnifyingGlass } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
 import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
 import { PostalShipmentModal } from '../components/Admin/PostalShipmentModal';
+import { Button } from '../components/ui/Button';
+import { SearchInput } from '../components/ui/SearchInput';
 
 export function AdminOrders() {
   const { auth, logout } = useAuth();
@@ -264,6 +266,9 @@ export function AdminOrders() {
   const orderTypeMeta = (order: any) => {
     const type = String(order?.type || '').toLowerCase();
     if (type === 'delivery') {
+      if (String(order?.fulfillmentMode || '').toLowerCase() === 'postal') {
+        return { label: 'Envio postal', pill: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: <Package size={14} weight="duotone" /> };
+      }
       return { label: 'Entrega', pill: 'bg-sky-100 text-sky-800 border-sky-200', icon: <Truck size={14} weight="duotone" /> };
     }
     if (type === 'pickup') {
@@ -314,20 +319,20 @@ export function AdminOrders() {
     const money = getOrderMoney(order);
     return (
       <div className={compact ? 'w-full rounded-2xl border border-slate-100 bg-slate-50/80 p-2.5' : 'mt-2 w-full max-w-full sm:mt-0 sm:w-auto'}>
-        <div className={compact ? 'grid grid-cols-3 gap-1.5 text-[10px] font-semibold' : 'flex max-w-full flex-wrap gap-1.5 text-[10px] font-semibold sm:justify-end sm:text-[11px]'}>
-          <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5">
+        <div className={compact ? 'grid grid-cols-[minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,1.25fr)] gap-1.5 text-[10px] font-semibold' : 'flex max-w-full flex-wrap gap-1.5 text-[10px] font-semibold sm:justify-end sm:text-[11px]'}>
+          <span className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5">
             <span className="text-slate-500">Volume</span>
-            <span className="truncate text-slate-800">
+            <span className="truncate whitespace-nowrap text-slate-800">
               {money.itemCount} item{money.itemCount === 1 ? '' : 's'}
             </span>
           </span>
-          <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-white px-2 py-1.5">
+          <span className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white px-2 py-1.5">
             <span className="text-slate-500">Frete</span>
-            <span className="truncate text-slate-800">{money.fee > 0 ? formatCurrency(money.fee) : '—'}</span>
+            <span className="truncate whitespace-nowrap text-slate-800">{money.fee > 0 ? formatCurrency(money.fee) : '—'}</span>
           </span>
-          <span className="flex min-w-0 flex-col rounded-xl border border-slate-900/10 bg-white px-2.5 py-1.5 shadow-[0_6px_18px_-14px_rgba(15,23,42,0.45)]">
+          <span className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-900/10 bg-white px-2.5 py-1.5 shadow-[0_6px_18px_-14px_rgba(15,23,42,0.45)]">
             <span className="text-slate-500">Total</span>
-            <span className={`${compact ? 'text-sm' : 'text-base'} truncate font-black leading-none text-slate-900`}>{formatCurrency(money.total)}</span>
+            <span className={`${compact ? 'text-[13px]' : 'text-base'} truncate whitespace-nowrap font-black leading-none text-slate-900`}>{formatCurrency(money.total)}</span>
           </span>
         </div>
       </div>
@@ -538,30 +543,38 @@ export function AdminOrders() {
             </div>
           </div>
 
-            <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-4">
-              <div className="inline-flex flex-wrap items-center gap-1 rounded-full bg-slate-100 p-1">
-	                {[
-	                  { id: 'all', label: 'Todos', count: statusCounts.all },
-	                  { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
-	                { id: 'preparing', label: 'Em Preparação', count: statusCounts.preparing },
-	                { id: 'ready', label: 'Prontos', count: statusCounts.ready },
-	                { id: 'done', label: 'Finalizados', count: statusCounts.done },
-	                { id: 'cancelled', label: 'Cancelados', count: statusCounts.cancelled },
-	                { id: 'refunds', label: 'Reembolsos', count: statusCounts.refunds },
-	              ].map((filter) => (
-                <button
-                  key={filter.id}
-                  onClick={() => setStatusFilter(filter.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${
-                    statusFilter === filter.id
-                      ? 'bg-white text-slate-900 border-slate-200 shadow-[0_4px_14px_rgba(15,23,42,0.08)]'
-                      : 'bg-transparent text-slate-600 border-transparent hover:bg-white/80'
-                  }`}
-                >
-                  {filter.label} ({filter.count})
-                </button>
-              ))}
-            </div>
+            <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
+              <div className="-mx-1 min-w-0 flex-1 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+                <div className="inline-flex min-w-max items-center gap-1 rounded-full bg-slate-100 p-1">
+                  {[
+                    { id: 'all', label: 'Todos', count: statusCounts.all },
+                    { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
+                    { id: 'preparing', label: 'Em preparação', count: statusCounts.preparing },
+                    { id: 'ready', label: 'Prontos', count: statusCounts.ready },
+                    { id: 'done', label: 'Finalizados', count: statusCounts.done },
+                    { id: 'cancelled', label: 'Cancelados', count: statusCounts.cancelled },
+                    { id: 'refunds', label: 'Reembolsos', count: statusCounts.refunds },
+                  ].map((filter) => (
+                    <button
+                      key={filter.id}
+                      type="button"
+                      onClick={() => setStatusFilter(filter.id)}
+                      className={`jnc-ds-touch jnc-ds-focus-ring inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
+                        statusFilter === filter.id
+                          ? 'border-slate-200 bg-white text-slate-900 shadow-[0_4px_14px_rgba(15,23,42,0.08)]'
+                          : 'border-transparent bg-transparent text-slate-600 hover:bg-white/80'
+                      }`}
+                    >
+                      <span>{filter.label}</span>
+                      <span className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black tabular-nums ${
+                        statusFilter === filter.id ? 'bg-[#edf5fa] text-[#336886]' : 'bg-white/70 text-slate-500'
+                      }`}>
+                        {filter.count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             <div className="flex flex-col sm:flex-row gap-2 lg:ml-auto w-full lg:w-auto">
               <input
                 type="date"
@@ -569,12 +582,14 @@ export function AdminOrders() {
                 onChange={(event) => setDateFilter(event.target.value)}
                 className="w-full sm:w-44 ds-select ds-focus-ring py-2 text-sm"
               />
-              <input
-                type="text"
+              <SearchInput
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
+                onClear={() => setQuery('')}
+                icon={<MagnifyingGlass weight="bold" />}
+                size="sm"
                 placeholder="Buscar cliente, telefone ou ID do pedido"
-                className="w-full sm:w-64 ds-input ds-focus-ring py-2 text-sm"
+                className="w-full sm:w-72"
               />
               <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1 gap-0.5 shrink-0">
                 <button
@@ -601,12 +616,9 @@ export function AdminOrders() {
                 </button>
               </div>
               {(statusFilter !== 'all' || dateFilter || query) && (
-                <button
-                  onClick={clearFilters}
-                  className="px-3 py-2 rounded-lg text-xs font-bold border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-100 transition shrink-0"
-                >
+                <Button variant="danger" size="sm" onClick={clearFilters} className="shrink-0">
                   Limpar
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -672,7 +684,10 @@ export function AdminOrders() {
                         {paymentMeta.icon && <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-3.5 w-3.5 object-contain" />}
                         <span className="font-semibold text-slate-700">{paymentMeta.label}</span>
                         <span className="text-slate-300">·</span>
-                        <span>{order.phone || 'Sem telefone'}</span>
+                        <span className="inline-flex min-w-0 items-center gap-1">
+                          <Phone size={12} weight="duotone" className="shrink-0" />
+                          <span className="truncate">{order.phone || 'Sem telefone'}</span>
+                        </span>
                         {order?.paymentMethod === 'MERCADO_PAGO' && (
                           <button type="button" onClick={() => openOrderPayment(order)} className="ml-auto rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                             Ver pagamento
@@ -699,19 +714,35 @@ export function AdminOrders() {
                         )}
                       </div>
 
+                      {String(order?.type || '').toLowerCase() === 'delivery' && formatAddress(order.address || order.deliveryAddress) && (
+                        <div className="border-t border-slate-100 px-4 py-3">
+                          <div className="flex min-w-0 items-start gap-2 rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-2.5">
+                            <MapPin size={16} weight="duotone" className="mt-0.5 shrink-0 text-[#336886]" />
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Destino da entrega</p>
+                              <p className="mt-0.5 break-words text-xs font-semibold leading-relaxed text-slate-700">
+                                {formatAddress(order.address || order.deliveryAddress)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Entrega postal */}
                       {String(order?.type || '').toLowerCase() === 'delivery' && (
                         <div className="border-t border-slate-100 px-4 py-2.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-semibold text-slate-500">Entrega:</span>
-                            <button type="button" disabled={postalSavingId === order.id} onClick={() => handleFulfillmentModeChange(order, 'distance')} className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold border ${String(order?.fulfillmentMode || 'distance').toLowerCase() === 'distance' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200'}`}>Local</button>
-                            <button type="button" disabled={postalSavingId === order.id} onClick={() => handleFulfillmentModeChange(order, 'postal')} className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold border ${String(order?.fulfillmentMode || 'distance').toLowerCase() === 'postal' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200'}`}>Postal</button>
-                            {String(order?.fulfillmentMode || '').toLowerCase() === 'postal' && (
-                              <button type="button" disabled={postalSavingId === order.id} onClick={() => handlePostalTrackAndPost(order)} className="ml-auto rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">Rastreio + Postado</button>
-                            )}
+                          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Modalidade da entrega</p>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button type="button" disabled={postalSavingId === order.id} onClick={() => handleFulfillmentModeChange(order, 'distance')} className={`jnc-ds-touch jnc-ds-focus-ring min-h-9 rounded-xl border px-2.5 py-1.5 text-[11px] font-bold ${String(order?.fulfillmentMode || 'distance').toLowerCase() === 'distance' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600'}`}>Entrega local</button>
+                            <button type="button" disabled={postalSavingId === order.id} onClick={() => handleFulfillmentModeChange(order, 'postal')} className={`jnc-ds-touch jnc-ds-focus-ring min-h-9 rounded-xl border px-2.5 py-1.5 text-[11px] font-bold ${String(order?.fulfillmentMode || 'distance').toLowerCase() === 'postal' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600'}`}>Envio postal</button>
                           </div>
+                          {String(order?.fulfillmentMode || '').toLowerCase() === 'postal' && (
+                            <button type="button" disabled={postalSavingId === order.id} onClick={() => handlePostalTrackAndPost(order)} className="jnc-ds-touch jnc-ds-focus-ring mt-2 inline-flex min-h-9 w-full items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-[11px] font-bold text-indigo-700">
+                              Rastreio e postagem
+                            </button>
+                          )}
                           {order?.shipment?.trackingCode && (
-                            <p className="mt-1 text-[11px] text-slate-500">Código: <span className="font-semibold">{order.shipment.trackingCode}</span></p>
+                            <p className="mt-2 break-all rounded-xl bg-slate-50 px-3 py-2 text-[11px] text-slate-500">Código: <span className="font-semibold text-slate-700">{order.shipment.trackingCode}</span></p>
                           )}
                         </div>
                       )}
@@ -770,19 +801,26 @@ export function AdminOrders() {
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
-                      <div>
-                        <p className="text-xs uppercase text-slate-400">Cliente</p>
-                        <p className="font-extrabold text-slate-800 text-base leading-tight">{order.customerName || order.name || 'Cliente'}</p>
-                        <p className="text-xs text-slate-500">{order.phone || '-'}</p>
+                    <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
+                      <div className="min-w-0 rounded-2xl border border-slate-100 bg-white/80 p-3">
+                        <div className="flex items-start gap-2.5">
+                          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#edf5fa] text-[#336886]">
+                            <Phone size={17} weight="duotone" />
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Cliente</p>
+                            <p className="truncate text-base font-extrabold leading-tight text-slate-800">{order.customerName || order.name || 'Cliente'}</p>
+                            <p className="truncate text-xs text-slate-500">{order.phone || 'Sem telefone'}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs uppercase text-slate-400">Pagamento</p>
+                      <div className="min-w-0 rounded-2xl border border-slate-100 bg-white/80 p-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Pagamento</p>
                         {(() => {
                           const paymentMeta = getPaymentMethodMeta(order.payment);
                           return (
                             <div className="flex flex-col gap-1">
-                              <p className="font-semibold text-slate-700 inline-flex items-center gap-2">
+                              <p className="inline-flex items-center gap-2 font-semibold text-slate-700">
                                 {paymentMeta.icon && (
                                   <img
                                     src={paymentMeta.icon}
@@ -792,7 +830,7 @@ export function AdminOrders() {
                                 )}
                                 {paymentMeta.label}
                               </p>
-                              <span className="text-xs text-slate-500 mb-2">
+                              <span className="mb-2 text-xs text-slate-500">
                                 {formatPaymentStatus(order.paymentStatus)}
                               </span>
                               {order?.paymentMethod === 'MERCADO_PAGO' && (
@@ -817,12 +855,20 @@ export function AdminOrders() {
                       {order?.refundStatus === 'PARTIALLY_REFUNDED' && (<span className="inline-block mt-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Reembolso parcial</span>)}
                       {order?.refundStatus === 'DENIED' && (<span className="inline-block mt-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-bold text-rose-600">Recusado</span>)}
                       </div>
-                      <div>
-                        <p className="text-xs uppercase text-slate-400">Endereço</p>
-                        <p className="font-semibold text-slate-700">{formatAddress(order.address || order.deliveryAddress) || '-'}</p>
-                        {order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined && (
-                          <p className="text-xs text-slate-500">Frete: {formatCurrency(order.deliveryFee)}</p>
-                        )}
+                      <div className="min-w-0 rounded-2xl border border-slate-100 bg-white/80 p-3">
+                        <div className="flex items-start gap-2.5">
+                          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
+                            <MapPin size={17} weight="duotone" />
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                              {String(order?.type || '').toLowerCase() === 'delivery' ? 'Destino da entrega' : 'Atendimento'}
+                            </p>
+                            <p className="break-words font-semibold leading-relaxed text-slate-700">
+                              {formatAddress(order.address || order.deliveryAddress) || orderTypeMeta(order).label}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     {String(order?.type || '').toLowerCase() === 'delivery' && (
@@ -833,7 +879,7 @@ export function AdminOrders() {
                             {String(order?.fulfillmentMode || 'distance').toLowerCase() === 'postal' ? 'Postal' : 'Local'}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <button
                             type="button"
                             disabled={postalSavingId === order.id}
@@ -863,7 +909,7 @@ export function AdminOrders() {
                               type="button"
                               disabled={postalSavingId === order.id}
                               onClick={() => handlePostalTrackAndPost(order)}
-                              className="ml-auto px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-white text-slate-700"
+                              className="px-3 py-1.5 rounded-full text-xs font-semibold border border-indigo-200 bg-indigo-50 text-indigo-700 sm:ml-auto"
                             >
                               Informar rastreio
                             </button>
