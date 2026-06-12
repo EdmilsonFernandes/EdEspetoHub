@@ -2,6 +2,7 @@ node_modules
 dist
 .git
 .gitignore
+# Keep this file in frontend so GitHub Actions can target frontend-only rebuilds.
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
