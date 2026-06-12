@@ -5,16 +5,133 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "7d129b66",
-  "versionLabel": "v0.1.9.7d129b66",
-  "versionInternal": "0.1.9+20260612.183156.7d129b66",
-  "buildId": "0.1.9+20260612.183156.7d129b66-20260612.183156-7d129b66",
-  "builtAt": "2026-06-12T18:31:56.501Z",
-  "commitHash": "7d129b668bd92e774203ecabcb7a243b4ca2943a",
-  "shortHash": "7d129b66",
+  "versionDisplaySuffix": "480117ae",
+  "versionLabel": "v0.1.9.480117ae",
+  "versionInternal": "0.1.9+20260612.205902.480117ae",
+  "buildId": "0.1.9+20260612.205902.480117ae-20260612.205902-480117ae",
+  "builtAt": "2026-06-12T20:59:02.541Z",
+  "commitHash": "480117aeda3d8d4f413868b2ca0689a3b5f618d8",
+  "shortHash": "480117ae",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "480117aeda3d8d4f413868b2ca0689a3b5f618d8",
+      "shortHash": "480117ae",
+      "dateIso": "2026-06-12T17:42:46-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(frontend): polish grill queue delivery cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/480117aeda3d8d4f413868b2ca0689a3b5f618d8"
+    },
+    {
+      "hash": "f47f6e4096b9f790f86f5eb2263bd44dc0b6f8b1",
+      "shortHash": "f47f6e40",
+      "dateIso": "2026-06-12T17:30:07-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(ui): migrate safe chrome buttons in CartView + GrillQueue",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f47f6e4096b9f790f86f5eb2263bd44dc0b6f8b1"
+    },
+    {
+      "hash": "87180fba98ce3ad40a860d72a0835086501e99a6",
+      "shortHash": "87180fba",
+      "dateIso": "2026-06-12T17:27:41-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(frontend): polish motoboy active delivery",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/87180fba98ce3ad40a860d72a0835086501e99a6"
+    },
+    {
+      "hash": "b5dfded5f595ee8748590d166166dc69a2a86580",
+      "shortHash": "b5dfded5",
+      "dateIso": "2026-06-12T17:21:23-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(ui): migrate buttons to <Button> in AdminMotoboys + ProductManager",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b5dfded5f595ee8748590d166166dc69a2a86580"
+    },
+    {
+      "hash": "eb4527386228749891018a5e44bf7e8b949f91a8",
+      "shortHash": "eb452738",
+      "dateIso": "2026-06-12T17:10:22-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(ui): migrate 4 form submit buttons to <Button> in SuperAdminDestinations",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eb4527386228749891018a5e44bf7e8b949f91a8"
+    },
+    {
+      "hash": "eaf17dd83d215aeb742bbf236eed480904cfd452",
+      "shortHash": "eaf17dd8",
+      "dateIso": "2026-06-12T16:56:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(frontend): compact admin motoboy management",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eaf17dd83d215aeb742bbf236eed480904cfd452"
+    },
+    {
+      "hash": "94eadb098948ea649135d55987ddaa0c64a949bf",
+      "shortHash": "94eadb09",
+      "dateIso": "2026-06-12T16:54:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(ui): migrate 4 buttons to <Button> in AdminDashboard config",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/94eadb098948ea649135d55987ddaa0c64a949bf"
+    },
+    {
+      "hash": "52b6e68230751edd31d0ce0c274cbdd94c236a0f",
+      "shortHash": "52b6e682",
+      "dateIso": "2026-06-12T16:44:26-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(bluetooth): remove redundant TS permission check + add debug panel",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/52b6e68230751edd31d0ce0c274cbdd94c236a0f"
+    },
+    {
+      "hash": "f68324af80f42f62233f44c08d1642831cc1f613",
+      "shortHash": "f68324af",
+      "dateIso": "2026-06-12T16:28:38-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(ui): migrate 5 buttons to <Button> primitive in printer + permissions",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f68324af80f42f62233f44c08d1642831cc1f613"
+    },
+    {
+      "hash": "46c6e1506bd7713e4845aec4803a3d18b774e8c0",
+      "shortHash": "46c6e150",
+      "dateIso": "2026-06-12T16:21:57-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ui): add 6 design system primitives — StatusBadge, Toggle, SearchInput, IconBox, Modal, SkeletonCard",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/46c6e1506bd7713e4845aec4803a3d18b774e8c0"
+    },
+    {
+      "hash": "f6c8d105862e15952bd6653936c76c4a4d893c82",
+      "shortHash": "f6c8d105",
+      "dateIso": "2026-06-12T16:01:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(frontend): polish destination form UI",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f6c8d105862e15952bd6653936c76c4a4d893c82"
+    },
+    {
+      "hash": "9bfcddcbb42abb1d4cd271b89db49500447b122c",
+      "shortHash": "9bfcddcb",
+      "dateIso": "2026-06-12T15:47:13-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(bluetooth): rename Java method to avoid Capacitor bridge collision + UX overhaul",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9bfcddcbb42abb1d4cd271b89db49500447b122c"
+    },
+    {
+      "hash": "5a36473499d4ea4b514f9b9020795fd012179e93",
+      "shortHash": "5a364734",
+      "dateIso": "2026-06-12T15:35:17-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "refactor(frontend): polish partner validation modal",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5a36473499d4ea4b514f9b9020795fd012179e93"
+    },
     {
       "hash": "7d129b668bd92e774203ecabcb7a243b4ca2943a",
       "shortHash": "7d129b66",
@@ -167,123 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(backend): update Dockerfile to node:22-alpine + npm install",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8d0b85203bb15f139cb2649da86cea59aad69698"
-    },
-    {
-      "hash": "af35d627734988b40bfffefe732a13601655f17b",
-      "shortHash": "af35d627",
-      "dateIso": "2026-06-12T11:32:05-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): apply UI primitives to destinations",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/af35d627734988b40bfffefe732a13601655f17b"
-    },
-    {
-      "hash": "cf0bb4ce62419825c220663a51607814e5e4b949",
-      "shortHash": "cf0bb4ce",
-      "dateIso": "2026-06-12T11:28:41-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(backend): sync package-lock.json with ioredis dependency",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cf0bb4ce62419825c220663a51607814e5e4b949"
-    },
-    {
-      "hash": "3330af77c0fe9122bc258d973acde838f6a4d7b2",
-      "shortHash": "3330af77",
-      "dateIso": "2026-06-12T11:17:36-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(backend): add Redis caching layer with invalidation strategy",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3330af77c0fe9122bc258d973acde838f6a4d7b2"
-    },
-    {
-      "hash": "ca6cdbbe985320437b3d55252456e38241a6bce0",
-      "shortHash": "ca6cdbbe",
-      "dateIso": "2026-06-12T11:08:41-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): migrate hub highlights to UI primitives",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ca6cdbbe985320437b3d55252456e38241a6bce0"
-    },
-    {
-      "hash": "7fa8e672ba7c08f5a346965af707686af4db91f3",
-      "shortHash": "7fa8e672",
-      "dateIso": "2026-06-12T10:53:35-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(frontend): add premium UI primitives",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7fa8e672ba7c08f5a346965af707686af4db91f3"
-    },
-    {
-      "hash": "25e3590b23d86750ee7d1f5c0414531e4628a85d",
-      "shortHash": "25e3590b",
-      "dateIso": "2026-06-12T10:35:31-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(thermal-printer): ASCII-safe normalizePrinterText + bump v1.0.54",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/25e3590b23d86750ee7d1f5c0414531e4628a85d"
-    },
-    {
-      "hash": "32b7485f97e77c9822f6cd61b49e7e9bdd406fa8",
-      "shortHash": "32b7485f",
-      "dateIso": "2026-06-12T10:22:25-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(thermal-printer): filter printer devices, real connection check, structured logs",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/32b7485f97e77c9822f6cd61b49e7e9bdd406fa8"
-    },
-    {
-      "hash": "8c27da136ec598149b6fa6e939069973f421f05d",
-      "shortHash": "8c27da13",
-      "dateIso": "2026-06-12T10:00:43-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(security): remove hardcoded pgAdmin credentials from docker-compose",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8c27da136ec598149b6fa6e939069973f421f05d"
-    },
-    {
-      "hash": "aea166cf85eaec3d10858d083ab35c60237707fc",
-      "shortHash": "aea166cf",
-      "dateIso": "2026-06-12T09:44:45-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish hub footer branding",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/aea166cf85eaec3d10858d083ab35c60237707fc"
-    },
-    {
-      "hash": "328e4dba583b8653a60f8e28499d3caa2cab59cd",
-      "shortHash": "328e4dba",
-      "dateIso": "2026-06-11T22:57:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Polish hub highlights filter grid",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/328e4dba583b8653a60f8e28499d3caa2cab59cd"
-    },
-    {
-      "hash": "4a1e94159d572e6298abb94b017b00c72ab9df8c",
-      "shortHash": "4a1e9415",
-      "dateIso": "2026-06-11T22:36:32-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(frontend): trigger frontend image publish",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4a1e94159d572e6298abb94b017b00c72ab9df8c"
-    },
-    {
-      "hash": "6e51551950ea373fe1f5f5a35c25a30d88ee1a54",
-      "shortHash": "6e515519",
-      "dateIso": "2026-06-11T22:29:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore: trigger frontend deploy",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6e51551950ea373fe1f5f5a35c25a30d88ee1a54"
-    },
-    {
-      "hash": "b56d443d1b10fe0efcce82988b5119007191d3ca",
-      "shortHash": "b56d443d",
-      "dateIso": "2026-06-11T22:17:25-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore: trigger CI rebuild — clear stale cache",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b56d443d1b10fe0efcce82988b5119007191d3ca"
     }
   ]
 } as const;

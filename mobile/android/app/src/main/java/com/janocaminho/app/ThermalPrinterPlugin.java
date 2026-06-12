@@ -34,7 +34,10 @@ import org.json.JSONObject;
 @CapacitorPlugin(
     name = "ThermalPrinter",
     permissions = {
-        @Permission(alias = "bluetoothConnect", strings = { Manifest.permission.BLUETOOTH_CONNECT })
+        @Permission(alias = "bluetoothConnect", strings = {
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.BLUETOOTH_SCAN
+        })
     }
 )
 public class ThermalPrinterPlugin extends Plugin {
@@ -350,7 +353,11 @@ public class ThermalPrinterPlugin extends Plugin {
                 BluetoothSocket socket = null;
                 try {
                     BluetoothDevice device = adapter.getRemoteDevice(printerAddress);
-                    adapter.cancelDiscovery();
+                    try {
+                        adapter.cancelDiscovery();
+                    } catch (SecurityException ignored) {
+                        Log.d(TAG, "print: cancelDiscovery failed (no BLUETOOTH_SCAN), continuing");
+                    }
                     Log.d(TAG, "print: attempt=" + (attempt + 1) + " creating socket to " + printerAddress);
 
                     try {
