@@ -586,3 +586,112 @@ free -h
 | Firebase Console | https://console.firebase.google.com |
 | Zoho Mail | https://mail.zoho.com |
 | PgAdmin (prod) | http://ec2-3-137-119-152.us-east-2.compute.amazonaws.com:5050 |
+
+---
+
+## Redis — Cache em Produção
+
+### Visão Geral
+
+Redis 7 (Alpine) roda como container Docker com 50 MB de memória e política LRU (`allkeys-lru`). O backend usa `ioredis` para cache automático de respostas da API.
+
+**Container:** `janocaminho-redis`
+**Porta:** 6379 (interna)
+**Volume:** `edespetohub_redis-data` (persistido)
+
+### Chaves de Cache (Padrões)
+
+| Padrão | TTL | O que cacheia | Invalidação automática |
+|--------|-----|---------------|----------------------|
+| `stores:portfolio` | 60s | Lista de lojas públicas | Produto CRUD, loja update |
+| `stores:slug:{slug}` | 60s | Dados de uma loja por slug | Produto CRUD, loja update |
+| `products:store:slug:{slug}` | 120s | Produtos de uma loja | Produto CRUD |
+| `categories:store:slug:{slug}` | 120s | Categorias de uma loja | Produto CRUD |
+| `config:home` | 300s (5 min) | Configuração da Home | Alteração no HomeConfig |
+| `featured:{storeId}` | 120s | Produtos em destaque | Alteração em FeaturedProduct |
+| `metrics:*` | 300s | Métricas da plataforma | `invalidatePlatformCache()` |
+| `platform:public:*` | 300s | Dados públicos da plataforma | Via `@cacheable` decorator |
+
+### Invalição Automática — Quando acontece
+
+O cache é invalidado **automaticamente** nas seguintes operações:
+
+| Ação no sistema | Invalidação | Arquivo |
+|-----------------|-------------|---------|
+| Criar/Editar/Remover produto | `stores:*`, `products:store:*`, `categories:store:*` | `ProductController.ts` |
+| Editar dados da loja | `stores:portfolio`, `stores:slug:{slug}` | `StoreController.ts` |
+| Alterar configuração da Home | `config:home` | `HomeConfigController.ts` |
+| Alterar produtos em destaque | `featured:*` | `FeaturedProductController.ts` |
+
+> Se a loja tiver produtos alterados, o cache da loja, dos produtos e das categorias são invalidados juntos. O próximo acesso recria o cache automaticamente.
+
+### Comandos Úteis de Redis
+
+```bash
+# Verificar se o Redis está rodando
+docker ps --filter name=redis --format '{{.Names}} {{.Status}}'
+
+# Ping (deve retornar PONG)
+docker exec janocaminho-redis redis-cli ping
+
+# Quantas chaves estão em cache agora
+docker exec janocaminho-redis redis-cli DBSIZE
+
+# Listar todas as chaves
+docker exec janocaminho-redis redis-cli KEYS '*'
+
+# Ver TTL de uma chave específica (em segundos, -1 = sem expiração, -2 = não existe)
+docker exec janocaminho-redis redis-cli TTL 'config:home'
+
+# Ver conteúdo de uma chave
+docker exec janocaminho-redis redis-cli GET 'config:home'
+
+# Ver estatísticas (hits, misses, memória, conexões)
+docker exec janocaminho-redis redis-cli INFO stats | grep -E 'keyspace_hits|keyspace_misses|connected_clients|used_memory_human'
+
+# ⚠️ Limpar TODO o cache (flush) — uso em emergência
+docker exec janocaminho-redis redis-cli FLUSHALL
+
+# Limpar cache de um padrão específico (sem matar tudo)
+docker exec janocaminho-redis redis-cli KEYS 'stores:*' | xargs -r docker exec -i janocaminho-redis redis-cli DEL
+
+# Ver uso de memória
+docker exec janocaminho-redis redis-cli INFO memory | grep used_memory_human
+```
+
+### Verificar se o Backend Conectou no Redis
+
+```bash
+# Logs do backend sobre Redis
+docker logs janocaminho-backend 2>&1 | grep -i redis
+
+# Deve mostrar:
+# "Redis connected" (CacheService)  ← sucesso
+# "REDIS_URL not set; caching disabled" ← problema: faltou REDIS_URL no .env.docker
+```
+
+### Troubleshooting
+
+**Redis não subiu no deploy:**
+```bash
+# Subir manualmente
+cd ~/EdEspetoHub
+docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.deploy.yml --env-file .env.prod up -d --no-build redis
+
+# Verificar rede (backend precisa estar na mesma rede do Redis)
+docker inspect janocaminho-redis --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}'
+docker inspect janocaminho-backend --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}'
+# Se redes diferentes, conectar:
+docker network connect <rede-do-redis> janocaminho-backend
+```
+
+**REDIS_URL faltando:**
+```bash
+# Verificar se está no .env.docker
+grep REDIS ~/EdEspetoHub/backend/.env.docker
+# Deve retornar: REDIS_URL=redis://redis:6379
+
+# Se faltando, adicionar e reiniciar backend:
+echo 'REDIS_URL=redis://redis:6379' >> ~/EdEspetoHub/backend/.env.docker
+docker restart janocaminho-backend
+```
