@@ -331,7 +331,8 @@ export function ThermalPrinterSettingsCard() {
   };
 
   const savedAddress = String(status?.savedPrinter?.address || '');
-  const isConnected = Boolean(savedAddress);
+  const isConnected = Boolean(savedAddress) && status?.printerReachable !== false;
+  const printerReachable = status?.printerReachable === true;
 
   const previewText = useMemo(
     () => stripPrinterCommands(buildRawBtText(sampleReceiptPayload, settings)).split('\n').slice(0, 18).join('\n'),
@@ -404,13 +405,18 @@ export function ThermalPrinterSettingsCard() {
             </p>
           </div>
         </div>
-        {isConnected ? (
+        {isConnected && printerReachable ? (
           <span className="flex items-center gap-2 shrink-0">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
             </span>
             <span className="text-[11px] font-black uppercase tracking-[0.12em] text-emerald-700">Conectada</span>
+          </span>
+        ) : savedAddress && !printerReachable ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-amber-700">
+            <WarningCircle size={13} weight="fill" />
+            Offline
           </span>
         ) : (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-amber-700">
@@ -455,6 +461,7 @@ export function ThermalPrinterSettingsCard() {
               {devices.map((device) => {
                 const selected = savedAddress === device.address;
                 const saving = savingAddress === device.address;
+                const likelyPrinter = device.isPrinter !== false;
                 return (
                   <button
                     type="button"
@@ -464,21 +471,28 @@ export function ThermalPrinterSettingsCard() {
                     className={`relative flex items-center gap-3 rounded-2xl border p-3.5 text-left transition-all active:scale-[0.99] ${
                       selected
                         ? 'border-emerald-300 bg-emerald-50/80 shadow-[0_8px_20px_-12px_rgba(16,185,129,0.3)]'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80'
+                        : likelyPrinter
+                          ? 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80'
+                          : 'border-amber-200 bg-amber-50/40 hover:border-amber-300'
                     }`}
                   >
                     <span
                       className={`shrink-0 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        selected ? 'border-emerald-500 bg-emerald-500' : 'border-slate-300 bg-white'
+                        selected ? 'border-emerald-500 bg-emerald-500' : likelyPrinter ? 'border-slate-300 bg-white' : 'border-amber-300 bg-white'
                       }`}
                     >
                       {selected && <span className="h-2 w-2 rounded-full bg-white" />}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-black text-slate-900">
-                        {device.name || 'Impressora Bluetooth'}
+                        {device.name || 'Dispositivo Bluetooth'}
                       </span>
                       <span className="mt-0.5 block text-xs font-semibold text-slate-500">{device.address}</span>
+                      {!likelyPrinter && (
+                        <span className="mt-1 block text-[10px] font-bold text-amber-600">
+                          Nao parece uma impressora — so selecione se tiver certeza
+                        </span>
+                      )}
                     </span>
                     {saving && (
                       <ArrowClockwise size={16} weight="bold" className="shrink-0 animate-spin text-[#153A4C]" />

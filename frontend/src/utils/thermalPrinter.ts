@@ -4,6 +4,7 @@ export type NativeThermalPrinterDevice = {
   name?: string;
   address: string;
   bonded?: boolean;
+  isPrinter?: boolean;
 };
 
 export type ThermalReceiptHeaderMode = 'complete' | 'compact';
@@ -19,6 +20,7 @@ export type NativeThermalPrinterStatus = {
   available: boolean;
   enabled: boolean;
   permissionGranted: boolean;
+  printerReachable?: boolean;
   settings?: ThermalPrinterSettings;
   savedPrinter?: NativeThermalPrinterDevice & Partial<ThermalPrinterSettings>;
 };
