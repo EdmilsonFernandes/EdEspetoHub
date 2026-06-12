@@ -16,6 +16,7 @@ import {
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
+import { Button } from '../ui/Button';
 import { normalizeProductModifiers } from '../../utils/productModifiers';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../../utils/nativeImagePicker';
@@ -1755,21 +1756,20 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button
+            <Button
               type="submit"
-              className="bg-brand-gradient text-white px-6 py-3 rounded-xl font-semibold flex-1 flex justify-center items-center gap-2 hover:opacity-95 transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 shadow-[0_14px_28px_-18px_rgba(59,130,246,0.8)]"
-              disabled={saving}
+              loading={saving}
+              leftIcon={<FloppyDisk size={18} weight="duotone" />}
+              className="flex-1"
             >
-              <FloppyDisk size={18} weight="duotone" />
-              {saving ? 'Salvando...' : 'Adicionar Produto'}
-            </button>
-            <button
-              type="button"
+              Adicionar Produto
+            </Button>
+            <Button
+              variant="ghost"
               onClick={resetForm}
-              className="bg-white border border-slate-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
             >
               Limpar
-            </button>
+            </Button>
           </div>
           </form>
 
@@ -2550,21 +2550,20 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="mx-auto flex w-full max-w-2xl gap-3">
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
                   onClick={handleInlineCancel}
-                  className="flex-1 py-3 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  className="flex-1"
                 >
                   Cancelar
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
                   onClick={handleInlineSave}
-                  disabled={saving}
-                  className="flex-1 py-3 rounded-xl bg-brand-gradient text-white text-sm font-semibold shadow-[0_12px_24px_-16px_rgba(59,130,246,0.85)] hover:opacity-95 disabled:opacity-60"
+                  loading={saving}
+                  className="flex-1"
                 >
                   Salvar
-                </button>
+                </Button>
                 </div>
               </div>
             </div>

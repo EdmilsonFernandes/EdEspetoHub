@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Car, Camera, CheckCircle, CopySimple, IdentificationCard, WarningCircle, Clock, UsersThree, LinkSimpleHorizontal, MagnifyingGlass, FunnelSimple, UserPlus, Key, Eye, EyeSlash } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
+import { Button } from '../components/ui/Button';
 import { useToast } from '../contexts/ToastContext';
 import { motoboyAdminService } from '../services/motoboyAdminService';
 import { orderService } from '../services/orderService';
@@ -1380,22 +1381,19 @@ export function AdminMotoboys() {
             ) : null}
 
             <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 onClick={() => setCreateMotoboyOpen(false)}
                 disabled={creatingMotoboy}
-                className="btn-press rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 disabled:opacity-60"
               >
                 Fechar
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
                 onClick={createStoreManagedMotoboy}
-                disabled={creatingMotoboy}
-                className="btn-press rounded-2xl bg-[#336886] px-4 py-3 text-sm font-black text-white shadow-[0_22px_48px_-32px_rgba(51,104,134,0.85)] disabled:cursor-not-allowed disabled:opacity-60"
+                loading={creatingMotoboy}
               >
-                {creatingMotoboy ? 'Criando acesso...' : 'Criar motoboy próprio'}
-              </button>
+                Criar motoboy próprio
+              </Button>
             </div>
           </div>
         </div>
@@ -1837,14 +1835,14 @@ export function AdminMotoboys() {
               >
                 Fechar
               </button>
-              <button
-                type="button"
+              <Button
+                size="sm"
                 onClick={submitResetPassword}
-                disabled={resetPasswordModal.loading}
-                className="flex-1 rounded-xl bg-[#336886] px-4 py-2.5 text-xs font-black text-white shadow-[0_14px_32px_-18px_rgba(51,104,134,0.6)] disabled:opacity-60"
+                loading={resetPasswordModal.loading}
+                className="flex-1"
               >
-                {resetPasswordModal.loading ? 'Redefinindo...' : 'Redefinir'}
-              </button>
+                Redefinir
+              </Button>
             </div>
           </div>
         </div>
