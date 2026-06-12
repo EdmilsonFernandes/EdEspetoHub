@@ -17,7 +17,15 @@ import {
 } from '@phosphor-icons/react';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
-import { Button, IconButton, SurfaceCard, TextField } from '../components/ui';
+import {
+  Button,
+  EmptyState,
+  IconButton,
+  SectionHeader,
+  SurfaceCard,
+  TextareaField,
+  TextField,
+} from '../components/ui';
 import { AuthLayout } from '../layouts/AuthLayout';
 import {
   destinationPartnerPortalService,
@@ -337,23 +345,29 @@ export function DestinationPartnerPortal() {
         subtitle="Destinos, chalés e serviços"
         backTo="/hub"
         right={(
-          <button type="button" onClick={logout} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-white/80 bg-white/75 px-3 text-[11px] font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-sm">
-            <SignOut size={15} weight="bold" />
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={logout}
+            leftIcon={<SignOut size={15} weight="bold" />}
+            className="rounded-full uppercase tracking-[0.12em]"
+          >
             Sair
-          </button>
+          </Button>
         )}
         maxWidthClassName="max-w-6xl"
       />
 
       <main className="mx-auto grid w-full max-w-6xl gap-4 px-4 lg:grid-cols-[360px_1fr]">
         <aside className="space-y-4">
-          <section className="rounded-[1.8rem] border border-white/70 bg-white/86 p-4 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.55)] backdrop-blur-xl">
+          <SurfaceCard as="section" padding="md" className="rounded-[1.8rem]">
             <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]/70">Conta</p>
             <h1 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">{session.partner?.name || 'Parceiro'}</h1>
             <p className="mt-1 text-sm font-semibold text-slate-500">{session.partner?.email}</p>
-          </section>
+          </SurfaceCard>
 
-          <section className="rounded-[1.8rem] border border-white/70 bg-white/86 p-3 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.55)] backdrop-blur-xl">
+          <SurfaceCard as="section" padding="sm" className="rounded-[1.8rem]">
             <div className="mb-3 flex items-center justify-between px-1">
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]/70">Cadastros</p>
               <span className="rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black text-[#153A4C]">{resources.length}</span>
@@ -368,7 +382,7 @@ export function DestinationPartnerPortal() {
                     key={resource.permissionId}
                     type="button"
                     onClick={() => setSelectedId(resource.permissionId)}
-                    className={`flex w-full items-center gap-3 rounded-[1.35rem] border p-2.5 text-left transition active:scale-[0.99] ${active ? 'border-[#336886]/24 bg-[#336886]/9 shadow-[0_18px_34px_-26px_rgba(21,58,76,0.45)]' : 'border-slate-100 bg-white hover:bg-slate-50'}`}
+                    className={`jnc-ds-touch jnc-ds-focus-ring flex w-full items-center gap-3 rounded-[1.35rem] border p-2.5 text-left transition ${active ? 'border-[#336886]/24 bg-[#336886]/9 shadow-[0_18px_34px_-26px_rgba(21,58,76,0.45)]' : 'border-slate-100 bg-white hover:bg-slate-50'}`}
                   >
                     <img src={resourceImage(resource)} alt="" className="h-[3.25rem] w-[3.25rem] shrink-0 rounded-2xl object-cover ring-1 ring-slate-100" />
                     <span className="min-w-0 flex-1">
@@ -383,10 +397,10 @@ export function DestinationPartnerPortal() {
                 );
               })}
             </div>
-          </section>
+          </SurfaceCard>
         </aside>
 
-        <section className="rounded-[2rem] border border-white/70 bg-white/88 p-4 shadow-[0_28px_80px_-50px_rgba(15,23,42,0.60)] backdrop-blur-xl sm:p-6">
+        <SurfaceCard as="section" padding="lg" className="rounded-[2rem]">
           {selectedResource ? (
             <form onSubmit={submit} className="space-y-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -406,16 +420,16 @@ export function DestinationPartnerPortal() {
                 </div>
               </div>
 
-              <section className="rounded-[1.6rem] border border-[#336886]/10 bg-[linear-gradient(135deg,rgba(51,104,134,0.08),rgba(255,255,255,0.82))] p-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Checklist de publicação</p>
-                    <h3 className="mt-1 text-base font-black text-slate-950">Deixe sua página pronta para converter.</h3>
-                  </div>
-                  <span className="rounded-full bg-white/88 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-600">
+              <SurfaceCard as="section" tone="brand" padding="md" className="rounded-[1.6rem]">
+                <SectionHeader
+                  eyebrow="Checklist de publicação"
+                  title="Deixe sua página pronta para converter."
+                  action={(
+                    <span className="rounded-full bg-white/88 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-600">
                     {checklist.filter((item) => item.done).length}/{checklist.length} concluídos
-                  </span>
-                </div>
+                    </span>
+                  )}
+                />
                 <div className="mt-3 grid gap-2 sm:grid-cols-5">
                   {checklist.map((item) => (
                     <div key={item.label} className={`rounded-2xl border px-3 py-2 text-xs font-black ${item.done ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white/78 text-slate-500'}`}>
@@ -424,129 +438,120 @@ export function DestinationPartnerPortal() {
                     </div>
                   ))}
                 </div>
-              </section>
+              </SurfaceCard>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <label className="block sm:col-span-2">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Nome público</span>
-                  <input
-                    {...inputAssistProps.name}
-                    value={selectedResource.resourceType === 'HOSPITALITY_PLACE' ? form.name : form.title}
-                    onChange={(event) => change(selectedResource.resourceType === 'HOSPITALITY_PLACE' ? 'name' : 'title', event.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white"
-                  />
-                </label>
+                <TextField
+                  {...inputAssistProps.name}
+                  name="publicName"
+                  label="Nome público"
+                  value={selectedResource.resourceType === 'HOSPITALITY_PLACE' ? form.name : form.title}
+                  onChange={(event) => change(selectedResource.resourceType === 'HOSPITALITY_PLACE' ? 'name' : 'title', event.target.value)}
+                  wrapperClassName="sm:col-span-2"
+                  inputClassName="bg-slate-50 focus:bg-white"
+                />
 
-                <label className="block sm:col-span-2">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Descrição</span>
-                  <textarea
-                    {...textareaAssistProps.description}
-                    value={form.description}
-                    onChange={(event) => change('description', event.target.value)}
-                    rows={4}
-                    className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white"
-                  />
-                </label>
+                <TextareaField
+                  {...textareaAssistProps.description}
+                  name="description"
+                  label="Descrição"
+                  value={form.description}
+                  onChange={(event) => change('description', event.target.value)}
+                  rows={4}
+                  wrapperClassName="sm:col-span-2"
+                  textareaClassName="bg-slate-50 focus:bg-white"
+                />
 
-                <label className="block">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">WhatsApp</span>
-                  <input {...inputAssistProps.phone} value={form.whatsapp} onChange={(event) => change('whatsapp', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white" />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Telefone</span>
-                  <input {...inputAssistProps.phone} value={form.phone} onChange={(event) => change('phone', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white" />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Instagram</span>
-                  <input type="url" value={form.instagramUrl} onChange={(event) => change('instagramUrl', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white" />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Site</span>
-                  <input type="url" value={form.websiteUrl} onChange={(event) => change('websiteUrl', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white" />
-                </label>
+                <TextField {...inputAssistProps.phone} name="whatsapp" label="WhatsApp" value={form.whatsapp} onChange={(event) => change('whatsapp', event.target.value)} inputClassName="bg-slate-50 focus:bg-white" />
+                <TextField {...inputAssistProps.phone} name="phone" label="Telefone" value={form.phone} onChange={(event) => change('phone', event.target.value)} inputClassName="bg-slate-50 focus:bg-white" />
+                <TextField name="instagramUrl" label="Instagram" type="url" value={form.instagramUrl} onChange={(event) => change('instagramUrl', event.target.value)} inputClassName="bg-slate-50 focus:bg-white" />
+                <TextField name="websiteUrl" label="Site" type="url" value={form.websiteUrl} onChange={(event) => change('websiteUrl', event.target.value)} inputClassName="bg-slate-50 focus:bg-white" />
               </div>
 
-              <div className="grid gap-3 rounded-[1.5rem] border border-slate-100 bg-slate-50/70 p-3 sm:grid-cols-6">
-                <label className="block sm:col-span-3">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Endereço</span>
-                  <input {...inputAssistProps.addressLine1} value={form.address} onChange={(event) => change('address', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886]" />
-                </label>
-                <label className="block sm:col-span-1">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Número</span>
-                  <input value={form.addressNumber} onChange={(event) => change('addressNumber', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886]" />
-                </label>
-                <label className="block sm:col-span-2">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">CEP</span>
-                  <input {...inputAssistProps.postalCode} value={form.zipCode} onChange={(event) => change('zipCode', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886]" />
-                </label>
-                <label className="block sm:col-span-2">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Bairro</span>
-                  <input {...inputAssistProps.neighborhood} value={form.district} onChange={(event) => change('district', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886]" />
-                </label>
-                <label className="block sm:col-span-3">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Cidade</span>
-                  <input {...inputAssistProps.city} value={form.city} onChange={(event) => change('city', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886]" />
-                </label>
-                <label className="block sm:col-span-1">
-                  <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">UF</span>
-                  <input {...inputAssistProps.state} value={form.state} onChange={(event) => change('state', event.target.value)} maxLength={2} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886]" />
-                </label>
-              </div>
+              <SurfaceCard tone="soft" padding="sm" className="grid gap-3 rounded-[1.5rem] border-slate-100 bg-slate-50/70 sm:grid-cols-6">
+                <TextField {...inputAssistProps.addressLine1} name="address" label="Endereço" value={form.address} onChange={(event) => change('address', event.target.value)} wrapperClassName="sm:col-span-3" inputClassName="bg-white" />
+                <TextField name="addressNumber" label="Número" value={form.addressNumber} onChange={(event) => change('addressNumber', event.target.value)} wrapperClassName="sm:col-span-1" inputClassName="bg-white" />
+                <TextField {...inputAssistProps.postalCode} name="zipCode" label="CEP" value={form.zipCode} onChange={(event) => change('zipCode', event.target.value)} wrapperClassName="sm:col-span-2" inputClassName="bg-white" />
+                <TextField {...inputAssistProps.neighborhood} name="district" label="Bairro" value={form.district} onChange={(event) => change('district', event.target.value)} wrapperClassName="sm:col-span-2" inputClassName="bg-white" />
+                <TextField {...inputAssistProps.city} name="city" label="Cidade" value={form.city} onChange={(event) => change('city', event.target.value)} wrapperClassName="sm:col-span-3" inputClassName="bg-white" />
+                <TextField {...inputAssistProps.state} name="state" label="UF" value={form.state} onChange={(event) => change('state', event.target.value)} maxLength={2} wrapperClassName="sm:col-span-1" inputClassName="bg-white" />
+              </SurfaceCard>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 {selectedResource.resourceType === 'HOSPITALITY_PLACE' ? (
                   <>
                     <label className="block rounded-[1.4rem] border border-dashed border-[#336886]/25 bg-[#336886]/6 p-4">
                       <span className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]"><Camera size={16} /> Logo</span>
-                      <input type="file" accept="image/*" onChange={(event) => chooseFile('logoFile', event.target.files?.[0])} className="text-sm font-semibold text-slate-600" />
+                      <input type="file" accept="image/*" onChange={(event) => chooseFile('logoFile', event.target.files?.[0])} className="jnc-ds-focus-ring w-full rounded-xl text-sm font-semibold text-slate-600" />
                     </label>
                     <label className="block rounded-[1.4rem] border border-dashed border-[#336886]/25 bg-[#336886]/6 p-4">
                       <span className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]"><Camera size={16} /> Banner</span>
-                      <input type="file" accept="image/*" onChange={(event) => chooseFile('bannerFile', event.target.files?.[0])} className="text-sm font-semibold text-slate-600" />
+                      <input type="file" accept="image/*" onChange={(event) => chooseFile('bannerFile', event.target.files?.[0])} className="jnc-ds-focus-ring w-full rounded-xl text-sm font-semibold text-slate-600" />
                     </label>
-                    <label className="block sm:col-span-2">
-                      <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Instruções de entrega</span>
-                      <textarea {...textareaAssistProps.notes} value={form.deliveryInstructions} onChange={(event) => change('deliveryInstructions', event.target.value)} rows={3} className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white" />
-                    </label>
+                    <TextareaField
+                      {...textareaAssistProps.notes}
+                      name="deliveryInstructions"
+                      label="Instruções de entrega"
+                      value={form.deliveryInstructions}
+                      onChange={(event) => change('deliveryInstructions', event.target.value)}
+                      rows={3}
+                      wrapperClassName="sm:col-span-2"
+                      textareaClassName="bg-slate-50 focus:bg-white"
+                    />
                   </>
                 ) : (
                   <label className="block rounded-[1.4rem] border border-dashed border-[#336886]/25 bg-[#336886]/6 p-4 sm:col-span-2">
                     <span className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]"><Camera size={16} /> Imagem do serviço</span>
-                    <input type="file" accept="image/*" onChange={(event) => chooseFile('imageFile', event.target.files?.[0])} className="text-sm font-semibold text-slate-600" />
+                    <input type="file" accept="image/*" onChange={(event) => chooseFile('imageFile', event.target.files?.[0])} className="jnc-ds-focus-ring w-full rounded-xl text-sm font-semibold text-slate-600" />
                   </label>
                 )}
               </div>
 
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <a href={selectedResource.resourceType === 'HOSPITALITY_PLACE' ? `/destinos/${selectedResource.item?.destination?.slug || ''}/chales/${selectedResource.item?.slug || ''}` : `/destinos/${selectedResource.item?.destination?.slug || ''}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-600 transition hover:bg-slate-50">
+                <a href={selectedResource.resourceType === 'HOSPITALITY_PLACE' ? `/destinos/${selectedResource.item?.destination?.slug || ''}/chales/${selectedResource.item?.slug || ''}` : `/destinos/${selectedResource.item?.destination?.slug || ''}`} target="_blank" rel="noreferrer" className="jnc-ds-touch jnc-ds-focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-600 transition hover:bg-slate-50">
                   <ArrowSquareOut size={17} weight="bold" />
                   Ver página pública
                 </a>
                 {storeSignupUrl ? (
-                  <a href={storeSignupUrl} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 transition hover:bg-emerald-100">
+                  <a href={storeSignupUrl} className="jnc-ds-touch jnc-ds-focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 transition hover:bg-emerald-100">
                     <Buildings size={17} weight="duotone" />
                     Quero receber pedidos
                   </a>
                 ) : null}
-                <button type="submit" disabled={saving} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.65)] transition active:scale-[0.98] disabled:opacity-60">
-                  {saving ? <Buildings size={17} weight="duotone" /> : <FloppyDisk size={17} weight="duotone" />}
-                  {saving ? 'Salvando...' : 'Salvar alterações'}
-                </button>
+                <Button
+                  type="submit"
+                  size="lg"
+                  loading={saving}
+                  leftIcon={saving ? <Buildings size={17} weight="duotone" /> : <FloppyDisk size={17} weight="duotone" />}
+                  className="sm:ml-auto"
+                >
+                  Salvar alterações
+                </Button>
               </div>
 
-              {success ? <p className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700"><CheckCircle size={16} weight="fill" className="mr-1 inline" />{success}</p> : null}
-              {error ? <p className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
+              {success ? (
+                <SurfaceCard tone="success" padding="md" className="rounded-2xl text-sm font-bold text-emerald-700">
+                  <CheckCircle size={16} weight="fill" className="mr-1 inline" />
+                  {success}
+                </SurfaceCard>
+              ) : null}
+              {error ? (
+                <SurfaceCard padding="md" className="rounded-2xl border-rose-100 bg-rose-50 text-sm font-bold text-rose-700 shadow-none">
+                  {error}
+                </SurfaceCard>
+              ) : null}
             </form>
           ) : (
-            <div className="grid min-h-[22rem] place-items-center text-center">
-              <div>
-                <HouseLine size={44} weight="duotone" className="mx-auto text-[#336886]" />
-                <h2 className="mt-3 text-xl font-black text-slate-950">Nenhum cadastro liberado ainda</h2>
-                <p className="mt-2 text-sm font-semibold text-slate-500">Quando o Super Admin aprovar sua solicitação, ela aparece aqui.</p>
-              </div>
+            <div className="grid min-h-[22rem] place-items-center">
+              <EmptyState
+                icon={<HouseLine size={32} weight="duotone" />}
+                title="Nenhum cadastro liberado ainda"
+                description="Quando o Super Admin aprovar sua solicitação, ela aparece aqui."
+                className="w-full max-w-lg"
+              />
             </div>
           )}
-        </section>
+        </SurfaceCard>
       </main>
     </div>
   );
