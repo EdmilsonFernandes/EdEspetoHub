@@ -20,6 +20,7 @@ import {
 import { openActionTarget } from '../../utils/actionLink';
 import { AppImagePreviewDialog } from '../common/AppImagePreviewDialog';
 import { AirbnbIcon, GoogleMapsIcon, isAirbnbUrlOrLabel } from '../common/BrandActionIcons';
+import { Button, IconButton, SkeletonBlock, SurfaceCard } from '../ui';
 
 const InstagramIcon = ({ className = 'h-4 w-4' }) => (
   <img src="/insta.avif" alt="" className={`${className} rounded-full object-cover`} />
@@ -110,17 +111,17 @@ const normalizeContent = (value?: string) =>
     .toLowerCase();
 
 export const PreStoreCardSkeleton = ({ compact = false }: any) => (
-  <article className={`overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white p-3 shadow-[0_16px_38px_-34px_rgba(15,23,42,0.42)] ${compact ? '' : 'min-h-[6.5rem]'}`}>
+  <SurfaceCard as="article" padding="sm" className={`rounded-[1.35rem] border-slate-200/80 bg-white ${compact ? '' : 'min-h-[6.5rem]'}`}>
     <div className="flex animate-pulse gap-3">
-      <div className={`${compact ? 'h-12 w-12' : 'h-16 w-16'} shrink-0 rounded-[1.1rem] bg-slate-200`} />
+      <SkeletonBlock className={`${compact ? 'h-12 w-12' : 'h-16 w-16'} shrink-0`} rounded="lg" />
       <div className="min-w-0 flex-1 space-y-2 py-1">
-        <div className="h-3 w-24 rounded-full bg-slate-200" />
-        <div className="h-4 w-3/4 rounded-full bg-slate-200" />
-        <div className="h-3 w-full rounded-full bg-slate-100" />
-        <div className="h-3 w-2/3 rounded-full bg-slate-100" />
+        <SkeletonBlock className="h-3 w-24" rounded="full" />
+        <SkeletonBlock className="h-4 w-3/4" rounded="full" />
+        <SkeletonBlock className="h-3 w-full bg-slate-100" rounded="full" />
+        <SkeletonBlock className="h-3 w-2/3 bg-slate-100" rounded="full" />
       </div>
     </div>
-  </article>
+  </SurfaceCard>
 );
 
 export function PreStoreDetailSheet({
@@ -202,7 +203,7 @@ export function PreStoreDetailSheet({
   return (
     <div className="fixed inset-0 z-[240] flex items-end bg-slate-950/38 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Detalhes de ${listing.title || 'serviço'}`}>
       <button type="button" aria-label="Fechar detalhes" className="absolute inset-0 cursor-default" onClick={onClose} />
-      <section className="relative w-full max-w-2xl overflow-hidden rounded-t-[2rem] bg-[#f7f1e8] shadow-[0_30px_90px_-42px_rgba(15,23,42,0.7)] sm:max-h-[92dvh] sm:rounded-[2rem]">
+      <SurfaceCard as="section" padding="none" className="w-full max-w-2xl rounded-t-[2rem] border-white/70 bg-[#f7f1e8] shadow-[0_30px_90px_-42px_rgba(15,23,42,0.7)] sm:max-h-[92dvh] sm:rounded-[2rem]">
         <div className="max-h-[92dvh] overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div className="relative bg-slate-900">
             <div className="aspect-[16/9] max-h-[19rem] w-full overflow-hidden relative">
@@ -226,14 +227,12 @@ export function PreStoreDetailSheet({
               )}
             </div>
             <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-950/72 via-slate-950/16 to-transparent" />
-            <button
-              type="button"
+            <IconButton
               onClick={onClose}
-              className="absolute right-3 top-3 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-950/82 text-white shadow-[0_12px_32px_-14px_rgba(0,0,0,0.75)] ring-2 ring-white/80 backdrop-blur-md transition hover:bg-slate-950 active:scale-95"
-              aria-label="Fechar"
-            >
-              <X size={18} weight="bold" />
-            </button>
+              icon={<X size={18} weight="bold" />}
+              label="Fechar"
+              className="absolute right-3 top-3 z-30 bg-slate-950/82 text-white shadow-[0_12px_32px_-14px_rgba(0,0,0,0.75)] ring-2 ring-white/80 backdrop-blur-md hover:bg-slate-950"
+            />
             <div className="absolute bottom-4 left-4 right-4">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/92 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#153A4C] shadow-sm">
                 <ForkKnife size={13} weight="duotone" />
@@ -244,7 +243,7 @@ export function PreStoreDetailSheet({
           </div>
 
           <div className="space-y-4 p-4 sm:p-5">
-            <div className="rounded-[1.5rem] border border-white/80 bg-white/88 p-4 shadow-[0_14px_38px_-34px_rgba(15,23,42,0.42)]">
+            <SurfaceCard padding="md" className="rounded-[1.5rem] border-white/80 bg-white/88">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#edf5fa] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#336886]">
                   <ShoppingBagOpen size={14} weight="duotone" />
@@ -268,12 +267,12 @@ export function PreStoreDetailSheet({
               ) : null}
 
               {routeAction?.href ? (
-                <div className="mt-4 rounded-[1.4rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(238,247,242,0.9))] p-3 text-slate-900 shadow-[0_18px_42px_-34px_rgba(51,104,134,0.42)] ring-1 ring-white/80">
+                <SurfaceCard tone="brand" padding="sm" className="mt-4 rounded-[1.4rem] border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(238,247,242,0.9))] text-slate-900 ring-1 ring-white/80">
                   <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
                     <GoogleMapsIcon className="h-4 w-4" />
                     Referência para entrega
                   </p>
-                  <div className="mt-3 rounded-[1.15rem] border border-white/80 bg-white/86 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+                  <SurfaceCard tone="soft" padding="sm" className="mt-3 rounded-[1.15rem] border-white/80 bg-white/86 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
                     <div className="flex items-center gap-2">
                       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#edf5fa] text-[#336886] ring-1 ring-[#cfe0ea]">
                         <Storefront size={17} weight="duotone" />
@@ -288,22 +287,23 @@ export function PreStoreDetailSheet({
                       <span className="text-[#336886]">{routeDistanceLabel || 'rota'}</span>
                       <span className="truncate text-right">{placeName || 'Chalé'}</span>
                     </div>
-                  </div>
+                  </SurfaceCard>
                   <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-600">
                     Mostra a distância entre este serviço e a hospedagem para facilitar a chegada do motoboy.
                   </p>
                   <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
                     <ContactAction action={routeAction} />
-                    <button
-                      type="button"
+                    <Button
                       onClick={copyRouteLink}
-                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.05rem] border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-700 shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]"
+                      variant={routeCopied ? 'success' : 'secondary'}
+                      size="lg"
+                      leftIcon={routeCopied ? <CheckCircle size={16} weight="fill" /> : <ClipboardText size={16} weight="duotone" />}
+                      className="rounded-[1.05rem] hover:-translate-y-0.5"
                     >
-                      {routeCopied ? <CheckCircle size={16} weight="fill" /> : <ClipboardText size={16} weight="duotone" />}
                       {routeCopied ? 'Copiado' : 'Copiar rota'}
-                    </button>
+                    </Button>
                   </div>
-                </div>
+                </SurfaceCard>
               ) : null}
 
               {actions.length > 0 ? (
@@ -332,9 +332,9 @@ export function PreStoreDetailSheet({
               ) : !routeAction?.href ? (
                 <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">Contato ainda não informado.</p>
               ) : null}
-            </div>
+            </SurfaceCard>
 
-            <div className="rounded-[1.5rem] border border-[#153A4C]/10 bg-white p-4 shadow-[0_16px_42px_-36px_rgba(21,58,76,0.45)]">
+            <SurfaceCard tone="brand" padding="md" className="rounded-[1.5rem] border-[#153A4C]/10 bg-white">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#336886]">Como parceiro oficial</p>
@@ -351,15 +351,15 @@ export function PreStoreDetailSheet({
                 ].map((item: any) => {
                   const Icon = item.icon;
                   return (
-                    <div key={item.title} className="rounded-[1.15rem] bg-[#f6f2e9] p-3">
+                    <SurfaceCard key={item.title} tone="soft" padding="sm" className="rounded-[1.15rem] border-transparent bg-[#f6f2e9] shadow-none">
                       <Icon size={21} weight="duotone" className="text-[#153A4C]" />
                       <p className="mt-2 text-sm font-extrabold text-slate-900">{item.title}</p>
                       <p className="mt-1 text-xs font-medium leading-snug text-slate-500">{item.text}</p>
-                    </div>
+                    </SurfaceCard>
                   );
                 })}
               </div>
-            </div>
+            </SurfaceCard>
 
             {claimHref ? (
               <Link
@@ -387,7 +387,7 @@ export function PreStoreDetailSheet({
             ) : null}
           </div>
         </div>
-      </section>
+      </SurfaceCard>
 
       <AppImagePreviewDialog image={previewImage} onClose={() => setPreviewImage(null)} label="Imagem ampliada do local" />
     </div>
