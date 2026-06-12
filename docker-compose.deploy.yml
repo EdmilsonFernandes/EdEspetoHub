@@ -1,12 +1,20 @@
 services:
-  frontend:
-    pull_policy: always
-
-  backend:
-    pull_policy: always
-
   face-worker:
-    pull_policy: always
+    restart: always
 
-  apis:
-    pull_policy: always
+  postgres:
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    restart: always
+
+volumes:
+  postgres-data:
+    external: true
+    name: "${POSTGRES_VOLUME_NAME:-edespetohub_postgres-data}"
+  edespetohub_uploads:
+    external: true
+    name: "${UPLOADS_VOLUME_NAME:-edespetohub_uploads_data}"
+  redis-data:
+    name: "${REDIS_VOLUME_NAME:-edespetohub_redis-data}"

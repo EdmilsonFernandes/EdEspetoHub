@@ -59,21 +59,58 @@ public class ThermalPrinterPlugin extends Plugin {
     public void getStatus(PluginCall call) {
         JSObject ret = new JSObject();
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        boolean hasPermission = hasBluetoothConnectPermission();
         ret.put("available", adapter != null);
         ret.put("enabled", adapter != null && adapter.isEnabled());
-        ret.put("permissionGranted", hasBluetoothConnectPermission());
+        ret.put("permissionGranted", hasPermission);
         ret.put("settings", getSettingsObject());
         ret.put("savedPrinter", getSavedPrinterObject());
 
+        Log.d(TAG, "getStatus: available=" + (adapter != null)
+            + " enabled=" + (adapter != null && adapter.isEnabled())
+            + " permission=" + hasPermission);
+
         String savedAddress = sanitize(getPreferences().getString(KEY_ADDRESS, ""));
-        if (!savedAddress.isEmpty() && adapter != null && adapter.isEnabled()) {
+        if (!savedAddress.isEmpty() && adapter != null && adapter.isEnabled() && hasPermission) {
             boolean reachable = checkPrinterReachable(adapter, savedAddress);
             ret.put("printerReachable", reachable);
             Log.d(TAG, "getStatus: saved=" + savedAddress + " reachable=" + reachable);
         } else {
             ret.put("printerReachable", false);
+            if (!hasPermission && !savedAddress.isEmpty()) {
+                Log.w(TAG, "getStatus: cannot check reachability — BLUETOOTH_CONNECT permission not granted");
+            }
         }
 
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void requestPermission(PluginCall call) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            Log.d(TAG, "requestPermission: SDK < 31, no runtime permission needed");
+            JSObject ret = new JSObject();
+            ret.put("granted", true);
+            call.resolve(ret);
+            return;
+        }
+        if (hasBluetoothConnectPermission()) {
+            Log.d(TAG, "requestPermission: already granted");
+            JSObject ret = new JSObject();
+            ret.put("granted", true);
+            call.resolve(ret);
+            return;
+        }
+        Log.i(TAG, "requestPermission: requesting BLUETOOTH_CONNECT from user");
+        requestPermissionForAlias("bluetoothConnect", call, "requestPermissionCallback");
+    }
+
+    @PermissionCallback
+    private void requestPermissionCallback(PluginCall call) {
+        boolean granted = hasBluetoothConnectPermission();
+        Log.i(TAG, "requestPermissionCallback: granted=" + granted);
+        JSObject ret = new JSObject();
+        ret.put("granted", granted);
         call.resolve(ret);
     }
 
@@ -89,9 +126,11 @@ public class ThermalPrinterPlugin extends Plugin {
     @PermissionCallback
     private void listPairedDevicesPermsCallback(PluginCall call) {
         if (!hasBluetoothConnectPermission()) {
+            Log.w(TAG, "listPairedDevicesPermsCallback: user denied BLUETOOTH_CONNECT");
             call.reject("Permissao Bluetooth negada.", "PERMISSION_DENIED");
             return;
         }
+        Log.i(TAG, "listPairedDevicesPermsCallback: permission granted, listing devices");
         listPairedDevicesWithPermission(call);
     }
 
@@ -187,19 +226,23 @@ public class ThermalPrinterPlugin extends Plugin {
     @PermissionCallback
     private void printPermsCallback(PluginCall call) {
         if (!hasBluetoothConnectPermission()) {
+            Log.w(TAG, "printPermsCallback: user denied BLUETOOTH_CONNECT");
             call.reject("Permissao Bluetooth negada.", "PERMISSION_DENIED");
             return;
         }
+        Log.i(TAG, "printPermsCallback: permission granted, proceeding to print");
         printWithPermission(call);
     }
 
     private void listPairedDevicesWithPermission(PluginCall call) {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null) {
+            Log.w(TAG, "listPairedDevices: no Bluetooth adapter on this device");
             call.reject("Este aparelho nao possui Bluetooth.", "BLUETOOTH_UNAVAILABLE");
             return;
         }
         if (!adapter.isEnabled()) {
+            Log.w(TAG, "listPairedDevices: Bluetooth is disabled");
             call.reject("Bluetooth desligado.", "BLUETOOTH_DISABLED");
             return;
         }
@@ -256,10 +299,12 @@ public class ThermalPrinterPlugin extends Plugin {
     private void printWithPermission(PluginCall call) {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null) {
+            Log.w(TAG, "print: no Bluetooth adapter on this device");
             call.reject("Este aparelho nao possui Bluetooth.", "BLUETOOTH_UNAVAILABLE");
             return;
         }
         if (!adapter.isEnabled()) {
+            Log.w(TAG, "print: Bluetooth is disabled");
             call.reject("Bluetooth desligado.", "BLUETOOTH_DISABLED");
             return;
         }

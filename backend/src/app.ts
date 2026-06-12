@@ -146,7 +146,7 @@ async function bootstrap()
 	  scheduleAwaitingPaymentExpirationJob();
 	  scheduleStoreDashboardSnapshotJob();
 
-  app.listen(env.port, () =>
+  const server = app.listen(env.port, () =>
   {
     logger.info('API listening', {
       port: env.port,
@@ -155,6 +155,19 @@ async function bootstrap()
       strictRuntimeValidation: env.security.strictRuntimeValidation,
     });
   });
+
+  // Graceful shutdown: disconnect Redis before exiting
+  const shutdown = async (signal: string) => {
+    logger.info(`${signal} received, shutting down gracefully...`);
+    server.close();
+    try {
+      const { cacheService } = await import('./services/CacheService');
+      await cacheService.disconnect();
+    } catch { /* ignore */ }
+    process.exit(0);
+  };
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
+  process.on('SIGINT', () => void shutdown('SIGINT'));
 }
 
 bootstrap().catch((error) =>

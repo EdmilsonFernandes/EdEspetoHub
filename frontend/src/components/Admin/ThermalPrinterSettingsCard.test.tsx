@@ -25,6 +25,7 @@ const thermalMock = vi.hoisted(() => {
       name: 'Printer Teste',
       address: 'AA:BB:CC:DD:EE:FF',
       bonded: true,
+      isPrinter: true,
     },
   };
 });
@@ -44,6 +45,7 @@ vi.mock('../../utils/thermalPrinter', () => ({
   })),
   getStoredThermalPrinterSettings: vi.fn(() => thermalMock.settings),
   isAndroidNativeThermalPrinterRuntime: vi.fn(() => true),
+  isNativeThermalPrinterPrinterAvailable: vi.fn(() => true),
   isNativeThermalPrinterPluginAvailable: vi.fn(() => true),
   listNativeThermalPrinters: vi.fn(() => Promise.resolve({ devices: [thermalMock.device] })),
   normalizeThermalPrinterSettings: vi.fn((settings) => ({
@@ -52,6 +54,7 @@ vi.mock('../../utils/thermalPrinter', () => ({
   })),
   openNativeBluetoothSettings: vi.fn(() => Promise.resolve()),
   printNativeThermalReceipt: vi.fn(() => Promise.resolve({ mode: 'native', bytes: 120 })),
+  requestNativeBluetoothPermission: vi.fn(() => Promise.resolve({ granted: true })),
   saveNativeThermalPrinter: vi.fn((device, settings) => Promise.resolve({
     settings,
     savedPrinter: { ...device, ...settings },

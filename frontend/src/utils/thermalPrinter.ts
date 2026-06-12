@@ -40,6 +40,7 @@ type ThermalPrinterPlugin = {
   saveSettings(options: Partial<ThermalPrinterSettings>): Promise<{ savedPrinter?: NativeThermalPrinterStatus['savedPrinter']; settings?: ThermalPrinterSettings }>;
   clearPrinter(): Promise<{ savedPrinter?: NativeThermalPrinterStatus['savedPrinter'] }>;
   openBluetoothSettings(): Promise<void>;
+  requestPermission(): Promise<{ granted: boolean }>;
   print(options: { text: string; address?: string; copies?: number; feedLines?: number }): Promise<NativeThermalPrinterPrintResult>;
 };
 
@@ -139,12 +140,35 @@ const ensureNativeThermalPrinterAvailable = (message: string) => {
 
 export const getNativeThermalPrinterStatus = async () => {
   ensureNativeThermalPrinterAvailable('Impressão nativa disponível apenas no app Android.');
-  return ThermalPrinter.getStatus();
+  const result = await ThermalPrinter.getStatus();
+  console.log('[thermal-printer] getStatus:', {
+    available: result.available,
+    enabled: result.enabled,
+    permissionGranted: result.permissionGranted,
+    printerReachable: result.printerReachable,
+    hasSavedPrinter: Boolean(result.savedPrinter?.address),
+  });
+  return result;
+};
+
+export const requestNativeBluetoothPermission = async () => {
+  ensureNativeThermalPrinterAvailable('Abra pelo app Android para configurar a impressora.');
+  console.log('[thermal-printer] requestPermission: requesting BLUETOOTH_CONNECT...');
+  const result = await ThermalPrinter.requestPermission();
+  console.log('[thermal-printer] requestPermission: granted=' + result.granted);
+  return result;
 };
 
 export const listNativeThermalPrinters = async () => {
   ensureNativeThermalPrinterAvailable('Abra pelo app Android para configurar a impressora.');
-  return ThermalPrinter.listPairedDevices();
+  console.log('[thermal-printer] listPairedDevices: fetching...');
+  const result = await ThermalPrinter.listPairedDevices();
+  console.log('[thermal-printer] listPairedDevices:', {
+    total: result?.devices?.length ?? 0,
+    printers: result?.devices?.filter(d => d.isPrinter).length ?? 0,
+    nonPrinters: result?.devices?.filter(d => !d.isPrinter).length ?? 0,
+  });
+  return result;
 };
 
 export const saveNativeThermalPrinter = async (
@@ -193,11 +217,21 @@ export const printNativeThermalReceipt = async (
   settings?: Partial<ThermalPrinterSettings>
 ) => {
   ensureNativeThermalPrinterAvailable('Impressão nativa disponível apenas no app Android.');
+  console.log('[thermal-printer] printNativeThermalReceipt: checking status before print...');
   const status = await ThermalPrinter.getStatus();
+
+  if (!status.enabled) {
+    throw new NativeThermalPrinterError('BLUETOOTH_DISABLED', 'Bluetooth desligado. Ligue o Bluetooth e tente novamente.');
+  }
+  if (!status.permissionGranted) {
+    throw new NativeThermalPrinterError('PERMISSION_DENIED', 'Permissão Bluetooth negada. Permita dispositivos próximos nas configurações do app.');
+  }
+
   const address = String(status?.savedPrinter?.address || '').trim();
   if (!address) {
     throw new NativeThermalPrinterError('NO_PRINTER', 'Nenhuma impressora configurada neste aparelho.');
   }
+  console.log('[thermal-printer] printNativeThermalReceipt: printing to', address);
   const effectiveSettings = normalizeThermalPrinterSettings({
     ...getStoredThermalPrinterSettings(),
     ...(status?.settings || {}),

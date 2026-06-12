@@ -22,6 +22,7 @@ import {
   normalizeThermalPrinterSettings,
   openNativeBluetoothSettings,
   printNativeThermalReceipt,
+  requestNativeBluetoothPermission,
   saveNativeThermalPrinter,
   saveNativeThermalPrinterSettings,
   type NativeThermalPrinterDevice,
@@ -103,6 +104,7 @@ export function ThermalPrinterSettingsCard() {
   const [savingAddress, setSavingAddress] = useState('');
   const [testPhase, setTestPhase] = useState<TestPhase>('idle');
   const [hasSearchedOnce, setHasSearchedOnce] = useState(false);
+  const [permissionDenied, setPermissionDenied] = useState(false);
   const isNativeAndroid = isAndroidNativeThermalPrinterRuntime();
   const hasNativePrinterPlugin = isNativeThermalPrinterPluginAvailable();
 
@@ -137,25 +139,72 @@ export function ThermalPrinterSettingsCard() {
       let currentStatus: NativeThermalPrinterStatus | null = null;
       try {
         currentStatus = await refreshNativeStatus();
-      } catch {
-        // status indisponivel
+      } catch (error) {
+        console.warn('[thermal-printer] mount: status indisponivel', error);
       }
+
+      // Se permissao negada, NAO tenta listar — pede permissao primeiro
+      if (currentStatus && !currentStatus.permissionGranted) {
+        console.warn('[thermal-printer] mount: BLUETOOTH_CONNECT permission not granted, requesting...');
+        try {
+          const permResult = await requestNativeBluetoothPermission();
+          if (!permResult.granted) {
+            console.warn('[thermal-printer] mount: user denied BLUETOOTH_CONNECT');
+            setPermissionDenied(true);
+            showToast('Permita dispositivos próximos para usar a impressora Bluetooth.', 'warning');
+            return;
+          }
+          setPermissionDenied(false);
+          // Re-obter status apos permissao concedida
+          currentStatus = await refreshNativeStatus();
+        } catch (error) {
+          console.warn('[thermal-printer] mount: permission request failed', error);
+          setPermissionDenied(true);
+          showToast('Permita dispositivos próximos nas configurações do app.', 'warning');
+          return;
+        }
+      }
+
+      // Se Bluetooth desligado, NAO tenta listar
+      if (currentStatus && !currentStatus.enabled) {
+        console.warn('[thermal-printer] mount: Bluetooth desligado');
+        showToast('Bluetooth desligado. Ligue o Bluetooth e toque em Buscar.', 'warning');
+        return;
+      }
+
+      // Se ja tem impressora salva, NAO tenta auto-selecionar
       if (!currentStatus?.savedPrinter?.address) {
         try {
           const result = await listNativeThermalPrinters();
           const found = result?.devices || [];
           setDevices(found);
           setHasSearchedOnce(true);
-          if (found.length === 1) {
+
+          // Auto-selecionar SOMENTE se houver exatamente 1 impressora (isPrinter === true)
+          const printers = found.filter(d => d.isPrinter === true);
+          if (printers.length === 1) {
+            console.log('[thermal-printer] mount: auto-selecting single printer:', printers[0].name || printers[0].address);
             const mergedSettings = normalizeThermalPrinterSettings({
               ...getStoredThermalPrinterSettings(),
             });
-            await saveNativeThermalPrinter(found[0], mergedSettings);
+            await saveNativeThermalPrinter(printers[0], mergedSettings);
             await refreshNativeStatus();
-            showToast(`Impressora ${found[0].name || found[0].address} selecionada automaticamente.`, 'info');
+            showToast(`Impressora ${printers[0].name || printers[0].address} selecionada automaticamente.`, 'info');
+          } else if (found.length > 0) {
+            console.log('[thermal-printer] mount: found', found.length, 'devices,', printers.length, 'printers — user must choose');
           }
-        } catch {
-          // auto-busca silenciosa
+        } catch (error: any) {
+          const code = String(error?.code || '');
+          if (code === 'PERMISSION_DENIED') {
+            console.warn('[thermal-printer] mount: listPairedDevices permission denied');
+            setPermissionDenied(true);
+            showToast('Permita dispositivos próximos para listar impressoras.', 'warning');
+          } else if (code === 'BLUETOOTH_DISABLED') {
+            console.warn('[thermal-printer] mount: Bluetooth disabled');
+            showToast('Bluetooth desligado. Ligue o Bluetooth e tente novamente.', 'warning');
+          } else {
+            console.warn('[thermal-printer] mount: list error', error);
+          }
         }
       }
     })();
@@ -270,10 +319,12 @@ export function ThermalPrinterSettingsCard() {
 
       if (!currentStatus?.savedPrinter?.address) {
         const availableDevices = devices.length ? devices : await loadDevices({ silent: true });
-        if (availableDevices.length === 1) {
-          currentStatus = await savePrinterDevice(availableDevices[0], { notify: false });
-          showToast(`Impressora ${availableDevices[0].name || availableDevices[0].address} selecionada para o teste.`, 'info');
-        } else if (availableDevices.length > 1) {
+        // Filtrar só impressoras (isPrinter === true) para auto-selecao
+        const printers = availableDevices.filter(d => d.isPrinter === true);
+        if (printers.length === 1) {
+          currentStatus = await savePrinterDevice(printers[0], { notify: false });
+          showToast(`Impressora ${printers[0].name || printers[0].address} selecionada para o teste.`, 'info');
+        } else if (availableDevices.length > 0) {
           setTestPhase('idle');
           showToast('Escolha uma impressora na lista antes de testar.', 'warning');
           return;
@@ -327,6 +378,24 @@ export function ThermalPrinterSettingsCard() {
       await openNativeBluetoothSettings();
     } catch (error: any) {
       showToast(error?.message || 'Nao foi possivel abrir o Bluetooth.', 'error');
+    }
+  };
+
+  const handleRequestPermission = async () => {
+    try {
+      const result = await requestNativeBluetoothPermission();
+      if (result.granted) {
+        setPermissionDenied(false);
+        showToast('Permissão Bluetooth concedida!', 'success');
+        await loadDevices();
+      } else {
+        setPermissionDenied(true);
+        showToast('Permita dispositivos próximos nas configurações do app (Configurações → Apps → Jano Caminho → Permissões).', 'warning');
+      }
+    } catch (error: any) {
+      console.warn('[thermal-printer] handleRequestPermission failed', error);
+      setPermissionDenied(true);
+      showToast('Não foi possível obter permissão. Vá em Configurações → Apps → Permissões.', 'warning');
     }
   };
 
@@ -431,6 +500,59 @@ export function ThermalPrinterSettingsCard() {
         <StepBadge number={1} label="Conectar" active={!isConnected} completed={isConnected} />
 
         <div className="mt-3">
+          {/* Permission denied banner */}
+          {(permissionDenied || (status && !status.permissionGranted)) && (
+            <div className="mb-3 rounded-2xl border border-rose-200 bg-rose-50 p-4">
+              <div className="flex items-start gap-3">
+                <WarningCircle size={20} weight="fill" className="shrink-0 text-rose-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-rose-800">Permissão Bluetooth necessária</p>
+                  <p className="mt-1 text-xs leading-relaxed text-rose-700">
+                    O app precisa de permissão para acessar dispositivos Bluetooth próximos. Sem essa permissão, não é possível encontrar ou conectar impressoras.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={handleRequestPermission}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-3 py-2 text-xs font-black text-white hover:bg-rose-700 active:scale-[0.99]"
+                    >
+                      <Bluetooth size={14} weight="bold" /> Permitir Bluetooth
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleOpenBluetooth}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs font-black text-rose-700 hover:bg-rose-50"
+                    >
+                      <Gear size={14} weight="duotone" /> Configurações
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bluetooth disabled banner */}
+          {status && !status.enabled && status.permissionGranted !== false && (
+            <div className="mb-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <div className="flex items-start gap-3">
+                <WarningCircle size={20} weight="fill" className="shrink-0 text-amber-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-amber-800">Bluetooth desligado</p>
+                  <p className="mt-1 text-xs leading-relaxed text-amber-700">
+                    Ligue o Bluetooth do aparelho para buscar e conectar impressoras.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleOpenBluetooth}
+                    className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-3 py-2 text-xs font-black text-white hover:bg-amber-700 active:scale-[0.99]"
+                  >
+                    <Bluetooth size={14} weight="bold" /> Ligar Bluetooth
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {status?.savedPrinter && (
             <div className="mb-3 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-3.5">
               <div className="flex items-center justify-between">
