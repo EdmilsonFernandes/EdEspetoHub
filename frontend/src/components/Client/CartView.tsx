@@ -30,6 +30,7 @@ import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderP
 import { DddSelect } from "../common/DddSelect";
 import { addressLookupService } from "../../services/addressLookupService";
 import { inputAssistProps, textareaAssistProps } from "../../utils/inputAssist";
+import { Button } from '../ui/Button';
 import { CUSTOMER_ORDER_NOTE_MAX_LENGTH, limitCustomerOrderNoteInput } from "../../utils/customerOrderNote";
 
 const BRAZIL_DDDS = [
@@ -1401,15 +1402,16 @@ export const CartView = ({
             </div>
           )}
           <div className="flex items-center gap-3">
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={useMultiStepFlow && checkoutStep > 1 ? () => setCheckoutStep(s => s - 1) : onBack}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-slate-200/80 bg-white text-[#336886] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.3)] transition hover:-translate-y-0.5 hover:bg-sky-50 active:scale-95"
               aria-label={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
               title={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
+              className="!h-11 !w-11 !rounded-[1.15rem] !px-0 text-[#336886]"
             >
               <ArrowLeft size={18} weight="bold" />
-            </button>
+            </Button>
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-[1.05rem] border border-white bg-white shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-100">
                 <img
@@ -3169,24 +3171,21 @@ export const CartView = ({
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
                   onClick={() => {
                     setCustomerNoteDraft("");
                     handleCustomerOrderNoteChange("");
                     setShowCustomerNoteSheet(false);
                   }}
-                  className="jnc-hub-touch rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700"
                 >
                   {customerNoteDraft.trim() ? "Remover observação" : "Continuar sem observação"}
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
                   onClick={saveCustomerNoteDraft}
-                  className="jnc-hub-touch rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)]"
                 >
                   Salvar observação
-                </button>
+                </Button>
               </div>
             </div>
           </div>

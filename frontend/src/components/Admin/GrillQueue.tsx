@@ -42,6 +42,7 @@ import {
 import { formatSelectedModifiers, getModifiersSignature } from "../../utils/productModifiers";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { useAuth } from "../../contexts/AuthContext";
+import { Button } from '../ui/Button';
 import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
 import { exportToCsv } from "../../utils/export";
@@ -5023,28 +5024,24 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
             )}
             <div className="mt-6 flex flex-col sm:flex-row gap-2">
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={closeOrderOverlays}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
+                className="w-full sm:w-auto"
               >
                 Voltar
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="success"
+                size="sm"
                 onClick={handleConfirmPaid}
                 disabled={!cashValid || updating === confirmModal?.id}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                loading={updating === confirmModal?.id}
+                className="w-full sm:w-auto"
               >
-                {updating === confirmModal?.id ? (
-                  <span className="inline-flex items-center gap-2">
-                    <ArrowsClockwise size={14} weight="duotone" className="animate-spin" />
-                    Confirmando...
-                  </span>
-                ) : (
-                  confirmModal.alreadyPaid ? 'Pedido retirado' : 'Pagamento recebido'
-                )}
-              </button>
+                {confirmModal.alreadyPaid ? 'Pedido retirado' : 'Pagamento recebido'}
+              </Button>
             </div>
                 </>
               );
@@ -6149,14 +6146,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 )}
               </div>
               <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={closeCancelOrderModal}
                   disabled={cancelOrderModal.loading}
-                  className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                 >
                   Voltar
-                </button>
+                </Button>
                 <button
                   type="button"
                   onClick={handleConfirmCancelOrder}
