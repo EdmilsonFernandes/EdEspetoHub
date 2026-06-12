@@ -15,7 +15,8 @@ import { Request, Response } from 'express';
 import { ProductService } from '../services/ProductService';
 import { logger } from '../utils/logger';
 import { respondWithError } from '../errors/respondWithError';
-import { publicStoreCache } from '../utils/publicStoreCache';
+import { cacheService } from '../services/CacheService';
+import { invalidateStoreCache } from '../utils/cacheInvalidation';
 
 const productService = new ProductService();
 const log = logger.child({ scope: 'ProductController' });
@@ -77,7 +78,7 @@ export class ProductController {
         { ...req.body, storeId: req.params.storeId },
         req.auth?.storeId
       );
-      publicStoreCache.invalidateAll();
+      await invalidateStoreCache();
       log.info('Product created', { productId: product?.id, storeId: req.params.storeId });
       return res.status(201).json(product);
     } catch (error: any) {
@@ -144,7 +145,13 @@ export class ProductController {
         return res.json(demoProducts);
       }
       log.debug('Product public list request', { slug: req.params.slug });
+      const cacheKey = `products:store:slug:${req.params.slug}`;
+      const cached = await cacheService.get(cacheKey);
+      if (cached) {
+        return res.json(cached);
+      }
       const products = await productService.listActiveByStoreSlug(req.params.slug);
+      await cacheService.set(cacheKey, products, 120);
       return res.json(products);
     } catch (error: any) {
       log.warn('Product public list failed', { slug: req.params.slug, error });
@@ -170,7 +177,7 @@ export class ProductController {
         req.body,
         req.auth?.storeId
       );
-      publicStoreCache.invalidateAll();
+      await invalidateStoreCache();
       log.info('Product updated', { storeId: req.params.storeId, productId: req.params.productId });
       return res.json(product);
     } catch (error: any) {
@@ -192,7 +199,7 @@ export class ProductController {
     try {
       log.info('Product remove request', { storeId: req.params.storeId, productId: req.params.productId });
       await productService.remove(req.params.storeId, req.params.productId, req.auth?.storeId);
-      publicStoreCache.invalidateAll();
+      await invalidateStoreCache();
       log.info('Product removed', { storeId: req.params.storeId, productId: req.params.productId });
       return res.status(204).send();
     } catch (error: any) {
@@ -222,7 +229,13 @@ static async listCategories(req: Request, res: Response) {
    */
 static async listPublicCategoriesBySlug(req: Request, res: Response) {
     try {
+      const cacheKey = `categories:store:slug:${req.params.slug}`;
+      const cached = await cacheService.get(cacheKey);
+      if (cached) {
+        return res.json(cached);
+      }
       const categories = await productService.listCategoriesByStoreSlug(req.params.slug);
+      await cacheService.set(cacheKey, categories, 120);
       return res.json(categories);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);
@@ -330,7 +343,7 @@ static async adjustStock(req: Request, res: Response) {
         req.auth?.storeId,
         req.auth?.sub
       );
-      publicStoreCache.invalidateAll();
+      await invalidateStoreCache();
       return res.json(payload);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);

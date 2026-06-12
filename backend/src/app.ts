@@ -82,6 +82,8 @@ async function bootstrap()
   // If the DB exists but is empty, apply the base schema before running migrations.
   await ensureBaseSchema(AppDataSource);
   await runMigrations();
+  const { cacheService } = await import('./services/CacheService');
+  await cacheService.initialize();
   const app = express();
   const corsAllowedOrigins = new Set(env.corsAllowedOrigins);
   // API endpoints are dynamic; avoid 304/ETag cache surprises in browsers/proxies.

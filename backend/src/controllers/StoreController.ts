@@ -22,7 +22,8 @@ import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 import { resolvePlanFeatures } from '../config/planFeatures';
-import { publicStoreCache } from '../utils/publicStoreCache';
+import { cacheService } from '../services/CacheService';
+import { invalidateStoreBySlugCache } from '../utils/cacheInvalidation';
 import { In } from 'typeorm';
 import { StorePaymentAccountService } from '../services/StorePaymentAccountService';
 import { StoreDashboardAnalyticsService } from '../services/StoreDashboardAnalyticsService';
@@ -629,7 +630,8 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
       const userState = String(_req.query?.state || '').trim().toUpperCase();
       const hasLocationContext = (userLat !== null && userLng !== null) || Boolean(userCity || userState);
 
-      const cached = !hasLocationContext ? publicStoreCache.getPortfolio() : null;
+      const cacheKey = 'stores:portfolio';
+      const cached = !hasLocationContext ? await cacheService.get(cacheKey) : null;
       if (cached) {
         return res.json(cached);
       }
@@ -644,7 +646,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
       );
       const payload = entries.filter(Boolean);
       if (!hasLocationContext) {
-        publicStoreCache.setPortfolio(payload);
+        await cacheService.set(cacheKey, payload, 60);
         return res.json(payload);
       }
       const enriched = payload.map((entry: any) =>
@@ -782,7 +784,8 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
         return res.json(buildDemoStore(req.params.slug));
       }
       log.debug('Store get by slug request', { slug: req.params.slug });
-      const cached = publicStoreCache.getStoreBySlug(req.params.slug);
+      const cacheKey = `stores:slug:${req.params.slug}`;
+      const cached = await cacheService.get(cacheKey);
       if (cached) {
         return res.json(cached);
       }
@@ -819,7 +822,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
         paymentSummary: await StoreController.buildPublicPaymentSummary(store),
       };
       const payload = { ...sanitizedStore, subscription };
-      publicStoreCache.setStoreBySlug(req.params.slug, payload);
+      await cacheService.set(cacheKey, payload, 60);
       return res.json(payload);
     } catch (error: any) {
       log.warn('Store get by slug failed', { slug: req.params.slug, error });
@@ -937,7 +940,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     try {
       log.info('Store update request', { storeId: req.params.storeId });
       const store = await storeService.update(req.params.storeId, req.body);
-      publicStoreCache.invalidateStore(store);
+      await invalidateStoreBySlugCache(store.slug);
       log.info('Store updated', { storeId: req.params.storeId });
       return res.json(store);
     } catch (error: any) {
@@ -959,7 +962,7 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
     try {
       log.info('Store status update request', { storeId: req.params.storeId, open: req.body?.open });
       const store = await storeService.setStatus(req.params.storeId, req.body.open);
-      publicStoreCache.invalidateStore(store);
+      await invalidateStoreBySlugCache(store.slug);
       log.info('Store status updated', { storeId: req.params.storeId, open: store?.open });
       return res.json(store);
     } catch (error: any) {

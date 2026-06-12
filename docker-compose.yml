@@ -37,6 +37,7 @@ services:
     depends_on:
       - postgres
       - face-worker
+      - redis
     restart: always
 
   face-worker:
@@ -47,6 +48,16 @@ services:
       dockerfile: Dockerfile
     environment:
       FACE_MODEL_NAME: "${FACE_MODEL_NAME:-buffalo_l}"
+    restart: always
+
+  redis:
+    container_name: janocaminho-redis
+    image: redis:7-alpine
+    command: redis-server --maxmemory 50mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
     restart: always
 
   postgres:
@@ -94,5 +105,7 @@ services:
 volumes:
   postgres-data:
     name: "${POSTGRES_VOLUME_NAME:-edespetohub_postgres-data}"
+  redis-data:
+    name: "${REDIS_VOLUME_NAME:-edespetohub_redis-data}"
   edespetohub_uploads:
     name: "${UPLOADS_VOLUME_NAME:-edespetohub_uploads_data}"

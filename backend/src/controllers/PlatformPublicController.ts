@@ -12,6 +12,7 @@
  */
 
 import { Request, Response } from 'express';
+import { cacheService } from '../services/CacheService';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { OrderRepository } from '../repositories/OrderRepository';
 import { logger } from '../utils/logger';
@@ -37,6 +38,11 @@ export class PlatformPublicController {
   static async metrics(_req: Request, res: Response) {
     try {
       log.debug('Public metrics request');
+      const cacheKey = 'metrics:platform';
+      const cached = await cacheService.get(cacheKey);
+      if (cached) {
+        return res.json(cached);
+      }
       const [ totalStores, activeStores, totalOrders, totalRevenue ] = await Promise.all([
         storeRepository.countAll(),
         storeRepository.countActiveForPublicMetrics(),
@@ -44,13 +50,15 @@ export class PlatformPublicController {
         orderRepository.sumAllRevenue(),
       ]);
 
-      return res.json({
+      const payload = {
         totalStores,
         activeStores,
         totalOrders,
         totalRevenue,
         updatedAt: new Date().toISOString(),
-      });
+      };
+      await cacheService.set(cacheKey, payload, 300);
+      return res.json(payload);
     } catch (error: any) {
       log.warn('Public metrics failed', { error });
       return respondWithError(_req, res, error, 400);

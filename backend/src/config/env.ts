@@ -155,6 +155,10 @@ export const env = {
     statementTimeoutMs: numberEnv('DB_STATEMENT_TIMEOUT_MS', 15000, 0),
     idleInTransactionSessionTimeoutMs: numberEnv('DB_IDLE_IN_TRANSACTION_TIMEOUT_MS', 10000, 0),
   },
+  redis: {
+    url: process.env.REDIS_URL || '',
+    ttlDefaultSeconds: numberEnv('REDIS_TTL_DEFAULT_SECONDS', 60, 1),
+  },
   etaV2: {
     enabled: process.env.ENABLE_ORDER_ETA_V2 !== 'false',
     defaultPrepMinutes: process.env.DEFAULT_PREP_MINUTES ? Number(process.env.DEFAULT_PREP_MINUTES) : 15,

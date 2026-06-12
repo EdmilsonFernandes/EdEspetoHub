@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { respondWithError } from '../errors/respondWithError';
+import { cacheService } from '../services/CacheService';
 import { FeaturedProductService } from '../services/FeaturedProductService';
 import { logger } from '../utils/logger';
 
@@ -176,6 +177,7 @@ export class FeaturedProductController {
   static async reviewByAdmin(req: Request, res: Response) {
     try {
       const payload = await service.reviewByAdmin(req.params.requestId, req.auth?.sub, req.body || {});
+      await cacheService.invalidateByPattern('featured:*');
       return res.json(payload);
     } catch (error: any) {
       log.warn('Featured request review failed', {
@@ -194,7 +196,14 @@ export class FeaturedProductController {
    */
   static async listPublic(req: Request, res: Response) {
     try {
-      const payload = await service.listActivePublic(Number(req.query?.limit || 18));
+      const limit = Number(req.query?.limit || 18);
+      const cacheKey = `featured:public:${limit}`;
+      const cached = await cacheService.get(cacheKey);
+      if (cached) {
+        return res.json(cached);
+      }
+      const payload = await service.listActivePublic(limit);
+      await cacheService.set(cacheKey, payload, 120);
       return res.json(payload);
     } catch (error: any) {
       log.warn('Featured request public list failed', { error });
