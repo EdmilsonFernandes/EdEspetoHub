@@ -339,6 +339,12 @@ if ! docker volume inspect "$POSTGRES_VOLUME_NAME" >/dev/null 2>&1; then
   docker volume create "$POSTGRES_VOLUME_NAME" >/dev/null
 fi
 
+: "${REDIS_VOLUME_NAME:=edespetohub_redis-data}"
+if ! docker volume inspect "$REDIS_VOLUME_NAME" >/dev/null 2>&1; then
+  echo "Creating Redis volume: $REDIS_VOLUME_NAME"
+  docker volume create "$REDIS_VOLUME_NAME" >/dev/null
+fi
+
 export IMAGE_TAG="$IMAGE_TAG_ARG"
 
 echo "Deploying image tag: $IMAGE_TAG"
@@ -380,5 +386,15 @@ if [ -n "$PG_NETWORK" ]; then
     docker network connect "$PG_NETWORK" "$cname" 2>/dev/null || true
   done
 fi
+
+# Ensure infrastructure services (redis, postgres) are running.
+# deploy-release uses --no-deps, so Redis/Postgres are never started automatically.
+echo "Ensuring infrastructure services are running (redis, postgres)..."
+$COMPOSE_CMD \
+  -f "$ROOT_DIR/docker-compose.yml" \
+  -f "$ROOT_DIR/docker-compose.prod.yml" \
+  -f "$ROOT_DIR/docker-compose.deploy.yml" \
+  --env-file "$ENV_FILE" \
+  up -d --no-build redis postgres
 
 echo "Release deploy done."
