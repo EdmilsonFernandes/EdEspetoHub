@@ -18,6 +18,7 @@ import {
 } from '@phosphor-icons/react';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
+import { Button, Chip, EmptyState, SkeletonBlock, SurfaceCard } from '../components/ui';
 import { featuredService } from '../services/featuredService';
 import { productService } from '../services/productService';
 import { storeService } from '../services/storeService';
@@ -399,7 +400,7 @@ export function HubHighlightsPage() {
 
       <main className="mx-auto w-full max-w-3xl px-4 pb-[calc(var(--jnk-client-bottom-nav-height,0px)+var(--jnk-native-nav-height,0px)+env(safe-area-inset-bottom)+5.5rem)] pt-[calc(env(safe-area-inset-top)+5.2rem)]">
         {/* Barra de Pesquisa Compacta Premium */}
-        <div className="relative z-10 mb-3 overflow-hidden rounded-2xl border border-slate-200 bg-white/92 p-1.5 shadow-[0_12px_28px_-16px_rgba(15,23,42,0.15)] ring-1 ring-slate-200/5 transition-all duration-300 focus-within:border-[#336886]/45 focus-within:bg-white focus-within:shadow-[0_16px_36px_-20px_rgba(51,104,134,0.25)] focus-within:ring-4 focus-within:ring-[#336886]/10">
+        <SurfaceCard padding="none" className="relative z-10 mb-3 overflow-hidden rounded-2xl border-slate-200 p-1.5 ring-1 ring-slate-200/5 transition-all duration-300 focus-within:border-[#336886]/45 focus-within:bg-white focus-within:shadow-[0_16px_36px_-20px_rgba(51,104,134,0.25)] focus-within:ring-4 focus-within:ring-[#336886]/10">
           <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(95,211,90,0.12),transparent_68%)]" />
           <div className="relative flex items-center gap-2.5">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[linear-gradient(145deg,#5FD35A_0%,#336886_64%,#153A4C_100%)] text-white shadow-[0_10px_20px_-14px_rgba(51,104,134,0.68)]">
@@ -426,11 +427,13 @@ export function HubHighlightsPage() {
               </button>
             ) : null}
           </div>
-        </div>
+        </SurfaceCard>
 
-        <div
+        <SurfaceCard
+          as="section"
           data-testid="highlight-category-filters"
-          className="relative z-10 mb-4 rounded-[1.35rem] border border-white/75 bg-white/72 p-2 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.22)] ring-1 ring-slate-200/30 backdrop-blur-xl"
+          padding="sm"
+          className="relative z-10 mb-4 rounded-[1.35rem] ring-1 ring-slate-200/30"
         >
           {allCategoryFilter ? (
             <button
@@ -471,19 +474,16 @@ export function HubHighlightsPage() {
               const CategoryIcon = option.icon;
               const active = selectedCategory === option.key;
               return (
-                <button
+                <Chip
                   key={option.key}
-                  type="button"
                   onClick={() => setSelectedCategory(option.key)}
-                  className={`jnc-hub-touch group/filter relative flex min-h-[3.45rem] min-w-0 flex-col items-center justify-center overflow-hidden rounded-[0.95rem] border px-1 py-1.5 text-center transition-all duration-300 ${
-                    active
-                      ? 'border-[#336886] bg-[#edf5fa] text-[#153A4C] shadow-[0_12px_22px_-18px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/20'
-                      : 'border-slate-200/65 bg-white/78 text-slate-600 shadow-[0_8px_16px_-16px_rgba(15,23,42,0.2)] hover:border-[#336886]/18 hover:bg-white'
-                  }`}
+                  selected={active}
+                  tone="brand"
+                  className="group/filter relative flex min-h-[3.45rem] w-full min-w-0 flex-col items-center justify-center overflow-hidden rounded-[0.95rem] px-1 py-1.5 text-center"
                 >
                   <span className={`relative grid h-7 w-7 place-items-center rounded-full transition-all duration-300 ${
                     active
-                      ? 'bg-[#153A4C] text-white shadow-[0_8px_18px_-13px_rgba(21,58,76,0.5)]'
+                      ? 'bg-white/18 text-white shadow-[0_10px_18px_-12px_rgba(15,23,42,0.28)] ring-1 ring-white/20'
                       : 'bg-[#f3f8fb] text-[#336886] group-hover/filter:bg-[#336886]/10'
                   }`}>
                     <CategoryIcon
@@ -498,17 +498,15 @@ export function HubHighlightsPage() {
                       </span>
                     ) : null}
                   </span>
-                  <span className={`relative mt-1 max-w-full truncate text-[8.5px] font-black uppercase leading-none tracking-[0.07em] ${
-                    active ? 'text-[#153A4C]' : 'text-slate-600'
-                    }`}>
+                  <span className="relative mt-1 max-w-full truncate text-[8.5px] font-black uppercase leading-none tracking-[0.07em]">
                     {option.label}
                   </span>
-                </button>
+                </Chip>
               );
             })}
             </div>
           ) : null}
-        </div>
+        </SurfaceCard>
 
         <section className="mt-4 flex flex-wrap gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/86 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.28)]">
@@ -530,40 +528,36 @@ export function HubHighlightsPage() {
         {loading ? (
           <section className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {Array.from({ length: 6 }).map((_, index) => (
-              <div
+              <SurfaceCard
                 key={index}
-                className="relative overflow-hidden grid h-[132px] grid-cols-[6.35rem_minmax(0,1fr)] items-center gap-3 rounded-[1.65rem] bg-white p-2.5 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50"
+                padding="sm"
+                className="grid h-[132px] grid-cols-[6.35rem_minmax(0,1fr)] items-center gap-3 rounded-[1.65rem] ring-1 ring-slate-100/50"
               >
-                <div className="relative h-[6.35rem] w-[6.35rem] shrink-0 rounded-[1.25rem] bg-slate-100 overflow-hidden">
+                <SkeletonBlock rounded="lg" className="relative h-[6.35rem] w-[6.35rem] shrink-0 overflow-hidden">
                   <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-                </div>
+                </SkeletonBlock>
                 <div className="flex-1 flex flex-col justify-center space-y-2 py-1 pr-1">
-                  <div className="relative h-4.5 w-11/12 rounded bg-slate-100 overflow-hidden">
+                  <SkeletonBlock rounded="sm" className="relative h-4.5 w-11/12 overflow-hidden">
                     <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-                  </div>
-                  <div className="relative h-3.5 w-6/12 rounded bg-slate-100 overflow-hidden">
+                  </SkeletonBlock>
+                  <SkeletonBlock rounded="sm" className="relative h-3.5 w-6/12 overflow-hidden">
                     <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-                  </div>
-                  <div className="relative mt-auto h-5 w-4/12 rounded bg-slate-100 overflow-hidden">
+                  </SkeletonBlock>
+                  <SkeletonBlock rounded="sm" className="relative mt-auto h-5 w-4/12 overflow-hidden">
                     <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-                  </div>
+                  </SkeletonBlock>
                 </div>
-              </div>
+              </SurfaceCard>
             ))}
           </section>
         ) : filteredItems.length === 0 ? (
-          <section className="mt-5 rounded-[1.8rem] border border-white/80 bg-white/88 p-8 text-center shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)]">
-            <ForkKnife size={30} weight="duotone" className="mx-auto text-slate-400" />
-            <p className="mt-3 text-sm font-black text-slate-800">Nenhum destaque encontrado.</p>
-            <p className="mt-1 text-xs font-semibold text-slate-500">Limpe a busca ou veja todos os tipos de item disponíveis.</p>
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="mt-4 rounded-full bg-[#153A4C] px-4 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-white"
-            >
-              Ver todos
-            </button>
-          </section>
+          <EmptyState
+            className="mt-5"
+            icon={<ForkKnife size={30} weight="duotone" />}
+            title="Nenhum destaque encontrado."
+            description="Limpe a busca ou veja todos os tipos de item disponíveis."
+            action={<Button size="sm" onClick={resetFilters}>Ver todos</Button>}
+          />
         ) : (
           <section className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {filteredItems.map((item, index) => {
