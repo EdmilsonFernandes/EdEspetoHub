@@ -66,7 +66,11 @@ describe('printReceiptAsImage', () => {
 
     expect(result.mode).toBe('native');
     expect(result.bytes).toBe(180);
-    expect(printNativeThermalReceipt).toHaveBeenCalledWith(expect.stringContaining('LOJA TESTE'), thermalPrinterMock.defaultPrinterSettings);
+    expect(printNativeThermalReceipt).toHaveBeenCalledWith(
+      expect.stringContaining('LOJA TESTE'),
+      thermalPrinterMock.defaultPrinterSettings,
+      undefined
+    );
     expect(clickSpy).not.toHaveBeenCalled();
   });
 
@@ -135,8 +139,8 @@ describe('printReceiptAsImage', () => {
     expect(text).toContain('Fila: #07');
     expect(text).toContain('Pedido: #PED123');
     expect(text).toContain('MESA 12');
-    expect(text).toContain('CLIENTE: MESA 12');
-    expect(text).toContain('OBS CLIENTE');
+    expect(text.match(/MESA 12/g)).toHaveLength(1);
+    expect(text).toContain('! OBS:');
     expect(text).toContain('Sem ketchup');
     expect(text).toContain('descer.');
     expect(text).toContain('2x Medalhão de Palmito');
@@ -147,6 +151,7 @@ describe('printReceiptAsImage', () => {
     expect(text).toContain('pessoa');
     expect(text).toContain('1x Taxa de serviço');
     expect(text).toContain('TOTAL:');
+    expect(text.match(/TOTAL:/g)).toHaveLength(1);
     expect(text).toContain('R$ 77,55');
   });
 
@@ -163,16 +168,18 @@ describe('printReceiptAsImage', () => {
     const result = await printReceiptAsImage(payload);
 
     expect(result.mode).toBe('native');
-    expect(printNativeThermalReceipt).toHaveBeenCalledWith(expect.any(String), customSettings);
+    expect(printNativeThermalReceipt).toHaveBeenCalledWith(expect.any(String), customSettings, undefined);
     const sentText = vi.mocked(printNativeThermalReceipt).mock.calls[0][0];
     expect(sentText).not.toContain('PLATAFORMA:');
     expect(sentText).toContain('==========================================');
   });
 
-  it('mantém opção de cupom completo por padrão', () => {
+  it('mantém o cabeçalho operacional limpo por padrão', () => {
     const text = buildRawBtText(payload);
 
-    expect(text).toContain('PLATAFORMA: Já no Caminho');
+    expect(text).toContain('LOJA TESTE');
+    expect(text).toContain('26/05/2026 10:00');
+    expect(text).not.toContain('PLATAFORMA:');
     expect(text).toContain('================================');
   });
 });

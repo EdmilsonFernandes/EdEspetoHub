@@ -173,18 +173,12 @@ export const buildRawBtText = (
     return lines;
   });
 
-  // Location block: double separator + repeated double-height text
+  // Location block: strong visual anchor without repeating the table/location.
   const locationBlock = locationLabel
     ? [
         strongSeparator(lineWidth),
         strongSeparator(lineWidth),
         "",
-        ...centerText(locationLabel.toUpperCase(), lineWidth)
-          .split("\n")
-          .map(
-            (line) =>
-              `${ESC_POS.boldOn}${ESC_POS.textDoubleHeightOn}${line}${ESC_POS.textSizeReset}${ESC_POS.boldOff}`
-          ),
         ...centerText(locationLabel.toUpperCase(), lineWidth)
           .split("\n")
           .map(
@@ -242,7 +236,6 @@ export const buildRawBtText = (
     ...itemsLines,
     separator(lineWidth),
     strongSeparator(lineWidth),
-    `${ESC_POS.boldOn}${ESC_POS.textDoubleHeightOn}${totalLine}${ESC_POS.textSizeReset}${ESC_POS.boldOff}`,
     `${ESC_POS.boldOn}${ESC_POS.textDoubleHeightOn}${totalLine}${ESC_POS.textSizeReset}${ESC_POS.boldOff}`,
     strongSeparator(lineWidth),
     "",
