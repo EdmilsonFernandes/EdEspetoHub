@@ -49,7 +49,6 @@ import { useHubLocation } from '../hooks/hub/useHubLocation';
 import { useHubSearchPlaceholder } from '../hooks/hub/useHubSearchPlaceholder';
 import { useHubStoreDistances } from '../hooks/hub/useHubStoreDistances';
 import { useHubStores } from '../hooks/hub/useHubStores';
-import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
 import { HubFilterSheet, type HubQuickFilterKey } from '../components/Marketplace/Hub/HubFilters';
 import { HubHeader, getTimeOfDay } from '../components/Marketplace/Hub/HubHeader';
@@ -2702,12 +2701,28 @@ export function MarketplacePage() {
               </div>
             </button>
           </section>
-          <section className="order-12 space-y-2 pb-2 sm:pb-4">
-            <div className="flex items-center justify-center gap-2">
-              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-3.5 w-3.5 rounded-[0.3rem] object-cover" />
-              <p className="text-[11px] font-bold text-slate-400">Conectando você aos melhores lojistas do app.</p>
+          <section className="order-12 pb-2 sm:pb-4">
+            <div className="mx-3 overflow-hidden rounded-[1.35rem] border border-white/80 bg-white/68 px-4 py-3.5 text-center shadow-[0_16px_36px_-30px_rgba(15,23,42,0.2)] ring-1 ring-slate-200/30 backdrop-blur-xl">
+              <div className="flex items-center justify-center gap-2">
+                <span className="grid h-7 w-7 place-items-center overflow-hidden rounded-[0.75rem] border border-white bg-white shadow-[0_10px_20px_-16px_rgba(15,23,42,0.35)]">
+                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
+                </span>
+                <span className="text-[12px] font-black tracking-[-0.02em] text-slate-900">Já no Caminho</span>
+              </div>
+              <p className="mx-auto mt-2 max-w-[20rem] text-[11px] font-semibold leading-4 text-slate-500">
+                Conectando você aos lojistas, destinos e serviços da sua região.
+              </p>
+              <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+                {['Marketplace local', 'Pedidos', 'Chalés', 'Feiras'].map((label) => (
+                  <span
+                    key={label}
+                    className="rounded-full border border-slate-200/70 bg-white/72 px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.12em] text-[#336886]"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
             </div>
-            <PlatformTrustFooter mode="minimal" align="center" compact />
           </section>
         </main>
       </div>
