@@ -3,6 +3,7 @@ import {
   buildAdminTableGroups,
   filterAdminQueueProducts,
   getAdminQueueLoadingState,
+  mergeAdminQueueOrderSources,
   resolveAdminSalesHistoryWindow,
 } from './adminQueueUx';
 
@@ -77,6 +78,21 @@ describe('filterAdminQueueProducts', () => {
 
   it('permite buscar por categoria e respeita limite', () => {
     expect(filterAdminQueueProducts(products, 'bebidas', 1)).toEqual([products[1]]);
+  });
+});
+
+describe('mergeAdminQueueOrderSources', () => {
+  it('mantém cancelado presente apenas na fila enquanto o histórico ainda carrega', () => {
+    const cancelled = { id: 'order-cancelled', status: 'cancelled' };
+
+    expect(mergeAdminQueueOrderSources([cancelled], [])).toEqual([cancelled]);
+  });
+
+  it('remove duplicidade quando o mesmo pedido aparece na fila e no histórico', () => {
+    const queueOrder = { id: 'order-cancelled', status: 'cancelled', source: 'queue' };
+    const historyOrder = { id: 'order-cancelled', status: 'cancelled', source: 'history' };
+
+    expect(mergeAdminQueueOrderSources([queueOrder], [historyOrder])).toEqual([queueOrder]);
   });
 });
 

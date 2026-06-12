@@ -140,6 +140,25 @@ export const filterAdminQueueProducts = <T extends { name?: unknown; category?: 
   return filtered.slice(0, Math.max(1, Number(limit || 40)));
 };
 
+export const mergeAdminQueueOrderSources = <T extends { id?: unknown }>(
+  ...sources: Array<T[] | null | undefined>
+) => {
+  const byId = new Map<string, T>();
+  let anonymousIndex = 0;
+
+  for (const source of sources) {
+    for (const order of Array.isArray(source) ? source : []) {
+      const id = String(order?.id || '').trim();
+      const key = id || `anonymous-${anonymousIndex++}`;
+      if (!byId.has(key)) {
+        byId.set(key, order);
+      }
+    }
+  }
+
+  return Array.from(byId.values());
+};
+
 type AdminQueueTableOrder = {
   id?: unknown;
   table?: unknown;

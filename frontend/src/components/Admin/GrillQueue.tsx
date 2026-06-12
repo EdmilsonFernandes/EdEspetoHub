@@ -52,6 +52,7 @@ import {
   buildAdminTableGroups,
   filterAdminQueueProducts,
   getAdminQueueLoadingState,
+  mergeAdminQueueOrderSources,
   resolveAdminSalesHistoryWindow,
 } from "../../utils/adminQueueUx";
 import {
@@ -2141,6 +2142,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   ]);
 
   useEffect(() => {
+    if (!storeIdentifier || activeTab !== 'queue' || queueFilter !== 'cancelled') return;
+    void loadHistory({ silent: true });
+  }, [activeTab, loadHistory, queueFilter, storeIdentifier]);
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     const openStatuses = new Set([
       'pending',
@@ -3058,6 +3064,21 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const todayKey = getNowKeyInSaoPaulo();
     return completedOrders.filter((order) => getDayKeyInSaoPaulo(order.createdAt) === todayKey);
   }, [completedOrders]);
+  const cancelledToday = useMemo(() => {
+    const todayKey = getNowKeyInSaoPaulo();
+    const getCreatedAtMs = (order: any) => {
+      const raw = order?.createdAt || order?.created_at || 0;
+      if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
+      const parsed = raw ? new Date(raw).getTime() : 0;
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+    return mergeAdminQueueOrderSources(queue, completedOrders)
+      .filter((order) => {
+        const status = String(order?.status || '').toLowerCase();
+        return status === 'cancelled' && getDayKeyInSaoPaulo(order.createdAt) === todayKey;
+      })
+      .sort((a, b) => getCreatedAtMs(b) - getCreatedAtMs(a));
+  }, [completedOrders, queue]);
   const reportCompleted = useMemo(() => {
     const todayKey = getNowKeyInSaoPaulo();
     const yesterdayKey = getDayKeyInSaoPaulo(Date.now() - 24 * 60 * 60 * 1000);
@@ -3311,18 +3332,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
     const condominium = queue.filter((o) => activeStatuses.has(String(o?.status || '').toLowerCase()) && isCondominiumOrder(o)).length;
     const late = withAges.filter((o) => o.ageMs > PREP_SLA_MS).length;
-    const todayKey = getNowKeyInSaoPaulo();
-    const cancelled = queue.filter((order) => {
-      const status = String(order?.status || '').toLowerCase();
-      return status === 'cancelled' && getDayKeyInSaoPaulo(order.createdAt) === todayKey;
-    }).length;
+    const cancelled = cancelledToday.length;
     const avgMs =
       withAges.length > 0
         ? withAges.reduce((acc, cur) => acc + cur.ageMs, 0) / withAges.length
         : 0;
     const oldest = withAges.reduce((acc, cur) => (cur.ageMs > acc ? cur.ageMs : acc), 0);
     return { pending, preparing, ready, condominium, late, cancelled, avgMs, oldest };
-  }, [productionQueue, queue, currentTime, PREP_SLA_MS]);
+  }, [productionQueue, queue, cancelledToday, currentTime, PREP_SLA_MS]);
 
   const allActiveQueue = useMemo(() => {
     const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
@@ -3355,14 +3372,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       });
     }
     if (queueFilter === 'cancelled') {
-      const todayKey = getNowKeyInSaoPaulo();
-      return completedOrders.filter((order) => {
-        const status = String(order?.status || '').toLowerCase();
-        return status === 'cancelled' && getDayKeyInSaoPaulo(order.createdAt) === todayKey;
-      });
+      return cancelledToday;
     }
     return allActiveQueue;
-  }, [allActiveQueue, completedOrders, queueFilter, currentTime, PREP_SLA_MS]);
+  }, [allActiveQueue, cancelledToday, queueFilter, currentTime, PREP_SLA_MS]);
 
   const bulkFinalizeCandidates = useMemo(() => {
     const merged = [ ...productionQueue ];
