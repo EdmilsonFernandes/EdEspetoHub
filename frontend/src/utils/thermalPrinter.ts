@@ -220,6 +220,12 @@ export const printNativeThermalReceipt = async (
   console.log('[thermal-printer] printNativeThermalReceipt: checking status before print...');
   const status = await ThermalPrinter.getStatus();
 
+  console.log('[thermal-printer] printNativeThermalReceipt: status =', {
+    enabled: status.enabled,
+    permissionGranted: status.permissionGranted,
+    hasAddress: Boolean(status?.savedPrinter?.address),
+  });
+
   if (!status.enabled) {
     throw new NativeThermalPrinterError('BLUETOOTH_DISABLED', 'Bluetooth desligado. Ligue o Bluetooth e tente novamente.');
   }
@@ -229,19 +235,11 @@ export const printNativeThermalReceipt = async (
     throw new NativeThermalPrinterError('NO_PRINTER', 'Nenhuma impressora configurada neste aparelho.');
   }
 
-  // If permission is not granted, request it BEFORE printing.
-  // The Java print() method also handles this, but requesting here gives
-  // the user a clear system dialog ("Permitir dispositivos próximos?").
-  if (!status.permissionGranted) {
-    console.log('[thermal-printer] printNativeThermalReceipt: permission not granted, requesting...');
-    const permResult = await ThermalPrinter.requestBluetoothPermission();
-    if (!permResult.granted) {
-      throw new NativeThermalPrinterError(
-        'PERMISSION_DENIED',
-        'Permissão Bluetooth negada. Toque em "Permitir Bluetooth" ou abra as Configurações do app para conceder a permissão de Dispositivos Próximos.',
-      );
-    }
-  }
+  // Do NOT check/request permission here. The Java print() method already
+  // handles permission via requestPermissionForAlias which shows the system
+  // dialog. Checking in TS creates a redundant gate that can produce false
+  // PERMISSION_DENIED errors when the status is stale or the Java-side
+  // permission state is inconsistent between getStatus() and print().
 
   console.log('[thermal-printer] printNativeThermalReceipt: printing to', address);
   const effectiveSettings = normalizeThermalPrinterSettings({

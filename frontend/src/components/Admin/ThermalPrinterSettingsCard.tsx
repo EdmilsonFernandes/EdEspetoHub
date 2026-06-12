@@ -839,6 +839,27 @@ export function ThermalPrinterSettingsCard() {
           </pre>
         </div>
       </details>
+
+      {/* Debug panel — shows raw status from Java plugin */}
+      <details className="mt-4 group">
+        <summary className="cursor-pointer list-none flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-slate-400 hover:text-slate-600">
+          <CaretDown size={14} weight="bold" className="transition-transform group-open:rotate-180" />
+          Debug status
+        </summary>
+        <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 font-mono text-[11px] leading-relaxed text-slate-600">
+          <pre className="whitespace-pre-wrap">{JSON.stringify({
+            enabled: status?.enabled,
+            permissionGranted: status?.permissionGranted,
+            printerReachable: status?.printerReachable,
+            savedPrinterAddress: status?.savedPrinter?.address || null,
+            savedPrinterName: status?.savedPrinter?.name || null,
+            hasSearchedOnce,
+            devicesCount: devices.length,
+            confirmedAlive,
+            permissionDenied,
+          }, null, 2)}</pre>
+        </div>
+      </details>
     </section>
   );
 }
