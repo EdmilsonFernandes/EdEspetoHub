@@ -460,7 +460,7 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
             transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
           }}
         >
-          <ul className="pointer-events-auto mx-auto grid w-full max-w-md grid-cols-4 gap-1 border-t border-slate-200/60 bg-white/95 px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-8px_32px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl">
+          <ul className="pointer-events-auto mx-auto grid w-full max-w-md grid-cols-4 gap-1 border-t border-slate-200/60 bg-white/[0.97] px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-18px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
             {superPrimaryItems.map((item) => {
               const Icon = item.icon;
               const isActive = optimisticActiveId ? optimisticActiveId === item.id : item.active;
@@ -470,12 +470,12 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
                     type="button"
                     onPointerDown={() => setOptimisticNav(item.id)}
                     onClick={() => item.onClick()}
-                    className={`w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[9px] font-bold uppercase tracking-[0.08em] transition-all active:scale-95 ${
+                    className={`w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[10px] font-bold uppercase tracking-[0.06em] transition-all active:scale-[0.96] ${
                       isActive ? 'text-[#153A4C]' : 'text-slate-400'
                     }`}
                   >
-                    <span className={`inline-flex h-8 w-8 items-center justify-center rounded-2xl transition-all ${
-                      isActive ? 'bg-[#153A4C]/10 text-[#153A4C]' : 'text-slate-400'
+                    <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
+                      isActive ? 'bg-[#153A4C] text-white shadow-[0_14px_28px_-18px_rgba(21,58,76,0.55)] scale-[1.06]' : 'bg-slate-50 ring-1 ring-slate-200/60'
                     }`}>
                       <Icon size={18} weight={isActive ? 'fill' : 'duotone'} />
                     </span>
@@ -499,7 +499,7 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
         transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
       }}
     >
-      <ul className={`pointer-events-auto mx-auto grid ${navItems.length <= 2 ? 'grid-cols-2' : navItems.length === 3 ? 'grid-cols-3' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-5'} gap-0.5 w-full max-w-lg sm:max-w-xl md:max-w-2xl border-t border-slate-200/60 bg-white/95 px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-8px_32px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl`}>
+      <ul className={`pointer-events-auto mx-auto grid ${navItems.length <= 2 ? 'grid-cols-2' : navItems.length === 3 ? 'grid-cols-3' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-5'} gap-0.5 w-full max-w-lg sm:max-w-xl md:max-w-2xl border-t border-slate-200/60 bg-white/[0.97] px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-18px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-2xl`}>
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = optimisticActiveId ? optimisticActiveId === item.id : item.active;
@@ -513,20 +513,20 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
                   preloadNavTarget(item.id);
                 }}
                 onClick={() => handleNavPress(item)}
-                className={`w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[9px] font-bold uppercase tracking-[0.08em] transition-all active:scale-95 ${
+                className={`w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[10px] font-bold uppercase tracking-[0.06em] transition-all active:scale-[0.96] ${
                   isActive ? '' : 'text-slate-400'
                 }`}
                 style={isActive ? { color: activeTextColor } : undefined}
               >
                 <span
-                  className={`relative inline-flex h-8 w-8 items-center justify-center rounded-2xl transition-all ${
-                    isActive ? '' : 'text-slate-400'
+                  className={`relative inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
+                    isActive ? '' : 'bg-slate-50 ring-1 ring-slate-200/60'
                   }`}
-                  style={isActive ? { backgroundColor: activePillColor, color: activeIconBg } : undefined}
+                  style={isActive ? { backgroundColor: activeIconBg, color: activeIconColor, boxShadow: '0 14px 28px -18px rgba(21,58,76,0.35)', transform: 'scale(1.06)' } : undefined}
                 >
                   <Icon size={18} weight={isActive ? 'fill' : 'duotone'} />
                   {item.badge ? (
-                    <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 rounded-full bg-rose-500 px-1 text-[9px] font-black text-white flex items-center justify-center">
+                    <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 rounded-full bg-rose-500 px-1 text-[9px] font-black text-white flex items-center justify-center animate-pulse">
                       {item.badge}
                     </span>
                   ) : null}

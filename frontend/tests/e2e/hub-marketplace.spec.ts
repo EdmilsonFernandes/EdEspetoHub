@@ -250,7 +250,7 @@ test.describe('Hub marketplace', () => {
     await page.goto('/hub');
 
     const featuredSection = page.locator('section').filter({ hasText: 'Destaques de hoje' }).first();
-    const highlightsLink = featuredSection.getByRole('link', { name: /Ver todos/i });
+    const highlightsLink = featuredSection.getByRole('link', { name: /Ver mais/i });
     await expect(highlightsLink).toBeVisible({ timeout: 15000 });
     await expect(highlightsLink).toHaveAttribute('href', '/hub/destaques');
 
@@ -271,9 +271,10 @@ test.describe('Hub marketplace', () => {
     await expect(filterGrid).toBeVisible();
     await expect(filterGrid).toContainText('Todos');
     await expect(filterGrid).toContainText('Pratos');
-    await expect(
-      filterGrid.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)
-    ).resolves.toBe(true);
+    const filterButtonRows = await filterGrid.locator('button').evaluateAll((buttons) =>
+      buttons.map((button) => Math.round((button as HTMLElement).offsetTop))
+    );
+    expect(new Set(filterButtonRows).size).toBe(1);
     await expect(page.getByRole('link', { name: /Tulipa Especial/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /Achado especial/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /Voltar para a home/i })).toHaveCount(0);

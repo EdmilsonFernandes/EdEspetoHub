@@ -452,51 +452,60 @@ export function MotoboyLayout() {
       )}
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-[70] motoboy-nav lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/60 bg-white/[0.85] shadow-[0_-18px_44px_-28px_rgba(15,23,42,0.32)] backdrop-blur-2xl lg:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         aria-label="Navegação do entregador"
       >
-        <div className="motoboy-screen !max-w-[72rem] !pt-0 !pb-0">
-          <div className="motoboy-pill grid grid-cols-5 gap-1 p-1">
-            {tabs.map((tab) => {
-              const active = tab.id === 'profile' ? accountDrawerOpen || tab.match(pathname) : tab.match(pathname);
-              const showDot = tab.label === 'Fila' && queueBadge && !pathname.startsWith('/motoboy/available');
-              const sharedClassName = [
-                'motoboy-tab relative flex flex-col items-center justify-center gap-1 rounded-[999px] px-2 py-2 text-[11px] font-semibold',
-                active
-                  ? 'bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_65%,#f59e0b))] text-white shadow-[0_18px_34px_-26px_rgba(239,68,68,0.8)]'
-                  : 'text-slate-700 hover:bg-slate-100/80',
-              ].join(' ');
+        <div className="mx-auto max-w-[72rem] px-2 pt-2">
+          <div className="rounded-full border border-slate-200/90 bg-white/[0.85] p-1 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.45)] backdrop-blur-sm">
+            <div className="grid grid-cols-5 gap-1">
+              {tabs.map((tab) => {
+                const active = tab.id === 'profile' ? accountDrawerOpen || tab.match(pathname) : tab.match(pathname);
+                const showDot = tab.label === 'Fila' && queueBadge && !pathname.startsWith('/motoboy/available');
+                const sharedClassName = [
+                  'relative flex flex-col items-center justify-center gap-1 rounded-full px-2 py-2 text-[11px] font-semibold transition-all duration-150 active:scale-[0.96]',
+                  active
+                    ? 'bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_65%,#f59e0b))] text-white shadow-[0_14px_28px_-18px_rgba(15,23,42,0.35)]'
+                    : 'text-slate-700 hover:bg-slate-100/80',
+                ].join(' ');
 
-              if (tab.to) {
+                const dotBadge = showDot ? (
+                  <span className="absolute top-1 right-1.5 flex h-2.5 w-2.5" aria-hidden="true">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-rose-500" />
+                  </span>
+                ) : null;
+
+                if (tab.to) {
+                  return (
+                    <Link
+                      key={tab.id}
+                      to={tab.to}
+                      className={sharedClassName}
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      {dotBadge}
+                      <span className={active ? 'text-white' : 'text-slate-700'}>{tab.icon}</span>
+                      <span>{tab.label}</span>
+                    </Link>
+                  );
+                }
+
                 return (
-                  <Link
+                  <button
                     key={tab.id}
-                    to={tab.to}
+                    type="button"
+                    onClick={tab.onClick}
                     className={sharedClassName}
                     aria-current={active ? 'page' : undefined}
                   >
-                    {showDot && <span className="motoboy-dot" aria-hidden="true" />}
+                    {dotBadge}
                     <span className={active ? 'text-white' : 'text-slate-700'}>{tab.icon}</span>
                     <span>{tab.label}</span>
-                  </Link>
+                  </button>
                 );
-              }
-
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={tab.onClick}
-                  className={sharedClassName}
-                  aria-current={active ? 'page' : undefined}
-                >
-                  {showDot && <span className="motoboy-dot" aria-hidden="true" />}
-                  <span className={active ? 'text-white' : 'text-slate-700'}>{tab.icon}</span>
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
+              })}
+            </div>
           </div>
         </div>
       </nav>

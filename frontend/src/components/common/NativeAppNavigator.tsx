@@ -192,32 +192,40 @@ export function NativeAppNavigator() {
   const isHome = !isOrders && !isCondominium && !isDestinations && !isMore;
 
   const itemBaseClass =
-    'group flex min-h-[4rem] flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02]';
-  const activeItemClass =
-    'bg-[#eef5f7] text-[#2d5f7b] shadow-[0_12px_26px_-22px_rgba(51,104,134,0.38)] ring-1 ring-[#336886]/8';
+    'group flex min-h-[3.2rem] flex-col items-center justify-center gap-1 rounded-2xl px-0.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] transition-[transform] duration-150 ease-out active:scale-[0.96]';
   const inactiveItemClass =
     'text-slate-500 hover:text-slate-700';
 
+  const activeClass = 'text-[#2d5f7b]';
+  const inactiveClass = 'text-slate-500 hover:text-slate-700';
+
+  const iconClass = (active: boolean) =>
+    `inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
+      active
+        ? 'bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)] scale-[1.08]'
+        : 'bg-slate-50 text-slate-600 ring-1 ring-slate-200/60 group-hover:bg-slate-100 group-hover:text-slate-700'
+    }`;
+
+  const dotClass = (active: boolean) =>
+    active ? 'h-1 w-1 rounded-full bg-[#336886]' : 'h-1 w-1';
+
   return (
     <nav ref={navRef} className="pointer-events-none fixed inset-x-0 bottom-0 z-[100] px-0 pb-0 lg:hidden">
-      <div className="pointer-events-auto mx-auto max-w-none rounded-none border-t border-slate-200/75 bg-white/96 px-2 pt-2 shadow-[0_-14px_34px_-28px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
-        <div className="grid grid-cols-5 gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
+      <div className="pointer-events-auto mx-auto max-w-none rounded-none border-t border-slate-200/60 bg-white/[0.97] px-2 pt-2 shadow-[0_-18px_44px_-28px_rgba(15,23,42,0.32)] backdrop-blur-2xl">
+        <div className="grid min-h-[4.2rem] grid-cols-5 items-center gap-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
         <button
           type="button"
           onPointerEnter={warmupRoute('/hub')}
           onFocus={warmupRoute('/hub')}
           onTouchStart={warmupRoute('/hub')}
           onClick={handleHome}
-          className={`${itemBaseClass} ${isHome ? activeItemClass : inactiveItemClass}`}
+          className={`${itemBaseClass} ${isHome ? activeClass : inactiveClass}`}
         >
-          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
-            isHome
-              ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
-              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-          }`}>
+          <span className={iconClass(isHome)}>
             <House size={16} weight={isHome ? 'fill' : 'duotone'} />
           </span>
-          Início
+          <span className={dotClass(isHome)} />
+          <span>Início</span>
         </button>
         <button
           type="button"
@@ -225,16 +233,13 @@ export function NativeAppNavigator() {
           onFocus={warmupRoute('/cliente/pedidos')}
           onTouchStart={warmupRoute('/cliente/pedidos')}
           onClick={handleOrders}
-          className={`${itemBaseClass} ${isOrders ? activeItemClass : inactiveItemClass}`}
+          className={`${itemBaseClass} ${isOrders ? activeClass : inactiveClass}`}
         >
-          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
-            isOrders
-              ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
-              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-          }`}>
+          <span className={iconClass(isOrders)}>
             <Receipt size={16} weight={isOrders ? 'fill' : 'duotone'} />
           </span>
-          Pedidos
+          <span className={dotClass(isOrders)} />
+          <span>Pedidos</span>
         </button>
         <button
           type="button"
@@ -242,16 +247,13 @@ export function NativeAppNavigator() {
           onFocus={warmupRoute('/hub')}
           onTouchStart={warmupRoute('/hub')}
           onClick={() => navigate('/hub?panel=condominios')}
-          className={`${itemBaseClass} ${isCondominium ? activeItemClass : inactiveItemClass}`}
+          className={`${itemBaseClass} ${isCondominium ? activeClass : inactiveClass}`}
         >
-          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
-            isCondominium
-              ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
-              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-          }`}>
+          <span className={iconClass(isCondominium)}>
             <Tent size={16} weight={isCondominium ? 'fill' : 'duotone'} />
           </span>
-          Feiras
+          <span className={dotClass(isCondominium)} />
+          <span>Feiras</span>
         </button>
         <button
           type="button"
@@ -259,16 +261,13 @@ export function NativeAppNavigator() {
           onFocus={warmupRoute('/destinos')}
           onTouchStart={warmupRoute('/destinos')}
           onClick={() => navigate('/destinos')}
-          className={`${itemBaseClass} ${isDestinations ? activeItemClass : inactiveItemClass}`}
+          className={`${itemBaseClass} ${isDestinations ? activeClass : inactiveClass}`}
         >
-          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
-            isDestinations
-              ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
-              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-          }`}>
+          <span className={iconClass(isDestinations)}>
             <MapTrifold size={16} weight={isDestinations ? 'fill' : 'duotone'} />
           </span>
-          Visite
+          <span className={dotClass(isDestinations)} />
+          <span>Visite</span>
         </button>
         <button
           type="button"
@@ -276,16 +275,13 @@ export function NativeAppNavigator() {
           onFocus={warmupRoute('/cliente/conta')}
           onTouchStart={warmupRoute('/cliente/conta')}
           onClick={() => navigate('/hub?profile=1')}
-          className={`${itemBaseClass} ${isMore ? activeItemClass : inactiveItemClass}`}
+          className={`${itemBaseClass} ${isMore ? activeClass : inactiveClass}`}
         >
-          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
-            isMore
-              ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
-              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-          }`}>
+          <span className={iconClass(isMore)}>
             <ListPlus size={17} weight={isMore ? 'bold' : 'duotone'} />
           </span>
-          Mais
+          <span className={dotClass(isMore)} />
+          <span>Mais</span>
         </button>
         </div>
       </div>
