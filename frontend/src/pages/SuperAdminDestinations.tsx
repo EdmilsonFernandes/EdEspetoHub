@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bed, Buildings, CaretDown, ChartBar, ChatCircleText, CheckCircle, ClockCountdown, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, ShieldCheck, Sparkle, Trash, UploadSimple, WarningCircle, X } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
+import { Chip, EmptyState, SectionHeader, SurfaceCard, TextField } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -4347,18 +4348,19 @@ export function SuperAdminDestinations() {
 
         {activeTab === 'requests' ? (
           <div className="space-y-4">
-            <section className="overflow-hidden rounded-[1.9rem] border border-slate-200 bg-[radial-gradient(circle_at_0%_0%,rgba(51,104,134,0.14),transparent_34%),linear-gradient(135deg,#ffffff,#f8fafc)] p-5 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.55)]">
+            <SurfaceCard as="section" tone="brand" padding="lg" className="rounded-[1.9rem] bg-[radial-gradient(circle_at_0%_0%,rgba(51,104,134,0.14),transparent_34%),linear-gradient(135deg,#ffffff,#f8fafc)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                  <p className="inline-flex items-center gap-2 rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
-                    <WarningCircle size={14} weight="fill" />
-                    Gestão de parceiros
-                  </p>
-                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-slate-950">Onboarding de parceiros</h2>
-                  <p className="mt-1 max-w-2xl text-sm font-semibold text-slate-500">
-                    Acompanhe pendências, validações de posse, convites não ativados e parceiros já liberados por destino.
-                  </p>
-                </div>
+                <SectionHeader
+                  eyebrow={(
+                    <span className="inline-flex items-center gap-2">
+                      <WarningCircle size={14} weight="fill" />
+                      Gestão de parceiros
+                    </span>
+                  )}
+                  title="Onboarding de parceiros"
+                  subtitle="Acompanhe pendências, validações de posse, convites não ativados e parceiros já liberados por destino."
+                  className="max-w-2xl"
+                />
                 <div className="grid grid-cols-2 gap-2 sm:min-w-[430px] lg:grid-cols-4">
                   {[
                     { label: 'Pendentes', value: partnerOnboardingMetrics.pending, icon: ClockCountdown, tone: 'text-amber-700 bg-amber-50' },
@@ -4368,48 +4370,45 @@ export function SuperAdminDestinations() {
                   ].map((item) => {
                     const Icon = item.icon;
                     return (
-                      <div key={item.label} className="rounded-[1.25rem] border border-white bg-white/82 p-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.35)]">
+                      <SurfaceCard key={item.label} padding="sm" className="rounded-[1.25rem] border-white bg-white/82">
                         <span className={`inline-grid h-8 w-8 place-items-center rounded-xl ${item.tone}`}>
                           <Icon size={17} weight="duotone" />
                         </span>
                         <p className="mt-2 text-xl font-black text-slate-950">{item.value}</p>
                         <p className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">{item.label}</p>
-                      </div>
+                      </SurfaceCard>
                     );
                   })}
                 </div>
               </div>
-            </section>
-            <section className="rounded-[1.55rem] border border-slate-200 bg-white/86 p-2 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.45)]">
+            </SurfaceCard>
+            <SurfaceCard as="section" padding="sm" className="rounded-[1.55rem] bg-white/86">
               <div className="grid gap-2 p-1 md:grid-cols-[minmax(220px,1fr)_auto] md:items-center">
-                <label className="relative block">
-                  <MagnifyingGlass size={16} weight="bold" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#336886]" />
-                  <input
-                    value={partnerRequestSearch}
-                    onChange={(event) => setPartnerRequestSearch(event.target.value)}
-                    placeholder="Buscar cidade, parceiro, e-mail, loja ou chalé..."
-                    className="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm font-bold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#336886]/35 focus:bg-white focus:ring-4 focus:ring-[#336886]/10"
-                  />
-                </label>
+                <TextField
+                  name="partnerRequestSearch"
+                  value={partnerRequestSearch}
+                  onChange={(event) => setPartnerRequestSearch(event.target.value)}
+                  placeholder="Buscar cidade, parceiro, e-mail, loja ou chalé..."
+                  leftIcon={<MagnifyingGlass size={16} weight="bold" />}
+                  inputClassName="h-11 bg-slate-50 py-2.5 font-bold focus:bg-white"
+                />
                 <div className="flex gap-2 overflow-x-auto no-scrollbar">
                   {partnerRequestStateOptions.map((option) => {
                     const active = String(partnerRequestStateFilter).toUpperCase() === String(option.id).toUpperCase();
                     return (
-                      <button
+                      <Chip
                         key={option.id}
                         type="button"
+                        size="md"
+                        selected={active}
                         onClick={() => setPartnerRequestStateFilter(option.id)}
-                        className={`shrink-0 rounded-2xl border px-3.5 py-2 text-xs font-black transition ${
-                          active
-                            ? 'border-[#336886] bg-[#EEF6F4] text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(21,58,76,0.55)]'
-                            : 'border-slate-200 bg-white text-slate-500 hover:text-slate-800'
-                        }`}
+                        className="shrink-0 rounded-2xl normal-case tracking-normal"
                       >
                         {option.label}
-                        <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${active ? 'bg-white text-[#153A4C]' : 'bg-slate-50 text-slate-400'}`}>
+                        <span className={`ml-1 rounded-full px-2 py-0.5 text-[10px] ${active ? 'bg-white/18 text-white' : 'bg-slate-50 text-slate-400'}`}>
                           {option.count}
                         </span>
-                      </button>
+                      </Chip>
                     );
                   })}
                 </div>
@@ -4418,21 +4417,20 @@ export function SuperAdminDestinations() {
                 {partnerRequestTypeOptions.map((option) => {
                   const active = partnerRequestTypeFilter === option.id;
                   return (
-                    <button
+                    <Chip
                       key={option.id}
                       type="button"
+                      size="sm"
+                      tone="neutral"
+                      selected={active}
                       onClick={() => setPartnerRequestTypeFilter(option.id as any)}
-                      className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] transition ${
-                        active
-                          ? 'border-[#153A4C] bg-[#153A4C] text-white'
-                          : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-white hover:text-slate-800'
-                      }`}
+                      className="shrink-0"
                     >
                       {option.label}
-                      <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[9px] ${active ? 'bg-white/16 text-white' : 'bg-white text-slate-400'}`}>
+                      <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[9px] ${active ? 'bg-white/16 text-white' : 'bg-white text-slate-400'}`}>
                         {option.count}
                       </span>
-                    </button>
+                    </Chip>
                   );
                 })}
               </div>
@@ -4440,29 +4438,27 @@ export function SuperAdminDestinations() {
                 {partnerFilterOptions.map((option) => {
                   const active = partnerRequestFilter === option.id;
                   return (
-                    <button
+                    <Chip
                       key={option.id}
                       type="button"
+                      size="md"
+                      selected={active}
                       onClick={() => setPartnerRequestFilter(option.id as any)}
-                      className={`shrink-0 rounded-2xl border px-3.5 py-2 text-xs font-black transition ${
-                        active
-                          ? 'border-[#336886] bg-[#153A4C] text-white shadow-[0_14px_28px_-22px_rgba(21,58,76,0.72)]'
-                          : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-white'
-                      }`}
+                      className="shrink-0 rounded-2xl normal-case tracking-normal"
                     >
                       {option.label}
-                      <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${active ? 'bg-white/18 text-white' : 'bg-white text-slate-500'}`}>
+                      <span className={`ml-1 rounded-full px-2 py-0.5 text-[10px] ${active ? 'bg-white/18 text-white' : 'bg-white text-slate-500'}`}>
                         {option.count}
                       </span>
-                    </button>
+                    </Chip>
                   );
                 })}
               </div>
-            </section>
+            </SurfaceCard>
             {inviteFeedback ? (
-              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700">
+              <SurfaceCard tone="success" padding="md" className="rounded-2xl text-sm font-black text-emerald-700">
                 {inviteFeedback}
-              </div>
+              </SurfaceCard>
             ) : null}
 
             {requestBoard.length ? (
@@ -4476,7 +4472,7 @@ export function SuperAdminDestinations() {
                   const sectionOpen = (key: string) => expandedRequestSections[key] === true;
                   const toggleSection = (key: string) => setExpandedRequestSections((current) => ({ ...current, [key]: !(current[key] === true) }));
                   return (
-                    <article key={group.id} className={`overflow-hidden rounded-[1.9rem] border p-3 transition-all ${
+                    <SurfaceCard as="article" key={group.id} padding="sm" className={`rounded-[1.9rem] transition-all ${
                       groupOpen
                         ? 'border-[#336886]/16 bg-[#EEF6F4]/45 shadow-[0_24px_64px_-44px_rgba(21,58,76,0.55)]'
                         : 'border-slate-200 bg-slate-50/70 shadow-[0_18px_44px_-38px_rgba(15,23,42,0.36)]'
@@ -4486,7 +4482,7 @@ export function SuperAdminDestinations() {
                         onClick={() => setExpandedRequestGroups((current) => ({ ...current, [group.id]: !(current[group.id] ?? defaultGroupOpen) }))}
                         aria-expanded={groupOpen}
                         aria-label={`${groupOpen ? 'Recolher' : 'Abrir'} solicitações de ${group.name}`}
-                        className="w-full rounded-[1.55rem] border border-white bg-white p-4 text-left shadow-[0_14px_36px_-32px_rgba(15,23,42,0.42)] transition active:scale-[0.99]"
+                        className="jnc-ds-touch jnc-ds-focus-ring w-full rounded-[1.55rem] border border-white bg-white p-4 text-left shadow-[0_14px_36px_-32px_rgba(15,23,42,0.42)] transition"
                       >
                         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                           <div className="flex min-w-0 items-center gap-3">
@@ -4563,18 +4559,17 @@ export function SuperAdminDestinations() {
                           )}
                         </div>
                       ) : null}
-                    </article>
+                    </SurfaceCard>
                   );
                 })}
               </div>
             ) : (
-              <div className="rounded-[1.75rem] border border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">
-                <WarningCircle size={30} weight="duotone" className="mx-auto text-[#336886]" />
-                <h3 className="mt-3 text-lg font-black text-slate-950">Nenhuma solicitação cadastrada</h3>
-                <p className="mx-auto mt-1 max-w-lg text-sm font-semibold text-slate-500">
-                  Quando um chalé, serviço ou loja demonstrar interesse, ele aparecerá aqui já agrupado por cidade.
-                </p>
-              </div>
+              <EmptyState
+                icon={<WarningCircle size={30} weight="duotone" />}
+                title="Nenhuma solicitação cadastrada"
+                description="Quando um chalé, serviço ou loja demonstrar interesse, ele aparecerá aqui já agrupado por cidade."
+                className="rounded-[1.75rem] border-dashed bg-white"
+              />
             )}
           </div>
         ) : null}
