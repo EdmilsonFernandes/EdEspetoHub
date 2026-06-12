@@ -49,7 +49,7 @@ public class ThermalPrinterPlugin extends Plugin {
     private static final int DEFAULT_FEED_LINES = 3;
     private static final int WRITE_CHUNK_SIZE = 512;
     private static final long WRITE_CHUNK_DELAY_MS = 18L;
-    private static final long PRINT_TIMEOUT_MS = 4500L;
+    private static final long PRINT_TIMEOUT_MS = 10000L;
     private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     @PluginMethod
@@ -248,48 +248,65 @@ public class ThermalPrinterPlugin extends Plugin {
 
         Thread worker = new Thread(() -> {
             long start = System.currentTimeMillis();
-            try {
-                BluetoothDevice device = adapter.getRemoteDevice(printerAddress);
-                adapter.cancelDiscovery();
+            Exception lastError = null;
 
-                BluetoothSocket socket = null;
+            for (int attempt = 0; attempt < 2; attempt++) {
+                if (finished.get()) return;
+                if (attempt > 0) {
+                    try { Thread.sleep(500L); } catch (InterruptedException ignored) {}
+                }
+
                 try {
-                    socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
-                    socketRef[0] = socket;
-                    socket.connect();
-                } catch (Exception firstError) {
-                    closeSocketQuietly(socket);
-                    if (finished.get()) return;
-                    socket = device.createInsecureRfcommSocketToServiceRecord(SPP_UUID);
-                    socketRef[0] = socket;
-                    socket.connect();
-                }
+                    BluetoothDevice device = adapter.getRemoteDevice(printerAddress);
+                    adapter.cancelDiscovery();
 
-                OutputStream output = socket.getOutputStream();
-                byte[] bytes = toPrinterBytes(printerText, printerFeedLines);
-                for (int copy = 0; copy < printerCopies; copy++) {
-                    writeInChunks(output, bytes);
-                    if (copy + 1 < printerCopies) {
-                        Thread.sleep(180L);
+                    BluetoothSocket socket = null;
+                    try {
+                        socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
+                        socketRef[0] = socket;
+                        socket.connect();
+                        Thread.sleep(150L);
+                    } catch (Exception firstError) {
+                        closeSocketQuietly(socket);
+                        socketRef[0] = null;
+                        if (finished.get()) return;
+                        socket = device.createInsecureRfcommSocketToServiceRecord(SPP_UUID);
+                        socketRef[0] = socket;
+                        socket.connect();
+                        Thread.sleep(150L);
                     }
-                }
-                output.flush();
-                closeSocketQuietly(socket);
 
-                if (finished.compareAndSet(false, true)) {
-                    JSObject ret = new JSObject();
-                    ret.put("mode", "native");
-                    ret.put("bytes", bytes.length * printerCopies);
-                    ret.put("durationMs", System.currentTimeMillis() - start);
-                    getActivity().runOnUiThread(() -> call.resolve(ret));
+                    OutputStream output = socket.getOutputStream();
+                    byte[] bytes = toPrinterBytes(printerText, printerFeedLines);
+                    for (int copy = 0; copy < printerCopies; copy++) {
+                        writeInChunks(output, bytes);
+                        if (copy + 1 < printerCopies) {
+                            Thread.sleep(180L);
+                        }
+                    }
+                    output.flush();
+                    closeSocketQuietly(socket);
+                    socketRef[0] = null;
+
+                    if (finished.compareAndSet(false, true)) {
+                        JSObject ret = new JSObject();
+                        ret.put("mode", "native");
+                        ret.put("bytes", bytes.length * printerCopies);
+                        ret.put("durationMs", System.currentTimeMillis() - start);
+                        ret.put("attempts", attempt + 1);
+                        resolveOnUi(call, ret);
+                    }
+                    return;
+                } catch (Exception error) {
+                    closeSocketQuietly(socketRef[0]);
+                    socketRef[0] = null;
+                    lastError = error;
                 }
-            } catch (Exception error) {
-                closeSocketQuietly(socketRef[0]);
-                if (finished.compareAndSet(false, true)) {
-                    getActivity().runOnUiThread(() ->
-                        call.reject("Não foi possível imprimir pela impressora configurada.", "PRINT_FAILED", error)
-                    );
-                }
+            }
+
+            if (finished.compareAndSet(false, true)) {
+                Exception err = lastError;
+                rejectOnUi(call, "Não foi possível imprimir pela impressora configurada.", "PRINT_FAILED", err != null ? err : new Exception("Unknown error"));
             }
         }, "JNC-ThermalPrinter");
         worker.start();
@@ -403,6 +420,30 @@ public class ThermalPrinterPlugin extends Plugin {
     private String sanitizeHeaderMode(String value) {
         String mode = sanitize(value).toLowerCase();
         return "compact".equals(mode) ? "compact" : DEFAULT_HEADER_MODE;
+    }
+
+    private void resolveOnUi(PluginCall call, JSObject result) {
+        try {
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> call.resolve(result));
+            } else {
+                call.resolve(result);
+            }
+        } catch (Exception e) {
+            call.resolve(result);
+        }
+    }
+
+    private void rejectOnUi(PluginCall call, String message, String code, Exception error) {
+        try {
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> call.reject(message, code, error));
+            } else {
+                call.reject(message, code, error);
+            }
+        } catch (Exception e) {
+            call.reject(message, code, error);
+        }
     }
 
     private void closeSocketQuietly(BluetoothSocket socket) {

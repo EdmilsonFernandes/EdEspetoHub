@@ -5,16 +5,43 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "2219e36f",
-  "versionLabel": "v0.1.9.2219e36f",
-  "versionInternal": "0.1.9+20260611.162604.2219e36f",
-  "buildId": "0.1.9+20260611.162604.2219e36f-20260611.162604-2219e36f",
-  "builtAt": "2026-06-11T16:26:04.404Z",
-  "commitHash": "2219e36f6b368e6658983e4a9733a3f74363427e",
-  "shortHash": "2219e36f",
+  "versionDisplaySuffix": "91c0d386",
+  "versionLabel": "v0.1.9.91c0d386",
+  "versionInternal": "0.1.9+20260612.002230.91c0d386",
+  "buildId": "0.1.9+20260612.002230.91c0d386-20260612.002230-91c0d386",
+  "builtAt": "2026-06-12T00:22:30.602Z",
+  "commitHash": "91c0d386ba556e991fd9cd7d34e32390e4274a0a",
+  "shortHash": "91c0d386",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "91c0d386ba556e991fd9cd7d34e32390e4274a0a",
+      "shortHash": "91c0d386",
+      "dateIso": "2026-06-11T21:18:42-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Soften hub header and restore view-more CTAs",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/91c0d386ba556e991fd9cd7d34e32390e4274a0a"
+    },
+    {
+      "hash": "c2624702fd48b0f9d80f9e00b120c409e49b7dea",
+      "shortHash": "c2624702",
+      "dateIso": "2026-06-11T13:45:25-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Polish hub footer and condominium cards",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c2624702fd48b0f9d80f9e00b120c409e49b7dea"
+    },
+    {
+      "hash": "58e07b3c737eed7b09f2982287d8fcea21ac0262",
+      "shortHash": "58e07b3c",
+      "dateIso": "2026-06-11T13:27:15-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(hub): compact header, lighter blue, green accents on sponsored/featured",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/58e07b3c737eed7b09f2982287d8fcea21ac0262"
+    },
     {
       "hash": "2219e36f6b368e6658983e4a9733a3f74363427e",
       "shortHash": "2219e36f",
@@ -257,33 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Rollback Android launch WebView visibility changes",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6b9acbf4f32d43f557a1150ee72ce701b4e99f1e"
-    },
-    {
-      "hash": "98502b96f12c88cc6ea9aa6bc3892475eea0b323",
-      "shortHash": "98502b96",
-      "dateIso": "2026-06-09T14:01:21-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix audit email layout",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/98502b96f12c88cc6ea9aa6bc3892475eea0b323"
-    },
-    {
-      "hash": "6820257901f9b47d9d1983c5c49cbab425a70a71",
-      "shortHash": "68202579",
-      "dateIso": "2026-06-09T13:16:34-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Auto retry native launch recovery",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6820257901f9b47d9d1983c5c49cbab425a70a71"
-    },
-    {
-      "hash": "8bbe3e8c68e23a382fef9a3867eed5e60a9c6294",
-      "shortHash": "8bbe3e8c",
-      "dateIso": "2026-06-09T13:03:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Improve native launch recovery overlay",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8bbe3e8c68e23a382fef9a3867eed5e60a9c6294"
     }
   ]
 } as const;
