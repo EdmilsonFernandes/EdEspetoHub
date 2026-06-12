@@ -1,15 +1,18 @@
 import { type SyntheticEvent, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  ArrowRight,
   Buildings,
   CheckCircle,
   CreditCard,
   Copy,
   CurrencyCircleDollar,
+  MapPinLine,
   NavigationArrow,
-  Package,
+  ShieldCheck,
   Storefront,
   UserCircle,
+  WarningCircle,
 } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
@@ -162,13 +165,13 @@ export function MotoboyCurrent() {
     const current = deliveryStatus === 'ACCEPTED' ? 0 : deliveryStatus === 'PICKED_UP' ? 1 : deliveryStatus === 'IN_TRANSIT' ? 2 : 0;
     const label =
       deliveryStatus === 'ACCEPTED'
-        ? 'Vá até a loja. Ao confirmar a retirada, o cliente recebe o código e a entrega entra em rota.'
+        ? 'Chegue na loja e confirme a retirada.'
         : deliveryStatus === 'PICKED_UP'
-          ? 'Confirme a saída para o cliente para iniciar a rota no sistema.'
+          ? 'Inicie a rota para o cliente.'
           : deliveryStatus === 'IN_TRANSIT'
             ? paymentIsPaid
-              ? 'Chegou no cliente? Confirme a entrega com o código.'
-              : 'Receba o pagamento e finalize com o código do cliente.'
+              ? 'Peça o código ao cliente para finalizar.'
+              : 'Receba o pagamento e finalize com o código.'
             : 'Aguardando informações da entrega.';
     return { current, label };
   }, [deliveryStatus, paymentIsPaid]);
@@ -179,7 +182,7 @@ export function MotoboyCurrent() {
         eyebrow: 'Retirada na loja',
         title: activeOrder?.store?.name || 'Retirada na loja',
         address: pickupAddress || 'Endereço da loja indisponível',
-        actionLabel: 'Abrir rota para a loja',
+        actionLabel: 'Abrir rota',
         avatarUrl: storeAvatarUrl,
         avatarAlt: activeOrder?.store?.name || 'Loja',
         avatarBadge: Buildings,
@@ -189,7 +192,7 @@ export function MotoboyCurrent() {
       eyebrow: 'Destino da entrega',
       title: activeOrder?.customerName || 'Entrega ao cliente',
       address: deliveryAddress || 'Endereço do cliente indisponível',
-      actionLabel: 'Abrir rota para o cliente',
+      actionLabel: 'Abrir rota',
       avatarUrl: customerAvatarUrl,
       avatarAlt: activeOrder?.customerName || 'Cliente',
       avatarBadge: UserCircle,
@@ -335,6 +338,31 @@ export function MotoboyCurrent() {
     target.src = fallbackUrl;
   };
 
+  const primaryActionLabel =
+    deliveryStatus === 'ACCEPTED'
+      ? 'Confirmar retirada'
+      : deliveryStatus === 'PICKED_UP'
+        ? 'Iniciar rota'
+        : paymentIsPaid
+          ? 'Confirmar entrega'
+          : 'Receber e finalizar';
+
+  const primaryActionHint =
+    deliveryStatus === 'ACCEPTED'
+      ? 'Avança o pedido para a etapa de saída.'
+      : deliveryStatus === 'PICKED_UP'
+        ? 'Abre a rota e avisa o sistema.'
+        : paymentIsPaid
+          ? 'Use o código de 4 dígitos do cliente.'
+          : 'Confirme pagamento e código do cliente.';
+
+  const primaryButtonClass =
+    deliveryStatus === 'ACCEPTED'
+      ? 'bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]'
+      : deliveryStatus === 'PICKED_UP'
+        ? 'bg-[linear-gradient(120deg,#0284c7,#0f766e)] shadow-[0_22px_48px_-32px_rgba(2,132,199,0.6)]'
+        : 'bg-[linear-gradient(120deg,#16a34a,#059669)] shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]';
+
   return (
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader
@@ -390,23 +418,25 @@ export function MotoboyCurrent() {
                     </span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">O que fazer agora</p>
-                    <span className="mt-2 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-slate-600">
-                      <Package size={13} weight="duotone" />
-                      {activeStop.eyebrow}
-                    </span>
-                    <p className="mt-2 text-lg font-extrabold text-slate-900">{activeStop.title}</p>
-                    <p className="text-sm text-slate-600 mt-1 break-words">{activeStop.address}</p>
-                    <p className="text-[11px] text-slate-500 mt-3">{stepMeta.label}</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">Próxima ação</p>
+                    <p className="mt-1 text-xl font-black leading-tight text-slate-950">{activeStop.eyebrow}</p>
+                    <p className="mt-1 text-sm font-extrabold text-slate-800">{activeStop.title}</p>
+                    <div className="mt-2 rounded-2xl border border-slate-200 bg-white/80 px-3 py-2">
+                      <p className="flex items-start gap-2 text-xs font-semibold leading-relaxed text-slate-600">
+                        <MapPinLine size={15} weight="duotone" className="mt-0.5 shrink-0 text-[#336886]" />
+                        <span className="break-words">{activeStop.address}</span>
+                      </p>
+                    </div>
+                    <p className="mt-2 text-xs font-semibold text-slate-500">{stepMeta.label}</p>
                   </div>
                 </div>
-                <div className="w-full sm:w-auto flex flex-col gap-2 shrink-0">
+                <div className="grid grid-cols-2 gap-2 sm:w-auto sm:min-w-[220px] sm:grid-cols-1">
                   <button
                     type="button"
                     onClick={openRoute}
-                    className="btn-press w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-900"
+                    className="btn-press rounded-xl border border-[#d7e7ef] bg-white px-3 py-2.5 text-xs font-black text-[#153A4C]"
                   >
-                    <span className="inline-flex items-center gap-2">
+                    <span className="inline-flex items-center justify-center gap-2">
                       <NavigationArrow size={16} weight="fill" />
                       {activeStop.actionLabel}
                     </span>
@@ -414,11 +444,11 @@ export function MotoboyCurrent() {
                   <button
                     type="button"
                     onClick={handleCopyAddress}
-                    className="btn-press w-full sm:w-auto rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-extrabold text-slate-700"
+                    className="btn-press rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-extrabold text-slate-700"
                   >
-                    <span className="inline-flex items-center gap-2">
+                    <span className="inline-flex items-center justify-center gap-2">
                       <Copy size={14} weight="bold" />
-                      Copiar endereço
+                      Copiar
                     </span>
                   </button>
                 </div>
@@ -472,10 +502,15 @@ export function MotoboyCurrent() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-                <div className="hidden rounded-xl border border-slate-200 bg-white px-3 py-3 sm:block">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div
+                  className={[
+                    'rounded-2xl border px-3 py-3',
+                    deliveryStatus === 'ACCEPTED' ? 'border-[#cfe0ea] bg-[#f4fafc]' : 'border-emerald-200 bg-emerald-50',
+                  ].join(' ')}
+                >
                   <div className="flex items-start gap-3">
-                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-white bg-slate-50 shadow-sm">
                       <img
                         src={storeAvatarUrl}
                         alt={activeOrder?.store?.name || 'Loja'}
@@ -488,15 +523,29 @@ export function MotoboyCurrent() {
                           )
                         }
                       />
+                      {deliveryStatus !== 'ACCEPTED' ? (
+                        <span className="absolute inset-0 flex items-center justify-center bg-emerald-600/75 text-white">
+                          <CheckCircle size={20} weight="fill" />
+                        </span>
+                      ) : null}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Loja</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">1. Retirada</p>
                       <p className="mt-1 text-sm font-black text-slate-900 break-words">{activeOrder?.store?.name || 'Loja'}</p>
-                      <p className="mt-1 text-[11px] text-slate-600 break-words">{pickupAddress || '-'}</p>
+                      <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-relaxed text-slate-600">{pickupAddress || '-'}</p>
                     </div>
                   </div>
                 </div>
-                <div className="hidden rounded-xl border border-slate-200 bg-white px-3 py-3 sm:block">
+                <div
+                  className={[
+                    'rounded-2xl border px-3 py-3',
+                    deliveryStatus === 'ACCEPTED'
+                      ? 'border-slate-200 bg-white'
+                      : deliveryStatus === 'PICKED_UP' || deliveryStatus === 'IN_TRANSIT'
+                        ? 'border-[#cfe0ea] bg-[#f4fafc]'
+                        : 'border-slate-200 bg-white',
+                  ].join(' ')}
+                >
                   <div className="flex items-start gap-3">
                     <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
                       <img
@@ -508,12 +557,15 @@ export function MotoboyCurrent() {
                       />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Cliente</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">2. Entrega</p>
                       <p className="mt-1 text-sm font-black text-slate-900 break-words">{activeOrder?.customerName || 'Cliente'}</p>
-                      <p className="mt-1 text-[11px] text-slate-600 break-words">{deliveryAddress || '-'}</p>
+                      <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-relaxed text-slate-600">{deliveryAddress || '-'}</p>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -550,40 +602,37 @@ export function MotoboyCurrent() {
             className="sticky bottom-[calc(env(safe-area-inset-bottom)+5.25rem)] z-30 space-y-2 rounded-[1.6rem] border border-white/80 bg-white/95 p-3 shadow-[0_22px_60px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl motoboy-fade-up sm:static sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-0"
             style={{ animationDelay: '90ms' }}
           >
-            {deliveryStatus === 'ACCEPTED' ? (
-              <button
-                onClick={handlePickup}
-                className="btn-press w-full rounded-2xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-4 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
-              >
-                Retirei o pedido e vou sair para entrega
-              </button>
-            ) : null}
-
-            {deliveryStatus === 'PICKED_UP' ? (
-              <button
-                type="button"
-                onClick={handleStartDelivery}
-                className="btn-press w-full rounded-2xl bg-[linear-gradient(120deg,#0284c7,#0f766e)] px-4 py-4 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(2,132,199,0.6)]"
-              >
-                Iniciar rota para o cliente
-              </button>
-            ) : null}
-
-            {deliveryStatus === 'IN_TRANSIT' ? (
-              <button
-                onClick={handleDelivered}
-                className="btn-press w-full rounded-2xl bg-[linear-gradient(120deg,#16a34a,#059669)] px-4 py-4 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
-              >
-                {paymentIsPaid ? 'Confirmar entrega' : 'Receber e finalizar entrega'}
-              </button>
-            ) : null}
+            <div className="flex items-center justify-between gap-3 px-1">
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Agora</p>
+                <p className="truncate text-xs font-bold text-slate-600">{primaryActionHint}</p>
+              </div>
+              <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black text-slate-600">
+                Etapa {stepMeta.current + 1}/3
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={
+                deliveryStatus === 'ACCEPTED'
+                  ? handlePickup
+                  : deliveryStatus === 'PICKED_UP'
+                    ? handleStartDelivery
+                    : handleDelivered
+              }
+              disabled={!['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT'].includes(deliveryStatus)}
+              className={`btn-press flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-4 text-sm font-black text-white disabled:opacity-50 ${primaryButtonClass}`}
+            >
+              <span>{primaryActionLabel}</span>
+              <ArrowRight size={18} weight="bold" />
+            </button>
 
             <button
               type="button"
               onClick={() => setShowDetails((value) => !value)}
-              className="btn-press w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-700"
+              className="btn-press w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-600"
             >
-              {showDetails ? 'Ocultar detalhes do pedido' : 'Ver detalhes do pedido'}
+              {showDetails ? 'Ocultar itens e valores' : 'Itens e detalhes do pedido'}
             </button>
           </div>
 
@@ -611,10 +660,30 @@ export function MotoboyCurrent() {
 
       {showCodeModal ? (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm px-4">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-600">Código do cliente</p>
-            <h3 className="mt-1 text-lg font-black text-slate-900">Confirme a entrega</h3>
-            <p className="mt-1 text-xs text-slate-500">Peça o código de 4 dígitos ao cliente para concluir.</p>
+          <div className="w-full max-w-md rounded-[2rem] bg-white p-5 shadow-2xl">
+            <div className="flex items-start gap-3">
+              <span
+                className={[
+                  'inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border',
+                  codeLocked ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-[#d7e7ef] bg-[#f4fafc] text-[#336886]',
+                ].join(' ')}
+              >
+                {codeLocked ? <WarningCircle size={22} weight="fill" /> : <ShieldCheck size={22} weight="duotone" />}
+              </span>
+              <div className="min-w-0">
+                <p className={['text-[10px] font-black uppercase tracking-[0.18em]', codeLocked ? 'text-rose-600' : 'text-[#336886]'].join(' ')}>
+                  {codeLocked ? 'Confirmação bloqueada' : 'Código do cliente'}
+                </p>
+                <h3 className="mt-1 text-lg font-black text-slate-900">
+                  {codeLocked ? 'A loja precisa resolver' : 'Confirme a entrega'}
+                </h3>
+                <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
+                  {codeLocked
+                    ? 'As tentativas de código acabaram. Feche esta tela e peça para a loja registrar o problema da entrega no painel.'
+                    : 'Peça ao cliente o código de 4 dígitos antes de concluir.'}
+                </p>
+              </div>
+            </div>
             <input
               type="text"
               inputMode="numeric"
@@ -627,13 +696,36 @@ export function MotoboyCurrent() {
               }}
               placeholder="0000"
               disabled={codeLocked}
-              className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-2xl font-black tracking-[0.5em] text-slate-900 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-2xl font-black tracking-[0.5em] text-slate-900 focus:border-[#336886] focus:outline-none focus:ring-2 focus:ring-[#336886]/15 disabled:cursor-not-allowed disabled:opacity-60"
               autoFocus
             />
-            {codeError ? <p className="mt-2 text-center text-xs font-semibold text-rose-600">{codeError}</p> : null}
+            {codeError ? (
+              <div className="mt-3 flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold leading-relaxed text-rose-700">
+                <WarningCircle size={16} weight="fill" className="mt-0.5 shrink-0" />
+                <span>{codeError}</span>
+              </div>
+            ) : (
+              <div className="mt-3 flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold leading-relaxed text-emerald-800">
+                <ShieldCheck size={16} weight="duotone" className="mt-0.5 shrink-0" />
+                <span>Essa confirmação evita entrega indevida. Não finalize sem o código do cliente.</span>
+              </div>
+            )}
             <div className="mt-5 flex gap-2">
-              <button type="button" onClick={() => setShowCodeModal(false)} className="flex-1 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 active:scale-95">Cancelar</button>
-              <button type="button" onClick={confirmDeliveryWithCode} disabled={codeLocked || deliveryCode.length < 4} className="flex-1 rounded-2xl bg-indigo-600 py-3 text-sm font-bold text-white disabled:opacity-50 active:scale-95">{codeLocked ? 'Bloqueado' : 'Confirmar'}</button>
+              <button
+                type="button"
+                onClick={() => setShowCodeModal(false)}
+                className="btn-press flex-1 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700"
+              >
+                {codeLocked ? 'Fechar' : 'Cancelar'}
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeliveryWithCode}
+                disabled={codeLocked || deliveryCode.length < 4}
+                className="btn-press flex-1 rounded-2xl bg-[#153A4C] py-3 text-sm font-bold text-white disabled:opacity-50"
+              >
+                {codeLocked ? 'Bloqueado' : 'Confirmar'}
+              </button>
             </div>
           </div>
         </div>
