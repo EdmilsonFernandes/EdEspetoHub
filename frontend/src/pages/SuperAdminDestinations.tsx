@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bed, Buildings, CaretDown, ChartBar, ChatCircleText, CheckCircle, ClockCountdown, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, ShieldCheck, Sparkle, Trash, UploadSimple, WarningCircle, X } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
-import { Chip, EmptyState, SectionHeader, SurfaceCard, TextareaField, TextField } from '../components/ui';
+import { Button, Chip, EmptyState, SectionHeader, SurfaceCard, TextareaField, TextField } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -3995,9 +3995,9 @@ export function SuperAdminDestinations() {
               </SurfaceCard>
 
               <div className="sticky bottom-0 z-[1] -mx-1 border-t border-slate-100 bg-white/92 px-1 py-3 backdrop-blur-xl">
-                <button disabled={saving} className="jnc-ds-touch jnc-ds-focus-ring w-full rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white shadow-[0_18px_36px_-24px_rgba(21,58,76,0.85)] disabled:opacity-50 sm:w-auto">
+                <Button disabled={saving} loading={saving} className="w-full sm:w-auto">
                   {editingDestinationId ? 'Atualizar destino' : 'Salvar destino'}
-                </button>
+                </Button>
               </div>
             </form>
               ) : null}
@@ -4413,9 +4413,9 @@ export function SuperAdminDestinations() {
               )}
               {(!editingPlaceId || placeEditSection === 'details') ? (
                 <div className="sticky bottom-0 z-[1] -mx-1 border-t border-slate-100 bg-white/92 px-1 py-3 backdrop-blur-xl">
-                  <button disabled={saving} className="jnc-ds-touch jnc-ds-focus-ring w-full rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white shadow-[0_18px_36px_-24px_rgba(21,58,76,0.85)] disabled:opacity-50 sm:w-auto">
+                  <Button disabled={saving} loading={saving} className="w-full sm:w-auto">
                     {editingPlaceId ? 'Atualizar hospedagem' : 'Salvar hospedagem'}
-                  </button>
+                  </Button>
                 </div>
               ) : null}
             </form>
@@ -4607,7 +4607,9 @@ export function SuperAdminDestinations() {
                 </select>
                 <textarea value={listingForm.description} onChange={(event) => updateListing('description', event.target.value)} placeholder="Descrição" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
               </div>
-              <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">{editingListingId ? 'Atualizar serviço' : 'Salvar serviço'}</button>
+              <Button disabled={saving} loading={saving} className="mt-4">
+                {editingListingId ? 'Atualizar serviço' : 'Salvar serviço'}
+              </Button>
             </form>
               ) : null}
 
@@ -4625,7 +4627,9 @@ export function SuperAdminDestinations() {
                 <input value={storeLinkForm.estimatedMinutes} onChange={(event) => updateStoreLink('estimatedMinutes', event.target.value)} placeholder="Tempo estimado" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={storeLinkForm.notes} onChange={(event) => updateStoreLink('notes', event.target.value)} placeholder="Observação" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
               </div>
-              <button disabled={saving} className="mt-4 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white disabled:opacity-50">Vincular loja</button>
+              <Button disabled={saving} loading={saving} className="mt-4">
+                Vincular loja
+              </Button>
             </form>
               ) : null}
             </div>
