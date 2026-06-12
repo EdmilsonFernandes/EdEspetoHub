@@ -89,7 +89,17 @@ export function AdminMotoboys() {
   const requestsSectionRef = useRef<HTMLDivElement | null>(null);
   const linkedSectionRef = useRef<HTMLDivElement | null>(null);
   const linkedFiltersRef = useRef<HTMLDivElement | null>(null);
-  const activeMotoboysCount = motoboys.filter((link) => link.active).length;
+  const motoboyTeamStats = useMemo(() => {
+    const active = motoboys.filter((link) => link.active);
+    return {
+      total: motoboys.length,
+      active: active.length,
+      free: active.filter((link) => !link.busy).length,
+      busy: active.filter((link) => Boolean(link.busy)).length,
+      inactive: motoboys.filter((link) => !link.active).length,
+    };
+  }, [motoboys]);
+  const activeMotoboysCount = motoboyTeamStats.active;
 
   const displayMotoboyEmail = (user: any) => {
     if (user?.managedWithoutEmail) return 'Sem e-mail, gerenciado pela loja';
@@ -256,7 +266,7 @@ export function AdminMotoboys() {
 
   const filteredMotoboys = useMemo(() => {
     const q = String(motoboyQuery || '').trim().toLowerCase();
-    const base = showInactive ? motoboys : motoboys.filter((link) => link.active);
+    const base = showInactive || motoboyFilter === 'inactive' ? motoboys : motoboys.filter((link) => link.active);
 
     const withQuery = q
       ? base.filter((link) => {
@@ -281,6 +291,21 @@ export function AdminMotoboys() {
 
     return byFilter;
   }, [documentsByMotoboy, motoboyFilter, motoboyQuery, motoboys, showInactive]);
+
+  const motoboyFilterOptions = useMemo(
+    () => [
+      { id: 'all' as const, label: 'Todos', count: showInactive ? motoboyTeamStats.total : motoboyTeamStats.active },
+      { id: 'free' as const, label: 'Livres', count: motoboyTeamStats.free },
+      { id: 'busy' as const, label: 'Ocupados', count: motoboyTeamStats.busy },
+      {
+        id: 'docs_pending' as const,
+        label: 'Docs',
+        count: motoboys.filter((link) => (showInactive || link.active) && docsPendingCount(documentsByMotoboy[link.motoboyId] || []) > 0).length,
+      },
+      { id: 'inactive' as const, label: 'Inativos', count: motoboyTeamStats.inactive },
+    ],
+    [documentsByMotoboy, motoboyTeamStats, motoboys, showInactive]
+  );
 
   const docStatusForType = (docs: any[], type: 'CNH' | 'SELFIE' | 'CRLV') => {
     const list = Array.isArray(docs) ? docs : [];
@@ -1002,15 +1027,38 @@ export function AdminMotoboys() {
                 type="button"
                 onClick={() => setActiveMotoboyTab(tab.id)}
                 className={[
-                  'btn-press shrink-0 rounded-2xl border px-3.5 py-2 text-xs font-black transition',
+                  'btn-press shrink-0 rounded-2xl border px-3.5 py-2 text-xs font-black transition inline-flex items-center gap-2',
                   active ? 'bg-slate-950 text-white border-slate-950 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.8)]' : tone,
                 ].join(' ')}
               >
-                {tab.label}
-                <span className={active ? 'ml-2 text-white/75' : 'ml-2 opacity-70'}>{tab.count}</span>
+                <span>{tab.label}</span>
+                <span
+                  className={[
+                    'inline-flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px]',
+                    active ? 'bg-white/15 text-white' : 'bg-white/75 text-current',
+                  ].join(' ')}
+                >
+                  {tab.count}
+                </span>
               </button>
             );
           })}
+        </div>
+        <div className="mt-2 flex gap-2 overflow-x-auto pb-1 text-[10px] font-black [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-800">
+            {motoboyTeamStats.active} ativo{motoboyTeamStats.active === 1 ? '' : 's'}
+          </span>
+          <span className="shrink-0 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-sky-800">
+            {motoboyTeamStats.free} livre{motoboyTeamStats.free === 1 ? '' : 's'}
+          </span>
+          <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-800">
+            {pendingRequests.length} pedido{pendingRequests.length === 1 ? '' : 's'} de vínculo
+          </span>
+          {tipsOverview.pendingTipOrders > 0 ? (
+            <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-slate-700">
+              {tipsOverview.pendingTipOrders} repasse{tipsOverview.pendingTipOrders === 1 ? '' : 's'} pendente{tipsOverview.pendingTipOrders === 1 ? '' : 's'}
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -2122,24 +2170,6 @@ export function AdminMotoboys() {
             </div>
           }
         />
-        <div className="px-4 pt-3 md:hidden">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveMotoboyTab('team')}
-              className="btn-press flex-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-extrabold text-emerald-800"
-            >
-              Ir para vinculados
-            </button>
-            <button
-              type="button"
-              onClick={() => setCreateMotoboyOpen(true)}
-              className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700"
-            >
-              Novo
-            </button>
-          </div>
-        </div>
         {pendingRequests.length === 0 ? (
           <div className="px-4 py-4">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
@@ -2158,7 +2188,7 @@ export function AdminMotoboys() {
                   className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 shadow-[0_18px_42px_-30px_rgba(15,23,42,0.24)] ds-interactive-card"
                   style={{ borderLeftWidth: 6, borderLeftColor: 'rgb(245 158 11)' }}
                 >
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0">
                     <AdaptiveAvatar
                       src={request.motoboyUser?.profileImageUrl ? resolveAssetUrl(request.motoboyUser.profileImageUrl) : ''}
@@ -2178,11 +2208,11 @@ export function AdminMotoboys() {
                     )}
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">
-                    {request.status || 'PENDING'}
+                  <span className="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-black border border-amber-200 bg-amber-50 text-amber-800">
+                    Aguardando
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => reviewRequest(request.id, 'approve')}
@@ -2200,7 +2230,7 @@ export function AdminMotoboys() {
                   <button
                     type="button"
                     onClick={() => reviewRequest(request.id, 'reject')}
-                    className="btn-press px-3 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold shadow-[0_22px_48px_-34px_rgba(244,63,94,0.65)]"
+                    className="btn-press px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 text-xs font-extrabold text-rose-700"
                   >
                     Rejeitar
                   </button>
@@ -2208,7 +2238,7 @@ export function AdminMotoboys() {
                     <button
                       type="button"
                       onClick={() => openDocsModal(request.motoboyId, request.motoboyUser?.fullName || 'Entregador')}
-                      className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
+                      className="btn-press col-span-2 px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
                     >
                       Ver documentos
                     </button>
@@ -2293,23 +2323,18 @@ export function AdminMotoboys() {
             </div>
 
             <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {[
-                { id: 'all', label: 'Todos' },
-                { id: 'free', label: 'Livres' },
-                { id: 'busy', label: 'Ocupados' },
-                { id: 'docs_pending', label: 'Docs pendentes' },
-                { id: 'inactive', label: 'Inativos' },
-              ].map((f) => (
+              {motoboyFilterOptions.map((f) => (
                 <button
                   key={f.id}
                   type="button"
                   onClick={() => setMotoboyFilter(f.id as any)}
                   className={[
-                    'btn-press shrink-0 px-3 py-1.5 rounded-full text-[11px] font-extrabold border',
+                    'btn-press shrink-0 px-3 py-1.5 rounded-full text-[11px] font-extrabold border inline-flex items-center gap-1.5',
                     motoboyFilter === f.id ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200',
                   ].join(' ')}
                 >
-                  {f.label}
+                  <span>{f.label}</span>
+                  <span className={motoboyFilter === f.id ? 'text-white/75' : 'text-slate-400'}>{f.count}</span>
                 </button>
               ))}
               <button
@@ -2321,28 +2346,10 @@ export function AdminMotoboys() {
                 ].join(' ')}
                 title="Alterna exibição de vínculos inativos no conjunto base"
               >
-                <span>Inativos no base</span>
+                <span>Mostrar inativos</span>
                 <span className="text-[10px] opacity-80">{showInactive ? 'ON' : 'OFF'}</span>
               </button>
             </div>
-          </div>
-        </div>
-        <div className="px-4 pt-3 md:hidden">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveMotoboyTab('requests')}
-              className="btn-press flex-1 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-extrabold text-amber-800"
-            >
-              Ir para solicitações
-            </button>
-            <button
-              type="button"
-              onClick={() => setCreateMotoboyOpen(true)}
-              className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700"
-            >
-              Novo
-            </button>
           </div>
         </div>
 
@@ -2463,11 +2470,11 @@ export function AdminMotoboys() {
                     </span>
                   </div>
                 ) : null}
-                <div className="flex flex-wrap gap-2 pt-1">
+                <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => openDocsModal(link.motoboyId, link.motoboyUser?.fullName || 'Entregador')}
-                    className="btn-press w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
+                    className="btn-press w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
                   >
                     Ver documentos
                   </button>
@@ -2475,10 +2482,10 @@ export function AdminMotoboys() {
                     <button
                       type="button"
                       onClick={() => openResetPasswordModal(link)}
-                      className="btn-press w-full sm:w-auto px-3 py-2 rounded-xl border border-[#cfe0ea] bg-[#f4fafc] text-[11px] font-extrabold text-[#336886] inline-flex items-center justify-center gap-1.5"
+                      className="btn-press w-full px-3 py-2 rounded-xl border border-[#cfe0ea] bg-[#f4fafc] text-[11px] font-extrabold text-[#336886] inline-flex items-center justify-center gap-1.5"
                     >
                       <Key size={14} weight="duotone" />
-                      Redefinir senha
+                      Senha
                     </button>
                   ) : null}
                   {!link.active && (
@@ -2494,7 +2501,7 @@ export function AdminMotoboys() {
                           showToast(error?.message || 'Não foi possível reativar vínculo.', 'error');
                         }
                       }}
-                      className="btn-press w-full sm:w-auto px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-extrabold text-emerald-800"
+                      className="btn-press w-full px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-extrabold text-emerald-800"
                     >
                       Reativar vínculo
                     </button>
@@ -2512,7 +2519,7 @@ export function AdminMotoboys() {
                           showToast(error?.message || 'Não foi possível liberar a operação.', 'error');
                         }
                       }}
-                      className="btn-press w-full sm:w-auto px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-extrabold text-emerald-800"
+                      className="btn-press w-full px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-extrabold text-emerald-800"
                     >
                       Liberar operação
                     </button>
@@ -2520,7 +2527,7 @@ export function AdminMotoboys() {
                   <button
                     type="button"
                     onClick={() => handleUnlink(link.motoboyId)}
-                    className="btn-press w-full sm:w-auto px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 text-xs font-extrabold text-rose-700"
+                    className="btn-press col-span-2 w-full px-3 py-2 rounded-xl border border-rose-100 bg-white text-xs font-extrabold text-rose-600"
                   >
                     Remover vínculo
                   </button>
@@ -2529,20 +2536,6 @@ export function AdminMotoboys() {
             ))}
           </div>
         )}
-        <div className="px-4 pb-4">
-          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-            <span className="font-semibold">Mostrar vínculos inativos</span>
-            <button
-              type="button"
-              onClick={() => setShowInactive((prev) => !prev)}
-              className={`btn-press px-3 py-1 rounded-full text-[10px] font-extrabold border ${
-                showInactive ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200'
-              }`}
-            >
-              {showInactive ? 'Visível' : 'Oculto'}
-            </button>
-          </div>
-        </div>
       </FormSection>
       </div>
 
