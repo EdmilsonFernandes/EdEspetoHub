@@ -15,6 +15,7 @@ import { ProductManager } from '../components/Admin/ProductManager';
 import { InventoryManager } from '../components/Admin/InventoryManager';
 import { OrderTypeSettingsCard } from '../components/Admin/OrderTypeSettingsCard';
 import { ThermalPrinterSettingsCard } from '../components/Admin/ThermalPrinterSettingsCard';
+import { DevicePermissionsCard } from '../components/Admin/DevicePermissionsCard';
 import { StoreUsersPanel } from '../components/Admin/StoreUsersPanel';
 import { AdminMotoboys } from './AdminMotoboys';
 import { useAuth } from '../contexts/AuthContext';
@@ -3056,6 +3057,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       title: 'Impressora térmica',
       subtitle: 'Escolha a impressora Bluetooth deste aparelho para imprimir direto pelo app.',
     },
+    permissions: {
+      title: 'Permissões do dispositivo',
+      subtitle: 'Câmera, notificações, biometria e Bluetooth deste aparelho.',
+    },
   };
   const configCards = [
     {
@@ -3138,6 +3143,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       badge: 'Gerenciar',
       tone: 'neutral',
       action: () => setMfaPanelOpen(true),
+    },
+    {
+      id: 'permissions',
+      title: 'Permissões do dispositivo',
+      description: 'Câmera, notificações push, biometria e Bluetooth do app.',
+      icon: ShieldCheck,
+      badge: 'App Android',
+      tone: 'neutral',
+      action: () => setConfigSection('permissions'),
     },
   ];
   const activeConfigMeta = activeTab === 'config' && configSection !== 'hub'
@@ -3654,6 +3668,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   )}
                   {configSection === 'ordering' && <OrderTypeSettingsCard />}
                   {configSection === 'printer' && <ThermalPrinterSettingsCard />}
+                  {configSection === 'permissions' && <DevicePermissionsCard role="admin" session={auth} onOpenMfa={() => setMfaPanelOpen(true)} />}
                   {configSection === 'hours' && <OpeningHoursCard />}
                 </>
               )}
