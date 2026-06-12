@@ -7,9 +7,8 @@ describe('PushNotificationService email fallback', () => {
     vi.restoreAllMocks();
   });
 
-  it('sends transactional email when customer has no active push token', async () => {
+  it('builds and sends the transactional customer order email', async () => {
     const service = new PushNotificationService() as any;
-    service.hasActiveCustomerTokens = vi.fn().mockResolvedValue(false);
     service.emailService = {
       sendCustomerOrderStatusUpdate: vi.fn().mockResolvedValue(undefined),
     };
@@ -39,21 +38,35 @@ describe('PushNotificationService email fallback', () => {
     });
   });
 
-  it('does not send email when customer already has active push token', async () => {
+  it('uses email fallback when no push was effectively delivered', async () => {
     const service = new PushNotificationService() as any;
-    service.hasActiveCustomerTokens = vi.fn().mockResolvedValue(true);
-    service.emailService = {
-      sendCustomerOrderStatusUpdate: vi.fn().mockResolvedValue(undefined),
-    };
-    const querySpy = vi.spyOn(AppDataSource, 'query');
+    service.dispatchByOwner = vi.fn().mockResolvedValue({ ok: true, sent: 0, skipped: true });
+    service.sendCustomerOrderEmailFallback = vi.fn().mockResolvedValue(undefined);
 
-    await service.sendCustomerOrderEmailFallback('customer-1', {
+    await service.notifyCustomerOrderUpdate('customer-1', {
       title: 'Pedido atualizado',
       body: 'Pedido atualizado.',
       data: { orderId: 'order-1', status: 'preparing' },
     });
 
-    expect(querySpy).not.toHaveBeenCalled();
-    expect(service.emailService.sendCustomerOrderStatusUpdate).not.toHaveBeenCalled();
+    expect(service.sendCustomerOrderEmailFallback).toHaveBeenCalledWith('customer-1', {
+      title: 'Pedido atualizado',
+      body: 'Pedido atualizado.',
+      data: { orderId: 'order-1', status: 'preparing' },
+    });
+  });
+
+  it('does not duplicate the update by email when at least one push was delivered', async () => {
+    const service = new PushNotificationService() as any;
+    service.dispatchByOwner = vi.fn().mockResolvedValue({ ok: true, sent: 1 });
+    service.sendCustomerOrderEmailFallback = vi.fn().mockResolvedValue(undefined);
+
+    await service.notifyCustomerOrderUpdate('customer-1', {
+      title: 'Pedido atualizado',
+      body: 'Pedido atualizado.',
+      data: { orderId: 'order-1', status: 'preparing' },
+    });
+
+    expect(service.sendCustomerOrderEmailFallback).not.toHaveBeenCalled();
   });
 });

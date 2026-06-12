@@ -607,31 +607,11 @@ export class PushNotificationService {
     return { ok: true, sent };
   }
 
-  /**
-   * Checks whether a customer has at least one active push token.
-   *
-   * @author Edmilson Lopes
-   */
-  async hasActiveCustomerTokens(userId: string) {
-    const normalizedUserId = String(userId || '').trim();
-    if (!normalizedUserId) return false;
-    const rows: Array<{ exists: boolean }> = await AppDataSource.query(
-      `
-        SELECT TRUE AS exists
-        FROM customer_push_tokens
-        WHERE user_id = $1
-          AND is_active = TRUE
-        LIMIT 1
-      `,
-      [normalizedUserId]
-    );
-    return rows.length > 0;
-  }
-
   private resolveCustomerStatusLabel(status?: string | null) {
     const normalized = String(status || '').trim().toLowerCase();
     const labels: Record<string, string> = {
       pending: 'Pedido recebido',
+      awaiting_payment: 'Pagamento pendente',
       preparing: 'Pedido em preparo',
       ready: 'Pedido pronto',
       ready_for_delivery: 'Pedido pronto',
@@ -641,6 +621,7 @@ export class PushNotificationService {
       delivered: 'Pedido entregue',
       finished: 'Pedido finalizado',
       cancelled: 'Pedido cancelado',
+      refunded: 'Reembolso confirmado',
     };
     return labels[normalized] || 'Pedido atualizado';
   }
@@ -649,9 +630,6 @@ export class PushNotificationService {
     const normalizedUserId = String(userId || '').trim();
     const orderId = String(payload.data?.orderId || '').trim();
     if (!normalizedUserId || !orderId) return;
-
-    const hasActivePush = await this.hasActiveCustomerTokens(normalizedUserId);
-    if (hasActivePush) return;
 
     const rows: Array<{
       email?: string | null;
@@ -688,7 +666,7 @@ export class PushNotificationService {
       customerName: row?.full_name || row?.customer_name || 'Cliente',
       storeName: row?.store_name || 'Loja parceira',
       orderId,
-      statusLabel: this.resolveCustomerStatusLabel(row?.status || payload.data?.status),
+      statusLabel: this.resolveCustomerStatusLabel(payload.data?.status || row?.status),
       statusMessage: String((payload.data as any)?.fullBody || payload.body || 'Seu pedido foi atualizado.').trim(),
     });
   }
@@ -699,14 +677,6 @@ export class PushNotificationService {
    * @author Edmilson Lopes
    */
   async notifyCustomerOrderUpdate(userId: string, payload: CustomerPushPayload) {
-    void this.sendCustomerOrderEmailFallback(userId, payload).catch((error) => {
-      log.warn('Customer order email fallback failed', {
-        userId: String(userId || '').trim(),
-        orderId: String(payload?.data?.orderId || '').trim() || null,
-        error,
-      });
-    });
-
     // Persist notification in database
     try {
       const { Notification: NotifEntity } = require("../entities/Notification");
@@ -725,13 +695,28 @@ export class PushNotificationService {
         imageUrl
       }));
     } catch { /* non-blocking */ }
-    return this.dispatchByOwner({
+
+    const pushResult = await this.dispatchByOwner({
       ownerKey: 'userId',
       ownerValue: userId,
       payload,
       noTokenLogMessage: 'Push skipped (no active tokens)',
       dispatchFinishedMessage: 'Push dispatch finished',
     });
+
+    if (pushResult.sent === 0) {
+      try {
+        await this.sendCustomerOrderEmailFallback(userId, payload);
+      } catch (error) {
+        log.warn('Customer order email fallback failed', {
+          userId: String(userId || '').trim(),
+          orderId: String(payload?.data?.orderId || '').trim() || null,
+          error,
+        });
+      }
+    }
+
+    return pushResult;
   }
 
   /**

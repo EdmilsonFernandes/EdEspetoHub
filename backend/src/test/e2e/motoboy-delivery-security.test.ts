@@ -245,7 +245,7 @@ describe('Motoboy delivery security flow', () => {
         .send({ reason: 'Cliente confirmou o codigo correto por suporte' });
       expect(resetCode.status).toBe(200);
       expect(resetCode.body?.ok).toBe(true);
-      expect(Number(resetCode.body?.confirmationCodeAttempts || -1)).toBe(0);
+      expect(Number(resetCode.body?.confirmationCodeAttempts ?? -1)).toBe(0);
 
       const resetRows = await AppDataSource.query(
         `
@@ -255,7 +255,7 @@ describe('Motoboy delivery security flow', () => {
         `,
         [deliveryOrderId]
       );
-      expect(Number(resetRows?.[0]?.confirmation_code_attempts || -1)).toBe(0);
+      expect(Number(resetRows?.[0]?.confirmation_code_attempts ?? -1)).toBe(0);
       expect(resetRows?.[0]?.confirmation_code_blocked_at).toBeFalsy();
 
       const deliveredAfterReset = await api
