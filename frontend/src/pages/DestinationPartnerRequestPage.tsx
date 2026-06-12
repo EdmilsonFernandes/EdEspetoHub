@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Bed, CheckCircle, Compass, Handshake, ImageSquare, LinkSimpleHorizontal, Sparkle, UploadSimple } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
+import { Button, Chip, SectionHeader, SurfaceCard, TextareaField, TextField } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
 import { BRAZIL_STATES, loadBrazilCitiesByState, normalizeLocationName } from '../utils/brazilLocations';
@@ -143,7 +144,7 @@ const MediaUploadField = ({ label, hint, urlValue, fileValue, onUrlChange, onFil
   };
 
   return (
-    <div className="sm:col-span-2 rounded-[1.35rem] border border-slate-200 bg-slate-50/80 p-3">
+    <SurfaceCard tone="soft" padding="sm" className="sm:col-span-2 rounded-[1.35rem] border-slate-200 bg-slate-50/80">
       <div className="grid gap-3 sm:grid-cols-[112px_1fr]">
         <div className="flex h-28 items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
           {previewUrl ? (
@@ -157,12 +158,11 @@ const MediaUploadField = ({ label, hint, urlValue, fileValue, onUrlChange, onFil
           <p className="mt-0.5 text-[11px] font-semibold text-slate-500">{hint}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {canUseNativePicker ? (
-              <button type="button" onClick={handleNativePicker} className="inline-flex items-center gap-2 rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
-                <UploadSimple size={14} weight="bold" />
+              <Button type="button" size="sm" onClick={handleNativePicker} leftIcon={<UploadSimple size={14} weight="bold" />} className="rounded-full uppercase tracking-[0.1em]">
                 Tirar ou escolher foto
-              </button>
+              </Button>
             ) : (
-              <label className="relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
+              <label className="jnc-ds-touch jnc-ds-focus-ring relative inline-flex min-h-9 cursor-pointer items-center gap-2 overflow-hidden rounded-full bg-[#153A4C] px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
                 <UploadSimple size={14} weight="bold" />
                 Escolher foto
                 <input
@@ -174,26 +174,26 @@ const MediaUploadField = ({ label, hint, urlValue, fileValue, onUrlChange, onFil
               </label>
             )}
             {(fileValue || urlValue) ? (
-              <button type="button" onClick={() => { onFileChange(''); onUrlChange(''); }} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-slate-600">
+              <Button type="button" variant="secondary" size="sm" onClick={() => { onFileChange(''); onUrlChange(''); }} className="rounded-full uppercase tracking-[0.1em]">
                 Limpar
-              </button>
+              </Button>
             ) : null}
           </div>
-          <label className="mt-3 flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2">
-            <LinkSimpleHorizontal size={16} weight="bold" className="text-slate-400" />
-            <input
-              value={urlValue || ''}
-              onChange={(event) => {
-                onUrlChange(event.target.value);
-                if (event.target.value) onFileChange('');
-              }}
-              placeholder="Ou cole uma URL pública da imagem"
-              className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
-            />
-          </label>
+          <TextField
+            name={`${String(label || 'imagem').toLowerCase().replace(/\s+/g, '-')}-url`}
+            value={urlValue || ''}
+            onChange={(event) => {
+              onUrlChange(event.target.value);
+              if (event.target.value) onFileChange('');
+            }}
+            placeholder="Ou cole uma URL pública da imagem"
+            leftIcon={<LinkSimpleHorizontal size={16} weight="bold" />}
+            wrapperClassName="mt-3"
+            inputClassName="py-2.5 font-bold shadow-none"
+          />
         </div>
       </div>
-    </div>
+    </SurfaceCard>
   );
 };
 
@@ -553,38 +553,41 @@ export function DestinationPartnerRequestPage() {
             </div>
           </aside>
 
-          <form id="dados-parceiro" ref={formStartRef} onSubmit={submit} className="relative z-10 scroll-mt-[calc(env(safe-area-inset-top)+5rem)] rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] sm:p-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Solicitação</p>
-                <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">Dados do parceiro</h2>
-              </div>
-              <Compass size={28} weight="duotone" className="text-[#336886]" />
-            </div>
+          <form id="dados-parceiro" ref={formStartRef} onSubmit={submit} className="jnc-ds-surface relative z-10 scroll-mt-[calc(env(safe-area-inset-top)+5rem)] rounded-[2rem] p-5 sm:p-6">
+            <SectionHeader
+              eyebrow="Solicitação"
+              title="Dados do parceiro"
+              subtitle="Preencha os dados públicos e informe quem será responsável pelo acesso."
+              action={<Compass size={28} weight="duotone" className="text-[#336886]" />}
+            />
 
-            {error ? <p className="mt-4 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
+            {error ? (
+              <SurfaceCard padding="md" className="mt-4 rounded-2xl border-rose-100 bg-rose-50 text-sm font-bold text-rose-700 shadow-none">
+                {error}
+              </SurfaceCard>
+            ) : null}
             {success ? (
-              <div className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">
+              <SurfaceCard tone="success" padding="md" className="mt-4 rounded-2xl text-sm font-bold text-emerald-700">
                 <CheckCircle size={18} weight="fill" className="mr-1 inline" />
                 Recebemos sua solicitação. O time Já no Caminho vai revisar e entrar em contato quando estiver tudo certo.
-              </div>
+              </SurfaceCard>
             ) : null}
             {loading ? <p className="mt-4 text-sm font-semibold text-slate-500">Carregando destinos...</p> : null}
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2 rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-3">
+              <SurfaceCard tone="soft" padding="sm" className="sm:col-span-2 rounded-[1.5rem] border-slate-200 bg-slate-50/80">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Cidade do destino</span>
                     <p className="mt-1 text-sm font-bold text-slate-800">Destino aqui é a cidade turística onde o parceiro quer aparecer.</p>
                   </div>
-                  <div className="flex rounded-full bg-white p-1 ring-1 ring-slate-200">
-                    <button type="button" onClick={() => setDestinationMode('existing')} className={`rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.1em] ${destinationMode === 'existing' ? 'bg-[#153A4C] text-white' : 'text-slate-500'}`}>
+                  <div className="flex gap-1 rounded-full bg-white p-1 ring-1 ring-slate-200">
+                    <Chip type="button" size="sm" selected={destinationMode === 'existing'} onClick={() => setDestinationMode('existing')} className="border-transparent shadow-none">
                       Cidade aberta
-                    </button>
-                    <button type="button" onClick={() => setDestinationMode('new')} className={`rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.1em] ${destinationMode === 'new' ? 'bg-[#153A4C] text-white' : 'text-slate-500'}`}>
+                    </Chip>
+                    <Chip type="button" size="sm" selected={destinationMode === 'new'} onClick={() => setDestinationMode('new')} className="border-transparent shadow-none">
                       Nova cidade
-                    </button>
+                    </Chip>
                   </div>
                 </div>
 
@@ -607,9 +610,9 @@ export function DestinationPartnerRequestPage() {
                       </select>
                     </label>
                     {filteredDestinations.length === 0 ? (
-                      <p className="sm:col-span-2 rounded-2xl border border-dashed border-slate-300 bg-white px-3 py-3 text-xs font-bold text-slate-500">
+                      <SurfaceCard padding="sm" className="sm:col-span-2 rounded-2xl border-dashed border-slate-300 bg-white text-xs font-bold text-slate-500 shadow-none">
                         Ainda não temos cidade aberta nesta UF. Use “Nova cidade” para sugerir ao time Já no Caminho.
-                      </p>
+                      </SurfaceCard>
                     ) : null}
                   </div>
                 ) : (
@@ -651,25 +654,25 @@ export function DestinationPartnerRequestPage() {
                       </p>
                     ) : null}
                     {newDestinationCityError ? (
-                      <p className="sm:col-span-2 rounded-2xl bg-amber-50 px-3 py-3 text-xs font-bold leading-relaxed text-amber-800">
+                      <SurfaceCard tone="warning" padding="sm" className="sm:col-span-2 rounded-2xl text-xs font-bold leading-relaxed text-amber-800 shadow-none">
                         {newDestinationCityError}
-                      </p>
+                      </SurfaceCard>
                     ) : null}
                     {existingDestinationForNewCity ? (
-                      <div className="sm:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-xs font-bold leading-relaxed text-emerald-800">
+                      <SurfaceCard tone="success" padding="sm" className="sm:col-span-2 rounded-2xl border-emerald-200 text-xs font-bold leading-relaxed text-emerald-800 shadow-none">
                         <p>Essa cidade já está disponível no Já no Caminho. Use o destino existente para evitar cadastro duplicado.</p>
-                        <button type="button" onClick={useExistingDestinationForNewCity} className="mt-2 rounded-full bg-emerald-700 px-3 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-white">
+                        <Button type="button" variant="success" size="sm" onClick={useExistingDestinationForNewCity} className="mt-2 rounded-full uppercase tracking-[0.1em]">
                           Usar cidade aberta
-                        </button>
-                      </div>
+                        </Button>
+                      </SurfaceCard>
                     ) : (
-                      <p className="sm:col-span-2 rounded-2xl bg-amber-50 px-3 py-3 text-xs font-bold leading-relaxed text-amber-800">
+                      <SurfaceCard tone="warning" padding="sm" className="sm:col-span-2 rounded-2xl text-xs font-bold leading-relaxed text-amber-800 shadow-none">
                         Essa cidade ainda não está aberta no app. O time Já no Caminho vai revisar, melhorar fotos e textos e avisar quando o destino estiver pronto para aparecer aos hóspedes.
-                      </p>
+                      </SurfaceCard>
                     )}
                   </div>
                 )}
-              </div>
+              </SurfaceCard>
 
               <label>
                 <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Tipo de parceiro</span>
@@ -704,23 +707,23 @@ export function DestinationPartnerRequestPage() {
                 </label>
               )}
 
-              <input required value={form.name} onChange={(event) => update('name', event.target.value)} placeholder="Nome do chalé, pousada ou serviço" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
-              <textarea value={form.description} onChange={(event) => update('description', event.target.value)} placeholder="Descrição pública" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
+              <TextField name="partnerName" required value={form.name} onChange={(event) => update('name', event.target.value)} label="Nome público" placeholder="Nome do chalé, pousada ou serviço" wrapperClassName="sm:col-span-2" />
+              <TextareaField name="partnerDescription" value={form.description} onChange={(event) => update('description', event.target.value)} label="Descrição pública" placeholder="Conte o que o hóspede encontra aqui" rows={3} wrapperClassName="sm:col-span-2" />
               <div className="sm:col-span-2 grid gap-3 sm:grid-cols-[160px_1fr]">
                 <div>
-                  <input value={form.zipCode} onChange={(event) => update('zipCode', formatCepBr(event.target.value))} placeholder="CEP" inputMode="numeric" autoComplete="postal-code" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
+                  <TextField name="zipCode" value={form.zipCode} onChange={(event) => update('zipCode', formatCepBr(event.target.value))} label="CEP" placeholder="00000-000" inputMode="numeric" autoComplete="postal-code" />
                   {zipLookupLoading ? <p className="mt-1 px-1 text-[11px] font-bold text-[#336886]">Buscando endereço...</p> : null}
                   {zipLookupError ? <p className="mt-1 px-1 text-[11px] font-bold text-rose-600">{zipLookupError}</p> : null}
                 </div>
-                <input value={form.address} onChange={(event) => update('address', event.target.value)} placeholder="Endereço" autoComplete="address-line1" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
+                <TextField name="address" value={form.address} onChange={(event) => update('address', event.target.value)} label="Endereço" placeholder="Rua, número e referência" autoComplete="address-line1" />
               </div>
-              <p className="sm:col-span-2 rounded-2xl bg-[#edf5fa] px-3 py-3 text-xs font-bold leading-relaxed text-[#153A4C]">
+              <SurfaceCard tone="brand" padding="sm" className="sm:col-span-2 rounded-2xl text-xs font-bold leading-relaxed text-[#153A4C] shadow-none">
                 Cidade do cadastro: {destinationMode === 'new' ? (form.destinationCity || 'nova cidade') : (selectedDestination?.city || selectedDestination?.name || 'cidade selecionada')}{' '}
                 {destinationMode === 'new' ? form.destinationState : selectedDestination?.state ? `- ${selectedDestination.state}` : ''}.
-              </p>
-              <input value={form.whatsapp} onChange={(event) => update('whatsapp', formatPhoneBr(event.target.value))} placeholder="WhatsApp público" inputMode="tel" autoComplete="tel" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
-              <input value={form.instagramUrl} onChange={(event) => update('instagramUrl', event.target.value)} placeholder="Instagram" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
-              <input value={form.websiteUrl} onChange={(event) => update('websiteUrl', event.target.value)} placeholder="Site, Airbnb, Booking ou cardápio" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
+              </SurfaceCard>
+              <TextField name="publicWhatsapp" value={form.whatsapp} onChange={(event) => update('whatsapp', formatPhoneBr(event.target.value))} label="WhatsApp público" placeholder="(00) 00000-0000" inputMode="tel" autoComplete="tel" />
+              <TextField name="instagramUrl" value={form.instagramUrl} onChange={(event) => update('instagramUrl', event.target.value)} label="Instagram" placeholder="@perfil ou link" />
+              <TextField name="websiteUrl" value={form.websiteUrl} onChange={(event) => update('websiteUrl', event.target.value)} label="Link principal" placeholder="Site, Airbnb, Booking ou cardápio" wrapperClassName="sm:col-span-2" />
 
               {form.partnerType === 'HOSPITALITY' ? (
                 <>
@@ -744,7 +747,7 @@ export function DestinationPartnerRequestPage() {
                     onError={setError}
                     maxEdge={900}
                   />
-                  <textarea value={form.deliveryInstructions} onChange={(event) => update('deliveryInstructions', event.target.value)} placeholder="Instruções para entrega no local" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
+                  <TextareaField name="deliveryInstructions" value={form.deliveryInstructions} onChange={(event) => update('deliveryInstructions', event.target.value)} label="Instruções para entrega" placeholder="Portaria, acesso, referência ou orientação importante" rows={3} wrapperClassName="sm:col-span-2" />
                 </>
               ) : (
                 <MediaUploadField
@@ -762,15 +765,15 @@ export function DestinationPartnerRequestPage() {
               <div className="sm:col-span-2 mt-2 border-t border-slate-100 pt-4">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Responsável pelo cadastro</p>
               </div>
-              <input required value={form.responsibleName} onChange={(event) => update('responsibleName', event.target.value)} placeholder="Nome do responsável" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
-              <input required type="email" value={form.responsibleEmail} onChange={(event) => update('responsibleEmail', event.target.value)} placeholder="E-mail do responsável" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]" />
-              <input required value={form.responsiblePhone} onChange={(event) => update('responsiblePhone', formatPhoneBr(event.target.value))} placeholder="WhatsApp do responsável" inputMode="tel" autoComplete="tel" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
-              <textarea value={form.message} onChange={(event) => update('message', event.target.value)} placeholder="Mensagem para o time Já no Caminho" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886] sm:col-span-2" />
+              <TextField name="responsibleName" required value={form.responsibleName} onChange={(event) => update('responsibleName', event.target.value)} label="Nome do responsável" placeholder="Nome completo" />
+              <TextField name="responsibleEmail" required type="email" value={form.responsibleEmail} onChange={(event) => update('responsibleEmail', event.target.value)} label="E-mail do responsável" placeholder="email@empresa.com.br" autoComplete="email" />
+              <TextField name="responsiblePhone" required value={form.responsiblePhone} onChange={(event) => update('responsiblePhone', formatPhoneBr(event.target.value))} label="WhatsApp do responsável" placeholder="(00) 00000-0000" inputMode="tel" autoComplete="tel" wrapperClassName="sm:col-span-2" />
+              <TextareaField name="message" value={form.message} onChange={(event) => update('message', event.target.value)} label="Mensagem para o time" placeholder="Conte algo importante sobre o cadastro" rows={3} wrapperClassName="sm:col-span-2" />
             </div>
 
-            <button type="submit" disabled={saving || !canSubmitDestination} className="mt-5 w-full rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white shadow-[0_16px_32px_-22px_rgba(21,58,76,0.8)] disabled:opacity-50">
-              {saving ? 'Enviando...' : 'Enviar para aprovação'}
-            </button>
+            <Button type="submit" size="lg" fullWidth loading={saving} disabled={!canSubmitDestination} className="mt-5">
+              Enviar para aprovação
+            </Button>
           </form>
         </div>
       </div>
