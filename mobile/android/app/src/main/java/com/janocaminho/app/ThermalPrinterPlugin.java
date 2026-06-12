@@ -55,8 +55,6 @@ public class ThermalPrinterPlugin extends Plugin {
     private static final long PRINT_TIMEOUT_MS = 15000L;
     private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
-    // ── Status ──────────────────────────────────────────────────────────
-
     @PluginMethod
     public void getStatus(PluginCall call) {
         JSObject ret = new JSObject();
@@ -67,7 +65,6 @@ public class ThermalPrinterPlugin extends Plugin {
         ret.put("settings", getSettingsObject());
         ret.put("savedPrinter", getSavedPrinterObject());
 
-        // Quick reachability check for the saved printer
         String savedAddress = sanitize(getPreferences().getString(KEY_ADDRESS, ""));
         if (!savedAddress.isEmpty() && adapter != null && adapter.isEnabled()) {
             boolean reachable = checkPrinterReachable(adapter, savedAddress);
@@ -79,8 +76,6 @@ public class ThermalPrinterPlugin extends Plugin {
 
         call.resolve(ret);
     }
-
-    // ── List paired devices (printer-filtered) ──────────────────────────
 
     @PluginMethod
     public void listPairedDevices(PluginCall call) {
@@ -99,8 +94,6 @@ public class ThermalPrinterPlugin extends Plugin {
         }
         listPairedDevicesWithPermission(call);
     }
-
-    // ── Save / clear printer ────────────────────────────────────────────
 
     @PluginMethod
     public void savePrinter(PluginCall call) {
@@ -182,8 +175,6 @@ public class ThermalPrinterPlugin extends Plugin {
         }
     }
 
-    // ── Print ───────────────────────────────────────────────────────────
-
     @PluginMethod
     public void print(PluginCall call) {
         if (!hasBluetoothConnectPermission()) {
@@ -201,8 +192,6 @@ public class ThermalPrinterPlugin extends Plugin {
         }
         printWithPermission(call);
     }
-
-    // ── Internal: list devices with printer filter ──────────────────────
 
     private void listPairedDevicesWithPermission(PluginCall call) {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -227,12 +216,11 @@ public class ThermalPrinterPlugin extends Plugin {
                     String deviceName = safeDeviceName(device);
                     String address = device.getAddress();
                     boolean isPrinter = isLikelyPrinter(device);
-                    boolean isBonded = true;
 
                     JSObject item = new JSObject();
                     item.put("name", deviceName);
                     item.put("address", address);
-                    item.put("bonded", isBonded);
+                    item.put("bonded", true);
                     item.put("isPrinter", isPrinter);
 
                     if (isPrinter) {
@@ -248,7 +236,6 @@ public class ThermalPrinterPlugin extends Plugin {
             return;
         }
 
-        // Merge: printers first, then other devices with isPrinter=false
         JSArray allDevices = new JSArray();
         for (int i = 0; i < printers.length(); i++) {
             allDevices.put(printers.optJSONObject(i));
@@ -265,8 +252,6 @@ public class ThermalPrinterPlugin extends Plugin {
         ret.put("savedPrinter", getSavedPrinterObject());
         call.resolve(ret);
     }
-
-    // ── Internal: print with retry ──────────────────────────────────────
 
     private void printWithPermission(PluginCall call) {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -323,7 +308,6 @@ public class ThermalPrinterPlugin extends Plugin {
                     adapter.cancelDiscovery();
                     Log.d(TAG, "print: attempt=" + (attempt + 1) + " creating socket to " + printerAddress);
 
-                    // Try secure socket first
                     try {
                         socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
                         socketRef[0] = socket;
@@ -335,7 +319,6 @@ public class ThermalPrinterPlugin extends Plugin {
                         socketRef[0] = null;
                         if (finished.get()) return;
 
-                        // Fallback: insecure socket
                         socket = device.createInsecureRfcommSocketToServiceRecord(SPP_UUID);
                         socketRef[0] = socket;
                         socket.connect();
@@ -399,15 +382,7 @@ public class ThermalPrinterPlugin extends Plugin {
         }, PRINT_TIMEOUT_MS);
     }
 
-    // ── Internal: printer detection ─────────────────────────────────────
-
-    /**
-     * Heuristic to detect if a Bluetooth device is likely a thermal printer.
-     * Uses BluetoothClass + name heuristics since many cheap thermal printers
-     * don't report proper device class.
-     */
     private boolean isLikelyPrinter(BluetoothDevice device) {
-        // 1. Check BluetoothClass (official way)
         BluetoothClass btClass = null;
         try {
             btClass = device.getBluetoothClass();
@@ -415,21 +390,14 @@ public class ThermalPrinterPlugin extends Plugin {
 
         if (btClass != null) {
             int majorClass = btClass.getMajorDeviceClass();
-            // BluetoothClass.Device.Major.IMAGING = 1536
             if (majorClass == BluetoothClass.Device.Major.IMAGING) {
                 return true;
             }
-            // Some printers report as PERIPHERAL with sub-class
-            // BluetoothClass.Device.Major.PERIPHERAL = 1280
             if (majorClass == BluetoothClass.Device.Major.PERIPHERAL) {
-                int deviceClass = btClass.getDeviceClass();
-                // Not all peripheral subclasses are printers, but many thermal printers
-                // report as uncategorized peripheral
                 return true;
             }
         }
 
-        // 2. Name heuristic — many thermal printers have these keywords in name
         String name = safeDeviceName(device).toLowerCase();
         if (name.contains("printer") || name.contains("print") ||
             name.contains("impres") || name.contains("pos-") ||
@@ -444,25 +412,15 @@ public class ThermalPrinterPlugin extends Plugin {
             return true;
         }
 
-        // 3. Check for SPP UUID support (Serial Port Profile)
-        // This is the most reliable indicator but requires API call
-        // We skip this for performance and rely on class + name
-
         return false;
     }
 
-    /**
-     * Quick reachability check: tries to connect SPP socket and immediately closes.
-     * Returns true if the device accepted the connection.
-     * Runs on the calling thread — must NOT be called on UI thread.
-     */
     private boolean checkPrinterReachable(BluetoothAdapter adapter, String address) {
         BluetoothSocket socket = null;
         try {
             BluetoothDevice device = adapter.getRemoteDevice(address);
             socket = device.createInsecureRfcommSocketToServiceRecord(SPP_UUID);
             socket.connect();
-            // If connect() returns without exception, the printer is reachable
             Log.d(TAG, "checkPrinterReachable: " + address + " => REACHABLE");
             return true;
         } catch (Exception error) {
@@ -472,8 +430,6 @@ public class ThermalPrinterPlugin extends Plugin {
             closeSocketQuietly(socket);
         }
     }
-
-    // ── Internal: error classification ──────────────────────────────────
 
     private String classifyError(Exception error) {
         if (error == null) return "UNKNOWN";
@@ -509,13 +465,11 @@ public class ThermalPrinterPlugin extends Plugin {
             case "SOCKET_CLOSED":
                 return "A conexao foi encerrada antes de concluir. Tente novamente.";
             case "PERMISSION_ERROR":
-                return "Permissao Bluetooth negada. Vá nas configuracoes do app e permita dispositivos proximos.";
+                return "Permissao Bluetooth negada. Va nas configuracoes do app e permita dispositivos proximos.";
             default:
                 return "Nao foi possivel imprimir (" + errorType + "). Verifique se a impressora esta ligada, pareada e proxima ao celular.";
         }
     }
-
-    // ── Helpers ─────────────────────────────────────────────────────────
 
     private boolean hasBluetoothConnectPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true;
@@ -559,13 +513,13 @@ public class ThermalPrinterPlugin extends Plugin {
 
     private byte[] toPrinterBytes(String text, int feedLines) throws Exception {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        output.write(new byte[] { 0x1B, 0x40 }); // ESC @ — initialize printer
+        output.write(new byte[] { 0x1B, 0x40 });
         String normalized = normalizePrinterText(text);
         output.write(normalized.getBytes(Charset.forName("ISO-8859-1")));
         for (int i = 0; i < feedLines; i++) {
-            output.write(0x0A); // LF — line feed
+            output.write(0x0A);
         }
-        output.write(new byte[] { 0x1D, 0x56, 0x42, 0x00 }); // GS V B — cut paper (full)
+        output.write(new byte[] { 0x1D, 0x56, 0x42, 0x00 });
         return output.toByteArray();
     }
 
@@ -573,14 +527,14 @@ public class ThermalPrinterPlugin extends Plugin {
         String normalized = Normalizer.normalize(value == null ? "" : value, Normalizer.Form.NFD)
             .replaceAll("\\p{M}", "");
         return normalized
-            .replace("ç", "c")
-            .replace("Ç", "C")
-            .replace("–", "-")
-            .replace("—", "-")
-            .replace(""", "\"")
-            .replace(""", "\"")
-            .replace("'", "'")
-            .replace("'", "'");
+            .replace("00e7", "c")
+            .replace("00c7", "C")
+            .replace("2013", "-")
+            .replace("2014", "-")
+            .replace("201c", "\"")
+            .replace("201d", "\"")
+            .replace("2018", "'")
+            .replace("2019", "'");
     }
 
     private void writeInChunks(OutputStream output, byte[] bytes) throws Exception {
