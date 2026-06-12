@@ -16,6 +16,7 @@ import { InventoryManager } from '../components/Admin/InventoryManager';
 import { OrderTypeSettingsCard } from '../components/Admin/OrderTypeSettingsCard';
 import { ThermalPrinterSettingsCard } from '../components/Admin/ThermalPrinterSettingsCard';
 import { DevicePermissionsCard } from '../components/Admin/DevicePermissionsCard';
+import { Button } from '../components/ui/Button';
 import { StoreUsersPanel } from '../components/Admin/StoreUsersPanel';
 import { AdminMotoboys } from './AdminMotoboys';
 import { useAuth } from '../contexts/AuthContext';
@@ -3202,14 +3203,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         <div className="fixed top-2 left-1/2 z-[12500] -translate-x-1/2 w-[calc(100%-1rem)] max-w-3xl">
           <div className="rounded-2xl border border-amber-200 bg-amber-50/95 backdrop-blur px-4 py-2.5 shadow-[0_14px_32px_-24px_rgba(180,83,9,0.55)] flex items-center justify-between gap-3">
             <p className="text-xs sm:text-sm font-semibold text-amber-900">Alterações não salvas detectadas</p>
-            <button
-              type="button"
+            <Button
+              variant="success"
+              size="sm"
               onClick={handleSaveBranding}
-              disabled={savingBranding}
-              className="rounded-xl bg-emerald-600 px-3 py-1.5 text-[11px] sm:text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
+              loading={savingBranding}
             >
-              {savingBranding ? 'Salvando...' : 'Salvar agora'}
-            </button>
+              Salvar agora
+            </Button>
           </div>
         </div>
       )}
@@ -3632,14 +3633,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   <div className="rounded-[1.5rem] border border-slate-200 bg-white px-4 py-4 shadow-[0_18px_42px_-32px_rgba(15,23,42,0.45)]">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-start gap-3">
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setConfigSection('hub')}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                           aria-label="Voltar para categorias"
+                          className="h-10 w-10 !rounded-2xl !px-0"
                         >
                           <CaretRight size={16} weight="bold" className="rotate-180" />
-                        </button>
+                        </Button>
                         <div>
                           <p className="text-[10px] uppercase tracking-[0.22em] font-black text-slate-400">Bloco da loja</p>
                           <h3 className="mt-1 text-base font-black text-slate-900">{activeConfigMeta?.title}</h3>
@@ -3684,28 +3686,29 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                       {focusedBrandingSection ? 'Salva apenas este bloco sem mexer no restante da operação.' : 'Salva os ajustes de perfil, canais, logística e operação da loja.'}
                     </p>
                   </div>
-                  <button
-                    type="button"
+                  <Button
+                    variant="success"
+                    size="sm"
                     onClick={handleSaveBranding}
-                    disabled={savingBranding || !hasBrandingChanges}
-                    className={`rounded-xl px-4 py-2 text-xs font-bold text-white shadow-[0_12px_26px_-18px_rgba(15,23,42,0.7)] hover:opacity-95 disabled:opacity-60 ${
-                      hasBrandingChanges ? 'bg-emerald-600 hover:bg-emerald-700 animate-pulse' : 'bg-brand-gradient'
-                    }`}
+                    loading={savingBranding}
+                    disabled={!hasBrandingChanges}
+                    className={!hasBrandingChanges ? 'bg-brand-gradient' : ''}
                   >
-                    {savingBranding ? 'Salvando...' : activeConfigMeta?.saveLabel || 'Salvar alterações'}
-                  </button>
+                    {activeConfigMeta?.saveLabel || 'Salvar alterações'}
+                  </Button>
                 </div>
                 <div className="sm:hidden fixed left-0 right-0 px-4 z-50 ds-safe-fab">
-                  <button
-                    type="button"
+                  <Button
+                    variant="success"
+                    size="lg"
+                    fullWidth
                     onClick={handleSaveBranding}
-                    disabled={savingBranding || !hasBrandingChanges}
-                    className={`w-full rounded-2xl text-white py-4 text-sm font-semibold shadow-lg hover:opacity-90 disabled:opacity-60 ${
-                      hasBrandingChanges ? 'bg-emerald-600 animate-pulse' : 'bg-brand-gradient'
-                    }`}
+                    loading={savingBranding}
+                    disabled={!hasBrandingChanges}
+                    className={!hasBrandingChanges ? 'bg-brand-gradient' : ''}
                   >
-                    {savingBranding ? 'Salvando...' : hasBrandingChanges ? activeConfigMeta?.saveLabel || 'Salvar alterações' : 'Sem alterações pendentes'}
-                  </button>
+                    {hasBrandingChanges ? activeConfigMeta?.saveLabel || 'Salvar alterações' : 'Sem alterações pendentes'}
+                  </Button>
                 </div>
               </>
             )}
