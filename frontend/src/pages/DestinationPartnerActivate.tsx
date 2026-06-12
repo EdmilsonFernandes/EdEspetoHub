@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, Eye, EyeSlash, Key, LockKey } from '@phosphor-icons/react';
+import { Button, IconButton, SurfaceCard, TextField } from '../components/ui';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { destinationPartnerPortalService } from '../services/destinationPartnerPortalService';
 import { inputAssistProps } from '../utils/inputAssist';
@@ -44,7 +45,7 @@ export function DestinationPartnerActivate() {
 
   return (
     <AuthLayout showHeader title="Ativar parceiro" eyebrow="Já no Caminho" subtitle="Crie sua senha de acesso" backTo="/entrar">
-      <form onSubmit={submit} className="w-full max-w-[520px] rounded-[2rem] border border-white/70 bg-white/88 p-5 shadow-[0_28px_80px_-48px_rgba(15,23,42,0.60)] backdrop-blur-xl sm:p-7">
+      <form onSubmit={submit} className="jnc-ds-surface w-full max-w-[520px] rounded-[2rem] p-5 sm:p-7">
         <div className="mb-5 flex items-start gap-3">
           <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#153A4C] text-white shadow-[0_16px_34px_-22px_rgba(21,58,76,0.7)]">
             <Key size={22} weight="duotone" />
@@ -58,44 +59,47 @@ export function DestinationPartnerActivate() {
 
         <div className="space-y-3">
           {['password', 'confirmPassword'].map((field, index) => (
-            <label key={field} className="block">
-              <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
-                {index === 0 ? 'Nova senha' : 'Confirmar senha'}
-              </span>
-              <div className="relative">
-                <input
-                  {...inputAssistProps.newPassword}
-                  type={showPassword ? 'text' : 'password'}
-                  value={form[field]}
-                  onChange={(event) => setForm((prev) => ({ ...prev, [field]: event.target.value }))}
-                  placeholder={index === 0 ? 'Crie uma senha segura' : 'Digite a senha novamente'}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white"
+            <TextField
+              key={field}
+              {...inputAssistProps.newPassword}
+              name={field}
+              label={index === 0 ? 'Nova senha' : 'Confirmar senha'}
+              type={showPassword ? 'text' : 'password'}
+              value={form[field]}
+              onChange={(event) => setForm((prev) => ({ ...prev, [field]: event.target.value }))}
+              placeholder={index === 0 ? 'Crie uma senha segura' : 'Digite a senha novamente'}
+              inputClassName="bg-slate-50 focus:bg-white"
+              rightIcon={index === 0 ? (
+                <IconButton
+                  type="button"
+                  variant="plain"
+                  size="sm"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  icon={showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
+                  label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  className="-mr-2"
                 />
-                {index === 0 ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  >
-                    {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
-                  </button>
-                ) : null}
-              </div>
-            </label>
+              ) : undefined}
+            />
           ))}
         </div>
 
-        {error ? <p className="mt-4 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
+        {error ? (
+          <SurfaceCard padding="md" className="mt-4 rounded-2xl border-rose-100 bg-rose-50 text-sm font-bold text-rose-700 shadow-none">
+            {error}
+          </SurfaceCard>
+        ) : null}
 
-        <button
+        <Button
           type="submit"
-          disabled={loading}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-4 py-3.5 text-base font-black text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.65)] transition hover:bg-[#1e4d62] active:scale-[0.98] disabled:opacity-60"
+          size="lg"
+          fullWidth
+          loading={loading}
+          leftIcon={loading ? <LockKey size={19} weight="duotone" /> : <CheckCircle size={20} weight="duotone" />}
+          className="mt-5"
         >
-          {loading ? <LockKey size={19} weight="duotone" /> : <CheckCircle size={20} weight="duotone" />}
-          {loading ? 'Ativando...' : 'Ativar meu acesso'}
-        </button>
+          Ativar meu acesso
+        </Button>
       </form>
     </AuthLayout>
   );

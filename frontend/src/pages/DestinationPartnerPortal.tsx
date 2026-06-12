@@ -17,6 +17,7 @@ import {
 } from '@phosphor-icons/react';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
+import { Button, IconButton, SurfaceCard, TextField } from '../components/ui';
 import { AuthLayout } from '../layouts/AuthLayout';
 import {
   destinationPartnerPortalService,
@@ -159,7 +160,7 @@ function PartnerLogin({ onLoggedIn }: { onLoggedIn: (session: any) => void }) {
 
   return (
     <AuthLayout showHeader title="Portal parceiro" eyebrow="Já no Caminho" subtitle="Destinos, chalés e serviços" backTo="/entrar">
-      <form onSubmit={submit} autoComplete="on" className="w-full max-w-[520px] rounded-[2rem] border border-white/70 bg-white/88 p-5 shadow-[0_28px_80px_-48px_rgba(15,23,42,0.60)] backdrop-blur-xl sm:p-7">
+      <form onSubmit={submit} autoComplete="on" className="jnc-ds-surface w-full max-w-[520px] rounded-[2rem] p-5 sm:p-7">
         <div className="mb-5 text-center">
           <div className="mx-auto grid h-16 w-16 place-items-center overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)]">
             <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
@@ -170,49 +171,55 @@ function PartnerLogin({ onLoggedIn }: { onLoggedIn: (session: any) => void }) {
         </div>
 
         <div className="space-y-3">
-          <label className="block">
-            <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">E-mail</span>
-            <input
-              {...inputAssistProps.email}
-              value={form.email}
-              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-              placeholder="email@empresa.com.br"
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white"
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1.5 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Senha</span>
-            <div className="relative">
-              <input
-                {...inputAssistProps.currentPassword}
-                type={showPassword ? 'text' : 'password'}
-                value={form.password}
-                onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-                placeholder="Sua senha"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#336886] focus:bg-white"
-              />
-              <button
+          <TextField
+            {...inputAssistProps.email}
+            name="partnerEmail"
+            label="E-mail"
+            value={form.email}
+            onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+            placeholder="email@empresa.com.br"
+            inputClassName="bg-slate-50 focus:bg-white"
+          />
+          <TextField
+            {...inputAssistProps.currentPassword}
+            name="partnerPassword"
+            label="Senha"
+            type={showPassword ? 'text' : 'password'}
+            value={form.password}
+            onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+            placeholder="Sua senha"
+            inputClassName="bg-slate-50 focus:bg-white"
+            rightIcon={(
+              <IconButton
                 type="button"
+                variant="plain"
+                size="sm"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-              >
-                {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </label>
+                icon={showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
+                label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                className="-mr-2"
+              />
+            )}
+          />
         </div>
 
-        {error ? <p className="mt-4 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
+        {error ? (
+          <SurfaceCard padding="md" className="mt-4 rounded-2xl border-rose-100 bg-rose-50 text-sm font-bold text-rose-700 shadow-none">
+            {error}
+          </SurfaceCard>
+        ) : null}
 
-        <button
+        <Button
           type="submit"
-          disabled={loading || !form.email || !form.password}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-4 py-3.5 text-base font-black text-white shadow-[0_18px_34px_-22px_rgba(21,58,76,0.65)] transition hover:bg-[#1e4d62] active:scale-[0.98] disabled:opacity-60"
+          size="lg"
+          fullWidth
+          loading={loading}
+          disabled={!form.email || !form.password}
+          leftIcon={<LockKey size={19} weight="duotone" />}
+          className="mt-5"
         >
-          <LockKey size={19} weight="duotone" />
-          {loading ? 'Entrando...' : 'Entrar no portal'}
-        </button>
+          Entrar no portal
+        </Button>
       </form>
     </AuthLayout>
   );
