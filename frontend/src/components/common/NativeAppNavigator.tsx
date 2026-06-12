@@ -193,9 +193,6 @@ export function NativeAppNavigator() {
 
   const itemBaseClass =
     'group flex min-h-[3.2rem] flex-col items-center justify-center gap-1 rounded-2xl px-0.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] transition-[transform] duration-150 ease-out active:scale-[0.96]';
-  const inactiveItemClass =
-    'text-slate-500 hover:text-slate-700';
-
   const activeClass = 'text-[#2d5f7b]';
   const inactiveClass = 'text-slate-500 hover:text-slate-700';
 
