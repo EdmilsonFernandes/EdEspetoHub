@@ -390,6 +390,18 @@ fi
 # Ensure infrastructure services (redis, postgres) are running.
 # deploy-release uses --no-deps, so Redis/Postgres are never started automatically.
 echo "Ensuring infrastructure services are running (redis, postgres)..."
+
+# Re-home any infrastructure container that belongs to a different compose project
+# (e.g. postgres created before `name: janocaminho` was added to docker-compose.yml).
+for infra_svc in redis postgres; do
+  infra_cname="janocaminho-${infra_svc}"
+  infra_project="$(docker inspect "$infra_cname" --format '{{index .Config.Labels "com.docker.compose.project"}}' 2>/dev/null || true)"
+  if [ -n "$infra_project" ] && [ "$infra_project" != "janocaminho" ]; then
+    echo "Re-homing $infra_cname (project was: $infra_project, expected: janocaminho)"
+    docker rm -f "$infra_cname" >/dev/null 2>&1 || true
+  fi
+done
+
 $COMPOSE_CMD \
   -f "$ROOT_DIR/docker-compose.yml" \
   -f "$ROOT_DIR/docker-compose.prod.yml" \
