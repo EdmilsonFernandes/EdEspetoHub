@@ -7,6 +7,7 @@ import { PublicDestinationShell } from '../components/Destinations/PublicDestina
 import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { AppImagePreviewDialog } from '../components/common/AppImagePreviewDialog';
 import { AirbnbIcon, GoogleMapsIcon, isAirbnbUrlOrLabel } from '../components/common/BrandActionIcons';
+import { EmptyState, SurfaceCard } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatCurrency } from '../utils/format';
@@ -622,9 +623,16 @@ export function HospitalityPlacePage() {
               <PreStoreCardSkeleton />
             </div>
           ) : null}
-          {error ? <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
+          {error ? (
+            <EmptyState
+              className="mt-5"
+              icon={<Bed size={30} weight="duotone" />}
+              title="Não conseguimos carregar esta hospedagem"
+              description={error}
+            />
+          ) : null}
           {!loading && !error ? (
-            <div className="mt-1.5 overflow-hidden rounded-[1.75rem] border border-white/85 bg-white/90 p-2 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.44)] backdrop-blur sm:mt-2">
+            <SurfaceCard padding="sm" className="mt-1.5 rounded-[1.75rem] border-white/85 bg-white/90 backdrop-blur sm:mt-2">
               <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
                 <div className="relative h-44 overflow-hidden rounded-[1.25rem] bg-slate-100 sm:h-64 lg:h-full">
                   <div
@@ -733,7 +741,7 @@ export function HospitalityPlacePage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </SurfaceCard>
           ) : null}
         </div>
       </section>
@@ -741,7 +749,7 @@ export function HospitalityPlacePage() {
       {!loading && !error && spotlightProviders.length > 0 ? (
         <section className="relative z-10 -mt-4 px-4">
           <div className="mx-auto max-w-6xl">
-            <div className="overflow-hidden rounded-[1.65rem] border border-white/85 bg-white/88 px-3.5 py-3.5 shadow-[0_24px_62px_-38px_rgba(15,23,42,0.38)] ring-1 ring-slate-950/[0.03] backdrop-blur-xl sm:px-4 sm:py-4">
+            <SurfaceCard padding="md" className="rounded-[1.65rem] border-white/85 bg-white/88 ring-1 ring-slate-950/[0.03] backdrop-blur-xl">
               <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
@@ -809,7 +817,7 @@ export function HospitalityPlacePage() {
                   <span className="truncate">{providerJumpLabel}</span>
                 </div>
               ) : null}
-            </div>
+            </SurfaceCard>
           </div>
         </section>
       ) : null}
@@ -857,11 +865,13 @@ export function HospitalityPlacePage() {
               </div>
             </div>
             {!hasVisiblePlaceDeliveryOptions ? (
-              <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white/70 p-5">
-                <p className="text-sm font-bold text-slate-600">
-                  {hasPlaceDeliveryOptions ? 'Nenhuma opção neste filtro por enquanto.' : 'Ainda não há lojas ou contatos configurados para atendimento direto neste chalé.'}
-                </p>
-              </div>
+              <EmptyState
+                icon={<ShoppingBagOpen size={30} weight="duotone" />}
+                title={hasPlaceDeliveryOptions ? 'Nenhuma opção neste filtro' : 'Ainda não há atendimento vinculado'}
+                description={hasPlaceDeliveryOptions
+                  ? 'Escolha outro filtro para ver lojas e contatos disponíveis.'
+                  : 'Lojas, restaurantes e serviços que atendem esta hospedagem aparecerão aqui.'}
+              />
             ) : null}
             <div className="grid gap-3 xl:grid-cols-2">
               {visibleStores.map((entry: any, index: number) => {
@@ -1059,7 +1069,7 @@ export function HospitalityPlacePage() {
           </div>
 
           <aside className="space-y-4">
-            <div className="rounded-[1.5rem] border border-white/80 bg-white/72 p-4 shadow-[0_14px_38px_-34px_rgba(15,23,42,0.24)] ring-1 ring-slate-900/[0.025] backdrop-blur-xl">
+            <SurfaceCard padding="md" className="rounded-[1.5rem] border-white/80 bg-white/72 ring-1 ring-slate-900/[0.025] backdrop-blur-xl">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#336886]">Região</p>
@@ -1129,12 +1139,12 @@ export function HospitalityPlacePage() {
                 ) : null}
                 {destinationListings.length === 0 ? <p className="text-sm font-bold text-slate-500">Sem outras sugestões da cidade por enquanto.</p> : null}
               </div>
-            </div>
+            </SurfaceCard>
             {place.deliveryInstructions ? (
-              <div className="rounded-[2rem] border border-emerald-100 bg-emerald-50 p-5">
+              <SurfaceCard tone="success" padding="lg" className="rounded-[2rem]">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">Instrução de entrega</p>
                 <p className="mt-2 text-sm font-bold leading-relaxed text-slate-700">{place.deliveryInstructions}</p>
-              </div>
+              </SurfaceCard>
             ) : null}
             <Link to="/destinos/cadastrar#dados-parceiro" className="group relative block overflow-hidden rounded-[2.2rem] border border-white/10 p-5 text-white shadow-[0_24px_54px_-30px_rgba(21,58,76,0.85)] bg-[radial-gradient(circle_at_14%_12%,rgba(95,211,90,0.15),transparent_40%),linear-gradient(135deg,#153A4C_0%,#1b465c_58%,#0b1e27_100%)] transition-all duration-300 hover:border-white/15 hover:shadow-[0_28px_64px_-24px_rgba(21,58,76,0.95)] hover:-translate-y-0.5 active:scale-[0.99]">
               {/* Glare Sweep Line */}
