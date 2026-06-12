@@ -11,6 +11,7 @@ import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Camera as CapCamera } from '@capacitor/camera';
+import { Button } from '../ui/Button';
 import { useToast } from '../../contexts/ToastContext';
 import { nativeBiometricService } from '../../services/nativeBiometricService';
 import { storePushService } from '../../services/storePushService';
@@ -373,13 +374,15 @@ export function DevicePermissionsCard({ role, session, onOpenMfa }: DevicePermis
       )}
 
       {/* Open system settings */}
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => void openAppSettings()}
-        className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 hover:bg-slate-50"
+        leftIcon={<Gear size={14} weight="duotone" />}
+        className="mt-3"
       >
-        <Gear size={14} weight="duotone" /> Configurações do app
-      </button>
+        Configurações do app
+      </Button>
     </section>
   );
 }

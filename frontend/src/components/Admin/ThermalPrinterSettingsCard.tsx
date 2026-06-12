@@ -12,6 +12,7 @@ import {
 } from '@phosphor-icons/react';
 import { useToast } from '../../contexts/ToastContext';
 import { buildRawBtText } from '../../utils/printReceiptImage';
+import { Button } from '../ui/Button';
 import {
   clearNativeThermalPrinter,
   getNativeThermalPrinterStatus,
@@ -656,36 +657,37 @@ export function ThermalPrinterSettingsCard() {
               <p className="mt-1 text-xs text-slate-500">
                 Pareie a impressora no Bluetooth do Android e toque em Buscar novamente.
               </p>
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleOpenBluetooth}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-xs font-black text-slate-700 border border-slate-200 hover:bg-slate-50"
+                leftIcon={<Gear size={14} weight="duotone" />}
+                className="mt-3"
               >
-                <Gear size={14} weight="duotone" /> Abrir Bluetooth
-              </button>
+                Abrir Bluetooth
+              </Button>
             </div>
           )}
 
           {/* Action buttons */}
           <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
+            <Button
+              variant="primary"
               onClick={() => loadDevices()}
               data-testid="thermal-printer-search"
-              disabled={loading}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#153A4C] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.75)] disabled:opacity-60"
+              loading={loading}
+              leftIcon={<ArrowClockwise size={16} weight="bold" className={loading ? 'animate-spin' : ''} />}
             >
-              <ArrowClockwise size={16} weight="bold" className={loading ? 'animate-spin' : ''} />
-              {loading ? 'Buscando...' : 'Buscar'}
-            </button>
-            <button
-              type="button"
+              Buscar
+            </Button>
+            <Button
+              variant="ghost"
               onClick={handleOpenBluetooth}
               data-testid="thermal-printer-open-bluetooth"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 hover:bg-slate-50"
+              leftIcon={<Gear size={16} weight="duotone" />}
             >
-              <Gear size={16} weight="duotone" /> Bluetooth
-            </button>
+              Bluetooth
+            </Button>
           </div>
         </div>
       </div>
@@ -759,14 +761,14 @@ export function ThermalPrinterSettingsCard() {
               <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Como o cupom sai</p>
               <p className="mt-1 text-sm font-bold text-slate-700">Configuracao local deste celular.</p>
             </div>
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              size="sm"
               onClick={handleSaveSettings}
-              disabled={savingSettings}
-              className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-black text-white disabled:opacity-60"
+              loading={savingSettings}
             >
-              {savingSettings ? 'Salvando...' : 'Salvar'}
-            </button>
+              Salvar
+            </Button>
           </div>
 
           <div className="grid gap-2 sm:grid-cols-2">
