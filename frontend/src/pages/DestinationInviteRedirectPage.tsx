@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight, ShieldCheck } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
+import { Button, SurfaceCard } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { buildListingClaimUrl } from '../utils/destinationListingClaim';
 
@@ -85,7 +86,7 @@ export function DestinationInviteRedirectPage({ kind = 'listing' }: { kind?: 'li
   return (
     <PublicDestinationShell active="register" backTo="/destinos" backLabel="Voltar" contextLabel="Convite seguro">
       <div className="mx-auto flex min-h-[62vh] max-w-xl items-center px-4 py-10">
-        <div className="w-full rounded-[2rem] border border-white/80 bg-white/90 p-6 text-center shadow-[0_24px_70px_-44px_rgba(15,23,42,0.45)]">
+        <SurfaceCard tone={error ? 'warning' : 'default'} padding="lg" className="w-full rounded-[2rem] text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-[#edf6f8] text-[#153A4C]">
             <ShieldCheck size={34} weight="duotone" />
           </div>
@@ -97,16 +98,17 @@ export function DestinationInviteRedirectPage({ kind = 'listing' }: { kind?: 'li
             {error || status || 'Abrindo o cadastro com segurança no domínio janocaminho.com.br.'}
           </p>
           {error ? (
-            <button
+            <Button
               type="button"
+              size="lg"
               onClick={() => navigate('/destinos', { replace: true })}
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#153A4C] px-5 py-3 text-sm font-black text-white"
+              rightIcon={<ArrowRight size={16} weight="bold" />}
+              className="mt-5 rounded-full"
             >
               Ver destinos
-              <ArrowRight size={16} weight="bold" />
-            </button>
+            </Button>
           ) : null}
-        </div>
+        </SurfaceCard>
       </div>
     </PublicDestinationShell>
   );
