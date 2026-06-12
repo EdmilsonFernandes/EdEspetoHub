@@ -2091,7 +2091,7 @@ export function MarketplacePage() {
                     </div>
 
                     <div className="ml-auto flex items-center gap-1.5 shrink-0 z-10">
-                      <span className="text-[10px] font-bold text-emerald-600 hidden sm:inline-block opacity-0 group-hover:opacity-100 transition-opacity duration-300">Explorar</span>
+                      <span className="hidden text-[10px] font-bold text-emerald-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:inline-block">Ver mais</span>
                       <div className="grid h-6 w-6 place-items-center rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 shadow-sm transition-transform duration-300 ease-out group-hover:translate-x-1.5 group-hover:bg-emerald-500 group-hover:text-white sm:h-7 sm:w-7">
                         <svg className="h-3.5 w-3.5 stroke-[2.5] sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -2160,7 +2160,7 @@ export function MarketplacePage() {
                   to={destinationListHref}
                   className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]"
                 >
-                  Ver guia
+                  Ver mais
                   <CaretRight size={10} weight="bold" />
                 </Link>
               </div>
@@ -2348,7 +2348,7 @@ export function MarketplacePage() {
                             onClick={() => openCondominiumPicker('all')}
                             className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center justify-center rounded-full px-3 py-2 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886]"
                           >
-                            Ver todos
+                            Ver mais
                           </button>
                         </div>
 

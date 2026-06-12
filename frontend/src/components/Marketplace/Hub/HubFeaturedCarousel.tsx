@@ -47,6 +47,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
     : hasSponsoredItems
       ? 'Uma escolha parceira para pedir agora.'
       : 'Toque e veja a loja que prepara.';
+  const showHighlightsLink = loading || items.length > 0 || hasOverflow;
 
   return (
     <section
@@ -67,7 +68,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
           <h2 className="text-[15px] font-black tracking-[-0.035em] text-slate-950">{title}</h2>
           <p className="mt-0.5 line-clamp-1 text-[10px] font-bold text-slate-500">{subtitle}</p>
         </div>
-        {hasOverflow ? (
+        {showHighlightsLink ? (
           <Link
             to="/hub/destaques"
             onPointerEnter={() => prefetchRouteByPath('/hub/destaques')}
@@ -75,7 +76,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
             onTouchStart={() => prefetchRouteByPath('/hub/destaques')}
             className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886]"
           >
-            Ver todos
+            Ver mais
             <CaretRight size={11} weight="bold" />
           </Link>
         ) : null}
