@@ -6,6 +6,7 @@ import { CheckCircle, ClipboardText, Clock, HouseLine, Storefront, WarningCircle
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { RouteMapView } from '../components/RouteMapView';
 import { GoogleMapsIcon } from '../components/common/BrandActionIcons';
+import { Chip, SurfaceCard } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { mapsService } from '../services/mapsService';
 import { buildDestinationAddressLine, buildDestinationRouteAddressLine } from '../utils/destinationWhatsApp';
@@ -189,7 +190,7 @@ const pointFallbackImage = (point: any, kind: 'service' | 'place') =>
   getStoreAvatarUrl(point?.slug || point?.id || point?.name, point?.name || (kind === 'service' ? 'Serviço' : 'Hospedagem'));
 
 const PointCard = ({ point, label, kind, icon: Icon, imageUrl, accent = '#336886' }: any) => (
-  <div className="jnc-hub-touch jnc-hub-lift group relative overflow-hidden rounded-[1.45rem] border border-white/80 bg-white/88 p-3 shadow-[0_18px_46px_-40px_rgba(15,23,42,0.52)] ring-1 ring-slate-900/[0.03] backdrop-blur-xl md:hover:border-[#336886]/18">
+  <SurfaceCard padding="sm" className="jnc-hub-touch jnc-hub-lift group rounded-[1.45rem] border-white/80 bg-white/88 ring-1 ring-slate-900/[0.03] backdrop-blur-xl md:hover:border-[#336886]/18">
     <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-20" />
     <div className="flex gap-3">
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[1.15rem] bg-slate-100 ring-1 ring-white">
@@ -215,7 +216,7 @@ const PointCard = ({ point, label, kind, icon: Icon, imageUrl, accent = '#336886
         </p>
       </div>
     </div>
-  </div>
+  </SurfaceCard>
 );
 
 export function HospitalityServiceRoutePage() {
@@ -381,7 +382,7 @@ export function HospitalityServiceRoutePage() {
     <PublicDestinationShell active="place" backTo={placePublicPath} backLabel="Voltar" contextLabel="Rota da hospedagem">
       <main className="min-h-screen bg-[radial-gradient(circle_at_12%_0%,rgba(51,104,134,0.16),transparent_34%),linear-gradient(135deg,#f6f2e9,#eef5f1_58%,#eadfc8)] px-4 pb-10 pt-3 sm:pt-5">
         <section className="mx-auto max-w-4xl">
-          <div className="overflow-hidden rounded-[1.85rem] border border-white/85 bg-white/92 p-4 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.5)] backdrop-blur sm:p-6">
+          <SurfaceCard padding="none" className="rounded-[1.85rem] border-white/85 bg-white/92 p-4 backdrop-blur sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Rota para atendimento</p>
@@ -394,18 +395,18 @@ export function HospitalityServiceRoutePage() {
               </div>
               {canShowMap ? (
               <div className="grid grid-cols-2 gap-2 sm:min-w-[15rem]">
-                <div className="rounded-[1.15rem] border border-[#336886]/12 bg-white/82 p-3 text-[#153A4C] shadow-sm">
+                <SurfaceCard padding="sm" className="rounded-[1.15rem] border-[#336886]/12 bg-white/82 text-[#153A4C] shadow-sm">
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Distância</p>
                   <p className="mt-1 text-sm font-black">
                     {formatRouteDistance(routeEstimate?.distanceKm) || formatDistance(distanceKm)}
                   </p>
-                </div>
-                <div className="rounded-[1.15rem] border border-[#5FD35A]/20 bg-[#5FD35A]/12 p-3 text-[#153A4C] ring-1 ring-white/70">
+                </SurfaceCard>
+                <SurfaceCard tone="success" padding="sm" className="rounded-[1.15rem] border-[#5FD35A]/20 bg-[#5FD35A]/12 text-[#153A4C] ring-1 ring-white/70">
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Tempo</p>
                   <p className="mt-1 text-sm font-black">
                     {formatRouteDuration(routeEstimate?.durationMin) || estimateMinutes(distanceKm) || 'Abrir mapa'}
                   </p>
-                </div>
+                </SurfaceCard>
               </div>
               ) : null}
             </div>
@@ -428,7 +429,7 @@ export function HospitalityServiceRoutePage() {
                     premiumMotion
                   />
                 ) : (
-                  <div className="rounded-[1.35rem] border border-amber-200 bg-amber-50/80 p-4 text-sm font-semibold leading-relaxed text-amber-900">
+                  <SurfaceCard tone="warning" padding="md" className="rounded-[1.35rem] border-amber-200 bg-amber-50/80 text-sm font-semibold leading-relaxed text-amber-900">
                     <p className="flex items-center gap-2 font-black">
                       <WarningCircle size={18} weight="duotone" />
                       Endereço pendente em {missingCoordinates.join(' e ')}.
@@ -436,7 +437,7 @@ export function HospitalityServiceRoutePage() {
                     <p className="mt-1">
                       Complete o endereço para abrir a rota no app de mapas.
                     </p>
-                  </div>
+                  </SurfaceCard>
                 )}
               </div>
             ) : null}
@@ -457,30 +458,26 @@ export function HospitalityServiceRoutePage() {
             </div>
 
             <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-              <button
-                type="button"
+              <Chip
                 onClick={() => copyText(currentRouteUrl, 'Link da rota copiado.')}
-                className={`jnc-hub-touch inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] shadow-sm transition-all hover:-translate-y-0.5 ${
-                  linkCopied
-                    ? 'border-[#5FD35A]/35 bg-[#5FD35A]/16 text-[#153A4C]'
-                    : 'border-slate-200/80 bg-white/65 text-slate-600 hover:border-slate-300'
-                }`}
+                tone={linkCopied ? 'success' : 'neutral'}
+                size="sm"
+                selected={linkCopied}
+                leftIcon={linkCopied ? <CheckCircle size={16} weight="fill" /> : <ClipboardText size={16} weight="duotone" />}
+                className="tracking-[0.12em] shadow-sm hover:-translate-y-0.5"
               >
-                {linkCopied ? <CheckCircle size={16} weight="fill" /> : <ClipboardText size={16} weight="duotone" />}
                 {linkCopied ? 'Copiado' : 'Copiar link'}
-              </button>
-              <button
-                type="button"
+              </Chip>
+              <Chip
                 onClick={() => copyText(placePoint.address, 'Endereço do chalé copiado.')}
-                className={`jnc-hub-touch inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] shadow-sm transition-all hover:-translate-y-0.5 ${
-                  addressCopied
-                    ? 'border-[#5FD35A]/35 bg-[#5FD35A]/16 text-[#153A4C]'
-                    : 'border-slate-200/80 bg-white/65 text-slate-600 hover:border-slate-300'
-                }`}
+                tone={addressCopied ? 'success' : 'neutral'}
+                size="sm"
+                selected={addressCopied}
+                leftIcon={addressCopied ? <CheckCircle size={16} weight="fill" /> : <HouseLine size={16} weight="duotone" />}
+                className="tracking-[0.12em] shadow-sm hover:-translate-y-0.5"
               >
-                {addressCopied ? <CheckCircle size={16} weight="fill" /> : <HouseLine size={16} weight="duotone" />}
                 {addressCopied ? 'Copiado' : 'Copiar endereço'}
-              </button>
+              </Chip>
             </div>
             {copied ? (
               <p aria-live="polite" className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#5FD35A]/14 px-3 py-2 text-xs font-black text-[#2d5f7b]">
@@ -490,13 +487,13 @@ export function HospitalityServiceRoutePage() {
             ) : null}
 
             {error ? (
-              <p className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+              <SurfaceCard tone="warning" padding="md" className="mt-4 rounded-2xl text-sm font-bold text-amber-800">
                 {error} O link continua funcionando com as informações enviadas pelo WhatsApp.
-              </p>
+              </SurfaceCard>
             ) : loading ? (
               <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Conferindo dados da hospedagem...</p>
             ) : null}
-          </div>
+          </SurfaceCard>
         </section>
       </main>
     </PublicDestinationShell>
