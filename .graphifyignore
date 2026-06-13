@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+.vite/
+.next/
+
+# Mobile / Android
+mobile/.gradle-home/
+mobile/android/
+*.aab
+*.apk
+
+# IDE
+.idea/
+.vscode/
+
+# Test results (error context only)
+test-results/
+
+# Docker volumes
+postgres-data/
+redis-data/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Lock files (don't add knowledge value)
+package-lock.json
+pnpm-lock.yaml
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Graphify output (avoid recursive indexing)
+graphify-out/
+
+# Claude config (not codebase knowledge)
+.claude/
