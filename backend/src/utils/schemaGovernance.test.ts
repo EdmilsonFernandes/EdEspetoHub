@@ -3,7 +3,11 @@ import path from 'path';
 import { describe, it, expect } from 'vitest';
 
 const srcRoot = path.resolve(__dirname, '..');
-const allowedDdlFile = path.join(srcRoot, 'utils', 'runMigrations.ts');
+const allowedDdlFiles = new Set([
+  path.join(srcRoot, 'utils', 'runMigrations.ts'),
+  path.join(srcRoot, 'utils', 'migrationRunner.ts'),
+]);
+const allowedDdlDirs = [path.join(srcRoot, 'migrations') + path.sep];
 
 function listTsFiles(dirPath: string): string[] {
   const entries = fs.readdirSync(dirPath, { withFileTypes: true });
@@ -24,14 +28,17 @@ function listTsFiles(dirPath: string): string[] {
 }
 
 describe('schema governance', () => {
-  it('keeps DDL centralized in runMigrations.ts', () => {
+  it('keeps DDL centralized in runMigrations.ts and versioned migrations', () => {
     const ddlQueryPattern =
-      /AppDataSource\.query\(\s*`[\s\S]*?\b(?:CREATE|ALTER|DROP)\s+(?:TABLE|INDEX|EXTENSION)\b[\s\S]*?`\s*(?:,|\))/g;
+      /\b(?:AppDataSource|queryRunner)\.query\(\s*`[\s\S]*?\b(?:CREATE|ALTER|DROP)\s+(?:TABLE|INDEX|EXTENSION)\b[\s\S]*?`\s*(?:,|\))/g;
 
     const offenders = listTsFiles(srcRoot)
-      .filter((filePath) => filePath !== allowedDdlFile)
+      .filter((filePath) => !filePath.endsWith('.test.ts'))
+      .filter((filePath) => !allowedDdlFiles.has(filePath))
+      .filter((filePath) => !allowedDdlDirs.some((dirPath) => filePath.startsWith(dirPath)))
       .filter((filePath) => {
         const content = fs.readFileSync(filePath, 'utf8');
+        ddlQueryPattern.lastIndex = 0;
         return ddlQueryPattern.test(content);
       })
       .map((filePath) => path.relative(srcRoot, filePath).replace(/\\/g, '/'));
