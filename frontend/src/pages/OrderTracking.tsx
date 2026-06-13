@@ -1610,6 +1610,7 @@ export function OrderTracking() {
     return normalizedStatus || status;
   })();
   const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
+  const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
   const progressSteps: OrderTrackingProgressStep[] = steps.map((step) => {
     const timestampValue = getStepTimestamp(order, step.id, {
       hasOnlinePayment,
