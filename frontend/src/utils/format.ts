@@ -14,7 +14,9 @@ const toDateValue = (
 export const formatCurrency = (value: number | string | null | undefined) => {
   const numeric = Number(value);
   const safeValue = Number.isFinite(numeric) ? numeric : 0;
-  return safeValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const formatted = safeValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  // Ensure space between R$ and the number (some environments return "R$45,00" without space)
+  return formatted.replace(/^R\$\s?/, 'R$ ');
 };
 
 export const formatDateTime = (timestamp: Date | number | string | { seconds: number } | null | undefined) => {
