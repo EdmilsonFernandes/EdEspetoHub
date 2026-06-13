@@ -23,6 +23,24 @@ A partir deste padrao, toda mudanca nova de schema deve entrar como migration ve
 O primeiro registro e `20260613_000_baseline_current_schema`. Ele nao altera tabelas;
 apenas valida que tabelas centrais existem antes de marcar o marco inicial.
 
+## Checklist para agentes de IA
+
+Quando uma tarefa pedir nova tabela, coluna, indice, constraint, relacao ou qualquer DDL no
+`backend/`, siga este fluxo antes de propor ou editar codigo:
+
+1. Ler este arquivo antes de alterar schema.
+2. Conferir o schema real quando houver banco disponivel.
+3. Criar a migration em `backend/src/migrations/YYYYMMDD_NNN_nome_curto.ts`.
+4. Registrar a migration em `backend/src/migrations/index.ts`; se nao registrar, ela nao roda.
+5. Atualizar `backend/schema.sql` com o mesmo estado final esperado para banco novo.
+6. Regenerar `backend/docs/database-schema.html` com `cd backend && npm run docs:schema`.
+7. Validar `cd backend && yarn test`.
+8. Validar `cd backend && npm run migrate:status` e, quando aplicavel, `cd backend && npm run migrate`.
+9. Nao editar migration ja aplicada em ambiente compartilhado. Criar nova migration corretiva.
+
+Nao colocar DDL novo em controller, service, repository, rota ou seed. Tambem nao acrescentar DDL
+novo ao bloco legado de `src/utils/runMigrations.ts`, salvo pedido explicito de manutencao do legado.
+
 ## Criando uma nova migration
 
 Use o formato:
