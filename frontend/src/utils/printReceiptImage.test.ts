@@ -146,6 +146,8 @@ describe('printReceiptAsImage', () => {
     expect(text).toContain('Sem ketchup');
     expect(text).toContain('descer.');
     expect(text).toContain('2x Medalhão de Palmito');
+    expect(text).toContain('QTD  ITEM');
+    expect(text).toContain('PREÇO');
     expect(text).toContain('R$ 24,00');
     expect(text).toContain('Ao ponto');
     expect(text).toContain('3x Couvert Luan Santana');

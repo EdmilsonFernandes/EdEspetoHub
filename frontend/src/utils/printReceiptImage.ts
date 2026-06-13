@@ -249,7 +249,7 @@ export const buildRawBtText = (
     ...locationBlock,
     ...customerBlock,
     ...customerNoteBlock,
-    `${ESC_POS.boldOn} QTD  ITEM${ESC_POS.boldOff}`,
+    `${ESC_POS.boldOn}${fitLeftRight("QTD  ITEM", "PREÇO", lineWidth)}${ESC_POS.boldOff}`,
     separator(lineWidth),
     ...itemsLines,
     separator(lineWidth),
