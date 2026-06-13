@@ -2445,6 +2445,17 @@ export function SuperAdminDestinations() {
               color: #0f172a;
               font-weight: 950;
             }
+            .qr-badge {
+              display: block;
+              margin-top: 8px;
+              height: 38px;
+              width: auto;
+            }
+            .qr-badge svg {
+              height: 100%;
+              width: auto;
+              display: block;
+            }
             .ios-note {
               margin: 14px 0 0 !important;
               border-top: 1px solid rgba(255,255,255,0.14);
@@ -2562,14 +2573,14 @@ export function SuperAdminDestinations() {
                       <div class="qr-option__box">
                         <img src="${safeAndroidQrUrl}" alt="QR Code Android para baixar o app Já no Caminho" />
                       </div>
-                      <small><strong>Baixar app</strong><br />Abre a página do app na Google Play.</small>
+                      <span class="qr-badge" aria-label="Disponível na Google Play"><svg viewBox="0 0 135 40" xmlns="http://www.w3.org/2000/svg"><rect width="135" height="40" rx="5" fill="#000000"/><path fill="#34A853" d="M15.5 19.7c0-.28.15-.54.39-.68l6.48-3.74c.12-.07.26-.1.39-.1.14 0 .27.03.4.1l6.47 3.74c.24.14.39.4.39.68l-.01 10.07c0 .14-.07.27-.19.34-.12.07-.27.07-.39 0l-3.84-2.21c-.24-.14-.39-.4-.39-.68v-4.71l-3.01 1.74c-.24.14-.54.14-.78 0l-3.86-2.23c-.24-.14-.39-.4-.39-.68z"/><path fill="#FBBC04" d="M22.16 15.08c.13-.07.27-.1.4-.1l6.48 3.74c.24.14.39.4.39.68v7.51c0 .14-.07.27-.19.34-.12.07-.27.07-.39 0l-3.84-2.21c-.24-.14-.39-.4-.39-.68v-7.2c0-.28.15-.54.39-.68z" opacity="0"/><path fill="#4285F4" d="M15.89 19.02l6.21 3.59c.24.14.39.4.39.68v7.51c0 .14-.07.27-.19.34-.12.07-.27.07-.39 0l-3.84-2.21c-.24-.14-.39-.4-.39-.68v-7.51c0-.14.07-.27.21-.34z"/><path fill="#EA4335" d="M22.5 22.61l6.09-3.52c.12-.07.27-.07.39 0 .12.07.19.2.19.34v7.51c0 .28-.15.54-.39.68l-3.84 2.21c-.12.07-.27.07-.39 0z"/><text x="42" y="17" fill="#fff" font-family="Arial,sans-serif" font-size="8" font-weight="400">DISPONÍVEL NO</text><text x="42" y="31" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">Google Play</text></svg></span>
                     </div>
                     <div class="qr-option">
                       <div class="qr-option__label"><span class="qr-option__dot"></span>iPhone</div>
                       <div class="qr-option__box">
                         <img src="${safeIosQrUrl}" alt="QR Code iPhone para abrir o hub Já no Caminho no Safari" />
                       </div>
-                      <small><strong>Abrir no Safari</strong><br />Acessa janocaminho.com.br/hub direto.</small>
+                      <span class="qr-badge" aria-label="Download na App Store"><svg viewBox="0 0 135 40" xmlns="http://www.w3.org/2000/svg"><rect width="135" height="40" rx="5" fill="#000000"/><path fill="#fff" d="M18.6 20.3c0-1.7 1.4-2.5 1.5-2.6-.8-1.2-2.1-1.4-2.5-1.4-1.1-.1-2.1.6-2.6.6-.5 0-1.4-.6-2.3-.6-1.2 0-2.3.7-2.9 1.8-1.2 2.1-.3 5.3 1 7 .6.8 1.3 1.8 2.2 1.7.9 0 1.2-.6 2.3-.6 1.1 0 1.4.6 2.3.5.9 0 1.6-.9 2.2-1.7.7-1 1-1.9 1-2-.1 0-1.9-.7-1.9-2.7z"/><path fill="#fff" d="M16.8 15.2c.5-.6.8-1.4.7-2.2-.7 0-1.5.4-2 1-.4.5-.8 1.3-.7 2.1.8.1 1.5-.3 2-.9z"/><text x="38" y="17" fill="#fff" font-family="Arial,sans-serif" font-size="7" font-weight="400">Baixe na</text><text x="38" y="31" fill="#fff" font-family="Arial,sans-serif" font-size="14" font-weight="600">App Store</text></svg></span>
                     </div>
                   </div>
                   <p class="ios-note">No iPhone, não precisa digitar o site: leia o QR iPhone e navegue pelo Hub.</p>

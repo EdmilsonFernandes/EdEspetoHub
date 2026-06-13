@@ -21,6 +21,7 @@ import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
+import { StoreAppPromoBanner } from '../components/common/StoreAppPromoBanner';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
@@ -4961,6 +4962,8 @@ export function StorePage() {
           <PaperPlaneTilt size={20} weight="duotone" />
         </div>
       )}
+
+      {showClientWebBottomNav && <StoreAppPromoBanner withBottomNav />}
 
       {showClientWebBottomNav && (
         <nav className="fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 lg:hidden">
