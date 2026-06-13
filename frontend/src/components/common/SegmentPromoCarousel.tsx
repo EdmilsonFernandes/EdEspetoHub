@@ -180,36 +180,22 @@ export function SegmentPromoCarousel({
       </div>
 
       {resolvedSlides.length > 1 ? (
-        <>
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-[5] flex gap-1 p-1.5">
+        <div className="absolute inset-x-0 bottom-0 z-[5] flex justify-center pb-1.5 sm:pb-2">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-white/55 bg-slate-950/24 px-2 py-1 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.72)] backdrop-blur-xl">
             {resolvedSlides.map((slide, index) => (
-              <span key={slide.id} className="h-[2.5px] flex-1 overflow-hidden rounded-full bg-white/32">
-                <span
-                  key={`${slide.id}-${activeIndex}`}
-                  className={`block h-full origin-left rounded-full bg-white ${
-                    index === activeIndex ? 'jnc-promo-carousel-progress' : index < activeIndex ? 'w-full' : 'w-0'
-                  }`}
-                />
-              </span>
+              <button
+                type="button"
+                key={slide.id}
+                aria-label={`Ir para banner ${index + 1}`}
+                aria-current={index === activeIndex ? 'true' : undefined}
+                onClick={() => emblaApi?.scrollTo(index)}
+                className={`rounded-full transition-all duration-300 ${
+                  index === activeIndex ? 'h-1.5 w-5 bg-white' : 'h-1.5 w-1.5 bg-white/58'
+                }`}
+              />
             ))}
           </div>
-          <div className="absolute inset-x-0 bottom-0 z-[5] flex justify-center pb-1.5 sm:pb-2">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-white/55 bg-slate-950/24 px-2 py-1 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.72)] backdrop-blur-xl">
-              {resolvedSlides.map((slide, index) => (
-                <button
-                  type="button"
-                  key={slide.id}
-                  aria-label={`Ir para banner ${index + 1}`}
-                  aria-current={index === activeIndex ? 'true' : undefined}
-                  onClick={() => emblaApi?.scrollTo(index)}
-                  className={`rounded-full transition-all duration-300 ${
-                    index === activeIndex ? 'h-1.5 w-5 bg-white' : 'h-1.5 w-1.5 bg-white/58'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </>
+        </div>
       ) : null}
     </div>
   );
