@@ -42,6 +42,7 @@ type ThermalPrinterPlugin = {
   clearPrinter(): Promise<{ savedPrinter?: NativeThermalPrinterStatus['savedPrinter'] }>;
   openBluetoothSettings(): Promise<void>;
   requestBluetoothPermission(): Promise<{ granted: boolean }>;
+  saveAutoPrintSetting(options: { enabled: boolean }): Promise<void>;
   print(options: { text: string; address?: string; copies?: number; feedLines?: number; qrData?: string }): Promise<NativeThermalPrinterPrintResult>;
 };
 
@@ -212,6 +213,15 @@ export const clearNativeThermalPrinter = async () => {
 export const openNativeBluetoothSettings = async () => {
   ensureNativeThermalPrinterAvailable('Abra pelo app Android para configurar a impressora.');
   return ThermalPrinter.openBluetoothSettings();
+};
+
+export const saveAutoPrintSetting = async (enabled: boolean) => {
+  if (!isNativeThermalPrinterPluginAvailable()) return;
+  try {
+    await ThermalPrinter.saveAutoPrintSetting({ enabled });
+  } catch (error) {
+    console.warn('[thermal-printer] saveAutoPrintSetting failed', error);
+  }
 };
 
 export const printNativeThermalReceipt = async (

@@ -2,16 +2,43 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "67dd57fd",
-  "versionLabel": "v0.1.9.67dd57fd",
-  "versionInternal": "0.1.9+20260612.222147.67dd57fd",
-  "buildId": "0.1.9+20260612.222147.67dd57fd-20260612.222147-67dd57fd",
-  "builtAt": "2026-06-12T22:21:47.261Z",
-  "commitHash": "67dd57fd603e11597e215233d6e96541fd3d0a4b",
-  "shortHash": "67dd57fd",
+  "versionDisplaySuffix": "b2757ac4",
+  "versionLabel": "v0.1.9.b2757ac4",
+  "versionInternal": "0.1.9+20260613.002141.b2757ac4",
+  "buildId": "0.1.9+20260613.002141.b2757ac4-20260613.002141-b2757ac4",
+  "builtAt": "2026-06-13T00:21:41.117Z",
+  "commitHash": "b2757ac40d5d9ba768d779243cad19e1ebbb1c51",
+  "shortHash": "b2757ac4",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "b2757ac40d5d9ba768d779243cad19e1ebbb1c51",
+      "shortHash": "b2757ac4",
+      "dateIso": "2026-06-12T21:16:31-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(print): restore customer name on receipt",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b2757ac40d5d9ba768d779243cad19e1ebbb1c51"
+    },
+    {
+      "hash": "ec9f58efeae8a9e43eef0bdad1970f88b34ef143",
+      "shortHash": "ec9f58ef",
+      "dateIso": "2026-06-12T19:38:50-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(print): remove duplicated table and total",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ec9f58efeae8a9e43eef0bdad1970f88b34ef143"
+    },
+    {
+      "hash": "f53f4a22f6e7d6939d817b556fc93c2616eab973",
+      "shortHash": "f53f4a22",
+      "dateIso": "2026-06-12T19:25:27-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(thermal-printer): redesign receipt + QR code + auto-print online orders",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f53f4a22f6e7d6939d817b556fc93c2616eab973"
+    },
     {
       "hash": "67dd57fd603e11597e215233d6e96541fd3d0a4b",
       "shortHash": "67dd57fd",
@@ -254,33 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "docs: add Redis cache documentation to production server guide",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fd0682ae6106983ab331c94f420115cac65c5952"
-    },
-    {
-      "hash": "8ea6d9a9dc7ed074c090a8353b63983129eda604",
-      "shortHash": "8ea6d9a9",
-      "dateIso": "2026-06-12T12:55:58-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): apply UI primitives to destination service sheet",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8ea6d9a9dc7ed074c090a8353b63983129eda604"
-    },
-    {
-      "hash": "0655ac6d901665b5574287d7779e3aee70ad17d0",
-      "shortHash": "0655ac6d",
-      "dateIso": "2026-06-12T12:44:00-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): apply UI primitives to hospitality route",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0655ac6d901665b5574287d7779e3aee70ad17d0"
-    },
-    {
-      "hash": "de835bffc8e62becdab6bbfc6bf9977696b288eb",
-      "shortHash": "de835bff",
-      "dateIso": "2026-06-12T12:40:13-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(deploy): ensure Redis starts on EC2 deploy + bump Android to v55",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/de835bffc8e62becdab6bbfc6bf9977696b288eb"
     }
   ]
 }

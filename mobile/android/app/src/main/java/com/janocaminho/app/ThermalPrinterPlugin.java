@@ -218,6 +218,16 @@ public class ThermalPrinterPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void saveAutoPrintSetting(PluginCall call) {
+        boolean enabled = call.getBoolean("enabled", false);
+        getPreferences().edit()
+            .putBoolean("auto_print_online_orders", enabled)
+            .apply();
+        Log.i(TAG, "saveAutoPrintSetting: enabled=" + enabled);
+        call.resolve();
+    }
+
+    @PluginMethod
     public void print(PluginCall call) {
         if (!hasBluetoothConnectPermission()) {
             requestPermissionForAlias("bluetoothConnect", call, "printPermsCallback");
@@ -382,7 +392,7 @@ public class ThermalPrinterPlugin extends Plugin {
                     Thread.sleep(150L);
 
                     OutputStream output = socket.getOutputStream();
-                    byte[] bytes = toPrinterBytes(printerText, printerFeedLines, printerQrData);
+                    byte[] bytes = BluetoothPrinterHelper.toPrinterBytes(printerText, printerFeedLines, printerQrData);
                     Log.d(TAG, "print: sending " + bytes.length + " bytes x" + printerCopies);
 
                     for (int copy = 0; copy < printerCopies; copy++) {
@@ -565,79 +575,8 @@ public class ThermalPrinterPlugin extends Plugin {
         }
     }
 
-    private byte[] toPrinterBytes(String text, int feedLines, String qrData) throws Exception {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        output.write(new byte[] { 0x1B, 0x40 }); // ESC @ = Initialize printer
-        String normalized = normalizePrinterText(text);
-        output.write(normalized.getBytes(Charset.forName("ISO-8859-1")));
-        for (int i = 0; i < feedLines; i++) {
-            output.write(0x0A); // LF
-        }
-        // QR Code (if qrData provided)
-        if (qrData != null && !qrData.trim().isEmpty()) {
-            output.write(new byte[] { 0x1B, 0x61, 0x01 }); // ESC a 1 = Center align
-            output.write(generateQrCodeBytes(qrData));
-            output.write(new byte[] { 0x1B, 0x61, 0x00 }); // ESC a 0 = Left align
-            output.write(0x0A); // Extra feed after QR
-        }
-        output.write(new byte[] { 0x1D, 0x56, 0x42, 0x00 }); // GS V B 0 = Full cut
-        return output.toByteArray();
-    }
-
-    private byte[] generateQrCodeBytes(String data) throws Exception {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] dataBytes = data.getBytes(Charset.forName("ISO-8859-1"));
-
-        // Select QR Code Model 2
-        output.write(new byte[] { 0x1D, 0x28, 0x6B, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00 });
-
-        // Set module size (6 dots)
-        output.write(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, 0x06 });
-
-        // Set error correction level (M = medium)
-        output.write(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x31 });
-
-        // Store QR data
-        int len = dataBytes.length + 3;
-        output.write(new byte[] {
-            0x1D, 0x28, 0x6B,
-            (byte)(len & 0xFF), (byte)((len >> 8) & 0xFF),
-            0x31, 0x50, 0x30
-        });
-        output.write(dataBytes);
-
-        // Print QR code
-        output.write(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x51, 0x30 });
-
-        Log.d(TAG, "generateQrCodeBytes: data length=" + dataBytes.length);
-        return output.toByteArray();
-    }
-
-    private String normalizePrinterText(String value) {
-        String normalized = Normalizer.normalize(value == null ? "" : value, Normalizer.Form.NFD)
-            .replaceAll("\\p{M}", "");
-        return normalized
-            .replace("00e7", "c")
-            .replace("00c7", "C")
-            .replace("2013", "-")
-            .replace("2014", "-")
-            .replace("201c", "\"")
-            .replace("201d", "\"")
-            .replace("2018", "'")
-            .replace("2019", "'");
-    }
-
     private void writeInChunks(OutputStream output, byte[] bytes) throws Exception {
-        int offset = 0;
-        while (offset < bytes.length) {
-            int length = Math.min(WRITE_CHUNK_SIZE, bytes.length - offset);
-            output.write(bytes, offset, length);
-            output.flush();
-            offset += length;
-            if (offset < bytes.length) {
-                Thread.sleep(WRITE_CHUNK_DELAY_MS);
-            }
-        }
+        BluetoothPrinterHelper.writeInChunks(output, bytes);
     }
 
     private String sanitize(String value) {
@@ -689,9 +628,6 @@ public class ThermalPrinterPlugin extends Plugin {
     }
 
     private void closeSocketQuietly(BluetoothSocket socket) {
-        if (socket == null) return;
-        try {
-            socket.close();
-        } catch (Exception ignored) {}
+        BluetoothPrinterHelper.closeSocketQuietly(socket);
     }
 }

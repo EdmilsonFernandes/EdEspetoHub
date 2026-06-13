@@ -517,9 +517,12 @@ export class OrderService
       | 'customerUserId'
       | 'guestPushId'
       | 'total'
+      | 'table'
+      | 'customerNote'
     > & {
       storeId?: string | null;
       store?: { id?: string; name?: string | null } | null;
+      items?: any[];
     }
   ) {
     if (!this.isOnlineCustomerOrder(order)) return;
@@ -537,6 +540,25 @@ export class OrderService
     const totalLabel = this.resolveCurrencyLabel(Number(order?.total || 0));
     const customerName = String(order?.customerName || '').trim() || 'Cliente online';
     const orderId = String(order?.id || '').trim();
+
+    // Build compact items string for FCM data: "qtyx name|price;qtyx name|price"
+    const orderItems = Array.isArray(order?.items) ? order.items : [];
+    const receiptItems = orderItems
+      .map((item: any) => {
+        const qty = Math.max(0, Number(item?.quantity || 0));
+        const name = String(item?.product?.name || item?.name || 'Item').trim();
+        const price = this.resolveCurrencyLabel(Number(item?.price || 0) * qty);
+        return `${qty}x ${name}|${price}`;
+      })
+      .join(';');
+
+    const storeName = String((order as any)?.store?.name || '').trim();
+    const locationLabel = String(order?.table || '').trim()
+      ? `MESA ${order.table}`
+      : String((order as any)?.fulfillmentMode === 'delivery' ? 'DELIVERY' : '').trim();
+    const customerNote = String(order?.customerNote || '').trim();
+    const dateLabel = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+
     const payload = {
       title: 'Novo pedido online',
       body: `${customerName} • ${shortOrderId} • ${typeLabel} • ${paymentLabel} • ${totalLabel}`,
@@ -547,6 +569,15 @@ export class OrderService
         storeId,
         status: String(order.status || ''),
         notificationType: storeNotificationType,
+        // Receipt data for background auto-print
+        ...(storeName ? { storeName } : {}),
+        ...(receiptItems ? { receiptItems } : {}),
+        ...(locationLabel ? { locationLabel } : {}),
+        ...(customerNote ? { customerNote } : {}),
+        ...(dateLabel ? { dateLabel } : {}),
+        orderLabel: shortOrderId,
+        totalLabel,
+        qrData: `https://janocaminho.com.br/ped/${orderId}`,
       },
       android: {
         channelId: storeNotificationChannelId,
