@@ -3995,7 +3995,7 @@ export function SuperAdminDestinations() {
               </SurfaceCard>
 
               <div className="sticky bottom-0 z-[1] -mx-1 border-t border-slate-100 bg-white/92 px-1 py-3 backdrop-blur-xl">
-                <Button disabled={saving} loading={saving} className="w-full sm:w-auto">
+                <Button type="submit" disabled={saving} loading={saving} className="w-full sm:w-auto">
                   {editingDestinationId ? 'Atualizar destino' : 'Salvar destino'}
                 </Button>
               </div>
@@ -4413,7 +4413,7 @@ export function SuperAdminDestinations() {
               )}
               {(!editingPlaceId || placeEditSection === 'details') ? (
                 <div className="sticky bottom-0 z-[1] -mx-1 border-t border-slate-100 bg-white/92 px-1 py-3 backdrop-blur-xl">
-                  <Button disabled={saving} loading={saving} className="w-full sm:w-auto">
+                  <Button type="submit" disabled={saving} loading={saving} className="w-full sm:w-auto">
                     {editingPlaceId ? 'Atualizar hospedagem' : 'Salvar hospedagem'}
                   </Button>
                 </div>
@@ -4607,7 +4607,7 @@ export function SuperAdminDestinations() {
                 </select>
                 <textarea value={listingForm.description} onChange={(event) => updateListing('description', event.target.value)} placeholder="Descrição" rows={3} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
               </div>
-              <Button disabled={saving} loading={saving} className="mt-4">
+              <Button type="submit" disabled={saving} loading={saving} className="mt-4">
                 {editingListingId ? 'Atualizar serviço' : 'Salvar serviço'}
               </Button>
             </form>
@@ -4627,7 +4627,7 @@ export function SuperAdminDestinations() {
                 <input value={storeLinkForm.estimatedMinutes} onChange={(event) => updateStoreLink('estimatedMinutes', event.target.value)} placeholder="Tempo estimado" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
                 <input value={storeLinkForm.notes} onChange={(event) => updateStoreLink('notes', event.target.value)} placeholder="Observação" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none sm:col-span-2" />
               </div>
-              <Button disabled={saving} loading={saving} className="mt-4">
+              <Button type="submit" disabled={saving} loading={saving} className="mt-4">
                 Vincular loja
               </Button>
             </form>
