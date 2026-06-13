@@ -2035,12 +2035,43 @@ body {
       0 0 18px rgba(16, 185, 129, 0.42);
   }
 
+  @keyframes jnc-promo-ken-burns {
+    0% { transform: scale(1.015); }
+    100% { transform: scale(1.075); }
+  }
+
+  @keyframes jnc-promo-progress {
+    0% { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
+  }
+
+  .jnc-promo-carousel-image {
+    transform: scale(1.015);
+    will-change: transform;
+  }
+
+  .jnc-promo-carousel-image--active {
+    animation: jnc-promo-ken-burns 8s linear both;
+  }
+
+  .jnc-promo-carousel-progress {
+    width: 100%;
+    animation: jnc-promo-progress 8s linear both;
+  }
+
+  .group:hover .jnc-promo-carousel-progress,
+  .group:focus-within .jnc-promo-carousel-progress {
+    animation-play-state: paused;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .jnc-mascot-head,
     .jnc-mascot-eye,
     .group:hover .jnc-glare-sweep,
     .jnc-progress-sweep::after,
-    .jnc-star-interactive {
+    .jnc-star-interactive,
+    .jnc-promo-carousel-image--active,
+    .jnc-promo-carousel-progress {
       animation: none !important;
       transition: none !important;
     }

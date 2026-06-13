@@ -303,7 +303,8 @@ test.describe('Hub marketplace', () => {
 
   test('abre loja pelo hub em modo cliente mesmo com sessão lojista de outra loja', async ({ page }) => {
     await page.goto('/hub');
-    await expect(page.getByRole('link', { name: /Brecho da Brisa E2E/i })).toBeVisible({ timeout: 15000 });
+    const brechoStoreCard = page.getByRole('link', { name: /Brecho da Brisa E2E 4\.7/i });
+    await expect(brechoStoreCard).toBeVisible({ timeout: 15000 });
 
     await page.evaluate(({ session }) => {
       const adminSession = {
@@ -320,7 +321,7 @@ test.describe('Hub marketplace', () => {
       window.dispatchEvent(new CustomEvent('jnc:customer-session-updated', { detail: session }));
     }, { session: customerSession });
 
-    await page.getByRole('link', { name: /Brecho da Brisa E2E 4\.7/i }).click();
+    await brechoStoreCard.click();
 
     await expect(page).toHaveURL(/\/brecho-brisa-e2e/);
     await expect(page.locator('h1').filter({ hasText: 'Brecho da Brisa E2E' }).first()).toBeVisible({ timeout: 15000 });
@@ -328,5 +329,116 @@ test.describe('Hub marketplace', () => {
     await expect(page.getByText('Painel Admin')).toHaveCount(0);
     await expect(page.getByText(/^Painel$/)).toHaveCount(0);
     await expect(page.getByText('Fila de Pedidos')).toHaveCount(0);
+  });
+
+  test('mantem banners, destinos e condominios navegaveis em carrosseis premium', async ({ page }) => {
+    await page.route('**/api/public/home-config', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          ...homeConfig,
+          homeBanners: [
+            {
+              id: 'banner-one-e2e',
+              imageUrl: '/janocaminho.jpg',
+              title: 'Banner principal E2E',
+              description: 'Primeiro banner do teste',
+              actionUrl: '/hub/destaques',
+              actionLabel: 'Ver destaques',
+              order: 1,
+              active: true,
+              fit: 'cover',
+            },
+            {
+              id: 'banner-two-e2e',
+              imageUrl: '/janocaminho.jpg',
+              title: 'Segundo banner E2E',
+              description: 'Segundo banner do teste',
+              actionUrl: '/destinos',
+              actionLabel: 'Ver destinos',
+              order: 2,
+              active: true,
+              fit: 'cover',
+            },
+          ],
+        }),
+      });
+    });
+
+    await page.route('**/api/public/destinations**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'dest-sfx-e2e',
+            slug: 'sao-francisco-xavier',
+            name: 'Sao Francisco Xavier',
+            city: 'Sao Francisco Xavier',
+            state: 'SP',
+            bannerUrl: '/janocaminho.jpg',
+            placesCount: 1,
+            listingsCount: 2,
+            active: true,
+          },
+          {
+            id: 'dest-mv-e2e',
+            slug: 'monte-verde',
+            name: 'Monte Verde',
+            city: 'Camanducaia',
+            state: 'MG',
+            bannerUrl: '/janocaminho.jpg',
+            placesCount: 2,
+            listingsCount: 3,
+            active: true,
+          },
+        ]),
+      });
+    });
+
+    await page.route('**/api/public/condominiums', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'cond-one-e2e',
+            slug: 'campo-di-milani',
+            name: 'Campo di Milani',
+            city: 'Sao Jose dos Campos',
+            state: 'SP',
+            logoUrl: '/janocaminho.jpg',
+            bannerUrl: '/janocaminho.jpg',
+            eventSummary: { state: 'live', title: 'Feira local' },
+          },
+          {
+            id: 'cond-two-e2e',
+            slug: 'san-marino',
+            name: 'Condominio San Marino',
+            city: 'Sao Jose dos Campos',
+            state: 'SP',
+            logoUrl: '/janocaminho.jpg',
+            bannerUrl: '/janocaminho.jpg',
+            eventSummary: { state: 'upcoming', title: 'Proxima feira' },
+          },
+        ]),
+      });
+    });
+
+    await page.goto('/hub');
+
+    const promoCarousel = page.getByRole('region', { name: 'Destaques do Já no Caminho' });
+    await expect(promoCarousel).toBeVisible({ timeout: 15000 });
+    await expect(promoCarousel.getByRole('link', { name: 'Banner principal E2E' })).toBeVisible();
+    await expect(promoCarousel.getByRole('button', { name: 'Ir para banner 2' })).toBeVisible();
+
+    const destinationCarousel = page.getByRole('region', { name: 'Destinos em destaque' });
+    await expect(destinationCarousel).toContainText('Sao Francisco Xavier');
+    await expect(destinationCarousel).toContainText('Monte Verde');
+
+    const condominiumCarousel = page.getByRole('region', { name: 'Feiras e eventos em condomínios' });
+    await expect(condominiumCarousel).toContainText('Campo di Milani');
+    await expect(condominiumCarousel).toContainText('Condominio San Marino');
   });
 });

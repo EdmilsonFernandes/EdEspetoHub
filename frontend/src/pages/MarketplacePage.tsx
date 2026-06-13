@@ -66,6 +66,7 @@ import { HubMarketingPopup } from '../components/Marketplace/Hub/HubMarketingPop
 import { CondominiumStatusModal } from '../components/Marketplace/CondominiumStatusModal';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { SegmentPromoCarousel } from '../components/common/SegmentPromoCarousel';
+import { HubPremiumCarousel } from '../components/Marketplace/Hub/HubPremiumCarousel';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { nativeBiometricService } from '../services/nativeBiometricService';
@@ -2163,7 +2164,11 @@ export function MarketplacePage() {
                   <CaretRight size={10} weight="bold" />
                 </Link>
               </div>
-              <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <HubPremiumCarousel
+                ariaLabel="Destinos em destaque"
+                className="-mx-1"
+                containerClassName="gap-3 px-1"
+              >
                 {homeDestinationHighlights.map((destination, index) => {
                   const placesCount = Number(destination.placesCount || 0);
                   const listingsCount = Number(destination.listingsCount || 0);
@@ -2182,7 +2187,7 @@ export function MarketplacePage() {
                       onPointerEnter={warmupDestination}
                       onFocus={warmupDestination}
                       onTouchStart={warmupDestination}
-                      className={`jnc-hub-touch jnc-hub-lift group relative flex shrink-0 overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_26px_62px_-48px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition-transform duration-300 active:scale-[0.98] ${index === 0 ? 'h-[11.4rem] w-[18.75rem]' : 'h-[10.75rem] w-[15.75rem]'}`}
+                      className="jnc-hub-touch jnc-hub-lift group relative flex h-[11.25rem] min-w-0 flex-[0_0_86%] overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_26px_62px_-48px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition-transform duration-300 active:scale-[0.98] sm:flex-[0_0_48%] lg:flex-[0_0_32%]"
                     >
                       <img
                         src={resolveDestinationAssetUrl(destination)}
@@ -2215,7 +2220,7 @@ export function MarketplacePage() {
                     </Link>
                   );
                 })}
-              </div>
+              </HubPremiumCarousel>
             </section>
           )}
 
@@ -2351,7 +2356,11 @@ export function MarketplacePage() {
                           </button>
                         </div>
 
-                        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        <HubPremiumCarousel
+                          ariaLabel="Feiras e eventos em condomínios"
+                          className="mt-3"
+                          containerClassName="gap-2"
+                        >
                           {homeCondominiumHighlights.map((condominium) => {
                             const slug = String(condominium.slug || '').trim();
                             const name = String(condominium.name || 'Condomínio').trim() || 'Condomínio';
@@ -2374,7 +2383,7 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleCondominiumSelection(slug, name, event)}
-                                className="group relative min-w-[16.25rem] overflow-hidden rounded-[1.35rem] bg-slate-900 bg-cover bg-center p-3.5 text-left text-white shadow-[0_18px_44px_-32px_rgba(15,23,42,0.55)] ring-1 ring-white/70 transition hover:-translate-y-0.5 hover:shadow-[0_24px_54px_-34px_rgba(15,23,42,0.66)] active:scale-[0.99]"
+                                className="jnc-hub-touch group relative min-w-0 flex-[0_0_88%] overflow-hidden rounded-[1.35rem] bg-slate-900 bg-cover bg-center p-3.5 text-left text-white shadow-[0_18px_44px_-32px_rgba(15,23,42,0.55)] ring-1 ring-white/70 transition hover:-translate-y-0.5 hover:shadow-[0_24px_54px_-34px_rgba(15,23,42,0.66)] active:scale-[0.99] sm:flex-[0_0_48%] lg:flex-[0_0_32%]"
                                 style={{ backgroundImage: cardBackgroundImage }}
                               >
                                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_0%,rgba(95,211,90,0.18),transparent_36%)] opacity-90" />
@@ -2418,7 +2427,7 @@ export function MarketplacePage() {
                               </button>
                             );
                           })}
-                        </div>
+                        </HubPremiumCarousel>
                       </>
                     );
                   })()}

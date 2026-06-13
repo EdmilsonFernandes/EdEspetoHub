@@ -4,6 +4,7 @@ import { CaretRight, Sparkle, Star } from '@phosphor-icons/react';
 import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
 import { prefetchRouteByPath } from '../../../utils/clientRoutePrefetch';
 import { prefetchStorefrontData } from '../../../utils/storefrontPrefetch';
+import { HubPremiumCarousel } from './HubPremiumCarousel';
 
 export type HubFeaturedCarouselItem = {
   id: string;
@@ -86,12 +87,16 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
         {hasOverflow ? (
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 rounded-r-[1.45rem] bg-[linear-gradient(90deg,rgba(255,255,255,0)_0%,rgba(250,252,253,0.84)_62%,rgba(250,252,253,0.98)_100%)]" />
         ) : null}
-        <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto no-scrollbar px-1 pb-1 pr-7">
+        <HubPremiumCarousel
+          ariaLabel="Produtos em destaque"
+          containerClassName="gap-2 px-1"
+          showProgress={hasOverflow}
+        >
           {loading
             ? Array.from({ length: 3 }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="relative overflow-hidden h-[112px] min-w-[268px] rounded-[1.45rem] bg-white p-2.5 shadow-[0_20px_46px_-38px_rgba(15,23,42,0.16)] ring-1 ring-slate-100/80 flex gap-3 sm:min-w-[292px]"
+                  className="relative flex h-[112px] min-w-0 flex-[0_0_84%] gap-3 overflow-hidden rounded-[1.45rem] bg-white p-2.5 shadow-[0_20px_46px_-38px_rgba(15,23,42,0.16)] ring-1 ring-slate-100/80 sm:flex-[0_0_48%] lg:flex-[0_0_34%]"
                 >
                   <div className="relative h-[92px] w-[92px] shrink-0 rounded-[1.2rem] bg-slate-100 overflow-hidden">
                     <div className="absolute inset-0 -translate-x-full jnc-animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
@@ -128,10 +133,10 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                     onFocus={warmupStore}
                     onTouchStart={warmupStore}
                     onClick={() => onStageProduct(item)}
-                    className={`jnc-hub-touch jnc-hub-lift jnc-hub-card group flex snap-start border transition-all duration-300 ${
+                    className={`jnc-hub-touch jnc-hub-lift jnc-hub-card group flex min-w-0 flex-[0_0_86%] border transition-all duration-300 sm:flex-[0_0_52%] lg:flex-[0_0_36%] ${
                       isLead
-                        ? 'min-h-[134px] min-w-[312px] gap-3.5 rounded-[1.65rem] p-3 sm:min-w-[338px]'
-                        : 'min-h-[112px] min-w-[268px] gap-3 rounded-[1.45rem] p-2.5 sm:min-w-[292px]'
+                        ? 'min-h-[134px] gap-3.5 rounded-[1.65rem] p-3'
+                        : 'min-h-[112px] gap-3 rounded-[1.45rem] p-2.5'
                     } ${
                       item.sponsored
                         ? 'border-[#5FD35A]/20 bg-[linear-gradient(135deg,rgba(95,211,90,0.06)_0%,#ffffff_58%,#ffffff_100%)] shadow-[0_24px_56px_-44px_rgba(95,211,90,0.18)]'
@@ -215,7 +220,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                   </Link>
                 );
               })}
-        </div>
+        </HubPremiumCarousel>
       </div>
     </section>
   );
