@@ -12,7 +12,6 @@ import {
   Motorcycle,
   Package,
   Phone,
-  QrCode,
   Rocket,
   ShieldCheck,
   Storefront,
@@ -31,6 +30,7 @@ import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
 import { HubFlowSimulator } from '../components/Landing/HubFlowSimulator';
 import { BentoFeatures } from '../components/Landing/BentoFeatures';
 import { LandingUseCases } from '../components/Landing/LandingUseCases';
+import { PricingSection } from '../components/Landing/PricingSection';
 
 const mercadoPagoLandingLogo = '/mercado-pago-horizontal.png';
 
@@ -341,13 +341,13 @@ export function LandingPage() {
 
                 <div className="space-y-4">
                   <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl leading-[1.05]">
-                    Venda online,<br /> organize e entregue<br />
+                    Seu negócio vendendo online<br />
                     <span className="bg-gradient-to-r from-cyan-400 via-emerald-400 to-cyan-400 bg-[size:200%_auto] bg-clip-text text-transparent animate-pulse">
-                      sem comissões.
+                      sem comissão por pedido.
                     </span>
                   </h1>
                   <p className="mx-auto max-w-xl text-slate-300 text-sm sm:text-base font-medium leading-relaxed lg:mx-0">
-                    O Já no Caminho conecta seu cardápio digital, gestão de entregadores, alertas automatizados e recebimento direto via Mercado Pago. Tudo em um fluxo premium e sem taxas intermediárias.
+                    Do cardápio à entrega, tudo num só app — para comida, varejo e serviço local. O cliente paga e o dinheiro cai direto no seu Mercado Pago. Planos a partir de R$ 69,90/mês.
                   </p>
                 </div>
 
@@ -358,7 +358,7 @@ export function LandingPage() {
                     onClick={() => navigate('/create?plan=trial')}
                     className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-black text-slate-950 shadow-[0_20px_40px_-15px_rgba(255,255,255,0.25)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    Garantir Vaga VIP
+                    Criar minha loja
                     <ArrowRight size={16} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
                   </button>
                   <a
@@ -508,6 +508,8 @@ export function LandingPage() {
           </div>
         </section>
 
+        <PricingSection />
+
         {/* ══════════════════════════════════════════════════════════════
             CASOS DE USO REAIS (SIMULADORES INTERATIVOS)
         ══════════════════════════════════════════════════════════════ */}
@@ -627,50 +629,37 @@ export function LandingPage() {
         {/* ══════════════════════════════════════════════════════════════
             HUB DE CONDOMÍNIOS (BANNER DE COMÉRCIO LOCAL)
         ══════════════════════════════════════════════════════════════ */}
-        <section className="relative bg-slate-950 py-16 overflow-hidden border-t border-b border-white/5">
-          <div className="mx-auto max-w-7xl px-4">
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.6),rgba(2,6,23,0.8))] p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                
-                <div className="flex items-start gap-4 max-w-2xl">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <Buildings size={24} weight="duotone" />
+        {/* ══════════════════════════════════════════════════════════════
+            OUTRAS SOLUÇÕES (CONDOMÍNIOS, DESTINOS E HOSPEDAGENS) — secundário
+        ══════════════════════════════════════════════════════════════ */}
+        <section className="relative bg-slate-950 py-14 overflow-hidden border-t border-b border-white/5">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 text-center">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Outras soluções</p>
+              <h3 className="mt-2 text-lg font-black text-white sm:text-xl">Mais do que uma vitrine online</h3>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {[
+                { icon: Buildings, title: 'Condomínios e feiras', desc: 'Vitrine hiperlocal: moradores veem quem entrega na portaria.', href: '/condominio/login', cta: 'Entrar no condomínio' },
+                { icon: MapPin, title: 'Destinos e pousadas', desc: 'Hóspede escaneia o QR e vê quem entrega no chalé.', href: '/destinos', cta: 'Ver destinos' },
+                { icon: Handshake, title: 'Sou parceiro de hospedagem', desc: 'Cadastre seu chalé/pousada e conecte comércios do entorno.', href: '/destinos/cadastrar', cta: 'Cadastrar hospedagem' },
+              ].map(({ icon: Icon, title, desc, href, cta }) => (
+                <button
+                  key={title}
+                  type="button"
+                  onClick={() => navigate(href)}
+                  className="group text-left rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-colors hover:border-white/20 hover:bg-white/[0.04]"
+                >
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-sky-400">
+                    <Icon size={18} weight="duotone" />
                   </div>
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">Hiperlocal</span>
-                    <h3 className="text-xl font-black text-white sm:text-2xl">Comércio Integrado para Condomínios & Feiras</h3>
-                    <p className="text-slate-400 text-xs sm:text-sm font-medium leading-relaxed">
-                      Sua loja cadastrada ganha vitrine local. Moradores acessam, visualizam barracas, feiras e comércios que entregam na portaria ou no apartamento de forma unificada.
-                    </p>
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {['Vendas no Condomínio', 'App Unificado', 'Entrega Programada'].map((badge) => (
-                        <span key={badge} className="text-[9.5px] font-bold text-slate-300 bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/5">
-                          ✓ {badge}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row lg:flex-col gap-2 shrink-0 sm:w-full lg:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/condominio/login')}
-                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3.5 text-xs font-black text-slate-950 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-transform"
-                  >
-                    Entrar no Condomínio
-                    <ArrowRight size={14} weight="bold" />
-                  </button>
-                  <a
-                    href="/condominio/solicitar"
-                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-xs font-black text-white hover:bg-white/10 active:scale-[0.98] transition-colors"
-                  >
-                    Solicitar Acesso do Condomínio
-                    <Buildings size={14} weight="duotone" />
-                  </a>
-                </div>
-
-              </div>
+                  <h4 className="mt-3 text-sm font-black text-white">{title}</h4>
+                  <p className="mt-1 text-xs font-medium text-slate-400 leading-relaxed">{desc}</p>
+                  <p className="mt-3 inline-flex items-center gap-1 text-[11px] font-black text-sky-400 transition-transform group-hover:translate-x-0.5">
+                    {cta} <ArrowRight size={12} weight="bold" />
+                  </p>
+                </button>
+              ))}
             </div>
           </div>
         </section>
@@ -678,83 +667,8 @@ export function LandingPage() {
         {/* ══════════════════════════════════════════════════════════════
             HOSPEDAGENS E TURISMO
         ══════════════════════════════════════════════════════════════ */}
-        <section id="solucao-hospedagens" className="relative bg-[#030712] py-20 sm:py-28 overflow-hidden">
-          <div className="pointer-events-none absolute right-0 top-1/4 h-[350px] w-[350px] rounded-full bg-cyan-500/5 blur-[100px]" />
-          
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-              
-              {/* Esquerda: Info Card */}
-              <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.6),rgba(2,6,23,0.8))] p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">
-                  <MapPin size={12} weight="duotone" />
-                  Turismo & Hospedagens
-                </span>
-                
-                <h3 className="mt-5 text-2xl font-black text-white sm:text-4xl leading-tight">
-                  Transforme seu chalé ou pousada em um hub local
-                </h3>
-                <p className="mt-3 text-slate-400 text-xs sm:text-sm font-medium leading-relaxed">
-                  O hóspede aponta a câmera para o QR Code impresso na cabana, abre a página Já no Caminho e vê imediatamente quem entrega comida lá, indicações de guias e passeios na região.
-                </p>
-
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {['QR Code Integrado', 'Delivery na Cabana', 'Rotas de Passeio'].map((feat) => (
-                    <span key={feat} className="text-[10px] font-bold text-slate-300 bg-white/[0.04] px-3 py-1.5 rounded-full border border-white/5">
-                      ✓ {feat}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/destinos')}
-                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3.5 text-xs font-black text-slate-950 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-transform"
-                  >
-                    Ver Destinos
-                    <ArrowRight size={14} weight="bold" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/destinos/cadastrar')}
-                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-xs font-black text-white hover:bg-white/10 active:scale-[0.98] transition-colors"
-                  >
-                    Cadastrar Hospedagem
-                    <Handshake size={14} weight="duotone" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Direita: Recursos */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-                {[
-                  {
-                    icon: QrCode,
-                    title: 'QR Code Exclusivo na Hospedagem',
-                    desc: 'O hóspede acessa no próprio navegador sem precisar baixar apps no primeiro instante.'
-                  },
-                  {
-                    icon: Storefront,
-                    title: 'Parcerias com Comércios do Entorno',
-                    desc: 'Indique lojas de confiança que garantem a entrega mesmo em locais afastados.'
-                  }
-                ].map(({ icon: Icon, title, desc }) => (
-                  <div key={title} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 space-y-2.5 backdrop-blur-xl">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
-                      <Icon size={18} weight="duotone" />
-                    </div>
-                    <h4 className="text-sm font-black text-white">{title}</h4>
-                    <p className="text-xs font-semibold text-slate-400 leading-relaxed">{desc}</p>
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════════════════════
+        {/* (seção de hospedagens/turismo consolidada em "Outras soluções" acima) */}
+{/* ══════════════════════════════════════════════════════════════
             DOWNLOAD DO APP (GOOGLE PLAY & SAFARI PWA)
         ══════════════════════════════════════════════════════════════ */}
         <section className="relative bg-slate-950 py-20 sm:py-28 overflow-hidden border-t border-white/5">

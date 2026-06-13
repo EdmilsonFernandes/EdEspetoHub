@@ -8,12 +8,12 @@ export interface ClientLogo {
 }
 
 const mockClientLogos: ClientLogo[] = [
-  { id: 'mock-edsertaneja', name: 'edsertaneja', logoUrl: '/janocaminho.jpg' },
-  { id: 'mock-cris', name: 'Espetinho da Cris', logoUrl: '/janocaminho.jpg' },
-  { id: 'mock-teus', name: 'teus espetinhos', logoUrl: '/janocaminho.jpg' },
-  { id: 'mock-villa', name: 'Villa Grill', logoUrl: '/janocaminho.jpg' },
-  { id: 'mock-ranch', name: 'Ranch do Espeto', logoUrl: '/janocaminho.jpg' },
-  { id: 'mock-boteco', name: 'Boteco 77', logoUrl: '/janocaminho.jpg' },
+  { id: 'mock-1', name: 'Lanchonete Bom D+', logoUrl: '/janocaminho.jpg' },
+  { id: 'mock-2', name: 'Adega do Vale', logoUrl: '/janocaminho.jpg' },
+  { id: 'mock-3', name: 'Empório Central', logoUrl: '/janocaminho.jpg' },
+  { id: 'mock-4', name: 'Casa dos Sucos', logoUrl: '/janocaminho.jpg' },
+  { id: 'mock-5', name: 'Hamburgueria 100', logoUrl: '/janocaminho.jpg' },
+  { id: 'mock-6', name: 'Mercado da Esquina', logoUrl: '/janocaminho.jpg' },
 ];
 
 interface SocialProofMarqueeProps {

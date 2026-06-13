@@ -1699,6 +1699,59 @@ export async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_featured_product_requests_payment_provider_id
     ON featured_product_requests(payment_provider_id);
   `);
+
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS destination_promotions (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      resource_type TEXT NOT NULL,
+      resource_id TEXT NOT NULL,
+      resource_name TEXT,
+      destination_id TEXT,
+      partner_account_id TEXT,
+      status TEXT NOT NULL DEFAULT 'PENDING_PAYMENT',
+      payment_status TEXT NOT NULL DEFAULT 'PENDING',
+      duration_days INT NOT NULL DEFAULT 30,
+      duration_unit TEXT NOT NULL DEFAULT 'MONTH',
+      original_sort_order INT,
+      price_amount NUMERIC(10,2),
+      payment_method TEXT NOT NULL DEFAULT 'PIX',
+      payment_provider TEXT,
+      payment_provider_id TEXT,
+      payment_link TEXT,
+      payment_qr_code_base64 TEXT,
+      payment_qr_code_text TEXT,
+      payment_expires_at TIMESTAMPTZ,
+      payment_paid_at TIMESTAMPTZ,
+      starts_at TIMESTAMPTZ,
+      ends_at TIMESTAMPTZ,
+      approved_by_admin_id TEXT,
+      admin_note TEXT,
+      public_note TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_promotions_resource
+    ON destination_promotions(resource_type, resource_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_promotions_partner
+    ON destination_promotions(partner_account_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_destination_promotions_status
+    ON destination_promotions(status);
+  `);
+  await AppDataSource.query(`
+    INSERT INTO site_settings (key, value)
+    VALUES
+      ('destination_promo_daily_price', '19.90'),
+      ('destination_promo_weekly_price', '89.90'),
+      ('destination_promo_monthly_price', '199.90'),
+      ('destination_promo_max_active_slots', '50')
+    ON CONFLICT (key) DO NOTHING;
+  `);
   await AppDataSource.query(`
     UPDATE featured_product_requests
     SET status = 'EXPIRED'

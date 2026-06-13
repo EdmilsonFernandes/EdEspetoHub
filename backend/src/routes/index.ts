@@ -37,6 +37,7 @@ import { FeaturedProductController } from '../controllers/FeaturedProductControl
 import { CondominiumController } from '../controllers/CondominiumController';
 import { DestinationController } from '../controllers/DestinationController';
 import { DestinationPartnerPortalController } from '../controllers/DestinationPartnerPortalController';
+import { DestinationPromotionController } from '../controllers/DestinationPromotionController';
 import { StorePaymentAccountController } from '../controllers/StorePaymentAccountController';
 import { MotoboyPaymentAccountController } from '../controllers/MotoboyPaymentAccountController';
 import { MapsController } from '../controllers/MapsController';
@@ -78,6 +79,17 @@ routes.get('/destination-partner/me', requireAuth, requireRole('DESTINATION_PART
 routes.get('/destination-partner/resources', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPartnerPortalController.me);
 routes.patch('/destination-partner/hospitality-places/:placeId', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPartnerPortalController.updateHospitalityPlace);
 routes.patch('/destination-partner/listings/:listingId', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPartnerPortalController.updateListing);
+
+// Destination promotions (pousada/chalé paga destaque de posicionamento)
+routes.get('/destination-partner/promotions/pricing', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPromotionController.getPricing);
+routes.post('/destination-partner/promotions', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPromotionController.create);
+routes.get('/destination-partner/promotions', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPromotionController.listMine);
+routes.post('/destination-partner/promotions/:id/refresh', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPromotionController.refreshPayment);
+routes.post('/destination-partner/promotions/:id/cancel', requireAuth, requireRole('DESTINATION_PARTNER'), DestinationPromotionController.cancel);
+
+// Destination promotions admin (Super Admin)
+routes.get('/admin/destination-promotions', requireAuth, requireRole('SUPER_ADMIN'), DestinationPromotionController.listForAdmin);
+routes.patch('/admin/destination-promotions/:id/review', requireAuth, requireRole('SUPER_ADMIN'), DestinationPromotionController.reviewByAdmin);
 routes.post('/customer/auth/register', CustomerAccountController.register);
 routes.post('/customer/auth/login', authLoginRateLimit, CustomerAccountController.login);
 routes.post('/customer/auth/verify-email-code', authRecoveryRateLimit, CustomerAccountController.verifyEmailCode);

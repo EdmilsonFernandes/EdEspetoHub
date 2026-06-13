@@ -20,6 +20,7 @@ import { User } from '../entities/User';
 import { Store } from '../entities/Store';
 import { AppDataSource } from '../config/database';
 import { MercadoPagoService } from './MercadoPagoService';
+import { DestinationPromotionService } from './DestinationPromotionService';
 import { env } from '../config/env';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { EmailService } from './EmailService';
@@ -48,6 +49,7 @@ export class PaymentService {
   private deliveryBillingService = new DeliveryBillingService();
   private orderReviewService = new OrderReviewService();
   private featuredProductService = new FeaturedProductService();
+  private destinationPromotionService = new DestinationPromotionService();
   private orderPaymentService = new OrderPaymentService();
   private accountService = new StorePaymentAccountService();
   private motoboyPaymentAccountService = new MotoboyPaymentAccountService();
@@ -504,6 +506,18 @@ private resolvePlanChargeAmount(plan: Plan) {
           await this.featuredProductService.markFailedFromWebhook(requestId, mpPayment);
         } else if (isMercadoPagoPendingStatus(mpPayment.status)) {
           await this.featuredProductService.markPendingFromProvider(requestId, mpPayment);
+        }
+        return { status: mpPayment.status };
+      }
+      if (paymentId.startsWith('destination_promo:')) {
+        const promoId = paymentId.replace('destination_promo:', '');
+        await auditByReference(PAYMENT_AUDIT_FLOW.DESTINATION_PROMO, PAYMENT_AUDIT_ENTITY.DESTINATION_PROMO, promoId);
+        if (isMercadoPagoApprovedStatus(mpPayment.status)) {
+          await this.destinationPromotionService.markPaidFromWebhook(promoId, mpPayment);
+        } else if (isMercadoPagoFailedStatus(mpPayment.status)) {
+          await this.destinationPromotionService.markFailedFromWebhook(promoId, mpPayment);
+        } else if (isMercadoPagoPendingStatus(mpPayment.status)) {
+          await this.destinationPromotionService.markPendingFromProvider(promoId, mpPayment);
         }
         return { status: mpPayment.status };
       }

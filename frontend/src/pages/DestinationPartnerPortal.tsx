@@ -17,6 +17,7 @@ import {
 } from '@phosphor-icons/react';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
+import { DestinationPromotionPanel } from '../components/Destination/DestinationPromotionPanel';
 import {
   Button,
   EmptyState,
@@ -528,6 +529,8 @@ export function DestinationPartnerPortal() {
                   Salvar alterações
                 </Button>
               </div>
+
+              <DestinationPromotionPanel />
 
               {success ? (
                 <SurfaceCard tone="success" padding="md" className="rounded-2xl text-sm font-bold text-emerald-700">

@@ -4,6 +4,7 @@ export const PAYMENT_AUDIT_FLOW = {
   TIP: 'TIP',
   FEATURED_REQUEST: 'FEATURED_REQUEST',
   DELIVERY_CYCLE: 'DELIVERY_CYCLE',
+  DESTINATION_PROMO: 'DESTINATION_PROMO',
 } as const;
 
 export const PAYMENT_AUDIT_ENTITY = {
@@ -12,6 +13,7 @@ export const PAYMENT_AUDIT_ENTITY = {
   ORDER_REVIEW: 'ORDER_REVIEW',
   FEATURED_REQUEST: 'FEATURED_REQUEST',
   DELIVERY_BILLING_CYCLE: 'DELIVERY_BILLING_CYCLE',
+  DESTINATION_PROMO: 'DESTINATION_PROMO',
 } as const;
 
 export const PAYMENT_AUDIT_STAGE = {
@@ -30,6 +32,7 @@ const FLOW_LABELS: Record<string, string> = {
   TIP: 'Gorjeta',
   FEATURED_REQUEST: 'Destaque de Produto',
   DELIVERY_CYCLE: 'Ciclo de Entrega',
+  DESTINATION_PROMO: 'Destaque de Destino',
 };
 
 const ENTITY_LABELS: Record<string, string> = {
@@ -38,6 +41,7 @@ const ENTITY_LABELS: Record<string, string> = {
   ORDER_REVIEW: 'Avaliação de Pedido',
   FEATURED_REQUEST: 'Solicitação de Destaque',
   DELIVERY_BILLING_CYCLE: 'Faturamento de Entregas',
+  DESTINATION_PROMO: 'Promoção de Destino',
 };
 
 const STAGE_LABELS: Record<string, string> = {
