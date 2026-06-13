@@ -424,7 +424,7 @@ export function ThermalPrinterSettingsCard() {
     return (
       <section
         role="region"
-        aria-label="Impressora termica"
+        aria-label="Impressora térmica"
         data-testid="thermal-printer-settings"
         className="rounded-2xl border border-slate-200 border-l-4 border-l-emerald-500 bg-white p-5 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.45)]"
       >
@@ -433,9 +433,9 @@ export function ThermalPrinterSettingsCard() {
             <Printer size={22} weight="duotone" />
           </span>
           <div>
-            <h3 className="text-lg font-black text-slate-900">Impressora termica</h3>
+            <h3 className="text-lg font-black text-slate-900">Impressora térmica</h3>
             <p className="mt-2 text-sm leading-relaxed text-slate-500">
-              Abra esta tela pelo app Android da loja para parear e salvar a impressora. No navegador web, a impressao continua pelo modo do navegador.
+              Admin e operador podem salvar a impressora usada na fila de pedidos. Abra esta tela pelo app Android da loja para parear e salvar a impressora. No navegador web, a impressão continua pelo modo do navegador.
             </p>
           </div>
         </div>
@@ -447,7 +447,7 @@ export function ThermalPrinterSettingsCard() {
     return (
       <section
         role="region"
-        aria-label="Impressora termica"
+        aria-label="Impressora térmica"
         data-testid="thermal-printer-settings"
         className="rounded-2xl border border-slate-200 border-l-4 border-l-amber-500 bg-white p-5 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.45)]"
       >
@@ -456,9 +456,9 @@ export function ThermalPrinterSettingsCard() {
             <Printer size={22} weight="duotone" />
           </span>
           <div>
-            <h3 className="text-lg font-black text-slate-900">Impressora termica</h3>
+            <h3 className="text-lg font-black text-slate-900">Impressora térmica</h3>
             <p className="mt-2 text-sm font-semibold leading-relaxed text-amber-800">
-              Esta versao instalada do app ainda nao tem o plugin de impressao Bluetooth direta. Atualize o app da loja para configurar a impressora aqui. Ate la, a impressao continua funcionando pelo RawBT instalado no aparelho.
+              Esta versão instalada do app ainda não tem o plugin de impressão Bluetooth direta. Atualize o app da loja para configurar a impressora aqui. Até lá, a impressão continua funcionando pelo RawBT instalado no aparelho.
             </p>
           </div>
         </div>
@@ -469,7 +469,7 @@ export function ThermalPrinterSettingsCard() {
   return (
     <section
       role="region"
-      aria-label="Impressora termica"
+      aria-label="Impressora térmica"
       data-testid="thermal-printer-settings"
       className="rounded-2xl border border-slate-200 border-l-4 border-l-emerald-500 bg-white p-5 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.45)]"
     >
@@ -480,7 +480,7 @@ export function ThermalPrinterSettingsCard() {
             <Printer size={22} weight="duotone" />
           </span>
           <div>
-            <h3 className="text-lg font-black text-slate-900">Impressora termica</h3>
+            <h3 className="text-lg font-black text-slate-900">Impressora térmica</h3>
             <p className="mt-1 text-sm leading-relaxed text-slate-500">
               Conecte a impressora Bluetooth usada na fila de pedidos.
             </p>

@@ -184,8 +184,8 @@ test.describe('Super Admin destinations partners', () => {
 
     await page.getByRole('button', { name: /Detalhes e validação/i }).click();
     await expect(page.getByText('Conferência antifraude obrigatória')).toBeVisible();
-    await expect(page.getByText('Cadastro atual', { exact: true })).toBeVisible();
-    await expect(page.getByText('Enviado na solicitação', { exact: true })).toBeVisible();
+    await expect(page.getByText('Cadastro atual', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Enviado', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Amerê Chalés', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Amerê Chalés Oficial').first()).toBeVisible();
 

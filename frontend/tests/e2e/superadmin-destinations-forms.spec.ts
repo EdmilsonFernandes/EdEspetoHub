@@ -146,15 +146,7 @@ test.describe('SuperAdmin destinations form buttons', () => {
 
     // Open destination, click edit on place
     await page.getByText(destination.name).first().click();
-    const editBtns = page.getByRole('button', { name: /Editar/i });
-    const count = await editBtns.count();
-    // Click the first visible edit button (should be the place)
-    for (let i = 0; i < count; i++) {
-      if (await editBtns.nth(i).isVisible()) {
-        await editBtns.nth(i).click();
-        break;
-      }
-    }
+    await page.getByRole('button', { name: `Editar hospedagem ${existingPlace.name}` }).click();
 
     const submitBtn = page.getByRole('button', { name: /Atualizar hospedagem/i });
     await expect(submitBtn).toBeVisible();

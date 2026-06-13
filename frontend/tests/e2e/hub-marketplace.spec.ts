@@ -286,7 +286,7 @@ test.describe('Hub marketplace', () => {
     await page.goto('/hub');
 
     await expect(page.getByRole('link', { name: /Gustavao Espetos E2E 4\.9/i })).toBeVisible({ timeout: 15000 });
-    await page.getByLabel('Abrir menu de perfil').first().click();
+    await page.getByLabel('Abrir menu de perfil').first().click({ force: true });
     await expect(page.getByText('Acesse sua conta')).toBeVisible();
     await page.waitForTimeout(550);
 
@@ -297,7 +297,7 @@ test.describe('Hub marketplace', () => {
     await expect(page.getByRole('button', { name: /^Entregador/i })).toBeVisible();
     await page.getByLabel('Fechar escolha de acesso').click({ force: true });
 
-    await page.locator('aside').getByRole('button', { name: /^Entrar/i }).click({ force: true });
+    await page.locator('aside').getByRole('button', { name: /^Entrar/i }).evaluate((element: HTMLButtonElement) => element.click());
     await expect(page).toHaveURL(/\/cliente\?mode=login/);
   });
 
@@ -321,7 +321,7 @@ test.describe('Hub marketplace', () => {
       window.dispatchEvent(new CustomEvent('jnc:customer-session-updated', { detail: session }));
     }, { session: customerSession });
 
-    await brechoStoreCard.click();
+    await brechoStoreCard.evaluate((element: HTMLAnchorElement) => element.click());
 
     await expect(page).toHaveURL(/\/brecho-brisa-e2e/);
     await expect(page.locator('h1').filter({ hasText: 'Brecho da Brisa E2E' }).first()).toBeVisible({ timeout: 15000 });

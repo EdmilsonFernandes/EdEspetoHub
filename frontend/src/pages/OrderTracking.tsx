@@ -144,6 +144,42 @@ const shouldStopOrderPolling = (order: any) => {
   );
 };
 
+const getShipmentFreshness = (shipment: any) => {
+  if (!shipment) return { timestamp: 0, eventCount: 0 };
+  const events = Array.isArray(shipment.events) ? shipment.events : [];
+  const timestamps = [
+    shipment.trackingLastAt,
+    shipment.deliveredAt,
+    shipment.postedAt,
+    ...events.flatMap((event: any) => [event?.eventAt, event?.createdAt]),
+  ]
+    .map((value) => new Date(value || 0).getTime())
+    .filter(Number.isFinite);
+
+  return {
+    timestamp: timestamps.length ? Math.max(...timestamps) : 0,
+    eventCount: events.length,
+  };
+};
+
+const mergeOrderPreservingFreshShipment = (current: any, incoming: any) => {
+  if (!current) return incoming;
+  if (!incoming) return current;
+
+  const currentFreshness = getShipmentFreshness(current.shipment);
+  const incomingFreshness = getShipmentFreshness(incoming.shipment);
+  const currentShipmentIsNewer =
+    currentFreshness.timestamp > incomingFreshness.timestamp ||
+    (
+      currentFreshness.timestamp === incomingFreshness.timestamp &&
+      currentFreshness.eventCount > incomingFreshness.eventCount
+    );
+
+  return currentShipmentIsNewer
+    ? { ...incoming, shipment: current.shipment }
+    : incoming;
+};
+
 const formatEtaMoment = (value: Date | string | number | null | undefined) => {
   if (!value) return '';
   const parsed = new Date(value);
@@ -544,7 +580,7 @@ export function OrderTracking() {
       try {
         const data = await orderService.getPublicById(orderId);
         if (!active) return;
-        setOrder(data);
+        setOrder((current: any) => mergeOrderPreservingFreshShipment(current, data));
         setError('');
         if (shouldStopOrderPolling(data)) {
           setPolling(false);
@@ -2211,6 +2247,7 @@ export function OrderTracking() {
                         onClick={() => setPostalHistoryExpanded((current) => !current)}
                         className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-[0_14px_28px_-24px_rgba(15,23,42,0.22)] active:scale-[0.99]"
                         aria-expanded={postalHistoryExpanded}
+                        style={{ scrollMarginBottom: 'calc(var(--jnk-client-bottom-nav-height, 0px) + 1rem)' }}
                       >
                         <div>
                           <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Histórico do envio</p>

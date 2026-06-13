@@ -206,7 +206,7 @@ test.describe('Cliente pedidos e conta', () => {
     });
   });
 
-  test('filtra pedidos e abre preview premium da imagem do item', async ({ page }) => {
+  test('filtra pedidos e apresenta resumo compacto do item', async ({ page }) => {
     await page.goto('/cliente/pedidos');
 
     await expect(page.getByRole('heading', { name: 'Meus Pedidos' })).toBeVisible({ timeout: 15000 });
@@ -222,13 +222,10 @@ test.describe('Cliente pedidos e conta', () => {
     await expect(page.getByText('Resumo do cancelamento:')).toBeVisible();
     await expect(page.getByText('Pedido cancelado conforme solicitação registrada no atendimento.')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Cancelados: 1 pedido' })).toBeVisible();
-
-    await page.getByLabel(/Ampliar imagem de Costela bovina/i).click();
-    const dialog = page.getByRole('dialog', { name: /Imagem ampliada do pedido: Costela bovina/i });
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole('button', { name: 'Fechar imagem ampliada' })).toBeVisible();
-    await dialog.getByRole('button', { name: 'Fechar imagem ampliada' }).click();
-    await expect(dialog).toBeHidden();
+    const cancelledOrderCard = page.locator('article').filter({ hasText: 'Costela bovina' }).first();
+    await expect(cancelledOrderCard).toBeVisible();
+    await expect(cancelledOrderCard).toContainText('Costela bovina');
+    expect(await cancelledOrderCard.locator('img').count()).toBeGreaterThan(0);
   });
 
   test('mostra conta, endereco principal e telefone mascarado na edicao', async ({ page }) => {

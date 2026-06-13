@@ -3529,7 +3529,12 @@ export function SuperAdminDestinations() {
                                 </div>
                               </div>
                               <div className="mt-3 flex flex-wrap gap-2">
-                                <button type="button" onClick={() => startPlaceEdit(place)} className={actionButtonClass('neutral')}>
+                                <button
+                                  type="button"
+                                  onClick={() => startPlaceEdit(place)}
+                                  aria-label={`Editar hospedagem ${place.name}`}
+                                  className={actionButtonClass('neutral')}
+                                >
                                   <PencilSimple size={13} weight="bold" />
                                   Editar
                                 </button>

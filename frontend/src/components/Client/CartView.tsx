@@ -1364,7 +1364,7 @@ export const CartView = ({
   };
 
   return (
-    <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "pb-[calc(var(--jnk-native-nav-height,0px)+env(safe-area-inset-bottom)+14rem)]" : "pb-[calc(env(safe-area-inset-bottom)+14rem)]"}`}>
+    <div className={`animate-in slide-in-from-right relative overflow-x-hidden no-x-scroll bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "pb-[calc(var(--jnk-native-nav-height,0px)+env(safe-area-inset-bottom)+16rem)]" : "pb-[calc(env(safe-area-inset-bottom)+16rem)]"}`}>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[max(env(safe-area-inset-top),0.85rem)] bg-[linear-gradient(180deg,rgba(238,245,247,0.98),rgba(238,245,247,0.74))]" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4 sm:mb-6`}>
@@ -2781,7 +2781,11 @@ export const CartView = ({
           )}
 
           {/* Pagamento */}
-          <div className="rounded-[1.55rem] border border-white/80 bg-white p-3.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.28)]" data-testid="checkout-review-payment-card">
+          <div
+            className="rounded-[1.55rem] border border-white/80 bg-white p-3.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.28)]"
+            data-testid="checkout-review-payment-card"
+            style={{ scrollMarginBottom: 'calc(env(safe-area-inset-bottom) + 9rem)' }}
+          >
             <div className="flex items-center gap-3.5">
               {renderPaymentMethodIcon(paymentMethod, { size: "md", selected: true, tone: isOnlinePaymentMethod ? "online" : "local" })}
               <div className="min-w-0">
