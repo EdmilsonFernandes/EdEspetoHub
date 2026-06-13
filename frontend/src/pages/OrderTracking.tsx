@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowClockwise, ArrowSquareOut, Bicycle, CheckCircle, Clock, CircleNotch, CopySimple, CreditCard, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowClockwise, ArrowSquareOut, Bicycle, CaretDown, CheckCircle, Clock, CircleNotch, CopySimple, CreditCard, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
 import { Capacitor } from '@capacitor/core';
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
@@ -29,6 +29,11 @@ import { openActionTarget } from '../utils/actionLink';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
+import { OrderTrackingActionBar } from '../components/Client/OrderTracking/OrderTrackingActionBar';
+import {
+  OrderTrackingProgressCard,
+  type OrderTrackingProgressStep,
+} from '../components/Client/OrderTracking/OrderTrackingProgressCard';
 
 const statusLabels: Record<string, string> = {
   awaiting_payment: 'Aguardando pagamento',
@@ -483,7 +488,6 @@ export function OrderTracking() {
   const { orderId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const isNativePlatform = Capacitor.isNativePlatform();
   const [order, setOrder] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -512,6 +516,8 @@ export function OrderTracking() {
   const [postalHistoryExpanded, setPostalHistoryExpanded] = useState(false);
   const [confirmReceiptLoading, setConfirmReceiptLoading] = useState(false);
   const [confirmReceiptError, setConfirmReceiptError] = useState('');
+  const [timelineExpanded, setTimelineExpanded] = useState(false);
+  const [serviceDetailsExpanded, setServiceDetailsExpanded] = useState(false);
   const [reviewForm, setReviewForm] = useState({
     storeRating: 0,
     deliveryRating: 0,
@@ -520,10 +526,6 @@ export function OrderTracking() {
     deliveryTags: [] as string[],
     tipAmount: 0,
   });
-  const mobileStatusDockBottom = isNativePlatform
-    ? 'calc(env(safe-area-inset-bottom) + 5.25rem)'
-    : '0.75rem';
-
   useEffect(() => {
     if (!orderId || typeof window === 'undefined') return;
     const params = new URLSearchParams(location.search || '');
@@ -728,6 +730,12 @@ export function OrderTracking() {
   const paymentProviderMeta = paymentProviderValue ? getPaymentProviderMeta(paymentProviderValue) : null;
   const normalizedPaymentProvider = normalizePaymentProvider(paymentProviderValue);
   const normalizedPaymentMethod = String(paymentValue || '').trim().toLowerCase();
+  const paymentActionUrl = String(
+    order?.paymentLink ||
+      order?.payment?.paymentLink ||
+      order?.onlinePayment?.paymentLink ||
+      ''
+  ).trim();
   const orderDisplayId = formatOrderDisplayId(order?.id, storeSlug) || String(order?.id || '-');
   const orderCreatedAtLabel = order?.createdAt ? formatDateTime(order.createdAt) : '';
   const deliveryAddressLabel = isDelivery ? formatAddress(order?.address || order?.deliveryAddress) : '';
@@ -794,6 +802,12 @@ export function OrderTracking() {
       (isPostalDelivery && (isPostalShipmentDeliveredByTracking || [ 'delivered', 'done' ].includes(normalizedStatus)))
     ) &&
     !hasCustomerReceiptConfirmation && normalizedStatus !== 'finished';
+
+  useEffect(() => {
+    if (!order?.id) return;
+    setTimelineExpanded(false);
+    setServiceDetailsExpanded(Boolean(hasOnlinePayment && !isPaymentApproved));
+  }, [order?.id]);
 
   const handleConfirmReceipt = async () => {
     if (!orderId || confirmReceiptLoading || !canConfirmReceipt) return;
@@ -1148,6 +1162,35 @@ export function OrderTracking() {
     if (block) {
       block.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  };
+  const revealAndScrollToBlock = (blockId: string, reveal?: () => void) => {
+    reveal?.();
+    window.setTimeout(() => scrollToBlock(blockId), 40);
+  };
+  const handleOpenPaymentAction = () => {
+    if (paymentActionUrl) {
+      void openActionTarget(
+        {
+          href: paymentActionUrl,
+          external: /^https?:\/\//i.test(paymentActionUrl),
+        },
+        navigate
+      );
+      return;
+    }
+    revealAndScrollToBlock('order-info-section', () => setServiceDetailsExpanded(true));
+  };
+  const handleOpenTrackingAction = () => {
+    if (isPostalDelivery) {
+      scrollToBlock('postal-tracking-section');
+      return;
+    }
+    const routeBlock = document.getElementById('order-delivery-route-section');
+    if (routeBlock) {
+      revealAndScrollToBlock('order-delivery-route-section', () => setServiceDetailsExpanded(true));
+      return;
+    }
+    revealAndScrollToBlock('order-status-section', () => setTimelineExpanded(true));
   };
 
   useEffect(() => {
@@ -1567,7 +1610,19 @@ export function OrderTracking() {
     return normalizedStatus || status;
   })();
   const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
-  const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
+  const progressSteps: OrderTrackingProgressStep[] = steps.map((step) => {
+    const timestampValue = getStepTimestamp(order, step.id, {
+      hasOnlinePayment,
+      isPaymentApproved,
+    });
+    if (!timestampValue) return step;
+    const timestamp = new Date(timestampValue);
+    if (Number.isNaN(timestamp.getTime())) return step;
+    return {
+      ...step,
+      timestampLabel: formatTimeOfDay(timestamp, { padHour: true }),
+    };
+  });
   const itemsToRender = Array.isArray(order?.items) ? order.items : [];
   const [itemsExpanded, setItemsExpanded] = useState(itemsToRender.length <= 3);
   const quickItemsCount = itemsToRender.reduce((sum, item) => sum + getOrderItemQuantity(item), 0);
@@ -1655,9 +1710,77 @@ export function OrderTracking() {
       icon: isDelivery ? <MapPin size={15} weight="duotone" /> : <Package size={15} weight="duotone" />,
     },
   ];
+  const stickyOrderAction = !isAdminForStore
+    ? (() => {
+        if (canConfirmReceipt) {
+          return {
+            label: isPostalDelivery ? 'Recebi o pacote' : 'Confirmar recebimento',
+            detail: 'Finalize o pedido depois de conferir a entrega.',
+            icon: <SealCheck size={16} weight="fill" />,
+            onClick: handleConfirmReceipt,
+            loading: confirmReceiptLoading,
+            tone: 'success' as const,
+          };
+        }
+        if (!isCancelled && hasOnlinePayment && !isPaymentApproved) {
+          return {
+            label: paymentActionUrl ? 'Pagar agora' : 'Ver pagamento',
+            detail: 'Conclua o pagamento para a loja iniciar o preparo.',
+            icon: <CreditCard size={16} weight="bold" />,
+            onClick: handleOpenPaymentAction,
+          };
+        }
+        if (isReady && !reviewState?.review && !reviewAccessDenied) {
+          return {
+            label: 'Avaliar pedido',
+            detail: 'Conte como foi sua experiência.',
+            icon: <Star size={16} weight="fill" />,
+            onClick: () => revealAndScrollToBlock('order-review-section', () => setServiceDetailsExpanded(true)),
+          };
+        }
+        if (!isTerminal && isPostalDelivery) {
+          return {
+            label: 'Acompanhar envio',
+            detail: 'Veja código, eventos e previsão dos Correios.',
+            icon: <Package size={16} weight="duotone" />,
+            onClick: handleOpenTrackingAction,
+          };
+        }
+        if (!isTerminal && isInTransitPhase) {
+          return {
+            label: 'Acompanhar entrega',
+            detail: 'Veja o trajeto e a previsão de chegada.',
+            icon: <Bicycle size={16} weight="duotone" />,
+            onClick: handleOpenTrackingAction,
+          };
+        }
+        if (!isTerminal && storePhone) {
+          return {
+            label: 'Falar com a loja',
+            detail: 'Tire dúvidas sem sair do acompanhamento.',
+            icon: <WhatsappLogo size={16} weight="fill" />,
+            onClick: openWhatsApp,
+          };
+        }
+        if (isTerminal && order?.items?.length) {
+          return {
+            label: 'Pedir novamente',
+            detail: 'Adicione os mesmos itens ao carrinho.',
+            icon: <ArrowClockwise size={16} weight="bold" />,
+            onClick: handleRepeatOrder,
+          };
+        }
+        return {
+          label: 'Ver andamento',
+          detail: 'Confira a etapa atual e o próximo passo.',
+          icon: <Clock size={16} weight="duotone" />,
+          onClick: () => revealAndScrollToBlock('order-status-section', () => setTimelineExpanded(true)),
+        };
+      })()
+    : null;
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f4f8fb_0%,#ebf2f7_100%)] pb-[var(--jnk-client-bottom-nav-height,0px)] pt-[calc(env(safe-area-inset-top)+4.55rem)]">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f4f8fb_0%,#ebf2f7_100%)] pt-[calc(env(safe-area-inset-top)+4.55rem)]">
       <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[42%] w-[50%] rounded-full bg-[#336886]/14 blur-[120px] -z-10" />
       <div className="pointer-events-none fixed bottom-[10%] left-[-6%] h-[28%] w-[36%] rounded-full bg-sky-300/16 blur-[100px] -z-10" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
@@ -1702,7 +1825,7 @@ export function OrderTracking() {
         )}
       />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-32 sm:pb-10 sm:py-6">
+      <main className="mx-auto max-w-5xl px-4 pb-[calc(var(--jnk-client-bottom-nav-height,0px)+var(--jnk-native-nav-height,0px)+8.5rem)] pt-4 sm:px-6 sm:py-6 lg:px-8 lg:pb-10">
         <div>
           {loading && (
             <div className="space-y-3 py-4">
@@ -1733,8 +1856,8 @@ export function OrderTracking() {
                         Pedido #{orderDisplayId}
                     </p>
                     <div className="mt-3 flex items-center gap-3 flex-wrap">
-                      <div className={`mb-2 inline-flex h-12 w-12 items-center justify-center rounded-2xl ${isCancelled ? "bg-rose-100 text-rose-500" : isReady ? "bg-emerald-100 text-emerald-600" : "bg-sky-100 text-sky-600"} ${!isTerminal ? "animate-bounce" : ""}`} style={!isTerminal ? { animationDuration: "2s" } : undefined}>
-                        {isCancelled ? <CircleNotch size={24} weight="bold" /> : isReady ? <CheckCircle size={24} weight="fill" /> : <Clock size={24} weight="duotone" className="animate-spin" style={{ animationDuration: "3s" }} />}
+                      <div className={`mb-2 inline-flex h-12 w-12 items-center justify-center rounded-2xl ${isCancelled ? "bg-rose-100 text-rose-500" : isReady ? "bg-emerald-100 text-emerald-600" : "bg-sky-100 text-sky-600"}`}>
+                        {isCancelled ? <CircleNotch size={24} weight="bold" /> : isReady ? <CheckCircle size={24} weight="fill" /> : <Clock size={24} weight="duotone" />}
                       </div>
                       <h1 className="text-[1.45rem] font-black leading-none text-slate-950 sm:text-[2rem]">{statusLabel}</h1>
                       {isDelivery && (
@@ -1794,7 +1917,7 @@ export function OrderTracking() {
                       </div>
                     )}
                     {storePhone && (
-                      <a href={storeWhatsappLink} onClick={(event) => { event.preventDefault(); openWhatsApp(); }} target="_blank" rel="noopener" className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 active:scale-95 transition-transform">
+                      <a href={storeWhatsappLink} onClick={(event) => { event.preventDefault(); openWhatsApp(); }} target="_blank" rel="noopener" className="mt-3 hidden items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 transition-transform active:scale-95 lg:inline-flex">
                         <WhatsappLogo size={15} weight="fill" />
                         Falar com a loja
                       </a>
@@ -1925,7 +2048,7 @@ export function OrderTracking() {
                             type="button"
                             onClick={handleConfirmReceipt}
                             disabled={confirmReceiptLoading}
-                            className="jnc-hub-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_32px_-24px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98]"
+                            className="jnc-hub-touch hidden items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_32px_-24px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] lg:inline-flex"
                           >
                             {confirmReceiptLoading ? <CircleNotch size={16} className="animate-spin" /> : <SealCheck size={16} weight="fill" />}
                             {isPostalDelivery ? 'Recebi o pacote' : 'Confirmar recebimento'}
@@ -1951,7 +2074,7 @@ export function OrderTracking() {
               </div>
 
               {isReady && !reviewState?.review && !reviewAccessDenied && (
-                <div className="sm:hidden rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2.5">
+                <div className="hidden rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2.5 lg:block">
                   <p className="text-xs font-semibold text-amber-800">Pedido finalizado. Falta sua avaliação.</p>
                   <p className="text-[11px] text-amber-700 mt-1">
                     Role até a seção <span className="font-bold">Avaliar pedido</span> para avaliar e
@@ -1967,130 +2090,35 @@ export function OrderTracking() {
                 </div>
               )}
 
-              <div id="order-status-section" className="rounded-[1.55rem] border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.96))] p-4 shadow-[0_20px_40px_-34px_rgba(51,104,134,0.18)]">
-                <div className="mb-4">
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-[#dce9f1]/80">
-                    <div
-                      className={`relative h-full transition-all duration-700 ease-out overflow-hidden ${isCancelled ? "" : "jnc-progress-sweep"}`}
-                      style={{
-                        width: `${progress}%`,
-                        backgroundImage: isCancelled
-                          ? 'linear-gradient(90deg, #f43f5e, #fda4af)'
-                          : 'linear-gradient(90deg, #336886, #009ee3)',
-                      }}
-                    >
-                      {!isTerminal && (
-                        <div className="jnc-animate-shimmer absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-                      )}
-                    </div>
-                  </div>
+              {((isReady && elapsedMs > 0) || isEstimateDelayed) ? (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {isReady && elapsedMs > 0 ? (
+                    <TrackingMetaCard
+                      label="Tempo total"
+                      value={formatDuration(elapsedMs)}
+                      detail="Tempo até a conclusão do pedido"
+                      accent="success"
+                    />
+                  ) : null}
+                  {isEstimateDelayed ? (
+                    <TrackingMetaCard
+                      label="Previsão"
+                      value="Em atraso"
+                      detail="Seu pedido está demorando mais que o previsto."
+                      accent="warning"
+                    />
+                  ) : null}
                 </div>
-                {(isReady && elapsedMs > 0) || isEstimateDelayed ? (
-                  <div className="mb-4 grid gap-2 sm:grid-cols-2">
-                    {isReady && elapsedMs > 0 ? (
-                      <TrackingMetaCard
-                        label="Tempo total"
-                        value={formatDuration(elapsedMs)}
-                        detail="Tempo até a conclusão do pedido"
-                        accent="success"
-                      />
-                    ) : null}
-                    {isEstimateDelayed ? (
-                      <TrackingMetaCard
-                        label="Previsão"
-                        value="Em atraso"
-                        detail="Seu pedido está demorando mais que o previsto."
-                        accent="warning"
-                      />
-                    ) : null}
-                  </div>
-                ) : null}
+              ) : null}
 
-                <div className="rounded-2xl border border-[#d9e6ee] bg-white/92 px-4 py-4 shadow-[0_12px_28px_-24px_rgba(51,104,134,0.14)]">
-                  <div className="relative pl-1">
-                    {/* Trilho de fundo */}
-                    <span className="pointer-events-none absolute left-[10px] top-3 bottom-6 w-[1.5px] rounded-full bg-[#dce9f1]/60" />
-                    {/* Trilho preenchido (concluído) */}
-                    {currentIndex > 0 && (
-                      <span
-                        className="pointer-events-none absolute left-[10px] top-3 w-[1.5px] rounded-full transition-all duration-700"
-                        style={{
-                          height: `${(currentIndex / Math.max(steps.length - 1, 1)) * 100}%`,
-                          background: isCancelled ? '#fda4af' : 'linear-gradient(180deg,#336886,#009ee3)',
-                        }}
-                      />
-                    )}
-                    <div className="space-y-3">
-                    {steps.map((step) => {
-                      const stepIndex = steps.findIndex((item) => item.id === step.id);
-                      const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
-                      const isCurrent = stepIndex === currentIndex;
-                      return (
-                        <div
-                          key={`mobile-line-${step.id}`}
-                          className={`relative z-[1] -ml-2 flex items-center gap-3 rounded-[1.1rem] px-2 py-1.5 transition-all duration-300 ${
-                            isCurrent
-                              ? isCancelled
-                                ? 'bg-rose-50/80 shadow-[0_14px_28px_-24px_rgba(244,63,94,0.34)] ring-1 ring-rose-100'
-                                : 'bg-white/92 shadow-[0_16px_34px_-26px_rgba(51,104,134,0.30)] ring-1 ring-[#d6e4ed]/80'
-                              : ''
-                          }`}
-                        >
-                          <span className="relative flex h-[22px] w-[22px] shrink-0 items-center justify-center">
-                            {isCurrent && !isCancelled && !isTerminal && (
-                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 duration-1000" />
-                            )}
-                            <span
-                              className={`relative z-[2] h-[22px] w-[22px] rounded-full border-2 grid place-items-center transition-all duration-300 ${
-                                isCurrent
-                                  ? isCancelled
-                                    ? 'border-rose-500 bg-rose-500 text-white shadow-[0_0_0_4px_rgba(244,63,94,0.2)]'
-                                    : 'jnc-active-step-halo border-emerald-500 bg-emerald-500 text-white ring-4 ring-emerald-500/30 scale-110'
-                                  : isCompleted
-                                    ? isCancelled
-                                      ? 'border-rose-200 bg-rose-100 text-rose-600'
-                                      : 'border-emerald-200 bg-emerald-100 text-emerald-600'
-                                    : 'border-stone-200 bg-stone-50 text-stone-300'
-                              }`}
-                            >
-                              {isCompleted
-                                ? <CheckCircle size={13} weight="fill" />
-                                : <span className="text-[8px] font-black">{stepIndex + 1}</span>
-                              }
-                            </span>
-                          </span>
-                          <div className="min-w-0">
-                            <span className={`text-[12.5px] leading-tight ${
-                              isCurrent
-                                ? isCancelled
-                                  ? "font-black text-rose-600"
-                                  : "font-black text-stone-950"
-                                : isCompleted
-                                  ? isCancelled
-                                    ? "font-semibold text-rose-500"
-                                    : "font-semibold text-stone-600"
-                                  : "text-stone-300"
-                            }`}>
-                              {step.label}
-                            </span>
-                            {(isCompleted || isCurrent) && (() => {
-                              const timestampValue = getStepTimestamp(order, step.id, {
-                                hasOnlinePayment,
-                                isPaymentApproved,
-                              });
-                              if (!timestampValue) return null;
-                              const t = new Date(timestampValue);
-                              if (Number.isNaN(t.getTime())) return null;
-                              return <p className="mt-1 flex w-fit items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500"><Clock size={9} weight="bold" />{formatTimeOfDay(t, { padHour: true })}</p>;
-                            })()}
-                          </div>
-                        </div>
-                      );
-                    })}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <OrderTrackingProgressCard
+                steps={progressSteps}
+                currentIndex={currentIndex}
+                isCancelled={isCancelled}
+                isTerminal={isTerminal}
+                expanded={timelineExpanded}
+                onToggle={() => setTimelineExpanded((current) => !current)}
+              />
 
               {isPostalDelivery && (
                 <section
@@ -2451,11 +2479,32 @@ export function OrderTracking() {
                   </div>
                 </div>
                 <div id="order-info-section" className="overflow-hidden rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]">
-                  <div className="border-b border-[#dce9f1] px-5 py-4">
-                    <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Como será atendido</p>
-                    <p className="mt-1 text-xs font-semibold text-slate-500">Pagamento, endereço e orientações importantes em um só lugar.</p>
-                  </div>
-                  <div className="space-y-4 px-4 py-4 sm:px-5">
+                  <button
+                    type="button"
+                    onClick={() => setServiceDetailsExpanded((current) => !current)}
+                    className="jnc-hub-touch flex w-full items-center justify-between gap-3 px-5 py-4 text-left lg:pointer-events-none"
+                    aria-expanded={serviceDetailsExpanded}
+                    aria-controls="order-service-details"
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">Pagamento e entrega</span>
+                      <span className="mt-1 block truncate text-xs font-semibold text-slate-500">
+                        {paymentMeta?.label || 'Pagamento a confirmar'} · {typeLabel}
+                      </span>
+                    </span>
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#d6e4ed] bg-white px-2.5 py-1 text-[10px] font-black text-[#336886] lg:hidden">
+                      {serviceDetailsExpanded ? 'Ocultar' : 'Ver detalhes'}
+                      <CaretDown
+                        size={13}
+                        weight="bold"
+                        className={`transition-transform duration-200 ${serviceDetailsExpanded ? 'rotate-180' : ''}`}
+                      />
+                    </span>
+                  </button>
+                  <div
+                    id="order-service-details"
+                    className={`${serviceDetailsExpanded ? 'block' : 'hidden lg:block'} space-y-4 border-t border-[#dce9f1] px-4 py-4 sm:px-5`}
+                  >
                     <div className="rounded-[1.35rem] border border-[#d6e4ed] bg-[linear-gradient(135deg,#ffffff_0%,#f5fafd_58%,#edf6fb_100%)] p-4 shadow-[0_20px_40px_-32px_rgba(51,104,134,0.22)]">
                       <div className="flex items-start gap-3">
                         <span className={`grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-[1.15rem] border shadow-[0_16px_30px_-22px_rgba(51,104,134,0.36)] ${paymentIconToneClass}`}>
@@ -2644,7 +2693,7 @@ export function OrderTracking() {
                     ) : null}
 
                     {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat && (
-                      <div className="rounded-[1.35rem] border border-amber-100/80 bg-white/92 p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
+                      <div id="order-delivery-route-section" className="rounded-[1.35rem] border border-amber-100/80 bg-white/92 p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-black text-stone-900">Rota da entrega</span>
                           {deliveryRoute?.distanceKm ? (
@@ -2687,7 +2736,7 @@ export function OrderTracking() {
                               window.setTimeout(() => setCtaPulse(false), 220);
                               handleRepeatOrder();
                             }}
-                            className="jnc-hub-touch inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.46)]"
+                            className="jnc-hub-touch hidden min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.46)] lg:inline-flex"
                             style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
                           >
                             <ArrowClockwise size={15} weight="bold" />
@@ -2988,6 +3037,16 @@ export function OrderTracking() {
         </div>
       </main>
 
+      {stickyOrderAction ? (
+        <OrderTrackingActionBar
+          label={stickyOrderAction.label}
+          detail={stickyOrderAction.detail}
+          icon={stickyOrderAction.icon}
+          onClick={stickyOrderAction.onClick}
+          loading={stickyOrderAction.loading}
+          tone={stickyOrderAction.tone}
+        />
+      ) : null}
       <ClientBottomNav active="orders" />
     </div>
   );

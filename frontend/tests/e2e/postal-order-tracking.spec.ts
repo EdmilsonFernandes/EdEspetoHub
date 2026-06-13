@@ -99,6 +99,11 @@ test.describe('Pedido postal - acompanhamento do cliente', () => {
     await expect(page.getByText('Acompanhe seu envio', { exact: true })).toBeVisible();
     await expect(page.getByText('Pedido postado').first()).toBeVisible();
     await expect(page.getByText('AA123456789BR')).toBeVisible();
+    await expect(page.getByRole('button', { name: /acompanhar envio/i })).toBeVisible();
+    await expect(page.getByText('Próximo passo')).toBeVisible();
+    await expect(page.getByRole('button', { name: /ver andamento completo/i })).toBeVisible();
+    await page.getByRole('button', { name: /ver andamento completo/i }).click();
+    await expect(page.getByRole('button', { name: /ocultar andamento/i })).toBeVisible();
     await expect(page.getByText('Histórico do envio')).toBeVisible();
     await expect(page.getByText('Objeto em trânsito')).not.toBeVisible();
     await page.getByRole('button', { name: /ver histórico/i }).click();
