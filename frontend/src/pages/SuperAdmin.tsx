@@ -206,6 +206,13 @@ const getSuperAdminRoleLabel = (role?: string) => {
   return 'Equipe Ja no Caminho';
 };
 
+const getPromoPushStoreImageUrl = (push: any) => {
+  const logoUrl = String(push?.storeLogoUrl || '').trim();
+  if (logoUrl) return logoUrl;
+  const bannerUrl = String(push?.storeBannerUrl || '').trim();
+  return bannerUrl || '';
+};
+
 const KycAvatar = ({ name, profileImageUrl }: { name?: string; profileImageUrl?: string }) => {
   return (
     <AdaptiveAvatar
@@ -2514,29 +2521,41 @@ export function SuperAdmin() {
             ) : (
               <div className="space-y-3">
                 {pendingPushes.map((push: any) => (
-                  <div key={push.id} className="overflow-hidden rounded-2xl border border-[#336886]/20 bg-white shadow-[0_4px_20px_-8px_rgba(21,58,76,0.15)]">
+                  <div key={push.id} className="group relative overflow-hidden rounded-[1.45rem] border border-[#336886]/15 bg-white shadow-[0_18px_48px_-34px_rgba(21,58,76,0.38)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_54px_-36px_rgba(21,58,76,0.48)]">
+                    <span className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-[#5FD35A]/10 blur-2xl" />
+                    <span className="pointer-events-none absolute -left-10 top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-2xl" />
                     <div className="h-[3px] bg-gradient-to-r from-[#153A4C] to-[#336886]" />
-                    <div className="p-4">
-                      <div className="flex items-start gap-3">
+                    <div className="relative p-4">
+                      <div className="flex items-start gap-3.5">
                         {/* Logo da loja */}
-                        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-slate-100 bg-slate-100 shadow-sm">
-                          {push.storeLogoUrl ? (
-                            <img src={resolveAssetUrl(push.storeLogoUrl)} alt={push.storeName} className="h-full w-full object-cover" />
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.2rem] border border-white bg-white p-1 shadow-[0_14px_28px_-20px_rgba(15,23,42,0.55)] ring-1 ring-[#336886]/10">
+                          {getPromoPushStoreImageUrl(push) ? (
+                            <img src={resolveAssetUrl(getPromoPushStoreImageUrl(push))} alt={push.storeName} className="h-full w-full rounded-[0.95rem] object-cover" />
                           ) : (
-                            <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-xs font-black text-white">
+                            <div className="grid h-full w-full place-items-center rounded-[0.95rem] bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
                               {String(push.storeName || 'L').slice(0, 2).toUpperCase()}
                             </div>
                           )}
+                          <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-white bg-[#5FD35A] text-[#153A4C] shadow-sm">
+                            <CheckCircle size={12} weight="fill" />
+                          </span>
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">{push.storeName}</p>
+                            <div className="min-w-0">
+                              <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                                <p className="truncate text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">{push.storeName}</p>
+                                {push.storeSlug ? (
+                                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-black text-slate-500">
+                                    @{push.storeSlug}
+                                  </span>
+                                ) : null}
+                              </div>
                               <p className="mt-0.5 text-sm font-black text-slate-900">{push.title}</p>
                               <p className="mt-0.5 text-xs font-medium leading-5 text-slate-500">{push.body}</p>
                             </div>
-                            <span className="shrink-0 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">
-                              R$ {Number(push.priceAmount).toFixed(2)}
+                            <span className="shrink-0 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-black text-emerald-700 shadow-[0_10px_24px_-20px_rgba(16,185,129,0.5)]">
+                              {formatCurrency(Number(push.priceAmount || 0))}
                             </span>
                           </div>
                           <p className="mt-2 text-[10px] text-slate-400">{new Date(push.createdAt).toLocaleString('pt-BR')}</p>
@@ -2602,9 +2621,9 @@ export function SuperAdmin() {
               <div className="space-y-4">
                 {/* Agrupar por loja */}
                 {Object.values(
-                  pushHistory.reduce((acc: Record<string, { storeName: string; storeLogoUrl?: string; pushes: any[] }>, push: any) => {
+                  pushHistory.reduce((acc: Record<string, { storeName: string; storeLogoUrl?: string; storeBannerUrl?: string; pushes: any[] }>, push: any) => {
                     const key = push.storeId || push.storeName || 'unknown';
-                    if (!acc[key]) acc[key] = { storeName: push.storeName || 'Loja', storeLogoUrl: push.storeLogoUrl, pushes: [] };
+                    if (!acc[key]) acc[key] = { storeName: push.storeName || 'Loja', storeLogoUrl: push.storeLogoUrl, storeBannerUrl: push.storeBannerUrl, pushes: [] };
                     acc[key].pushes.push(push);
                     return acc;
                   }, {})
@@ -2613,8 +2632,8 @@ export function SuperAdmin() {
                     {/* Header da loja */}
                     <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50/80 px-4 py-3">
                       <div className="h-9 w-9 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-                        {group.storeLogoUrl ? (
-                          <img src={resolveAssetUrl(group.storeLogoUrl)} alt={group.storeName} className="h-full w-full object-cover" />
+                        {getPromoPushStoreImageUrl(group) ? (
+                          <img src={resolveAssetUrl(getPromoPushStoreImageUrl(group))} alt={group.storeName} className="h-full w-full object-cover" />
                         ) : (
                           <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-[10px] font-black text-white">
                             {String(group.storeName).slice(0, 2).toUpperCase()}

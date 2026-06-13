@@ -197,6 +197,7 @@ export class PromoPushService {
       storeName: (row as any).store?.name || null,
       storeSlug: (row as any).store?.slug || null,
       storeLogoUrl: (row as any).store?.settings?.logoUrl || null,
+      storeBannerUrl: (row as any).store?.settings?.bannerUrl || null,
       title: row.title,
       body: row.body,
       status: row.status,
