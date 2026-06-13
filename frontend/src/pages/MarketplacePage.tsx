@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiClient } from '../config/apiClient';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useRoleRedirect } from '../hooks/useRoleRedirect';
 import { Capacitor } from '@capacitor/core';
 import {
   MagnifyingGlass,
@@ -628,6 +629,7 @@ const readMotoboySession = () => {
 export function MarketplacePage() {
   const navigate = useNavigate();
   const location = useLocation();
+  useRoleRedirect();
   const isNativePlatform = Capacitor.isNativePlatform();
   const { setAuth } = useAuth();
   const { setBranding } = useTheme();
@@ -1641,10 +1643,6 @@ export function MarketplacePage() {
         brandName: savedSession?.store?.name,
       });
       const savedRole = String(savedSession?.user?.role || '').toUpperCase();
-      if ((savedRole === 'ADMIN' || savedRole === 'OPERATOR' || savedRole === 'LOJISTA') && window.matchMedia('(max-width: 767px)').matches && savedSession?.store?.slug) {
-        navigate(`/${savedSession.store.slug}`, { replace: true });
-        return;
-      }
       navigate(savedRole === 'ADMIN' ? '/admin/dashboard' : '/admin/queue', { replace: true });
       return;
     }
@@ -1660,10 +1658,6 @@ export function MarketplacePage() {
           brandName: session?.store?.name,
         });
         const role = String(session?.user?.role || '').toUpperCase();
-        if ((role === 'ADMIN' || role === 'OPERATOR' || role === 'LOJISTA') && window.matchMedia('(max-width: 767px)').matches && session?.store?.slug) {
-          navigate(`/${session.store.slug}`, { replace: true });
-          return;
-        }
         navigate(role === 'ADMIN' ? '/admin/dashboard' : '/admin/queue', { replace: true });
         return;
       } catch {

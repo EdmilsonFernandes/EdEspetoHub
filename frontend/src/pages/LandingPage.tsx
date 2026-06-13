@@ -22,6 +22,7 @@ import {
   X,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
+import { useRoleRedirect } from '../hooks/useRoleRedirect';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
 import { storeService } from '../services/storeService';
 import { customerAccountService } from '../services/customerAccountService';
@@ -98,6 +99,8 @@ export function LandingPage() {
     }, 120);
     return () => window.clearTimeout(timer);
   }, []);
+
+  useRoleRedirect();
 
   useEffect(() => {
     const sync = () => {
