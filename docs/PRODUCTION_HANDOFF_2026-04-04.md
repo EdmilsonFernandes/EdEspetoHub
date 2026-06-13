@@ -55,6 +55,10 @@ These files must be backed up after each relevant change:
 Script:
 - `scripts/backup-config.sh`
 
+Run the versioned script from the repository, or always set
+`APP_ROOT=/home/ec2-user/EdEspetoHub`. A copied script under `~/bin` cannot
+infer the repository root and previously created metadata-only archives.
+
 What it does:
 - Creates timestamped tar.gz backup with critical runtime config.
 - Includes the effective env files used on the server when they exist.
@@ -74,15 +78,16 @@ sh scripts/backup-config.sh
 Custom destination/retention:
 
 ```bash
-BACKUP_DIR=/var/backups/chamanoespeto/config KEEP_DAYS=60 sh scripts/backup-config.sh
+APP_ROOT=/home/ec2-user/EdEspetoHub BACKUP_DIR=/var/backups/janocaminho/config KEEP_DAYS=60 sh scripts/backup-config.sh
 ```
 
 Upload to private S3 bucket and require SSM export:
 
 ```bash
-BACKUP_DIR=/var/backups/chamanoespeto/config \
+APP_ROOT=/home/ec2-user/EdEspetoHub \
+BACKUP_DIR=/var/backups/janocaminho/config \
 KEEP_DAYS=60 \
-CONFIG_BACKUP_S3_BUCKET=jnc-config-backups-prod-222984221398 \
+CONFIG_BACKUP_S3_BUCKET=jnc-db-backups-prod-222984221398 \
 CONFIG_BACKUP_S3_PREFIX=config/runtime \
 CONFIG_BACKUP_SSM_EXPORT_MODE=required \
 sh scripts/backup-config.sh
@@ -91,10 +96,11 @@ sh scripts/backup-config.sh
 Approx. every 15 days:
 
 ```bash
-BACKUP_DIR=/var/backups/chamanoespeto/config \
+APP_ROOT=/home/ec2-user/EdEspetoHub \
+BACKUP_DIR=/var/backups/janocaminho/config \
 KEEP_DAYS=60 \
-MIN_INTERVAL_HOURS=360 \
-CONFIG_BACKUP_S3_BUCKET=jnc-config-backups-prod-222984221398 \
+MIN_INTERVAL_HOURS=20 \
+CONFIG_BACKUP_S3_BUCKET=jnc-db-backups-prod-222984221398 \
 CONFIG_BACKUP_S3_PREFIX=config/runtime \
 CONFIG_BACKUP_SSM_EXPORT_MODE=required \
 sh scripts/backup-config.sh
@@ -104,7 +110,7 @@ sh scripts/backup-config.sh
 
 ```bash
 ( crontab -l 2>/dev/null | grep -v 'backup-config.sh' ; \
-  echo '15 2 * * * BACKUP_DIR=/var/backups/chamanoespeto/config KEEP_DAYS=30 MIN_INTERVAL_HOURS=360 CONFIG_BACKUP_S3_BUCKET=jnc-config-backups-prod-222984221398 CONFIG_BACKUP_S3_PREFIX=config/runtime CONFIG_BACKUP_SSM_EXPORT_MODE=required sh /home/ec2-user/EdEspetoHub/scripts/backup-config.sh >> /var/log/config-backup.log 2>&1' \
+  echo '25 2 * * * APP_ROOT=/home/ec2-user/EdEspetoHub BACKUP_DIR=/var/backups/janocaminho/config KEEP_DAYS=30 MIN_INTERVAL_HOURS=20 CONFIG_BACKUP_S3_BUCKET=jnc-db-backups-prod-222984221398 CONFIG_BACKUP_S3_PREFIX=config/runtime CONFIG_BACKUP_SSM_EXPORT_MODE=required sh /home/ec2-user/EdEspetoHub/scripts/backup-config.sh >> /var/log/config-backup.log 2>&1' \
 ) | crontab -
 ```
 
@@ -113,8 +119,8 @@ Validate:
 ```bash
 crontab -l
 tail -n 50 /var/log/config-backup.log
-ls -lah /var/backups/chamanoespeto/config
-aws s3 ls s3://jnc-config-backups-prod-222984221398/config/runtime/ | tail
+ls -lah /var/backups/janocaminho/config
+aws s3 ls s3://jnc-db-backups-prod-222984221398/config/runtime/ | tail
 ```
 
 ## 5) Fast Restore Procedure
@@ -122,14 +128,14 @@ aws s3 ls s3://jnc-config-backups-prod-222984221398/config/runtime/ | tail
 1. Pick backup file:
 
 ```bash
-ls -1t /var/backups/chamanoespeto/config/config-backup-*.tar.gz | head -n 1
+ls -1t /var/backups/janocaminho/config/config-backup-*.tar.gz | head -n 1
 ```
 
 2. Extract to temp:
 
 ```bash
 mkdir -p /tmp/restore-config
-tar -xzf /var/backups/chamanoespeto/config/config-backup-YYYYMMDDTHHMMSSZ.tar.gz -C /tmp/restore-config
+tar -xzf /var/backups/janocaminho/config/config-backup-YYYYMMDDTHHMMSSZ.tar.gz -C /tmp/restore-config
 ```
 
 3. Restore files:

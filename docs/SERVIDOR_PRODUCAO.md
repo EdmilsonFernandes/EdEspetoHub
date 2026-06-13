@@ -2,6 +2,11 @@
 
 > Documento de referência para configuração, manutenção e recuperação do servidor.  
 > **Guarde este arquivo em local seguro fora do repositório também.**
+>
+> Para indisponibilidade, perda do banco, restore completo ou migracao, use
+> [`DISASTER_RECOVERY_RUNBOOK.md`](./DISASTER_RECOVERY_RUNBOOK.md). Ele contem
+> o estado auditado em 2026-06-13 e substitui os comandos simplificados de
+> recuperacao deste documento.
 
 ---
 
@@ -29,7 +34,7 @@ ssh -i /tmp/jnc.pem ec2-user@ec2-3-137-119-152.us-east-2.compute.amazonaws.com
 
 **Domínio principal:** `janocaminho.com.br` (e `www.janocaminho.com.br`)  
 **SSL:** Let's Encrypt via Certbot  
-**Validade atual:** 2026-05-19 (renovar antes de expirar)
+**Validade observada em 2026-06-13:** 2026-08-17
 
 ```bash
 # Renovar SSL manualmente
@@ -301,11 +306,11 @@ docker exec -it janocaminho-postgres psql -U postgres -d espetinho
 # Executar SQL direto
 docker exec janocaminho-postgres psql -U postgres -d espetinho -c "SELECT COUNT(*) FROM orders;"
 
-# Backup do banco
-docker exec janocaminho-postgres pg_dump -U postgres espetinho > backup_$(date +%Y%m%d).sql
+# Backup verificado, comprimido e opcionalmente enviado ao S3
+bash scripts/pg-backup-rotate.sh
 
-# Restaurar backup
-docker exec -i janocaminho-postgres psql -U postgres espetinho < backup_YYYYMMDD.sql
+# Restore seguro para um banco temporario de teste
+bash scripts/restore-postgres-backup.sh backup_YYYYMMDDTHHMMSSZ.sql.gz jnc_restore_drill
 ```
 
 **PgAdmin:** `http://SEU_IP:5050`  
@@ -490,12 +495,14 @@ sudo nginx -s reload
 
 ## Recuperação do Zero (Servidor Novo)
 
-Se perder o servidor e precisar recriar do zero:
+O procedimento abaixo e apenas um resumo. Siga o runbook de contingencia para
+restaurar checksums, configuracao/SSM, banco, uploads, Nginx, DNS, TLS e executar
+o checklist funcional antes de liberar trafego.
 
 ### 1. Criar EC2
 - AMI: Amazon Linux 2023
 - Tipo: `t3.medium` ou superior
-- Security Group: portas 22, 80, 443, 5432 (só interno)
+- Security Group: publico apenas 80/443; porta 22 restrita ao IP administrativo
 
 ### 2. Instalar dependências
 ```bash
@@ -531,8 +538,9 @@ mkdir -p backend/keys
 # Subir só o postgres primeiro
 docker compose up -d postgres
 
-# Restaurar backup
-docker exec -i janocaminho-postgres psql -U postgres espetinho < backup.sql
+# Restaurar backup validado
+ALLOW_PRODUCTION_RESTORE=true BACKEND_STOPPED_ACK=true \
+  bash scripts/restore-postgres-backup.sh backup.sql.gz espetinho
 ```
 
 ### 6. Subir tudo
@@ -564,8 +572,8 @@ docker stats --no-stream
 # Ver logs de erro da API
 docker logs janocaminho-backend --tail 100 2>&1 | grep '"level":"warn"\|"level":"error"'
 
-# Testar se a API está respondendo
-curl -s https://janocaminho.com.br/api/health | head -c 100
+# Testar BFF internamente; /api/health publico ainda nao existe
+curl -fsS http://127.0.0.1:5000/health
 
 # Ver espaço em disco
 df -h

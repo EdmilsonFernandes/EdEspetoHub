@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
 set -eu
 
-ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+SCRIPT_ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+ROOT_DIR="${APP_ROOT:-$SCRIPT_ROOT}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/janocaminho/config}"
 KEEP_DAYS="${KEEP_DAYS:-30}"
 MIN_INTERVAL_HOURS="${MIN_INTERVAL_HOURS:-0}"
@@ -11,13 +12,18 @@ S3_STORAGE_CLASS="${CONFIG_BACKUP_S3_STORAGE_CLASS:-${BACKUP_S3_STORAGE_CLASS:-S
 S3_SSE="${CONFIG_BACKUP_S3_SSE:-${BACKUP_S3_SSE:-AES256}}"
 SSM_EXPORT_MODE="${CONFIG_BACKUP_SSM_EXPORT_MODE:-auto}"
 EXTRA_SSM_PARAMETERS="${CONFIG_BACKUP_EXTRA_SSM_PARAMETERS:-}"
+REQUIRE_CRITICAL_FILES="${CONFIG_BACKUP_REQUIRE_CRITICAL_FILES:-true}"
+NGINX_CONFIG_PATH="${CONFIG_BACKUP_NGINX_CONFIG_PATH:-/etc/nginx/conf.d/chamanoespeto.conf}"
+CERT_RENEW_SCRIPT_PATH="${CONFIG_BACKUP_CERT_RENEW_SCRIPT_PATH:-/usr/local/sbin/jnc-renew-janocaminho-cert.sh}"
 
 TS="$(date -u +%Y%m%dT%H%M%SZ)"
 TMP_DIR="$(mktemp -d)"
 STAGE_DIR="$TMP_DIR/config-$TS"
 ARCHIVE="$BACKUP_DIR/config-backup-$TS.tar.gz"
+CHECKSUM="$ARCHIVE.sha256"
 
 mkdir -p "$BACKUP_DIR" "$STAGE_DIR"
+trap 'rm -rf "$TMP_DIR"' EXIT
 
 if [ "$MIN_INTERVAL_HOURS" -gt 0 ]; then
   latest_backup="$(ls -1t "$BACKUP_DIR"/config-backup-*.tar.gz 2>/dev/null | head -n 1 || true)"
@@ -184,7 +190,39 @@ copy_if_exists "$ROOT_DIR/.env.prod.secrets" "$STAGE_DIR/.env.prod.secrets"
 copy_if_exists "$ROOT_DIR/frontend/.env.production" "$STAGE_DIR/frontend/.env.production"
 copy_if_exists "$ROOT_DIR/docker-compose.yml" "$STAGE_DIR/docker-compose.yml"
 copy_if_exists "$ROOT_DIR/docker-compose.prod.yml" "$STAGE_DIR/docker-compose.prod.yml"
+copy_if_exists "$ROOT_DIR/docker-compose.deploy.yml" "$STAGE_DIR/docker-compose.deploy.yml"
 copy_if_exists "$ROOT_DIR/backend/keys/firebase-adminsdk.json" "$STAGE_DIR/backend/keys/firebase-adminsdk.json"
+copy_if_exists "$NGINX_CONFIG_PATH" "$STAGE_DIR/system/nginx/chamanoespeto.conf"
+copy_if_exists "$CERT_RENEW_SCRIPT_PATH" "$STAGE_DIR/system/certbot/jnc-renew-janocaminho-cert.sh"
+
+if command -v crontab >/dev/null 2>&1; then
+  mkdir -p "$STAGE_DIR/system/cron"
+  crontab -l > "$STAGE_DIR/system/cron/ec2-user.crontab" 2>/dev/null || true
+  if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+    sudo -n crontab -l > "$STAGE_DIR/system/cron/root.crontab" 2>/dev/null || true
+  fi
+fi
+
+if [ "$REQUIRE_CRITICAL_FILES" = "true" ]; then
+  missing_files=""
+  for required_file in \
+    "$STAGE_DIR/backend/.env.docker" \
+    "$STAGE_DIR/apis/.env.docker" \
+    "$STAGE_DIR/.env.prod" \
+    "$STAGE_DIR/docker-compose.yml" \
+    "$STAGE_DIR/docker-compose.prod.yml" \
+    "$STAGE_DIR/docker-compose.deploy.yml"
+  do
+    if [ ! -s "$required_file" ]; then
+      missing_files="${missing_files}\n- ${required_file#"$STAGE_DIR/"}"
+    fi
+  done
+
+  if [ -n "$missing_files" ]; then
+    printf 'Config backup aborted: critical files were not captured from APP_ROOT=%s:%b\n' "$ROOT_DIR" "$missing_files" >&2
+    exit 1
+  fi
+fi
 
 CONFIG_FILES="
 $ROOT_DIR/.env.prod
@@ -219,6 +257,14 @@ fi
 
 if [ -n "$SSM_PARAMETERS" ]; then
   export_ssm_parameters_if_configured "$SSM_EXPORT_MODE" "$STAGE_DIR/ssm" "$AWS_REGION_VALUE" "$SSM_PARAMETERS"
+elif [ "$SSM_EXPORT_MODE" = "required" ]; then
+  echo "CONFIG_BACKUP_SSM_EXPORT_MODE=required, but no SSM parameter name was found under APP_ROOT=$ROOT_DIR." >&2
+  exit 1
+fi
+
+if [ "$SSM_EXPORT_MODE" = "required" ] && ! find "$STAGE_DIR/ssm" -type f -name '*.json' -print -quit 2>/dev/null | grep -q .; then
+  echo "Config backup aborted: required SSM export did not produce a JSON file." >&2
+  exit 1
 fi
 
 # Metadata for audit/recovery
@@ -230,6 +276,7 @@ fi
   echo "config_backup_s3_prefix=$S3_PREFIX"
   echo "config_backup_ssm_export_mode=$SSM_EXPORT_MODE"
   echo "config_backup_aws_region=${AWS_REGION_VALUE:-}"
+  echo "git_commit=$(git -C "$ROOT_DIR" rev-parse HEAD 2>/dev/null || echo unknown)"
 } > "$STAGE_DIR/backup.meta"
 
 (
@@ -243,11 +290,21 @@ fi
 mkdir -p "$BACKUP_DIR"
 tar -C "$TMP_DIR" -czf "$ARCHIVE" "config-$TS"
 chmod 600 "$ARCHIVE" || true
+tar -tzf "$ARCHIVE" >/dev/null
+if command -v sha256sum >/dev/null 2>&1; then
+  (
+    cd "$(dirname "$ARCHIVE")"
+    sha256sum "$(basename "$ARCHIVE")" > "$(basename "$CHECKSUM")"
+  )
+  chmod 600 "$CHECKSUM" || true
+fi
 upload_backup_if_configured "$ARCHIVE"
+if [ -f "$CHECKSUM" ]; then
+  upload_backup_if_configured "$CHECKSUM"
+fi
 
 # Retention
 find "$BACKUP_DIR" -maxdepth 1 -type f -name 'config-backup-*.tar.gz' -mtime +"$KEEP_DAYS" -delete
-
-rm -rf "$TMP_DIR"
+find "$BACKUP_DIR" -maxdepth 1 -type f -name 'config-backup-*.tar.gz.sha256' -mtime +"$KEEP_DAYS" -delete
 
 echo "Config backup created: $ARCHIVE"

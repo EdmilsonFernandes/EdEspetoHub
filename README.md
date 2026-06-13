@@ -428,6 +428,7 @@ BACKUP_DIR=/home/ec2-user/backups/janocaminho MIN_INTERVAL_HOURS=4 KEEP_LATEST=1
 - Jobs backend: `docs/BACKEND_JOBS.md`
 - Guia de testes: `docs/TESTING_GUIDE.md`
 - Servidor de producao: `docs/SERVIDOR_PRODUCAO.md`
+- Contingencia, restore e migracao: `docs/DISASTER_RECOVERY_RUNBOOK.md`
 - Schema HTML: `backend/docs/database-schema.html`
 
 ## Regras de manutencao

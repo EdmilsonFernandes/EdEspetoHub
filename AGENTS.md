@@ -9,6 +9,7 @@ Este arquivo orienta agentes de IA que entram no repositorio sem conhecer o cont
 3. `docs/SQL_CONSULTAS_MANUTENCAO.md` quando a tarefa envolver banco
 4. `docs/TESTING_GUIDE.md` quando a tarefa envolver testes
 5. `docs/SERVIDOR_PRODUCAO.md` quando a tarefa envolver producao, EC2, Docker, backup ou deploy
+6. `docs/DISASTER_RECOVERY_RUNBOOK.md` quando a tarefa envolver indisponibilidade, restore, migracao, banco perdido, SSL, e-mail ou recuperacao total
 
 ## Resumo do projeto
 

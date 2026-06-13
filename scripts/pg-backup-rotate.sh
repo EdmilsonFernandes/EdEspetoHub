@@ -75,13 +75,27 @@ fi
 
 ts="$(date -u +%Y%m%dT%H%M%SZ)"
 out="$OUT_DIR/${DB_NAME}_${ts}.sql.gz"
+checksum="$out.sha256"
 
 echo "Backing up $DB_NAME from $CONTAINER_NAME to $out"
 docker exec "$CONTAINER_NAME" sh -lc "pg_dump -U \"$USER_NAME\" -d \"$DB_NAME\" --no-owner --no-privileges" | gzip -9 > "$out"
+test -s "$out"
+gzip -t "$out"
+if command -v sha256sum >/dev/null 2>&1; then
+  (
+    cd "$OUT_DIR"
+    sha256sum "$(basename "$out")" > "$(basename "$checksum")"
+  )
+fi
 upload_backup_if_configured "$out"
+if [ -f "$checksum" ]; then
+  upload_backup_if_configured "$checksum"
+fi
 echo "Backup done: $out"
 
 if [ "$KEEP_LATEST" = "1" ]; then
   # Delete every backup except the newest.
-  ls -1t ${pattern} 2>/dev/null | tail -n +2 | xargs -r rm -f --
+  ls -1t ${pattern} 2>/dev/null | tail -n +2 | while IFS= read -r old_backup; do
+    rm -f -- "$old_backup" "$old_backup.sha256"
+  done
 fi
