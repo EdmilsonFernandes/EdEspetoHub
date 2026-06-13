@@ -1,4 +1,3 @@
-import QRCode from 'qrcode';
 import { AppDataSource } from '../config/database';
 import { env } from '../config/env';
 import { PromoPush } from '../entities/PromoPush';
@@ -42,7 +41,9 @@ export class PromoPushService {
 
     // Criar pagamento MP da plataforma
     const mpEnabled = Boolean(env.mercadoPago.accessToken);
-    const payerEmail = String(store.owner?.email || env.email.smtpUser || 'contato@janocaminho.com.br').trim();
+    const ownerEmail = String(store.owner?.email || '').trim();
+    // Nunca usar email da propria plataforma (smtpUser/contato@): MP rejeita (4390 Payer email forbidden).
+    const payerEmail = ownerEmail;
     const payerName = String(store.owner?.fullName || store.name || 'Lojista').trim();
 
     let providerId: string | null = null;
@@ -52,34 +53,32 @@ export class PromoPushService {
     let providerExpiresAt: Date | null = expiresAt;
 
     if (mpEnabled && payerEmail) {
-      try {
-        const mp: any = await this.mercadoPago.createPayment({
-          amount: PROMO_PUSH_PRICE,
-          method: 'PIX',
-          description: `Push Promocional - ${store.name}`,
-          externalReference: `promo_push:${created.id}`,
-          payer: { email: payerEmail, name: payerName },
-        });
-        providerId = String(mp?.providerId || '');
-        paymentLink = mp?.paymentLink || null;
-        qrCodeBase64 = mp?.qrCodeBase64
-          ? (String(mp.qrCodeBase64).startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`)
-          : null;
-        qrCodeText = mp?.qrCodeText || null;
-        if (mp?.expiresAt) {
-          const parsed = new Date(mp.expiresAt);
-          if (Number.isFinite(parsed.getTime())) providerExpiresAt = parsed;
-        }
-      } catch (err: any) {
-        log.warn('PromoPush MP payment creation failed, using mock QR', { storeId, payerEmail, error: err?.message || err });
+      const mp: any = await this.mercadoPago.createPayment({
+        amount: PROMO_PUSH_PRICE,
+        method: 'PIX',
+        description: `Push Promocional - ${store.name}`,
+        externalReference: `promo_push:${created.id}`,
+        payer: { email: payerEmail, name: payerName },
+      });
+      providerId = String(mp?.providerId || '');
+      paymentLink = mp?.paymentLink || null;
+      qrCodeBase64 = mp?.qrCodeBase64
+        ? (String(mp.qrCodeBase64).startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`)
+        : null;
+      qrCodeText = mp?.qrCodeText || null;
+      if (mp?.expiresAt) {
+        const parsed = new Date(mp.expiresAt);
+        if (Number.isFinite(parsed.getTime())) providerExpiresAt = parsed;
       }
     }
 
+    // Nunca gerar QR Pix falso: propagar erro claro se o provedor nao retornou payload valido.
     if (!qrCodeText) {
-      qrCodeText = `PIX PUSH PROMO | Store:${store.name} | Amount:${PROMO_PUSH_PRICE.toFixed(2)} | Push:${created.id}`;
-    }
-    if (!qrCodeBase64) {
-      qrCodeBase64 = await QRCode.toDataURL(qrCodeText);
+      throw new AppError('PAY-016', 400, {
+        message: mpEnabled
+          ? 'Nao foi possivel gerar o QR Pix do push promocional no Mercado Pago. Verifique a configuracao de pagamento (webhook/token) e tente novamente.'
+          : 'Pagamento online nao configurado. Nao e possivel gerar o QR Pix do push agora.',
+      });
     }
 
     created.paymentProviderId = providerId;
@@ -104,7 +103,7 @@ export class PromoPushService {
   async listHistory(limit = 50) {
     const rows = await this.repo.find({
       where: [{ status: 'SENT' }, { status: 'REJECTED' }],
-      relations: ['store'],
+      relations: ['store', 'store.settings'],
       order: { updatedAt: 'DESC' },
       take: limit,
     });
@@ -114,7 +113,7 @@ export class PromoPushService {
   async listPending() {
     const rows = await this.repo.find({
       where: { status: 'PENDING_APPROVAL' },
-      relations: ['store'],
+      relations: ['store', 'store.settings'],
       order: { createdAt: 'ASC' },
     });
     return rows.map((r) => this.serialize(r));
@@ -149,7 +148,7 @@ export class PromoPushService {
   }
 
   async approve(pushId: string) {
-    const row = await this.repo.findOne({ where: { id: pushId }, relations: ['store'] });
+    const row = await this.repo.findOne({ where: { id: pushId }, relations: ['store', 'store.settings'] });
     if (!row) throw new AppError('NOT-001', 404);
     if (row.status !== 'PENDING_APPROVAL') throw new AppError('VAL-001', 400, { message: 'Push não está aguardando aprovação.' });
 
@@ -196,6 +195,8 @@ export class PromoPushService {
       id: row.id,
       storeId: row.storeId,
       storeName: (row as any).store?.name || null,
+      storeSlug: (row as any).store?.slug || null,
+      storeLogoUrl: (row as any).store?.settings?.logoUrl || null,
       title: row.title,
       body: row.body,
       status: row.status,

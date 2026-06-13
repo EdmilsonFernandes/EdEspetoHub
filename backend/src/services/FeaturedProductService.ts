@@ -1,4 +1,3 @@
-import QRCode from 'qrcode';
 import { AppDataSource } from '../config/database';
 import { env } from '../config/env';
 import { FeaturedProductRequest } from '../entities/FeaturedProductRequest';
@@ -234,48 +233,44 @@ export class FeaturedProductService {
     const payerName = String(user?.fullName || store?.owner?.fullName || store?.name || 'Cliente').trim();
 
     if (mpEnabled && payerEmail) {
-      try {
-        const mp: any = await this.mercadoPago.createPayment({
-          amount,
-          method: paymentMethod,
-          description: `Destaque Hub ${durationUnit} - ${store.name}`,
+      const mp: any = await this.mercadoPago.createPayment({
+        amount,
+        method: paymentMethod,
+        description: `Destaque Hub ${durationUnit} - ${store.name}`,
+        externalReference: `featured_request:${created.id}`,
+        payer: {
+          email: payerEmail,
+          name: payerName,
+        },
+        auditContext: {
+          flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
+          entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
+          entityId: created.id,
+          storeId,
           externalReference: `featured_request:${created.id}`,
-          payer: {
-            email: payerEmail,
-            name: payerName,
-          },
-          auditContext: {
-            flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
-            entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
-            entityId: created.id,
-            storeId,
-            externalReference: `featured_request:${created.id}`,
-            eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
-          },
-        });
-        provider = 'MERCADO_PAGO';
-        providerId = String(mp?.providerId || '');
-        paymentLink = mp?.paymentLink || null;
-        qrCodeBase64 = mp?.qrCodeBase64
-          ? (String(mp.qrCodeBase64).startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`)
-          : null;
-        qrCodeText = mp?.qrCodeText || null;
-        if (mp?.expiresAt) {
-          const parsed = new Date(mp.expiresAt);
-          providerExpiresAt = Number.isFinite(parsed.getTime()) ? parsed : providerExpiresAt;
-        }
-      } catch {
-        // Fallback to mock QR payload below.
+          eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
+        },
+      });
+      provider = 'MERCADO_PAGO';
+      providerId = String(mp?.providerId || '');
+      paymentLink = mp?.paymentLink || null;
+      qrCodeBase64 = mp?.qrCodeBase64
+        ? (String(mp.qrCodeBase64).startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`)
+        : null;
+      qrCodeText = mp?.qrCodeText || null;
+      if (mp?.expiresAt) {
+        const parsed = new Date(mp.expiresAt);
+        providerExpiresAt = Number.isFinite(parsed.getTime()) ? parsed : providerExpiresAt;
       }
     }
 
+    // Nunca gerar QR Pix falso: se o provedor nao retornou payload valido, propagar erro claro.
     if (paymentMethod === 'PIX' && !qrCodeText) {
-      qrCodeText = `PIX DESTAQUE HUB | Store:${store.name} | Amount:${amount.toFixed(2)} | Request:${created.id}`;
-    }
-    if (paymentMethod === 'PIX' && !qrCodeBase64) {
-      const pixPayload = String(qrCodeText || `PIX DESTAQUE HUB | Request:${created.id}`);
-      qrCodeBase64 = await QRCode.toDataURL(pixPayload);
-      qrCodeText = pixPayload;
+      throw new AppError('PAY-016', 400, {
+        message: mpEnabled
+          ? 'Nao foi possivel gerar o QR Pix do destaque no Mercado Pago. Verifique a configuracao de pagamento (webhook/token) e tente novamente.'
+          : 'Pagamento online nao configurado. Nao e possivel gerar o QR Pix do destaque agora.',
+      });
     }
     if (paymentMethod === 'CREDIT_CARD' && !paymentLink) {
       paymentLink = `https://pay.janocaminho.com/checkout/featured/${created.id}`;

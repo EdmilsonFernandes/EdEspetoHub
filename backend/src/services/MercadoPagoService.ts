@@ -80,6 +80,19 @@ const buildHeaders = (accessToken?: string) => ({
   'X-Idempotency-Key': crypto.randomUUID(),
 });
 /**
+ * Returns the Mercado Pago notification_url only when it is a public https URL.
+ * MP rejects localhost / http / invalid values with error 4020
+ * ("notification_url attribute must be url valid"). Omitting it is allowed:
+ * the QR Pix still generates and payment confirmation falls back to polling/manual.
+ */
+export const resolveNotificationUrl = (webhookUrl?: string): string | undefined => {
+  const url = String(webhookUrl || '').trim();
+  if (!url) return undefined;
+  if (!/^https:\/\//i.test(url)) return undefined;
+  if (/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])/i.test(url)) return undefined;
+  return url;
+};
+/**
  * Provides MercadoPagoService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
@@ -248,7 +261,7 @@ export class MercadoPagoService {
         name: input.payer.name,
       },
       external_reference: input.externalReference,
-      notification_url: env.mercadoPago.webhookUrl || undefined,
+      notification_url: resolveNotificationUrl(env.mercadoPago.webhookUrl),
     };
 
     const response = await fetch(url, {
@@ -325,7 +338,7 @@ export class MercadoPagoService {
           { id: 'atm' },
         ],
       },
-      notification_url: env.mercadoPago.webhookUrl || undefined,
+      notification_url: resolveNotificationUrl(env.mercadoPago.webhookUrl),
     };
 
     const response = await fetch(url, {
@@ -394,7 +407,7 @@ export class MercadoPagoService {
         first_name: input.payer.name.split(' ')[0] || input.payer.name,
         last_name: input.payer.name.split(' ').slice(1).join(' ') || 'Cliente',
       },
-      notification_url: env.mercadoPago.webhookUrl || undefined,
+      notification_url: resolveNotificationUrl(env.mercadoPago.webhookUrl),
     };
 
     const response = await fetch(url, {
