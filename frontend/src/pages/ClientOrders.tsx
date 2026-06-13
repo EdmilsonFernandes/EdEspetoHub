@@ -22,7 +22,6 @@ import {
   Timer,
   WarningCircle,
   WhatsappLogo,
-  MagnifyingGlass,
   Star,
   XCircle,
 } from '@phosphor-icons/react';
@@ -36,7 +35,6 @@ import { formatSelectedModifiers } from '../utils/productModifiers';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { getPostalExpectedDeliveryDeadlineMs, isPostalShipmentDelayed, isPostalShipmentDelivered } from '../utils/postalTracking';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
-import { AppImagePreviewDialog } from '../components/common/AppImagePreviewDialog';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
 import { textareaAssistProps } from '../utils/inputAssist';
@@ -662,7 +660,6 @@ function OrderCard({
   onOpenOrder: (orderId: string) => void;
   onOpenStore: (slug?: string) => void;
 }) {
-  const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
   const statusMeta = getStatusMeta(order.status, order.type);
   const items = Array.isArray(order.items) ? order.items : [];
   const primaryItem = items[0] || null;
@@ -744,9 +741,8 @@ function OrderCard({
     <>
     <article
       aria-label={`Pedido #${orderDisplayId} em ${storeName}`}
-      className={`jnc-hub-touch jnc-hub-lift group relative overflow-hidden rounded-[28px] bg-white shadow-[0_18px_46px_-34px_rgba(15,23,42,0.28)] md:hover:border-[#336886]/18 ${isActive ? 'ring-1 ring-emerald-200/80' : isCancelled ? 'ring-1 ring-rose-100/80' : 'ring-1 ring-slate-100'}`}
+      className={`jnc-hub-touch group relative overflow-hidden rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${isActive ? 'border-l-4 border-l-emerald-500' : isCancelled ? 'border-l-4 border-l-rose-400' : 'border-l-4 border-l-transparent'}`}
     >
-      <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent z-20" />
       {/* Header do card */}
       <div
         role="button"
@@ -761,7 +757,7 @@ function OrderCard({
         {/* Logo da loja */}
         <div
           onClick={(e) => { e.stopPropagation(); onOpenStore(order.store?.slug); }}
-          className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-[1.1rem] border-2 bg-slate-100 transition-transform active:scale-95 ${isActive ? 'border-emerald-300 shadow-[0_0_0_3px_rgba(52,211,153,0.15)]' : 'border-slate-200'}`}
+          className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-slate-100 transition-transform active:scale-95 ${isActive ? 'ring-2 ring-emerald-400' : ''}`}
         >
           {logoUrl ? (
             <img src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
@@ -778,31 +774,32 @@ function OrderCard({
         {/* Nome + status */}
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2">
-            <h3 className="truncate text-[14px] font-black text-slate-900">{storeName}</h3>
+            <h3 className="truncate text-[15px] font-bold text-slate-900">{storeName}</h3>
             {storeRatingMeta ? (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-100 bg-amber-50/90 px-1.5 py-0.5 text-[10.5px] font-black text-amber-700 shadow-sm ring-1 ring-white/70" title={storeRatingMeta.totalLabel}>
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10.5px] font-bold text-amber-700" title={storeRatingMeta.totalLabel}>
                 <Star size={10} weight="fill" />
                 {storeRatingMeta.label}
               </span>
             ) : null}
           </div>
           <div className="mt-1 flex min-w-0 items-center gap-1.5">
-            <span className={`inline-flex max-w-[min(100%,10.5rem)] items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-black shadow-sm ring-1 ${statusBadgeClass}`}>
+            <span className={`inline-flex items-center gap-1 text-[12px] font-medium ${
+              isActive ? 'text-emerald-600' : isCancelled ? 'text-rose-500' : 'text-slate-500'
+            }`}>
               {isActive ? (
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 duration-1000" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
               ) : statusMeta.icon}
               <span className="truncate">{statusMeta.label}</span>
             </span>
-            <span className="min-w-0 truncate text-[11px] font-medium text-slate-400">{orderMoment || orderDate || formatGroupDate(order.createdAt)}</span>
+            <span className="text-slate-300">•</span>
+            <span className="min-w-0 truncate text-[12px] text-slate-400">{orderMoment || orderDate || formatGroupDate(order.createdAt)}</span>
           </div>
-          <div className="mt-1.5 flex min-w-0 items-center gap-1.5">
-            <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-100 ${fulfillmentMeta.textClass || 'text-slate-500'}`}>
-              <FulfillmentIcon size={11} weight="duotone" />
-            </span>
-            <span className="truncate text-[11px] font-bold text-slate-500">
+          <div className="mt-1 flex min-w-0 items-center gap-1.5">
+            <FulfillmentIcon size={12} weight="duotone" className={fulfillmentMeta.textClass || 'text-slate-400'} />
+            <span className="truncate text-[11px] text-slate-500">
               {fulfillmentMeta.label}
             </span>
           </div>
@@ -813,13 +810,13 @@ function OrderCard({
           ) : null}
         </div>
 
-        {/* Valor */}
-        <div className="shrink-0 rounded-2xl bg-slate-50/88 px-2.5 py-1.5 text-right ring-1 ring-slate-100">
-          <p className="text-[14px] font-black tracking-tight text-slate-900">{formatCurrency(order.total || 0)}</p>
+        {/* Valor + thumbnails */}
+        <div className="shrink-0 text-right">
+          <p className="text-[15px] font-bold text-slate-900">{formatCurrency(order.total || 0)}</p>
           {thumbnails.length > 0 && (
-            <div className="mt-1 flex justify-end">
+            <div className="mt-1.5 flex justify-end">
               {thumbnails.map((src, index) => (
-                <img key={`${order.id}-th-${index}`} src={src} alt="" className={`h-4.5 w-4.5 rounded-full border border-white object-cover ${index > 0 ? '-ml-1.5' : ''}`} />
+                <img key={`${order.id}-th-${index}`} src={src} alt="" className={`h-8 w-8 rounded-full border-2 border-white object-cover shadow-sm ${index > 0 ? '-ml-2' : ''}`} />
               ))}
             </div>
           )}
@@ -855,7 +852,7 @@ function OrderCard({
         onTouchStart={() => primeOrderTrackingNavigation(order.id)}
         className="block w-full text-left"
       >
-        <div className="mx-4 mb-3 overflow-hidden rounded-[1.35rem] bg-[linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] ring-1 ring-slate-100">
+        <div className="mx-4 mb-3">
           {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && (
             <div className="border-b border-slate-100 px-3 py-2">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-600">
@@ -873,58 +870,25 @@ function OrderCard({
             </div>
           )}
           {primaryItem ? (
-            <div className="px-3 py-3">
+            <div className="px-1 py-2">
               <div className="flex items-center gap-3">
-                {primaryItemImageUrl ? (
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setPreviewImage({ src: primaryItemImageUrl, title: primaryItem.name || 'Item do pedido' });
-                    }}
-                    onKeyDown={(event) => event.stopPropagation()}
-                    className="group relative h-12 w-12 shrink-0 cursor-zoom-in overflow-hidden rounded-[1rem] bg-white text-left shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] ring-1 ring-white transition-transform active:scale-95"
-                    aria-label={`Ampliar imagem de ${primaryItem.name || 'item do pedido'}`}
-                    title="Ampliar imagem"
-                  >
-                    <img src={primaryItemImageUrl} alt={primaryItem.name || 'Item do pedido'} className="h-full w-full object-cover" />
-                    <span className="absolute left-1 top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white/92 px-1 text-[10px] font-black text-slate-700 shadow-sm">
-                      {getOrderItemQty(primaryItem)}
-                    </span>
-                    <span className="absolute right-1 bottom-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-950/72 text-white shadow-sm ring-1 ring-white/28 backdrop-blur-md transition group-hover:scale-105">
-                      <MagnifyingGlass size={11} weight="bold" />
-                    </span>
-                  </button>
-                ) : (
-                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-black text-slate-600 shadow-sm ring-1 ring-slate-200">
-                    {getOrderItemQty(primaryItem)}
-                  </span>
-                )}
+                <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-600">
+                  {getOrderItemQty(primaryItem)}
+                </span>
                 <div className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-black text-slate-900">{primaryItem.name || 'Item do pedido'}</span>
-                  {getOrderItemDetails(primaryItem) ? (
-                    <span className="block truncate text-[11px] text-slate-400">{getOrderItemDetails(primaryItem)}</span>
-                  ) : null}
+                  <span className="block truncate text-[13px] font-medium text-slate-800">{primaryItem.name || 'Item do pedido'}</span>
                 </div>
-                {extraItems > 0 ? (
-                  <span className="inline-flex shrink-0 rounded-full bg-white px-2 py-1 text-[10px] font-black text-[#336886] ring-1 ring-slate-200">
-                    +{extraItems}
-                  </span>
+                {primaryItemImageUrl ? (
+                  <img src={primaryItemImageUrl} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />
                 ) : null}
               </div>
-              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
-                <span className="font-semibold text-slate-500">{orderMoment || formatGroupDate(order.createdAt)}</span>
-                <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-flex" />
-                <span>{itemsCount} {itemsCount === 1 ? 'item no pedido' : 'itens no pedido'}</span>
-                {extraItems > 0 ? (
-                  <>
-                    <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-flex" />
-                    <span className="font-semibold text-[#336886]">+{extraItems} {extraItems === 1 ? 'adicional' : 'adicionais'}</span>
-                  </>
-                ) : null}
-              </div>
+              {extraItems > 0 ? (
+                <div className="mt-1.5 pl-9">
+                  <span className="text-[12px] text-slate-400">+{extraItems} {extraItems === 1 ? 'item' : 'itens'}</span>
+                </div>
+              ) : null}
               {isCancelled && cancellationReason ? (
-                <div className="mt-3 rounded-[1rem] border border-white/90 bg-white/72 px-3 py-2 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.28)]">
+                <div className="mt-2 rounded-lg bg-slate-50 px-3 py-2">
                   <p className="text-[11px] font-semibold leading-relaxed text-slate-500">
                     <span className="text-slate-700">Resumo do cancelamento:</span> {cancellationReason}
                   </p>
@@ -935,45 +899,45 @@ function OrderCard({
           {isCancelled && (!cancellationReason || hasRefundInfo) && (
             <div className="px-3 pb-3 flex flex-wrap items-center gap-2">
               {!cancellationReason ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">Cancelado</span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">Cancelado</span>
               ) : null}
               {order.refundStatus === "REFUNDED" && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-700">✓ Reembolsado{order.refundAmount ? ` ${formatCurrency(order.refundAmount)}` : ""}</span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">✓ Reembolsado{order.refundAmount ? ` ${formatCurrency(order.refundAmount)}` : ""}</span>
               )}
               {order.refundStatus === "PARTIALLY_REFUNDED" && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-700">✓ Parcial{order.refundAmount ? ` ${formatCurrency(order.refundAmount)}` : ""}</span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">✓ Parcial{order.refundAmount ? ` ${formatCurrency(order.refundAmount)}` : ""}</span>
               )}
               {order.refundStatus === "DENIED" && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-bold text-rose-600">Não aprovado</span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600">Não aprovado</span>
               )}
               {["pix","credito","debito","credit_card","debit_card"].includes(String(order.paymentMethod || order.payment || "").toLowerCase()) && String(order.paymentStatus || "").toUpperCase() === "PAID" && !order.refundStatus && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 border border-sky-200 px-2 py-0.5 text-[10px] font-semibold text-sky-600">Reembolso em análise</span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-600">Reembolso em análise</span>
               )}
             </div>
           )}
           {['DELIVERING', 'IN_DELIVERY', 'DISPATCHED'].includes(normalizeStatus(order.status)) && details?.delivery?.motoboy?.name && (
-            <div className="flex items-center gap-2 border-t border-indigo-100 bg-indigo-50 px-3 py-2">
+            <div className="flex items-center gap-2 border-t border-slate-100 bg-slate-50 px-3 py-2">
               <div className="h-6 w-6 shrink-0 overflow-hidden rounded-full border border-white shadow-sm">
                 {details.delivery.motoboy.profileImageUrl ? (
                   <img src={resolveAssetUrl(details.delivery.motoboy.profileImageUrl)} alt={details.delivery.motoboy.name} className="h-full w-full object-cover" />
                 ) : (
-                  <div className="grid h-full w-full place-items-center bg-indigo-200 text-[10px] font-bold text-indigo-700">
+                  <div className="grid h-full w-full place-items-center bg-slate-200 text-[10px] font-bold text-slate-600">
                     {String(details.delivery.motoboy.name)[0]?.toUpperCase()}
                   </div>
                 )}
               </div>
-              <p className="text-[11px] font-semibold text-indigo-700">{details.delivery.motoboy.name}</p>
-              <Motorcycle size={13} weight="duotone" className="ml-auto text-indigo-400" />
+              <p className="text-[11px] font-semibold text-slate-600">{details.delivery.motoboy.name}</p>
+              <Motorcycle size={13} weight="duotone" className="ml-auto text-slate-400" />
             </div>
           )}
         </div>
       </div>
 
       {/* Rodapé com ações */}
-      <div className={`${isActive && isDelayed ? 'flex flex-col items-stretch gap-1.5' : 'flex items-center gap-2'} border-t border-slate-100/80 bg-[linear-gradient(180deg,#ffffff_0%,#fbfdff_100%)] px-4 py-2.5`}>
+      <div className={`${isActive && isDelayed ? 'flex flex-col items-stretch gap-1.5' : 'flex items-center gap-2'} border-t border-slate-100 bg-white px-4 py-2.5`}>
         {isActive && isDelayed ? (
           <>
-            <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex w-full items-center justify-center gap-1.5 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-2.5 text-[13px] font-black text-white shadow-[0_14px_28px_-18px_rgba(21,58,76,0.52)] active:scale-[0.98] transition-all hover:-translate-y-0.5">
+            <button type="button" onClick={() => onOpenHelp(order)} className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#153A4C] py-2.5 text-[13px] font-bold text-white active:scale-[0.98] transition-transform">
               <ChatCircleDots size={15} weight="duotone" />
               Falar com a loja
             </button>
@@ -990,7 +954,7 @@ function OrderCard({
             onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
             onFocus={() => primeOrderTrackingNavigation(order.id)}
             onTouchStart={() => primeOrderTrackingNavigation(order.id)}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-2.5 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(21,58,76,0.5)] active:scale-[0.98] transition-transform"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#153A4C] py-2.5 text-[13px] font-bold text-white active:scale-[0.98] transition-transform"
           >
             Acompanhar pedido
           </button>
@@ -999,11 +963,12 @@ function OrderCard({
             <button
               type="button"
               onClick={() => onOpenHelp(order)}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#cfe0ea]/70 bg-white/86 text-[#336886] shadow-[0_12px_24px_-22px_rgba(51,104,134,0.28)] transition-all active:scale-95 hover:-translate-y-0.5 hover:bg-[#f3f8fb]"
+              className="inline-flex items-center gap-1 text-[13px] font-medium text-[#336886] active:opacity-70 transition-opacity"
               title="Ajuda com este pedido"
               aria-label="Ajuda com este pedido"
             >
               <ChatCircleDots size={16} weight="duotone" />
+              <span className="hidden sm:inline">Ajuda</span>
             </button>
             <button
               type="button"
@@ -1025,7 +990,7 @@ function OrderCard({
                 type="button"
                 onClick={() => onConfirmReceipt(order)}
                 disabled={confirmReceiptLoading}
-                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-emerald-600 py-2.5 text-[13px] font-bold text-white shadow-[0_8px_20px_-10px_rgba(5,150,105,0.5)] active:scale-[0.98] transition-transform disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2.5 text-[13px] font-bold text-white active:scale-[0.98] transition-transform disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {confirmReceiptLoading ? <SpinnerGap size={14} weight="bold" className="animate-spin" /> : <CheckCircle size={14} weight="fill" />}
                 Confirmar recebimento
@@ -1034,10 +999,10 @@ function OrderCard({
               <button
                 type="button"
                 onClick={handleRepeatOrder}
-                className={`ml-auto inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full px-3.5 py-2.5 text-[12px] font-black transition-all active:scale-[0.98] ${
+                className={`ml-auto inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-[12px] font-bold transition-transform active:scale-[0.98] ${
                   isCancelled
-                    ? 'border border-[#cfe0ea] bg-white text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.34)] hover:-translate-y-0.5 hover:bg-[#f7fbfd]'
-                    : 'bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_14px_28px_-18px_rgba(21,58,76,0.48)] hover:-translate-y-0.5'
+                    ? 'border border-slate-200 bg-white text-[#153A4C]'
+                    : 'bg-[#153A4C] text-white'
                 }`}
               >
                 <ArrowClockwise size={13} weight="bold" />
@@ -1048,7 +1013,6 @@ function OrderCard({
         )}
       </div>
     </article>
-    <AppImagePreviewDialog image={previewImage} onClose={() => setPreviewImage(null)} label="Imagem ampliada do pedido" />
     </>
   );
 }
@@ -1714,8 +1678,8 @@ export function ClientOrders() {
 
   return (
     <main className="min-h-screen bg-[#E2EBF2] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[calc(env(safe-area-inset-top)+4.35rem)]">
-      <div className="pointer-events-none fixed top-[-10%] right-[-8%] h-[38%] w-[46%] rounded-full bg-[#153A4C]/13 blur-[120px] -z-10" />
-      <div className="pointer-events-none fixed bottom-[8%] left-[-5%] h-[26%] w-[34%] rounded-full bg-[#336886]/7 blur-[100px] -z-10" />
+      <div className="pointer-events-none fixed top-[-10%] right-[-8%] h-[38%] w-[46%] rounded-full bg-[#153A4C]/6 blur-[120px] -z-10" />
+      <div className="pointer-events-none fixed bottom-[8%] left-[-5%] h-[26%] w-[34%] rounded-full bg-[#336886]/4 blur-[100px] -z-10" />
       <div className="mx-auto max-w-2xl">
         <AppGlassHeader
           title="Meus Pedidos"
@@ -1727,12 +1691,12 @@ export function ClientOrders() {
 
         <div className="px-4 py-4">
           {statusFilter === 'all' && lastOrderMerged ? (
-            <section className="mb-4 overflow-hidden rounded-[1.85rem] border border-white/90 bg-white/82 p-3 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.28)] ring-1 ring-[#d7e7ef]/60 backdrop-blur-xl">
+            <section className="mb-4 overflow-hidden rounded-2xl bg-white p-3 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => openStore(lastOrderMerged?.store?.slug || lastOrderMerged?.storeSlug)}
-                  className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.25rem] border border-white bg-slate-100 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/70 active:scale-95"
+                  className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-100 active:scale-95"
                   aria-label={`Abrir ${lastOrderStoreName}`}
                 >
                   {lastOrderLogoUrl ? (
@@ -1748,7 +1712,9 @@ export function ClientOrders() {
                   <h2 className="mt-0.5 truncate text-[15px] font-black text-slate-950">{lastOrderStoreName}</h2>
                   <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-500">
                     {lastOrderStatusMeta ? (
-                      <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-black ${getOrderStatusBadgeClass(lastOrderMerged.status, lastOrderIsActive)}`}>
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold ${
+                        lastOrderIsActive ? 'text-emerald-600' : lastOrderIsCancelled ? 'text-rose-500' : 'text-slate-500'
+                      }`}>
                         {lastOrderIsActive ? <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> : lastOrderStatusMeta.icon}
                         {lastOrderStatusMeta.label}
                       </span>
@@ -1774,7 +1740,7 @@ export function ClientOrders() {
                   onMouseEnter={() => lastOrderMerged?.id && primeOrderTrackingNavigation(lastOrderMerged.id)}
                   onFocus={() => lastOrderMerged?.id && primeOrderTrackingNavigation(lastOrderMerged.id)}
                   onTouchStart={() => lastOrderMerged?.id && primeOrderTrackingNavigation(lastOrderMerged.id)}
-                  className="shrink-0 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-3.5 py-2.5 text-[12px] font-black text-white shadow-[0_16px_30px_-22px_rgba(21,58,76,0.55)] active:scale-[0.98]"
+                  className="shrink-0 rounded-xl bg-[#153A4C] px-3.5 py-2.5 text-[12px] font-bold text-white active:scale-[0.98] transition-transform"
                 >
                   {lastOrderIsActive ? 'Acompanhar' : lastOrderIsCancelled ? 'Ver detalhes' : 'Pedir de novo'}
                 </button>
@@ -1798,7 +1764,7 @@ export function ClientOrders() {
                     onClick={() => openStore(store.slug)}
                     className="jnc-hub-touch group flex w-[76px] shrink-0 flex-col items-center text-center"
                   >
-                    <span className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-[1.45rem] border border-white bg-white shadow-[0_18px_34px_-26px_rgba(15,23,42,0.35)] ring-1 ring-slate-200/70 transition-transform group-active:scale-95">
+                    <span className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-white shadow-sm transition-transform group-active:scale-95">
                       {store.logoUrl ? (
                         <img src={store.logoUrl} alt={store.name} className="h-full w-full object-cover" />
                       ) : (
@@ -1807,7 +1773,7 @@ export function ClientOrders() {
                         </span>
                       )}
                       {store.count > 1 ? (
-                        <span className="absolute right-1 top-1 rounded-full border border-[#5FD35A]/35 bg-white/92 px-1.5 py-0.5 text-[8.5px] font-black leading-none text-[#153A4C] shadow-[0_8px_14px_-10px_rgba(21,58,76,0.45)] ring-1 ring-white/80 backdrop-blur-md">
+                        <span className="absolute right-1 top-1 rounded-full bg-white/92 px-1.5 py-0.5 text-[8.5px] font-bold leading-none text-[#153A4C] shadow-sm">
                           {store.count}x
                         </span>
                       ) : null}
@@ -1825,7 +1791,7 @@ export function ClientOrders() {
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Pedidos</p>
                 <p className="text-xs font-semibold text-slate-500">Filtre sem perder o histórico.</p>
               </div>
-              <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-black text-[#336886] ring-1 ring-[#cfe0ea] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.36)]">
+              <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-[#336886] shadow-sm">
                 {filteredOrders.length}
               </span>
             </div>
@@ -1837,10 +1803,10 @@ export function ClientOrders() {
                     key={filter.key}
                     type="button"
                     onClick={() => setStatusFilter(filter.key)}
-                    className={`jnc-hub-touch inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[12px] font-black transition-all active:scale-[0.98] ${
+                    className={`jnc-hub-touch inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[12px] font-bold transition-all active:scale-[0.98] ${
                       isSelected
-                        ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.56)]'
-                        : 'border-white/90 bg-white/88 text-slate-600 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60'
+                        ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-sm'
+                        : 'border-slate-200 bg-white text-slate-600 shadow-sm'
                     }`}
                     aria-pressed={isSelected}
                     aria-label={`${filter.label}: ${filter.count} pedido${filter.count === 1 ? '' : 's'}`}
@@ -1852,8 +1818,8 @@ export function ClientOrders() {
                       {filter.icon}
                     </span>
                     <span>{filter.shortLabel}</span>
-                    <span className={`inline-flex min-w-[1.45rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black leading-none tabular-nums ${
-                        isSelected ? 'bg-white/16 text-white ring-1 ring-white/16' : 'bg-slate-50 text-slate-700 ring-1 ring-slate-200/80'
+                    <span className={`inline-flex min-w-[1.45rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
+                        isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                       }`}>
                       {filter.count}
                     </span>
@@ -1882,7 +1848,7 @@ export function ClientOrders() {
                     <p className="text-[11px] text-slate-400">Acompanhe estes pedidos primeiro.</p>
                   </div>
                 </div>
-                <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-emerald-600 ring-1 ring-emerald-100 shadow-[0_10px_20px_-18px_rgba(16,185,129,0.5)]">
+                <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-emerald-600 shadow-sm">
                   {filteredActiveOrders.length} ativo{filteredActiveOrders.length === 1 ? '' : 's'}
                 </span>
               </div>
@@ -1915,14 +1881,14 @@ export function ClientOrders() {
                 </div>
               </div>
               {filteredPastOrders.length > 0 ? (
-                <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-slate-500 ring-1 ring-slate-200 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.28)]">
+                <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-slate-500 shadow-sm">
                   {filteredPastOrders.length} no histórico
                 </span>
               ) : null}
             </div>
 
             {filteredPastOrders.length === 0 && filteredActiveOrders.length === 0 ? (
-              <div className="rounded-[28px] border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
+              <div className="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
                 <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-slate-400">
                   <Storefront size={28} weight="duotone" />
                 </div>
@@ -1930,7 +1896,7 @@ export function ClientOrders() {
                 <p className="mt-1 text-sm text-slate-500">Quando pedir pelo app, eles vão aparecer aqui.</p>
                 <button
                   onClick={() => navigate('/hub')}
-                  className="mt-6 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_36px_-24px_rgba(21,58,76,0.55)] transition-colors hover:brightness-105"
+                  className="mt-6 rounded-xl bg-[#153A4C] px-5 py-3 text-sm font-semibold text-white transition-colors active:scale-[0.98]"
                 >
                   Explorar lojas
                 </button>
