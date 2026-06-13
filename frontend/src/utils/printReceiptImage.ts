@@ -117,6 +117,18 @@ const fitLeftRight = (left: string, right: string, width = DEFAULT_LINE_WIDTH) =
   return `${leftPadded}${rightPadded}`;
 };
 
+const normalizeReceiptIdentity = (value: unknown) =>
+  sanitizeText(value)
+    .toUpperCase()
+    .replace(/^CLIENTE:\s*/, "")
+    .replace(/\s+/g, " ");
+
+const shouldPrintCustomer = (customerLabel: string, locationLabel: string) => {
+  const customerIdentity = normalizeReceiptIdentity(customerLabel);
+  if (!customerIdentity) return false;
+  return customerIdentity !== normalizeReceiptIdentity(locationLabel);
+};
+
 const toBase64Utf8 = (value: string) => {
   const utf8 = encodeURIComponent(value).replace(/%([0-9A-F]{2})/g, (_, hex) =>
     String.fromCharCode(parseInt(hex, 16))
@@ -133,6 +145,7 @@ export const buildRawBtText = (
   const locationLabel = sanitizeText(
     payload.locationLabel || (payload.tableLabel ? `MESA ${payload.tableLabel}` : "")
   );
+  const customerLabel = sanitizeText(payload.customerLabel || "");
 
   // Items: QTD bold + name + price right-aligned, notes with *
   const itemsLines = payload.items.flatMap((item) => {
@@ -191,6 +204,15 @@ export const buildRawBtText = (
       ]
     : [];
 
+  const customerBlock = shouldPrintCustomer(customerLabel, locationLabel)
+    ? [
+        ...wrapWords(`CLIENTE: ${customerLabel}`, lineWidth).map(
+          (line) => `${ESC_POS.boldOn}${line}${ESC_POS.boldOff}`
+        ),
+        separator(lineWidth),
+      ]
+    : [];
+
   // Customer note block: isolated with ! marker
   const customerNoteBlock = (() => {
     const note = sanitizeText(payload.customerNote || "");
@@ -230,6 +252,7 @@ export const buildRawBtText = (
     fitLeftRight(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, `Fila: ${sanitizeText(payload.queueLabel || "--")}`, lineWidth),
     ...locationBlock,
     "",
+    ...customerBlock,
     ...customerNoteBlock,
     `${ESC_POS.boldOn} QTD  ITEM${ESC_POS.boldOff}`,
     separator(lineWidth),
@@ -249,6 +272,7 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
   const locationLabel = sanitizeText(
     payload.locationLabel || (payload.tableLabel ? `MESA ${payload.tableLabel}` : "")
   );
+  const customerLabel = sanitizeText(payload.customerLabel || "");
   const itemsHtml = payload.items
     .map((item) => {
       const qty = Math.max(0, Number(item.quantity || 0));
@@ -268,9 +292,9 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
   const tableHtml = locationLabel
     ? `<div class="location-block">${locationLabel.toUpperCase()}</div>`
     : '';
-  const customerHtml = `<div class="customer-block">CLIENTE: ${sanitizeText(
-    payload.customerLabel || "Cliente"
-  )}</div>`;
+  const customerHtml = shouldPrintCustomer(customerLabel, locationLabel)
+    ? `<div class="customer-block">CLIENTE: ${escapeHtml(customerLabel)}</div>`
+    : '';
   const customerNote = sanitizeText(payload.customerNote || "");
   const customerNoteHtml = customerNote
     ? `<div class="sep"></div><div class="note-title">OBS CLIENTE</div><div class="customer-note">${escapeHtml(customerNote)}</div>`

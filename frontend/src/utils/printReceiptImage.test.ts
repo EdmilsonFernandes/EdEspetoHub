@@ -140,6 +140,7 @@ describe('printReceiptAsImage', () => {
     expect(text).toContain('Pedido: #PED123');
     expect(text).toContain('MESA 12');
     expect(text.match(/MESA 12/g)).toHaveLength(1);
+    expect(text).not.toContain('CLIENTE: Mesa 12');
     expect(text).toContain('! OBS:');
     expect(text).toContain('Sem ketchup');
     expect(text).toContain('descer.');
@@ -153,6 +154,18 @@ describe('printReceiptAsImage', () => {
     expect(text).toContain('TOTAL:');
     expect(text.match(/TOTAL:/g)).toHaveLength(1);
     expect(text).toContain('R$ 77,55');
+  });
+
+  it('mantém o nome do cliente no recibo sem repetir a localização', () => {
+    const text = buildRawBtText({
+      ...payload,
+      customerLabel: 'Edmilson Fernandes',
+      locationLabel: 'ENTREGA',
+    });
+
+    expect(text).toContain('ENTREGA');
+    expect(text).toContain('CLIENTE: Edmilson Fernandes');
+    expect(text.match(/CLIENTE:/g)).toHaveLength(1);
   });
 
   it('usa a configuração local de cópias e largura ao montar o cupom Android', async () => {
