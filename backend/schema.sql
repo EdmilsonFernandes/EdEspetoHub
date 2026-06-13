@@ -9,6 +9,19 @@ END$$;
 -- Cria database se necessário
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+CREATE TABLE IF NOT EXISTS app_schema_migrations (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  checksum TEXT NOT NULL,
+  executed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  execution_ms INTEGER NOT NULL DEFAULT 0,
+  app_version TEXT,
+  git_sha TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_app_schema_migrations_executed_at
+  ON app_schema_migrations(executed_at DESC);
+
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   full_name TEXT NOT NULL,

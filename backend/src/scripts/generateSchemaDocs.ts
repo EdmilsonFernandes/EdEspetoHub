@@ -125,6 +125,7 @@ const testEnvPath = path.join(backendRoot, '.env.test');
 
 const TABLE_DESCRIPTION_OVERRIDES: Record<string, string> = {
   access_logs: 'Trilha de acessos administrativos e operacionais usada para auditoria e suporte.',
+  app_schema_migrations: 'Controle de migrations versionadas aplicadas no banco, com checksum e metadados de execucao.',
   condominiums: 'Cadastro mestre de condomínios atendidos pela plataforma.',
   condominium_access_requests: 'Solicitações de entrada/onboarding de condomínios, incluindo dados do responsável e fluxo de revisão.',
   condominium_events: 'Eventos/janelas especiais de operação dentro de um condomínio.',
@@ -186,6 +187,7 @@ const TABLE_DESCRIPTION_OVERRIDES: Record<string, string> = {
 
 const TABLE_RESPONSIBILITY_OVERRIDES: Record<string, string> = {
   orders: 'É a tabela âncora do fluxo de venda: quase todo processo de checkout, produção, entrega e acompanhamento converge aqui.',
+  app_schema_migrations: 'Protege a evolucao de schema contra reexecucao, concorrencia entre instancias e alteracao de migration ja aplicada.',
   order_items: 'Quebra o pedido em linhas de item, permitindo preço, observação, modificadores e quantidade por produto.',
   order_deliveries: 'Complementa pedidos que entram em entrega com estado logístico, motoboy e confirmações de pagamento/recebimento.',
   payments: 'Representa a cobrança da plataforma, principalmente assinatura/trial/renovação, separada do pagamento operacional do pedido.',
@@ -531,8 +533,8 @@ function scanDdlOperations(rootDir: string): Map<string, DdlOperation[]> {
 
   const patterns: Array<{ regex: RegExp; operation: string; tableIndex: number }> = [
     { regex: /CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+([a-z0-9_]+)/gi, operation: 'create-table', tableIndex: 1 },
-    { regex: /ALTER\s+TABLE\s+IF\s+EXISTS\s+([a-z0-9_]+)/gi, operation: 'alter-table', tableIndex: 1 },
-    { regex: /CREATE\s+(?:UNIQUE\s+)?INDEX\s+IF\s+NOT\s+EXISTS\s+[a-z0-9_]+\s+ON\s+([a-z0-9_]+)/gi, operation: 'create-index', tableIndex: 1 },
+    { regex: /ALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?([a-z0-9_]+)/gi, operation: 'alter-table', tableIndex: 1 },
+    { regex: /CREATE\s+(?:UNIQUE\s+)?INDEX\s+(?:CONCURRENTLY\s+)?IF\s+NOT\s+EXISTS\s+[a-z0-9_]+\s+ON\s+([a-z0-9_]+)/gi, operation: 'create-index', tableIndex: 1 },
   ];
 
   for (const filePath of files) {
@@ -1388,7 +1390,7 @@ async function main() {
 
   const ddlMap = scanDdlOperations(srcRoot);
   const tableDocs = mergeTableDocs(devSnapshot, testSnapshot, entityMetadata, ddlMap);
-  const html = renderHtml(tableDocs, devSnapshot, testSnapshot);
+  const html = renderHtml(tableDocs, devSnapshot, testSnapshot).replace(/[ \t]+$/gm, '');
 
   fs.mkdirSync(docsRoot, { recursive: true });
   fs.writeFileSync(docsOutput, html, 'utf8');

@@ -3030,4 +3030,8 @@ export async function runMigrations() {
       )
     ON CONFLICT (slug) DO NOTHING;
   `);
+
+  // Forward-only migrations live in src/migrations and are tracked by checksum.
+  const { runAppMigrations } = await import('./migrationRunner');
+  await runAppMigrations(AppDataSource);
 }
