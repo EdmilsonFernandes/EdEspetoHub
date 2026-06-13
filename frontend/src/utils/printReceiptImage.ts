@@ -190,16 +190,12 @@ export const buildRawBtText = (
   const locationBlock = locationLabel
     ? [
         strongSeparator(lineWidth),
-        strongSeparator(lineWidth),
-        "",
         ...centerText(locationLabel.toUpperCase(), lineWidth)
           .split("\n")
           .map(
             (line) =>
               `${ESC_POS.boldOn}${ESC_POS.textDoubleHeightOn}${line}${ESC_POS.textSizeReset}${ESC_POS.boldOff}`
           ),
-        "",
-        strongSeparator(lineWidth),
         strongSeparator(lineWidth),
       ]
     : [];
@@ -251,7 +247,6 @@ export const buildRawBtText = (
     sanitizeText(payload.dateLabel || ""),
     fitLeftRight(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, `Fila: ${sanitizeText(payload.queueLabel || "--")}`, lineWidth),
     ...locationBlock,
-    "",
     ...customerBlock,
     ...customerNoteBlock,
     `${ESC_POS.boldOn} QTD  ITEM${ESC_POS.boldOff}`,

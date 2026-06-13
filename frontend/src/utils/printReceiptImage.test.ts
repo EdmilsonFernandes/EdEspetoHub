@@ -140,6 +140,7 @@ describe('printReceiptAsImage', () => {
     expect(text).toContain('Pedido: #PED123');
     expect(text).toContain('MESA 12');
     expect(text.match(/MESA 12/g)).toHaveLength(1);
+    expect(text.match(/^={32}$/gm)).toHaveLength(7);
     expect(text).not.toContain('CLIENTE: Mesa 12');
     expect(text).toContain('! OBS:');
     expect(text).toContain('Sem ketchup');
