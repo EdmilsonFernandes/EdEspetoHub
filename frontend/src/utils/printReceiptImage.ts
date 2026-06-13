@@ -245,7 +245,7 @@ export const buildRawBtText = (
   const chunks = [
     ...headerBlock,
     sanitizeText(payload.dateLabel || ""),
-    fitLeftRight(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, `Fila: ${sanitizeText(payload.queueLabel || "--")}`, lineWidth),
+    ...wrapWords(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, lineWidth),
     ...locationBlock,
     ...customerBlock,
     ...customerNoteBlock,

@@ -136,7 +136,7 @@ describe('printReceiptAsImage', () => {
     });
 
     expect(text).toContain('GUSTAVÃO ESPETOS');
-    expect(text).toContain('Fila: #07');
+    expect(text).not.toContain('Fila:');
     expect(text).toContain('Pedido: #PED123');
     expect(text).toContain('MESA 12');
     expect(text.match(/MESA 12/g)).toHaveLength(1);
