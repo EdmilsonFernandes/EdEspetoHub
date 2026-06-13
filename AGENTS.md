@@ -7,9 +7,10 @@ Este arquivo orienta agentes de IA que entram no repositorio sem conhecer o cont
 1. `.ai/agent-rules.md`
 2. `README.md`
 3. `docs/SQL_CONSULTAS_MANUTENCAO.md` quando a tarefa envolver banco
-4. `docs/TESTING_GUIDE.md` quando a tarefa envolver testes
-5. `docs/SERVIDOR_PRODUCAO.md` quando a tarefa envolver producao, EC2, Docker, backup ou deploy
-6. `docs/DISASTER_RECOVERY_RUNBOOK.md` quando a tarefa envolver indisponibilidade, restore, migracao, banco perdido, SSL, e-mail ou recuperacao total
+4. `backend/docs/MIGRATION_STANDARD.md` quando a tarefa envolver schema, DDL, migrations, tabelas, colunas, indices ou constraints
+5. `docs/TESTING_GUIDE.md` quando a tarefa envolver testes
+6. `docs/SERVIDOR_PRODUCAO.md` quando a tarefa envolver producao, EC2, Docker, backup ou deploy
+7. `docs/DISASTER_RECOVERY_RUNBOOK.md` quando a tarefa envolver indisponibilidade, restore, migracao, banco perdido, SSL, e-mail ou recuperacao total
 
 ## Resumo do projeto
 
@@ -36,7 +37,7 @@ Fluxo de chamadas:
 - Nao commitar arquivos de segredo, `.env`, chaves, `.pem`, `.jks`, `.apk` ou `.aab`.
 - Nao executar deploy no EC2; o usuario faz deploy.
 - Mudanca em `backend/` exige `cd backend && yarn test`.
-- Mudanca de schema exige atualizar `backend/docs/database-schema.html`.
+- Mudanca de schema nova deve seguir `backend/docs/MIGRATION_STANDARD.md`: criar migration versionada em `backend/src/migrations/**`, registrar em `backend/src/migrations/index.ts`, atualizar `backend/schema.sql` e regenerar `backend/docs/database-schema.html`.
 - Mudanca frontend exige validar build/teste conforme escopo.
 - Preserve alteracoes nao relacionadas existentes no working tree.
 

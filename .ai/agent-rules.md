@@ -58,6 +58,24 @@ Se `users`, `stores` ou `products` vierem zerados/baixos sem intenção explíci
 
 Não apagar, dropar, recriar ou reimportar o banco local automaticamente durante validação comum. Rebuild local Docker deve preservar o volume/banco existente. Só fazer import de produção ou `DROP DATABASE` quando o usuário pedir explicitamente, quando o banco local estiver incoerente/zerado, ou quando houver mudança real de schema que exija validar migração em dump recente. Antes de qualquer import destrutivo, gerar backup local em `.local-db-dumps/`.
 
+### Padrão obrigatório de migrations
+
+Toda mudança nova de schema no `backend/` deve seguir `backend/docs/MIGRATION_STANDARD.md`.
+
+Regra operacional para agentes:
+
+1. DDL novo não deve ser adicionado em service, repository, controller ou rota.
+2. DDL novo não deve ser acrescentado ao bloco legado de `backend/src/utils/runMigrations.ts`, exceto se o usuário pedir manutenção explícita do legado.
+3. Criar uma migration versionada em `backend/src/migrations/YYYYMMDD_NNN_nome_curto.ts`.
+4. Exportar uma `SchemaMigration` com `id`, `name`, `checksumSource` estável e `up(queryRunner)`.
+5. Registrar a migration em `backend/src/migrations/index.ts`; arquivo criado mas não registrado não roda.
+6. Atualizar `backend/schema.sql` para banco novo nascer com o schema completo.
+7. Regenerar `backend/docs/database-schema.html` com `cd backend && npm run docs:schema`.
+8. Rodar `cd backend && yarn test`.
+9. Conferir `cd backend && npm run migrate:status`; migrations pendentes devem ser intencionais antes de `npm run migrate` e `pending: []` depois.
+
+Depois que uma migration rodou em qualquer ambiente compartilhado, ela é imutável. Não editar arquivo de migration já aplicada; criar outra migration corrigindo/evoluindo o schema. O checksum existe para derrubar o backend se alguém alterar histórico aplicado.
+
 ### ANDROID / AAB
 - se a mudança tocar código nativo mobile, Capacitor, plugins nativos, `MainActivity`, `AndroidManifest`, `build.gradle`, `capacitor.config`, `res/` Android ou qualquer fluxo que exija novo binário Android → gerar novo `AAB`
 - ao gerar novo `AAB`, subir sempre:
@@ -192,7 +210,7 @@ Backend API (chamanoespeto-api :4000)
 ### Onde implementar algo novo
 
 - **Nova rota que o frontend consome**: registrar no BFF (`apis/src/domains/proxy/proxy.routes.ts` se for proxy, ou criar controller+processor se tiver lógica própria).
-- **Nova lógica de negócio/banco**: implementar no backend (`backend/`). O BFF faz proxy.
+- **Nova lógica de negócio/banco**: implementar no backend (`backend/`). Se mudar schema, seguir `backend/docs/MIGRATION_STANDARD.md`. O BFF faz proxy.
 - **Novo componente visual**: frontend (`frontend/src/`).
 - **Alterar roteamento nginx**: `frontend/nginx.conf`.
 
@@ -338,7 +356,7 @@ docker compose --env-file .env.dev ps backend apis frontend postgres
 
 ## VALIDAÇÃO DOCKER LOCAL (OBRIGATÓRIO para mudanças de schema/migration)
 
-Antes de dar push em qualquer mudança que altere `runMigrations.ts`, `schema.sql`, ou crie/altere tabelas:
+Antes de dar push em qualquer mudança que altere `backend/src/migrations/**`, `backend/src/migrations/index.ts`, `runMigrations.ts`, `schema.sql`, ou crie/altere tabelas:
 
 1. Preferir SEMPRE os scripts versionados de validação local, nunca montar comando longo manual se já existir wrapper em `scripts/`.
 
@@ -429,6 +447,8 @@ Se algum teste falhar:
 ## DOCUMENTAÇÃO DE SCHEMA (OBRIGATÓRIO)
 
 - Toda alteração que crie, remova ou altere **tabela, coluna, índice, constraint, relação ou DDL manual** no `backend/` deve atualizar a documentação HTML do banco.
+- Toda alteração nova de schema deve seguir o padrão versionado em `backend/docs/MIGRATION_STANDARD.md`.
+- DDL novo deve ficar em `backend/src/migrations/**`, registrado em `backend/src/migrations/index.ts`, e refletido também em `backend/schema.sql`.
 - Arquivo versionado: `backend/docs/database-schema.html`
 - Comando para regenerar: `cd backend && npm run docs:schema`
 - Após regenerar, revisar obrigatoriamente o diff do HTML antes do commit.
