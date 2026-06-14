@@ -350,7 +350,16 @@ async pickupAndStart(orderId: string, motoboy: Motoboy) {
       delivery.status = 'IN_TRANSIT';
       delivery.pickedUpAt = delivery.pickedUpAt ?? now;
       delivery.inTransitAt = now;
-      delivery.confirmationCode = String(Math.floor(1000 + Math.random() * 9000));
+      // So gera codigo de confirmacao se houver cliente pra recebe-lo (pedido de cliente).
+      // Pedido criado pelo admin (sem customerUserId/guestPushId) nao tem quem receba o
+      // codigo — entao nao geramos, e o MotoboyOrderService.markDelivered pula a checagem
+      // (ele so valida o codigo quando delivery.confirmationCode existe).
+      const orderForCode = await orderRepo.findOne({ where: { id: orderId } as any });
+      const hasCustomer = Boolean(
+        String((orderForCode as any)?.customerUserId || '').trim() ||
+        String((orderForCode as any)?.guestPushId || '').trim()
+      );
+      delivery.confirmationCode = hasCustomer ? String(Math.floor(1000 + Math.random() * 9000)) : null;
       await repo.save(delivery);
 
       await this.insertEvent(manager, {
