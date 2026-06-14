@@ -37,6 +37,11 @@ import {
 } from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
+import {
+  SUPER_ADMIN_NAV_GROUPS as SUPER_ADMIN_NAV_GROUPS_SRC,
+  SUPER_ADMIN_NAV_ITEMS as SUPER_ADMIN_NAV_ITEMS_SRC,
+  SUPER_ADMIN_DASHBOARD_SECTIONS,
+} from '../navigation/superAdminNavigation';
 import { formatCurrency, formatPlanName, formatReadableDateTime } from '../utils/format';
 import { exportToCsv } from '../utils/export';
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -314,64 +319,31 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
   },
 };
 
-const SUPER_ADMIN_SECTIONS = [
-  { id: 'executive', label: 'Resumo',     icon: ChartBar,          group: 'overview' },
-  { id: 'rankings',  label: 'Rankings',   icon: TrendUp,           group: 'overview' },
-  { id: 'stores',    label: 'Lojas',      icon: Storefront,        group: 'operation' },
-  { id: 'payments',  label: 'Pagamentos', icon: CurrencyDollar,    group: 'operation' },
-  { id: 'destinations', label: 'Destinos', icon: Compass,           group: 'ecosystem' },
-  { id: 'push',      label: 'Push',       icon: Megaphone,         group: 'marketing' },
-  { id: 'kyc',       label: 'KYC',        icon: IdentificationCard,group: 'trust' },
-  { id: 'security',  label: 'Segurança',  icon: ShieldCheck,       group: 'trust' },
-  { id: 'logs',      label: 'Logs',       icon: GitCommit,         group: 'technical' },
-  { id: 'events',    label: 'Eventos',    icon: Sparkle,           group: 'technical' },
-  { id: 'health',    label: 'Status',     icon: Cpu,               group: 'technical' },
-  { id: 'versions',  label: 'Versões',    icon: RocketLaunch,      group: 'technical' },
-];
+// Fonte única de verdade: navigation/superAdminNavigation.ts.
+// Derivamos no formato (id/label/icon/group) esperado pelo restante do componente,
+// assim a barra de topo passa a refletir os mesmos 6 grupos e 16 itens do rodapé.
+const SUPER_ADMIN_SECTIONS = SUPER_ADMIN_NAV_ITEMS_SRC.map((item) => ({
+  id: item.id,
+  label: item.shortLabel || item.label,
+  icon: item.icon,
+  group: item.group,
+}));
 
-const SUPER_ADMIN_SECTION_GROUPS = [
-  {
-    id: 'overview',
-    label: 'Visão geral',
-    subtitle: 'Status da plataforma',
-    icon: ChartBar,
-  },
-  {
-    id: 'operation',
-    label: 'Operação',
-    subtitle: 'Lojas e financeiro',
-    icon: Storefront,
-  },
-  {
-    id: 'ecosystem',
-    label: 'Ecossistema',
-    subtitle: 'Destinos e chalés',
-    icon: Compass,
-  },
-  {
-    id: 'marketing',
-    label: 'Marketing',
-    subtitle: 'Push e campanhas',
-    icon: Megaphone,
-  },
-  {
-    id: 'trust',
-    label: 'Confiança',
-    subtitle: 'KYC e segurança',
-    icon: ShieldCheck,
-  },
-  {
-    id: 'technical',
-    label: 'Técnico',
-    subtitle: 'Logs, eventos e versões',
-    icon: Cpu,
-  },
-];
+const SUPER_ADMIN_SECTION_GROUPS = SUPER_ADMIN_NAV_GROUPS_SRC.map((group) => ({
+  id: group.id,
+  label: group.label,
+  subtitle: group.subtitle,
+  icon: group.icon,
+}));
+
+// IDs que são abas in-page (possuem `section` na fonte canônica). Itens-rota
+// (destinos/condomínios/banners/e-mails) navegam para fora, não ficam ativos in-page.
+const SUPER_ADMIN_IN_PAGE_SECTION_IDS = SUPER_ADMIN_DASHBOARD_SECTIONS.map((item) => item.id);
 
 const readInitialSuperAdminSection = () => {
   if (typeof window === 'undefined') return 'executive';
   const stored = String(sessionStorage.getItem(ACTIVE_SECTION_STORAGE_KEY) || '').trim();
-  return SUPER_ADMIN_SECTIONS.some((section) => section.id === stored) ? stored : 'executive';
+  return SUPER_ADMIN_IN_PAGE_SECTION_IDS.includes(stored) ? stored : 'executive';
 };
 
 export function SuperAdmin() {
@@ -502,7 +474,7 @@ export function SuperAdmin() {
     if (typeof window === 'undefined') return;
     const onSuperAdminSectionChange = (event: any) => {
       const nextSection = String(event?.detail?.section || '').trim();
-      if (!SUPER_ADMIN_SECTIONS.some((section) => section.id === nextSection)) return;
+      if (!SUPER_ADMIN_IN_PAGE_SECTION_IDS.includes(nextSection)) return;
       setActiveSection(nextSection);
     };
     window.addEventListener('superadmin:set-section', onSuperAdminSectionChange as EventListener);
@@ -530,23 +502,26 @@ export function SuperAdmin() {
     return date.toLocaleString('pt-BR');
   }, []);
   const activeSuperAdminGroup = useMemo(() => {
-    return SUPER_ADMIN_SECTIONS.find((section) => section.id === activeSection)?.group || 'operacional';
+    return SUPER_ADMIN_SECTIONS.find((section) => section.id === activeSection)?.group || 'overview';
   }, [activeSection]);
   const activeSuperAdminGroupSections = useMemo(() => {
     return SUPER_ADMIN_SECTIONS.filter((section) => section.group === activeSuperAdminGroup);
   }, [activeSuperAdminGroup]);
   const openSuperAdminSection = (sectionId: string) => {
-    if (sectionId === 'destinations') {
-      navigate('/superadmin/destinations');
+    // Itens-rota (destinos/condomínios/banners/e-mails) navegam para sua própria página.
+    const navItem = SUPER_ADMIN_NAV_ITEMS_SRC.find((item) => item.id === sectionId);
+    if (navItem && navItem.route && navItem.route !== '/superadmin') {
+      navigate(navItem.route);
       return;
     }
     setActiveSection(sectionId);
   };
   const openSuperAdminGroup = (groupId: string) => {
-    const firstSection = SUPER_ADMIN_SECTIONS.find((section) => section.group === groupId && section.id !== 'destinations')
-      || SUPER_ADMIN_SECTIONS.find((section) => section.group === groupId);
-    if (!firstSection) return;
-    openSuperAdminSection(firstSection.id);
+    const groupItems = SUPER_ADMIN_NAV_ITEMS_SRC.filter((item) => item.group === groupId);
+    if (!groupItems.length) return;
+    // Prefere a primeira aba in-page do grupo; se não houver nenhuma, abre o primeiro item (rota).
+    const first = groupItems.find((item) => item.section) || groupItems[0];
+    openSuperAdminSection(first.id);
   };
 
   useEffect(() => {

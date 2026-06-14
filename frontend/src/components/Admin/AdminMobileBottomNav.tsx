@@ -349,38 +349,46 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
   if (isSuperAdminPath) {
     const superPrimaryItems = [
       {
-        id: 'super-home',
+        id: 'super-overview',
         label: 'Resumo',
-        icon: ChartBar,
-        active: path === '/superadmin' && superActiveSection === 'executive',
+        icon: SUPER_ADMIN_NAV_GROUPS.find((group) => group.id === 'overview')?.icon || ChartBar,
+        active: path === '/superadmin' && ['executive', 'rankings'].includes(superActiveSection),
         onClick: () => openSuperAdminSection('executive'),
       },
       {
         id: 'super-operation',
         label: 'Operação',
         icon: SUPER_ADMIN_NAV_GROUPS.find((group) => group.id === 'operation')?.icon || ChartBar,
-        active: path === '/superadmin' && ['rankings', 'stores', 'payments'].includes(superActiveSection),
+        active: path === '/superadmin' && ['stores', 'payments'].includes(superActiveSection),
         onClick: () => openSuperAdminSection('stores'),
+      },
+      {
+        id: 'super-ecosystem',
+        label: 'Ecossistema',
+        icon: SUPER_ADMIN_NAV_GROUPS.find((group) => group.id === 'ecosystem')?.icon || ChartBar,
+        active:
+          path.startsWith('/superadmin/destinations') ||
+          path.startsWith('/superadmin/condominiums'),
+        onClick: () => navigate('/superadmin/destinations'),
       },
       {
         id: 'super-marketing',
         label: 'Marketing',
         icon: SUPER_ADMIN_NAV_GROUPS.find((group) => group.id === 'marketing')?.icon || ChartBar,
         active:
-          path === '/superadmin' && ['push'].includes(superActiveSection),
+          (path === '/superadmin' && superActiveSection === 'push') ||
+          path.startsWith('/superadmin/home-config') ||
+          path.startsWith('/superadmin/email-templates'),
         onClick: () => openSuperAdminSection('push'),
       },
       {
         id: 'super-more',
-        label: 'Menu',
+        label: 'Mais',
         icon: DotsThreeCircle,
         active:
           superMoreOpen ||
-          path.startsWith('/superadmin/condominiums') ||
-          path.startsWith('/superadmin/destinations') ||
-          path.startsWith('/superadmin/home-config') ||
-          path.startsWith('/superadmin/email-templates') ||
-          ['logs', 'events', 'versions'].includes(superActiveSection),
+          (path === '/superadmin' &&
+            ['kyc', 'security', 'logs', 'events', 'health', 'versions'].includes(superActiveSection)),
         onClick: () => setSuperMoreOpen((prev) => !prev),
       },
     ];
@@ -400,7 +408,9 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
       if (item.section && path !== '/superadmin') navigate('/superadmin');
     };
     const superMenuActions = [
-      ...filterSuperAdminNavigationItems(superMenuSearch).map((item) => {
+      ...filterSuperAdminNavigationItems(superMenuSearch)
+          .filter((item) => item.group === 'trust' || item.group === 'technical')
+          .map((item) => {
         const Icon = item.icon;
         const group = getSuperAdminGroup(item.group);
         const active = isSuperAdminNavigationItemActive(item, path, superActiveSection);
@@ -460,7 +470,7 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
             transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
           }}
         >
-          <ul className="pointer-events-auto mx-auto grid w-full max-w-md grid-cols-4 gap-1 border-t border-slate-200/60 bg-white/[0.97] px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-18px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
+          <ul className="pointer-events-auto mx-auto grid w-full max-w-md grid-cols-5 gap-1 border-t border-slate-200/60 bg-white/[0.97] px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-[0_-18px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
             {superPrimaryItems.map((item) => {
               const Icon = item.icon;
               const isActive = optimisticActiveId ? optimisticActiveId === item.id : item.active;
