@@ -216,6 +216,10 @@ export const openNativeBluetoothSettings = async () => {
 };
 
 export const saveAutoPrintSetting = async (enabled: boolean) => {
+  // Persiste no localStorage: o card recarrega esse valor ao remontar e o polling da
+  // fila (GrillQueue) le aqui para decidir a impressao com o app aberto. Sem isso, o
+  // toggle voltava para OFF ao sair e voltar (gravava so no nativo).
+  saveStoredThermalPrinterSettings({ autoPrintOnlineOrders: enabled });
   if (!isNativeThermalPrinterPluginAvailable()) return;
   try {
     await ThermalPrinter.saveAutoPrintSetting({ enabled });
