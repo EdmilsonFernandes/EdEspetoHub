@@ -6,8 +6,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -18,6 +20,8 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Custom FCM service that intercepts push notifications.
@@ -36,6 +40,9 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
     private static final String STORE_ORDERS_CHANNEL_ID = "store_new_orders_v1";
     private static final String GENERAL_CHANNEL_ID = "jnc_general_push";
     private static final int NOTIFICATION_ID_BASE = 3000;
+    private static final String KEY_FEED_LINES = "printer_feed_lines";
+    // Serializa os jobs de impressao executados direto no callback do FCM (background).
+    private static final ExecutorService PRINT_EXECUTOR = Executors.newSingleThreadExecutor();
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message) {
@@ -77,15 +84,24 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
         // tela (foreground), com app minimizado (background) e com a tela bloqueada. O
         // polling da fila nao imprime mais (evitaria impressao dupla quando a fila esta aberta).
         if (autoPrintEnabled) {
-            Intent printIntent = new Intent(this, PrintForegroundService.class);
-            for (Map.Entry<String, String> entry : data.entrySet()) {
-                printIntent.putExtra(entry.getKey(), entry.getValue());
-            }
-            try {
-                ContextCompat.startForegroundService(this, printIntent);
-                Log.i(TAG, "PrintForegroundService started for " + orderId);
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to start PrintForegroundService", e);
+            if (isForeground) {
+                // App aberta: o servico foreground funciona (sem restricao do Android 12+).
+                Intent printIntent = new Intent(this, PrintForegroundService.class);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    printIntent.putExtra(entry.getKey(), entry.getValue());
+                }
+                try {
+                    ContextCompat.startForegroundService(this, printIntent);
+                    Log.i(TAG, "PrintForegroundService started for " + orderId);
+                } catch (Exception e) {
+                    Log.e(TAG, "FGS start falhou (foreground), imprimindo inline", e);
+                    printOrderInline(data, orderId);
+                }
+            } else {
+                // Background / tela bloqueada: o Android 12+ bloqueia startForegroundService,
+                // entao imprimimos direto no callback do FCM (msg high-priority da janela de
+                // execucao). Antes o push chegava mas nada imprimia com a tela desligada.
+                printOrderInline(data, orderId);
             }
         }
 
@@ -101,6 +117,36 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         showNotification(title, body, data, STORE_ORDERS_CHANNEL_ID, NotificationCompat.PRIORITY_HIGH);
+    }
+
+    private void printOrderInline(Map<String, String> data, String orderId) {
+        // Imprime direto no callback do FCM (sem ForegroundService), o que contorna a
+        // restricao do Android 12+ que bloqueia startForegroundService em background.
+        PRINT_EXECUTOR.submit(() -> {
+            try {
+                SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                String address = prefs.getString(KEY_ADDRESS, "");
+                if (address == null || address.trim().isEmpty()) {
+                    Log.w(TAG, "inline print: sem impressora configurada p/ " + orderId);
+                    return;
+                }
+                int feedLines = Math.max(1, Math.min(6, prefs.getInt(KEY_FEED_LINES, 3)));
+
+                Bundle bundle = new Bundle();
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    if (entry.getValue() != null) bundle.putString(entry.getKey(), entry.getValue());
+                }
+                String receiptText = BluetoothPrinterHelper.buildReceiptText(bundle, 32);
+                String qrData = bundle.getString("qrData", "");
+                byte[] printBytes = BluetoothPrinterHelper.toPrinterBytes(receiptText, feedLines, qrData);
+
+                BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+                boolean ok = BluetoothPrinterHelper.printViaBluetooth(adapter, address.trim(), printBytes);
+                Log.i(TAG, "inline print " + (ok ? "SUCCESS" : "FAILED") + " p/ " + orderId);
+            } catch (Exception e) {
+                Log.e(TAG, "inline print error p/ " + orderId, e);
+            }
+        });
     }
 
     private void showDefaultNotification(RemoteMessage message) {

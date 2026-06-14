@@ -588,7 +588,7 @@ export class OrderService
         ...(dateLabel ? { dateLabel } : {}),
         orderLabel: shortOrderId,
         totalLabel,
-        qrData: `https://janocaminho.com.br/ped/${orderId}`,
+        qrData: `https://janocaminho.com.br/pedido/${orderId}`,
       },
       android: {
         channelId: storeNotificationChannelId,
