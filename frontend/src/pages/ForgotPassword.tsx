@@ -16,6 +16,8 @@ import {
 import { authService } from '../services/authService';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { inputAssistProps } from '../utils/inputAssist';
+import { Capacitor } from '@capacitor/core';
+import { Clipboard } from '@capacitor/clipboard';
 
 type RecoveryStep = 'email' | 'password' | 'code' | 'success';
 
@@ -180,19 +182,31 @@ export function ForgotPassword() {
 
   const pasteCode = async () => {
     setError('');
-    try {
-      const text = await navigator.clipboard?.readText?.();
-      const nextCode = cleanCode(text || '');
-      if (!nextCode) {
-        codeInputRef.current?.focus();
-        setError('Não encontrei um código válido copiado. Toque no campo e use colar do teclado.');
-        return;
+    let text = '';
+    // No app (WebView Android), navigator.clipboard e bloqueado. Usamos o plugin
+    // Capacitor, que le a area de transferencia direto no aparelho.
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const result = await Clipboard.read();
+        text = String(result?.value || '');
+      } catch {
+        text = '';
       }
-      applyCode(nextCode, true);
-    } catch {
-      codeInputRef.current?.focus();
-      setError('Não deu para ler automaticamente. Toque no campo e use colar do teclado.');
     }
+    if (!text) {
+      try {
+        text = (await navigator.clipboard?.readText?.()) || '';
+      } catch {
+        text = '';
+      }
+    }
+    const nextCode = cleanCode(text || '');
+    if (!nextCode) {
+      codeInputRef.current?.focus();
+      setError('Não encontrei um código válido copiado. Copie o código do e-mail e toque em "Colar código".');
+      return;
+    }
+    applyCode(nextCode, true);
   };
 
   return (
