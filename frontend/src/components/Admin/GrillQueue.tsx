@@ -1391,6 +1391,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         queueLabel: `#${String(payload.queueRank || 1).padStart(2, '0')}`,
         orderLabel: `#${payload.orderDisplayId}`,
         customerLabel: payload.order?.customerName || payload.order?.name || 'Cliente',
+        customerPhone: payload.order?.phone || payload.order?.customerPhone || '',
         customerNote: resolveCustomerOrderNote(payload.order),
         locationLabel: payload.locationIdentifier || '',
         tableLabel: payload.table ? String(payload.table) : '',

@@ -519,6 +519,7 @@ export class OrderService
       | 'total'
       | 'table'
       | 'customerNote'
+      | 'phone'
     > & {
       storeId?: string | null;
       store?: { id?: string; name?: string | null } | null;
@@ -539,6 +540,7 @@ export class OrderService
     const paymentLabel = this.resolveStorePaymentPushLabel(order);
     const totalLabel = this.resolveCurrencyLabel(Number(order?.total || 0));
     const customerName = String(order?.customerName || '').trim() || 'Cliente online';
+    const customerPhone = String(order?.phone || '').trim().slice(0, 30);
     const orderId = String(order?.id || '').trim();
 
     // Build compact items string for FCM data: "qtyx name|price;qtyx name|price"
@@ -579,6 +581,7 @@ export class OrderService
         // Receipt data for background auto-print
         ...(storeName ? { storeName } : {}),
         ...(customerName && customerName !== 'Cliente online' ? { customerName } : {}),
+        ...(customerPhone ? { customerPhone } : {}),
         ...(receiptItems ? { receiptItems } : {}),
         ...(locationLabel ? { locationLabel } : {}),
         ...(customerNote ? { customerNote } : {}),

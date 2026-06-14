@@ -18,6 +18,7 @@ type PrintReceiptRawBtInput = {
   queueLabel?: string;
   orderLabel: string;
   customerLabel: string;
+  customerPhone?: string;
   customerNote?: string;
   locationLabel?: string;
   tableLabel?: string;
@@ -146,6 +147,7 @@ export const buildRawBtText = (
     payload.locationLabel || (payload.tableLabel ? `MESA ${payload.tableLabel}` : "")
   );
   const customerLabel = sanitizeText(payload.customerLabel || "");
+  const customerPhone = sanitizeText(payload.customerPhone || "");
 
   // Items: QTD bold + name + price right-aligned, notes with *
   const itemsLines = payload.items.flatMap((item) => {
@@ -205,6 +207,9 @@ export const buildRawBtText = (
         ...wrapWords(`CLIENTE: ${customerLabel}`, lineWidth).map(
           (line) => `${ESC_POS.boldOn}${line}${ESC_POS.boldOff}`
         ),
+        ...(customerPhone
+          ? [`${ESC_POS.boldOn}FONE: ${customerPhone}${ESC_POS.boldOff}`]
+          : []),
         separator(lineWidth),
       ]
     : [];
@@ -268,6 +273,7 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
     payload.locationLabel || (payload.tableLabel ? `MESA ${payload.tableLabel}` : "")
   );
   const customerLabel = sanitizeText(payload.customerLabel || "");
+  const customerPhone = sanitizeText(payload.customerPhone || "");
   const itemsHtml = payload.items
     .map((item) => {
       const qty = Math.max(0, Number(item.quantity || 0));
@@ -288,7 +294,7 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
     ? `<div class="location-block">${locationLabel.toUpperCase()}</div>`
     : '';
   const customerHtml = shouldPrintCustomer(customerLabel, locationLabel)
-    ? `<div class="customer-block">CLIENTE: ${escapeHtml(customerLabel)}</div>`
+    ? `<div class="customer-block">CLIENTE: ${escapeHtml(customerLabel)}${customerPhone ? ` &middot; FONE: ${escapeHtml(customerPhone)}` : ''}</div>`
     : '';
   const customerNote = sanitizeText(payload.customerNote || "");
   const customerNoteHtml = customerNote
