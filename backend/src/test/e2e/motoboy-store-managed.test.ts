@@ -207,4 +207,45 @@ describe('Motoboy — fluxo gerenciado pela loja', () => {
     expect(approvedRes.status).toBe(200);
     expect(String(approvedRes.body?.status || '').toUpperCase()).toBe('ACTIVE');
   });
+
+  it('re-ativa o vinculo apos desvincular (loja desvincula e vincula de novo)', async () => {
+    const storeRegistration = await registerStore();
+    await verifyEmailDirectly(storeRegistration.email);
+    const reStoreId = String(storeRegistration.body.store?.id || '');
+    const reToken = String((await loginAdmin(storeRegistration.email, storeRegistration.password)).token || '');
+
+    const motoboyRegistration = await registerMotoboy();
+    await verifyEmailDirectly(motoboyRegistration.email);
+
+    const addRes = await api
+      .post(`/api/stores/${reStoreId}/motoboys`)
+      .set('Authorization', `Bearer ${reToken}`)
+      .send({ email: motoboyRegistration.email });
+    const motoboyId = String(addRes.body?.id || '');
+    expect(motoboyId).toBeTruthy();
+
+    await api.post(`/api/stores/${reStoreId}/motoboys/${motoboyId}/link`).set('Authorization', `Bearer ${reToken}`).send({});
+    await seedApprovedMotoboyDocuments(motoboyId);
+
+    const approved = await api.post(`/api/stores/${reStoreId}/motoboys/${motoboyId}/approve`).set('Authorization', `Bearer ${reToken}`).send({});
+    expect(approved.status).toBe(200);
+    expect(String(approved.body?.status || '').toUpperCase()).toBe('ACTIVE');
+
+    const listActive = (await api.get(`/api/stores/${reStoreId}/motoboys`).set('Authorization', `Bearer ${reToken}`)).body || [];
+    const activeRow = listActive.find((l: any) => String(l?.motoboyId || '') === motoboyId);
+    expect(Boolean(activeRow?.active)).toBe(true);
+
+    // desvincula
+    const unlinkRes = await api.post(`/api/stores/${reStoreId}/motoboys/${motoboyId}/unlink`).set('Authorization', `Bearer ${reToken}`).send({});
+    expect(unlinkRes.status).toBe(200);
+
+    // religa — tem que voltar ativo (este era o bug do Thiago: request approved + vinculo inativo)
+    const relinkRes = await api.post(`/api/stores/${reStoreId}/motoboys/${motoboyId}/link`).set('Authorization', `Bearer ${reToken}`).send({});
+    expect(relinkRes.status).toBe(200);
+    expect(Boolean(relinkRes.body?.active)).toBe(true);
+
+    const listAfterRelink = (await api.get(`/api/stores/${reStoreId}/motoboys`).set('Authorization', `Bearer ${reToken}`)).body || [];
+    const relinkedRow = listAfterRelink.find((l: any) => String(l?.motoboyId || '') === motoboyId);
+    expect(Boolean(relinkedRow?.active)).toBe(true);
+  });
 });

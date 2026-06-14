@@ -1404,6 +1404,19 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
           existing.decidedByUserId = null;
           existing.reason = null;
           await repo.save(existing);
+        } else if (existing.status === 'APPROVED') {
+          // Bug: se o motoboy foi aprovado e depois DESVINCULADO, a solicitacao ficava
+          // APPROVED e era silenciosamente ignorada num re-pedido — o motoboy nao conseguia
+          // re-vincular. Se o vinculo esta inativo/ausente, reabrimos como PENDING pra loja
+          // poder reaprovar (o que reativa o vinculo).
+          const link = await this.motoboyStoreRepository.findLink(motoboy.id, storeId);
+          if (!link || !link.active) {
+            existing.status = 'PENDING';
+            existing.decidedAt = null;
+            existing.decidedByUserId = null;
+            existing.reason = null;
+            await repo.save(existing);
+          }
         }
         continue;
       }
