@@ -751,6 +751,39 @@ export function ThermalPrinterSettingsCard() {
         </div>
       </div>
 
+      {/* Impressao automatica — visivel direto (fora do accordion) */}
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-black uppercase tracking-wider text-slate-700">
+              Impressao automatica
+            </p>
+            <p className="mt-0.5 text-[11px] leading-snug text-slate-500">
+              Pedidos de clientes online sao impressos ao chegar na fila — inclusive com o app em segundo plano ou tela bloqueada (precisa impressora pareada e notificacao permitida). Pedidos criados pelo admin nao sao afetados.
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={Boolean(settings.autoPrintOnlineOrders)}
+            onClick={() => {
+              const next = !settings.autoPrintOnlineOrders;
+              setSettings((prev) => ({ ...prev, autoPrintOnlineOrders: next }));
+              void saveAutoPrintSetting(next);
+            }}
+            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#336886] ${
+              settings.autoPrintOnlineOrders ? 'bg-[#5FD35A]' : 'bg-slate-300'
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
+                settings.autoPrintOnlineOrders ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
       {/* Step 3: Ajustar (collapsible) */}
       <details className="mt-6 group">
         <summary className="cursor-pointer list-none flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-slate-400 hover:text-slate-600">
@@ -824,36 +857,7 @@ export function ThermalPrinterSettingsCard() {
             ))}
           </div>
 
-          {/* Auto-print toggle */}
-          <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-black uppercase tracking-wider text-slate-700">
-                Impressao automatica
-              </p>
-              <p className="mt-0.5 text-[11px] leading-snug text-slate-500">
-                Pedidos de clientes online sao impressos ao chegar na fila. Pedidos criados pelo admin nao sao afetados.
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={Boolean(settings.autoPrintOnlineOrders)}
-              onClick={() => {
-                const next = !settings.autoPrintOnlineOrders;
-                setSettings((prev) => ({ ...prev, autoPrintOnlineOrders: next }));
-                void saveAutoPrintSetting(next);
-              }}
-              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#336886] ${
-                settings.autoPrintOnlineOrders ? 'bg-[#5FD35A]' : 'bg-slate-300'
-              }`}
-            >
-              <span
-                className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
-                  settings.autoPrintOnlineOrders ? 'translate-x-5' : 'translate-x-0'
-                }`}
-              />
-            </button>
-          </div>
+
         </div>
       </details>
 

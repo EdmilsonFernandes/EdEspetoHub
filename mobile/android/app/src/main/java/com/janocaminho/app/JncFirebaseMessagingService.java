@@ -1,6 +1,5 @@
 package com.janocaminho.app;
 
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -123,24 +122,12 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private boolean isAppInForeground() {
-        ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        if (am == null) return false;
-        String currentPackage = getPackageName();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // On Android 10+, we only get our own process info
-            return true; // If onMessageReceived fires, our process is alive
-        }
-        // For older versions, check running tasks
-        java.util.List<ActivityManager.RunningAppProcessInfo> processes = am.getRunningAppProcesses();
-        if (processes != null) {
-            for (ActivityManager.RunningAppProcessInfo process : processes) {
-                if (process.processName.equals(currentPackage)
-                    && process.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        // Estado real de primeiro plano, rastreado pelo ciclo de vida da MainActivity
+        // (sWebViewInForeground, setado em onResume/onPause). Antes este metodo retornava
+        // `true` no Android 10+ (SDK >= Q), o que tornava `!isForeground` sempre falso e
+        // a impressao em background (tela bloqueada / app minimizado) nunca disparava.
+        // Default false = trata como background quando o processo e (re)iniciado pelo FCM.
+        return MainActivity.sWebViewInForeground;
     }
 
     private void showNotification(String title, String body, Map<String, String> data, String channelId, int priority) {

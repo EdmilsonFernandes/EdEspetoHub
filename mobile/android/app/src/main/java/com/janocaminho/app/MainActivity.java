@@ -99,6 +99,15 @@ public class MainActivity extends BridgeActivity {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
     private static final int APP_UPDATE_REQUEST_CODE = 4403;
 
+    /**
+     * Rastreia se a Activity (WebView) esta em primeiro plano. Lido pelo
+     * JncFirebaseMessagingService para decidir entre disparar a impressao em
+     * background (app minimizado / tela bloqueada) ou apenas notificar (o polling
+     * da fila cuida da impressao com o app aberto). Antes o FCM usava `return true`
+     * no Android 10+, o que impedia a impressao em background em todos os aparelhos.
+     */
+    public static volatile boolean sWebViewInForeground = false;
+
     private String lastKnownUrl = HUB_URL;
     private GeolocationPermissions.Callback pendingGeoCallback = null;
     private String pendingGeoOrigin = null;
@@ -166,6 +175,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
+        sWebViewInForeground = true;
         // Se a página falhou (deploy, idle, sem rede), reativa o overlay e tenta recarregar
         if (pageFailedToLoad) {
             launchOverlayDismissed = false;
@@ -182,6 +192,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onPause() {
         super.onPause();
+        sWebViewInForeground = false;
         cancelResumeWebViewHealthCheck();
         saveLastVisitedUrl();
     }
