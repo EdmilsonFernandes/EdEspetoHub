@@ -1298,6 +1298,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     error: "",
   });
   const previousIdsRef = useRef<string[]>([]);
+  // True apos o primeiro poll bem-sucedido. Evita tratar os pedidos que ja estao na fila
+  // como "novos" quando o lojista abre/retoma a tela (o que reimprimia tudo na entrada).
+  const queuePrimedRef = useRef(false);
   const queueRef = useRef<any[]>([]);
   const historyOrdersRef = useRef<any[]>([]);
   const queuePollTimerRef = useRef<number | null>(null);
@@ -1965,7 +1968,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       const previousIds = previousIdsRef.current;
       const incoming = nextIds.filter((id) => !previousIds.includes(id));
       const hasNew = incoming.length > 0;
-      if (hasNew) {
+      // Primeira carga apos abrir a fila: pedidos ja existentes NAO sao "novos" —
+      // nao tocam som nem disparam auto-print. So imprime quem chega depois da tela aberta.
+      const isFirstPrime = !queuePrimedRef.current;
+      if (hasNew && !isFirstPrime) {
         void playNewOrderSound();
         setNewOrderIds(incoming);
         window.setTimeout(() => setNewOrderIds([]), 4000);
@@ -1985,6 +1991,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           }
         }
       }
+      queuePrimedRef.current = true;
       previousIdsRef.current = nextIds;
       setQueue(data);
     } catch (err) {
