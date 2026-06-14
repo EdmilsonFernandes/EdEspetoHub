@@ -80,6 +80,10 @@ export const normalizeThermalPrinterSettings = (
     copies: copies === 2 ? 2 : 1,
     headerMode,
     feedLines: Number.isFinite(feedLines) ? Math.max(1, Math.min(6, Math.round(feedLines))) : 3,
+    // Preservar o toggle de auto-print — antes este campo era descartado aqui, então
+    // saveStoredThermalPrinterSettings/getStoredThermalPrinterSettings nunca o carregavam
+    // e o toggle voltava para OFF ao sair e voltar da tela.
+    autoPrintOnlineOrders: Boolean(settings?.autoPrintOnlineOrders),
   };
 };
 

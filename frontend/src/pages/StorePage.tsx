@@ -732,6 +732,7 @@ export function StorePage() {
   const isNativeRuntime = Capacitor.isNativePlatform();
   const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
   const showClientWebBottomNav = !isNativeRuntime && !isStoreAdmin && view === 'menu';
+  const showClientWebCheckoutContext = !isNativeRuntime && !isStoreAdmin && (view === 'cart' || view === 'success');
   const showPublicStoreAppHeader = !isStoreAdmin && [ 'menu', 'cart', 'success' ].includes(String(view || ''));
   const [publicStoreHeaderScrolled, setPublicStoreHeaderScrolled] = useState(false);
   const publicStoreHeaderIsSolid = view !== 'menu' || publicStoreHeaderScrolled;
@@ -3445,6 +3446,30 @@ export function StorePage() {
     showToast('Sessão de cliente encerrada.', 'success');
   };
 
+  const openCustomerAccountPanel = (mode: 'login' | 'register' = 'login') => {
+    setCustomerAuthCheckoutPrompt(false);
+    setCustomerVerifyPrompt(null);
+    setCustomerVerifyCode('');
+    setCustomerAccountError('');
+    setCustomerAccountNotice('');
+    setCustomerAuthMode(mode);
+    setShowCustomerAccount(true);
+  };
+
+  const customerDisplayName =
+    String(customerSession?.user?.fullName || customerSession?.user?.name || '').trim() ||
+    String(customerSession?.user?.email || '').trim() ||
+    '';
+  const customerDisplayEmail = String(customerSession?.user?.email || '').trim();
+  const customerInitials = (() => {
+    const source = customerDisplayName || customerDisplayEmail || 'Cliente';
+    const parts = String(source).replace(/@.*/, '').split(/\s+/).filter(Boolean);
+    return (parts.length > 1 ? `${parts[0][0]}${parts[1][0]}` : source.slice(0, 2)).toUpperCase();
+  })();
+  const storefrontWebContextLogo =
+    resolveAssetUrl(String(branding?.logoUrl || '')) || getStoreAvatarUrl(storeSlug, storeName || branding?.brandName || 'Loja');
+  const storefrontWebContextStoreName = storeName || branding?.brandName || 'Loja parceira';
+
   const finishCustomerAuthentication = async (response: any, message: string) => {
     persistCustomerSession(response);
     setCustomerAuthForm((prev) => ({ ...prev, password: '' }));
@@ -3858,6 +3883,78 @@ export function StorePage() {
           maxWidthClassName="max-w-6xl"
         />
       ) : null}
+      {showClientWebCheckoutContext && (
+        <section className="mx-auto w-full max-w-6xl px-4 pt-2 sm:pt-3">
+          <div className="relative overflow-hidden rounded-[1.55rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.92)_0%,rgba(247,250,252,0.88)_100%)] px-3.5 py-3 shadow-[0_22px_52px_-38px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/55 backdrop-blur-2xl sm:px-4">
+            <div className="pointer-events-none absolute -right-10 -top-14 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-12 left-8 h-24 w-24 rounded-full bg-emerald-300/12 blur-3xl" />
+            <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-[1.1rem] border border-white bg-white shadow-[0_14px_28px_-22px_rgba(15,23,42,0.45)] ring-1 ring-slate-100">
+                  <img
+                    src={storefrontWebContextLogo}
+                    alt={storefrontWebContextStoreName}
+                    className="h-full w-full object-cover"
+                    onError={(event) => {
+                      (event.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, storefrontWebContextStoreName);
+                    }}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#336886]/75">
+                    {view === 'success' ? 'Pedido enviado' : 'Pedido online'}
+                  </p>
+                  <h2 className="mt-0.5 truncate text-sm font-black tracking-tight text-slate-950 sm:text-[15px]">
+                    {view === 'success' ? 'Acompanhe seu pedido no Já no Caminho' : `Comprando em ${storefrontWebContextStoreName}`}
+                  </h2>
+                  <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-500">
+                    {customerSession?.token
+                      ? `Logado como ${customerDisplayName || 'cliente'}`
+                      : 'Entre para salvar endereço, ver pedidos e continuar em outro aparelho.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex min-w-0 flex-wrap items-center gap-2 sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => navigate('/hub')}
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-slate-200/80 bg-white/82 px-3 text-[11px] font-black uppercase tracking-[0.08em] text-slate-600 shadow-[0_12px_24px_-22px_rgba(15,23,42,0.32)] transition-all hover:bg-white active:scale-[0.98]"
+                >
+                  <House size={15} weight="duotone" />
+                  Início
+                </button>
+                <button
+                  type="button"
+                  onClick={() => (customerSession?.token ? navigate('/cliente/pedidos') : openCustomerAccountPanel('login'))}
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-[#d7e7ef] bg-white/88 px-3 text-[11px] font-black uppercase tracking-[0.08em] text-[#336886] shadow-[0_12px_24px_-22px_rgba(51,104,134,0.42)] transition-all hover:bg-white active:scale-[0.98]"
+                >
+                  <Receipt size={15} weight="duotone" />
+                  Pedidos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openCustomerAccountPanel('login')}
+                  className={`inline-flex h-10 min-w-0 items-center gap-2 rounded-full px-2.5 pr-3 text-[11px] font-black uppercase tracking-[0.08em] shadow-[0_14px_28px_-20px_rgba(15,23,42,0.35)] transition-all active:scale-[0.98] ${
+                    customerSession?.token
+                      ? 'border border-slate-200/80 bg-slate-950 text-white'
+                      : 'border border-emerald-200/80 bg-emerald-50 text-emerald-700'
+                  }`}
+                >
+                  <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-black ${
+                    customerSession?.token ? 'bg-white/14 text-white ring-1 ring-white/15' : 'bg-white text-emerald-700 ring-1 ring-emerald-100'
+                  }`}>
+                    {customerSession?.token ? customerInitials : <UserCircle size={15} weight="fill" />}
+                  </span>
+                  <span className="max-w-[8.5rem] truncate">
+                    {customerSession?.token ? 'Minha conta' : 'Entrar'}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
       {isDemo && view === 'menu' && (
         <div className="bg-amber-50 border-b border-amber-200">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-amber-900">
