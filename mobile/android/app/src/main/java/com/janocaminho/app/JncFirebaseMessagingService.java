@@ -73,8 +73,10 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
             + " foreground=" + isForeground
             + " autoPrint=" + autoPrintEnabled);
 
-        // If app is in background and auto-print is enabled, start the print service
-        if (!isForeground && autoPrintEnabled) {
+        // Sempre que o auto-print esta ligado, imprime pelo servico — funciona em qualquer
+        // tela (foreground), com app minimizado (background) e com a tela bloqueada. O
+        // polling da fila nao imprime mais (evitaria impressao dupla quando a fila esta aberta).
+        if (autoPrintEnabled) {
             Intent printIntent = new Intent(this, PrintForegroundService.class);
             for (Map.Entry<String, String> entry : data.entrySet()) {
                 printIntent.putExtra(entry.getKey(), entry.getValue());
@@ -93,7 +95,7 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
         if (body == null || body.isEmpty()) {
             body = storeName != null ? storeName : "Pedido recebido";
         }
-        if (!isForeground && autoPrintEnabled) {
+        if (autoPrintEnabled) {
             title = "Pedido impresso!";
             body = (orderId != null ? "#" + orderId.substring(0, Math.min(8, orderId.length())) : "Pedido") + " impresso automaticamente.";
         }

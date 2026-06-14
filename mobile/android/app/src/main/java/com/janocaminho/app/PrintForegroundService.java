@@ -17,6 +17,10 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Foreground service that prints a thermal receipt via Bluetooth.
  * Started by JncFirebaseMessagingService when a new online order arrives
@@ -30,6 +34,12 @@ public class PrintForegroundService extends Service {
     private static final String KEY_ADDRESS = "printer_address";
     private static final String KEY_FEED_LINES = "printer_feed_lines";
     private static final int DEFAULT_FEED_LINES = 3;
+
+    // Executor single-thread: garante que so um job de impressao roda por vez. Sem isso,
+    // quando varios pedidos chegam quase juntos, varias threads concorriam pelo mesmo
+    // socket Bluetooth e so uma das impressoes concluia.
+    private final ExecutorService printExecutor = Executors.newSingleThreadExecutor();
+    private final AtomicInteger pendingJobs = new AtomicInteger(0);
 
     @Override
     public void onCreate() {
@@ -45,63 +55,78 @@ public class PrintForegroundService extends Service {
         }
 
         String orderLabel = intent.getStringExtra("orderLabel");
-        String notificationTitle = "Imprimindo " + (orderLabel != null ? orderLabel : "pedido...");
+        startForeground(NOTIFICATION_ID, buildNotification(
+            "Imprimindo " + (orderLabel != null ? orderLabel : "pedido..."),
+            "Conectando na impressora..."));
 
-        startForeground(NOTIFICATION_ID, buildNotification(notificationTitle, "Conectando na impressora..."));
-
-        new Thread(() -> {
-            boolean success = false;
-            String errorMsg = null;
-            try {
-                Bundle data = intent.getExtras();
-                if (data == null) {
-                    errorMsg = "No data in intent";
-                    Log.e(TAG, errorMsg);
-                    return;
-                }
-
-                String printerAddress = getPrinterAddress();
-                if (printerAddress.isEmpty()) {
-                    errorMsg = "Nenhuma impressora configurada";
-                    Log.w(TAG, errorMsg);
-                    return;
-                }
-
-                int feedLines = getFeedLines();
-                int lineWidth = 32;
-
-                Log.i(TAG, "Building receipt for " + orderLabel);
-                String receiptText = BluetoothPrinterHelper.buildReceiptText(data, lineWidth);
-                String qrData = data.getString("qrData", "");
-
-                byte[] printBytes = BluetoothPrinterHelper.toPrinterBytes(receiptText, feedLines, qrData);
-                Log.i(TAG, "Print bytes: " + printBytes.length + " to " + printerAddress);
-
-                updateNotification("Imprimindo " + orderLabel, "Enviando para impressora...");
-
-                BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-                success = BluetoothPrinterHelper.printViaBluetooth(adapter, printerAddress, printBytes);
-
-            } catch (Exception e) {
-                errorMsg = e.getMessage();
-                Log.e(TAG, "Print failed", e);
-            } finally {
-                if (success) {
-                    Log.i(TAG, "Print SUCCESS for " + orderLabel);
-                    updateNotification("Pedido impresso! " + (orderLabel != null ? orderLabel : ""),
-                        "Cupom impresso com sucesso.");
-                } else {
-                    String msg = errorMsg != null ? errorMsg : "Falha na conexão Bluetooth";
-                    Log.w(TAG, "Print FAILED: " + msg);
-                    updateNotification("Falha ao imprimir", msg);
-                }
-                // Stop service after a short delay so user can see the result notification
-                try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
-                stopSelf();
-            }
-        }, "JNC-PrintService-Worker").start();
+        // Enfileira no executor single-thread: quando varios pedidos chegam quase juntos,
+        // cada um imprime na sua vez. Antes, varias threads concorriam pelo socket
+        // Bluetooth e so uma das impressoes concluia.
+        pendingJobs.incrementAndGet();
+        final Intent printIntent = intent;
+        final String label = orderLabel;
+        printExecutor.submit(() -> processPrintJob(printIntent, label));
 
         return START_NOT_STICKY;
+    }
+
+    private void processPrintJob(Intent intent, String orderLabel) {
+        boolean success = false;
+        String errorMsg = null;
+        try {
+            Bundle data = intent.getExtras();
+            if (data == null) {
+                errorMsg = "No data in intent";
+                Log.e(TAG, errorMsg);
+                return;
+            }
+
+            String printerAddress = getPrinterAddress();
+            if (printerAddress.isEmpty()) {
+                errorMsg = "Nenhuma impressora configurada";
+                Log.w(TAG, errorMsg);
+                return;
+            }
+
+            int feedLines = getFeedLines();
+            int lineWidth = 32;
+
+            Log.i(TAG, "Building receipt for " + orderLabel);
+            String receiptText = BluetoothPrinterHelper.buildReceiptText(data, lineWidth);
+            String qrData = data.getString("qrData", "");
+
+            byte[] printBytes = BluetoothPrinterHelper.toPrinterBytes(receiptText, feedLines, qrData);
+            Log.i(TAG, "Print bytes: " + printBytes.length + " to " + printerAddress);
+
+            updateNotification("Imprimindo " + orderLabel, "Enviando para impressora...");
+
+            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+            success = BluetoothPrinterHelper.printViaBluetooth(adapter, printerAddress, printBytes);
+
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+            Log.e(TAG, "Print failed", e);
+        } finally {
+            if (success) {
+                Log.i(TAG, "Print SUCCESS for " + orderLabel);
+                updateNotification("Pedido impresso! " + (orderLabel != null ? orderLabel : ""),
+                    "Cupom impresso com sucesso.");
+            } else {
+                String msg = errorMsg != null ? errorMsg : "Falha na conexao Bluetooth";
+                Log.w(TAG, "Print FAILED: " + msg);
+                updateNotification("Falha ao imprimir", msg);
+            }
+            // So encerra o servico quando a fila esvazia, preservando jobs pendentes.
+            if (pendingJobs.decrementAndGet() <= 0) {
+                stopSelf();
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        printExecutor.shutdownNow();
+        super.onDestroy();
     }
 
     @Nullable

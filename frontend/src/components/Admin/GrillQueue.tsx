@@ -46,7 +46,6 @@ import { useAuth } from "../../contexts/AuthContext";
 import { Button } from '../ui/Button';
 import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
-import { getStoredThermalPrinterSettings } from "../../utils/thermalPrinter";
 import { exportToCsv } from "../../utils/export";
 import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from "../../utils/orderNotificationSound";
 import {
@@ -1969,27 +1968,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       const incoming = nextIds.filter((id) => !previousIds.includes(id));
       const hasNew = incoming.length > 0;
       // Primeira carga apos abrir a fila: pedidos ja existentes NAO sao "novos" —
-      // nao tocam som nem disparam auto-print. So imprime quem chega depois da tela aberta.
+      // nao tocam som nem destacam. O auto-print agora e via push (servico nativo).
       const isFirstPrime = !queuePrimedRef.current;
       if (hasNew && !isFirstPrime) {
         void playNewOrderSound();
         setNewOrderIds(incoming);
         window.setTimeout(() => setNewOrderIds([]), 4000);
-
-        // Auto-print: only for online customer orders when setting is enabled
-        const autoPrintEnabled = getStoredThermalPrinterSettings().autoPrintOnlineOrders;
-        if (autoPrintEnabled && hasPrintAccess) {
-          const newOrders = (data || []).filter((o: any) => incoming.includes(o.id));
-          const onlineOrders = newOrders.filter((o: any) =>
-            Boolean(String(o?.customerUserId || '').trim() || String(o?.guestPushId || '').trim())
-          );
-          for (const order of onlineOrders) {
-            const rank = nextIds.indexOf(order.id) + 1;
-            void executePrintOrder(order, rank).catch((autoPrintErr) => {
-              console.warn('[auto-print] falha ao imprimir pedido automaticamente', order.id, autoPrintErr);
-            });
-          }
-        }
+        // Auto-print agora e feito pelo push (PrintForegroundService) em qualquer tela/estado
+        // (foreground em qualquer tela, background, tela bloqueada). O polling da fila nao
+        // imprime mais para evitar impressao dupla quando a fila esta aberta.
       }
       queuePrimedRef.current = true;
       previousIdsRef.current = nextIds;
