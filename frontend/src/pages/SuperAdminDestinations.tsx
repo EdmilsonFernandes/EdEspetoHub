@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bed, Buildings, CaretDown, ChartBar, ChatCircleText, CheckCircle, ClockCountdown, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, ShieldCheck, Sparkle, Trash, UploadSimple, WarningCircle, X } from '@phosphor-icons/react';
+import { DestinationMonetizationAdmin } from '../components/Destination/DestinationMonetizationAdmin';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { Button, Chip, EmptyState, SectionHeader, SurfaceCard, TextareaField, TextField } from '../components/ui';
 import { destinationService } from '../services/destinationService';
@@ -2625,6 +2626,7 @@ export function SuperAdminDestinations() {
     { id: 'dashboard', label: 'Resumo', icon: Compass },
     { id: 'cadastro', label: 'Cadastro', icon: Plus },
     { id: 'requests', label: 'Parceiros', icon: WarningCircle, badge: metrics.pending },
+    { id: 'monetizacao', label: 'Monetização', icon: Sparkle },
   ];
   const superAdminGroups = [
     { id: 'overview', label: 'Visão geral', subtitle: 'Saúde da plataforma', icon: ChartBar, target: 'executive' },
@@ -3266,6 +3268,12 @@ export function SuperAdminDestinations() {
 
         {error ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
         {loading ? <p className="text-sm font-semibold text-slate-500">Carregando destinos...</p> : null}
+
+        {activeTab === 'monetizacao' ? (
+          <div className="px-4 py-4">
+            <DestinationMonetizationAdmin />
+          </div>
+        ) : null}
 
         {activeTab === 'dashboard' ? (
           <div className="space-y-4">

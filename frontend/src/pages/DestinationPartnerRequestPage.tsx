@@ -569,7 +569,10 @@ export function DestinationPartnerRequestPage() {
             {success ? (
               <SurfaceCard tone="success" padding="md" className="mt-4 rounded-2xl text-sm font-bold text-emerald-700">
                 <CheckCircle size={18} weight="fill" className="mr-1 inline" />
-                Recebemos sua solicitação. O time Já no Caminho vai revisar e entrar em contato quando estiver tudo certo.
+                Recebemos sua solicitação! O time Já no Caminho vai revisar e entrar em contato quando estiver tudo certo.
+                <span className="mt-1 block text-xs font-semibold text-slate-500">
+                  Depois de aprovado, no portal você pode <strong className="text-[#336886]">destacar seu espaço</strong> para aparecer primeiro no destino (opcional, a partir de R$ 19,90).
+                </span>
               </SurfaceCard>
             ) : null}
             {loading ? <p className="mt-4 text-sm font-semibold text-slate-500">Carregando destinos...</p> : null}
