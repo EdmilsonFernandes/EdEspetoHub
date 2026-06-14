@@ -543,7 +543,11 @@ export class OrderService
 
     // Build compact items string for FCM data: "qtyx name|price;qtyx name|price"
     const orderItems = Array.isArray(order?.items) ? order.items : [];
-    const receiptItems = orderItems
+    // Limite seguro: o payload `data` do FCM tem ~4KB. Pedidos muitos grandes
+    // estouravam o limite -> o FCM rejeitava (INVALID_ARGUMENT) e o push nao chegava
+    // (e ainda podia desativar o token do aparelho). Truncamos os campos pesados.
+    const MAX_RECEIPT_ITEMS_CHARS = 1200;
+    let receiptItems = orderItems
       .map((item: any) => {
         const qty = Math.max(0, Number(item?.quantity || 0));
         const name = String(item?.product?.name || item?.name || 'Item').trim();
@@ -551,12 +555,15 @@ export class OrderService
         return `${qty}x ${name}|${price}`;
       })
       .join(';');
+    if (receiptItems.length > MAX_RECEIPT_ITEMS_CHARS) {
+      receiptItems = `${receiptItems.slice(0, MAX_RECEIPT_ITEMS_CHARS).replace(/;[^;]*$/, '')};...`;
+    }
 
     const storeName = String((order as any)?.store?.name || '').trim();
     const locationLabel = String(order?.table || '').trim()
       ? `MESA ${order.table}`
       : String((order as any)?.fulfillmentMode === 'delivery' ? 'DELIVERY' : '').trim();
-    const customerNote = String(order?.customerNote || '').trim();
+    const customerNote = String(order?.customerNote || '').trim().slice(0, 300);
     const dateLabel = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
 
     const payload = {
@@ -571,6 +578,7 @@ export class OrderService
         notificationType: storeNotificationType,
         // Receipt data for background auto-print
         ...(storeName ? { storeName } : {}),
+        ...(customerName && customerName !== 'Cliente online' ? { customerName } : {}),
         ...(receiptItems ? { receiptItems } : {}),
         ...(locationLabel ? { locationLabel } : {}),
         ...(customerNote ? { customerNote } : {}),

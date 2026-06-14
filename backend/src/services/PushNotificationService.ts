@@ -460,10 +460,11 @@ export class PushNotificationService {
       }
 
       const code = this.normalizeV1ErrorCode(body);
+      // INVALID_ARGUMENT (ex.: payload > 4KB) NAO desativa o token — apenas erros de
+      // token invalido. Desativar por tamanho quebraria todos os pushes seguintes.
       const deactivateToken =
         code === 'UNREGISTERED' ||
         code === 'NOT_FOUND' ||
-        code === 'INVALID_ARGUMENT' ||
         code === 'SENDER_ID_MISMATCH';
       return {
         ok: false,
