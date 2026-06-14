@@ -493,9 +493,38 @@ body {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(20px, 10px) scale(1.06); }
 }
+.jnc-hub-aurora-1,
+.jnc-hub-aurora-2,
+.jnc-hub-aurora-3 {
+  contain: paint;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
 .jnc-hub-aurora-1 { animation: jnc-aurora-1 18s ease-in-out infinite; }
 .jnc-hub-aurora-2 { animation: jnc-aurora-2 22s ease-in-out infinite; }
 .jnc-hub-aurora-3 { animation: jnc-aurora-3 15s ease-in-out infinite; }
+
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  .jnc-safe-area-glass {
+    -webkit-backdrop-filter: blur(10px) saturate(1.08);
+    backdrop-filter: blur(10px) saturate(1.08);
+  }
+
+  .jnc-marketplace-header-glass {
+    -webkit-backdrop-filter: blur(12px) saturate(1.08);
+    backdrop-filter: blur(12px) saturate(1.08);
+  }
+
+  .jnc-hub-aurora-1,
+  .jnc-hub-aurora-2,
+  .jnc-hub-aurora-3 {
+    animation: none;
+    filter: blur(72px) !important;
+    opacity: 0.72;
+    will-change: auto;
+  }
+}
 
 .client-marquee-track {
   animation: clientMarquee 32s linear infinite;

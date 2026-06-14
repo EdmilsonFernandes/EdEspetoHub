@@ -658,7 +658,13 @@ export function MarketplacePage() {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const condominiumSearchInputRef = useRef<HTMLInputElement | null>(null);
   const storesSectionRef = useRef<HTMLElement | null>(null);
+  const headerElevatedRef = useRef(false);
   const publicCondominiumLoadInFlightRef = useRef(false);
+  const updateHeaderElevated = useCallback((nextValue: boolean) => {
+    if (headerElevatedRef.current === nextValue) return;
+    headerElevatedRef.current = nextValue;
+    setIsHeaderElevated(nextValue);
+  }, []);
   const openOrderTracking = useCallback((orderId?: string | null, accessToken?: string | null) => {
     const normalizedOrderId = String(orderId || '').trim();
     if (!normalizedOrderId) return;
@@ -1016,7 +1022,7 @@ export function MarketplacePage() {
   useEffect(() => {
     const restoreHubHeader = () => {
       setHasEntered(true);
-      setIsHeaderElevated(!isNativePlatform || (window.scrollY || 0) > 6);
+      updateHeaderElevated(!isNativePlatform || (window.scrollY || 0) > 6);
       setIsSearchEditing(false);
       if (searchInputRef.current) {
         searchInputRef.current.blur();
@@ -1037,11 +1043,11 @@ export function MarketplacePage() {
       window.removeEventListener('pageshow', restoreHubHeader);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [isNativePlatform]);
+  }, [isNativePlatform, updateHeaderElevated]);
 
   useEffect(() => {
     if (!isNativePlatform) {
-      setIsHeaderElevated(true);
+      updateHeaderElevated(true);
       return;
     }
     let ticking = false;
@@ -1050,13 +1056,13 @@ export function MarketplacePage() {
       ticking = true;
       window.requestAnimationFrame(() => {
         const currentY = window.scrollY || 0;
-        setIsHeaderElevated(currentY > 8);
+        updateHeaderElevated(currentY > 8);
         ticking = false;
       });
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [isNativePlatform]);
+  }, [isNativePlatform, updateHeaderElevated]);
 
   useEffect(() => {
     const onTouchStart = (event: TouchEvent) => {
@@ -2008,9 +2014,9 @@ export function MarketplacePage() {
         }`}
       >
         {/* Floating Ambient Mesh Gradients */}
-        <div className="pointer-events-none absolute -left-[10%] top-[8%] -z-10 h-[380px] w-[380px] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.06)_0%,rgba(20,184,166,0.02)_60%,transparent_100%)] blur-[60px] animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="pointer-events-none absolute -right-[10%] top-[35%] -z-10 h-[450px] w-[450px] rounded-full bg-[radial-gradient(circle,rgba(51,104,134,0.05)_0%,rgba(99,102,241,0.02)_60%,transparent_100%)] blur-[80px] animate-pulse" style={{ animationDuration: '12s' }} />
-        <div className="pointer-events-none absolute left-[15%] top-[65%] -z-10 h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.04)_0%,rgba(236,72,153,0.01)_60%,transparent_100%)] blur-[50px] animate-pulse" style={{ animationDuration: '10s' }} />
+        <div className="pointer-events-none absolute -left-[10%] top-[8%] -z-10 h-[380px] w-[380px] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.06)_0%,rgba(20,184,166,0.02)_60%,transparent_100%)] blur-[60px]" />
+        <div className="pointer-events-none absolute -right-[10%] top-[35%] -z-10 h-[450px] w-[450px] rounded-full bg-[radial-gradient(circle,rgba(51,104,134,0.05)_0%,rgba(99,102,241,0.02)_60%,transparent_100%)] blur-[80px]" />
+        <div className="pointer-events-none absolute left-[15%] top-[65%] -z-10 h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.04)_0%,rgba(236,72,153,0.01)_60%,transparent_100%)] blur-[50px]" />
 
         <HubHeader
           isNativePlatform={isNativePlatform}

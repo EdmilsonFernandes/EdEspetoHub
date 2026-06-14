@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Autoplay from 'embla-carousel-autoplay';
 import useEmblaCarousel from 'embla-carousel-react';
@@ -55,6 +55,7 @@ export function SegmentPromoCarousel({
 }: SegmentPromoCarouselProps) {
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
+  const scrollResumeTimerRef = useRef<number | null>(null);
   const compact = mode === 'hub';
   const activeSlides = slides && slides.length ? slides : PROMO_SLIDES;
   const useDefaultAction = !slides || !slides.length;
@@ -114,6 +115,31 @@ export function SegmentPromoCarousel({
       emblaApi.off('reInit', syncSelectedIndex);
     };
   }, [emblaApi, syncSelectedIndex]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || activeSlides.length <= 1 || prefersReducedMotion) return undefined;
+
+    const pauseAutoplayDuringScroll = () => {
+      autoplay.stop();
+      if (scrollResumeTimerRef.current != null) {
+        window.clearTimeout(scrollResumeTimerRef.current);
+      }
+      scrollResumeTimerRef.current = window.setTimeout(() => {
+        if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+          autoplay.play();
+        }
+      }, 700);
+    };
+
+    window.addEventListener('scroll', pauseAutoplayDuringScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', pauseAutoplayDuringScroll);
+      if (scrollResumeTimerRef.current != null) {
+        window.clearTimeout(scrollResumeTimerRef.current);
+        scrollResumeTimerRef.current = null;
+      }
+    };
+  }, [activeSlides.length, autoplay, prefersReducedMotion]);
 
   if (!resolvedSlides.length) return null;
 
