@@ -376,6 +376,12 @@ export const CartView = ({
     () => resolvedPaymentMethods.find((method) => method.id === paymentMethod) || resolvedPaymentMethods[0] || null,
     [paymentMethod, resolvedPaymentMethods]
   );
+  const activePaymentId = paymentMethod || selectedPaymentMethod?.id || "dinheiro";
+  const activePaymentMeta = getPaymentMethodMeta(activePaymentId);
+  const activePaymentLabel =
+    selectedPaymentMethod?.id === activePaymentId ? selectedPaymentMethod.label : activePaymentMeta.label;
+  const activePaymentTone = isOnlinePaymentMethod ? "online" : "local";
+  const openPaymentSheet = () => setShowPaymentSheet(true);
 
   useEffect(() => {
     if (!isPostalDelivery || !resolvedPaymentMethods.length) return;
@@ -1139,7 +1145,7 @@ export const CartView = ({
         data-testid="checkout-payment-summary-card"
       >
         <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-[#336886]/18 to-transparent" />
-        <div className="flex items-center gap-3">
+        <div className="flex items-start gap-3">
           {renderPaymentMethodIcon(currentPaymentId, { size: "md", selected: true, tone: isOnlinePaymentMethod ? "online" : "local" })}
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -1153,15 +1159,18 @@ export const CartView = ({
                 ? `Troco para ${formatCurrency(cashTenderedValue)}`
                 : methodDescription}
             </p>
+            <p className="mt-2 text-[10.5px] font-bold leading-snug text-slate-400">
+              Quer usar Pix, cartão ou dinheiro? Toque em alterar forma.
+            </p>
           </div>
           <button
             type="button"
-            onClick={() => {
-              setShowPaymentSheet(true);
-            }}
-            className="jnc-hub-touch shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886] transition hover:bg-[#336886]/10"
+            onClick={openPaymentSheet}
+            className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#153A4C,#336886)] px-3 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)] transition hover:brightness-105 active:scale-[0.98]"
           >
-            Trocar
+            <CreditCard size={13} weight="duotone" />
+            <span>Alterar</span>
+            <span className="hidden min-[390px]:inline">forma</span>
           </button>
         </div>
       </div>
@@ -1345,6 +1354,11 @@ export const CartView = ({
                   tone === "online" ? "bg-[#336886]" : "bg-emerald-600"
                 }`}>
                   ✓
+                </span>
+              )}
+              {selected && (
+                <span className="hidden shrink-0 rounded-full bg-white/78 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-slate-600 ring-1 ring-white/80 min-[390px]:inline-flex">
+                  Selecionado
                 </span>
               )}
             </div>
@@ -2629,8 +2643,11 @@ export const CartView = ({
                 Pagamento
               </p>
               <h2 className="text-base font-black tracking-tight text-slate-950">
-                Forma escolhida
+                Como você vai pagar?
               </h2>
+              <p className="mt-0.5 text-xs font-semibold leading-snug text-slate-500">
+                Confira a forma atual ou altere antes de finalizar.
+              </p>
             </div>
           </div>
           <div className="relative z-10 space-y-3">
@@ -2786,9 +2803,9 @@ export const CartView = ({
             data-testid="checkout-review-payment-card"
             style={{ scrollMarginBottom: 'calc(env(safe-area-inset-bottom) + 9rem)' }}
           >
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-start gap-3.5">
               {renderPaymentMethodIcon(paymentMethod, { size: "md", selected: true, tone: isOnlinePaymentMethod ? "online" : "local" })}
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Pagamento</p>
                 {(() => {
                   const methodMeta = getPaymentMethodMeta(paymentMethod);
@@ -2813,6 +2830,17 @@ export const CartView = ({
                     : 'Você pagará quando receber o pedido.'}
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setCheckoutStep(3);
+                  openPaymentSheet();
+                }}
+                className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/12 bg-[#336886]/7 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition hover:bg-[#336886]/12 active:scale-[0.98]"
+              >
+                <CreditCard size={13} weight="duotone" />
+                Alterar
+              </button>
             </div>
           </div>
         </div>
@@ -3014,9 +3042,9 @@ export const CartView = ({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Pagamento</p>
-                  <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Escolha como pagar</h3>
+                  <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Trocar forma de pagamento</h3>
                   <p className="mt-1 text-xs font-semibold leading-snug text-slate-500">
-                    Escolha a forma de pagamento. Os itens do pedido continuam iguais.
+                    Selecione uma opção abaixo. O pedido continua igual e a troca aplica na hora.
                   </p>
                 </div>
                 <button
@@ -3029,6 +3057,18 @@ export const CartView = ({
                 >
                   X
                 </button>
+              </div>
+              <div className="mt-3 flex items-center gap-3 rounded-[1.25rem] border border-[#336886]/10 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)] p-3 shadow-[0_14px_30px_-26px_rgba(51,104,134,0.28)]">
+                {renderPaymentMethodIcon(activePaymentId, { size: "sm", selected: true, tone: activePaymentTone })}
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
+                    Forma atual
+                  </p>
+                  <p className="truncate text-sm font-black text-slate-950">{activePaymentLabel}</p>
+                </div>
+                <span className="shrink-0 rounded-full border border-[#336886]/10 bg-white px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                  Ativa
+                </span>
               </div>
             </div>
 
@@ -3069,7 +3109,7 @@ export const CartView = ({
                       <span>Seguro</span>
                     </div>
                   </div>
-                  <div className={`grid gap-2.5 ${paymentGroups.online.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
+                  <div className="grid grid-cols-1 gap-2.5">
                     {paymentGroups.online.map((method) => renderPaymentMethodCard(method, "online"))}
                   </div>
                 </section>
@@ -3091,7 +3131,7 @@ export const CartView = ({
                       Presencial
                     </span>
                   </div>
-                  <div className={`grid gap-2.5 ${paymentGroups.local.length === 1 ? "grid-cols-1" : "grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3"}`}>
+                  <div className="grid grid-cols-1 gap-2.5">
                     {paymentGroups.local.map((method) => renderPaymentMethodCard(method, "local"))}
                   </div>
                 </section>
