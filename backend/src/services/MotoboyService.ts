@@ -228,6 +228,9 @@ private async ensureMotoboyProfileIsComplete(motoboy: Motoboy) {
    * @author Edmilson Lopes
    */
 private getRequiredDocTypesForMotoboy(motoboy: Motoboy) {
+    // Motoboy gerenciado pela loja (e-mail placeholder @store-managed...) NAO exige KYC:
+    // a loja responde por ele. Motoboy independente (e-mail real) continua exigindo KYC.
+    if (this.isStoreManagedPlaceholderEmail(motoboy.user?.email)) return [];
     const vehicleType = String(motoboy.vehicleType || '').toUpperCase();
     const mustHave = [ 'CNH', 'SELFIE' ];
     if (vehicleType === 'MOTO' || vehicleType === 'CARRO' || vehicleType === 'OUTRO') mustHave.push('CRLV');
@@ -455,6 +458,7 @@ async listPendingKycQueue() {
     }
 
     return Array.from(byMotoboy.values())
+      .filter((x) => !this.isStoreManagedPlaceholderEmail(x.motoboy?.user?.email)) // exclui store-managed (sem KYC obrigatorio)
       .sort((a, b) => b.latestAt.getTime() - a.latestAt.getTime())
       .map((x) => ({ ...x, latestAt: x.latestAt.toISOString() }));
   }
