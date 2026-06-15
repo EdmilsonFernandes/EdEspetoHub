@@ -351,12 +351,22 @@ const Header = ({
               ) : null}
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/10" />
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="absolute left-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white backdrop-blur-md active:scale-95 transition"
+                aria-label="Voltar"
+              >
+                <ArrowLeft size={16} weight="bold" />
+              </button>
+            )}
             <div className="absolute right-3 top-3 z-20 flex items-center gap-2">
               {onOpenCustomerAccount && (
                 <button
                   type="button"
                   onClick={onOpenCustomerAccount}
-                  className="h-9 w-9 rounded-full border border-white/35 bg-black/25 text-white backdrop-blur-md inline-flex items-center justify-center active:scale-95 transition"
+                  className="h-9 w-9 rounded-full border border-white/15 bg-black/40 text-white backdrop-blur-md inline-flex items-center justify-center active:scale-95 transition"
                   aria-label={isCustomerAuthenticated ? "Minha conta" : "Entrar na conta"}
                   title={isCustomerAuthenticated ? "Minha conta" : "Entrar"}
                 >
@@ -366,7 +376,7 @@ const Header = ({
               <button
                 type="button"
                 onClick={handleShareStore}
-                className="h-9 w-9 rounded-full border border-white/35 bg-black/25 text-white backdrop-blur-md inline-flex items-center justify-center active:scale-95 transition"
+                className="h-9 w-9 rounded-full border border-white/15 bg-black/40 text-white backdrop-blur-md inline-flex items-center justify-center active:scale-95 transition"
                 aria-label="Compartilhar loja"
               >
                 <ShareNetwork size={15} weight="bold" />
@@ -374,7 +384,7 @@ const Header = ({
               <button
                 type="button"
                 onClick={() => setIsFavorite((prev) => !prev)}
-                className="h-9 w-9 rounded-full border border-white/35 bg-black/25 text-white backdrop-blur-md inline-flex items-center justify-center active:scale-95 transition"
+                className="h-9 w-9 rounded-full border border-white/15 bg-black/40 text-white backdrop-blur-md inline-flex items-center justify-center active:scale-95 transition"
                 aria-label={isFavorite ? "Remover dos favoritos" : "Favoritar loja"}
               >
                 <HeartStraight size={15} weight={isFavorite ? "fill" : "regular"} />
@@ -604,6 +614,7 @@ export const MenuView = ({
   systemHeaderOffset = false,
   activeTab = "products",
   setActiveTab = (() => {}) as any,
+  onBack,
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

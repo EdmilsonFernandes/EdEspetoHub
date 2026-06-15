@@ -734,7 +734,7 @@ export function StorePage() {
   const showAdminWebReturnBar = isStoreAdmin && !isNativeRuntime && view !== 'menu';
   const showClientWebBottomNav = !isNativeRuntime && !isStoreAdmin && view === 'menu';
   const showClientWebCheckoutContext = !isNativeRuntime && !isStoreAdmin && (view === 'cart' || view === 'success');
-  const showPublicStoreAppHeader = !isStoreAdmin && [ 'menu', 'cart', 'success' ].includes(String(view || ''));
+  const showPublicStoreAppHeader = !isStoreAdmin && [ 'cart', 'success' ].includes(String(view || ''));
   const [publicStoreHeaderScrolled, setPublicStoreHeaderScrolled] = useState(false);
   const publicStoreHeaderIsSolid = view !== 'menu' || publicStoreHeaderScrolled;
   const publicStoreHeaderTitle =
@@ -4469,6 +4469,7 @@ export function StorePage() {
               minOrderValue={branding?.minOrderValue ?? 20}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
+              onBack={handlePublicStoreHeaderBack}
               compactHeader={isMobile}
               systemHeaderOffset={showPublicStoreAppHeader}
               staffView={Boolean(canUseAdminPrintFlow)}
