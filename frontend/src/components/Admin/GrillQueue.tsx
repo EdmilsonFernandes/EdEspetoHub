@@ -1303,6 +1303,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const queuePrimedRef = useRef(false);
   // Pedidos sendo impressidos agora (evita duplicar entre ciclos de polling).
   const printingIdsRef = useRef<Set<string>>(new Set());
+  // Cap de tentativas de auto-print por pedido (anti-loop infinito). Mesmo se o ACK falhar
+  // (ex.: WebView pausada em background), cada pedido e re-impresso no maximo N vezes e para.
+  const MAX_AUTO_PRINT_ATTEMPTS = 3;
+  const printAttemptsRef = useRef<Map<string, number>>(new Map());
   const queueRef = useRef<any[]>([]);
   const historyOrdersRef = useRef<any[]>([]);
   const queuePollTimerRef = useRef<number | null>(null);
@@ -1328,7 +1332,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     setEditingFinalizedOrder(false);
   };
 
-  const executePrintOrder = async (order: any, queueRank = 1, mode: 'all' | 'new' = 'all') => {
+  const executePrintOrder = async (order: any, queueRank = 1, mode: 'all' | 'new' = 'all', allowRawBtFallback = true) => {
     if (!hasPrintAccess || !order?.id) return;
     if (isGeneratingPrint) return;
     const orderItems = Array.isArray(order?.items) ? order.items : [];
@@ -1418,6 +1422,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           };
         }),
         totalLabel: formatCurrency(payload.total),
+        allowRawBtFallback,
       });
       printMode = result?.mode || '';
     } catch (printError) {
@@ -1992,15 +1997,21 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           Boolean(String(o?.customerUserId || '').trim() || String(o?.guestPushId || '').trim())
           && !acked.has(String(o?.id || ''))
           && !printingIdsRef.current.has(String(o?.id || ''))
+          && (printAttemptsRef.current.get(String(o?.id || '')) || 0) < MAX_AUTO_PRINT_ATTEMPTS
         );
         for (const order of toPrint) {
           const oid = String(order.id);
           printingIdsRef.current.add(oid);
+          printAttemptsRef.current.set(oid, (printAttemptsRef.current.get(oid) || 0) + 1);
           const rank = nextIds.indexOf(order.id) + 1;
-          void executePrintOrder(order, rank)
-            .then(() => { ackPrintOrder(oid); })
+          // Auto-print é NATIVE-ONLY (allowRawBtFallback=false): o Intent rawbt: backgroundava
+          // o app e sabotava o ACK, causando loop infinito reimprimindo os mesmos pedidos.
+          // Falha nativa conta como tentativa; apos MAX_AUTO_PRINT_ATTEMPTS o pedido para de
+          // ser re-impresso (cap duro anti-loop, independente do estado do ACK).
+          void executePrintOrder(order, rank, 'all', false)
+            .then(() => { ackPrintOrder(oid); printAttemptsRef.current.delete(oid); })
             .catch((autoPrintErr) => {
-              console.warn('[auto-print] falhou — vai retentar no proximo ciclo', oid, autoPrintErr);
+              console.warn('[auto-print] falhou — retentativa limitada no proximo ciclo', oid, autoPrintErr);
             })
             .finally(() => { printingIdsRef.current.delete(oid); });
         }

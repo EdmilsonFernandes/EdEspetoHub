@@ -26,6 +26,9 @@ type PrintReceiptRawBtInput = {
   items: ReceiptItem[];
   totalLabel: string;
   qrData?: string;
+  // false = auto-print (native-only, SEM fallback RawBT). Default true = impressao manual,
+  // que mantem o fallback RawBT para quem nao tem conexao Bluetooth direta configurada.
+  allowRawBtFallback?: boolean;
 };
 
 type PrintReceiptMode = 'native' | 'rawbt' | 'browser';
@@ -479,7 +482,12 @@ const runPrintReceipt = async (payload: PrintReceiptRawBtInput): Promise<PrintRe
     const startedAt = getNow();
     const printerSettings = getStoredThermalPrinterSettings();
     const rawText = buildRawBtText(payload, printerSettings);
-    const fastFallbackReason = getRawBtFastFallbackReason();
+    // Auto-print (allowRawBtFallback=false) NAO usa RawBT: o Intent rawbt: coloca o app em
+    // background e sabota o ACK do polling (race com onPause da Activity) => loop infinito
+    // reimprimindo os mesmos pedidos. Nesse modo, falha nativa PROPAGA o erro (o caller do
+    // polling conta como tentativa e, apos o cap, desiste). Impressao manual mantem o fallback.
+    const allowFallback = payload.allowRawBtFallback !== false;
+    const fastFallbackReason = allowFallback ? getRawBtFastFallbackReason() : '';
     if (fastFallbackReason) {
       return sendToRawBt(rawText, startedAt, fastFallbackReason, payload.items.length);
     }
@@ -495,6 +503,13 @@ const runPrintReceipt = async (payload: PrintReceiptRawBtInput): Promise<PrintRe
       return { mode: 'native', durationMs, bytes: result?.bytes };
     } catch (nativeError: any) {
       const nativeCode = String(nativeError?.code || nativeError?.message || 'NATIVE_PRINT_UNAVAILABLE');
+      if (!allowFallback) {
+        console.warn('[print] nativa falhou (auto-print, sem fallback RawBT)', {
+          code: nativeCode,
+          message: nativeError?.message,
+        });
+        throw nativeError;
+      }
       markRawBtFastFallback(nativeCode);
       console.warn('[print] impressão nativa indisponível, usando fallback RawBT', {
         code: nativeCode,
