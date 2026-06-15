@@ -17,7 +17,11 @@ import java.util.UUID;
  */
 public final class BluetoothPrinterHelper {
     private static final String TAG = "JNC_THERMAL";
-    private static final int WRITE_CHUNK_SIZE = 512;
+    // Tamanho grande proposital: o cupom inteiro (~1-2KB) deve ir em UM unico write para
+    // o comando de QR Code nao ser partido no meio (o que causava intermittencia do QR na
+    // KA-1445 — "so um gerou"). Printers 58mm tem buffer >= 4KB, entao um write de ~1-2KB
+    // e seguro. O delay entre chunks so aplica se o cupom passar de 4096 bytes (raro).
+    private static final int WRITE_CHUNK_SIZE = 4096;
     private static final long WRITE_CHUNK_DELAY_MS = 18L;
     private static final int MAX_RETRIES = 3;
     private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
