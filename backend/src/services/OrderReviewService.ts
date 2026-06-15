@@ -12,7 +12,6 @@
  */
 
 import { AppError } from '../errors/AppError';
-import QRCode from 'qrcode';
 import { env } from '../config/env';
 import { MercadoPagoService } from './MercadoPagoService';
 import { OrderDeliveryRepository } from '../repositories/OrderDeliveryRepository';
@@ -285,16 +284,16 @@ private async ensureTipPayment(order: any, review: any) {
     }
 
     if (!qrCodeText && !qrCodeBase64 && !paymentLink) {
-      this.log.warn('Tip PIX falling back to mock payload', {
+      this.log.warn('Tip PIX generation returned no payload', {
         reviewId: review.id,
         orderId: order.id,
         storeId: order?.store?.id || null,
         tipSettlementMode,
       });
-      const payload = `PIX GORJETA | Store: ${order.store?.name || 'Loja'} | Amount: ${tipAmount.toFixed(2)} | Review:${review.id}`;
-      qrCodeText = payload;
-      qrCodeBase64 = await QRCode.toDataURL(payload);
-      tipSettlementMode = 'STORE_PAYOUT';
+      // Nunca gerar QR/PIX fake: string nao-EMV nao dispara o copia-e-cola dos bancos/Google Pay.
+      throw new AppError('PAY-016', 400, {
+        message: 'Não foi possível gerar o Pix da gorjeta no Mercado Pago. Tente novamente em instantes.',
+      });
     }
 
     review.tipStatus = 'PENDING';
