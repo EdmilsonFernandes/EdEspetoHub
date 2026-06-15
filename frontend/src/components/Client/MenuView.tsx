@@ -29,8 +29,6 @@ import {
   Trash,
   CalendarBlank,
   Storefront,
-  Info,
-  Package,
   CaretRight,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
@@ -41,7 +39,6 @@ import { ProductModal } from "../Cart/ProductModal";
 import { StoreMapView } from "../StoreMapView";
 import { PlatformTrustFooter } from "../common/PlatformTrustFooter";
 import { ConfirmationModal } from "../common/ConfirmationModal";
-import { PremiumTabs } from "../common/PremiumTabs";
 import { StoreReviewsTab } from "./StoreReviewsTab";
 import { StoreInfoTab } from "./StoreInfoTab";
 
@@ -1276,35 +1273,48 @@ export const MenuView = ({
           </section>
         )}
         {showHeader && (
-          <div className="space-y-6 sm:space-y-8">
-            <PremiumTabs
-              items={[
-                { id: "products", label: "Produtos", icon: <Package size={18} weight="duotone" /> },
-                { id: "reviews", label: "Avaliações", icon: <Star size={18} weight="duotone" /> },
-                { id: "info", label: "Informações", icon: <Info size={18} weight="duotone" /> },
-              ]}
-              activeId={activeTab}
-              onChange={(id) => setActiveTab(id as "products" | "reviews" | "info")}
-            />
-            {activeTab === "reviews" && <StoreReviewsTab storeSlug={branding?.espetoId} />}
-            {activeTab === "info" && (
-              <StoreInfoTab
-                storeDescription={storeDescription}
-                storeAddress={storeAddress}
-                todayHoursLabel={todayHoursLabel}
-                todayClosingLabel={todayClosingLabel}
-                isOpenNow={isOpenNow}
-                deliveryFeeLabel={deliveryFeeLabel}
-                orderTypes={orderTypes}
-                whatsappNumber={whatsappNumber}
-                whatsappMessage={whatsappMessage}
-                instagramHandle={instagramHandle}
-                mapMarkers={mapMarkers}
-                googleMapsUrl={googleMapsUrl}
-                wazeUrl={wazeUrl}
-              />
-            )}
+          <div className="-mx-3 sm:-mx-4 border-b border-slate-200">
+            <div className="flex items-center gap-7 overflow-x-auto px-3 sm:px-4 no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              {([
+                { id: "products", label: "Produtos" },
+                { id: "reviews", label: "Avaliações" },
+                { id: "info", label: "Informações" },
+              ] as const).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`-mb-px shrink-0 border-b-2 py-3 text-sm font-semibold transition-colors ${
+                    activeTab === tab.id
+                      ? "border-rose-500 text-rose-600"
+                      : "border-transparent text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
+        )}
+        {showHeader && activeTab === "reviews" && (
+          <StoreReviewsTab storeSlug={branding?.espetoId} />
+        )}
+        {showHeader && activeTab === "info" && (
+          <StoreInfoTab
+            storeDescription={storeDescription}
+            storeAddress={storeAddress}
+            todayHoursLabel={todayHoursLabel}
+            todayClosingLabel={todayClosingLabel}
+            isOpenNow={isOpenNow}
+            deliveryFeeLabel={deliveryFeeLabel}
+            orderTypes={orderTypes}
+            whatsappNumber={whatsappNumber}
+            whatsappMessage={whatsappMessage}
+            instagramHandle={instagramHandle}
+            mapMarkers={mapMarkers}
+            googleMapsUrl={googleMapsUrl}
+            wazeUrl={wazeUrl}
+          />
         )}
         <div id="menu-list" className={`space-y-7 sm:space-y-8 ${activeTab === "products" ? "" : "hidden"}`}>
         {promoMessage && (
