@@ -147,6 +147,7 @@ const Header = ({
   todayClosingLabel,
   onOpenStoreDetails,
   onShowReviews,
+  onShowInfo,
   reviewSummary,
   deliveryFeeLabel,
   orderTypes
@@ -414,9 +415,16 @@ const Header = ({
               <div className="w-full text-center sm:text-left">
                 <div className="flex w-full items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h1 className={`${compact ? 'text-lg' : 'text-xl sm:text-2xl'} font-black text-slate-900 truncate max-w-full`}>
-                      {branding?.brandName || "Sua Loja"}
-                    </h1>
+                    <button
+                      type="button"
+                      onClick={onShowInfo}
+                      className="inline-flex max-w-full items-center gap-1 text-left transition-opacity hover:opacity-80 active:scale-[0.99]"
+                    >
+                      <h1 className={`${compact ? 'text-lg' : 'text-xl sm:text-2xl'} font-black text-slate-900 truncate max-w-full`}>
+                        {branding?.brandName || "Sua Loja"}
+                      </h1>
+                      <CaretRight size={16} weight="bold" className="shrink-0 text-slate-400" />
+                    </button>
                     <div className="mt-1.5 flex flex-wrap items-center justify-center sm:justify-start gap-2">
                       {segmentLabel !== "Comércio" && (
                         <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">
@@ -1136,7 +1144,7 @@ export const MenuView = ({
   return (
     <div className="bg-slate-50 overflow-x-clip">
 
-      {showHeader && (
+      {showHeader && activeTab === "products" && (
         <Header
           branding={branding}
           segment={segment}
@@ -1156,6 +1164,7 @@ export const MenuView = ({
           todayClosingLabel={todayClosingLabel}
           onOpenStoreDetails={() => setShowStoreDetails(true)}
           onShowReviews={() => setActiveTab("reviews")}
+          onShowInfo={() => setActiveTab("info")}
           reviewSummary={reviewSummary}
           deliveryFeeLabel={deliveryFeeLabel}
           orderTypes={orderTypes}
@@ -1272,11 +1281,21 @@ export const MenuView = ({
             <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">{branding?.brandName || "Seu Espeto"}</h2>
           </section>
         )}
-        {showHeader && (
-          <div className="-mx-3 sm:-mx-4 border-b border-slate-200">
-            <div className="flex items-center gap-7 overflow-x-auto px-3 sm:px-4 no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {showHeader && activeTab !== "products" && (
+          <div className="-mx-3 sm:-mx-4 border-b border-slate-200 bg-white">
+            <div className="mx-auto flex max-w-6xl items-center gap-1 px-3 sm:px-4">
+              <button
+                type="button"
+                onClick={() => setActiveTab("products")}
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100"
+                aria-label="Voltar aos produtos"
+              >
+                <ArrowLeft size={18} weight="bold" />
+              </button>
+              <span className="mr-3 truncate py-3 text-sm font-bold text-slate-800">
+                {branding?.brandName || "Loja"}
+              </span>
               {([
-                { id: "products", label: "Produtos" },
                 { id: "reviews", label: "Avaliações" },
                 { id: "info", label: "Informações" },
               ] as const).map((tab) => (
