@@ -8,6 +8,7 @@ import { motoboyService } from '../services/motoboyService';
 import { storePushService } from '../services/storePushService';
 import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from '../utils/orderNotificationSound';
 import { extractPushTargetCandidate, resolvePushClickTarget } from '../utils/pushNavigation';
+import { syncKeepAwakeForAutoPrint } from '../utils/thermalPrinter';
 
 
 const MOBILE_PUSH_ENABLED =
@@ -483,6 +484,7 @@ export const bootstrapNativeApp = async () => {
         if (MOBILE_PUSH_ENABLED) syncPushTokenNow();
         consumePendingPushNavigation();
         void checkForNativeBuildUpdate();
+        syncKeepAwakeForAutoPrint();
         // O app usa esse evento para reidratar telas nativas sem forçar reload da WebView.
         window.dispatchEvent(new CustomEvent('jnc:app-foreground'));
       }
@@ -516,4 +518,7 @@ export const bootstrapNativeApp = async () => {
   window.setInterval(() => {
     void checkForNativeBuildUpdate();
   }, NATIVE_BUILD_CHECK_INTERVAL_MS);
+
+  // Mantem a tela acesa se o auto-print estiver ligado (polling da fila nao pausa).
+  syncKeepAwakeForAutoPrint();
 };

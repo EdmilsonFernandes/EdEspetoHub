@@ -26,6 +26,7 @@ import {
   requestNativeBluetoothPermission,
   saveAutoPrintSetting,
   saveNativeThermalPrinter,
+  syncKeepAwakeForAutoPrint,
   saveNativeThermalPrinterSettings,
   type NativeThermalPrinterDevice,
   type NativeThermalPrinterStatus,
@@ -770,6 +771,7 @@ export function ThermalPrinterSettingsCard() {
               const next = !settings.autoPrintOnlineOrders;
               setSettings((prev) => ({ ...prev, autoPrintOnlineOrders: next }));
               void saveAutoPrintSetting(next);
+              syncKeepAwakeForAutoPrint();
             }}
             className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#336886] ${
               settings.autoPrintOnlineOrders ? 'bg-[#5FD35A]' : 'bg-slate-300'

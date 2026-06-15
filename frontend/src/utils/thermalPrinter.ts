@@ -230,6 +230,20 @@ export const saveAutoPrintSetting = async (enabled: boolean) => {
   } catch (error) {
     console.warn('[thermal-printer] saveAutoPrintSetting failed', error);
   }
+}
+
+// Mantem a tela acesa (wake lock) quando o auto-print esta ligado no app nativo, para o
+// polling da fila nao pausar quando a tela apagaria. So faz algo quando o bridge nativo
+// (window.JNCKeepAwake) existe — no web é no-op.
+export const syncKeepAwakeForAutoPrint = () => {
+  if (typeof window === 'undefined') return;
+  const bridge = (window as any).JNCKeepAwake;
+  if (!bridge || typeof bridge.setEnabled !== 'function') return;
+  try {
+    bridge.setEnabled(Boolean(getStoredThermalPrinterSettings().autoPrintOnlineOrders));
+  } catch {
+    // no-op
+  }
 };
 
 export const printNativeThermalReceipt = async (

@@ -137,6 +137,7 @@ public class MainActivity extends BridgeActivity {
     private InstallStateUpdatedListener installStateUpdatedListener;
     private boolean flexibleUpdatePromptVisible = false;
     private boolean biometricBridgeInjected = false;
+    private boolean keepAwakeBridgeInjected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -230,6 +231,10 @@ public class MainActivity extends BridgeActivity {
         if (!launchBridgeInjected) {
             webView.addJavascriptInterface(new LaunchBridge(), "JNCLaunch");
             launchBridgeInjected = true;
+        }
+        if (!keepAwakeBridgeInjected) {
+            webView.addJavascriptInterface(new KeepAwakeBridge(), "JNCKeepAwake");
+            keepAwakeBridgeInjected = true;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             webView.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_YES);
@@ -1184,6 +1189,26 @@ public class MainActivity extends BridgeActivity {
         @JavascriptInterface
         public void appReady() {
             markWebAppReadyFromJavascript();
+        }
+    }
+
+    // Mantem a tela acesa (FLAG_KEEP_SCREEN_ON) enquanto o auto-print esta ligado, para o
+    // polling da fila nao pausar quando a tela apagaria. Controlado pelo JS via syncKeepAwakeForAutoPrint.
+    private class KeepAwakeBridge {
+        @JavascriptInterface
+        public void setEnabled(boolean enabled) {
+            runOnUiThread(() -> {
+                try {
+                    android.view.Window window = getWindow();
+                    if (window == null) return;
+                    if (enabled) {
+                        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    } else {
+                        window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    }
+                } catch (Exception ignored) {
+                }
+            });
         }
     }
 
