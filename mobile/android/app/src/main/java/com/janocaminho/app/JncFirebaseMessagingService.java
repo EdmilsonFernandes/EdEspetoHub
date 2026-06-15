@@ -80,29 +80,12 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
             + " foreground=" + isForeground
             + " autoPrint=" + autoPrintEnabled);
 
-        // Sempre que o auto-print esta ligado, imprime pelo servico — funciona em qualquer
-        // tela (foreground), com app minimizado (background) e com a tela bloqueada. O
-        // polling da fila nao imprime mais (evitaria impressao dupla quando a fila esta aberta).
-        if (autoPrintEnabled) {
-            if (isForeground) {
-                // App aberta: o servico foreground funciona (sem restricao do Android 12+).
-                Intent printIntent = new Intent(this, PrintForegroundService.class);
-                for (Map.Entry<String, String> entry : data.entrySet()) {
-                    printIntent.putExtra(entry.getKey(), entry.getValue());
-                }
-                try {
-                    ContextCompat.startForegroundService(this, printIntent);
-                    Log.i(TAG, "PrintForegroundService started for " + orderId);
-                } catch (Exception e) {
-                    Log.e(TAG, "FGS start falhou (foreground), imprimindo inline", e);
-                    printOrderInline(data, orderId);
-                }
-            } else {
-                // Background / tela bloqueada: o Android 12+ bloqueia startForegroundService,
-                // entao imprimimos direto no callback do FCM (msg high-priority da janela de
-                // execucao). Antes o push chegava mas nada imprimia com a tela desligada.
-                printOrderInline(data, orderId);
-            }
+        // Em BACKGROUND/tela bloqueada, imprime direto no callback do FCM (sem ForegroundService,
+        // que o Android 12+ bloqueia em background). Em FOREGROUND o polling da fila cuida da
+        // impressao (app aberto na fila) — assim nao duplica. Os dois caminhos coexistem:
+        // polling (foreground, confiavel) + push (background/tela apagada).
+        if (!isForeground && autoPrintEnabled) {
+            printOrderInline(data, orderId);
         }
 
         // Always show a notification so the user knows about the new order
@@ -111,7 +94,7 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
         if (body == null || body.isEmpty()) {
             body = storeName != null ? storeName : "Pedido recebido";
         }
-        if (autoPrintEnabled) {
+        if (!isForeground && autoPrintEnabled) {
             title = "Pedido impresso!";
             body = (orderId != null ? "#" + orderId.substring(0, Math.min(8, orderId.length())) : "Pedido") + " impresso automaticamente.";
         }
