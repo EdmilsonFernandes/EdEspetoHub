@@ -382,7 +382,14 @@ const Header = ({
             {compact && !mobileCollapsedStable && (
               <div className="sm:hidden absolute inset-x-0 bottom-0 px-4 pb-3">
                 <div className="pr-14 text-left">
-                  <h1 className="text-base font-black text-white truncate">{branding?.brandName || "Sua Loja"}</h1>
+                  <button
+                    type="button"
+                    onClick={onShowInfo}
+                    className="inline-flex max-w-full items-center gap-1 text-left active:opacity-80"
+                  >
+                    <h1 className="text-base font-black text-white truncate">{branding?.brandName || "Sua Loja"}</h1>
+                    <CaretRight size={14} weight="bold" className="shrink-0 text-white/70" />
+                  </button>
                   <div className="mt-0.5 inline-flex items-center gap-1.5 text-[11px] text-white/95 font-semibold">
                     <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-400 animate-pulse" : "bg-amber-300"}`} />
                     <span>
@@ -390,6 +397,18 @@ const Header = ({
                       {statusDetailLabel ? ` · ${statusDetailLabel}` : ""}
                     </span>
                   </div>
+                  {avgRating > 0 && (
+                    <button
+                      type="button"
+                      onClick={onShowReviews}
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-black/35 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-md active:scale-95"
+                    >
+                      <Star size={11} weight="fill" className="text-amber-400" />
+                      {avgRating.toFixed(1).replace('.', ',')}
+                      {totalReviews > 0 && <span className="font-medium text-white/80">· {totalReviews}</span>}
+                      <CaretRight size={11} weight="bold" className="text-white/70" />
+                    </button>
+                  )}
                 </div>
                 <div className="absolute right-4 top-1 h-11 w-11 rounded-full overflow-hidden border-2 border-white bg-white shadow-lg flex items-center justify-center">
                   {branding?.logoUrl ? (
