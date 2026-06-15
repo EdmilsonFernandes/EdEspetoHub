@@ -122,13 +122,30 @@ export function StoreReviewsTab({ storeSlug }: { storeSlug: string }) {
   const cancellationRate = Number(data?.cancellationRate || 0);
   const allReviews = Array.isArray(data?.reviews) ? data.reviews : [];
 
-  const qualityChecks = useMemo(() => {
-    const checks: Array<{ icon: typeof Star; label: string }> = [];
-    if (avg >= 4.5) checks.push({ icon: Star, label: 'Avaliações excelentes' });
-    if (positivePercent >= 90) checks.push({ icon: ChatCircle, label: 'Poucas avaliações negativas' });
-    if (totalOrders > 0 && cancellationRate <= 5)
-      checks.push({ icon: ClipboardText, label: 'Baixo índice de cancelamento' });
-    return checks;
+  const level = useMemo(() => {
+    if (total === 0) return 0;
+    if (avg >= 4.7) return 5;
+    if (avg >= 4.3) return 4;
+    if (avg >= 3.8) return 3;
+    if (avg >= 3.0) return 2;
+    return 1;
+  }, [avg, total]);
+
+  const levelInfo = useMemo(() => {
+    if (level >= 4) return { label: 'Experiência boa', bar: 'bg-emerald-500', text: 'text-emerald-600' };
+    if (level === 3) return { label: 'Experiência regular', bar: 'bg-amber-500', text: 'text-amber-600' };
+    return { label: 'Experiência ruim', bar: 'bg-rose-500', text: 'text-rose-600' };
+  }, [level]);
+
+  const checks = useMemo(() => {
+    const list = [
+      { icon: Star, positive: avg >= 4.5, ok: 'Avaliações excelentes', nok: 'Avaliações regulares' },
+      { icon: ChatCircle, positive: positivePercent >= 85, ok: 'Poucas avaliações negativas', nok: 'Algumas avaliações negativas' },
+    ];
+    if (totalOrders > 0) {
+      list.push({ icon: ClipboardText, positive: cancellationRate <= 5, ok: 'Baixo índice de cancelamento', nok: 'Cancelamentos acima do ideal' });
+    }
+    return list;
   }, [avg, positivePercent, totalOrders, cancellationRate]);
 
   const sortedReviews = useMemo(() => {
@@ -160,20 +177,41 @@ export function StoreReviewsTab({ storeSlug }: { storeSlug: string }) {
 
   return (
     <div className="space-y-5">
-      {/* Card de qualidade: Experiência boa (estilo iFood) */}
-      {qualityChecks.length > 0 && (
-        <section className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 shadow-[0_18px_40px_-34px_rgba(5,150,105,0.35)] sm:p-5">
+      {/* Card: Qualidade do serviço (estilo iFood) */}
+      {total > 0 && (
+        <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
           <div className="flex items-center gap-2">
-            <Info size={18} weight="fill" className="text-emerald-600" />
-            <span className="text-sm font-bold text-emerald-700">Experiência boa</span>
+            <Info size={16} weight="fill" className={levelInfo.text} />
+            <h3 className="text-sm font-bold text-slate-800">Qualidade do serviço</h3>
           </div>
-          <p className="mt-1 text-xs text-emerald-700/70">Com base nas avaliações dos clientes</p>
-          <div className="mt-3 space-y-2">
-            {qualityChecks.map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-2">
-                <Icon size={16} weight="duotone" className="text-emerald-600" />
-                <span className="text-xs font-semibold text-slate-700">{label}</span>
-                <CheckCircle size={15} weight="fill" className="ml-auto text-emerald-500" />
+          <p className="mt-1 text-xs text-slate-500">
+            <span className={`font-bold ${levelInfo.text}`}>{levelInfo.label}</span> · com base nas avaliações dos clientes
+          </p>
+
+          {/* Slider de níveis */}
+          <div className="mt-3 flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <div key={n} className={`h-1.5 flex-1 rounded-full ${n <= level ? levelInfo.bar : 'bg-slate-200'}`} />
+            ))}
+          </div>
+          <div className="mt-1 flex justify-between text-[10px] font-medium text-slate-400">
+            <span>Nível 1</span>
+            <span>Super</span>
+          </div>
+
+          {/* Checks */}
+          <div className="mt-4 grid gap-2.5">
+            {checks.map((check) => (
+              <div key={check.ok} className="flex items-center gap-2.5">
+                <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${check.positive ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                  <check.icon size={14} weight="duotone" />
+                </span>
+                <span className="flex-1 text-xs font-semibold text-slate-700">
+                  {check.positive ? check.ok : check.nok}
+                </span>
+                {check.positive
+                  ? <CheckCircle size={16} weight="fill" className="text-emerald-500" />
+                  : <WarningCircle size={16} weight="fill" className="text-amber-500" />}
               </div>
             ))}
           </div>

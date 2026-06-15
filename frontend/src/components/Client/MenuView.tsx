@@ -150,7 +150,8 @@ const Header = ({
   onShowInfo,
   reviewSummary,
   deliveryFeeLabel,
-  orderTypes
+  orderTypes,
+  minOrderValue
 }) => {
   const normalizedRole = String(userRole || "").toLowerCase();
   const isAdminUser = normalizedRole === "admin" || normalizedRole === "lojista";
@@ -396,6 +397,10 @@ const Header = ({
                       {isOpenNow ? "Aberto agora" : "Fechado agora"}
                       {statusDetailLabel ? ` · ${statusDetailLabel}` : ""}
                     </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="text-white/40">•</span>
+                      Min {formatCurrency(Number(minOrderValue))}
+                    </span>
                     {avgRating > 0 && (
                       <button
                         type="button"
@@ -491,6 +496,10 @@ const Header = ({
                     {label}
                   </span>
                 ))}
+                <span className="inline-flex items-center gap-1">
+                  <span className="text-slate-300">•</span>
+                  Min {formatCurrency(Number(minOrderValue))}
+                </span>
               </div>
 
               {!compact && (
@@ -632,6 +641,7 @@ export const MenuView = ({
   reviewSummary,
   deliveryFeeLabel,
   orderTypes = [],
+  minOrderValue = 20,
   preOrderBlocked = false,
   preOrderBlockedTitle = "Pedidos em breve",
   preOrderBlockedMessage = "",
@@ -1185,6 +1195,7 @@ export const MenuView = ({
           reviewSummary={reviewSummary}
           deliveryFeeLabel={deliveryFeeLabel}
           orderTypes={orderTypes}
+          minOrderValue={minOrderValue}
         />
       )}
 

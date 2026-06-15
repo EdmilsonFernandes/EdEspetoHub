@@ -1595,6 +1595,7 @@ export function StorePage() {
             primaryColor: data.settings?.primaryColor || prev.primaryColor,
             accentColor: data.settings?.secondaryColor || prev.accentColor,
             instagram: instagramLink || prev.instagram,
+            minOrderValue: Number(data.settings?.minOrderValue ?? 20),
           }));
           const normalizedHours = normalizeOpeningHours(data.settings?.openingHours || []);
           setOpeningHours(normalizedHours);
@@ -4460,6 +4461,7 @@ export function StorePage() {
               }
               orderTypes={orderTypes}
               todayClosingLabel={todayClosingLabel}
+              minOrderValue={branding?.minOrderValue ?? 20}
               compactHeader={isMobile}
               systemHeaderOffset={showPublicStoreAppHeader}
               staffView={Boolean(canUseAdminPrintFlow)}

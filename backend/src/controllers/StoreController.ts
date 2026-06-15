@@ -469,6 +469,7 @@ export class StoreController {
             deliveryRadiusKm: store.settings.deliveryRadiusKm ?? null,
             lat: store.settings.lat ?? null,
             lng: store.settings.lng ?? null,
+            minOrderValue: Number(store.settings.minOrderValue ?? 20),
           }
         : null,
     };

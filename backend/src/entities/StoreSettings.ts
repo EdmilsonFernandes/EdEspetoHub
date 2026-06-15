@@ -152,6 +152,9 @@ export class StoreSettings
   @Column({ name: "order_notification_sound_duration", type: "int", default: 4, nullable: true })
   orderNotificationSoundDuration?: number | null;
 
+  @Column({ name: 'min_order_value', type: 'decimal', precision: 10, scale: 2, default: 20 })
+  minOrderValue?: number;
+
   @Column({
     name: 'social_links',
     type: 'jsonb',

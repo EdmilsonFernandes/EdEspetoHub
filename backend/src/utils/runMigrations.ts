@@ -71,6 +71,10 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS min_order_value DECIMAL(10,2) NOT NULL DEFAULT 20;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
     ADD COLUMN IF NOT EXISTS table_service_settings JSONB DEFAULT '{}'::jsonb;
   `);
   await AppDataSource.query(`
