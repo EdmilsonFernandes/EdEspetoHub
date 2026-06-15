@@ -5,285 +5,285 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "b2757ac4",
-  "versionLabel": "v0.1.9.b2757ac4",
-  "versionInternal": "0.1.9+20260613.002141.b2757ac4",
-  "buildId": "0.1.9+20260613.002141.b2757ac4-20260613.002141-b2757ac4",
-  "builtAt": "2026-06-13T00:21:41.117Z",
-  "commitHash": "b2757ac40d5d9ba768d779243cad19e1ebbb1c51",
-  "shortHash": "b2757ac4",
+  "versionDisplaySuffix": "7bfa5dd1",
+  "versionLabel": "v0.1.9.7bfa5dd1",
+  "versionInternal": "0.1.9+20260615.160440.7bfa5dd1",
+  "buildId": "0.1.9+20260615.160440.7bfa5dd1-20260615.160440-7bfa5dd1",
+  "builtAt": "2026-06-15T16:04:40.839Z",
+  "commitHash": "7bfa5dd1b6224b52e7bfb733412522a9c01ad983",
+  "shortHash": "7bfa5dd1",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
     {
-      "hash": "b2757ac40d5d9ba768d779243cad19e1ebbb1c51",
-      "shortHash": "b2757ac4",
-      "dateIso": "2026-06-12T21:16:31-03:00",
+      "hash": "7bfa5dd1b6224b52e7bfb733412522a9c01ad983",
+      "shortHash": "7bfa5dd1",
+      "dateIso": "2026-06-15T13:02:38-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): restore customer name on receipt",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b2757ac40d5d9ba768d779243cad19e1ebbb1c51"
+      "subject": "fix(vitrine): tabs de texto com underline (estilo iFood) no lugar de botões grandes",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7bfa5dd1b6224b52e7bfb733412522a9c01ad983"
     },
     {
-      "hash": "ec9f58efeae8a9e43eef0bdad1970f88b34ef143",
-      "shortHash": "ec9f58ef",
-      "dateIso": "2026-06-12T19:38:50-03:00",
+      "hash": "0a643d5e19df3e118763a9f5ffbb49b9779a42c3",
+      "shortHash": "0a643d5e",
+      "dateIso": "2026-06-15T13:00:56-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): remove duplicated table and total",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ec9f58efeae8a9e43eef0bdad1970f88b34ef143"
+      "subject": "fix(print): auto-print native-only + cap anti-loop (P0 prod)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0a643d5e19df3e118763a9f5ffbb49b9779a42c3"
     },
     {
-      "hash": "f53f4a22f6e7d6939d817b556fc93c2616eab973",
-      "shortHash": "f53f4a22",
-      "dateIso": "2026-06-12T19:25:27-03:00",
+      "hash": "7526aa8e0ff904fa535ed440aa80886ba93572ed",
+      "shortHash": "7526aa8e",
+      "dateIso": "2026-06-15T12:40:00-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(thermal-printer): redesign receipt + QR code + auto-print online orders",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f53f4a22f6e7d6939d817b556fc93c2616eab973"
+      "subject": "feat(vitrine): alinhar avaliações ao design iFood (card qualidade + sub-tabs + header com seta)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7526aa8e0ff904fa535ed440aa80886ba93572ed"
     },
     {
-      "hash": "67dd57fd603e11597e215233d6e96541fd3d0a4b",
-      "shortHash": "67dd57fd",
-      "dateIso": "2026-06-12T18:32:44-03:00",
+      "hash": "009177f8ff7e35327f405490898416edf62883a8",
+      "shortHash": "009177f8",
+      "dateIso": "2026-06-15T12:23:19-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(notifications): fallback order updates to email",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/67dd57fd603e11597e215233d6e96541fd3d0a4b"
+      "subject": "fix(ux): contador por categoria em /hub/destaques nao corta mais os numeros",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/009177f8ff7e35327f405490898416edf62883a8"
     },
     {
-      "hash": "198f0049b8c776370f1a793b6ba0cb07645ab6c7",
-      "shortHash": "198f0049",
-      "dateIso": "2026-06-12T18:13:58-03:00",
+      "hash": "19d808c847d884e3b871edacc20726ebb0310cd0",
+      "shortHash": "19d808c8",
+      "dateIso": "2026-06-15T11:37:40-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(frontend): show cancelled orders in queue filter",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/198f0049b8c776370f1a793b6ba0cb07645ab6c7"
+      "subject": "feat(vitrine): abas Produtos/Avaliações/Informações + tela de avaliações iFood",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/19d808c847d884e3b871edacc20726ebb0310cd0"
     },
     {
-      "hash": "d2bc3a30bc37f6677e06bdd44822991f7562f15d",
-      "shortHash": "d2bc3a30",
-      "dateIso": "2026-06-12T18:05:58-03:00",
+      "hash": "dc25cd2ceb7832b6a5a89cbeca7535b80809da46",
+      "shortHash": "dc25cd2c",
+      "dateIso": "2026-06-15T09:43:13-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(bluetooth): add BLUETOOTH_SCAN permission to fix print SecurityException",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d2bc3a30bc37f6677e06bdd44822991f7562f15d"
+      "subject": "feat(print): device-side print queue com retry + ACK (idempotencia)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dc25cd2ceb7832b6a5a89cbeca7535b80809da46"
     },
     {
-      "hash": "d5584e109a78f66dc20803334d6062e2549426cf",
-      "shortHash": "d5584e10",
-      "dateIso": "2026-06-12T18:01:37-03:00",
+      "hash": "118dff38b03e94530c09180022109784f15e1233",
+      "shortHash": "118dff38",
+      "dateIso": "2026-06-15T09:34:44-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): polish admin order history",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d5584e109a78f66dc20803334d6062e2549426cf"
+      "subject": "feat(ux): migrar modais de destaque e push para PaymentQRCard",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/118dff38b03e94530c09180022109784f15e1233"
     },
     {
-      "hash": "480117aeda3d8d4f413868b2ca0689a3b5f618d8",
-      "shortHash": "480117ae",
-      "dateIso": "2026-06-12T17:42:46-03:00",
+      "hash": "df6adaaf716889b5dd929a32362897b30dd3c7e9",
+      "shortHash": "df6adaaf",
+      "dateIso": "2026-06-15T09:29:03-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): polish grill queue delivery cards",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/480117aeda3d8d4f413868b2ca0689a3b5f618d8"
+      "subject": "feat(ux): migrar painel de destaque de destino para PaymentQRCard",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/df6adaaf716889b5dd929a32362897b30dd3c7e9"
     },
     {
-      "hash": "f47f6e4096b9f790f86f5eb2263bd44dc0b6f8b1",
-      "shortHash": "f47f6e40",
-      "dateIso": "2026-06-12T17:30:07-03:00",
+      "hash": "c143114bd48f7f441fbe77ab7c70d35407985868",
+      "shortHash": "c143114b",
+      "dateIso": "2026-06-15T09:27:28-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(ui): migrate safe chrome buttons in CartView + GrillQueue",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f47f6e4096b9f790f86f5eb2263bd44dc0b6f8b1"
+      "subject": "fix(print): QR Code intermittente era causado pelo chunking de 512 bytes",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c143114bd48f7f441fbe77ab7c70d35407985868"
     },
     {
-      "hash": "87180fba98ce3ad40a860d72a0835086501e99a6",
-      "shortHash": "87180fba",
-      "dateIso": "2026-06-12T17:27:41-03:00",
+      "hash": "452b33e4991727f638d42b9ddcd995fcb42fda8e",
+      "shortHash": "452b33e4",
+      "dateIso": "2026-06-15T09:15:10-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): polish motoboy active delivery",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/87180fba98ce3ad40a860d72a0835086501e99a6"
+      "subject": "fix(payment): destaque usa email deterministico (evita 4390 no self-pay)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/452b33e4991727f638d42b9ddcd995fcb42fda8e"
     },
     {
-      "hash": "b5dfded5f595ee8748590d166166dc69a2a86580",
-      "shortHash": "b5dfded5",
-      "dateIso": "2026-06-12T17:21:23-03:00",
+      "hash": "f9cffe1a9c9b514af1af369647212806ee3822b4",
+      "shortHash": "f9cffe1a",
+      "dateIso": "2026-06-15T06:56:16-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(ui): migrate buttons to <Button> in AdminMotoboys + ProductManager",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b5dfded5f595ee8748590d166166dc69a2a86580"
+      "subject": "feat(mobile): wake-lock mantem a tela acesa quando auto-print esta ligado",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f9cffe1a9c9b514af1af369647212806ee3822b4"
     },
     {
-      "hash": "eb4527386228749891018a5e44bf7e8b949f91a8",
-      "shortHash": "eb452738",
-      "dateIso": "2026-06-12T17:10:22-03:00",
+      "hash": "76932c9b2cac73a017b8fcbb4725430f7e39cb0d",
+      "shortHash": "76932c9b",
+      "dateIso": "2026-06-15T06:49:07-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(ui): migrate 4 form submit buttons to <Button> in SuperAdminDestinations",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eb4527386228749891018a5e44bf7e8b949f91a8"
+      "subject": "fix(auth): avaliacao/gorjeta de pedido feito por conta so pelo dono",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/76932c9b2cac73a017b8fcbb4725430f7e39cb0d"
     },
     {
-      "hash": "eaf17dd83d215aeb742bbf236eed480904cfd452",
-      "shortHash": "eaf17dd8",
-      "dateIso": "2026-06-12T16:56:30-03:00",
+      "hash": "75e71a4904b60f58b1acc35eb2fad28b22740275",
+      "shortHash": "75e71a49",
+      "dateIso": "2026-06-14T23:08:12-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): compact admin motoboy management",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eaf17dd83d215aeb742bbf236eed480904cfd452"
+      "subject": "fix(print): auto-print pulava pedidos simultaneos (lock rejeitava a 2a impressao)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/75e71a4904b60f58b1acc35eb2fad28b22740275"
     },
     {
-      "hash": "94eadb098948ea649135d55987ddaa0c64a949bf",
-      "shortHash": "94eadb09",
-      "dateIso": "2026-06-12T16:54:45-03:00",
+      "hash": "ff028185de4e6f430515c8cfbb602b26eca01054",
+      "shortHash": "ff028185",
+      "dateIso": "2026-06-14T22:09:08-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(ui): migrate 4 buttons to <Button> in AdminDashboard config",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/94eadb098948ea649135d55987ddaa0c64a949bf"
+      "subject": "fix(print): coexistem polling (foreground) + push (background) sem duplicar",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ff028185de4e6f430515c8cfbb602b26eca01054"
     },
     {
-      "hash": "52b6e68230751edd31d0ce0c274cbdd94c236a0f",
-      "shortHash": "52b6e682",
-      "dateIso": "2026-06-12T16:44:26-03:00",
+      "hash": "45f290683dde8a0126e9a437dc3407189754985d",
+      "shortHash": "45f29068",
+      "dateIso": "2026-06-14T22:00:58-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(bluetooth): remove redundant TS permission check + add debug panel",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/52b6e68230751edd31d0ce0c274cbdd94c236a0f"
+      "subject": "feat(ux): migrar gorjeta/motoboy para PaymentQRCard (fim do pisca)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/45f290683dde8a0126e9a437dc3407189754985d"
     },
     {
-      "hash": "f68324af80f42f62233f44c08d1642831cc1f613",
-      "shortHash": "f68324af",
-      "dateIso": "2026-06-12T16:28:38-03:00",
+      "hash": "453e90d942b77d66ab2dc2b5baf2e7534267b2e3",
+      "shortHash": "453e90d9",
+      "dateIso": "2026-06-14T21:07:22-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(ui): migrate 5 buttons to <Button> primitive in printer + permissions",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f68324af80f42f62233f44c08d1642831cc1f613"
+      "subject": "fix(tip): remover fallback de QR PIX fake na gorjeta + PaymentQRCard compartilhado",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/453e90d942b77d66ab2dc2b5baf2e7534267b2e3"
     },
     {
-      "hash": "46c6e1506bd7713e4845aec4803a3d18b774e8c0",
-      "shortHash": "46c6e150",
-      "dateIso": "2026-06-12T16:21:57-03:00",
+      "hash": "87e4d446636acc95d1b65b7feae13a38484824ad",
+      "shortHash": "87e4d446",
+      "dateIso": "2026-06-14T20:33:33-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ui): add 6 design system primitives — StatusBadge, Toggle, SearchInput, IconBox, Modal, SkeletonCard",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/46c6e1506bd7713e4845aec4803a3d18b774e8c0"
+      "subject": "fix(print): imprime com tela bloqueada (FCM inline) + corrige URL do QR do cupom",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/87e4d446636acc95d1b65b7feae13a38484824ad"
     },
     {
-      "hash": "f6c8d105862e15952bd6653936c76c4a4d893c82",
-      "shortHash": "f6c8d105",
-      "dateIso": "2026-06-12T16:01:09-03:00",
+      "hash": "e3a49779b4ffcfa06f70d53cc40a7a22a2cb6868",
+      "shortHash": "e3a49779",
+      "dateIso": "2026-06-14T20:09:50-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): polish destination form UI",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f6c8d105862e15952bd6653936c76c4a4d893c82"
+      "subject": "fix(motoboy): re-solicitar vinculo apos desvinculo era ignorado (request APPROVED)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e3a49779b4ffcfa06f70d53cc40a7a22a2cb6868"
     },
     {
-      "hash": "9bfcddcbb42abb1d4cd271b89db49500447b122c",
-      "shortHash": "9bfcddcb",
-      "dateIso": "2026-06-12T15:47:13-03:00",
+      "hash": "3f79668fab1a3140679e3c2b18a0997fde2011cb",
+      "shortHash": "3f79668f",
+      "dateIso": "2026-06-14T19:41:20-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(bluetooth): rename Java method to avoid Capacitor bridge collision + UX overhaul",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9bfcddcbb42abb1d4cd271b89db49500447b122c"
+      "subject": "fix(motoboy): motoboy gerenciado pela loja (store-managed) nao exige KYC",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f79668fab1a3140679e3c2b18a0997fde2011cb"
     },
     {
-      "hash": "5a36473499d4ea4b514f9b9020795fd012179e93",
-      "shortHash": "5a364734",
-      "dateIso": "2026-06-12T15:35:17-03:00",
+      "hash": "b91674927a348804f13714782ace74fead56f551",
+      "shortHash": "b9167492",
+      "dateIso": "2026-06-14T19:07:57-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): polish partner validation modal",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5a36473499d4ea4b514f9b9020795fd012179e93"
+      "subject": "fix(delivery): pedido de entrega criado pelo admin pedia codigo ao motoboy sem sentido",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b91674927a348804f13714782ace74fead56f551"
     },
     {
-      "hash": "7d129b668bd92e774203ecabcb7a243b4ca2943a",
-      "shortHash": "7d129b66",
-      "dateIso": "2026-06-12T14:22:06-03:00",
+      "hash": "63ac5d00dd9638264f548334b0ff68e21e46d581",
+      "shortHash": "63ac5d00",
+      "dateIso": "2026-06-14T18:53:28-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(bluetooth): overhaul printer UX — offline false, duplicate, permission flow",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7d129b668bd92e774203ecabcb7a243b4ca2943a"
+      "subject": "fix(auth): botao \"Colar codigo\" da recuperacao de senha nao funcionava no app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/63ac5d00dd9638264f548334b0ff68e21e46d581"
     },
     {
-      "hash": "0a84ebec439717bb64a0dc1598f70cf5e7e1d6e5",
-      "shortHash": "0a84ebec",
-      "dateIso": "2026-06-12T14:07:30-03:00",
+      "hash": "ff3fd0ec636df481f8151d9c837de62211c0a4c2",
+      "shortHash": "ff3fd0ec",
+      "dateIso": "2026-06-14T18:52:30-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(deploy): re-home infrastructure containers with wrong compose project label",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0a84ebec439717bb64a0dc1598f70cf5e7e1d6e5"
+      "subject": "polish checkout payment switcher",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ff3fd0ec636df481f8151d9c837de62211c0a4c2"
     },
     {
-      "hash": "19c39979d250f1dd91b2e1c2ba736a3183fbf8ab",
-      "shortHash": "19c39979",
-      "dateIso": "2026-06-12T14:00:17-03:00",
+      "hash": "d1f40555f99e8fa60fbd59bcbd2962b4721e365b",
+      "shortHash": "d1f40555",
+      "dateIso": "2026-06-14T18:46:37-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): add missing ShieldCheck import for permissions card",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/19c39979d250f1dd91b2e1c2ba736a3183fbf8ab"
+      "subject": "feat(receipt): telefone do cliente no cupom (pedido de cliente); admin so nome",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d1f40555f99e8fa60fbd59bcbd2962b4721e365b"
     },
     {
-      "hash": "0166d17025bde7354bc20d93e9b448012650d15e",
-      "shortHash": "0166d170",
-      "dateIso": "2026-06-12T13:56:08-03:00",
+      "hash": "5e35c408528171cf8f77c0eaa7e98aff5ae1bcab",
+      "shortHash": "5e35c408",
+      "dateIso": "2026-06-14T18:18:35-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): apply UI primitives to partner onboarding",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0166d17025bde7354bc20d93e9b448012650d15e"
+      "subject": "fix(print): QR code abortava o cupom na KA-1445 (e genericas 58mm) -> nao imprimia",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e35c408528171cf8f77c0eaa7e98aff5ae1bcab"
     },
     {
-      "hash": "4b818ab2452c8f2d744c260455eed820288a029b",
-      "shortHash": "4b818ab2",
-      "dateIso": "2026-06-12T13:54:48-03:00",
+      "hash": "6b01168e999ad707479e18ea7860811f748f4039",
+      "shortHash": "6b01168e",
+      "dateIso": "2026-06-14T18:03:03-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(admin): add device permissions section to admin dashboard",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4b818ab2452c8f2d744c260455eed820288a029b"
+      "subject": "fix(print/auto): payload FCM size + nome do cliente no cupom (nao imprime alguns)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6b01168e999ad707479e18ea7860811f748f4039"
     },
     {
-      "hash": "0b6d353636c4b3aaf1f94c4e8289a06ad92e4cae",
-      "shortHash": "0b6d3536",
-      "dateIso": "2026-06-12T13:32:38-03:00",
+      "hash": "cc8d76f10e67d4ae892a245e79f2693c236c53de",
+      "shortHash": "cc8d76f1",
+      "dateIso": "2026-06-14T12:38:44-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): apply UI primitives to destination invites",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0b6d353636c4b3aaf1f94c4e8289a06ad92e4cae"
+      "subject": "feat(mobile): auto-print via push em qualquer tela + serializa jobs concorrentes",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cc8d76f10e67d4ae892a245e79f2693c236c53de"
     },
     {
-      "hash": "69cf9f668126e46074ae22346b48a537cee24056",
-      "shortHash": "69cf9f66",
-      "dateIso": "2026-06-12T13:26:27-03:00",
+      "hash": "15dbd0927e6841c028da977d3e9a5badef1875e7",
+      "shortHash": "15dbd092",
+      "dateIso": "2026-06-14T12:20:35-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): apply UI primitives to partner portal",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/69cf9f668126e46074ae22346b48a537cee24056"
+      "subject": "fix(queue): abrir a fila reimprimia todos os pedidos existentes (falsa \"novidade\")",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/15dbd0927e6841c028da977d3e9a5badef1875e7"
     },
     {
-      "hash": "2ee080e02d0da289baca774c097e07fefb86c3cd",
-      "shortHash": "2ee080e0",
-      "dateIso": "2026-06-12T13:19:54-03:00",
+      "hash": "e0ec9baedc8b6ca73c1796abc388eff91ebca06b",
+      "shortHash": "e0ec9bae",
+      "dateIso": "2026-06-14T12:10:49-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): apply UI primitives to partner access",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2ee080e02d0da289baca774c097e07fefb86c3cd"
+      "subject": "fix(thermal-printer): normalize descartava autoPrintOnlineOrders (causa real da nao-persistencia)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e0ec9baedc8b6ca73c1796abc388eff91ebca06b"
     },
     {
-      "hash": "a7de14e43847d82c0c0a74955e322ba139366eef",
-      "shortHash": "a7de14e4",
-      "dateIso": "2026-06-12T13:13:43-03:00",
+      "hash": "34cf3ba33cf25974d690f315cd7974d04b94d0f9",
+      "shortHash": "34cf3ba3",
+      "dateIso": "2026-06-14T11:50:27-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "refactor(frontend): apply UI primitives to destination partner request",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a7de14e43847d82c0c0a74955e322ba139366eef"
+      "subject": "fix(thermal-printer): toggle de auto-print nao persistia (causa real de nao imprimir)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/34cf3ba33cf25974d690f315cd7974d04b94d0f9"
     },
     {
-      "hash": "fd0682ae6106983ab331c94f420115cac65c5952",
-      "shortHash": "fd0682ae",
-      "dateIso": "2026-06-12T13:05:40-03:00",
+      "hash": "6e9d1799b65f6aa6f58e7c38ca3efdfe555ddeae",
+      "shortHash": "6e9d1799",
+      "dateIso": "2026-06-14T11:28:36-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs: add Redis cache documentation to production server guide",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fd0682ae6106983ab331c94f420115cac65c5952"
+      "subject": "fix(mobile): corrige impressao automatica em background +_promove o toggle",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6e9d1799b65f6aa6f58e7c38ca3efdfe555ddeae"
     }
   ]
 } as const;
