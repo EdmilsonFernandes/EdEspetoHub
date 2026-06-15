@@ -31,6 +31,7 @@ import {
   Storefront,
   Info,
   Package,
+  CaretRight,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -382,11 +383,7 @@ const Header = ({
             </div>
             {compact && !mobileCollapsedStable && (
               <div className="sm:hidden absolute inset-x-0 bottom-0 px-4 pb-3">
-                <button
-                  type="button"
-                  onClick={onOpenStoreDetails}
-                  className="pr-14 text-left"
-                >
+                <div className="pr-14 text-left">
                   <h1 className="text-base font-black text-white truncate">{branding?.brandName || "Sua Loja"}</h1>
                   <div className="mt-0.5 inline-flex items-center gap-1.5 text-[11px] text-white/95 font-semibold">
                     <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-400 animate-pulse" : "bg-amber-300"}`} />
@@ -395,7 +392,7 @@ const Header = ({
                       {statusDetailLabel ? ` · ${statusDetailLabel}` : ""}
                     </span>
                   </div>
-                </button>
+                </div>
                 <div className="absolute right-4 top-1 h-11 w-11 rounded-full overflow-hidden border-2 border-white bg-white shadow-lg flex items-center justify-center">
                   {branding?.logoUrl ? (
                     <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
@@ -417,11 +414,7 @@ const Header = ({
             </div>
 
             <div className="sm:pl-32 flex w-full flex-col items-center text-center sm:items-start sm:text-left">
-              <button
-                type="button"
-                onClick={onOpenStoreDetails}
-                className="w-full text-center sm:text-left"
-              >
+              <div className="w-full text-center sm:text-left">
                 <div className="flex w-full items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h1 className={`${compact ? 'text-lg' : 'text-xl sm:text-2xl'} font-black text-slate-900 truncate max-w-full`}>
@@ -442,21 +435,24 @@ const Header = ({
                       </div>
                     </div>
                   </div>
-                  <span className="hidden sm:inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold text-slate-600">
-                    Ver loja
-                  </span>
                 </div>
-              </button>
+              </div>
 
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                 {avgRating > 0 && (
                   <button
                     type="button"
                     onClick={onShowReviews}
-                    className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 transition-colors hover:bg-amber-100 active:scale-95"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 transition-colors hover:bg-amber-100 active:scale-95"
                   >
-                    <Star size={11} weight="fill" className="text-amber-500" />
-                    {avgRating.toFixed(1)} {totalReviews > 0 ? `(${totalReviews})` : ''}
+                    <Star size={13} weight="fill" className="text-amber-500" />
+                    {avgRating.toFixed(1).replace('.', ',')}
+                    {totalReviews > 0 && (
+                      <span className="font-medium text-amber-600/80">
+                        · {totalReviews} {totalReviews === 1 ? 'avaliação' : 'avaliações'}
+                      </span>
+                    )}
+                    <CaretRight size={12} weight="bold" className="text-amber-500" />
                   </button>
                 )}
                 {deliveryFeeLabel && (
@@ -1303,6 +1299,9 @@ export const MenuView = ({
                 whatsappNumber={whatsappNumber}
                 whatsappMessage={whatsappMessage}
                 instagramHandle={instagramHandle}
+                mapMarkers={mapMarkers}
+                googleMapsUrl={googleMapsUrl}
+                wazeUrl={wazeUrl}
               />
             )}
           </div>

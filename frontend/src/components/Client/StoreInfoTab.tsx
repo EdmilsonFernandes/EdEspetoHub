@@ -9,6 +9,7 @@ import {
   Info,
 } from '@phosphor-icons/react';
 import { formatAddress, formatOrderType } from '../../utils/format';
+import { StoreMapView } from '../StoreMapView';
 
 type StoreInfoTabProps = {
   storeDescription?: string | null;
@@ -21,6 +22,9 @@ type StoreInfoTabProps = {
   whatsappNumber?: string;
   whatsappMessage?: string;
   instagramHandle?: string;
+  mapMarkers?: Array<{ lat: number; lng: number; label?: string }> | null;
+  googleMapsUrl?: string;
+  wazeUrl?: string;
 };
 
 const normalizePhoneDigits = (value?: string | null) => String(value || '').replace(/\D/g, '');
@@ -59,6 +63,9 @@ export function StoreInfoTab({
   whatsappNumber,
   whatsappMessage,
   instagramHandle,
+  mapMarkers,
+  googleMapsUrl,
+  wazeUrl,
 }: StoreInfoTabProps) {
   const addressLabel = formatAddress(storeAddress);
   const phoneDigits = normalizePhoneDigits(whatsappNumber);
@@ -71,7 +78,8 @@ export function StoreInfoTab({
       todayHoursLabel ||
       deliveryModes.length ||
       phoneDigits ||
-      igHandle
+      igHandle ||
+      (mapMarkers && mapMarkers.length > 0)
   );
 
   if (!hasAnyInfo) {
@@ -130,9 +138,40 @@ export function StoreInfoTab({
         </InfoCard>
       )}
 
-      {addressLabel && (
+      {(addressLabel || (mapMarkers && mapMarkers.length > 0)) && (
         <InfoCard icon={<MapPinLine size={16} weight="bold" />} title="Endereço">
-          <p className="break-words">{addressLabel}</p>
+          {addressLabel && <p className="break-words">{addressLabel}</p>}
+          {mapMarkers && mapMarkers.length > 0 && (
+            <div className="mt-3 overflow-hidden rounded-[20px] border border-slate-100">
+              <StoreMapView markers={mapMarkers} zoom={15} />
+            </div>
+          )}
+          {(googleMapsUrl || wazeUrl) && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {googleMapsUrl && (
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-slate-700"
+                >
+                  <MapPinLine size={15} weight="fill" />
+                  Google Maps
+                </a>
+              )}
+              {wazeUrl && (
+                <a
+                  href={wazeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-cyan-600"
+                >
+                  <MapPinLine size={15} weight="fill" />
+                  Waze
+                </a>
+              )}
+            </div>
+          )}
         </InfoCard>
       )}
 

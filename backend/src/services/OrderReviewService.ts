@@ -591,6 +591,7 @@ async publicStoreReviewsBySlug(slug: string, limit = 20, offset = 0) {
     if (!store) throw new AppError('STORE-001', 404);
     const { summary, distribution } = await this.orderReviewRepository.getStoreSummary(store.id);
     const reviews = await this.orderReviewRepository.listPublicByStoreId(store.id, limit, offset);
+    const { totalOrders, cancelledOrders } = await this.orderReviewRepository.getStoreOrderStats(store.id);
 
     const totalReviews = Number(summary?.total_reviews || 0);
     const distributionRows = Array.isArray(distribution)
@@ -620,6 +621,7 @@ async publicStoreReviewsBySlug(slug: string, limit = 20, offset = 0) {
       .slice(0, 5)
       .map(([label]) => label);
 
+    const cancellationRate = totalOrders > 0 ? Math.round((cancelledOrders / totalOrders) * 100) : 0;
     return {
       avgStoreRating: Number(summary?.store_avg_rating || 0),
       totalReviews,
@@ -627,6 +629,9 @@ async publicStoreReviewsBySlug(slug: string, limit = 20, offset = 0) {
       positivePercent,
       topTags,
       reviews,
+      totalOrders,
+      cancelledOrders,
+      cancellationRate,
     };
   }
 

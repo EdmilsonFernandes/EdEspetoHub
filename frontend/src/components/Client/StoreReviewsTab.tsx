@@ -1,5 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Star, ChatCircleDots, WarningCircle, Sparkle } from '@phosphor-icons/react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Star,
+  ChatCircle,
+  ClipboardText,
+  CheckCircle,
+  Info,
+  WarningCircle,
+  ChatCircleDots,
+} from '@phosphor-icons/react';
 import { storeService } from '../../services/storeService';
 import { formatRelativeDate } from '../../utils/format';
 
@@ -21,6 +29,9 @@ type ReviewsPayload = {
   positivePercent?: number;
   topTags?: string[];
   reviews?: ReviewRow[];
+  totalOrders?: number;
+  cancelledOrders?: number;
+  cancellationRate?: number;
 };
 
 const buildDistribution = (raw: DistributionRow[] = []) => {
@@ -63,8 +74,8 @@ function Skeleton() {
   return (
     <div className="space-y-4">
       <div className="h-24 animate-pulse rounded-2xl bg-slate-100" />
-      <div className="h-28 animate-pulse rounded-2xl bg-slate-100" />
-      <div className="h-20 animate-pulse rounded-2xl bg-slate-100" />
+      <div className="h-40 animate-pulse rounded-2xl bg-slate-100" />
+      <div className="h-24 animate-pulse rounded-2xl bg-slate-100" />
       {[0, 1, 2].map((i) => (
         <div key={i} className="h-24 animate-pulse rounded-2xl bg-slate-100" />
       ))}
@@ -76,6 +87,7 @@ export function StoreReviewsTab({ storeSlug }: { storeSlug: string }) {
   const [data, setData] = useState<ReviewsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sort, setSort] = useState<'comments' | 'recent'>('recent');
 
   useEffect(() => {
     let active = true;
@@ -86,7 +98,7 @@ export function StoreReviewsTab({ storeSlug }: { storeSlug: string }) {
     setLoading(true);
     setError(null);
     storeService
-      .fetchPublicStoreReviews(storeSlug, { limit: 20 })
+      .fetchPublicStoreReviews(storeSlug, { limit: 30 })
       .then((payload) => {
         if (active) setData(payload || null);
       })
@@ -101,6 +113,31 @@ export function StoreReviewsTab({ storeSlug }: { storeSlug: string }) {
     };
   }, [storeSlug]);
 
+  const avg = Number(data?.avgStoreRating || 0);
+  const total = Number(data?.totalReviews || 0);
+  const distribution = buildDistribution(data?.distribution);
+  const maxTotal = Math.max(1, ...distribution.map((d) => d.total));
+  const positivePercent = Number(data?.positivePercent || 0);
+  const totalOrders = Number(data?.totalOrders || 0);
+  const cancellationRate = Number(data?.cancellationRate || 0);
+  const allReviews = Array.isArray(data?.reviews) ? data.reviews : [];
+
+  const qualityChecks = useMemo(() => {
+    const checks: Array<{ icon: typeof Star; label: string }> = [];
+    if (avg >= 4.5) checks.push({ icon: Star, label: 'Avaliações excelentes' });
+    if (positivePercent >= 90) checks.push({ icon: ChatCircle, label: 'Poucas avaliações negativas' });
+    if (totalOrders > 0 && cancellationRate <= 5)
+      checks.push({ icon: ClipboardText, label: 'Baixo índice de cancelamento' });
+    return checks;
+  }, [avg, positivePercent, totalOrders, cancellationRate]);
+
+  const sortedReviews = useMemo(() => {
+    if (sort === 'comments') {
+      return [...allReviews].sort((a, b) => Number(b.storeRating || 0) - Number(a.storeRating || 0));
+    }
+    return allReviews;
+  }, [sort, allReviews]);
+
   if (loading) return <Skeleton />;
 
   if (error) {
@@ -111,14 +148,6 @@ export function StoreReviewsTab({ storeSlug }: { storeSlug: string }) {
       </div>
     );
   }
-
-  const avg = Number(data?.avgStoreRating || 0);
-  const total = Number(data?.totalReviews || 0);
-  const distribution = buildDistribution(data?.distribution);
-  const maxTotal = Math.max(1, ...distribution.map((d) => d.total));
-  const positivePercent = Number(data?.positivePercent || 0);
-  const topTags = Array.isArray(data?.topTags) ? data.topTags.slice(0, 5) : [];
-  const reviews = Array.isArray(data?.reviews) ? data.reviews : [];
 
   if (total === 0) {
     return (
@@ -131,74 +160,79 @@ export function StoreReviewsTab({ storeSlug }: { storeSlug: string }) {
 
   return (
     <div className="space-y-5">
-      {/* Header da nota */}
-      <section className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.3)] sm:p-5">
-        <div className="flex items-baseline gap-1">
-          <span className="text-4xl font-black text-slate-900">{avg.toFixed(1).replace('.', ',')}</span>
-          <Star size={22} weight="fill" className="text-amber-400" />
-        </div>
-        <div className="flex flex-col">
-          <StarsRow rating={avg} size={18} />
-          <span className="mt-1 text-xs font-medium text-slate-500">
-            {total} {total === 1 ? 'avaliação' : 'avaliações'}
-          </span>
-        </div>
-      </section>
-
-      {/* Gráfico de distribuição */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.2)] sm:p-5">
-        <div className="space-y-2">
-          {distribution.map((d) => (
-            <div key={d.rating} className="flex items-center gap-3">
-              <span className="w-3 text-xs font-bold text-slate-600">{d.rating}</span>
-              <Star size={13} weight="fill" className="text-amber-400" />
-              <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-amber-400 transition-all"
-                  style={{ width: `${(d.total / maxTotal) * 100}%` }}
-                />
-              </div>
-              <span className="w-8 text-right text-xs font-semibold text-slate-500">{d.total}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Card de qualidade */}
-      {(positivePercent > 0 || topTags.length > 0) && (
+      {/* Card de qualidade: Experiência boa (estilo iFood) */}
+      {qualityChecks.length > 0 && (
         <section className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 shadow-[0_18px_40px_-34px_rgba(5,150,105,0.35)] sm:p-5">
           <div className="flex items-center gap-2">
-            <Sparkle size={18} weight="fill" className="text-emerald-500" />
-            <span className="text-sm font-bold text-emerald-700">
-              {positivePercent > 0 ? `${positivePercent}% avaliações positivas` : 'Avaliações dos clientes'}
-            </span>
+            <Info size={18} weight="fill" className="text-emerald-600" />
+            <span className="text-sm font-bold text-emerald-700">Experiência boa</span>
           </div>
-          {topTags.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {topTags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold text-emerald-700"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
+          <p className="mt-1 text-xs text-emerald-700/70">Com base nas avaliações dos clientes</p>
+          <div className="mt-3 space-y-2">
+            {qualityChecks.map(({ icon: Icon, label }) => (
+              <div key={label} className="flex items-center gap-2">
+                <Icon size={16} weight="duotone" className="text-emerald-600" />
+                <span className="text-xs font-semibold text-slate-700">{label}</span>
+                <CheckCircle size={15} weight="fill" className="ml-auto text-emerald-500" />
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
-      {/* Feed de comentários */}
+      {/* Nota média + gráfico de distribuição */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.3)] sm:p-5">
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col items-center">
+            <span className="text-3xl font-black text-slate-900">{avg.toFixed(1).replace('.', ',')}</span>
+            <StarsRow rating={avg} size={13} />
+            <span className="mt-1 text-[11px] font-medium text-slate-400">
+              {total} {total === 1 ? 'avaliação' : 'avaliações'}
+            </span>
+          </div>
+          <div className="flex-1 space-y-1.5">
+            {distribution.map((d) => (
+              <div key={d.rating} className="flex items-center gap-2">
+                <span className="w-2 text-[11px] font-bold text-slate-500">{d.rating}</span>
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-slate-800 transition-all"
+                    style={{ width: `${(d.total / maxTotal) * 100}%` }}
+                  />
+                </div>
+                <span className="w-6 text-right text-[11px] font-semibold text-slate-400">{d.total}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Feed de comentários com sub-tabs */}
       <section>
-        <h3 className="mb-3 px-1 text-sm font-bold text-slate-800">Comentários</h3>
-        {reviews.length === 0 ? (
+        <div className="mb-3 flex items-center gap-4 border-b border-slate-200 px-1">
+          {(['recent', 'comments'] as const).map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setSort(key)}
+              className={`-mb-px border-b-2 pb-2 text-sm font-bold transition-colors ${
+                sort === key
+                  ? 'border-rose-500 text-rose-600'
+                  : 'border-transparent text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              {key === 'recent' ? 'Recentes' : 'Comentários'}
+            </button>
+          ))}
+        </div>
+        {sortedReviews.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-6 text-center">
             <ChatCircleDots size={28} weight="duotone" className="text-slate-300" />
             <p className="text-xs font-medium text-slate-500">Ainda não há comentários por escrito.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {reviews.map((review, index) => (
+            {sortedReviews.map((review, index) => (
               <article
                 key={review.id || `review-${index}`}
                 className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.25)]"

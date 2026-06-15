@@ -204,6 +204,26 @@ async getStoreSummary(storeId: string) {
   }
 
     /**
+   * Retrieves public order stats for a store (total + cancelled) used by the
+   * quality card on the storefront reviews screen.
+   *
+   * @author Edmilson Lopes
+   */
+async getStoreOrderStats(storeId: string) {
+    const [row] = await AppDataSource.query(
+      `
+      SELECT
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE LOWER(status) = 'cancelled')::int AS cancelled
+      FROM orders
+      WHERE store_id = $1
+      `,
+      [storeId]
+    );
+    return { totalOrders: Number(row?.total || 0), cancelledOrders: Number(row?.cancelled || 0) };
+  }
+
+    /**
    * Lists records for list tip payouts by store id.
    *
    * @author Edmilson Lopes
