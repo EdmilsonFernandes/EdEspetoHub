@@ -1202,7 +1202,7 @@ export const MenuView = ({
             ) : null}
           </div>
         </div>
-        {filteredGrouped.length > 1 && (
+        {activeTab === "products" && filteredGrouped.length > 1 && (
           <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-3">
             <div className="flex w-full items-stretch gap-2 rounded-[1.65rem] border border-white/85 bg-white/70 p-1.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.32),inset_0_1px_0_rgba(255,255,255,0.82)] ring-1 ring-slate-900/[0.025] backdrop-blur-xl">
               {useCompactCategoryCarousel && (
@@ -1283,35 +1283,34 @@ export const MenuView = ({
         )}
         {showHeader && activeTab !== "products" && (
           <div className="-mx-3 sm:-mx-4 border-b border-slate-200 bg-white">
-            <div className="mx-auto flex max-w-6xl items-center gap-1 px-3 sm:px-4">
+            <div className="mx-auto flex max-w-6xl items-center gap-4 px-3 sm:px-4">
               <button
                 type="button"
                 onClick={() => setActiveTab("products")}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100"
-                aria-label="Voltar aos produtos"
+                className="inline-flex shrink-0 items-center gap-1 py-3 text-sm font-semibold text-slate-500 transition-colors hover:text-slate-900"
               >
-                <ArrowLeft size={18} weight="bold" />
+                <ArrowLeft size={16} weight="bold" />
+                Voltar
               </button>
-              <span className="mr-3 truncate py-3 text-sm font-bold text-slate-800">
-                {branding?.brandName || "Loja"}
-              </span>
-              {([
-                { id: "reviews", label: "Avaliações" },
-                { id: "info", label: "Informações" },
-              ] as const).map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`-mb-px shrink-0 border-b-2 py-3 text-sm font-semibold transition-colors ${
-                    activeTab === tab.id
-                      ? "border-rose-500 text-rose-600"
-                      : "border-transparent text-slate-500 hover:text-slate-700"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+              <div className="ml-auto flex items-center gap-5">
+                {([
+                  { id: "reviews", label: "Avaliações" },
+                  { id: "info", label: "Informações" },
+                ] as const).map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`-mb-px border-b-2 py-3 text-sm font-semibold transition-colors ${
+                      activeTab === tab.id
+                        ? "border-rose-500 text-rose-600"
+                        : "border-transparent text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
