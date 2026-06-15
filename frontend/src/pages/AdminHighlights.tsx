@@ -30,6 +30,7 @@ import { formatCurrency, formatDateTime } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
+import { PaymentQRCard } from '../components/common/PaymentQRCard';
 import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
 import { promoPushService } from '../services/promoPushService';
 import {
@@ -1321,38 +1322,18 @@ export function AdminHighlights() {
               )}
             </div>
 
-            {selectedRequest?.paymentQrCodeBase64 && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-3 flex justify-center">
-                <img src={selectedRequest.paymentQrCodeBase64} alt="QR Code PIX" className="h-44 w-44 object-contain sm:h-48 sm:w-48" />
-              </div>
-            )}
-
-            {selectedRequest?.paymentQrCodeText && (
-              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">PIX copia e cola</p>
-                <p className="mt-1 max-h-24 overflow-y-auto break-all rounded-lg bg-white/70 p-2 text-xs leading-relaxed text-slate-700">
-                  {String(selectedRequest.paymentQrCodeText || '')}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => copyText(String(selectedRequest.paymentQrCodeText || ''), 'Código PIX copiado.')}
-                  className="mt-2 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700"
-                >
-                  Copiar código PIX
-                </button>
-              </div>
-            )}
-
-            {selectedRequest?.paymentLink && (
-              <a
-                href={selectedRequest.paymentLink}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white"
-              >
-                Abrir link de pagamento
-              </a>
-            )}
+            <PaymentQRCard
+              qrCodeBase64={selectedRequest?.paymentQrCodeBase64 || null}
+              qrCodeText={selectedRequest?.paymentQrCodeText || null}
+              paymentLink={selectedRequest?.paymentLink || null}
+              status={selectedRequest?.paymentStatus || 'PENDING'}
+              expiresAt={selectedRequest?.paymentExpiresAt || null}
+              amountLabel={formatCurrency(Number(selectedRequest?.priceAmount || 0))}
+              title="Pagamento do destaque"
+              subtitle={selectedRequest?.product?.name}
+              variant="admin"
+              onVerifyNow={() => refreshSelectedPaymentStatus(false)}
+            />
 
             <div className="mt-3">
               <PaymentAuditPanel
@@ -1409,21 +1390,24 @@ export function AdminHighlights() {
                 <p className="text-xs text-amber-700 mt-1">Expira em: <strong>{new Date(activePush.paymentExpiresAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</strong></p>
               )}
             </div>
-            {activePush.paymentQrCodeBase64 && activePush.paymentStatus !== 'PAID' && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-3 flex justify-center">
-                <img src={activePush.paymentQrCodeBase64} alt="QR Code PIX" className="h-48 w-48 object-contain" />
-              </div>
-            )}
-            {activePush.paymentQrCodeText && activePush.paymentStatus !== 'PAID' && (
-              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">PIX copia e cola</p>
-                <p className="mt-1 break-all text-xs text-slate-700">{activePush.paymentQrCodeText}</p>
-                <button type="button" onClick={() => navigator.clipboard.writeText(activePush.paymentQrCodeText).then(() => showToast('Código PIX copiado.', 'success'))} className="mt-2 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700">Copiar código PIX</button>
-              </div>
-            )}
-            {activePush.paymentStatus === 'PAID' && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">✅ Pagamento confirmado! Aguardando aprovação da plataforma.</div>
-            )}
+            <PaymentQRCard
+              qrCodeBase64={activePush.paymentQrCodeBase64 || null}
+              qrCodeText={activePush.paymentQrCodeText || null}
+              status={activePush.paymentStatus || 'PENDING'}
+              expiresAt={activePush.paymentExpiresAt || null}
+              title="Pagamento do Push"
+              subtitle={activePush.title}
+              variant="admin"
+              onVerifyNow={async () => {
+                if (!storeId) return;
+                try {
+                  const updated = await promoPushService.refreshPayment(activePush.id, storeId);
+                  setActivePush(updated);
+                  setPushes((prev) => prev.map((p) => p.id === updated.id ? updated : p));
+                  if (updated.paymentStatus === 'PAID') showToast('Pagamento confirmado!', 'success');
+                } catch { showToast('Não foi possível atualizar.', 'warning'); }
+              }}
+            />
             <div className="mt-3 flex justify-end gap-2">
               {activePush.paymentStatus !== 'PAID' && (
                 <button type="button" onClick={async () => {
