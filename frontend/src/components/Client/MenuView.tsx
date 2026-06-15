@@ -151,7 +151,8 @@ const Header = ({
   reviewSummary,
   deliveryFeeLabel,
   orderTypes,
-  minOrderValue
+  minOrderValue,
+  onBack
 }) => {
   const normalizedRole = String(userRole || "").toLowerCase();
   const isAdminUser = normalizedRole === "admin" || normalizedRole === "lojista";
@@ -1164,6 +1165,7 @@ export const MenuView = ({
           deliveryFeeLabel={deliveryFeeLabel}
           orderTypes={orderTypes}
           minOrderValue={minOrderValue}
+          onBack={onBack}
         />
       )}
 
