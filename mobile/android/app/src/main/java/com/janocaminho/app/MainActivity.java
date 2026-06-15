@@ -138,6 +138,7 @@ public class MainActivity extends BridgeActivity {
     private boolean flexibleUpdatePromptVisible = false;
     private boolean biometricBridgeInjected = false;
     private boolean keepAwakeBridgeInjected = false;
+    private boolean printAckBridgeInjected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -235,6 +236,10 @@ public class MainActivity extends BridgeActivity {
         if (!keepAwakeBridgeInjected) {
             webView.addJavascriptInterface(new KeepAwakeBridge(), "JNCKeepAwake");
             keepAwakeBridgeInjected = true;
+        }
+        if (!printAckBridgeInjected) {
+            webView.addJavascriptInterface(new PrintAckBridge(), "JNCPrintAck");
+            printAckBridgeInjected = true;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             webView.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_YES);
@@ -1189,6 +1194,22 @@ public class MainActivity extends BridgeActivity {
         @JavascriptInterface
         public void appReady() {
             markWebAppReadyFromJavascript();
+        }
+    }
+
+    // Bridge para o JS consultar/marcar pedidos ja impressos (ACK — device-side queue).
+    private class PrintAckBridge {
+        @JavascriptInterface
+        public String getAcked() {
+            return BluetoothPrinterHelper.getAckedOrderIdsJson(MainActivity.this);
+        }
+        @JavascriptInterface
+        public void ack(String orderId) {
+            BluetoothPrinterHelper.ackOrderPrinted(MainActivity.this, orderId);
+        }
+        @JavascriptInterface
+        public boolean isAcked(String orderId) {
+            return BluetoothPrinterHelper.isOrderAcked(MainActivity.this, orderId);
         }
     }
 

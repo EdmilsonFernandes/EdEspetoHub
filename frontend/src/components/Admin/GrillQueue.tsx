@@ -46,7 +46,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { Button } from '../ui/Button';
 import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
-import { getStoredThermalPrinterSettings } from "../../utils/thermalPrinter";
+import { getStoredThermalPrinterSettings, getAckedPrintOrderIds, ackPrintOrder } from "../../utils/thermalPrinter";
 import { exportToCsv } from "../../utils/export";
 import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from "../../utils/orderNotificationSound";
 import {
@@ -1301,6 +1301,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   // True apos o primeiro poll bem-sucedido. Evita tratar os pedidos que ja estao na fila
   // como "novos" quando o lojista abre/retoma a tela (o que reimprimia tudo na entrada).
   const queuePrimedRef = useRef(false);
+  // Pedidos sendo impressidos agora (evita duplicar entre ciclos de polling).
+  const printingIdsRef = useRef<Set<string>>(new Set());
   const queueRef = useRef<any[]>([]);
   const historyOrdersRef = useRef<any[]>([]);
   const queuePollTimerRef = useRef<number | null>(null);
@@ -1976,22 +1978,31 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         void playNewOrderSound();
         setNewOrderIds(incoming);
         window.setTimeout(() => setNewOrderIds([]), 4000);
+      }
 
-        // Auto-print por polling: imprime quando a fila esta aberta (app em foreground nesta
-        // tela). O push (FCM) cuida do background/tela bloqueada — so imprime em background,
-        // entao nao duplica. So pedidos de cliente online (nao os criados pelo admin).
-        const autoPrintEnabled = getStoredThermalPrinterSettings().autoPrintOnlineOrders;
-        if (autoPrintEnabled && hasPrintAccess) {
-          const newOrders = (data || []).filter((o: any) => incoming.includes(o.id));
-          const onlineOrders = newOrders.filter((o: any) =>
-            Boolean(String(o?.customerUserId || '').trim() || String(o?.guestPushId || '').trim())
-          );
-          for (const order of onlineOrders) {
-            const rank = nextIds.indexOf(order.id) + 1;
-            void executePrintOrder(order, rank).catch((autoPrintErr) => {
-              console.warn('[auto-print] falha ao imprimir pedido automaticamente', order.id, autoPrintErr);
-            });
-          }
+      // Auto-print com RETRY + ACK (device-side queue):
+      // A cada ciclo (apos o primeiro), imprime os pedidos online NAO-ackados. Os que
+      // falharam ficam nao-ackados e sao reimpressos no ciclo seguinte (retry automatico).
+      // Os ja impressos (ackados) sao pulados (idempotencia — nao duplica). O push
+      // (background) tambem acka, entao nao duplica entre push e polling.
+      const autoPrintEnabled = getStoredThermalPrinterSettings().autoPrintOnlineOrders;
+      if (autoPrintEnabled && hasPrintAccess && !isFirstPrime) {
+        const acked = getAckedPrintOrderIds();
+        const toPrint = (data || []).filter((o: any) =>
+          Boolean(String(o?.customerUserId || '').trim() || String(o?.guestPushId || '').trim())
+          && !acked.has(String(o?.id || ''))
+          && !printingIdsRef.current.has(String(o?.id || ''))
+        );
+        for (const order of toPrint) {
+          const oid = String(order.id);
+          printingIdsRef.current.add(oid);
+          const rank = nextIds.indexOf(order.id) + 1;
+          void executePrintOrder(order, rank)
+            .then(() => { ackPrintOrder(oid); })
+            .catch((autoPrintErr) => {
+              console.warn('[auto-print] falhou — vai retentar no proximo ciclo', oid, autoPrintErr);
+            })
+            .finally(() => { printingIdsRef.current.delete(oid); });
         }
       }
       queuePrimedRef.current = true;

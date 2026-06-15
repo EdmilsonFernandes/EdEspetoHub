@@ -103,6 +103,12 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void printOrderInline(Map<String, String> data, String orderId) {
+        // Idempotencia: se ja foi impresso (ackado), nao reimprime.
+        if (orderId != null && !orderId.trim().isEmpty()
+            && BluetoothPrinterHelper.isOrderAcked(this, orderId.trim())) {
+            Log.i(TAG, "inline print: pedido ja ackado, pulando " + orderId);
+            return;
+        }
         // Imprime direto no callback do FCM (sem ForegroundService), o que contorna a
         // restricao do Android 12+ que bloqueia startForegroundService em background.
         PRINT_EXECUTOR.submit(() -> {
@@ -126,6 +132,10 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
                 BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
                 boolean ok = BluetoothPrinterHelper.printViaBluetooth(adapter, address.trim(), printBytes);
                 Log.i(TAG, "inline print " + (ok ? "SUCCESS" : "FAILED") + " p/ " + orderId);
+                // ACK: marca como impresso pra nao duplicar (polling vai pular).
+                if (ok && orderId != null && !orderId.trim().isEmpty()) {
+                    BluetoothPrinterHelper.ackOrderPrinted(JncFirebaseMessagingService.this, orderId.trim());
+                }
             } catch (Exception e) {
                 Log.e(TAG, "inline print error p/ " + orderId, e);
             }

@@ -349,4 +349,61 @@ public final class BluetoothPrinterHelper {
         if (!current.isEmpty()) lines.add(current);
         return lines.toArray(new String[0]);
     }
+
+    // --- Print ACK store (device-side queue: idempotencia + retry) ---
+    // Marca pedidos ja impressos pra nao reimprimir (ACK). Os que falham ficam nao-ackados
+    // e o polling re-tenta. Persiste em SharedPreferences (sobrevive a restart do app).
+    private static final String ACK_PREFS = "jnc_print_acked";
+    private static final long ACK_TTL_MS = 48L * 60 * 60 * 1000; // 48h
+
+    public static boolean isOrderAcked(android.content.Context context, String orderId) {
+        if (orderId == null || orderId.trim().isEmpty()) return false;
+        try {
+            android.content.SharedPreferences prefs = context.getSharedPreferences(ACK_PREFS, android.content.Context.MODE_PRIVATE);
+            long ts = prefs.getLong(orderId.trim(), 0);
+            if (ts == 0) return false;
+            if (System.currentTimeMillis() - ts > ACK_TTL_MS) {
+                prefs.edit().remove(orderId.trim()).apply();
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static void ackOrderPrinted(android.content.Context context, String orderId) {
+        if (orderId == null || orderId.trim().isEmpty()) return;
+        try {
+            android.content.SharedPreferences prefs = context.getSharedPreferences(ACK_PREFS, android.content.Context.MODE_PRIVATE);
+            prefs.edit().putLong(orderId.trim(), System.currentTimeMillis()).apply();
+        } catch (Exception ignored) {
+        }
+    }
+
+    // Retorna os orderIds ackados como JSON array string (consumido pelo JS via bridge).
+    public static String getAckedOrderIdsJson(android.content.Context context) {
+        try {
+            android.content.SharedPreferences prefs = context.getSharedPreferences(ACK_PREFS, android.content.Context.MODE_PRIVATE);
+            java.util.Map<String, ?> all = prefs.getAll();
+            long cutoff = System.currentTimeMillis() - ACK_TTL_MS;
+            StringBuilder sb = new StringBuilder("[");
+            boolean first = true;
+            for (java.util.Map.Entry<String, ?> entry : all.entrySet()) {
+                Object val = entry.getValue();
+                long ts = (val instanceof Long) ? (Long) val : 0;
+                if (ts > cutoff) {
+                    if (!first) sb.append(",");
+                    sb.append("\"").append(entry.getKey()).append("\"");
+                    first = false;
+                } else {
+                    prefs.edit().remove(entry.getKey()).apply();
+                }
+            }
+            sb.append("]");
+            return sb.toString();
+        } catch (Exception e) {
+            return "[]";
+        }
+    }
 }

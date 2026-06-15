@@ -232,6 +232,33 @@ export const saveAutoPrintSetting = async (enabled: boolean) => {
   }
 }
 
+// --- Device-side print ACK (idempotencia + retry) ---
+// Consome o bridge nativo (window.JNCPrintAck) pra saber quais pedidos ja foram impressos
+// (ACK). No web e no-op (retorna set vazio). O polling usa isso pra: (1) nao reimprimir
+// os ja feitos, e (2) re-tentar os que falharam (ficam nao-ackados).
+export const getAckedPrintOrderIds = (): Set<string> => {
+  if (typeof window === 'undefined') return new Set();
+  const bridge = (window as any).JNCPrintAck;
+  if (!bridge || typeof bridge.getAcked !== 'function') return new Set();
+  try {
+    const arr = JSON.parse(bridge.getAcked() || '[]');
+    return new Set(Array.isArray(arr) ? arr.map(String) : []);
+  } catch {
+    return new Set();
+  }
+};
+
+export const ackPrintOrder = (orderId: string) => {
+  if (typeof window === 'undefined' || !orderId) return;
+  const bridge = (window as any).JNCPrintAck;
+  if (!bridge || typeof bridge.ack !== 'function') return;
+  try {
+    bridge.ack(String(orderId));
+  } catch {
+    // no-op
+  }
+};
+
 // Mantem a tela acesa (wake lock) quando o auto-print esta ligado no app nativo, para o
 // polling da fila nao pausar quando a tela apagaria. So faz algo quando o bridge nativo
 // (window.JNCKeepAwake) existe — no web é no-op.
