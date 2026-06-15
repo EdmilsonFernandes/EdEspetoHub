@@ -302,9 +302,28 @@ export const clearPrintingOrder = (orderId: string) => {
 export const syncKeepAwakeForAutoPrint = () => {
   if (typeof window === 'undefined') return;
   const bridge = (window as any).JNCKeepAwake;
-  if (!bridge || typeof bridge.setEnabled !== 'function') return;
+  if (!bridge) return;
+  const enabled = Boolean(getStoredThermalPrinterSettings().autoPrintOnlineOrders);
+  // Mantem a tela acesa enquanto o app esta em foreground (evita Doze com tela ligada).
   try {
-    bridge.setEnabled(Boolean(getStoredThermalPrinterSettings().autoPrintOnlineOrders));
+    if (typeof bridge.setEnabled === 'function') bridge.setEnabled(enabled);
+  } catch {
+    // no-op
+  }
+  // Keep-alive FGS + isencao de bateria: mantem o PROCESSO vivo atraves do Doze para o FCM
+  // imprimir mesmo com tela apagada por horas. Sem isso, o Android/Samsung congela o app em
+  // ~4min de idle e o push nao imprime ate ligar a tela.
+  try {
+    if (enabled) {
+      if (typeof bridge.startPrintKeepAlive === 'function') bridge.startPrintKeepAlive();
+      if (typeof bridge.isBatteryOptimizationExempt === 'function'
+        && !bridge.isBatteryOptimizationExempt()
+        && typeof bridge.requestBatteryExemption === 'function') {
+        bridge.requestBatteryExemption();
+      }
+    } else if (typeof bridge.stopPrintKeepAlive === 'function') {
+      bridge.stopPrintKeepAlive();
+    }
   } catch {
     // no-op
   }

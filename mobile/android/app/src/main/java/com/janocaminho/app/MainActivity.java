@@ -1244,6 +1244,57 @@ public class MainActivity extends BridgeActivity {
                 }
             });
         }
+
+        // --- Keep-alive FGS: mantem o processo vivo atraves do Doze (FCM imprime com tela apagada) ---
+        @JavascriptInterface
+        public void startPrintKeepAlive() {
+            runOnUiThread(() -> {
+                try {
+                    Intent intent = new Intent(MainActivity.this, PrintKeepAliveService.class);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(intent);
+                    } else {
+                        startService(intent);
+                    }
+                } catch (Exception ignored) {
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void stopPrintKeepAlive() {
+            runOnUiThread(() -> {
+                try {
+                    stopService(new Intent(MainActivity.this, PrintKeepAliveService.class));
+                } catch (Exception ignored) {
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public boolean isBatteryOptimizationExempt() {
+            try {
+                android.os.PowerManager pm = (android.os.PowerManager) getSystemService(Context.POWER_SERVICE);
+                return pm != null && pm.isIgnoringBatteryOptimizations(getPackageName());
+            } catch (Exception e) {
+                return true;
+            }
+        }
+
+        @JavascriptInterface
+        public void requestBatteryExemption() {
+            runOnUiThread(() -> {
+                try {
+                    android.os.PowerManager pm = (android.os.PowerManager) getSystemService(Context.POWER_SERVICE);
+                    if (pm != null && pm.isIgnoringBatteryOptimizations(getPackageName())) return;
+                    Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                    intent.setData(android.net.Uri.parse("package:" + getPackageName()));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } catch (Exception ignored) {
+                }
+            });
+        }
     }
 
     private class BiometricBridge {
