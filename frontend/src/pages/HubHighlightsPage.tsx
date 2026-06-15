@@ -474,34 +474,35 @@ export function HubHighlightsPage() {
               const CategoryIcon = option.icon;
               const active = selectedCategory === option.key;
               return (
-                <Chip
-                  key={option.key}
-                  onClick={() => setSelectedCategory(option.key)}
-                  selected={active}
-                  tone="brand"
-                  className="group/filter relative flex min-h-[3.45rem] w-full min-w-0 flex-col items-center justify-center overflow-hidden rounded-[0.95rem] px-1 py-1.5 text-center"
-                >
-                  <span className={`relative grid h-7 w-7 place-items-center rounded-full transition-all duration-300 ${
-                    active
-                      ? 'bg-white/18 text-white shadow-[0_10px_18px_-12px_rgba(15,23,42,0.28)] ring-1 ring-white/20'
-                      : 'bg-[#f3f8fb] text-[#336886] group-hover/filter:bg-[#336886]/10'
-                  }`}>
-                    <CategoryIcon
-                      size={13}
-                      weight={active ? 'fill' : 'bold'}
-                    />
-                    {option.count > 0 ? (
-                      <span className={`absolute -right-1 -top-1 inline-flex h-3.5 min-w-3.5 items-center justify-center rounded-full px-0.5 text-[7px] font-black leading-none ${
-                        active ? 'bg-[#5FD35A] text-[#153A4C]' : 'bg-[#153A4C] text-white'
-                      }`}>
-                        {option.count > 99 ? '99+' : option.count}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="relative mt-1 max-w-full truncate text-[8.5px] font-black uppercase leading-none tracking-[0.07em]">
-                    {option.label}
-                  </span>
-                </Chip>
+                <div key={option.key} className="relative">
+                  <Chip
+                    onClick={() => setSelectedCategory(option.key)}
+                    selected={active}
+                    tone="brand"
+                    className="group/filter relative flex min-h-[3.45rem] w-full min-w-0 flex-col items-center justify-center overflow-hidden rounded-[0.95rem] px-1 py-1.5 text-center"
+                  >
+                    <span className={`relative grid h-7 w-7 place-items-center rounded-full transition-all duration-300 ${
+                      active
+                        ? 'bg-white/18 text-white shadow-[0_10px_18px_-12px_rgba(15,23,42,0.28)] ring-1 ring-white/20'
+                        : 'bg-[#f3f8fb] text-[#336886] group-hover/filter:bg-[#336886]/10'
+                    }`}>
+                      <CategoryIcon
+                        size={13}
+                        weight={active ? 'fill' : 'bold'}
+                      />
+                    </span>
+                    <span className="relative mt-1 max-w-full truncate text-[8.5px] font-black uppercase leading-none tracking-[0.07em]">
+                      {option.label}
+                    </span>
+                  </Chip>
+                  {option.count > 0 ? (
+                    <span className={`pointer-events-none absolute -right-1 -top-1 z-10 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-black leading-none ring-2 ring-white ${
+                      active ? 'bg-[#5FD35A] text-[#153A4C]' : 'bg-[#153A4C] text-white'
+                    }`}>
+                      {option.count > 99 ? '99+' : option.count}
+                    </span>
+                  ) : null}
+                </div>
               );
             })}
             </div>
