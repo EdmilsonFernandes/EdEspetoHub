@@ -5,16 +5,70 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "7bfa5dd1",
-  "versionLabel": "v0.1.9.7bfa5dd1",
-  "versionInternal": "0.1.9+20260615.160440.7bfa5dd1",
-  "buildId": "0.1.9+20260615.160440.7bfa5dd1-20260615.160440-7bfa5dd1",
-  "builtAt": "2026-06-15T16:04:40.839Z",
-  "commitHash": "7bfa5dd1b6224b52e7bfb733412522a9c01ad983",
-  "shortHash": "7bfa5dd1",
+  "versionDisplaySuffix": "3f4f6ef9",
+  "versionLabel": "v0.1.9.3f4f6ef9",
+  "versionInternal": "0.1.9+20260615.184102.3f4f6ef9",
+  "buildId": "0.1.9+20260615.184102.3f4f6ef9-20260615.184102-3f4f6ef9",
+  "builtAt": "2026-06-15T18:41:02.051Z",
+  "commitHash": "3f4f6ef97cf00c9e7dc7d7ea313f3753efe5d911",
+  "shortHash": "3f4f6ef9",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "3f4f6ef97cf00c9e7dc7d7ea313f3753efe5d911",
+      "shortHash": "3f4f6ef9",
+      "dateIso": "2026-06-15T15:40:41-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(print): auto-print em background + anti-duplicata push×polling",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f4f6ef97cf00c9e7dc7d7ea313f3753efe5d911"
+    },
+    {
+      "hash": "4da45632f4d4319a817fc34c74d7b23c6c984802",
+      "shortHash": "4da45632",
+      "dateIso": "2026-06-15T15:00:32-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(vitrine): esconder categorias nas abas de detalhes + cabeçalho de detalhes limpo",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4da45632f4d4319a817fc34c74d7b23c6c984802"
+    },
+    {
+      "hash": "e1c3792c3023b27e810b869c071cc17d2a95668a",
+      "shortHash": "e1c3792c",
+      "dateIso": "2026-06-15T13:42:56-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(vitrine): acesso a Avaliações/Informações via setas › no header (estilo iFood), sem Tab Bar",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e1c3792c3023b27e810b869c071cc17d2a95668a"
+    },
+    {
+      "hash": "fe8133bfddf9ba81cf32e6c8b4aa0ecc66fe08f3",
+      "shortHash": "fe8133bf",
+      "dateIso": "2026-06-15T13:37:33-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(release): v73 — hotfix auto-print anti-loop + QR do cupom (P0 prod)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fe8133bfddf9ba81cf32e6c8b4aa0ecc66fe08f3"
+    },
+    {
+      "hash": "1d707d34aa0f85e4b4ac019c637a74d8c037d7f8",
+      "shortHash": "1d707d34",
+      "dateIso": "2026-06-15T13:25:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(print): QR do cupom no auto-print foreground (executePrintOrder)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1d707d34aa0f85e4b4ac019c637a74d8c037d7f8"
+    },
+    {
+      "hash": "f244e161a406172089660aa9e756cf2e8e10f634",
+      "shortHash": "f244e161",
+      "dateIso": "2026-06-15T13:09:40-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(release): v72 — hotfix auto-print anti-loop (P0 prod)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f244e161a406172089660aa9e756cf2e8e10f634"
+    },
     {
       "hash": "7bfa5dd1b6224b52e7bfb733412522a9c01ad983",
       "shortHash": "7bfa5dd1",
@@ -230,60 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(print): QR code abortava o cupom na KA-1445 (e genericas 58mm) -> nao imprimia",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e35c408528171cf8f77c0eaa7e98aff5ae1bcab"
-    },
-    {
-      "hash": "6b01168e999ad707479e18ea7860811f748f4039",
-      "shortHash": "6b01168e",
-      "dateIso": "2026-06-14T18:03:03-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print/auto): payload FCM size + nome do cliente no cupom (nao imprime alguns)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6b01168e999ad707479e18ea7860811f748f4039"
-    },
-    {
-      "hash": "cc8d76f10e67d4ae892a245e79f2693c236c53de",
-      "shortHash": "cc8d76f1",
-      "dateIso": "2026-06-14T12:38:44-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(mobile): auto-print via push em qualquer tela + serializa jobs concorrentes",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cc8d76f10e67d4ae892a245e79f2693c236c53de"
-    },
-    {
-      "hash": "15dbd0927e6841c028da977d3e9a5badef1875e7",
-      "shortHash": "15dbd092",
-      "dateIso": "2026-06-14T12:20:35-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(queue): abrir a fila reimprimia todos os pedidos existentes (falsa \"novidade\")",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/15dbd0927e6841c028da977d3e9a5badef1875e7"
-    },
-    {
-      "hash": "e0ec9baedc8b6ca73c1796abc388eff91ebca06b",
-      "shortHash": "e0ec9bae",
-      "dateIso": "2026-06-14T12:10:49-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(thermal-printer): normalize descartava autoPrintOnlineOrders (causa real da nao-persistencia)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e0ec9baedc8b6ca73c1796abc388eff91ebca06b"
-    },
-    {
-      "hash": "34cf3ba33cf25974d690f315cd7974d04b94d0f9",
-      "shortHash": "34cf3ba3",
-      "dateIso": "2026-06-14T11:50:27-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(thermal-printer): toggle de auto-print nao persistia (causa real de nao imprimir)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/34cf3ba33cf25974d690f315cd7974d04b94d0f9"
-    },
-    {
-      "hash": "6e9d1799b65f6aa6f58e7c38ca3efdfe555ddeae",
-      "shortHash": "6e9d1799",
-      "dateIso": "2026-06-14T11:28:36-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(mobile): corrige impressao automatica em background +_promove o toggle",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6e9d1799b65f6aa6f58e7c38ca3efdfe555ddeae"
     }
   ]
 } as const;
