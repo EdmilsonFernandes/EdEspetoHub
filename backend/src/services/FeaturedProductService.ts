@@ -229,7 +229,10 @@ export class FeaturedProductService {
     let providerExpiresAt: Date | null = expiresAt;
 
     const mpEnabled = Boolean(env.mercadoPago.accessToken);
-    const payerEmail = String(user?.email || store?.owner?.email || env.email.smtpUser || '').trim();
+    // Email deterministico e unico: nunca o dono da conta MP (evita 4390 "Payer email forbidden"
+    // quando o proprio dono da plataforma testa o destaque da sua loja). O email do pagador nao
+    // afeta a receita da taxa de destaque (vai pro MP da plataforma).
+    const payerEmail = `destaque+${created.id}@janocaminho.com.br`;
     const payerName = String(user?.fullName || store?.owner?.fullName || store?.name || 'Cliente').trim();
 
     if (mpEnabled && payerEmail) {
