@@ -65,7 +65,8 @@ static async submitByOrder(req: Request, res: Response) {
       const payload = await orderReviewService.submitByOrderId(
         req.params.orderId,
         req.body || {},
-        OrderReviewController.resolveAccessToken(req)
+        OrderReviewController.resolveAccessToken(req),
+        (req as any).auth?.sub || null
       );
       return res.status(201).json(payload);
     } catch (error: any) {

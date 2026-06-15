@@ -335,10 +335,18 @@ private normalizeRating(value: unknown, field: string, required = false) {
    *
    * @author Edmilson Lopes
    */
-async submitByOrderId(orderId: string, input: SubmitReviewInput, accessToken?: string | null) {
+async submitByOrderId(orderId: string, input: SubmitReviewInput, accessToken?: string | null, callerCustomerId?: string | null) {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
     this.ensureOrderAccess(order.id, accessToken);
+    // Pedido feito por conta logada: so o dono da conta pode avaliar/dar gorjeta.
+    // Pedido de guest (sem customerUserId): continua valendo o token de acesso acima.
+    if (order.customerUserId) {
+      const caller = String(callerCustomerId || '').trim();
+      if (!caller || caller !== String(order.customerUserId)) {
+        throw new AppError('AUTH-003', 403, { reason: 'order_owner_required' });
+      }
+    }
 
     const status = String(order.status || '').toLowerCase();
     const isFinished = [ 'done', 'delivered', 'finished' ].includes(status);

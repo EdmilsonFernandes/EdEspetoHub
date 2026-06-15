@@ -314,8 +314,8 @@ routes.patch('/orders/:orderId/reopen', requireAuth, requireRole('ADMIN', 'OPERA
 routes.patch('/orders/:orderId/mark-as-printed', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.markItemsAsPrinted);
 routes.get('/orders/:orderId/public', OrderController.getPublic);
 routes.get('/v2/orders/:orderId/tracking', OrderController.getTrackingV2);
-routes.get('/orders/:orderId/review', OrderReviewController.getByOrder);
-routes.post('/orders/:orderId/review', OrderReviewController.submitByOrder);
+routes.get('/orders/:orderId/review', hydrateAuthOptional, OrderReviewController.getByOrder);
+routes.post('/orders/:orderId/review', hydrateAuthOptional, OrderReviewController.submitByOrder);
 routes.get('/stores/:storeId/reviews', requireAuth, requireRole('ADMIN', 'LOJISTA'), OrderReviewController.listByStore);
 routes.get('/stores/:storeId/reviews/summary', requireAuth, requireRole('ADMIN', 'LOJISTA'), OrderReviewController.summaryByStore);
 routes.get('/stores/:storeId/reviews/tip-payouts', requireAuth, requireRole('ADMIN', 'LOJISTA'), requirePlanFeature('tipPayouts'), OrderReviewController.listTipPayoutsByStore);
