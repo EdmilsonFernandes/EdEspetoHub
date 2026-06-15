@@ -1423,6 +1423,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         }),
         totalLabel: formatCurrency(payload.total),
         allowRawBtFallback,
+        qrData: `https://janocaminho.com.br/pedido/${order.id}`,
       });
       printMode = result?.mode || '';
     } catch (printError) {
