@@ -1173,7 +1173,7 @@ export const MenuView = ({
 
       <div
         ref={stickySearchContainerRef}
-        className={`sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-white/70 bg-white/92 shadow-[0_10px_32px_-26px_rgba(15,23,42,0.26)] backdrop-blur-2xl`}
+        className={`${activeTab === "products" ? "" : "hidden"} sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-white/70 bg-white/92 shadow-[0_10px_32px_-26px_rgba(15,23,42,0.26)] backdrop-blur-2xl`}
       >
         <div className="mx-auto w-full max-w-6xl px-4 pt-3 pb-2">
           <div className="relative flex items-center gap-2.5 overflow-hidden rounded-[1.25rem] border border-white/80 bg-white/88 px-3.5 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)] ring-1 ring-slate-100/80 transition-[border-color,box-shadow,transform] duration-300 focus-within:-translate-y-0.5 focus-within:border-[#336886]/20 focus-within:bg-white focus-within:shadow-[0_22px_48px_-34px_rgba(51,104,134,0.34)]">
@@ -1283,34 +1283,25 @@ export const MenuView = ({
         )}
         {showHeader && activeTab !== "products" && (
           <div className="-mx-3 sm:-mx-4 border-b border-slate-200 bg-white">
-            <div className="mx-auto flex max-w-6xl items-center gap-4 px-3 sm:px-4">
-              <button
-                type="button"
-                onClick={() => setActiveTab("products")}
-                className="inline-flex shrink-0 items-center gap-1 py-3 text-sm font-semibold text-slate-500 transition-colors hover:text-slate-900"
-              >
-                <ArrowLeft size={16} weight="bold" />
-                Voltar
-              </button>
-              <div className="ml-auto flex items-center gap-5">
-                {([
-                  { id: "reviews", label: "Avaliações" },
-                  { id: "info", label: "Informações" },
-                ] as const).map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`-mb-px border-b-2 py-3 text-sm font-semibold transition-colors ${
-                      activeTab === tab.id
-                        ? "border-rose-500 text-rose-600"
-                        : "border-transparent text-slate-500 hover:text-slate-700"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
+            <div className="mx-auto flex max-w-6xl items-center gap-6 px-3 sm:px-4">
+              {([
+                { id: "products", label: "Cardápio" },
+                { id: "reviews", label: "Avaliações" },
+                { id: "info", label: "Informações" },
+              ] as const).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`-mb-px border-b-2 py-3 text-sm font-semibold transition-colors ${
+                    activeTab === tab.id
+                      ? "border-rose-500 text-rose-600"
+                      : "border-transparent text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
         )}
