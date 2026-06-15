@@ -310,17 +310,12 @@ export const syncKeepAwakeForAutoPrint = () => {
   } catch {
     // no-op
   }
-  // Keep-alive FGS + isencao de bateria: mantem o PROCESSO vivo atraves do Doze para o FCM
-  // imprimir mesmo com tela apagada por horas. Sem isso, o Android/Samsung congela o app em
-  // ~4min de idle e o push nao imprime ate ligar a tela.
+  // Keep-alive FGS: mantem o PROCESSO vivo atraves do Doze para o push imprimir com tela apagada
+  // (backup, melhor esforco). O popup de isencao de bateria foi REMOVIDO — era intrusivo e o
+  // Modo Balcao (foreground, tela acesa) ja e confiavel sem ele.
   try {
     if (enabled) {
       if (typeof bridge.startPrintKeepAlive === 'function') bridge.startPrintKeepAlive();
-      if (typeof bridge.isBatteryOptimizationExempt === 'function'
-        && !bridge.isBatteryOptimizationExempt()
-        && typeof bridge.requestBatteryExemption === 'function') {
-        bridge.requestBatteryExemption();
-      }
     } else if (typeof bridge.stopPrintKeepAlive === 'function') {
       bridge.stopPrintKeepAlive();
     }
