@@ -444,52 +444,50 @@ const Header = ({
                       </h1>
                       <CaretRight size={16} weight="bold" className="shrink-0 text-slate-400" />
                     </button>
-                    <div className="mt-1.5 flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                      {segmentLabel !== "Comércio" && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">
-                          {segmentLabel}
-                        </span>
-                      )}
-                      <div className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 font-semibold">
+                    <div className="mt-1.5 flex flex-wrap items-center justify-center gap-1.5 sm:justify-start text-xs sm:text-sm text-slate-500 font-medium">
+                      <span className="inline-flex items-center gap-1.5">
                         <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-500 animate-pulse" : "bg-orange-500"}`} />
-                        <span>
-                          {isOpenNow ? "Aberto agora" : "Fechado agora"}
-                          {statusDetailLabel ? ` · ${statusDetailLabel}` : ""}
-                        </span>
-                      </div>
+                        {isOpenNow ? "Aberto agora" : "Fechado agora"}
+                        {statusDetailLabel ? ` · ${statusDetailLabel}` : ""}
+                      </span>
+                      {segmentLabel !== "Comércio" && (
+                        <>
+                          <span className="text-slate-300">•</span>
+                          <span>{segmentLabel}</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+              <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 sm:justify-start text-xs font-medium text-slate-500">
                 {avgRating > 0 && (
                   <button
                     type="button"
                     onClick={onShowReviews}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 transition-colors hover:bg-amber-100 active:scale-95"
+                    className="inline-flex items-center gap-1 font-bold text-amber-600 transition-opacity hover:opacity-70 active:scale-95"
                   >
-                    <Star size={13} weight="fill" className="text-amber-500" />
+                    <Star size={13} weight="fill" className="text-amber-400" />
                     {avgRating.toFixed(1).replace('.', ',')}
                     {totalReviews > 0 && (
-                      <span className="font-medium text-amber-600/80">
+                      <span className="font-medium text-slate-500">
                         · {totalReviews} {totalReviews === 1 ? 'avaliação' : 'avaliações'}
                       </span>
                     )}
-                    <CaretRight size={12} weight="bold" className="text-amber-500" />
+                    <CaretRight size={11} weight="bold" className="text-amber-500" />
                   </button>
                 )}
                 {deliveryFeeLabel && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
-                    <ShoppingCart size={11} weight="duotone" />
+                  <span className="inline-flex items-center gap-1">
+                    <span className="text-slate-300">•</span>
+                    <ShoppingCart size={12} weight="duotone" className="text-slate-400" />
                     {deliveryFeeLabel}
                   </span>
                 )}
                 {deliveryModes.slice(0, 2).map((label) => (
-                  <span
-                    key={label}
-                    className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600"
-                  >
+                  <span key={label} className="inline-flex items-center gap-1">
+                    <span className="text-slate-300">•</span>
                     {label}
                   </span>
                 ))}
@@ -1195,26 +1193,20 @@ export const MenuView = ({
         className={`${activeTab === "products" ? "" : "hidden"} sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-white/70 bg-white/92 shadow-[0_10px_32px_-26px_rgba(15,23,42,0.26)] backdrop-blur-2xl`}
       >
         <div className="mx-auto w-full max-w-6xl px-4 pt-3 pb-2">
-          <div className="relative flex items-center gap-2.5 overflow-hidden rounded-[1.25rem] border border-white/80 bg-white/88 px-3.5 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)] ring-1 ring-slate-100/80 transition-[border-color,box-shadow,transform] duration-300 focus-within:-translate-y-0.5 focus-within:border-[#336886]/20 focus-within:bg-white focus-within:shadow-[0_22px_48px_-34px_rgba(51,104,134,0.34)]">
-            <span className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
-            <span
-              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[0.65rem]"
-              style={{ backgroundColor: `${catalogPrimaryColor}18`, color: catalogPrimaryColor }}
-            >
-              <MagnifyingGlass className="w-3.5 h-3.5" weight="bold" />
-            </span>
+          <div className="relative flex items-center gap-2.5 rounded-full bg-slate-100 px-4 transition-colors focus-within:bg-white focus-within:ring-2 focus-within:ring-slate-200">
+            <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
             <input
               {...inputAssistProps.search}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className="min-h-[42px] flex-1 bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
+              className="min-h-[44px] flex-1 bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
               placeholder="Buscar no cardápio..."
             />
             {query ? (
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-slate-200 active:scale-95"
+                className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-500 transition-colors hover:bg-slate-300 active:scale-95"
               >
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2L2 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
               </button>
