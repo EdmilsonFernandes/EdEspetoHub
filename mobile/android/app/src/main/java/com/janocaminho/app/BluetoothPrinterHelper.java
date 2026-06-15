@@ -406,4 +406,46 @@ public final class BluetoothPrinterHelper {
             return "[]";
         }
     }
+
+    // --- In-flight print lock (anti-duplicata push x polling) ---
+    // Marca que um pedido esta sendo impresso AGORA. Tanto o push (background) quanto o
+    // polling (foreground) checam isso ANTES de imprimir — se o outro caminho ja comecou, o
+    // atual pula. Evita imprimir o mesmo pedido 2x durante transicoes foreground/background.
+    // TTL curto: se um caminho travar, o outro pode retomar apos expirar.
+    private static final String INFLIGHT_PREFS = "jnc_print_inflight";
+    private static final long INFLIGHT_TTL_MS = 15L * 1000; // 15s
+
+    public static boolean isPrinting(android.content.Context context, String orderId) {
+        if (orderId == null || orderId.trim().isEmpty()) return false;
+        try {
+            android.content.SharedPreferences prefs = context.getSharedPreferences(INFLIGHT_PREFS, android.content.Context.MODE_PRIVATE);
+            long ts = prefs.getLong(orderId.trim(), 0);
+            if (ts == 0) return false;
+            if (System.currentTimeMillis() - ts > INFLIGHT_TTL_MS) {
+                prefs.edit().remove(orderId.trim()).apply();
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static void markPrinting(android.content.Context context, String orderId) {
+        if (orderId == null || orderId.trim().isEmpty()) return;
+        try {
+            android.content.SharedPreferences prefs = context.getSharedPreferences(INFLIGHT_PREFS, android.content.Context.MODE_PRIVATE);
+            prefs.edit().putLong(orderId.trim(), System.currentTimeMillis()).apply();
+        } catch (Exception ignored) {
+        }
+    }
+
+    public static void clearPrinting(android.content.Context context, String orderId) {
+        if (orderId == null || orderId.trim().isEmpty()) return;
+        try {
+            android.content.SharedPreferences prefs = context.getSharedPreferences(INFLIGHT_PREFS, android.content.Context.MODE_PRIVATE);
+            prefs.edit().remove(orderId.trim()).apply();
+        } catch (Exception ignored) {
+        }
+    }
 }

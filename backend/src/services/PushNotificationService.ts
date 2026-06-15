@@ -12,6 +12,11 @@ type CustomerPushPayload = {
   android?: {
     channelId?: string;
   };
+  // true = mensagem DATA-ONLY (sem bloco `notification`). Necessario para pushes que precisam
+  // disparar onMessageReceived mesmo em background/Doze (ex.: auto-print de pedido da loja).
+  // Mensagens com bloco notification em background sao entregues a bandeja do sistema e NAO
+  // chamam onMessageReceived -> o printOrderInline nunca roda -> nao imprime com tela apagada.
+  dataOnly?: boolean;
 };
 
 type FirebaseServiceAccount = {
@@ -443,10 +448,13 @@ export class PushNotificationService {
           body: JSON.stringify({
             message: {
               token,
-              notification: {
-                title: payload.title,
-                body: payload.body,
-              },
+              // dataOnly: sem bloco notification -> onMessageReceived dispara em background/Doze.
+              ...(payload.dataOnly ? {} : {
+                notification: {
+                  title: payload.title,
+                  body: payload.body,
+                },
+              }),
               data: payload.data || {},
               android,
             },
@@ -504,7 +512,7 @@ export class PushNotificationService {
         body: JSON.stringify({
           to: token,
           priority: 'high',
-          notification,
+          ...(payload.dataOnly ? {} : { notification }),
           data: payload.data || {},
         }),
       });

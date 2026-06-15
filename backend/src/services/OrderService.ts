@@ -593,6 +593,9 @@ export class OrderService
       android: {
         channelId: storeNotificationChannelId,
       },
+      // dataOnly: push sem bloco notification -> onMessageReceived dispara em background/Doze e
+      // roda o printOrderInline (auto-print com tela apagada). O app monta a notificacao (Java).
+      dataOnly: true,
     };
 
     this.log.info('Dispatching store user push for online order', {

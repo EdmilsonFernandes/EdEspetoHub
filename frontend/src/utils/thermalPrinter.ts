@@ -259,6 +259,43 @@ export const ackPrintOrder = (orderId: string) => {
   }
 };
 
+// --- In-flight print lock (anti-duplicata push×polling) ---
+// Lock compartilhado (SharedPreferences via bridge JNCPrintAck). Push (background) e polling
+// (foreground) checam/marcam ANTES de imprimir — se o outro caminho ja comecou, pula. Evita
+// imprimir o mesmo pedido 2x durante transicoes foreground/background. No web e no-op.
+export const isPrintingOrder = (orderId: string): boolean => {
+  if (typeof window === 'undefined' || !orderId) return false;
+  const bridge = (window as any).JNCPrintAck;
+  if (!bridge || typeof bridge.isPrinting !== 'function') return false;
+  try {
+    return Boolean(bridge.isPrinting(String(orderId)));
+  } catch {
+    return false;
+  }
+};
+
+export const markPrintingOrder = (orderId: string) => {
+  if (typeof window === 'undefined' || !orderId) return;
+  const bridge = (window as any).JNCPrintAck;
+  if (!bridge || typeof bridge.markPrinting !== 'function') return;
+  try {
+    bridge.markPrinting(String(orderId));
+  } catch {
+    // no-op
+  }
+};
+
+export const clearPrintingOrder = (orderId: string) => {
+  if (typeof window === 'undefined' || !orderId) return;
+  const bridge = (window as any).JNCPrintAck;
+  if (!bridge || typeof bridge.clearPrinting !== 'function') return;
+  try {
+    bridge.clearPrinting(String(orderId));
+  } catch {
+    // no-op
+  }
+};
+
 // Mantem a tela acesa (wake lock) quando o auto-print esta ligado no app nativo, para o
 // polling da fila nao pausar quando a tela apagaria. So faz algo quando o bridge nativo
 // (window.JNCKeepAwake) existe — no web é no-op.

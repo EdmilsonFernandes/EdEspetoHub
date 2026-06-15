@@ -109,6 +109,16 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
             Log.i(TAG, "inline print: pedido ja ackado, pulando " + orderId);
             return;
         }
+        // Anti-duplicata push×polling: se o polling (foreground) ja esta imprimindo este
+        // pedido, o push pula. Lock compartilhado via SharedPreferences (bridge JNCPrintAck).
+        if (orderId != null && !orderId.trim().isEmpty()
+            && BluetoothPrinterHelper.isPrinting(this, orderId.trim())) {
+            Log.i(TAG, "inline print: pedido ja em impressao (polling), pulando " + orderId);
+            return;
+        }
+        if (orderId != null && !orderId.trim().isEmpty()) {
+            BluetoothPrinterHelper.markPrinting(this, orderId.trim());
+        }
         // Imprime direto no callback do FCM (sem ForegroundService), o que contorna a
         // restricao do Android 12+ que bloqueia startForegroundService em background.
         PRINT_EXECUTOR.submit(() -> {
@@ -138,6 +148,10 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "inline print error p/ " + orderId, e);
+            } finally {
+                if (orderId != null && !orderId.trim().isEmpty()) {
+                    BluetoothPrinterHelper.clearPrinting(JncFirebaseMessagingService.this, orderId.trim());
+                }
             }
         });
     }

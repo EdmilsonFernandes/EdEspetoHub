@@ -1211,6 +1211,19 @@ public class MainActivity extends BridgeActivity {
         public boolean isAcked(String orderId) {
             return BluetoothPrinterHelper.isOrderAcked(MainActivity.this, orderId);
         }
+        // --- In-flight print lock (anti-duplicata push x polling) ---
+        @JavascriptInterface
+        public boolean isPrinting(String orderId) {
+            return BluetoothPrinterHelper.isPrinting(MainActivity.this, orderId);
+        }
+        @JavascriptInterface
+        public void markPrinting(String orderId) {
+            BluetoothPrinterHelper.markPrinting(MainActivity.this, orderId);
+        }
+        @JavascriptInterface
+        public void clearPrinting(String orderId) {
+            BluetoothPrinterHelper.clearPrinting(MainActivity.this, orderId);
+        }
     }
 
     // Mantem a tela acesa (FLAG_KEEP_SCREEN_ON) enquanto o auto-print esta ligado, para o

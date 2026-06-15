@@ -46,7 +46,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { Button } from '../ui/Button';
 import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
-import { getStoredThermalPrinterSettings, getAckedPrintOrderIds, ackPrintOrder } from "../../utils/thermalPrinter";
+import { getStoredThermalPrinterSettings, getAckedPrintOrderIds, ackPrintOrder, isPrintingOrder, markPrintingOrder, clearPrintingOrder } from "../../utils/thermalPrinter";
 import { exportToCsv } from "../../utils/export";
 import { normalizeOrderNotificationDurationSeconds, parseOrderNotificationSoundSetting, playOrderNotificationPreset } from "../../utils/orderNotificationSound";
 import {
@@ -1999,10 +1999,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           && !acked.has(String(o?.id || ''))
           && !printingIdsRef.current.has(String(o?.id || ''))
           && (printAttemptsRef.current.get(String(o?.id || '')) || 0) < MAX_AUTO_PRINT_ATTEMPTS
+          && !isPrintingOrder(String(o?.id || ''))
         );
         for (const order of toPrint) {
           const oid = String(order.id);
           printingIdsRef.current.add(oid);
+          markPrintingOrder(oid);
           printAttemptsRef.current.set(oid, (printAttemptsRef.current.get(oid) || 0) + 1);
           const rank = nextIds.indexOf(order.id) + 1;
           // Auto-print é NATIVE-ONLY (allowRawBtFallback=false): o Intent rawbt: backgroundava
@@ -2014,7 +2016,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             .catch((autoPrintErr) => {
               console.warn('[auto-print] falhou — retentativa limitada no proximo ciclo', oid, autoPrintErr);
             })
-            .finally(() => { printingIdsRef.current.delete(oid); });
+            .finally(() => { printingIdsRef.current.delete(oid); clearPrintingOrder(oid); });
         }
       }
       queuePrimedRef.current = true;
