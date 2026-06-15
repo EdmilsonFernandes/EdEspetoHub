@@ -114,7 +114,8 @@ public final class BluetoothPrinterHelper {
 
     /**
      * Generates ESC/POS QR Code bytes for the given data string.
-     * Uses Model 2, module size 6, error correction level M.
+     * Uses Model 2, module size 4 (menor = mais compativel com 58mm; module 6 causava
+     * "QR CREAT ERR" em varios firmwares), error correction level M.
      */
     public static byte[] generateQrCodeBytes(String data) throws Exception {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -124,8 +125,8 @@ public final class BluetoothPrinterHelper {
         // impressoras 58mm (incl. KA-1445) rejeitam/abortam o cupom INTEIRO ao recebe-lo,
         // o que fazia o pedido "nao imprimir" e o QR sair com erro. O model 2 e o default
         // e funciona sem esse comando. (Mesma abordagem da lib DantSu ESCPOS-ThermalPrinter.)
-        // Set module size (6)
-        output.write(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, 0x06 });
+        // Set module size (4) — module 6 gerava "QR CREAT ERR" em varios 58mm (QR grande demais).
+        output.write(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, 0x04 });
         // Set error correction level (M)
         output.write(new byte[] { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x31 });
         // Store data
