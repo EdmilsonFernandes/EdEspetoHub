@@ -317,9 +317,9 @@ const Header = ({
   return (
     <div className={`w-full ${compact ? 'pb-1' : 'pb-3'} pt-2`}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4">
-        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div className="relative overflow-hidden">
           <div
-            className={`relative rounded-b-3xl overflow-hidden transition-all duration-300 ${
+            className={`relative overflow-hidden transition-all duration-300 ${
               compact
                 ? mobileCollapsedStable
                   ? "h-0 opacity-0"
@@ -380,54 +380,10 @@ const Header = ({
                 <HeartStraight size={15} weight={isFavorite ? "fill" : "regular"} />
               </button>
             </div>
-            {compact && !mobileCollapsedStable && (
-              <div className="sm:hidden absolute inset-x-0 bottom-0 px-4 pb-3">
-                <div className="pr-14 text-left">
-                  <button
-                    type="button"
-                    onClick={onShowInfo}
-                    className="inline-flex max-w-full items-center gap-1 text-left active:opacity-80"
-                  >
-                    <h1 className="text-base font-black text-white truncate drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">{branding?.brandName || "Sua Loja"}</h1>
-                    <CaretRight size={14} weight="bold" className="shrink-0 text-white/70" />
-                  </button>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-semibold text-white/95">
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-400 animate-pulse" : "bg-amber-300"}`} />
-                      {isOpenNow ? "Aberto agora" : "Fechado agora"}
-                      {statusDetailLabel ? ` · ${statusDetailLabel}` : ""}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <span className="text-white/40">•</span>
-                      Min {formatCurrency(Number(minOrderValue))}
-                    </span>
-                    {avgRating > 0 && (
-                      <button
-                        type="button"
-                        onClick={onShowReviews}
-                        className="inline-flex items-center gap-1 font-bold text-amber-300 active:opacity-70"
-                      >
-                        <Star size={11} weight="fill" className="text-amber-400" />
-                        {avgRating.toFixed(1).replace('.', ',')}
-                        {totalReviews > 0 && <span className="font-medium text-white/80">· {totalReviews}</span>}
-                        <CaretRight size={11} weight="bold" className="text-white/70" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div className="absolute right-4 top-1 h-11 w-11 rounded-full overflow-hidden border-2 border-white bg-white shadow-lg flex items-center justify-center">
-                  {branding?.logoUrl ? (
-                    <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
-                  ) : (
-                    <span className="font-black text-xs text-slate-700">{previewInitials || "JC"}</span>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
 
-          <div className={`relative -mt-7 sm:-mt-10 mx-3 sm:mx-4 rounded-3xl border border-slate-100 bg-white px-4 sm:px-6 pb-4 pt-11 sm:pt-4 shadow-[0_20px_40px_-30px_rgba(15,23,42,0.5)] ${compact ? "hidden sm:block" : ""}`}>
-            <div className="absolute -top-10 sm:-top-12 left-1/2 -translate-x-1/2 sm:left-6 sm:translate-x-0 h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl flex items-center justify-center">
+          <div className={`relative z-10 -mt-12 sm:-mt-16 mx-0 rounded-t-[28px] sm:rounded-t-[32px] bg-white px-4 sm:px-6 pb-5 pt-16 shadow-[0_-12px_30px_-18px_rgba(15,23,42,0.18)] ${compact && mobileCollapsedStable ? "hidden" : ""}`}>
+            <div className="absolute -top-12 left-1/2 -translate-x-1/2 h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl flex items-center justify-center">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
               ) : (
@@ -435,8 +391,8 @@ const Header = ({
               )}
             </div>
 
-            <div className="sm:pl-32 flex w-full flex-col items-center text-center sm:items-start sm:text-left">
-              <div className="w-full text-center sm:text-left">
+            <div className="flex w-full flex-col items-center text-center">
+              <div className="w-full text-center">
                 <div className="flex w-full items-start justify-between gap-3">
                   <div className="min-w-0">
                     <button
@@ -444,12 +400,12 @@ const Header = ({
                       onClick={onShowInfo}
                       className="inline-flex max-w-full items-center gap-1 text-left transition-opacity hover:opacity-80 active:scale-[0.99]"
                     >
-                      <h1 className={`${compact ? 'text-lg' : 'text-xl sm:text-2xl'} font-black text-slate-900 truncate max-w-full`}>
+                      <h1 className="text-xl sm:text-2xl font-black text-slate-900 truncate max-w-full">
                         {branding?.brandName || "Sua Loja"}
                       </h1>
                       <CaretRight size={16} weight="bold" className="shrink-0 text-slate-400" />
                     </button>
-                    <div className="mt-1.5 flex flex-wrap items-center justify-center gap-1.5 sm:justify-start text-xs sm:text-sm text-slate-500 font-medium">
+                    <div className="mt-1.5 flex flex-wrap items-center justify-center gap-1.5 text-xs sm:text-sm text-slate-500 font-medium">
                       <span className="inline-flex items-center gap-1.5">
                         <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-500 animate-pulse" : "bg-orange-500"}`} />
                         {isOpenNow ? "Aberto agora" : "Fechado agora"}
@@ -466,7 +422,7 @@ const Header = ({
                 </div>
               </div>
 
-              <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 sm:justify-start text-xs font-medium text-slate-500">
+              <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 text-xs font-medium text-slate-500">
                 {avgRating > 0 && (
                   <button
                     type="button"
@@ -503,7 +459,7 @@ const Header = ({
               </div>
 
               {!compact && (
-                <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2">
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
                   {storeSlug && (
                     <a
                       href={storeUrl}
@@ -646,12 +602,13 @@ export const MenuView = ({
   preOrderBlockedTitle = "Pedidos em breve",
   preOrderBlockedMessage = "",
   systemHeaderOffset = false,
+  activeTab = "products",
+  setActiveTab = (() => {}) as any,
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [showStoreDetails, setShowStoreDetails] = useState(false);
-  const [activeTab, setActiveTab] = useState<"products" | "reviews" | "info">("products");
   const [activeCategoryKey, setActiveCategoryKey] = useState("");
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const [showClearCartModal, setShowClearCartModal] = useState(false);
@@ -1307,7 +1264,6 @@ export const MenuView = ({
           <div className="-mx-3 sm:-mx-4 border-b border-slate-200 bg-white">
             <div className="mx-auto flex max-w-6xl items-center gap-6 px-3 sm:px-4">
               {([
-                { id: "products", label: "Cardápio" },
                 { id: "reviews", label: "Avaliações" },
                 { id: "info", label: "Informações" },
               ] as const).map((tab) => (

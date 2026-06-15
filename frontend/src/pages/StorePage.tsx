@@ -476,6 +476,7 @@ export function StorePage() {
   const [recentPublicOrders, setRecentPublicOrders] = useState([]);
   const [lastOrderItems, setLastOrderItems] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [activeTab, setActiveTab] = useState<'products' | 'reviews' | 'info'>('products');
   const [orderNotice, setOrderNotice] = useState(null);
   const [tableNotice, setTableNotice] = useState(null);
   const [occupiedTables, setOccupiedTables] = useState<string[]>([]);
@@ -774,8 +775,12 @@ export function StorePage() {
       setView('menu');
       return;
     }
+    if (activeTab !== 'products') {
+      setActiveTab('products');
+      return;
+    }
     navigateBackOrFallback(navigate, '/hub');
-  }, [navigate, view]);
+  }, [navigate, view, activeTab, setActiveTab]);
   useEffect(() => {
     if (!showPublicStoreAppHeader) {
       setPublicStoreHeaderScrolled(false);
@@ -4462,6 +4467,8 @@ export function StorePage() {
               orderTypes={orderTypes}
               todayClosingLabel={todayClosingLabel}
               minOrderValue={branding?.minOrderValue ?? 20}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
               compactHeader={isMobile}
               systemHeaderOffset={showPublicStoreAppHeader}
               staffView={Boolean(canUseAdminPrintFlow)}
