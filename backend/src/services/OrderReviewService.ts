@@ -554,12 +554,79 @@ async markTipPayoutByStoreId(
 async publicSummaryByStoreId(storeId: string) {
     const store = await this.storeRepository.findById(storeId);
     if (!store) throw new AppError('STORE-001', 404);
-    const { summary } = await this.orderReviewRepository.getStoreSummary(store.id);
+    const { summary, distribution } = await this.orderReviewRepository.getStoreSummary(store.id);
     return {
       totalReviews: Number(summary?.total_reviews || 0),
       avgStoreRating: Number(summary?.store_avg_rating || 0),
       totalDeliveryReviews: Number(summary?.total_delivery_reviews || 0),
       avgDeliveryRating: Number(summary?.delivery_avg_rating || 0),
+      distribution: Array.isArray(distribution)
+        ? distribution.map((row: any) => ({
+            rating: Number(row?.rating || 0),
+            total: Number(row?.total || 0),
+          }))
+        : [],
+    };
+  }
+
+    /**
+   * Lists PUBLIC reviews for a store (comment feed only; no sensitive fields).
+   *
+   * @author Edmilson Lopes
+   */
+async publicListByStoreId(storeId: string, limit = 20, offset = 0) {
+    const store = await this.storeRepository.findById(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    return this.orderReviewRepository.listPublicByStoreId(store.id, limit, offset);
+  }
+
+    /**
+   * Builds the public store-reviews payload (summary + distribution + feed) by slug,
+   * including the quality-card signals (positive % and most frequent tags).
+   *
+   * @author Edmilson Lopes
+   */
+async publicStoreReviewsBySlug(slug: string, limit = 20, offset = 0) {
+    const store = await this.storeRepository.findBySlug(String(slug || '').trim());
+    if (!store) throw new AppError('STORE-001', 404);
+    const { summary, distribution } = await this.orderReviewRepository.getStoreSummary(store.id);
+    const reviews = await this.orderReviewRepository.listPublicByStoreId(store.id, limit, offset);
+
+    const totalReviews = Number(summary?.total_reviews || 0);
+    const distributionRows = Array.isArray(distribution)
+      ? distribution.map((row: any) => ({ rating: Number(row?.rating || 0), total: Number(row?.total || 0) }))
+      : [];
+    const positiveCount = distributionRows
+      .filter((row) => Number(row.rating) >= 4)
+      .reduce((acc, row) => acc + Number(row.total || 0), 0);
+    const positivePercent = totalReviews > 0 ? Math.round((positiveCount / totalReviews) * 100) : 0;
+
+    const tagCounts = new Map<string, number>();
+    for (const review of reviews) {
+      const rawTags = (review as any)?.storeTags;
+      let tags: any[] = [];
+      if (Array.isArray(rawTags)) tags = rawTags;
+      else if (typeof rawTags === 'string' && rawTags.trim().startsWith('[')) {
+        try { tags = JSON.parse(rawTags); } catch { tags = []; }
+      }
+      for (const tag of tags) {
+        const label = String(tag || '').trim();
+        if (!label) continue;
+        tagCounts.set(label, (tagCounts.get(label) || 0) + 1);
+      }
+    }
+    const topTags = [...tagCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([label]) => label);
+
+    return {
+      avgStoreRating: Number(summary?.store_avg_rating || 0),
+      totalReviews,
+      distribution: distributionRows,
+      positivePercent,
+      topTags,
+      reviews,
     };
   }
 

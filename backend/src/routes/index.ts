@@ -253,6 +253,7 @@ routes.get('/public/stores/slug/:slug/categories', ProductController.listPublicC
 routes.post('/stores/slug/:slug/postal/quote', ShippingController.quotePostalPublicBySlug);
 routes.get('/public/stores/slug/:slug/highlights', OrderController.listHighlightsBySlug);
 routes.get('/public/stores/slug/:slug/tables/status', OrderController.listTableStatusBySlug);
+routes.get('/public/stores/slug/:slug/reviews', OrderReviewController.publicListByStore);
 
 // Store admin
 routes.put('/stores/:storeId', requireAuth, requireRole('ADMIN'), StoreController.update);

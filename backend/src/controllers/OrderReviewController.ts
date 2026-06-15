@@ -107,6 +107,27 @@ static async summaryByStore(req: Request, res: Response) {
   }
 
     /**
+   * Lists PUBLIC reviews for a store by slug (no auth): summary + distribution + comment feed.
+   *
+   * @author Edmilson Lopes
+   */
+static async publicListByStore(req: Request, res: Response) {
+    try {
+      const limit = Number(req.query?.limit || 20);
+      const offset = Number(req.query?.offset || 0);
+      const payload = await orderReviewService.publicStoreReviewsBySlug(
+        req.params.slug,
+        Number.isFinite(limit) ? limit : 20,
+        Number.isFinite(offset) ? offset : 0
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      log.warn('Public store reviews failed', { slug: req.params.slug, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+    /**
    * Lists records for list tip payouts by store.
    *
    * @author Edmilson Lopes

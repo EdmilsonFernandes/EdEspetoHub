@@ -176,6 +176,16 @@ export const storeService = {
     return toJson(response);
   },
 
+  async fetchPublicStoreReviews(slug: string, params?: { limit?: number; offset?: number }) {
+    if (!slug) return null;
+    const search = new URLSearchParams();
+    if (params && Number.isFinite(Number(params.limit))) search.set('limit', String(params.limit));
+    if (params && Number.isFinite(Number(params.offset))) search.set('offset', String(params.offset));
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    const response = await apiClient.rawGet(`/public/stores/slug/${slug}/reviews${suffix}`, { authMode: 'none' });
+    return toJson(response);
+  },
+
   async getLinkStats(storeId: string, days = 7) {
     const response = await apiClient.rawGet(`/stores/${storeId}/link-stats?days=${days}`);
     return toJson(response);

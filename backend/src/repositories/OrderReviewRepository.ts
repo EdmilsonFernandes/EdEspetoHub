@@ -98,6 +98,34 @@ async listByStoreId(storeId: string, limit = 100) {
   }
 
     /**
+   * Lists PUBLIC reviews for a store — only safe fields (no phone, tip or motoboy).
+   * The public feed is a comment feed, so only rows with a non-empty comment are
+   * returned; ratings without text still count toward the summary/distribution.
+   *
+   * @author Edmilson Lopes
+   */
+async listPublicByStoreId(storeId: string, limit = 20, offset = 0) {
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+    const safeOffset = Math.max(0, Number(offset) || 0);
+    return this.repository
+      .createQueryBuilder('r')
+      .select([
+        'r.id as id',
+        'r.store_rating as "storeRating"',
+        'r.comment as comment',
+        'r.store_tags as "storeTags"',
+        'r.created_at as "createdAt"',
+        'r.customer_name as "customerName"',
+      ])
+      .where('r.store_id = :storeId', { storeId })
+      .andWhere('(r.comment IS NOT NULL AND TRIM(r.comment) <> :empty)', { empty: '' })
+      .orderBy('r.created_at', 'DESC')
+      .limit(safeLimit)
+      .offset(safeOffset)
+      .getRawMany();
+  }
+
+    /**
    * Retrieves data for get store summary.
    *
    * @author Edmilson Lopes

@@ -29,6 +29,8 @@ import {
   Trash,
   CalendarBlank,
   Storefront,
+  Info,
+  Package,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -38,6 +40,9 @@ import { ProductModal } from "../Cart/ProductModal";
 import { StoreMapView } from "../StoreMapView";
 import { PlatformTrustFooter } from "../common/PlatformTrustFooter";
 import { ConfirmationModal } from "../common/ConfirmationModal";
+import { PremiumTabs } from "../common/PremiumTabs";
+import { StoreReviewsTab } from "./StoreReviewsTab";
+import { StoreInfoTab } from "./StoreInfoTab";
 
 // =======================================
 // HEADER PREMIUM COM LOGO OFICIAL
@@ -143,6 +148,7 @@ const Header = ({
   todayHoursLabel,
   todayClosingLabel,
   onOpenStoreDetails,
+  onShowReviews,
   reviewSummary,
   deliveryFeeLabel,
   orderTypes
@@ -444,10 +450,14 @@ const Header = ({
 
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                 {avgRating > 0 && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+                  <button
+                    type="button"
+                    onClick={onShowReviews}
+                    className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 transition-colors hover:bg-amber-100 active:scale-95"
+                  >
                     <Star size={11} weight="fill" className="text-amber-500" />
                     {avgRating.toFixed(1)} {totalReviews > 0 ? `(${totalReviews})` : ''}
-                  </span>
+                  </button>
                 )}
                 {deliveryFeeLabel && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
@@ -613,6 +623,7 @@ export const MenuView = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [showStoreDetails, setShowStoreDetails] = useState(false);
+  const [activeTab, setActiveTab] = useState<"products" | "reviews" | "info">("products");
   const [activeCategoryKey, setActiveCategoryKey] = useState("");
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const [showClearCartModal, setShowClearCartModal] = useState(false);
@@ -1151,6 +1162,7 @@ export const MenuView = ({
           todayHoursLabel={todayHoursLabel}
           todayClosingLabel={todayClosingLabel}
           onOpenStoreDetails={() => setShowStoreDetails(true)}
+          onShowReviews={() => setActiveTab("reviews")}
           reviewSummary={reviewSummary}
           deliveryFeeLabel={deliveryFeeLabel}
           orderTypes={orderTypes}
@@ -1267,7 +1279,35 @@ export const MenuView = ({
             <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">{branding?.brandName || "Seu Espeto"}</h2>
           </section>
         )}
-        <div id="menu-list" className="space-y-7 sm:space-y-8">
+        {showHeader && (
+          <div className="space-y-6 sm:space-y-8">
+            <PremiumTabs
+              items={[
+                { id: "products", label: "Produtos", icon: <Package size={18} weight="duotone" /> },
+                { id: "reviews", label: "Avaliações", icon: <Star size={18} weight="duotone" /> },
+                { id: "info", label: "Informações", icon: <Info size={18} weight="duotone" /> },
+              ]}
+              activeId={activeTab}
+              onChange={(id) => setActiveTab(id as "products" | "reviews" | "info")}
+            />
+            {activeTab === "reviews" && <StoreReviewsTab storeSlug={branding?.espetoId} />}
+            {activeTab === "info" && (
+              <StoreInfoTab
+                storeDescription={storeDescription}
+                storeAddress={storeAddress}
+                todayHoursLabel={todayHoursLabel}
+                todayClosingLabel={todayClosingLabel}
+                isOpenNow={isOpenNow}
+                deliveryFeeLabel={deliveryFeeLabel}
+                orderTypes={orderTypes}
+                whatsappNumber={whatsappNumber}
+                whatsappMessage={whatsappMessage}
+                instagramHandle={instagramHandle}
+              />
+            )}
+          </div>
+        )}
+        <div id="menu-list" className={`space-y-7 sm:space-y-8 ${activeTab === "products" ? "" : "hidden"}`}>
         {promoMessage && (
           <div className="rounded-3xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
             <p className="text-[11px] uppercase tracking-[0.3em] text-fuchsia-500 font-semibold">Mensagem do dia</p>

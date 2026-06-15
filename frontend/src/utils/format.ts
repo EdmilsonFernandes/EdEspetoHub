@@ -256,4 +256,30 @@ export const formatAddressLines = (value: unknown) => {
   return { primary, secondary, locality, zipCode };
 };
 
+export const formatRelativeDate = (
+  timestamp: Date | number | string | { seconds: number } | null | undefined
+) => {
+  const parsed = toDateValue(timestamp);
+  if (!parsed) return '';
+  const diffMs = Date.now() - parsed.getTime();
+  if (diffMs < 0) return 'agora';
+  const seconds = Math.floor(diffMs / 1000);
+  if (seconds < 60) return 'agora';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `há ${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `há ${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'ontem';
+  if (days < 7) return `há ${days} dias`;
+  const weeks = Math.floor(days / 7);
+  if (weeks === 1) return 'há 1 semana';
+  if (weeks < 5) return `há ${weeks} semanas`;
+  const months = Math.floor(days / 30);
+  if (months === 1) return 'há 1 mês';
+  if (months < 12) return `há ${months} meses`;
+  const years = Math.floor(days / 365);
+  return years === 1 ? 'há 1 ano' : `há ${years} anos`;
+};
+
 
