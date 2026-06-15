@@ -1236,11 +1236,17 @@ public class MainActivity extends BridgeActivity {
                 try {
                     android.view.Window window = getWindow();
                     if (window == null) return;
+                    android.view.WindowManager.LayoutParams attrs = window.getAttributes();
                     if (enabled) {
+                        // Modo balcao: mantem a tela acesa (polling foreground imprime confiavel) +
+                        // brilho baixo (dim) para reduzir queima de tela/bateria no balcao.
                         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        attrs.screenBrightness = 0.30f;
                     } else {
                         window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        attrs.screenBrightness = android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
                     }
+                    window.setAttributes(attrs);
                 } catch (Exception ignored) {
                 }
             });
