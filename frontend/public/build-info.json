@@ -2,16 +2,97 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "3f4f6ef9",
-  "versionLabel": "v0.1.9.3f4f6ef9",
-  "versionInternal": "0.1.9+20260615.184102.3f4f6ef9",
-  "buildId": "0.1.9+20260615.184102.3f4f6ef9-20260615.184102-3f4f6ef9",
-  "builtAt": "2026-06-15T18:41:02.051Z",
-  "commitHash": "3f4f6ef97cf00c9e7dc7d7ea313f3753efe5d911",
-  "shortHash": "3f4f6ef9",
+  "versionDisplaySuffix": "3e1e71f8",
+  "versionLabel": "v0.1.9.3e1e71f8",
+  "versionInternal": "0.1.9+20260615.203918.3e1e71f8",
+  "buildId": "0.1.9+20260615.203918.3e1e71f8-20260615.203918-3e1e71f8",
+  "builtAt": "2026-06-15T20:39:18.210Z",
+  "commitHash": "3e1e71f8c6687deac98492990ded218797ddb4cc",
+  "shortHash": "3e1e71f8",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "3e1e71f8c6687deac98492990ded218797ddb4cc",
+      "shortHash": "3e1e71f8",
+      "dateIso": "2026-06-15T17:38:58-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(print): FGS keep-alive + isencao de bateria (auto-print sobrevive ao Doze)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3e1e71f8c6687deac98492990ded218797ddb4cc"
+    },
+    {
+      "hash": "bbac01ae7f16684d0b1fcafaaf7310413c303eba",
+      "shortHash": "bbac01ae",
+      "dateIso": "2026-06-15T16:47:27-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(release): v75 — fix QR CREAT ERR (module size 4)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bbac01ae7f16684d0b1fcafaaf7310413c303eba"
+    },
+    {
+      "hash": "87122fcff461de7c0ca66d0c5ea367fb88eb4b0f",
+      "shortHash": "87122fcf",
+      "dateIso": "2026-06-15T16:46:59-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(print): QR module size 6 -> 4 (corrige \"QR CREAT ERR\")",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/87122fcff461de7c0ca66d0c5ea367fb88eb4b0f"
+    },
+    {
+      "hash": "fd4fce8c7f311df571e7964793b7b26d0705e8c0",
+      "shortHash": "fd4fce8c",
+      "dateIso": "2026-06-15T16:46:32-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(vitrine): slider de qualidade + pedido mínimo (default R$ 20)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fd4fce8c7f311df571e7964793b7b26d0705e8c0"
+    },
+    {
+      "hash": "61785afcb987bc6cc3d0a093df4fe62242d28c39",
+      "shortHash": "61785afc",
+      "dateIso": "2026-06-15T16:26:38-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(vitrine): header mobile clean — status+nota numa linha, sem pílula preta",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/61785afcb987bc6cc3d0a093df4fe62242d28c39"
+    },
+    {
+      "hash": "38c6a7b8af7c57ebc9aa9fab1c7c16c545b47ec9",
+      "shortHash": "38c6a7b8",
+      "dateIso": "2026-06-15T16:20:40-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "style(vitrine): header clean/premium estilo iFood (busca + info sem caixas)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/38c6a7b8af7c57ebc9aa9fab1c7c16c545b47ec9"
+    },
+    {
+      "hash": "a67e5ee882a6875c16f0af50a00c959182555ea7",
+      "shortHash": "a67e5ee8",
+      "dateIso": "2026-06-15T15:50:36-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(vitrine): gatilhos de Avaliações/Informações no header mobile (compact)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a67e5ee882a6875c16f0af50a00c959182555ea7"
+    },
+    {
+      "hash": "672ba635f4facca24a7c19e9f9d6e230f19c9755",
+      "shortHash": "672ba635",
+      "dateIso": "2026-06-15T15:46:41-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(release): v74 — auto-print em background + anti-duplicata + QR",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/672ba635f4facca24a7c19e9f9d6e230f19c9755"
+    },
+    {
+      "hash": "b27e836dde5ab7179789219d8ca6e02506ed7632",
+      "shortHash": "b27e836d",
+      "dateIso": "2026-06-15T15:42:48-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(vitrine): esconder busca nas abas de detalhes + tabs Cardápio/Avaliações/Informações",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b27e836dde5ab7179789219d8ca6e02506ed7632"
+    },
     {
       "hash": "3f4f6ef97cf00c9e7dc7d7ea313f3753efe5d911",
       "shortHash": "3f4f6ef9",
@@ -200,87 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(ux): migrar gorjeta/motoboy para PaymentQRCard (fim do pisca)",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/45f290683dde8a0126e9a437dc3407189754985d"
-    },
-    {
-      "hash": "453e90d942b77d66ab2dc2b5baf2e7534267b2e3",
-      "shortHash": "453e90d9",
-      "dateIso": "2026-06-14T21:07:22-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(tip): remover fallback de QR PIX fake na gorjeta + PaymentQRCard compartilhado",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/453e90d942b77d66ab2dc2b5baf2e7534267b2e3"
-    },
-    {
-      "hash": "87e4d446636acc95d1b65b7feae13a38484824ad",
-      "shortHash": "87e4d446",
-      "dateIso": "2026-06-14T20:33:33-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): imprime com tela bloqueada (FCM inline) + corrige URL do QR do cupom",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/87e4d446636acc95d1b65b7feae13a38484824ad"
-    },
-    {
-      "hash": "e3a49779b4ffcfa06f70d53cc40a7a22a2cb6868",
-      "shortHash": "e3a49779",
-      "dateIso": "2026-06-14T20:09:50-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(motoboy): re-solicitar vinculo apos desvinculo era ignorado (request APPROVED)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e3a49779b4ffcfa06f70d53cc40a7a22a2cb6868"
-    },
-    {
-      "hash": "3f79668fab1a3140679e3c2b18a0997fde2011cb",
-      "shortHash": "3f79668f",
-      "dateIso": "2026-06-14T19:41:20-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(motoboy): motoboy gerenciado pela loja (store-managed) nao exige KYC",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f79668fab1a3140679e3c2b18a0997fde2011cb"
-    },
-    {
-      "hash": "b91674927a348804f13714782ace74fead56f551",
-      "shortHash": "b9167492",
-      "dateIso": "2026-06-14T19:07:57-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(delivery): pedido de entrega criado pelo admin pedia codigo ao motoboy sem sentido",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b91674927a348804f13714782ace74fead56f551"
-    },
-    {
-      "hash": "63ac5d00dd9638264f548334b0ff68e21e46d581",
-      "shortHash": "63ac5d00",
-      "dateIso": "2026-06-14T18:53:28-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(auth): botao \"Colar codigo\" da recuperacao de senha nao funcionava no app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/63ac5d00dd9638264f548334b0ff68e21e46d581"
-    },
-    {
-      "hash": "ff3fd0ec636df481f8151d9c837de62211c0a4c2",
-      "shortHash": "ff3fd0ec",
-      "dateIso": "2026-06-14T18:52:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "polish checkout payment switcher",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ff3fd0ec636df481f8151d9c837de62211c0a4c2"
-    },
-    {
-      "hash": "d1f40555f99e8fa60fbd59bcbd2962b4721e365b",
-      "shortHash": "d1f40555",
-      "dateIso": "2026-06-14T18:46:37-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(receipt): telefone do cliente no cupom (pedido de cliente); admin so nome",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d1f40555f99e8fa60fbd59bcbd2962b4721e365b"
-    },
-    {
-      "hash": "5e35c408528171cf8f77c0eaa7e98aff5ae1bcab",
-      "shortHash": "5e35c408",
-      "dateIso": "2026-06-14T18:18:35-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): QR code abortava o cupom na KA-1445 (e genericas 58mm) -> nao imprimia",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e35c408528171cf8f77c0eaa7e98aff5ae1bcab"
     }
   ]
 }
