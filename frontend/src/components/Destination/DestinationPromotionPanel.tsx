@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CheckCircle, Copy, Sparkle, X } from '@phosphor-icons/react';
+import { CheckCircle, Sparkle, X } from '@phosphor-icons/react';
+import { PaymentQRCard } from '../common/PaymentQRCard';
 import { destinationPartnerPortalService } from '../../services/destinationPartnerPortalService';
 import {
   destinationPromotionService,
@@ -187,45 +188,22 @@ export function DestinationPromotionPanel() {
                 <X size={18} weight="bold" />
               </button>
             </div>
-            {String(paymentPromo.paymentStatus || '').toUpperCase() === 'PAID' ? (
-              <div className="rounded-2xl bg-emerald-50 p-4 text-center">
-                <CheckCircle size={36} weight="fill" className="mx-auto text-emerald-500" />
-                <p className="mt-2 text-sm font-black text-emerald-700">Pagamento confirmado!</p>
-                <p className="mt-1 text-xs text-emerald-600">Seu destaque está ativo.</p>
-              </div>
-            ) : (
-              <>
-                {paymentPromo.paymentQrCodeBase64 ? (
-                  <div className="flex justify-center">
-                    <img src={paymentPromo.paymentQrCodeBase64} alt="QR Code PIX" className="h-52 w-52 rounded-xl border border-slate-100" />
-                  </div>
-                ) : null}
-                {paymentPromo.paymentQrCodeText ? (
-                  <div className="mt-3">
-                    <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">PIX copia e cola</p>
-                    <div className="mt-1 flex items-center gap-2">
-                      <input
-                        readOnly
-                        value={paymentPromo.paymentQrCodeText}
-                        className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 text-[10px] text-slate-600"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigator.clipboard?.writeText(paymentPromo.paymentQrCodeText || '');
-                          setCopied(true);
-                          setTimeout(() => setCopied(false), 1500);
-                        }}
-                        className="inline-flex items-center gap-1 rounded-xl bg-slate-900 px-2.5 py-1.5 text-[10px] font-black text-white"
-                      >
-                        <Copy size={12} weight="bold" /> {copied ? 'Copiado' : 'Copiar'}
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-                <p className="mt-3 text-center text-[11px] text-slate-400">Aguardando pagamento… atualiza sozinho.</p>
-              </>
-            )}
+            <PaymentQRCard
+              qrCodeBase64={paymentPromo.paymentQrCodeBase64 || null}
+              qrCodeText={paymentPromo.paymentQrCodeText || null}
+              paymentLink={paymentPromo.paymentLink || null}
+              status={paymentPromo.paymentStatus}
+              expiresAt={paymentPromo.paymentExpiresAt || null}
+              amountLabel={formatBRL(Number(paymentPromo.priceAmount || 0))}
+              title="Destaque do destino"
+              variant="client"
+              onVerifyNow={() =>
+                destinationPromotionService
+                  .refreshPayment(String(paymentPromo.id))
+                  .then(setPaymentPromo)
+                  .catch(() => {})
+              }
+            />
           </div>
         </div>
       ) : null}
