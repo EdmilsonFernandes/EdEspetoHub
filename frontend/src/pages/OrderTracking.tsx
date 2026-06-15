@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
+import { PaymentQRCard } from '../components/common/PaymentQRCard';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowClockwise, ArrowSquareOut, Bicycle, CaretDown, CheckCircle, Clock, CircleNotch, CopySimple, CreditCard, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
 import { Capacitor } from '@capacitor/core';
@@ -2908,112 +2909,18 @@ export function OrderTracking() {
                                       ? 'Esse Pix cai direto no Mercado Pago do entregador conectado.'
                                       : 'Depois do pagamento, a loja confirma o repasse manual para o entregador.'}
                                   </div>
-                                  {reviewTip?.tipQrCodeBase64 ? (
-                                    <div className="flex items-center justify-center">
-                                      <div className="overflow-hidden rounded-2xl border-4 border-white bg-white p-2 shadow-[0_12px_32px_-16px_rgba(15,23,42,0.25)]">
-                                        <img
-                                          src={reviewTip.tipQrCodeBase64}
-                                          alt="QR Code da gorjeta"
-                                          className="w-36 h-36 object-contain"
-                                        />
-                                      </div>
-                                    </div>
-                                  ) : null}
-                                  {reviewTip?.tipQrCodeText ? (
-                                    <button
-                                      type="button"
-                                      onClick={async () => {
-                                        try {
-                                          await navigator.clipboard.writeText(String(reviewTip.tipQrCodeText || ''));
-                                          setTipPixCopied(true);
-                                          window.setTimeout(() => setTipPixCopied(false), 2000);
-                                        } catch (error) {
-                                          console.error('Falha ao copiar PIX da gorjeta', error);
-                                        }
-                                      }}
-                                      className="jnc-hub-touch w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50/50 shadow-sm active:scale-[0.98]"
-                                    >
-                                      {tipPixCopied ? 'Copiado!' : 'Copiar Pix da gorjeta'}
-                                    </button>
-                                  ) : null}
-                                  {reviewTip?.tipPaymentLink ? (
-                                    <a
-                                      href={String(reviewTip.tipPaymentLink)}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="jnc-hub-touch block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-center text-xs font-semibold text-slate-700 hover:bg-slate-50/50 shadow-sm active:scale-[0.98]"
-                                    >
-                                      Abrir link de pagamento
-                                    </a>
-                                  ) : null}
-                                  {tipUiStatus === 'PAID' ? (
-                                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
-                                      <p className="font-semibold">
-                                        {tipDirectToMotoboy
-                                          ? 'Pagamento confirmado. A gorjeta foi enviada direto ao entregador.'
-                                          : 'Pagamento confirmado. Obrigado!'}
-                                      </p>
-                                      {tipDirectToMotoboy ? (
-                                        <p className="mt-1 text-[11px] text-emerald-800/80">
-                                          O valor foi liquidado na conta Mercado Pago conectada do entregador.
-                                        </p>
-                                      ) : null}
-                                    </div>
-                                  ) : showTipPendingUi ? (
-                                    <div className="rounded-lg border border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-white px-3 py-2 space-y-2 shadow-[0_10px_24px_-22px_rgba(234,88,12,0.85)]">
-                                      <div className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-white/80 px-2.5 py-2">
-                                        <span className="text-[11px] font-semibold text-amber-900 uppercase tracking-[0.2em]">Tempo restante</span>
-                                        <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1 text-xs font-mono font-black text-white animate-pulse">
-                                          {tipCountdownLabel}
-                                        </span>
-                                      </div>
-                                      <div className="h-1.5 rounded-full bg-amber-100 overflow-hidden">
-                                        <div
-                                          className="h-full rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 transition-all duration-700"
-                                          style={{ width: `${tipProgressPct}%` }}
-                                        />
-                                      </div>
-                                      <div className="flex items-center gap-2 text-xs text-slate-700">
-                                        <CircleNotch
-                                          size={14}
-                                          weight="bold"
-                                          className={tipPolling.isChecking || tipPolling.isPolling ? 'animate-spin text-sky-600' : 'text-slate-400'}
-                                        />
-                                        <span className="font-semibold">
-                                          {tipUiStatus === 'PENDING'
-                                            ? tipDirectToMotoboy
-                                              ? 'Aguardando confirmação do Pix. Quando aprovar, a gorjeta cai direto no entregador.'
-                                              : 'Aguardando confirmação do pagamento via Pix. Isso pode levar alguns segundos.'
-                                            : 'Não conseguimos confirmar ainda. Você pode tentar novamente.'}
-                                        </span>
-                                      </div>
-                                      <div className="text-[11px] text-slate-500 space-y-1">
-                                        <p>{tipPolling.isChecking ? 'Verificando...' : 'Monitoramento automático ativo.'}</p>
-                                        {tipPolling.connectionUnstable ? (
-                                          <p className="text-amber-700">Conexão instável, tentando novamente.</p>
-                                        ) : null}
-                                        {tipPolling.lastCheckedAgoSec !== null ? (
-                                          <p>Última verificação há {tipPolling.lastCheckedAgoSec}s</p>
-                                        ) : null}
-                                        {tipPolling.timedOut ? (
-                                          <p>Tempo de verificação automática finalizado. Você pode verificar novamente agora.</p>
-                                        ) : null}
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={tipPolling.verifyNow}
-                                        disabled={tipPolling.isChecking}
-                                        className="jnc-hub-touch w-full rounded-xl bg-slate-900 px-3 py-2.5 text-xs font-extrabold text-white shadow-sm active:scale-[0.98] disabled:opacity-60"
-                                      >
-                                        {tipPolling.isChecking ? 'Verificando...' : 'Já paguei, verificar agora'}
-                                      </button>
-                                    </div>
-                                  ) : null}
-                                  {tipUiStatus === 'PAID' && reviewTip?.tipPaidAt ? (
-                                    <p className="text-[11px] text-emerald-700 font-semibold">
-                                      Confirmado em {new Date(reviewTip.tipPaidAt).toLocaleString('pt-BR')}
-                                    </p>
-                                  ) : null}
+                                  <PaymentQRCard
+                                    qrCodeBase64={reviewTip?.tipQrCodeBase64 || null}
+                                    qrCodeText={reviewTip?.tipQrCodeText || null}
+                                    paymentLink={reviewTip?.tipPaymentLink || null}
+                                    status={tipUiStatus}
+                                    expiresAt={reviewTip?.tipExpiresAt || null}
+                                    amountLabel={formatCurrency(tipAmount)}
+                                    title="Gorjeta via PIX"
+                                    subtitle={tipDirectToMotoboy ? 'Cai direto no entregador' : 'Repasse manual da loja'}
+                                    variant="client"
+                                    onVerifyNow={tipPolling.verifyNow}
+                                  />
                                 </div>
                               ) : null}
                             </div>
