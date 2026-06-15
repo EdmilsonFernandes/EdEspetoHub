@@ -524,10 +524,14 @@ const runPrintReceipt = async (payload: PrintReceiptRawBtInput): Promise<PrintRe
 };
 
 export const printReceiptAsImage = async (payload: PrintReceiptRawBtInput) => {
-  if (activePrintPromise) {
-    throw new Error("Aguarde a impressão atual terminar antes de enviar outro cupom.");
-  }
-  const current = runPrintReceipt(payload).finally(() => {
+  // Serializa impressoes: cada cupom espera o anterior terminar (encadeado). Antes, uma
+  // 2a impressao concorrente era rejeitada com erro ("Aguarde a impressao atual..."),
+  // fazendo o auto-print pular pedidos que chegavam durante uma impressao (so o 1o
+  // imprimia). Agora eles formam fila; falha de um cupom nao derruba o proximo.
+  const previous = activePrintPromise;
+  const current = (previous ? previous.catch(() => undefined) : Promise.resolve())
+    .then(() => runPrintReceipt(payload))
+    .finally(() => {
     const releaseLock = () => {
       if (activePrintPromise === current) {
         activePrintPromise = null;
