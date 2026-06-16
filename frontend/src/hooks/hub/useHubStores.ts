@@ -94,21 +94,27 @@ export function useHubStores({
     }
     portfolioLoadInFlightRef.current = true;
     try {
-      const locationQuery =
-        selectedCondominiumSlug || hubScopeOverride === 'all_stores'
-          ? { lat: null, lng: null, city: null, state: null }
-          : {
-              lat: savedAddressLocation?.lat ?? userLocation?.lat ?? null,
-              lng: savedAddressLocation?.lng ?? userLocation?.lng ?? null,
-              city: preferredDiscoveryAddress?.city || activeRegion?.city || null,
-              state: preferredDiscoveryAddress?.state || activeRegion?.state || null,
-            };
-      const basePortfolio = await storeService.listPortfolio({
-        lat: locationQuery.lat,
-        lng: locationQuery.lng,
-        city: locationQuery.city,
-        state: locationQuery.state,
-      });
+      const isAllStoresOrCondominium = Boolean(selectedCondominiumSlug) || hubScopeOverride === 'all_stores';
+      const locationQuery = isAllStoresOrCondominium
+        ? { lat: null, lng: null, city: null, state: null }
+        : {
+            lat: savedAddressLocation?.lat ?? userLocation?.lat ?? null,
+            lng: savedAddressLocation?.lng ?? userLocation?.lng ?? null,
+            city: preferredDiscoveryAddress?.city || activeRegion?.city || null,
+            state: preferredDiscoveryAddress?.state || activeRegion?.state || null,
+          };
+      // Usa o endpoint de discovery (filtrado por raio + devolve mode/no_coverage)
+      // quando há contexto de localização. Mantém listPortfolio (todas as lojas) em:
+      // all_stores ("explorar outras lojas"), condomínio, ou user sem localização.
+      const hasLocationContext =
+        locationQuery.lat !== null ||
+        locationQuery.lng !== null ||
+        Boolean(locationQuery.city) ||
+        Boolean(locationQuery.state);
+      const useDiscovery = !isAllStoresOrCondominium && hasLocationContext;
+      const basePortfolio = useDiscovery
+        ? await storeService.discoverPortfolio(locationQuery)
+        : await storeService.listPortfolio(locationQuery);
       const discoveryPayload =
         basePortfolio && !Array.isArray(basePortfolio) && Array.isArray((basePortfolio as StoreDiscoveryResponse).stores)
           ? (basePortfolio as StoreDiscoveryResponse)
