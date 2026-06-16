@@ -2469,7 +2469,6 @@ export function MarketplacePage() {
             <HubStoreDiscoveryNotice
               isShowingAllStores={isShowingAllStores}
               geoDiscovery={geoDiscovery}
-              displayLocationLabel={displayLocationLabel}
               onRestoreRegionalView={restoreRegionalView}
             />
 
@@ -2550,9 +2549,15 @@ export function MarketplacePage() {
                     : store.supportsPickup || store.supportsTable
                       ? 'Retirada'
                       : 'Consulte';
-                  const resolvedDistanceLabel = distanceLoading && activeLocation && distanceByStore[store.id] == null
-                    ? '...'
-                    : formatDistance(distanceByStore[store.id] ?? store.distanceKm);
+                  // Loja postal (sem entrega local na zona do user) mostra "Envio nacional"
+                  // em vez do km — km de 1383 etc. parece erro e contradiz o contexto local.
+                  // Se a loja TAMBÉM entrega perto (deliversToUserLocation), mostra o km normalmente.
+                  const isPostalOnly = !selectedCondominium && store.supportsPostal && !store.deliversToUserLocation;
+                  const resolvedDistanceLabel = isPostalOnly
+                    ? 'Envio nacional'
+                    : distanceLoading && activeLocation && distanceByStore[store.id] == null
+                      ? '...'
+                      : formatDistance(distanceByStore[store.id] ?? store.distanceKm);
                   const ratingLabel = store.reviewCount > 0
                     ? `${store.rating.toFixed(1)} (${store.reviewCount})`
                     : store.rating.toFixed(1);

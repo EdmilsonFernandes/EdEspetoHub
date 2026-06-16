@@ -19,14 +19,12 @@ type HubGeoDiscovery = {
 type HubStoreDiscoveryNoticeProps = {
   isShowingAllStores: boolean;
   geoDiscovery: HubGeoDiscovery;
-  displayLocationLabel?: string | null;
   onRestoreRegionalView: () => void;
 };
 
 export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
   isShowingAllStores,
   geoDiscovery,
-  displayLocationLabel,
   onRestoreRegionalView,
 }: HubStoreDiscoveryNoticeProps) {
   if (isShowingAllStores) {
@@ -57,24 +55,12 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
     );
   }
 
+  // Quando há lojas que entregam perto, NÃO mostramos banner explicativo
+  // (padrão iFood): as próprias lojas já dizem o que entrega. Banner só em
+  // casos que precisam de contexto (nearby_fallback / all_stores). Evita o
+  // card verde "perto de você" brigando com lojas postais a 1000km.
   if (geoDiscovery?.mode === 'deliverable') {
-    const deliverableCount = geoDiscovery?.summary?.deliverableCount || 0;
-    return (
-      <div className="rounded-[1.55rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.98)_0%,rgba(240,253,250,0.94)_100%)] px-4 py-3 shadow-[0_18px_40px_-34px_rgba(16,185,129,0.30)]">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-            <MapPinLine size={18} weight="duotone" />
-          </span>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">Sua região</p>
-            <p className="mt-1 text-sm font-bold text-slate-900">Mostrando lojas que entregam perto de você.</p>
-            <p className="mt-1 text-xs font-medium text-slate-500">
-              {deliverableCount} loja{deliverableCount === 1 ? '' : 's'} com cobertura ativa{displayLocationLabel ? ` em ${displayLocationLabel}` : ''}.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (geoDiscovery?.mode === 'nearby_fallback') {
@@ -181,18 +167,21 @@ export const HubStoreEmptyState = memo(function HubStoreEmptyState({
         <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[#336886]/10 blur-3xl" />
         <div className="pointer-events-none absolute -left-10 bottom-0 h-36 w-36 rounded-full bg-emerald-300/12 blur-3xl" />
         <div className="relative flex flex-col gap-5">
-          <div className="flex items-start gap-4">
-            <span className="inline-flex h-14 w-14 items-center justify-center rounded-[1.4rem] border border-white/70 bg-white/88 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.24)]">
-              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-9 w-9 rounded-full object-contain" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Expansão da região</p>
-              <h3 className="mt-1 text-lg font-black leading-tight text-slate-950">
-                Ainda não atendemos {displayLocationLabel || 'essa região'} com entrega.
-              </h3>
-              <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
-                Indique um lojista, restaurante ou operação perto de você para acelerar a chegada do Já no Caminho.
-              </p>
+          <div className="relative overflow-hidden rounded-[1.6rem] border border-white/80 bg-white/90 p-4 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.35)]">
+            <div className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-[#336886]/10 blur-2xl" />
+            <div className="relative flex items-center gap-3">
+              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] bg-[linear-gradient(135deg,#336886,#0f766e)] shadow-[0_14px_28px_-16px_rgba(51,104,134,0.6)]">
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-7 w-7 rounded-full object-contain" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Sua região no radar</p>
+                <h3 className="mt-0.5 text-base font-black leading-tight text-slate-950 sm:text-lg">
+                  O Já no Caminho tá chegando em {displayLocationLabel || 'sua região'}
+                </h3>
+                <p className="mt-1 text-[12px] font-medium leading-snug text-slate-600">
+                  Ainda sem lojas entregando aqui — mas você pode acelerar isso ou explorar o que já temos perto.
+                </p>
+              </div>
             </div>
           </div>
 
