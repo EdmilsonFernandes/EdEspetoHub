@@ -394,7 +394,7 @@ const Header = ({
             </div>
           </div>
 
-          <div className={`relative z-10 -mt-24 sm:-mt-36 mx-0 rounded-t-[36px] sm:rounded-t-[44px] bg-white px-5 sm:px-6 pb-7 pt-28 shadow-[0_28px_60px_-28px_rgba(15,23,42,0.28)] ring-1 ring-black/5 ${compact && mobileCollapsedStable ? "hidden" : ""}`}>
+          <div className={`relative z-10 -mt-24 sm:-mt-36 mx-0 rounded-t-[36px] sm:rounded-t-[44px] bg-white px-5 sm:px-6 pb-7 pt-12 shadow-[0_28px_60px_-28px_rgba(15,23,42,0.28)] ring-1 ring-black/5 ${compact && mobileCollapsedStable ? "hidden" : ""}`}>
             <div className="absolute -top-20 left-1/2 -translate-x-1/2 h-28 w-28 sm:h-36 sm:w-36 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl ring-1 ring-black/5 flex items-center justify-center">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
@@ -403,15 +403,12 @@ const Header = ({
               )}
             </div>
 
-            <div className="flex w-full flex-col items-center text-center">
-              <div className="w-full text-center">
-                <div className="flex w-full items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <button
-                      type="button"
-                      onClick={onShowInfo}
-                      className="inline-flex max-w-full items-center gap-1 text-left transition-opacity hover:opacity-80 active:scale-[0.99]"
-                    >
+            <div className="flex w-full flex-col items-center text-center gap-1">
+              <button
+                type="button"
+                onClick={onShowInfo}
+                className="inline-flex max-w-full items-center gap-1 justify-center transition-opacity hover:opacity-80 active:scale-[0.99]"
+              >
                       <h1 className="text-xl sm:text-2xl font-black text-slate-900 truncate max-w-full">
                         {branding?.brandName || "Sua Loja"}
                       </h1>
@@ -435,12 +432,9 @@ const Header = ({
                           <span>{Number(distanceKm).toFixed(1).replace('.', ',')} km</span>
                         </>
                       )}
-                    </div>
-                  </div>
-                </div>
               </div>
 
-              <div className="mt-3.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs font-medium text-slate-500">
+              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs font-medium text-slate-500">
                 {avgRating > 0 && (
                   <button
                     type="button"
