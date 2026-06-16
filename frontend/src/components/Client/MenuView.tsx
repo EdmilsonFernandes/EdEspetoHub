@@ -1271,25 +1271,37 @@ export const MenuView = ({
           </section>
         )}
         {showHeader && activeTab !== "products" && (
-          <div className="-mx-3 sm:-mx-4 border-b border-slate-200 bg-white">
-            <div className="mx-auto flex max-w-6xl items-center gap-6 px-3 sm:px-4">
-              {([
-                { id: "reviews", label: "Avaliações" },
-                { id: "info", label: "Informações" },
-              ] as const).map((tab) => (
+          <div className={`-mx-3 sm:-mx-4 sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 border-b border-slate-200 bg-white/92 shadow-[0_10px_32px_-26px_rgba(15,23,42,0.26)] backdrop-blur-2xl`}>
+            <div className="mx-auto flex max-w-6xl items-center gap-3 px-3 sm:px-4">
+              {onBack && (
                 <button
-                  key={tab.id}
                   type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`-mb-px border-b-2 py-3 text-sm font-semibold transition-colors ${
-                    activeTab === tab.id
-                      ? "border-rose-500 text-rose-600"
-                      : "border-transparent text-slate-500 hover:text-slate-700"
-                  }`}
+                  aria-label="Voltar ao cardápio"
+                  onClick={onBack}
+                  className="-ml-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-700 transition-colors hover:bg-slate-100 active:scale-95"
                 >
-                  {tab.label}
+                  <ArrowLeft size={18} weight="bold" />
                 </button>
-              ))}
+              )}
+              <div className="flex flex-1 items-center gap-6">
+                {([
+                  { id: "reviews", label: "Avaliações" },
+                  { id: "info", label: "Informações" },
+                ] as const).map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`-mb-px border-b-2 py-3 text-sm font-semibold transition-colors ${
+                      activeTab === tab.id
+                        ? "border-rose-500 text-rose-600"
+                        : "border-transparent text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
