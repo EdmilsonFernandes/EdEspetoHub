@@ -325,8 +325,8 @@ const Header = ({
               compact
                 ? mobileCollapsedStable
                   ? "h-0 opacity-0"
-                  : "h-[176px] opacity-100"
-                : "h-[220px] sm:h-[260px] lg:h-[320px]"
+                  : "h-[260px] opacity-100"
+                : "h-[320px] sm:h-[380px] lg:h-[440px]"
             }`}
           >
             <div
@@ -394,8 +394,8 @@ const Header = ({
             </div>
           </div>
 
-          <div className={`relative z-10 -mt-16 sm:-mt-24 mx-0 rounded-t-[32px] sm:rounded-t-[40px] bg-white px-5 sm:px-6 pb-6 pt-24 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.22)] ring-1 ring-black/5 ${compact && mobileCollapsedStable ? "hidden" : ""}`}>
-            <div className="absolute -top-16 left-1/2 -translate-x-1/2 h-24 w-24 sm:h-32 sm:w-32 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl ring-1 ring-black/5 flex items-center justify-center">
+          <div className={`relative z-10 -mt-24 sm:-mt-36 mx-0 rounded-t-[36px] sm:rounded-t-[44px] bg-white px-5 sm:px-6 pb-7 pt-28 shadow-[0_28px_60px_-28px_rgba(15,23,42,0.28)] ring-1 ring-black/5 ${compact && mobileCollapsedStable ? "hidden" : ""}`}>
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 h-28 w-28 sm:h-36 sm:w-36 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl ring-1 ring-black/5 flex items-center justify-center">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
               ) : (
@@ -417,7 +417,7 @@ const Header = ({
                       </h1>
                       <CaretRight size={16} weight="bold" className="shrink-0 text-slate-400" />
                     </button>
-                    <div className="mt-1.5 flex flex-wrap items-center justify-center gap-1.5 text-xs sm:text-sm text-slate-500 font-medium">
+                    <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm text-slate-500 font-medium">
                       <span className="inline-flex items-center gap-1.5">
                         <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-500 animate-pulse" : "bg-orange-500"}`} />
                         {isOpenNow ? "Aberto agora" : "Fechado agora"}
@@ -440,7 +440,7 @@ const Header = ({
                 </div>
               </div>
 
-              <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 text-xs font-medium text-slate-500">
+              <div className="mt-3.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs font-medium text-slate-500">
                 {avgRating > 0 && (
                   <button
                     type="button"
@@ -464,12 +464,6 @@ const Header = ({
                     {deliveryFeeLabel}
                   </span>
                 )}
-                {deliveryModes.slice(0, 2).map((label) => (
-                  <span key={label} className="inline-flex items-center gap-1">
-                    <span className="text-slate-300">•</span>
-                    {label}
-                  </span>
-                ))}
                 <span className="inline-flex items-center gap-1">
                   <span className="text-slate-300">•</span>
                   Min {formatCurrency(Number(minOrderValue))}
