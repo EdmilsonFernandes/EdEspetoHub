@@ -4470,6 +4470,7 @@ export function StorePage() {
               activeTab={activeTab}
               setActiveTab={setActiveTab}
               onBack={handlePublicStoreHeaderBack}
+              distanceKm={pickupDistanceKm ?? undefined}
               compactHeader={isMobile}
               systemHeaderOffset={showPublicStoreAppHeader}
               staffView={Boolean(canUseAdminPrintFlow)}

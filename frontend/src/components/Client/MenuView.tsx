@@ -152,7 +152,8 @@ const Header = ({
   deliveryFeeLabel,
   orderTypes,
   minOrderValue,
-  onBack
+  onBack,
+  distanceKm
 }) => {
   const normalizedRole = String(userRole || "").toLowerCase();
   const isAdminUser = normalizedRole === "admin" || normalizedRole === "lojista";
@@ -324,8 +325,8 @@ const Header = ({
               compact
                 ? mobileCollapsedStable
                   ? "h-0 opacity-0"
-                  : "h-[118px] opacity-100"
-                : "h-[210px] sm:h-[240px] lg:h-[300px]"
+                  : "h-[176px] opacity-100"
+                : "h-[220px] sm:h-[260px] lg:h-[320px]"
             }`}
           >
             <div
@@ -393,8 +394,8 @@ const Header = ({
             </div>
           </div>
 
-          <div className={`relative z-10 -mt-12 sm:-mt-16 mx-0 rounded-t-[28px] sm:rounded-t-[32px] bg-white px-4 sm:px-6 pb-5 pt-16 shadow-[0_-12px_30px_-18px_rgba(15,23,42,0.18)] ${compact && mobileCollapsedStable ? "hidden" : ""}`}>
-            <div className="absolute -top-12 left-1/2 -translate-x-1/2 h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl flex items-center justify-center">
+          <div className={`relative z-10 -mt-16 sm:-mt-24 mx-0 rounded-t-[32px] sm:rounded-t-[40px] bg-white px-5 sm:px-6 pb-6 pt-24 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.22)] ring-1 ring-black/5 ${compact && mobileCollapsedStable ? "hidden" : ""}`}>
+            <div className="absolute -top-16 left-1/2 -translate-x-1/2 h-24 w-24 sm:h-32 sm:w-32 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl ring-1 ring-black/5 flex items-center justify-center">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
               ) : (
@@ -426,6 +427,12 @@ const Header = ({
                         <>
                           <span className="text-slate-300">•</span>
                           <span>{segmentLabel}</span>
+                        </>
+                      )}
+                      {Number(distanceKm) > 0 && (
+                        <>
+                          <span className="text-slate-300">•</span>
+                          <span>{Number(distanceKm).toFixed(1).replace('.', ',')} km</span>
                         </>
                       )}
                     </div>
@@ -609,6 +616,7 @@ export const MenuView = ({
   deliveryFeeLabel,
   orderTypes = [],
   minOrderValue = 20,
+  distanceKm,
   preOrderBlocked = false,
   preOrderBlockedTitle = "Pedidos em breve",
   preOrderBlockedMessage = "",
@@ -1166,6 +1174,7 @@ export const MenuView = ({
           orderTypes={orderTypes}
           minOrderValue={minOrderValue}
           onBack={onBack}
+          distanceKm={distanceKm}
         />
       )}
 
