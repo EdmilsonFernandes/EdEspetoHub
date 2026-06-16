@@ -7,6 +7,7 @@ import {
   Sparkle,
   Storefront,
 } from '@phosphor-icons/react';
+import { HubRegionConvertPanel } from './HubRegionConvertPanel';
 
 type HubGeoDiscovery = {
   mode?: string | null;
@@ -240,6 +241,8 @@ export const HubStoreEmptyState = memo(function HubStoreEmptyState({
           <p className="text-[11px] font-medium text-slate-500">
             Quando a cobertura local abrir, sua região entra na frente da operação.
           </p>
+
+          <HubRegionConvertPanel displayLocationLabel={displayLocationLabel} />
         </div>
       </div>
     );
