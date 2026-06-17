@@ -248,6 +248,7 @@ const Header = ({
     const deltaThreshold = 8;
 
     collapsedRef.current = false;
+    setMobileCollapsedStable(false);
     lastYRef.current = window.scrollY || document.documentElement.scrollTop || 0;
     collapseLockUntilRef.current = 0;
 
@@ -284,7 +285,9 @@ const Header = ({
         collapsedRef.current = true;
         lockTransition();
         setMobileCollapsedStable(true);
-      } else if (collapsed && goingUp && y <= expandAt) {
+      } else if (goingUp && (y <= expandAt || collapsed)) {
+        // re-expande ao subir: no topo (y<=expandAt) OU em qualquer scroll pra cima se colapsado (estilo iFood).
+        // Antes so re-expandia colapsado E no topo, o que deixava o header "travado" se collapsedRef dessincronizasse.
         collapsedRef.current = false;
         lockTransition();
         setMobileCollapsedStable(false);
