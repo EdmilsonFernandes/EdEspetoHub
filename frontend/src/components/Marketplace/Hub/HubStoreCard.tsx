@@ -255,7 +255,7 @@ export function HubStoreCard({
             {store.name}
           </h3>
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] font-semibold leading-4 text-slate-500">
+        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] font-semibold leading-4 text-slate-500 tabular-nums">
           {store.rating > 0 ? (
             <span className="inline-flex items-center gap-1">
               <Star size={11} weight="fill" className="text-amber-400" />
@@ -264,7 +264,7 @@ export function HubStoreCard({
           ) : null}
           {store.rating > 0 ? <span className="text-slate-200">·</span> : null}
           <span className={`inline-flex items-center gap-1 ${storeAvailable ? 'text-emerald-700' : isUnavailableForRegion ? 'text-slate-500' : 'text-rose-600'}`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${storeAvailable ? 'bg-emerald-500' : isUnavailableForRegion ? 'bg-slate-400' : 'bg-rose-500'}`} />
+            <span className={`h-1.5 w-1.5 rounded-full ${storeAvailable ? 'bg-emerald-500 animate-pulse' : isUnavailableForRegion ? 'bg-slate-400' : 'bg-rose-500'}`} />
             {isUnavailableForRegion ? 'Fora da entrega' : store.isOpen ? 'Aberto' : 'Fechado'}
           </span>
           <span className="text-slate-200">·</span>
