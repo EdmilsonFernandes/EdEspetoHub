@@ -38,7 +38,7 @@ const storeDashboardAnalyticsService = new StoreDashboardAnalyticsService();
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
 const log = logger.child({ scope: 'StoreController' });
 const SAO_PAULO_TZ = 'America/Sao_Paulo';
-const MAX_NEARBY_DISCOVERY_DISTANCE_KM = 80;
+const MAX_NEARBY_DISCOVERY_DISTANCE_KM = 100;
 let storeCoordinateBackfillPromise: Promise<void> | null = null;
 let storeCoordinateBackfillLastRunAt = 0;
 /**
@@ -737,14 +737,16 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
             : nearbyStores.length > 0
               ? 'nearby_fallback'
               : 'no_coverage';
-      const visibleStores =
-        mode === 'deliverable'
-          ? deliverableStores
-          : mode === 'same_city_fallback'
-            ? sameCityStores
-            : mode === 'nearby_fallback'
-              ? nearbyStores.slice(0, 12)
-              : [];
+      // Marketplace (estilo iFood): mostra entrega (deliver_now/postal) + retirada
+      // na mesma cidade (sameCity) + próximas (nearby) JUNTAS. Antes só mostrava o
+      // bucket do mode — quando havia delivery, lojas só-retirada (pickup/table)
+      // da mesma cidade e lojas próximas ficavam escondidas. Cada bucket já vem
+      // ordenado por proximidade e são mutuamente exclusivos.
+      const visibleStores = [
+        ...deliverableStores,
+        ...sameCityStores,
+        ...nearbyStores.slice(0, 12),
+      ];
       const nearestStoreId = deliverableStores[0]?.id || sameCityStores[0]?.id || nearbyStores[0]?.id || null;
 
       return res.json({
