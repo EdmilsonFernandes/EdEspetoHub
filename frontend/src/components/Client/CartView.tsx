@@ -719,6 +719,13 @@ export const CartView = ({
     () => formatAddressLines(normalizedCustomerAddress),
     [normalizedCustomerAddress]
   );
+  const storeAddressLines = useMemo(
+    () => formatAddressLines(normalizedStoreAddress),
+    [normalizedStoreAddress]
+  );
+  const storeAddressSubtitle = [storeAddressLines.secondary, storeAddressLines.locality, storeAddressLines.zipCode]
+    .filter(Boolean)
+    .join(' · ');
   const normalizeAddressForCompare = (value = "") =>
     value
       .toString()
@@ -1766,9 +1773,16 @@ export const CartView = ({
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Retirada no local</p>
-                  <p className="mt-1 text-sm font-black leading-tight text-slate-900">
-                    {storeAddress || "Retire no balcão da loja"}
-                  </p>
+                  {normalizedStoreAddress ? (
+                    <div className="mt-1">
+                      <p className="text-sm font-black leading-tight text-slate-900">{storeAddressLines.primary || normalizedStoreAddress}</p>
+                      {storeAddressSubtitle && (
+                        <p className="mt-0.5 text-xs font-medium leading-relaxed text-slate-500">{storeAddressSubtitle}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="mt-1 text-sm font-black leading-tight text-slate-900">Retire no balcão da loja</p>
+                  )}
                   <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
                     Seu pedido segue identificado para retirada. Apresente o número do pedido ao chegar.
                   </p>
@@ -2769,7 +2783,16 @@ export const CartView = ({
                     </div>
                   )}
                   {customer.type === 'pickup' && (
-                    <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">{storeAddress || 'Retirada no balcão'}</p>
+                    normalizedStoreAddress ? (
+                      <div className="mt-1">
+                        <p className="text-sm font-black leading-relaxed text-slate-800">{storeAddressLines.primary || normalizedStoreAddress}</p>
+                        {storeAddressSubtitle && (
+                          <p className="text-xs font-semibold leading-relaxed text-slate-500">{storeAddressSubtitle}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">Retirada no balcão</p>
+                    )
                   )}
                   {customer.type === 'table' && (
                     <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">Pedido identificado para a mesa {customer.table || 'selecionada'}.</p>
@@ -3301,7 +3324,10 @@ export const CartView = ({
                 {storeAddress ? (
                   <div className="mt-3 rounded-2xl border border-amber-200/70 bg-white/85 px-3 py-2 shadow-[0_12px_24px_-20px_rgba(245,158,11,0.45)]">
                     <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Local da retirada</p>
-                    <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-800">{storeAddress}</p>
+                    <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-800">{storeAddressLines.primary || normalizedStoreAddress}</p>
+                    {storeAddressSubtitle && (
+                      <p className="mt-0.5 text-xs font-medium leading-relaxed text-slate-500">{storeAddressSubtitle}</p>
+                    )}
                   </div>
                 ) : null}
                 <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-amber-700">
