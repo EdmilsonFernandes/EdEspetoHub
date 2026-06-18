@@ -12,6 +12,7 @@ type AppGlassHeaderProps = {
   eyebrowLogoClassName?: string;
   backTo?: string;
   onBack?: () => void;
+  hideBack?: boolean;
   right?: ReactNode;
   children?: ReactNode;
   topSlot?: ReactNode;
@@ -28,6 +29,7 @@ export function AppGlassHeader({
   eyebrowLogoClassName = 'object-cover',
   backTo = '/hub',
   onBack,
+  hideBack = false,
   right,
   children,
   topSlot,
@@ -52,14 +54,18 @@ export function AppGlassHeader({
       {topSlot}
       <div className={`mx-auto ${maxWidthClassName} px-4`}>
         <div className="flex min-h-[3.95rem] items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/70 text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.55)] ring-1 ring-[#d7e7ef]/70 transition-all active:scale-95"
-            aria-label="Voltar"
-          >
-            <ArrowLeft size={18} weight="bold" />
-          </button>
+          {hideBack ? (
+            <span className="h-10 w-10 shrink-0" aria-hidden="true" />
+          ) : (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/70 text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.55)] ring-1 ring-[#d7e7ef]/70 transition-all active:scale-95"
+              aria-label="Voltar"
+            >
+              <ArrowLeft size={18} weight="bold" />
+            </button>
+          )}
 
           <div className="min-w-0 flex-1 text-center">
             {eyebrow ? (

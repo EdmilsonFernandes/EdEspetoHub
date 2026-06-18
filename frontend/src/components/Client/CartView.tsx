@@ -1423,18 +1423,16 @@ export const CartView = ({
             </div>
           )}
           <div className="flex items-center gap-3">
-            {((useMultiStepFlow && checkoutStep > 1) || !systemHeaderOffset) && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={useMultiStepFlow && checkoutStep > 1 ? () => setCheckoutStep(s => s - 1) : onBack}
-                aria-label={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
-                title={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
-                className="!h-11 !w-11 !rounded-[1.15rem] !px-0 text-[#336886]"
-              >
-                <ArrowLeft size={18} weight="bold" />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={useMultiStepFlow && checkoutStep > 1 ? () => setCheckoutStep(s => s - 1) : onBack}
+              aria-label={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
+              title={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
+              className="!h-11 !w-11 !rounded-[1.15rem] !px-0 text-[#336886]"
+            >
+              <ArrowLeft size={18} weight="bold" />
+            </Button>
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-[1.05rem] border border-white bg-white shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-100">
                 <img

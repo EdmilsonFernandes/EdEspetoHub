@@ -3884,6 +3884,7 @@ export function StorePage() {
           subtitle={publicStoreHeaderSubtitle}
           backTo="/hub"
           onBack={handlePublicStoreHeaderBack}
+          hideBack={view === 'cart'}
           right={publicStoreHeaderRight}
           className={publicStoreHeaderIsSolid ? 'jnc-app-glass-header--solid' : 'jnc-app-glass-header--ambient'}
           maxWidthClassName="max-w-6xl"
