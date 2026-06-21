@@ -141,6 +141,7 @@ export function PreStoreDetailSheet({
   routeAction,
   routeDistanceLabel,
   address,
+  onOpenRoute,
 }: any) {
   const [routeCopied, setRouteCopied] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
@@ -292,7 +293,18 @@ export function PreStoreDetailSheet({
                     Mostra a distância entre este serviço e a hospedagem para facilitar a chegada do motoboy.
                   </p>
                   <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-                    <ContactAction action={routeAction} />
+                    {onOpenRoute ? (
+                      <button
+                        type="button"
+                        onClick={onOpenRoute}
+                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-[#336886]/12 bg-[#336886] px-4 py-3 text-sm font-extrabold text-white shadow-[0_18px_34px_-28px_rgba(51,104,134,0.68)] transition hover:-translate-y-0.5 active:scale-[0.98]"
+                      >
+                        <GoogleMapsIcon className="h-5 w-5" />
+                        {routeAction?.label || 'Ver rota até meu chalé'}
+                      </button>
+                    ) : (
+                      <ContactAction action={routeAction} />
+                    )}
                     <Button
                       onClick={copyRouteLink}
                       variant={routeCopied ? 'success' : 'secondary'}

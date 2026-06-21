@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { ArrowRight, Bed, Clock, ForkKnife, GlobeHemisphereWest, HouseLine, MagnifyingGlass, MapPinLine, PhoneCall, ShoppingBagOpen, Sparkle, Storefront, WhatsappLogo } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
+import { HospitalityRouteSheet } from '../components/Destinations/HospitalityRouteSheet';
 import { PreStoreCardSkeleton, PreStoreDetailSheet } from '../components/Destinations/PreStoreDetailSheet';
 import { AppImagePreviewDialog } from '../components/common/AppImagePreviewDialog';
 import { AirbnbIcon, GoogleMapsIcon, isAirbnbUrlOrLabel } from '../components/common/BrandActionIcons';
@@ -12,7 +13,7 @@ import { destinationService } from '../services/destinationService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatCurrency } from '../utils/format';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
-import { buildDestinationInquiryMessage, buildHospitalityServiceRouteUrl, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
+import { buildDestinationAddressLine, buildDestinationInquiryMessage, buildDestinationRouteAddressLine, buildHospitalityServiceRouteUrl, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 import { openActionTarget } from '../utils/actionLink';
 import { buildListingClaimUrl } from '../utils/destinationListingClaim';
 import { prefetchRouteByPath } from '../utils/clientRoutePrefetch';
@@ -317,6 +318,83 @@ const storeContactPhone = (store: any) =>
   store?.settings?.contactPhone ||
   '';
 
+const buildRouteSheetContext = ({ item, destination, destinationSlug, place, placeSlug, mode }: any) => {
+  const isStore = mode === 'store';
+  const servicePoint = {
+    name: isStore ? item?.name || item?.store?.name || 'Loja' : item?.title || item?.name || 'Serviço',
+    address: buildDestinationAddressLine({
+      address: item?.address || item?.settings?.address,
+      addressNumber: item?.addressNumber || item?.settings?.addressNumber || item?.settings?.number,
+      district: item?.district || item?.neighborhood || item?.settings?.district || item?.settings?.neighborhood,
+      city: item?.city || item?.settings?.city || destination.city,
+      state: item?.state || item?.settings?.state || destination.state,
+      zipCode: item?.zipCode || item?.cep || item?.settings?.zipCode || item?.settings?.cep,
+    }),
+    routeAddress: buildDestinationRouteAddressLine({
+      address: item?.address || item?.settings?.address,
+      addressNumber: item?.addressNumber || item?.settings?.addressNumber || item?.settings?.number,
+      district: item?.district || item?.neighborhood || item?.settings?.district || item?.settings?.neighborhood,
+      city: item?.city || item?.settings?.city || destination.city,
+      state: item?.state || item?.settings?.state || destination.state,
+      zipCode: item?.zipCode || item?.cep || item?.settings?.zipCode || item?.settings?.cep,
+    }),
+    lat: item?.lat || item?.settings?.lat || item?.settings?.latitude,
+    lng: item?.lng || item?.settings?.lng || item?.settings?.longitude,
+    geoApproximate: item?.geoApproximate,
+    geoPrecision: item?.geoPrecision,
+  };
+  const placePoint = {
+    name: place.name || 'Hospedagem',
+    address: buildDestinationAddressLine({
+      address: place.address,
+      addressNumber: place.addressNumber,
+      district: place.district,
+      city: place.city || destination.city,
+      state: place.state || destination.state,
+      zipCode: place.zipCode,
+    }),
+    routeAddress: buildDestinationRouteAddressLine({
+      address: place.address,
+      addressNumber: place.addressNumber,
+      district: place.district,
+      city: place.city || destination.city,
+      state: place.state || destination.state,
+      zipCode: place.zipCode,
+    }),
+    lat: place.lat,
+    lng: place.lng,
+    geoApproximate: place.geoApproximate,
+    geoPrecision: place.geoPrecision,
+  };
+  const routeUrl = buildHospitalityServiceRouteUrl({
+    destinationSlug: destination.slug || destinationSlug,
+    placeSlug: place.slug || placeSlug,
+    serviceId: isStore ? undefined : item?.id,
+    serviceName: servicePoint.name,
+    serviceAddress: item?.address || item?.settings?.address,
+    serviceAddressNumber: item?.addressNumber || item?.settings?.addressNumber || item?.settings?.number,
+    serviceDistrict: item?.district || item?.neighborhood || item?.settings?.district || item?.settings?.neighborhood,
+    serviceCity: item?.city || item?.settings?.city || destination.city,
+    serviceState: item?.state || item?.settings?.state || destination.state,
+    serviceZipCode: item?.zipCode || item?.cep || item?.settings?.zipCode || item?.settings?.cep,
+    serviceLat: item?.lat || item?.settings?.lat || item?.settings?.latitude,
+    serviceLng: item?.lng || item?.settings?.lng || item?.settings?.longitude,
+    placeName: place.name,
+    placeAddress: place.address,
+    placeAddressNumber: place.addressNumber,
+    placeDistrict: place.district,
+    placeCity: place.city || destination.city,
+    placeState: place.state || destination.state,
+    placeZipCode: place.zipCode,
+    placeLat: place.lat,
+    placeLng: place.lng,
+  });
+  const serviceWhatsapp = isStore ? storeContactPhone(item) : listingContactPhone(item);
+  const serviceImageUrl = logoFor(item) || cardMediaFor(item) || imageFor(item);
+  const placeImageUrl = logoFor(place) || imageFor(place);
+  return { servicePoint, placePoint, routeUrl, serviceWhatsapp, serviceImageUrl, placeImageUrl };
+};
+
 const listingContactPhone = (listing: any) => {
   const ctaUrl = String(listing?.ctaUrl || '').trim();
   return listing?.whatsapp || listing?.phone || listing?.contactPhone || (/^https?:\/\//i.test(ctaUrl) ? '' : ctaUrl);
@@ -364,12 +442,47 @@ const buildProviderQuickActions = ({ item, destination, destinationSlug, place, 
     placeSlug,
     idKey: mode === 'store' ? '_skipStoreIdForQuery' : 'id',
   });
+  const routeUrl = buildHospitalityServiceRouteUrl({
+    destinationSlug: destination.slug || destinationSlug,
+    placeSlug: place.slug || placeSlug,
+    serviceId: mode === 'store' ? undefined : item?.id,
+    serviceName: item?.title || item?.name,
+    serviceAddress: item?.address || item?.settings?.address,
+    serviceAddressNumber: item?.addressNumber || item?.settings?.addressNumber || item?.settings?.number,
+    serviceDistrict: item?.district || item?.neighborhood || item?.settings?.district || item?.settings?.neighborhood,
+    serviceCity: item?.city || item?.settings?.city || destination.city,
+    serviceState: item?.state || item?.settings?.state || destination.state,
+    serviceZipCode: item?.zipCode || item?.cep || item?.settings?.zipCode || item?.settings?.cep,
+    serviceLat: item?.lat || item?.settings?.lat || item?.settings?.latitude,
+    serviceLng: item?.lng || item?.settings?.lng || item?.settings?.longitude,
+    placeName: place.name,
+    placeAddress: place.address,
+    placeAddressNumber: place.addressNumber,
+    placeDistrict: place.district,
+    placeCity: place.city || destination.city,
+    placeState: place.state || destination.state,
+    placeZipCode: place.zipCode,
+    placeLat: place.lat,
+    placeLng: place.lng,
+  });
+  const routeAction = routeHref
+    ? {
+        href: routeHref,
+        label: 'Rota',
+        kind: 'route',
+        icon: GoogleMapsIcon,
+        external: false,
+        routeItem: item,
+        routeMode: mode,
+        routeUrl,
+      }
+    : null;
 
   return [
     whatsappHref ? { href: whatsappHref, label: 'WhatsApp', kind: 'whatsapp', icon: WhatsappLogo, external: true } : null,
     phoneHref ? { href: phoneHref, label: 'Ligar', kind: 'phone', icon: PhoneCall, external: false } : null,
     instagramHref ? { href: instagramHref, label: 'Instagram', kind: 'instagram', icon: InstagramIcon, external: true } : null,
-    routeHref ? { href: routeHref, label: 'Rota', kind: 'route', icon: GoogleMapsIcon, external: false } : null,
+    routeAction,
   ].filter(Boolean);
 };
 
@@ -419,6 +532,7 @@ export function HospitalityPlacePage() {
   const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
   const [highlightedProviderTarget, setHighlightedProviderTarget] = useState('');
   const [providerJumpLabel, setProviderJumpLabel] = useState('');
+  const [routeSheet, setRouteSheet] = useState<any>(null);
 
   useEffect(() => {
     let active = true;
@@ -573,6 +687,20 @@ export function HospitalityPlacePage() {
   const openProviderQuickAction = (event: any, action: any) => {
     event.preventDefault();
     event.stopPropagation();
+    if (action?.kind === 'route' && action?.routeItem) {
+      const context = buildRouteSheetContext({
+        item: action.routeItem,
+        destination,
+        destinationSlug,
+        place,
+        placeSlug,
+        mode: action.routeMode || 'listing',
+      });
+      if (context.routeUrl) {
+        setRouteSheet(context);
+        return;
+      }
+    }
     const href = String(action?.href || '').trim();
     if (!href) return;
     if (/^(tel:|mailto:)/i.test(href)) {
@@ -580,6 +708,18 @@ export function HospitalityPlacePage() {
       return;
     }
     void openActionTarget({ href, external: Boolean(action?.external) || /^https?:\/\//i.test(href) }, navigate);
+  };
+  const openRouteSheetForListing = (listing: any) => {
+    if (!listing) return;
+    const context = buildRouteSheetContext({
+      item: listing,
+      destination,
+      destinationSlug,
+      place,
+      placeSlug,
+      mode: 'listing',
+    });
+    if (context.routeUrl) setRouteSheet(context);
   };
   const scrollToProviderTarget = (targetId: string, providerName = '') => {
     if (!targetId || typeof window === 'undefined' || typeof document === 'undefined') return;
@@ -601,6 +741,7 @@ export function HospitalityPlacePage() {
     setPreviewImage(null);
     setHighlightedProviderTarget('');
     setProviderJumpLabel('');
+    setRouteSheet(null);
   }, [destinationSlug, placeSlug]);
 
   useEffect(() => {
@@ -1201,10 +1342,24 @@ export function HospitalityPlacePage() {
         primaryAction={selectedListingAction}
         routeAction={selectedListingRouteHref ? { href: selectedListingRouteHref, label: 'Ver rota até meu chalé', kind: 'route', external: false } : null}
         routeDistanceLabel={selectedListingRouteDistanceLabel}
+        onOpenRoute={selectedListingRouteHref ? () => openRouteSheetForListing(selectedListing) : undefined}
         instagramUrl={selectedListingInstagramUrl}
         websiteUrl={selectedListingWebsiteUrl}
         websiteLabel={siteLabel(selectedListing?.websiteUrl)}
         address={selectedListing?.address}
+      />
+
+      <HospitalityRouteSheet
+        open={Boolean(routeSheet)}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setRouteSheet(null);
+        }}
+        servicePoint={routeSheet?.servicePoint}
+        placePoint={routeSheet?.placePoint}
+        serviceImageUrl={routeSheet?.serviceImageUrl}
+        placeImageUrl={routeSheet?.placeImageUrl}
+        serviceWhatsapp={routeSheet?.serviceWhatsapp}
+        routeUrl={routeSheet?.routeUrl || ''}
       />
     </PublicDestinationShell>
   );

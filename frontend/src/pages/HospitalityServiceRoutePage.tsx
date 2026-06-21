@@ -453,6 +453,7 @@ export function HospitalityServiceRoutePage() {
                     origin={toCoords(servicePoint)}
                     destination={toCoords(placePoint)}
                     compact
+                    hideAction
                     originLabel={servicePoint.name || 'Serviço'}
                     destinationLabel={placePoint.name || 'Chalé'}
                     mapActionLabel="Abrir rota"

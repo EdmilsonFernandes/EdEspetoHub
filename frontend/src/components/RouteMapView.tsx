@@ -15,6 +15,7 @@ type RouteMapViewProps = {
   destinationLabel?: string;
   mapActionLabel?: string;
   premiumMotion?: boolean;
+  hideAction?: boolean;
 };
 
 const isValidPoint = (point?: Partial<RouteCoords> | null) =>
@@ -92,6 +93,7 @@ export function RouteMapView({
   destinationLabel = 'Entrega',
   mapActionLabel = 'Abrir no mapa',
   premiumMotion = false,
+  hideAction = false,
 }: RouteMapViewProps) {
   const [reducedMotion, setReducedMotion] = useState(false);
   const isValid = isValidPoint(origin) && isValidPoint(destination);
@@ -244,16 +246,20 @@ export function RouteMapView({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              const geoUrl = `https://www.google.com/maps/dir/?api=1&origin=${Number(origin.lat).toFixed(6)},${Number(origin.lng).toFixed(6)}&destination=${Number(destination.lat).toFixed(6)},${Number(destination.lng).toFixed(6)}&travelmode=driving`;
-              void openRouteInSystemBrowser(geoUrl);
-            }}
-            className={premiumMotion ? 'rounded-2xl border border-white/70 bg-[linear-gradient(135deg,#153A4C,#336886)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-white shadow-[0_18px_30px_-22px_rgba(51,104,134,0.62)] transition-transform hover:-translate-y-0.5 active:scale-[0.96]' : 'rounded-2xl border border-amber-300/80 bg-[linear-gradient(135deg,#fff7e7,#f7d58d)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-amber-900 shadow-[0_18px_30px_-24px_rgba(180,83,9,0.62)] transition-transform hover:-translate-y-0.5 active:scale-[0.96]'}
-          >
-            {mapActionLabel}
-          </button>
+          {hideAction ? (
+            <div className="min-w-[5.5rem] flex-1" aria-hidden="true" />
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                const geoUrl = `https://www.google.com/maps/dir/?api=1&origin=${Number(origin.lat).toFixed(6)},${Number(origin.lng).toFixed(6)}&destination=${Number(destination.lat).toFixed(6)},${Number(destination.lng).toFixed(6)}&travelmode=driving`;
+                void openRouteInSystemBrowser(geoUrl);
+              }}
+              className={premiumMotion ? 'rounded-2xl border border-white/70 bg-[linear-gradient(135deg,#153A4C,#336886)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-white shadow-[0_18px_30px_-22px_rgba(51,104,134,0.62)] transition-transform hover:-translate-y-0.5 active:scale-[0.96]' : 'rounded-2xl border border-amber-300/80 bg-[linear-gradient(135deg,#fff7e7,#f7d58d)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-amber-900 shadow-[0_18px_30px_-24px_rgba(180,83,9,0.62)] transition-transform hover:-translate-y-0.5 active:scale-[0.96]'}
+            >
+              {mapActionLabel}
+            </button>
+          )}
 
           <div className={`jnc-route-pin flex min-w-0 items-center gap-2 rounded-2xl border border-white/70 bg-white/90 px-3 py-2 shadow-[0_18px_30px_-24px_rgba(28,25,23,0.55)] backdrop-blur ${shouldAnimate ? 'opacity-0' : ''}`} style={shouldAnimate ? { animation: 'jnc-route-pin-drop 0.62s cubic-bezier(0.34,1.56,0.64,1) 0.32s forwards' } : undefined}>
             <span className={premiumMotion ? 'h-2.5 w-2.5 rounded-full bg-[#5FD35A]' : 'h-2.5 w-2.5 rounded-full bg-orange-600'} />
