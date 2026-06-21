@@ -133,13 +133,12 @@ export function HospitalityRouteSheet({
     [servicePoint, placePoint]
   );
 
-  const [direction, setDirection] = useState<'toService' | 'toPlace'>('toPlace');
-  const mapDirectionsUrl = useMemo(() => {
-    // toService: o hóspede vai do chalé até o serviço. toPlace: o serviço vem até o chalé.
-    const from = direction === 'toService' ? placePoint : servicePoint;
-    const to = direction === 'toService' ? servicePoint : placePoint;
-    return buildGoogleDirectionsUrl(from, to);
-  }, [direction, servicePoint, placePoint]);
+  // Rota para o hóspede IR até o serviço (chalé -> serviço). O "serviço vem até mim"
+  // é coberto pelo CTA "Enviar localização" (partilha a localização do chalé).
+  const toServiceDirectionsUrl = useMemo(
+    () => buildGoogleDirectionsUrl(placePoint, servicePoint),
+    [placePoint, servicePoint]
+  );
 
   const shareMessage = useMemo(
     () =>
@@ -234,51 +233,26 @@ export function HospitalityRouteSheet({
               <button
                 type="button"
                 onClick={() => void handlePrimary()}
-                className="jnc-hub-touch inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.15rem] bg-[#25D366] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(37,211,102,0.72)] transition hover:-translate-y-0.5 active:scale-[0.98]"
+                className="jnc-hub-touch inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-[1.4rem] bg-[#336886] px-4 py-3 text-[15px] font-semibold text-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.72)] transition hover:-translate-y-0.5 active:scale-[0.98]"
               >
                 {shareWhatsappUrl ? <WhatsappLogo size={18} weight="fill" /> : <ShareNetwork size={18} weight="fill" />}
                 Enviar localização do chalé
               </button>
 
-              {mapDirectionsUrl ? (
-                <>
-                  {/* seletor de direção da rota (GPS) */}
-                  <div className="grid grid-cols-2 gap-1.5 rounded-[1.1rem] bg-slate-100/80 p-1">
-                    <button
-                      type="button"
-                      onClick={() => setDirection('toService')}
-                      className={`jnc-hub-touch inline-flex items-center justify-center gap-1.5 rounded-[0.85rem] px-2 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition active:scale-[0.98] ${
-                        direction === 'toService'
-                          ? 'bg-white text-[#336886] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.5)]'
-                          : 'text-slate-500 hover:text-slate-700'
-                      }`}
-                    >
-                      <NavigationArrow size={14} weight="duotone" />
-                      Ir até o serviço
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDirection('toPlace')}
-                      className={`jnc-hub-touch inline-flex items-center justify-center gap-1.5 rounded-[0.85rem] px-2 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition active:scale-[0.98] ${
-                        direction === 'toPlace'
-                          ? 'bg-white text-[#336886] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.5)]'
-                          : 'text-slate-500 hover:text-slate-700'
-                      }`}
-                    >
-                      <Storefront size={14} weight="duotone" />
-                      Serviço vem a mim
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => void openExternal(mapDirectionsUrl)}
-                    className="jnc-hub-touch inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/14 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#336886] shadow-sm transition hover:-translate-y-0.5 hover:border-[#336886]/22 active:scale-[0.98]"
-                  >
-                    <NavigationArrow size={18} weight="duotone" />
-                    {direction === 'toService' ? 'Abrir rota até o serviço' : 'Abrir rota até o chalé'}
-                  </button>
-                </>
+              {toServiceDirectionsUrl ? (
+                <button
+                  type="button"
+                  onClick={() => void openExternal(toServiceDirectionsUrl)}
+                  className="jnc-hub-touch inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-[1.4rem] border border-[#336886]/18 bg-white px-4 py-3 text-[15px] font-semibold text-[#336886] shadow-sm transition hover:-translate-y-0.5 hover:border-[#336886]/30 active:scale-[0.98]"
+                >
+                  <NavigationArrow size={18} weight="duotone" />
+                  Como chegar até o serviço
+                </button>
               ) : null}
+
+              <p className="mt-0.5 text-center text-[12px] font-medium leading-snug text-slate-500">
+                Envie sua localização para receber, ou veja como chegar para visitar.
+              </p>
             </div>
 
             <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
