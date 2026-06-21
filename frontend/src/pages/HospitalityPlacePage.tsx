@@ -708,7 +708,8 @@ export function HospitalityPlacePage() {
                     collapsedClassName="line-clamp-4"
                     threshold={210}
                   />
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <p className="mt-4 mb-2 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Falar com esta hospedagem</p>
+                  <div className="flex flex-wrap gap-2">
                     {placeWhatsAppUrl ? (
                       <a
                         href={placeWhatsAppUrl}
