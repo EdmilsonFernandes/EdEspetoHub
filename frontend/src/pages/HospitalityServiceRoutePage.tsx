@@ -2,14 +2,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { CheckCircle, ClipboardText, Clock, HouseLine, Storefront, WarningCircle } from '@phosphor-icons/react';
+import { CheckCircle, ClipboardText, HouseLine, ShareNetwork, Storefront, WarningCircle, WhatsappLogo } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { RouteMapView } from '../components/RouteMapView';
 import { GoogleMapsIcon } from '../components/common/BrandActionIcons';
 import { Chip, SurfaceCard } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { mapsService } from '../services/mapsService';
-import { buildDestinationAddressLine, buildDestinationRouteAddressLine } from '../utils/destinationWhatsApp';
+import { buildDestinationAddressLine, buildDestinationRouteAddressLine, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 
@@ -357,6 +357,36 @@ export function HospitalityServiceRoutePage() {
     }
   };
 
+  // CTA primário: partilhar a localização do chalé com o serviço (WhatsApp) ou share nativo.
+  const serviceWhatsapp = String(
+    serviceFromPayload?.whatsapp ||
+    serviceFromPayload?.phone ||
+    serviceFromPayload?.contactPhone ||
+    serviceFromPayload?.store?.settings?.whatsapp ||
+    ''
+  ).trim();
+  const shareMessage = [
+    `Olá! Estou hospedado em ${placePoint.name}.`,
+    placePoint.address ? `Endereço para entrega: ${placePoint.address}` : '',
+    currentRouteUrl ? `Como chegar até meu chalé: ${currentRouteUrl}` : '',
+  ].filter(Boolean).join('\n');
+  const shareWhatsappUrl = serviceWhatsapp ? buildWhatsAppUrl(serviceWhatsapp, shareMessage) : '';
+  const handleShareWhatsapp = (event: any) => {
+    event.preventDefault();
+    if (shareWhatsappUrl) void openRouteInBrowser(shareWhatsappUrl);
+  };
+  const handleShareOrCopy = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title: `Localização de ${placePoint.name}`, text: shareMessage, url: currentRouteUrl });
+        return;
+      } catch {
+        // cai no fallback de copiar
+      }
+    }
+    copyText(currentRouteUrl, 'Link da rota copiado.');
+  };
+
   useEffect(() => {
     let active = true;
     setRouteEstimate(null);
@@ -443,16 +473,37 @@ export function HospitalityServiceRoutePage() {
             ) : null}
 
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
-              {googleDirectionsUrl ? (
-                <a href={googleDirectionsUrl} onClick={openExternalRoute(googleDirectionsUrl, googleNativeUrl)} target="_blank" rel="noreferrer" className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/16 bg-[#336886] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.62)] hover:-translate-y-0.5">
-                  <GoogleMapsIcon className="h-6 w-6" />
-                  Abrir no Google Maps
+              {shareWhatsappUrl ? (
+                <a
+                  href={shareWhatsappUrl}
+                  onClick={handleShareWhatsapp}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] bg-[#25D366] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(37,211,102,0.72)] hover:-translate-y-0.5"
+                >
+                  <WhatsappLogo size={18} weight="fill" />
+                  Compartilhar localização
                 </a>
-              ) : null}
-              {wazeUrl ? (
-                <a href={wazeUrl} onClick={openExternalRoute(wazeUrl, wazeNativeUrl)} target="_blank" rel="noreferrer" className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/14 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#336886] shadow-sm hover:-translate-y-0.5 hover:border-[#336886]/18">
-                  <Clock size={17} weight="duotone" />
-                  Abrir no Waze
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleShareOrCopy}
+                  className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] bg-[#336886] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.62)] hover:-translate-y-0.5"
+                >
+                  <ShareNetwork size={18} weight="fill" />
+                  Compartilhar localização
+                </button>
+              )}
+              {googleDirectionsUrl ? (
+                <a
+                  href={googleDirectionsUrl}
+                  onClick={openExternalRoute(googleDirectionsUrl, googleNativeUrl)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/14 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#336886] shadow-sm hover:-translate-y-0.5 hover:border-[#336886]/18"
+                >
+                  <GoogleMapsIcon className="h-6 w-6" />
+                  Abrir no mapa
                 </a>
               ) : null}
             </div>
@@ -466,17 +517,7 @@ export function HospitalityServiceRoutePage() {
                 leftIcon={linkCopied ? <CheckCircle size={16} weight="fill" /> : <ClipboardText size={16} weight="duotone" />}
                 className="tracking-[0.12em] shadow-sm hover:-translate-y-0.5"
               >
-                {linkCopied ? 'Copiado' : 'Copiar link'}
-              </Chip>
-              <Chip
-                onClick={() => copyText(placePoint.address, 'Endereço do chalé copiado.')}
-                tone={addressCopied ? 'success' : 'neutral'}
-                size="sm"
-                selected={addressCopied}
-                leftIcon={addressCopied ? <CheckCircle size={16} weight="fill" /> : <HouseLine size={16} weight="duotone" />}
-                className="tracking-[0.12em] shadow-sm hover:-translate-y-0.5"
-              >
-                {addressCopied ? 'Copiado' : 'Copiar endereço'}
+                {linkCopied ? 'Copiado' : 'Copiar link da rota'}
               </Chip>
             </div>
             {copied ? (
