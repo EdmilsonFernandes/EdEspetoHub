@@ -1,11 +1,12 @@
-import { 
-  ListChecks, 
-  Motorcycle, 
-  CreditCard, 
-  ShieldCheck, 
-  Buildings, 
-  QrCode, 
-  Sparkle 
+import {
+  CalendarCheck,
+  ListChecks,
+  Motorcycle,
+  CreditCard,
+  ShieldCheck,
+  Buildings,
+  QrCode,
+  Sparkle
 } from '@phosphor-icons/react';
 
 export function BentoFeatures() {
@@ -179,6 +180,39 @@ export function BentoFeatures() {
                 ✓ {item}
               </span>
             ))}
+          </div>
+        </div>
+
+        {/* Card 7: Reservas com Horário (destaque full-width) */}
+        <div className="group relative overflow-hidden rounded-[2rem] border border-amber-400/15 bg-[linear-gradient(120deg,rgba(15,23,42,0.7),rgba(2,6,23,0.85))] p-6 shadow-[0_24px_50px_-30px_rgba(2,6,23,0.9)] backdrop-blur-xl lg:col-span-3 min-h-[240px]">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-amber-500/12 blur-[70px] transition-transform group-hover:scale-125" />
+          <div className="pointer-events-none absolute -left-16 bottom-0 h-40 w-40 rounded-full bg-[#336886]/14 blur-[60px]" />
+          <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+
+          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="max-w-2xl space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-400/25 bg-amber-400/10 text-amber-300">
+                  <CalendarCheck size={24} weight="duotone" />
+                </div>
+                <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-amber-300">
+                  Novo · Reservas
+                </span>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-white leading-tight sm:text-3xl">Reservas com Horário</h3>
+                <p className="text-slate-300 text-sm sm:text-base font-medium leading-relaxed">
+                  O cliente escolhe o melhor horário e quantas pessoas vão. Você controla a capacidade por horário, prepara com antecedência e o pedido já está pronto quando ele chega — <span className="font-bold text-amber-300">sem filas, sem overbooking</span>.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2.5 sm:max-w-[15rem] sm:justify-end">
+              {['Escolha de data e hora', 'Capacidade configurável', 'Pronto na chegada', 'Sem overbooking'].map((item) => (
+                <span key={item} className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-200 bg-white/[0.05] border border-white/10 px-3 py-1.5 rounded-full">
+                  ✓ {item}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
