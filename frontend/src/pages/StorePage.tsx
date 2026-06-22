@@ -462,6 +462,7 @@ export function StorePage() {
   const [promoMessage, setPromoMessage] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'pickup', 'table' ]);
+  const [reservationLeadTimeHours, setReservationLeadTimeHours] = useState<number | null>(null);
   const [storeSubscription, setStoreSubscription] = useState(null);
   const [storePlanExempt, setStorePlanExempt] = useState(false);
   const [storeReviewSummary, setStoreReviewSummary] = useState<any | null>(null);
@@ -1628,6 +1629,8 @@ export function StorePage() {
             ? baseTypes
             : baseTypes.filter((type: string) => String(type || '').toLowerCase() !== 'delivery');
           setOrderTypes(allowedTypes.length ? allowedTypes : [ 'pickup', 'table' ]);
+          const parsedLead = Number(data.settings?.reservationLeadTimeHours);
+          setReservationLeadTimeHours(Number.isFinite(parsedLead) && parsedLead > 0 ? parsedLead : null);
           setStorePhone(data.owner?.phone || '');
           setStoreAddress(data.settings?.address || data.owner?.address || '');
           setStoreDescription(data.settings?.description || '');
@@ -4557,6 +4560,7 @@ export function StorePage() {
             customers={customers}
             paymentMethod={paymentMethod}
             allowedOrderTypes={orderTypes}
+            reservationLeadTimeHours={reservationLeadTimeHours}
             allowCustomerAutocomplete={canUseAdminPrintFlow}
             tablePhoneOptional={canUseAdminPrintFlow}
             guestPhoneRequired={!customerSession?.token && !isStoreAdmin}

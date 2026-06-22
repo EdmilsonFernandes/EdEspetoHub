@@ -38,6 +38,7 @@ export interface CreateStoreDto {
   prepBaseMinutes?: number;
   prepAttentionMinutes?: number;
   reservationCapacity?: number | null;
+  reservationLeadTimeHours?: number | null;
   address?: string;
   city?: string;
   state?: string;

@@ -193,6 +193,7 @@ export const CartView = ({
   guestPhoneRequired = false,
   occupiedTables = [],
   allowedOrderTypes = [ "delivery", "pickup", "table" ],
+  reservationLeadTimeHours = null,
   deliveryRadiusKm = null,
   deliveryFee = 0,
   deliveryCheck = { status: "idle", distanceKm: null, durationMin: null },
@@ -2492,6 +2493,18 @@ export const CartView = ({
                 const candidate = new Date(buildLocalScheduledValue(selectedDateKey, slotLabel)).getTime();
                 return Number.isFinite(candidate) ? candidate <= Date.now() : false;
               };
+              // Antecedencia minima (lead time): slots cujo horario esta dentro da
+              // janela de reservationLeadTimeHours a partir de agora ficam
+              // indisponiveis (mantem para walk-in). NULL/0 = sem restricao.
+              const parsedLead = Number(reservationLeadTimeHours);
+              const leadTimeMs =
+                Number.isFinite(parsedLead) && parsedLead > 0 ? parsedLead * 3600 * 1000 : 0;
+              const leadCutoffTs = leadTimeMs > 0 ? Date.now() + leadTimeMs : 0;
+              const isLeadBlockedSlot = (slotLabel: string) => {
+                if (!leadTimeMs || !selectedDateKey) return false;
+                const candidate = new Date(buildLocalScheduledValue(selectedDateKey, slotLabel)).getTime();
+                return Number.isFinite(candidate) ? candidate < leadCutoffTs : false;
+              };
 
               const updateReservation = (nextDateKey: string, nextTime: string) => {
                 const value = buildLocalScheduledValue(nextDateKey, nextTime);
@@ -2623,9 +2636,14 @@ export const CartView = ({
                         11h às 22h30
                       </span>
                     </div>
+                    {leadTimeMs > 0 && (
+                      <p className="text-[11px] font-semibold text-slate-500">
+                        Reservas com pelo menos {parsedLead}h de antecedência.
+                      </p>
+                    )}
                     <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6">
                       {RESERVATION_TIME_SLOTS.map((slot) => {
-                        const disabled = isPastSlot(slot);
+                        const disabled = isPastSlot(slot) || isLeadBlockedSlot(slot);
                         const active = selectedTime === slot && Boolean(selectedDateKey);
                         return (
                           <button

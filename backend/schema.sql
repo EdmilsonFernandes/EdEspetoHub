@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS store_settings (
   queue_buffer_minutes INT,
   eta_buffer_minutes INT,
   reservation_capacity INT,
+  reservation_lead_time_hours INT,
   plan_exempt BOOLEAN NOT NULL DEFAULT FALSE,
   plan_exempt_label TEXT,
   delivery_radius_km NUMERIC(10,2),
@@ -139,6 +140,8 @@ ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS formatted_address TEXT;
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS reservation_capacity INT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS reservation_lead_time_hours INT;
 UPDATE store_settings
 SET geo_source = 'imported',
     geo_precision = 'street',

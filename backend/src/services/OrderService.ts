@@ -2374,6 +2374,19 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
           message: 'Você já tem uma reserva ativa nesta loja. Cancele ou aguarde a finalização para fazer outra.',
         });
       }
+
+      // Antecedencia minima (lead time): exige que a reserva seja feita com pelo
+      // menos reservationLeadTimeHours horas de antecedencia. Mantem slots
+      // proximos para walk-in. NULL/0 = sem antecedencia minima.
+      const leadTimeHours = Number(store?.settings?.reservationLeadTimeHours);
+      if (Number.isFinite(leadTimeHours) && leadTimeHours > 0) {
+        const minMs = leadTimeHours * 3600 * 1000;
+        if (scheduledFor.getTime() - Date.now() < minMs) {
+          throw new AppError('ORDER-009', 400, {
+            message: `Reserve com pelo menos ${leadTimeHours}h de antecedência. Escolha um horário mais tarde.`,
+          });
+        }
+      }
     }
     const partySize = input.type === 'reservation' && input.partySize !== undefined && input.partySize !== null
       ? Number(input.partySize)

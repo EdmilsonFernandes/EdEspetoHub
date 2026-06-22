@@ -131,6 +131,13 @@ export class StoreSettings
   @Column({ name: 'reservation_capacity', type: 'int', nullable: true })
   reservationCapacity?: number | null;
 
+  /**
+   * Antecedencia minima em horas para reservas (NULL/0 = sem antecedencia minima).
+   * Backward compatible: coluna nasce NULL, lojas existentes nao sao afetadas.
+   */
+  @Column({ name: 'reservation_lead_time_hours', type: 'int', nullable: true })
+  reservationLeadTimeHours?: number | null;
+
   @Column({ name: 'queue_buffer_minutes', type: 'int', nullable: true })
   queueBufferMinutes?: number | null;
 

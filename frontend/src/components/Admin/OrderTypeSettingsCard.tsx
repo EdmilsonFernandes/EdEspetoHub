@@ -41,6 +41,11 @@ export function OrderTypeSettingsCard() {
     const parsed = Number(raw);
     return Number.isFinite(parsed) && parsed > 0 ? String(parsed) : '';
   });
+  const [reservationLeadTimeHours, setReservationLeadTimeHours] = useState(() => {
+    const raw = auth?.store?.settings?.reservationLeadTimeHours;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed > 0 ? String(parsed) : '';
+  });
   const [saving, setSaving] = useState(false);
   const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
   const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
@@ -61,11 +66,15 @@ export function OrderTypeSettingsCard() {
     const rawCap = auth?.store?.settings?.reservationCapacity;
     const parsedCap = Number(rawCap);
     setReservationCapacity(Number.isFinite(parsedCap) && parsedCap > 0 ? String(parsedCap) : '');
+    const rawLead = auth?.store?.settings?.reservationLeadTimeHours;
+    const parsedLead = Number(rawLead);
+    setReservationLeadTimeHours(Number.isFinite(parsedLead) && parsedLead > 0 ? String(parsedLead) : '');
   }, [
     auth?.store?.id,
     auth?.store?.settings?.orderTypes,
     auth?.store?.settings?.tableServiceSettings,
     auth?.store?.settings?.reservationCapacity,
+    auth?.store?.settings?.reservationLeadTimeHours,
     canUseDelivery,
   ]);
 
@@ -102,15 +111,25 @@ export function OrderTypeSettingsCard() {
         nextSelected.includes('reservation') && Number.isFinite(parsedCapacity) && parsedCapacity > 0
           ? Math.floor(parsedCapacity)
           : null;
+      // Antecedencia minima: vazio/0 = sem antecedencia minima (NULL no backend).
+      const parsedLeadTime = Number(reservationLeadTimeHours);
+      const nextReservationLeadTimeHours =
+        nextSelected.includes('reservation') && Number.isFinite(parsedLeadTime) && parsedLeadTime > 0
+          ? Math.floor(parsedLeadTime)
+          : null;
       const updated = await storeService.update(storeId, {
         orderTypes: nextSelected,
         tableServiceSettings: normalizedTableService,
         reservationCapacity: nextReservationCapacity,
+        reservationLeadTimeHours: nextReservationLeadTimeHours,
       });
       if (updated?.settings?.orderTypes) {
         const persistedCapacity = Number(updated?.settings?.reservationCapacity);
         const capacityLabel =
           Number.isFinite(persistedCapacity) && persistedCapacity > 0 ? String(persistedCapacity) : '';
+        const persistedLeadTime = Number(updated?.settings?.reservationLeadTimeHours);
+        const leadTimeLabel =
+          Number.isFinite(persistedLeadTime) && persistedLeadTime > 0 ? String(persistedLeadTime) : '';
         setAuth({
           ...auth,
           store: {
@@ -121,15 +140,21 @@ export function OrderTypeSettingsCard() {
               tableServiceSettings: updated.settings.tableServiceSettings || normalizedTableService,
               reservationCapacity:
                 Number.isFinite(persistedCapacity) && persistedCapacity > 0 ? persistedCapacity : null,
+              reservationLeadTimeHours:
+                Number.isFinite(persistedLeadTime) && persistedLeadTime > 0 ? persistedLeadTime : null,
             },
           },
         });
         setReservationCapacity(capacityLabel);
+        setReservationLeadTimeHours(leadTimeLabel);
       } else {
         setSelected(nextSelected);
         setTableServiceSettings(normalizedTableService);
         setReservationCapacity(
           nextReservationCapacity && nextReservationCapacity > 0 ? String(nextReservationCapacity) : ''
+        );
+        setReservationLeadTimeHours(
+          nextReservationLeadTimeHours && nextReservationLeadTimeHours > 0 ? String(nextReservationLeadTimeHours) : ''
         );
       }
       showToast('Tipos de pedido atualizados.', 'success');
@@ -200,6 +225,7 @@ export function OrderTypeSettingsCard() {
         </div>
       ) : null}
       {selected.includes('reservation') ? (
+        <>
         <div className="mt-4 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/70 via-white to-slate-50 p-4">
           <div className="mb-3 flex items-start gap-3">
             <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-500 text-white shadow-sm">
@@ -223,6 +249,30 @@ export function OrderTypeSettingsCard() {
             className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
           />
         </div>
+        <div className="mt-4 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/70 via-white to-slate-50 p-4">
+          <div className="mb-3 flex items-start gap-3">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-500 text-white shadow-sm">
+              <CalendarBlank size={18} weight="duotone" />
+            </span>
+            <div>
+              <p className="text-sm font-black text-slate-900">Antecedência mínima (horas)</p>
+              <p className="text-xs font-semibold leading-5 text-slate-500">
+                Quantas horas antes o cliente precisa reservar. Ex.: <span className="font-bold text-slate-700">3</span> = só dá pra reservar com 3h de antecedência; o que chega na hora vira atendimento sem reserva (walk-in). Deixe vazio para não exigir antecedência.
+              </p>
+            </div>
+          </div>
+          <input
+            type="number"
+            min={0}
+            step={1}
+            value={reservationLeadTimeHours}
+            onChange={(event) => setReservationLeadTimeHours(event.target.value)}
+            placeholder="ex.: 3 — deixe vazio para não exigir antecedência"
+            inputMode="numeric"
+            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          />
+        </div>
+        </>
       ) : null}
       {selected.includes('table') ? (
         <div className="mt-4 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/80 via-white to-slate-50 p-4">

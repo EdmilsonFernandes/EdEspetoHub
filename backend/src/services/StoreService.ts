@@ -638,6 +638,12 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
         // NULL/0 = ilimitado (default, backward compat). Valores validos >= 0.
         store.settings.reservationCapacity = Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : null;
       }
+      if (data.reservationLeadTimeHours !== undefined)
+      {
+        const parsed = Number(data.reservationLeadTimeHours);
+        // NULL/0 = sem antecedencia minima (default, backward compat).
+        store.settings.reservationLeadTimeHours = Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : null;
+      }
 
       if (data.socialLinks)
       {
