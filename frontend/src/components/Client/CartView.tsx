@@ -19,6 +19,7 @@ import {
   Trash,
   ShieldCheck,
   NotePencil,
+  CalendarBlank,
 } from "@phosphor-icons/react";
 import { formatAddressLines, formatCurrency } from "../../utils/format";
 import { getPaymentMethodMeta, getPaymentProviderMeta } from "../../utils/paymentAssets";
@@ -624,6 +625,11 @@ export const CartView = ({
       label: "Mesa",
       helper: "No salão",
       icon: <ForkKnife size={16} weight="duotone" />,
+    },
+    reservation: {
+      label: "Reserva",
+      helper: "Com horário",
+      icon: <CalendarBlank size={16} weight="duotone" />,
     },
   };
 
@@ -2369,6 +2375,86 @@ export const CartView = ({
                   </p>
                 </div>
               )}
+            </div>
+          )}
+
+          {customer.type === "reservation" && visibleOrderTypes.includes("reservation") && (
+            <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  Quando você chega?
+                </p>
+                {customer.scheduledFor && (() => {
+                  const ts = new Date(customer.scheduledFor).getTime();
+                  return Number.isFinite(ts) ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-[#153A4C]">
+                      <CalendarBlank size={12} weight="duotone" />
+                      {new Date(customer.scheduledFor).toLocaleString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  ) : null;
+                })()}
+              </div>
+
+              <p className="text-xs text-slate-500 -mt-1">
+                Escolha o horário em que você estará no local — a loja prepara para ficar pronto.
+              </p>
+
+              <div className="space-y-3 animate-in fade-in duration-200">
+                <input
+                  type="datetime-local"
+                  value={customer.scheduledFor || ""}
+                  onChange={(e) => onChangeCustomer({ ...customer, scheduledFor: e.target.value })}
+                  className={`${premiumInputClass} text-sm`}
+                />
+                {customer.scheduledFor && (() => {
+                  const ts = new Date(customer.scheduledFor).getTime();
+                  if (!Number.isFinite(ts)) {
+                    return (
+                      <p className="text-xs font-semibold text-amber-600">
+                        Data e horário inválidos. Verifique o campo acima.
+                      </p>
+                    );
+                  }
+                  if (ts <= Date.now()) {
+                    return (
+                      <p className="text-xs font-semibold text-amber-600">
+                        Escolha um horário futuro.
+                      </p>
+                    );
+                  }
+                  return null;
+                })()}
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5">
+                    Pessoas (opcional)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    inputMode="numeric"
+                    value={customer.partySize ?? ""}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const parsed = raw === "" ? undefined : Number(raw);
+                      onChangeCustomer({
+                        ...customer,
+                        partySize:
+                          parsed === undefined || !Number.isFinite(parsed) || parsed < 1
+                            ? undefined
+                            : Math.floor(parsed),
+                      });
+                    }}
+                    placeholder="Ex: 4"
+                    className={`${premiumInputClass} text-sm`}
+                  />
+                </div>
+              </div>
             </div>
           )}
         </div>

@@ -1187,6 +1187,22 @@ export function StorePage() {
     return { blocked: false, reason: '' };
   }, [customer.number, customer.type, customer.cep, customer.city, customer.state, deliveryCheck.status, deliveryRadiusValue, storeCoords, isPostalDelivery, selectedPostalService, storeCity, storeState]);
 
+  const reservationValidation = useMemo(() => {
+    if (customer.type !== 'reservation') return { blocked: false, reason: '' };
+    const raw = customer.scheduledFor;
+    if (!raw || !String(raw).trim()) {
+      return { blocked: true, reason: 'Escolha um horário futuro para a reserva.' };
+    }
+    const ts = new Date(raw).getTime();
+    if (!Number.isFinite(ts)) {
+      return { blocked: true, reason: 'Escolha um horário futuro para a reserva.' };
+    }
+    if (ts <= Date.now()) {
+      return { blocked: true, reason: 'Escolha um horário futuro para a reserva.' };
+    }
+    return { blocked: false, reason: '' };
+  }, [customer.type, customer.scheduledFor]);
+
   const postalPaymentValidation = useMemo(() => {
     if (!isPostalDelivery) return { blocked: false, reason: '' };
     if (!availablePaymentMethods.some((method) => isPostalPrepaidPaymentMethod(method.id))) {
@@ -2756,6 +2772,15 @@ export function StorePage() {
       return;
     }
 
+    if (customer.type === 'reservation' && !isCondominiumOrder) {
+      const raw = customer.scheduledFor;
+      const ts = raw ? new Date(raw).getTime() : NaN;
+      if (!Number.isFinite(ts) || ts <= Date.now()) {
+        showToast('Escolha um horário futuro para a reserva.', 'warning');
+        return;
+      }
+    }
+
     if (!checkoutIsStoreAdmin && !isDemo && !customerSession?.token) {
       const rememberedEmail = (() => {
         try {
@@ -2868,6 +2893,14 @@ export function StorePage() {
       address: isCondominiumOrder ? condominiumAddress : (deliveryAddress || customer.address),
       table: isCondominiumOrder ? undefined : customer.table,
       type: isCondominiumOrder ? 'pickup' : customer.type,
+      scheduledFor:
+        customer.type === 'reservation' && !isCondominiumOrder && customer.scheduledFor
+          ? new Date(customer.scheduledFor).toISOString()
+          : undefined,
+      partySize:
+        customer.type === 'reservation' && !isCondominiumOrder && customer.partySize
+          ? Number(customer.partySize)
+          : undefined,
       fulfillmentMode: isCondominiumOrder
         ? (isApartmentCondominiumDelivery ? 'condominium_apartment' : 'condominium_pickup')
         : customer.type === 'delivery' ? (isPostalDelivery ? 'postal' : 'distance') : undefined,
@@ -4562,12 +4595,14 @@ export function StorePage() {
               setCustomerAccountNotice('');
               setShowCustomerAccount(true);
             }}
-            checkoutDisabled={!cartItemsCount || deliveryValidation.blocked || postalPaymentValidation.blocked || loggedDeliveryNeedsSavedAddress}
+            checkoutDisabled={!cartItemsCount || deliveryValidation.blocked || reservationValidation.blocked || postalPaymentValidation.blocked || loggedDeliveryNeedsSavedAddress}
             checkoutDisabledReason={
               !cartItemsCount
                 ? 'Adicione pelo menos 1 item para continuar.'
                 : loggedDeliveryNeedsSavedAddress
                 ? 'Cadastre um endereço na sua conta para finalizar entrega.'
+                : reservationValidation.blocked
+                ? reservationValidation.reason
                 : postalPaymentValidation.blocked
                 ? postalPaymentValidation.reason
                 : deliveryValidation.reason
