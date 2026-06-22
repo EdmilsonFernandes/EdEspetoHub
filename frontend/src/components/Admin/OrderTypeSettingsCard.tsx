@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
-import { Bicycle, ForkKnife, House, Percent, Receipt, UsersThree } from '@phosphor-icons/react';
+import { Bicycle, CalendarBlank, ForkKnife, House, Percent, Receipt, UsersThree } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -8,16 +8,20 @@ import { storeService } from '../../services/storeService';
 import { normalizeTableServiceSettings } from '../../utils/tableServiceSettings';
 
 const DEFAULT_TYPES = [ 'delivery', 'pickup', 'table' ];
+// Opções oferecidas no admin (o padrão selecionado continua DEFAULT_TYPES).
+const AVAILABLE_TYPES = [ 'delivery', 'pickup', 'table', 'reservation' ];
 
 const labels = {
   delivery: 'Entrega',
   pickup: 'Retirada',
   table: 'Mesa',
+  reservation: 'Reserva',
 };
 const icons = {
   delivery: Bicycle,
   pickup: House,
   table: ForkKnife,
+  reservation: CalendarBlank,
 };
 
 export function OrderTypeSettingsCard() {
@@ -124,7 +128,7 @@ export function OrderTypeSettingsCard() {
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        {DEFAULT_TYPES.map((type) => {
+        {AVAILABLE_TYPES.map((type) => {
           const active = selected.includes(type);
           const Icon = icons[type];
           const disabled = type === 'delivery' && !canUseDelivery;
