@@ -36,6 +36,11 @@ export function OrderTypeSettingsCard() {
   const [tableServiceSettings, setTableServiceSettings] = useState(() =>
     normalizeTableServiceSettings(auth?.store?.settings?.tableServiceSettings)
   );
+  const [reservationCapacity, setReservationCapacity] = useState(() => {
+    const raw = auth?.store?.settings?.reservationCapacity;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed > 0 ? String(parsed) : '';
+  });
   const [saving, setSaving] = useState(false);
   const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
   const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
@@ -53,10 +58,14 @@ export function OrderTypeSettingsCard() {
       : DEFAULT_TYPES;
     setSelected(canUseDelivery ? next : next.filter((type) => type !== 'delivery'));
     setTableServiceSettings(normalizeTableServiceSettings(auth?.store?.settings?.tableServiceSettings));
+    const rawCap = auth?.store?.settings?.reservationCapacity;
+    const parsedCap = Number(rawCap);
+    setReservationCapacity(Number.isFinite(parsedCap) && parsedCap > 0 ? String(parsedCap) : '');
   }, [
     auth?.store?.id,
     auth?.store?.settings?.orderTypes,
     auth?.store?.settings?.tableServiceSettings,
+    auth?.store?.settings?.reservationCapacity,
     canUseDelivery,
   ]);
 
@@ -87,11 +96,21 @@ export function OrderTypeSettingsCard() {
     setSaving(true);
     try {
       const normalizedTableService = normalizeTableServiceSettings(tableServiceSettings);
+      // Vagas por horário: vazio/0 = ilimitado (NULL no backend).
+      const parsedCapacity = Number(reservationCapacity);
+      const nextReservationCapacity =
+        nextSelected.includes('reservation') && Number.isFinite(parsedCapacity) && parsedCapacity > 0
+          ? Math.floor(parsedCapacity)
+          : null;
       const updated = await storeService.update(storeId, {
         orderTypes: nextSelected,
         tableServiceSettings: normalizedTableService,
+        reservationCapacity: nextReservationCapacity,
       });
       if (updated?.settings?.orderTypes) {
+        const persistedCapacity = Number(updated?.settings?.reservationCapacity);
+        const capacityLabel =
+          Number.isFinite(persistedCapacity) && persistedCapacity > 0 ? String(persistedCapacity) : '';
         setAuth({
           ...auth,
           store: {
@@ -100,12 +119,18 @@ export function OrderTypeSettingsCard() {
               ...auth.store.settings,
               orderTypes: updated.settings.orderTypes,
               tableServiceSettings: updated.settings.tableServiceSettings || normalizedTableService,
+              reservationCapacity:
+                Number.isFinite(persistedCapacity) && persistedCapacity > 0 ? persistedCapacity : null,
             },
           },
         });
+        setReservationCapacity(capacityLabel);
       } else {
         setSelected(nextSelected);
         setTableServiceSettings(normalizedTableService);
+        setReservationCapacity(
+          nextReservationCapacity && nextReservationCapacity > 0 ? String(nextReservationCapacity) : ''
+        );
       }
       showToast('Tipos de pedido atualizados.', 'success');
     } catch (err) {
@@ -172,6 +197,31 @@ export function OrderTypeSettingsCard() {
           >
             Trocar assinatura
           </button>
+        </div>
+      ) : null}
+      {selected.includes('reservation') ? (
+        <div className="mt-4 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/70 via-white to-slate-50 p-4">
+          <div className="mb-3 flex items-start gap-3">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-500 text-white shadow-sm">
+              <CalendarBlank size={18} weight="duotone" />
+            </span>
+            <div>
+              <p className="text-sm font-black text-slate-900">Vagas por horário</p>
+              <p className="text-xs font-semibold leading-5 text-slate-500">
+                Limite de reservas aceitas por slot de 30 min. Deixe vazio para horário livre (ilimitado).
+              </p>
+            </div>
+          </div>
+          <input
+            type="number"
+            min={1}
+            step={1}
+            value={reservationCapacity}
+            onChange={(event) => setReservationCapacity(event.target.value)}
+            placeholder="ex.: 10 — deixe vazio para ilimitado"
+            inputMode="numeric"
+            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          />
         </div>
       ) : null}
       {selected.includes('table') ? (

@@ -2313,6 +2313,36 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
         throw new AppError('ORDER-006', 400, { message: 'scheduledFor deve estar no futuro.' });
       }
       scheduledFor = parsed;
+
+      // Capacidade por slot de 30 min (modelo "stock").
+      // Conta reservas ativas (nao canceladas) para a mesma loja dentro da
+      // janela de 30 min do scheduledFor. Cancelada libera a vaga.
+      const reservationCapacity = Number(store?.settings?.reservationCapacity);
+      if (Number.isFinite(reservationCapacity) && reservationCapacity > 0) {
+        const slotStart = new Date(scheduledFor);
+        slotStart.setUTCSeconds(0, 0);
+        slotStart.setUTCMinutes(Math.floor(slotStart.getUTCMinutes() / 30) * 30);
+        const slotEnd = new Date(slotStart.getTime() + 30 * 60 * 1000);
+
+        const countManager = manager || AppDataSource.manager;
+        const result = await countManager.query(
+          `SELECT COUNT(*)::int AS count
+             FROM orders
+            WHERE store_id = $1
+              AND type = 'reservation'
+              AND status <> 'cancelled'
+              AND scheduled_for IS NOT NULL
+              AND scheduled_for >= $2
+              AND scheduled_for < $3`,
+          [ store!.id, slotStart, slotEnd ]
+        );
+        const occupied = Number(result?.[0]?.count || 0);
+        if (occupied >= reservationCapacity) {
+          throw new AppError('ORDER-007', 400, {
+            message: 'Horário esgotado para reserva. Escolha outro horário.',
+          });
+        }
+      }
     }
     const partySize = input.type === 'reservation' && input.partySize !== undefined && input.partySize !== null
       ? Number(input.partySize)

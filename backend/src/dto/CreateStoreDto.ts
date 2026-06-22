@@ -37,6 +37,7 @@ export interface CreateStoreDto {
   orderNotificationSoundDuration?: number;
   prepBaseMinutes?: number;
   prepAttentionMinutes?: number;
+  reservationCapacity?: number | null;
   address?: string;
   city?: string;
   state?: string;

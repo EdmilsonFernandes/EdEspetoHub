@@ -123,6 +123,14 @@ export class StoreSettings
   @Column({ name: 'queue_capacity_per_hour', type: 'int', nullable: true })
   queueCapacityPerHour?: number | null;
 
+  /**
+   * Capacidade máxima de reservas por slot de 30 min (NULL/0 = ilimitado).
+   * Modelo "stock": conta reservas ativas (nao canceladas) com scheduled_for
+   * dentro da mesma janela de 30 min arredondada para baixo.
+   */
+  @Column({ name: 'reservation_capacity', type: 'int', nullable: true })
+  reservationCapacity?: number | null;
+
   @Column({ name: 'queue_buffer_minutes', type: 'int', nullable: true })
   queueBufferMinutes?: number | null;
 

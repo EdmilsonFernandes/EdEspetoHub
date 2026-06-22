@@ -632,6 +632,12 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
         const parsed = Number(data.prepAttentionMinutes);
         store.settings.prepAttentionMinutes = Number.isFinite(parsed) ? Math.max(1, Math.round(parsed)) : null;
       }
+      if (data.reservationCapacity !== undefined)
+      {
+        const parsed = Number(data.reservationCapacity);
+        // NULL/0 = ilimitado (default, backward compat). Valores validos >= 0.
+        store.settings.reservationCapacity = Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : null;
+      }
 
       if (data.socialLinks)
       {
