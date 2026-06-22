@@ -73,6 +73,7 @@
   "ORDER-004": "Invalid order status transition.",
   "ORDER-005": "Product has insufficient stock. Review the cart and try again.",
   "ORDER-007": "Reservation slot is full. Please choose another time.",
+  "ORDER-008": "You already have an active reservation at this store. Cancel or wait for it to finish to make another.",
   "DELIV-001": "You already have an active delivery. Finish it before accepting another one.",
   "DELIV-002": "Invalid delivery status transition.",
   "DELIV-003": "This order is not a delivery order.",

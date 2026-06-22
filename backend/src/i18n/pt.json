@@ -73,6 +73,7 @@
   "ORDER-004": "Transição de status inválida para este pedido.",
   "ORDER-005": "Produto sem estoque suficiente. Revise o carrinho e tente novamente.",
   "ORDER-007": "Horário esgotado para reserva. Escolha outro horário.",
+  "ORDER-008": "Você já tem uma reserva ativa nesta loja. Cancele ou aguarde a finalização para fazer outra.",
   "DELIV-001": "Você já possui uma entrega ativa. Finalize a entrega atual antes de aceitar outra.",
   "DELIV-002": "Transição inválida do status da entrega.",
   "DELIV-003": "Este pedido não é de entrega.",

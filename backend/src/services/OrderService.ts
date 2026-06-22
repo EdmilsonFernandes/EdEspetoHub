@@ -2343,6 +2343,37 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
           });
         }
       }
+
+      // Segurança: 1 reserva ativa por usuário (até finalizar/cancelar).
+      const dupUserId = String(input.customerUserId || '').trim();
+      const dupPhone = String(input.phone || '').replace(/\D/g, '');
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dupUserId);
+      const dupManager = manager || AppDataSource.manager;
+      let activeByUser = 0;
+      if (isUuid) {
+        const r = await dupManager.query(
+          `SELECT COUNT(*)::int AS count FROM orders
+            WHERE store_id = $1 AND type = 'reservation'
+              AND status NOT IN ('cancelled','done','finished')
+              AND customer_user_id = $2`,
+          [ store!.id, dupUserId ]
+        );
+        activeByUser = Number(r?.[0]?.count || 0);
+      } else if (dupPhone.length >= 8 && dupPhone.length <= 15) {
+        const r = await dupManager.query(
+          `SELECT COUNT(*)::int AS count FROM orders
+            WHERE store_id = $1 AND type = 'reservation'
+              AND status NOT IN ('cancelled','done','finished')
+              AND REGEXP_REPLACE(COALESCE(phone,''), '\\D', '', 'g') = $2`,
+          [ store!.id, dupPhone ]
+        );
+        activeByUser = Number(r?.[0]?.count || 0);
+      }
+      if (activeByUser > 0) {
+        throw new AppError('ORDER-008', 400, {
+          message: 'Você já tem uma reserva ativa nesta loja. Cancele ou aguarde a finalização para fazer outra.',
+        });
+      }
     }
     const partySize = input.type === 'reservation' && input.partySize !== undefined && input.partySize !== null
       ? Number(input.partySize)
