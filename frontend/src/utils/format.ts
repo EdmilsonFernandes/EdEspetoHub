@@ -88,6 +88,7 @@ export const formatOrderType = (type?: string) => {
     delivery: 'Entrega',
     pickup: 'Retirada',
     table: 'Mesa',
+    reservation: 'Reserva',
   };
 
   return (type && map[type]) || 'Não informado';

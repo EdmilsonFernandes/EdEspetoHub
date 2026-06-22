@@ -681,6 +681,16 @@ const OrderSummaryCard = ({
     const typeLabel = String(typeMeta?.label || '').trim();
     const showTypeInMeta = !hasLocationIdentifier && Boolean(typeLabel);
     const renderMetaDivider = () => <span className="text-slate-300">•</span>;
+    // Reserva: chip compacto inline com o horário agendado (HH:MM local).
+    // Só renderiza para pedidos de reserva com scheduledFor válido; não cria nova linha.
+    const reservationTimeLabel = (() => {
+      if (orderType !== 'reservation' || !order?.scheduledFor) return '';
+      const parsed = new Date(order.scheduledFor);
+      const ts = Number(parsed?.getTime?.() || 0);
+      if (!Number.isFinite(ts) || ts <= 0) return '';
+      return parsed.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    })();
+    const showReservationChip = orderType === 'reservation' && Boolean(reservationTimeLabel);
     return (
   <div
     role="button"
@@ -826,6 +836,12 @@ const OrderSummaryCard = ({
               <span className={`inline-flex max-w-full items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] whitespace-nowrap ${statusBadgeTone}`}>
                 {archived ? 'Finalizado' : statusMeta.label}
               </span>
+              {showReservationChip && (
+                <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] whitespace-nowrap text-indigo-700">
+                  <Clock size={10} weight="fill" className="shrink-0" />
+                  Reserva {reservationTimeLabel}
+                </span>
+              )}
             </div>
           </div>
 
