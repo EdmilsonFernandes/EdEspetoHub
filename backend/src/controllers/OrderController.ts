@@ -533,6 +533,8 @@ static async markItemsAsPrinted(req: Request, res: Response) {
             }
           : null,
         table: order.table,
+        scheduledFor: (order as any).scheduledFor || null,
+        partySize: (order as any).partySize != null ? Number((order as any).partySize) : null,
         customerName: order.customerName,
         phone: order.phone,
         address: order.address,

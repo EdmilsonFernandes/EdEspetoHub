@@ -1209,6 +1209,8 @@ async setDefaultAddress(userId: string, addressId: string) {
       phone: order.phone || null,
       address: order.address || null,
       table: order.table || null,
+      scheduledFor: (order as any).scheduledFor || null,
+      partySize: (order as any).partySize != null ? Number((order as any).partySize) : null,
       store: order.store
         ? {
             id: order.store.id,

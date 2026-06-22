@@ -24,6 +24,8 @@ import {
   Phone,
   NotePencil,
   CheckCircle,
+  CalendarBlank,
+  Users,
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { PostalShipmentModal } from "./PostalShipmentModal";
@@ -206,6 +208,14 @@ const resolveLocationIdentifier = (order: any) => {
   if (type === "table") {
     const formattedTable = formatTableIdentifier(order?.table);
     return formattedTable ? `MESA ${formattedTable}` : "MESA";
+  }
+  if (type === "reservation") {
+    const scheduled = order?.scheduledFor;
+    const ts = scheduled ? new Date(scheduled).getTime() : NaN;
+    const timeLabel = Number.isFinite(ts)
+      ? new Date(scheduled).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      : '';
+    return timeLabel ? `RESERVA ${timeLabel}` : 'RESERVA';
   }
   return "";
 };
@@ -4676,6 +4686,41 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         </span>
                       ) : null}
                     </div>
+
+                    {order.type === 'reservation' ? (
+                      (() => {
+                        const scheduled = order?.scheduledFor;
+                        const ts = scheduled ? new Date(scheduled).getTime() : NaN;
+                        const whenLabel = Number.isFinite(ts)
+                          ? new Date(scheduled).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                          : '';
+                        const party = Number(order?.partySize);
+                        const hasParty = Number.isFinite(party) && party > 0;
+                        if (!whenLabel && !hasParty) return null;
+                        return (
+                          <div className="mt-3 rounded-[1.15rem] border border-[#336886]/15 bg-[#eef7fb]/70 px-3 py-2.5 text-[11px] shadow-[0_16px_30px_-26px_rgba(51,104,134,0.22)]">
+                            <p className="flex items-center gap-1.5 font-black uppercase tracking-[0.12em] text-[#153A4C]">
+                              <CalendarBlank size={12} weight="duotone" className="shrink-0 text-[#336886]" />
+                              Reserva
+                            </p>
+                            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] font-semibold text-slate-700">
+                              {whenLabel ? (
+                                <span className="inline-flex items-center gap-1">
+                                  <Clock size={11} weight="duotone" className="shrink-0 text-[#336886]" />
+                                  {whenLabel}
+                                </span>
+                              ) : null}
+                              {hasParty ? (
+                                <span className="inline-flex items-center gap-1">
+                                  <Users size={11} weight="duotone" className="shrink-0 text-[#336886]" />
+                                  {party} {party === 1 ? 'pessoa' : 'pessoas'}
+                                </span>
+                              ) : null}
+                            </div>
+                          </div>
+                        );
+                      })()
+                    ) : null}
 
                     {order.payment?.toString().toLowerCase() === 'dinheiro' && order.cashTendered ? (
                       <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-[11px] shadow-sm">

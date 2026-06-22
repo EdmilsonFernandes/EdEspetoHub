@@ -28,7 +28,7 @@ import {
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
 import { useToast } from '../contexts/ToastContext';
-import { formatCurrency, formatOrderDisplayId, formatReadableDateTime, formatTimeOfDay } from '../utils/format';
+import { formatCurrency, formatOrderDisplayId, formatOrderType, formatReadableDateTime, formatTimeOfDay } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatSelectedModifiers } from '../utils/productModifiers';
@@ -498,6 +498,15 @@ const getOrderFulfillmentMeta = (order: any) => {
     };
   }
 
+  if (normalizedType === 'reservation') {
+    return {
+      label: 'Reserva',
+      icon: CalendarBlank,
+      toneClass: 'bg-[#336886]/10 text-[#153A4C] ring-1 ring-[#336886]/15',
+      textClass: 'text-[#336886]',
+    };
+  }
+
   if (normalizedType === 'table') {
     return {
       label: 'Mesa',
@@ -688,6 +697,19 @@ function OrderCard({
   const itemsCount = getOrderItemsCount(items);
   const fulfillmentMeta = getOrderFulfillmentMeta(order);
   const FulfillmentIcon = fulfillmentMeta.icon || Package;
+  // Reserva: horário agendado + nº de pessoas (quando o pedido é reserva).
+  const reservationSummary = (() => {
+    if (String(order?.type || '').toLowerCase() !== 'reservation') return null;
+    const scheduled = order?.scheduledFor;
+    const ts = scheduled ? new Date(scheduled).getTime() : NaN;
+    const whenLabel = Number.isFinite(ts)
+      ? new Date(scheduled).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      : '';
+    const party = Number(order?.partySize);
+    const partyLabel = Number.isFinite(party) && party > 0 ? `${party} ${party === 1 ? 'pessoa' : 'pessoas'}` : '';
+    if (!whenLabel && !partyLabel) return null;
+    return { whenLabel, partyLabel };
+  })();
   const storeRatingMeta = getOrderStoreRatingMeta(order);
   const condominiumOrder = order?.condominiumOrder || (order?.condominiumId ? {
     condominiumName: order?.condominiumName,
@@ -803,6 +825,17 @@ function OrderCard({
               {fulfillmentMeta.label}
             </span>
           </div>
+          {reservationSummary ? (
+            <p className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-full bg-[#336886]/8 px-2 py-0.5 text-[10px] font-bold tracking-tight text-[#153A4C]">
+              <CalendarBlank size={11} weight="duotone" className="shrink-0 text-[#336886]" />
+              <span className="truncate">
+                {reservationSummary.whenLabel
+                  ? `Reserva ${reservationSummary.whenLabel}`
+                  : 'Reserva'}
+                {reservationSummary.partyLabel ? ` • ${reservationSummary.partyLabel}` : ''}
+              </span>
+            </p>
+          ) : null}
           {condominiumOrder?.condominiumName ? (
             <p className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-emerald-700">
               <span className="truncate">{condominiumLabel} • {condominiumOrder.condominiumName}</span>
@@ -1038,6 +1071,22 @@ function OrderHelpScreen({
     String(order?.id || '').trim() ||
     '-';
   const totalLabel = isDelivery ? 'Total com entrega' : 'Total para retirada';
+  const isReservationOrder = String(order?.type || '').toLowerCase() === 'reservation';
+  const attendanceLabel = formatOrderType(order?.type);
+  const attendanceDetail = isReservationOrder
+    ? (() => {
+        const scheduled = order?.scheduledFor;
+        const ts = scheduled ? new Date(scheduled).getTime() : NaN;
+        const when = Number.isFinite(ts)
+          ? new Date(scheduled).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+          : '';
+        const party = Number(order?.partySize);
+        const partyLabel = Number.isFinite(party) && party > 0
+          ? `${party} ${party === 1 ? 'pessoa' : 'pessoas'}`
+          : '';
+        return [when ? `Reserva ${when}` : 'Reserva', partyLabel].filter(Boolean).join(' • ');
+      })()
+    : isDelivery ? 'Pedido com envio' : 'Pedido para retirada';
   const supportSections = useMemo(() => getOrderHelpSections(isDelivery), [isDelivery]);
   const defaultExpandedId = supportSections[0]?.items?.[0]?.id || null;
   const [expandedTopicId, setExpandedTopicId] = useState<string | null>(defaultExpandedId);
@@ -1126,8 +1175,8 @@ function OrderHelpScreen({
               </div>
               <div className="rounded-[1.15rem] border border-stone-200/80 bg-white/88 px-4 py-3 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.12)]">
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-500">Atendimento</p>
-                <p className="mt-1 text-sm font-black text-stone-900">{isDelivery ? 'Entrega' : 'Retirada'}</p>
-                <p className="mt-1 text-xs font-medium text-stone-500">{isDelivery ? 'Pedido com envio' : 'Pedido para retirada'}</p>
+                <p className="mt-1 text-sm font-black text-stone-900">{attendanceLabel}</p>
+                <p className="mt-1 text-xs font-medium text-stone-500">{attendanceDetail}</p>
               </div>
               <div className="rounded-[1.15rem] border border-stone-200/80 bg-white/88 px-4 py-3 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.12)]">
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-500">Canal</p>

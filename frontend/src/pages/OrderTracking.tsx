@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { PaymentQRCard } from '../components/common/PaymentQRCard';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowClockwise, ArrowSquareOut, Bicycle, CaretDown, CheckCircle, Clock, CircleNotch, CopySimple, CreditCard, MapPin, Package, Phone, SealCheck, Star, User, WhatsappLogo } from '@phosphor-icons/react';
+import { ArrowClockwise, ArrowSquareOut, Bicycle, CalendarBlank, CaretDown, CheckCircle, Clock, CircleNotch, CopySimple, CreditCard, MapPin, Package, Phone, SealCheck, Star, User, Users, WhatsappLogo } from '@phosphor-icons/react';
 import { Capacitor } from '@capacitor/core';
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
@@ -56,6 +56,7 @@ const typeLabels: Record<string, string> = {
   delivery: 'Entrega',
   pickup: 'Retirada',
   table: 'Comer no local',
+  reservation: 'Reserva',
 };
 
 const ONLINE_PAYMENT_METHODS = new Set([
@@ -1681,6 +1682,19 @@ export function OrderTracking() {
     ? (deliveryAddressLabel ? 'Entrega no endereço' : 'Entrega')
     : order?.type === 'table'
     ? `Mesa ${order?.table || '-'}`
+    : normalizedOrderType === 'reservation'
+    ? (() => {
+        const scheduled = (order as any)?.scheduledFor;
+        const ts = scheduled ? new Date(scheduled).getTime() : NaN;
+        const when = Number.isFinite(ts)
+          ? new Date(scheduled).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+          : '';
+        const party = Number((order as any)?.partySize);
+        const partyLabel = Number.isFinite(party) && party > 0
+          ? `${party} ${party === 1 ? 'pessoa' : 'pessoas'}`
+          : '';
+        return [when ? `Reserva ${when}` : 'Reserva', partyLabel].filter(Boolean).join(' • ') || 'Reserva';
+      })()
     : 'Retirada na loja';
   const orderQuickFacts = [
     {
@@ -1709,7 +1723,7 @@ export function OrderTracking() {
       label: 'Atendimento',
       value: typeLabel,
       detail: quickFulfillmentDetail,
-      icon: isDelivery ? <MapPin size={15} weight="duotone" /> : <Package size={15} weight="duotone" />,
+      icon: isDelivery ? <MapPin size={15} weight="duotone" /> : normalizedOrderType === 'reservation' ? <CalendarBlank size={15} weight="duotone" /> : <Package size={15} weight="duotone" />,
     },
   ];
   const stickyOrderAction = !isAdminForStore
@@ -2589,6 +2603,33 @@ export function OrderTracking() {
                           label="Mesa"
                           value={order.table || '-'}
                         />
+                      ) : null}
+
+                      {normalizedOrderType === 'reservation' ? (
+                        <>
+                          <TrackingInfoRow
+                            icon={<CalendarBlank size={16} weight="duotone" />}
+                            label="Reserva para"
+                            value={(() => {
+                              const scheduled = (order as any)?.scheduledFor;
+                              const ts = scheduled ? new Date(scheduled).getTime() : NaN;
+                              return Number.isFinite(ts)
+                                ? new Date(scheduled).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                                : 'Horário a confirmar';
+                            })()}
+                          />
+                          {(() => {
+                            const party = Number((order as any)?.partySize);
+                            if (!Number.isFinite(party) || party <= 0) return null;
+                            return (
+                              <TrackingInfoRow
+                                icon={<Users size={16} weight="duotone" />}
+                                label="Pessoas"
+                                value={`${party} ${party === 1 ? 'pessoa' : 'pessoas'}`}
+                              />
+                            );
+                          })()}
+                        </>
                       ) : null}
 
                       {isDelivery && formatAddress(order.address || order.deliveryAddress) ? (

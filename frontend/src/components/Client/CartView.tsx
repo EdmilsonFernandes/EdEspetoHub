@@ -16,6 +16,9 @@ import {
   Truck,
   MapPinLine,
   Clock,
+  Minus,
+  Plus,
+  Users,
   Trash,
   ShieldCheck,
   NotePencil,
@@ -70,6 +73,85 @@ const buildPhoneFromParts = (ddd = "", local = "") => {
   const localDigits = String(local || "").replace(/\D/g, "").slice(0, 9);
   if (!safeDdd || !localDigits) return "";
   return `(${safeDdd}) ${formatLocalPhoneNumber(localDigits)}`;
+};
+
+// ---- Reservation date/time helpers ----
+// Local date key "YYYY-MM-DD" (no timezone drift): we read the calendar fields
+// directly so the value is stable regardless of the device's UTC offset.
+const toLocalDateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const parseLocalDateKey = (key: string): Date | null => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(key || "").trim());
+  if (!match) return null;
+  const [, y, m, d] = match;
+  const parsed = new Date(Number(y), Number(m) - 1, Number(d), 0, 0, 0, 0);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const dayDiffFromToday = (dateKey: string) => {
+  const target = parseLocalDateKey(dateKey);
+  if (!target) return null;
+  const now = new Date();
+  const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startTarget = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+  return Math.round((startTarget.getTime() - startToday.getTime()) / 86_400_000);
+};
+
+// Build/parse the local datetime string stored in customer.scheduledFor.
+// Shape "YYYY-MM-DDTHH:mm" is what the native datetime-local used, and
+// `new Date(...)` + `.toISOString()` continue to work for the API contract.
+const buildLocalScheduledValue = (dateKey: string, timeLabel: string) => {
+  if (!dateKey || !timeLabel) return "";
+  return `${dateKey}T${timeLabel}`;
+};
+
+const splitLocalScheduledValue = (value: string) => {
+  const raw = String(value || "").trim();
+  if (!raw) return { dateKey: "", timeLabel: "" };
+  const match = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/.exec(raw);
+  if (match) return { dateKey: match[1], timeLabel: match[2] };
+  // ISO string fallback (e.g. when value came back as full ISO from elsewhere).
+  const parsed = new Date(raw);
+  if (Number.isFinite(parsed.getTime())) {
+    return {
+      dateKey: toLocalDateKey(parsed),
+      timeLabel: `${String(parsed.getHours()).padStart(2, "0")}:${String(parsed.getMinutes()).padStart(2, "0")}`,
+    };
+  }
+  return { dateKey: "", timeLabel: "" };
+};
+
+const RESERVATION_TIME_SLOTS = (() => {
+  const slots: string[] = [];
+  for (let hour = 11; hour <= 22; hour += 1) {
+    slots.push(`${String(hour).padStart(2, "0")}:00`);
+    slots.push(`${String(hour).padStart(2, "0")}:30`);
+  }
+  return slots;
+})();
+
+const RESERVATION_PARTY_MIN = 1;
+const RESERVATION_PARTY_MAX = 20;
+const RESERVATION_PARTY_DEFAULT = 2;
+
+const formatReservationDateChipLabel = (dateKey: string) => {
+  const diff = dayDiffFromToday(dateKey);
+  if (diff === 0) return "Hoje";
+  if (diff === 1) return "Amanhã";
+  const parsed = parseLocalDateKey(dateKey);
+  if (!parsed) return dateKey;
+  const now = new Date();
+  const sameYear = parsed.getFullYear() === now.getFullYear();
+  return parsed.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    ...(sameYear ? {} : { year: "numeric" }),
+  });
 };
 
 const PROFESSIONAL_PAYMENT_METHODS = [
@@ -1700,7 +1782,14 @@ export const CartView = ({
                 return (
                   <button
                     key={type}
-                    onClick={() => onChangeCustomer({ ...customer, type })}
+                    onClick={() => {
+                      // Reserva: garante nº de pessoas padrão ao entrar no modo reserva.
+                      if (type === "reservation" && (customer.partySize === undefined || customer.partySize === null)) {
+                        onChangeCustomer({ ...customer, type, partySize: RESERVATION_PARTY_DEFAULT });
+                        return;
+                      }
+                      onChangeCustomer({ ...customer, type });
+                    }}
                     className={`jnc-hub-touch flex min-h-[74px] min-w-0 flex-1 items-center gap-3 rounded-[1.2rem] border px-3 py-3 text-left ${
                       isActive
                         ? "border-slate-900 bg-white text-slate-900 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.45)] active:scale-[0.985]"
@@ -2379,83 +2468,238 @@ export const CartView = ({
           )}
 
           {customer.type === "reservation" && visibleOrderTypes.includes("reservation") && (
-            <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                  Quando você chega?
-                </p>
-                {customer.scheduledFor && (() => {
-                  const ts = new Date(customer.scheduledFor).getTime();
-                  return Number.isFinite(ts) ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-[#153A4C]">
-                      <CalendarBlank size={12} weight="duotone" />
-                      {new Date(customer.scheduledFor).toLocaleString("pt-BR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
+            (() => {
+              const { dateKey: selectedDateKey, timeLabel: selectedTime } = splitLocalScheduledValue(customer.scheduledFor || "");
+              const todayKey = toLocalDateKey(new Date());
+              const tomorrowKey = (() => {
+                const t = new Date();
+                t.setDate(t.getDate() + 1);
+                return toLocalDateKey(t);
+              })();
+              const quickDateChips = [
+                { key: todayKey, label: "Hoje" },
+                { key: tomorrowKey, label: "Amanhã" },
+              ].filter((chip) => Boolean(chip.key));
+              const isQuickDateSelected = (key: string) => selectedDateKey === key;
+              const reservationTs = (() => {
+                const value = buildLocalScheduledValue(selectedDateKey, selectedTime);
+                if (!value) return null;
+                const ts = new Date(value).getTime();
+                return Number.isFinite(ts) ? ts : null;
+              })();
+              const isPastSlot = (slotLabel: string) => {
+                if (!selectedDateKey) return false;
+                const candidate = new Date(buildLocalScheduledValue(selectedDateKey, slotLabel)).getTime();
+                return Number.isFinite(candidate) ? candidate <= Date.now() : false;
+              };
+
+              const updateReservation = (nextDateKey: string, nextTime: string) => {
+                const value = buildLocalScheduledValue(nextDateKey, nextTime);
+                onChangeCustomer({ ...customer, scheduledFor: value || undefined });
+              };
+              const handleDateChip = (key: string) => {
+                // Keep current time when switching days; clear if it falls in the past.
+                const keepTime = selectedTime && !isPastSlotFor(key, selectedTime) ? selectedTime : "";
+                updateReservation(key, keepTime);
+              };
+              const isPastSlotFor = (key: string, slotLabel: string) => {
+                const candidate = new Date(buildLocalScheduledValue(key, slotLabel)).getTime();
+                return Number.isFinite(candidate) ? candidate <= Date.now() : false;
+              };
+              const handleTimeSlot = (slotLabel: string) => {
+                updateReservation(selectedDateKey || todayKey, slotLabel);
+              };
+              const handleOtherDate = (e: React.ChangeEvent<HTMLInputElement>) => {
+                const key = e.target.value;
+                if (!key) return;
+                const keepTime = selectedTime && !isPastSlotFor(key, selectedTime) ? selectedTime : "";
+                updateReservation(key, keepTime);
+              };
+
+              const partyValue = (() => {
+                const raw = Number(customer.partySize);
+                if (Number.isFinite(raw) && raw >= RESERVATION_PARTY_MIN) return Math.min(RESERVATION_PARTY_MAX, Math.floor(raw));
+                return RESERVATION_PARTY_DEFAULT;
+              })();
+              const setPartySize = (next: number) => {
+                const clamped = Math.max(RESERVATION_PARTY_MIN, Math.min(RESERVATION_PARTY_MAX, Math.floor(next)));
+                onChangeCustomer({ ...customer, partySize: clamped });
+              };
+
+              const dateChipButtonClass = (active: boolean) =>
+                `jnc-hub-touch inline-flex min-h-[44px] items-center justify-center rounded-[1rem] border px-3.5 py-2 text-sm font-black tracking-tight transition-all duration-200 active:scale-[0.97] ${
+                  active
+                    ? "border-[#336886] bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.6)]"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-[#336886]/35 hover:text-[#153A4C]"
+                }`;
+              const timeSlotClass = (active: boolean, disabled: boolean) =>
+                `jnc-hub-touch inline-flex min-h-[40px] min-w-[58px] items-center justify-center rounded-[0.85rem] border px-2.5 py-1.5 text-[13px] font-bold tabular-nums transition-all duration-200 active:scale-[0.96] ${
+                  disabled
+                    ? "border-slate-100 bg-slate-50 text-slate-300 line-through cursor-not-allowed"
+                    : active
+                    ? "border-[#336886] bg-[#336886] text-white shadow-[0_12px_24px_-18px_rgba(51,104,134,0.6)]"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-[#336886]/35 hover:text-[#153A4C]"
+                }`;
+
+              return (
+                <div className="rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(238,247,251,0.6)_0%,rgba(255,255,255,0.98)_100%)] p-3.5 shadow-[0_20px_42px_-34px_rgba(51,104,134,0.32)] space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] bg-[#336886]/10 text-[#336886] ring-1 ring-[#336886]/12">
+                        <CalendarBlank size={17} weight="duotone" />
+                      </span>
+                      <div>
+                        <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#336886]">
+                          Reserva
+                        </p>
+                        <p className="text-sm font-black tracking-tight text-slate-950">
+                          Quando você chega?
+                        </p>
+                      </div>
+                    </div>
+                    {reservationTs !== null && (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#153A4C] ring-1 ring-[#336886]/15 shadow-sm">
+                        <CalendarBlank size={11} weight="duotone" className="text-[#336886]" />
+                        {new Date(reservationTs).toLocaleString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="-mt-1 text-[12px] font-medium leading-snug text-slate-500">
+                    Escolha o dia e o horário — a loja prepara tudo para ficar pronto na sua chegada.
+                  </p>
+
+                  {/* Data — chips Hoje/Amanhã + date picker */}
+                  <div className="space-y-2">
+                    <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">Dia</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {quickDateChips.map((chip) => (
+                        <button
+                          key={chip.key}
+                          type="button"
+                          onClick={() => handleDateChip(chip.key)}
+                          className={dateChipButtonClass(isQuickDateSelected(chip.key))}
+                        >
+                          {chip.label}
+                        </button>
+                      ))}
+                      <label
+                        className={`jnc-hub-touch group inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-[1rem] border px-3.5 py-2 text-sm font-black tracking-tight transition-all duration-200 active:scale-[0.97] ${
+                          selectedDateKey && !quickDateChips.some((c) => c.key === selectedDateKey)
+                            ? "border-[#336886] bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.6)]"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-[#336886]/35 hover:text-[#153A4C]"
+                        }`}
+                        title="Escolher outra data"
+                      >
+                        <CalendarBlank size={15} weight="duotone" />
+                        <span>
+                          {selectedDateKey && !quickDateChips.some((c) => c.key === selectedDateKey)
+                            ? formatReservationDateChipLabel(selectedDateKey)
+                            : "Outro dia"}
+                        </span>
+                        <input
+                          type="date"
+                          value={selectedDateKey && !quickDateChips.some((c) => c.key === selectedDateKey) ? selectedDateKey : ""}
+                          min={todayKey}
+                          onChange={handleOtherDate}
+                          className="sr-only"
+                          aria-label="Escolher data da reserva"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Horário — grid de slots */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">Horário</p>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                        <Clock size={11} weight="duotone" />
+                        11h às 22h30
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6">
+                      {RESERVATION_TIME_SLOTS.map((slot) => {
+                        const disabled = isPastSlot(slot);
+                        const active = selectedTime === slot && Boolean(selectedDateKey);
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => handleTimeSlot(slot)}
+                            className={timeSlotClass(active, disabled)}
+                          >
+                            {slot}
+                          </button>
+                        );
                       })}
-                    </span>
-                  ) : null;
-                })()}
-              </div>
-
-              <p className="text-xs text-slate-500 -mt-1">
-                Escolha o horário em que você estará no local — a loja prepara para ficar pronto.
-              </p>
-
-              <div className="space-y-3 animate-in fade-in duration-200">
-                <input
-                  type="datetime-local"
-                  value={customer.scheduledFor || ""}
-                  onChange={(e) => onChangeCustomer({ ...customer, scheduledFor: e.target.value })}
-                  className={`${premiumInputClass} text-sm`}
-                />
-                {customer.scheduledFor && (() => {
-                  const ts = new Date(customer.scheduledFor).getTime();
-                  if (!Number.isFinite(ts)) {
-                    return (
-                      <p className="text-xs font-semibold text-amber-600">
-                        Data e horário inválidos. Verifique o campo acima.
+                    </div>
+                    {!selectedDateKey && (
+                      <p className="text-[11px] font-semibold text-amber-600">
+                        Primeiro escolha o dia para liberar os horários.
                       </p>
-                    );
-                  }
-                  if (ts <= Date.now()) {
-                    return (
-                      <p className="text-xs font-semibold text-amber-600">
-                        Escolha um horário futuro.
+                    )}
+                    {reservationTs !== null && reservationTs <= Date.now() && (
+                      <p className="text-[11px] font-semibold text-amber-600">
+                        Escolha um horário futuro para a reserva.
                       </p>
-                    );
-                  }
-                  return null;
-                })()}
+                    )}
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                    Pessoas (opcional)
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    inputMode="numeric"
-                    value={customer.partySize ?? ""}
-                    onChange={(e) => {
-                      const raw = e.target.value;
-                      const parsed = raw === "" ? undefined : Number(raw);
-                      onChangeCustomer({
-                        ...customer,
-                        partySize:
-                          parsed === undefined || !Number.isFinite(parsed) || parsed < 1
-                            ? undefined
-                            : Math.floor(parsed),
-                      });
-                    }}
-                    placeholder="Ex: 4"
-                    className={`${premiumInputClass} text-sm`}
-                  />
+                  {/* Pessoas — stepper */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">
+                        <Users size={13} weight="duotone" className="text-[#336886]" />
+                        Pessoas
+                      </p>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                        {partyValue} {partyValue === 1 ? "pessoa" : "pessoas"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 rounded-[1.2rem] border border-slate-200 bg-white px-2 py-2 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.25)]">
+                      <button
+                        type="button"
+                        onClick={() => setPartySize(partyValue - 1)}
+                        disabled={partyValue <= RESERVATION_PARTY_MIN}
+                        className="jnc-hub-touch flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.95rem] border border-slate-200 bg-slate-50 text-slate-700 transition-all hover:border-[#336886]/35 hover:text-[#153A4C] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-700"
+                        aria-label="Diminuir número de pessoas"
+                      >
+                        <Minus size={18} weight="bold" />
+                      </button>
+                      <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
+                        <span className="text-2xl font-black tabular-nums tracking-tight text-slate-950">
+                          {partyValue}
+                        </span>
+                        <span className="text-[12px] font-bold text-slate-400">
+                          {partyValue === 1 ? "pessoa" : "pessoas"}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setPartySize(partyValue + 1)}
+                        disabled={partyValue >= RESERVATION_PARTY_MAX}
+                        className="jnc-hub-touch flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.95rem] bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.6)] transition-all hover:brightness-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                        aria-label="Aumentar número de pessoas"
+                      >
+                        <Plus size={18} weight="bold" />
+                      </button>
+                    </div>
+                    {partyValue >= RESERVATION_PARTY_MAX && (
+                      <p className="text-[11px] font-semibold text-slate-400">
+                        Para grupos maiores, combine direto com a loja na observação.
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
+              );
+            })()
           )}
         </div>
       </div>}
