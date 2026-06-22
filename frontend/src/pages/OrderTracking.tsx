@@ -1572,6 +1572,15 @@ export function OrderTracking() {
         { id: 'done', label: hasOnlinePayment ? 'Retirada concluída' : 'Pago' },
       ];
     }
+    if (order?.type === 'reservation') {
+      return [
+        ...(hasOnlinePayment ? [{ id: 'payment', label: isPaymentApproved ? 'Pagamento confirmado' : 'Aguardando pagamento' }] : []),
+        { id: 'pending', label: 'Reserva recebida' },
+        { id: 'preparing', label: 'Sendo preparada' },
+        { id: 'ready', label: 'Reserva pronta' },
+        { id: 'done', label: 'Reserva concluída' },
+      ];
+    }
     return [
       ...(hasOnlinePayment ? [{ id: 'payment', label: isPaymentApproved ? 'Pagamento confirmado' : 'Aguardando pagamento' }] : []),
       { id: 'pending', label: 'Pedido Recebido' },
@@ -1588,6 +1597,10 @@ export function OrderTracking() {
       if (st === 'awaiting_payment' && hasOnlinePayment && isPaymentApproved) return 'pending';
       if (known.has(st)) return st;
       if (order?.type === 'pickup') {
+        if ([ 'ready_for_pickup', 'ready_for_delivery', 'waiting_for_motoboy', 'ready' ].includes(st)) return 'ready';
+        if ([ 'paid', 'done', 'finished', 'delivered' ].includes(st)) return 'done';
+      }
+      if (order?.type === 'reservation') {
         if ([ 'ready_for_pickup', 'ready_for_delivery', 'waiting_for_motoboy', 'ready' ].includes(st)) return 'ready';
         if ([ 'paid', 'done', 'finished', 'delivered' ].includes(st)) return 'done';
       }
