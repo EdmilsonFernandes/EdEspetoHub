@@ -208,7 +208,7 @@ export function OrderTypeSettingsCard() {
             <div>
               <p className="text-sm font-black text-slate-900">Vagas por horário</p>
               <p className="text-xs font-semibold leading-5 text-slate-500">
-                Limite de reservas aceitas por slot de 30 min. Deixe vazio para horário livre (ilimitado).
+                Quantas reservas você aceita para o <span className="font-bold text-slate-700">mesmo horário</span>. Ex.: colocando <span className="font-bold text-slate-700">10</span>, só 10 clientes conseguem reservar às 19h — a 11ª reserva nesse horário é recusada sozinha (evita lotar a casa). Cada reserva conta como 1, mesmo que seja para várias pessoas. Deixe vazio para aceitar sem limite.
               </p>
             </div>
           </div>
