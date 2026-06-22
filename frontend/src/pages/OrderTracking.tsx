@@ -710,6 +710,11 @@ export function OrderTracking() {
     if (isDelivery && normalizedStatus === 'ready') return 'Aguardando entregador';
     // Legacy delivery orders that still use "done".
     if (isDelivery && normalizedStatus === 'done') return 'Entregue';
+    if (order?.type === 'reservation') {
+      if (normalizedStatus === 'pending') return 'Reserva recebida';
+      if (normalizedStatus === 'preparing') return 'Sendo preparada';
+      if (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_pickup' || normalizedStatus === 'done') return 'Reserva pronta';
+    }
     if (order?.type === 'table' && normalizedStatus === 'done') return 'Pedido Pronto';
     if (order?.type === 'pickup' && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_pickup')) return 'Pronto para retirada';
     return statusLabels[normalizedStatus] || statusLabels[status] || status;

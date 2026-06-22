@@ -215,7 +215,7 @@ const resolveLocationIdentifier = (order: any) => {
     const timeLabel = Number.isFinite(ts)
       ? new Date(scheduled).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
       : '';
-    return timeLabel ? `RESERVA ${timeLabel}` : 'RESERVA';
+    return ""; // o chip no card já mostra "Reserva HH:MM" — não duplicar no identificador
   }
   return "";
 };
@@ -3408,6 +3408,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const ready = withAges.filter((o) => normalizeQueueStage(o) === 'ready').length;
     const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
     const condominium = queue.filter((o) => activeStatuses.has(String(o?.status || '').toLowerCase()) && isCondominiumOrder(o)).length;
+    const reservations = queue.filter((o) => activeStatuses.has(String(o?.status || '').toLowerCase()) && o?.type === 'reservation').length;
     const late = withAges.filter((o) => o.ageMs > PREP_SLA_MS).length;
     const cancelled = cancelledToday.length;
     const avgMs =
@@ -3415,7 +3416,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         ? withAges.reduce((acc, cur) => acc + cur.ageMs, 0) / withAges.length
         : 0;
     const oldest = withAges.reduce((acc, cur) => (cur.ageMs > acc ? cur.ageMs : acc), 0);
-    return { pending, preparing, ready, condominium, late, cancelled, avgMs, oldest };
+    return { pending, preparing, ready, condominium, reservations, late, cancelled, avgMs, oldest };
   }, [productionQueue, queue, cancelledToday, currentTime, PREP_SLA_MS]);
 
   const allActiveQueue = useMemo(() => {
@@ -3439,6 +3440,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
     if (queueFilter === 'condominium') {
       return allActiveQueue.filter((order) => isCondominiumOrder(order));
+    }
+    if (queueFilter === 'reservations') {
+      return allActiveQueue.filter((order) => order?.type === 'reservation');
     }
     if (queueFilter === 'late') {
       const now = Date.now();
@@ -4130,6 +4134,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       {[
                         { id: 'all', label: 'Todos', value: allActiveQueue.length, activeClass: 'bg-slate-800 text-white' },
                         { id: 'condominium', label: 'Condomínio', value: queueMetrics.condominium, activeClass: 'bg-emerald-500 text-white' },
+        { id: 'reservations', label: 'Reservas', value: queueMetrics.reservations, activeClass: 'bg-indigo-500 text-white' },
                         { id: 'pending', label: 'Pendentes', value: queueMetrics.pending, activeClass: 'bg-amber-500 text-white' },
                         { id: 'preparing', label: 'Em Preparação', value: queueMetrics.preparing, activeClass: 'bg-sky-500 text-white' },
                         { id: 'ready', label: 'Prontos', value: queueMetrics.ready, activeClass: 'bg-violet-500 text-white' },
