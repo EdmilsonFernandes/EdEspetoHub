@@ -40,6 +40,8 @@ export interface CreateOrderDto {
   address?: string;
   table?: string;
   type: string;
+  scheduledFor?: string | Date | null;
+  partySize?: number | null;
   fulfillmentMode?: 'distance' | 'postal' | string;
   paymentMethod?: string;
   paymentStatus?: string;

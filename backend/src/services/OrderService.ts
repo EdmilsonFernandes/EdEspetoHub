@@ -2297,6 +2297,26 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
     if (!safeAllowedTypes.includes(input.type)) {
       throw new AppError('ORDER-002', 400);
     }
+
+    // Reservation: agendamento de mesa exige horário futuro.
+    let scheduledFor: Date | null = null;
+    if (input.type === 'reservation') {
+      const raw = input.scheduledFor;
+      if (raw === undefined || raw === null || raw === '') {
+        throw new AppError('ORDER-006', 400, { message: 'Reserva exige scheduledFor.' });
+      }
+      const parsed = new Date(raw);
+      if (Number.isNaN(parsed.getTime())) {
+        throw new AppError('ORDER-006', 400, { message: 'scheduledFor inválido.' });
+      }
+      if (parsed.getTime() <= Date.now()) {
+        throw new AppError('ORDER-006', 400, { message: 'scheduledFor deve estar no futuro.' });
+      }
+      scheduledFor = parsed;
+    }
+    const partySize = input.type === 'reservation' && input.partySize !== undefined && input.partySize !== null
+      ? Number(input.partySize)
+      : null;
     // Mesa sem bloqueio: permite múltiplos pedidos ativos no mesmo número.
     const normalizedItems = Array.isArray(input.items)
       ? input.items.filter((item) => Number(item?.quantity || 0) > 0 && Boolean(item?.productId))
@@ -2387,6 +2407,8 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       address: input.address,
       table: input.table,
       type: input.type,
+      scheduledFor,
+      partySize,
       fulfillmentMode: normalizedFulfillmentMode,
       condominiumId: condominiumContext?.condominiumId || null,
       condominiumEventId: condominiumContext?.eventId || null,

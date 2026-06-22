@@ -186,6 +186,8 @@ CREATE TABLE IF NOT EXISTS orders (
   address TEXT,
   table_number TEXT,
   type TEXT NOT NULL DEFAULT 'delivery',
+  scheduled_for TIMESTAMPTZ NULL,
+  party_size INT NULL,
   status TEXT NOT NULL DEFAULT 'pending',
   payment_method TEXT,
   payment_status TEXT NOT NULL DEFAULT 'PENDING',

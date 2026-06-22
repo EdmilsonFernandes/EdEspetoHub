@@ -67,6 +67,12 @@ export class Order {
   @Column({ default: 'delivery' })
   type!: string;
 
+  @Column({ name: 'scheduled_for', type: 'timestamptz', nullable: true })
+  scheduledFor?: Date | null;
+
+  @Column({ name: 'party_size', type: 'int', nullable: true })
+  partySize?: number | null;
+
   @Column({ name: 'fulfillment_mode', default: 'distance' })
   fulfillmentMode!: string;
 
