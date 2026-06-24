@@ -16,6 +16,40 @@ export type PublicObjectReadResult = {
 export const DEFAULT_PUBLIC_UPLOAD_FOLDERS = ['products', 'logos', 'condominiums', 'destinations', 'payment'] as const;
 export const PUBLIC_UPLOAD_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 
+// Cache em memória dos bytes lidos do S3 (LRU por inserção + TTL).
+// O 1º load busca no S3 + cacheia; os seguintes servem do cache (rápido).
+// Invalida no upload (uploadPublicObjectToS3) pra imagem nova/atualizada.
+type CachedPublicObject = { result: PublicObjectReadResult; expiresAt: number };
+const publicObjectCache = new Map<string, CachedPublicObject>();
+const PUBLIC_OBJECT_CACHE_TTL_MS = 30 * 60 * 1000; // 30 min
+const PUBLIC_OBJECT_CACHE_MAX_ENTRIES = 500;
+const PUBLIC_OBJECT_CACHE_MAX_BYTES = 3 * 1024 * 1024; // não cacheia imagens > 3MB
+
+const readPublicObjectCache = (key: string): PublicObjectReadResult | null => {
+  const entry = publicObjectCache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    publicObjectCache.delete(key);
+    return null;
+  }
+  return entry.result;
+};
+
+const writePublicObjectCache = (key: string, result: PublicObjectReadResult) => {
+  const bodyLength = result.body?.length ?? 0;
+  if (bodyLength > PUBLIC_OBJECT_CACHE_MAX_BYTES) return; // pula imagens grandes
+  if (publicObjectCache.size >= PUBLIC_OBJECT_CACHE_MAX_ENTRIES) {
+    // Evicta o mais antigo (Map mantém ordem de inserção).
+    const oldestKey = publicObjectCache.keys().next().value;
+    if (oldestKey) publicObjectCache.delete(oldestKey);
+  }
+  publicObjectCache.set(key, { result, expiresAt: Date.now() + PUBLIC_OBJECT_CACHE_TTL_MS });
+};
+
+const invalidatePublicObjectCache = (key: string) => {
+  publicObjectCache.delete(key);
+};
+
 const UPLOADS_ROOT = path.join(process.cwd(), 'uploads');
 
 const normalizeFolder = (folder: string) => String(folder || '').trim().toLowerCase();
@@ -134,6 +168,8 @@ export const uploadPublicObjectToS3 = async (
       CacheControl: PUBLIC_UPLOAD_CACHE_CONTROL,
     })
   );
+  // Invalida o cache em memória pra que a imagem nova/atualizada seja servida.
+  invalidatePublicObjectCache(relativePath);
 };
 
 export const publicObjectExistsInS3 = async (relativePath: string) => {
@@ -157,6 +193,9 @@ export const publicObjectExistsInS3 = async (relativePath: string) => {
 export const getPublicObjectFromS3 = async (
   relativePath: string
 ): Promise<PublicObjectReadResult | null> => {
+  const cached = readPublicObjectCache(relativePath);
+  if (cached) return cached;
+
   ensureS3Configured();
   try {
     const response = await getS3Client().send(
@@ -168,7 +207,7 @@ export const getPublicObjectFromS3 = async (
 
     const body = response.Body ? Buffer.from(await response.Body.transformToByteArray()) : Buffer.alloc(0);
 
-    return {
+    const result: PublicObjectReadResult = {
       body,
       cacheControl: response.CacheControl,
       contentLength: response.ContentLength ? Number(response.ContentLength) : body.length,
@@ -176,6 +215,9 @@ export const getPublicObjectFromS3 = async (
       etag: response.ETag,
       lastModified: response.LastModified,
     };
+
+    writePublicObjectCache(relativePath, result);
+    return result;
   } catch (error: any) {
     if (
       error?.$metadata?.httpStatusCode === 404 ||
