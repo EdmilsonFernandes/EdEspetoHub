@@ -30,6 +30,7 @@ import { openActionTarget } from '../utils/actionLink';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
+import { Image } from '../components/common/Image';
 import { OrderTrackingActionBar } from '../components/Client/OrderTracking/OrderTrackingActionBar';
 import {
   OrderTrackingProgressCard,
@@ -1985,10 +1986,11 @@ export function OrderTracking() {
                       <div className="mt-3 rounded-2xl border border-[#d5e3ec] bg-[linear-gradient(135deg,#f9fcfe,#eef5fa)] px-4 py-3 text-sm text-stone-800 shadow-[0_18px_32px_-28px_rgba(51,104,134,0.16)]">
                         <div className="flex items-start gap-3">
                           {motoboyProfileImageUrl ? (
-                            <img
+                            <Image
                               src={motoboyProfileImageUrl}
                               alt={motoboyFirst}
                               className="h-10 w-10 rounded-2xl border border-amber-200/70 object-cover shrink-0 bg-white"
+                              eager
                             />
                           ) : (
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-amber-200/70 bg-white text-amber-800">
@@ -2343,7 +2345,7 @@ export function OrderTracking() {
                                         : 'border-slate-200 bg-white text-slate-500'
                                   }`}>
                                     {isSellerEvent ? (
-                                      <img
+                                      <Image
                                         src={storeLogo}
                                         alt={storeName}
                                         className="h-full w-full object-cover"
@@ -2356,7 +2358,7 @@ export function OrderTracking() {
                                         }}
                                       />
                                     ) : isSystemEvent ? (
-                                      <img
+                                      <Image
                                         src="/janocaminho.jpg"
                                         alt="Já no Caminho"
                                         className="h-full w-full object-cover"
@@ -2426,7 +2428,7 @@ export function OrderTracking() {
                         <div key={item.id || item.productId} className="flex items-start gap-3 rounded-2xl border border-[#dce9f1] bg-white/92 px-3 py-3 shadow-[0_12px_24px_-24px_rgba(51,104,134,0.12)]">
                         {/* Imagem */}
                         {item.imageUrl || item.image || item.product?.imageUrl ? (
-                          <img
+                          <Image
                             src={resolveAssetUrl(item.imageUrl || item.image || item.product?.imageUrl)}
                             alt={item.name}
                             className="h-10 w-10 shrink-0 rounded-xl border border-[#dce9f1] object-cover"
@@ -2721,7 +2723,7 @@ export function OrderTracking() {
                             <>
                               <div className="mt-4 flex items-center justify-center">
                                 <div className="overflow-hidden rounded-2xl border-4 border-white bg-white p-2 shadow-[0_12px_32px_-16px_rgba(120,53,15,0.25)]">
-                                  <img
+                                  <Image
                                     src={pixQrUrl}
                                     alt="QR Code Pix"
                                     className="h-40 w-40 object-contain"

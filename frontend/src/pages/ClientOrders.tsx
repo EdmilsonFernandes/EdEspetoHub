@@ -37,6 +37,7 @@ import { getPostalExpectedDeliveryDeadlineMs, isPostalShipmentDelayed, isPostalS
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
+import { Image } from '../components/common/Image';
 import { textareaAssistProps } from '../utils/inputAssist';
 
 const TERMINAL_STATUSES = [ 'DELIVERED', 'CANCELLED', 'FINISHED', 'REJECTED', 'DONE' ];
@@ -782,7 +783,7 @@ function OrderCard({
           className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-slate-100 transition-transform active:scale-95 ${isActive ? 'ring-2 ring-emerald-400' : ''}`}
         >
           {logoUrl ? (
-            <img src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
+            <Image src={logoUrl} alt={storeName} className="h-full w-full object-cover" eager />
           ) : (
             <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
               {getStoreInitials(storeName)}
@@ -849,7 +850,7 @@ function OrderCard({
           {thumbnails.length > 0 && (
             <div className="mt-1.5 flex justify-end">
               {thumbnails.map((src, index) => (
-                <img key={`${order.id}-th-${index}`} src={src} alt="" className={`h-8 w-8 rounded-full border-2 border-white object-cover shadow-sm ${index > 0 ? '-ml-2' : ''}`} />
+                <Image key={`${order.id}-th-${index}`} src={src} alt="" className={`h-8 w-8 rounded-full border-2 border-white object-cover shadow-sm ${index > 0 ? '-ml-2' : ''}`} />
               ))}
             </div>
           )}
@@ -912,7 +913,7 @@ function OrderCard({
                   <span className="block truncate text-[13px] font-medium text-slate-800">{primaryItem.name || 'Item do pedido'}</span>
                 </div>
                 {primaryItemImageUrl ? (
-                  <img src={primaryItemImageUrl} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+                  <Image src={primaryItemImageUrl} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />
                 ) : null}
               </div>
               {extraItems > 0 ? (
@@ -952,7 +953,7 @@ function OrderCard({
             <div className="flex items-center gap-2 border-t border-slate-100 bg-slate-50 px-3 py-2">
               <div className="h-6 w-6 shrink-0 overflow-hidden rounded-full border border-white shadow-sm">
                 {details.delivery.motoboy.profileImageUrl ? (
-                  <img src={resolveAssetUrl(details.delivery.motoboy.profileImageUrl)} alt={details.delivery.motoboy.name} className="h-full w-full object-cover" />
+                  <Image src={resolveAssetUrl(details.delivery.motoboy.profileImageUrl)} alt={details.delivery.motoboy.name} className="h-full w-full object-cover" />
                 ) : (
                   <div className="grid h-full w-full place-items-center bg-slate-200 text-[10px] font-bold text-slate-600">
                     {String(details.delivery.motoboy.name)[0]?.toUpperCase()}
@@ -1135,7 +1136,7 @@ function OrderHelpScreen({
           </button>
           <div className="flex flex-col items-center gap-0.5">
             <div className="flex items-center gap-1.5">
-              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.5rem] object-cover shadow-sm ring-1 ring-slate-200" />
+              <Image src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.5rem] object-cover shadow-sm ring-1 ring-slate-200" />
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#336886]">Atendimento</p>
             </div>
             <h1 className="text-[15px] font-semibold text-stone-950">Ajuda com pedido</h1>
@@ -1148,7 +1149,7 @@ function OrderHelpScreen({
             <div className="flex items-start gap-3">
               <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.2rem] border border-[#cfe0ea] bg-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.22)]">
                 {logoUrl ? (
-                  <img src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
+                  <Image src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
                 ) : (
                   <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
                     {getStoreInitials(storeName)}
@@ -1189,7 +1190,7 @@ function OrderHelpScreen({
           <div className="mt-4 rounded-[26px] border border-[#dbe7ef] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] p-4 shadow-[0_18px_40px_-32px_rgba(51,104,134,0.18)]">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#cfe0ea] bg-white shadow-[0_14px_28px_-22px_rgba(51,104,134,0.22)]">
-                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
+                <Image src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
               </div>
               <div>
                 <p className="text-sm font-black text-stone-950">Como funciona o atendimento</p>
@@ -1749,7 +1750,7 @@ export function ClientOrders() {
                   aria-label={`Abrir ${lastOrderStoreName}`}
                 >
                   {lastOrderLogoUrl ? (
-                    <img src={lastOrderLogoUrl} alt={lastOrderStoreName} className="h-full w-full object-cover" />
+                    <Image src={lastOrderLogoUrl} alt={lastOrderStoreName} className="h-full w-full object-cover" />
                   ) : (
                     <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
                       {getStoreInitials(lastOrderStoreName)}
@@ -1815,7 +1816,7 @@ export function ClientOrders() {
                   >
                     <span className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-white shadow-sm transition-transform group-active:scale-95">
                       {store.logoUrl ? (
-                        <img src={store.logoUrl} alt={store.name} className="h-full w-full object-cover" />
+                        <Image src={store.logoUrl} alt={store.name} className="h-full w-full object-cover" />
                       ) : (
                         <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
                           {getStoreInitials(store.name)}
