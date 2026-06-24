@@ -1,44 +1,45 @@
 /**
- * Backfill: otimiza as imagens JÁ enviadas no S3 (resize + compressão com sharp).
+ * Backfill: otimiza as imagens JÁ enviadas (resize + compressão com sharp).
  *
- * Lista os objetos públicos, baixa cada imagem, otimiza (optimizeImageBuffer) e
- * re-envia SOMENTE se a versão otimizada for menor (idempotente: já otimizadas
- * são puladas). Pula svg/gif/pdf e erros individuais.
+ * Percorre as pastas públicas de upload (LOCAL), lê cada imagem, otimiza e
+ * sobrescreve SOMENTE se a versão otimizada for menor (idempotente). Se o S3
+ * estiver configurado (híbrido/s3), re-envia também pro S3. Pula svg/gif/pdf.
  *
- * Como rodar (no EC2, dentro de backend/ com o .env de prod):
- *   1) DRY-RUN primeiro pra conferer os tamanhos:
- *        OPTIMIZE_DRY_RUN=true npm run uploads:public:optimize
- *   2) Pra valer:
- *        npm run uploads:public:optimize
+ * Como rodar (no EC2, dentro de backend/):
+ *   1) DRY-RUN:  OPTIMIZE_DRY_RUN=true npm run uploads:public:optimize
+ *   2) Pra valer: npm run uploads:public:optimize
  */
+import fs from 'fs/promises';
+import path from 'path';
 import { env } from '../config/env';
 import {
-  getPublicObjectFromS3,
-  isPublicUploadPath,
-  listPublicUploadRelativePaths,
+  inferContentTypeFromFilename,
+  resolveLocalUploadDir,
+  resolveUploadRelativePath,
+  shouldWritePublicUploadToS3,
   uploadPublicObjectToS3,
 } from '../utils/objectStorage';
 import { optimizeImageBuffer } from '../utils/imageStorage';
 
 const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
+const extOf = (absolutePath: string) => (path.extname(absolutePath).slice(1) || '').toLowerCase();
 
-const extOf = (p: string) => (p.split('.').pop() || '').toLowerCase();
-const folderOf = (p: string) => {
-  const match = p.match(/^\/uploads\/([^/]+)\//i);
-  return match?.[1] || '';
+const walkFiles = async (dir: string): Promise<string[]> => {
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  const nested = await Promise.all(
+    entries.map(async (entry) => {
+      const absolutePath = path.join(dir, entry.name);
+      return entry.isDirectory() ? walkFiles(absolutePath) : [absolutePath];
+    })
+  );
+  return nested.flat();
 };
 
 async function main() {
   const dryRun = process.env.OPTIMIZE_DRY_RUN === 'true';
+  const s3Configured = Boolean(env.storage.publicUploadsS3Bucket && env.storage.publicUploadsS3Region);
 
-  if (!env.storage.publicUploadsS3Bucket || !env.storage.publicUploadsS3Region) {
-    throw new Error('PUBLIC_UPLOADS_S3_BUCKET e PUBLIC_UPLOADS_S3_REGION são obrigatórios.');
-  }
-
-  console.log('[optimize-uploads] listando objetos no S3...');
-  const all = await listPublicUploadRelativePaths();
-  const paths = all.filter((p) => isPublicUploadPath(p) && IMAGE_EXTENSIONS.has(extOf(p)));
-  console.log(`[optimize-uploads] ${all.length} objetos, ${paths.length} imagens candidatas. dryRun=${dryRun}`);
+  console.log(`[optimize-uploads] iniciando. dryRun=${dryRun} s3Configured=${s3Configured}`);
 
   let optimized = 0;
   let skipped = 0;
@@ -46,38 +47,53 @@ async function main() {
   let bytesBefore = 0;
   let bytesAfter = 0;
 
-  for (const relativePath of paths) {
+  for (const folder of env.storage.publicFolders) {
+    const folderDir = resolveLocalUploadDir(folder);
+    let files: string[] = [];
     try {
-      const obj = await getPublicObjectFromS3(relativePath);
-      if (!obj) {
-        skipped += 1;
-        continue;
-      }
-      const folder = folderOf(relativePath);
-      const optimizedBuf = await optimizeImageBuffer(obj.body, folder, extOf(relativePath));
-      bytesBefore += obj.body.length;
-      bytesAfter += optimizedBuf.length;
-
-      // Idempotente: só re-envia se reduziu de fato.
-      if (optimizedBuf.length >= obj.body.length) {
-        skipped += 1;
-        continue;
-      }
-
-      if (dryRun) {
-        console.log(`[dry-run] ${relativePath}: ${obj.body.length} -> ${optimizedBuf.length} bytes`);
-        optimized += 1;
-        continue;
-      }
-
-      await uploadPublicObjectToS3(relativePath, optimizedBuf, obj.contentType || undefined);
-      optimized += 1;
-      if (optimized % 25 === 0) {
-        console.log(`[optimize-uploads] progresso ${optimized}/${paths.length}...`);
-      }
+      files = await walkFiles(folderDir);
     } catch (error: any) {
-      errors += 1;
-      console.warn(`[optimize-uploads] erro em ${relativePath}: ${error?.message || error}`);
+      if (error?.code === 'ENOENT') {
+        continue;
+      }
+      throw error;
+    }
+
+    for (const absolutePath of files) {
+      const ext = extOf(absolutePath);
+      if (!IMAGE_EXTENSIONS.has(ext)) continue;
+      try {
+        const original = await fs.readFile(absolutePath);
+        const optimizedBuf = await optimizeImageBuffer(original, folder, ext);
+        bytesBefore += original.length;
+        bytesAfter += optimizedBuf.length;
+
+        // Idempotente: só sobrescreve se reduziu.
+        if (optimizedBuf.length >= original.length) {
+          skipped += 1;
+          continue;
+        }
+
+        if (dryRun) {
+          console.log(`[dry-run] ${absolutePath}: ${original.length} -> ${optimizedBuf.length} bytes`);
+          optimized += 1;
+          continue;
+        }
+
+        await fs.writeFile(absolutePath, optimizedBuf);
+        if (s3Configured && shouldWritePublicUploadToS3(folder)) {
+          const relativeWithinFolder = path.relative(folderDir, absolutePath).split(path.sep).join('/');
+          const relativePath = resolveUploadRelativePath(folder, relativeWithinFolder);
+          await uploadPublicObjectToS3(relativePath, optimizedBuf, inferContentTypeFromFilename(absolutePath));
+        }
+        optimized += 1;
+        if (optimized % 25 === 0) {
+          console.log(`[optimize-uploads] progresso ${optimized}...`);
+        }
+      } catch (error: any) {
+        errors += 1;
+        console.warn(`[optimize-uploads] erro em ${absolutePath}: ${error?.message || error}`);
+      }
     }
   }
 
