@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Capacitor } from '@capacitor/core';
 import { AppVersionBadge } from '../components/common/AppVersionBadge';

@@ -1,5 +1,3 @@
-// @ts-nocheck
-import React from 'react';
 import { ClockCounterClockwise, CreditCard, ShieldCheck, WarningCircle, Code } from '@phosphor-icons/react';
 import { formatCurrency, formatDateTime } from '../../utils/format';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../../utils/paymentAssets';
@@ -37,7 +35,7 @@ export function PaymentAuditPanel({
   showTechnicalButton = false,
   technicalLoading = false,
   onTechnicalClick,
-}) {
+}: any) {
   if (!summary) return null;
 
   const paymentMethodMeta = getPaymentMethodMeta(summary?.paymentMethod || summary?.providerStatus || '');

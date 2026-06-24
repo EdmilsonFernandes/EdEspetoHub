@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { CaretDown } from '@phosphor-icons/react';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanFeatureBenefit, getPlanFeatureLabel } from '../constants/planCatalog';
 import { formatCurrency, formatDate } from '../utils/format';
@@ -44,14 +43,14 @@ const resolvePlanDetails = (planName = '') => {
   };
 };
 
-export const PlanBadge = ({ planName, displayName, variant = 'light', details }) => {
+export const PlanBadge = ({ planName, displayName, variant = 'light', details }: any) => {
   const [isOpen, setIsOpen] = useState(false);
-  const detailsRef = useRef(null);
+  const detailsRef = useRef<any>(null);
 
   const planDetails = resolvePlanDetails(planName);
   const styleKey = planDetails?.tierKey || 'basic';
-  const style = PLAN_STYLES[styleKey];
-  const billing = planDetails?.billingKey ? BILLING_OPTIONS[planDetails.billingKey] : null;
+  const style = PLAN_STYLES[styleKey as keyof typeof PLAN_STYLES];
+  const billing: any = planDetails?.billingKey ? BILLING_OPTIONS[planDetails.billingKey as keyof typeof BILLING_OPTIONS] : null;
   const isVip = Boolean(details?.planExempt);
   const subscriptionStatus = String(details?.status || '').toUpperCase();
   const isFounderVipTrial = Boolean(details?.founderVipPromotion?.applied && subscriptionStatus === 'TRIAL' && !isVip);
@@ -65,7 +64,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
 
   // Handle click outside to close dropdown
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: any) => {
       if (detailsRef.current && !detailsRef.current.contains(event.target)) {
         setIsOpen(false);
       }
