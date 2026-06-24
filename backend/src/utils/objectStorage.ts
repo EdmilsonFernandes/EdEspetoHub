@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, HeadObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { env } from '../config/env';
 
 export type PublicUploadsStorageMode = 'local' | 'hybrid' | 's3';
@@ -188,6 +188,37 @@ export const publicObjectExistsInS3 = async (relativePath: string) => {
     }
     throw error;
   }
+};
+
+/**
+ * Lista os relativePaths (/uploads/...) de todos os objetos públicos no S3.
+ * Usado pelo backfill de otimização de imagens existentes.
+ */
+export const listPublicUploadRelativePaths = async (): Promise<string[]> => {
+  ensureS3Configured();
+  const client = getS3Client();
+  const bucket = env.storage.publicUploadsS3Bucket;
+  const prefix = normalizeS3KeyPrefix(env.storage.publicUploadsS3Prefix);
+  const s3Prefix = prefix ? `${prefix}/` : '';
+  const relativePaths: string[] = [];
+  let continuationToken: string | undefined;
+  do {
+    const response: any = await client.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: s3Prefix,
+        ContinuationToken: continuationToken,
+      })
+    );
+    for (const obj of response?.Contents || []) {
+      if (!obj?.Key) continue;
+      const uploadsRelative =
+        s3Prefix && String(obj.Key).startsWith(s3Prefix) ? String(obj.Key).slice(s3Prefix.length) : String(obj.Key);
+      relativePaths.push(`/uploads/${uploadsRelative}`);
+    }
+    continuationToken = response?.IsTruncated ? response?.NextContinuationToken : undefined;
+  } while (continuationToken);
+  return relativePaths;
 };
 
 export const getPublicObjectFromS3 = async (

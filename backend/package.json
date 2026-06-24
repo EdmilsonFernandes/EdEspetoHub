@@ -14,6 +14,7 @@
     "docs:schema": "ts-node src/scripts/generateSchemaDocs.ts",
     "backfill:customer-addresses": "ts-node src/scripts/backfillCustomerAddressCoordinates.ts",
     "uploads:public:mirror": "ts-node src/scripts/mirrorPublicUploadsToS3.ts",
+    "uploads:public:optimize": "ts-node src/scripts/optimizeExistingUploads.ts",
     "seed:home-config": "ts-node src/scripts/seedHomeConfigFromMarketingAssets.ts",
     "seed:condominium:azuli": "ts-node src/scripts/seedCondominiumAzuli.ts",
     "seed:destination:sao-bento": "ts-node src/scripts/seedSaoBentoTourismMap.ts",
