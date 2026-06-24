@@ -5,6 +5,7 @@ import { Heart, Star, Storefront } from '@phosphor-icons/react';
 import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
 import { prefetchRouteByPath } from '../../../utils/clientRoutePrefetch';
 import { prefetchStorefrontData } from '../../../utils/storefrontPrefetch';
+import { Image } from '../../common/Image';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 18, scale: 0.97 },
@@ -126,7 +127,8 @@ export function HubStoreCard({
       >
         <div className="relative">
           <div className="relative h-[56px] overflow-hidden rounded-t-[1.45rem] bg-slate-100">
-            <img
+            <Image
+              eager
               src={store.banner || store.logo}
               alt={store.name}
               loading="lazy"
@@ -162,7 +164,7 @@ export function HubStoreCard({
         </div>
         <div className="px-3 pb-3 pt-3">
           <div className="flex min-w-0 items-start gap-2">
-            <img
+            <Image
               src={store.logo}
               alt=""
               loading="lazy"
@@ -235,7 +237,7 @@ export function HubStoreCard({
       }`}
     >
       <div className="relative h-[4.55rem] w-[4.55rem] shrink-0 overflow-hidden rounded-[1.08rem] bg-white shadow-[0_16px_32px_-28px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/70">
-        <img
+        <Image
           src={store.logo}
           alt=""
           loading="lazy"

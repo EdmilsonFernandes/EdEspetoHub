@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from '@phosphor-icons/react';
 import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
+import { Image } from '../../common/Image';
 
 export type HubFavoriteStore = {
   id: string | number;
@@ -68,7 +69,7 @@ export const HubFavoriteStores = memo(function HubFavoriteStores({
               state={{ storefrontMode: 'customer' }}
               className="jnc-hub-touch jnc-hub-lift jnc-hub-card group min-w-[168px] rounded-[1.45rem] p-2 sm:min-w-[186px]"
             >
-              <img
+              <Image
                 src={store.banner || store.logo || getStoreAvatarUrl(store.slug, store.name)}
                 alt={store.name}
                 loading="lazy"

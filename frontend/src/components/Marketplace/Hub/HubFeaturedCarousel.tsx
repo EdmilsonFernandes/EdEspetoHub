@@ -5,6 +5,7 @@ import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
 import { prefetchRouteByPath } from '../../../utils/clientRoutePrefetch';
 import { prefetchStorefrontData } from '../../../utils/storefrontPrefetch';
 import { HubPremiumCarousel } from './HubPremiumCarousel';
+import { Image } from '../../common/Image';
 
 export type HubFeaturedCarouselItem = {
   id: string;
@@ -148,7 +149,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                     <div className={`relative shrink-0 overflow-hidden bg-slate-100 shadow-[0_20px_38px_-32px_rgba(15,23,42,0.30)] ring-1 ring-white/80 ${
                       isLead ? 'h-[110px] w-[110px] rounded-[1.35rem]' : 'h-[92px] w-[92px] rounded-[1.2rem]'
                     }`}>
-                      <img
+                      <Image
                         src={item.imageUrl}
                         alt={item.name}
                         loading={index < 2 ? 'eager' : 'lazy'}
@@ -181,7 +182,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                       <div className={`absolute bottom-1 right-1 z-20 overflow-hidden rounded-full border-2 border-white bg-white shadow-[0_8px_16px_-10px_rgba(15,23,42,0.36)] ${
                         isLead ? 'h-7 w-7' : 'h-6 w-6'
                       }`}>
-                        <img
+                        <Image
                           src={item.storeLogo || getStoreAvatarUrl(item.storeSlug, item.storeName)}
                           alt={item.storeName}
                           loading="lazy"

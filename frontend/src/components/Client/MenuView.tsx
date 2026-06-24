@@ -35,6 +35,7 @@ import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { inputAssistProps } from "../../utils/inputAssist";
+import { Image } from "../common/Image";
 import { ProductModal } from "../Cart/ProductModal";
 import { StoreMapView } from "../StoreMapView";
 import { PlatformTrustFooter } from "../common/PlatformTrustFooter";
@@ -339,14 +340,15 @@ const Header = ({
             >
               {headerBanner ? (
                 <>
-                  <img
+                  <Image
+                    eager
                     src={headerBanner}
                     alt=""
                     aria-hidden="true"
                     className="absolute inset-[-22px] h-[calc(100%+44px)] w-[calc(100%+44px)] scale-110 object-cover opacity-95 blur-md saturate-125"
                     onError={(event) => { event.currentTarget.style.display = "none"; }}
                   />
-                  <img
+                  <Image
                     src={headerBanner}
                     alt={branding?.brandName ? `Banner de ${branding.brandName}` : "Banner da loja"}
                     className="absolute inset-0 h-full w-full object-contain p-2 drop-shadow-[0_20px_34px_rgba(15,23,42,0.28)] sm:p-3"
@@ -400,7 +402,7 @@ const Header = ({
           <div className={`relative z-10 -mt-24 sm:-mt-36 mx-0 rounded-t-[36px] sm:rounded-t-[44px] bg-white px-5 sm:px-6 pb-7 pt-12 shadow-[0_28px_60px_-28px_rgba(15,23,42,0.28)] ring-1 ring-black/5 ${compact && mobileCollapsedStable ? "hidden" : ""}`}>
             <div className="absolute -top-20 left-1/2 -translate-x-1/2 h-28 w-28 sm:h-36 sm:w-36 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl ring-1 ring-black/5 flex items-center justify-center">
               {branding?.logoUrl ? (
-                <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
+                <Image src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
               ) : (
                 <span className="font-black text-xl text-slate-700">{previewInitials || "JC"}</span>
               )}
@@ -1368,7 +1370,7 @@ export const MenuView = ({
                     <div className="flex items-center gap-3">
                       <div className="aspect-square w-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] text-slate-400">
                         {item.imageUrl ? (
-                          <img src={resolveAssetUrl(item.imageUrl)} alt={item.name} className="w-full h-full object-cover" />
+                          <Image src={resolveAssetUrl(item.imageUrl)} alt={item.name} className="w-full h-full object-cover" />
                         ) : (
                           "🍖"
                         )}
@@ -1398,7 +1400,7 @@ export const MenuView = ({
               <div className="flex min-w-0 flex-1 items-center gap-4">
                 <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[1.2rem] border border-white/80 bg-white shadow-[0_16px_28px_-20px_rgba(15,23,42,0.32)] ring-1 ring-slate-100 sm:h-[4.25rem] sm:w-[4.25rem]">
                   {featuredProduct.imageUrl ? (
-                    <img
+                    <Image
                       src={resolveAssetUrl(featuredProduct.imageUrl)}
                       alt={featuredProduct.name}
                       className="h-full w-full object-cover"
@@ -1659,7 +1661,7 @@ export const MenuView = ({
                         className={`h-full w-full rounded-2xl overflow-hidden bg-slate-50 border border-white shadow-[0_12px_24px_-16px_rgba(15,23,42,0.3)] ring-1 ring-slate-100/50 ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
                       >
                         {item.imageUrl ? (
-                          <img
+                          <Image
                             src={resolveAssetUrl(item.imageUrl)}
                             alt={item.name}
                             loading="lazy"
@@ -1849,14 +1851,14 @@ export const MenuView = ({
                 >
                   {resolveAssetUrl(branding?.bannerUrl || "") ? (
                     <>
-                      <img
+                      <Image
                         src={resolveAssetUrl(branding?.bannerUrl || "")}
                         alt=""
                         aria-hidden="true"
                         className="absolute inset-[-22px] h-[calc(100%+44px)] w-[calc(100%+44px)] scale-110 object-cover opacity-95 blur-md saturate-125"
                         onError={(event) => { event.currentTarget.style.display = "none"; }}
                       />
-                      <img
+                      <Image
                         src={resolveAssetUrl(branding?.bannerUrl || "")}
                         alt={branding?.brandName ? `Banner de ${branding.brandName}` : "Banner da loja"}
                         className="absolute inset-0 h-full w-full object-contain p-2 drop-shadow-[0_18px_30px_rgba(15,23,42,0.3)]"
@@ -1871,7 +1873,7 @@ export const MenuView = ({
                   <div className="flex items-start gap-4 pt-4">
                     <div className="-mt-10 shrink-0 h-20 w-20 overflow-hidden rounded-[24px] border-4 border-white bg-white shadow-lg">
                     {branding?.logoUrl ? (
-                      <img src={branding.logoUrl} alt={branding?.brandName} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
+                      <Image src={branding.logoUrl} alt={branding?.brandName} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(branding?.espetoId, branding?.brandName); }} />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-xl font-black text-slate-700">
                         {String(branding?.brandName || "JC").slice(0, 2).toUpperCase()}
@@ -2121,7 +2123,7 @@ export const MenuView = ({
             }}
           >
             {fly.imageUrl ? (
-              <img src={fly.imageUrl} alt="" className="h-full w-full object-cover" />
+              <Image src={fly.imageUrl} alt="" className="h-full w-full object-cover" />
             ) : (
               <div className="h-full w-full flex items-center justify-center" style={{ color: catalogPrimaryText }}>
                 <Plus size={12} weight="bold" />
