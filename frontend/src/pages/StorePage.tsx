@@ -22,6 +22,7 @@ import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
 import { StoreAppPromoBanner } from '../components/common/StoreAppPromoBanner';
+import { Image } from '../components/common/Image';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
@@ -3905,7 +3906,7 @@ export function StorePage() {
             <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-[1.1rem] border border-white bg-white shadow-[0_14px_28px_-22px_rgba(15,23,42,0.45)] ring-1 ring-slate-100">
-                  <img
+                  <Image
                     src={storefrontWebContextLogo}
                     alt={storefrontWebContextStoreName}
                     className="h-full w-full object-cover"
@@ -3999,10 +4000,11 @@ export function StorePage() {
             style={{ borderColor: branding?.primaryColor, color: branding?.primaryColor }}
           >
             {branding?.logoUrl ? (
-              <img 
-                src={branding.logoUrl} 
-                alt={branding.brandName} 
-                className="w-full h-full object-cover" 
+              <Image
+                src={branding.logoUrl}
+                alt={branding.brandName}
+                className="w-full h-full object-cover"
+                eager
                 onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
               />
             ) : (
@@ -4195,17 +4197,18 @@ export function StorePage() {
                   <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.92)_0%,rgba(241,247,246,0.9)_54%,rgba(255,255,255,0.94)_100%)] shadow-[0_26px_60px_-38px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
                     <div className="relative h-40 overflow-hidden sm:h-48">
                       <div className="absolute inset-0 bg-[#153A4C]">
-                        <img
+                        <Image
                           src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.jpg'}
                           alt=""
                           aria-hidden="true"
                           className="absolute inset-[-22px] h-[calc(100%+44px)] w-[calc(100%+44px)] scale-110 object-cover opacity-95 blur-md saturate-125"
                           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                         />
-                        <img
+                        <Image
                           src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.jpg'}
                           alt={closedStateStoreName}
                           className="relative h-full w-full object-contain p-2 drop-shadow-[0_20px_34px_rgba(15,23,42,0.32)] sm:p-3"
+                          eager
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
                         />
                       </div>
@@ -4213,7 +4216,7 @@ export function StorePage() {
                       <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
                         <div className="flex items-end gap-4">
                           <div className="h-18 w-18 shrink-0 overflow-hidden rounded-[1.35rem] border border-white/65 bg-white/90 shadow-[0_16px_30px_-18px_rgba(15,23,42,0.45)] sm:h-20 sm:w-20">
-                            <img
+                            <Image
                               src={branding?.logoUrl || '/janocaminho.jpg'}
                               alt={closedStateStoreName}
                               className="h-full w-full object-cover"
@@ -4646,7 +4649,7 @@ export function StorePage() {
           subtitle={[adminRoleLabel, adminOperatorName || null, adminOperatorEmail || null].filter(Boolean).join(' · ') || 'Acesso da operação neste aparelho'}
           leading={
             adminStoreLogo ? (
-              <img
+              <Image
                 src={adminStoreLogo}
                 alt={adminStoreName}
                 className="h-10 w-10 rounded-[0.95rem] bg-white object-contain p-1"

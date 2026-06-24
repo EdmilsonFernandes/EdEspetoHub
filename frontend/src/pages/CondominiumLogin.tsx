@@ -1,14 +1,11 @@
-// @ts-nocheck
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Capacitor } from '@capacitor/core';
 import { ArrowLeft, Buildings, Eye, EyeSlash, LockKey, ShieldCheck } from '@phosphor-icons/react';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { authService } from '../services/authService';
 import { inputAssistProps } from '../utils/inputAssist';
 
 export function CondominiumLogin() {
-  const isNativePlatform = Capacitor.isNativePlatform();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);

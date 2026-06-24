@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { CheckCircle, Info, WarningCircle, X, XCircle } from '@phosphor-icons/react';
 import { normalizeUserFacingError } from '../utils/userFriendlyErrors';

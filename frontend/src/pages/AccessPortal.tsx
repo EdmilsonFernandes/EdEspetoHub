@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ArrowLeft, ArrowRight, Buildings, Scooter, Storefront, UserCircle } from '@phosphor-icons/react';
 import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
