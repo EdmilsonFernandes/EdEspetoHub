@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Clock, Monitor } from "@phosphor-icons/react";
 import { formatCurrency } from "../../../utils/format";
 import { getTableStageMeta } from "./helpers";

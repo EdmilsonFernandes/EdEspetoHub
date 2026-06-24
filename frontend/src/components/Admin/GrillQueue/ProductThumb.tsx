@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Package } from "@phosphor-icons/react";
 import { resolveAssetUrl } from "../../../utils/resolveAssetUrl";
 

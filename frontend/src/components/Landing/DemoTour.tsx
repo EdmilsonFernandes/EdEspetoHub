@@ -1,5 +1,4 @@
-﻿// @ts-nocheck
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChefHat, ClipboardText, ShoppingCart } from '@phosphor-icons/react';
 

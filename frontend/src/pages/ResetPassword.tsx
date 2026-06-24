@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { AuthLayout } from '../layouts/AuthLayout';
@@ -25,7 +24,7 @@ export function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: any) => {
     event.preventDefault();
     setError('');
     setMessage('');
@@ -48,7 +47,7 @@ export function ResetPassword() {
       setPassword('');
       setConfirm('');
       setTimeout(() => navigate(loginPath), 3000);
-    } catch (err) {
+    } catch (err: any) {
       setError(err?.message || 'Não foi possível atualizar a senha agora.');
     } finally {
       setLoading(false);
