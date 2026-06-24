@@ -551,10 +551,6 @@ export function DestinationDetailPage() {
                       </p>
                     ) : null}
                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">
-                        <Sparkle size={13} weight="duotone" />
-                        Base da viagem
-                      </span>
                       {placeWhatsAppHref ? (
                         <a
                           href={placeWhatsAppHref}
