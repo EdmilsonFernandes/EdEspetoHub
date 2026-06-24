@@ -15,6 +15,7 @@ import {
 } from '@phosphor-icons/react';
 import { RouteMapView } from '../RouteMapView';
 import { buildWhatsAppUrl } from '../../utils/destinationWhatsApp';
+import { hasCoords, toCoords, isApproximatePoint } from '../../utils/geo';
 
 type RoutePoint = {
   name: string;
@@ -36,23 +37,6 @@ type Props = {
   serviceWhatsapp?: string;
   routeUrl: string;
 };
-
-const normalizeCoordinate = (value?: string | number | null) => {
-  if (value === null || value === undefined || value === '') return null;
-  const parsed = Number(String(value).replace(',', '.'));
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const hasCoords = (point: any) =>
-  normalizeCoordinate(point?.lat) !== null && normalizeCoordinate(point?.lng) !== null;
-
-const toCoords = (point: any) => ({
-  lat: Number(normalizeCoordinate(point?.lat)),
-  lng: Number(normalizeCoordinate(point?.lng)),
-});
-
-const isApproximatePoint = (point: any) =>
-  Boolean(point?.geoApproximate || ['zip', 'city', 'unknown'].includes(String(point?.geoPrecision || '').toLowerCase()));
 
 const mapPointQuery = (point: any) => {
   const address = String(point?.routeAddress || point?.address || '').trim();

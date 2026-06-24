@@ -5,6 +5,9 @@
 
 @theme {
   --color-primary: #2f9df7;
+  --color-brand-teal: #336886;
+  --color-brand-navy: #153a4c;
+  --color-brand-green: #5fd35a;
 }
 
 :root {

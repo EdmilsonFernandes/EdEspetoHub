@@ -10,37 +10,11 @@ import { Chip, SurfaceCard } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { mapsService } from '../services/mapsService';
 import { buildDestinationAddressLine, buildDestinationRouteAddressLine, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
+import { hasCoords, haversineKm, isApproximatePoint, normalizeCoordinate, toCoords } from '../utils/geo';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 
-const normalizeCoordinate = (value?: string | number | null) => {
-  if (value === null || value === undefined || value === '') return null;
-  const parsed = Number(String(value).replace(',', '.'));
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const hasCoords = (point: any) => normalizeCoordinate(point?.lat) !== null && normalizeCoordinate(point?.lng) !== null;
-
-const toCoords = (point: any) => ({
-  lat: Number(normalizeCoordinate(point?.lat)),
-  lng: Number(normalizeCoordinate(point?.lng)),
-});
-
-const haversineKm = (origin: any, destination: any) => {
-  if (!hasCoords(origin) || !hasCoords(destination)) return null;
-  const toRad = (value: number) => (value * Math.PI) / 180;
-  const earthRadiusKm = 6371;
-  const a = toCoords(origin);
-  const b = toCoords(destination);
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-  const lat1 = toRad(a.lat);
-  const lat2 = toRad(b.lat);
-  const x = Math.sin(dLat / 2) ** 2 + Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
-  return earthRadiusKm * (2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)));
-};
-
-const isApproximatePoint = (point: any) => Boolean(point?.geoApproximate || ['zip', 'city', 'unknown'].includes(String(point?.geoPrecision || '').toLowerCase()));
+// Geo helpers (normalizeCoordinate, hasCoords, toCoords, haversineKm, isApproximatePoint) importados de ../utils/geo.
 
 const mapPointQuery = (point: any) => {
   const address = String(point?.routeAddress || point?.address || '').trim();

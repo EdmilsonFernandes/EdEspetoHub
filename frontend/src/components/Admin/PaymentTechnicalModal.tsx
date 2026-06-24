@@ -1,5 +1,3 @@
-// @ts-nocheck
-import React from 'react';
 import { X } from '@phosphor-icons/react';
 import { formatDateTime } from '../../utils/format';
 
@@ -12,7 +10,7 @@ const renderJson = (value: any) => {
   }
 };
 
-export function PaymentTechnicalModal({ open, title, audit, onClose }) {
+export function PaymentTechnicalModal({ open, title, audit, onClose }: any) {
   if (!open) return null;
   const summary = audit?.summary || null;
   const technical = audit?.technical || null;

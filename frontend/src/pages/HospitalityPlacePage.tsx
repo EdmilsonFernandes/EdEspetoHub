@@ -14,6 +14,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatCurrency } from '../utils/format';
 import { getStoreAvatarUrl } from '../utils/storeAvatar';
 import { buildDestinationAddressLine, buildDestinationInquiryMessage, buildDestinationRouteAddressLine, buildHospitalityServiceRouteUrl, buildPhoneCallUrl, buildWhatsAppUrl } from '../utils/destinationWhatsApp';
+import { haversineKm } from '../utils/geo';
 import { openActionTarget } from '../utils/actionLink';
 import { buildListingClaimUrl } from '../utils/destinationListingClaim';
 import { prefetchRouteByPath } from '../utils/clientRoutePrefetch';
@@ -132,27 +133,7 @@ const categoryLabel = (value?: string | null) => {
   return 'Serviço';
 };
 
-const normalizeCoordinate = (value: any) => {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-};
-
-const haversineDistanceKm = (origin: any, destination: any) => {
-  const originLat = normalizeCoordinate(origin?.lat);
-  const originLng = normalizeCoordinate(origin?.lng);
-  const destinationLat = normalizeCoordinate(destination?.lat);
-  const destinationLng = normalizeCoordinate(destination?.lng);
-  if (originLat == null || originLng == null || destinationLat == null || destinationLng == null) return null;
-
-  const earthRadiusKm = 6371;
-  const toRad = (value: number) => (value * Math.PI) / 180;
-  const deltaLat = toRad(destinationLat - originLat);
-  const deltaLng = toRad(destinationLng - originLng);
-  const a =
-    Math.sin(deltaLat / 2) ** 2 +
-    Math.cos(toRad(originLat)) * Math.cos(toRad(destinationLat)) * Math.sin(deltaLng / 2) ** 2;
-  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
+const haversineDistanceKm = haversineKm;
 
 const formatRouteDistanceLabel = (distanceKm?: number | null) => {
   if (!Number.isFinite(Number(distanceKm))) return '';

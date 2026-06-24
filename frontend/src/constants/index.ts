@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 export const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'table', lat: null, lng: null, customerNote: '' };

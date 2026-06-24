@@ -51,6 +51,7 @@ import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT, nativeBiometricService } f
 import { navigateBackOrFallback } from '../utils/navigation';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
 import { buildDestinationInquiryMessage, prettifyDestinationLabel } from '../utils/destinationWhatsApp';
+import { haversineKm } from '../utils/geo';
 import { reconcileCartStock } from '../utils/cartStock';
 import { normalizeCustomerOrderNote } from '../utils/customerOrderNote';
 import { inputAssistProps } from '../utils/inputAssist';
@@ -267,6 +268,8 @@ const isTerminalRecentOrder = (entry?: { status?: string; paymentStatus?: string
   return false;
 };
 
+const haversineDistanceKm = haversineKm;
+
 export function StorePage() {
   const { storeSlug } = useParams();
   const navigate = useNavigate();
@@ -405,19 +408,6 @@ export function StorePage() {
     const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
     if (digits.length <= 5) return digits;
     return `${digits.slice(0, 5)}-${digits.slice(5)}`;
-  };
-  const haversineKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
-    const toRad = (deg: number) => (deg * Math.PI) / 180;
-    const earthRadiusKm = 6371;
-    const dLat = toRad(b.lat - a.lat);
-    const dLng = toRad(b.lng - a.lng);
-    const lat1 = toRad(a.lat);
-    const lat2 = toRad(b.lat);
-    const x =
-      Math.sin(dLat / 2) ** 2 +
-      Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
-    const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-    return earthRadiusKm * c;
   };
   const normalizeGeoText = (value: string) =>
     String(value || '')
@@ -640,25 +630,6 @@ export function StorePage() {
     if (!raw) return null;
     const parsed = Number(raw.replace(',', '.'));
     return Number.isNaN(parsed) ? null : parsed;
-  };
-
-  const haversineDistanceKm = (a, b) => {
-    if (!a || !b) return null;
-    const toRad = (val) => (val * Math.PI) / 180;
-    const lat1 = Number(a.lat);
-    const lon1 = Number(a.lng ?? a.lon);
-    const lat2 = Number(b.lat);
-    const lon2 = Number(b.lng ?? b.lon);
-    if ([lat1, lon1, lat2, lon2].some((v) => Number.isNaN(v))) return null;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const radLat1 = toRad(lat1);
-    const radLat2 = toRad(lat2);
-    const aVal =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(radLat1) * Math.cos(radLat2);
-    const cVal = 2 * Math.atan2(Math.sqrt(aVal), Math.sqrt(1 - aVal));
-    return 6371 * cVal;
   };
 
   const storeUrl =

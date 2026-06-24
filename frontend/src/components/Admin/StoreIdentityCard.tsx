@@ -1,10 +1,8 @@
-// @ts-nocheck
-import React from 'react';
 import { ImageSquare, Palette } from '@phosphor-icons/react';
 
-export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }) {
+export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }: any) {
   const storeLogo = branding?.logoUrl;
-  const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
+  const instagramLink = socialLinks.find((link: any) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
   const normalizedWhatsapp = whatsappNumber?.toString().replace(/\D/g, '') || '';
 

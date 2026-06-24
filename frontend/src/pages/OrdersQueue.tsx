@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChefHat, Truck } from '@phosphor-icons/react';
 import { GrillQueue } from '../components/Admin/GrillQueue';
@@ -11,7 +10,7 @@ export function OrdersQueue() {
   const navigate = useNavigate();
   const { storeSlug } = useParams();
   const [user, setUser] = useState(null);
-  const [branding, setBranding] = useState(() => getPersistedBranding(storeSlug || defaultBranding.espetoId));
+  const [branding] = useState(() => getPersistedBranding(storeSlug || defaultBranding.espetoId));
 
   useEffect(() => {
     const savedSession = localStorage.getItem('adminSession');

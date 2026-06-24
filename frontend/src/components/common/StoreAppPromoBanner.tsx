@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { GooglePlayLogo, X } from '@phosphor-icons/react';
