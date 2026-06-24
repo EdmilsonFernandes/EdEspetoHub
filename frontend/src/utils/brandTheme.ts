@@ -1,7 +1,6 @@
-// @ts-nocheck
 import { defaultBranding } from '../constants';
 
-export const applyBrandTheme = (branding) => {
+export const applyBrandTheme = (branding: any) => {
   const primary = branding?.primaryColor || defaultBranding.primaryColor;
   const secondary = branding?.accentColor || primary || defaultBranding.accentColor;
   document.documentElement.style.setProperty('--primary-color', primary);
