@@ -1,5 +1,4 @@
 // Helpers e constantes de módulo extraídos de GrillQueue.tsx.
-// @ts-nocheck
 import { Clock, Play, Check, CheckSquare } from "@phosphor-icons/react";
 import { isTableServiceCategory } from "../../../utils/tableServiceSettings";
 
@@ -86,11 +85,6 @@ export const resolveLocationIdentifier = (order: any) => {
     return formattedTable ? `MESA ${formattedTable}` : "MESA";
   }
   if (type === "reservation") {
-    const scheduled = order?.scheduledFor;
-    const ts = scheduled ? new Date(scheduled).getTime() : NaN;
-    const timeLabel = Number.isFinite(ts)
-      ? new Date(scheduled).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      : '';
     return ""; // o chip no card já mostra "Reserva HH:MM" — não duplicar no identificador
   }
   return "";

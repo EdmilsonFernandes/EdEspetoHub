@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { SYSTEM_LOGO_SRC } from "./helpers";
 
 export const QueueLoadingSkeleton = ({ variant = "queue" }: { variant?: "queue" | "sales" | "route" }) => {
