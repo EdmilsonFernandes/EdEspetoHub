@@ -7,17 +7,24 @@ import {
   Camera,
   CheckCircle,
   Compass,
+  Crown,
   Eye,
   EyeSlash,
   FloppyDisk,
   HouseLine,
+  Image as ImageIcon,
   LockKey,
+  Plus,
   SignOut,
   Sparkle,
+  Trash,
+  TrendUp,
 } from '@phosphor-icons/react';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
 import { DestinationPromotionPanel } from '../components/Destination/DestinationPromotionPanel';
+import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../utils/nativeImagePicker';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import {
   Button,
   EmptyState,
@@ -34,6 +41,12 @@ import {
 } from '../services/destinationPartnerPortalService';
 import { buildListingClaimUrl } from '../utils/destinationListingClaim';
 import { inputAssistProps, textareaAssistProps } from '../utils/inputAssist';
+
+const BANNER_SLOT_COUNT = 4;
+const padBannerSlots = (value: any) => {
+  const list = Array.isArray(value) ? value : [];
+  return Array.from({ length: BANNER_SLOT_COUNT }, (_, index) => String(list[index] || ''));
+};
 
 const blankForm = {
   name: '',
@@ -53,8 +66,13 @@ const blankForm = {
   lng: '',
   deliveryInstructions: '',
   logoFile: '',
+  logoUrl: '',
   bannerFile: '',
+  bannerUrl: '',
+  bannerUrls: padBannerSlots([]),
+  bannerFiles: padBannerSlots([]),
   imageFile: '',
+  imageUrl: '',
 };
 
 const fileToBase64 = (file: File) =>
@@ -65,9 +83,60 @@ const fileToBase64 = (file: File) =>
     reader.readAsDataURL(file);
   });
 
+const compressImageFileToDataUrl = (file: File, maxEdge = 1600) =>
+  new Promise<string>((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      try {
+        const width = image.naturalWidth || image.width;
+        const height = image.naturalHeight || image.height;
+        if (!width || !height) throw new Error('invalid_image');
+        const scale = Math.min(1, maxEdge / Math.max(width, height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(width * scale);
+        canvas.height = Math.round(height * scale);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('no_canvas');
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        let quality = 0.82;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        while (dataUrl.length > 1_200_000 && quality > 0.62) {
+          quality -= 0.08;
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+        resolve(dataUrl);
+      } catch (err) {
+        reject(err);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('invalid_image'));
+    };
+    image.src = objectUrl;
+  });
+
+const prepareImageUpload = async (file: File, maxEdge = 1600) => {
+  if (!file.type.startsWith('image/')) throw new Error('invalid_file_type');
+  if (file.type === 'image/gif') return fileToBase64(file);
+  try {
+    return await compressImageFileToDataUrl(file, maxEdge);
+  } catch {
+    return fileToBase64(file);
+  }
+};
+
+const hospitalityGalleryCount = (item: any, form: typeof blankForm) =>
+  (Array.isArray(item?.bannerUrls) ? item.bannerUrls.filter(Boolean).length : 0) +
+  (Array.isArray(form?.bannerFiles) ? form.bannerFiles.filter(Boolean).length : 0);
+
 const completionScore = (item: any, type: string) => {
   const checks = [
     type === 'HOSPITALITY_PLACE' ? item.logoUrl || item.bannerUrl : item.imageUrl,
+    type === 'HOSPITALITY_PLACE' ? hospitalityGalleryCount(item, blankForm) >= 1 : true,
     item.description,
     item.whatsapp || item.phone,
     item.instagramUrl || item.websiteUrl,
@@ -82,9 +151,10 @@ const onboardingChecklist = (resource: DestinationPartnerResource | null | undef
   const isHospitality = resource?.resourceType === 'HOSPITALITY_PLACE';
   return [
     {
-      label: isHospitality ? 'Logo ou banner' : 'Foto do serviço',
+      label: isHospitality ? 'Logo ou capa' : 'Foto do serviço',
       done: Boolean(isHospitality ? (item.logoUrl || item.bannerUrl || form.logoFile || form.bannerFile) : (item.imageUrl || form.imageFile)),
     },
+    { label: 'Galeria com fotos', done: isHospitality ? hospitalityGalleryCount(item, form) >= 1 : true },
     { label: 'Descrição clara', done: String(form.description || '').trim().length >= 20 },
     { label: 'WhatsApp ou telefone', done: Boolean(form.whatsapp || form.phone) },
     { label: 'Endereço completo', done: Boolean(form.address && form.city && form.state && form.zipCode) },
@@ -126,6 +196,11 @@ const buildForm = (resource?: DestinationPartnerResource | null) => {
     lat: item.lat ?? '',
     lng: item.lng ?? '',
     deliveryInstructions: item.deliveryInstructions || '',
+    logoUrl: item.logoUrl || '',
+    bannerUrl: item.bannerUrl || '',
+    bannerUrls: padBannerSlots(item.bannerUrls),
+    bannerFiles: padBannerSlots([]),
+    imageUrl: item.imageUrl || '',
   };
 };
 
@@ -143,6 +218,41 @@ const buildStoreSignupUrl = (resource?: DestinationPartnerResource | null) => {
     deliveryMode: linkedPlaceIds.length ? 'selected' : 'all',
     placeIds: Array.from(new Set(linkedPlaceIds)),
   });
+};
+
+const PartnerMediaSlot = ({ label, hint, previewSrc, onFile, onClear, aspect = 'aspect-[4/3]' }: any) => {
+  const hasImage = Boolean(previewSrc);
+  return (
+    <div className="overflow-hidden rounded-[1.4rem] border border-slate-200 bg-white shadow-[0_14px_30px_-26px_rgba(15,23,42,0.32)]">
+      <div className={`${aspect} w-full bg-slate-100`}>
+        {hasImage ? (
+          <img src={previewSrc} alt={label} className="h-full w-full object-cover" />
+        ) : (
+          <label className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-1 px-3 text-center">
+            <ImageIcon size={22} weight="duotone" className="text-[#336886]/55" />
+            <span className="text-[11px] font-black uppercase tracking-[0.12em] text-[#336886]/70">{label}</span>
+            {hint ? <span className="text-[10px] font-semibold text-slate-400">{hint}</span> : null}
+            <input type="file" accept="image/*" className="hidden" onChange={(event) => onFile?.(event.target.files?.[0])} />
+          </label>
+        )}
+      </div>
+      <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-2 py-1.5">
+        <label className="jnc-ds-touch inline-flex cursor-pointer items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-700 transition hover:bg-slate-100">
+          <Camera size={12} />
+          {hasImage ? 'Trocar' : 'Enviar'}
+          <input type="file" accept="image/*" className="hidden" onChange={(event) => onFile?.(event.target.files?.[0])} />
+        </label>
+        {hasImage && onClear ? (
+          <button type="button" onClick={onClear} className="jnc-ds-touch inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-rose-600 transition hover:bg-rose-100">
+            <Trash size={12} />
+            Remover
+          </button>
+        ) : (
+          <span className="text-[10px] font-semibold text-slate-400">JPG · PNG</span>
+        )}
+      </div>
+    </div>
+  );
 };
 
 function PartnerLogin({ onLoggedIn }: { onLoggedIn: (session: any) => void }) {
@@ -284,8 +394,51 @@ export function DestinationPartnerPortal() {
 
   const chooseFile = async (field: string, file?: File | null) => {
     if (!file) return;
-    const encoded = await fileToBase64(file);
-    change(field, encoded);
+    try {
+      const encoded = await prepareImageUpload(file);
+      change(field, encoded);
+    } catch {
+      setError('Não foi possível ler essa imagem. Tente outro arquivo.');
+    }
+  };
+
+  const chooseBannerSlot = async (index: number, file?: File | null) => {
+    if (!file) return;
+    try {
+      const encoded = await prepareImageUpload(file);
+      setForm((prev) => {
+        const nextFiles = [...prev.bannerFiles];
+        nextFiles[index] = encoded;
+        return { ...prev, bannerFiles: nextFiles };
+      });
+    } catch {
+      setError('Não foi possível ler essa imagem. Tente outro arquivo.');
+    }
+  };
+
+  const pickBannerSlotNative = async (index: number) => {
+    if (!canUseNativeImagePicker()) return;
+    try {
+      const dataUrl = await pickNativeImageAsDataUrl({ quality: 82, maxWidth: 1600 });
+      if (!dataUrl) return;
+      setForm((prev) => {
+        const nextFiles = [...prev.bannerFiles];
+        nextFiles[index] = dataUrl;
+        return { ...prev, bannerFiles: nextFiles };
+      });
+    } catch {
+      setError('Não foi possível abrir a câmera/galeria.');
+    }
+  };
+
+  const removeBannerSlot = (index: number) => {
+    setForm((prev) => {
+      const nextFiles = [...prev.bannerFiles];
+      const nextUrls = [...prev.bannerUrls];
+      nextFiles[index] = '';
+      nextUrls[index] = '';
+      return { ...prev, bannerFiles: nextFiles, bannerUrls: nextUrls };
+    });
   };
 
   const logout = () => {
@@ -322,6 +475,10 @@ export function DestinationPartnerPortal() {
         payload.deliveryInstructions = form.deliveryInstructions;
         if (form.logoFile) payload.logoFile = form.logoFile;
         if (form.bannerFile) payload.bannerFile = form.bannerFile;
+        // Galeria de banners: envia sempre (URLs existentes + novos uploads) para
+        // que remoções e substituições sejam persistidas.
+        payload.bannerUrls = [...form.bannerUrls];
+        payload.bannerFiles = [...form.bannerFiles];
         await destinationPartnerPortalService.updateHospitalityPlace(selectedResource.item.id, payload);
       } else {
         payload.title = form.title;
@@ -330,6 +487,8 @@ export function DestinationPartnerPortal() {
       }
       const refreshed = await destinationPartnerPortalService.me();
       setResources(refreshed.resources || []);
+      const refreshedSelected = (refreshed.resources || []).find((resource) => resource.permissionId === selectedResource.permissionId) || null;
+      setForm(buildForm(refreshedSelected));
       setSuccess('Informações salvas. A página pública já usa esses dados.');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível salvar.');
@@ -401,6 +560,28 @@ export function DestinationPartnerPortal() {
           </SurfaceCard>
         </aside>
 
+        <div className="space-y-4">
+        <SurfaceCard as="section" padding="none" className="overflow-hidden rounded-[2rem] border-amber-200/70 bg-gradient-to-br from-amber-50 via-white to-[#eef6f8] shadow-[0_24px_60px_-40px_rgba(180,120,20,0.4)]">
+          <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow-lg">
+                <Crown size={22} weight="fill" />
+              </span>
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-amber-700">Destaque opcional</p>
+                <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">Apareça primeiro no destino</h2>
+                <p className="mt-1 max-w-md text-sm font-semibold leading-relaxed text-slate-500">Seu espaço ganha prioridade de posicionamento. Você só paga se quiser destacar — manter o cadastro é grátis.</p>
+              </div>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-full bg-amber-500/12 px-3 py-1.5 text-xs font-black text-amber-700 sm:self-auto">
+              <TrendUp size={14} weight="bold" /> a partir de R$ 19,90
+            </span>
+          </div>
+          <div className="border-t border-amber-100/80 bg-white/55 p-5">
+            <DestinationPromotionPanel />
+          </div>
+        </SurfaceCard>
+
         <SurfaceCard as="section" padding="lg" className="rounded-[2rem]">
           {selectedResource ? (
             <form onSubmit={submit} className="space-y-5">
@@ -465,8 +646,8 @@ export function DestinationPartnerPortal() {
 
                 <TextField {...inputAssistProps.phone} name="whatsapp" label="WhatsApp" value={form.whatsapp} onChange={(event) => change('whatsapp', event.target.value)} inputClassName="bg-slate-50 focus:bg-white" />
                 <TextField {...inputAssistProps.phone} name="phone" label="Telefone" value={form.phone} onChange={(event) => change('phone', event.target.value)} inputClassName="bg-slate-50 focus:bg-white" />
-                <TextField name="instagramUrl" label="Instagram" type="url" value={form.instagramUrl} onChange={(event) => change('instagramUrl', event.target.value)} inputClassName="bg-slate-50 focus:bg-white" />
-                <TextField name="websiteUrl" label="Site" type="url" value={form.websiteUrl} onChange={(event) => change('websiteUrl', event.target.value)} inputClassName="bg-slate-50 focus:bg-white" />
+                <TextField name="instagramUrl" label="Instagram" value={form.instagramUrl} onChange={(event) => change('instagramUrl', event.target.value)} placeholder="@perfil ou link" inputClassName="bg-slate-50 focus:bg-white" />
+                <TextField name="websiteUrl" label="Site" value={form.websiteUrl} onChange={(event) => change('websiteUrl', event.target.value)} placeholder="Site, Airbnb ou Booking" inputClassName="bg-slate-50 focus:bg-white" />
               </div>
 
               <SurfaceCard tone="soft" padding="sm" className="grid gap-3 rounded-[1.5rem] border-slate-100 bg-slate-50/70 sm:grid-cols-6">
@@ -478,35 +659,56 @@ export function DestinationPartnerPortal() {
                 <TextField {...inputAssistProps.state} name="state" label="UF" value={form.state} onChange={(event) => change('state', event.target.value)} maxLength={2} wrapperClassName="sm:col-span-1" inputClassName="bg-white" />
               </SurfaceCard>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                {selectedResource.resourceType === 'HOSPITALITY_PLACE' ? (
-                  <>
-                    <label className="block rounded-[1.4rem] border border-dashed border-[#336886]/25 bg-[#336886]/6 p-4">
-                      <span className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]"><Camera size={16} /> Logo</span>
-                      <input type="file" accept="image/*" onChange={(event) => chooseFile('logoFile', event.target.files?.[0])} className="jnc-ds-focus-ring w-full rounded-xl text-sm font-semibold text-slate-600" />
-                    </label>
-                    <label className="block rounded-[1.4rem] border border-dashed border-[#336886]/25 bg-[#336886]/6 p-4">
-                      <span className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]"><Camera size={16} /> Banner</span>
-                      <input type="file" accept="image/*" onChange={(event) => chooseFile('bannerFile', event.target.files?.[0])} className="jnc-ds-focus-ring w-full rounded-xl text-sm font-semibold text-slate-600" />
-                    </label>
-                    <TextareaField
-                      {...textareaAssistProps.notes}
-                      name="deliveryInstructions"
-                      label="Instruções de entrega"
-                      value={form.deliveryInstructions}
-                      onChange={(event) => change('deliveryInstructions', event.target.value)}
-                      rows={3}
-                      wrapperClassName="sm:col-span-2"
-                      textareaClassName="bg-slate-50 focus:bg-white"
-                    />
-                  </>
-                ) : (
-                  <label className="block rounded-[1.4rem] border border-dashed border-[#336886]/25 bg-[#336886]/6 p-4 sm:col-span-2">
-                    <span className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]"><Camera size={16} /> Imagem do serviço</span>
-                    <input type="file" accept="image/*" onChange={(event) => chooseFile('imageFile', event.target.files?.[0])} className="jnc-ds-focus-ring w-full rounded-xl text-sm font-semibold text-slate-600" />
-                  </label>
-                )}
-              </div>
+              {selectedResource.resourceType === 'HOSPITALITY_PLACE' ? (
+                <SurfaceCard as="section" tone="soft" padding="md" className="space-y-4 rounded-[1.7rem] border-slate-100 bg-slate-50/70">
+                  <SectionHeader eyebrow="Fotos do seu espaço" title="Logo, capa e galeria" />
+                  <div className="grid gap-3 sm:grid-cols-[10rem_1fr]">
+                    <div className="space-y-1.5">
+                      <p className="px-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Logo</p>
+                      <PartnerMediaSlot label="Logo" hint="Quadrada" aspect="aspect-square" previewSrc={form.logoFile || resolveAssetUrl(form.logoUrl) || ''} onFile={(file: File) => chooseFile('logoFile', file)} onClear={() => { change('logoFile', ''); change('logoUrl', ''); }} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <p className="px-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Capa</p>
+                      <PartnerMediaSlot label="Capa" hint="Formato paisagem" aspect="aspect-[16/9]" previewSrc={form.bannerFile || resolveAssetUrl(form.bannerUrl) || ''} onFile={(file: File) => chooseFile('bannerFile', file)} onClear={() => { change('bannerFile', ''); change('bannerUrl', ''); }} />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between px-1">
+                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Galeria (até {BANNER_SLOT_COUNT} fotos)</p>
+                      <span className="text-[10px] font-black text-slate-400">{form.bannerFiles.filter(Boolean).length + form.bannerUrls.filter((u: string) => u).length}/{BANNER_SLOT_COUNT}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      {Array.from({ length: BANNER_SLOT_COUNT }).map((_, index) => (
+                        <PartnerMediaSlot key={index} label={`Foto ${index + 1}`} aspect="aspect-[4/3]" previewSrc={form.bannerFiles[index] || resolveAssetUrl(form.bannerUrls[index]) || ''} onFile={(file: File) => chooseBannerSlot(index, file)} onClear={() => removeBannerSlot(index)} />
+                      ))}
+                    </div>
+                    {canUseNativeImagePicker() ? (
+                      <div className="flex justify-end">
+                        <button type="button" onClick={() => pickBannerSlotNative(form.bannerFiles.findIndex(Boolean) < 0 ? 0 : form.bannerFiles.length >= BANNER_SLOT_COUNT ? 0 : form.bannerFiles.length)} className="jnc-ds-touch inline-flex items-center gap-1.5 rounded-full bg-[#336886]/8 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.1em] text-[#153A4C]">
+                          <Camera size={13} /> Tirar foto / galeria
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                  <TextareaField
+                    {...textareaAssistProps.notes}
+                    name="deliveryInstructions"
+                    label="Instruções de entrega / chegada"
+                    value={form.deliveryInstructions}
+                    onChange={(event) => change('deliveryInstructions', event.target.value)}
+                    rows={3}
+                    textareaClassName="bg-white"
+                    hint="Como o cliente/motoboy encontra você (referências, portão, acesso)."
+                  />
+                </SurfaceCard>
+              ) : (
+                <SurfaceCard as="section" tone="soft" padding="md" className="space-y-3 rounded-[1.7rem] border-slate-100 bg-slate-50/70">
+                  <SectionHeader eyebrow="Foto" title="Imagem do serviço" />
+                  <div className="mx-auto max-w-sm">
+                    <PartnerMediaSlot label="Foto principal" hint="Formato paisagem" aspect="aspect-[4/3]" previewSrc={form.imageFile || resolveAssetUrl(form.imageUrl) || ''} onFile={(file: File) => chooseFile('imageFile', file)} onClear={() => { change('imageFile', ''); change('imageUrl', ''); }} />
+                  </div>
+                </SurfaceCard>
+              )}
 
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <a href={selectedResource.resourceType === 'HOSPITALITY_PLACE' ? `/destinos/${selectedResource.item?.destination?.slug || ''}/chales/${selectedResource.item?.slug || ''}` : `/destinos/${selectedResource.item?.destination?.slug || ''}`} target="_blank" rel="noreferrer" className="jnc-ds-touch jnc-ds-focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-600 transition hover:bg-slate-50">
@@ -529,8 +731,6 @@ export function DestinationPartnerPortal() {
                   Salvar alterações
                 </Button>
               </div>
-
-              <DestinationPromotionPanel />
 
               {success ? (
                 <SurfaceCard tone="success" padding="md" className="rounded-2xl text-sm font-bold text-emerald-700">
@@ -555,6 +755,7 @@ export function DestinationPartnerPortal() {
             </div>
           )}
         </SurfaceCard>
+        </div>
       </main>
     </div>
   );

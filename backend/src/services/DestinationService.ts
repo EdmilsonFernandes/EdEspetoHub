@@ -12,6 +12,7 @@ import {
   toNullableNumber,
   toOptionalText,
 } from '../utils/destinationHub';
+import { normalizeExternalUrl, normalizeInstagramUrl } from '../utils/socialUrl';
 import {
   MAX_HOSPITALITY_BANNER_IMAGES,
   mergeHospitalityBannerSlots,
@@ -78,6 +79,31 @@ export class DestinationService {
     } catch (error) {
       this.log.error('Destination partner request notification failed', {
         requestId: payload.requestId || null,
+        resourceName: payload.resourceName,
+        responsibleEmail: payload.responsibleEmail,
+        error,
+      });
+    }
+  }
+
+
+  private async notifyPartnerConfirmationByEmail(payload: {
+    partnerType: string;
+    resourceName: string | null;
+    destinationName?: string | null;
+    responsibleName: string;
+    responsibleEmail: string;
+  }) {
+    try {
+      await this.emailService.sendDestinationPartnerRequestConfirmation({
+        email: payload.responsibleEmail,
+        name: payload.responsibleName,
+        partnerType: payload.partnerType,
+        resourceName: payload.resourceName,
+        destinationName: payload.destinationName,
+      });
+    } catch (error) {
+      this.log.error('Destination partner request confirmation failed', {
         resourceName: payload.resourceName,
         responsibleEmail: payload.responsibleEmail,
         error,
@@ -232,7 +258,7 @@ export class DestinationService {
 
     const existing = await this.repository.findPendingPartnerRequestByEmailAndName(responsibleEmail, name, destination.id);
     if (existing) {
-      await this.notifyPartnerRequestByEmail({
+      void this.notifyPartnerRequestByEmail({
         requestId: existing.id,
         partnerType: existing.partnerType || partnerType,
         resourceName: existing.name || name,
@@ -243,6 +269,13 @@ export class DestinationService {
         city: existing.city || destination.city || null,
         state: existing.state || destination.state || null,
         message: existing.message || payload?.message || null,
+      });
+      void this.notifyPartnerConfirmationByEmail({
+        partnerType: existing.partnerType || partnerType,
+        resourceName: existing.name || name,
+        destinationName: destination.name || destination.city || null,
+        responsibleName: existing.responsibleName || responsibleName,
+        responsibleEmail,
       });
       return this.toPublicPartnerRequest(existing);
     }
@@ -266,8 +299,8 @@ export class DestinationService {
       zipCode: toOptionalText(payload?.zipCode),
       phone: toOptionalText(payload?.phone),
       whatsapp: toOptionalText(payload?.whatsapp),
-      instagramUrl: toOptionalText(payload?.instagramUrl),
-      websiteUrl: toOptionalText(payload?.websiteUrl),
+      instagramUrl: normalizeInstagramUrl(payload?.instagramUrl),
+      websiteUrl: normalizeExternalUrl(payload?.websiteUrl),
       logoUrl: logoUrl || toOptionalText(payload?.logoUrl),
       bannerUrl: bannerUrl || toOptionalText(payload?.bannerUrl),
       imageUrl: imageUrl || toOptionalText(payload?.imageUrl),
@@ -281,7 +314,7 @@ export class DestinationService {
       message: toOptionalText(payload?.message),
       status: 'pending',
     });
-    await this.notifyPartnerRequestByEmail({
+    void this.notifyPartnerRequestByEmail({
       requestId: saved.id,
       partnerType,
       resourceName: saved.name || name,
@@ -292,6 +325,13 @@ export class DestinationService {
       city: saved.city || destination.city || null,
       state: saved.state || destination.state || null,
       message: saved.message || null,
+    });
+    void this.notifyPartnerConfirmationByEmail({
+      partnerType,
+      resourceName: saved.name || name,
+      destinationName: destination.name || destination.city || null,
+      responsibleName,
+      responsibleEmail,
     });
     return this.toPublicPartnerRequest({ ...saved, destination });
   }
@@ -876,8 +916,8 @@ export class DestinationService {
       formattedAddress: coordinates.formattedAddress,
       phone: payload?.phone !== undefined ? toOptionalText(payload.phone) : current?.phone ?? null,
       whatsapp: payload?.whatsapp !== undefined ? toOptionalText(payload.whatsapp) : current?.whatsapp ?? null,
-      instagramUrl: payload?.instagramUrl !== undefined ? toOptionalText(payload.instagramUrl) : current?.instagramUrl ?? null,
-      websiteUrl: payload?.websiteUrl !== undefined ? toOptionalText(payload.websiteUrl) : current?.websiteUrl ?? null,
+      instagramUrl: payload?.instagramUrl !== undefined ? normalizeInstagramUrl(payload.instagramUrl) : current?.instagramUrl ?? null,
+      websiteUrl: payload?.websiteUrl !== undefined ? normalizeExternalUrl(payload.websiteUrl) : current?.websiteUrl ?? null,
       logoUrl: logoUrl || toOptionalText(payload?.logoUrl) || current?.logoUrl || null,
       bannerUrl: resolvedBannerUrl || bannerUrls[0] || null,
       bannerUrls,
@@ -960,8 +1000,8 @@ export class DestinationService {
       formattedAddress: coordinates.formattedAddress,
       phone: payload?.phone !== undefined ? toOptionalText(payload.phone) : current?.phone ?? null,
       whatsapp: payload?.whatsapp !== undefined ? toOptionalText(payload.whatsapp) : current?.whatsapp ?? null,
-      instagramUrl: payload?.instagramUrl !== undefined ? toOptionalText(payload.instagramUrl) : current?.instagramUrl ?? null,
-      websiteUrl: payload?.websiteUrl !== undefined ? toOptionalText(payload.websiteUrl) : current?.websiteUrl ?? null,
+      instagramUrl: payload?.instagramUrl !== undefined ? normalizeInstagramUrl(payload.instagramUrl) : current?.instagramUrl ?? null,
+      websiteUrl: payload?.websiteUrl !== undefined ? normalizeExternalUrl(payload.websiteUrl) : current?.websiteUrl ?? null,
       ctaType: payload?.ctaType !== undefined ? toOptionalText(payload.ctaType) : current?.ctaType ?? null,
       ctaUrl: payload?.ctaUrl !== undefined ? toOptionalText(payload.ctaUrl) : current?.ctaUrl ?? null,
       featured: payload?.featured !== undefined ? payload.featured === true : current?.featured === true,

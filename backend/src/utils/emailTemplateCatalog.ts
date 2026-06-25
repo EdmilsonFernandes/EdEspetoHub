@@ -315,6 +315,28 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     `,
   },
   {
+    key: 'destination_partner_request_confirmation',
+    name: 'Confirmação de solicitação ao parceiro',
+    category: 'account',
+    description: 'Enviado ao próprio parceiro quando ele envia a solicitação de entrada em destinos.',
+    subject: 'Recebemos sua solicitação - Já no Caminho',
+    preheader: 'Sua solicitação está em análise. Avisaremos quando for aprovada.',
+    variables: ['PARTNER_NAME', 'REQUEST_TYPE_LABEL', 'RESOURCE_NAME', 'DESTINATION_NAME', 'SUPPORT_EMAIL'],
+    textBody: 'Olá, {{PARTNER_NAME}}.\n\nRecebemos sua solicitação para incluir {{RESOURCE_NAME}} ({{REQUEST_TYPE_LABEL}}) em {{DESTINATION_NAME}} no Já no Caminho.\n\nNossa equipe vai analisar os dados e liberar seu acesso. Você receberá um novo e-mail assim que a solicitação for aprovada, com o link para criar sua senha e atualizar fotos, contatos e informações.\n\nEm geral a análise leva até 1 dia útil. Se precisar de ajuda, responda este e-mail ou fale com {{SUPPORT_EMAIL}}.',
+    htmlBody: `
+      <h1 style="margin: 0 0 10px; font-size: 28px; line-height: 1.12; color: #0f172a;">Solicitação recebida</h1>
+      <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.7;">Olá, {{PARTNER_NAME}}. Confirmamos o recebimento da sua solicitação para incluir <strong>{{RESOURCE_NAME}}</strong> em <strong>{{DESTINATION_NAME}}</strong> no Já no Caminho.</p>
+      <div style="margin: 0 0 18px; padding: 16px; border-radius: 18px; background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; line-height: 1.7;">
+        <strong>Tipo:</strong> {{REQUEST_TYPE_LABEL}}<br />
+        Nossa equipe vai validar as informações e liberar seu acesso de parceiro. Você receberá um novo e-mail assim que a solicitação for aprovada, com o link para criar sua senha e manter fotos, contatos e informações atualizados.
+      </div>
+      <div style="margin: 0 0 18px; padding: 16px; border-radius: 18px; background: #eef6f8; border: 1px solid rgba(51,104,134,0.18); color: #153A4C; line-height: 1.7;">
+        <strong>Quer aparecer primeiro no destino?</strong> Depois de aprovado, você pode destacar seu espaço com prioridade de posicionamento no portal do parceiro (opcional, a partir de R$ 19,90).
+      </div>
+      <p style="margin: 0; color: #64748b; font-size: 13px; line-height: 1.7;">Em geral a análise leva até 1 dia útil. Dúvidas? Responda este e-mail ou fale com {{SUPPORT_EMAIL}}.</p>
+    `,
+  },
+  {
     key: 'condominium_access_credentials',
     name: 'Credenciais de condomínio',
     category: 'security',

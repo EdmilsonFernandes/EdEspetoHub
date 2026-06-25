@@ -11,8 +11,15 @@ import { DestinationPartnerPermission } from '../entities/DestinationPartnerPerm
 import { HospitalityPlace } from '../entities/HospitalityPlace';
 import { AppError } from '../errors/AppError';
 import { isApproximateGeoPrecision, sameCoordinatePair } from '../utils/geoQuality';
+import {
+  MAX_HOSPITALITY_BANNER_IMAGES,
+  mergeHospitalityBannerSlots,
+  normalizeHospitalityBannerSlots,
+  normalizeHospitalityBannerUrls,
+} from '../utils/hospitalityMedia';
 import { saveBase64Image } from '../utils/imageStorage';
 import { logger } from '../utils/logger';
+import { normalizeExternalUrl, normalizeInstagramUrl } from '../utils/socialUrl';
 import { EmailService } from './EmailService';
 
 export const RESOURCE_HOSPITALITY_PLACE = 'HOSPITALITY_PLACE';
@@ -210,12 +217,13 @@ export class DestinationPartnerPortalService {
     if (!account.passwordHash || account.status !== 'active') {
       const inviteResult = await this.createInvite(account, input.reviewedBy);
       activationToken = inviteResult.token;
-      try {
-        await this.sendInviteEmail(account, activationToken, input.resourceName);
-        inviteSent = true;
-      } catch (error) {
+      // Dispara o e-mail de convite em segundo plano: um SMTP lento (Zoho) não
+      // pode segurar a resposta da aprovação, senão o botão do Super Admin fica
+      // "travado" e o operador acha que precisa clicar de novo.
+      inviteSent = true;
+      void this.sendInviteEmail(account, activationToken, input.resourceName).catch((error) => {
         this.log.warn('Destination partner invite email failed', { accountId: account.id, error });
-      }
+      });
     }
 
     await this.auditRepository.save(
@@ -468,12 +476,17 @@ export class DestinationPartnerPortalService {
     const submittedExistingCoordinate = sameCoordinatePair(submittedLat, submittedLng, (current as any).lat, (current as any).lng);
 
     if (addressChanged && (!hasLatInput || !hasLngInput || submittedExistingCoordinate)) {
-      (patch as any).lat = null;
-      (patch as any).lng = null;
-      (patch as any).geoSource = 'unknown';
+      // Endereço mudou mas o parceiro não reposicionou o pin: mantemos as
+      // coordenadas anteriores (em vez de zerar) para a distância entre chalé e
+      // serviço continuar disponível, apenas sinalizando que precisa revalidar.
+      // Locais com o mesmo CEP continuam com coordenadas próprias (geocode usa
+      // rua + número, não só CEP).
+      (patch as any).lat = (current as any).lat;
+      (patch as any).lng = (current as any).lng;
+      (patch as any).geoSource = (current as any).geoSource || 'unknown';
       (patch as any).geoPrecision = 'unknown';
       (patch as any).geoVerified = false;
-      (patch as any).geocodedAt = null;
+      (patch as any).geocodedAt = (current as any).geocodedAt || null;
       (patch as any).formattedAddress = null;
       return patch;
     }
@@ -515,14 +528,19 @@ export class DestinationPartnerPortalService {
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'lng')) patch.lng = toNullableNumber(payload.lng) as any;
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'phone')) patch.phone = toOptionalText(payload.phone) as any;
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'whatsapp')) patch.whatsapp = toOptionalText(payload.whatsapp) as any;
-    if (Object.prototype.hasOwnProperty.call(payload || {}, 'instagramUrl')) patch.instagramUrl = toOptionalText(payload.instagramUrl) as any;
-    if (Object.prototype.hasOwnProperty.call(payload || {}, 'websiteUrl')) patch.websiteUrl = toOptionalText(payload.websiteUrl) as any;
+    if (Object.prototype.hasOwnProperty.call(payload || {}, 'instagramUrl')) patch.instagramUrl = normalizeInstagramUrl(payload.instagramUrl) as any;
+    if (Object.prototype.hasOwnProperty.call(payload || {}, 'websiteUrl')) patch.websiteUrl = normalizeExternalUrl(payload.websiteUrl) as any;
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'deliveryInstructions')) patch.deliveryInstructions = toOptionalText(payload.deliveryInstructions) as any;
     if (Array.isArray(payload?.amenities)) {
       patch.amenities = payload.amenities.map((item: unknown) => String(item || '').trim()).filter(Boolean).slice(0, 24);
     }
-    if (Array.isArray(payload?.bannerUrls)) {
-      patch.bannerUrls = payload.bannerUrls.map((item: unknown) => String(item || '').trim()).filter(Boolean).slice(0, 6);
+    const hasBannerGalleryInput =
+      Object.prototype.hasOwnProperty.call(payload || {}, 'bannerUrls') ||
+      Object.prototype.hasOwnProperty.call(payload || {}, 'bannerFiles');
+    if (hasBannerGalleryInput) {
+      const uploadedBannerSlots = await this.savePartnerBannerImages(payload?.bannerFiles, place.id);
+      const submittedBannerSlots = mergeHospitalityBannerSlots(payload?.bannerUrls, uploadedBannerSlots);
+      patch.bannerUrls = normalizeHospitalityBannerUrls(submittedBannerSlots);
     }
     this.applyGeoQualityForPartnerPatch(patch, payload, place);
     const logoUrl = await saveBase64Image(payload?.logoFile, `partner-place-logo-${place.id}`, 'destinations');
@@ -530,6 +548,19 @@ export class DestinationPartnerPortalService {
     if (logoUrl) patch.logoUrl = logoUrl;
     if (bannerUrl) patch.bannerUrl = bannerUrl;
     return patch;
+  }
+
+
+  private async savePartnerBannerImages(files: unknown, placeId: string) {
+    const slots = normalizeHospitalityBannerSlots(files);
+    const uploaded = normalizeHospitalityBannerSlots([]);
+    for (let index = 0; index < Math.min(slots.length, MAX_HOSPITALITY_BANNER_IMAGES); index += 1) {
+      const imageFile = slots[index];
+      if (!imageFile) continue;
+      const imageUrl = await saveBase64Image(imageFile, `partner-place-banner-${placeId}-${index + 1}`, 'destinations');
+      if (imageUrl) uploaded[index] = imageUrl;
+    }
+    return uploaded;
   }
 
   private async sanitizeListingPayload(payload: any, listing: DestinationListing) {
@@ -550,8 +581,8 @@ export class DestinationPartnerPortalService {
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'lng')) patch.lng = toNullableNumber(payload.lng) as any;
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'phone')) patch.phone = toOptionalText(payload.phone) as any;
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'whatsapp')) patch.whatsapp = toOptionalText(payload.whatsapp) as any;
-    if (Object.prototype.hasOwnProperty.call(payload || {}, 'instagramUrl')) patch.instagramUrl = toOptionalText(payload.instagramUrl) as any;
-    if (Object.prototype.hasOwnProperty.call(payload || {}, 'websiteUrl')) patch.websiteUrl = toOptionalText(payload.websiteUrl) as any;
+    if (Object.prototype.hasOwnProperty.call(payload || {}, 'instagramUrl')) patch.instagramUrl = normalizeInstagramUrl(payload.instagramUrl) as any;
+    if (Object.prototype.hasOwnProperty.call(payload || {}, 'websiteUrl')) patch.websiteUrl = normalizeExternalUrl(payload.websiteUrl) as any;
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'ctaType')) patch.ctaType = toOptionalText(payload.ctaType) as any;
     if (Object.prototype.hasOwnProperty.call(payload || {}, 'ctaUrl')) patch.ctaUrl = toOptionalText(payload.ctaUrl) as any;
     this.applyGeoQualityForPartnerPatch(patch, payload, listing);

@@ -538,13 +538,14 @@ describe('Destination Hub', () => {
 
     expect(destinationRes.status).toBe(201);
 
+    const partnerEmail = testEmail('destino-parceiro');
     const requestRes = await api.post('/api/public/destination-partner-requests').send({
       destinationId: destinationRes.body.id,
       partnerType: 'HOSPITALITY',
       placeType: 'POUSADA',
       name: `Pousada Sol ${suffix}`,
       responsibleName: 'Maria Responsável',
-      responsibleEmail: testEmail('destino-parceiro'),
+      responsibleEmail: partnerEmail,
       responsiblePhone: '11999999999',
       whatsapp: '11999999999',
       deliveryInstructions: 'Confirmar casa pelo WhatsApp.',
@@ -553,16 +554,35 @@ describe('Destination Hub', () => {
     expect(requestRes.status).toBe(201);
     expect(requestRes.body.status).toBe('pending');
 
-    const notificationLogs = await AppDataSource.query(
-      `SELECT to_email, status
-         FROM email_send_logs
-        WHERE template_key = $1
-          AND metadata->>'requestId' = $2`,
-      ['destination_partner_request_notification', requestRes.body.id]
-    );
+    // A notificação por e-mail é disparada de forma assíncrona (fire-and-forget)
+    // para não travar a resposta do cadastro, então fazemos um poll curto.
+    let notificationLogs: any[] = [];
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      notificationLogs = await AppDataSource.query(
+        `SELECT to_email, status
+           FROM email_send_logs
+          WHERE template_key = $1
+            AND metadata->>'requestId' = $2`,
+        ['destination_partner_request_notification', requestRes.body.id]
+      );
+      if (Array.isArray(notificationLogs) && notificationLogs.length) break;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
     const notifiedEmails = notificationLogs.map((row: any) => String(row.to_email || '').toLowerCase());
     expect(notifiedEmails).toContain(String(env.email.auditInbox || 'edmls2008@gmail.com').toLowerCase());
     expect(notifiedEmails).toContain('contato@janocaminho.com.br');
+
+    // O próprio parceiro recebe um e-mail confirmando o recebimento da solicitação.
+    let confirmationLogs: any[] = [];
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      confirmationLogs = await AppDataSource.query(
+        `SELECT to_email FROM email_send_logs WHERE template_key = $1 AND lower(to_email) = $2`,
+        ['destination_partner_request_confirmation', partnerEmail.toLowerCase()]
+      );
+      if (Array.isArray(confirmationLogs) && confirmationLogs.length) break;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    expect(confirmationLogs.length).toBeGreaterThan(0);
 
     const reviewRes = await api
       .patch(`/api/admin/destination-partner-requests/${requestRes.body.id}/review`)

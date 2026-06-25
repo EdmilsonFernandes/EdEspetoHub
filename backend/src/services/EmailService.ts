@@ -473,6 +473,28 @@ export class EmailService {
     );
   }
 
+
+  async sendDestinationPartnerRequestConfirmation(payload: {
+    email: string;
+    name?: string | null;
+    partnerType: string;
+    resourceName?: string | null;
+    destinationName?: string | null;
+  }) {
+    if (!payload.email) return;
+    const partnerType = String(payload.partnerType || '').toUpperCase();
+    const typeLabel = partnerType === 'HOSPITALITY'
+      ? 'Chalé, pousada ou hospedagem'
+      : 'Serviço, restaurante ou comércio';
+    await this.sendTemplate(payload.email, 'destination_partner_request_confirmation', {
+      PARTNER_NAME: payload.name || 'Parceiro',
+      REQUEST_TYPE_LABEL: typeLabel,
+      RESOURCE_NAME: payload.resourceName || '-',
+      DESTINATION_NAME: payload.destinationName || '-',
+      SUPPORT_EMAIL: this.getSupportEmail(),
+    });
+  }
+
   async sendCondominiumAccessCredentials(payload: {
     email: string;
     responsibleName: string;
