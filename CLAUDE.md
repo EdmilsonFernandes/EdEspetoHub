@@ -3,6 +3,17 @@
 > **Guia completo**: `.ai/SKILL.md` (arquitetura, deploy, migrations, operações, integrações).
 > **Graphify**: knowledge graph em `graphify-out/` — use `graphify query "<pergunta>"` para navegar o código.
 
+## Workflow do Agente (SEMPRE seguir)
+1. **Procurar resposta**: Graphify (`graphify query`) → se não achar → Context7 (docs de libs) → Serena (análise de código) → AI token (relay/IA).
+2. **Planejar trabalho complexo**: usar GSD (`gsd` no terminal) → depois implementar aqui.
+3. **No início de cada sessão**: ler CLAUDE.md (auto) + `.ai/SKILL.md` + AGENTS.md + memories.
+4. **Antes de commitar**: `yarn test` (backend) + `npm run build` (frontend) + migrar se schema mudou.
+5. **Ferramentas disponíveis**:
+   - **Graphify**: knowledge graph do projeto → `graphify query`.
+   - **Serena**: análise semântica → `.serena/project.yml`.
+   - **Context7**: docs de libs (React, Express, TypeORM, etc.).
+   - **GSD**: agente de planejamento → `gsd` no terminal.
+
 ## Stack (NÃO MUDAR SEM PENSAR)
 - **Frontend**: React 19 + Vite 6 + TypeScript 5.7 + Tailwind CSS 4 + Capacitor 7 (porta 8080)
 - **Backend**: Express 4 + TypeORM 0.3 + PostgreSQL 16 + Redis 7 (porta 4000)
