@@ -324,7 +324,11 @@ export function DestinationPartnerRequestPage() {
       setZipLookupError('');
       try {
         const addressData = await addressLookupService.lookupZipCode(cleanedCep);
-        if (!active || !addressData) return;
+        if (!active) return;
+        if (!addressData) {
+          setZipLookupError('Não encontramos esse CEP. Preencha o endereço manualmente.');
+          return;
+        }
         setForm((current) => ({
           ...current,
           zipCode: formatCepBr(cleanedCep),
@@ -344,6 +348,11 @@ export function DestinationPartnerRequestPage() {
       window.clearTimeout(timer);
     };
   }, [form.zipCode]);
+
+  useEffect(() => {
+    if (!success) return;
+    formStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [success]);
 
   useEffect(() => {
     if (destinationMode !== 'new') return;
@@ -567,16 +576,25 @@ export function DestinationPartnerRequestPage() {
               </SurfaceCard>
             ) : null}
             {success ? (
-              <SurfaceCard tone="success" padding="md" className="mt-4 rounded-2xl text-sm font-bold text-emerald-700">
-                <CheckCircle size={18} weight="fill" className="mr-1 inline" />
-                Recebemos sua solicitação! O time Já no Caminho vai revisar e entrar em contato quando estiver tudo certo.
-                <span className="mt-1 block text-xs font-semibold text-slate-500">
+              <div className="mt-6 flex flex-col items-center justify-center gap-4 rounded-[2rem] border border-emerald-100 bg-gradient-to-b from-emerald-50/80 to-white px-6 py-12 text-center">
+                <span className="grid h-20 w-20 place-items-center rounded-full bg-emerald-100 text-emerald-600 shadow-[0_18px_42px_-24px_rgba(16,185,129,0.7)]">
+                  <CheckCircle size={44} weight="fill" />
+                </span>
+                <h2 className="text-2xl font-black leading-tight tracking-[-0.03em] text-slate-950">Recebemos sua solicitação!</h2>
+                <p className="max-w-md text-sm font-semibold leading-relaxed text-slate-600">
+                  O time Já no Caminho vai revisar e entrar em contato quando estiver tudo certo.
+                </p>
+                <span className="mt-1 max-w-md text-xs font-semibold leading-relaxed text-slate-500">
                   Depois de aprovado, no portal você pode <strong className="text-[#336886]">destacar seu espaço</strong> para aparecer primeiro no destino (opcional, a partir de R$ 19,90).
                 </span>
-              </SurfaceCard>
+                <Button type="button" size="lg" onClick={() => { setSuccess(null); formStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} className="mt-3 rounded-full uppercase tracking-[0.1em]">
+                  Enviar outra solicitação
+                </Button>
+              </div>
             ) : null}
             {loading ? <p className="mt-4 text-sm font-semibold text-slate-500">Carregando destinos...</p> : null}
 
+            {!success ? (
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <SurfaceCard tone="soft" padding="sm" className="sm:col-span-2 rounded-[1.5rem] border-slate-200 bg-slate-50/80">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -714,9 +732,14 @@ export function DestinationPartnerRequestPage() {
               <TextareaField name="partnerDescription" value={form.description} onChange={(event) => update('description', event.target.value)} label="Descrição pública" placeholder="Conte o que o hóspede encontra aqui" rows={3} wrapperClassName="sm:col-span-2" />
               <div className="sm:col-span-2 grid gap-3 sm:grid-cols-[160px_1fr]">
                 <div>
-                  <TextField name="zipCode" value={form.zipCode} onChange={(event) => update('zipCode', formatCepBr(event.target.value))} label="CEP" placeholder="00000-000" inputMode="numeric" autoComplete="postal-code" />
-                  {zipLookupLoading ? <p className="mt-1 px-1 text-[11px] font-bold text-[#336886]">Buscando endereço...</p> : null}
-                  {zipLookupError ? <p className="mt-1 px-1 text-[11px] font-bold text-rose-600">{zipLookupError}</p> : null}
+                  <TextField name="zipCode" value={form.zipCode} onChange={(event) => update('zipCode', formatCepBr(event.target.value))} label="CEP" placeholder="00000-000" inputMode="numeric" autoComplete="postal-code" rightIcon={zipLookupLoading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#336886]/30 border-t-[#336886]" /> : undefined} />
+                  {zipLookupLoading ? (
+                    <p className="mt-1 flex items-center gap-1.5 px-1 text-[11px] font-bold text-[#336886]">
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#336886]/30 border-t-[#336886]" />
+                      Buscando endereço...
+                    </p>
+                  ) : null}
+                  {zipLookupError ? <p className="mt-1 px-1 text-[11px] font-bold leading-snug text-rose-600">{zipLookupError}</p> : null}
                 </div>
                 <TextField name="address" value={form.address} onChange={(event) => update('address', event.target.value)} label="Endereço" placeholder="Rua, número e referência" autoComplete="address-line1" />
               </div>
@@ -773,10 +796,13 @@ export function DestinationPartnerRequestPage() {
               <TextField name="responsiblePhone" required value={form.responsiblePhone} onChange={(event) => update('responsiblePhone', formatPhoneBr(event.target.value))} label="WhatsApp do responsável" placeholder="(00) 00000-0000" inputMode="tel" autoComplete="tel" wrapperClassName="sm:col-span-2" />
               <TextareaField name="message" value={form.message} onChange={(event) => update('message', event.target.value)} label="Mensagem para o time" placeholder="Conte algo importante sobre o cadastro" rows={3} wrapperClassName="sm:col-span-2" />
             </div>
+            ) : null}
 
-            <Button type="submit" size="lg" fullWidth loading={saving} disabled={!canSubmitDestination} className="mt-5">
+            {!success ? (
+            <Button type="submit" size="lg" fullWidth loading={saving} disabled={!canSubmitDestination || saving} className="mt-5">
               Enviar para aprovação
             </Button>
+            ) : null}
           </form>
         </div>
       </div>
