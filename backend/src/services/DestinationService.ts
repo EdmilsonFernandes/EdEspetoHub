@@ -1,4 +1,6 @@
 import { resolvePlanFeatures } from '../config/planFeatures';
+import { AppDataSource } from '../config/database';
+import { User } from '../entities/User';
 import { AppError } from '../errors/AppError';
 import { DestinationRepository } from '../repositories/DestinationRepository';
 import {
@@ -54,6 +56,7 @@ type ResolvedDestinationCoordinates = {
 
 export class DestinationService {
   private repository = new DestinationRepository();
+  private userRepository = AppDataSource.getRepository(User);
   private subscriptionService = new SubscriptionService();
   private orderReviewService = new OrderReviewService();
   private geoLocationService = new GeoLocationService();
@@ -256,6 +259,23 @@ export class DestinationService {
       claimedListingId = claimedListing.id;
     }
 
+    // Decisão explícita de vínculo: só vincula ao login do cliente se o usuário
+    // confirmar (linkToAccount). Caso contrário, vira conta separada.
+    const linkToAccount = payload?.linkToAccount !== false;
+    const effectiveUserId = linkToAccount && actorUserId ? actorUserId : null;
+
+    // Conta separada (sem vínculo): o e-mail do responsável não pode ser de uma
+    // conta users já existente — senão gera dois logins com o mesmo e-mail.
+    // Nesse caso, a única opção é vincular (ou usar outro e-mail).
+    if (!effectiveUserId) {
+      const existingUserByEmail = await this.userRepository.findOne({ where: { email: responsibleEmail } });
+      if (existingUserByEmail) {
+        throw new AppError('DEST-014', 409, {
+          message: 'Este e-mail já pertence a uma conta no Já no Caminho. Entre com ele para vincular o chalé, ou use outro e-mail.',
+        });
+      }
+    }
+
     const existing = await this.repository.findPendingPartnerRequestByEmailAndName(responsibleEmail, name, destination.id);
     if (existing) {
       void this.notifyPartnerRequestByEmail({
@@ -287,7 +307,7 @@ export class DestinationService {
 
     const saved = await this.repository.savePartnerRequest({
       destinationId: destination.id,
-      userId: actorUserId || null,
+      userId: effectiveUserId,
       partnerType,
       placeType: partnerType === 'HOSPITALITY' ? normalizeHospitalityPlaceType(payload?.placeType) : null,
       category: partnerType === 'SERVICE_PROVIDER' ? normalizeDestinationListingCategory(payload?.category) : null,

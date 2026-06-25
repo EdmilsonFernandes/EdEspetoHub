@@ -1339,4 +1339,84 @@ describe('Destination Hub', () => {
     expect(partnerLoginRes.body.partner).toBeTruthy();
     expect(partnerLoginRes.body.resources?.length).toBeGreaterThan(0);
   });
+
+  it('creates a separate partner account when the customer declines to link (Fase 2a)', async () => {
+    const suffix = Date.now();
+    const customer = await registerCustomer({ fullName: 'Cliente Sem Vinculo', termsAccepted: true, lgpdAccepted: true });
+    await verifyEmailDirectly(customer.email);
+    const customerLogin = await loginCustomer(customer.email, customer.password);
+
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ name: `Destino Sem Vinculo ${suffix}`, slug: `destino-sem-vinculo-${suffix}`, city: 'São Francisco Xavier', state: 'SP' });
+
+    // Recusa o vínculo e usa um e-mail DIFERENTE do cliente → conta separada.
+    const otherEmail = testEmail('chale-separado');
+    const requestRes = await api
+      .post('/api/public/destination-partner-requests')
+      .set('Authorization', `Bearer ${customerLogin.token}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        partnerType: 'HOSPITALITY',
+        placeType: 'CHALE',
+        name: `Chalé Separado ${suffix}`,
+        responsibleName: 'Outro Responsável',
+        responsibleEmail: otherEmail,
+        responsiblePhone: '11999999999',
+        whatsapp: '11999999999',
+        linkToAccount: false,
+      });
+    expect(requestRes.status, JSON.stringify(requestRes.body)).toBe(201);
+
+    // Pedido NÃO vinculado.
+    const reqRow = await AppDataSource.query(
+      `SELECT user_id FROM destination_partner_requests WHERE id = $1`,
+      [requestRes.body.id]
+    );
+    expect(reqRow[0].user_id).toBeNull();
+
+    // Aprova → conta parceira separada (legado: invited, sem user_id).
+    const reviewRes = await api
+      .patch(`/api/admin/destination-partner-requests/${requestRes.body.id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ status: 'approved' });
+    expect(reviewRes.status).toBe(200);
+    const accountRow = await AppDataSource.query(
+      `SELECT user_id, status FROM destination_partner_accounts WHERE id = $1`,
+      [reviewRes.body.createdPartnerAccountId]
+    );
+    expect(accountRow[0].user_id).toBeNull();
+    expect(accountRow[0].status).toBe('invited');
+  });
+
+  it('rejects a separate account when the email already belongs to a customer (Fase 2a)', async () => {
+    const suffix = Date.now();
+    const customer = await registerCustomer({ fullName: 'Cliente Email Existente', termsAccepted: true, lgpdAccepted: true });
+    await verifyEmailDirectly(customer.email);
+    const customerLogin = await loginCustomer(customer.email, customer.password);
+
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ name: `Destino Email Existente ${suffix}`, slug: `destino-email-existente-${suffix}`, city: 'São Francisco Xavier', state: 'SP' });
+
+    // Recusa o vínculo MAS usa o MESMO e-mail do cliente → rejeitado (não pode duplicar).
+    const requestRes = await api
+      .post('/api/public/destination-partner-requests')
+      .set('Authorization', `Bearer ${customerLogin.token}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        partnerType: 'HOSPITALITY',
+        placeType: 'CHALE',
+        name: `Chalé Email Existente ${suffix}`,
+        responsibleName: 'Mesmo Cliente',
+        responsibleEmail: customer.email,
+        responsiblePhone: '11999999999',
+        whatsapp: '11999999999',
+        linkToAccount: false,
+      });
+    expect(requestRes.status).toBe(409);
+    expect(requestRes.body.code).toBe('DEST-014');
+  });
 });
