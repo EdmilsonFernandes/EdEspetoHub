@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { env } from '../../config/env';
 import { AppDataSource } from '../../config/database';
-import { activateSubscription, api, loginAdmin, registerStore, testEmail, verifyEmailDirectly } from '../helpers';
+import { activateSubscription, api, loginAdmin, loginCustomer, registerCustomer, registerStore, testEmail, verifyEmailDirectly } from '../helpers';
 
 const superAdminToken = () => jwt.sign({ sub: '00000000-0000-0000-0000-000000000001', role: 'SUPER_ADMIN' }, env.jwtSecret);
 
@@ -1269,5 +1269,74 @@ describe('Destination Hub', () => {
       .send({ identifier: claimedStore.email, password: claimedStore.password });
     expect(blockedAdminLoginRes.status).toBe(409);
     expect(blockedAdminLoginRes.body.code).toBe('AUTH-029');
+  });
+
+  it('associates an approved chale to the logged-in customer login (Fase 2a)', async () => {
+    const suffix = Date.now();
+
+    // 1. Cliente se registra, valida e-mail e loga.
+    const customer = await registerCustomer({ fullName: 'Cliente Dono Chalé', termsAccepted: true, lgpdAccepted: true });
+    await verifyEmailDirectly(customer.email);
+    const customerLogin = await loginCustomer(customer.email, customer.password);
+    expect(customerLogin.res.status, JSON.stringify(customerLogin.res.body)).toBe(200);
+    expect(customerLogin.token).toBeTruthy();
+
+    // 2. Cria um destino (admin).
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ name: `Destino Vínculo ${suffix}`, slug: `destino-vinculo-${suffix}`, city: 'São Francisco Xavier', state: 'SP' });
+    expect(destinationRes.status).toBe(201);
+
+    // 3. Solicita o chalé LOGADO como cliente (Bearer do cliente).
+    const requestRes = await api
+      .post('/api/public/destination-partner-requests')
+      .set('Authorization', `Bearer ${customerLogin.token}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        partnerType: 'HOSPITALITY',
+        placeType: 'CHALE',
+        name: `Chalé Vínculo ${suffix}`,
+        responsibleName: 'Cliente Dono',
+        responsibleEmail: customer.email,
+        responsiblePhone: '11999999999',
+        whatsapp: '11999999999',
+        deliveryInstructions: 'Confirmar casa pelo WhatsApp.',
+      });
+    expect(requestRes.status).toBe(201);
+
+    // 4. O pedido fica vinculado ao cliente.
+    const reqRow = await AppDataSource.query(
+      `SELECT user_id FROM destination_partner_requests WHERE id = $1`,
+      [requestRes.body.id]
+    );
+    expect(reqRow[0].user_id).toBeTruthy();
+
+    // 5. Aprova como admin.
+    const reviewRes = await api
+      .patch(`/api/admin/destination-partner-requests/${requestRes.body.id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ status: 'approved' });
+    expect(reviewRes.status).toBe(200);
+    expect(reviewRes.body.createdHospitalityPlaceId).toBeTruthy();
+    expect(reviewRes.body.createdPartnerAccountId).toBeTruthy();
+
+    // 6. A conta parceiro fica VINCULADA (user_id, ativa, sem senha própria).
+    const accountRow = await AppDataSource.query(
+      `SELECT user_id, status, password_hash FROM destination_partner_accounts WHERE id = $1`,
+      [reviewRes.body.createdPartnerAccountId]
+    );
+    expect(accountRow[0].user_id).toBeTruthy();
+    expect(accountRow[0].status).toBe('active');
+    expect(accountRow[0].password_hash).toBeNull();
+
+    // 7. O cliente entra no portal do parceiro com a MESMA senha de cliente.
+    const partnerLoginRes = await api
+      .post('/api/destination-partner/auth/login')
+      .send({ email: customer.email, password: customer.password });
+    expect(partnerLoginRes.status, JSON.stringify(partnerLoginRes.body)).toBe(200);
+    expect(partnerLoginRes.body.token).toBeTruthy();
+    expect(partnerLoginRes.body.partner).toBeTruthy();
+    expect(partnerLoginRes.body.resources?.length).toBeGreaterThan(0);
   });
 });

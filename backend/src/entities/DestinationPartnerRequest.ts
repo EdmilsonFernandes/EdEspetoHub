@@ -25,6 +25,11 @@ export class DestinationPartnerRequest {
   @Column({ name: 'destination_id' })
   destinationId!: string;
 
+  // Cliente (users) que fez a solicitacao logado — quando preenchido, o chalé
+  // fica vinculado a esse login na aprovacao (sem conta de parceiro separada).
+  @Column({ name: 'user_id', type: 'uuid', nullable: true })
+  userId?: string | null;
+
   @Column({ name: 'partner_type', type: 'text', default: 'HOSPITALITY' })
   partnerType!: string;
 

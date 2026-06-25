@@ -220,7 +220,7 @@ export class DestinationService {
     };
   }
 
-  async createPartnerRequest(payload: any) {
+  async createPartnerRequest(payload: any, actorUserId?: string | null) {
     const destinationResolution = await this.resolvePartnerRequestDestination(payload);
     const destination = destinationResolution.destination;
     if (!destination || (!destinationResolution.allowInactive && destination.active === false)) throw new AppError('DEST-001', 404);
@@ -287,6 +287,7 @@ export class DestinationService {
 
     const saved = await this.repository.savePartnerRequest({
       destinationId: destination.id,
+      userId: actorUserId || null,
       partnerType,
       placeType: partnerType === 'HOSPITALITY' ? normalizeHospitalityPlaceType(payload?.placeType) : null,
       category: partnerType === 'SERVICE_PROVIDER' ? normalizeDestinationListingCategory(payload?.category) : null,

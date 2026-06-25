@@ -140,7 +140,9 @@ export const destinationService = {
   },
 
   createPartnerRequest(payload: any) {
-    return apiClient.post('/public/destination-partner-requests', payload, { authMode: 'none' });
+    // Envia o token do cliente quando logado, para o backend VINCULAR o chalé
+    // ao login do cliente (Fase 2a). Sem login, segue anônimo (fluxo legado).
+    return apiClient.post('/public/destination-partner-requests', payload, { authMode: 'customer', skipAutoLogout: true });
   },
 
   adminOverview(params?: any) {

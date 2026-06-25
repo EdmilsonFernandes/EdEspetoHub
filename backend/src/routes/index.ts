@@ -236,7 +236,7 @@ routes.post('/public/condominium-access-requests', CondominiumController.createA
 routes.get('/public/condominiums/:slug', CondominiumController.getPublicBySlug);
 routes.get('/public/condominiums/:slug/stores', CondominiumController.listPublicStoresBySlug);
 routes.get('/public/destinations', DestinationController.listPublic);
-routes.post('/public/destination-partner-requests', DestinationController.createPartnerRequest);
+routes.post('/public/destination-partner-requests', hydrateAuthOptional, DestinationController.createPartnerRequest);
 routes.get('/public/destinations/:slug', DestinationController.getPublicBySlug);
 routes.get('/public/destinations/:slug/hospitality', DestinationController.listPublicHospitality);
 routes.get('/public/destinations/:slug/hospitality/:placeSlug', DestinationController.getPublicHospitalityPlace);

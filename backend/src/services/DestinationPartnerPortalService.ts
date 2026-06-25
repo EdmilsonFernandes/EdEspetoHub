@@ -9,6 +9,7 @@ import { DestinationPartnerAuditLog } from '../entities/DestinationPartnerAuditL
 import { DestinationPartnerInvite } from '../entities/DestinationPartnerInvite';
 import { DestinationPartnerPermission } from '../entities/DestinationPartnerPermission';
 import { HospitalityPlace } from '../entities/HospitalityPlace';
+import { User } from '../entities/User';
 import { AppError } from '../errors/AppError';
 import { isApproximateGeoPrecision, sameCoordinatePair } from '../utils/geoQuality';
 import {
@@ -34,6 +35,7 @@ type PartnerRequestLike = {
   responsibleEmail?: string | null;
   responsiblePhone?: string | null;
   name?: string | null;
+  userId?: string | null;
 };
 
 type RequestMeta = {
@@ -77,6 +79,7 @@ export class DestinationPartnerPortalService {
   private auditRepository = AppDataSource.getRepository(DestinationPartnerAuditLog);
   private placeRepository = AppDataSource.getRepository(HospitalityPlace);
   private listingRepository = AppDataSource.getRepository(DestinationListing);
+  private userRepository = AppDataSource.getRepository(User);
   private emailService = new EmailService();
 
   private hashToken(value: string) {
@@ -144,6 +147,45 @@ export class DestinationPartnerPortalService {
   private async ensureAccount(request: PartnerRequestLike) {
     const email = normalizeEmail(request.responsibleEmail);
     if (!email) throw new AppError('DPARTNER-001', 400);
+
+    const actorUserId = request.userId ? String(request.userId) : null;
+
+    // Cliente logado: reusa/cria conta de parceiro VINCULADA ao users. O parceiro
+    // autentica com a credencial de cliente — sem conta/senha própria e sem invite.
+    if (actorUserId) {
+      const linked = await this.accountRepository.findOne({ where: { userId: actorUserId } as any });
+      if (linked) {
+        if (linked.status !== 'active') {
+          linked.status = 'active';
+          linked.activatedAt = linked.activatedAt || new Date();
+          linked.mustChangePassword = false;
+          await this.accountRepository.save(linked);
+        }
+        return { account: linked, isNew: false };
+      }
+      // Conta legada com o mesmo email: vincula ao user em vez de criar nova.
+      const byEmail = await this.accountRepository.findOne({ where: { email } });
+      if (byEmail) {
+        byEmail.userId = actorUserId;
+        byEmail.status = 'active';
+        byEmail.activatedAt = byEmail.activatedAt || new Date();
+        byEmail.mustChangePassword = false;
+        await this.accountRepository.save(byEmail);
+        return { account: byEmail, isNew: false };
+      }
+      const created = await this.accountRepository.save(
+        this.accountRepository.create({
+          userId: actorUserId,
+          name: String(request.responsibleName || request.name || email).trim(),
+          email,
+          phone: String(request.responsiblePhone || '').trim() || null,
+          status: 'active',
+          activatedAt: new Date(),
+          mustChangePassword: false,
+        })
+      );
+      return { account: created, isNew: true };
+    }
 
     let account = await this.accountRepository.findOne({ where: { email } });
     if (!account) {
@@ -214,7 +256,8 @@ export class DestinationPartnerPortalService {
 
     let activationToken: string | null = null;
     let inviteSent = false;
-    if (!account.passwordHash || account.status !== 'active') {
+    // Conta vinculada (userId) não precisa de invite — o parceiro autentica via users.
+    if (!account.userId && (!account.passwordHash || account.status !== 'active')) {
       const inviteResult = await this.createInvite(account, input.reviewedBy);
       activationToken = inviteResult.token;
       // Dispara o e-mail de convite em segundo plano: um SMTP lento (Zoho) não
@@ -334,7 +377,26 @@ export class DestinationPartnerPortalService {
 
   async login(email: string, password: string) {
     const account = await this.accountRepository.findOne({ where: { email: normalizeEmail(email) } });
-    if (!account || account.status !== 'active' || !account.passwordHash) {
+    if (!account || account.status !== 'active') {
+      throw new AppError('DPARTNER-004', 401);
+    }
+
+    // Conta vinculada (userId): autentica contra users (credencial de cliente).
+    if (account.userId) {
+      const user = await this.userRepository.findOne({ where: { id: account.userId } });
+      if (!user || user.isActive === false || !user.password) {
+        throw new AppError('DPARTNER-004', 401);
+      }
+      const matches = await bcrypt.compare(String(password || ''), user.password);
+      if (!matches) throw new AppError('DPARTNER-004', 401);
+      account.lastLoginAt = new Date();
+      await this.accountRepository.save(account);
+      const resources = await this.listResourcesForAccount(account.id);
+      return this.buildSession(account, resources);
+    }
+
+    // Fluxo legado: senha própria da conta de parceiro.
+    if (!account.passwordHash) {
       throw new AppError('DPARTNER-004', 401);
     }
 

@@ -14,6 +14,11 @@ export class DestinationPartnerAccount {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
+  // Vinculo com a conta unificada (users). Quando preenchido, o parceiro
+  // autentica com as credenciais do cliente (users) em vez de senha própria.
+  @Column({ name: 'user_id', type: 'uuid', nullable: true })
+  userId?: string | null;
+
   @Column()
   name!: string;
 

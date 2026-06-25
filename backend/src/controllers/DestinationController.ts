@@ -51,7 +51,8 @@ export class DestinationController {
 
   static async createPartnerRequest(req: Request, res: Response) {
     try {
-      const payload = await destinationService.createPartnerRequest(req.body || {});
+      const actorUserId = req.auth?.role === 'CUSTOMER' ? String(req.auth.sub || '') : '';
+      const payload = await destinationService.createPartnerRequest(req.body || {}, actorUserId || undefined);
       return res.status(201).json(payload);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);
