@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';

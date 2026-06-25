@@ -1,6 +1,5 @@
-// @ts-nocheck
 import { useCallback, useEffect, useState } from 'react';
-import { CurrencyDollar, Sparkle } from '@phosphor-icons/react';
+import { Sparkle } from '@phosphor-icons/react';
 import { destinationPromotionService } from '../../services/destinationPromotionService';
 
 const formatBRL = (value: number) =>

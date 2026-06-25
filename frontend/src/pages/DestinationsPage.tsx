@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Buildings, Compass, MagnifyingGlass, MapTrifold, Mountains, Sparkle, X } from '@phosphor-icons/react';
