@@ -1419,4 +1419,158 @@ describe('Destination Hub', () => {
     expect(requestRes.status).toBe(409);
     expect(requestRes.body.code).toBe('DEST-014');
   });
+
+  it('rejects an anonymous request when the email already belongs to a customer (Fase 2a)', async () => {
+    const suffix = Date.now();
+    const customer = await registerCustomer({ fullName: 'Cliente Anonimo Email', termsAccepted: true, lgpdAccepted: true });
+    await verifyEmailDirectly(customer.email);
+
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ name: `Destino Anonimo ${suffix}`, slug: `destino-anonimo-${suffix}`, city: 'São Francisco Xavier', state: 'SP' });
+
+    // Anônimo (sem Authorization) usando e-mail que já é de cliente → rejeitado.
+    const requestRes = await api.post('/api/public/destination-partner-requests').send({
+      destinationId: destinationRes.body.id,
+      partnerType: 'HOSPITALITY',
+      placeType: 'CHALE',
+      name: `Chalé Anonimo ${suffix}`,
+      responsibleName: 'Outro',
+      responsibleEmail: customer.email,
+      responsiblePhone: '11999999999',
+      whatsapp: '11999999999',
+    });
+    expect(requestRes.status).toBe(409);
+    expect(requestRes.body.code).toBe('DEST-014');
+  });
+
+  it('links a SERVICE_PROVIDER (listing) to the logged-in customer login too (Fase 2a)', async () => {
+    const suffix = Date.now();
+    const customer = await registerCustomer({ fullName: 'Cliente Servico', termsAccepted: true, lgpdAccepted: true });
+    await verifyEmailDirectly(customer.email);
+    const customerLogin = await loginCustomer(customer.email, customer.password);
+
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ name: `Destino Servico Vinc ${suffix}`, slug: `destino-servico-vinc-${suffix}`, city: 'São Bento do Sapucaí', state: 'SP' });
+
+    const requestRes = await api
+      .post('/api/public/destination-partner-requests')
+      .set('Authorization', `Bearer ${customerLogin.token}`)
+      .send({
+        destinationId: destinationRes.body.id,
+        partnerType: 'SERVICE_PROVIDER',
+        category: 'SERVICO',
+        name: `Restaurante Vinc ${suffix}`,
+        responsibleName: 'Cliente Dono',
+        responsibleEmail: customer.email,
+        responsiblePhone: '11999999999',
+        whatsapp: '11999999999',
+        description: 'Restaurante.',
+        linkToAccount: true,
+      });
+    expect(requestRes.status, JSON.stringify(requestRes.body)).toBe(201);
+
+    const reviewRes = await api
+      .patch(`/api/admin/destination-partner-requests/${requestRes.body.id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ status: 'approved' });
+    expect(reviewRes.status, JSON.stringify(reviewRes.body)).toBe(200);
+    expect(reviewRes.body.createdPartnerAccountId).toBeTruthy();
+
+    // Conta vinculada + ativa.
+    const accountRow = await AppDataSource.query(
+      `SELECT user_id, status FROM destination_partner_accounts WHERE id = $1`,
+      [reviewRes.body.createdPartnerAccountId]
+    );
+    expect(accountRow[0].user_id).toBeTruthy();
+    expect(accountRow[0].status).toBe('active');
+
+    // Entra no portal com a senha de cliente e vê o serviço.
+    const partnerLoginRes = await api
+      .post('/api/destination-partner/auth/login')
+      .send({ email: customer.email, password: customer.password });
+    expect(partnerLoginRes.status).toBe(200);
+    expect(partnerLoginRes.body.resources?.length).toBeGreaterThan(0);
+  });
+
+  it('reuses a legacy partner account when the customer later links with the same email (Fase 2a)', async () => {
+    const suffix = Date.now();
+    const legacyEmail = testEmail('chale-legado');
+
+    // 1. Conta parceira LEGADA (anônima, com invite) — sem user_id.
+    const destinationRes = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ name: `Destino Legado ${suffix}`, slug: `destino-legado-${suffix}`, city: 'São Francisco Xavier', state: 'SP' });
+    const legacyReq = await api.post('/api/public/destination-partner-requests').send({
+      destinationId: destinationRes.body.id,
+      partnerType: 'HOSPITALITY',
+      placeType: 'CHALE',
+      name: `Chalé Legado ${suffix}`,
+      responsibleName: 'Legado',
+      responsibleEmail: legacyEmail,
+      responsiblePhone: '11999999999',
+      whatsapp: '11999999999',
+    });
+    expect(legacyReq.status).toBe(201);
+    const legacyReview = await api
+      .patch(`/api/admin/destination-partner-requests/${legacyReq.body.id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ status: 'approved' });
+    const legacyAccountId = legacyReview.body.createdPartnerAccountId;
+    expect(legacyAccountId).toBeTruthy();
+    const legacyRow = await AppDataSource.query(
+      `SELECT user_id FROM destination_partner_accounts WHERE id = $1`,
+      [legacyAccountId]
+    );
+    expect(legacyRow[0].user_id).toBeNull();
+
+    // 2. Cliente criado com o MESMO e-mail da conta legada.
+    //    (registerCustomer retorna o email gerado, então usamos legacyEmail direto.)
+    const customer = await registerCustomer({ fullName: 'Cliente Legado', email: legacyEmail, termsAccepted: true, lgpdAccepted: true });
+    await verifyEmailDirectly(legacyEmail);
+    const customerLogin = await loginCustomer(legacyEmail, customer.password);
+    expect(customerLogin.token).toBeTruthy();
+
+    // 3. Solicita OUTRO chalé vinculado → a conta legada é reutilizada (byEmail) e vinculada.
+    const dest2 = await api
+      .post('/api/admin/destinations')
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ name: `Destino Legado 2 ${suffix}`, slug: `destino-legado-2-${suffix}`, city: 'São Francisco Xavier', state: 'SP' });
+    const linkReq = await api
+      .post('/api/public/destination-partner-requests')
+      .set('Authorization', `Bearer ${customerLogin.token}`)
+      .send({
+        destinationId: dest2.body.id,
+        partnerType: 'HOSPITALITY',
+        placeType: 'CHALE',
+        name: `Chalé Vinc Legado ${suffix}`,
+        responsibleName: 'Cliente',
+        responsibleEmail: legacyEmail,
+        responsiblePhone: '11999999999',
+        whatsapp: '11999999999',
+        linkToAccount: true,
+      });
+    expect(linkReq.status).toBe(201);
+
+    await api
+      .patch(`/api/admin/destination-partner-requests/${linkReq.body.id}/review`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ status: 'approved' });
+
+    // A conta reusada (mesmo email) agora tem user_id e não duplicou.
+    const reusedRow = await AppDataSource.query(
+      `SELECT user_id FROM destination_partner_accounts WHERE lower(email) = lower($1)`,
+      [legacyEmail]
+    );
+    expect(reusedRow[0].user_id).toBeTruthy();
+    const countRow = await AppDataSource.query(
+      `SELECT count(*)::int AS n FROM destination_partner_accounts WHERE lower(email) = lower($1)`,
+      [legacyEmail]
+    );
+    expect(countRow[0].n).toBe(1);
+  });
 });
