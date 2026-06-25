@@ -25,9 +25,13 @@ export const resolveAssetUrl = (value?: string) => {
   // IMPORTANTE: Usamos sem 'www.' para garantir consistência com a configuração que você informou
   const productionDomain = 'https://janocaminho.com.br';
   
-  // LOG PARA DEBUG NO APK
-  const isMobile = typeof window !== 'undefined' && 
-    (window.location.origin.includes('localhost') || window.location.origin.startsWith('capacitor://'));
+  // No APK o webview roda em capacitor:// ou ionic://, fora do origin do servidor,
+  // então URLs relativas precisam resolver contra o domínio de produção.
+  // IMPORTANTE: localhost NÃO é mobile — é o dev web local. Tratar localhost como
+  // mobile fazia /uploads/... (imagens salvas localmente) serem reescritas para o
+  // domínio de produção, onde o arquivo não existe → 404.
+  const isMobile = typeof window !== 'undefined' &&
+    (window.location.origin.startsWith('capacitor://') || window.location.origin.startsWith('ionic://'));
 
   // 1. Se for uma URL absoluta
   if (isAbsoluteUrl(value)) {
