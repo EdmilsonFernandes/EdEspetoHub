@@ -31,6 +31,11 @@ const INVALID_CREDENTIALS_PATTERNS = [
   /login.*inv[aá]lid/i,
 ];
 
+// Codigos de erro de credenciais invalidas em endpoints de login (o backend
+// nem sempre envia uma mensagem que casa com os patterns acima, e sem isso o
+// 401 cai no fallback "sessao expirou" — confuso numa tela de login).
+const INVALID_CREDENTIALS_CODES = ['AUTH-004', 'DPARTNER-004'];
+
 const SESSION_ERROR_PATTERNS = [
   /jwt expired/i,
   /invalid token/i,
@@ -88,7 +93,7 @@ export const normalizeUserFacingError = (
     return 'Sua conta ainda precisa ser ativada. Reenvie o código e confirme o e-mail para continuar.';
   }
 
-  if (INVALID_CREDENTIALS_PATTERNS.some((pattern) => pattern.test(message))) {
+  if (INVALID_CREDENTIALS_CODES.includes(code) || INVALID_CREDENTIALS_PATTERNS.some((pattern) => pattern.test(message))) {
     return 'E-mail, usuário ou senha incorretos. Confira os dados e tente de novo.';
   }
 

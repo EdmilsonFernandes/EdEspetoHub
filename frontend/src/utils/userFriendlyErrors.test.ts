@@ -36,6 +36,15 @@ describe('userFriendlyErrors', () => {
     );
   });
 
+  it('trata login do parceiro (DPARTNER-004) como credenciais, nao sessao expirada', () => {
+    expect(normalizeUserFacingError(Object.assign(new Error('DPARTNER-004'), { status: 401, code: 'DPARTNER-004' }))).toBe(
+      'E-mail, usuário ou senha incorretos. Confira os dados e tente de novo.'
+    );
+    expect(normalizeUserFacingError(Object.assign(new Error('AUTH-004'), { status: 401, code: 'AUTH-004' }))).toBe(
+      'E-mail, usuário ou senha incorretos. Confira os dados e tente de novo.'
+    );
+  });
+
   it('nao confunde conta sem ativacao com senha errada', () => {
     expect(normalizeUserFacingError(Object.assign(new Error('E-mail não verificado.'), { status: 401, code: 'AUTH-005' }))).toBe(
       'Sua conta ainda precisa ser ativada. Reenvie o código e confirme o e-mail para continuar.'
