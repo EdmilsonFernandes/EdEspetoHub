@@ -285,8 +285,8 @@ function PartnerLogin({ onLoggedIn }: { onLoggedIn: (session: any) => void }) {
             <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
           </div>
           <p className="mt-3 text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]/75">Acesso do parceiro</p>
-          <h1 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">Atualize sua presença no app</h1>
-          <p className="mx-auto mt-2 max-w-sm text-sm font-semibold leading-6 text-slate-500">Gerencie fotos, contatos e informações permitidas pelo Super Admin.</p>
+          <h1 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">Entrar no portal do parceiro</h1>
+          <p className="mx-auto mt-2 max-w-sm text-sm font-semibold leading-6 text-slate-500">Acesse para atualizar fotos, contatos e informações do seu chalé, pousada ou serviço.</p>
         </div>
 
         <div className="space-y-3">

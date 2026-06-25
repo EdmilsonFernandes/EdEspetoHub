@@ -12,13 +12,13 @@ import {
   Headset,
   MapTrifold,
   Buildings,
+  Briefcase,
   RocketLaunch,
   SignOut,
   ShieldCheckered,
   UserCircle,
   UserRectangle,
   CaretRight,
-  Fingerprint,
   X
 } from '@phosphor-icons/react';
 import {
@@ -242,11 +242,6 @@ export function ProfileDrawer({
     if (profile.hasSession) return 'Disponível neste aparelho';
     return 'Entrar';
   };
-  const getCompactAccessStateLabel = (profile: { biometric: boolean; hasSession: boolean }) => {
-    if (profile.biometric) return 'Rápido';
-    if (profile.hasSession) return 'Disponível';
-    return 'Entrar';
-  };
 
   const accessProfiles: AccessProfile[] = [
     {
@@ -408,53 +403,6 @@ export function ProfileDrawer({
           ? 'client'
           : 'neutral';
 
-  const quickSwitchAccess = accessProfiles
-    .filter((item) => hasActiveContext && item.id !== activeContext)
-    .map((item) => {
-      const profile =
-        item.id === 'client'
-          ? savedAccessProfiles.customer
-          : item.id === 'store'
-            ? savedAccessProfiles.admin
-            : savedAccessProfiles.motoboy;
-
-      return {
-        id: item.id,
-        label: item.id === 'client' ? 'Cliente' : item.id === 'store' ? 'Loja' : 'Entrega',
-        description:
-          item.id === 'client'
-            ? 'Conta e pedidos'
-            : item.id === 'store'
-              ? 'Painel do lojista'
-              : 'Rotas e coletas',
-        state: getCompactAccessStateLabel(profile),
-        stateIcon: profile.biometric
-          ? <Fingerprint size={13} weight="duotone" />
-          : profile.hasSession
-            ? <CheckCircle size={13} weight="fill" />
-            : <CaretRight size={13} weight="bold" />,
-        icon: item.id === 'client' ? <UserCircle size={23} weight="duotone" /> : item.id === 'store' ? <Storefront size={23} weight="duotone" /> : <Motorcycle size={23} weight="duotone" />,
-        shell:
-          item.id === 'store'
-            ? 'border-[#d8e5ee] bg-[linear-gradient(135deg,#ffffff_0%,#f1f7fb_100%)] text-slate-950 shadow-[0_14px_28px_-24px_rgba(51,104,134,0.28)]'
-            : 'border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f6f9fb_100%)] text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.22)]',
-        iconClass:
-          item.id === 'store'
-            ? 'bg-white/88 text-[#336886] ring-1 ring-[#d8e5ee]'
-            : 'bg-white/88 text-slate-700 ring-1 ring-slate-200',
-        stateClass:
-          profile.biometric || profile.hasSession
-            ? item.id === 'store'
-              ? 'text-[#336886]'
-              : 'text-slate-700'
-            : 'text-slate-500',
-        onClick: () => {
-          item.action();
-          onClose();
-        },
-      };
-    });
-
   const getAccessCardClasses = (item: AccessProfile) => {
     if (item.current) {
       return {
@@ -590,37 +538,26 @@ export function ProfileDrawer({
                   </div>
                 </div>
               </div>
-              {quickSwitchAccess.length > 0 ? (
-                <section className="relative overflow-hidden rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] p-3.5 shadow-[0_18px_34px_-26px_rgba(51,104,134,0.24)]">
-                  <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
-                  <div className="relative mb-2.5">
-                    <p className="text-[11px] font-bold tracking-tight text-slate-400">{currentIdentity.switchTitle}</p>
-                    {currentIdentity.switchHint ? (
-                      <p className="mt-1 text-[10px] font-semibold leading-4 text-slate-500">{currentIdentity.switchHint}</p>
-                    ) : null}
-                  </div>
-
-                  <div className="relative grid gap-2">
-                    {quickSwitchAccess.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={item.onClick}
-                        className={`group relative flex w-full items-center gap-3 rounded-[1.2rem] border px-3 py-3 pr-9 text-left transition-all active:scale-[0.98] ${item.shell}`}
-                      >
-                        <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition-transform group-active:scale-95 ${item.iconClass}`}>
-                          {item.icon}
-                        </span>
-                        <span className="min-w-0 flex-1 pt-0.5">
-                          <span className="block truncate text-[14px] font-black leading-tight">{item.label}</span>
-                          <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-600">{item.description}</span>
-                        </span>
-                        <CaretRight size={14} weight="bold" className="absolute right-3 top-3 text-slate-400/80 transition-transform group-active:translate-x-0.5" />
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
+              <button
+                type="button"
+                onClick={() => { setAccessPickerMode('login'); setHighlightFirstAccess(false); setAccessPickerOpen(true); }}
+                className="group flex w-full items-center gap-3 rounded-[1.3rem] border border-[#d7e7ef]/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] px-3.5 py-3 text-left shadow-[0_14px_30px_-26px_rgba(21,58,76,0.28)] transition-all active:scale-[0.98]"
+              >
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(21,58,76,0.36)]">
+                  <Briefcase size={19} weight="duotone" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[12px] font-black uppercase tracking-[0.1em] text-[#153A4C]">
+                    {activeContext === 'client' ? 'Sou um profissional' : 'Trocar de perfil'}
+                  </span>
+                  <span className="mt-0.5 block text-[10.5px] font-semibold leading-4 text-slate-500">
+                    {activeContext === 'client'
+                      ? 'Lojista, entregador, parceiro ou condomínio'
+                      : 'Cliente, outro profissional ou gestão'}
+                  </span>
+                </span>
+                <CaretRight size={15} weight="bold" className="shrink-0 text-[#336886]/60 transition-transform group-active:translate-x-0.5" />
+              </button>
             </div>
           ) : (
             <div className="space-y-2.5">
