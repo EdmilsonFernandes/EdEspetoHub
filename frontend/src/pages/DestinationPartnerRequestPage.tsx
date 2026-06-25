@@ -242,6 +242,23 @@ export function DestinationPartnerRequestPage() {
   const [newDestinationCitiesLoading, setNewDestinationCitiesLoading] = useState(false);
   const [newDestinationCityError, setNewDestinationCityError] = useState('');
 
+  // Deteca se o solicitante está logado como cliente — pra oferecer o vínculo.
+  const customerSession = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('customerSession');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed?.token) return null;
+      return {
+        name: String(parsed?.customer?.fullName || parsed?.customer?.name || '').trim(),
+        email: String(parsed?.customer?.email || '').trim(),
+      };
+    } catch {
+      return null;
+    }
+  }, []);
+  const [linkToAccount, setLinkToAccount] = useState(true);
+
   useEffect(() => {
     let active = true;
     destinationService
@@ -510,6 +527,7 @@ export function DestinationPartnerRequestPage() {
         state: form.state || destinationState,
         requestSource: form.requestSource || (hospitalityClaim ? 'hospitality_place_claim' : ''),
         claimedHospitalityPlaceId: form.claimedHospitalityPlaceId || hospitalityClaim?.placeId || '',
+        linkToAccount: customerSession ? linkToAccount : undefined,
       });
       setSuccess(payload);
       setForm((current) => ({
@@ -569,6 +587,43 @@ export function DestinationPartnerRequestPage() {
               subtitle="Preencha os dados públicos e informe quem será responsável pelo acesso."
               action={<Compass size={28} weight="duotone" className="text-[#336886]" />}
             />
+
+            {customerSession ? (
+              <SurfaceCard tone="brand" padding="md" className="mt-4 rounded-2xl">
+                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Vincular ao seu login</p>
+                <p className="mt-1 text-sm font-bold text-slate-800">
+                  Você está logado como <strong>{customerSession.name || customerSession.email}</strong>{customerSession.name ? ` (${customerSession.email})` : ''}.
+                </p>
+                <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
+                  Vincular o chalé a esta conta evita criar login e senha novos — você acessa tudo com o mesmo login de cliente.
+                </p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setLinkToAccount(true)}
+                    className={`jnc-ds-touch rounded-2xl border px-3 py-2.5 text-left text-sm font-black transition ${linkToAccount ? 'border-[#336886] bg-[#336886]/10 text-[#153A4C]' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}
+                  >
+                    <CheckCircle size={16} weight="fill" className="mb-1" />
+                    Sim, vincular
+                    <span className="mt-0.5 block text-[10px] font-semibold text-slate-500">Recomendado · sem conta nova</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLinkToAccount(false)}
+                    className={`jnc-ds-touch rounded-2xl border px-3 py-2.5 text-left text-sm font-black transition ${!linkToAccount ? 'border-[#336886] bg-[#336886]/10 text-[#153A4C]' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}
+                  >
+                    <LinkSimpleHorizontal size={16} weight="bold" className="mb-1" />
+                    Não, outro e-mail
+                    <span className="mt-0.5 block text-[10px] font-semibold text-slate-500">Conta separada</span>
+                  </button>
+                </div>
+                {!linkToAccount ? (
+                  <p className="mt-2 text-[11px] font-bold leading-relaxed text-amber-700">
+                    Conta separada não pode usar o mesmo e-mail do seu login. Informe abaixo um e-mail diferente.
+                  </p>
+                ) : null}
+              </SurfaceCard>
+            ) : null}
 
             {error ? (
               <SurfaceCard padding="md" className="mt-4 rounded-2xl border-rose-100 bg-rose-50 text-sm font-bold text-rose-700 shadow-none">
