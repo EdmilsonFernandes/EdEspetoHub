@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CheckCircle, Sparkle, X } from '@phosphor-icons/react';
 import { PaymentQRCard } from '../common/PaymentQRCard';
@@ -35,7 +34,6 @@ export function DestinationPromotionPanel() {
   const [creating, setCreating] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [paymentPromo, setPaymentPromo] = useState<DestinationPromotion | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const resources = useMemo<ResourceLite[]>(() => {
     const session = destinationPartnerPortalService.getSession();

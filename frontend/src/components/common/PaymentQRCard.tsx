@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { memo, useEffect, useRef, useState } from 'react';
 import { CheckCircle, Copy, Timer } from '@phosphor-icons/react';
 
@@ -91,7 +90,6 @@ export const PaymentQRCard = memo(function PaymentQRCard({
     }
   }, [isPaid, onPaid]);
 
-  const pct = expiryMs > 0 ? Math.max(0, Math.min(100, (remainingMs / (expiryMs - (expiryMs - Math.min(expiryMs, Date.now())))))) : 0;
   const tone =
     remainingMs <= 60_000 ? 'rose' : remainingMs <= 180_000 ? 'amber' : 'emerald';
 

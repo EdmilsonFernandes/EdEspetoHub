@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -21,7 +20,7 @@ export function OpeningHoursCard() {
 
   const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
 
-  const updateDay = (day, field, value) => {
+  const updateDay = (day: any, field: any, value: any) => {
     setOpeningHours((prev) =>
       prev.map((entry) =>
         entry.day === day ? { ...entry, [field]: value } : entry
@@ -29,7 +28,7 @@ export function OpeningHoursCard() {
     );
   };
 
-  const updateInterval = (day, index, field, value) => {
+  const updateInterval = (day: any, index: any, field: any, value: any) => {
     setOpeningHours((prev) =>
       prev.map((entry) => {
         if (entry.day !== day) return entry;
@@ -41,7 +40,7 @@ export function OpeningHoursCard() {
     );
   };
 
-  const addInterval = (day) => {
+  const addInterval = (day: any) => {
     setOpeningHours((prev) =>
       prev.map((entry) => {
         if (entry.day !== day) return entry;
@@ -54,7 +53,7 @@ export function OpeningHoursCard() {
     );
   };
 
-  const removeInterval = (day, index) => {
+  const removeInterval = (day: any, index: any) => {
     setOpeningHours((prev) =>
       prev.map((entry) => {
         if (entry.day !== day) return entry;

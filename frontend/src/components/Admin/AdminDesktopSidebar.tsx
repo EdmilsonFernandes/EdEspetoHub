@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CaretDown, SignOut } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../common/PlatformTrustFooter';
 
@@ -38,7 +37,6 @@ export function AdminDesktopSidebar({
 
   const groupedSections = useMemo(() => {
     const byId = new Map((items || []).map((item) => [item.id, item]));
-    const pick = (id: string) => byId.get(id);
     const consumeIds = new Set<string>();
     const consume = (id: string) => {
       if (byId.has(id)) consumeIds.add(id);

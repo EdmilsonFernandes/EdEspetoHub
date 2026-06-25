@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Drawer } from 'vaul';
 import { Capacitor } from '@capacitor/core';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Buildings, CheckCircle, ImageSquare, PaperPlaneTilt, UploadSimple } from '@phosphor-icons/react';
@@ -158,7 +157,7 @@ export function CondominiumAccessRequest() {
               { key: 'bannerFile', label: 'Banner de capa', icon: Buildings },
             ].map((item) => {
               const Icon = item.icon;
-              const preview = form[item.key];
+              const preview = (form as any)[item.key];
               return (
                 <label key={item.key} className="group cursor-pointer overflow-hidden rounded-[1.35rem] border border-dashed border-slate-300 bg-white p-3 transition hover:border-[#336886] hover:bg-[#fafdff]">
                   <input type="file" accept="image/*" className="hidden" onChange={(event) => handleAsset(item.key as any, event.target.files?.[0])} />
