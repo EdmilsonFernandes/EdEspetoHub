@@ -53,6 +53,12 @@ export function createProxyRoutes(): Router {
     r.get('/destination-partner/resources', authRequired, forward);
     r.patch('/destination-partner/hospitality-places/:placeId', authRequired, forward);
     r.patch('/destination-partner/listings/:listingId', authRequired, forward);
+    // Destination partner promotions (destaque pago)
+    r.get('/destination-partner/promotions/pricing', authRequired, forward);
+    r.post('/destination-partner/promotions', authRequired, forward);
+    r.get('/destination-partner/promotions', authRequired, forward);
+    r.post('/destination-partner/promotions/:id/refresh', authRequired, forward);
+    r.post('/destination-partner/promotions/:id/cancel', authRequired, forward);
     // Legal (public)
     r.get('/legal/terms', forward); r.get('/legal/lgpd', forward);
     // Public platform / discovery
