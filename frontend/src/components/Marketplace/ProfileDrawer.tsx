@@ -10,6 +10,8 @@ import {
   CookingPot,
   Motorcycle,
   Headset,
+  MapTrifold,
+  Buildings,
   RocketLaunch,
   SignOut,
   ShieldCheckered,
@@ -64,7 +66,7 @@ type ProfileDrawerProps = {
 };
 
 type AccessProfile = {
-  id: 'client' | 'store' | 'motoboy';
+  id: 'client' | 'store' | 'motoboy' | 'parceiro' | 'condominio';
   title: string;
   subtitle: string;
   icon: ReactNode;
@@ -284,6 +286,22 @@ export function ProfileDrawer({
       action: onOpenMotoboyLogin,
       ready: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession,
     },
+    {
+      id: 'parceiro',
+      title: 'Parceiro',
+      subtitle: 'Chalés, pousadas, serviços e turismo local',
+      icon: <MapTrifold size={24} weight="duotone" />,
+      action: () => { drawerNavigate('/parceiro'); },
+      ready: false,
+    },
+    {
+      id: 'condominio',
+      title: 'Condomínio',
+      subtitle: 'Feiras, eventos locais e gestão do condomínio',
+      icon: <Buildings size={24} weight="duotone" />,
+      action: () => { drawerNavigate('/condominio/login'); },
+      ready: false,
+    },
   ];
   const activeContext: DrawerContext = isLogged ? 'client' : isAdmin ? 'store' : isMotoboy ? 'motoboy' : 'guest';
   const hasActiveContext = activeContext !== 'guest';
@@ -304,7 +322,7 @@ export function ProfileDrawer({
             { label: 'Conectado', tone: 'success' as const },
           ],
           switchTitle: 'Outros acessos',
-          switchHint: 'Lojista e entregador aparecem aqui.',
+          switchHint: 'Lojista, entregador, parceiro e condomínio aparecem aqui.',
         }
       : activeContext === 'store'
         ? {
@@ -659,7 +677,7 @@ export function ProfileDrawer({
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-[11px] font-black uppercase tracking-[0.12em] text-[#153A4C]">Sou profissional</span>
-                  <span className="mt-0.5 block text-[10.5px] font-semibold leading-4 text-slate-500">Lojista, entregador ou operação</span>
+                  <span className="mt-0.5 block text-[10.5px] font-semibold leading-4 text-slate-500">Lojista, entregador, parceiro ou condomínio</span>
                 </span>
                 <CaretRight size={15} weight="bold" className="shrink-0 text-[#336886]/60 transition-transform group-active:translate-x-0.5" />
               </button>

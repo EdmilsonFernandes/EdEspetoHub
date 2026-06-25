@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Buildings, Scooter, Storefront, UserCircle } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Buildings, MapTrifold, Scooter, Storefront, UserCircle } from '@phosphor-icons/react';
 import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthLayout } from '../layouts/AuthLayout';
@@ -53,6 +53,17 @@ export function AccessPortal() {
       iconTone: 'text-[#153A4C]',
       badgeTone: 'border-amber-100 bg-amber-50 text-amber-700',
       route: appendContext('/motoboy/login', true),
+    },
+    {
+      id: 'parceiro',
+      title: 'Parceiro',
+      description: 'Chalés, pousadas, serviços e turismo local.',
+      icon: MapTrifold,
+      eyebrow: 'Destinos e turismo',
+      accent: 'from-[#153A4C]/12 via-[#336886]/6 to-transparent',
+      iconTone: 'text-[#153A4C]',
+      badgeTone: 'border-sky-100 bg-sky-50 text-sky-700',
+      route: '/parceiro',
     },
     {
       id: 'condominio',
