@@ -44,7 +44,7 @@ test.describe('Solicitação de parceiro de destinos', () => {
     await page.getByLabel('WhatsApp do responsável').fill('12999998888');
     await page.getByRole('button', { name: 'Enviar para aprovação' }).click();
 
-    await expect(page.getByText('Recebemos sua solicitação.')).toBeVisible();
+    await expect(page.getByText('Recebemos sua solicitação')).toBeVisible();
     expect(submittedPayload).toMatchObject({
       destinationId: 'destination-sao-bento',
       destinationCity: 'São Bento do Sapucaí',
