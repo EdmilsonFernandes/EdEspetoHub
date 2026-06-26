@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Bed, CheckCircle, Compass, Handshake, ImageSquare, LinkSimpleHorizontal, Sparkle, UploadSimple } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { Button, Chip, SectionHeader, SurfaceCard, TextareaField, TextField } from '../components/ui';
@@ -202,6 +202,7 @@ export function DestinationPartnerRequestPage() {
   const firstPartnerControlRef = useRef<HTMLSelectElement | null>(null);
   const initialFocusAppliedRef = useRef(false);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const hospitalityClaimKey = searchParams.toString();
   const hospitalityClaim = useMemo(() => {
     if (String(searchParams.get('source') || '').trim() !== 'hospitality_place_claim') return null;
@@ -243,21 +244,34 @@ export function DestinationPartnerRequestPage() {
   const [newDestinationCityError, setNewDestinationCityError] = useState('');
 
   // Deteca se o solicitante está logado como cliente — pra oferecer o vínculo.
+  // A sessão pode estar na chave base (customerSession) OU namespaced por loja
+  // (customerSession:slug), então escaneamos todas as chaves customerSession*.
   const customerSession = useMemo(() => {
     try {
-      const raw = localStorage.getItem('customerSession');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed?.token) return null;
+      let best: { token?: string; user?: any; customer?: any } | null = null;
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (!key || !key.startsWith('customerSession')) continue;
+        let parsed: any;
+        try { parsed = JSON.parse(localStorage.getItem(key) || '{}'); } catch { continue; }
+        if (!parsed?.token || !parsed?.user) continue;
+        if (!best || (parsed.user.email && !best.user?.email)) {
+          best = parsed;
+          if (parsed.user.email) break;
+        }
+      }
+      if (!best) return null;
+      const profile = best.user || best.customer || {};
       return {
-        name: String(parsed?.customer?.fullName || parsed?.customer?.name || '').trim(),
-        email: String(parsed?.customer?.email || '').trim(),
+        name: String(profile.fullName || profile.name || '').trim(),
+        email: String(profile.email || '').trim(),
       };
     } catch {
       return null;
     }
   }, []);
   const [linkToAccount, setLinkToAccount] = useState(true);
+  const [linkSuggestionEmail, setLinkSuggestionEmail] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -541,7 +555,15 @@ export function DestinationPartnerRequestPage() {
       }));
       if (isNewDestination && destinations.length) setDestinationMode('existing');
     } catch (err: any) {
-      setError(err?.message || 'Não foi possível enviar cadastro.');
+      const code = String(err?.code || '').toUpperCase();
+      if (code === 'DEST-014') {
+        // E-mail já é de uma conta: orienta a entrar pra vincular (ou trocar e-mail).
+        setLinkSuggestionEmail(String(form.responsibleEmail || '').trim());
+        setError('Este e-mail já é de uma conta no Já no Caminho. Entre com ele para vincular o chalé a essa conta (sem criar login novo) — ou use outro e-mail abaixo.');
+      } else {
+        setLinkSuggestionEmail('');
+        setError(err?.message || 'Não foi possível enviar cadastro.');
+      }
     } finally {
       setSaving(false);
     }
@@ -627,7 +649,26 @@ export function DestinationPartnerRequestPage() {
 
             {error ? (
               <SurfaceCard padding="md" className="mt-4 rounded-2xl border-rose-100 bg-rose-50 text-sm font-bold text-rose-700 shadow-none">
-                {error}
+                <p className="leading-relaxed">{error}</p>
+                {linkSuggestionEmail ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => navigate(`/cliente?next=${encodeURIComponent('/destinos/cadastrar')}&reason=link_partner`)}
+                    >
+                      Entrar para vincular o chalé
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => { setLinkSuggestionEmail(''); setError(''); }}
+                    >
+                      Usar outro e-mail
+                    </Button>
+                  </div>
+                ) : null}
               </SurfaceCard>
             ) : null}
             {success ? (
