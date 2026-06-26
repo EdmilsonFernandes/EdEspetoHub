@@ -117,4 +117,5 @@ temp_search.txt
 # ========================
 # AI / Tooling
 # ========================
-.claude/
+.claude/*
+!.claude/*.md

@@ -3,6 +3,16 @@
 > **Guia completo**: `.ai/SKILL.md` (arquitetura, deploy, migrations, operações, integrações).
 > **Graphify**: knowledge graph em `graphify-out/` — use `graphify query "<pergunta>"` para navegar o código.
 
+## 📂 Framework `.claude/` (ler on-demand conforme a tarefa)
+Documentação modular — **não** carregada toda sessão (contexto leve); ler quando relevante:
+- [`STARTUP.md`](.claude/STARTUP.md) — bootstrap + sequência de inicialização + estado real dos MCPs.
+- [`AGENTS.md`](.claude/AGENTS.md) — papel de cada MCP (Graphify/Serena/GSD/Context7) + fallbacks.
+- [`GRAPH_RULES.md`](.claude/GRAPH_RULES.md) — consultar o grafo antes de alterar (impacto/reuso/duplicação).
+- [`ARCHITECTURE.md`](.claude/ARCHITECTURE.md) — multi-serviço, ports, BFF, deploy com approval, migrations TypeORM.
+- [`DESIGN_SYSTEM.md`](.claude/DESIGN_SYSTEM.md) — identidade (azul `#2f9df7`/verde `#5fd35a`/laranja), Tailwind 4, UI.
+- [`TASK_RULES.md`](.claude/TASK_RULES.md) — pipeline + validação + definição de "concluído".
+> **Regra operacional principal**: `.ai/agent-rules.md`. **Ops profundo**: `.ai/SKILL.md`.
+
 ## Stack (NÃO MUDAR SEM PENSAR)
 - **Frontend**: React 19 + Vite 6 + TypeScript 5.7 + Tailwind CSS 4 + Capacitor 7 (porta 8080)
 - **Backend**: Express 4 + TypeORM 0.3 + PostgreSQL 16 + Redis 7 (porta 4000)
