@@ -9,6 +9,7 @@ import { CustomerEmailOtp } from '../entities/CustomerEmailOtp';
 import { User } from '../entities/User';
 import { Order } from '../entities/Order';
 import { EmailService } from './EmailService';
+import { userIdentityService } from './UserIdentityService';
 import { PushNotificationService } from './PushNotificationService';
 import { saveBase64Image } from '../utils/imageStorage';
 import { OrderService } from './OrderService';
@@ -611,6 +612,8 @@ async register(
       lgpdAcceptedAt: new Date(),
     } as Partial<User>);
     const saved = await userRepo.save(user);
+    // Identidade unificada: registra o email como identificador (validador "já tem conta?").
+    void userIdentityService.addIdentifier(saved.id, 'EMAIL', saved.email, Boolean(saved.emailVerified));
     const delivery = await this.sendCustomerEmailOtp(saved, meta);
     void this.notifySignupAdmin(saved);
 

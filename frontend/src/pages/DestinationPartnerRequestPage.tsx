@@ -6,6 +6,7 @@ import { PublicDestinationShell } from '../components/Destinations/PublicDestina
 import { Button, Chip, SectionHeader, SurfaceCard, TextareaField, TextField } from '../components/ui';
 import { destinationService } from '../services/destinationService';
 import { addressLookupService } from '../services/addressLookupService';
+import { identityService } from '../services/identityService';
 import { BRAZIL_STATES, loadBrazilCitiesByState, normalizeLocationName } from '../utils/brazilLocations';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { canUseNativeImagePicker, pickNativeImageAsDataUrl } from '../utils/nativeImagePicker';
@@ -263,6 +264,7 @@ export function DestinationPartnerRequestPage() {
       if (!best) return null;
       const profile = best.user || best.customer || {};
       return {
+        userId: String(profile.id || '').trim(),
         name: String(profile.fullName || profile.name || '').trim(),
         email: String(profile.email || '').trim(),
       };
@@ -272,6 +274,28 @@ export function DestinationPartnerRequestPage() {
   }, []);
   const [linkToAccount, setLinkToAccount] = useState(true);
   const [linkSuggestionEmail, setLinkSuggestionEmail] = useState('');
+  const [emailLookup, setEmailLookup] = useState<{ exists: boolean; name?: string; roles?: string[]; userId?: string; checking?: boolean } | null>(null);
+
+  // Validador: debounce no email do responsável → "este email já tem conta? integrar?".
+  useEffect(() => {
+    const email = String(form.responsibleEmail || '').trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setEmailLookup(null); return; }
+    let active = true;
+    const timer = window.setTimeout(async () => {
+      try {
+        const result = await identityService.lookup(email);
+        if (active) setEmailLookup({ exists: Boolean(result?.exists), name: result?.name, roles: result?.roles, userId: result?.userId });
+      } catch {
+        if (active) setEmailLookup(null);
+      }
+    }, 450);
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [form.responsibleEmail]);
+
+  // O email do responsável bate com outra conta existente (e não é o próprio login)?
+  const emailBelongsToOtherAccount = Boolean(
+    emailLookup?.exists && emailLookup?.userId && emailLookup.userId !== customerSession?.userId,
+  );
 
   useEffect(() => {
     let active = true;
@@ -889,6 +913,17 @@ export function DestinationPartnerRequestPage() {
               </div>
               <TextField name="responsibleName" required value={form.responsibleName} onChange={(event) => update('responsibleName', event.target.value)} label="Nome do responsável" placeholder="Nome completo" />
               <TextField name="responsibleEmail" required type="email" value={form.responsibleEmail} onChange={(event) => update('responsibleEmail', event.target.value)} label="E-mail do responsável" placeholder="email@empresa.com.br" autoComplete="email" />
+              {emailBelongsToOtherAccount ? (
+                <div className="sm:col-span-2 -mt-1 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm shadow-sm">
+                  <p className="font-black text-amber-800">Este e-mail já é de uma conta no Já no Caminho</p>
+                  <p className="mt-0.5 text-xs font-semibold leading-relaxed text-amber-700">
+                    {emailLookup?.name ? `Pertence a ${emailLookup.name}` : 'Já existe conta'}{emailLookup?.roles?.length ? ` · ${emailLookup.roles.join(', ')}` : ''}. Entre com ele para vincular o chalé a essa conta — sem criar login novo.
+                  </p>
+                  <Button type="button" size="sm" className="mt-2 rounded-full uppercase tracking-[0.1em]" onClick={() => navigate(`/cliente?next=${encodeURIComponent('/destinos/cadastrar')}&reason=link_partner`)}>
+                    Entrar para integrar o chalé
+                  </Button>
+                </div>
+              ) : null}
               <TextField name="responsiblePhone" required value={form.responsiblePhone} onChange={(event) => update('responsiblePhone', formatPhoneBr(event.target.value))} label="WhatsApp do responsável" placeholder="(00) 00000-0000" inputMode="tel" autoComplete="tel" wrapperClassName="sm:col-span-2" />
               <TextareaField name="message" value={form.message} onChange={(event) => update('message', event.target.value)} label="Mensagem para o time" placeholder="Conte algo importante sobre o cadastro" rows={3} wrapperClassName="sm:col-span-2" />
             </div>

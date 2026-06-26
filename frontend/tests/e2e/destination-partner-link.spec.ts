@@ -172,4 +172,24 @@ test.describe('Vínculo chalé ↔ login do cliente (Fase 2a)', () => {
     expect(row).not.toBe(''); // user_id não é nulo
     await page.screenshot({ path: 'test-results/05-real-vinculado.png', fullPage: true });
   });
+
+  test('validador: e-mail de cliente existente oferece "Entrar para integrar" (A.3)', async ({ page }) => {
+    const { user } = await createVerifiedCustomer('Cliente Val Existente');
+    await mockDestinations(page);
+    await page.route('**/api/public/destination-partner-requests', async (route) => {
+      await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 'pr-val', status: 'PENDING' }) });
+    });
+
+    await page.goto('/destinos/cadastrar');
+    await page.getByLabel('E-mail do responsável').fill(user.email);
+    await expect(page.getByText('Este e-mail já é de uma conta no Já no Caminho')).toBeVisible({ timeout: 12000 });
+    await expect(page.getByRole('button', { name: /Entrar para integrar o chalé/i })).toBeVisible();
+    await expect(page.getByText(/Cliente Val Existente/)).toBeVisible();
+    await page.screenshot({ path: 'test-results/06-validador-email-existente.png', fullPage: true });
+
+    // E-mail novo → o banner some.
+    await page.getByLabel('E-mail do responsável').fill(`novo-${Date.now()}@test.local`);
+    await expect(page.getByText('Este e-mail já é de uma conta no Já no Caminho')).toBeHidden({ timeout: 8000 });
+    await page.screenshot({ path: 'test-results/07-validador-email-novo.png', fullPage: true });
+  });
 });
