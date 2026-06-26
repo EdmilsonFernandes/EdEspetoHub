@@ -1,5 +1,6 @@
 import { AppDataSource } from '../config/database';
 import { User } from '../entities/User';
+import { UserDocument, UserDocumentType } from '../entities/UserDocument';
 import { UserIdentifier, UserIdentifierType } from '../entities/UserIdentifier';
 
 /**
@@ -9,6 +10,7 @@ import { UserIdentifier, UserIdentifierType } from '../entities/UserIdentifier';
  */
 class UserIdentityService {
   private repo = AppDataSource.getRepository(UserIdentifier);
+  private docRepo = AppDataSource.getRepository(UserDocument);
   private userRepo = AppDataSource.getRepository(User);
 
   normalizeType(type: string): UserIdentifierType {
@@ -79,6 +81,43 @@ class UserIdentityService {
       email: user.email,
       roles: [user.userRole].filter(Boolean) as string[],
     };
+  }
+
+  // ─── Documentos (CPF/CNPJ) — KYC centralizado ───
+
+  normalizeDocType(type: string): UserDocumentType {
+    const t = String(type || '').trim().toUpperCase();
+    if (t === 'CPF' || t === 'CNPJ') return t;
+    throw new Error(`INVALID_DOCUMENT_TYPE:${type}`);
+  }
+
+  /** Adiciona um documento (CPF/CNPJ) ao user — idempotente. */
+  async addDocument(userId: string, type: string, value: string, fileUrl?: string | null, verified = false): Promise<void> {
+    if (!userId) return;
+    const t = this.normalizeDocType(type);
+    const v = this.normalizeValue(t, value);
+    if (!v) return;
+    try {
+      await this.docRepo.save(this.docRepo.create({ userId, type: t, value: v, fileUrl: fileUrl || null, verified }));
+    } catch (error: any) {
+      if (String(error?.code || '') === '23505') return; // já existe
+      throw error;
+    }
+  }
+
+  async getDocuments(userId: string): Promise<UserDocument[]> {
+    if (!userId) return [];
+    return this.docRepo.find({ where: { userId } });
+  }
+
+  /** Resolve um user por documento (CPF/CNPJ). */
+  async resolveByDocument(type: string, value: string) {
+    const t = this.normalizeDocType(type);
+    const v = this.normalizeValue(t, value);
+    const doc = await this.docRepo.findOne({ where: { type: t, value: v } });
+    if (!doc) return null;
+    const user = await this.userRepo.findOne({ where: { id: doc.userId } });
+    return user ? { user, document: doc } : null;
   }
 }
 

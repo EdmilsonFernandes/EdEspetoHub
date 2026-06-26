@@ -4,6 +4,7 @@ import storeReservationCapacity from './20260622_002_store_reservation_capacity'
 import storeReservationLeadTime from './20260622_003_store_reservation_lead_time';
 import partnerAccountUserLink from './20260625_001_partner_account_user_link';
 import userIdentifiers from './20260626_001_user_identifiers';
+import userDocuments from './20260626_002_user_documents';
 
 export const schemaMigrations = [
   baselineCurrentSchema,
@@ -12,4 +13,5 @@ export const schemaMigrations = [
   storeReservationLeadTime,
   partnerAccountUserLink,
   userIdentifiers,
+  userDocuments,
 ] as const;

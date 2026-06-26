@@ -70,6 +70,32 @@ describe('UserIdentityService (Fase A.1)', () => {
     expect(owner?.user.id).toBe(a.id); // continua apontando pro primeiro
   });
 
+  it('user_documents: adiciona, resolve e é idempotente (Fase B)', async () => {
+    const user = await createUser();
+    await userIdentityService.addDocument(user.id, 'CPF', '123.456.789-00');
+    await userIdentityService.addDocument(user.id, 'CPF', '123.456.789-00', null, true); // idempotente
+
+    const docs = await userIdentityService.getDocuments(user.id);
+    expect(docs.length).toBe(1);
+    expect(docs[0].value).toBe('12345678900');
+
+    const resolved = await userIdentityService.resolveByDocument('CPF', '12345678900');
+    expect(resolved?.user.id).toBe(user.id);
+
+    const byMasked = await userIdentityService.resolveByDocument('CPF', '123.456.789-00');
+    expect(byMasked?.user.id).toBe(user.id);
+
+    expect(await userIdentityService.resolveByDocument('CPF', '99999999999')).toBeNull();
+  });
+
+  it('user_documents: CPF e CNPJ convivem no mesmo user (Fase B)', async () => {
+    const user = await createUser();
+    await userIdentityService.addDocument(user.id, 'CPF', '11122233344');
+    await userIdentityService.addDocument(user.id, 'CNPJ', '11222333000144');
+    const docs = await userIdentityService.getDocuments(user.id);
+    expect(docs.map((d) => d.type).sort()).toEqual(['CNPJ', 'CPF']);
+  });
+
   it('GET /public/identity/lookup acha user por email e por CPF (com máscara)', async () => {
     const email = `lookup-${uid()}@test.local`;
     const user = await createUser('STORE_OWNER', email);
