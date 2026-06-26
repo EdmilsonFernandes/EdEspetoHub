@@ -21,6 +21,7 @@ import {
 import { saveBase64Image } from '../utils/imageStorage';
 import { logger } from '../utils/logger';
 import { normalizeExternalUrl, normalizeInstagramUrl } from '../utils/socialUrl';
+import { userIdentityService } from './UserIdentityService';
 import { EmailService } from './EmailService';
 
 export const RESOURCE_HOSPITALITY_PLACE = 'HOSPITALITY_PLACE';
@@ -281,6 +282,11 @@ export class DestinationPartnerPortalService {
         },
       })
     );
+
+    // Identidade unificada: registra o papel PARTNER no whitelabel (vinculado ao user).
+    if (account.userId) {
+      void userIdentityService.addRole(account.userId, 'PARTNER', { type: 'DESTINATION_PARTNER_ACCOUNT', id: account.id });
+    }
 
     return {
       accountId: account.id,
