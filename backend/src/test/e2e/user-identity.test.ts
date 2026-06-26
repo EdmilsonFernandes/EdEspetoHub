@@ -96,6 +96,24 @@ describe('UserIdentityService (Fase A.1)', () => {
     expect(docs.map((d) => d.type).sort()).toEqual(['CNPJ', 'CPF']);
   });
 
+  it('whitelabel: user pode ter vários papéis (listRolesForUser, addRole, hasRole) — Fase C', async () => {
+    const user = await createUser('CUSTOMER');
+    // adiciona o papel CUSTOMER (no fluxo real o write-hook do register faria isso)
+    // + mais dois papéis pra validar multi-papel.
+    await userIdentityService.addRole(user.id, 'CUSTOMER');
+    await userIdentityService.addRole(user.id, 'PARTNER', { type: 'DESTINATION_PARTNER_ACCOUNT', id: '11111111-1111-1111-1111-111111111111' });
+    await userIdentityService.addRole(user.id, 'MOTOBOY');
+    await userIdentityService.addRole(user.id, 'PARTNER', { type: 'DESTINATION_PARTNER_ACCOUNT', id: '11111111-1111-1111-1111-111111111111' }); // idempotente
+
+    const roles = await userIdentityService.listRolesForUser(user.id);
+    expect(roles.sort()).toEqual(['CUSTOMER', 'MOTOBOY', 'PARTNER']);
+    expect(await userIdentityService.hasRole(user.id, 'PARTNER')).toBe(true);
+    expect(await userIdentityService.hasRole(user.id, 'SUPER_ADMIN')).toBe(false);
+
+    const desc = await userIdentityService.describeUser(user.id);
+    expect(desc?.roles.sort()).toEqual(['CUSTOMER', 'MOTOBOY', 'PARTNER']);
+  });
+
   it('GET /public/identity/lookup acha user por email e por CPF (com máscara)', async () => {
     const email = `lookup-${uid()}@test.local`;
     const user = await createUser('STORE_OWNER', email);

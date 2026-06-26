@@ -1,6 +1,7 @@
 import { AppDataSource } from '../config/database';
 import { User } from '../entities/User';
 import { UserDocument, UserDocumentType } from '../entities/UserDocument';
+import { WhitelabelUser } from '../entities/WhitelabelUser';
 import { UserIdentifier, UserIdentifierType } from '../entities/UserIdentifier';
 
 /**
@@ -11,6 +12,7 @@ import { UserIdentifier, UserIdentifierType } from '../entities/UserIdentifier';
 class UserIdentityService {
   private repo = AppDataSource.getRepository(UserIdentifier);
   private docRepo = AppDataSource.getRepository(UserDocument);
+  private wlRepo = AppDataSource.getRepository(WhitelabelUser);
   private userRepo = AppDataSource.getRepository(User);
 
   normalizeType(type: string): UserIdentifierType {
@@ -69,18 +71,45 @@ class UserIdentityService {
   }
 
   /**
-   * Descreve um user (nome, email, papéis atuais). Na Fase A os papéis vêm do
-   * userRole; na Fase C-E virão do whitelabel_users (multi-papel real).
+   * Descreve um user (nome, email, papéis). Papéis vêm do whitelabel_users
+   * (multi-papel); cai no userRole se não houver registro (compat retroativa).
    */
   async describeUser(userId: string) {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) return null;
+    const roles = await this.listRolesForUser(userId);
     return {
       id: user.id,
       name: user.fullName || user.email,
       email: user.email,
-      roles: [user.userRole].filter(Boolean) as string[],
+      roles: roles.length ? roles : ([user.userRole].filter(Boolean) as string[]),
     };
+  }
+
+  // ─── Whitelabel (registro de papéis) — multi-papel ───
+
+  /** Lista os papéis ativos de um user (do whitelabel_users). */
+  async listRolesForUser(userId: string): Promise<string[]> {
+    if (!userId) return [];
+    const rows = await this.wlRepo.find({ where: { userId, status: 'active' } });
+    const roles = Array.from(new Set(rows.map((r) => String(r.role || '').trim()).filter(Boolean)));
+    return roles;
+  }
+
+  /** Adiciona um papel ao user (idempotente). profile = perfil vinculado (opcional). */
+  async addRole(userId: string, role: string, profile?: { type: string; id: string }): Promise<void> {
+    if (!userId || !role) return;
+    const profileType = profile?.type || null;
+    const profileId = profile?.id || null;
+    const existing = await this.wlRepo.findOne({ where: { userId, role, profileType: profileType as any, profileId: profileId as any } });
+    if (existing) return;
+    await this.wlRepo.save(this.wlRepo.create({ userId, role, profileType, profileId, status: 'active' }));
+  }
+
+  async hasRole(userId: string, role: string): Promise<boolean> {
+    if (!userId || !role) return false;
+    const count = await this.wlRepo.count({ where: { userId, role, status: 'active' } });
+    return count > 0;
   }
 
   // ─── Documentos (CPF/CNPJ) — KYC centralizado ───

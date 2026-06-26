@@ -612,8 +612,10 @@ async register(
       lgpdAcceptedAt: new Date(),
     } as Partial<User>);
     const saved = await userRepo.save(user);
-    // Identidade unificada: registra o email como identificador (validador "já tem conta?").
+    // Identidade unificada: registra o email como identificador (validador "já tem conta?")
+    // e o papel no whitelabel (multi-papel).
     void userIdentityService.addIdentifier(saved.id, 'EMAIL', saved.email, Boolean(saved.emailVerified));
+    void userIdentityService.addRole(saved.id, saved.userRole || 'CUSTOMER');
     const delivery = await this.sendCustomerEmailOtp(saved, meta);
     void this.notifySignupAdmin(saved);
 
