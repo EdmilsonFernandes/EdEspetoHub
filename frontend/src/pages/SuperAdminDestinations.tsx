@@ -3134,12 +3134,12 @@ export function SuperAdminDestinations() {
             </div>
 
           </div>
-          <div className="shrink-0 space-y-2 border-t border-slate-100 bg-white/95 px-4 py-3 shadow-[0_-14px_30px_-26px_rgba(15,23,42,0.32)] backdrop-blur-xl sm:px-5">
+          <div className="shrink-0 border-t border-slate-100 bg-white/95 px-4 py-3 shadow-[0_-14px_30px_-26px_rgba(15,23,42,0.32)] backdrop-blur-xl sm:px-5">
             {error ? (
-              <p className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold leading-relaxed text-rose-700">{error}</p>
+              <p className="mb-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold leading-relaxed text-rose-700">{error}</p>
             ) : null}
             {inviteFeedback ? (
-              <p className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold leading-relaxed text-emerald-700">{inviteFeedback}</p>
+              <p className="mb-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold leading-relaxed text-emerald-700">{inviteFeedback}</p>
             ) : null}
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
               {pendingRequest ? (
@@ -3274,7 +3274,8 @@ export function SuperAdminDestinations() {
           })}
         </div>
 
-        {error ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
+        {/* Erro de página só quando o modal de detalhe está fechado (no modal ele aparece no rodapé). */}
+        {error && !selectedPartnerRequest ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
         {loading ? <p className="text-sm font-semibold text-slate-500">Carregando destinos...</p> : null}
 
         {activeTab === 'monetizacao' ? (
