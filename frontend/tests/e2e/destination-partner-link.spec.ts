@@ -83,6 +83,8 @@ test.describe('Vínculo chalé ↔ login do cliente (Fase 2a)', () => {
     await fillChaleForm(page, user.email);
     await expect(submitButton(page)).toBeEnabled({ timeout: 15000 });
     await submitButton(page).click();
+    // Logado + vínculo -> abre o modal de confirmação explícita.
+    await page.getByRole('button', { name: /Sim, vincular e enviar/i }).click();
 
     await expect(page.getByText('Recebemos sua solicitação')).toBeVisible();
     expect(payload.linkToAccount).toBe(true);
@@ -154,9 +156,11 @@ test.describe('Vínculo chalé ↔ login do cliente (Fase 2a)', () => {
     await fillChaleForm(page, user.email);
 
     await expect(submitButton(page)).toBeEnabled({ timeout: 15000 });
+    await submitButton(page).click();
+    // Modal de confirmação de vínculo — o POST real só dispara ao confirmar.
     const [response] = await Promise.all([
       page.waitForResponse((r) => r.url().includes('/api/public/destination-partner-requests') && r.request().method() === 'POST'),
-      submitButton(page).click(),
+      page.getByRole('button', { name: /Sim, vincular e enviar/i }).click(),
     ]);
     expect(response.status()).toBe(201);
     const body = await response.json();
