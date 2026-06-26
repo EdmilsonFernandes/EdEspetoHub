@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
+import { api } from '../helpers';
 import { AppDataSource } from '../../config/database';
 import { User } from '../../entities/User';
 import { UserIdentifier } from '../../entities/UserIdentifier';
@@ -67,5 +68,24 @@ describe('UserIdentityService (Fase A.1)', () => {
     await userIdentityService.addIdentifier(b.id, 'CPF', '999.888.777-66'); // ignora (já é de A)
     const owner = await userIdentityService.resolveByIdentifier('CPF', '99988877766');
     expect(owner?.user.id).toBe(a.id); // continua apontando pro primeiro
+  });
+
+  it('GET /public/identity/lookup acha user por email e por CPF (com máscara)', async () => {
+    const email = `lookup-${uid()}@test.local`;
+    const user = await createUser('STORE_OWNER', email);
+    await userIdentityService.addIdentifier(user.id, 'EMAIL', email);
+    await userIdentityService.addIdentifier(user.id, 'CPF', '555.666.777-88');
+
+    const byEmail = await api.get(`/api/public/identity/lookup?value=${encodeURIComponent(email.toUpperCase())}`);
+    expect(byEmail.status).toBe(200);
+    expect(byEmail.body.exists).toBe(true);
+    expect(byEmail.body.name).toBe('User Identity');
+    expect(byEmail.body.roles).toContain('STORE_OWNER');
+
+    const byCpf = await api.get(`/api/public/identity/lookup?value=${encodeURIComponent('555.666.777-88')}`);
+    expect(byCpf.body.exists).toBe(true);
+
+    const none = await api.get(`/api/public/identity/lookup?value=nope-${uid()}@test.local`);
+    expect(none.body.exists).toBe(false);
   });
 });

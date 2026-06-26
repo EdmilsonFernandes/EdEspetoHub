@@ -73,6 +73,7 @@ export function createProxyRoutes(): Router {
     r.get('/public/condominiums', forward); r.post('/public/condominium-access-requests', forward);
     r.get('/public/condominiums/:slug', forward); r.get('/public/condominiums/:slug/stores', forward);
     r.get('/public/destinations', forward); r.post('/public/destination-partner-requests', authOptional, forward);
+    r.get('/public/identity/lookup', forward);
     r.get('/public/destinations/:slug', forward);
     r.get('/public/destinations/:slug/hospitality', forward);
     r.get('/public/destinations/:slug/hospitality/:placeSlug', forward);

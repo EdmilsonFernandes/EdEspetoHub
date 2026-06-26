@@ -36,6 +36,7 @@ import { CustomerAccountController } from '../controllers/CustomerAccountControl
 import { FeaturedProductController } from '../controllers/FeaturedProductController';
 import { CondominiumController } from '../controllers/CondominiumController';
 import { DestinationController } from '../controllers/DestinationController';
+import { IdentityController } from '../controllers/IdentityController';
 import { DestinationPartnerPortalController } from '../controllers/DestinationPartnerPortalController';
 import { DestinationPromotionController } from '../controllers/DestinationPromotionController';
 import { StorePaymentAccountController } from '../controllers/StorePaymentAccountController';
@@ -237,6 +238,8 @@ routes.get('/public/condominiums/:slug', CondominiumController.getPublicBySlug);
 routes.get('/public/condominiums/:slug/stores', CondominiumController.listPublicStoresBySlug);
 routes.get('/public/destinations', DestinationController.listPublic);
 routes.post('/public/destination-partner-requests', hydrateAuthOptional, DestinationController.createPartnerRequest);
+// Lookup de identidade (validador "já tem conta? integrar?") — público.
+routes.get('/public/identity/lookup', IdentityController.lookup);
 routes.get('/public/destinations/:slug', DestinationController.getPublicBySlug);
 routes.get('/public/destinations/:slug/hospitality', DestinationController.listPublicHospitality);
 routes.get('/public/destinations/:slug/hospitality/:placeSlug', DestinationController.getPublicHospitalityPlace);
