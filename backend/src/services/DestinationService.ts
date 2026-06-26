@@ -915,7 +915,7 @@ export class DestinationService {
       fallbackLng: fallbackCoordinates.lng,
       scope: 'hospitality_place',
     });
-    const saved = await this.repository.savePlace({
+    const placePayload = {
       ...(current || {}),
       destinationId: destination.id,
       name,
@@ -946,7 +946,15 @@ export class DestinationService {
       deliveryInstructions: payload?.deliveryInstructions !== undefined ? toOptionalText(payload.deliveryInstructions) : current?.deliveryInstructions ?? null,
       active: payload?.active !== false,
       sortOrder: Number(payload?.sortOrder ?? current?.sortOrder ?? 0) || 0,
-    });
+    };
+    let saved: any;
+    try {
+      saved = await this.repository.savePlace(placePayload);
+    } catch (error: any) {
+      // Conflito de slug (race ou falha do resolvePlaceSlug): sufixa único e retenta.
+      if (String(error?.code || '') !== '23505') throw error;
+      saved = await this.repository.savePlace({ ...placePayload, slug: `${slug}-${crypto.randomUUID().slice(0, 8)}` });
+    }
     return this.toPublicPlace({ ...saved, destination });
   }
 

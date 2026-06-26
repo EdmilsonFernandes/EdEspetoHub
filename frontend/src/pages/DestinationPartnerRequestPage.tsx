@@ -275,6 +275,7 @@ export function DestinationPartnerRequestPage() {
   const [linkToAccount, setLinkToAccount] = useState(true);
   const [linkSuggestionEmail, setLinkSuggestionEmail] = useState('');
   const [emailLookup, setEmailLookup] = useState<{ exists: boolean; name?: string; roles?: string[]; userId?: string; checking?: boolean } | null>(null);
+  const [showLinkConfirm, setShowLinkConfirm] = useState(false);
 
   // Validador: debounce no email do responsável → "este email já tem conta? integrar?".
   useEffect(() => {
@@ -540,8 +541,7 @@ export function DestinationPartnerRequestPage() {
     imageFile: '',
   }));
 
-  const submit = async (event: any) => {
-    event.preventDefault();
+  const doSubmit = async () => {
     setSaving(true);
     setError('');
     setSuccess(null);
@@ -591,6 +591,17 @@ export function DestinationPartnerRequestPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const submit = async (event: any) => {
+    event.preventDefault();
+    // Antes de enviar: confirmação EXPLÍCITA de vínculo à conta existente
+    // (não deixa "seguir direto" — o usuário precisa dar o OK).
+    if (customerSession && linkToAccount) {
+      setShowLinkConfirm(true);
+      return;
+    }
+    await doSubmit();
   };
 
   const canSubmitDestination = destinationMode === 'new'
@@ -710,6 +721,27 @@ export function DestinationPartnerRequestPage() {
                 <Button type="button" size="lg" onClick={() => { setSuccess(null); formStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} className="mt-3 rounded-full uppercase tracking-[0.1em]">
                   Enviar outra solicitação
                 </Button>
+              </div>
+            ) : null}
+            {showLinkConfirm ? (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="link-confirm-title">
+                <div className="w-full max-w-md rounded-[2rem] bg-white p-6 shadow-2xl">
+                  <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-full bg-[#336886]/10 text-[#153A4C]">
+                    <LinkSimpleHorizontal size={26} weight="duotone" />
+                  </div>
+                  <h2 id="link-confirm-title" className="text-center text-xl font-black tracking-[-0.03em] text-slate-950">Vincular o chalé à sua conta?</h2>
+                  <p className="mt-2 text-center text-sm font-semibold leading-relaxed text-slate-600">
+                    Você está logado(a) como <strong>{customerSession?.name || customerSession?.email}</strong>{customerSession?.name ? ` (${customerSession.email})` : ''}. Este chalé será <strong>vinculado a esta conta</strong> — você acessa tudo com o mesmo login de cliente, sem criar conta nova.
+                  </p>
+                  <div className="mt-5 flex flex-col gap-2 sm:flex-row-reverse">
+                    <Button type="button" size="lg" leftIcon={<CheckCircle size={18} weight="fill" />} onClick={() => { setShowLinkConfirm(false); doSubmit(); }} className="flex-1">
+                      Sim, vincular e enviar
+                    </Button>
+                    <Button type="button" variant="secondary" size="lg" onClick={() => setShowLinkConfirm(false)} className="flex-1">
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
               </div>
             ) : null}
             {loading ? <p className="mt-4 text-sm font-semibold text-slate-500">Carregando destinos...</p> : null}

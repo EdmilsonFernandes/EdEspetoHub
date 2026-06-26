@@ -1734,7 +1734,7 @@ export function SuperAdminDestinations() {
         reviewNote: normalizedReviewNote || undefined,
       });
       const actionLabel = status === 'approved' ? 'aprovada' : 'recusada';
-      const emailTarget = request.responsibleEmail || request.createdPartnerAccount?.email || request.store?.owner?.email || 'o parceiro';
+      const emailTarget = String(request.responsibleEmail || request.createdPartnerAccount?.email || request.store?.owner?.email || 'o parceiro');
       setInviteFeedback(`Solicitação ${actionLabel}. O aviso por e-mail foi enviado para ${emailTarget}.`);
       window.setTimeout(() => setInviteFeedback(''), 4200);
       await refreshAdminData(selectedDestinationId);
@@ -1745,7 +1745,13 @@ export function SuperAdminDestinations() {
         return next;
       });
     } catch (err: any) {
-      setError(err?.message || 'Não foi possível revisar solicitação.');
+      const rawMessage = err?.message;
+      const friendly = typeof rawMessage === 'string' && rawMessage.trim()
+        ? rawMessage
+        : typeof err === 'string'
+          ? err
+          : 'Não foi possível revisar solicitação.';
+      setError(friendly);
     } finally {
       setSaving(false);
       setPartnerReviewAction(null);
