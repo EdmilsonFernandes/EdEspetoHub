@@ -151,14 +151,14 @@ export function HubStoreCard({
             <button
               type="button"
               onClick={toggleFavorite}
-              className={`absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.8] ${
+              className={`jnc-hub-touch absolute right-1.5 top-1.5 inline-flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.8] ${
                 isFavorite
                   ? 'scale-[1.06] bg-rose-500 text-white shadow-[0_4px_18px_-4px_rgba(244,63,94,0.72)]'
                   : 'border border-white/20 bg-black/28 text-white backdrop-blur-md hover:scale-[1.1] hover:bg-black/42'
               }`}
               aria-label={`Favoritar ${store.name}`}
             >
-              <Heart size={12} weight={isFavorite ? 'fill' : 'regular'} className={isFavorite ? 'animate-pop' : 'transition-transform duration-200 hover:scale-110'} />
+              <Heart size={15} weight={isFavorite ? 'fill' : 'regular'} className={isFavorite ? 'animate-pop' : 'transition-transform duration-200 hover:scale-110'} />
             </button>
           </div>
         </div>
@@ -230,13 +230,13 @@ export function HubStoreCard({
       onPointerEnter={warmupStoreRoute}
       onFocus={warmupStoreRoute}
       onTouchStart={warmupStoreRoute}
-      className={`jnc-hub-touch group grid grid-cols-[4.85rem_minmax(0,1fr)_2rem] items-center gap-3.5 rounded-[1.35rem] border px-2.5 py-2.5 transition-all ${
+      className={`jnc-hub-touch group grid grid-cols-[4.35rem_minmax(0,1fr)_2.5rem] items-center gap-3 rounded-[1.25rem] border px-2.5 py-2.5 transition-all min-[390px]:grid-cols-[4.65rem_minmax(0,1fr)_2.5rem] min-[390px]:gap-3.5 ${
         storeAvailable
           ? 'border-white/80 bg-white/95 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 md:hover:-translate-y-0.5 md:hover:border-[#336886]/14 md:hover:bg-white md:hover:shadow-[0_24px_52px_-38px_rgba(15,23,42,0.42)]'
           : 'border-slate-100/80 bg-white/72 shadow-[0_14px_32px_-30px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/45 grayscale-[14%] opacity-85 filter blur-[0.15px] hover:grayscale-0 hover:opacity-100 hover:blur-none'
       }`}
     >
-      <div className="relative h-[4.55rem] w-[4.55rem] shrink-0 overflow-hidden rounded-[1.08rem] bg-white shadow-[0_16px_32px_-28px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/70">
+      <div className="relative h-[4.2rem] w-[4.2rem] shrink-0 overflow-hidden rounded-[1rem] bg-white shadow-[0_16px_32px_-28px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/70 min-[390px]:h-[4.45rem] min-[390px]:w-[4.45rem]">
         <Image
           src={store.logo}
           alt=""
@@ -253,11 +253,11 @@ export function HubStoreCard({
 
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-1.5">
-          <h3 className={`min-w-0 truncate text-[14.8px] font-black leading-5 tracking-[-0.035em] ${storeAvailable ? 'text-slate-950' : 'text-slate-500'}`}>
+          <h3 className={`min-w-0 truncate text-[14px] font-black leading-5 tracking-[-0.02em] min-[390px]:text-[14.8px] ${storeAvailable ? 'text-slate-950' : 'text-slate-500'}`}>
             {store.name}
           </h3>
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] font-semibold leading-4 text-slate-500 tabular-nums">
+        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10.5px] font-semibold leading-4 text-slate-500 tabular-nums min-[390px]:text-[11px]">
           {store.rating > 0 ? (
             <span className="inline-flex items-center gap-1">
               <Star size={11} weight="fill" className="text-amber-400" />
@@ -272,8 +272,12 @@ export function HubStoreCard({
           <span className="text-slate-200">·</span>
           <span>{store.etaMin}–{store.etaMax} min</span>
           <span className="text-slate-200">·</span>
-          <span>{resolvedDistanceLabel}</span>
-          <span className="text-slate-200">·</span>
+          {resolvedDistanceLabel ? (
+            <>
+              <span>{resolvedDistanceLabel}</span>
+              <span className="text-slate-200">·</span>
+            </>
+          ) : null}
           <span className={deliveryIsFree ? 'font-black text-emerald-700' : ''}>{deliveryFeeLabel}</span>
         </div>
         {store.isOpen && serviceBadges.length > 0 ? (
@@ -283,7 +287,7 @@ export function HubStoreCard({
               return (
                 <span
                   key={`${store.id}-${badge.key}`}
-                  className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9.5px] font-black leading-none ring-1 ${getCompactBadgeClass(badge.key)} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
+                  className={`inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[9.5px] font-black leading-none ring-1 ${getCompactBadgeClass(badge.key)} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
                 >
                   {Icon ? <Icon size={9} weight="duotone" /> : null}
                   {badge.label}
@@ -302,7 +306,7 @@ export function HubStoreCard({
       <button
         type="button"
         onClick={toggleFavorite}
-        className={`jnc-hub-touch inline-flex h-9 w-9 items-center justify-center rounded-full ${
+        className={`jnc-hub-touch inline-flex h-10 w-10 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5FD35A] ${
           isFavorite
             ? 'bg-rose-50 text-rose-500 shadow-[0_10px_24px_-18px_rgba(244,63,94,0.58)] ring-1 ring-rose-100'
             : 'bg-transparent text-slate-400 hover:bg-white/80 hover:text-rose-400 hover:shadow-[0_10px_22px_-20px_rgba(15,23,42,0.28)]'

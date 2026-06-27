@@ -39,15 +39,16 @@ afterEach(() => {
 
 describe('useHubStores', () => {
   it('loads portfolio with regional context and clears location when showing all stores', async () => {
+    vi.mocked(storeService.discoverPortfolio)
+      .mockResolvedValueOnce({ stores: [{ id: '1', slug: 'loja-a', name: 'Loja A' }], mode: 'nearby' } as any);
     vi.mocked(storeService.listPortfolio)
-      .mockResolvedValueOnce([{ id: '1', slug: 'loja-a', name: 'Loja A' }] as any)
       .mockResolvedValueOnce([{ id: '2', slug: 'loja-b', name: 'Loja B' }] as any);
 
     render(<StoresHarness />);
 
     await waitFor(() => expect(screen.getByTestId('stores')).toHaveTextContent('loja-a'));
-    expect(storeService.discoverPortfolio).not.toHaveBeenCalled();
-    expect(storeService.listPortfolio).toHaveBeenLastCalledWith({
+    expect(storeService.listPortfolio).not.toHaveBeenCalled();
+    expect(storeService.discoverPortfolio).toHaveBeenLastCalledWith({
       lat: -23.1,
       lng: -45.9,
       city: 'São José dos Campos',

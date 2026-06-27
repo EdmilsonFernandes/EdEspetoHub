@@ -79,7 +79,7 @@ export function HubFilterBar({
 
   return (
     <div className={`${isNativePlatform ? 'pt-0.5' : 'pt-1'}`}>
-      <div className="grid grid-cols-[repeat(3,minmax(0,1fr))_auto] gap-1.5">
+      <div className="grid grid-cols-[repeat(3,minmax(0,1fr))_auto] gap-1.5 min-[390px]:gap-2">
         {primaryOptions.map((filter) => {
           const Icon = filter.icon;
           const active = quickFilter === filter.key;
@@ -92,7 +92,7 @@ export function HubFilterBar({
                 onQuickFilterChange(nextFilter);
                 if (nextFilter !== 'all') onScrollStoresIntoView();
               }}
-              className={`jnc-hub-touch inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full px-2.5 py-2 text-[11px] font-black ${
+              className={`jnc-hub-touch inline-flex min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-full px-2.5 py-2 text-[11px] font-black leading-none min-[390px]:min-h-11 min-[390px]:px-3 ${
                 active
                   ? 'jnc-hub-pill-active'
                   : 'jnc-hub-pill text-slate-600 hover:text-[#153A4C]'
@@ -109,7 +109,7 @@ export function HubFilterBar({
         <button
           type="button"
           onClick={onOpenFilters}
-          className={`jnc-hub-touch relative inline-flex h-full min-w-[3.35rem] items-center justify-center gap-1 rounded-full px-2.5 py-2 text-[11px] font-black ${
+          className={`jnc-hub-touch relative inline-flex h-full min-h-10 min-w-[3.35rem] items-center justify-center gap-1 rounded-full px-2.5 py-2 text-[11px] font-black leading-none min-[390px]:min-h-11 min-[390px]:px-3 ${
             hiddenFilterCount > 0
               ? 'border border-[#336886]/22 bg-[#edf5fa]/86 text-[#153A4C] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.34)]'
               : 'jnc-hub-pill text-slate-600 hover:text-[#153A4C]'
@@ -218,7 +218,7 @@ export function HubFilterSheet({
                   <button
                     type="button"
                     onClick={() => onQuickFilterChange('all')}
-                    className="text-[11px] font-black text-[#336886] active:scale-95"
+                    className="jnc-hub-touch inline-flex min-h-10 items-center rounded-full px-3 text-[11px] font-black text-[#336886] active:scale-95"
                   >
                     Limpar atalho
                   </button>
@@ -280,7 +280,7 @@ export function HubFilterSheet({
                     onOpenChange(false);
                     onScrollStoresIntoView();
                   }}
-                  className={`jnc-hub-touch min-w-0 rounded-[1.05rem] px-2 py-2.5 text-center text-[11px] font-black ${
+                  className={`jnc-hub-touch min-h-10 min-w-0 rounded-[1.05rem] px-2 py-2.5 text-center text-[11px] font-black ${
                     segmentFilter === 'all'
                       ? 'jnc-hub-pill-active'
                       : 'jnc-hub-pill text-slate-600'
@@ -300,7 +300,7 @@ export function HubFilterSheet({
                         onOpenChange(false);
                         onScrollStoresIntoView();
                       }}
-                      className={`jnc-hub-touch min-w-0 rounded-[1.05rem] px-2 py-2.5 text-center ${
+                      className={`jnc-hub-touch min-h-10 min-w-0 rounded-[1.05rem] px-2 py-2.5 text-center ${
                         active
                           ? 'jnc-hub-pill-active'
                           : 'jnc-hub-pill text-slate-600'

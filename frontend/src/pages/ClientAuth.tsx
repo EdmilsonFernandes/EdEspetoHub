@@ -611,7 +611,7 @@ export function ClientAuth() {
                 setError('');
                 setMode('login');
               }}
-              className={`flex-1 rounded-[0.9rem] px-3 py-2 text-xs font-bold transition-all sm:py-2.5 ${mode === 'login' ? 'bg-white text-[#153A4C] shadow-sm ring-1 ring-[#336886]/10' : 'text-slate-600 hover:bg-white/70'}`}
+              className={`min-h-10 flex-1 rounded-[0.9rem] px-3 py-2.5 text-xs font-bold transition-all sm:py-3 ${mode === 'login' ? 'bg-white text-[#153A4C] shadow-sm ring-1 ring-[#336886]/10' : 'text-slate-600 hover:bg-white/70'}`}
             >
               Login
             </button>
@@ -622,7 +622,7 @@ export function ClientAuth() {
                 setError('');
                 setMode('register');
               }}
-              className={`flex-1 rounded-[0.9rem] px-3 py-2 text-xs font-bold transition-all sm:py-2.5 ${mode === 'register' ? 'bg-white text-[#153A4C] shadow-sm ring-1 ring-[#336886]/10' : 'text-slate-600 hover:bg-white/70'}`}
+              className={`min-h-10 flex-1 rounded-[0.9rem] px-3 py-2.5 text-xs font-bold transition-all sm:py-3 ${mode === 'register' ? 'bg-white text-[#153A4C] shadow-sm ring-1 ring-[#336886]/10' : 'text-slate-600 hover:bg-white/70'}`}
             >
               Cadastro
             </button>
@@ -710,7 +710,8 @@ export function ClientAuth() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
+                className="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
               >
                 {showPassword ? <EyeSlash size={18} weight="bold" /> : <Eye size={18} weight="bold" />}
               </button>
@@ -722,7 +723,7 @@ export function ClientAuth() {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="text-[11px] font-black uppercase tracking-[0.12em] text-[#0d4f66] hover:text-[#0b3f52] hover:underline sm:text-xs"
+                  className="inline-flex min-h-10 items-center rounded-full px-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#0d4f66] hover:text-[#0b3f52] hover:underline sm:text-xs"
                 >
                   Esqueci minha senha
                 </button>

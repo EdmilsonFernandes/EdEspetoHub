@@ -608,7 +608,7 @@ export function AdminLogin() {
           <button
             type="button"
             onClick={() => navigate(accessPortalPath)}
-            className="mx-auto hidden items-center justify-center rounded-full border border-slate-200 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.45)] transition hover:border-slate-300 hover:text-slate-700 sm:inline-flex sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.18em]"
+            className="mx-auto hidden min-h-10 items-center justify-center rounded-full border border-slate-200 bg-white/75 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.45)] transition hover:border-slate-300 hover:text-slate-700 sm:inline-flex sm:px-4 sm:text-[11px] sm:tracking-[0.18em]"
           >
             Trocar tipo de acesso
           </button>
@@ -811,7 +811,7 @@ export function AdminLogin() {
             <button
               type="button"
               onClick={() => navigate('/forgot-password?perfil=lojista')}
-              className="text-xs font-bold text-[#0d4f66] hover:text-[#0b3f52] hover:underline uppercase tracking-wider"
+              className="inline-flex min-h-10 items-center rounded-full px-2 text-xs font-bold uppercase tracking-wider text-[#0d4f66] hover:text-[#0b3f52] hover:underline"
             >
               Recuperar senha
             </button>

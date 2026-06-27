@@ -243,7 +243,7 @@ export const HubStoreEmptyState = memo(function HubStoreEmptyState({
       <button
         type="button"
         onClick={onClearFilters}
-        className="mt-3 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600"
+        className="jnc-hub-touch mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600"
       >
         Limpar filtros
       </button>
