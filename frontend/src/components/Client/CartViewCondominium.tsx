@@ -336,28 +336,32 @@ export const CartViewCondominium = ({
           {/* Modo de Entrega */}
           <div className="rounded-[1.55rem] border border-slate-100 bg-white/90 p-3 shadow-[0_16px_28px_-26px_rgba(15,23,42,0.22)] sm:p-4">
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Como deseja receber?</p>
-            <div className="flex gap-1 rounded-2xl bg-slate-100 p-1">
+            <div className="grid grid-cols-1 gap-1 rounded-2xl bg-slate-100 p-1 min-[340px]:grid-cols-2">
               <button
+                type="button"
+                aria-pressed={!isApartmentDelivery}
                 onClick={() => onChangeCustomer({ ...customer, condominiumFulfillmentMode: 'pickup_at_stall', type: 'pickup' })}
-                className={`flex-1 py-3 rounded-xl flex flex-col items-center gap-1 transition-all ${
+                className={`min-h-[58px] min-w-0 rounded-xl px-2 py-3 flex flex-col items-center justify-center gap-1 text-center transition-all ${
                   !isApartmentDelivery ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-700"
                 }`}
               >
                 <Storefront size={18} weight={!isApartmentDelivery ? "fill" : "duotone"} />
-                <span className="text-[10px] uppercase font-bold">Retirar na Barraca</span>
+                <span className="text-[10px] uppercase font-bold leading-tight break-words">Retirar na Barraca</span>
               </button>
               <button
+                type="button"
+                aria-pressed={isApartmentDelivery}
                 onClick={() => {
                   if (!apartmentDeliveryAllowed) return;
                   onChangeCustomer({ ...customer, condominiumFulfillmentMode: 'apartment_delivery', type: 'pickup' });
                 }}
                 disabled={!apartmentDeliveryAllowed}
-                className={`flex-1 py-3 rounded-xl flex flex-col items-center gap-1 transition-all ${
+                className={`min-h-[58px] min-w-0 rounded-xl px-2 py-3 flex flex-col items-center justify-center gap-1 text-center transition-all ${
                   isApartmentDelivery ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-700"
                 } disabled:cursor-not-allowed disabled:opacity-45`}
               >
                 <Building size={18} weight={isApartmentDelivery ? "fill" : "duotone"} />
-                <span className="text-[10px] uppercase font-bold">No Apartamento</span>
+                <span className="text-[10px] uppercase font-bold leading-tight break-words">No Apartamento</span>
               </button>
             </div>
             {!apartmentDeliveryAllowed && (

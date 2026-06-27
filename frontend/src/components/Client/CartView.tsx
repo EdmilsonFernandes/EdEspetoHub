@@ -1763,7 +1763,7 @@ export const CartView = ({
 
           {/* Tipo de pedido */}
           <div className="rounded-[1.7rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(248,250,252,0.96)_0%,rgba(255,255,255,0.98)_100%)] p-3 sm:p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.28)]">
-            <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
                   Tipo de pedido
@@ -1776,13 +1776,15 @@ export const CartView = ({
                 {orderTypeVisuals[customer.type]?.label || "Pedido"}
               </span>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-1 gap-2 min-[340px]:grid-cols-2 lg:grid-cols-4">
               {visibleOrderTypes.map((type) => {
                 const typeMeta = orderTypeVisuals[type] || orderTypeVisuals.delivery;
                 const isActive = customer.type === type;
                 return (
                   <button
+                    type="button"
                     key={type}
+                    aria-pressed={isActive}
                     onClick={() => {
                       // Reserva: garante nº de pessoas padrão ao entrar no modo reserva.
                       if (type === "reservation" && (customer.partySize === undefined || customer.partySize === null)) {
@@ -1791,7 +1793,7 @@ export const CartView = ({
                       }
                       onChangeCustomer({ ...customer, type });
                     }}
-                    className={`jnc-hub-touch flex min-h-[74px] min-w-0 flex-1 items-center gap-3 rounded-[1.2rem] border px-3 py-3 text-left ${
+                    className={`jnc-hub-touch flex min-h-[74px] w-full min-w-0 items-center gap-2.5 overflow-hidden rounded-[1.2rem] border px-3 py-3 text-left ${
                       isActive
                         ? "border-slate-900 bg-white text-slate-900 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.45)] active:scale-[0.985]"
                         : "border-transparent bg-white/60 text-slate-500 hover:border-slate-200 hover:bg-white active:scale-[0.985]"
@@ -1804,11 +1806,11 @@ export const CartView = ({
                     >
                       {typeMeta.icon}
                     </span>
-                    <span className="min-w-0">
-                      <span className="block text-sm font-black leading-tight tracking-tight">
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-black leading-tight tracking-tight break-words">
                         {typeMeta.label}
                       </span>
-                      <span className={`mt-0.5 block text-[11px] font-semibold ${isActive ? "text-slate-500" : "text-slate-400"}`}>
+                      <span className={`mt-0.5 block break-words text-[11px] font-semibold leading-snug ${isActive ? "text-slate-500" : "text-slate-400"}`}>
                         {typeMeta.helper}
                       </span>
                     </span>
@@ -1818,19 +1820,20 @@ export const CartView = ({
             </div>
             {customer.type === "delivery" && postalEnabled && (
               <div className="mt-3 rounded-[1.35rem] border border-slate-200 bg-white/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-1 gap-1.5 min-[340px]:grid-cols-2">
                   <button
                     type="button"
+                    aria-pressed={!isPostalDelivery}
                     onClick={() => onChangeDeliveryMode?.("distance")}
-                    className={`min-h-[52px] rounded-[1.05rem] px-3 py-2.5 text-left transition ${
+                    className={`min-h-[52px] min-w-0 rounded-[1.05rem] px-3 py-2.5 text-left transition ${
                       !isPostalDelivery
                         ? "bg-slate-900 text-white shadow-[0_16px_30px_-24px_rgba(15,23,42,0.55)]"
                         : "bg-slate-50 text-slate-600 hover:bg-white"
                     }`}
                   >
-                    <span className="flex items-center gap-2 text-xs font-black">
+                    <span className="flex min-w-0 items-center gap-2 text-xs font-black leading-tight">
                       <Truck size={15} weight="duotone" />
-                      Entrega local
+                      <span className="min-w-0 break-words">Entrega local</span>
                     </span>
                     <span className={`mt-0.5 block text-[10px] font-semibold ${!isPostalDelivery ? "text-white/72" : "text-slate-400"}`}>
                       Motoboy ou loja
@@ -1838,21 +1841,22 @@ export const CartView = ({
                   </button>
                   <button
                     type="button"
+                    aria-pressed={isPostalDelivery}
                     onClick={() => {
                       onChangeDeliveryMode?.("postal");
                       window.setTimeout(() => {
                         void onCalculatePostalQuote?.({ silent: true });
                       }, 0);
                     }}
-                    className={`min-h-[52px] rounded-[1.05rem] px-3 py-2.5 text-left transition ${
+                    className={`min-h-[52px] min-w-0 rounded-[1.05rem] px-3 py-2.5 text-left transition ${
                       isPostalDelivery
                         ? "bg-slate-900 text-white shadow-[0_16px_30px_-24px_rgba(15,23,42,0.55)]"
                         : "bg-slate-50 text-slate-600 hover:bg-white"
                     }`}
                   >
-                    <span className="flex items-center gap-2 text-xs font-black">
+                    <span className="flex min-w-0 items-center gap-2 text-xs font-black leading-tight">
                       <PaperPlaneTilt size={15} weight="duotone" />
-                      Envio postal
+                      <span className="min-w-0 break-words">Envio postal</span>
                     </span>
                     <span className={`mt-0.5 block text-[10px] font-semibold ${isPostalDelivery ? "text-white/72" : "text-slate-400"}`}>
                       Correios
