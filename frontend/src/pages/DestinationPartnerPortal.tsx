@@ -14,6 +14,7 @@ import {
   HouseLine,
   Image as ImageIcon,
   LockKey,
+  PencilSimple,
   Plus,
   SignOut,
   Sparkle,
@@ -542,8 +543,10 @@ export function DestinationPartnerPortal() {
                     key={resource.permissionId}
                     type="button"
                     onClick={() => setSelectedId(resource.permissionId)}
-                    className={`jnc-ds-touch jnc-ds-focus-ring flex w-full items-center gap-3 rounded-[1.35rem] border p-2.5 text-left transition ${active ? 'border-[#336886]/24 bg-[#336886]/9 shadow-[0_18px_34px_-26px_rgba(21,58,76,0.45)]' : 'border-slate-100 bg-white hover:bg-slate-50'}`}
+                    aria-current={active ? 'true' : undefined}
+                    className={`jnc-ds-touch jnc-ds-focus-ring relative flex w-full items-center gap-3 overflow-hidden rounded-[1.35rem] border p-2.5 text-left transition ${active ? 'border-[#336886] bg-[#336886]/12 ring-2 ring-[#336886]/25 shadow-[0_18px_34px_-26px_rgba(21,58,76,0.5)]' : 'border-slate-100 bg-white hover:bg-slate-50'}`}
                   >
+                    {active ? <span className="absolute inset-y-0 left-0 w-1.5 bg-[#336886]" aria-hidden="true" /> : null}
                     <img src={resourceImage(resource)} alt="" className="h-[3.25rem] w-[3.25rem] shrink-0 rounded-2xl object-cover ring-1 ring-slate-100" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-black text-slate-950">{resourceTitle(resource)}</span>
@@ -552,7 +555,7 @@ export function DestinationPartnerPortal() {
                         {resource.resourceType === 'HOSPITALITY_PLACE' ? 'Hospedagem' : 'Serviço local'}
                       </span>
                     </span>
-                    <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-black text-emerald-700">{score}%</span>
+                    {active ? <CheckCircle size={18} weight="fill" className="shrink-0 text-[#336886]" /> : <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-black text-emerald-700">{score}%</span>}
                   </button>
                 );
               })}
@@ -578,7 +581,7 @@ export function DestinationPartnerPortal() {
             </span>
           </div>
           <div className="border-t border-amber-100/80 bg-white/55 p-5">
-            <DestinationPromotionPanel />
+            <DestinationPromotionPanel resourceId={String(selectedResource?.item?.id || '')} />
           </div>
         </SurfaceCard>
 
@@ -589,11 +592,11 @@ export function DestinationPartnerPortal() {
                 <div className="flex items-center gap-3">
                   <img src={resourceImage(selectedResource)} alt="" className="h-16 w-16 rounded-[1.35rem] object-cover ring-1 ring-slate-100" />
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]/70">
-                      {selectedResource.resourceType === 'HOSPITALITY_PLACE' ? 'Hospedagem' : 'Serviço local'}
+                    <p className="inline-flex items-center gap-1.5 rounded-full bg-[#336886]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#153A4C]">
+                      <PencilSimple size={12} weight="bold" /> Editando · {selectedResource.resourceType === 'HOSPITALITY_PLACE' ? 'Hospedagem' : 'Serviço'}
                     </p>
-                    <h2 className="text-2xl font-black tracking-[-0.04em] text-slate-950">{resourceTitle(selectedResource)}</h2>
-                    <p className="mt-1 text-sm font-semibold text-slate-500">Edite somente campos operacionais liberados.</p>
+                    <h2 className="mt-1.5 text-2xl font-black tracking-[-0.04em] text-slate-950">{resourceTitle(selectedResource)}</h2>
+                    <p className="mt-1 text-sm font-semibold text-slate-500">As mudanças abaixo salvam <strong>somente neste cadastro</strong>. Clique em outro chalé na lista à esquerda pra trocar.</p>
                   </div>
                 </div>
                 <div className="inline-flex items-center gap-2 rounded-2xl bg-[#153A4C] px-4 py-2 text-sm font-black text-white">

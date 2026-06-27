@@ -27,7 +27,7 @@ const DURATION_LABEL: Record<string, string> = {
  * O parceiro escolhe um recurso (chalé/pousada ou serviço), paga via PIX e ganha
  * destaque de posicionamento (featured + ordem) pelo período.
  */
-export function DestinationPromotionPanel() {
+export function DestinationPromotionPanel({ resourceId }: { resourceId?: string } = {}) {
   const [pricing, setPricing] = useState<any>(null);
   const [promotions, setPromotions] = useState<DestinationPromotion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,8 +44,9 @@ export function DestinationPromotionPanel() {
         resourceId: String(r.item?.id || ''),
         name: String(r.resourceType === 'HOSPITALITY_PLACE' ? r.item?.name : r.item?.title || 'Recurso'),
       }))
-      .filter((r) => r.resourceId);
-  }, []);
+      .filter((r) => r.resourceId)
+      .filter((r) => !resourceId || r.resourceId === resourceId);
+  }, [resourceId]);
 
   const load = useCallback(async () => {
     setLoading(true);
