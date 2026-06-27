@@ -185,6 +185,16 @@ export const SUPER_ADMIN_NAV_ITEMS: SuperAdminNavigationItem[] = [
     aliases: ['bloqueios', 'mfa', 'fraude'],
   },
   {
+    id: 'users',
+    label: 'Usuários',
+    description: 'Buscar usuários por email/ID e ver rotas acessadas.',
+    group: 'trust',
+    icon: IdentificationCard,
+    section: 'users',
+    route: '/superadmin',
+    aliases: ['acessos', 'logs', 'rotas'],
+  },
+  {
     id: 'health',
     label: 'Saúde técnica',
     shortLabel: 'Saúde',

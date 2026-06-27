@@ -214,6 +214,8 @@ export function createProxyRoutes(): Router {
     r.get('/admin/system-health', authRequired, forward);
     r.get('/admin/payment-events', authRequired, forward);
     r.get('/admin/access-logs', authRequired, forward);
+    r.get('/admin/users', authRequired, forward);
+    r.get('/admin/users/:userId', authRequired, forward);
     r.get('/admin/customer-security/overview', authRequired, forward);
     r.patch('/admin/customer-security/blocks/:blockId/revoke', authRequired, forward);
     r.post('/admin/push/broadcast', authRequired, forward);

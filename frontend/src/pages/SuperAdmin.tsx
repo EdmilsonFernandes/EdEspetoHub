@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { SuperAdminUsers } from './SuperAdminUsers';
 import { Capacitor } from '@capacitor/core';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -3872,6 +3873,12 @@ export function SuperAdmin() {
             <div className="text-sm text-slate-500">KYC oculto.</div>
           )}
         </FormSection>
+
+        {activeSection === 'users' && (
+          <div className="px-4 py-4">
+            <SuperAdminUsers />
+          </div>
+        )}
 
         <FormSection
           title="Versões e Build"

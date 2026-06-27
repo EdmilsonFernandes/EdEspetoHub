@@ -86,3 +86,12 @@ export const isAllowlistedEmail = (email?: string | null, allowlistedEmails: str
     .map((entry) => String(entry || '').trim().toLowerCase())
     .includes(normalized);
 };
+
+/** Permite um DOMÍNIO inteiro na allowlist (ex: test.local pros e2e/Playwright). */
+export const isAllowlistedEmailDomain = (email?: string | null, allowlistedDomains: string[] = []) => {
+  const domain = extractEmailDomain(email);
+  if (!domain) return false;
+  return allowlistedDomains
+    .map((entry) => String(entry || '').trim().toLowerCase())
+    .includes(domain);
+};

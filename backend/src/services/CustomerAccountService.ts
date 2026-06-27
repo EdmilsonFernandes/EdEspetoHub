@@ -15,7 +15,7 @@ import { OrderService } from './OrderService';
 import { OrderEtaServiceV2 } from './OrderEtaServiceV2';
 import { logger } from '../utils/logger';
 import { ZipCodeLookupService } from './ZipCodeLookupService';
-import { getEmailDomainTypoMessage, isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
+import { getEmailDomainTypoMessage, isAllowlistedEmail, isAllowlistedEmailDomain, isDisposableEmailDomain } from '../utils/emailRisk';
 import { CustomerSecurityService } from './CustomerSecurityService';
 import { GeoLocationService } from './GeoLocationService';
 import { buildOrderTimelineJson } from '../utils/orderTimeline';
@@ -560,7 +560,8 @@ async register(
     }
     if (
       isDisposableEmailDomain(email, env.security.disposableEmailDomains) &&
-      !isAllowlistedEmail(email, env.security.allowlistedEmails)
+      !isAllowlistedEmail(email, env.security.allowlistedEmails) &&
+      !isAllowlistedEmailDomain(email, env.security.allowlistedEmailDomains)
     ) {
       await this.securityService.recordRiskEvent({
         email,

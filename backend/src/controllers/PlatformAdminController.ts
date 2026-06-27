@@ -21,6 +21,7 @@ import { OrderRepository } from '../repositories/OrderRepository';
 import { AppDataSource } from '../config/database';
 import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
 import { AccessLogRepository } from '../repositories/AccessLogRepository';
+import { User } from '../entities/User';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
 import { respondWithError } from '../errors/respondWithError';
@@ -991,6 +992,69 @@ export class PlatformAdminController {
       return res.json(result);
     } catch (error: any) {
       log.warn('Admin push broadcast failed', { topic, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Lista usuários com busca/filtro (Super Admin).
+   */
+  static async listUsers(req: Request, res: Response) {
+    try {
+      const search = (req.query.search as string | undefined) || '';
+      const role = (req.query.role as string | undefined) || undefined;
+      const limit = Math.min(Number(req.query.limit) || 50, 200);
+      const offset = Number(req.query.offset) || 0;
+
+      const repo = AppDataSource.getRepository(User);
+      const qb = repo.createQueryBuilder('u').select([
+        'u.id', 'u.fullName', 'u.email', 'u.userRole', 'u.isActive',
+        'u.emailVerified', 'u.phone', 'u.document', 'u.createdAt',
+      ]);
+
+      if (search) {
+        qb.andWhere('(LOWER(u.email) LIKE :search OR LOWER(u.fullName) LIKE :search)', { search: `%${search.toLowerCase()}%` });
+      }
+      if (role) {
+        qb.andWhere('u.userRole = :role', { role });
+      }
+      qb.orderBy('u.createdAt', 'DESC').limit(limit).offset(offset);
+
+      const [users, total] = await qb.getManyAndCount();
+      return res.json({ users, total, limit, offset });
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Detalhe de um usuário + seus access logs (rotas que acessou).
+   */
+  static async getUserDetail(req: Request, res: Response) {
+    try {
+      const userId = String(req.params.userId || '');
+      const repo = AppDataSource.getRepository(User);
+      const user = await repo.findOne({ where: { id: userId } });
+      if (!user) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Usuário não encontrado.' } });
+
+      const logs = await accessLogRepository.list({ userId, limit: 100 });
+      const logData = Array.isArray(logs) ? logs : (logs as any)?.data || [];
+
+      return res.json({
+        user: {
+          id: user.id,
+          fullName: user.fullName,
+          email: user.email,
+          userRole: user.userRole,
+          isActive: user.isActive,
+          emailVerified: user.emailVerified,
+          phone: user.phone,
+          document: user.document,
+          createdAt: user.createdAt,
+        },
+        logs: logData,
+      });
+    } catch (error: any) {
       return respondWithError(req, res, error, 400);
     }
   }

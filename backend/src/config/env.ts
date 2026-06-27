@@ -235,6 +235,7 @@ export const env = {
     recoveryRateLimitMax: numberEnv('AUTH_RECOVERY_RATE_LIMIT_MAX', 10, 1),
     disposableEmailDomains: listEnv('DISPOSABLE_EMAIL_DOMAINS').map((value) => value.toLowerCase()),
     allowlistedEmails: listEnv('SECURITY_EMAIL_ALLOWLIST').map((value) => value.toLowerCase()),
+    allowlistedEmailDomains: listEnv('ALLOWLISTED_EMAIL_DOMAINS').map((value) => value.toLowerCase()),
     customerRapidPickupWindowMinutes: numberEnv('CUSTOMER_RAPID_PICKUP_WINDOW_MINUTES', 15, 1),
     customerRapidPickupAutoBlockAfterEvents: numberEnv('CUSTOMER_RAPID_PICKUP_AUTO_BLOCK_AFTER_EVENTS', 2, 2),
     customerRapidPickupAutoBlockWindowHours: numberEnv('CUSTOMER_RAPID_PICKUP_AUTO_BLOCK_WINDOW_HOURS', 24, 1),

@@ -147,6 +147,8 @@ routes.get('/admin/queue-health', requireAuth, requireRole('SUPER_ADMIN'), Platf
 routes.get('/admin/system-health', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.systemHealth);
 routes.get('/admin/payment-events', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listPaymentEvents);
 routes.get('/admin/access-logs', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listAccessLogs);
+routes.get('/admin/users', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listUsers);
+routes.get('/admin/users/:userId', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.getUserDetail);
 routes.get('/admin/customer-security/overview', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.customerSecurityOverview);
 routes.patch('/admin/customer-security/blocks/:blockId/revoke', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.revokeCustomerSecurityBlock);
 routes.post('/admin/push/broadcast', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.broadcastPush);
