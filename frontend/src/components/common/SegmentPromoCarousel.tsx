@@ -206,8 +206,8 @@ export function SegmentPromoCarousel({
       </div>
 
       {resolvedSlides.length > 1 ? (
-        <div className="absolute inset-x-0 bottom-0 z-[5] flex justify-center pb-1.5 sm:pb-2">
-          <div className="inline-flex items-center gap-0.5 rounded-full border border-white/55 bg-slate-950/24 px-1 py-1 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.72)] backdrop-blur-xl">
+        <div className="absolute inset-x-0 bottom-1.5 z-[5] flex justify-center sm:bottom-2">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-white/45 bg-slate-950/22 px-2 py-1 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.62)] backdrop-blur-md">
             {resolvedSlides.map((slide, index) => (
               <button
                 type="button"
@@ -215,7 +215,7 @@ export function SegmentPromoCarousel({
                 aria-label={`Ir para banner ${index + 1}`}
                 aria-current={index === activeIndex ? 'true' : undefined}
                 onClick={() => emblaApi?.scrollTo(index)}
-                className="jnc-hub-touch grid h-10 w-10 place-items-center rounded-full transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="jnc-hub-touch grid h-5 w-5 place-items-center rounded-full transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 <span
                   className={`rounded-full transition-all duration-300 ${
