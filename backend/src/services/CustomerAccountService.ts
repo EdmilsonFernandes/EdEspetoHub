@@ -571,7 +571,7 @@ async register(
         metadata: { flow: 'customer_register' },
       });
       throw new AppError('AUTH-023', 400, {
-        message: 'Use um e-mail pessoal ou comercial válido. E-mails temporários não são aceitos.',
+        message: 'Use um e-mail pessoal ou comercial válido. E-mails temporários ou suspeitos não são aceitos.',
       });
     }
     if (password.length < 6) {

@@ -1,4 +1,5 @@
 const BUILT_IN_DISPOSABLE_EMAIL_DOMAINS = new Set([
+  // Domínios temporários / descartáveis conhecidos
   '10minutemail.com',
   '10minutemail.net',
   '20minutemail.com',
@@ -16,6 +17,18 @@ const BUILT_IN_DISPOSABLE_EMAIL_DOMAINS = new Set([
   'tempmailo.com',
   'trashmail.com',
   'yopmail.com',
+  // Domínios de teste / reservados (RFC 2606) — nenhum usuário real usa
+  'test.local',
+  'test.com',
+  'teste.local',
+  'example.com',
+  'example.org',
+  'example.net',
+  'example.br',
+  'fake.com',
+  'fakeemail.com',
+  'nada.com',
+  'naoexiste.com',
 ]);
 
 export const extractEmailDomain = (email?: string | null) => {
