@@ -6,6 +6,11 @@ type IdleWindow = Window & {
   cancelIdleCallback?: (handle: number) => void;
 };
 
+type NetworkInformationLike = {
+  effectiveType?: string;
+  saveData?: boolean;
+};
+
 let marketplacePagePromise: Promise<any> | null = null;
 let hubHighlightsPagePromise: Promise<any> | null = null;
 let destinationsPagePromise: Promise<any> | null = null;
@@ -79,7 +84,18 @@ export const loadNotificationsPage = () => {
   return notificationsPagePromise;
 };
 
+const shouldAvoidRoutePrefetch = () => {
+  if (typeof window === 'undefined') return true;
+
+  const connection = (navigator as Navigator & { connection?: NetworkInformationLike }).connection;
+  if (connection?.saveData) return true;
+  if (connection?.effectiveType && ['slow-2g', '2g', '3g'].includes(connection.effectiveType)) return true;
+
+  return window.matchMedia('(max-width: 767px)').matches;
+};
+
 const safePrefetch = (loader: () => Promise<any>) => {
+  if (shouldAvoidRoutePrefetch()) return;
   void loader().catch(() => undefined);
 };
 
@@ -190,6 +206,7 @@ export const prefetchClientAccountAdjacentRoutes = () => {
 
 export const scheduleIdlePrefetch = (callback: () => void, timeout = 1400) => {
   if (typeof window === 'undefined') return () => undefined;
+  if (shouldAvoidRoutePrefetch()) return () => undefined;
   const win = window as IdleWindow;
 
   if (typeof win.requestIdleCallback === 'function') {

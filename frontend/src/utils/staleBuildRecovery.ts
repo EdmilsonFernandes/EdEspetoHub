@@ -42,7 +42,7 @@ const clearRuntimeCaches = async () => {
   try {
     if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map((registration) => registration.update().catch(() => undefined)));
+      await Promise.all(registrations.map((registration) => registration.unregister().catch(() => undefined)));
     }
   } catch {
     // no-op

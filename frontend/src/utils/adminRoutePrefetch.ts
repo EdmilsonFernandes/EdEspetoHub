@@ -4,6 +4,11 @@ let adminOrdersPromise: Promise<any> | null = null;
 let adminHighlightsPromise: Promise<any> | null = null;
 let storePagePromise: Promise<any> | null = null;
 
+type NetworkInformationLike = {
+  effectiveType?: string;
+  saveData?: boolean;
+};
+
 export const loadAdminDashboardPage = () => {
   adminDashboardPromise ||= import('../pages/AdminDashboard');
   return adminDashboardPromise;
@@ -35,18 +40,18 @@ const warmAdminProductCatalog = () => {
     .catch(() => undefined);
 };
 
+const shouldAvoidAdminPrefetch = () => {
+  if (typeof window === 'undefined') return true;
+
+  const connection = (navigator as Navigator & { connection?: NetworkInformationLike }).connection;
+  if (connection?.saveData) return true;
+  if (connection?.effectiveType && ['slow-2g', '2g', '3g'].includes(connection.effectiveType)) return true;
+
+  return window.matchMedia('(max-width: 767px)').matches;
+};
+
 export const prefetchAdminLandingRoutes = () => {
-  const isMobile =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(max-width: 767px)').matches;
-
-  if (isMobile) {
-    void loadStorePage().catch(() => undefined);
-    void loadAdminQueuePage().catch(() => undefined);
-    warmAdminProductCatalog();
-    return;
-  }
-
+  if (shouldAvoidAdminPrefetch()) return;
   void loadAdminDashboardPage().catch(() => undefined);
   void loadAdminQueuePage().catch(() => undefined);
   void loadAdminOrdersPage().catch(() => undefined);
@@ -55,6 +60,7 @@ export const prefetchAdminLandingRoutes = () => {
 
 export const scheduleAdminRoutePrefetch = () => {
   if (typeof window === 'undefined') return () => undefined;
+  if (shouldAvoidAdminPrefetch()) return () => undefined;
   const win = window as Window & {
     requestIdleCallback?: (cb: () => void, options?: { timeout?: number }) => number;
     cancelIdleCallback?: (handle: number) => void;

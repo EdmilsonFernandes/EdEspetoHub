@@ -21,7 +21,10 @@ export default defineConfig({
         skipWaiting: true,
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//, /^\/minhasaude/, /^\/meus-exames/],
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        // Keep SW install light in production: route chunks are fetched on demand.
+        globPatterns: ['index.html', 'assets/*.{css,ico,png,svg,webp,jpg,jpeg,woff2}'],
+        globIgnores: ['**/*.js', '**/*.map', '**/stats.html'],
+        maximumFileSizeToCacheInBytes: 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: ({ request, url, sameOrigin }) =>
