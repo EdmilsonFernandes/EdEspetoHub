@@ -10,6 +10,7 @@ const ALWAYS_OPEN_HOURS = Array.from({ length: 7 }, (_, day) => ({
 const listOrders = (payload: any) => {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.orders)) return payload.orders;
+  if (Array.isArray(payload?.stores)) return payload.stores;
   if (Array.isArray(payload?.data)) return payload.data;
   return [];
 };
@@ -19,7 +20,7 @@ describe('Fluxo E2E completo — loja, cliente e entregador', () => {
     'configura a loja e fecha os fluxos de retirada e entrega com motoboy',
     async () => {
       const storeRegistration = await registerStore();
-      expect([200, 201]).toContain(storeRegistration.res.status);
+      expect([200, 201], JSON.stringify(storeRegistration.body)).toContain(storeRegistration.res.status);
       await verifyEmailDirectly(storeRegistration.email);
 
       const storeId = String(storeRegistration.body?.store?.id || '');
@@ -72,6 +73,23 @@ describe('Fluxo E2E completo — loja, cliente e entregador', () => {
       const publicCatalog = await api.get(`/api/stores/slug/${storeSlug}/products`);
       expect(publicCatalog.status).toBe(200);
       expect(listOrders(publicCatalog.body).some((item: any) => String(item?.id || '') === productId)).toBe(true);
+
+      const nearbyStoreDiscovery = await api
+        .get('/api/public/stores/discovery')
+        .query({
+          lat: -23.5512,
+          lng: -46.6325,
+          city: 'São Paulo',
+          state: 'SP',
+        });
+      expect(nearbyStoreDiscovery.status).toBe(200);
+      const visibleStores = listOrders(nearbyStoreDiscovery.body);
+      const discoveredStore = visibleStores.find((store: any) => String(store?.id || '') === storeId);
+      expect(discoveredStore).toBeTruthy();
+      expect(discoveredStore?.openNow).toBe(true);
+      expect(discoveredStore?.deliversToUserLocation).toBe(true);
+      expect(String(discoveredStore?.geoAvailability || '')).toBe('deliver_now');
+      expect(Number(discoveredStore?.distanceKm || 0)).toBeLessThanOrEqual(12);
 
       const customerEmail = `cliente-full-flow-${Date.now()}@example.com`;
       const customerPassword = 'Test@123456';
@@ -203,6 +221,7 @@ describe('Fluxo E2E completo — loja, cliente e entregador', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ status: 'preparing' });
       expect(markPreparing.status).toBe(200);
+      expect(String(markPreparing.body?.status || '').toLowerCase()).toBe('preparing');
 
       const markReadyForDelivery = await api
         .patch(`/api/orders/${deliveryOrderId}/status`)
@@ -210,6 +229,13 @@ describe('Fluxo E2E completo — loja, cliente e entregador', () => {
         .send({ status: 'ready_for_delivery' });
       expect(markReadyForDelivery.status).toBe(200);
       expect(String(markReadyForDelivery.body?.status || '').toLowerCase()).toBe('ready_for_delivery');
+
+      const markWaitingForMotoboy = await api
+        .patch(`/api/orders/${deliveryOrderId}/status`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ status: 'waiting_for_motoboy' });
+      expect(markWaitingForMotoboy.status).toBe(200);
+      expect(String(markWaitingForMotoboy.body?.status || '').toLowerCase()).toBe('waiting_for_motoboy');
 
       const availableOrders = await api
         .get('/api/motoboy/orders/available')
@@ -230,6 +256,7 @@ describe('Fluxo E2E completo — loja, cliente e entregador', () => {
         .set('Authorization', `Bearer ${motoboyToken}`);
       expect(currentAccepted.status).toBe(200);
       expect(String(currentAccepted.body?.id || '')).toBe(deliveryOrderId);
+      expect(String(currentAccepted.body?.status || '').toLowerCase()).toBe('waiting_for_motoboy');
 
       const pickupDelivery = await api
         .post(`/api/motoboy/orders/${deliveryOrderId}/pickup`)
@@ -246,12 +273,38 @@ describe('Fluxo E2E completo — loja, cliente e entregador', () => {
       const confirmationCode = String(currentInTransit.body?.delivery?.confirmationCode || '');
       expect(confirmationCode).toHaveLength(4);
 
+      const inRouteTracking = await api.get(`/api/v2/orders/${deliveryOrderId}/tracking`);
+      expect(inRouteTracking.status).toBe(200);
+      expect(String(inRouteTracking.body?.status || '').toLowerCase()).toBe('in_delivery');
+
+      const publicInRouteTracking = await api.get(`/api/orders/${deliveryOrderId}/public`);
+      expect(publicInRouteTracking.status).toBe(200);
+      expect(String(publicInRouteTracking.body?.status || publicInRouteTracking.body?.order?.status || '').toLowerCase()).toBe('in_delivery');
+      expect(String(publicInRouteTracking.body?.delivery?.confirmationCode || publicInRouteTracking.body?.order?.delivery?.confirmationCode || '')).toBe(confirmationCode);
+
+      const confirmPayment = await api
+        .post(`/api/motoboy/orders/${deliveryOrderId}/confirm-payment`)
+        .set('Authorization', `Bearer ${motoboyToken}`)
+        .send({ cashTendered: 100 });
+      expect(confirmPayment.status).toBe(200);
+      expect(String(confirmPayment.body?.paymentStatus || '').toUpperCase()).toBe('PAID');
+
       const delivered = await api
         .post(`/api/motoboy/orders/${deliveryOrderId}/delivered`)
         .set('Authorization', `Bearer ${motoboyToken}`)
         .send({ code: confirmationCode });
       expect(delivered.status).toBe(200);
-      expect(['delivered', 'finished']).toContain(String(delivered.body?.status || '').toLowerCase());
+      let finalDeliveryStatus = String(delivered.body?.status || '').toLowerCase();
+      expect(['delivered', 'finished']).toContain(finalDeliveryStatus);
+      if (finalDeliveryStatus !== 'finished') {
+        const finished = await api
+          .post(`/api/motoboy/orders/${deliveryOrderId}/finish`)
+          .set('Authorization', `Bearer ${motoboyToken}`)
+          .send({});
+        expect(finished.status).toBe(200);
+        finalDeliveryStatus = String(finished.body?.status || '').toLowerCase();
+      }
+      expect(finalDeliveryStatus).toBe('finished');
 
       const customerOrders = await api
         .get('/api/customer/orders')
@@ -263,9 +316,11 @@ describe('Fluxo E2E completo — loja, cliente e entregador', () => {
 
       const publicDeliveryTracking = await api.get(`/api/orders/${deliveryOrderId}/public`);
       expect(publicDeliveryTracking.status).toBe(200);
-      expect(['delivered', 'finished']).toContain(
-        String(publicDeliveryTracking.body?.status || publicDeliveryTracking.body?.order?.status || '').toLowerCase()
-      );
+      expect(String(publicDeliveryTracking.body?.status || publicDeliveryTracking.body?.order?.status || '').toLowerCase()).toBe('finished');
+
+      const finalTracking = await api.get(`/api/v2/orders/${deliveryOrderId}/tracking`);
+      expect(finalTracking.status).toBe(200);
+      expect(String(finalTracking.body?.status || '').toLowerCase()).toBe('finished');
 
       const motoboyHistory = await api
         .get('/api/motoboy/orders/history')

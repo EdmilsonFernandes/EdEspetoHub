@@ -6,6 +6,7 @@ import { AppError } from '../errors/AppError';
 const originalQuery = AppDataSource.query.bind(AppDataSource);
 const originalGetRepository = AppDataSource.getRepository.bind(AppDataSource);
 const originalTransaction = AppDataSource.transaction.bind(AppDataSource);
+const CUSTOMER_EMAIL = 'cliente@janocaminho.dev';
 
 afterAll(() => {
   (AppDataSource as any).query = originalQuery;
@@ -31,7 +32,7 @@ describe('CustomerAccountService — email OTP', () => {
     savedUser = {
       id: 'customer-1',
       fullName: 'Cliente OTP',
-      email: 'cliente@example.com',
+      email: CUSTOMER_EMAIL,
       password: 'hashed-password',
       userRole: 'CUSTOMER',
       emailVerified: false,
@@ -53,7 +54,7 @@ describe('CustomerAccountService — email OTP', () => {
 
     const userRepo = {
       findOne: async ({ where }: any) => {
-        if (where?.email === 'cliente@example.com') return userExists ? savedUser : null;
+        if (where?.email === CUSTOMER_EMAIL) return userExists ? savedUser : null;
         return null;
       },
       create: (payload: any) => ({ ...payload }),
@@ -93,7 +94,7 @@ describe('CustomerAccountService — email OTP', () => {
 
   it('register requests OTP verification and sends 4-digit code', async () => {
     const result = await service.register({
-      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      fullName: 'Cliente OTP', email: CUSTOMER_EMAIL, password: '123456',
       termsAccepted: true, lgpdAccepted: true,
     }, { ipAddress: '127.0.0.1' });
 
@@ -108,7 +109,7 @@ describe('CustomerAccountService — email OTP', () => {
     };
 
     const result = await service.register({
-      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      fullName: 'Cliente OTP', email: CUSTOMER_EMAIL, password: '123456',
       termsAccepted: true, lgpdAccepted: true,
     }, { ipAddress: '127.0.0.1' });
 
@@ -123,12 +124,12 @@ describe('CustomerAccountService — email OTP', () => {
 
   it('retoma a confirmação quando cliente tenta cadastrar e-mail ainda não verificado', async () => {
     await service.register({
-      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      fullName: 'Cliente OTP', email: CUSTOMER_EMAIL, password: '123456',
       termsAccepted: true, lgpdAccepted: true,
     }, { ipAddress: '127.0.0.1' });
 
     const result = await service.register({
-      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      fullName: 'Cliente OTP', email: CUSTOMER_EMAIL, password: '123456',
       termsAccepted: true, lgpdAccepted: true,
     }, { ipAddress: '127.0.0.1' });
 
@@ -141,7 +142,7 @@ describe('CustomerAccountService — email OTP', () => {
 
   it('mantém código anterior válido quando tentativa de novo envio falha', async () => {
     await service.register({
-      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      fullName: 'Cliente OTP', email: CUSTOMER_EMAIL, password: '123456',
       termsAccepted: true, lgpdAccepted: true,
     }, { ipAddress: '127.0.0.1' });
     const deliveredCode = sentCode;
@@ -152,7 +153,7 @@ describe('CustomerAccountService — email OTP', () => {
     };
 
     const retry = await service.register({
-      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      fullName: 'Cliente OTP', email: CUSTOMER_EMAIL, password: '123456',
       termsAccepted: true, lgpdAccepted: true,
     }, { ipAddress: '127.0.0.1' });
 
@@ -160,28 +161,28 @@ describe('CustomerAccountService — email OTP', () => {
     expect(retry.emailDeliveryStatus).toBe('failed');
     expect(otpRecords[0]?.usedAt).toBeTruthy();
 
-    const result = await service.verifyEmailCode({ email: 'cliente@example.com', code: deliveredCode });
+    const result = await service.verifyEmailCode({ email: CUSTOMER_EMAIL, code: deliveredCode });
     expect(result.token).toBeTruthy();
     expect(savedUser.emailVerified).toBe(true);
   });
 
   it('invalid code increments attempts and throws', async () => {
     await service.register({
-      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      fullName: 'Cliente OTP', email: CUSTOMER_EMAIL, password: '123456',
       termsAccepted: true, lgpdAccepted: true,
     }, { ipAddress: '127.0.0.1' });
 
-    await expect(service.verifyEmailCode({ email: 'cliente@example.com', code: '0000' })).rejects.toThrow(AppError);
+    await expect(service.verifyEmailCode({ email: CUSTOMER_EMAIL, code: '0000' })).rejects.toThrow(AppError);
     expect(Number(otpRecords[0]?.attemptsCount || 0)).toBe(1);
   });
 
   it('valid code authenticates customer and sends welcome', async () => {
     await service.register({
-      fullName: 'Cliente OTP', email: 'cliente@example.com', password: '123456',
+      fullName: 'Cliente OTP', email: CUSTOMER_EMAIL, password: '123456',
       termsAccepted: true, lgpdAccepted: true,
     }, { ipAddress: '127.0.0.1' });
 
-    const result = await service.verifyEmailCode({ email: 'cliente@example.com', code: sentCode });
+    const result = await service.verifyEmailCode({ email: CUSTOMER_EMAIL, code: sentCode });
     expect(result.token).toBeTruthy();
     expect(savedUser.emailVerified).toBe(true);
     expect(welcomeSent).toBe(1);

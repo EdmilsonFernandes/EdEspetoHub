@@ -42,7 +42,12 @@ import { CondominiumUser } from '../entities/CondominiumUser';
 import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
 import { resolvePlanFeatures, resolvePlanTier } from '../config/planFeatures';
 import { StoreUserRepository } from '../repositories/StoreUserRepository';
-import { getEmailDomainTypoMessage, isAllowlistedEmail, isDisposableEmailDomain } from '../utils/emailRisk';
+import {
+  getEmailDomainTypoMessage,
+  isAllowlistedEmail,
+  isAllowlistedEmailDomain,
+  isDisposableEmailDomain,
+} from '../utils/emailRisk';
 import { CustomerSecurityService } from './CustomerSecurityService';
 import { AuditNotificationService } from './AuditNotificationService';
 import { MfaService } from './MfaService';
@@ -403,7 +408,8 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     }
     if (
       isDisposableEmailDomain(email, env.security.disposableEmailDomains) &&
-      !isAllowlistedEmail(email, env.security.allowlistedEmails)
+      !isAllowlistedEmail(email, env.security.allowlistedEmails) &&
+      !isAllowlistedEmailDomain(email, env.security.allowlistedEmailDomains)
     ) {
       await this.securityService.recordRiskEvent({
         email,
@@ -682,7 +688,8 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     }
     if (
       isDisposableEmailDomain(normalizedEmail, env.security.disposableEmailDomains) &&
-      !isAllowlistedEmail(normalizedEmail, env.security.allowlistedEmails)
+      !isAllowlistedEmail(normalizedEmail, env.security.allowlistedEmails) &&
+      !isAllowlistedEmailDomain(normalizedEmail, env.security.allowlistedEmailDomains)
     ) {
       await this.securityService.recordRiskEvent({
         email: normalizedEmail,

@@ -2,6 +2,16 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.test', override: true });
 
+const testEmailDomains = new Set([
+  ...(process.env.ALLOWLISTED_EMAIL_DOMAINS || '')
+    .split(',')
+    .map((domain) => domain.trim())
+    .filter(Boolean),
+  'test.local',
+  'example.com',
+]);
+process.env.ALLOWLISTED_EMAIL_DOMAINS = Array.from(testEmailDomains).join(',');
+
 import 'reflect-metadata';
 
 let dataSource: any;
