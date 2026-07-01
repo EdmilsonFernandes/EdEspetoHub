@@ -31,6 +31,7 @@ import { HubFlowSimulator } from '../components/Landing/HubFlowSimulator';
 import { BentoFeatures } from '../components/Landing/BentoFeatures';
 import { LandingUseCases } from '../components/Landing/LandingUseCases';
 import { PricingSection } from '../components/Landing/PricingSection';
+import { EcosystemDeckShowcase } from '../components/Landing/EcosystemDeckShowcase';
 
 const mercadoPagoLandingLogo = '/mercado-pago-horizontal.png';
 
@@ -507,6 +508,11 @@ export function LandingPage() {
             <BentoFeatures />
           </div>
         </section>
+
+        {/* ══════════════════════════════════════════════════════════════
+            APRESENTAÇÃO DO ECOSSISTEMA (SLIDESHOW DO PITCH DECK)
+        ══════════════════════════════════════════════════════════════ */}
+        <EcosystemDeckShowcase />
 
         <PricingSection />
 
