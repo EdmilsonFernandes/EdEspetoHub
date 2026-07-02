@@ -910,6 +910,7 @@ export const BrandingSettings = ({
                 <option value="preset:triple">Vinheta destaque</option>
                 <option value="preset:alert">Vinheta urgente</option>
                 <option value="custom">URL personalizada (MP3/OGG/WAV)</option>
+                <option value="none">Sem som (mudo)</option>
               </select>
               {orderSoundIsCustom && (
                 <div className="space-y-2">
@@ -953,6 +954,11 @@ export const BrandingSettings = ({
                   )}
                 </div>
               )}
+            {orderSoundValue === 'none' ? (
+              <p className="mt-3 rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-slate-500">
+                🔇 Sem som — o painel fica silencioso quando entra um pedido novo.
+              </p>
+            ) : (
             <div className="mt-3">
               <label className="text-xs font-semibold text-slate-600">Duração da vinheta (segundos)</label>
               <input
@@ -965,6 +971,7 @@ export const BrandingSettings = ({
                 className="mt-1 w-24 rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white/90 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none"
               />
             </div>
+            )}
             </div>
           </div>
         </div>

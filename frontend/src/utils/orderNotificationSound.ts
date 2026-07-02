@@ -1,4 +1,4 @@
-export type OrderNotificationPreset = 'default' | 'chime' | 'triple' | 'alert';
+export type OrderNotificationPreset = 'default' | 'chime' | 'triple' | 'alert' | 'none';
 
 const MIN_ORDER_NOTIFICATION_DURATION_SECONDS = 1;
 const MAX_ORDER_NOTIFICATION_DURATION_SECONDS = 15;
@@ -13,6 +13,7 @@ type ToneStep = {
 };
 
 const PRESET_PATTERNS: Record<OrderNotificationPreset, ToneStep[]> = {
+  none: [],
   default: [
     { offset: 0, frequency: 880, duration: 0.2, gain: 0.07, type: 'sine' },
   ],
@@ -47,7 +48,9 @@ export const parseOrderNotificationSoundSetting = (value: unknown) => {
   const customUrl = /^(https?:\/\/|\/|data:)/i.test(raw) ? raw : '';
   const normalizedSetting = raw.toLowerCase();
   const preset: OrderNotificationPreset =
-    normalizedSetting === 'preset:chime'
+    normalizedSetting === 'none'
+      ? 'none'
+      : normalizedSetting === 'preset:chime'
       ? 'chime'
       : normalizedSetting === 'preset:triple'
       ? 'triple'
@@ -67,6 +70,8 @@ export const playOrderNotificationPreset = (
   preset: OrderNotificationPreset,
   durationMs: number,
 ) => {
+  // "none" = lojista deixou mudo: não toca nada quando chega pedido.
+  if (preset === 'none') return;
   const pattern = PRESET_PATTERNS[preset] || PRESET_PATTERNS.default;
   const cycleDuration = pattern.reduce((max, step) => Math.max(max, step.offset + step.duration), 0) + 0.06;
   const requestedSeconds = Math.max(cycleDuration, Number(durationMs) > 0 ? Number(durationMs) / 1000 : cycleDuration);

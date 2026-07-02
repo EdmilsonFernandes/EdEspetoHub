@@ -155,6 +155,7 @@ const playStoreOrderForegroundAlert = async () => {
     const { sound, durationSeconds } = getAdminOrderNotificationSettings();
     const durationMs = durationSeconds * 1000;
     const { customUrl, preset } = parseOrderNotificationSoundSetting(sound);
+    if (preset === 'none') return; // lojista deixou mudo: sem som de novo pedido
 
     if (customUrl) {
       if (!foregroundNotificationAudio || lastForegroundNotificationAudioSrc !== customUrl) {

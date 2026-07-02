@@ -998,6 +998,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const playNewOrderSound = async () => {
     if (!soundEnabled) return;
     const { customUrl, preset } = parseOrderNotificationSoundSetting(configuredOrderNotificationSound);
+    if (preset === 'none') return; // lojista deixou mudo: sem som de novo pedido
 
     if (customUrl) {
       try {
