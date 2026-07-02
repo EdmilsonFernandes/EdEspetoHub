@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, Compass, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck, ShieldCheck, Printer } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, Compass, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck, ShieldCheck, Printer, Stack, Sparkle, ChatCircle, ForkKnife, IdentificationCard } from '@phosphor-icons/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -1831,10 +1831,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'pedidos', label: 'Histórico de Pedidos', icon: ClipboardText },
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
             { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'estoque', label: 'Estoque', icon: Package },
-            { id: 'destaques', label: 'Visibilidade', icon: Star },
-            { id: 'pagamentos', label: 'Minha assinatura', icon: CreditCard },
-            { id: 'gateway', label: 'Pagamentos Online', icon: PlugsConnected },
+            { id: 'estoque', label: 'Estoque', icon: Stack },
+            { id: 'destaques', label: 'Destaques', icon: Sparkle },
+            { id: 'pagamentos', label: 'Assinatura e plano', icon: CreditCard },
+            { id: 'gateway', label: 'Pagamentos online', icon: PlugsConnected },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'condominios', label: 'Condomínios', icon: Buildings },
             { id: 'destinos', label: 'Destinos', icon: Compass },
@@ -1844,11 +1844,27 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           ]),
     [canUseMotoboys, isOperatorUser]
   );
+  // Submenu direto de Configurações (lojista): cada item abre a seção correspondente
+  // (perfil, horários, entrega...), pulando o hub de cards. O item 'config' (hub)
+  // segue no array para a paleta de comandos Ctrl+K e para o activeNavItem; o sidebar
+  // o oculta quando estes sub-itens existem. Operador (sem cfg-*) continua com 'config' único.
+  const configNavItems = [
+    { id: 'cfg-hub', label: 'Visão geral', icon: Gear },
+    { id: 'cfg-profile', label: 'Perfil e marca', icon: IdentificationCard },
+    { id: 'cfg-channels', label: 'Promo e contato', icon: ChatCircle },
+    { id: 'cfg-delivery', label: 'Entrega e frete', icon: Truck },
+    { id: 'cfg-ordering', label: 'Tipos de pedido', icon: ForkKnife },
+    { id: 'cfg-hours', label: 'Horários', icon: Clock },
+    { id: 'cfg-operation', label: 'Operação e som', icon: Bell },
+    { id: 'cfg-printer', label: 'Impressora térmica', icon: Printer },
+    { id: 'cfg-permissions', label: 'Permissões do app', icon: ShieldCheck },
+  ];
   const navItems = useMemo(() => {
     if (isOperatorUser) return desktopTabItems;
     return [
       ...desktopTabItems,
-      { id: 'cardapio', label: 'Loja Online', icon: BookOpen, disabled: false, standalone: true },
+      { id: 'cardapio', label: 'Loja Online', icon: Storefront, disabled: false, standalone: true },
+      ...configNavItems,
     ];
   }, [desktopTabItems, isOperatorUser]);
   const tabMeta = useMemo(
@@ -2970,6 +2986,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   const handleNavSelect = (id: string) => {
     runOrConfirmDiscard(() => {
+      if (id.startsWith('cfg-')) {
+        openConfigSection(id.slice(4) || 'hub');
+        return;
+      }
       if (id === 'cardapio') {
         if (storeSlug) navigate(`/${storeSlug}`);
         return;
@@ -3004,6 +3024,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   };
 
   const activeNavItem = (navItems || []).find((item) => item.id === activeTab);
+  // No submenu de Configurações, destaca o sub-item ativo (ex: cfg-hours em vez de só 'config').
+  const sidebarActiveId = !isOperatorUser && activeTab === 'config' ? `cfg-${configSection}` : activeTab;
   const ActiveTabIcon = activeNavItem?.icon || null;
   const hasStoreLocationConfigured = Boolean(
     String(brandingDraft.address || '').trim() &&
@@ -3186,7 +3208,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 : undefined,
             tone: item.id === 'motoboys' && item.disabled ? 'violet' : item.id === 'motoboys' ? 'amber' : 'default',
           }))}
-          activeId={activeTab}
+          activeId={sidebarActiveId}
           compact={sidebarCompact}
           onToggleCompact={() => setSidebarCompact((prev) => !prev)}
           onSelect={handleNavSelect}

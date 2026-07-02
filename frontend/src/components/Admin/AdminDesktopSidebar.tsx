@@ -31,8 +31,11 @@ export function AdminDesktopSidebar({
   const optimisticTimerRef = useRef<number | null>(null);
   const allItemIds = useMemo(() => new Set((items || []).map((item) => item.id)), [items]);
   const isGroupedMode = useMemo(
-    () => ['resumo', 'pedidos', 'vendas', 'produtos', 'estoque', 'config', 'avaliacoes', 'fila'].some((id) => allItemIds.has(id)),
-    [allItemIds]
+    () =>
+      Boolean(items && items.length) &&
+      (items.some((item) => item.id.startsWith('cfg-')) ||
+        ['resumo', 'pedidos', 'vendas', 'produtos', 'estoque', 'config', 'avaliacoes', 'fila'].some((id) => allItemIds.has(id))),
+    [items, allItemIds]
   );
 
   const groupedSections = useMemo(() => {
@@ -42,28 +45,39 @@ export function AdminDesktopSidebar({
       if (byId.has(id)) consumeIds.add(id);
       return byId.get(id);
     };
+    const consumeMany = (ids: string[]) => ids.map(consume).filter(Boolean);
     const sections: any[] = [];
 
     const principal = consume('resumo');
     if (principal) sections.push({ type: 'item', item: principal });
 
-    const vendas = ['fila', 'pedidos', 'vendas', 'avaliacoes'].map(consume).filter(Boolean);
-    if (vendas.length) sections.push({ type: 'group', id: 'vendas', label: 'Vendas', children: vendas });
+    const operacao = consumeMany(['fila', 'pedidos', 'avaliacoes']);
+    if (operacao.length) sections.push({ type: 'group', id: 'operacao', label: 'Operação', children: operacao });
 
-    const catalogo = ['produtos', 'estoque', 'cardapio'].map(consume).filter(Boolean);
-    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Produtos e Loja', children: catalogo });
+    const catalogo = consumeMany(['produtos', 'estoque', 'cardapio']);
+    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Catálogo', children: catalogo });
 
-    const marketing = ['destaques'].map(consume).filter(Boolean);
-    if (marketing.length) sections.push({ type: 'group', id: 'marketing', label: 'Marketing', children: marketing });
+    const crescer = consumeMany(['destaques', 'destinos', 'condominios']);
+    if (crescer.length) sections.push({ type: 'group', id: 'crescer', label: 'Crescer', children: crescer });
 
-    const financeiro = ['pagamentos', 'gateway'].map(consume).filter(Boolean);
+    const financeiro = consumeMany(['pagamentos', 'gateway']);
     if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
 
-    const gestao = ['motoboys', 'condominios', 'destinos', 'usuarios'].map(consume).filter(Boolean);
-    if (gestao.length) sections.push({ type: 'group', id: 'gestao', label: 'Gestão', children: gestao });
+    const equipe = consumeMany(['motoboys', 'usuarios']);
+    if (equipe.length) sections.push({ type: 'group', id: 'equipe', label: 'Equipe', children: equipe });
 
-    const sistema = consume('config');
-    if (sistema) sections.push({ type: 'item', item: sistema });
+    // Configurações como submenu (lojista): se houver sub-itens cfg-*, o item
+    // 'config' (hub) é consumido/ocultado aqui, mas segue no array para a paleta
+    // de comandos e para o activeNavItem. Operador (sem cfg-*) vê 'config' como item único.
+    const configChildren = (items || []).filter((item) => item.id.startsWith('cfg-'));
+    if (configChildren.length) {
+      consume('config');
+      configChildren.forEach((item) => consumeIds.add(item.id));
+      sections.push({ type: 'group', id: 'config', label: 'Configurações', children: configChildren });
+    } else {
+      const sistema = consume('config');
+      if (sistema) sections.push({ type: 'item', item: sistema });
+    }
     sections.push({ type: 'logout' });
 
     const leftovers = (items || []).filter((item) => !consumeIds.has(item.id));
