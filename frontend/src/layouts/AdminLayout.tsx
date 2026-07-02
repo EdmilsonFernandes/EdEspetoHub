@@ -5,7 +5,7 @@ import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Buildings, CaretDown, ChartBar, CheckSquare, ClipboardText, Compass, CreditCard, Gear, LockKey, Package, Printer, ShoppingCart, SignOut, Scooter, Star, UserCircle, X, UsersThree } from '@phosphor-icons/react';
+import { Bell, Buildings, CaretDown, ChartBar, ChatCircle, CheckSquare, ClipboardText, Clock, Compass, CreditCard, ForkKnife, Gear, IdentificationCard, LockKey, Package, PlugsConnected, Printer, ShieldCheck, ShoppingCart, SignOut, Scooter, Sparkle, Stack, Star, Storefront, Truck, UserCircle, X, UsersThree } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
@@ -77,21 +77,29 @@ export function AdminLayout({
             { id: 'config', label: 'Impressora', icon: Printer },
           ]
         : [
-            { id: 'resumo', label: 'Visão Geral', icon: ChartBar },
+            { id: 'resumo', label: 'Início', icon: ChartBar },
             { id: 'fila', label: 'Fila ao Vivo', icon: CheckSquare },
-            { id: 'vendas', label: 'Histórico de Vendas', icon: ClipboardText },
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'estoque', label: 'Estoque', icon: Package },
-            { id: 'destaques', label: 'Visibilidade', icon: Star },
-            { id: 'cardapio', label: 'Loja Online', icon: ShoppingCart },
-            { id: 'pagamentos', label: 'Minha Assinatura', icon: CreditCard },
-            { id: 'gateway', label: 'Pagamentos Online', icon: CreditCard },
-            { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
-            { id: 'condominios', label: 'Condomínios', icon: Buildings },
-            { id: 'destinos', label: 'Destinos', icon: Compass },
-            { id: 'usuarios', label: 'Usuários', icon: UsersThree },
-            { id: 'config', label: 'Configurações da Loja', icon: Gear },
+            { id: 'vendas', label: 'Vendas', icon: ClipboardText },
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
+            { id: 'produtos', label: 'Produtos', icon: Package },
+            { id: 'estoque', label: 'Estoque', icon: Stack },
+            { id: 'cardapio', label: 'Loja Online', icon: Storefront },
+            { id: 'destaques', label: 'Destaques', icon: Sparkle },
+            { id: 'destinos', label: 'Destinos', icon: Compass },
+            { id: 'condominios', label: 'Condomínios', icon: Buildings },
+            { id: 'pagamentos', label: 'Assinatura e plano', icon: CreditCard },
+            { id: 'gateway', label: 'Pagamentos online', icon: PlugsConnected },
+            { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
+            { id: 'usuarios', label: 'Usuários', icon: UsersThree },
+            { id: 'cfg-hub', label: 'Visão geral', icon: Gear },
+            { id: 'cfg-profile', label: 'Perfil e marca', icon: IdentificationCard },
+            { id: 'cfg-channels', label: 'Promo e contato', icon: ChatCircle },
+            { id: 'cfg-delivery', label: 'Entrega e frete', icon: Truck },
+            { id: 'cfg-ordering', label: 'Tipos de pedido', icon: ForkKnife },
+            { id: 'cfg-hours', label: 'Horários', icon: Clock },
+            { id: 'cfg-operation', label: 'Operação e som', icon: Bell },
+            { id: 'cfg-printer', label: 'Impressora térmica', icon: Printer },
+            { id: 'cfg-permissions', label: 'Permissões do app', icon: ShieldCheck },
           ]),
     [isOperatorUser, canUseMotoboys]
   );
@@ -111,21 +119,29 @@ export function AdminLayout({
       if (byId.has(id)) consumeIds.add(id);
       return byId.get(id);
     };
+    const consumeMany = (ids: string[]) => ids.map(consume).filter(Boolean);
     const sections: any[] = [];
     const principal = consume('resumo');
     if (principal) sections.push({ type: 'item', item: principal });
-    const vendas = ['fila', 'vendas', 'avaliacoes'].map(consume).filter(Boolean);
-    if (vendas.length) sections.push({ type: 'group', id: 'vendas', label: 'Pedidos e Vendas', children: vendas });
-    const catalogo = ['produtos', 'estoque', 'cardapio'].map(consume).filter(Boolean);
-    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Cardápio e Loja', children: catalogo });
-    const marketing = ['destaques'].map(consume).filter(Boolean);
-    if (marketing.length) sections.push({ type: 'group', id: 'marketing', label: 'Visibilidade', children: marketing });
-    const financeiro = ['pagamentos', 'gateway'].map(consume).filter(Boolean);
-    if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Plano e Pagamentos', children: financeiro });
-    const gestao = ['motoboys', 'condominios', 'destinos', 'usuarios'].map(consume).filter(Boolean);
-    if (gestao.length) sections.push({ type: 'group', id: 'gestao', label: 'Equipe e Operação', children: gestao });
-    const sistema = consume('config');
-    if (sistema) sections.push({ type: 'item', item: sistema });
+    const operacao = consumeMany(['fila', 'vendas', 'avaliacoes']);
+    if (operacao.length) sections.push({ type: 'group', id: 'operacao', label: 'Operação', children: operacao });
+    const catalogo = consumeMany(['produtos', 'estoque', 'cardapio']);
+    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Catálogo', children: catalogo });
+    const crescer = consumeMany(['destaques', 'destinos', 'condominios']);
+    if (crescer.length) sections.push({ type: 'group', id: 'crescer', label: 'Crescer', children: crescer });
+    const financeiro = consumeMany(['pagamentos', 'gateway']);
+    if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
+    const equipe = consumeMany(['motoboys', 'usuarios']);
+    if (equipe.length) sections.push({ type: 'group', id: 'equipe', label: 'Equipe', children: equipe });
+    // Configurações como submenu (cfg-*); operador sem cfg-* mantém 'config' como item único.
+    const configChildren = (mobileNavItems || []).filter((item) => item.id.startsWith('cfg-'));
+    if (configChildren.length) {
+      configChildren.forEach((item) => consumeIds.add(item.id));
+      sections.push({ type: 'group', id: 'config', label: 'Configurações', children: configChildren });
+    } else {
+      const sistema = consume('config');
+      if (sistema) sections.push({ type: 'item', item: sistema });
+    }
     const leftovers = (mobileNavItems || []).filter((item) => !consumeIds.has(item.id));
     leftovers.forEach((item) => sections.push({ type: 'item', item }));
     return sections;
@@ -137,9 +153,16 @@ export function AdminLayout({
     if (path.startsWith('/admin/queue')) return 'fila';
     if (path.startsWith('/admin/orders')) return 'vendas';
     if (path.startsWith('/admin/highlights')) return 'destaques';
-    if (path.startsWith('/admin/dashboard')) return String((location.state as any)?.activeTab || persistedTab || '');
+    if (path.startsWith('/admin/dashboard')) {
+      const tab = String((location.state as any)?.activeTab || persistedTab || '');
+      if (tab === 'config') {
+        const section = String(new URLSearchParams(location.search || '').get('section') || 'hub');
+        return `cfg-${section}`;
+      }
+      return tab;
+    }
     return '';
-  }, [location.pathname, location.state]);
+  }, [location.pathname, location.state, location.search]);
 
   useEffect(() => {
     if (!mobileNavOpen) return;
@@ -191,6 +214,11 @@ export function AdminLayout({
   };
 
   const handleNavSelect = (id: string) => {
+    if (id.startsWith('cfg-')) {
+      const section = id.slice(4) || 'hub';
+      runAfterMobileNavClose(() => navigate(`/admin/dashboard?section=${encodeURIComponent(section)}`, { state: { activeTab: 'config' } }));
+      return;
+    }
     if (id === 'fila') {
       runAfterMobileNavClose(() => navigate('/admin/queue'));
       return;
