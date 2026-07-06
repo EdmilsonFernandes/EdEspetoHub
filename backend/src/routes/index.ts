@@ -285,12 +285,12 @@ routes.post('/stores/:storeId/destination-requests', requireAuth, requireRole('A
 routes.delete('/stores/:storeId/destinations/:placeId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), DestinationController.removeStoreDestination);
 
 // Products admin (cadastro não depende de assinatura)
-routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);
+routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.create);
 routes.get('/stores/:storeId/products', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.list);
-routes.put('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.update);
-routes.delete('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.remove);
+routes.put('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.update);
+routes.delete('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.remove);
 routes.get('/stores/:storeId/categories', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.listCategories);
-routes.patch('/stores/:storeId/categories/priority', requireAuth, requireRole('ADMIN'), ProductController.setCategoryPriority);
+routes.patch('/stores/:storeId/categories/priority', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.setCategoryPriority);
 routes.get('/stores/:storeId/inventory', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.listInventory);
 routes.get('/stores/:storeId/inventory/alerts', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.getInventoryAlerts);
 routes.get('/stores/:storeId/inventory/movements', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), ProductController.listInventoryMovements);
