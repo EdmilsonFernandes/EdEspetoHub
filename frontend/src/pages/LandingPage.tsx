@@ -12,6 +12,7 @@ import {
   Motorcycle,
   Package,
   Phone,
+  PlayCircle,
   Rocket,
   ShieldCheck,
   Storefront,
@@ -59,6 +60,9 @@ export function LandingPage() {
   const navigate = useNavigate();
   const googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.janocaminho.app';
   const googlePlayQrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=4&data=${encodeURIComponent(googlePlayUrl)}`;
+  // Tour em vídeo (YouTube) — botão no hero (modal) + seção "Veja como funciona".
+  const tourVideoId = 'HtU1t1zp43I';
+  const tourVideoSrc = `https://www.youtube-nocookie.com/embed/${tourVideoId}?rel=0`;
   const [featuredStores, setFeaturedStores] = useState<Array<{ id: string; name: string; slug: string; logoUrl?: string | null }>>([]);
   const [showCustomerAuth, setShowCustomerAuth] = useState(false);
   const [hasCustomerSession, setHasCustomerSession] = useState(false);
@@ -81,6 +85,7 @@ export function LandingPage() {
   const [customerResendCooldown, setCustomerResendCooldown] = useState(0);
   const [targetStoreSlug, setTargetStoreSlug] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
 
   useEffect(() => {
     document.title = 'Já no Caminho | Venda online, organize pedidos e entregue melhor';
@@ -373,6 +378,18 @@ export function LandingPage() {
                   </a>
                 </div>
 
+                {/* Assistir tour (abre modal de vídeo) */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setTourOpen(true)}
+                    className="inline-flex items-center gap-2 text-xs font-bold text-slate-300 transition-colors hover:text-white"
+                  >
+                    <PlayCircle size={18} weight="fill" className="text-sky-400" />
+                    Assistir tour do app
+                  </button>
+                </div>
+
                 {/* Mini Highlights */}
                 <div className="grid gap-3 sm:grid-cols-3 pt-4">
                   {heroHighlights.map(({ icon: Icon, title, desc }) => (
@@ -506,6 +523,30 @@ export function LandingPage() {
           <div className="pointer-events-none absolute left-0 bottom-0 h-96 w-96 rounded-full bg-emerald-500/5 blur-[120px]" />
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <BentoFeatures />
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════
+            VEJA COMO FUNCIONA — tour em vídeo (YouTube embed)
+        ══════════════════════════════════════════════════════════════ */}
+        <section className="relative bg-[#030712] py-20 sm:py-28 overflow-hidden border-t border-b border-white/5">
+          <div className="pointer-events-none absolute left-1/2 top-0 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-sky-500/10 blur-[120px]" />
+          <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-10 text-center">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-sky-300">Veja como funciona</p>
+              <h2 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">Tour completo pelo app</h2>
+              <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">Do cardápio à entrega — veja o Já no Caminho em ação, sem comissão por pedido.</p>
+            </div>
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl" style={{ aspectRatio: '16 / 9' }}>
+              <iframe
+                src={tourVideoSrc}
+                title="Já no Caminho — tour pelo app"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                loading="lazy"
+                className="absolute inset-0 h-full w-full border-0"
+              />
+            </div>
           </div>
         </section>
 
@@ -1058,6 +1099,37 @@ export function LandingPage() {
               )}
                 </>
               ) : null}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL — tour em vídeo (aberto pelo botão "Assistir tour" do hero). Iframe só monta ao abrir. */}
+      {tourOpen && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+          onClick={() => setTourOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Tour em vídeo"
+        >
+          <div className="relative w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setTourOpen(false)}
+              aria-label="Fechar vídeo"
+              className="absolute -top-9 right-0 inline-flex items-center gap-1 text-xs font-bold text-slate-300 transition-colors hover:text-white"
+            >
+              <X size={16} weight="bold" /> Fechar
+            </button>
+            <div className="overflow-hidden rounded-xl border border-white/10 bg-black shadow-2xl" style={{ aspectRatio: '16 / 9' }}>
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${tourVideoId}?autoplay=1&rel=0`}
+                title="Já no Caminho — tour pelo app"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="h-full w-full border-0"
+              />
             </div>
           </div>
         </div>
