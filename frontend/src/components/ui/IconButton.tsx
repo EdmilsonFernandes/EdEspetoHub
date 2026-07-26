@@ -13,8 +13,8 @@ type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'>
 
 const variantClasses: Record<IconButtonVariant, string> = {
   plain: 'border-transparent bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-  surface: 'border-white/80 bg-white/78 text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.55)] ring-1 ring-[#d7e7ef]/70',
-  primary: 'border-transparent bg-[#153A4C] text-white shadow-[0_16px_32px_-24px_rgba(21,58,76,0.70)]',
+  surface: 'border-white/80 bg-white/78 text-brand-navy shadow-[0_14px_28px_-22px_rgba(21,58,76,0.55)] ring-1 ring-[#d7e7ef]/70',
+  primary: 'border-transparent bg-brand-navy text-white shadow-[0_16px_32px_-24px_rgba(21,58,76,0.70)]',
   danger: 'border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-100',
 };
 

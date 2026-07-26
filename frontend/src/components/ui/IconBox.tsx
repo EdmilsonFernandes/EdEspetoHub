@@ -18,7 +18,7 @@ const sizeClasses: Record<IconBoxSize, string> = {
 };
 
 const toneClasses: Record<IconBoxTone, string> = {
-  brand: 'bg-[#336886]/10 text-[#336886] ring-1 ring-[#336886]/15',
+  brand: 'bg-brand-teal/10 text-brand-teal ring-1 ring-brand-teal/15',
   success: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100',
   warning: 'bg-amber-50 text-amber-700 ring-1 ring-amber-100',
   danger: 'bg-rose-50 text-rose-700 ring-1 ring-rose-100',
