@@ -74,3 +74,65 @@ Browser/App → Nginx (EC2:443)
 - **NUNCA** `git pull` no servidor sem pedido explícito.
 - **NUNCA** commitar secrets/`.env`/keys/`.pem`/`.jks`/`.apk`/`.aab`.
 - **NUNCA** refatorar rotas/auth/regras de negócio sem pedido claro.
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+# Skills de UI/UX e Produto
+
+Quando a tarefa envolver tela, layout, app, mobile, web, desktop, painel admin, design, responsividade ou experiência visual, carregar as skills abaixo conforme necessidade:
+
+- `.claude/skills/product-designer.md`
+- `.claude/skills/ui-ux-reviewer.md`
+- `.claude/skills/mobile-first-designer.md`
+- `.claude/skills/design-system-guardian.md`
+- `.claude/skills/extract-design-system.md` — extrai tokens de design (cores, tipografia, espaçamento, radius, sombras) de sites públicos via `npx extract-design-system <url>`. Útil para inspiração/onboarding de cliente; **não** sobrescreve a identidade atual sem aprovação.
+- `.claude/skills/frontend-refactor.md`
+- `.claude/skills/playwright-visual-qa.md`
+- `.claude/skills/accessibility-reviewer.md`
+- `.claude/skills/performance-reviewer.md`
+- `.claude/skills/cybersecurity-reviewer.md`
+- `.claude/skills/conversion-copywriter.md`
+
+## Ordem recomendada para tarefas de tela
+
+1. Graphify para mapear componentes, rotas, estilos, services e dependências.
+2. design-system-guardian para preservar identidade visual.
+3. product-designer para avaliar jornada e objetivo da tela.
+4. ui-ux-reviewer para revisar layout, hierarquia, contraste, espaçamento e estados.
+5. mobile-first-designer para garantir responsividade.
+6. accessibility-reviewer para revisar contraste, labels, foco e navegação.
+7. frontend-refactor para implementar com código limpo.
+8. performance-reviewer quando houver lentidão, listas grandes ou tela pesada.
+9. cybersecurity-reviewer quando houver login, dados sensíveis, exames, upload, IA, admin ou API.
+10. playwright-visual-qa para validar visualmente.
+
+## Antes de alterar código de tela
+
+Sempre listar:
+
+- arquivos envolvidos;
+- fluxo atual;
+- problemas encontrados;
+- riscos;
+- plano de alteração;
+- validação prevista.
+
+Não alterar nada grande sem plano.
+
+## Como usar as skills
+
+Quando eu pedir melhoria de tela, layout, mobile, desktop, web, painel admin ou UX, o agente deve:
+
+1. Ler esta seção.
+2. Abrir as skills relevantes em `.claude/skills/`.
+3. Usar Graphify antes de mexer no código.
+4. Usar Serena para localizar arquivos reais.
+5. Usar Playwright para validar visualmente quando houver alteração de tela.
