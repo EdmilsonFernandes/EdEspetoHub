@@ -1119,6 +1119,21 @@ export function OrderTracking() {
     }
     return null;
   }, [isDelivery, isReady, isPostalDelivery, postalExpectedDeliveryDate, routeEtaRemainingMinutes, remainingEstimateMinutes]);
+  const [countdownNow, setCountdownNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!estimatedReadyAt || isTerminal) return;
+    const id = window.setInterval(() => setCountdownNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [estimatedReadyAt, isTerminal]);
+  const etaCountdownMs = estimatedReadyAt && !isTerminal ? Math.max(0, estimatedReadyAt.getTime() - countdownNow) : 0;
+  const etaCountdownLabel = (() => {
+    if (etaCountdownMs <= 0) return '';
+    const totalSec = Math.floor(etaCountdownMs / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
+  })();
   const storeWhatsappLink = buildWhatsAppContactUrl(storePhone, false, whatsappReceiptMessage);
   const postalIssueWhatsappMessage = useMemo(() => {
     const lines = [
@@ -1974,11 +1989,24 @@ export function OrderTracking() {
                             ? estimatedReadyAt.toLocaleDateString('pt-BR')
                             : formatEtaMoment(estimatedReadyAt)}
                         </p>
+                        {!isPostalDelivery && etaCountdownMs > 0 ? (
+                          <p className="mt-1.5 text-sm font-black text-emerald-700">{isDelivery ? 'Chega em' : 'Pronto em'} {etaCountdownLabel}</p>
+                        ) : null}
                         {isPostalDelivery ? (
                           <p className="mt-1 text-xs text-stone-600">
                             {shipmentServiceName || shipmentServiceCode || 'Serviço postal'}{postalEstimatedDays ? ` • ${postalEstimatedDays} dia(s) úteis` : ''}
                           </p>
                         ) : null}
+                      </div>
+                    ) : null}
+
+                    {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat ? (
+                      <div className="mt-3 overflow-hidden rounded-2xl border border-[#d5e3ec] bg-white/80 shadow-[0_16px_30px_-26px_rgba(51,104,134,0.18)]">
+                        <RouteMapView
+                          origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
+                          destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
+                          compact
+                        />
                       </div>
                     ) : null}
 
