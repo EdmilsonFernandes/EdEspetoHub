@@ -28,6 +28,7 @@ import {
 import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
 import { useToast } from '../contexts/ToastContext';
+import { EmptyState } from '../components/ui';
 import { formatCurrency, formatOrderDisplayId, formatOrderType, formatReadableDateTime, formatTimeOfDay } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPaymentProviderMeta } from '../utils/paymentAssets';
@@ -670,6 +671,7 @@ function OrderCard({
   onOpenOrder: (orderId: string) => void;
   onOpenStore: (slug?: string) => void;
 }) {
+  const { showToast } = useToast();
   const statusMeta = getStatusMeta(order.status, order.type);
   const items = Array.isArray(order.items) ? order.items : [];
   const primaryItem = items[0] || null;
@@ -735,6 +737,7 @@ function OrderCard({
   );
   const handleRepeatOrder = () => {
     queueOrderForReorder(order, onOpenStore);
+    showToast('Reabrindo seu pedido anterior na loja...', 'success');
   };
 
   const isCancelled = ['CANCELLED', 'REJECTED'].includes(normalizeStatus(order.status));
@@ -1938,19 +1941,19 @@ export function ClientOrders() {
             </div>
 
             {filteredPastOrders.length === 0 && filteredActiveOrders.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
-                <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-slate-400">
-                  <Storefront size={28} weight="duotone" />
-                </div>
-                <p className="text-base font-semibold text-slate-900">Você ainda não fez pedidos</p>
-                <p className="mt-1 text-sm text-slate-500">Quando pedir pelo app, eles vão aparecer aqui.</p>
-                <button
-                  onClick={() => navigate('/hub')}
-                  className="mt-6 rounded-xl bg-[#153A4C] px-5 py-3 text-sm font-semibold text-white transition-colors active:scale-[0.98]"
-                >
-                  Explorar lojas
-                </button>
-              </div>
+              <EmptyState
+                icon={<Storefront size={28} weight="duotone" />}
+                title="Você ainda não fez pedidos"
+                description="Quando pedir pelo app, eles vão aparecer aqui."
+                action={
+                  <button
+                    onClick={() => navigate('/hub')}
+                    className="jnc-ds-touch rounded-xl bg-brand-navy px-5 py-3 text-sm font-semibold text-white transition-colors active:scale-[0.98]"
+                  >
+                    Explorar lojas
+                  </button>
+                }
+              />
             ) : (
               <div className="space-y-6">
                 {groupedFilteredPastOrders.map((group) => (

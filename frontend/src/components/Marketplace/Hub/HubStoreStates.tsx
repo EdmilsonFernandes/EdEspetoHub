@@ -8,6 +8,7 @@ import {
   Storefront,
 } from '@phosphor-icons/react';
 import { HubRegionConvertPanel } from './HubRegionConvertPanel';
+import { EmptyState } from '../../ui';
 
 type HubGeoDiscovery = {
   mode?: string | null;
@@ -238,15 +239,17 @@ export const HubStoreEmptyState = memo(function HubStoreEmptyState({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-      <p className="font-semibold text-slate-700">Nenhuma loja encontrada com esses filtros.</p>
-      <button
-        type="button"
-        onClick={onClearFilters}
-        className="jnc-hub-touch mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600"
-      >
-        Limpar filtros
-      </button>
-    </div>
+    <EmptyState
+      title="Nenhuma loja encontrada com esses filtros."
+      action={
+        <button
+          type="button"
+          onClick={onClearFilters}
+          className="jnc-hub-touch inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600"
+        >
+          Limpar filtros
+        </button>
+      }
+    />
   );
 });

@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft, Eye, EyeSlash, ClipboardText, House, Receipt, Buildings, UserCircle, WarningCircle, X, Gear, Package, LockKey, Scooter, SignOut, Star, CreditCard, UsersThree, Mountains, Printer, Tent, MapTrifold } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
@@ -288,7 +288,23 @@ export function StorePage() {
   const [recentPublicOrders, setRecentPublicOrders] = useState([]);
   const [lastOrderItems, setLastOrderItems] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
-  const [activeTab, setActiveTab] = useState<'products' | 'reviews' | 'info'>('products');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<'products' | 'reviews' | 'info'>(
+    () => (searchParams.get('tab') as 'products' | 'reviews' | 'info' | null) || 'products',
+  );
+  const changeTab = useCallback(
+    (next: 'products' | 'reviews' | 'info') => {
+      setActiveTab(next);
+      setSearchParams(
+        (prev) => {
+          prev.set('tab', next);
+          return prev;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
   const [orderNotice, setOrderNotice] = useState(null);
   const [tableNotice, setTableNotice] = useState(null);
   const [occupiedTables, setOccupiedTables] = useState<string[]>([]);
@@ -569,11 +585,11 @@ export function StorePage() {
       return;
     }
     if (activeTab !== 'products') {
-      setActiveTab('products');
+      changeTab('products');
       return;
     }
     navigateBackOrFallback(navigate, '/hub');
-  }, [navigate, view, activeTab, setActiveTab]);
+  }, [navigate, view, activeTab, changeTab]);
   useEffect(() => {
     if (!showPublicStoreAppHeader) {
       setPublicStoreHeaderScrolled(false);
@@ -4299,7 +4315,7 @@ export function StorePage() {
               todayClosingLabel={todayClosingLabel}
               minOrderValue={branding?.minOrderValue ?? 20}
               activeTab={activeTab}
-              setActiveTab={setActiveTab}
+              setActiveTab={changeTab}
               onBack={handlePublicStoreHeaderBack}
               distanceKm={pickupDistanceKm ?? undefined}
               compactHeader={isMobile}

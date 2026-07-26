@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { Drawer } from "vaul";
+import { EmptyState } from "../ui";
 import {
   SquaresFour,
   Plus,
@@ -1740,9 +1741,7 @@ export const MenuView = ({
         );
         })}
         {filteredGrouped.length === 0 && (
-          <div className="rounded-2xl ds-empty-state p-6 text-sm text-slate-500">
-            Nenhum item encontrado.
-          </div>
+          <EmptyState title="Nenhum item encontrado" />
         )}
         <div className="pt-1 pb-2">
           <PlatformTrustFooter compact />
