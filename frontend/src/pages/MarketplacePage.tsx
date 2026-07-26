@@ -17,6 +17,7 @@ import {
   Sparkle,
   ForkKnife,
   Hamburger,
+  BowlFood,
   Pizza,
   Wine,
   ShoppingCart,
@@ -539,25 +540,25 @@ const formatCondominiumPickerEventTime = (event?: CondominiumEventSummary | null
 const categoryVisuals: Record<string, { icon: typeof Storefront; label: string }> = {
   Restaurante: { icon: ForkKnife, label: 'Restaurante' },
   Hamburguer: { icon: Hamburger, label: 'Hamburguer' },
-  Lanche: { icon: Hamburger, label: 'Lanche' },
+  Lanche: { icon: BowlFood, label: 'Lanche' },
   Pizza: { icon: Pizza, label: 'Pizza' },
   Bebidas: { icon: Wine, label: 'Bebidas' },
   Mercado: { icon: ShoppingCart, label: 'Mercado' },
   Farmacia: { icon: Pill, label: 'Farmacia' },
   Doces: { icon: Cookie, label: 'Doces' },
-  Empório: { icon: ShoppingCart, label: 'Empório' },
+  Empório: { icon: Storefront, label: 'Empório' },
 };
 
 const CATEGORY_COLORS: Record<string, { active: string; inactive: string; icon: string }> = {
-  Restaurante: { active: 'bg-amber-500 shadow-[0_18px_34px_-24px_rgba(245,158,11,0.58)]', inactive: 'border border-amber-100/75 bg-white/78', icon: 'text-amber-500' },
-  Hamburguer: { active: 'bg-orange-500 shadow-[0_18px_34px_-24px_rgba(249,115,22,0.56)]', inactive: 'border border-orange-100/75 bg-white/78', icon: 'text-orange-500' },
-  Lanche:     { active: 'bg-orange-400 shadow-[0_18px_34px_-24px_rgba(249,115,22,0.50)]', inactive: 'border border-orange-100/75 bg-white/78', icon: 'text-orange-400' },
-  Pizza:      { active: 'bg-rose-500 shadow-[0_18px_34px_-24px_rgba(244,63,94,0.56)]',    inactive: 'border border-rose-100/75 bg-white/78',   icon: 'text-rose-500' },
-  Bebidas:    { active: 'bg-violet-500 shadow-[0_18px_34px_-24px_rgba(139,92,246,0.56)]', inactive: 'border border-violet-100/75 bg-white/78', icon: 'text-violet-500' },
-  Mercado:    { active: 'bg-emerald-600 shadow-[0_18px_34px_-24px_rgba(5,150,105,0.54)]', inactive: 'border border-emerald-100/75 bg-white/78', icon: 'text-emerald-600' },
-  Farmacia:   { active: 'bg-teal-500 shadow-[0_18px_34px_-24px_rgba(20,184,166,0.54)]',  inactive: 'border border-teal-100/75 bg-white/78',   icon: 'text-teal-500' },
-  Doces:      { active: 'bg-pink-500 shadow-[0_18px_34px_-24px_rgba(236,72,153,0.54)]',  inactive: 'border border-pink-100/75 bg-white/78',   icon: 'text-pink-500' },
-  Empório:    { active: 'bg-lime-600 shadow-[0_18px_34px_-24px_rgba(101,163,13,0.52)]',  inactive: 'border border-lime-100/75 bg-white/78',   icon: 'text-lime-600' },
+  Restaurante: { active: 'bg-amber-500 shadow-[0_18px_34px_-24px_rgba(245,158,11,0.58)]', inactive: 'border border-amber-100/80 bg-gradient-to-br from-amber-50 to-amber-100/35', icon: 'text-amber-500' },
+  Hamburguer: { active: 'bg-orange-500 shadow-[0_18px_34px_-24px_rgba(249,115,22,0.56)]', inactive: 'border border-orange-100/80 bg-gradient-to-br from-orange-50 to-orange-100/35', icon: 'text-orange-500' },
+  Lanche:     { active: 'bg-orange-400 shadow-[0_18px_34px_-24px_rgba(249,115,22,0.50)]', inactive: 'border border-orange-100/80 bg-gradient-to-br from-orange-50 to-orange-100/35', icon: 'text-orange-400' },
+  Pizza:      { active: 'bg-rose-500 shadow-[0_18px_34px_-24px_rgba(244,63,94,0.56)]',    inactive: 'border border-rose-100/80 bg-gradient-to-br from-rose-50 to-rose-100/35',   icon: 'text-rose-500' },
+  Bebidas:    { active: 'bg-violet-500 shadow-[0_18px_34px_-24px_rgba(139,92,246,0.56)]', inactive: 'border border-violet-100/80 bg-gradient-to-br from-violet-50 to-violet-100/35', icon: 'text-violet-500' },
+  Mercado:    { active: 'bg-emerald-600 shadow-[0_18px_34px_-24px_rgba(5,150,105,0.54)]', inactive: 'border border-emerald-100/80 bg-gradient-to-br from-emerald-50 to-emerald-100/35', icon: 'text-emerald-600' },
+  Farmacia:   { active: 'bg-teal-500 shadow-[0_18px_34px_-24px_rgba(20,184,166,0.54)]',  inactive: 'border border-teal-100/80 bg-gradient-to-br from-teal-50 to-teal-100/35',   icon: 'text-teal-500' },
+  Doces:      { active: 'bg-pink-500 shadow-[0_18px_34px_-24px_rgba(236,72,153,0.54)]',  inactive: 'border border-pink-100/80 bg-gradient-to-br from-pink-50 to-pink-100/35',   icon: 'text-pink-500' },
+  Empório:    { active: 'bg-lime-600 shadow-[0_18px_34px_-24px_rgba(101,163,13,0.52)]',  inactive: 'border border-lime-100/80 bg-gradient-to-br from-lime-50 to-lime-100/35',   icon: 'text-lime-600' },
 };
 
 const readCustomerSession = () => {
@@ -1557,8 +1558,13 @@ export function MarketplacePage() {
   }, [isHomeStorePreview]);
 
   const categoryTiles = useMemo(() => {
-    return segmentOptions.map((segment) => categoryVisuals[segment] || { icon: Storefront, label: segment });
-  }, [segmentOptions]);
+    const counts: Record<string, number> = {};
+    for (const s of scopedEnrichedStores) counts[s.segment] = (counts[s.segment] ?? 0) + 1;
+    return segmentOptions.map((segment) => ({
+      ...(categoryVisuals[segment] || { icon: Storefront, label: segment }),
+      count: counts[segment] ?? 0,
+    }));
+  }, [segmentOptions, scopedEnrichedStores]);
 
   const currency = useMemo(
     () =>
@@ -2374,10 +2380,10 @@ export function MarketplacePage() {
                 className="group flex min-w-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
                 onClick={() => setSegmentFilter('all')}
               >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-[15px] transition-all duration-200 ease-out ${
+                <div className={`flex h-12 w-12 items-center justify-center rounded-[1.05rem] transition-all duration-200 ease-out ${
                   segmentFilter === 'all' ? 'scale-[1.04] bg-[#336886] shadow-[0_18px_34px_-26px_rgba(51,104,134,0.66)]' : 'jnc-hub-pill group-hover:bg-slate-50'
                 }`}>
-                  <List size={17} weight="duotone" className={segmentFilter === 'all' ? 'scale-[0.95] text-white' : 'text-slate-600'} />
+                  <List size={19} weight="duotone" className={segmentFilter === 'all' ? 'scale-[0.95] text-white' : 'text-slate-600'} />
                 </div>
                 <span className={`text-center text-[9px] font-black uppercase tracking-[0.08em] transition-colors ${
                   segmentFilter === 'all' ? 'text-[#336886]' : 'text-slate-600'
@@ -2395,13 +2401,13 @@ export function MarketplacePage() {
                     className="group flex min-w-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-[15px] transition-all duration-200 ease-out ${
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-[1.05rem] transition-all duration-200 ease-out ${
                       active
                         ? `${colors?.active ?? 'bg-[#336886] shadow-[0_16px_28px_-18px_rgba(51,104,134,0.74)]'} scale-[1.04]`
                         : `${colors?.inactive ?? 'jnc-hub-pill'} shadow-[0_14px_30px_-26px_rgba(15,23,42,0.18)] ring-1 ring-white/70 backdrop-blur-xl group-hover:scale-[1.03]`
                     }`}>
                       <CategoryIcon
-                        size={19}
+                        size={22}
                         weight={active ? 'fill' : 'duotone'}
                         className={`transition-all duration-150 ease-out ${
                           active ? 'scale-[0.94] text-white' : `${colors?.icon ?? 'text-slate-500'} group-hover:scale-105`
@@ -2410,7 +2416,7 @@ export function MarketplacePage() {
                     </div>
                     <span className={`text-center text-[9px] font-black uppercase tracking-[0.08em] transition-colors ${
                       active ? (colors ? colors.icon : 'text-[#336886]') : 'text-slate-600'
-                    }`}>{item.label}</span>
+                    }`}>{item.label} <span className="font-semibold normal-case tracking-normal text-slate-400">· {item.count}</span></span>
                   </button>
                 );
               })}
