@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Notificacao ongoing de acompanhamento (visao expandida).
+  Cabecalho (logo + loja + status + ETA) + barra de progresso + lista de etapas.
+  As 6 linhas de etapa tem IDs distintos (dot_N / label_N) e visibilidade alternada no
+  OrderTrackingNotification. Nao usamos <include> repetido p/ evitar IDs duplicados no
+  RemoteViews (que atingiria so a primeira ocorrencia).
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="6dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="10dp">
+
+    <!-- Cabecalho: logo + (loja, status, eta) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/notif_track_logo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/app_name" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/notif_track_store"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:text="Já no Caminho" />
+
+            <TextView
+                android:id="@+id/notif_track_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="13sp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:text="Pedido em andamento" />
+
+            <TextView
+                android:id="@+id/notif_track_eta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:visibility="gone"
+                android:text="" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/notif_track_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_marginTop="10dp"
+        android:max="100"
+        android:progress="0"
+        android:progressDrawable="@drawable/notif_progress_horizontal" />
+
+    <TextView
+        android:id="@+id/notif_track_order"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="11.5sp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:text="" />
+
+    <!-- Etapas (IDs unicos por linha) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical">
+
+        <LinearLayout android:id="@+id/notif_step_row_1" style="@style/NotifStepRow">
+            <ImageView android:id="@+id/notif_step_dot_1" style="@style/NotifStepDot" />
+            <TextView android:id="@+id/notif_step_label_1" style="@style/NotifStepLabel" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/notif_step_row_2" style="@style/NotifStepRow">
+            <ImageView android:id="@+id/notif_step_dot_2" style="@style/NotifStepDot" />
+            <TextView android:id="@+id/notif_step_label_2" style="@style/NotifStepLabel" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/notif_step_row_3" style="@style/NotifStepRow">
+            <ImageView android:id="@+id/notif_step_dot_3" style="@style/NotifStepDot" />
+            <TextView android:id="@+id/notif_step_label_3" style="@style/NotifStepLabel" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/notif_step_row_4" style="@style/NotifStepRow">
+            <ImageView android:id="@+id/notif_step_dot_4" style="@style/NotifStepDot" />
+            <TextView android:id="@+id/notif_step_label_4" style="@style/NotifStepLabel" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/notif_step_row_5" style="@style/NotifStepRow">
+            <ImageView android:id="@+id/notif_step_dot_5" style="@style/NotifStepDot" />
+            <TextView android:id="@+id/notif_step_label_5" style="@style/NotifStepLabel" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/notif_step_row_6" style="@style/NotifStepRow">
+            <ImageView android:id="@+id/notif_step_dot_6" style="@style/NotifStepDot" />
+            <TextView android:id="@+id/notif_step_label_6" style="@style/NotifStepLabel" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

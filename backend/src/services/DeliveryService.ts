@@ -77,13 +77,36 @@ private dispatchDeliveryProgressPush(
       IN_TRANSIT: `${firstName} retirou o pedido ${orderDisplayId} e saiu para entrega.`,
       DELIVERED: `Pedido ${orderDisplayId} entregue. Obrigado por comprar pelo Já no Caminho.`,
     } as const;
+    // Mapeia o milestone de entrega p/ um status de pedido reconhecido pela notificacao
+    // ongoing (OrderTrackingNotification). Assim a barra avanca em "saiu para entrega" e
+    // MORRE no "entregue".
+    const mappedStatus = milestone === 'DELIVERED'
+      ? 'delivered'
+      : milestone === 'IN_TRANSIT'
+      ? 'in_delivery'
+      : 'waiting_for_motoboy'; // ACCEPTED
+    const orderType = String((order as any)?.type || '').trim();
+    const logoUrl = (order as any)?.store?.settings?.logoUrl || null;
+    const title = milestone === 'DELIVERED' ? 'Pedido entregue' : 'Entrega atualizada';
+    const body = storeName ? `${storeName}: ${messages[milestone]}` : messages[milestone];
     const payload = {
-      title: milestone === 'DELIVERED' ? 'Pedido entregue' : 'Entrega atualizada',
-      body: storeName ? `${storeName}: ${messages[milestone]}` : messages[milestone],
+      title,
+      body,
+      // dataOnly: onMessageReceived dispara em background/Doze -> a notificacao ongoing de
+      // acompanhamento atualiza a etapa atual e some no estado terminal (entregue).
+      dataOnly: true,
       data: {
         url: `https://janocaminho.com.br/pedido/${order.id}`,
         orderId: String(order.id),
+        status: mappedStatus,
         deliveryStatus: milestone,
+        notificationType: 'customer_order_update',
+        // title/body no data porque dataOnly retira o bloco notification; o nativo le do data.
+        title,
+        body,
+        ...(storeName ? { storeName } : {}),
+        ...(orderType ? { orderType } : {}),
+        ...(logoUrl ? { imageUrl: String(logoUrl) } : {}),
       },
     };
 

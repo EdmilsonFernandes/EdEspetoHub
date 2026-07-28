@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Notificacao ongoing de acompanhamento (visao colapsada).
+  Logo da loja + nome + status atual + barra de progresso.
+  Cores de texto usam atributos do sistema (?android:attr/textColor*) p/ adaptar a dark/light.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="6dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp">
+
+    <ImageView
+        android:id="@+id/notif_track_logo"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/app_name" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="10dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/notif_track_store"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="Já no Caminho" />
+
+        <TextView
+            android:id="@+id/notif_track_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12.5sp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="Pedido em andamento" />
+
+        <ProgressBar
+            android:id="@+id/notif_track_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginTop="6dp"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/notif_progress_horizontal" />
+    </LinearLayout>
+</LinearLayout>

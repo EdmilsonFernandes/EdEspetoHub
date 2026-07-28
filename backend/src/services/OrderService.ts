@@ -622,7 +622,10 @@ export class OrderService
    * @author Edmilson Lopes
    */
   private dispatchOrderUpdatePush(
-    order: Pick<Order, 'id' | 'status' | 'customerUserId' | 'guestPushId'> & { store?: { name?: string } | null }
+    order: Pick<Order, 'id' | 'status' | 'customerUserId' | 'guestPushId' | 'type'> & {
+      store?: { name?: string } | null;
+      eta?: { windowMin?: number | null; windowMax?: number | null } | null;
+    }
   ) {
     const userId = String(order?.customerUserId || '').trim();
     const guestId = String(order?.guestPushId || '').trim();
@@ -635,14 +638,33 @@ export class OrderService
     );
     const storeName = String(order?.store?.name || '').trim();
     const body = storeName ? `${storeName}: ${statusBody}` : statusBody;
+    const orderType = String((order as any)?.type || '').trim();
+    const eta = (order as any)?.eta || null;
+    const etaWindowMin = Number(eta?.windowMin) > 0 ? String(eta.windowMin) : '';
+    const etaWindowMax = Number(eta?.windowMax) > 0 ? String(eta.windowMax) : '';
+    const logoUrl = (order?.store as any)?.settings?.logoUrl || null;
     const payload = {
       title: 'Pedido atualizado',
       body,
+      // dataOnly: push sem bloco notification -> onMessageReceived dispara em background/Doze,
+      // permitindo que o JncFirebaseMessagingService monte a notificacao ongoing de
+      // acompanhamento (barra de progresso que so some no estado terminal). Com bloco
+      // notification em background a mensagem vai direto pra bandeja do sistema e o handler
+      // nativo NAO roda -> a barra nunca atualizaria com o app fechado.
+      dataOnly: true,
       data: {
         url: `https://janocaminho.com.br/pedido/${order.id}`,
         orderId: String(order.id),
         status: String(order.status || ""),
-        imageUrl: (order?.store as any)?.settings?.logoUrl || null,
+        notificationType: 'customer_order_update',
+        // title/body no data porque dataOnly retira o bloco notification; o nativo le do data.
+        title: 'Pedido atualizado',
+        body,
+        ...(storeName ? { storeName } : {}),
+        ...(orderType ? { orderType } : {}),
+        ...(etaWindowMin ? { etaWindowMin } : {}),
+        ...(etaWindowMax ? { etaWindowMax } : {}),
+        ...(logoUrl ? { imageUrl: String(logoUrl) } : {}),
       },
     };
     if (userId) {

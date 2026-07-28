@@ -56,6 +56,13 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
             return;
         }
 
+        // Notificacao ongoing de acompanhamento do pedido do cliente (barra de progresso
+        // estilo iFood). Push data-only -> onMessageReceived dispara em background/Doze.
+        if (OrderTrackingNotification.NOTIFICATION_TYPE.equals(notificationType)) {
+            OrderTrackingNotification.handle(this, message);
+            return;
+        }
+
         // All other messages: show a standard notification
         showDefaultNotification(message);
     }
