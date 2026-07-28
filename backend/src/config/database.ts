@@ -100,8 +100,21 @@ export const AppDataSource = new DataSource({
     max: env.database.poolMax,
     idleTimeoutMillis: env.database.poolIdleTimeoutMs,
     connectionTimeoutMillis: env.database.poolConnectionTimeoutMs,
-    statement_timeout: env.database.statementTimeoutMs,
-    idle_in_transaction_session_timeout: env.database.idleInTransactionSessionTimeoutMs,
+    // statement_timeout / idle_in_transaction_session_timeout NAO podem ser chaves diretas do
+    // `extra`: o node-postgres as envia como parametros de STARTUP do libpq, e configuracoes
+    // restritas do Postgres (ex.: atras de PgBouncer) rejeitam com
+    // "unsupported startup parameter: statement_timeout". Empacotados via `options`
+    // (formato libpq "-c chave=valor") sao aceitos universalmente e aplicam o GUC por conexao.
+    ...((() => {
+      const parts: string[] = [];
+      if (env.database.statementTimeoutMs > 0) {
+        parts.push(`-c statement_timeout=${env.database.statementTimeoutMs}`);
+      }
+      if (env.database.idleInTransactionSessionTimeoutMs > 0) {
+        parts.push(`-c idle_in_transaction_session_timeout=${env.database.idleInTransactionSessionTimeoutMs}`);
+      }
+      return parts.length ? { options: parts.join(' ') } : {};
+    })()),
   }
   //logging: [ 'error', 'query' ]
 });
