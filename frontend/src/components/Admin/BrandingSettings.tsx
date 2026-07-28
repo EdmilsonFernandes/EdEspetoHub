@@ -308,6 +308,32 @@ export const BrandingSettings = ({
         </div>
 
         <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700">Tipo de negócio (segmento)</label>
+          <select
+            value={branding.segment || "outros"}
+            onChange={(e) => handleChange("segment", e.target.value)}
+            className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+          >
+            <option value="restaurante">Restaurante</option>
+            <option value="hamburgueria">Hamburgueria</option>
+            <option value="lanchonete">Lanchonete</option>
+            <option value="pizzaria">Pizzaria</option>
+            <option value="adega">Adega</option>
+            <option value="mercado">Mercado</option>
+            <option value="hortifruti">Hortifruti</option>
+            <option value="farmacia">Farmácia / Drogaria</option>
+            <option value="confeitaria">Confeitaria</option>
+            <option value="servicos">Serviços (agenda no WhatsApp)</option>
+            <option value="outros">Outros</option>
+          </select>
+          <p className="text-xs text-gray-500">
+            {String(branding.segment || "") === "servicos"
+              ? "Modo serviços: o cliente agenda direto no WhatsApp, sem compra online."
+              : "Define o tipo da loja e ajusta cores/etiquetas automaticamente."}
+          </p>
+        </div>
+
+        <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-700">Descrição da marca</label>
             <textarea
               value={branding.description || ""}

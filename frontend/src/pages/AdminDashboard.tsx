@@ -2025,6 +2025,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     postalOriginZip: session?.store?.settings?.postalOriginZip || '',
     prepBaseMinutes: session?.store?.settings?.prepBaseMinutes || '20',
     prepAttentionMinutes: session?.store?.settings?.prepAttentionMinutes || '15',
+    segment: session?.store?.settings?.segment || 'outros',
   }));
 
   useEffect(() => {
@@ -2194,6 +2195,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       postalOriginZip: session?.store?.settings?.postalOriginZip || '',
       prepBaseMinutes: session?.store?.settings?.prepBaseMinutes || '20',
       prepAttentionMinutes: session?.store?.settings?.prepAttentionMinutes || '15',
+    segment: session?.store?.settings?.segment || 'outros',
     });
   }, [
     session?.store?.name,
@@ -2940,6 +2942,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         prepBaseMinutes: brandingDraft.prepBaseMinutes,
         prepAttentionMinutes: brandingDraft.prepAttentionMinutes,
         socialLinks: brandingDraft.instagram ? [{ type: 'instagram', value: brandingDraft.instagram }] : [],
+        segment: brandingDraft.segment || undefined,
       };
       const updated = await storeService.update(storeId, payload);
       updateAuthStore(updated);
