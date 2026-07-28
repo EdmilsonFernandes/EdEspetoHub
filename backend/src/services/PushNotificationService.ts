@@ -686,23 +686,30 @@ export class PushNotificationService {
    * @author Edmilson Lopes
    */
   async notifyCustomerOrderUpdate(userId: string, payload: CustomerPushPayload) {
-    // Persist notification in database
+    // Persist notification in database (com dedup por pedido: uma entrada por url/orderId que
+    // reflete o estado mais recente, em vez de uma nova linha a cada mudanca de status).
     try {
       const { Notification: NotifEntity } = require("../entities/Notification");
       const { AppDataSource: DS } = require("../config/database");
       const repo = DS.getRepository(NotifEntity);
-      let imageUrl = (payload.data as any)?.imageUrl || null;
-      if (!imageUrl && (payload.data as any)?.orderId) {
-        const rows = await DS.query("SELECT ss.logo_url FROM store_settings ss JOIN stores s ON s.id = ss.store_id JOIN orders o ON o.store_id = s.id WHERE o.id = $1 LIMIT 1", [(payload.data as any).orderId]);
-        imageUrl = rows?.[0]?.logo_url || null;
+      const notifTitle = String((payload.data as any)?.fullTitle || payload.title || "").trim();
+      const notifBody = String((payload.data as any)?.fullBody || payload.body || "").trim();
+      const notifUrl = (payload.data as any)?.url ? String((payload.data as any).url) : null;
+
+      // Dedup (userId + url): atualiza a linha existente (status mais recente) em vez de
+      // inserir nova -> central do app com UMA entrada por pedido, sem spam por etapa.
+      const existing = notifUrl ? await repo.findOne({ where: { userId, url: notifUrl } }) : null;
+      if (existing) {
+        await repo.update(existing.id, { title: notifTitle, body: notifBody, read: false });
+        try { await DS.query("UPDATE notifications SET created_at = NOW() WHERE id = $1", [existing.id]); } catch { /* non-blocking */ }
+      } else {
+        let imageUrl = (payload.data as any)?.imageUrl || null;
+        if (!imageUrl && (payload.data as any)?.orderId) {
+          const rows = await DS.query("SELECT ss.logo_url FROM store_settings ss JOIN stores s ON s.id = ss.store_id JOIN orders o ON o.store_id = s.id WHERE o.id = $1 LIMIT 1", [(payload.data as any).orderId]);
+          imageUrl = rows?.[0]?.logo_url || null;
+        }
+        void repo.save(repo.create({ userId, title: notifTitle, body: notifBody, url: notifUrl, imageUrl }));
       }
-      void repo.save(repo.create({
-        userId,
-        title: String((payload.data as any)?.fullTitle || payload.title || "").trim(),
-        body: String((payload.data as any)?.fullBody || payload.body || "").trim(),
-        url: (payload.data as any)?.url || null,
-        imageUrl
-      }));
     } catch { /* non-blocking */ }
 
     const pushResult = await this.dispatchByOwner({

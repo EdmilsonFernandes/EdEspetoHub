@@ -6,12 +6,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
-import android.view.View;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
@@ -19,9 +15,6 @@ import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.messaging.RemoteMessage;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Map;
 
 /**
@@ -29,13 +22,14 @@ import java.util.Map;
  *
  * O backend envia um push data-only (notificationType = "customer_order_update") a cada
  * mudanca de status do pedido do cliente. Como e data-only, o onMessageReceived dispara
- * mesmo em background/Doze (nao cai direto na bandeja do sistema). A cada push re-postamos
- * a MESMA notificacao (mesmo ID derivado do orderId), atualizando titulo, etapas, barra de
- * progresso e logo. No estado terminal (entregue/finalizado/cancelado) a notificacao vira
- * descartavel (setOngoing(false) + setAutoCancel(true)) — e o "morre quando entregue".
+ * mesmo em background/Doze. A cada push re-postamos a MESMA notificacao (mesmo ID derivado
+ * do orderId), atualizando o texto de status e a barra de progresso. No estado terminal
+ * (entregue/finalizado/cancelado) vira descartavel (setOngoing(false) + setAutoCancel) — e o
+ * "morre quando entregue".
  *
- * Push-driven: sem Foreground Service de longa duracao. A barra avanca por etapa a cada
- * push (nao anima suavemente dentro de uma fase) — decisao de projeto (bateria + Doze).
+ * Layout minimalista: UMA linha de status (que so troca o texto) + barra de progresso.
+ * Sem nome de loja, sem logo, sem lista de etapas. O cabecalho (icone do app + nome) e
+ * adicionado pelo sistema. Push-driven: sem Foreground Service de longa duracao.
  */
 public final class OrderTrackingNotification {
     private static final String TAG = "JNC_ORDER_TRACK";
@@ -45,21 +39,6 @@ public final class OrderTrackingNotification {
 
     // Faixa de IDs separada do FCM (3000) e do print (2001) p/ evitar colisao.
     private static final int NOTIFICATION_ID_BASE = 5000;
-
-    // Numero maximo de linhas de etapa no layout expandido (delivery tem 5).
-    private static final int MAX_STEP_ROWS = 6;
-
-    // Cache de bitmaps de logo p/ nao baixar a cada push do mesmo pedido.
-    private static final android.util.LruCache<String, Bitmap> LOGO_CACHE =
-        new android.util.LruCache<String, Bitmap>(8);
-
-    // Tokens da marca (DESIGN_SYSTEM.md).
-    private static final int COLOR_PROGRESS = 0xFF2F9DF7; // azul
-    private static final int COLOR_DONE = 0xFF5FD35A;     // verde
-    private static final int COLOR_CURRENT = 0xFF2F9DF7;  // azul
-    private static final int COLOR_PENDING = 0xFF9AA5B1;  // cinza
-    private static final int COLOR_TEXT_PRIMARY = 0xFF1E293B;
-    private static final int COLOR_TEXT_SECONDARY = 0xFF64748B;
 
     private OrderTrackingNotification() {}
 
@@ -71,42 +50,32 @@ public final class OrderTrackingNotification {
         if (orderId.isEmpty()) return;
 
         String orderType = trim(data.get("orderType"));
-        String storeName = trim(data.get("storeName"));
-        String etaWindowMin = trim(data.get("etaWindowMin"));
-        String etaWindowMax = trim(data.get("etaWindowMax"));
-        String logoUrl = trim(data.get("imageUrl"));
 
         ensureChannel(context);
 
         if (isTerminal(status)) {
-            showFinal(context, orderId, orderType, status, storeName, logoUrl);
+            showFinal(context, orderId, orderType, status);
             return;
         }
-        showOngoing(context, orderId, status, orderType, storeName, etaWindowMin, etaWindowMax, logoUrl);
+        showOngoing(context, orderId, status, orderType);
     }
 
     // ------------------------------------------------------------------ ongoing
 
-    private static void showOngoing(Context context, String orderId, String status, String orderType,
-                                    String storeName, String etaWindowMin, String etaWindowMax, String logoUrl) {
+    private static void showOngoing(Context context, String orderId, String status, String orderType) {
         StepModel steps = buildSteps(orderType, status);
-
-        Bitmap logo = loadLogo(logoUrl);
-
-        String title = storeName.isEmpty() ? "Acompanhando pedido" : storeName;
         String headline = safe(steps.labels, steps.currentIndex, "Pedido em andamento");
-        String etaLabel = buildEtaLabel(etaWindowMin, etaWindowMax);
 
         int notifId = notificationIdFor(orderId);
 
-        RemoteViews collapsed = buildCollapsed(context, title, headline, logo, steps);
-        RemoteViews expanded = buildExpanded(context, title, headline, orderId, etaLabel, logo, steps);
+        RemoteViews collapsed = buildCollapsed(context, headline, steps);
+        RemoteViews expanded = buildExpanded(context, headline, orderId, steps);
 
         PendingIntent contentIntent = buildContentIntent(context, orderId, notifId);
 
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(title)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(headline)
             .setContentText(headline)
             .setCustomContentView(collapsed)
             .setCustomBigContentView(expanded)
@@ -123,22 +92,17 @@ public final class OrderTrackingNotification {
 
     // -------------------------------------------------------------------- final
 
-    private static void showFinal(Context context, String orderId, String orderType, String status,
-                                  String storeName, String logoUrl) {
+    private static void showFinal(Context context, String orderId, String orderType, String status) {
         int notifId = notificationIdFor(orderId);
         String headline = finalHeadline(orderType, status);
-        String title = storeName.isEmpty() ? headline : storeName;
 
-        Bitmap logo = loadLogo(logoUrl);
-
-        RemoteViews collapsed = buildFinalCollapsed(context, title, headline, logo);
-
+        RemoteViews collapsed = buildCollapsed(context, headline, null);
         PendingIntent contentIntent = buildContentIntent(context, orderId, notifId);
 
         // Mesmo ID -> substitui a ongoing no mesmo slot (sem duplicar). Agora descartavel.
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(title)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(headline)
             .setContentText(headline)
             .setCustomContentView(collapsed)
             .setCustomBigContentView(collapsed)
@@ -153,113 +117,23 @@ public final class OrderTrackingNotification {
 
     // --------------------------------------------------------------- layouts
 
-    private static RemoteViews buildCollapsed(Context context, String title, String headline,
-                                              Bitmap logo, StepModel steps) {
+    private static RemoteViews buildCollapsed(Context context, String headline, StepModel steps) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.notification_order_tracking);
-        applyLogo(views, logo);
-        views.setTextViewText(R.id.notif_track_store, emptyFallback(title, "Já no Caminho"));
         views.setTextViewText(R.id.notif_track_status, headline);
-        int pct = steps.percent();
-        views.setProgressBar(R.id.notif_track_progress, pct, 100, false);
+        int visibility = steps != null ? android.view.View.VISIBLE : android.view.View.GONE;
+        views.setViewVisibility(R.id.notif_track_progress, visibility);
+        if (steps != null) {
+            views.setProgressBar(R.id.notif_track_progress, steps.percent(), 100, false);
+        }
         return views;
     }
 
-    private static RemoteViews buildExpanded(Context context, String title, String headline, String orderId,
-                                             String etaLabel, Bitmap logo, StepModel steps) {
+    private static RemoteViews buildExpanded(Context context, String headline, String orderId, StepModel steps) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.notification_order_tracking_expanded);
-        applyLogo(views, logo);
-        views.setTextViewText(R.id.notif_track_store, emptyFallback(title, "Já no Caminho"));
         views.setTextViewText(R.id.notif_track_status, headline);
         views.setTextViewText(R.id.notif_track_order, "Pedido #" + shortId(orderId));
-
-        int etaVisibility = etaLabel.isEmpty() ? View.GONE : View.VISIBLE;
-        views.setViewVisibility(R.id.notif_track_eta, etaVisibility);
-        if (!etaLabel.isEmpty()) views.setTextViewText(R.id.notif_track_eta, etaLabel);
-
-        views.setProgressBar(R.id.notif_track_progress, 100, steps.percent(), false);
-        renderStepRows(views, steps);
+        views.setProgressBar(R.id.notif_track_progress, steps.percent(), 100, false);
         return views;
-    }
-
-    private static RemoteViews buildFinalCollapsed(Context context, String title, String headline, Bitmap logo) {
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.notification_order_tracking);
-        applyLogo(views, logo);
-        views.setTextViewText(R.id.notif_track_store, emptyFallback(title, "Já no Caminho"));
-        views.setTextViewText(R.id.notif_track_status, headline);
-        views.setViewVisibility(R.id.notif_track_progress, View.GONE);
-        return views;
-    }
-
-    private static void renderStepRows(RemoteViews views, StepModel steps) {
-        int total = steps.labels.length;
-        for (int i = 0; i < MAX_STEP_ROWS; i++) {
-            int rowId = rowId(i);
-            int dotId = dotId(i);
-            int labelId = labelId(i);
-            if (rowId == 0 || dotId == 0 || labelId == 0) continue;
-
-            if (i >= total) {
-                views.setViewVisibility(rowId, View.GONE);
-                continue;
-            }
-            views.setViewVisibility(rowId, View.VISIBLE);
-            views.setTextViewText(labelId, steps.labels[i]);
-            if (i < steps.currentIndex) {
-                views.setImageViewResource(dotId, R.drawable.notif_step_done);
-                views.setTextColor(labelId, COLOR_TEXT_SECONDARY);
-            } else if (i == steps.currentIndex) {
-                views.setImageViewResource(dotId, R.drawable.notif_step_current);
-                views.setTextColor(labelId, COLOR_TEXT_PRIMARY);
-            } else {
-                views.setImageViewResource(dotId, R.drawable.notif_step_pending);
-                views.setTextColor(labelId, COLOR_TEXT_SECONDARY);
-            }
-        }
-    }
-
-    // Os IDs das linhas de etapa seguem o sufixo _1.._6 definidos no layout expandido.
-    private static int rowId(int index) {
-        switch (index) {
-            case 0: return R.id.notif_step_row_1;
-            case 1: return R.id.notif_step_row_2;
-            case 2: return R.id.notif_step_row_3;
-            case 3: return R.id.notif_step_row_4;
-            case 4: return R.id.notif_step_row_5;
-            case 5: return R.id.notif_step_row_6;
-            default: return 0;
-        }
-    }
-
-    private static int dotId(int index) {
-        switch (index) {
-            case 0: return R.id.notif_step_dot_1;
-            case 1: return R.id.notif_step_dot_2;
-            case 2: return R.id.notif_step_dot_3;
-            case 3: return R.id.notif_step_dot_4;
-            case 4: return R.id.notif_step_dot_5;
-            case 5: return R.id.notif_step_dot_6;
-            default: return 0;
-        }
-    }
-
-    private static int labelId(int index) {
-        switch (index) {
-            case 0: return R.id.notif_step_label_1;
-            case 1: return R.id.notif_step_label_2;
-            case 2: return R.id.notif_step_label_3;
-            case 3: return R.id.notif_step_label_4;
-            case 4: return R.id.notif_step_label_5;
-            case 5: return R.id.notif_step_label_6;
-            default: return 0;
-        }
-    }
-
-    private static void applyLogo(RemoteViews views, Bitmap logo) {
-        if (logo != null) {
-            views.setImageViewBitmap(R.id.notif_track_logo, logo);
-        } else {
-            views.setImageViewResource(R.id.notif_track_logo, R.mipmap.ic_launcher);
-        }
     }
 
     // -------------------------------------------------------------- step model
@@ -278,9 +152,8 @@ public final class OrderTrackingNotification {
     }
 
     /**
-     * Mapeia orderType + status -> conjunto de etapas + indice atual.
-     * Espelha a logica do frontend (OrderTracking.tsx), simplificada (sem etapa de pagamento,
-     * que e resolvida antes do primeiro push, e sem "recebido pelo cliente" pos-entrega).
+     * Mapeia orderType + status -> conjunto de etapas + indice atual (so pra calcular o % da
+     * barra). Espelha o frontend (OrderTracking.tsx), simplificado.
      */
     private static StepModel buildSteps(String orderType, String status) {
         String s = normalize(status);
@@ -352,15 +225,6 @@ public final class OrderTrackingNotification {
 
     // --------------------------------------------------------------- infra
 
-    private static String buildEtaLabel(String etaWindowMin, String etaWindowMax) {
-        boolean hasMin = !etaWindowMin.isEmpty();
-        boolean hasMax = !etaWindowMax.isEmpty();
-        if (hasMin && hasMax) return "Previsão: " + etaWindowMin + "–" + etaWindowMax + " min";
-        if (hasMin) return "Previsão: ~" + etaWindowMin + " min";
-        if (hasMax) return "Previsão: ~" + etaWindowMax + " min";
-        return "";
-    }
-
     private static PendingIntent buildContentIntent(Context context, String orderId, int notifId) {
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
         if (launchIntent == null) return null;
@@ -411,58 +275,6 @@ public final class OrderTrackingNotification {
         return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-    // ----------------------------------------------------------------- logo
-
-    private static Bitmap loadLogo(String rawUrl) {
-        String url = resolveLogoUrl(rawUrl);
-        if (url.isEmpty()) return null;
-        Bitmap cached = LOGO_CACHE.get(url);
-        if (cached != null) return cached;
-        HttpURLConnection conn = null;
-        try {
-            conn = (HttpURLConnection) new URL(url).openConnection();
-            conn.setConnectTimeout(4000);
-            conn.setReadTimeout(4000);
-            conn.setInstanceFollowRedirects(true);
-            try (InputStream in = conn.getInputStream()) {
-                Bitmap bmp = BitmapFactory.decodeStream(in);
-                if (bmp == null) return null;
-                Bitmap scaled = scaleForNotification(bmp);
-                LOGO_CACHE.put(url, scaled);
-                return scaled;
-            }
-        } catch (Exception e) {
-            Log.w(TAG, "logo download falhou: " + url + " — " + e.getMessage());
-            return null;
-        } finally {
-            if (conn != null) conn.disconnect();
-        }
-    }
-
-    private static Bitmap scaleForNotification(Bitmap bmp) {
-        int maxDim = 144; // px — suficiente p/ a area do logo na notificacao
-        float scale = Math.min(1f, (float) maxDim / Math.max(bmp.getWidth(), bmp.getHeight()));
-        if (scale >= 1f) return bmp;
-        Bitmap scaled = Bitmap.createScaledBitmap(
-            bmp,
-            Math.max(1, Math.round(bmp.getWidth() * scale)),
-            Math.max(1, Math.round(bmp.getHeight() * scale)),
-            true
-        );
-        if (scaled != bmp) bmp.recycle();
-        return scaled;
-    }
-
-    /** logoUrl pode vir como caminho relativo (/uploads/...) — prependa a base confiavel. */
-    private static String resolveLogoUrl(String rawUrl) {
-        String value = trim(rawUrl);
-        if (value.isEmpty()) return "";
-        if (value.startsWith("http://") || value.startsWith("https://")) return value;
-        if (value.startsWith("//")) return "https:" + value;
-        if (value.startsWith("/")) return "https://janocaminho.com.br" + value;
-        return "https://janocaminho.com.br/" + value;
-    }
-
     // --------------------------------------------------------------- utils
 
     private static String trim(String value) {
@@ -476,10 +288,6 @@ public final class OrderTrackingNotification {
     private static String safe(String[] labels, int index, String fallback) {
         if (labels == null || index < 0 || index >= labels.length) return fallback;
         return labels[index];
-    }
-
-    private static String emptyFallback(String value, String fallback) {
-        return (value == null || value.isEmpty()) ? fallback : value;
     }
 
     private static String shortId(String orderId) {

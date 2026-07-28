@@ -211,7 +211,7 @@ public class JncFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         Notification notification = new NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(body)
             .setPriority(priority)
