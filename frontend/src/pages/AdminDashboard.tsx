@@ -2255,6 +2255,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       postalOriginZip: normalize(session?.store?.settings?.postalOriginZip),
       prepBaseMinutes: normalize(session?.store?.settings?.prepBaseMinutes || '20'),
       prepAttentionMinutes: normalize(session?.store?.settings?.prepAttentionMinutes || '15'),
+      segment: normalize(session?.store?.settings?.segment || 'outros'),
     };
     const draft = {
       brandName: normalize(brandingDraft.brandName),
@@ -2283,6 +2284,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       postalOriginZip: normalize(brandingDraft.postalOriginZip),
       prepBaseMinutes: normalize(brandingDraft.prepBaseMinutes || '20'),
       prepAttentionMinutes: normalize(brandingDraft.prepAttentionMinutes || '15'),
+      segment: normalize(brandingDraft.segment || 'outros'),
     };
     const fieldsChanged = Object.keys(current).some((key) => current[key] !== draft[key]);
     return fieldsChanged || Boolean(brandingDraft.logoFile || brandingDraft.bannerFile);

@@ -502,7 +502,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
         </div>
       </div>
 
-      <div className="hidden md:flex absolute top-4 right-4 z-[90] items-center gap-2 rounded-full border border-white/25 bg-black/20 px-3 py-2 backdrop-blur-sm shadow-[0_14px_28px_-18px_rgba(2,6,23,0.75)]">
+      <div className="hidden md:flex absolute top-4 right-4 z-[1100] items-center gap-2 rounded-full border border-white/25 bg-black/20 px-3 py-2 backdrop-blur-sm shadow-[0_14px_28px_-18px_rgba(2,6,23,0.75)]">
         <button
           type="button"
           onClick={toggleFocusMode}

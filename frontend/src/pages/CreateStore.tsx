@@ -128,6 +128,13 @@ const STORE_SEGMENT_PRESETS: Record<string, { primaryColor: string; secondaryCol
     orderTypes: ['delivery', 'pickup', 'table'],
     categories: ['Bolos', 'Doces', 'Tortas', 'Bebidas'],
   },
+  servicos: {
+    primaryColor: '#0d9488',
+    secondaryColor: '#0f172a',
+    description: 'Vitrine de serviços com agendamento direto pelo WhatsApp da loja.',
+    orderTypes: [],
+    categories: ['Serviços', 'Destaques'],
+  },
   outros: {
     primaryColor: '#2f9df7',
     secondaryColor: '#5fd35a',
