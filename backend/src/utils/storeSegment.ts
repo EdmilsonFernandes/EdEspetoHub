@@ -8,10 +8,33 @@ export const STORE_SEGMENTS = [
   'hortifruti',
   'farmacia',
   'confeitaria',
+  'servicos',
   'outros',
 ] as const;
 
 export type StoreSegment = (typeof STORE_SEGMENTS)[number];
+
+// Segmentos de SERVICO (nao comida/varejo): o cliente nao compra online \u2014 agenda direto no
+// WhatsApp da loja. Usado pelo frontend pra trocar "Card\u00e1pio" -> "Servi\u00e7os" e o botao de
+// carrinho -> "Agendar no WhatsApp".
+const SERVICE_SEGMENT_SYNONYMS = [
+  'servicos', 'servico', 'lavarapido', 'lava_rapido', 'lavacao', 'lava\u00e7\u00e3o',
+  'beleza', 'salao', 'sal\u00e3o', 'barbearia', 'barbeiro', 'manicure', 'estetica',
+  'oficina', 'mecanico', 'mec\u00e2nico', 'autocenter', 'prestador', 'prestacaodeservico',
+];
+
+export const isServiceSegment = (segment?: string | null): boolean => {
+  const safe = sanitizeStoreSegment(segment);
+  if (safe === 'servicos') return true;
+  // Tambem detecta por sinonimo bruto (caso o valor ainda nao tenha sido sanitizado).
+  const normalized = String(segment || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '');
+  return SERVICE_SEGMENT_SYNONYMS.includes(normalized);
+};
 
 export const sanitizeStoreSegment = (value?: string | null): StoreSegment => {
   const normalized = String(value || '')
@@ -24,6 +47,7 @@ export const sanitizeStoreSegment = (value?: string | null): StoreSegment => {
   if (normalized === 'hortifruti' || normalized === 'hortifrutigranjeiros') return 'hortifruti';
   if (normalized === 'farmacia' || normalized === 'drogaria') return 'farmacia';
   if (normalized === 'outros' || normalized === 'generico') return 'outros';
+  if (SERVICE_SEGMENT_SYNONYMS.includes(normalized)) return 'servicos';
   if ((STORE_SEGMENTS as readonly string[]).includes(normalized)) return normalized as StoreSegment;
   return 'outros';
 };
@@ -89,6 +113,12 @@ const SEGMENT_PRESETS: Record<StoreSegment, SegmentPreset> = {
     secondaryColor: '#1f2937',
     description: 'Doces e sobremesas com vitrine digital irresistível.',
     orderTypes: ['delivery', 'pickup', 'table'],
+  },
+  servicos: {
+    primaryColor: '#0d9488',
+    secondaryColor: '#0f172a',
+    description: 'Vitrine de serviços com agendamento direto pelo WhatsApp da loja.',
+    orderTypes: [],
   },
   outros: {
     primaryColor: '#2f9df7',

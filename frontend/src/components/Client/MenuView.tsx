@@ -75,6 +75,18 @@ const openWhatsAppContact = (value, event, message = "") => {
   window.open(webUrl, "_blank", "noopener,noreferrer");
 };
 
+// Segmentos de SERVICO (lava-rapido, beleza, oficina...): o cliente nao compra online,
+// agenda direto no WhatsApp. Controla o "modo lead" da vitrine.
+const SERVICE_SEGMENT_VALUES = ["servicos", "servico", "lavarapido", "lava_rapido", "lavacao", "beleza", "salao", "barbearia", "oficina", "estetica"];
+const isServiceSegmentValue = (segment) => {
+  const normalized = String(segment || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[^\w]/g, "");
+  return SERVICE_SEGMENT_VALUES.includes(normalized);
+};
+
 const isEspetoCategory = (category) => {
   const normalized = (category || "").toString().trim().toLowerCase();
   return normalized.includes("espeto");
@@ -191,6 +203,7 @@ const Header = ({
     hortifruti: "Hortifruti",
     farmacia: "Farmácia",
     confeitaria: "Confeitaria",
+    servicos: "Serviços",
     outros: "Comércio",
   };
   const segmentLabel = segmentLabelMap[String(segment || "").toLowerCase()] || "Comércio";
@@ -652,7 +665,11 @@ export const MenuView = ({
   const categorySyncLockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousCartItemsCountRef = React.useRef(0);
   const cartPulseTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const canOrder = isOrderingEnabled !== false && !preOrderBlocked;
+  const isServiceStore = isServiceSegmentValue(segment);
+  // Loja de servico e sempre "modo lead" (agenda no WhatsApp) — nunca mostra carrinho,
+  // mesmo que isOrderingEnabled esteja ligado.
+  const canOrder = !isServiceStore && isOrderingEnabled !== false && !preOrderBlocked;
+  const catalogTerm = isServiceStore ? "Serviços" : "Cardápio";
   const effectiveCompactHeader = compactHeader || autoCompactHeader;
   const catalogPrimaryColor = branding?.primaryColor || "#f59e0b";
   const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
@@ -1184,7 +1201,7 @@ export const MenuView = ({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               className="min-h-[44px] flex-1 bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
-              placeholder="Buscar no cardápio..."
+              placeholder={`Buscar ${isServiceStore ? "nos serviços" : "no cardápio"}...`}
             />
             {query ? (
               <button
@@ -1208,7 +1225,7 @@ export const MenuView = ({
                   className="inline-flex w-[3.45rem] shrink-0 flex-col items-center justify-center gap-1 rounded-[1.2rem] border border-white/90 bg-white text-slate-700 shadow-[0_14px_28px_-22px_rgba(15,23,42,0.36)] ring-1 ring-slate-100 transition-all active:scale-95"
                 >
                   <List size={17} weight="bold" style={{ color: catalogPrimaryColor }} />
-                  <span className="text-[9px] font-black uppercase tracking-[0.08em] text-slate-400">Menu</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.08em] text-slate-400">{catalogTerm}</span>
                 </button>
               )}
               <div className={`${
@@ -1464,8 +1481,8 @@ export const MenuView = ({
                 <Storefront size={18} weight="duotone" />
               </span>
               <span className="min-w-0">
-                <span className="block text-sm font-black text-indigo-900">Apenas cardápio</span>
-                <span className="mt-1 block text-xs font-medium leading-relaxed text-indigo-700/80">Esta loja não aceita pedidos online. Consulte os produtos e faça o pedido presencialmente.</span>
+                <span className="block text-sm font-black text-indigo-900">{isServiceStore ? "Agende pelo WhatsApp" : `Apenas ${catalogTerm.toLowerCase()}`}</span>
+                <span className="mt-1 block text-xs font-medium leading-relaxed text-indigo-700/80">{isServiceStore ? "Esta loja oferece serviços. Toque em um serviço para falar com a loja e agendar um horário." : "Esta loja não aceita pedidos online. Consulte os produtos e faça o pedido presencialmente."}</span>
               </span>
             </div>
           </div>
@@ -1655,6 +1672,10 @@ export const MenuView = ({
                         type="button"
                         onClick={(event) => {
                           event.stopPropagation();
+                          if (isServiceStore && whatsappNumber) {
+                            openWhatsAppContact(whatsappNumber, event, `Olá! Vim pelo app Já no Caminho e quero agendar o serviço "${item.name}". Quais horários vocês têm disponíveis?`);
+                            return;
+                          }
                           if (!staffView || allowStaffModal) {
                             openProductModal(item);
                           }
@@ -1676,6 +1697,22 @@ export const MenuView = ({
                         )}
                       </button>
 
+                      {isServiceStore && !stockState.soldOut && whatsappNumber && (
+                        <div className="absolute -bottom-1.5 -right-1.5 z-10">
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              openWhatsAppContact(whatsappNumber, event, `Olá! Vim pelo app Já no Caminho e quero agendar o serviço "${item.name}". Quais horários vocês têm disponíveis?`);
+                            }}
+                            className="h-9 px-3 rounded-2xl shadow-[0_12px_28px_-6px_rgba(0,0,0,0.32)] border-[3px] border-white inline-flex items-center ring-1 ring-black/5 transition-transform duration-200 active:scale-90 hover:scale-105"
+                            style={{ backgroundColor: "#25D366", color: "#ffffff" }}
+                            aria-label={`Agendar ${item.name} no WhatsApp`}
+                          >
+                            <span className="text-[11px] font-black whitespace-nowrap">Agendar</span>
+                          </button>
+                        </div>
+                      )}
                       {canOrder && !stockState.soldOut && (
                         <div className="absolute -bottom-1.5 -right-1.5 z-10">
                           {itemQty <= 0 ? (
@@ -1758,7 +1795,7 @@ export const MenuView = ({
           <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[60] mt-24 h-fit max-h-[88vh] rounded-t-[32px] bg-white outline-none shadow-[0_-24px_64px_-38px_rgba(15,23,42,0.55)]">
             <div className="mx-auto my-4 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
             <div className="px-5 pb-3 pt-1">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Navegue pelo cardápio</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{isServiceStore ? "Navegue pelos serviços" : "Navegue pelo cardápio"}</p>
               <h3 className="mt-1 text-2xl font-black tracking-tight text-zinc-950">Categorias</h3>
               <p className="mt-1 text-sm font-medium text-slate-500">Toque em uma categoria para ir direto aos produtos.</p>
             </div>
@@ -2013,7 +2050,7 @@ export const MenuView = ({
                   className="w-full rounded-full px-4 py-3 text-sm font-black text-white shadow-[0_16px_30px_-18px_rgba(15,23,42,0.45)]"
                   style={{ backgroundColor: catalogPrimaryColor, color: catalogPrimaryText }}
                 >
-                  Ver cardápio
+                  Ver {catalogTerm}
                 </button>
               </div>
             </div>

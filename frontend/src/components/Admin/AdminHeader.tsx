@@ -64,6 +64,7 @@ const segmentLabelMap: Record<string, string> = {
   hortifruti: 'Hortifruti',
   farmacia: 'Farmácia',
   confeitaria: 'Confeitaria',
+  servicos: 'Serviços',
   outros: 'Comércio',
 };
 

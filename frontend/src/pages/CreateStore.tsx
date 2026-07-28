@@ -49,6 +49,7 @@ const STORE_SEGMENTS = [
   { value: 'hortifruti', label: 'Hortifruti' },
   { value: 'farmacia', label: 'Farmácia / Drogaria' },
   { value: 'confeitaria', label: 'Confeitaria' },
+  { value: 'servicos', label: 'Serviços (agenda no WhatsApp)' },
   { value: 'outros', label: 'Outros' },
 ];
 
