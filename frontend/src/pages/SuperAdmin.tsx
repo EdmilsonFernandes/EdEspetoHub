@@ -91,6 +91,25 @@ const PUSH_APP_ROUTE_OPTIONS = [
   { value: '/guia', label: 'Sobre o app / Guia' },
 ];
 
+// Biblioteca de pushes prontos por tema. Clicar preenche o formulário (title/body/rota).
+// targetType: 'app' (rota fixa do select), 'custom' (path interno), 'external' (URL).
+const PUSH_TEMPLATES = [
+  { id: 'hub-fome', category: 'Vender', tag: 'Comida agora', emoji: '🔥', title: 'Bateu a fome? 🔥', body: 'Tem lojas abertas perto de você agora. Dá uma olhada!', targetType: 'app', value: '/hub' },
+  { id: 'hub-nova', category: 'Vender', tag: 'Loja nova', emoji: '👀', title: 'Loja nova por aí 👀', body: 'Novidades chegando no seu bairro. Confere!', targetType: 'app', value: '/hub' },
+  { id: 'promo', category: 'Vender', tag: 'Promo', emoji: '⚡', title: 'Destaques de hoje ⚡', body: 'Aproveite as ofertas antes de acabarem.', targetType: 'app', value: '/hub/destaques' },
+  { id: 'saudades', category: 'Reengajar', tag: 'Voltou?', emoji: '👋', title: 'Sentimos sua falta! 👋', body: 'Olha o que tem de novo pra você no app.', targetType: 'app', value: '/hub' },
+  { id: 'avaliar', category: 'Reengajar', tag: 'Avaliar pedido', emoji: '⭐', title: 'Avalie seu último pedido ⭐', body: 'Conta como foi sua experiência — leva 1 minuto.', targetType: 'app', value: '/cliente/pedidos' },
+  { id: 'turismo', category: 'Turismo', tag: 'Passear', emoji: '🏞️', title: 'Bora passear? 🏞️', body: 'Destinos lindos perto de você pra este fim de semana.', targetType: 'app', value: '/destinos' },
+  { id: 'hospedagem', category: 'Turismo', tag: 'Hospedagem', emoji: '🛏️', title: 'Pousadas e chalés 🛏️', body: 'Onde ficar nos melhores destinos da serra.', targetType: 'app', value: '/destinos' },
+  { id: 'dest-sfx', category: 'Turismo', tag: 'S.F. Xavier', emoji: '📍', title: 'São Francisco Xavier 📍', body: 'Montanha, cachoeiras e frio a pouca distância de casa.', targetType: 'custom', value: '/destinos/sao-francisco-xavier' },
+  { id: 'dest-monteverde', category: 'Turismo', tag: 'Monte Verde', emoji: '📍', title: 'Monte Verde 📍', body: 'Suíços, frio e gastronomia — explore Monte Verde.', targetType: 'custom', value: '/destinos/monte-verde' },
+  { id: 'entregador', category: 'Parceiros', tag: 'Ser entregador', emoji: '🛵', title: 'Faça entregas e ganhe por corrida 🛵', body: 'Seja parceiro entregador do Já no Caminho. Cadastro grátis.', targetType: 'custom', value: '/motoboy/register' },
+  { id: 'criar-loja', category: 'Parceiros', tag: 'Criar loja', emoji: '🚀', title: 'Venda pelo app 🚀', body: 'Cadastre sua loja grátis e comece a vender hoje.', targetType: 'app', value: '/create' },
+  { id: 'condominio', category: 'Comunidade', tag: 'Condomínio', emoji: '🏢', title: 'Seu condomínio no app 🏢', body: 'Traga a feira e as lojas parceiras pro seu prédio.', targetType: 'custom', value: '/condominio/solicitar' },
+  { id: 'youtube', category: 'Mídia', tag: 'Tour (YouTube)', emoji: '▶️', title: 'Assista o tour do app ▶️', body: 'Veja como o Já no Caminho funciona em 2 minutos.', targetType: 'external', value: 'https://www.youtube.com/watch?v=HtU1t1zp43I' },
+  { id: 'instalar', category: 'App', tag: 'Instalar app', emoji: '📲', title: 'Leve o app no bolso 📲', body: 'Instale e peça de onde estiver.', targetType: 'app', value: '/instalar' },
+];
+
 const readFilters = () => {
   try {
     return JSON.parse(localStorage.getItem(FILTERS_KEY) || '{}');
@@ -2319,6 +2338,34 @@ export function SuperAdmin() {
               <p className="text-sm">
                 Envie uma notificação para todos os aplicativos ativos (audiência global).
               </p>
+            </div>
+            <div className="rounded-2xl border border-cyan-100 bg-white/60 p-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                Pushes prontos — clique pra preencher o formulário (depois é só revisar e enviar)
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {PUSH_TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => setBroadcastForm((prev) => ({
+                      ...prev,
+                      title: tpl.title,
+                      body: tpl.body,
+                      targetType: tpl.targetType,
+                      route: tpl.targetType === 'app' ? tpl.value : prev.route,
+                      customRoute: tpl.targetType === 'custom' ? tpl.value : prev.customRoute,
+                      url: tpl.targetType === 'external' ? tpl.value : prev.url,
+                    }))}
+                    title={`${tpl.title} — ${tpl.body}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-cyan-200 bg-cyan-50/70 px-3 py-1.5 text-xs font-semibold text-cyan-800 hover:border-cyan-300 hover:bg-cyan-100 transition-colors"
+                  >
+                    <span>{tpl.emoji}</span>
+                    <span>{tpl.tag}</span>
+                    <span className="text-[10px] font-medium text-cyan-500/80">{tpl.category}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             <form onSubmit={handleBroadcastPush} className="grid gap-3">
               <label className="grid gap-1">
