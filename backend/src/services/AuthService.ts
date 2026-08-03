@@ -855,33 +855,50 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
       const subscriptionRepo = manager.getRepository(Subscription);
 
       const exists = await userRepo.findOne({ where: { email: normalizedEmail } });
+      let user: any;
       if (exists)
       {
-        throw new AppError('AUTH-011', 409);
+        // Cliente virando lojista: promove a conta existente (exige a senha correta, para
+        // evitar hijack). Assim um cliente nao precisa criar loja com outro email — preenche
+        // o /create com o email/senha de cliente + os dados da loja.
+        if (String(exists.userRole || '').toUpperCase() !== 'CUSTOMER')
+        {
+          throw new AppError('AUTH-011', 409);
+        }
+        const passwordMatches = await bcrypt.compare(userPayload.password, String(exists.password || ''));
+        if (!passwordMatches)
+        {
+          throw new AppError('AUTH-004', 401);
+        }
+        exists.userRole = 'STORE_OWNER';
+        await userRepo.save(exists);
+        user = exists;
       }
-
-      const existingDocument = await userRepo.findOne({ where: { document: normalizedDocument } });
-      if (existingDocument)
+      else
       {
-        throw new AppError('AUTH-010', 409);
+        const existingDocument = await userRepo.findOne({ where: { document: normalizedDocument } });
+        if (existingDocument)
+        {
+          throw new AppError('AUTH-010', 409);
+        }
+        await this.ensurePhoneIsAvailable(manager, userPayload.phone);
+
+        const hashed = await bcrypt.hash(userPayload.password, 10);
+
+        user = userRepo.create({
+          fullName: userPayload.fullName,
+          email: normalizedEmail,
+          password: hashed,
+          phone: userPayload.phone,
+          address: userPayload.address,
+          document: normalizedDocument,
+          documentType: userPayload.documentType,
+          termsAcceptedAt: new Date(),
+          lgpdAcceptedAt: new Date(),
+          userRole: 'STORE_OWNER',
+        });
+        await userRepo.save(user);
       }
-      await this.ensurePhoneIsAvailable(manager, userPayload.phone);
-
-      const hashed = await bcrypt.hash(userPayload.password, 10);
-
-      const user = userRepo.create({
-        fullName: userPayload.fullName,
-        email: normalizedEmail,
-        password: hashed,
-        phone: userPayload.phone,
-        address: userPayload.address,
-        document: normalizedDocument,
-        documentType: userPayload.documentType,
-        termsAcceptedAt: new Date(),
-        lgpdAcceptedAt: new Date(),
-        userRole: 'STORE_OWNER',
-      });
-      await userRepo.save(user);
 
       const baseSlug = slugify(storePayload.name);
       let slug = baseSlug;
