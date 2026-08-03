@@ -432,6 +432,12 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     const userRepo = AppDataSource.getRepository(User);
     const existingEmail = await userRepo.findOne({ where: { email } });
     if (existingEmail) {
+      // Cliente virando lojista: permite e sinaliza (o frontend mostra um aviso premium de
+      // que a conta de cliente virara lojista com o mesmo email/senha). Documento/telefone
+      // nao sao checados nesse caso (ja sao do propio cliente).
+      if (String(existingEmail.userRole || '').toUpperCase() === 'CUSTOMER') {
+        return { ok: true, existingCustomer: true };
+      }
       throw new AppError('AUTH-011', 409);
     }
 

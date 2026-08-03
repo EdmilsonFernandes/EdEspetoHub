@@ -228,6 +228,7 @@ export function CreateStore() {
   const [storeError, setStoreError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [isPreflightingOwner, setIsPreflightingOwner] = useState(false);
+  const [existingCustomerOwner, setExistingCustomerOwner] = useState(false);
   const [plans, setPlans] = useState([]);
   const [signupPromotion, setSignupPromotion] = useState<any | null>(null);
   const [signupPromotionLoading, setSignupPromotionLoading] = useState(false);
@@ -1259,15 +1260,17 @@ export function CreateStore() {
 
     setIsPreflightingOwner(true);
     try {
-      await storeService.preflightOwner({
+      const preflightResult = await storeService.preflightOwner({
         email: registerForm.email,
         document: registerForm.document,
         documentType: registerForm.documentType,
         phone: registerForm.phone,
       });
+      setExistingCustomerOwner(Boolean(preflightResult?.existingCustomer));
       setFieldErrors((prev) => ({ ...prev, email: '', document: '' }));
       return true;
     } catch (error: any) {
+      setExistingCustomerOwner(false);
       const message = resolveCreateStoreError(error);
       const code = String(error?.code || '');
       const fields: Record<string, boolean> = {};
@@ -2121,6 +2124,7 @@ export function CreateStore() {
                         const next = e.target.value;
                         setRegisterForm((prev) => ({ ...prev, email: next }));
                         clearMissingField('email');
+                        setExistingCustomerOwner(false);
                         if (storeError) {
                           setStoreError('');
                         }
@@ -2138,6 +2142,17 @@ export function CreateStore() {
                       <p className="ds-field-error">{fieldErrors.email}</p>
                     ) : (
                     <p className="text-xs text-gray-500">Cada e-mail pode ter apenas uma conta.</p>
+                    )}
+                    {existingCustomerOwner && (
+                      <div className="mt-2 flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-3 shadow-[0_10px_24px_-18px_rgba(5,150,105,0.45)]">
+                        <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-black">★</span>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-emerald-900">Encontramos sua conta de cliente!</p>
+                          <p className="mt-0.5 text-xs leading-relaxed text-emerald-800/80">
+                            Ao criar a loja, essa conta <span className="font-semibold">vira conta de lojista</span> — continue com o <span className="font-semibold">mesmo e-mail e a mesma senha</span> que você já usa como cliente.
+                          </p>
+                        </div>
+                      </div>
                     )}
                   </div>
                   <div className="space-y-2">
