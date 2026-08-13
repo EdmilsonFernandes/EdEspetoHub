@@ -176,6 +176,10 @@ export const condominiumService = {
     return adminRequest(`/admin/condominiums/${encodeURIComponent(condominiumId)}/stores`, { method: 'POST', body: { storeId } });
   },
 
+  adminRemoveStore(condominiumId: string, storeId: string) {
+    return adminRequest(`/admin/condominiums/${encodeURIComponent(condominiumId)}/stores/${encodeURIComponent(storeId)}`, { method: 'DELETE' });
+  },
+
   adminUpdateStoreSettings(
     condominiumId: string,
     storeId: string,

@@ -253,6 +253,7 @@ export function createProxyRoutes(): Router {
     r.patch('/admin/condominium-events/:eventId/deactivate', authRequired, forward);
     r.post('/admin/condominiums/:condominiumId/stores', authRequired, forward);
     r.patch('/admin/condominiums/:condominiumId/stores/:storeId/settings', authRequired, forward);
+    r.delete('/admin/condominiums/:condominiumId/stores/:storeId', authRequired, forward);
     r.post('/admin/condominium-events/:eventId/stores', authRequired, forward);
     r.patch('/admin/condominium-requests/:requestId/review', authRequired, forward);
     r.patch('/admin/condominium-access-requests/:requestId/review', authRequired, forward);

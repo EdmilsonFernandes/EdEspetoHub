@@ -304,6 +304,18 @@ export class CondominiumController {
     }
   }
 
+  static async adminRemoveStore(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.removeStoreCondominium(
+        String(req.params.storeId || ''),
+        String(req.params.condominiumId || '')
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   static async createAccessRequest(req: Request, res: Response) {
     try {
       const payload = await condominiumService.createAccessRequest(req.body || {});

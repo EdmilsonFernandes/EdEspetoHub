@@ -629,6 +629,21 @@ export function SuperAdminCondominiums() {
     }
   };
 
+  const removeStoreLink = async (condominiumId: string, storeLink: any) => {
+    const storeName = storeLink?.store?.name || 'esta loja';
+    if (!window.confirm(`Remover ${storeName} deste condomínio? Ela deixa de aparecer no filtro "Meu Condomínio" e nas próximas feiras até nova aprovação.`)) return;
+    setSaving(true);
+    setError('');
+    try {
+      await condominiumService.adminRemoveStore(condominiumId, storeLink.storeId);
+      await load();
+    } catch (err: any) {
+      setError(err?.message || 'Falha ao remover a loja do condomínio.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const createCondominiumUser = async () => {
     if (!userForm.condominiumId || !userForm.email || !userForm.password) {
       setError('Escolha o condomínio e informe usuário/e-mail e senha do responsável.');
@@ -1036,6 +1051,14 @@ export function SuperAdminCondominiums() {
                                   <p className="truncate text-[11px] font-semibold text-slate-500">{storeLink.store?.slug || storeLink.storeId}</p>
                                   <p className="mt-1 line-clamp-1 text-[11px] font-bold text-[#336886]">{describeFulfillmentMode(storeLink)}</p>
                                 </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeStoreLink(condominium.id, storeLink)}
+                                  disabled={saving}
+                                  className="shrink-0 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-rose-600 transition hover:bg-rose-100 disabled:opacity-50"
+                                >
+                                  Remover
+                                </button>
                               </div>
                               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                                 <label className="flex min-h-[48px] items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-black text-slate-700">

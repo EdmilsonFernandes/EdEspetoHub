@@ -1597,10 +1597,13 @@ export function MarketplacePage() {
   const categoryTiles = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const s of scopedEnrichedStores) counts[s.segment] = (counts[s.segment] ?? 0) + 1;
-    return segmentOptions.map((segment) => ({
-      ...(categoryVisuals[segment] || { icon: Storefront, label: segment }),
-      count: counts[segment] ?? 0,
-    }));
+    // "Empório" saiu da fileira de categorias — o tile vira o "Condomínio" (contexto, premium).
+    return segmentOptions
+      .filter((segment) => segment !== 'Empório')
+      .map((segment) => ({
+        ...(categoryVisuals[segment] || { icon: Storefront, label: segment }),
+        count: counts[segment] ?? 0,
+      }));
   }, [segmentOptions, scopedEnrichedStores]);
 
   const currency = useMemo(
@@ -2479,6 +2482,41 @@ export function MarketplacePage() {
                 }`}>Todos</span>
               </button>
               
+              {/* Tile Condomínio (contexto premium) — substitui o Empório na fileira */}
+              <button
+                type="button"
+                className="group flex min-w-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
+                onClick={() => {
+                  if (myCondominium) {
+                    setQuickFilter(quickFilter === 'my_condo' ? 'all' : 'my_condo');
+                  } else {
+                    navigate('/cliente/enderecos?mode=new');
+                  }
+                }}
+              >
+                <div className={`relative flex h-12 w-12 items-center justify-center rounded-[1.05rem] transition-all duration-200 ease-out ${
+                  quickFilter === 'my_condo'
+                    ? 'scale-[1.04] bg-gradient-to-br from-[#2f9df7] to-[#336886] shadow-[0_18px_34px_-24px_rgba(47,157,247,0.75)]'
+                    : 'border border-sky-100/80 bg-gradient-to-br from-sky-50 to-[#336886]/10 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.18)] ring-1 ring-white/70 group-hover:scale-[1.03]'
+                }`}>
+                  <Buildings
+                    size={22}
+                    weight={quickFilter === 'my_condo' ? 'fill' : 'duotone'}
+                    className={`transition-all duration-150 ease-out ${
+                      quickFilter === 'my_condo' ? 'scale-[0.94] text-white' : 'text-[#336886] group-hover:scale-105'
+                    }`}
+                  />
+                  {isCustomerLogged && !myCondominium ? (
+                    <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#5fd35a] ring-2 ring-white" />
+                  ) : null}
+                </div>
+                <span className={`text-center text-[9px] font-black uppercase tracking-[0.08em] transition-colors ${
+                  quickFilter === 'my_condo' ? 'text-[#336886]' : 'text-slate-600'
+                }`}>
+                  Condomínio{myCondominium ? <span className="font-semibold normal-case tracking-normal text-slate-400"> · {myCondoStoreIds.length}</span> : null}
+                </span>
+              </button>
+
               {categoryTiles.map((item, index) => {
                 const active = segmentFilter === item.label;
                 const CategoryIcon = item.icon;

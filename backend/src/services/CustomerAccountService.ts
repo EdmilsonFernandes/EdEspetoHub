@@ -982,14 +982,16 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
     const current = await AppDataSource.getRepository(CustomerAddress).findOne({ where: { id: addressId, userId } });
     if (!current) throw new AppError('GEN-001', 404, { message: 'Endereço não encontrado.' });
 
+    // Compara VALORES (não presença): editar sem mudar nada de endereço (ex.: só
+    // ajustar bloco/apto do condomínio) NÃO pode disparar re-geocoding no save.
     const addressFieldsChanged =
-      input?.cep !== undefined ||
-      input?.street !== undefined ||
-      input?.number !== undefined ||
-      input?.complement !== undefined ||
-      input?.neighborhood !== undefined ||
-      input?.city !== undefined ||
-      input?.state !== undefined;
+      (input?.cep !== undefined && String(input.cep || '').replace(/\D/g, '').slice(0, 8) !== String(current.cep || '')) ||
+      (input?.street !== undefined && String(input.street || '').trim() !== String(current.street || '').trim()) ||
+      (input?.number !== undefined && String(input.number || '').trim() !== String(current.number || '').trim()) ||
+      (input?.complement !== undefined && String(input.complement || '').trim() !== String(current.complement || '').trim()) ||
+      (input?.neighborhood !== undefined && String(input.neighborhood || '').trim() !== String(current.neighborhood || '').trim()) ||
+      (input?.city !== undefined && String(input.city || '').trim() !== String(current.city || '').trim()) ||
+      (input?.state !== undefined && String(input.state || '').trim().toUpperCase().slice(0, 2) !== String(current.state || '').trim().toUpperCase().slice(0, 2));
     const hasExplicitLat = input?.lat !== undefined;
     const hasExplicitLng = input?.lng !== undefined;
     const nextLat = this.parseCoordinate(input?.lat);
