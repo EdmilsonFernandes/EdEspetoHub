@@ -113,7 +113,8 @@ O estudo detalhado da sessão `1685e9a3` propôs destravar o pedido permanente *
 5. ✅ Cliente vê o local: badge "Retirada: Bloco B · Apto 84" no card do hub (filtro `my_condo`) + no checkout (caixa e resumo de pickup) via navigation state (`myCondoPickup`), no mesmo padrão do `hubCoverageWarning`.
 6. ✅ Fix crítico: `useHubLocation` não propagava `condominiumId` do endereço preferido → filtro `my_condo` era inoperante (bug latente do `4a7f22f1`).
 7. ⏳ Validação local: frontend `test:unit` 199/199 + `build` ✅; backend `tsc` + BFF `build` ✅; **pendente** `yarn test`/`migrate:status`/`docs:schema` (Postgres local indisponível — rodar via `compose-dev-backend.sh` antes do deploy).
-8. ⏳ Follow-ups: exibir local de retirada na fila admin/tracking do pedido; regenerar `database-schema.html`.
+8. ✅ Pedido persiste o local de retirada: `orders += condominium_pickup_location` (migration `20260813_002`); `OrderService.resolveCondominiumPickupLocation` resolve na criação (pickup + condomínio do contexto do checkout ou do endereço salvo do cliente; label sempre do vínculo server-side); exposto nos 3 serializadores (detalhe, tracking, Meus Pedidos). **Meus Pedidos** mostra pill "Retirada: Bloco B · Apto 84 (Condomínio)" e o **tracking** mostra no quick fact. Checkpoint envia `condominiumId` quando o pedido veio do filtro `my_condo`.
+9. ⏳ Follow-ups: fila admin (lojista) exibir o local; regenerar `database-schema.html`.
 
 ## Não goals
 

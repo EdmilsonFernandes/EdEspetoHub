@@ -152,7 +152,7 @@ export function StorePage() {
   });
   const [showCustomerPassword, setShowCustomerPassword] = useState(false);
   const [hubCoverageNotice, setHubCoverageNotice] = useState<{ message: string } | null>(null);
-  const [myCondoPickup, setMyCondoPickup] = useState<{ label: string } | null>(null);
+  const [myCondoPickup, setMyCondoPickup] = useState<{ label?: string | null; condominiumId?: string | null } | null>(null);
   const [newAddressForm, setNewAddressForm] = useState({
     label: 'Casa',
     recipientName: '',
@@ -191,11 +191,14 @@ export function StorePage() {
 
   useEffect(() => {
     const pickup = location.state && (location.state as any).myCondoPickup;
-    if (!pickup?.label) {
+    if (!pickup?.label && !pickup?.condominiumId) {
       setMyCondoPickup(null);
       return;
     }
-    setMyCondoPickup({ label: String(pickup.label) });
+    setMyCondoPickup({
+      label: pickup?.label ? String(pickup.label) : null,
+      condominiumId: pickup?.condominiumId ? String(pickup.condominiumId) : null,
+    });
   }, [location.state]);
 
   useLayoutEffect(() => {
@@ -2736,6 +2739,9 @@ export function StorePage() {
             apartment: customer.apartment || condominiumOrderPayload?.apartment || '',
             reference: customer.reference || condominiumOrderPayload?.reference || '',
           }
+        : undefined,
+      condominiumId: !isCondominiumOrder && customer.type === 'pickup' && myCondoPickup?.condominiumId
+        ? myCondoPickup.condominiumId
         : undefined,
       postalShipment:
         customer.type === 'delivery' && isPostalDelivery && selectedPostalService

@@ -2474,6 +2474,9 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
     const normalizedPaymentStatus = (input.paymentStatus || '').toString().trim().toUpperCase();
     const paymentStatus = normalizedPaymentStatus === 'PAID' ? 'PAID' : 'PENDING';
     const condominiumContext = await this.resolveCondominiumOrderContext(input, store!.id);
+    const condominiumPickupLocation = input.type === 'pickup' && !condominiumContext
+      ? await this.resolveCondominiumPickupLocation(input, store!.id)
+      : null;
     const deliveryFee =
       (input.type === 'delivery' || Boolean(condominiumContext)) && input.deliveryFee !== undefined && input.deliveryFee !== null
         ? Number(input.deliveryFee)
@@ -2512,6 +2515,7 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       condominiumEventTitle: condominiumContext?.eventTitle || null,
       condominiumFulfillmentMode: condominiumContext?.fulfillmentMode || null,
       condominiumUnit: condominiumContext?.unit || null,
+      condominiumPickupLocation,
       paymentMethod: input.paymentMethod,
       paymentStatus,
       cashTendered,
@@ -2622,5 +2626,56 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       fulfillmentMode,
       unit,
     };
+  }
+
+  /**
+   * Resolves the VENDOR's pickup location (block/unit) for a PERMANENT condominium
+   * pickup order (filtro "Meu Condomínio"). Prefers the condominium context sent by
+   * checkout; falls back to the customer's saved condominium address. Server-side
+   * only — the label comes from store_condominiums, never from client input.
+   * Returns e.g. "Bloco B · Apto 84 (Spazio Campo Azuli)" or null.
+   */
+  private async resolveCondominiumPickupLocation(
+    input: Omit<CreateOrderDto, 'storeId'>,
+    storeId: string
+  ): Promise<string | null> {
+    const explicitCondominiumId = String((input as any).condominiumId || '').trim();
+    let condominiumId: string | null = explicitCondominiumId || null;
+    if (!condominiumId && input.customerUserId) {
+      const addressRows = await AppDataSource.query(
+        `
+          SELECT condominium_id
+          FROM customer_addresses
+          WHERE user_id = $1 AND condominium_id IS NOT NULL
+          ORDER BY is_default DESC, created_at ASC
+          LIMIT 1;
+        `,
+        [input.customerUserId]
+      );
+      condominiumId = addressRows[0]?.condominium_id || null;
+    }
+    if (!condominiumId) return null;
+
+    const linkRows = await AppDataSource.query(
+      `
+        SELECT sc.pickup_block, sc.pickup_unit, sc.pickup_instructions, c.name AS condominium_name
+        FROM store_condominiums sc
+        INNER JOIN condominiums c ON c.id = sc.condominium_id
+        WHERE sc.store_id = $1 AND sc.condominium_id = $2 AND sc.active = true
+        LIMIT 1;
+      `,
+      [storeId, condominiumId]
+    );
+    const link = linkRows[0];
+    if (!link) return null;
+
+    const block = String(link.pickup_block || '').trim();
+    const unit = String(link.pickup_unit || '').trim();
+    const condominiumName = String(link.condominium_name || '').trim();
+    const label = [block, unit].filter(Boolean).join(' · ');
+    if (label) return condominiumName ? `${label} (${condominiumName})` : label;
+
+    const instructions = String(link.pickup_instructions || '').trim().slice(0, 80);
+    return instructions || null;
   }
 }

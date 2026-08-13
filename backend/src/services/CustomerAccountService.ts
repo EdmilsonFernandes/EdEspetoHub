@@ -1210,6 +1210,7 @@ async setDefaultAddress(userId: string, addressId: string) {
       condominiumEventTitle: (order as any).condominiumEventTitle || null,
       condominiumFulfillmentMode: (order as any).condominiumFulfillmentMode || null,
       condominiumUnit: (order as any).condominiumUnit || null,
+      condominiumPickupLocation: (order as any).condominiumPickupLocation || null,
       condominiumOrder: (order as any).condominiumId
         ? {
             condominiumId: (order as any).condominiumId || null,

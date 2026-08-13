@@ -14,6 +14,7 @@ import {
   ChatCircleDots,
   Clock,
   CreditCard,
+  MapPin,
   Package,
   Receipt,
   Motorcycle,
@@ -843,6 +844,12 @@ function OrderCard({
           {condominiumOrder?.condominiumName ? (
             <p className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-emerald-700">
               <span className="truncate">{condominiumLabel} • {condominiumOrder.condominiumName}</span>
+            </p>
+          ) : null}
+          {String((order as any)?.condominiumPickupLocation || '') && String(order?.type || '').toLowerCase() === 'pickup' ? (
+            <p className="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9.5px] font-bold text-emerald-700">
+              <MapPin size={10} weight="fill" className="shrink-0" />
+              <span className="truncate">Retirada: {(order as any).condominiumPickupLocation}</span>
             </p>
           ) : null}
         </div>

@@ -209,6 +209,7 @@ CREATE TABLE IF NOT EXISTS orders (
   condominium_event_title TEXT,
   condominium_fulfillment_mode TEXT,
   condominium_unit TEXT,
+  condominium_pickup_location TEXT,
   canceled_at TIMESTAMPTZ,
   canceled_reason TEXT,
   customer_received_at TIMESTAMPTZ,

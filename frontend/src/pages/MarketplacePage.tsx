@@ -2594,7 +2594,9 @@ export function MarketplacePage() {
                         }
                       : {}),
                     ...(navigationDistanceKm !== null ? { hubDistanceKm: navigationDistanceKm } : {}),
-                    ...(quickFilter === 'my_condo' && myCondoPickupLabel ? { myCondoPickup: { label: myCondoPickupLabel } } : {}),
+                    ...(quickFilter === 'my_condo' && myCondominium?.id
+                      ? { myCondoPickup: { label: myCondoPickupLabel, condominiumId: String(myCondominium.id) } }
+                      : {}),
                   };
                   const primaryBadge = store.isOpen
                     ? getPrimaryStoreCardBadge(store, { condominiumScope: isCondominiumScope })

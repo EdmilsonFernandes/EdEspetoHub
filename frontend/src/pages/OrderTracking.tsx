@@ -1729,7 +1729,9 @@ export function OrderTracking() {
           : '';
         return [when ? `Reserva ${when}` : 'Reserva', partyLabel].filter(Boolean).join(' • ') || 'Reserva';
       })()
-    : 'Retirada na loja';
+    : (order as any)?.condominiumPickupLocation
+      ? `Retirada: ${(order as any).condominiumPickupLocation}`
+      : 'Retirada na loja';
   const orderQuickFacts = [
     {
       key: 'total',

@@ -94,6 +94,10 @@ export class Order {
   @Column({ name: 'condominium_unit', type: 'jsonb', nullable: true })
   condominiumUnit?: Record<string, any> | null;
 
+  /** Local de retirada do VENDEDOR no condomínio (comércio permanente, ex.: "Bloco B · Apto 84 (Azuli)"). */
+  @Column({ name: 'condominium_pickup_location', type: 'text', nullable: true })
+  condominiumPickupLocation?: string | null;
+
   @Column({ default: 'pending' })
   status!: string;
 
