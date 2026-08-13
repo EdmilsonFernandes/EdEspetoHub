@@ -13,6 +13,7 @@
 
 import { Response, Request } from 'express';
 import { getMessage, resolveLang } from '../i18n';
+import { logger } from '../utils/logger';
 import { AppError } from './AppError';
 
 type ErrorPayload = {
@@ -39,6 +40,18 @@ export const respondWithError = (
     code = error.code;
     status = error.status || fallbackStatus;
     details = error.details ?? null;
+  }
+
+  // Erro não-tratado (GEN-001) já custou diagnóstico cego — agora sempre deixa rastro com stack.
+  if (!(error instanceof AppError)) {
+    logger.error('Unhandled error returned to client', {
+      method: req.method,
+      url: req.originalUrl,
+      code,
+      status,
+      message: error?.message || String(error),
+      stack: error?.stack || null,
+    });
   }
 
   const lang = resolveLang(req);

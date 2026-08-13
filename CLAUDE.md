@@ -49,6 +49,13 @@ Browser/App → Nginx (EC2:443)
 - **Ou manual**: `scripts/deploy-release-{frontend,api,apis}.sh <sha>`.
 - **Pós-deploy**: validar `SELECT COUNT(*) FROM users;` (se voltar 0 = sem dump/seed).
 
+## Acesso SSH ao servidor (diagnóstico, SOMENTE leitura)
+- **Doc completo**: `docs/SERVIDOR_PRODUCAO.md`.
+- **Conexão**: `ssh -i "/d/PESSOAL/chamanoespeto-aws/medtrack-system.pem" ec2-user@ec2-3-137-119-152.us-east-2.compute.amazonaws.com`
+- **PERMITIDO (diagnóstico)**: `docker logs janocaminho-backend`, psql SELECT (`docker exec janocaminho-postgres psql -U postgres -d espetinho`), `docker exec janocaminho-backend node dist/scripts/migrationStatus.js`, reproduzir bug via `docker exec -i janocaminho-backend node -` com script que limpa o que cria.
+- **PROIBIDO**: deploy, `git pull`, restart/recreate de containers, writes no banco fora de teste com cleanup — sempre o usuário.
+- Erros não-tratados da API aparecem nos logs como `Unhandled error returned to client` (desde 13/08/2026 — antes o `respondWithError` descartava a causa sem logar).
+
 ## Migrations (MANDATÓRIO seguir o padrão)
 - **Arquivo**: `backend/docs/MIGRATION_STANDARD.md`.
 - Criar em `backend/src/migrations/YYYYMMDD_NNN_nome.ts`.
