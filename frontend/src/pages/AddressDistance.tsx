@@ -1,8 +1,9 @@
 // @ts-nocheck
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   MapPinLine,
+  CaretDown,
   Plus,
   Trash,
   House,
@@ -18,6 +19,7 @@ import {
 import { customerAccountService } from '../services/customerAccountService';
 import { addressLookupService } from '../services/addressLookupService';
 import { condominiumService } from '../services/condominiumService';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { useToast } from '../contexts/ToastContext';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
@@ -144,6 +146,10 @@ export function AddressDistance() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [form, setForm] = useState(createEmptyForm());
   const [condominiums, setCondominiums] = useState<any[]>([]);
+  const [condoDropdownOpen, setCondoDropdownOpen] = useState(false);
+  // CEP cujo endereço já foi buscado/preenchido — evita re-buscar ao abrir um endereço para edição.
+  const lastAutoLookupCepRef = useRef<string>('');
+  const selectedCondominium = condominiums.find((c: any) => c?.id === form.condominiumId) || null;
 
   const clearNewModeParam = useCallback(() => {
     if (!searchParams.get('mode')) return;
@@ -155,6 +161,8 @@ export function AddressDistance() {
   const resetFormState = useCallback(() => {
     setForm(createEmptyForm());
     setEditingAddressId(null);
+    lastAutoLookupCepRef.current = '';
+    setCondoDropdownOpen(false);
     setShowForm(false);
     clearNewModeParam();
   }, [clearNewModeParam]);
@@ -187,6 +195,7 @@ export function AddressDistance() {
     if (searchParams.get('mode') !== 'new') return;
     setEditingAddressId(null);
     setForm(createEmptyForm());
+    lastAutoLookupCepRef.current = '';
     setShowForm(true);
   }, [searchParams]);
 
@@ -196,6 +205,8 @@ export function AddressDistance() {
       if (cleanedCep.length !== 8) return;
       // Quando o endereço é de condomínio, o macro endereço vem do condomínio (não do CEP).
       if (form.condominiumId) return;
+      // Endereço já veio preenchido (edição) com este CEP — só re-busca se o usuário trocar o CEP.
+      if (cleanedCep === lastAutoLookupCepRef.current) return;
 
       setIsGeocoding(true);
       try {
@@ -215,6 +226,7 @@ export function AddressDistance() {
       } catch {
         // silent
       } finally {
+        lastAutoLookupCepRef.current = cleanedCep;
         setIsGeocoding(false);
       }
     };
@@ -226,6 +238,7 @@ export function AddressDistance() {
   const handleOpenNewForm = () => {
     setEditingAddressId(null);
     setForm(createEmptyForm());
+    lastAutoLookupCepRef.current = '';
     setShowForm(true);
     clearNewModeParam();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -233,7 +246,11 @@ export function AddressDistance() {
 
   const handleEditAddress = (address: any) => {
     setEditingAddressId(address.id);
-    setForm(normalizeAddressToForm(address));
+    const nextForm = normalizeAddressToForm(address);
+    setForm(nextForm);
+    // Marca o CEP carregado como já resolvido — a busca automática só roda se o CEP mudar.
+    lastAutoLookupCepRef.current = String(nextForm.cep || '').replace(/\D/g, '');
+    setCondoDropdownOpen(false);
     setShowForm(true);
     clearNewModeParam();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -430,17 +447,86 @@ export function AddressDistance() {
                 <div className={`rounded-2xl border p-4 ${form.condominiumId ? 'border-sky-200 bg-sky-50/60' : 'border-slate-200 bg-slate-50'}`}>
                   <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Condomínio (opcional)</label>
                   <div className="relative mt-2">
-                    <House size={16} weight="duotone" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <select
-                      value={form.condominiumId || ''}
-                      onChange={e => handleSelectCondominium(e.target.value)}
-                      className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
+                    <button
+                      type="button"
+                      onClick={() => setCondoDropdownOpen(prev => !prev)}
+                      className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white py-2.5 pl-3 pr-4 text-left outline-none transition-all focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
                     >
-                      <option value="">Endereço comum (sem condomínio)</option>
-                      {condominiums.map((c: any) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
+                      {(() => {
+                        const selectedLogo = resolveAssetUrl(selectedCondominium?.logoUrl || selectedCondominium?.bannerUrl || '');
+                        return selectedLogo ? (
+                          <img src={selectedLogo} alt="" className="h-9 w-9 shrink-0 rounded-xl bg-white object-contain ring-1 ring-slate-100" />
+                        ) : (
+                          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-400">
+                            <House size={16} weight="duotone" />
+                          </span>
+                        );
+                      })()}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-bold text-slate-700">
+                          {selectedCondominium ? selectedCondominium.name : 'Endereço comum (sem condomínio)'}
+                        </span>
+                        <span className="block truncate text-[11px] font-semibold text-slate-400">
+                          {selectedCondominium
+                            ? [selectedCondominium.city, selectedCondominium.state].filter(Boolean).join(' - ') || 'Condomínio selecionado'
+                            : 'Mora em um condomínio? Toque para escolher'}
+                        </span>
+                      </span>
+                      <CaretDown size={16} className={`shrink-0 text-slate-400 transition-transform ${condoDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {condoDropdownOpen ? (
+                      <>
+                        <button
+                          type="button"
+                          aria-label="Fechar lista de condomínios"
+                          className="fixed inset-0 z-20 cursor-default"
+                          onClick={() => setCondoDropdownOpen(false)}
+                        />
+                        <div className="absolute z-30 mt-2 max-h-72 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-[0_24px_48px_-24px_rgba(15,23,42,0.35)]">
+                          <button
+                            type="button"
+                            onClick={() => { handleSelectCondominium(''); setCondoDropdownOpen(false); }}
+                            className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors hover:bg-slate-50 ${!form.condominiumId ? 'bg-sky-50/70' : ''}`}
+                          >
+                            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-400">
+                              <House size={16} weight="duotone" />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-bold text-slate-700">Endereço comum</span>
+                              <span className="block truncate text-[11px] font-semibold text-slate-400">Sem condomínio</span>
+                            </span>
+                          </button>
+                          {condominiums.map((c: any) => {
+                            const optionLogo = resolveAssetUrl(c?.logoUrl || c?.bannerUrl || '');
+                            return (
+                              <button
+                                key={c.id}
+                                type="button"
+                                onClick={() => { handleSelectCondominium(c.id); setCondoDropdownOpen(false); }}
+                                className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors hover:bg-slate-50 ${c.id === form.condominiumId ? 'bg-sky-50/70' : ''}`}
+                              >
+                                {optionLogo ? (
+                                  <img src={optionLogo} alt="" className="h-9 w-9 shrink-0 rounded-xl bg-white object-contain ring-1 ring-slate-100" />
+                                ) : (
+                                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-400">
+                                    <House size={16} weight="duotone" />
+                                  </span>
+                                )}
+                                <span className="min-w-0">
+                                  <span className="block truncate text-sm font-bold text-slate-700">{c.name}</span>
+                                  <span className="block truncate text-[11px] font-semibold text-slate-400">
+                                    {[c.city, c.state].filter(Boolean).join(' - ') || 'Condomínio'}
+                                  </span>
+                                </span>
+                                {c.id === form.condominiumId ? (
+                                  <CheckCircle size={16} weight="fill" className="ml-auto shrink-0 text-sky-600" />
+                                ) : null}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    ) : null}
                   </div>
                   {form.condominiumId ? (
                     <>
