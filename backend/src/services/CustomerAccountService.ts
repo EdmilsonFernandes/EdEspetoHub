@@ -977,30 +977,56 @@ async createAddress(userId: string, input: AddressInput) {
    * @author Edmilson Lopes
    */
 async updateAddress(userId: string, addressId: string, input: Partial<AddressInput>) {
+    // Pré-carrega FORA da transação: geocoding (chamada externa lenta) nunca pode rodar com
+    // transação aberta — estourava QueryRunnerAlreadyReleased no save (400 GEN-001).
+    const current = await AppDataSource.getRepository(CustomerAddress).findOne({ where: { id: addressId, userId } });
+    if (!current) throw new AppError('GEN-001', 404, { message: 'Endereço não encontrado.' });
+
+    const addressFieldsChanged =
+      input?.cep !== undefined ||
+      input?.street !== undefined ||
+      input?.number !== undefined ||
+      input?.complement !== undefined ||
+      input?.neighborhood !== undefined ||
+      input?.city !== undefined ||
+      input?.state !== undefined;
+    const hasExplicitLat = input?.lat !== undefined;
+    const hasExplicitLng = input?.lng !== undefined;
+    const nextLat = this.parseCoordinate(input?.lat);
+    const nextLng = this.parseCoordinate(input?.lng);
+    const explicitCoordinatesAreStale =
+      addressFieldsChanged &&
+      hasExplicitLat &&
+      hasExplicitLng &&
+      sameCoordinatePair(nextLat, nextLng, current.lat, current.lng);
+    const shouldUseExplicitLat = hasExplicitLat && !explicitCoordinatesAreStale;
+    const shouldUseExplicitLng = hasExplicitLng && !explicitCoordinatesAreStale;
+
+    // Resolve coordenadas FORA da transação com os valores FINAIS dos campos (input > atual).
+    let resolvedLat: number | null = null;
+    let resolvedLng: number | null = null;
+    if (addressFieldsChanged && (!shouldUseExplicitLat || !shouldUseExplicitLng)) {
+      const nextText = (key: 'cep' | 'street' | 'number' | 'complement' | 'neighborhood' | 'city' | 'state') =>
+        input?.[key] !== undefined ? String(input[key] || '').trim() : String((current as any)[key] || '').trim();
+      const coordinates = await this.resolveAddressCoordinates({
+        cep: nextText('cep').replace(/\D/g, '').slice(0, 8),
+        street: nextText('street'),
+        number: nextText('number'),
+        complement: nextText('complement'),
+        neighborhood: nextText('neighborhood'),
+        city: nextText('city'),
+        state: nextText('state').toUpperCase().slice(0, 2),
+      });
+      if (coordinates) {
+        resolvedLat = coordinates.lat;
+        resolvedLng = coordinates.lng;
+      }
+    }
+
     return AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(CustomerAddress);
       const address = await repo.findOne({ where: { id: addressId, userId } });
       if (!address) throw new AppError('GEN-001', 404, { message: 'Endereço não encontrado.' });
-
-      const addressFieldsChanged =
-        input?.cep !== undefined ||
-        input?.street !== undefined ||
-        input?.number !== undefined ||
-        input?.complement !== undefined ||
-        input?.neighborhood !== undefined ||
-        input?.city !== undefined ||
-        input?.state !== undefined;
-      const hasExplicitLat = input?.lat !== undefined;
-      const hasExplicitLng = input?.lng !== undefined;
-      const nextLat = this.parseCoordinate(input?.lat);
-      const nextLng = this.parseCoordinate(input?.lng);
-      const explicitCoordinatesAreStale =
-        addressFieldsChanged &&
-        hasExplicitLat &&
-        hasExplicitLng &&
-        sameCoordinatePair(nextLat, nextLng, address.lat, address.lng);
-      const shouldUseExplicitLat = hasExplicitLat && !explicitCoordinatesAreStale;
-      const shouldUseExplicitLng = hasExplicitLng && !explicitCoordinatesAreStale;
 
       if (input?.label !== undefined) address.label = input.label ? String(input.label).trim() : undefined;
       if (input?.recipientName !== undefined) {
@@ -1052,23 +1078,9 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
           city: address.city,
           state: address.state,
         }, { requireNumber: !isCondominiumAddressUpdate });
-        if (!shouldUseExplicitLat) address.lat = null;
-        if (!shouldUseExplicitLng) address.lng = null;
-        if (!shouldUseExplicitLat || !shouldUseExplicitLng) {
-          const coordinates = await this.resolveAddressCoordinates({
-            cep: address.cep,
-            street: address.street,
-            number: address.number,
-            complement: address.complement,
-            neighborhood: address.neighborhood,
-            city: address.city,
-            state: address.state,
-          });
-          if (coordinates) {
-            if (!shouldUseExplicitLat) address.lat = coordinates.lat;
-            if (!shouldUseExplicitLng) address.lng = coordinates.lng;
-          }
-        }
+        // Coordenadas já resolvidas FORA da transação — aqui só aplica.
+        if (!shouldUseExplicitLat) address.lat = resolvedLat;
+        if (!shouldUseExplicitLng) address.lng = resolvedLng;
       }
 
       const saved = await repo.save(address);
