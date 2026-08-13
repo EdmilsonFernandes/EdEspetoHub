@@ -46,6 +46,9 @@ type AddressInput = {
   lat?: number | string | null;
   lng?: number | string | null;
   isDefault?: boolean;
+  condominiumId?: string | null;
+  condominiumBlock?: string | null;
+  condominiumUnit?: string | null;
 };
 
 type EmailOtpDelivery = {
@@ -161,13 +164,15 @@ private assertRequiredAddressFields(payload: {
     number?: string | null;
     city?: string | null;
     state?: string | null;
-  }) {
+  }, options: { requireNumber?: boolean } = {}) {
     const cep = String(payload?.cep || '').replace(/\D/g, '').slice(0, 8);
     const street = String(payload?.street || '').trim();
     const number = String(payload?.number || '').trim();
     const city = String(payload?.city || '').trim();
     const state = String(payload?.state || '').trim().toUpperCase().slice(0, 2);
-    if (!cep || cep.length !== 8 || !street || !number || !city || !state) {
+    // Para endereço de condomínio, a unidade é bloco/apto — o número da rua é opcional.
+    const requireNumber = options.requireNumber !== false;
+    if (!cep || cep.length !== 8 || !street || (requireNumber && !number) || !city || !state) {
       throw new AppError('ADDR-001', 400);
     }
   }
@@ -455,6 +460,9 @@ private mapAddress(entity: CustomerAddress) {
       lat: this.parseCoordinate(entity.lat) ?? null,
       lng: this.parseCoordinate(entity.lng) ?? null,
       isDefault: Boolean(entity.isDefault),
+      condominiumId: entity.condominiumId || null,
+      condominiumBlock: entity.condominiumBlock || null,
+      condominiumUnit: entity.condominiumUnit || null,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };
@@ -902,7 +910,8 @@ async createAddress(userId: string, input: AddressInput) {
     const street = String(input?.street || '').trim();
     const number = String(input?.number || '').trim();
     const city = String(input?.city || '').trim();
-    this.assertRequiredAddressFields({ cep, street, number, city, state });
+    const isCondominiumAddress = Boolean(input?.condominiumId);
+    this.assertRequiredAddressFields({ cep, street, number, city, state }, { requireNumber: !isCondominiumAddress });
 
     const requestedLat = this.parseCoordinate(input?.lat);
     const requestedLng = this.parseCoordinate(input?.lng);
@@ -953,6 +962,9 @@ async createAddress(userId: string, input: AddressInput) {
         lat: resolvedLat,
         lng: resolvedLng,
         isDefault: shouldBeDefault,
+        condominiumId: input?.condominiumId ? String(input.condominiumId).trim() || null : null,
+        condominiumBlock: input?.condominiumBlock ? String(input.condominiumBlock).trim() || null : null,
+        condominiumUnit: input?.condominiumUnit ? String(input.condominiumUnit).trim() || null : null,
       } as Partial<CustomerAddress>);
       const saved = await repo.save(entity);
       return this.mapAddress(saved);
@@ -1010,6 +1022,15 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
       }
       if (input?.city !== undefined) address.city = String(input.city || '').trim();
       if (input?.state !== undefined) address.state = String(input.state || '').trim().toUpperCase().slice(0, 2);
+      if (input?.condominiumId !== undefined) {
+        address.condominiumId = input.condominiumId ? String(input.condominiumId).trim() || null : null;
+      }
+      if (input?.condominiumBlock !== undefined) {
+        address.condominiumBlock = input.condominiumBlock ? String(input.condominiumBlock).trim() || null : null;
+      }
+      if (input?.condominiumUnit !== undefined) {
+        address.condominiumUnit = input.condominiumUnit ? String(input.condominiumUnit).trim() || null : null;
+      }
       if (shouldUseExplicitLat) {
         address.lat = nextLat !== null ? Number(nextLat) : null;
       }
@@ -1023,13 +1044,14 @@ async updateAddress(userId: string, addressId: string, input: Partial<AddressInp
       }
 
       if (addressFieldsChanged || shouldUseExplicitLat || shouldUseExplicitLng) {
+        const isCondominiumAddressUpdate = Boolean(address.condominiumId);
         this.assertRequiredAddressFields({
           cep: address.cep,
           street: address.street,
           number: address.number,
           city: address.city,
           state: address.state,
-        });
+        }, { requireNumber: !isCondominiumAddressUpdate });
         if (!shouldUseExplicitLat) address.lat = null;
         if (!shouldUseExplicitLng) address.lng = null;
         if (!shouldUseExplicitLat || !shouldUseExplicitLng) {

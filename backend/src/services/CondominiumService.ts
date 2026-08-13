@@ -902,6 +902,52 @@ export class CondominiumService {
   }
 
   /**
+   * Lists only the PERMANENT store-condominium links (StoreCondominium.active),
+   * independent of events/feiras. Powers the "Meu Condomínio" filter in the main hub
+   * so daily commerce shows up regardless of whether a feira is live.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   */
+  async listPermanentStoresBySlug(slug: string) {
+    const condominium = await this.condominiumRepository.findActiveBySlug(slug);
+    if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
+    const links = await this.condominiumRepository.listActiveStoreLinksBySlug(slug);
+    const storeIds = Array.from(new Set(
+      links.map((link: any) => String(link?.store?.id || '')).filter(Boolean)
+    ));
+    const subscriptionsByStoreId = await this.subscriptionService.getCurrentByStoreIds(storeIds);
+    const stores = links
+      .map((link: any) => {
+        const store = link?.store;
+        if (!store) return null;
+        const subscription = subscriptionsByStoreId.get(String(store.id || '')) || null;
+        const isVip = Boolean(store?.settings?.planExempt);
+        const isActive = isVip || this.subscriptionService.isActiveSubscription(subscription);
+        if (!isActive) return null;
+        return {
+          id: store.id,
+          name: store.name,
+          slug: store.slug,
+          open: store.open,
+          isOrderingEnabled: store.settings?.isOrderingEnabled !== false,
+        };
+      })
+      .filter(Boolean);
+
+    this.log.info('Loaded permanent condominium stores by slug', {
+      slug,
+      condominiumId: condominium.id,
+      permanentStoreCount: stores.length,
+    });
+
+    return {
+      condominium: { id: condominium.id, name: condominium.name, slug: condominium.slug },
+      stores,
+      storeIds: stores.map((store: any) => String(store.id)),
+    };
+  }
+
+  /**
    * Serializes condominium public payload.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)

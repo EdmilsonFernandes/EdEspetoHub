@@ -963,6 +963,14 @@ ALTER TABLE IF EXISTS customer_addresses
 ADD COLUMN IF NOT EXISTS geocoded_at TIMESTAMPTZ;
 ALTER TABLE IF EXISTS customer_addresses
 ADD COLUMN IF NOT EXISTS formatted_address TEXT;
+ALTER TABLE IF EXISTS customer_addresses
+ADD COLUMN IF NOT EXISTS condominium_id UUID REFERENCES condominiums(id) ON DELETE SET NULL;
+ALTER TABLE IF EXISTS customer_addresses
+ADD COLUMN IF NOT EXISTS condominium_block TEXT;
+ALTER TABLE IF EXISTS customer_addresses
+ADD COLUMN IF NOT EXISTS condominium_unit TEXT;
+CREATE INDEX IF NOT EXISTS idx_customer_addresses_condominium
+ON customer_addresses(condominium_id) WHERE condominium_id IS NOT NULL;
 DO $$
 BEGIN
   IF to_regclass('public.customer_addresses') IS NOT NULL THEN

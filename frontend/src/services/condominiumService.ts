@@ -126,6 +126,11 @@ export const condominiumService = {
     return publicCachedRawGet(`public:condominiums:stores:${normalizedSlug}`, `/public/condominiums/${encodeURIComponent(slug)}/stores`);
   },
 
+  async listPermanentStores(slug: string) {
+    const normalizedSlug = String(slug || '').trim().toLowerCase();
+    return publicCachedRawGet(`public:condominiums:stores-permanent:${normalizedSlug}`, `/public/condominiums/${encodeURIComponent(slug)}/stores/permanent`);
+  },
+
   prefetchStores(slug: string) {
     if (!String(slug || '').trim()) return Promise.resolve(null);
     return condominiumService.listStores(slug).catch(() => null);

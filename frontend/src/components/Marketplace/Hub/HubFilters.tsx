@@ -10,7 +10,7 @@ import {
   X,
 } from '@phosphor-icons/react';
 
-export type HubQuickFilterKey = 'all' | 'free_shipping' | 'nearby' | 'open_now' | 'favorites';
+export type HubQuickFilterKey = 'all' | 'free_shipping' | 'nearby' | 'open_now' | 'favorites' | 'my_condo';
 type HubActiveQuickFilterKey = Exclude<HubQuickFilterKey, 'all'>;
 
 export type HubCategoryTile = {

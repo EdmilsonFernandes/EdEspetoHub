@@ -349,4 +349,19 @@ export class CondominiumController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+  /**
+   * Lists permanent (non-event) stores linked to one condominium.
+   * Powers the "Meu Condomínio" filter in the main hub.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   */
+  static async listPermanentStores(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.listPermanentStoresBySlug(String(req.params.slug || ''));
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
 }

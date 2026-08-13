@@ -237,6 +237,7 @@ routes.get('/public/condominiums', CondominiumController.listPublic);
 routes.post('/public/condominium-access-requests', CondominiumController.createAccessRequest);
 routes.get('/public/condominiums/:slug', CondominiumController.getPublicBySlug);
 routes.get('/public/condominiums/:slug/stores', CondominiumController.listPublicStoresBySlug);
+routes.get('/public/condominiums/:slug/stores/permanent', CondominiumController.listPermanentStores);
 routes.get('/public/destinations', DestinationController.listPublic);
 routes.post('/public/destination-partner-requests', DestinationController.createPartnerRequest);
 routes.get('/public/destinations/:slug', DestinationController.getPublicBySlug);

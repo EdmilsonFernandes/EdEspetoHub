@@ -17,6 +17,7 @@ import {
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { addressLookupService } from '../services/addressLookupService';
+import { condominiumService } from '../services/condominiumService';
 import { useToast } from '../contexts/ToastContext';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
@@ -36,6 +37,9 @@ const createEmptyForm = () => ({
   phone: '',
   lat: null,
   lng: null,
+  condominiumId: '',
+  condominiumBlock: '',
+  condominiumUnit: '',
 });
 
 const formatCepBr = (value: string) => {
@@ -55,6 +59,9 @@ const formatPhoneBr = (value: string) => {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 };
 
+const buildCondoComplement = (block?: string | null, unit?: string | null) =>
+  [block ? `Bloco ${block}` : '', unit ? `Apto ${unit}` : ''].filter(Boolean).join(' · ');
+
 const normalizeAddressToForm = (address: any) => ({
   label: String(address?.label || 'Casa'),
   street: String(address?.street || ''),
@@ -68,6 +75,9 @@ const normalizeAddressToForm = (address: any) => ({
   phone: formatPhoneBr(address?.phone || ''),
   lat: address?.lat ?? null,
   lng: address?.lng ?? null,
+  condominiumId: address?.condominiumId || '',
+  condominiumBlock: address?.condominiumBlock || '',
+  condominiumUnit: address?.condominiumUnit || '',
 });
 
 const getAddressTone = (label: string, isDefault: boolean) => {
@@ -133,6 +143,7 @@ export function AddressDistance() {
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [form, setForm] = useState(createEmptyForm());
+  const [condominiums, setCondominiums] = useState<any[]>([]);
 
   const clearNewModeParam = useCallback(() => {
     if (!searchParams.get('mode')) return;
@@ -164,6 +175,15 @@ export function AddressDistance() {
   }, [loadAddresses]);
 
   useEffect(() => {
+    let active = true;
+    condominiumService
+      .listPublic()
+      .then((rows: any) => { if (active) setCondominiums(Array.isArray(rows) ? rows : []); })
+      .catch(() => { if (active) setCondominiums([]); });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
     if (searchParams.get('mode') !== 'new') return;
     setEditingAddressId(null);
     setForm(createEmptyForm());
@@ -174,6 +194,8 @@ export function AddressDistance() {
     const fetchAddressByCep = async () => {
       const cleanedCep = String(form.cep || '').replace(/\D/g, '');
       if (cleanedCep.length !== 8) return;
+      // Quando o endereço é de condomínio, o macro endereço vem do condomínio (não do CEP).
+      if (form.condominiumId) return;
 
       setIsGeocoding(true);
       try {
@@ -217,10 +239,37 @@ export function AddressDistance() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleSelectCondominium = (condoId: string) => {
+    const condo = condominiums.find((c: any) => c?.id === condoId) || null;
+    if (!condo) {
+      setForm(prev => ({ ...prev, condominiumId: '', condominiumBlock: '', condominiumUnit: '' }));
+      return;
+    }
+    setForm(prev => ({
+      ...prev,
+      condominiumId: condo.id,
+      label: (!prev.label || prev.label === 'Casa') ? condo.name : prev.label,
+      cep: formatCepBr(condo.zipCode || condo.zip_code || condo.cep || prev.cep || ''),
+      street: condo.address || condo.name || prev.street || '',
+      city: condo.city || prev.city || '',
+      state: String(condo.state || prev.state || '').toUpperCase().slice(0, 2),
+      number: '',
+      complement: buildCondoComplement(prev.condominiumBlock, prev.condominiumUnit),
+      lat: condo.lat ?? prev.lat ?? null,
+      lng: condo.lng ?? prev.lng ?? null,
+    }));
+  };
+
   const handleSubmitAddress = async (e) => {
     e.preventDefault();
 
-    if (!form.cep || !form.street || !form.number || !form.neighborhood || !form.city || !form.state) {
+    const isCondominiumAddress = Boolean(form.condominiumId);
+    if (isCondominiumAddress) {
+      if (!form.condominiumBlock || !form.condominiumUnit || !form.cep || !form.street || !form.city || !form.state) {
+        showToast('Selecione o condomínio e informe bloco e apartamento.', 'warning');
+        return;
+      }
+    } else if (!form.cep || !form.street || !form.number || !form.neighborhood || !form.city || !form.state) {
       showToast('Preencha CEP, rua, número, bairro, cidade e estado corretamente.', 'warning');
       return;
     }
@@ -375,6 +424,53 @@ export function AddressDistance() {
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Condomínio (opcional) — morador vincula o endereço a um condomínio real (admin-curated) */}
+                <div className={`rounded-2xl border p-4 ${form.condominiumId ? 'border-sky-200 bg-sky-50/60' : 'border-slate-200 bg-slate-50'}`}>
+                  <label className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Condomínio (opcional)</label>
+                  <div className="relative mt-2">
+                    <House size={16} weight="duotone" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <select
+                      value={form.condominiumId || ''}
+                      onChange={e => handleSelectCondominium(e.target.value)}
+                      className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition-all focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
+                    >
+                      <option value="">Endereço comum (sem condomínio)</option>
+                      {condominiums.map((c: any) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {form.condominiumId ? (
+                    <>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <input
+                          placeholder="Bloco / Torre"
+                          value={form.condominiumBlock}
+                          onChange={e => {
+                            const nextBlock = e.target.value;
+                            setForm(prev => ({ ...prev, condominiumBlock: nextBlock, complement: buildCondoComplement(nextBlock, prev.condominiumUnit) }));
+                          }}
+                          enterKeyHint="next"
+                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
+                        />
+                        <input
+                          placeholder="Apto / Unidade"
+                          value={form.condominiumUnit}
+                          onChange={e => {
+                            const nextUnit = e.target.value;
+                            setForm(prev => ({ ...prev, condominiumUnit: nextUnit, complement: buildCondoComplement(prev.condominiumBlock, nextUnit) }));
+                          }}
+                          enterKeyHint="next"
+                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
+                        />
+                      </div>
+                      <p className="mt-2 text-[11px] font-medium text-sky-700">
+                        Usando o endereço do condomínio. Bloco e apartamento identificam a sua unidade.
+                      </p>
+                    </>
+                  ) : null}
                 </div>
 
                 <div className="space-y-2">

@@ -11,6 +11,7 @@ export type PreferredDiscoveryAddress = {
   addressLine?: string;
   lat?: number | null;
   lng?: number | null;
+  condominiumId?: string | null;
 };
 
 type HubDebug = (event: string, payload?: Record<string, any>) => void;
@@ -51,6 +52,7 @@ const buildCustomerAddressLookup = (address: any) => {
     label: label || 'Endereço principal',
     lat: parseOptionalNumber(address?.lat),
     lng: parseOptionalNumber(address?.lng),
+    condominiumId: address?.condominiumId || null,
   };
 };
 

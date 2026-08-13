@@ -72,6 +72,17 @@ export class CustomerAddress {
   @Column({ name: 'formatted_address', type: 'text', nullable: true })
   formattedAddress?: string | null;
 
+  // Link opcional ao condomínio (FK real, nunca texto livre). Quando presente,
+  // este endereço representa uma unidade dentro do condomínio (bloco/apto).
+  @Column({ name: 'condominium_id', type: 'uuid', nullable: true })
+  condominiumId?: string | null;
+
+  @Column({ name: 'condominium_block', type: 'text', nullable: true })
+  condominiumBlock?: string | null;
+
+  @Column({ name: 'condominium_unit', type: 'text', nullable: true })
+  condominiumUnit?: string | null;
+
   @Column({ name: 'is_default', type: 'boolean', default: false })
   isDefault!: boolean;
 

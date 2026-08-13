@@ -1493,6 +1493,28 @@ export function MarketplacePage() {
     hubDebugEnabled,
   });
 
+  const myCondominium = useMemo(() => {
+    const condoId = preferredDiscoveryAddress?.condominiumId || null;
+    if (!condoId) return null;
+    return Array.isArray(condominiums) ? condominiums.find((c: any) => String(c?.id || '') === String(condoId)) || null : null;
+  }, [preferredDiscoveryAddress?.condominiumId, condominiums]);
+
+  const [myCondoStoreIds, setMyCondoStoreIds] = useState<string[]>([]);
+  useEffect(() => {
+    const slug = myCondominium?.slug;
+    if (!slug) { setMyCondoStoreIds([]); return; }
+    let active = true;
+    condominiumService
+      .listPermanentStores(String(slug))
+      .then((payload: any) => {
+        if (!active) return;
+        const ids = Array.isArray(payload?.storeIds) ? payload.storeIds.map((id: any) => String(id)) : [];
+        setMyCondoStoreIds(ids);
+      })
+      .catch(() => { if (active) setMyCondoStoreIds([]); });
+    return () => { active = false; };
+  }, [myCondominium?.slug]);
+
   const filteredStores = useMemo(() => {
     return scopedEnrichedStores
       .filter((store) => {
@@ -1503,6 +1525,7 @@ export function MarketplacePage() {
         if (!isCondominiumScope && quickFilter === 'nearby' && (resolvedDistance == null || resolvedDistance > 2.5)) return false;
         if (quickFilter === 'open_now' && !store.isOpen) return false;
         if (quickFilter === 'favorites' && !favoriteStoreSlugs.includes(store.slug)) return false;
+        if (quickFilter === 'my_condo' && !myCondoStoreIds.includes(String(store.id))) return false;
         return true;
       })
       .sort((a, b) => {
@@ -1520,7 +1543,7 @@ export function MarketplacePage() {
         if (favoritesDelta !== 0) return favoritesDelta;
         return b.rating - a.rating;
       });
-  }, [scopedEnrichedStores, debouncedQuery, segmentFilter, quickFilter, favoriteStoreSlugs, distanceByStore, isCondominiumScope, selectedCondominiumSlug]);
+  }, [scopedEnrichedStores, debouncedQuery, segmentFilter, quickFilter, favoriteStoreSlugs, distanceByStore, isCondominiumScope, selectedCondominiumSlug, myCondoStoreIds]);
   const isHomeStorePreview =
     debouncedQuery.length < 2 &&
     !selectedCondominium &&
@@ -2370,6 +2393,42 @@ export function MarketplacePage() {
             </section>
             </>
           )}
+
+          {/* Filtro Meu Condomínio — somente clientes logados (comércio permanente diário) */}
+          {isCustomerLogged ? (
+            <section className="px-4">
+              <button
+                type="button"
+                onClick={() => {
+                  if (myCondominium) {
+                    setQuickFilter(quickFilter === 'my_condo' ? 'all' : 'my_condo');
+                  } else {
+                    navigate('/cliente/enderecos?mode=new');
+                  }
+                }}
+                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all active:scale-[0.99] ${
+                  quickFilter === 'my_condo'
+                    ? 'border-[#336886] bg-[#336886] text-white shadow-[0_18px_34px_-26px_rgba(51,104,134,0.66)]'
+                    : 'border-slate-200 bg-white text-slate-700 shadow-sm'
+                }`}
+              >
+                <span className="flex items-center gap-2.5">
+                  <span className="text-lg leading-none">🏢</span>
+                  <span className="flex flex-col">
+                    <span className="text-[11px] font-black uppercase tracking-[0.14em] opacity-70">
+                      {myCondominium ? 'Meu condomínio' : 'Mora em condomínio?'}
+                    </span>
+                    <span className="text-sm font-extrabold leading-tight">
+                      {myCondominium ? myCondominium.name : 'Cadastre e veja quem entrega aqui'}
+                    </span>
+                  </span>
+                </span>
+                <span className={`text-[11px] font-black uppercase tracking-[0.12em] ${quickFilter === 'my_condo' ? 'text-white' : 'text-[#336886]'}`}>
+                  {myCondominium ? (quickFilter === 'my_condo' ? 'Todos' : 'Filtrar') : 'Atualizar'}
+                </span>
+              </button>
+            </section>
+          ) : null}
 
           {/* Seção Categorias Premium Squircle */}
           <section className="order-4 relative" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
