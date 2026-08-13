@@ -213,6 +213,7 @@ export const CartView = ({
   onCalculatePostalQuote,
   onSelectPostalService,
   storeAddress = "",
+  pickupLocationLabel = "",
   storeCoords = null,
   deliveryCoords = null,
   pickupDistanceKm = null,
@@ -1873,7 +1874,12 @@ export const CartView = ({
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Retirada no local</p>
-                  {normalizedStoreAddress ? (
+                  {pickupLocationLabel ? (
+                    <div className="mt-1">
+                      <p className="text-sm font-black leading-tight text-slate-900">Retirada: {pickupLocationLabel}</p>
+                      <p className="mt-0.5 text-xs font-medium leading-relaxed text-slate-500">Local do vendedor no seu condomínio</p>
+                    </div>
+                  ) : normalizedStoreAddress ? (
                     <div className="mt-1">
                       <p className="text-sm font-black leading-tight text-slate-900">{storeAddressLines.primary || normalizedStoreAddress}</p>
                       {storeAddressSubtitle && (
@@ -3135,7 +3141,12 @@ export const CartView = ({
                     </div>
                   )}
                   {customer.type === 'pickup' && (
-                    normalizedStoreAddress ? (
+                    pickupLocationLabel ? (
+                      <div className="mt-1">
+                        <p className="text-sm font-black leading-relaxed text-slate-800">Retirada: {pickupLocationLabel}</p>
+                        <p className="text-xs font-semibold leading-relaxed text-slate-500">Local do vendedor no seu condomínio</p>
+                      </div>
+                    ) : normalizedStoreAddress ? (
                       <div className="mt-1">
                         <p className="text-sm font-black leading-relaxed text-slate-800">{storeAddressLines.primary || normalizedStoreAddress}</p>
                         {storeAddressSubtitle && (

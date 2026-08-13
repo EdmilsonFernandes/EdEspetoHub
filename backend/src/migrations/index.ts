@@ -8,6 +8,7 @@ import userDocuments from './20260626_002_user_documents';
 import whitelabelUsers from './20260626_003_whitelabel_users';
 import whitelabelProfileLinks from './20260626_004_whitelabel_profile_links';
 import customerAddressCondominium from './20260812_001_customer_address_condominium';
+import storeCondominiumPickupLocation from './20260813_001_store_condominium_pickup_location';
 
 export const schemaMigrations = [
   baselineCurrentSchema,
@@ -20,4 +21,5 @@ export const schemaMigrations = [
   whitelabelUsers,
   whitelabelProfileLinks,
   customerAddressCondominium,
+  storeCondominiumPickupLocation,
 ] as const;

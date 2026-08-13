@@ -152,6 +152,7 @@ export function StorePage() {
   });
   const [showCustomerPassword, setShowCustomerPassword] = useState(false);
   const [hubCoverageNotice, setHubCoverageNotice] = useState<{ message: string } | null>(null);
+  const [myCondoPickup, setMyCondoPickup] = useState<{ label: string } | null>(null);
   const [newAddressForm, setNewAddressForm] = useState({
     label: 'Casa',
     recipientName: '',
@@ -186,6 +187,15 @@ export function StorePage() {
       return;
     }
     setHubCoverageNotice({ message: String(warning.message) });
+  }, [location.state]);
+
+  useEffect(() => {
+    const pickup = location.state && (location.state as any).myCondoPickup;
+    if (!pickup?.label) {
+      setMyCondoPickup(null);
+      return;
+    }
+    setMyCondoPickup({ label: String(pickup.label) });
   }, [location.state]);
 
   useLayoutEffect(() => {
@@ -4390,6 +4400,7 @@ export function StorePage() {
             onCalculatePostalQuote={handleCalculatePostalQuote}
             onSelectPostalService={setSelectedPostalServiceCode}
             storeAddress={storeAddress}
+            pickupLocationLabel={myCondoPickup?.label || ''}
             storeCoords={storeCoords}
             deliveryCoords={deliveryCoords}
             pickupDistanceKm={pickupDistanceKm}

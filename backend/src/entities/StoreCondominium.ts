@@ -65,6 +65,14 @@ export class StoreCondominium {
   @Column({ name: 'pickup_instructions', type: 'text', nullable: true })
   pickupInstructions?: string | null;
 
+  /** Bloco/torre do VENDEDOR dentro do condomínio (local de retirada no comércio permanente). */
+  @Column({ name: 'pickup_block', type: 'text', nullable: true })
+  pickupBlock?: string | null;
+
+  /** Apto/unidade do VENDEDOR dentro do condomínio (local de retirada no comércio permanente). */
+  @Column({ name: 'pickup_unit', type: 'text', nullable: true })
+  pickupUnit?: string | null;
+
   @Column({ name: 'allow_pickup_at_stall', type: 'boolean', default: true })
   allowPickupAtStall!: boolean;
 

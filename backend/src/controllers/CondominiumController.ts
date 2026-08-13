@@ -290,6 +290,20 @@ export class CondominiumController {
     }
   }
 
+  static async storeUpdatePickupLocation(req: Request, res: Response) {
+    try {
+      const payload = await condominiumService.storeUpdatePickupLocation(
+        String(req.params.storeId || ''),
+        String(req.params.condominiumId || ''),
+        req.body || {},
+        req.auth?.storeId
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   static async createAccessRequest(req: Request, res: Response) {
     try {
       const payload = await condominiumService.createAccessRequest(req.body || {});

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Buildings, CalendarBlank, CheckCircle, Clock, SignOut, WarningCircle } from '@phosphor-icons/react';
+import { Buildings, CalendarBlank, CheckCircle, Clock, MapPin, SignOut, WarningCircle } from '@phosphor-icons/react';
 import { ConfirmationModal } from '../common/ConfirmationModal';
 import { useToast } from '../../contexts/ToastContext';
 import { condominiumService } from '../../services/condominiumService';
@@ -42,6 +42,8 @@ export function StoreCondominiumPanel({ storeId }: Props) {
   const [loading, setLoading] = useState(false);
   const [savingId, setSavingId] = useState('');
   const [messageById, setMessageById] = useState<Record<string, string>>({});
+  const [pickupDraftByCondominium, setPickupDraftByCondominium] = useState<Record<string, { block: string; unit: string }>>({});
+  const [savingPickupId, setSavingPickupId] = useState('');
   const [error, setError] = useState('');
   const [confirmModal, setConfirmModal] = useState<null | {
     condominiumId: string;
@@ -56,7 +58,14 @@ export function StoreCondominiumPanel({ storeId }: Props) {
     setError('');
     try {
       const payload = await condominiumService.listStoreOptions(storeId);
-      setItems(Array.isArray(payload) ? payload : []);
+      const rows = Array.isArray(payload) ? payload : [];
+      setItems(rows);
+      setPickupDraftByCondominium(
+        Object.fromEntries(rows.map((item: any) => [
+          item?.condominium?.id,
+          { block: String(item?.pickupBlock || ''), unit: String(item?.pickupUnit || '') },
+        ]))
+      );
     } catch (err: any) {
       setError(err?.message || 'Não foi possível carregar condomínios.');
     } finally {
@@ -83,6 +92,25 @@ export function StoreCondominiumPanel({ storeId }: Props) {
       setError(err?.message || 'Não foi possível enviar solicitação.');
     } finally {
       setSavingId('');
+    }
+  };
+
+  const savePickupLocation = async (condominiumId: string) => {
+    if (!storeId) return;
+    setSavingPickupId(condominiumId);
+    setError('');
+    try {
+      const draft = pickupDraftByCondominium[condominiumId] || { block: '', unit: '' };
+      await condominiumService.updatePickupLocation(storeId, condominiumId, {
+        pickupBlock: draft.block,
+        pickupUnit: draft.unit,
+      });
+      await load();
+      showToast('Local de retirada atualizado.', 'success');
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível salvar o local de retirada.');
+    } finally {
+      setSavingPickupId('');
     }
   };
 
@@ -154,7 +182,7 @@ export function StoreCondominiumPanel({ storeId }: Props) {
                   {status === 'approved' ? (
                     <p className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-emerald-700">
                       <CheckCircle size={14} weight="fill" />
-                      Sua loja já pode ser escalada em eventos desse condomínio.
+                      Sua loja aparece para os moradores no filtro "Meu Condomínio" e pode ser escalada nas feiras.
                     </p>
                   ) : status === 'pending' ? (
                     <p className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-amber-700">
@@ -201,6 +229,48 @@ export function StoreCondominiumPanel({ storeId }: Props) {
                   </div>
                 ) : null}
               </div>
+              {status === 'approved' ? (
+                <div className="mt-3 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
+                  <p className="inline-flex items-center gap-1 text-xs font-black text-slate-800">
+                    <MapPin size={14} weight="duotone" className="text-[#336886]" />
+                    Local de retirada no condomínio
+                  </p>
+                  <p className="mt-1 text-[11px] font-semibold leading-relaxed text-slate-500">
+                    Onde o morador retira o pedido no dia a dia (comércio permanente). Deixe vazio se não houver retirada.
+                  </p>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    <input
+                      value={pickupDraftByCondominium[condominium.id]?.block || ''}
+                      onChange={(event) => setPickupDraftByCondominium((prev) => ({
+                        ...prev,
+                        [condominium.id]: { block: event.target.value, unit: prev[condominium.id]?.unit || '' },
+                      }))}
+                      placeholder="Bloco/Torre (ex.: B)"
+                      maxLength={40}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#336886]"
+                    />
+                    <input
+                      value={pickupDraftByCondominium[condominium.id]?.unit || ''}
+                      onChange={(event) => setPickupDraftByCondominium((prev) => ({
+                        ...prev,
+                        [condominium.id]: { block: prev[condominium.id]?.block || '', unit: event.target.value },
+                      }))}
+                      placeholder="Apto/Unidade (ex.: 84)"
+                      maxLength={40}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#336886]"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => savePickupLocation(condominium.id)}
+                    disabled={savingPickupId === condominium.id}
+                    className="mt-2 inline-flex items-center gap-1 rounded-xl bg-[#336886] px-3 py-2 text-xs font-black text-white disabled:opacity-50"
+                  >
+                    <MapPin size={13} weight="fill" />
+                    {savingPickupId === condominium.id ? 'Salvando...' : 'Salvar local de retirada'}
+                  </button>
+                </div>
+              ) : null}
               </div>
             </div>
           );

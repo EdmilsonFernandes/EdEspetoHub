@@ -281,6 +281,7 @@ routes.get('/stores/:storeId/featured-requests/:requestId/payment-audit', requir
 routes.get('/stores/:storeId/condominiums', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.listStoreOptions);
 routes.post('/stores/:storeId/condominium-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.createStoreRequest);
 routes.delete('/stores/:storeId/condominiums/:condominiumId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.removeStoreCondominium);
+routes.patch('/stores/:storeId/condominiums/:condominiumId/pickup-location', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.storeUpdatePickupLocation);
 routes.get('/stores/:storeId/destinations', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), DestinationController.listStoreOptions);
 routes.post('/stores/:storeId/destination-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), DestinationController.createStoreRequest);
 routes.delete('/stores/:storeId/destinations/:placeId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), DestinationController.removeStoreDestination);

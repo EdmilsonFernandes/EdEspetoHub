@@ -415,6 +415,30 @@ export class CondominiumRepository {
     );
   }
 
+  /**
+   * Updates ONLY the vendor's pickup location (block/unit) within a condominium.
+   * Kept separate from updateStoreCondomiumSettings so admin/organizer settings
+   * updates never wipe the vendor location.
+   */
+  async updateStorePickupLocation(
+    condominiumId: string,
+    storeId: string,
+    pickupBlock: string | null,
+    pickupUnit: string | null
+  ) {
+    await AppDataSource.query(
+      `
+        UPDATE store_condominiums
+        SET pickup_block = $3,
+            pickup_unit = $4,
+            updated_at = NOW()
+        WHERE condominium_id = $1
+          AND store_id = $2;
+      `,
+      [condominiumId, storeId, pickupBlock, pickupUnit]
+    );
+  }
+
   async upsertEventStore(
     eventId: string,
     storeId: string,

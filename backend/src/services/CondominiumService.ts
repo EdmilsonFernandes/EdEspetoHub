@@ -683,6 +683,8 @@ export class CondominiumService {
         condominium: this.toPublicCondominium(condominium, summaries.get(condominium.id) || null),
         status: link?.active ? 'approved' : request?.status || 'available',
         request: request ? this.toPublicRequest(request) : null,
+        pickupBlock: link?.pickupBlock || null,
+        pickupUnit: link?.pickupUnit || null,
       };
     });
   }
@@ -727,6 +729,34 @@ export class CondominiumService {
     }
 
     return { ok: true };
+  }
+
+  /**
+   * Lets an APPROVED store set its own pickup location (block/unit) inside a condominium.
+   * Powers permanent commerce: the customer sees where to pick up ("Retirada: Bloco B · Apto 84").
+   */
+  async storeUpdatePickupLocation(storeId: string, condominiumId: string, payload: any, authStoreId?: string) {
+    if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
+    if (!storeId || !condominiumId) throw new AppError('CONDO-006', 400, { message: 'Loja e condominio sao obrigatorios.' });
+
+    const condominium = await this.condominiumRepository.findById(condominiumId);
+    if (!condominium) throw new AppError('CONDO-001', 404, { message: 'Condominio nao encontrado.' });
+
+    const links = await this.condominiumRepository.listStoreLinksByCondominiumId(condominiumId);
+    const link = links.find((item: any) => item.storeId === storeId);
+    if (!link || link.active === false) {
+      throw new AppError('CONDO-010', 404, { message: 'Vinculo da loja com o condominio nao encontrado.' });
+    }
+
+    const normalize = (value: unknown) => {
+      const text = String(value ?? '').trim();
+      return text ? text.slice(0, 40) : null;
+    };
+    const pickupBlock = normalize(payload?.pickupBlock);
+    const pickupUnit = normalize(payload?.pickupUnit);
+
+    await this.condominiumRepository.updateStorePickupLocation(condominiumId, storeId, pickupBlock, pickupUnit);
+    return { ok: true, pickupBlock, pickupUnit };
   }
 
   /**
@@ -930,6 +960,9 @@ export class CondominiumService {
           slug: store.slug,
           open: store.open,
           isOrderingEnabled: store.settings?.isOrderingEnabled !== false,
+          pickupBlock: link?.pickupBlock || null,
+          pickupUnit: link?.pickupUnit || null,
+          pickupInstructions: link?.pickupInstructions || null,
         };
       })
       .filter(Boolean);

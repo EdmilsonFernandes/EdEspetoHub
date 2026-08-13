@@ -254,4 +254,11 @@ export const condominiumService = {
   removeStoreCondominium(storeId: string, condominiumId: string) {
     return apiClient.delete(`/stores/${encodeURIComponent(storeId)}/condominiums/${encodeURIComponent(condominiumId)}`);
   },
+
+  updatePickupLocation(storeId: string, condominiumId: string, payload: { pickupBlock?: string | null; pickupUnit?: string | null }) {
+    return apiClient.patch(
+      `/stores/${encodeURIComponent(storeId)}/condominiums/${encodeURIComponent(condominiumId)}/pickup-location`,
+      payload
+    );
+  },
 };

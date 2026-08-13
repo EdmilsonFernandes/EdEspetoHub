@@ -1500,18 +1500,28 @@ export function MarketplacePage() {
   }, [preferredDiscoveryAddress?.condominiumId, condominiums]);
 
   const [myCondoStoreIds, setMyCondoStoreIds] = useState<string[]>([]);
+  const [myCondoPickupByStoreId, setMyCondoPickupByStoreId] = useState<Record<string, string>>({});
   useEffect(() => {
     const slug = myCondominium?.slug;
-    if (!slug) { setMyCondoStoreIds([]); return; }
+    if (!slug) { setMyCondoStoreIds([]); setMyCondoPickupByStoreId({}); return; }
     let active = true;
     condominiumService
       .listPermanentStores(String(slug))
       .then((payload: any) => {
         if (!active) return;
-        const ids = Array.isArray(payload?.storeIds) ? payload.storeIds.map((id: any) => String(id)) : [];
+        const stores = Array.isArray(payload?.stores) ? payload.stores : [];
+        const ids = Array.isArray(payload?.storeIds) && payload.storeIds.length > 0
+          ? payload.storeIds.map((id: any) => String(id))
+          : stores.map((item: any) => String(item?.id || '')).filter(Boolean);
         setMyCondoStoreIds(ids);
+        const pickupMap: Record<string, string> = {};
+        stores.forEach((item: any) => {
+          const label = [item?.pickupBlock, item?.pickupUnit].filter(Boolean).join(' · ');
+          if (label) pickupMap[String(item?.id || '')] = label;
+        });
+        setMyCondoPickupByStoreId(pickupMap);
       })
-      .catch(() => { if (active) setMyCondoStoreIds([]); });
+      .catch(() => { if (active) { setMyCondoStoreIds([]); setMyCondoPickupByStoreId({}); } });
     return () => { active = false; };
   }, [myCondominium?.slug]);
 
@@ -2569,6 +2579,9 @@ export function MarketplacePage() {
                       !store.supportsPostal &&
                       [ 'outside_radius', 'same_city' ].includes(String(store.geoAvailability || '').toLowerCase()));
                   const navigationDistanceKm = distanceByStore[store.id] ?? store.distanceKm ?? null;
+                  const myCondoPickupLabel = quickFilter === 'my_condo'
+                    ? myCondoPickupByStoreId[String(store.id)] || null
+                    : null;
                   const storeNavigationState = {
                     storefrontMode: 'customer',
                     ...(shouldWarnCoverage
@@ -2581,6 +2594,7 @@ export function MarketplacePage() {
                         }
                       : {}),
                     ...(navigationDistanceKm !== null ? { hubDistanceKm: navigationDistanceKm } : {}),
+                    ...(quickFilter === 'my_condo' && myCondoPickupLabel ? { myCondoPickup: { label: myCondoPickupLabel } } : {}),
                   };
                   const primaryBadge = store.isOpen
                     ? getPrimaryStoreCardBadge(store, { condominiumScope: isCondominiumScope })
@@ -2642,6 +2656,7 @@ export function MarketplacePage() {
                       deliveryFeeLabel={deliveryFeeLabel}
                       resolvedDistanceLabel={resolvedDistanceLabel}
                       ratingLabel={ratingLabel}
+                      myCondoPickupLabel={myCondoPickupLabel}
                       onToggleFavorite={toggleFavoriteStore}
                     />
                   );

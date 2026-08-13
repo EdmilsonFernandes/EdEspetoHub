@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { ComponentType, MouseEvent } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Star, Storefront } from '@phosphor-icons/react';
+import { Heart, MapPin, Star, Storefront } from '@phosphor-icons/react';
 import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
 import { prefetchRouteByPath } from '../../../utils/clientRoutePrefetch';
 import { prefetchStorefrontData } from '../../../utils/storefrontPrefetch';
@@ -62,6 +62,8 @@ type HubStoreCardProps = {
   deliveryFeeLabel: string;
   resolvedDistanceLabel: string;
   ratingLabel: string;
+  /** "Bloco B · Apto 84" do VENDEDOR — exibido no filtro Meu Condomínio (comércio permanente). */
+  myCondoPickupLabel?: string | null;
   onToggleFavorite: (slug: string) => void;
 };
 
@@ -88,6 +90,7 @@ export function HubStoreCard({
   deliveryFeeLabel,
   resolvedDistanceLabel,
   ratingLabel,
+  myCondoPickupLabel,
   onToggleFavorite,
 }: HubStoreCardProps) {
   const toggleFavorite = (event: MouseEvent<HTMLButtonElement>) => {
@@ -294,6 +297,14 @@ export function HubStoreCard({
                 </span>
               );
             })}
+          </div>
+        ) : null}
+        {myCondoPickupLabel ? (
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-1.5 py-1 text-[9.5px] font-black leading-none text-emerald-700 ring-1 ring-emerald-100">
+              <MapPin size={10} weight="fill" />
+              Retirada: {myCondoPickupLabel}
+            </span>
           </div>
         ) : null}
         {!store.isOpen || isUnavailableForRegion ? (

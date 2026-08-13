@@ -144,6 +144,7 @@ export function createProxyRoutes(): Router {
     r.get('/stores/:storeId/condominiums', authRequired, forward);
     r.post('/stores/:storeId/condominium-requests', authRequired, forward);
     r.delete('/stores/:storeId/condominiums/:condominiumId', authRequired, forward);
+    r.patch('/stores/:storeId/condominiums/:condominiumId/pickup-location', authRequired, forward);
     r.get('/stores/:storeId/destinations', authRequired, forward);
     r.post('/stores/:storeId/destination-requests', authRequired, forward);
     r.delete('/stores/:storeId/destinations/:placeId', authRequired, forward);

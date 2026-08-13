@@ -824,6 +824,8 @@ CREATE TABLE IF NOT EXISTS store_condominiums (
   active BOOLEAN NOT NULL DEFAULT TRUE,
   schedule JSONB DEFAULT '[]'::jsonb,
   pickup_instructions TEXT,
+  pickup_block TEXT,
+  pickup_unit TEXT,
   allow_pickup_at_stall BOOLEAN NOT NULL DEFAULT TRUE,
   allow_apartment_delivery BOOLEAN NOT NULL DEFAULT FALSE,
   apartment_delivery_fee NUMERIC(10,2),

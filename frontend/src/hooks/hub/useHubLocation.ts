@@ -140,6 +140,7 @@ export function useHubLocation({ customerToken, customerEmail, hubDebug }: UseHu
           addressLine: normalized.addressLine,
           lat: normalized.lat,
           lng: normalized.lng,
+          condominiumId: normalized.condominiumId || null,
         };
 
         setPreferredDiscoveryAddress(nextAddress);
