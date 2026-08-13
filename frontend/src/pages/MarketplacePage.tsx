@@ -1501,6 +1501,10 @@ export function MarketplacePage() {
 
   const [myCondoStoreIds, setMyCondoStoreIds] = useState<string[]>([]);
   const [myCondoPickupByStoreId, setMyCondoPickupByStoreId] = useState<Record<string, string>>({});
+  // Quem não mora em condomínio pode dispensar o aviso (senão fica eternamente no hub).
+  const [myCondoBannerDismissed, setMyCondoBannerDismissed] = useState(() => {
+    try { return localStorage.getItem('jnc:my-condo-banner-dismissed') === '1'; } catch { return false; }
+  });
   useEffect(() => {
     const slug = myCondominium?.slug;
     if (!slug) { setMyCondoStoreIds([]); setMyCondoPickupByStoreId({}); return; }
@@ -2405,8 +2409,9 @@ export function MarketplacePage() {
           )}
 
           {/* Filtro Meu Condomínio — somente clientes logados (comércio permanente diário) */}
-          {isCustomerLogged ? (
+          {isCustomerLogged && (myCondominium || !myCondoBannerDismissed) ? (
             <section className="px-4">
+              <div className="flex items-stretch gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -2416,7 +2421,7 @@ export function MarketplacePage() {
                     navigate('/cliente/enderecos?mode=new');
                   }
                 }}
-                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all active:scale-[0.99] ${
+                className={`flex flex-1 items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all active:scale-[0.99] ${
                   quickFilter === 'my_condo'
                     ? 'border-[#336886] bg-[#336886] text-white shadow-[0_18px_34px_-26px_rgba(51,104,134,0.66)]'
                     : 'border-slate-200 bg-white text-slate-700 shadow-sm'
@@ -2437,6 +2442,21 @@ export function MarketplacePage() {
                   {myCondominium ? (quickFilter === 'my_condo' ? 'Todos' : 'Filtrar') : 'Atualizar'}
                 </span>
               </button>
+              {!myCondominium ? (
+                <button
+                  type="button"
+                  aria-label="Dispensar aviso de condomínio"
+                  title="Não mostrar mais"
+                  onClick={() => {
+                    setMyCondoBannerDismissed(true);
+                    try { localStorage.setItem('jnc:my-condo-banner-dismissed', '1'); } catch { /* noop */ }
+                  }}
+                  className="flex w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400 shadow-sm transition-colors hover:text-slate-600 active:scale-95"
+                >
+                  <X size={16} weight="bold" />
+                </button>
+              ) : null}
+              </div>
             </section>
           ) : null}
 
