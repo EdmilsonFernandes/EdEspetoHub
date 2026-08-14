@@ -108,6 +108,17 @@ Quando a tarefa envolver tela, layout, app, mobile, web, desktop, painel admin, 
 - `.claude/skills/cybersecurity-reviewer.md`
 - `.claude/skills/conversion-copywriter.md`
 
+## Skill pack UX/Front-end (Claude_SKILLS)
+
+Instaladas em `.claude/skills/` (formato pasta `SKILL.md`, invocáveis via Skill tool; locais — não versionadas, igual graphify). Origem: repositório aprovado Claude_SKILLS (FITec), **sem** o plugin fitec-sdd. Invocar pelo nome quando o pedido casar:
+
+- **Design/taste geral**: `impeccable` (design/redesign/crítica/polish de UI — a mais abrangente), `design-taste-frontend` (anti-slop p/ landing/redesign), `redesign-existing-projects` (upgrade de projeto existente sem quebrar), `high-end-visual-design`, `gpt-taste`, `stitch-design-taste`.
+- **Estilos específicos**: `apple-design` (gestos/springs/materials), `minimalist-ui`, `industrial-brutalist-ui`.
+- **Animação/motion** (linha Emil Kowalski): `animate` (construir), `review-animations` (criticar diff), `improve-animations` (audit de codebase), `find-animation-opportunities`, `animation-vocabulary` (nomear efeito), `emil-design-eng`.
+- **Imagem → código**: `image-to-code`, `imagegen-frontend-web`, `imagegen-frontend-mobile`, `prototype`, `brandkit` (geração de imagens de referência).
+- **Ferramentas**: `pick-ui-library` (escolher lib de UI), `ask-sonner` (toasts React), `full-output-enforcement`.
+- `design-taste-frontend-v1` = legado (retrocompat), ignorar.
+
 ## Ordem recomendada para tarefas de tela
 
 1. Graphify para mapear componentes, rotas, estilos, services e dependências.
