@@ -119,6 +119,22 @@ Instaladas em `.claude/skills/` (formato pasta `SKILL.md`, invocáveis via Skill
 - **Ferramentas**: `pick-ui-library` (escolher lib de UI), `ask-sonner` (toasts React), `full-output-enforcement`.
 - `design-taste-frontend-v1` = legado (retrocompat), ignorar.
 
+## Processo SDD — janocaminho-sdd
+
+Desenvolvimento Spec-Driven adaptado à realidade do projeto (sem Jira/PMO — regras em
+`.ai/sdd/referencia-janocaminho.md`). Usar quando uma feature merecer spec → design → tarefas
+→ implementação → verificação antes do código (mudança grande, arriscada, ou quando pedido):
+
+- `sdd-constitution` (Fase 0 — análise do projeto + `constitution.md`)
+- `sdd-specify` (G1 — `specs/<feature>/requirements.md` em EARS)
+- `sdd-plan` (G2 — `design.md` + `test_plan.md`, migrations/contratos/rollback)
+- `sdd-tasks` (G3 — `tasks.md` com `Tn` rastreáveis)
+- `sdd-implement` (G4 — uma tarefa por vez, validação verde, commit `— REQ-n, Tn`)
+- `sdd-verify` (G5 — matriz REQ→evidência + `rastreabilidade.md`)
+- `sdd-security-req` (transversal — 5 campos; biometria facial = dado sensível LGPD)
+
+A IA propõe; o Edmilson aprova gates e aceite. Deploy é sempre do Edmilson.
+
 ## Ordem recomendada para tarefas de tela
 
 1. Graphify para mapear componentes, rotas, estilos, services e dependências.
