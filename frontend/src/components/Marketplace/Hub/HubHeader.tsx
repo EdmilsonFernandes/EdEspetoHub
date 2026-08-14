@@ -128,7 +128,7 @@ export const HubHeader = memo(function HubHeader({
                       alt="Já no Caminho"
                       className="h-4 w-4 shrink-0 rounded-[0.4rem] object-cover shadow-[0_2px_6px_-2px_rgba(21,58,76,0.3)]"
                     />
-                    <p className="truncate text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/70 min-[390px]:text-[11px] min-[390px]:tracking-[0.2em]">
+                    <p className="truncate text-2xs font-black uppercase tracking-[0.16em] text-[#336886]/70 min-[390px]:text-[11px] min-[390px]:tracking-[0.2em]">
                       {hubHeaderEyebrow}
                     </p>
                   </div>
@@ -162,7 +162,7 @@ export const HubHeader = memo(function HubHeader({
               >
                 <BellRinging size={18} weight={hubNotificationCount > 0 ? 'fill' : 'duotone'} />
                 {hubNotificationCount > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[9px] font-black leading-none text-white ring-2 ring-white shadow-[0_8px_18px_-10px_rgba(225,29,72,0.9)]">
+                  <span className="absolute -right-0.5 -top-0.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-2xs font-black leading-none text-white ring-2 ring-white shadow-[0_8px_18px_-10px_rgba(225,29,72,0.9)]">
                     {hubNotificationCount > 9 ? '9+' : hubNotificationCount}
                   </span>
                 ) : null}
@@ -395,7 +395,7 @@ export const HubHeader = memo(function HubHeader({
               >
                 <BellRinging size={15} weight={hubNotificationCount > 0 ? 'fill' : 'bold'} />
                 {hubNotificationCount > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-rose-600 text-[8px] font-black text-white ring-1.5 ring-white">
+                  <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-rose-600 text-2xs font-black text-white ring-1.5 ring-white">
                     {hubNotificationCount > 9 ? '9+' : hubNotificationCount}
                   </span>
                 ) : null}

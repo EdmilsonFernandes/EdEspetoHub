@@ -803,7 +803,7 @@ function OrderCard({
           <div className="flex min-w-0 items-center gap-2">
             <h3 className="truncate text-[15px] font-bold text-slate-900">{storeName}</h3>
             {storeRatingMeta ? (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10.5px] font-bold text-amber-700" title={storeRatingMeta.totalLabel}>
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-1.5 py-0.5 text-2xs font-bold text-amber-700" title={storeRatingMeta.totalLabel}>
                 <Star size={10} weight="fill" />
                 {storeRatingMeta.label}
               </span>
@@ -831,7 +831,7 @@ function OrderCard({
             </span>
           </div>
           {reservationSummary ? (
-            <p className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-full bg-[#336886]/8 px-2 py-0.5 text-[10px] font-bold tracking-tight text-[#153A4C]">
+            <p className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-full bg-[#336886]/8 px-2 py-0.5 text-2xs font-bold tracking-tight text-[#153A4C]">
               <CalendarBlank size={11} weight="duotone" className="shrink-0 text-[#336886]" />
               <span className="truncate">
                 {reservationSummary.whenLabel
@@ -842,12 +842,12 @@ function OrderCard({
             </p>
           ) : null}
           {condominiumOrder?.condominiumName ? (
-            <p className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-emerald-700">
+            <p className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2 py-0.5 text-2xs font-bold uppercase tracking-[0.12em] text-emerald-700">
               <span className="truncate">{condominiumLabel} • {condominiumOrder.condominiumName}</span>
             </p>
           ) : null}
           {String((order as any)?.condominiumPickupLocation || '') && String(order?.type || '').toLowerCase() === 'pickup' ? (
-            <p className="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9.5px] font-bold text-emerald-700">
+            <p className="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-2xs font-bold text-emerald-700">
               <MapPin size={10} weight="fill" className="shrink-0" />
               <span className="truncate">Retirada: {(order as any).condominiumPickupLocation}</span>
             </p>
@@ -943,19 +943,19 @@ function OrderCard({
           {isCancelled && (!cancellationReason || hasRefundInfo) && (
             <div className="px-3 pb-3 flex flex-wrap items-center gap-2">
               {!cancellationReason ? (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">Cancelado</span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-0.5 text-2xs font-semibold text-slate-500">Cancelado</span>
               ) : null}
               {order.refundStatus === "REFUNDED" && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">✓ Reembolsado{order.refundAmount ? ` ${formatCurrency(order.refundAmount)}` : ""}</span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-0.5 text-2xs font-bold text-emerald-700">✓ Reembolsado{order.refundAmount ? ` ${formatCurrency(order.refundAmount)}` : ""}</span>
               )}
               {order.refundStatus === "PARTIALLY_REFUNDED" && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">✓ Parcial{order.refundAmount ? ` ${formatCurrency(order.refundAmount)}` : ""}</span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-0.5 text-2xs font-bold text-amber-700">✓ Parcial{order.refundAmount ? ` ${formatCurrency(order.refundAmount)}` : ""}</span>
               )}
               {order.refundStatus === "DENIED" && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600">Não aprovado</span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-2 py-0.5 text-2xs font-bold text-rose-600">Não aprovado</span>
               )}
               {["pix","credito","debito","credit_card","debit_card"].includes(String(order.paymentMethod || order.payment || "").toLowerCase()) && String(order.paymentStatus || "").toUpperCase() === "PAID" && !order.refundStatus && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-600">Reembolso em análise</span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-sky-50 px-2 py-0.5 text-2xs font-semibold text-sky-600">Reembolso em análise</span>
               )}
             </div>
           )}
@@ -965,7 +965,7 @@ function OrderCard({
                 {details.delivery.motoboy.profileImageUrl ? (
                   <Image src={resolveAssetUrl(details.delivery.motoboy.profileImageUrl)} alt={details.delivery.motoboy.name} className="h-full w-full object-cover" />
                 ) : (
-                  <div className="grid h-full w-full place-items-center bg-slate-200 text-[10px] font-bold text-slate-600">
+                  <div className="grid h-full w-full place-items-center bg-slate-200 text-2xs font-bold text-slate-600">
                     {String(details.delivery.motoboy.name)[0]?.toUpperCase()}
                   </div>
                 )}
@@ -1169,7 +1169,7 @@ function OrderHelpScreen({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="truncate text-lg font-black text-stone-950">{storeName}</p>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[#cfe0ea] bg-white/92 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-[0_12px_22px_-20px_rgba(51,104,134,0.2)]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#cfe0ea] bg-white/92 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.16em] text-[#336886] shadow-[0_12px_22px_-20px_rgba(51,104,134,0.2)]">
                     {statusMeta.icon}
                     {statusMeta.label}
                   </span>
@@ -1180,17 +1180,17 @@ function OrderHelpScreen({
 
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
               <div className="rounded-[1.15rem] border border-[#cfe0ea] bg-white/92 px-4 py-3 shadow-[0_16px_30px_-24px_rgba(51,104,134,0.16)]">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Resumo</p>
+                <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#336886]">Resumo</p>
                 <p className="mt-1 text-sm font-black text-stone-900">{totalLabel}</p>
                 <p className="mt-1 text-base font-black text-[#153A4C]">{formatCurrency(order?.total || 0)}</p>
               </div>
               <div className="rounded-[1.15rem] border border-stone-200/80 bg-white/88 px-4 py-3 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.12)]">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-500">Atendimento</p>
+                <p className="text-2xs font-black uppercase tracking-[0.18em] text-stone-500">Atendimento</p>
                 <p className="mt-1 text-sm font-black text-stone-900">{attendanceLabel}</p>
                 <p className="mt-1 text-xs font-medium text-stone-500">{attendanceDetail}</p>
               </div>
               <div className="rounded-[1.15rem] border border-stone-200/80 bg-white/88 px-4 py-3 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.12)]">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-500">Canal</p>
+                <p className="text-2xs font-black uppercase tracking-[0.18em] text-stone-500">Canal</p>
                 <p className="mt-1 text-sm font-black text-stone-900">Loja responsável</p>
                 <p className="mt-1 text-xs font-medium text-stone-500">Contato direto pelo pedido</p>
               </div>
@@ -1768,11 +1768,11 @@ export function ClientOrders() {
                   )}
                 </button>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Último pedido</p>
+                  <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#336886]">Último pedido</p>
                   <h2 className="mt-0.5 truncate text-[15px] font-black text-slate-950">{lastOrderStoreName}</h2>
                   <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-500">
                     {lastOrderStatusMeta ? (
-                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold ${
+                      <span className={`inline-flex items-center gap-1 text-2xs font-bold ${
                         lastOrderIsActive ? 'text-emerald-600' : lastOrderIsCancelled ? 'text-rose-500' : 'text-slate-500'
                       }`}>
                         {lastOrderIsActive ? <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> : lastOrderStatusMeta.icon}
@@ -1833,7 +1833,7 @@ export function ClientOrders() {
                         </span>
                       )}
                       {store.count > 1 ? (
-                        <span className="absolute right-1 top-1 rounded-full bg-white/92 px-1.5 py-0.5 text-[8.5px] font-bold leading-none text-[#153A4C] shadow-sm">
+                        <span className="absolute right-1 top-1 rounded-full bg-white/92 px-1.5 py-0.5 text-2xs font-bold leading-none text-[#153A4C] shadow-sm">
                           {store.count}x
                         </span>
                       ) : null}
@@ -1851,7 +1851,7 @@ export function ClientOrders() {
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Pedidos</p>
                 <p className="text-xs font-semibold text-slate-500">Filtre sem perder o histórico.</p>
               </div>
-              <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-[#336886] shadow-sm">
+              <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-2xs font-bold text-[#336886] shadow-sm">
                 {filteredOrders.length}
               </span>
             </div>
@@ -1878,7 +1878,7 @@ export function ClientOrders() {
                       {filter.icon}
                     </span>
                     <span>{filter.shortLabel}</span>
-                    <span className={`inline-flex min-w-[1.45rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
+                    <span className={`inline-flex min-w-[1.45rem] items-center justify-center rounded-full px-1.5 py-0.5 text-2xs font-bold leading-none tabular-nums ${
                         isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                       }`}>
                       {filter.count}

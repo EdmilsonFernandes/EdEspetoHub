@@ -27,7 +27,10 @@ export function ClientBottomNav({
   onOpenProfile,
   className = '',
   zIndexClassName = 'z-[100]',
-  hideOnNative = true,
+  // Nav visível também no app nativo (APK): o hub (MarketplacePage) já exibe bottom nav
+  // custom no nativo — esconder aqui criava navegação inconsistente no app (tab bar sumia
+  // ao sair da home). Páginas posicionam conteúdo via --jnk-client-bottom-nav-height/padding fixo.
+  hideOnNative = false,
 }: ClientBottomNavProps) {
   const navigate = useNavigate();
   const navRef = useRef<HTMLElement | null>(null);

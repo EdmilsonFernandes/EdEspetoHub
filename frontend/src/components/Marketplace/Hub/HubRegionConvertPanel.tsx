@@ -112,7 +112,7 @@ export const HubRegionConvertPanel = memo(function HubRegionConvertPanel({
           <RocketLaunch size={17} weight="fill" />
         </span>
         <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/75">
+          <p className="text-2xs font-black uppercase tracking-[0.18em] text-white/75">
             Sem lojas em {region}?
           </p>
           <p className="truncate text-sm font-black leading-tight">Sua região tá no radar do Jano 🚀</p>

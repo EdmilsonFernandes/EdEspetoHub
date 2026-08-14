@@ -9,6 +9,8 @@
   --color-brand-navy: #153a4c;
   --color-brand-green: #5fd35a;
   --color-rating: #f5a623;
+  /* Type scale — piso tipográfico da jornada cliente (badges/micro-labels ≥ 10px) */
+  --text-2xs: 0.625rem;
 }
 
 :root {
@@ -550,6 +552,14 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .client-marquee-track {
+    animation: none;
+  }
+}
+
+/* Loops infinitos utilitários (Tailwind) também respeitam reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .animate-ping {
     animation: none;
   }
 }

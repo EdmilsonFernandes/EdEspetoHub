@@ -51,7 +51,7 @@ export const HubFavoriteStores = memo(function HubFavoriteStores({
         <button
           type="button"
           onClick={onShowAll}
-          className="jnc-hub-touch jnc-hub-pill inline-flex items-center justify-center rounded-full px-3 py-2 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886]"
+          className="jnc-hub-touch jnc-hub-pill inline-flex items-center justify-center rounded-full px-3 py-2 text-2xs font-black uppercase tracking-[0.14em] text-[#336886]"
         >
           Ver todas
         </button>

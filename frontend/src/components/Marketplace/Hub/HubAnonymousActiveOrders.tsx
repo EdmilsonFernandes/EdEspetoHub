@@ -57,14 +57,14 @@ export function HubAnonymousActiveOrders({
                   onTouchStart={() => onPrimeOrder(order.id, order.accessToken)}
                   className="jnc-hub-touch min-w-[180px] rounded-[1.4rem] border border-white/70 bg-white/95 px-3.5 py-3 text-left shadow-[0_16px_34px_-28px_rgba(245,158,11,0.28)]"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+                  <p className="text-2xs font-black uppercase tracking-[0.16em] text-slate-400">
                     Pedido salvo
                   </p>
                   <div className="mt-1 flex items-center justify-between gap-3">
                     <p className="text-sm font-black text-slate-900">
                       #{String(order.id).slice(-6).toUpperCase()}
                     </p>
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700 ring-1 ring-emerald-200">
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.14em] text-emerald-700 ring-1 ring-emerald-200">
                       Em andamento
                     </span>
                   </div>
@@ -84,7 +84,7 @@ export function HubAnonymousActiveOrders({
               Acompanhar agora
               <CaretRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
             </button>
-            <p className="text-[10px] font-bold italic text-emerald-600/70">
+            <p className="text-2xs font-bold italic text-emerald-600/70">
               Disponível por 3 horas neste navegador
             </p>
           </div>

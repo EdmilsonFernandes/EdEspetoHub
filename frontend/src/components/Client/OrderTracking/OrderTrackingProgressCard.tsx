@@ -51,7 +51,7 @@ export function OrderTrackingProgressCard({
               {isTerminal || isCancelled ? <CheckCircle size={17} weight="fill" /> : <Clock size={16} weight="bold" />}
             </span>
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+              <p className="text-2xs font-black uppercase tracking-[0.16em] text-slate-400">
                 {isTerminal || isCancelled ? 'Situação final' : 'Agora'}
               </p>
               <p className={`mt-0.5 text-sm font-black ${isCancelled ? 'text-rose-600' : 'text-slate-950'}`}>
@@ -69,7 +69,7 @@ export function OrderTrackingProgressCard({
                 <span className="h-2 w-2 rounded-full bg-[#336886]" />
               </span>
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Próximo passo</p>
+                <p className="text-2xs font-black uppercase tracking-[0.16em] text-slate-400">Próximo passo</p>
                 <p className="mt-0.5 text-sm font-black text-slate-800">{nextStep.label}</p>
                 <p className="mt-1 text-[11px] font-semibold text-slate-500">Você será avisado quando mudar.</p>
               </div>
@@ -89,7 +89,7 @@ export function OrderTrackingProgressCard({
           <span className="block text-xs font-black text-[#153A4C]">
             {expanded ? 'Ocultar andamento' : 'Ver andamento completo'}
           </span>
-          <span className="mt-0.5 block text-[10px] font-semibold text-slate-500">
+          <span className="mt-0.5 block text-2xs font-semibold text-slate-500">
             {steps.length} etapas com horários do pedido
           </span>
         </span>
@@ -150,7 +150,7 @@ export function OrderTrackingProgressCard({
                         {isCompleted ? (
                           <CheckCircle size={13} weight="fill" />
                         ) : (
-                          <span className="text-[8px] font-black">{stepIndex + 1}</span>
+                          <span className="text-2xs font-black">{stepIndex + 1}</span>
                         )}
                       </span>
                     </span>
@@ -172,7 +172,7 @@ export function OrderTrackingProgressCard({
                         {step.label}
                       </span>
                       {(isCompleted || isCurrent) && step.timestampLabel ? (
-                        <p className="mt-1 flex w-fit items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+                        <p className="mt-1 flex w-fit items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-2xs font-semibold text-slate-500">
                           <Clock size={9} weight="bold" />
                           {step.timestampLabel}
                         </p>

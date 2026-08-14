@@ -144,7 +144,7 @@ export function HubStoreCard({
             <div className={`absolute inset-0 ${store.isOpen ? 'bg-gradient-to-t from-black/38 via-black/5 to-transparent' : 'bg-gradient-to-t from-black/20 via-transparent to-transparent'}`} />
             <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             <span
-              className={`jnc-hub-glass-badge absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.1em] ${
+              className={`jnc-hub-glass-badge absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-black uppercase tracking-[0.1em] ${
                 isCondominiumEventLive ? 'bg-white/92 text-emerald-700' : 'bg-white/92 text-[#336886]'
               }`}
             >
@@ -154,12 +154,12 @@ export function HubStoreCard({
             <button
               type="button"
               onClick={toggleFavorite}
-              className={`jnc-hub-touch absolute right-1.5 top-1.5 inline-flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.8] ${
+              className={`jnc-hub-touch absolute right-1.5 top-1.5 inline-flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5FD35A] ${
                 isFavorite
                   ? 'scale-[1.06] bg-rose-500 text-white shadow-[0_4px_18px_-4px_rgba(244,63,94,0.72)]'
                   : 'border border-white/20 bg-black/28 text-white backdrop-blur-md hover:scale-[1.1] hover:bg-black/42'
               }`}
-              aria-label={`Favoritar ${store.name}`}
+              aria-label={isFavorite ? `Desfavoritar ${store.name}` : `Favoritar ${store.name}`}
             >
               <Heart size={15} weight={isFavorite ? 'fill' : 'regular'} className={isFavorite ? 'animate-pop' : 'transition-transform duration-200 hover:scale-110'} />
             </button>
@@ -181,7 +181,7 @@ export function HubStoreCard({
               {store.name}
             </h3>
           </div>
-          <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] font-bold text-slate-500">
+          <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-2xs font-bold text-slate-500">
             {store.rating > 0 ? (
               <span className="inline-flex items-center gap-1">
                 <Star size={10} weight="fill" className="text-amber-400" />
@@ -192,21 +192,21 @@ export function HubStoreCard({
             <span>{store.etaMin}-{store.etaMax} min</span>
           </div>
           {!isCondominiumEventLive ? (
-            <p className="mt-2 line-clamp-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#336886]">
+            <p className="mt-2 line-clamp-1 text-2xs font-black uppercase tracking-[0.08em] text-[#336886]">
               {hasUpcomingCondominiumEvent ? condominiumEventTimeLabel || 'Próxima feira' : 'Agenda em confirmação'}
             </p>
           ) : !store.isOpen ? (
-            <p className="mt-2 line-clamp-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">
+            <p className="mt-2 line-clamp-1 text-2xs font-black uppercase tracking-[0.08em] text-slate-400">
               {store.nextOpeningLabel || 'Sem horário cadastrado'}
             </p>
           ) : (
             <div className="mt-2 flex flex-wrap gap-1">
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-emerald-700">
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.1em] text-emerald-700">
                 <Storefront size={10} weight="fill" />
                 Retirada
               </span>
               {store.supportsDelivery && store.freeShipping ? (
-                <span className="inline-flex rounded-full bg-sky-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-[#336886]">
+                <span className="inline-flex rounded-full bg-sky-50 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.1em] text-[#336886]">
                   Grátis
                 </span>
               ) : null}
@@ -260,7 +260,7 @@ export function HubStoreCard({
             {store.name}
           </h3>
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10.5px] font-semibold leading-4 text-slate-500 tabular-nums min-[390px]:text-[11px]">
+        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-2xs font-semibold leading-4 text-slate-500 tabular-nums min-[390px]:text-[11px]">
           {store.rating > 0 ? (
             <span className="inline-flex items-center gap-1">
               <Star size={11} weight="fill" className="text-amber-400" />
@@ -290,7 +290,7 @@ export function HubStoreCard({
               return (
                 <span
                   key={`${store.id}-${badge.key}`}
-                  className={`inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[9.5px] font-black leading-none ring-1 ${getCompactBadgeClass(badge.key)} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
+                  className={`inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-2xs font-black leading-none ring-1 ${getCompactBadgeClass(badge.key)} ${badge.key === 'open_now' ? 'animate-pulse' : ''}`}
                 >
                   {Icon ? <Icon size={9} weight="duotone" /> : null}
                   {badge.label}
@@ -301,14 +301,14 @@ export function HubStoreCard({
         ) : null}
         {myCondoPickupLabel ? (
           <div className="mt-1.5 flex flex-wrap gap-1">
-            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-1.5 py-1 text-[9.5px] font-black leading-none text-emerald-700 ring-1 ring-emerald-100">
+            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-1.5 py-1 text-2xs font-black leading-none text-emerald-700 ring-1 ring-emerald-100">
               <MapPin size={10} weight="fill" />
               Retirada: {myCondoPickupLabel}
             </span>
           </div>
         ) : null}
         {!store.isOpen || isUnavailableForRegion ? (
-          <p className="mt-2 text-[10.5px] font-bold text-slate-400">
+          <p className="mt-2 text-2xs font-bold text-slate-400">
             {isUnavailableForRegion ? store.deliveryStatusLabel || 'Entrega fora da área' : store.nextOpeningLabel || 'Sem horário cadastrado'}
           </p>
         ) : null}
@@ -322,7 +322,7 @@ export function HubStoreCard({
             ? 'bg-rose-50 text-rose-500 shadow-[0_10px_24px_-18px_rgba(244,63,94,0.58)] ring-1 ring-rose-100'
             : 'bg-transparent text-slate-400 hover:bg-white/80 hover:text-rose-400 hover:shadow-[0_10px_22px_-20px_rgba(15,23,42,0.28)]'
         }`}
-        aria-label={`Favoritar ${store.name}`}
+        aria-label={isFavorite ? `Desfavoritar ${store.name}` : `Favoritar ${store.name}`}
       >
         <Heart size={17} weight={isFavorite ? 'fill' : 'regular'} className={isFavorite ? 'animate-pop' : 'transition-transform duration-200 hover:scale-110'} />
       </button>

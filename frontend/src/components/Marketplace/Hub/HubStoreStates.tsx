@@ -37,7 +37,7 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
               <Sparkle size={18} weight="duotone" />
             </span>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Exploração ampliada</p>
+              <p className="text-2xs font-black uppercase tracking-[0.16em] text-[#336886]">Exploração ampliada</p>
               <p className="mt-1 text-sm font-bold text-slate-900">Você está vendo uma vitrine ampliada do app.</p>
               <p className="mt-1 text-xs font-medium text-slate-500">
                 Isso ajuda a explorar mais lojas sem depender do contexto local da home.
@@ -47,7 +47,7 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
           <button
             type="button"
             onClick={onRestoreRegionalView}
-            className="jnc-hub-touch jnc-hub-pill shrink-0 rounded-[1rem] px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600"
+            className="jnc-hub-touch jnc-hub-pill shrink-0 rounded-[1rem] px-3 py-2 text-2xs font-black uppercase tracking-[0.14em] text-slate-600"
           >
             Voltar
           </button>
@@ -72,7 +72,7 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
             <MapPinLine size={18} weight="duotone" />
           </span>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-sky-700">Mais próximas</p>
+            <p className="text-2xs font-black uppercase tracking-[0.16em] text-sky-700">Mais próximas</p>
             <p className="mt-1 text-sm font-bold text-slate-900">Não encontramos cobertura direta agora.</p>
             <p className="mt-1 text-xs font-medium text-slate-500">
               Estas são as lojas mais próximas da sua localização.
@@ -175,7 +175,7 @@ export const HubStoreEmptyState = memo(function HubStoreEmptyState({
                 <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-7 w-7 rounded-full object-contain" />
               </span>
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Sua região no radar</p>
+                <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#336886]">Sua região no radar</p>
                 <h3 className="mt-0.5 text-base font-black leading-tight text-slate-950 sm:text-lg">
                   O Já no Caminho tá chegando em {displayLocationLabel || 'sua região'}
                 </h3>

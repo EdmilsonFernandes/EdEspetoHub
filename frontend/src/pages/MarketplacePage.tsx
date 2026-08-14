@@ -1988,7 +1988,7 @@ export function MarketplacePage() {
       <div className="fixed left-[25%] top-[3%] h-[16%] w-[32%] bg-white/12 blur-[100px] pointer-events-none -z-10" />
 
       <div
-        className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
+        className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-2xs font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
           pullDistance > 0 || isRefreshing ? 'opacity-100' : 'opacity-0'
         }`}
         style={{ top: `${Math.max(8, 8 + pullDistance * 0.35)}px` }}
@@ -2119,7 +2119,7 @@ export function MarketplacePage() {
             <section className="order-8 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
+                  <p className="inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.22em] text-[#336886]">
                     <Mountains size={12} weight="duotone" />
                     Guia da região
                   </p>
@@ -2132,7 +2132,7 @@ export function MarketplacePage() {
                 </div>
                 <Link
                   to={destinationListHref}
-                  className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]"
+                  className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-2xs font-black uppercase tracking-[0.14em] text-[#336886]"
                 >
                   Ver mais
                   <CaretRight size={10} weight="bold" />
@@ -2173,7 +2173,7 @@ export function MarketplacePage() {
                       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04)_0%,rgba(15,23,42,0)_34%,rgba(15,23,42,0.30)_66%,rgba(15,23,42,0.78)_100%)]" />
                       {/* Glass shimmer on hover */}
                       <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent z-[1]" />
-                      <div className="jnc-hub-glass-badge absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.13em] text-[#153A4C] ring-1 ring-[#d7e7ef]/70">
+                      <div className="jnc-hub-glass-badge absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full px-2.5 py-1 text-2xs font-black uppercase tracking-[0.13em] text-[#153A4C] ring-1 ring-[#d7e7ef]/70">
                         <MapPinLine size={10} weight="fill" className="shrink-0 text-[#336886]" />
                         <span className="truncate">{formatDestinationMatchLabel(destination)}</span>
                       </div>
@@ -2182,7 +2182,7 @@ export function MarketplacePage() {
                           {displayName}
                         </p>
                         <div className="mt-2 flex items-center justify-between gap-2">
-                          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/18 px-2.5 py-1 text-[9.5px] font-black uppercase tracking-[0.1em] text-white shadow-[0_14px_28px_-22px_rgba(15,23,42,0.58)] backdrop-blur-xl">
+                          <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/18 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.1em] text-white shadow-[0_14px_28px_-22px_rgba(15,23,42,0.58)] backdrop-blur-xl">
                             <Sparkle size={10} weight="fill" className="shrink-0 text-lime-200" />
                             <span className="truncate">{countLabel}</span>
                           </span>
@@ -2273,7 +2273,7 @@ export function MarketplacePage() {
                       </button>
                     </div>
                     <div className="mt-4 flex flex-wrap items-center gap-2">
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-2xs font-bold ${
                         isCondominiumEventLive
                           ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
                           : hasUpcomingCondominiumEvent
@@ -2283,13 +2283,13 @@ export function MarketplacePage() {
                         <CalendarBlank size={11} weight="fill" />
                         {isCondominiumEventLive ? 'Ao vivo' : hasUpcomingCondominiumEvent ? 'Agendado' : 'Sem agenda'}
                       </span>
-                      <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200/80">
+                      <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-2xs font-bold text-slate-600 ring-1 ring-slate-200/80">
                         <Clock size={11} weight="fill" />
                         <span className="max-w-[11.5rem] truncate sm:max-w-[18rem]">
                           {condominiumStoresLoading ? 'Carregando agenda' : condominiumEventTimeLabel || 'Agenda em confirmação'}
                         </span>
                       </span>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[10px] font-bold text-[#336886] ring-1 ring-[#336886]/12">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#336886]/8 px-2.5 py-1 text-2xs font-bold text-[#336886] ring-1 ring-[#336886]/12">
                         <Buildings size={11} weight="fill" />
                         {filteredStores.length} loja{filteredStores.length === 1 ? '' : 's'}
                       </span>
@@ -2310,7 +2310,7 @@ export function MarketplacePage() {
                                 Feiras e eventos
                               </p>
                               {liveCount > 0 ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white shadow-[0_10px_18px_-12px_rgba(16,185,129,0.6)]">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-1 text-2xs font-black uppercase tracking-[0.12em] text-white shadow-[0_10px_18px_-12px_rgba(16,185,129,0.6)]">
                                   <span className="relative flex h-1.5 w-1.5">
                                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
                                     <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
@@ -2324,7 +2324,7 @@ export function MarketplacePage() {
                           <button
                             type="button"
                             onClick={() => openCondominiumPicker('all')}
-                            className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center justify-center rounded-full px-3 py-2 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886]"
+                            className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center justify-center rounded-full px-3 py-2 text-2xs font-black uppercase tracking-[0.14em] text-[#336886]"
                           >
                             Ver mais
                           </button>
@@ -2379,7 +2379,7 @@ export function MarketplacePage() {
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-1.5">
-                                      <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] ${
+                                      <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-black uppercase tracking-[0.1em] ${
                                         eventState === 'live'
                                           ? 'bg-[#5FD35A] text-[#153A4C] shadow-[0_10px_20px_-12px_rgba(95,211,90,0.65)]'
                                           : eventState === 'upcoming'
@@ -2388,10 +2388,10 @@ export function MarketplacePage() {
                                       }`}>
                                         {statusLabel}
                                       </span>
-                                      <span className="min-w-0 truncate text-[10px] font-bold uppercase tracking-[0.1em] text-white/72">{region || 'Operação local'}</span>
+                                      <span className="min-w-0 truncate text-2xs font-bold uppercase tracking-[0.1em] text-white/72">{region || 'Operação local'}</span>
                                     </div>
                                     <p className="mt-1 line-clamp-1 text-sm font-black text-white drop-shadow-sm">{name}</p>
-                                    <p className="mt-0.5 inline-flex max-w-full items-center gap-1 rounded-full bg-white/14 px-2 py-1 text-[10px] font-bold text-white/86 ring-1 ring-white/12 backdrop-blur-md">
+                                    <p className="mt-0.5 inline-flex max-w-full items-center gap-1 rounded-full bg-white/14 px-2 py-1 text-2xs font-bold text-white/86 ring-1 ring-white/12 backdrop-blur-md">
                                       {eventState === 'live' ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" /> : <Clock size={10} weight="bold" className="shrink-0" />}
                                       <span className="truncate">{agendaLine}</span>
                                       <CaretRight size={10} weight="bold" className="shrink-0" />
@@ -2465,7 +2465,7 @@ export function MarketplacePage() {
 
           {/* Seção Categorias Premium Squircle */}
           <section className="order-4 relative" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
-            <p className="mb-1.5 px-1 text-[9px] font-black uppercase tracking-[0.24em] text-slate-500/90">Categorias</p>
+            <p className="mb-1.5 px-1 text-2xs font-black uppercase tracking-[0.24em] text-slate-500/90">Categorias</p>
             <div className="-mx-4 grid grid-flow-col auto-cols-[minmax(54px,1fr)] snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <button
                 type="button"
@@ -2477,7 +2477,7 @@ export function MarketplacePage() {
                 }`}>
                   <List size={19} weight="duotone" className={segmentFilter === 'all' ? 'scale-[0.95] text-white' : 'text-slate-600'} />
                 </div>
-                <span className={`text-center text-[9px] font-black uppercase tracking-[0.08em] transition-colors ${
+                <span className={`text-center text-2xs font-black uppercase tracking-[0.08em] transition-colors ${
                   segmentFilter === 'all' ? 'text-[#336886]' : 'text-slate-600'
                 }`}>Todos</span>
               </button>
@@ -2510,7 +2510,7 @@ export function MarketplacePage() {
                     <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#5fd35a] ring-2 ring-white" />
                   ) : null}
                 </div>
-                <span className={`text-center text-[9px] font-black uppercase tracking-[0.08em] transition-colors ${
+                <span className={`text-center text-2xs font-black uppercase tracking-[0.08em] transition-colors ${
                   quickFilter === 'my_condo' ? 'text-[#336886]' : 'text-slate-600'
                 }`}>
                   Condomínio{myCondominium ? <span className="font-semibold normal-case tracking-normal text-slate-400"> · {myCondoStoreIds.length}</span> : null}
@@ -2541,7 +2541,7 @@ export function MarketplacePage() {
                         }`}
                       />
                     </div>
-                    <span className={`text-center text-[9px] font-black uppercase tracking-[0.08em] transition-colors ${
+                    <span className={`text-center text-2xs font-black uppercase tracking-[0.08em] transition-colors ${
                       active ? (colors ? colors.icon : 'text-[#336886]') : 'text-slate-600'
                     }`}>{item.label} <span className="font-semibold normal-case tracking-normal text-slate-400">· {item.count}</span></span>
                   </button>
@@ -2588,7 +2588,7 @@ export function MarketplacePage() {
                     Restaurantes, mercados e serviços prontos para pedir.
                   </p>
                 ) : !loading && !error && filteredStores.length > 0 ? (
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                  <p className="text-2xs font-bold uppercase tracking-[0.16em] text-slate-400">
                     {productSearchLoading && debouncedQuery
                       ? 'Buscando também nos cardápios...'
                       : isShowingAllStores
@@ -2727,10 +2727,10 @@ export function MarketplacePage() {
                   <button
                     type="button"
                     onClick={() => setIsHomeStoreListExpanded(true)}
-                    className="jnc-hub-touch inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#153A4C] shadow-[0_8px_22px_-10px_rgba(21,58,76,0.22)] hover:shadow-[0_12px_28px_-10px_rgba(21,58,76,0.32)]"
+                    className="jnc-hub-touch inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-2xs font-black uppercase tracking-[0.14em] text-[#153A4C] shadow-[0_8px_22px_-10px_rgba(21,58,76,0.22)] hover:shadow-[0_12px_28px_-10px_rgba(21,58,76,0.32)]"
                   >
                     Ver todas as lojas
-                    <span className="rounded-full bg-[#5FD35A]/12 px-2 py-0.5 text-[10px] font-black text-[#336886]">+{hiddenHomeStoreCount}</span>
+                    <span className="rounded-full bg-[#5FD35A]/12 px-2 py-0.5 text-2xs font-black text-[#336886]">+{hiddenHomeStoreCount}</span>
                   </button>
                 </div>
               ) : null}
@@ -2768,7 +2768,7 @@ export function MarketplacePage() {
                     <p className="text-[0.92rem] font-black leading-tight tracking-[-0.03em] text-white">
                       Tem um negócio local?
                     </p>
-                    <span className="rounded-full bg-[#5FD35A] px-2.5 py-0.5 text-[8.5px] font-black uppercase tracking-[0.1em] text-[#153A4C] shadow-[0_6px_16px_-8px_rgba(95,211,90,0.5)]">
+                    <span className="rounded-full bg-[#5FD35A] px-2.5 py-0.5 text-2xs font-black uppercase tracking-[0.1em] text-[#153A4C] shadow-[0_6px_16px_-8px_rgba(95,211,90,0.5)]">
                       3 meses VIP
                     </span>
                   </div>
@@ -2776,7 +2776,7 @@ export function MarketplacePage() {
                     Crie sua loja e venda online pelo app.
                   </p>
                 </div>
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#5FD35A] px-3.5 py-2.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#153A4C] shadow-[0_12px_28px_-16px_rgba(95,211,90,0.55)] transition-all group-hover:translate-x-0.5 group-hover:shadow-[0_16px_32px_-14px_rgba(95,211,90,0.65)]">
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#5FD35A] px-3.5 py-2.5 text-2xs font-black uppercase tracking-[0.08em] text-[#153A4C] shadow-[0_12px_28px_-16px_rgba(95,211,90,0.55)] transition-all group-hover:translate-x-0.5 group-hover:shadow-[0_16px_32px_-14px_rgba(95,211,90,0.65)]">
                   Começar
                   <CaretRight size={11} weight="bold" />
                 </span>
@@ -2798,7 +2798,7 @@ export function MarketplacePage() {
                 {['Marketplace local', 'Pedidos', 'Chalés', 'Feiras'].map((label) => (
                   <span
                     key={label}
-                    className="rounded-full border border-slate-200/70 bg-white/72 px-2.5 py-1 text-[8.5px] font-black uppercase tracking-[0.12em] text-[#336886]"
+                    className="rounded-full border border-slate-200/70 bg-white/72 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-[#336886]"
                   >
                     {label}
                   </span>
@@ -2817,7 +2817,7 @@ export function MarketplacePage() {
           <button
             type="button"
             onClick={handleHomeHubNavigation}
-            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
+            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-2xs font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
               quickFilter === 'all' && !condominiumPickerOpen && !selectedCondominium
                 ? 'bg-[#f0fdf4] text-[#166534] shadow-[0_12px_26px_-24px_rgba(95,211,90,0.35)] ring-1 ring-[#5FD35A]/12'
                 : 'text-slate-500 hover:text-slate-700'
@@ -2836,7 +2836,7 @@ export function MarketplacePage() {
           <button
             type="button"
             onClick={handleOpenPedidos}
-            className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-2xs font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
           >
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
               <Receipt size={16} weight="duotone" />
@@ -2846,7 +2846,7 @@ export function MarketplacePage() {
           <button
             type="button"
             onClick={() => setCondominiumPickerOpen(true)}
-            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
+            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-2xs font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
               selectedCondominium || condominiumPickerOpen
                 ? 'bg-[#f0fdf4] text-[#166534] shadow-[0_12px_26px_-24px_rgba(95,211,90,0.35)] ring-1 ring-[#5FD35A]/12'
                 : 'text-slate-500 hover:text-slate-700'
@@ -2864,7 +2864,7 @@ export function MarketplacePage() {
           <button
             type="button"
             onClick={() => navigate('/destinos')}
-            className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
+            className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-2xs font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
           >
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
               <MapTrifold size={16} weight="duotone" />
@@ -2874,7 +2874,7 @@ export function MarketplacePage() {
           <button
             type="button"
             onClick={() => setProfileDrawerOpen(true)}
-            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
+            className={`group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-2xs font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02] ${
               profileDrawerOpen
                 ? 'bg-[#f0fdf4] text-[#166534] shadow-[0_12px_26px_-24px_rgba(95,211,90,0.35)] ring-1 ring-[#5FD35A]/12'
                 : 'text-slate-500 hover:text-slate-700'
@@ -2904,7 +2904,7 @@ export function MarketplacePage() {
             maxWidthClassName="max-w-[640px]"
             right={(
               <div className="rounded-full border border-[#bfd6e4]/80 bg-white/78 px-3 py-1.5 text-center shadow-[0_14px_26px_-22px_rgba(51,104,134,0.32)] backdrop-blur-xl">
-                <p className="text-[8px] font-black uppercase tracking-[0.1em] text-[#336886]">Ao vivo</p>
+                <p className="text-2xs font-black uppercase tracking-[0.1em] text-[#336886]">Ao vivo</p>
                 <p className="text-sm font-black leading-none text-slate-950">{condominiumPickerCounts.live}</p>
               </div>
             )}
@@ -2924,7 +2924,7 @@ export function MarketplacePage() {
                           className="h-5 w-5 rounded-full object-contain"
                         />
                       </span>
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Já no Caminho</p>
+                      <p className="text-2xs font-black uppercase tracking-[0.2em] text-[#336886]">Já no Caminho</p>
                     </div>
                     <p className="max-w-[19rem] text-[13px] font-medium leading-snug text-slate-600">
                       Veja o que está ao vivo, o que vem em seguida e entre com um toque no condomínio certo.
@@ -2984,13 +2984,13 @@ export function MarketplacePage() {
                         key={key}
                         type="button"
                         onClick={() => setCondoPickerFilter(key)}
-                        className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.25 py-1.75 text-[10px] font-black tracking-[0.01em] transition-all duration-200 active:scale-95 ${isActive ? activeClasses : idleClasses}`}
+                        className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.25 py-1.75 text-2xs font-black tracking-[0.01em] transition-all duration-200 active:scale-95 ${isActive ? activeClasses : idleClasses}`}
                       >
                         {tone === 'live' && (
                           <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-[#009ee3]'}`} />
                         )}
                         <span>{label}</span>
-                        <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[8px] font-black ${isActive ? 'bg-white/16 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                        <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1.5 py-0.5 text-2xs font-black ${isActive ? 'bg-white/16 text-white' : 'bg-slate-100 text-slate-500'}`}>
                           {count}
                         </span>
                       </button>
@@ -3050,7 +3050,7 @@ export function MarketplacePage() {
                             <span className="block text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Acontecendo agora</span>
                             <span className="text-[11px] font-medium text-slate-500">Entre direto na feira que já está rodando.</span>
                           </div>
-                          <span className="ml-auto inline-flex items-center justify-center rounded-full bg-[#336886] px-2.5 py-1 text-[9px] font-black text-white shadow-[0_6px_18px_-10px_rgba(51,104,134,0.62)]">{live.length}</span>
+                          <span className="ml-auto inline-flex items-center justify-center rounded-full bg-[#336886] px-2.5 py-1 text-2xs font-black text-white shadow-[0_6px_18px_-10px_rgba(51,104,134,0.62)]">{live.length}</span>
                         </div>
                         <div className={`${isNativePlatform ? 'flex flex-col gap-2.5' : 'flex flex-col gap-3'}`}>
                           {live.map(({ condominium, slug, name, region, event }) => {
@@ -3080,7 +3080,7 @@ export function MarketplacePage() {
                                   <div className="relative h-[5.45rem] w-[6.8rem] shrink-0 overflow-hidden rounded-[1.35rem] bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.34)] ring-1 ring-white/80">
                                     <img src={bannerUrl} alt="" aria-hidden loading="lazy" decoding="async" className="h-full w-full object-cover" />
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.24)_100%)]" />
-                                    <div className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-[8px] font-black uppercase tracking-[0.09em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(15,23,42,0.32)]">
+                                    <div className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-2xs font-black uppercase tracking-[0.09em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(15,23,42,0.32)]">
                                       <span className="relative flex h-2 w-2">
                                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#009ee3] opacity-75" />
                                         <span className="relative inline-flex h-2 w-2 rounded-full bg-[#009ee3]" />
@@ -3106,17 +3106,17 @@ export function MarketplacePage() {
                                         ) : null}
                                       </div>
                                       {active ? (
-                                        <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-[8px] font-black uppercase tracking-[0.1em] text-white">
+                                        <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-2xs font-black uppercase tracking-[0.1em] text-white">
                                           Atual
                                         </span>
                                       ) : null}
                                     </div>
                                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-[#336886]">
+                                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.08em] text-[#336886]">
                                         <Clock size={10} weight="fill" />
                                         {timeLabel || 'Feira aberta'}
                                       </span>
-                                      <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-emerald-700">
+                                      <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.08em] text-emerald-700">
                                         Pedidos liberados
                                       </span>
                                     </div>
@@ -3124,7 +3124,7 @@ export function MarketplacePage() {
                                       <span className="text-[11px] font-medium text-slate-500">
                                       Pagamento, lojas abertas e pedido em fluxo.
                                       </span>
-                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.1em] ${
+                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-2xs font-black uppercase tracking-[0.1em] ${
                                         active ? 'bg-[#336886] text-white' : 'bg-slate-900 text-white'
                                       }`}>
                                         Entrar
@@ -3149,7 +3149,7 @@ export function MarketplacePage() {
                             <span className="block text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Em breve</span>
                             <span className="text-[11px] font-medium text-slate-500">Condomínios com agenda próxima.</span>
                           </div>
-                          <span className="ml-auto inline-flex items-center justify-center rounded-full bg-[#336886]/10 px-2 py-0.5 text-[9px] font-black text-[#336886]">{upcoming.length}</span>
+                          <span className="ml-auto inline-flex items-center justify-center rounded-full bg-[#336886]/10 px-2 py-0.5 text-2xs font-black text-[#336886]">{upcoming.length}</span>
                         </div>
                         <div className="flex flex-col gap-3">
                           {upcoming.map(({ condominium, slug, name, region, event }) => {
@@ -3195,10 +3195,10 @@ export function MarketplacePage() {
                                           </span>
                                         ) : null}
                                       </div>
-                                      {active ? <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-[8px] font-black uppercase tracking-[0.1em] text-white">Atual</span> : null}
+                                      {active ? <span className="shrink-0 rounded-full bg-[#336886] px-2 py-1 text-2xs font-black uppercase tracking-[0.1em] text-white">Atual</span> : null}
                                     </div>
                                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-[#336886]">
+                                      <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.08em] text-[#336886]">
                                         <Clock size={10} weight="fill" />
                                         Agendado
                                       </span>
@@ -3206,7 +3206,7 @@ export function MarketplacePage() {
                                     </div>
                                     <div className="mt-3 flex items-center justify-between gap-3">
                                       <span className="text-[11px] font-medium text-slate-500">Acompanhe o início e entre na hora certa.</span>
-                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.75 text-[10px] font-black uppercase tracking-[0.1em] ${
+                                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.75 text-2xs font-black uppercase tracking-[0.1em] ${
                                         active ? 'bg-[#336886] text-white' : 'bg-slate-900 text-white'
                                       }`}>
                                         Agenda
@@ -3231,7 +3231,7 @@ export function MarketplacePage() {
                             <span className="block text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">Outros condomínios</span>
                             <span className="text-[11px] font-medium text-slate-500">Descubra locais próximos e acompanhe quando abrirem agenda.</span>
                           </div>
-                          <span className="ml-auto rounded-full bg-slate-200/80 px-2 py-0.5 text-[9px] font-bold text-slate-500">{none.length}</span>
+                          <span className="ml-auto rounded-full bg-slate-200/80 px-2 py-0.5 text-2xs font-bold text-slate-500">{none.length}</span>
                         </div>
                         <div className="flex flex-col gap-2.5">
                           {none.map(({ condominium, slug, name, region }) => {
@@ -3273,13 +3273,13 @@ export function MarketplacePage() {
                                       </span>
                                     ) : null}
                                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                                      <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-slate-500">
+                                      <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.08em] text-slate-500">
                                         Sem agenda
                                       </span>
                                       <span className="text-[11px] font-medium text-slate-500">Receba novidades quando abrir.</span>
                                     </div>
                                   </div>
-                                  <span className={`relative shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.08em] ${
+                                  <span className={`relative shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-2xs font-black uppercase tracking-[0.08em] ${
                                     active ? 'bg-[#336886]/10 text-[#336886]' : 'bg-slate-100/80 text-slate-600'
                                   }`}>
                                     {active ? 'Aqui' : 'Ver mais'}
@@ -3307,7 +3307,7 @@ export function MarketplacePage() {
                     setCondominiumPickerOpen(false);
                     handleHomeHubNavigation();
                   }}
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-2xs font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
                     <House size={16} weight="duotone" />
@@ -3321,7 +3321,7 @@ export function MarketplacePage() {
                     setCondominiumPickerOpen(false);
                     handleOpenPedidos();
                   }}
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-2xs font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
                     <Receipt size={16} weight="duotone" />
@@ -3330,7 +3330,7 @@ export function MarketplacePage() {
                 </button>
                 <button
                   type="button"
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] bg-[#f0fdf4] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-[#166534] shadow-[0_12px_26px_-24px_rgba(95,211,90,0.35)] ring-1 ring-[#5FD35A]/12 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] bg-[#f0fdf4] px-0.5 py-1.5 text-2xs font-bold uppercase tracking-[0.08em] text-[#166534] shadow-[0_12px_26px_-24px_rgba(95,211,90,0.35)] ring-1 ring-[#5FD35A]/12 transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.02]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#5FD35A] text-white shadow-[0_16px_32px_-24px_rgba(95,211,90,0.55)]">
                     <Tent size={16} weight="fill" />
@@ -3343,7 +3343,7 @@ export function MarketplacePage() {
                     setCondominiumPickerOpen(false);
                     navigate('/destinos');
                   }}
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-2xs font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
                     <MapTrifold size={16} weight="duotone" />
@@ -3356,7 +3356,7 @@ export function MarketplacePage() {
                     setCondominiumPickerOpen(false);
                     setProfileDrawerOpen(true);
                   }}
-                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
+                  className="group flex flex-col items-center justify-center gap-1 rounded-[1.05rem] px-0.5 py-1.5 text-2xs font-bold uppercase tracking-[0.08em] text-slate-500 transition-[transform,color,background-color,box-shadow] duration-200 ease-out hover:text-slate-700 active:scale-[1.02]"
                 >
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-600 transition-all duration-200 group-hover:bg-slate-200/80">
                     <ListPlus size={17} weight="duotone" />

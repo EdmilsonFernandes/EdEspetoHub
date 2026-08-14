@@ -35,7 +35,7 @@ export function OrderTrackingActionBar({
     >
       <div className="mx-auto flex max-w-2xl items-center gap-3 rounded-[1.35rem] border border-white/80 bg-white/95 p-2.5 shadow-[0_-16px_42px_-28px_rgba(15,23,42,0.38)] ring-1 ring-[#d6e4ed]/80 backdrop-blur-xl">
         <div className="min-w-0 flex-1 pl-1">
-          <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#336886]">Próxima ação</p>
+          <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#336886]">Próxima ação</p>
           <p className="truncate text-[11px] font-semibold text-slate-500">{detail}</p>
         </div>
         <button

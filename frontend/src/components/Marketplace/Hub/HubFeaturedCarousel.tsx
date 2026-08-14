@@ -63,12 +63,12 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
     >
       <div className="flex items-center justify-between gap-3 px-1">
         <div className="min-w-0">
-          <p className="mb-0.5 inline-flex items-center gap-1.5 text-[8.5px] font-black uppercase tracking-[0.2em] text-[#336886]">
+          <p className="mb-0.5 inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.2em] text-[#336886]">
             <Sparkle size={9} weight="fill" />
             Destaques locais
           </p>
           <h2 className="text-[15px] font-black tracking-[-0.035em] text-slate-950">{title}</h2>
-          <p className="mt-0.5 line-clamp-1 text-[10px] font-bold text-slate-500">{subtitle}</p>
+          <p className="mt-0.5 line-clamp-1 text-2xs font-bold text-slate-500">{subtitle}</p>
         </div>
         {showHighlightsLink ? (
           <Link
@@ -76,7 +76,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
             onPointerEnter={() => prefetchRouteByPath('/hub/destaques')}
             onFocus={() => prefetchRouteByPath('/hub/destaques')}
             onTouchStart={() => prefetchRouteByPath('/hub/destaques')}
-            className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#336886]"
+            className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-2xs font-black uppercase tracking-[0.14em] text-[#336886]"
           >
             Ver mais
             <CaretRight size={11} weight="bold" />
@@ -204,7 +204,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                       <p className={`line-clamp-2 font-extrabold tracking-[-0.02em] text-slate-950 transition-colors group-hover:text-[#336886] ${
                         isLead ? 'text-[15px] leading-[1.22rem]' : 'text-[13px] leading-[1.12rem]'
                       }`}>{item.name}</p>
-                      <p className="mt-1 truncate text-[10.5px] font-semibold text-slate-400">por {item.storeName}</p>
+                      <p className="mt-1 truncate text-2xs font-semibold text-slate-400">por {item.storeName}</p>
                       <div className="mt-auto flex items-end justify-between gap-2 pt-2">
                         <span className={`${isLead ? 'text-[22px]' : 'text-[19px]'} font-black leading-none tracking-[-0.05em] text-[#153A4C]`}>
                           {currency.format(item.price)}
@@ -213,7 +213,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                         <span className={`inline-flex items-center gap-1 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.76)] transition-all duration-300 group-hover:bg-[#336886] group-hover:text-white group-hover:shadow-[0_12px_22px_-16px_rgba(51,104,134,0.42)] ${
                           isLead ? 'h-8 bg-[#153A4C] px-3 text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.48)]' : 'h-7 bg-[#edf5fa]/82 px-2 text-[#336886] group-hover:px-3'
                         }`}>
-                          <span className={`${isLead ? 'max-w-none scale-100 opacity-100' : 'max-w-0 scale-0 opacity-0 group-hover:max-w-[40px] group-hover:scale-100 group-hover:opacity-100'} text-[9px] font-black uppercase tracking-wider transition-all duration-300`}>Pedir</span>
+                          <span className={`${isLead ? 'max-w-none scale-100 opacity-100' : 'max-w-0 scale-0 opacity-0 group-hover:max-w-[40px] group-hover:scale-100 group-hover:opacity-100'} text-2xs font-black uppercase tracking-wider transition-all duration-300`}>Pedir</span>
                           <CaretRight size={11} weight="bold" />
                         </span>
                       </div>

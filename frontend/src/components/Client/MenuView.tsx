@@ -671,7 +671,7 @@ export const MenuView = ({
   const canOrder = !isServiceStore && isOrderingEnabled !== false && !preOrderBlocked;
   const catalogTerm = isServiceStore ? "Serviços" : "Cardápio";
   const effectiveCompactHeader = compactHeader || autoCompactHeader;
-  const catalogPrimaryColor = branding?.primaryColor || "#f59e0b";
+  const catalogPrimaryColor = branding?.primaryColor || "#2f9df7";
   const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
   const catalogPrimaryText = getContrastTextColor(catalogPrimaryColor);
   const categoryRefs = React.useRef({});
@@ -1225,7 +1225,7 @@ export const MenuView = ({
                   className="inline-flex w-[3.45rem] shrink-0 flex-col items-center justify-center gap-1 rounded-[1.2rem] border border-white/90 bg-white text-slate-700 shadow-[0_14px_28px_-22px_rgba(15,23,42,0.36)] ring-1 ring-slate-100 transition-all active:scale-95"
                 >
                   <List size={17} weight="bold" style={{ color: catalogPrimaryColor }} />
-                  <span className="text-[9px] font-black uppercase tracking-[0.08em] text-slate-400">{catalogTerm}</span>
+                  <span className="text-2xs font-black uppercase tracking-[0.08em] text-slate-400">{catalogTerm}</span>
                 </button>
               )}
               <div className={`${
@@ -1270,10 +1270,10 @@ export const MenuView = ({
                       >
                         <Icon size={13} weight={isActive ? "fill" : "duotone"} />
                       </span>
-                      <span className={`mt-0.5 block w-full truncate text-[10.5px] font-black leading-tight tracking-[-0.02em] sm:text-[11px] ${isActive ? "text-current" : "text-slate-800"}`}>
+                      <span className={`mt-0.5 block w-full truncate text-2xs font-black leading-tight tracking-[-0.02em] sm:text-[11px] ${isActive ? "text-current" : "text-slate-800"}`}>
                         {category.label}
                       </span>
-                      <span className={`mt-0.5 block text-[8.5px] font-black uppercase tracking-[0.1em] ${isActive ? "text-current/70" : "text-slate-400"}`}>
+                      <span className={`mt-0.5 block text-2xs font-black uppercase tracking-[0.1em] ${isActive ? "text-current/70" : "text-slate-400"}`}>
                         {categoryCountLabel}
                       </span>
                     </button>
@@ -1358,7 +1358,7 @@ export const MenuView = ({
         {!staffView && topItems.length > 0 && (
           <div className="rounded-3xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
             <div className="mb-1">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-amber-600">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.18em] text-amber-600">
                 <Sparkle size={10} weight="fill" />
                 Top {topItems.length} do dia
               </span>
@@ -1386,7 +1386,7 @@ export const MenuView = ({
                     className="group min-w-[240px] sm:min-w-0 rounded-2xl border border-slate-100 bg-white shadow-sm px-3 py-3 text-left transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 active:scale-[0.99]"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="aspect-square w-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] text-slate-400">
+                      <div className="aspect-square w-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center text-2xs text-slate-400">
                         {item.imageUrl ? (
                           <Image src={resolveAssetUrl(item.imageUrl)} alt={item.name} className="w-full h-full object-cover" />
                         ) : (
@@ -1429,7 +1429,7 @@ export const MenuView = ({
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em]" style={{ backgroundColor: `${catalogPrimaryColor}18`, color: catalogPrimaryColor }}>
+                <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-2xs font-black uppercase tracking-[0.18em]" style={{ backgroundColor: `${catalogPrimaryColor}18`, color: catalogPrimaryColor }}>
                   <Sparkle size={9} weight="fill" />
                   Promoção do dia
                 </span>
@@ -1442,7 +1442,7 @@ export const MenuView = ({
               <div className="flex shrink-0 flex-col items-end gap-2">
                 {resolvePromoPrice(featuredProduct) ? (
                   <div className="flex flex-col items-end leading-none">
-                    <span className="text-[10px] text-slate-400 line-through">{formatCurrency(featuredProduct.price || 0)}</span>
+                    <span className="text-2xs text-slate-400 line-through">{formatCurrency(featuredProduct.price || 0)}</span>
                     <span className="text-xl font-black text-emerald-600">{formatCurrency(resolvePromoPrice(featuredProduct))}</span>
                   </div>
                 ) : (
@@ -1635,19 +1635,19 @@ export const MenuView = ({
 
                       <div className="flex flex-wrap items-center gap-1.5">
                         {item.isFeatured && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100/50">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-black uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100/50">
                             <Sparkle size={10} weight="fill" />
                             Destaque
                           </span>
                         )}
                         {!item.isFeatured && isTopItem && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-100/30 shadow-[0_4px_12px_rgba(249,115,22,0.08)]">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-100/30 shadow-[0_4px_12px_rgba(249,115,22,0.08)]">
                             🔥 Mais pedido
                           </span>
                         )}
                         {hasConfigurableOptions && (
                           <span
-                            className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider"
+                            className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-2xs font-black uppercase tracking-wider"
                             style={{
                               backgroundColor: `${catalogPrimaryColor}10`,
                               borderColor: `${catalogPrimaryColor}18`,
@@ -1658,7 +1658,7 @@ export const MenuView = ({
                           </span>
                         )}
                         {stockState.soldOut && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-black uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
                             Esgotado
                           </span>
                         )}
@@ -1795,7 +1795,7 @@ export const MenuView = ({
           <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[60] mt-24 h-fit max-h-[88vh] rounded-t-[32px] bg-white outline-none shadow-[0_-24px_64px_-38px_rgba(15,23,42,0.55)]">
             <div className="mx-auto my-4 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
             <div className="px-5 pb-3 pt-1">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{isServiceStore ? "Navegue pelos serviços" : "Navegue pelo cardápio"}</p>
+              <p className="text-2xs font-black uppercase tracking-[0.2em] text-slate-400">{isServiceStore ? "Navegue pelos serviços" : "Navegue pelo cardápio"}</p>
               <h3 className="mt-1 text-2xl font-black tracking-tight text-zinc-950">Categorias</h3>
               <p className="mt-1 text-sm font-medium text-slate-500">Toque em uma categoria para ir direto aos produtos.</p>
             </div>
@@ -1936,12 +1936,12 @@ export const MenuView = ({
 
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Status</p>
+                      <p className="text-2xs font-black uppercase tracking-[0.18em] text-slate-400">Status</p>
                       <p className="mt-1 text-sm font-bold text-slate-900">{isOpenNow ? "Aberto agora" : "Fechado agora"}</p>
                       {todayHoursLabel ? <p className="mt-1 text-xs text-slate-500">{todayHoursLabel}</p> : null}
                     </div>
                     <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Atendimento</p>
+                      <p className="text-2xs font-black uppercase tracking-[0.18em] text-slate-400">Atendimento</p>
                       <p className="mt-1 text-sm font-bold text-slate-900">
                         {deliveryModes.length ? deliveryModes.join(" • ") : "Consulte a loja"}
                       </p>
@@ -1951,7 +1951,7 @@ export const MenuView = ({
 
                   {storeDescription ? (
                     <div className="mt-4 rounded-2xl border border-slate-100 bg-white px-4 py-3">
-                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Sobre a loja</p>
+                      <p className="text-2xs font-black uppercase tracking-[0.18em] text-slate-400">Sobre a loja</p>
                       <p className="mt-2 text-sm leading-6 text-slate-600">{storeDescription}</p>
                     </div>
                   ) : null}
@@ -2131,7 +2131,7 @@ export const MenuView = ({
                 <span className="font-black text-[15px] uppercase tracking-wider">Ver minha sacola</span>
               </div>
               <div className="flex flex-col items-end leading-none">
-                <span className="text-[10px] font-bold opacity-80 uppercase tracking-tight">Total</span>
+                <span className="text-2xs font-bold opacity-80 uppercase tracking-tight">Total</span>
                 <span className="font-black text-lg sm:text-xl tracking-tighter">{formatCurrency(cartTotalValue)}</span>
               </div>
             </button>

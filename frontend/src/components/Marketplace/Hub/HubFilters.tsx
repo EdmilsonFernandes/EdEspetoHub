@@ -120,7 +120,7 @@ export function HubFilterBar({
           <span className="hidden min-[390px]:inline">Filtros</span>
           <span className="min-[390px]:hidden">Mais</span>
           {hiddenFilterCount > 0 ? (
-            <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#153A4C] px-1 text-[9px] font-black text-white ring-2 ring-white">
+            <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#153A4C] px-1 text-2xs font-black text-white ring-2 ring-white">
               {hiddenFilterCount}
             </span>
           ) : null}
@@ -190,12 +190,12 @@ export function HubFilterSheet({
             <div className="mt-4 rounded-[1.35rem] border border-[#336886]/10 bg-[#edf5fa]/68 px-3.5 py-3 text-[#153A4C] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]/75">Agora na lista</p>
+                  <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#336886]/75">Agora na lista</p>
                   <p className="mt-0.5 truncate text-sm font-black text-[#153A4C]">
                     {filteredStoresCount} loja{filteredStoresCount === 1 ? '' : 's'} encontrada{filteredStoresCount === 1 ? '' : 's'}
                   </p>
                 </div>
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-black text-[#336886] ring-1 ring-white/80">
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-2xs font-black text-[#336886] ring-1 ring-white/80">
                   <CheckCircle size={12} weight="fill" />
                   {activeFilterCount > 0 ? `${activeFilterCount} ativo${activeFilterCount === 1 ? '' : 's'}` : 'Sem filtro'}
                 </span>
@@ -307,7 +307,7 @@ export function HubFilterSheet({
                       }`}
                     >
                       <CategoryIcon size={15} weight={active ? 'fill' : 'duotone'} className="mx-auto mb-1" />
-                      <span className="block truncate text-[10.5px] font-black">{item.label}</span>
+                      <span className="block truncate text-2xs font-black">{item.label}</span>
                     </button>
                   );
                 })}

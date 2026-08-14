@@ -93,7 +93,7 @@ export function HubPremiumCarousel({
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <span className="min-w-8 text-right text-[9px] font-black tabular-nums tracking-[0.08em] text-slate-400">
+              <span className="min-w-8 text-right text-2xs font-black tabular-nums tracking-[0.08em] text-slate-400">
                 {selectedIndex + 1}/{snapCount}
               </span>
             </div>

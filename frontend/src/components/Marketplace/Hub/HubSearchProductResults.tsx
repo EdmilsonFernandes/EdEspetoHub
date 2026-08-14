@@ -33,7 +33,7 @@ export const HubSearchProductResults = memo(function HubSearchProductResults({
       <div className="flex items-center justify-between px-1">
         <h2 className="text-[15px] font-black tracking-tight text-slate-950">Itens encontrados que você busca</h2>
         <div className="flex gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#336886]">
+          <span className="text-2xs font-bold uppercase tracking-wider text-[#336886]">
             {items.length} itens
           </span>
         </div>
@@ -80,9 +80,9 @@ export const HubSearchProductResults = memo(function HubSearchProductResults({
                       (event.target as HTMLImageElement).src = getStoreAvatarUrl(item.storeSlug, item.storeName);
                     }}
                   />
-                  <span className="truncate text-[9px] font-bold text-slate-400">{item.storeName}</span>
+                  <span className="truncate text-2xs font-bold text-slate-400">{item.storeName}</span>
                 </div>
-                <span className="shrink-0 text-[10px] font-black text-[#336886]">
+                <span className="shrink-0 text-2xs font-black text-[#336886]">
                   {currency.format(item.price)}
                 </span>
               </div>

@@ -178,11 +178,11 @@ export function PaymentPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E2EBF2] to-[#D9E4EF]">
       <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
-        <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
+        <div className="h-1 bg-[linear-gradient(90deg,#336886,#2f9df7,#5FD35A)]" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] border border-white bg-white">
+              <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-[0_14px_26px_-18px_rgba(21,58,76,0.45)] border border-white bg-white">
                 <img src={platformLogo} alt="Já no Caminho" className="w-full h-full object-cover" />
               </div>
               <div className="hidden sm:block text-left leading-tight">
@@ -213,7 +213,7 @@ export function PaymentPage() {
         <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-10">
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-10 gap-3">
-              <div className="w-12 h-12 border-4 border-red-200 border-t-red-500 rounded-full animate-spin" />
+              <div className="w-12 h-12 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin" />
               <p className="text-gray-600">Carregando informações do pagamento...</p>
             </div>
           )}
@@ -327,7 +327,7 @@ export function PaymentPage() {
                         <div className="flex items-center justify-between w-full gap-2">
                           <p className="text-sm font-semibold text-gray-700">Escolha um plano</p>
                           <span className="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                            Renovacao mensal
+                            Renovação mensal
                           </span>
                         </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -351,10 +351,10 @@ export function PaymentPage() {
                                 onClick={() => plan?.id && setSelectedPlanId(plan.id)}
                                 disabled={isDisabled}
                                 className={`border rounded-2xl px-3 py-3 text-left transition-all ${
-                                  !selectedPlanId && !isSelected ? 'border-red-200 bg-red-50/40' : ''
+                                  !selectedPlanId && !isSelected ? 'border-amber-200 bg-amber-50/40' : ''
                                 } ${isSelected
-                                  ? 'border-red-500 shadow-lg bg-red-50'
-                                  : 'border-gray-200 hover:border-red-200'
+                                  ? 'border-[#2f9df7] shadow-lg bg-sky-50'
+                                  : 'border-gray-200 hover:border-sky-200'
                                   } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                               >
                                 <p className="text-[11px] uppercase font-semibold text-gray-500">{tier.label}</p>
@@ -528,7 +528,7 @@ export function PaymentPage() {
                         </button>
                       </div>
                       {isMock && (
-                        <p className="text-xs text-gray-500 text-center">Pagamento mock para testes - nenhum valor será cobrado.</p>
+                        <p className="text-xs text-gray-500 text-center">Pagamento mock para testes — nenhum valor será cobrado.</p>
                       )}
                     </>
                   ) : payment.paymentLink && isRecentPayment ? (

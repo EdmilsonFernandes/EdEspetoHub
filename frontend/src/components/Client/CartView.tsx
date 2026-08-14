@@ -1123,7 +1123,7 @@ export const CartView = ({
               <p className="text-sm font-black tracking-tight text-slate-950">
                 {note ? "Observação adicionada" : "Alguma observação?"}
               </p>
-              <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] ${
                 note ? "bg-white text-[#336886] ring-1 ring-[#cfe0ea]" : "bg-[#336886]/8 text-[#336886] ring-1 ring-[#336886]/10"
               }`}>
                 {note ? "Editar" : "+ Adicionar"}
@@ -1166,7 +1166,7 @@ export const CartView = ({
               <button
                 type="button"
                 onClick={openCustomerNoteSheet}
-                className="jnc-hub-touch shrink-0 rounded-full bg-[#336886]/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] ring-1 ring-[#336886]/10"
+                className="jnc-hub-touch shrink-0 rounded-full bg-[#336886]/8 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-[#336886] ring-1 ring-[#336886]/10"
               >
                 {note ? "Editar" : "+ Adicionar"}
               </button>
@@ -1202,7 +1202,7 @@ export const CartView = ({
                 <p className="text-sm font-black tracking-tight text-slate-950 sm:text-base">
                   Pagamento online necessário
                 </p>
-                <span className="inline-flex shrink-0 items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-amber-700">
+                <span className="inline-flex shrink-0 items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-2xs font-black uppercase tracking-[0.12em] text-amber-700">
                   Envio postal
                 </span>
               </div>
@@ -1247,7 +1247,7 @@ export const CartView = ({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm font-black tracking-tight text-slate-950 sm:text-base">{methodLabel}</p>
-              <span className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] ${badgeClass}`}>
+              <span className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-2xs font-black uppercase tracking-[0.12em] ${badgeClass}`}>
                 {badgeLabel}
               </span>
             </div>
@@ -1256,14 +1256,14 @@ export const CartView = ({
                 ? `Troco para ${formatCurrency(cashTenderedValue)}`
                 : methodDescription}
             </p>
-            <p className="mt-2 text-[10.5px] font-bold leading-snug text-slate-400">
+            <p className="mt-2 text-2xs font-bold leading-snug text-slate-400">
               Quer usar Pix, cartão ou dinheiro? Toque em alterar forma.
             </p>
           </div>
           <button
             type="button"
             onClick={openPaymentSheet}
-            className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#153A4C,#336886)] px-3 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)] transition hover:brightness-105 active:scale-[0.98]"
+            className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#153A4C,#336886)] px-3 py-2.5 text-2xs font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)] transition hover:brightness-105 active:scale-[0.98]"
           >
             <CreditCard size={13} weight="duotone" />
             <span>Alterar</span>
@@ -1286,7 +1286,7 @@ export const CartView = ({
         <button
           type="button"
           onClick={() => setCashNeedsChange((prev) => !prev)}
-          className={`jnc-hub-touch shrink-0 rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] ${
+          className={`jnc-hub-touch shrink-0 rounded-full border px-3 py-2 text-2xs font-black uppercase tracking-[0.12em] ${
             cashNeedsChange
               ? "border-emerald-200 bg-emerald-50 text-emerald-700"
               : "border-slate-200 bg-white text-slate-600"
@@ -1309,7 +1309,7 @@ export const CartView = ({
             />
           </div>
           <div className="rounded-[1.15rem] border border-slate-100 bg-white px-3 py-2.5 shadow-sm sm:min-w-[145px]">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Troco</p>
+            <p className="text-2xs font-black uppercase tracking-[0.18em] text-slate-400">Troco</p>
             <p className="mt-1 text-base font-black text-slate-950 tabular-nums">
               {cashChangeDue !== null && cashChangeDue >= 0 ? formatCurrency(cashChangeDue) : formatCurrency(0)}
             </p>
@@ -1454,7 +1454,7 @@ export const CartView = ({
                 </span>
               )}
               {selected && (
-                <span className="hidden shrink-0 rounded-full bg-white/78 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-slate-600 ring-1 ring-white/80 min-[390px]:inline-flex">
+                <span className="hidden shrink-0 rounded-full bg-white/78 px-2 py-0.5 text-2xs font-black uppercase tracking-[0.12em] text-slate-600 ring-1 ring-white/80 min-[390px]:inline-flex">
                   Selecionado
                 </span>
               )}
@@ -1463,7 +1463,7 @@ export const CartView = ({
               {method.description}
             </p>
             {tone === "online" && (
-              <span className="inline-flex w-fit items-center gap-1 rounded-full border border-[#336886]/10 bg-[#edf5fa]/70 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">
+              <span className="inline-flex w-fit items-center gap-1 rounded-full border border-[#336886]/10 bg-[#edf5fa]/70 px-2 py-0.5 text-2xs font-black uppercase tracking-[0.12em] text-[#336886]">
                 <ShieldCheck size={10} weight="fill" />
                 Protegido
               </span>
@@ -1488,7 +1488,7 @@ export const CartView = ({
                 return (
                   <React.Fragment key={step}>
                     <div className="flex items-center gap-1.5">
-                      <span className={`flex h-4.5 w-4.5 items-center justify-center rounded-full text-[9px] font-black transition-all ${
+                      <span className={`flex h-4.5 w-4.5 items-center justify-center rounded-full text-2xs font-black transition-all ${
                         isDone
                           ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-[0_4px_10px_rgba(16,185,129,0.25)] text-white'
                           : isActive
@@ -1497,7 +1497,7 @@ export const CartView = ({
                       }`}>
                         {isDone ? '✓' : step}
                       </span>
-                      <span className={`text-[9px] font-bold uppercase tracking-wide transition-colors ${isActive ? 'text-slate-900 font-extrabold' : isDone ? 'text-emerald-600' : 'text-slate-400'}`}>{label}</span>
+                      <span className={`text-2xs font-bold uppercase tracking-wide transition-colors ${isActive ? 'text-slate-900 font-extrabold' : isDone ? 'text-emerald-600' : 'text-slate-400'}`}>{label}</span>
                     </div>
                     {i < 3 && (
                       <div className="h-[2px] flex-1 rounded-full overflow-hidden bg-slate-200">
@@ -1535,7 +1535,7 @@ export const CartView = ({
                 />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Checkout</p>
+                <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#336886]">Checkout</p>
                 <p className="truncate text-sm font-black tracking-tight text-slate-950">
                   {storeLabel || 'Finalizando seu pedido'}
                 </p>
@@ -1559,13 +1559,13 @@ export const CartView = ({
                   {imageUrl ? (
                     <img src={imageUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">🍖</div>
+                    <div className="flex h-full w-full items-center justify-center text-2xs text-slate-400">🍖</div>
                   )}
                 </div>
               );
             })}
             {extraCartPreviewCount > 0 ? (
-              <span className="inline-flex h-9 min-w-[2.3rem] items-center justify-center rounded-full border-2 border-white bg-[#153A4C] px-2 text-[10px] font-black text-white shadow-sm">
+              <span className="inline-flex h-9 min-w-[2.3rem] items-center justify-center rounded-full border-2 border-white bg-[#153A4C] px-2 text-2xs font-black text-white shadow-sm">
                 +{extraCartPreviewCount}
               </span>
             ) : null}
@@ -1773,7 +1773,7 @@ export const CartView = ({
                   Escolha como quer receber este pedido.
                 </p>
               </div>
-              <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#153A4C] shadow-sm">
+              <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.16em] text-[#153A4C] shadow-sm">
                 {orderTypeVisuals[customer.type]?.label || "Pedido"}
               </span>
             </div>
@@ -1836,7 +1836,7 @@ export const CartView = ({
                       <Truck size={15} weight="duotone" />
                       <span className="min-w-0 break-words">Entrega local</span>
                     </span>
-                    <span className={`mt-0.5 block text-[10px] font-semibold ${!isPostalDelivery ? "text-white/72" : "text-slate-400"}`}>
+                    <span className={`mt-0.5 block text-2xs font-semibold ${!isPostalDelivery ? "text-white/72" : "text-slate-400"}`}>
                       Motoboy ou loja
                     </span>
                   </button>
@@ -1859,7 +1859,7 @@ export const CartView = ({
                       <PaperPlaneTilt size={15} weight="duotone" />
                       <span className="min-w-0 break-words">Envio postal</span>
                     </span>
-                    <span className={`mt-0.5 block text-[10px] font-semibold ${isPostalDelivery ? "text-white/72" : "text-slate-400"}`}>
+                    <span className={`mt-0.5 block text-2xs font-semibold ${isPostalDelivery ? "text-white/72" : "text-slate-400"}`}>
                       Correios
                     </span>
                   </button>
@@ -1873,7 +1873,7 @@ export const CartView = ({
             <div className="rounded-[1.7rem] border border-emerald-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(236,253,245,0.96)_100%)] p-4 shadow-[0_22px_42px_-34px_rgba(5,150,105,0.35)]">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Retirada no local</p>
+                  <p className="text-2xs font-black uppercase tracking-[0.2em] text-emerald-700">Retirada no local</p>
                   {pickupLocationLabel ? (
                     <div className="mt-1">
                       <p className="text-sm font-black leading-tight text-slate-900">Retirada: {pickupLocationLabel}</p>
@@ -1898,13 +1898,13 @@ export const CartView = ({
                 </span>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700 shadow-sm">
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-emerald-700 shadow-sm">
                   Sem frete
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm">
+                <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm">
                   Pedido identificado
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm">
+                <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm">
                   Retirada simples
                 </span>
               </div>
@@ -1917,7 +1917,7 @@ export const CartView = ({
               {showCustomerFulfillmentInsights && (
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                    <p className="text-2xs font-black uppercase tracking-[0.22em] text-slate-400">
                       {isPostalDelivery ? "Envio postal" : "Entrega no endereço"}
                     </p>
                     <h3 className="mt-1 text-[15px] font-black leading-tight text-slate-900">
@@ -1931,7 +1931,7 @@ export const CartView = ({
                     {deliveryMetaChips.map((chip) => (
                       <span
                         key={chip.key}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm"
                       >
                         {chip.icon}
                         {chip.label}
@@ -1982,16 +1982,16 @@ export const CartView = ({
                               </p>
                             </div>
                             {address?.isDefault && (
-                              <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                              <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-2xs font-bold text-emerald-700">
                                 Principal
                               </span>
                             )}
                           </div>
                           <div className="mt-2 flex items-center justify-between">
-                            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                            <span className="text-2xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                               {address?.cep || ""}
                             </span>
-                            <span className={`rounded-full px-2 py-1 text-[10px] font-bold ${isCurrent ? "bg-brand-primary text-white" : "bg-slate-100 text-slate-600"}`}>
+                            <span className={`rounded-full px-2 py-1 text-2xs font-bold ${isCurrent ? "bg-brand-primary text-white" : "bg-slate-100 text-slate-600"}`}>
                               {isCurrent ? "Em uso" : "Usar"}
                             </span>
                           </div>
@@ -2028,7 +2028,7 @@ export const CartView = ({
                                 <button
                                   type="button"
                                   onClick={() => onOpenAddressManager?.()}
-                                  className="rounded-full border border-slate-200/80 bg-white px-2.5 py-1 text-[10px] font-bold text-slate-600 shadow-sm hover:bg-slate-50 transition active:scale-[0.97]"
+                                  className="rounded-full border border-slate-200/80 bg-white px-2.5 py-1 text-2xs font-bold text-slate-600 shadow-sm hover:bg-slate-50 transition active:scale-[0.97]"
                                 >
                                   Alterar
                                 </button>
@@ -2229,7 +2229,7 @@ export const CartView = ({
                           <MapPinLine size={14} weight="fill" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Destino</p>
+                          <p className="text-2xs font-bold uppercase tracking-[0.12em] text-slate-400">Destino</p>
                           <p className="mt-0.5 text-[13px] font-black leading-snug text-slate-900">
                             {customerAddressLines.primary || normalizedCustomerAddress}
                           </p>
@@ -2239,7 +2239,7 @@ export const CartView = ({
                             </p>
                           )}
                           {customerAddressLines.zipCode && (
-                            <span className="mt-2 inline-flex rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-black text-slate-500">
+                            <span className="mt-2 inline-flex rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-2xs font-black text-slate-500">
                               {customerAddressLines.zipCode}
                             </span>
                           )}
@@ -2255,7 +2255,7 @@ export const CartView = ({
                             <Bicycle size={15} weight="duotone" />
                           </div>
                           <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">Distância</p>
+                            <p className="text-2xs font-bold uppercase tracking-[0.1em] text-slate-400">Distância</p>
                             <p className="text-[15px] font-black text-slate-900">{deliveryCheck.distanceKm.toFixed(1)} km</p>
                           </div>
                         </div>
@@ -2265,7 +2265,7 @@ export const CartView = ({
                               <Clock size={15} weight="duotone" />
                             </div>
                             <div>
-                              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">Tempo</p>
+                              <p className="text-2xs font-bold uppercase tracking-[0.1em] text-slate-400">Tempo</p>
                               <p className="text-[15px] font-black text-slate-900">{deliveryCheck.durationMin} min</p>
                             </div>
                           </div>
@@ -2581,7 +2581,7 @@ export const CartView = ({
                       </div>
                     </div>
                     {reservationTs !== null && (
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#153A4C] ring-1 ring-[#336886]/15 shadow-sm">
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.1em] text-[#153A4C] ring-1 ring-[#336886]/15 shadow-sm">
                         <CalendarBlank size={11} weight="duotone" className="text-[#336886]" />
                         {new Date(reservationTs).toLocaleString("pt-BR", {
                           day: "2-digit",
@@ -2641,7 +2641,7 @@ export const CartView = ({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">Horário</p>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                      <span className="inline-flex items-center gap-1 text-2xs font-bold uppercase tracking-[0.1em] text-slate-400">
                         <Clock size={11} weight="duotone" />
                         11h às 22h30
                       </span>
@@ -2687,7 +2687,7 @@ export const CartView = ({
                         <Users size={13} weight="duotone" className="text-[#336886]" />
                         Pessoas
                       </p>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                      <span className="text-2xs font-bold uppercase tracking-[0.1em] text-slate-400">
                         {partyValue} {partyValue === 1 ? "pessoa" : "pessoas"}
                       </span>
                     </div>
@@ -2782,7 +2782,7 @@ export const CartView = ({
                     loading="lazy"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">
+                  <div className="w-full h-full flex items-center justify-center text-2xs text-gray-400">
                     🍖
                   </div>
                 )}
@@ -2878,10 +2878,10 @@ export const CartView = ({
         <div className="mb-4 sm:mb-6 rounded-[1.9rem] border border-slate-100 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(241,245,249,0.95)_100%)] p-4 shadow-[0_24px_48px_-34px_rgba(15,23,42,0.24)]">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Adicionar ao pedido</p>
+              <p className="text-2xs font-black uppercase tracking-[0.2em] text-slate-400">Adicionar ao pedido</p>
               <p className="mt-1 text-sm font-bold text-slate-900">Complete sua sacola com mais alguns favoritos</p>
             </div>
-            <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886] shadow-sm">
+            <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.14em] text-[#336886] shadow-sm">
               Sugestões
             </span>
           </div>
@@ -2934,13 +2934,13 @@ export const CartView = ({
                     {imageUrl ? (
                       <img src={imageUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">🍖</div>
+                      <div className="flex h-full w-full items-center justify-center text-2xs text-slate-400">🍖</div>
                     )}
                   </div>
                 );
               })}
               {extraCartPreviewCount > 0 ? (
-                <span className="inline-flex h-10 min-w-[2.5rem] items-center justify-center rounded-full border-2 border-white bg-[#153A4C] px-2 text-[10px] font-black text-white shadow-sm">
+                <span className="inline-flex h-10 min-w-[2.5rem] items-center justify-center rounded-full border-2 border-white bg-[#153A4C] px-2 text-2xs font-black text-white shadow-sm">
                   +{extraCartPreviewCount}
                 </span>
               ) : null}
@@ -2956,7 +2956,7 @@ export const CartView = ({
                     {imageUrl ? (
                       <img src={imageUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">🍖</div>
+                      <div className="flex h-full w-full items-center justify-center text-2xs text-slate-400">🍖</div>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -3011,7 +3011,7 @@ export const CartView = ({
               <Wallet size={21} weight="duotone" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">
+              <p className="text-2xs font-black uppercase tracking-[0.22em] text-[#336886]">
                 Pagamento
               </p>
               <h2 className="text-base font-black tracking-tight text-slate-950">
@@ -3030,7 +3030,7 @@ export const CartView = ({
                 {renderPaymentMethodIcon("pix_loja", { size: "sm", selected: true, tone: "local" })}
                 <div className="min-w-0">
                   <p className="text-[11px] font-black text-emerald-700">Pix da loja</p>
-                  <p className="text-[10px] leading-tight text-slate-500">
+                  <p className="text-2xs leading-tight text-slate-500">
                     A chave Pix da loja será exibida após confirmar o pedido.
                   </p>
                 </div>
@@ -3052,7 +3052,7 @@ export const CartView = ({
                 <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Itens do pedido</p>
                 <p className="mt-1 text-xs text-slate-500">Confirme os itens e quantidades antes de enviar.</p>
               </div>
-              <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
+              <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-2xs font-black uppercase tracking-[0.14em] text-slate-600">
                 {totalCartUnits} {totalCartUnits === 1 ? "item" : "itens"}
               </span>
             </div>
@@ -3066,12 +3066,12 @@ export const CartView = ({
                         {imageUrl ? (
                           <img src={imageUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-400">🍖</div>
+                          <div className="flex h-full w-full items-center justify-center text-2xs text-slate-400">🍖</div>
                         )}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex min-w-[1.6rem] items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-[10px] font-black text-slate-700 ring-1 ring-slate-200">
+                          <span className="inline-flex min-w-[1.6rem] items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-2xs font-black text-slate-700 ring-1 ring-slate-200">
                             {item.qty}x
                           </span>
                           <p className="truncate text-sm font-bold text-slate-800">{item.name}</p>
@@ -3222,7 +3222,7 @@ export const CartView = ({
                   setCheckoutStep(3);
                   openPaymentSheet();
                 }}
-                className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/12 bg-[#336886]/7 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition hover:bg-[#336886]/12 active:scale-[0.98]"
+                className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/12 bg-[#336886]/7 px-3 py-2 text-2xs font-black uppercase tracking-[0.12em] text-[#336886] transition hover:bg-[#336886]/12 active:scale-[0.98]"
               >
                 <CreditCard size={13} weight="duotone" />
                 Alterar
@@ -3306,7 +3306,7 @@ export const CartView = ({
                   ? "bg-[linear-gradient(135deg,#0f172a,#153A4C)] text-white cursor-pointer shadow-[0_20px_42px_-26px_rgba(21,58,76,0.56)]"
                   : checkoutStep === 3
                   ? "bg-[linear-gradient(135deg,#336886,#207A52)] text-white cursor-pointer shadow-[0_18px_36px_-24px_rgba(51,104,134,0.55)]"
-                  : "bg-slate-900 text-white cursor-pointer"
+                  : "bg-[linear-gradient(135deg,#0f172a,#153A4C)] text-white cursor-pointer shadow-[0_20px_42px_-26px_rgba(21,58,76,0.56)]"
               }`}
               style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
             >
@@ -3393,7 +3393,7 @@ export const CartView = ({
               className={`relative w-full overflow-hidden font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
                 primaryCtaDisabled
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
-                  : "bg-slate-900 text-white cursor-pointer"
+                  : "bg-[linear-gradient(135deg,#0f172a,#153A4C)] text-white cursor-pointer shadow-[0_20px_42px_-26px_rgba(21,58,76,0.56)]"
               }`}
               style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
             >
@@ -3427,7 +3427,7 @@ export const CartView = ({
               <div className="mx-auto mb-3 h-1.5 w-11 rounded-full bg-slate-200" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Pagamento</p>
+                  <p className="text-2xs font-black uppercase tracking-[0.22em] text-[#336886]">Pagamento</p>
                   <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Trocar forma de pagamento</h3>
                   <p className="mt-1 text-xs font-semibold leading-snug text-slate-500">
                     Selecione uma opção abaixo. O pedido continua igual e a troca aplica na hora.
@@ -3447,12 +3447,12 @@ export const CartView = ({
               <div className="mt-3 flex items-center gap-3 rounded-[1.25rem] border border-[#336886]/10 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)] p-3 shadow-[0_14px_30px_-26px_rgba(51,104,134,0.28)]">
                 {renderPaymentMethodIcon(activePaymentId, { size: "sm", selected: true, tone: activePaymentTone })}
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
+                  <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#336886]">
                     Forma atual
                   </p>
                   <p className="truncate text-sm font-black text-slate-950">{activePaymentLabel}</p>
                 </div>
-                <span className="shrink-0 rounded-full border border-[#336886]/10 bg-white px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886]">
+                <span className="shrink-0 rounded-full border border-[#336886]/10 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-[#336886]">
                   Ativa
                 </span>
               </div>
@@ -3479,14 +3479,14 @@ export const CartView = ({
                 <section className="rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(232,244,248,0.86))] p-3.5 shadow-[0_22px_50px_-44px_rgba(51,104,134,0.32)]">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]">
+                      <p className="text-2xs font-black uppercase tracking-[0.24em] text-[#336886]">
                         Pagar online
                       </p>
                       <p className="mt-1 text-[11px] leading-snug text-slate-500">
                         Processado com segurança antes do pedido seguir para a loja.
                       </p>
                     </div>
-                    <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/92 px-2.5 py-1.5 text-[10px] font-black text-slate-600 shadow-[0_14px_26px_-22px_rgba(51,104,134,0.34)]">
+                    <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/92 px-2.5 py-1.5 text-2xs font-black text-slate-600 shadow-[0_14px_26px_-22px_rgba(51,104,134,0.34)]">
                       {mercadoPagoMeta.icon ? (
                         <img src={mercadoPagoMeta.icon} alt={mercadoPagoMeta.label} className="h-4 w-4 object-contain" />
                       ) : (
@@ -3505,14 +3505,14 @@ export const CartView = ({
                 <section className="rounded-[1.55rem] border border-emerald-200/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(238,250,241,0.86))] p-3.5 shadow-[0_22px_50px_-44px_rgba(32,122,82,0.28)]">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-700">
+                      <p className="text-2xs font-black uppercase tracking-[0.24em] text-emerald-700">
                         Pagar na entrega, retirada ou balcão
                       </p>
                       <p className="mt-1 text-[11px] leading-snug text-slate-500">
                         Ideal para dinheiro, Pix da loja ou cartão na entrega, retirada ou mesa.
                       </p>
                     </div>
-                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-white/90 px-2.5 py-1.5 text-[10px] font-black text-emerald-700">
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-white/90 px-2.5 py-1.5 text-2xs font-black text-emerald-700">
                       <ShieldCheck size={12} weight="duotone" />
                       Presencial
                     </span>
@@ -3540,7 +3540,7 @@ export const CartView = ({
               <div className="mx-auto mb-3 h-1.5 w-11 rounded-full bg-[#336886]/18" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Observação</p>
+                  <p className="text-2xs font-black uppercase tracking-[0.22em] text-[#336886]">Observação</p>
                   <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Alguma instrução para a loja?</h3>
                   <p className="mt-1 text-xs font-semibold leading-snug text-slate-500">
                     {customerOrderNoteCopy.helper}
@@ -3558,7 +3558,7 @@ export const CartView = ({
             </div>
             <div className="space-y-4 overflow-y-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
               <div>
-                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                <p className="mb-2 text-2xs font-black uppercase tracking-[0.18em] text-slate-400">
                   Atalhos rápidos
                 </p>
                 <div className="grid grid-cols-2 gap-2">
@@ -3593,7 +3593,7 @@ export const CartView = ({
                   className="min-h-[118px] w-full resize-none rounded-[1.2rem] border border-white bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-[#336886]/45 focus:ring-4 focus:ring-[#336886]/10"
                   data-testid="customer-order-note-input"
                 />
-                <div className="mt-2 flex items-center justify-between gap-3 text-[10.5px] font-bold text-slate-400">
+                <div className="mt-2 flex items-center justify-between gap-3 text-2xs font-bold text-slate-400">
                   <span>Evite pedir item extra por aqui; use o cardápio para adicionais.</span>
                   <span className="shrink-0 tabular-nums rounded-full bg-white px-2 py-0.5 shadow-sm">
                     {customerNoteDraft.length}/{CUSTOMER_ORDER_NOTE_MAX_LENGTH}
@@ -3686,14 +3686,14 @@ export const CartView = ({
                 </p>
                 {storeAddress ? (
                   <div className="mt-3 rounded-2xl border border-amber-200/70 bg-white/85 px-3 py-2 shadow-[0_12px_24px_-20px_rgba(245,158,11,0.45)]">
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Local da retirada</p>
+                    <p className="text-2xs font-black uppercase tracking-[0.16em] text-slate-500">Local da retirada</p>
                     <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-800">{storeAddressLines.primary || normalizedStoreAddress}</p>
                     {storeAddressSubtitle && (
                       <p className="mt-0.5 text-xs font-medium leading-relaxed text-slate-500">{storeAddressSubtitle}</p>
                     )}
                   </div>
                 ) : null}
-                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-amber-700">
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-2xs font-black uppercase tracking-[0.14em] text-amber-700">
                   <ShieldCheck size={12} weight="duotone" />
                   Confirmação extra para retirada distante
                 </div>
