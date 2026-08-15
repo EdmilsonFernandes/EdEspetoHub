@@ -804,7 +804,7 @@ export function HospitalityPlacePage() {
                                 e.stopPropagation();
                                 setBannerIndex(index);
                               }}
-                              className={`h-2 rounded-full transition ${active ? 'w-6 bg-white shadow-sm' : 'w-2 bg-white/55 hover:bg-white/80'}`}
+                              className={`relative h-2 rounded-full transition after:absolute after:inset-[-1.1rem] after:content-[''] ${active ? 'w-6 bg-white shadow-sm' : 'w-2 bg-white/55 hover:bg-white/80'}`}
                             />
                           );
                         })}

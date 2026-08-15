@@ -55,12 +55,12 @@ export function AppGlassHeader({
       <div className={`mx-auto ${maxWidthClassName} px-4`}>
         <div className="flex min-h-[3.95rem] items-center justify-between gap-3">
           {hideBack ? (
-            <span className="h-10 w-10 shrink-0" aria-hidden="true" />
+            <span className="h-11 w-11 shrink-0" aria-hidden="true" />
           ) : (
             <button
               type="button"
               onClick={handleBack}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/70 text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.55)] ring-1 ring-[#d7e7ef]/70 transition-all active:scale-95"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/70 text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.55)] ring-1 ring-[#d7e7ef]/70 transition-all active:scale-95"
               aria-label="Voltar"
             >
               <ArrowLeft size={18} weight="bold" />
@@ -79,7 +79,7 @@ export function AppGlassHeader({
           </div>
 
           <div className={`flex h-10 shrink-0 items-center justify-center ${right ? 'min-w-10' : 'w-10'}`}>
-            {right ?? <span className="h-10 w-10" aria-hidden="true" />}
+            {right ?? <span className="h-11 w-11" aria-hidden="true" />}
           </div>
         </div>
         {children ? <div className="pb-3">{children}</div> : null}

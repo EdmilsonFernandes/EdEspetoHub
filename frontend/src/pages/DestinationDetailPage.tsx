@@ -372,7 +372,7 @@ export function DestinationDetailPage() {
                   <button
                     type="button"
                     onClick={() => jumpToDestinationSection('hospedagens', 'HOSPEDAGENS')}
-                    className="jnc-hub-touch inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#336886]/16"
+                    className="jnc-hub-touch inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#336886]/16"
                     aria-label={`Ver ${places.length} hospedagens`}
                   >
                     <Bed size={16} weight="duotone" className="shrink-0" />
@@ -381,7 +381,7 @@ export function DestinationDetailPage() {
                   <button
                     type="button"
                     onClick={() => jumpToDestinationSection('servicos-cidade', 'TODOS')}
-                    className="jnc-hub-touch inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#336886]/16"
+                    className="jnc-hub-touch inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#336886]/16"
                     aria-label={`Ver ${listings.length} serviços`}
                   >
                     <ForkKnife size={16} weight="duotone" className="shrink-0" />

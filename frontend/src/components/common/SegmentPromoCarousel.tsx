@@ -215,7 +215,7 @@ export function SegmentPromoCarousel({
                 aria-label={`Ir para banner ${index + 1}`}
                 aria-current={index === activeIndex ? 'true' : undefined}
                 onClick={() => emblaApi?.scrollTo(index)}
-                className="jnc-hub-touch grid h-5 w-5 place-items-center rounded-full transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="jnc-hub-touch relative grid h-6 w-6 place-items-center rounded-full transition-all duration-300 after:absolute after:inset-[-10px] after:content-[''] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 <span
                   className={`rounded-full transition-all duration-300 ${
