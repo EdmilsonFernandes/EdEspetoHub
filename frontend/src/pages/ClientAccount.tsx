@@ -968,7 +968,7 @@ export function ClientAccount() {
                     <div className="min-w-0">
                       <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Trocar senha</p>
                       <p className="mt-1 text-[11px] font-semibold leading-5 text-slate-500">
-                        Confirme a senha atual. MFA e biometria protegem o acesso, mas não substituem essa confirmação.
+                        Digite sua senha atual para confirmar a troca.
                       </p>
                     </div>
                   </div>
@@ -989,16 +989,6 @@ export function ClientAccount() {
                       onChange={e => setPwdForm(p => ({...p, newPassword: e.target.value}))}
                       className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#bfd6e4] focus:ring-2 focus:ring-[#336886]/10"
                     />
-                    <div className="flex flex-wrap gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-500">
-                        <CheckCircle size={11} weight="fill" className="text-[#336886]" />
-                        Senha atual obrigatória
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-emerald-700">
-                        <ShieldCheck size={11} weight="fill" />
-                        MFA protege novos acessos
-                      </span>
-                    </div>
                     <button
                       onClick={handleChangePassword}
                       disabled={pwdLoading}
@@ -1152,13 +1142,22 @@ export function ClientAccount() {
           ) : null}
 
           {!settingsOnly && (
-            <section className="pt-6 flex justify-center">
+            <section className="mt-8 space-y-3 border-t border-slate-200/70 pt-6">
               <button
-                onClick={() => setShowDeactivateModal(true)}
-                className="text-xs font-semibold text-slate-400 transition-colors hover:text-rose-500 active:scale-95"
+                onClick={logout}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-3 text-xs font-black uppercase tracking-[0.14em] text-slate-600 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.3)] transition active:scale-[0.98] hover:border-[#336886]/25 hover:text-[#336886]"
               >
-                Excluir minha conta
+                Sair da conta
               </button>
+              <div className="flex flex-col items-center gap-2 rounded-2xl border border-rose-100 bg-rose-50/50 px-4 py-3.5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-rose-300">Zona de risco</p>
+                <button
+                  onClick={() => setShowDeactivateModal(true)}
+                  className="text-xs font-black text-rose-500 transition-colors hover:text-rose-600 active:scale-95"
+                >
+                  Excluir minha conta
+                </button>
+              </div>
             </section>
           )}
         </div>

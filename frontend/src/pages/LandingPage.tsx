@@ -90,7 +90,7 @@ export function LandingPage() {
   useEffect(() => {
     document.title = 'Já no Caminho | Venda online, organize pedidos e entregue melhor';
     const description =
-      'Sistema para comerciantes venderem online sem comissão por pedido: cardápio digital, pedidos em tempo real, entregadores, pagamentos, condomínios, chalés e turismo local.';
+      'Peça de lojas, feiras de condomínio e destinos turísticos num só app — ou coloque seu negócio online sem comissão por pedido, com cardápio digital, entregas e pagamentos.';
     upsertMeta('description', description, 'name');
     upsertMeta('og:title', 'Já no Caminho | Venda online, organize pedidos e entregue melhor', 'property');
     upsertMeta('og:description', description, 'property');
@@ -314,7 +314,7 @@ export function LandingPage() {
   const ctaPrimaryHref = whatsAppBusinessHref;
 
   const heroHighlights = [
-    { icon: ShieldCheck, title: '3 meses VIP para as 50 primeiras', desc: 'Campanha de lançamento para a loja testar com estrutura real.' },
+    { icon: Storefront, title: 'Peça de lojas e feiras', desc: 'Cardápio, checkout e entrega no mesmo app — inclusive feira ao vivo do seu condomínio.' },
     { icon: Package, title: 'Pedido pronto para produzir', desc: 'Cardápio, checkout e impressão no mesmo fluxo.' },
     { icon: Motorcycle, title: 'Entrega conectada à loja', desc: 'Entregador recebe oferta, aceita e atualiza o cliente.' },
   ];
@@ -347,39 +347,38 @@ export function LandingPage() {
 
                 <div className="space-y-4">
                   <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl leading-[1.05]">
-                    Seu negócio vendendo online<br />
+                    Peça perto de você.<br />
                     <span className="bg-gradient-to-r from-cyan-400 via-emerald-400 to-cyan-400 bg-[size:200%_auto] bg-clip-text text-transparent animate-pulse">
-                      sem comissão por pedido.
+                      Ou venda sem comissão por pedido.
                     </span>
                   </h1>
                   <p className="mx-auto max-w-xl text-slate-300 text-sm sm:text-base font-medium leading-relaxed lg:mx-0">
-                    Do cardápio à entrega, tudo num só app — para comida, varejo e serviço local. O cliente paga e o dinheiro cai direto no seu Mercado Pago. Planos a partir de R$ 69,90/mês.
+                    Do lanche da feira do condomínio ao fim de semana num chalé: lojas, feiras ao vivo e destinos da sua região num só app. E se o negócio é seu, ele vende online com o dinheiro caindo direto no seu Mercado Pago — planos a partir de R$ 69,90/mês.
                   </p>
                 </div>
 
-                {/* CTAs */}
+                {/* CTAs — duas vozes em igualdade: consumidor primeiro (quem pede financia o marketplace) */}
                 <div className="flex flex-col gap-3 sm:flex-row justify-center lg:justify-start">
                   <button
                     type="button"
-                    onClick={() => navigate('/create?plan=trial')}
+                    onClick={() => navigate('/hub')}
                     className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-black text-slate-950 shadow-[0_20px_40px_-15px_rgba(255,255,255,0.25)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    Criar minha loja
+                    Pedir agora
                     <ArrowRight size={16} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
                   </button>
-                  <a
-                    href={ctaPrimaryHref}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => navigate('/create?plan=trial')}
                     className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-sm font-black text-white backdrop-blur-md transition-colors hover:bg-white/10 active:scale-[0.98]"
                   >
-                    <WhatsappLogo size={18} weight="fill" className="text-emerald-400" />
-                    Falar no WhatsApp
-                  </a>
+                    <Storefront size={18} weight="fill" className="text-emerald-400" />
+                    Criar minha loja
+                  </button>
                 </div>
 
-                {/* Assistir tour (abre modal de vídeo) */}
-                <div className="pt-1">
+                {/* Assistir tour + WhatsApp */}
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setTourOpen(true)}
@@ -388,6 +387,15 @@ export function LandingPage() {
                     <PlayCircle size={18} weight="fill" className="text-sky-400" />
                     Assistir tour do app
                   </button>
+                  <a
+                    href={ctaPrimaryHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-xs font-bold text-slate-300 transition-colors hover:text-white"
+                  >
+                    <WhatsappLogo size={16} weight="fill" className="text-emerald-400" />
+                    Falar no WhatsApp
+                  </a>
                 </div>
 
                 {/* Mini Highlights */}

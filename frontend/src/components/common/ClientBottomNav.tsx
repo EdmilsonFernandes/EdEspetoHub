@@ -9,6 +9,7 @@ type ClientBottomNavItem = 'home' | 'orders' | 'agenda' | 'destinations' | 'prof
 type ClientBottomNavProps = {
   active?: ClientBottomNavItem;
   hidden?: boolean;
+  onOpenHome?: () => void | Promise<void>;
   onOpenOrders?: () => void | Promise<void>;
   onOpenAgenda?: () => void | Promise<void>;
   onOpenProfile?: () => void | Promise<void>;
@@ -22,6 +23,7 @@ const HEIGHT_VAR = '--jnk-client-bottom-nav-height';
 export function ClientBottomNav({
   active = 'home',
   hidden = false,
+  onOpenHome,
   onOpenOrders,
   onOpenAgenda,
   onOpenProfile,
@@ -76,6 +78,14 @@ export function ClientBottomNav({
     `${itemBaseClass} ${active === item ? 'text-[#2d5f7b]' : inactiveItemClass}`;
   const warmupRoute = (path: string) => () => prefetchRouteByPath(path);
 
+  const openHome = () => {
+    if (onOpenHome) {
+      void onOpenHome();
+      return;
+    }
+    navigate('/hub');
+  };
+
   const openOrders = () => {
     if (onOpenOrders) {
       void onOpenOrders();
@@ -111,7 +121,7 @@ export function ClientBottomNav({
     >
       <div className="mx-auto max-w-none rounded-none border-t border-slate-200/60 bg-white/[0.97] px-2 pt-2 shadow-[0_-18px_44px_-28px_rgba(15,23,42,0.32)] backdrop-blur-2xl">
         <div className="grid min-h-[4.2rem] grid-cols-5 items-center gap-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
-          <button type="button" onPointerEnter={warmupRoute('/hub')} onFocus={warmupRoute('/hub')} onTouchStart={warmupRoute('/hub')} onClick={() => navigate('/hub')} className={itemClass('home')} aria-current={active === 'home' ? 'page' : undefined}>
+          <button type="button" onPointerEnter={warmupRoute('/hub')} onFocus={warmupRoute('/hub')} onTouchStart={warmupRoute('/hub')} onClick={openHome} className={itemClass('home')} aria-current={active === 'home' ? 'page' : undefined}>
             <span className={iconClass(active === 'home')}>
               <House size={16} weight={active === 'home' ? 'fill' : 'duotone'} />
             </span>
