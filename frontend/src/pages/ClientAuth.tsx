@@ -662,6 +662,7 @@ export function ClientAuth() {
                 />
               </div>
             )}
+            <label htmlFor="email" className="mb-1 block pl-1 text-[11px] font-bold text-slate-500">E-mail</label>
             <div className="relative">
               <EnvelopeSimple size={18} weight="duotone" className="absolute left-3 top-[1.32rem] text-slate-400 sm:top-[1.45rem]" />
               <input
@@ -685,6 +686,7 @@ export function ClientAuth() {
               />
               {fieldErrors.email ? <p id="customer-email-error" className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.email}</p> : null}
             </div>
+            <label htmlFor="password" className="mb-1 mt-3 block pl-1 text-[11px] font-bold text-slate-500">Senha</label>
             <div className="relative">
               <LockKey size={18} weight="duotone" className="absolute left-3 top-[1.32rem] text-slate-400 sm:top-[1.45rem]" />
               <input

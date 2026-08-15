@@ -141,7 +141,15 @@ export function ClientAccount() {
         setNameDraft(String(meData?.fullName || ''));
         setPhoneDraft(formatBrazilPhoneDraft(meData?.phone || ''));
         setAddresses(Array.isArray(addressesData) ? addressesData : []);
-        setOrders(Array.isArray(ordersData) ? ordersData : []);
+        // /customer/orders devolve wrapper { data: [...] } — sem o unwrap a Conta
+        // mostrava "0 pedidos salvos" com pedidos existentes (auditoria UX 15/08).
+        setOrders(
+          Array.isArray(ordersData)
+            ? ordersData
+            : Array.isArray(ordersData?.data)
+              ? ordersData.data
+              : []
+        );
 
         if (meData) {
           syncCustomerSession(meData);

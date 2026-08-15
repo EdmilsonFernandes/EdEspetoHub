@@ -74,7 +74,7 @@ export function AppGlassHeader({
                 <p className="truncate text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]/82">{eyebrow}</p>
               </div>
             ) : null}
-            <h1 className="mt-0.5 truncate text-[15px] font-black tracking-[-0.02em] text-[#153A4C]">{title}</h1>
+            <div role="heading" aria-level={2} className="mt-0.5 truncate text-[15px] font-black tracking-[-0.02em] text-[#153A4C]">{title}</div>
             {subtitle ? <p className="mt-0.5 truncate text-[11px] font-semibold text-[#336886]/72">{subtitle}</p> : null}
           </div>
 

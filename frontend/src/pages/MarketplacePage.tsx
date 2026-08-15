@@ -767,6 +767,10 @@ export function MarketplacePage() {
     [homeConfig.marketingPopup.actionLabel, homeConfig.marketingPopup.actionUrl, marketingPopupHasAction]
   );
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
+  // Boas-vindas mínimas, 1x por navegador (auditoria UX: zero onboarding pós-login)
+  const [welcomeOpen, setWelcomeOpen] = useState(() => {
+    try { return !localStorage.getItem('jnc:welcome-v1'); } catch { return false; }
+  });
   const [customerSession, setCustomerSession] = useState(() => readCustomerSession());
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
   const [deactivating, setDeactivating] = useState(false);
@@ -2095,6 +2099,26 @@ export function MarketplacePage() {
         />
 
         <main className={`mx-auto flex max-w-[1200px] flex-col gap-4 px-4 sm:gap-5 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
+          <h1 className="sr-only">Já no Caminho — lojas, feiras de condomínio e destinos</h1>
+          {isCustomerLogged && welcomeOpen ? (
+            <section className="order-1 rounded-[1.35rem] border border-[#5FD35A]/25 bg-[linear-gradient(135deg,#f2fbf4_0%,#ffffff_60%,#f0f8ff_100%)] px-4 py-3.5 shadow-[0_18px_40px_-34px_rgba(21,58,76,0.3)]">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[13px] font-black tracking-[-0.02em] text-slate-900">Bem-vindo de volta ao seu bairro</p>
+                  <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">
+                    Peça das lojas abertas, acompanhe as <span className="font-black text-[#166534]">feiras do seu condomínio</span> e explore <span className="font-black text-[#336886]">destinos e chalés</span> — tudo por aqui.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { try { localStorage.setItem('jnc:welcome-v1', '1'); } catch {} setWelcomeOpen(false); }}
+                  className="jnc-hub-touch inline-flex h-9 shrink-0 items-center rounded-full bg-[#153A4C] px-4 text-2xs font-black uppercase tracking-[0.1em] text-white shadow-[0_12px_26px_-16px_rgba(21,58,76,0.6)] active:scale-95"
+                >
+                  Entendi
+                </button>
+              </div>
+            </section>
+          ) : null}
           {/* Acompanhamento anonimo salvo neste navegador */}
           {!isCustomerLogged ? (
             <HubAnonymousActiveOrders
@@ -3257,12 +3281,12 @@ export function MarketplacePage() {
           'Entre para ver as lojas participantes, horários da agenda e as opções de retirada na barraca ou entrega no apartamento quando disponíveis.';
         return (
           <div
-            className="fixed inset-0 z-[255] flex items-center justify-center bg-slate-950/58 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md animate-in fade-in duration-200"
+            className="fixed inset-0 z-[255] flex items-end justify-center bg-slate-950/58 px-0 pb-0 backdrop-blur-md animate-in fade-in duration-200 sm:items-center sm:px-4 sm:py-[max(1rem,env(safe-area-inset-top))]"
             role="dialog"
             aria-modal="true"
             aria-label={`Feira do condomínio ${condominiumPromoModal.name}`}
           >
-            <div className="relative w-full max-w-[430px] max-h-[calc(100vh-2rem)] overflow-y-auto rounded-[2rem] border border-white/80 bg-white shadow-[0_32px_74px_-34px_rgba(15,23,42,0.74)] animate-in zoom-in-95 duration-200">
+            <div className="relative w-full max-w-[430px] max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-t-[1.6rem] border border-white/80 bg-white shadow-[0_32px_74px_-34px_rgba(15,23,42,0.74)] animate-in slide-in-from-bottom-4 duration-200 sm:max-h-[calc(100vh-2rem)] sm:rounded-[2rem]">
               <button
                 type="button"
                 onClick={() => setCondominiumPromoModal(null)}

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { ComponentType, MouseEvent } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Heart, MapPin, Star, Storefront } from '@phosphor-icons/react';
 import { getStoreAvatarUrl } from '../../../utils/storeAvatar';
 import { prefetchRouteByPath } from '../../../utils/clientRoutePrefetch';
@@ -93,6 +93,7 @@ export function HubStoreCard({
   myCondoPickupLabel,
   onToggleFavorite,
 }: HubStoreCardProps) {
+  const prefersReducedMotion = useReducedMotion();
   const toggleFavorite = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -111,7 +112,7 @@ export function HubStoreCard({
       <motion.div
         custom={index}
         variants={cardVariants}
-        initial="hidden"
+        initial={prefersReducedMotion ? false : "hidden"}
         animate="visible"
         {...tapSpring}
         className="contents"
@@ -222,7 +223,7 @@ export function HubStoreCard({
     <motion.div
       custom={index}
       variants={cardVariants}
-      initial="hidden"
+      initial={prefersReducedMotion ? false : "hidden"}
       animate="visible"
       {...tapSpring}
       className="contents"

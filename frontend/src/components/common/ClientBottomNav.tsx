@@ -150,7 +150,7 @@ export function ClientBottomNav({
               <MapTrifold size={16} weight={active === 'destinations' ? 'fill' : 'duotone'} />
             </span>
             <span className={dotClass(active === 'destinations')} />
-            <span>Visite</span>
+            <span>Destinos</span>
           </button>
 
           <button type="button" onPointerEnter={warmupRoute('/cliente/conta')} onFocus={warmupRoute('/cliente/conta')} onTouchStart={warmupRoute('/cliente/conta')} onClick={openProfile} className={itemClass('profile')} aria-current={active === 'profile' ? 'page' : undefined}>
@@ -158,7 +158,7 @@ export function ClientBottomNav({
               <ListPlus size={17} weight={active === 'profile' ? 'bold' : 'duotone'} />
             </span>
             <span className={dotClass(active === 'profile')} />
-            <span>Mais</span>
+            <span>Conta</span>
           </button>
         </div>
       </div>
