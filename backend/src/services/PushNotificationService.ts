@@ -616,7 +616,10 @@ export class PushNotificationService {
     return { ok: true, sent };
   }
 
-  private resolveCustomerStatusLabel(status?: string | null) {
+  // public: o OrderService usa este mapa como título das notificações de pedido —
+  // "Pedido saiu para entrega" informa; "Pedido atualizado" genérico não (168 registros
+  // idênticos na central em produção, auditoria UX 15/08).
+  resolveCustomerStatusLabel(status?: string | null) {
     const normalized = String(status || '').trim().toLowerCase();
     const labels: Record<string, string> = {
       pending: 'Pedido recebido',

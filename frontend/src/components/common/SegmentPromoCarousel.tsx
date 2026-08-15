@@ -16,7 +16,7 @@ export type PromoSlide = {
 const PROMO_SLIDES: PromoSlide[] = [
   {
     id: 'mercado-pago',
-    image: '/marketing/mp01.png',
+    image: '/marketing/mp01.webp',
     imageAlt: 'Banner Mercado Pago do Ja no Caminho para ativar loja online',
     fit: 'cover',
   },

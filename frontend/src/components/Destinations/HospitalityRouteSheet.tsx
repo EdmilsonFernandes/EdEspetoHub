@@ -242,7 +242,7 @@ export function HospitalityRouteSheet({
               <button
                 type="button"
                 onClick={() => void copyRouteUrl()}
-                className={`jnc-hub-touch inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] transition active:scale-95 ${
+                className={`jnc-hub-touch inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-full border px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] transition active:scale-95 ${
                   copied
                     ? 'border-emerald-200 bg-[#5FD35A]/16 text-[#2d5f7b]'
                     : 'border-slate-200 bg-white text-slate-600 hover:border-[#336886]/22 hover:text-[#336886]'

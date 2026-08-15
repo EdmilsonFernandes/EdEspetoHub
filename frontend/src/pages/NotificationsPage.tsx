@@ -65,6 +65,10 @@ export function NotificationsPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    document.title = 'Notificações | Já no Caminho';
+  }, []);
+
   const handleRead = async (n: Notification) => {
     if (!n.read) {
       await apiClient.patch(`/customer/notifications/${n.id}/read`, {}).catch(() => {});

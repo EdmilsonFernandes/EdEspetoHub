@@ -121,6 +121,7 @@ export function RouteMapView({
 
   const heightClass = compact ? 'h-[180px] sm:h-[200px]' : 'h-[240px] sm:h-[280px]';
   const zoomBadge = Math.max(10, Math.min(18, Number(zoom || 13)));
+  void zoomBadge;
   const shouldAnimate = premiumMotion && !reducedMotion;
   const mapSurfaceClass = premiumMotion
     ? 'border-white/85 bg-[radial-gradient(circle_at_12%_0%,rgba(95,211,90,0.20),transparent_34%),radial-gradient(circle_at_90%_8%,rgba(51,104,134,0.18),transparent_38%),linear-gradient(135deg,#fffdf7_0%,#eef7f4_54%,#f4ead6_100%)] shadow-[0_28px_70px_-46px_rgba(15,23,42,0.56)] ring-1 ring-white/65'
@@ -230,10 +231,7 @@ export function RouteMapView({
 
         <div className="absolute left-3 top-3 flex items-center gap-2">
           <span className={premiumMotion ? 'rounded-full border border-white/75 bg-white/82 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#153A4C] shadow-[0_12px_24px_-22px_rgba(28,25,23,0.6)] backdrop-blur-xl' : 'rounded-full border border-stone-900/10 bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-stone-700 shadow-[0_12px_24px_-22px_rgba(28,25,23,0.6)]'}>
-            {premiumMotion ? 'Rota viva' : 'Rota estimada'}
-          </span>
-          <span className={premiumMotion ? 'rounded-full border border-[#5FD35A]/25 bg-[#5FD35A]/14 px-2 py-1 text-[10px] font-bold text-[#153A4C] backdrop-blur-xl' : 'rounded-full border border-amber-200/80 bg-amber-50/90 px-2 py-1 text-[10px] font-bold text-amber-800'}>
-            Zoom {zoomBadge}
+            Sua rota
           </span>
         </div>
 

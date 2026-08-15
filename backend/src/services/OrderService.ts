@@ -638,13 +638,17 @@ export class OrderService
     );
     const storeName = String(order?.store?.name || '').trim();
     const body = storeName ? `${storeName}: ${statusBody}` : statusBody;
+    // Título específico por status ("Pedido saiu para entrega") em vez do genérico
+    // "Pedido atualizado" — 168 títulos idênticos na central do cliente em produção
+    // tornavam o sino irrelevante (auditoria UX 15/08).
+    const statusTitle = this.pushService.resolveCustomerStatusLabel(String(order?.status || ''));
     const orderType = String((order as any)?.type || '').trim();
     const eta = (order as any)?.eta || null;
     const etaWindowMin = Number(eta?.windowMin) > 0 ? String(eta.windowMin) : '';
     const etaWindowMax = Number(eta?.windowMax) > 0 ? String(eta.windowMax) : '';
     const logoUrl = (order?.store as any)?.settings?.logoUrl || null;
     const payload = {
-      title: 'Pedido atualizado',
+      title: statusTitle,
       body,
       // dataOnly: push sem bloco notification -> onMessageReceived dispara em background/Doze,
       // permitindo que o JncFirebaseMessagingService monte a notificacao ongoing de
@@ -658,7 +662,7 @@ export class OrderService
         status: String(order.status || ""),
         notificationType: 'customer_order_update',
         // title/body no data porque dataOnly retira o bloco notification; o nativo le do data.
-        title: 'Pedido atualizado',
+        title: statusTitle,
         body,
         ...(storeName ? { storeName } : {}),
         ...(orderType ? { orderType } : {}),

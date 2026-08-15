@@ -283,14 +283,14 @@ export function PreStoreDetailSheet({
                         <MapPinLine size={17} weight="duotone" />
                       </span>
                     </div>
-                    <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-start gap-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                    <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-start gap-2 text-2xs font-black tracking-[0.02em] text-slate-400">
                       <span className="truncate">{listing.title || 'Serviço'}</span>
                       <span className="text-[#336886]">{routeDistanceLabel || 'rota'}</span>
                       <span className="truncate text-right">{placeName || 'Chalé'}</span>
                     </div>
                   </SurfaceCard>
                   <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-600">
-                    Mostra a distância entre este serviço e a hospedagem para facilitar a chegada do motoboy.
+                    Mostra a distância entre este serviço e a sua hospedagem para orientar a entrega.
                   </p>
                   <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
                     {onOpenRoute ? (

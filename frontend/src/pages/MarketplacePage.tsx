@@ -2593,7 +2593,7 @@ export function MarketplacePage() {
                       ? 'Buscando também nos cardápios...'
                       : isShowingAllStores
                         ? `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} no app`
-                        : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} ${selectedCondominium ? 'no condomínio' : 'disponíveis'}`}
+                        : `${filteredStores.length} resultado${filteredStores.length === 1 ? '' : 's'} ${selectedCondominium ? 'no condomínio' : filteredStores.length === 1 ? 'disponível' : 'disponíveis'}`}
                   </p>
                 ) : null}
               </div>
@@ -2748,7 +2748,10 @@ export function MarketplacePage() {
             />
           )}
 
-          {/* CTA compacto para lojistas — premium style */}
+          {/* CTA compacto para lojistas — premium style.
+              Oculto dentro da feira de condomínio: recrutamento B2B não interrompe
+              o morador no meio do evento (auditoria UX 15/08). */}
+          {!selectedCondominium && (
           <section className="order-11 px-3 pb-2 pt-0">
             <button
               type="button"
@@ -2783,6 +2786,7 @@ export function MarketplacePage() {
               </div>
             </button>
           </section>
+          )}
           <section className="order-12 pb-2 sm:pb-4">
             <div className="mx-3 overflow-hidden rounded-[1.35rem] border border-white/80 bg-white/68 px-4 py-3.5 text-center shadow-[0_16px_36px_-30px_rgba(15,23,42,0.2)] ring-1 ring-slate-200/30 backdrop-blur-xl">
               <div className="flex items-center justify-center gap-2">
@@ -2794,16 +2798,6 @@ export function MarketplacePage() {
               <p className="mx-auto mt-2 max-w-[20rem] text-[11px] font-semibold leading-4 text-slate-500">
                 Conectando você aos lojistas, destinos e serviços da sua região.
               </p>
-              <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-                {['Marketplace local', 'Pedidos', 'Chalés', 'Feiras'].map((label) => (
-                  <span
-                    key={label}
-                    className="rounded-full border border-slate-200/70 bg-white/72 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-[#336886]"
-                  >
-                    {label}
-                  </span>
-                ))}
-              </div>
             </div>
           </section>
         </main>

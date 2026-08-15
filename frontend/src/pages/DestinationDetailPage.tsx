@@ -201,6 +201,10 @@ export function DestinationDetailPage() {
   const isNativePlatform = Capacitor.isNativePlatform();
 
   useEffect(() => {
+    document.title = payload?.destination?.name ? `${payload.destination.name} | Já no Caminho` : 'Destinos | Já no Caminho';
+  }, [payload]);
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     const scrollToTop = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });

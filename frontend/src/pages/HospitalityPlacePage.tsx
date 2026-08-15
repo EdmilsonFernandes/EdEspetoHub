@@ -516,6 +516,10 @@ export function HospitalityPlacePage() {
   const [routeSheet, setRouteSheet] = useState<any>(null);
 
   useEffect(() => {
+    document.title = payload?.hospitalityPlace?.name ? `${payload.hospitalityPlace.name} | Já no Caminho` : 'Destinos | Já no Caminho';
+  }, [payload]);
+
+  useEffect(() => {
     let active = true;
     setServiceFilter('all');
     setLoading(true);

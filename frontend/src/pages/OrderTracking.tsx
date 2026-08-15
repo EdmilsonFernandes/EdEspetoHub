@@ -1131,8 +1131,11 @@ export function OrderTracking() {
     const totalSec = Math.floor(etaCountdownMs / 1000);
     const h = Math.floor(totalSec / 3600);
     const m = Math.floor((totalSec % 3600) / 60);
-    const s = totalSec % 60;
-    return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
+    // Duração por extenso — "19:55" era lido como hora do dia e contradizia
+    // o "por volta das 08h24" do mesmo card (auditoria UX 15/08).
+    if (h > 0) return `${h} h${m > 0 ? ` ${String(m).padStart(2, '0')} min` : ''}`;
+    if (m >= 1) return `${m} min`;
+    return 'menos de 1 min';
   })();
   const storeWhatsappLink = buildWhatsAppContactUrl(storePhone, false, whatsappReceiptMessage);
   const postalIssueWhatsappMessage = useMemo(() => {
@@ -1585,7 +1588,7 @@ export function OrderTracking() {
         { id: 'pending', label: 'Pedido Recebido' },
         { id: 'preparing', label: 'Em Preparação' },
         { id: 'ready', label: 'Pronto para retirada' },
-        { id: 'done', label: hasOnlinePayment ? 'Retirada concluída' : 'Pago' },
+        { id: 'done', label: 'Retirada concluída' },
       ];
     }
     if (order?.type === 'reservation') {
@@ -1841,7 +1844,7 @@ export function OrderTracking() {
         eyebrow={storeName}
         eyebrowLogoSrc={storeLogo}
         eyebrowLogoAlt={storeName}
-        subtitle={`Pedido #${orderDisplayId}`}
+        subtitle={`Pedido #${String(order?.id || '').slice(0, 8)}`}
         onBack={handleBack}
         maxWidthClassName="max-w-5xl"
         topSlot={(

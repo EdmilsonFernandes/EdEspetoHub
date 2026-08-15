@@ -43,6 +43,10 @@ export function DestinationsPage() {
   const [selectedState, setSelectedState] = useState<string>('ALL');
 
   useEffect(() => {
+    document.title = 'Destinos | Já no Caminho';
+  }, []);
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     const scrollToTop = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
