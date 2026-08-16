@@ -100,8 +100,8 @@ export function OpeningHoursCard() {
         <div className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-teal-500" />
           <div>
-            <h3 className="text-lg font-bold text-slate-800">Horario de funcionamento</h3>
-            <p className="text-xs text-slate-500">Atualize os horarios visiveis na vitrine.</p>
+            <h3 className="text-lg font-bold text-slate-800">Horário de funcionamento</h3>
+            <p className="text-xs text-slate-500">Atualize os horários visíveis na vitrine.</p>
           </div>
         </div>
         {lastSavedAt && (

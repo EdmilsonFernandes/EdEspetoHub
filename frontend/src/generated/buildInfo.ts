@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "56a7922c",
-  "versionLabel": "v0.1.9.56a7922c",
-  "versionInternal": "0.1.9+20260816.192406.56a7922c",
-  "buildId": "0.1.9+20260816.192406.56a7922c-20260816.192406-56a7922c",
-  "builtAt": "2026-08-16T19:24:06.162Z",
-  "commitHash": "56a7922c0a619d1ed48f53469fd7cbbbd2b49f29",
-  "shortHash": "56a7922c",
+  "versionDisplaySuffix": "6f015390",
+  "versionLabel": "v0.1.9.6f015390",
+  "versionInternal": "0.1.9+20260816.195403.6f015390",
+  "buildId": "0.1.9+20260816.195403.6f015390-20260816.195403-6f015390",
+  "builtAt": "2026-08-16T19:54:03.595Z",
+  "commitHash": "6f015390f6d40b60d778e921651779f09f19f1f0",
+  "shortHash": "6f015390",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "6f015390f6d40b60d778e921651779f09f19f1f0",
+      "shortHash": "6f015390",
+      "dateIso": "2026-08-16T16:42:25-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(design): batch 5 storefront — desktop 3 colunas, toast fora da sacola, spacing do +, singular",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6f015390f6d40b60d778e921651779f09f19f1f0"
+    },
     {
       "hash": "56a7922c0a619d1ed48f53469fd7cbbbd2b49f29",
       "shortHash": "56a7922c",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(superadmin): biblioteca de pushes prontos por tema (engajamento)",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1cb5e4e1391759c70aabfe6596c96f32b26a21e4"
-    },
-    {
-      "hash": "47c9be4fd9f1bb607823b8204ff4072922cac822",
-      "shortHash": "47c9be4f",
-      "dateIso": "2026-07-28T19:40:49-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): Salvar segmento + cadastro Serviços + dropdown perfil sob banner",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/47c9be4fd9f1bb607823b8204ff4072922cac822"
     }
   ]
 } as const;

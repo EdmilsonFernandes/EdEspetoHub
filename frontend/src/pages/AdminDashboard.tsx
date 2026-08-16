@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, Compass, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck, ShieldCheck, Printer, Stack, Sparkle, ChatCircle, ForkKnife, IdentificationCard } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, Compass, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck, ShieldCheck, Printer, Stack, Sparkle, ChatCircle, ForkKnife, IdentificationCard, DeviceMobile } from '@phosphor-icons/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -1735,7 +1735,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (requestedTab === 'pedidos') return 'fila';
     return (requestedTab as any) || 'fila';
   });
-  const [configSection, setConfigSection] = useState('hub');
+  const [configSection, setConfigSection] = useState(() => {
+    const fromQuery = String(new URLSearchParams(location.search || '').get('cfg') || '').trim();
+    return fromQuery || 'hub';
+  });
   const [menuVisible, setMenuVisible] = useState(() => {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('adminHeader:visible') !== 'false';
@@ -1778,6 +1781,17 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (typeof window === 'undefined') return;
     sessionStorage.setItem('admin:activeTab', String(activeTab || 'fila'));
   }, [activeTab]);
+  // URL reflete a seção atual (deep-link compartilhável) — antes a seção só vivia no sessionStorage (auditoria 16/08)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const nextTab = String(activeTab || 'fila');
+    const nextCfg = activeTab === 'config' && configSection && configSection !== 'hub' ? String(configSection) : '';
+    if (params.get('tab') === nextTab && (params.get('cfg') || '') === nextCfg) return;
+    params.set('tab', nextTab);
+    if (nextCfg) params.set('cfg', nextCfg);
+    else params.delete('cfg');
+    navigate(`/admin/dashboard?${params.toString()}`, { replace: true });
+  }, [activeTab, configSection, navigate]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showReviewsCardMobile, setShowReviewsCardMobile] = useState(() => {
     if (typeof window === 'undefined') return true;
@@ -1855,9 +1869,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     { id: 'cfg-delivery', label: 'Entrega e frete', icon: Truck },
     { id: 'cfg-ordering', label: 'Tipos de pedido', icon: ForkKnife },
     { id: 'cfg-hours', label: 'Horários', icon: Clock },
-    { id: 'cfg-operation', label: 'Operação e som', icon: Bell },
-    { id: 'cfg-printer', label: 'Impressora térmica', icon: Printer },
-    { id: 'cfg-permissions', label: 'Permissões do app', icon: ShieldCheck },
+    // 3 telas "do celular da loja" fundidas em 1 — auditoria 16/08 (menu 9 -> 7)
+    { id: 'cfg-device', label: 'Preferências do dispositivo', icon: DeviceMobile },
   ];
   const navItems = useMemo(() => {
     if (isOperatorUser) return desktopTabItems;
@@ -1992,7 +2005,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, [activeTab, isOperatorUser]);
 
   useEffect(() => {
-    if (isOperatorUser && activeTab === 'config' && configSection !== 'printer') {
+    if (isOperatorUser && activeTab === 'config' && configSection !== 'printer' && configSection !== 'device') {
       setConfigSection('printer');
     }
   }, [activeTab, configSection, isOperatorUser]);
@@ -3081,6 +3094,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       sections: ['access'],
       saveLabel: 'Salvar operação',
     },
+    device: {
+      title: 'Preferências do dispositivo',
+      subtitle: 'Operação e som, impressora Bluetooth e permissões deste aparelho.',
+      sections: ['access'],
+      saveLabel: 'Salvar operação',
+    },
     printer: {
       title: 'Impressora térmica',
       subtitle: 'Escolha a impressora Bluetooth deste aparelho para imprimir direto pelo app.',
@@ -3187,7 +3206,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     : tabMeta.config;
   const activeSurfaceMeta = activeTab === 'config' ? activeConfigMeta : tabMeta[activeTab];
   const completedSetupSteps = setupChecklist.filter((item) => item.done).length;
-  const focusedBrandingSection = activeTab === 'config' && ['profile', 'channels', 'delivery', 'operation'].includes(configSection);
+  const focusedBrandingSection = activeTab === 'config' && ['profile', 'channels', 'delivery', 'operation', 'device'].includes(configSection);
   const showBrandingSaveBar = activeTab === 'config' && (configSection === 'hub' || focusedBrandingSection);
 
   return (
@@ -3683,13 +3702,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     </div>
                   </div>
 
+                  {/* header da página já exibe título+subtítulo — sem duplicar (auditoria 16/08) */}
                   {focusedBrandingSection && (
                     <BrandingSettings
                       branding={brandingDraft}
                       onChange={setBrandingDraft}
                       storeSlug={storeSlug}
-                      title={activeConfigMeta?.title}
-                      subtitle={activeConfigMeta?.subtitle}
+                      title=""
+                      subtitle=""
                       visibleSections={activeConfigMeta?.sections}
                       hideSectionTabs
                       expandVisibleSections
@@ -3698,6 +3718,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   {configSection === 'ordering' && <OrderTypeSettingsCard />}
                   {configSection === 'printer' && <ThermalPrinterSettingsCard />}
                   {configSection === 'permissions' && <DevicePermissionsCard role="admin" session={auth} onOpenMfa={() => setMfaPanelOpen(true)} />}
+                  {configSection === 'device' && (
+                    <div className="space-y-4">
+                      <ThermalPrinterSettingsCard />
+                      <DevicePermissionsCard role="admin" session={auth} onOpenMfa={() => setMfaPanelOpen(true)} />
+                    </div>
+                  )}
                   {configSection === 'hours' && <OpeningHoursCard />}
                 </>
               )}

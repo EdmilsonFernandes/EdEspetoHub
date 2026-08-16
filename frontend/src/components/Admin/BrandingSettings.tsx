@@ -233,8 +233,12 @@ export const BrandingSettings = ({
     <div className="bg-white/95 rounded-2xl shadow-[0_16px_36px_-28px_rgba(15,23,42,0.35)] border border-slate-200 overflow-hidden">
       <div className="p-4 sm:p-5 border-b border-slate-100 bg-gradient-to-r from-white via-white to-slate-50/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h3 className="text-lg font-bold text-gray-800 mb-1">{title}</h3>
-          <p className="text-sm text-gray-500">{subtitle}</p>
+          {title ? (
+            <>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">{title}</h3>
+              {subtitle ? <p className="text-sm text-gray-500">{subtitle}</p> : null}
+            </>
+          ) : null}
         </div>
       </div>
 

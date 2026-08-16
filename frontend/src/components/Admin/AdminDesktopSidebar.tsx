@@ -55,7 +55,7 @@ export function AdminDesktopSidebar({
     if (operacao.length) sections.push({ type: 'group', id: 'operacao', label: 'Operação', children: operacao });
 
     const catalogo = consumeMany(['produtos', 'estoque', 'cardapio']);
-    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Catálogo', children: catalogo });
+    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Loja', children: catalogo });
 
     const crescer = consumeMany(['destaques', 'destinos', 'condominios']);
     if (crescer.length) sections.push({ type: 'group', id: 'crescer', label: 'Crescer', children: crescer });
@@ -73,7 +73,7 @@ export function AdminDesktopSidebar({
     if (configChildren.length) {
       consume('config');
       configChildren.forEach((item) => consumeIds.add(item.id));
-      sections.push({ type: 'group', id: 'config', label: 'Configurações', children: configChildren });
+      sections.push({ type: 'group', id: 'config', label: 'Ajustes', children: configChildren });
     } else {
       const sistema = consume('config');
       if (sistema) sections.push({ type: 'item', item: sistema });
