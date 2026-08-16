@@ -445,6 +445,28 @@ async listByStoreId(storeId: string, authStoreId?: string, limit = 100) {
   }
 
     /**
+   * Store public reply to a review (audit 16/08 — avaliações sem resposta do lojista).
+   *
+   * @author Edmilson Lopes
+   */
+async replyByStoreId(storeId: string, reviewId: string, reply: string | null, authStoreId?: string) {
+    const store = await this.storeRepository.findById(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    this.ensureStoreAccess(store.id, authStoreId);
+    const normalized = String(reply || '').trim();
+    if (normalized && normalized.length < 2) {
+      throw new AppError('REVIEW-002', 400, { message: 'Resposta muito curta.' });
+    }
+    const updated = await this.orderReviewRepository.updateStoreReply(
+      store.id,
+      reviewId,
+      normalized || null
+    );
+    if (!updated) throw new AppError('REVIEW-001', 404, { message: 'Avaliação não encontrada nesta loja.' });
+    return { id: reviewId, storeReply: normalized || null, replied: Boolean(normalized) };
+  }
+
+    /**
    * Executes summary by store id business logic.
    *
    * @author Edmilson Lopes

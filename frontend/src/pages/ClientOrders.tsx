@@ -992,16 +992,27 @@ function OrderCard({
             )}
           </>
         ) : isActive ? (
-          <button
-            type="button"
-            onClick={() => onOpenOrder(order.id)}
-            onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
-            onFocus={() => primeOrderTrackingNavigation(order.id)}
-            onTouchStart={() => primeOrderTrackingNavigation(order.id)}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#153A4C] py-2.5 text-[13px] font-bold text-white active:scale-[0.98] transition-transform"
-          >
-            Acompanhar pedido
-          </button>
+          <div className="flex w-full items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onOpenOrder(order.id)}
+              onMouseEnter={() => primeOrderTrackingNavigation(order.id)}
+              onFocus={() => primeOrderTrackingNavigation(order.id)}
+              onTouchStart={() => primeOrderTrackingNavigation(order.id)}
+              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#153A4C] py-2.5 text-[13px] font-bold text-white active:scale-[0.98] transition-transform"
+            >
+              Acompanhar pedido
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenHelp(order)}
+              className="inline-flex shrink-0 items-center justify-center rounded-full px-2.5 py-2 text-slate-500 transition-all active:scale-[0.98] hover:bg-slate-100 hover:text-slate-700"
+              title="Ajuda com este pedido"
+              aria-label="Ajuda com este pedido"
+            >
+              <ChatCircleDots size={16} weight="duotone" />
+            </button>
+          </div>
         ) : (
           <>
             <button
@@ -1056,6 +1067,18 @@ function OrderCard({
           </>
         )}
       </div>
+      {isActive && !isPostalOrder && etaDeadlineMs && !canCancel ? (
+        <p className="border-t border-slate-100 bg-slate-50/60 px-4 py-1.5 text-center text-[10.5px] leading-snug text-slate-500">
+          Cancelamento pelo app abre às{' '}
+          <strong className="font-bold text-slate-700">
+            {new Date(etaDeadlineMs + DELAY_GRACE_MS).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+          </strong>{' '}
+          (prazo de entrega + 15 min). Precisa antes?{' '}
+          <button type="button" onClick={() => onOpenHelp(order)} className="font-bold text-[#336886] underline underline-offset-2">
+            Fale com a loja
+          </button>
+        </p>
+      ) : null}
     </article>
     </>
   );

@@ -11,6 +11,7 @@ import customerAddressCondominium from './20260812_001_customer_address_condomin
 import storeCondominiumPickupLocation from './20260813_001_store_condominium_pickup_location';
 import orderCondominiumPickupLocation from './20260813_002_order_condominium_pickup_location';
 import orderOrigin from './20260816_001_order_origin';
+import orderReviewReply from './20260816_002_order_review_reply';
 
 export const schemaMigrations = [
   baselineCurrentSchema,
@@ -26,4 +27,5 @@ export const schemaMigrations = [
   storeCondominiumPickupLocation,
   orderCondominiumPickupLocation,
   orderOrigin,
+  orderReviewReply,
 ] as const;

@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "92e8270c",
-  "versionLabel": "v0.1.9.92e8270c",
-  "versionInternal": "0.1.9+20260816.202607.92e8270c",
-  "buildId": "0.1.9+20260816.202607.92e8270c-20260816.202607-92e8270c",
-  "builtAt": "2026-08-16T20:26:07.720Z",
-  "commitHash": "92e8270cfb21226457a42a05b4ab9e80fee0fe50",
-  "shortHash": "92e8270c",
+  "versionDisplaySuffix": "88f47691",
+  "versionLabel": "v0.1.9.88f47691",
+  "versionInternal": "0.1.9+20260816.205040.88f47691",
+  "buildId": "0.1.9+20260816.205040.88f47691-20260816.205040-88f47691",
+  "builtAt": "2026-08-16T20:50:40.715Z",
+  "commitHash": "88f47691dc64ef8351ea788895ecb8e67b1a70b4",
+  "shortHash": "88f47691",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "88f47691dc64ef8351ea788895ecb8e67b1a70b4",
+      "shortHash": "88f47691",
+      "dateIso": "2026-08-16T17:29:59-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ux): onda 2 do benchmark iFood — configuráveis e alvo de toque",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/88f47691dc64ef8351ea788895ecb8e67b1a70b4"
+    },
+    {
+      "hash": "71bf3c39d27a4952ced3af7d6fc522356a0d83d2",
+      "shortHash": "71bf3c39",
+      "dateIso": "2026-08-16T17:26:59-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(orders): origem do pedido — migration + badge Balcao/App/Site na fila",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/71bf3c39d27a4952ced3af7d6fc522356a0d83d2"
+    },
     {
       "hash": "92e8270cfb21226457a42a05b4ab9e80fee0fe50",
       "shortHash": "92e8270c",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(condominio): local de retirada do vendedor no comercio permanente",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8cb99473228b4a9fde77120cc2cb0310e13f3406"
-    },
-    {
-      "hash": "4a7f22f1823d046bb4eaadebc2523f98b3b1cb12",
-      "shortHash": "4a7f22f1",
-      "dateIso": "2026-08-12T21:36:28-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(condominio): filtro \"Meu Condomínio\" no hub + endereço-condo no perfil",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4a7f22f1823d046bb4eaadebc2523f98b3b1cb12"
-    },
-    {
-      "hash": "6c6257c5d8676ff78c5957df88ed059ff0f4e3e9",
-      "shortHash": "6c6257c5",
-      "dateIso": "2026-08-03T15:00:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(auth): aviso premium \"cliente vira lojista\" no criar-loja",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6c6257c5d8676ff78c5957df88ed059ff0f4e3e9"
     }
   ]
 } as const;

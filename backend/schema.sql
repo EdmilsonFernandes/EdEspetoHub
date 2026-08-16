@@ -378,6 +378,8 @@ CREATE TABLE IF NOT EXISTS motoboys (
 );
 
 CREATE TABLE IF NOT EXISTS order_reviews (
+  store_reply TEXT,
+  store_replied_at TIMESTAMPTZ,
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,

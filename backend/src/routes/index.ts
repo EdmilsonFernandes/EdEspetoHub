@@ -325,6 +325,7 @@ routes.post('/orders/:orderId/review', hydrateAuthOptional, OrderReviewControlle
 routes.get('/stores/:storeId/reviews', requireAuth, requireRole('ADMIN', 'LOJISTA'), OrderReviewController.listByStore);
 routes.get('/stores/:storeId/reviews/summary', requireAuth, requireRole('ADMIN', 'LOJISTA'), OrderReviewController.summaryByStore);
 routes.get('/stores/:storeId/reviews/tip-payouts', requireAuth, requireRole('ADMIN', 'LOJISTA'), requirePlanFeature('tipPayouts'), OrderReviewController.listTipPayoutsByStore);
+routes.patch('/stores/:storeId/reviews/:reviewId/reply', requireAuth, requireRole('ADMIN', 'LOJISTA'), OrderReviewController.replyByStore);
 routes.patch('/stores/:storeId/reviews/:reviewId/tip-payout', requireAuth, requireRole('ADMIN', 'LOJISTA'), requirePlanFeature('tipPayouts'), OrderReviewController.markTipPayoutByStore);
 
 // Motoboy

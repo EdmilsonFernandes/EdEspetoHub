@@ -65,6 +65,13 @@ export class OrderReview {
   @Column({ name: 'comment', type: 'text', nullable: true })
   comment?: string | null;
 
+  // Resposta pública do lojista à avaliação (audit 16/08: "avaliações sem resposta do lojista")
+  @Column({ name: 'store_reply', type: 'text', nullable: true })
+  storeReply?: string | null;
+
+  @Column({ name: 'store_replied_at', type: 'timestamptz', nullable: true })
+  storeRepliedAt?: Date | null;
+
   @Column({ name: 'store_tags', type: 'jsonb', default: () => "'[]'" })
   storeTags!: string[];
 

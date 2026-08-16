@@ -172,6 +172,26 @@ static async markTipPayoutByStore(req: Request, res: Response) {
     }
   }
 
+  static async replyByStore(req: Request, res: Response) {
+    try {
+      const reply = typeof req.body?.reply === 'string' ? req.body.reply : null;
+      const payload = await orderReviewService.replyByStoreId(
+        req.params.storeId,
+        req.params.reviewId,
+        reply,
+        req.auth?.storeId
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      log.warn('Order review reply failed', {
+        storeId: req.params.storeId,
+        reviewId: req.params.reviewId,
+        error,
+      });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
     /**
    * Lists records for list tip payouts for motoboy.
    *

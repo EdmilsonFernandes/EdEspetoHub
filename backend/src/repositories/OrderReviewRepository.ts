@@ -75,6 +75,8 @@ async listByStoreId(storeId: string, limit = 100) {
         'r.store_rating as "storeRating"',
         'r.delivery_rating as "deliveryRating"',
         'r.comment as comment',
+        'r.store_reply as "storeReply"',
+        'r.store_replied_at as "storeRepliedAt"',
         'r.store_tags as "storeTags"',
         'r.delivery_tags as "deliveryTags"',
         'r.tip_amount as "tipAmount"',
@@ -104,7 +106,18 @@ async listByStoreId(storeId: string, limit = 100) {
    *
    * @author Edmilson Lopes
    */
-async listPublicByStoreId(storeId: string, limit = 20, offset = 0) {
+async updateStoreReply(storeId: string, reviewId: string, reply: string | null) {
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(OrderReview)
+      .set({ storeReply: reply, storeRepliedAt: reply ? new Date() : null })
+      .where('id = :reviewId AND store_id = :storeId', { reviewId, storeId })
+      .returning(['id'])
+      .execute();
+    return (result.affected ?? 0) > 0;
+  }
+
+  async listPublicByStoreId(storeId: string, limit = 20, offset = 0) {
     const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
     const safeOffset = Math.max(0, Number(offset) || 0);
     return this.repository
@@ -113,6 +126,8 @@ async listPublicByStoreId(storeId: string, limit = 20, offset = 0) {
         'r.id as id',
         'r.store_rating as "storeRating"',
         'r.comment as comment',
+        'r.store_reply as "storeReply"',
+        'r.store_replied_at as "storeRepliedAt"',
         'r.store_tags as "storeTags"',
         'r.created_at as "createdAt"',
         'r.customer_name as "customerName"',

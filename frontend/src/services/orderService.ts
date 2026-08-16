@@ -514,6 +514,10 @@ export const orderService = {
     return apiClient.get(`/stores/${storeId}/reviews/tip-payouts?limit=${limit}`);
   },
 
+  async replyReviewByStore(storeId: string, reviewId: string, reply: string) {
+    return apiClient.patch(`/stores/${storeId}/reviews/${reviewId}/reply`, { reply });
+  },
+
   async markTipPayoutByStore(
     storeId: string,
     reviewId: string,

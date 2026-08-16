@@ -568,8 +568,10 @@ const OrdersView = ({ orders, products, storeSlug, storeId, canViewTechnical, sh
   );
 };
 
-const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpgrade, storeSlug }) => {
+const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpgrade, storeSlug, storeId, onReplySaved }) => {
   const [query, setQuery] = useState('');
+  const [replyDraft, setReplyDraft] = useState<{ reviewId: string; text: string } | null>(null);
+  const [replySaving, setReplySaving] = useState(false);
   const [ratingFilter, setRatingFilter] = useState<'all' | '1' | '2' | '3' | '4' | '5'>('all');
   const [commentFilter, setCommentFilter] = useState<'all' | 'with_comment'>('all');
   const [tipFilter, setTipFilter] = useState<'all' | 'with_tip'>('all');
@@ -878,6 +880,62 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
                 ) : (
                   <p className="mt-3 text-xs text-slate-400">Sem comentário.</p>
                 )}
+                {row.storeReply ? (
+                  <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50/70 px-3 py-2.5">
+                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">Sua resposta pública</p>
+                    <p className="mt-1 text-sm text-slate-700 leading-relaxed">{row.storeReply}</p>
+                  </div>
+                ) : null}
+                {storeId && row.comment ? (
+                  replyDraft?.reviewId === row.id ? (
+                    <div className="mt-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                      <textarea
+                        value={replyDraft.text}
+                        onChange={(event) => setReplyDraft({ reviewId: row.id, text: event.target.value })}
+                        rows={2}
+                        maxLength={500}
+                        placeholder="Responda com atenção — sua resposta aparece na vitrine da loja."
+                        className="ds-focus-ring w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 outline-none"
+                      />
+                      <div className="mt-2 flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setReplyDraft(null)}
+                          className="ds-focus-ring rounded-full border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 hover:bg-slate-50"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="button"
+                          disabled={replySaving || replyDraft.text.trim().length < 2}
+                          onClick={async () => {
+                            try {
+                              setReplySaving(true);
+                              await orderService.replyReviewByStore(storeId, row.id, replyDraft.text.trim());
+                              setReplyDraft(null);
+                              onReplySaved?.();
+                            } catch {
+                              /* erro já tratado pelo apiClient (toast padrão) */
+                            } finally {
+                              setReplySaving(false);
+                            }
+                          }}
+                          className="ds-focus-ring rounded-full bg-[#153A4C] px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-50"
+                        >
+                          {replySaving ? 'Salvando...' : row.storeReply ? 'Atualizar resposta' : 'Publicar resposta'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setReplyDraft({ reviewId: row.id, text: String(row.storeReply || '') })}
+                      className="ds-focus-ring mt-2 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-bold text-[#336886] hover:bg-slate-50"
+                    >
+                      {row.storeReply ? 'Editar resposta' : 'Responder avaliação'}
+                    </button>
+                  )
+                ) : null}
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
                   <span className="rounded-full border border-slate-200 bg-white px-2 py-1 font-semibold">
                     ID: {String(row.orderId || '').slice(0, 8)}
@@ -3508,6 +3566,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               canUseDeliveryReviewsAndTips={canUseDeliveryReviewsAndTips}
               onUpgrade={() => navigate('/admin/renewal')}
               storeSlug={storeSlug}
+              storeId={storeId}
+              onReplySaved={() => void loadReviewsSummary()}
             />
           </FormSection>
         )}

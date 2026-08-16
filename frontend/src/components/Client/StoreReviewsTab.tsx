@@ -15,6 +15,7 @@ type ReviewRow = {
   id?: string;
   storeRating?: number;
   comment?: string | null;
+  storeReply?: string | null;
   storeTags?: string[] | string | null;
   createdAt?: string;
   customerName?: string | null;
@@ -295,6 +296,14 @@ export function StoreReviewsTab({ storeSlug }: { storeSlug: string }) {
                       <p className="mt-2 whitespace-pre-line break-words text-sm leading-relaxed text-slate-600">
                         {review.comment}
                       </p>
+                    )}
+                    {review.storeReply && (
+                      <div className="mt-2.5 rounded-xl border border-[#336886]/15 bg-[#eef5f8] px-3 py-2.5">
+                        <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#336886]">Resposta da loja</p>
+                        <p className="mt-1 whitespace-pre-line break-words text-sm leading-relaxed text-slate-700">
+                          {review.storeReply}
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>
