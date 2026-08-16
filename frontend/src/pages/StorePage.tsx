@@ -4948,7 +4948,10 @@ export function StorePage() {
         </div>
       )}
 
-      {showClientWebBottomNav && <StoreAppPromoBanner withBottomNav />}
+      {/* banner do app some enquanto a sacola está ativa — cobria a barra da sacola pós-add (auditoria 16/08) */}
+      {showClientWebBottomNav && Object.values(cart).every((item: any) => Number(item?.qty || 0) === 0) && (
+        <StoreAppPromoBanner withBottomNav />
+      )}
 
       {showClientWebBottomNav && (
         <nav className="fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 lg:hidden">

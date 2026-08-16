@@ -1395,7 +1395,7 @@ export const MenuView = ({
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-slate-900 truncate">{item.name}</p>
-                        <p className="text-[11px] text-slate-500">{item.qty} pedidos</p>
+                        <p className="text-[11px] text-slate-500">{item.qty} {item.qty === 1 ? 'pedido' : 'pedidos'}</p>
                         {displayPrice ? (
                           <p className="mt-1 text-sm font-bold tracking-tight text-slate-800">
                             {formatCurrency(displayPrice)}
@@ -1512,7 +1512,7 @@ export const MenuView = ({
             </div>
 
             {/* Lista de itens */}
-            <div className="space-y-3">
+            <div className="space-y-3 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4 lg:space-y-0">
               {category.items.map((item) => {
                 const hasActiveModifiers = Array.isArray(item?.modifiers)
                   ? item.modifiers.some((modifier: any) => modifier?.active !== false)
@@ -1583,7 +1583,7 @@ export const MenuView = ({
                 <div
                   key={item.id}
                   data-menu-card
-                  className={`jnc-hub-touch jnc-hub-lift group relative grid grid-cols-[minmax(0,1fr)_auto] gap-4 overflow-hidden rounded-3xl border border-slate-100/70 bg-white/96 p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.34)] ring-1 ring-white/75 transition-all duration-300 hover:border-slate-200/60 hover:shadow-[0_26px_58px_-44px_rgba(15,23,42,0.42)] active:scale-[0.985] sm:gap-5 sm:p-5 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
+                  className={`jnc-hub-touch jnc-hub-lift group relative grid grid-cols-[minmax(0,1fr)_auto] lg:grid-cols-1 gap-4 overflow-hidden rounded-3xl border border-slate-100/70 bg-white/96 p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.34)] ring-1 ring-white/75 transition-all duration-300 hover:border-slate-200/60 hover:shadow-[0_26px_58px_-44px_rgba(15,23,42,0.42)] active:scale-[0.985] sm:gap-5 sm:p-5 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
                   }}
@@ -1666,8 +1666,8 @@ export const MenuView = ({
                     </div>
                   </div>
 
-                  <div className={`flex flex-col items-end justify-center flex-shrink-0 ${staffView ? "min-w-[124px]" : "min-w-[112px]"}`}>
-                    <div data-menu-item-media className="relative h-[112px] w-[112px] sm:h-[124px] sm:w-[124px]">
+                  <div className={`flex flex-col items-end justify-center flex-shrink-0 lg:order-first lg:w-full lg:items-stretch lg:min-w-0 ${staffView ? "min-w-[124px]" : "min-w-[112px]"}`}>
+                    <div data-menu-item-media className="relative h-[112px] w-[112px] sm:h-[124px] sm:w-[124px] lg:h-44 lg:w-full">
                       <button
                         type="button"
                         onClick={(event) => {
@@ -1698,7 +1698,7 @@ export const MenuView = ({
                       </button>
 
                       {isServiceStore && !stockState.soldOut && whatsappNumber && (
-                        <div className="absolute -bottom-1.5 -right-1.5 z-10">
+                        <div className="absolute -bottom-3 -right-3 z-10">
                           <button
                             type="button"
                             onClick={(event) => {
@@ -1714,7 +1714,7 @@ export const MenuView = ({
                         </div>
                       )}
                       {canOrder && !stockState.soldOut && (
-                        <div className="absolute -bottom-1.5 -right-1.5 z-10">
+                        <div className="absolute -bottom-3 -right-3 z-10">
                           {itemQty <= 0 ? (
                             <button
                               type="button"

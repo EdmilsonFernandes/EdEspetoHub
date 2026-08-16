@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "3eb05ced",
-  "versionLabel": "v0.1.9.3eb05ced",
-  "versionInternal": "0.1.9+20260816.185039.3eb05ced",
-  "buildId": "0.1.9+20260816.185039.3eb05ced-20260816.185039-3eb05ced",
-  "builtAt": "2026-08-16T18:50:39.497Z",
-  "commitHash": "3eb05ced7e5c2b942fe89112478566bb95a0d5cf",
-  "shortHash": "3eb05ced",
+  "versionDisplaySuffix": "56a7922c",
+  "versionLabel": "v0.1.9.56a7922c",
+  "versionInternal": "0.1.9+20260816.192406.56a7922c",
+  "buildId": "0.1.9+20260816.192406.56a7922c-20260816.192406-56a7922c",
+  "builtAt": "2026-08-16T19:24:06.162Z",
+  "commitHash": "56a7922c0a619d1ed48f53469fd7cbbbd2b49f29",
+  "shortHash": "56a7922c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "56a7922c0a619d1ed48f53469fd7cbbbd2b49f29",
+      "shortHash": "56a7922c",
+      "dateIso": "2026-08-16T16:07:43-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(design): batch 4 restante — default 7d no historico, colapso de itens, Finalizados hoje, chips sem zero-cronico, atrasado com peso",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/56a7922c0a619d1ed48f53469fd7cbbbd2b49f29"
+    },
     {
       "hash": "3eb05ced7e5c2b942fe89112478566bb95a0d5cf",
       "shortHash": "3eb05ced",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(admin): Salvar segmento + cadastro Serviços + dropdown perfil sob banner",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/47c9be4fd9f1bb607823b8204ff4072922cac822"
-    },
-    {
-      "hash": "53df8f0e766f102e47f64113e53c28a4c39cdfba",
-      "shortHash": "53df8f0e",
-      "dateIso": "2026-07-28T18:43:07-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(admin): seletor de segmento no painel do lojista (troca pra Serviços sem banco)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/53df8f0e766f102e47f64113e53c28a4c39cdfba"
     }
   ]
 } as const;
