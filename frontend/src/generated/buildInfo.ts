@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "88f47691",
-  "versionLabel": "v0.1.9.88f47691",
-  "versionInternal": "0.1.9+20260816.205040.88f47691",
-  "buildId": "0.1.9+20260816.205040.88f47691-20260816.205040-88f47691",
-  "builtAt": "2026-08-16T20:50:40.715Z",
-  "commitHash": "88f47691dc64ef8351ea788895ecb8e67b1a70b4",
-  "shortHash": "88f47691",
+  "versionDisplaySuffix": "2defa0eb",
+  "versionLabel": "v0.1.9.2defa0eb",
+  "versionInternal": "0.1.9+20260816.212818.2defa0eb",
+  "buildId": "0.1.9+20260816.212818.2defa0eb-20260816.212818-2defa0eb",
+  "builtAt": "2026-08-16T21:28:18.553Z",
+  "commitHash": "2defa0eb9c331ed015a25c24a8f6b0c8fb1248f4",
+  "shortHash": "2defa0eb",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "2defa0eb9c331ed015a25c24a8f6b0c8fb1248f4",
+      "shortHash": "2defa0eb",
+      "dateIso": "2026-08-16T17:53:41-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(design): batch 7 customer flow — cancelamento com regra explícita + resposta do lojista nas avaliações",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2defa0eb9c331ed015a25c24a8f6b0c8fb1248f4"
+    },
+    {
+      "hash": "ad059b79549838e3f6c7c681da70c6c6533b1658",
+      "shortHash": "ad059b79",
+      "dateIso": "2026-08-16T17:50:52-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ux): onda 5 do benchmark iFood — placeholder orientado ao catálogo e polimento",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ad059b79549838e3f6c7c681da70c6c6533b1658"
+    },
     {
       "hash": "88f47691dc64ef8351ea788895ecb8e67b1a70b4",
       "shortHash": "88f47691",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(condominio): pedido persiste e exibe o local de retirada (Meus Pedidos + tracking)",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e954555cf771fdd630e9498c51a3dcc73de728e4"
-    },
-    {
-      "hash": "d513b3cbc418768218f61d1696f2aea252147940",
-      "shortHash": "d513b3cb",
-      "dateIso": "2026-08-13T07:20:00-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 85 (v1.0.85) — AAB com local de retirada do condominio",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d513b3cbc418768218f61d1696f2aea252147940"
-    },
-    {
-      "hash": "8cb99473228b4a9fde77120cc2cb0310e13f3406",
-      "shortHash": "8cb99473",
-      "dateIso": "2026-08-13T07:14:14-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(condominio): local de retirada do vendedor no comercio permanente",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8cb99473228b4a9fde77120cc2cb0310e13f3406"
     }
   ]
 } as const;

@@ -251,7 +251,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                     onClick={() => setSolutionsMenuOpen((prev) => !prev)}
                     className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-300 transition-all hover:bg-white/[0.05] hover:text-white"
                   >
-                    <Buildings size={16} weight="duotone" className="text-emerald-300" />
+                    <Buildings size={16} weight="duotone" className="text-[#5FD35A]" />
                     Soluções
                     <CaretDown size={14} weight="bold" className={`transition-transform ${solutionsMenuOpen ? 'rotate-180 text-white' : ''}`} />
                   </button>
@@ -294,7 +294,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                               setSolutionsMenuOpen(false);
                               goToCondominiumRequest();
                             }}
-                            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-[0.95rem] border border-emerald-400/18 bg-emerald-400/10 px-3 py-2.5 text-xs font-black text-emerald-200 transition hover:bg-emerald-400/16"
+                            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-[0.95rem] border border-[#5FD35A]/25 bg-[#5FD35A]/10 px-3 py-2.5 text-xs font-black text-[#5FD35A] transition hover:bg-[#5FD35A]/16"
                           >
                             <Buildings size={14} weight="duotone" />
                             Solicitar acesso
@@ -308,7 +308,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   onClick={() => window.open('https://play.google.com/store/apps/details?id=com.janocaminho.app', '_blank', 'noopener,noreferrer')}
                   className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[-0.02em] text-slate-300 transition-all hover:bg-white/[0.05] hover:text-white"
                 >
-                  <GooglePlayLogo size={16} weight="fill" className="text-emerald-400" />
+                  <GooglePlayLogo size={16} weight="fill" className="text-[#5FD35A]" />
                   Google Play
                 </button>
               </nav>
@@ -415,7 +415,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             <button
               type="button"
               onClick={goToCondominiumRequest}
-              className="w-full inline-flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-emerald-300"
+              className="w-full inline-flex items-center justify-between rounded-xl border border-[#15803D]/20 bg-[#15803D]/[0.06] px-4 py-3 text-sm font-semibold text-[#15803D] dark:border-[#5FD35A]/30 dark:bg-[#5FD35A]/10 dark:text-[#5FD35A]"
             >
               Solicitar acesso do condomínio
               <Buildings size={18} weight="duotone" />
@@ -560,7 +560,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   rel="noreferrer"
                   className="inline-flex items-center justify-center rounded-xl border border-slate-600 bg-white/5 px-5 py-3 text-sm font-black text-slate-100 hover:bg-white/10 transition"
                 >
-                  <WhatsappLogo size={16} weight="fill" className="mr-2 text-emerald-300" />
+                  <WhatsappLogo size={16} weight="fill" className="mr-2 text-[#5FD35A]" />
                   Falar pelo WhatsApp
                 </a>
               </div>
@@ -659,7 +659,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 <p className="mt-1 text-xs leading-5 text-slate-400">
                   O comerciante conecta a própria conta Mercado Pago e recebe Pix, crédito e débito direto no fluxo do pedido.
                 </p>
-                <div className="mt-3 flex items-center gap-2 text-[11px] text-emerald-300 font-bold uppercase tracking-[0.12em]">
+                <div className="mt-3 flex items-center gap-2 text-[11px] text-[#5FD35A] font-bold uppercase tracking-[0.12em]">
                   <ShieldCheck size={14} weight="duotone" />
                   Conexão segura
                 </div>

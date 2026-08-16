@@ -26,7 +26,7 @@ export function PremiumSplashScreen() {
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const showDuration = isNativePlatform
-      ? (prefersReducedMotion ? 260 : 1600)
+      ? (prefersReducedMotion ? 260 : 620) // consolidacao 3->2 splashes: overlay nativo ja cobre a marca (~1,6s) — o web so ponte o paint (auditoria 16/08)
       : (prefersReducedMotion ? 850 : 2600);
     const fadeDuration = prefersReducedMotion ? 0 : isNativePlatform ? 260 : 480;
 
@@ -73,7 +73,7 @@ export function PremiumSplashScreen() {
         isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_14%,rgba(51,104,134,0.2),transparent_30%),radial-gradient(circle_at_86%_12%,rgba(95,211,90,0.1),transparent_34%),linear-gradient(180deg,#0B0F1A_0%,#0F1B2D_48%,#0B0F1A_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_14%,rgba(51,104,134,0.2),transparent_30%),radial-gradient(circle_at_86%_12%,rgba(95,211,90,0.1),transparent_34%),linear-gradient(180deg,#0B0F1A_0%,#0B0F1A_100%)]" />
       <div className="pointer-events-none absolute left-1/2 top-[14%] h-64 w-64 -translate-x-1/2 rounded-full bg-[#336886]/18 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[12%] left-[12%] h-44 w-44 rounded-full bg-[#5FD35A]/8 blur-3xl" />
       <div className="splash-grid pointer-events-none absolute inset-0 opacity-[0.16]" />

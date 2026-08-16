@@ -332,7 +332,7 @@ export function LandingPage() {
           
           {/* Glowing blobs */}
           <div className="pointer-events-none absolute left-[15%] top-[-10%] h-[350px] w-[350px] rounded-full bg-sky-500/10 blur-[100px]" />
-          <div className="pointer-events-none absolute right-[10%] top-[20%] h-[400px] w-[400px] rounded-full bg-emerald-500/8 blur-[120px]" />
+          <div className="pointer-events-none absolute right-[10%] top-[20%] h-[400px] w-[400px] rounded-full bg-[#5FD35A]/[0.08] blur-[120px]" />
           
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
@@ -348,7 +348,7 @@ export function LandingPage() {
                 <div className="space-y-4">
                   <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl leading-[1.05]">
                     Peça perto de você.<br />
-                    <span className="bg-gradient-to-r from-cyan-400 via-emerald-400 to-cyan-400 bg-[size:200%_auto] bg-clip-text text-transparent animate-pulse">
+                    <span className="bg-gradient-to-r from-cyan-400 via-[#5FD35A] to-cyan-400 bg-[size:200%_auto] bg-clip-text text-transparent animate-pulse">
                       Ou venda sem comissão por pedido.
                     </span>
                   </h1>
@@ -372,7 +372,7 @@ export function LandingPage() {
                     onClick={() => navigate('/create?plan=trial')}
                     className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-sm font-black text-white backdrop-blur-md transition-colors hover:bg-white/10 active:scale-[0.98]"
                   >
-                    <Storefront size={18} weight="fill" className="text-emerald-400" />
+                    <Storefront size={18} weight="fill" className="text-[#5FD35A]" />
                     Criar minha loja
                   </button>
                 </div>
@@ -393,7 +393,7 @@ export function LandingPage() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-2 text-xs font-bold text-slate-300 transition-colors hover:text-white"
                   >
-                    <WhatsappLogo size={16} weight="fill" className="text-emerald-400" />
+                    <WhatsappLogo size={16} weight="fill" className="text-[#5FD35A]" />
                     Falar no WhatsApp
                   </a>
                 </div>
@@ -443,7 +443,7 @@ export function LandingPage() {
                       <p className="text-[9px] font-black uppercase tracking-wider text-sky-300">Checkout Unificado</p>
                       <p className="text-[12px] font-black text-white mt-0.5">Pagamento Direto na sua Conta</p>
                     </div>
-                    <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[#5FD35A] animate-pulse" />
                   </div>
 
                   {/* Detalhes do Pedido Simulado */}
@@ -453,7 +453,7 @@ export function LandingPage() {
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-wide">Pedido #1027</p>
                         <p className="text-[14px] font-black text-white mt-0.5">Combo Família VIP</p>
                       </div>
-                      <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-[9px] font-black uppercase text-emerald-300">
+                      <span className="rounded-full bg-[#5FD35A]/10 border border-[#5FD35A]/20 px-2.5 py-0.5 text-[9px] font-black uppercase text-[#5FD35A]">
                         Pago via Pix
                       </span>
                     </div>
@@ -469,7 +469,7 @@ export function LandingPage() {
                       </div>
                       <div className="flex items-center justify-between gap-3 bg-white px-3 py-1.5 rounded-xl border border-slate-200">
                         <img src={mercadoPagoLandingLogo} alt="Mercado Pago Logo" className="h-6 object-contain" />
-                        <span className="text-[9.5px] font-black text-emerald-600">✓ Ativo</span>
+                        <span className="text-[9.5px] font-black text-[#15803D]">✓ Ativo</span>
                       </div>
                     </div>
 
@@ -485,7 +485,7 @@ export function LandingPage() {
                       </div>
                       <div className="flex justify-between text-sm font-black text-white border-t border-white/5 pt-2">
                         <span>Total Recebido</span>
-                        <span className="text-emerald-400">R$ 95,90</span>
+                        <span className="text-[#5FD35A]">R$ 95,90</span>
                       </div>
                     </div>
                   </div>
@@ -528,7 +528,7 @@ export function LandingPage() {
             BENTO GRID (FUNCIONALIDADES)
         ══════════════════════════════════════════════════════════════ */}
         <section className="relative bg-[#030712] py-20 sm:py-28 overflow-hidden">
-          <div className="pointer-events-none absolute left-0 bottom-0 h-96 w-96 rounded-full bg-emerald-500/5 blur-[120px]" />
+          <div className="pointer-events-none absolute left-0 bottom-0 h-96 w-96 rounded-full bg-[#5FD35A]/[0.05] blur-[120px]" />
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <BentoFeatures />
           </div>
@@ -781,7 +781,7 @@ export function LandingPage() {
 
               {/* Preview da Playstore e App */}
               <div className="lg:col-span-5 relative flex flex-col gap-4 items-center">
-                <div className="absolute -inset-4 rounded-full bg-emerald-500/5 blur-[80px]" />
+                <div className="absolute -inset-4 rounded-full bg-[#5FD35A]/[0.05] blur-[80px]" />
                 
                 {/* Banner de Rastreamento Real no Celular */}
                 <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900 shadow-2xl p-2.5 max-w-[320px]">
@@ -806,8 +806,8 @@ export function LandingPage() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.08),transparent_50%)]" />
           
           <div className="relative mx-auto max-w-4xl px-4 text-center space-y-8">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-400">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#5FD35A]/20 bg-[#5FD35A]/[0.05] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#5FD35A]">
+              <span className="h-2 w-2 rounded-full bg-[#5FD35A] animate-ping" />
               Lançamento Oficial VIP
             </span>
 
@@ -834,7 +834,7 @@ export function LandingPage() {
                 rel="noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-8 py-4.5 text-base font-black text-white hover:bg-white/10 active:scale-[0.98] transition-colors"
               >
-                <WhatsappLogo size={18} weight="fill" className="text-emerald-400" />
+                <WhatsappLogo size={18} weight="fill" className="text-[#5FD35A]" />
                 Tirar Dúvidas no WhatsApp
               </a>
             </div>
@@ -929,7 +929,7 @@ export function LandingPage() {
                     className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center text-2xl font-black tracking-[0.35em] text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/15"
                   />
                   {customerAuthNotice ? (
-                    <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold leading-relaxed text-emerald-700">{customerAuthNotice}</p>
+                    <p className="rounded-xl border border-[#15803D]/20 bg-[#15803D]/[0.06] px-3 py-2 text-xs font-semibold leading-relaxed text-[#15803D]">{customerAuthNotice}</p>
                   ) : null}
                   {customerAuthError ? (
                     <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold leading-relaxed text-rose-600">{customerAuthError}</p>
@@ -1078,7 +1078,7 @@ export function LandingPage() {
               </div>
 
               {customerAuthError && (
-                <p className={`rounded-xl px-3 py-2 text-xs font-semibold ${customerAuthError.includes('recuperação') ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}>
+                <p className={`rounded-xl px-3 py-2 text-xs font-semibold ${customerAuthError.includes('recuperação') ? 'bg-[#15803D]/[0.06] text-[#15803D]' : 'bg-rose-50 text-rose-600'}`}>
                   {customerAuthError}
                 </p>
               )}

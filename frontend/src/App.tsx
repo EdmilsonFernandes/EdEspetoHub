@@ -24,6 +24,7 @@ import { MotoboyLayout } from './layouts/MotoboyLayout';
 import { loadOrderTrackingPage } from './utils/orderTrackingPrefetch';
 import { isStaleBuildErrorMessage, recoverFromStaleBuild } from './utils/staleBuildRecovery';
 import { installTextInputAssistance } from './utils/inputAssist';
+import { clearAllCustomerSessions } from './utils/customerSessionStorage';
 import {
   loadAdminDashboardPage,
   loadAdminHighlightsPage,
@@ -143,12 +144,39 @@ const AppRouteScrollToTop = () => {
   return null;
 };
 
+// Sessão do cliente validada no boot (sliding session): token morto é limpo antes de qualquer tela
+// assumir "logado" — antes o token expirado só era descoberto quando o 1º request falhava (auditoria 16/08).
+const CustomerSessionBootValidator = () => {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let cancelled = false;
+    try {
+      if (!localStorage.getItem('customerSession')) return;
+    } catch {
+      return;
+    }
+    import('./services/customerAccountService').then(({ customerAccountService }) => {
+      customerAccountService.me().catch((error: any) => {
+        const status = Number(error?.status || 0);
+        if (!cancelled && (status === 401 || status === 403)) {
+          clearAllCustomerSessions();
+        }
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return null;
+};
+
 function App() {
   useEffect(() => installTextInputAssistance(), []);
 
   return (
     <ThemeProvider>
       <PremiumSplashScreen />
+      <CustomerSessionBootValidator />
       <ToastProvider>
         <Router>
           <AppRouteWarmup />
