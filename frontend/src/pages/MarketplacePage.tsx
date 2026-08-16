@@ -28,6 +28,7 @@ import {
   Mountains,
   House,
   Warning,
+  ArrowCounterClockwise,
 } from '@phosphor-icons/react';
 import { condominiumService } from '../services/condominiumService';
 import { destinationService } from '../services/destinationService';
@@ -45,6 +46,7 @@ import { useHubFeaturedProducts, type HubFeaturedProduct as FeaturedProduct } fr
 import { useHubImagePreload } from '../hooks/hub/useHubImagePreload';
 import { useHubLocation } from '../hooks/hub/useHubLocation';
 import { useHubSearchPlaceholder } from '../hooks/hub/useHubSearchPlaceholder';
+import { useHubReorderStores } from '../hooks/hub/useHubReorderStores';
 import { useHubStoreDistances } from '../hooks/hub/useHubStoreDistances';
 import { useHubStores } from '../hooks/hub/useHubStores';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
@@ -1635,6 +1637,7 @@ export function MarketplacePage() {
   };
 
   const isCustomerLogged = Boolean(customerSession?.token);
+  const { reorderStores } = useHubReorderStores(isCustomerLogged);
   const { visibleActiveAnonymousOrders, dismissVisibleAnonymousOrders } = useHubAnonymousOrders(isCustomerLogged);
   useHubCustomerActiveOrders(isCustomerLogged);
   const customerDisplayName = String(
@@ -2595,6 +2598,38 @@ export function MarketplacePage() {
             />
           )}
 
+          {/* Peça de novo — lojas dos últimos pedidos (reorder em 2 toques, benchmark §29) */}
+          {debouncedQuery.length < 2 && reorderStores.length > 0 && (
+            <section className="order-5 space-y-2.5" style={{ transition: 'all .45s ease', transitionDelay: '260ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+              <div className="flex items-center justify-between gap-2 px-1">
+                <div className="min-w-0">
+                  <p className="text-2xs font-black uppercase tracking-[0.22em] text-[#336886]">Peça de novo</p>
+                  <p className="mt-0.5 text-xs font-semibold text-slate-500">Suas lojas recentes em um toque.</p>
+                </div>
+              </div>
+              <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1 no-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {reorderStores.map((store) => (
+                  <Link
+                    key={store.slug}
+                    to={`/${store.slug}`}
+                    className="jnc-hub-touch jnc-hub-lift group inline-flex min-w-0 shrink-0 items-center gap-2.5 rounded-full border border-white/70 bg-white/85 py-1.5 pl-1.5 pr-4 shadow-[0_16px_36px_-30px_rgba(15,23,42,0.4)] ring-1 ring-white/60 backdrop-blur-xl transition hover:border-[#5FD35A]/30 active:scale-[0.97]"
+                  >
+                    <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-100 bg-slate-50 text-2xs font-black text-slate-400">
+                      {store.logoUrl ? (
+                        <img src={store.logoUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                      ) : (
+                        store.name.slice(0, 2).toUpperCase()
+                      )}
+                    </span>
+                    <span className="max-w-[9rem] truncate text-xs font-black tracking-tight text-slate-800 group-hover:text-[#153A4C]">
+                      {store.name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
           {debouncedQuery.length < 2 && (
             <HubFavoriteStores
               hasEntered={hasEntered}
@@ -2637,7 +2672,19 @@ export function MarketplacePage() {
 
             {loading && <HubStoreLoadingSkeleton selectedCondominium={isCondominiumScope} />}
 
-            {!loading && error && <div className="rounded-2xl border border-rose-900/60 bg-rose-950/50 p-4 text-sm text-rose-200">{error}</div>}
+            {!loading && error && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-900/60 bg-rose-950/50 p-4 text-sm text-rose-200">
+                <span>{error}</span>
+                <button
+                  type="button"
+                  onClick={() => void refreshHub?.()}
+                  className="jnc-hub-touch inline-flex h-10 items-center gap-1.5 rounded-full border border-rose-400/40 bg-rose-500/15 px-4 text-2xs font-black uppercase tracking-[0.12em] text-rose-100 transition hover:bg-rose-500/25 active:scale-95"
+                >
+                  <ArrowCounterClockwise size={14} weight="bold" />
+                  Tentar novamente
+                </button>
+              </div>
+            )}
 
             {!loading && !error && filteredStores.length === 0 && (
               <HubStoreEmptyState

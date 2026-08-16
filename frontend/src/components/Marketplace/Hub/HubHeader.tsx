@@ -1,9 +1,10 @@
 import { memo, useRef, type RefObject } from 'react';
 import { Link } from 'react-router-dom';
-import { BellRinging, CaretDown, MagnifyingGlass, X, House, Receipt, MapTrifold, Tent } from '@phosphor-icons/react';
+import { BellRinging, CaretDown, MagnifyingGlass, X, House, Receipt, MapTrifold, Tent, ClockCounterClockwise } from '@phosphor-icons/react';
 import { HeaderAvatarTrigger } from '../HeaderAvatarTrigger';
 import { inputAssistProps } from '../../../utils/inputAssist';
 import { HubFilterBar, type HubQuickFilterKey } from './HubFilters';
+import { useRecentSearches } from '../../../hooks/hub/useRecentSearches';
 
 export type TimeOfDay = 'morning' | 'afternoon' | 'evening';
 
@@ -77,6 +78,18 @@ export const HubHeader = memo(function HubHeader({
   isCondominiumScope,
 }: HubHeaderProps) {
   const desktopSearchInputRef = useRef<HTMLInputElement | null>(null);
+  const { recentSearches, addRecentSearch, clearRecentSearches } = useRecentSearches();
+
+  const handleSearchBlur = () => {
+    if (query.trim().length >= 3) addRecentSearch(query);
+    onSearchEditingChange(false);
+  };
+
+  const applyRecentSearch = (term: string) => {
+    onQueryChange(term);
+    onDebouncedQueryChange(term);
+    searchInputRef?.current?.focus?.();
+  };
 
   const assignVisibleSearchRef = (el: HTMLInputElement | null) => {
     if (el && el.offsetParent !== null) {
@@ -200,7 +213,7 @@ export const HubHeader = memo(function HubHeader({
                     value={query}
                     onChange={(event) => onQueryChange(event.target.value)}
                     onFocus={() => onSearchEditingChange(true)}
-                    onBlur={() => onSearchEditingChange(false)}
+                    onBlur={handleSearchBlur}
                     placeholder={isSearchEditing ? 'Buscar loja, categoria ou produto' : ''}
                     enterKeyHint="search"
                     className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-[#153A4C] outline-none transition-opacity duration-300 placeholder:text-[#336886]/45 ${
@@ -352,7 +365,7 @@ export const HubHeader = memo(function HubHeader({
                     value={query}
                     onChange={(event) => onQueryChange(event.target.value)}
                     onFocus={() => onSearchEditingChange(true)}
-                    onBlur={() => onSearchEditingChange(false)}
+                    onBlur={handleSearchBlur}
                     placeholder={isSearchEditing ? 'Buscar no app' : ''}
                     enterKeyHint="search"
                     className="block min-h-10 w-full min-w-0 appearance-none bg-transparent font-bold text-[#153A4C] outline-none text-xs placeholder:text-[#336886]/45 placeholder:font-semibold"
@@ -421,6 +434,39 @@ export const HubHeader = memo(function HubHeader({
           />
         </div>
       </div>
+
+      {/* Buscas recentes — aparece ao focar a busca vazia (benchmark §5) */}
+      {isSearchEditing && !query && recentSearches.length > 0 && (
+        <div className="absolute inset-x-0 top-full z-[61] px-4 pt-2">
+          <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-2 rounded-[1.35rem] border border-white/70 bg-white/95 p-3 shadow-[0_26px_58px_-34px_rgba(21,58,76,0.4)] backdrop-blur-xl animate-in fade-in slide-in-from-top-1 duration-150">
+            <span className="inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.16em] text-slate-400">
+              <ClockCounterClockwise size={13} weight="duotone" />
+              Recentes
+            </span>
+            {recentSearches.map((term) => (
+              <button
+                key={term}
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => applyRecentSearch(term)}
+                className="jnc-hub-touch jnc-hub-pill max-w-[46vw] truncate rounded-full border border-slate-200/70 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:border-[#336886]/30 hover:bg-white hover:text-[#153A4C] active:scale-95"
+              >
+                {term}
+              </button>
+            ))}
+            <button
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={clearRecentSearches}
+              className="ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-2xs font-bold uppercase tracking-[0.1em] text-slate-400 transition hover:text-rose-500"
+              aria-label="Limpar buscas recentes"
+            >
+              <X size={12} weight="bold" />
+              Limpar
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 });

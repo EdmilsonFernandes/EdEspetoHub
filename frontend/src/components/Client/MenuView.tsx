@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { Drawer } from "vaul";
 import { EmptyState } from "../ui";
@@ -31,6 +31,7 @@ import {
   CalendarBlank,
   Storefront,
   CaretRight,
+  ArrowCounterClockwise,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -648,6 +649,29 @@ export const MenuView = ({
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const [showClearCartModal, setShowClearCartModal] = useState(false);
   const [showPreOrderBlockedModal, setShowPreOrderBlockedModal] = useState(false);
+  // Desfazer limpeza da sacola (benchmark: ação destrutiva sempre reversível)
+  const [undoClearSnapshot, setUndoClearSnapshot] = useState(null);
+  const [undoClearVisible, setUndoClearVisible] = useState(false);
+  const undoClearTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    return () => {
+      if (undoClearTimerRef.current != null) window.clearTimeout(undoClearTimerRef.current);
+    };
+  }, []);
+  const showUndoClearToast = (snapshot: any[]) => {
+    setUndoClearSnapshot(snapshot);
+    setUndoClearVisible(true);
+    if (undoClearTimerRef.current != null) window.clearTimeout(undoClearTimerRef.current);
+    undoClearTimerRef.current = window.setTimeout(() => setUndoClearVisible(false), 7000);
+  };
+  const handleUndoClearCart = () => {
+    if (undoClearTimerRef.current != null) window.clearTimeout(undoClearTimerRef.current);
+    setUndoClearVisible(false);
+    (undoClearSnapshot || []).forEach((entry: any) => {
+      onUpdateCart?.(entry, Number(entry?.qty) || 1, entry?.options);
+    });
+    setUndoClearSnapshot(null);
+  };
   const [qtyPulseId, setQtyPulseId] = useState<string | null>(null);
   const [activeQtyControlId, setActiveQtyControlId] = useState<string | null>(null);
   const [flyToCartItems, setFlyToCartItems] = useState<
@@ -2208,8 +2232,10 @@ export const MenuView = ({
         isOpen={showClearCartModal}
         onClose={() => setShowClearCartModal(false)}
         onConfirm={() => {
+          const snapshot = Array.isArray(cart) ? cart.filter((entry: any) => entry && entry.id != null) : [];
           onClearCart?.();
           setShowClearCartModal(false);
+          if (snapshot.length > 0) showUndoClearToast(snapshot);
         }}
         title="Limpar sacola?"
         description="Todos os itens adicionados serão removidos da sua sacola. Deseja continuar?"
@@ -2219,6 +2245,25 @@ export const MenuView = ({
         confirmAsSecondary
         icon={<Trash size={32} weight="duotone" className="text-rose-500" />}
       />
+
+      {/* Undo da limpeza — ação destrutiva reversível */}
+      {undoClearVisible && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),5.5rem)] z-[70] mx-auto flex w-fit max-w-[92vw] animate-in slide-in-from-bottom-3 fade-in duration-200 items-center gap-3 rounded-full border border-white/70 bg-slate-900/95 py-2.5 pl-4 pr-2.5 text-white shadow-[0_22px_46px_-18px_rgba(15,23,42,0.6)] backdrop-blur-xl"
+        >
+          <span className="text-xs font-semibold">Sacola limpa</span>
+          <button
+            type="button"
+            onClick={handleUndoClearCart}
+            className="jnc-hub-touch inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-3.5 text-2xs font-black uppercase tracking-[0.12em] text-slate-900 shadow-sm transition hover:bg-slate-100 active:scale-95"
+          >
+            <ArrowCounterClockwise size={14} weight="bold" />
+            Desfazer
+          </button>
+        </div>
+      )}
 
       <ConfirmationModal
         isOpen={showPreOrderBlockedModal}
