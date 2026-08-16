@@ -41,6 +41,10 @@ export class OrderItem {
   @Column({ name: 'selected_modifiers', type: 'jsonb', nullable: true })
   selectedModifiers?: Array<{ id: string; name: string; price: number; quantity?: number }> | null;
 
+  @Column({ type: 'varchar', length: 280, nullable: true })
+  /** Observação do item ("sem cebola", "bem passado"...) — benchmark §10. */
+  note?: string | null;
+
   @Column({ name: 'is_printed', type: 'boolean', default: false })
   isPrinted?: boolean;
 

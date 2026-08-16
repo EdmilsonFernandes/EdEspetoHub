@@ -651,6 +651,36 @@ const getOrderStatusBadgeClass = (status: string, isActive?: boolean) => {
   return 'border-slate-100 bg-slate-50 text-slate-600 ring-slate-100';
 };
 
+/** Countdown honesto do pagamento pendente — usa expiresAt real do provider (benchmark §13). */
+function PaymentCountdownPill({ expiresAt, className = '' }: { expiresAt?: string | null; className?: string }) {
+  const validExpiresAt = expiresAt ? new Date(expiresAt).getTime() : 0;
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!Number.isFinite(validExpiresAt) || validExpiresAt <= 0) return;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [validExpiresAt]);
+  if (!Number.isFinite(validExpiresAt) || validExpiresAt <= 0) return null;
+  const remaining = validExpiresAt - now;
+  if (remaining <= 0) return null;
+  const totalSeconds = Math.floor(remaining / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const label = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  const urgent = totalSeconds <= 120;
+  const warning = !urgent && totalSeconds <= 300;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[11px] font-bold tabular-nums ${
+        urgent ? 'bg-rose-50 text-rose-600' : warning ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
+      } ${className}`}
+    >
+      <Timer size={11} weight="duotone" />
+      expira em {label}
+    </span>
+  );
+}
+
 function OrderCard({
   order,
   isActive,
@@ -870,6 +900,10 @@ function OrderCard({
       {/* Botão pagar MP */}
       {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && order.paymentLink && (
         <div className="px-4 pb-3">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <span className="text-2xs font-black uppercase tracking-[0.14em] text-slate-400">Pagar agora</span>
+            <PaymentCountdownPill expiresAt={(order as any).paymentExpiresAt} />
+          </div>
           <button
             type="button"
             onClick={() => {
@@ -898,11 +932,12 @@ function OrderCard({
       >
         <div className="mx-4 mb-3">
           {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && (
-            <div className="border-b border-slate-100 px-3 py-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-3 py-2">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-600">
                 <SpinnerGap size={11} weight="duotone" className="animate-spin" />
                 Confirme o pagamento para iniciar o preparo
               </span>
+              <PaymentCountdownPill expiresAt={(order as any).paymentExpiresAt} />
             </div>
           )}
           {isActive && etaWindowLabel && (

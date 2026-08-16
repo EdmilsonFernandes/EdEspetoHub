@@ -27,6 +27,8 @@ export interface CreateOrderItemInput {
   isPrinted?: boolean;
   unitPriceOverride?: number;
   priceOverride?: number;
+  /** Observação do item (benchmark iFood §10) — máx. 280 caracteres. */
+  note?: string | null;
 }
 
 export interface CreateOrderDto {
@@ -37,6 +39,10 @@ export interface CreateOrderDto {
   clientIp?: string | null;
   phone?: string;
   customerNote?: string | null;
+  /** CPF/CNPJ na nota (benchmark §12) — só dígitos. */
+  taxId?: string | null;
+  /** Cupom da loja (benchmark §12) — validado e aplicado server-side. */
+  couponCode?: string | null;
   address?: string;
   table?: string;
   type: string;

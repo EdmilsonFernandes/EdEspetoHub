@@ -215,6 +215,16 @@ const fetchPublicOrderById = async (orderId: string) => {
 };
 
 export const orderService = {
+  /** Cupom: preview do desconto no checkout (público, por slug da loja) */
+  async validateCouponBySlug(storeSlug: string, code: string, subtotal: number)
+  {
+    return apiClient.post(`/public/stores/slug/${storeSlug}/coupons/validate`, { code, subtotal }, { authMode: 'none' });
+  },
+  /** Cupom: quantos ativos a loja tem ("N cupons disponíveis") */
+  async couponCountBySlug(storeSlug: string)
+  {
+    return apiClient.get(`/public/stores/slug/${storeSlug}/coupons/count`, { authMode: 'none' });
+  },
   async createBySlug(
     orderData: any,
     storeSlug: string,

@@ -2392,6 +2392,7 @@ export function StorePage() {
       options?.selectedModifiers ?? item?.selectedModifiers ?? [],
       item?.modifiers || []
     );
+    const itemNote = String(options?.note ?? item?.note ?? '').replace(/\s+/g, ' ').trim().slice(0, 280) || null;
     const cartKey = `${item.id}:${cookingPoint || ''}:${passSkewer ? '1' : '0'}:${getModifiersSignature(selectedModifiers)}`;
     setCart((previous) => {
       const manageStock = Boolean(catalogItem?.manageStock ?? item?.manageStock);
@@ -2436,6 +2437,7 @@ export function StorePage() {
       return {
         ...previous,
         [cartKey]: {
+          ...previous[cartKey],
           ...item,
           key: cartKey,
           manageStock,
@@ -2447,6 +2449,7 @@ export function StorePage() {
           cookingPoint,
           passSkewer,
           selectedModifiers,
+          note: itemNote ?? previous[cartKey]?.note ?? null,
           bundlePromoActive: Boolean(item?.bundlePromoActive),
           bundlePromoQty: item?.bundlePromoQty ?? null,
           bundlePromoPrice: item?.bundlePromoPrice ?? null,
@@ -2466,6 +2469,7 @@ export function StorePage() {
     if (item?.passSkewer) labels.push('passar farinha');
     const selected = formatSelectedModifiers(item?.selectedModifiers || []);
     if (selected.length) labels.push(`+ ${selected.join(', ')}`);
+    if (item?.note) labels.push(`obs: ${item.note}`);
     return labels.length ? `(${labels.join(' • ')})` : '';
   };
 
@@ -2715,9 +2719,12 @@ export function StorePage() {
         ].filter(Boolean).join(' | ')
       : '';
 
+    const taxIdDigits = String(customer.taxId || '').replace(/\D/g, '');
     const order = {
       customerName: effectiveCustomerName,
       customerNote: customerNote || undefined,
+      taxId: taxIdDigits.length === 11 || taxIdDigits.length === 14 ? taxIdDigits : undefined,
+      couponCode: String(customer.couponCode || '').trim().toUpperCase() || undefined,
       guestPushId: getOrCreateGuestPushId(),
       originClient: Capacitor.isNativePlatform() ? 'app' : 'web',
       phone: customer.phone,
@@ -2775,6 +2782,7 @@ export function StorePage() {
         passSkewer: item.passSkewer,
         selectedModifiers: item.selectedModifiers || [],
         isPrinted: Boolean(checkoutCanUseAdminPrintFlow),
+        note: String(item.note || '').trim().slice(0, 280) || undefined,
       })),
     };
 

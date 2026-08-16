@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { ForkKnife, Minus, Plus, Sparkle, X } from "@phosphor-icons/react";
+import { ForkKnife, Minus, Plus, Sparkle, X, NotePencil } from "@phosphor-icons/react";
 import { Capacitor } from "@capacitor/core";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "../../utils/format";
@@ -35,6 +35,7 @@ export const ProductModal = ({
   const [passSkewer, setPassSkewer] = useState(false);
   const [modifierCounts, setModifierCounts] = useState<Record<string, number>>({});
   const [itemQty, setItemQty] = useState(1);
+  const [itemNote, setItemNote] = useState("");
 
   const promoPrice =
     product?.promoActive && product?.promoPrice && Number(product?.promoPrice) > 0
@@ -65,12 +66,12 @@ export const ProductModal = ({
   const hasSelectableOptions =
     showEspetoOptions ||
     (Array.isArray(product?.modifiers) && product.modifiers.some((modifier: any) => modifier?.active !== false));
-  const selectedOptions =
-    selectedModifiers.length > 0
-      ? { ...(showEspetoOptions ? { cookingPoint, passSkewer } : {}), selectedModifiers }
-      : showEspetoOptions
-      ? { cookingPoint, passSkewer }
-      : undefined;
+  const normalizedItemNote = itemNote.trim().slice(0, 140);
+  const selectedOptions = {
+    ...(selectedModifiers.length > 0 ? { selectedModifiers } : {}),
+    ...(showEspetoOptions ? { cookingPoint, passSkewer } : {}),
+    ...(normalizedItemNote ? { note: normalizedItemNote } : {}),
+  };
   const selectedSignature = getModifiersSignature(selectedModifiers);
   const currentSelectionQty = Object.values(cart || {}).reduce((acc: number, entry: any) => {
     if (!entry || String(entry?.id) !== String(product?.id)) return acc;
@@ -316,6 +317,27 @@ export const ProductModal = ({
                     );
                   })}
                 </div>
+              </div>
+            )}
+
+            {/* Observação do item (benchmark §10) */}
+            {!readOnly && (
+              <div>
+                <label className="mb-1 flex items-center justify-between text-sm font-semibold text-gray-700">
+                  <span className="inline-flex items-center gap-1.5">
+                    <NotePencil size={14} weight="duotone" className="text-brand-primary" />
+                    Observação do item
+                  </span>
+                  <span className="text-2xs font-semibold text-slate-400">{itemNote.length}/140</span>
+                </label>
+                <textarea
+                  value={itemNote}
+                  onChange={(event) => setItemNote(event.target.value.replace(/\s+/g, ' ').slice(0, 140))}
+                  rows={2}
+                  placeholder="Ex: sem cebola, bem passado, embalar separado..."
+                  className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary/15"
+                  data-testid="product-item-note"
+                />
               </div>
             )}
 

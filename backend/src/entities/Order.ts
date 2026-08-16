@@ -119,6 +119,16 @@ export class Order {
   @Column({ name: 'customer_received_confirmed_by_user_id', type: 'uuid', nullable: true })
   customerReceivedConfirmedByUserId?: string | null;
 
+  @Column({ name: 'tax_id', type: 'varchar', length: 20, nullable: true })
+  /** CPF/CNPJ para a nota (benchmark §12) — só dígitos, opcional. */
+  taxId?: string | null;
+
+  @Column({ name: 'coupon_code', type: 'varchar', length: 40, nullable: true })
+  couponCode?: string | null;
+
+  @Column({ name: 'coupon_discount', type: 'numeric', precision: 10, scale: 2, nullable: true })
+  couponDiscount?: number | null;
+
   @Column({ name: 'payment_method', nullable: true })
   paymentMethod?: string;
 

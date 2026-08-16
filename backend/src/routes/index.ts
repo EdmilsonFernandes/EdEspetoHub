@@ -18,6 +18,7 @@ import { StoreController } from '../controllers/StoreController';
 import { ProductController } from '../controllers/ProductController';
 import { OrderController } from '../controllers/OrderController';
 import { OrderReviewController } from '../controllers/OrderReviewController';
+import { CouponController } from '../controllers/CouponController';
 import { PlanController } from '../controllers/PlanController';
 import { SubscriptionController } from '../controllers/SubscriptionController';
 import { PlatformAdminController } from '../controllers/PlatformAdminController';
@@ -258,6 +259,8 @@ routes.post('/stores/slug/:slug/postal/quote', ShippingController.quotePostalPub
 routes.get('/public/stores/slug/:slug/highlights', OrderController.listHighlightsBySlug);
 routes.get('/public/stores/slug/:slug/tables/status', OrderController.listTableStatusBySlug);
 routes.get('/public/stores/slug/:slug/reviews', OrderReviewController.publicListByStore);
+routes.post('/public/stores/slug/:slug/coupons/validate', CouponController.publicValidateBySlug);
+routes.get('/public/stores/slug/:slug/coupons/count', CouponController.publicCountBySlug);
 
 // Store admin
 routes.put('/stores/:storeId', requireAuth, requireRole('ADMIN'), StoreController.update);
@@ -280,6 +283,9 @@ routes.patch('/stores/:storeId/featured-requests/:requestId/cancel', requireAuth
 routes.patch('/stores/:storeId/featured-requests/:requestId/refresh-payment', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.refreshPaymentByStore);
 routes.get('/stores/:storeId/featured-requests/:requestId/payment-audit', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), FeaturedProductController.getPaymentAuditByStore);
 routes.get('/stores/:storeId/condominiums', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.listStoreOptions);
+routes.get('/stores/:storeId/coupons', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CouponController.listByStore);
+routes.post('/stores/:storeId/coupons', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CouponController.upsertByStore);
+routes.delete('/stores/:storeId/coupons/:couponId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CouponController.deactivateByStore);
 routes.post('/stores/:storeId/condominium-requests', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.createStoreRequest);
 routes.delete('/stores/:storeId/condominiums/:condominiumId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.removeStoreCondominium);
 routes.patch('/stores/:storeId/condominiums/:condominiumId/pickup-location', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), CondominiumController.storeUpdatePickupLocation);

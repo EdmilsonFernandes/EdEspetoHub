@@ -1173,19 +1173,24 @@ async setDefaultAddress(userId: string, addressId: string) {
       skip: offset,
     });
 
-    // Fetch paymentLink for awaiting_payment orders so the client can show a direct pay button
+    // Fetch paymentLink + expiresAt for awaiting_payment orders so the client can
+    // show a direct pay button and an honest countdown (benchmark iFood §13)
     const awaitingIds = rows
       .filter((o) => o.status === 'awaiting_payment')
       .map((o) => o.id);
     const paymentLinkMap: Record<string, string> = {};
+    const paymentExpiresAtMap: Record<string, string> = {};
     if (awaitingIds.length > 0) {
-      const paymentRows: { order_id: string; payment_link: string }[] = await AppDataSource.query(
-        `SELECT order_id, payment_link FROM order_payments
+      const paymentRows: { order_id: string; payment_link: string; expires_at: Date | null }[] = await AppDataSource.query(
+        `SELECT order_id, payment_link, expires_at FROM order_payments
          WHERE order_id = ANY($1) AND payment_status = 'PENDING' AND payment_link IS NOT NULL`,
         [awaitingIds]
       );
       for (const row of paymentRows) {
         paymentLinkMap[row.order_id] = row.payment_link;
+        if (row.expires_at) {
+          paymentExpiresAtMap[row.order_id] = new Date(row.expires_at).toISOString();
+        }
       }
     }
 
@@ -1238,6 +1243,7 @@ async setDefaultAddress(userId: string, addressId: string) {
       paymentMethod: order.paymentMethod || null,
       paymentStatus: order.paymentStatus || null,
       paymentLink: paymentLinkMap[order.id] || null,
+      paymentExpiresAt: paymentExpiresAtMap[order.id] || null,
       total: Number(order.total || 0),
       refundStatus: refundMap[order.id]?.status || null,
       refundAmount: refundMap[order.id]?.amount || null,

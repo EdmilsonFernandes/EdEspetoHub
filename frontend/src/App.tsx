@@ -69,6 +69,7 @@ const AdminDashboard = lazyPage(loadAdminDashboardPage, 'AdminDashboard');
 const AdminOrders = lazyPage(loadAdminOrdersPage, 'AdminOrders');
 const AdminQueue = lazyPage(loadAdminQueuePage, 'AdminQueue');
 const AdminRenewal = lazyPage(() => import('./pages/AdminRenewal'), 'AdminRenewal');
+const AdminCoupons = lazyPage(() => import('./pages/AdminCoupons'), 'AdminCoupons');
 const AdminDemo = lazyPage(() => import('./pages/AdminDemo'), 'AdminDemo');
 const PaymentPage = lazyPage(() => import('./pages/PaymentPage'), 'PaymentPage');
 const SuperAdmin = lazyPage(() => import('./pages/SuperAdmin'), 'SuperAdmin');
@@ -283,6 +284,16 @@ function App() {
                   <AppErrorBoundary>
                     <AdminRoute>
                       <AdminRenewal />
+                    </AdminRoute>
+                  </AppErrorBoundary>
+                }
+              />
+              <Route
+                path="/admin/coupons"
+                element={
+                  <AppErrorBoundary>
+                    <AdminRoute allowedRoles={['ADMIN', 'OPERATOR', 'LOJISTA']}>
+                      <AdminCoupons />
                     </AdminRoute>
                   </AppErrorBoundary>
                 }

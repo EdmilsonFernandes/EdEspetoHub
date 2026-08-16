@@ -19,6 +19,7 @@ import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { AppDataSource } from '../config/database';
 import { AppError } from '../errors/AppError';
+import { couponService, normalizeCouponCode } from './CouponService';
 import { DeliveryBillingService } from './DeliveryBillingService';
 import { deliveryService } from './DeliveryService';
 import { SubscriptionService } from './SubscriptionService';
@@ -2475,6 +2476,7 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
       orderItem.isPrinted = Boolean(item.isPrinted);
+      orderItem.note = this.sanitizeItemNote((item as any).note);
       items.push(orderItem);
       total += orderItem.price;
     }
@@ -2508,10 +2510,35 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
     }
     const customerNote = normalizeCustomerOrderNote((input as any).customerNote);
 
+    // CPF/CNPJ na nota (benchmark §12): guarda apenas dígitos válidos (11 ou 14)
+    const taxIdDigits = String((input as any).taxId || '').replace(/\D/g, '');
+    const taxId = taxIdDigits.length === 11 || taxIdDigits.length === 14 ? taxIdDigits : null;
+
+    // Cupom (benchmark §12): revalida server-side e desconta do total ANTES do charge
+    let couponDiscountValue = 0;
+    let couponCodeValue: string | null = null;
+    const requestedCouponCode = normalizeCouponCode((input as any).couponCode);
+    if (requestedCouponCode) {
+      const applied = await couponService.applyForOrderTx(
+        manager ?? (AppDataSource.manager as any),
+        store!.id,
+        requestedCouponCode,
+        total
+      );
+      if (applied) {
+        couponCodeValue = applied.code;
+        couponDiscountValue = Math.min(applied.discount, total);
+      }
+    }
+    const finalTotal = Math.max(0, Math.round((total + deliveryFeeValue - couponDiscountValue) * 100) / 100);
+
     return this.orderRepository.create({
       id: orderRefId as any,
       customerName: input.customerName,
       customerNote,
+      taxId,
+      couponCode: couponCodeValue,
+      couponDiscount: couponDiscountValue > 0 ? couponDiscountValue : null,
       customerUserId: input.customerUserId || null,
       guestPushId: input.guestPushId || null,
       phone: input.phone,
@@ -2534,9 +2561,15 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       cashTendered,
       deliveryFee: deliveryFeeValue || null,
       items,
-      total: total + deliveryFeeValue,
+      total: finalTotal,
       store: store!,
     } as Order);
+  }
+
+  /** Observação por item: 280 caracteres, sem quebra. */
+  private sanitizeItemNote(raw: unknown): string | null {
+    const note = String(raw ?? '').replace(/\s+/g, ' ').trim().slice(0, 280);
+    return note || null;
   }
 
   private async resolveCondominiumOrderContext(input: Omit<CreateOrderDto, 'storeId'>, storeId: string) {

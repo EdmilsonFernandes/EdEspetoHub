@@ -24,6 +24,8 @@ import {
   NotePencil,
   CalendarBlank,
   X,
+  Ticket,
+  IdentificationCard,
 } from "@phosphor-icons/react";
 import { formatAddressLines, formatCurrency } from "../../utils/format";
 import { getPaymentMethodMeta, getPaymentProviderMeta } from "../../utils/paymentAssets";
@@ -37,6 +39,27 @@ import { addressLookupService } from "../../services/addressLookupService";
 import { inputAssistProps, textareaAssistProps } from "../../utils/inputAssist";
 import { Button } from '../ui/Button';
 import { CUSTOMER_ORDER_NOTE_MAX_LENGTH, limitCustomerOrderNoteInput } from "../../utils/customerOrderNote";
+import { orderService } from "../../services/orderService";
+
+const maskTaxId = (value: string): string => {
+  const digits = String(value || "").replace(/\D/g, "").slice(0, 14);
+  if (digits.length <= 11) {
+    return digits
+      .replace(/^(\d{3})(\d)/, "$1.$2")
+      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d{1,2})$/, ".$1-$2");
+  }
+  return digits
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+};
+
+export const isValidTaxIdLength = (value: string): boolean => {
+  const digits = String(value || "").replace(/\D/g, "");
+  return digits.length === 0 || digits.length === 11 || digits.length === 14;
+};
 
 const BRAZIL_DDDS = [
   "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -287,6 +310,13 @@ export const CartView = ({
   const [showEmptyCartSheet, setShowEmptyCartSheet] = useState(false);
   const [showFarPickupSheet, setShowFarPickupSheet] = useState(false);
   const [showPaymentSheet, setShowPaymentSheet] = useState(false);
+  // Cupom (benchmark §12): preview client-side; desconto real é sempre do backend
+  const [couponCodeInput, setCouponCodeInput] = useState("");
+  const [couponPreview, setCouponPreview] = useState(null);
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponCount, setCouponCount] = useState(null);
+  const [taxIdInput, setTaxIdInput] = useState("");
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
   const [showCustomerNoteSheet, setShowCustomerNoteSheet] = useState(false);
   const [customerNoteDraft, setCustomerNoteDraft] = useState("");
@@ -381,7 +411,8 @@ export const CartView = ({
     pickupWarningThreshold,
     normalizeNumber(pickupDistanceConfirmationKm) || 40
   );
-  const totalWithFee = total + deliveryFeeValue;
+  const couponDiscountValue = couponPreview ? Math.min(Number(couponPreview.discount || 0), total + deliveryFeeValue) : 0;
+  const totalWithFee = Math.max(0, Math.round((total + deliveryFeeValue - couponDiscountValue) * 100) / 100);
   const cashTenderedValue = isCash ? normalizeNumber(cashTenderedInput) : null;
   const cashChangeDue =
     isCash && cashTenderedValue !== null ? Number(cashTenderedValue) - Number(totalWithFee || 0) : null;
@@ -392,6 +423,70 @@ export const CartView = ({
     !isProfessionalUser &&
     pickupDistanceValue !== null &&
     pickupDistanceValue >= pickupConfirmationThreshold;
+  // ---------- Cupom: contagem + aplicar/remover + revalidação automática ----------
+  useEffect(() => {
+    setTaxIdInput(customer?.taxId ? maskTaxId(String(customer.taxId)) : "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!storeSlug) return;
+    orderService.couponCountBySlug(storeSlug)
+      .then((res) => { if (!cancelled) setCouponCount(Number(res?.count || 0)); })
+      .catch(() => { if (!cancelled) setCouponCount(null); });
+    return () => { cancelled = true; };
+  }, [storeSlug]);
+
+  const applyCoupon = async () => {
+    const code = couponCodeInput.trim().toUpperCase();
+    if (!code || !storeSlug) return;
+    setCouponLoading(true);
+    setCouponError("");
+    try {
+      const res = await orderService.validateCouponBySlug(storeSlug, code, total);
+      if (res?.valid) {
+        setCouponPreview({ code: res.code, discount: Number(res.discount || 0), label: res.label });
+        onChangeCustomer?.({ ...customer, couponCode: res.code });
+        setCouponCodeInput("");
+      } else {
+        setCouponPreview(null);
+        onChangeCustomer?.({ ...customer, couponCode: "" });
+        setCouponError(String(res?.reason || "Cupom inválido."));
+      }
+    } catch {
+      setCouponError("Não foi possível validar o cupom agora.");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCouponPreview(null);
+    setCouponError("");
+    onChangeCustomer?.({ ...customer, couponCode: "" });
+  };
+
+  // Subtotal mudou (itens editados): revalida o cupom aplicado para manter o
+  // preview honesto — o backend revalida de novo no fechamento.
+  const couponRevalidateKey = couponPreview ? `${couponPreview.code}|${total}` : "";
+  useEffect(() => {
+    if (!couponPreview || !storeSlug) return;
+    const timer = window.setTimeout(async () => {
+      try {
+        const res = await orderService.validateCouponBySlug(storeSlug, couponPreview.code, total);
+        if (res?.valid) {
+          setCouponPreview({ code: res.code, discount: Number(res.discount || 0), label: res.label });
+        } else {
+          removeCoupon();
+          setCouponError(String(res?.reason || "Cupom não é mais válido para este pedido."));
+        }
+      } catch { /* mantém o preview atual; backend decide no fechamento */ }
+    }, 600);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [couponRevalidateKey]);
+
   const pickupDistanceContextKey = useMemo(
     () =>
       [
@@ -3010,10 +3105,117 @@ export const CartView = ({
                 <span className="font-semibold text-slate-800">{formatCurrency(deliveryFeeValue)}</span>
               </div>
             )}
+            {couponPreview && couponDiscountValue > 0 && (
+              <div className="flex justify-between text-emerald-700 font-semibold">
+                <span className="inline-flex items-center gap-1"><Ticket size={13} weight="duotone" />Cupom {couponPreview.code}</span>
+                <span>- {formatCurrency(couponDiscountValue)}</span>
+              </div>
+            )}
             <div className="flex justify-between pt-2 border-t border-slate-100">
               <span className="font-bold text-slate-900">Total</span>
               <span className="text-xl font-black text-slate-900">{formatCurrency(totalWithFee)}</span>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cupom de desconto (benchmark §12) */}
+      {(!useMultiStepFlow || checkoutStep === 3) && (
+        <div className="relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
+          <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#5FD35A]/25 to-transparent" />
+          <div className="relative z-10 mb-3 flex items-center gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.1rem] bg-[#5FD35A]/12 text-[#1F7A3D] shadow-[0_16px_30px_-24px_rgba(95,211,90,0.5)] ring-1 ring-[#5FD35A]/15">
+              <Ticket size={21} weight="duotone" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-2xs font-black uppercase tracking-[0.22em] text-[#1F7A3D]">Cupom</p>
+              <h2 className="text-base font-black tracking-tight text-slate-950">Tem cupom de desconto?</h2>
+              <p className="mt-0.5 text-xs font-semibold leading-snug text-slate-500">
+                {couponCount != null && couponCount > 0
+                  ? `${couponCount} ${couponCount === 1 ? "cupom disponível" : "cupons disponíveis"} nesta loja.`
+                  : "Aplique o código da loja e economize na hora."}
+              </p>
+            </div>
+          </div>
+          {couponPreview ? (
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 rounded-[1.25rem] border border-[#5FD35A]/25 bg-[#F2FBF4] p-3">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-black tracking-tight text-[#166534]">{couponPreview.code}</p>
+                <p className="text-xs font-semibold text-emerald-700">
+                  {couponPreview.label} − {formatCurrency(couponDiscountValue)}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-emerald-700 ring-1 ring-[#5FD35A]/25">
+                  Aplicado
+                </span>
+                <button
+                  type="button"
+                  onClick={removeCoupon}
+                  className="jnc-hub-touch grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:text-rose-500 active:scale-95"
+                  aria-label="Remover cupom"
+                >
+                  <X size={15} weight="bold" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="relative z-10 flex flex-col gap-2 sm:flex-row">
+              <input
+                value={couponCodeInput}
+                onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyCoupon(); } }}
+                placeholder="DIGITE O CÓDIGO"
+                autoCapitalize="characters"
+                autoCorrect="off"
+                className={`${premiumInputClass} flex-1 uppercase tracking-[0.08em]`}
+                data-testid="checkout-coupon-input"
+              />
+              <button
+                type="button"
+                onClick={applyCoupon}
+                disabled={couponLoading || !couponCodeInput.trim()}
+                className="jnc-hub-touch inline-flex h-11 items-center justify-center gap-1.5 rounded-[1.1rem] bg-[#153A4C] px-5 text-2xs font-black uppercase tracking-[0.12em] text-white shadow-[0_16px_32px_-20px_rgba(21,58,76,0.6)] transition hover:brightness-110 active:scale-95 disabled:opacity-50"
+              >
+                {couponLoading ? "Validando..." : "Aplicar"}
+              </button>
+            </div>
+          )}
+          {couponError ? (
+            <p className="relative z-10 mt-2 text-xs font-semibold text-rose-600" data-testid="checkout-coupon-error">{couponError}</p>
+          ) : null}
+        </div>
+      )}
+
+      {/* CPF/CNPJ na nota (benchmark §12) */}
+      {(!useMultiStepFlow || checkoutStep === 3) && (
+        <div className="relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
+          <div className="relative z-10 flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.1rem] bg-slate-50 text-slate-500 ring-1 ring-slate-100">
+                <IdentificationCard size={21} weight="duotone" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-2xs font-black uppercase tracking-[0.22em] text-slate-400">Nota fiscal</p>
+                <h2 className="text-base font-black tracking-tight text-slate-950">CPF/CNPJ na nota</h2>
+                <p className="mt-0.5 text-xs font-semibold leading-snug text-slate-500">Opcional — informe só se precisar de nota.</p>
+              </div>
+            </div>
+            <input
+              value={taxIdInput}
+              onChange={(e) => {
+                const masked = maskTaxId(e.target.value);
+                setTaxIdInput(masked);
+                onChangeCustomer?.({ ...customer, taxId: masked });
+              }}
+              inputMode="numeric"
+              placeholder="000.000.000-00"
+              className={`${premiumInputClass} sm:max-w-[16rem]`}
+              data-testid="checkout-tax-id-input"
+            />
+            {taxIdInput && !isValidTaxIdLength(taxIdInput) ? (
+              <p className="text-xs font-semibold text-amber-600">Complete o CPF (11 dígitos) ou CNPJ (14).</p>
+            ) : null}
           </div>
         </div>
       )}

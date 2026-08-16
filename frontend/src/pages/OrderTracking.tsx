@@ -2487,7 +2487,7 @@ export function OrderTracking() {
                             </span>
                             <span className="font-semibold leading-snug text-slate-900">{item.name}</span>
                           </div>
-                          {(item?.cookingPoint || item?.passSkewer || formatSelectedModifiers(item?.selectedModifiers || []).length > 0) && (
+                          {(item?.cookingPoint || item?.passSkewer || item?.note || formatSelectedModifiers(item?.selectedModifiers || []).length > 0) && (
                             <div className="mt-1.5 flex flex-wrap gap-1">
                               {item?.cookingPoint && (
                                 <span className="rounded-full border border-[#dce9f1] bg-[#f4f8fb] px-2 py-0.5 text-[11px] font-medium text-slate-500">
@@ -2497,6 +2497,11 @@ export function OrderTracking() {
                               {item?.passSkewer && (
                                 <span className="rounded-full border border-[#dce9f1] bg-[#f4f8fb] px-2 py-0.5 text-[11px] font-medium text-slate-500">
                                   passar farinha
+                                </span>
+                              )}
+                              {item?.note && (
+                                <span className="rounded-full border border-amber-100 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                                  obs: {item.note}
                                 </span>
                               )}
                               {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
@@ -2542,6 +2547,20 @@ export function OrderTracking() {
                       <span className="rounded-full border border-[#dce9f1] bg-[#edf5fa] px-2 py-1 text-[#336886]">
                         {formatCurrency(order.deliveryFee)}
                       </span>
+                    </div>
+                  ) : null}
+                  {Number((order as any).couponDiscount || 0) > 0 ? (
+                    <div className="mt-2 flex items-center justify-between text-xs font-semibold text-emerald-700">
+                      <span>Cupom {(order as any).couponCode || ''}</span>
+                      <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2 py-1">
+                        − {formatCurrency(Number((order as any).couponDiscount || 0))}
+                      </span>
+                    </div>
+                  ) : null}
+                  {(order as any).taxId ? (
+                    <div className="mt-2 flex items-center justify-between text-xs font-semibold text-slate-500">
+                      <span>CPF/CNPJ na nota</span>
+                      <span className="tabular-nums">{String((order as any).taxId).replace(/^(\d{3})\d{3}(\d{3})/, '$1.***.$2')}</span>
                     </div>
                   ) : null}
                   <div className="mt-3 flex items-center justify-between border-t border-[#dce9f1] pt-4">

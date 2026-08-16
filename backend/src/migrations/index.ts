@@ -12,6 +12,7 @@ import storeCondominiumPickupLocation from './20260813_001_store_condominium_pic
 import orderCondominiumPickupLocation from './20260813_002_order_condominium_pickup_location';
 import orderOrigin from './20260816_001_order_origin';
 import orderReviewReply from './20260816_002_order_review_reply';
+import checkoutExtras from './20260816_003_checkout_extras';
 
 export const schemaMigrations = [
   baselineCurrentSchema,
@@ -28,4 +29,5 @@ export const schemaMigrations = [
   orderCondominiumPickupLocation,
   orderOrigin,
   orderReviewReply,
+  checkoutExtras,
 ] as const;

@@ -921,6 +921,7 @@ export const MenuView = ({
     cookingPoint: entry?.cookingPoint || "",
     passSkewer: Boolean(entry?.passSkewer),
     selectedModifiers: Array.isArray(entry?.selectedModifiers) ? entry.selectedModifiers : [],
+    note: entry?.note || null,
   });
 
   const resolveQuickAdjustEntry = (item: any) => {
