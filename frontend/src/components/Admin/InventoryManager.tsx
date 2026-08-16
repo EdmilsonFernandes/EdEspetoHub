@@ -137,6 +137,11 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
     });
   }, [items, query, categoryFilter]);
 
+  const hasAnyManaged = useMemo(
+    () => (items || []).some((item) => Boolean(item?.manageStock)),
+    [items]
+  );
+
   const filteredMovements = useMemo(() => {
     const normalized = String(movementQuery || '').trim().toLowerCase();
     if (!normalized) return movements;
@@ -338,6 +343,17 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
             </button>
           ))}
         </div>
+
+        {!loading && !hasAnyManaged ? (
+          <div className="mb-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-5 text-center">
+            <div className="text-3xl">📦</div>
+            <p className="mt-2 text-sm font-bold text-slate-700">Nenhum produto com controle de estoque ativo</p>
+            <p className="mt-1 text-xs leading-relaxed text-slate-500">
+              Ative o controle em <strong>Produtos → editar produto → controlar estoque</strong> para acompanhar
+              quantidades, alertas de reposição e movimentações aqui.
+            </p>
+          </div>
+        ) : null}
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[820px] text-left">

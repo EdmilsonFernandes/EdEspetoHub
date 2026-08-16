@@ -216,7 +216,8 @@ body {
 
 .jnc-ds-focus-ring:focus-visible {
   box-shadow:
-    0 0 0 3px rgba(51, 104, 134, 0.14),
+    0 0 0 2px rgba(51, 104, 134, 0.45),
+    0 0 0 5px rgba(51, 104, 134, 0.16),
     var(--jnc-shadow-control);
   border-color: rgba(51, 104, 134, 0.34);
 }
@@ -1212,7 +1213,7 @@ body {
   .ds-input:focus-visible,
   .ds-select:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 65%, transparent), 0 0 0 5px color-mix(in srgb, var(--color-primary) 20%, transparent);
   }
 
   .ds-safe-bottom {

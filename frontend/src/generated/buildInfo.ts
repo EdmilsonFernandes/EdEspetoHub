@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "2defa0eb",
-  "versionLabel": "v0.1.9.2defa0eb",
-  "versionInternal": "0.1.9+20260816.212818.2defa0eb",
-  "buildId": "0.1.9+20260816.212818.2defa0eb-20260816.212818-2defa0eb",
-  "builtAt": "2026-08-16T21:28:18.553Z",
-  "commitHash": "2defa0eb9c331ed015a25c24a8f6b0c8fb1248f4",
-  "shortHash": "2defa0eb",
+  "versionDisplaySuffix": "c431d767",
+  "versionLabel": "v0.1.9.c431d767",
+  "versionInternal": "0.1.9+20260816.220117.c431d767",
+  "buildId": "0.1.9+20260816.220117.c431d767-20260816.220117-c431d767",
+  "builtAt": "2026-08-16T22:01:17.044Z",
+  "commitHash": "c431d7672594cb65eef186838f3b19ae91ec0b28",
+  "shortHash": "c431d767",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "c431d7672594cb65eef186838f3b19ae91ec0b28",
+      "shortHash": "c431d767",
+      "dateIso": "2026-08-16T18:52:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(design): batch 2 native splash/login + batch 8 landing ponte-verde",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c431d7672594cb65eef186838f3b19ae91ec0b28"
+    },
+    {
+      "hash": "6b3527a11c421723bda787df950015dc4d5b58d3",
+      "shortHash": "6b3527a1",
+      "dateIso": "2026-08-16T18:37:58-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ux): benchmark iFood — complemento: undo, buscas recentes, retry e reorder na home",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6b3527a11c421723bda787df950015dc4d5b58d3"
+    },
     {
       "hash": "2defa0eb9c331ed015a25c24a8f6b0c8fb1248f4",
       "shortHash": "2defa0eb",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(cliente): CEP nao re-busca ao editar endereço + seletor de condominio visual com logo",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/023d89a3e17f07fc567e713f3c67c3ba4b1525f6"
-    },
-    {
-      "hash": "7716f0fc616c0c1c1ec212af5a8427ea96fca61e",
-      "shortHash": "7716f0fc",
-      "dateIso": "2026-08-13T09:31:54-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 86 (v1.0.86) — AAB com retirada persistida no pedido",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7716f0fc616c0c1c1ec212af5a8427ea96fca61e"
-    },
-    {
-      "hash": "e954555cf771fdd630e9498c51a3dcc73de728e4",
-      "shortHash": "e954555c",
-      "dateIso": "2026-08-13T09:24:44-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(condominio): pedido persiste e exibe o local de retirada (Meus Pedidos + tracking)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e954555cf771fdd630e9498c51a3dcc73de728e4"
     }
   ]
 } as const;
