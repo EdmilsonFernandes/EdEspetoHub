@@ -919,7 +919,7 @@ export function OrderTracking() {
   const paymentIconToneClass = normalizedPaymentMethod === 'dinheiro'
     ? 'border-amber-100 bg-[linear-gradient(135deg,#fff8e7,#ffffff)] text-amber-700'
     : hasOnlinePayment
-    ? 'border-sky-100 bg-[linear-gradient(135deg,#ecfeff,#ffffff)] text-[#009ee3]'
+    ? 'border-sky-100 bg-[linear-gradient(135deg,#ecfeff,#ffffff)] text-[#4e96ae]'
     : 'border-[#d6e4ed] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] text-[#336886]';
   const postalStatusLabel = isCancelled
     ? 'Cancelado'
@@ -1851,7 +1851,7 @@ export function OrderTracking() {
           <div className="h-[2.5px] w-full overflow-hidden bg-[#dce9f1]/80">
             <div
               className={`relative h-full transition-all duration-700 ease-out overflow-hidden ${isCancelled ? "" : "jnc-progress-sweep"}`}
-              style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#336886,#009ee3)' }}
+              style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#336886,#4e96ae)' }}
             >
               <div className="jnc-animate-shimmer absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-white/40 to-transparent" />
             </div>
@@ -2117,7 +2117,7 @@ export function OrderTracking() {
                             type="button"
                             onClick={handleConfirmReceipt}
                             disabled={confirmReceiptLoading}
-                            className="jnc-hub-touch hidden items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_32px_-24px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] lg:inline-flex"
+                            className="jnc-hub-touch hidden items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-extrabold text-slate-900 shadow-[0_18px_32px_-24px_rgba(5,150,105,0.5)] transition-all hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] lg:inline-flex"
                           >
                             {confirmReceiptLoading ? <CircleNotch size={16} className="animate-spin" /> : <SealCheck size={16} weight="fill" />}
                             {isPostalDelivery ? 'Recebi o pacote' : 'Confirmar recebimento'}
@@ -2605,7 +2605,7 @@ export function OrderTracking() {
                         </div>
                       </div>
                       {showMercadoPagoApproved ? (
-                        <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#009ee3]/15 bg-white/85 px-3 py-2">
+                        <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#4e96ae]/15 bg-white/85 px-3 py-2">
                           <span className="text-[11px] font-semibold leading-4 text-slate-500">{mercadoPagoApprovalDetail}</span>
                           <span className="flex h-9 w-[124px] shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-white px-2">
                             <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-7 w-[104px] object-contain" />
@@ -2959,7 +2959,7 @@ export function OrderTracking() {
                                     disabled={Boolean(reviewState?.review)}
                                     className={`jnc-hub-touch px-3.5 py-1.5 rounded-full text-2xs font-black uppercase tracking-wider border transition-all duration-300 ${
                                       Number(reviewForm.tipAmount || 0) === value
-                                        ? 'bg-emerald-500 text-white border-emerald-500 shadow-[0_6px_15px_-4px_rgba(16,185,129,0.4)] scale-[1.03]'
+                                        ? 'bg-emerald-500 text-slate-900 border-emerald-500 shadow-[0_6px_15px_-4px_rgba(16,185,129,0.4)] scale-[1.03]'
                                         : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                                     }`}
                                   >

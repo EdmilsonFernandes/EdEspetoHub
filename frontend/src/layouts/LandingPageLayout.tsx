@@ -219,7 +219,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         <div className="relative overflow-visible rounded-[1.7rem] border border-white/12 bg-[linear-gradient(135deg,rgba(8,16,31,0.88)_0%,rgba(12,24,45,0.72)_55%,rgba(9,18,35,0.88)_100%)] px-4 py-3 shadow-[0_18px_42px_-24px_rgba(2,6,23,0.75)] backdrop-blur-[16px] ring-1 ring-white/8 sm:rounded-[999px] sm:px-6 lg:px-8">
           <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)]" />
           <div className="pointer-events-none absolute inset-x-16 bottom-0 h-px bg-[linear-gradient(90deg,transparent,rgba(148,163,184,0.12),transparent)]" />
-          <div className="pointer-events-none absolute right-24 top-2 h-12 w-24 rounded-full bg-[#84cc16]/12 blur-2xl" />
+          <div className="pointer-events-none absolute right-24 top-2 h-12 w-24 rounded-full bg-[#5fd35a]/12 blur-2xl" />
           <div className="pointer-events-none absolute left-28 top-2 h-10 w-20 rounded-full bg-sky-400/12 blur-2xl" />
           <div className="relative flex items-center justify-between gap-4">
             <a href="https://www.janocaminho.com.br" className="group ml-0.5 flex min-w-0 items-center gap-3 rounded-full pr-2 transition-colors hover:bg-white/[0.03]">
@@ -274,7 +274,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                               className="flex w-full items-start gap-3 rounded-[1rem] px-3.5 py-3 text-left transition hover:bg-white/[0.05]"
                             >
                               <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/8 bg-white/[0.04]">
-                                <span className="h-2.5 w-2.5 rounded-full bg-[#84cc16] shadow-[0_0_18px_rgba(132,204,22,0.55)]" />
+                                <span className="h-2.5 w-2.5 rounded-full bg-[#5fd35a] shadow-[0_0_18px_rgba(132,204,22,0.55)]" />
                               </span>
                               <span className="min-w-0">
                                 <span className="block text-sm font-semibold tracking-[-0.02em] text-white">{item.label}</span>
@@ -333,7 +333,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               </button>
               <button
                 onClick={() => navigate('/create?plan=trial')}
-                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#b7ef53_0%,#84cc16_100%)] px-5 py-2.5 text-sm font-black tracking-[-0.02em] text-[#07111f] shadow-[0_16px_28px_-16px_rgba(132,204,22,0.62)] ring-1 ring-white/10 transition-all hover:scale-[1.02] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_20px_36px_-16px_rgba(132,204,22,0.62),0_0_24px_rgba(132,204,22,0.28)] active:scale-[0.985] sm:px-6"
+                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#b7ef53_0%,#5fd35a_100%)] px-5 py-2.5 text-sm font-black tracking-[-0.02em] text-[#07111f] shadow-[0_16px_28px_-16px_rgba(132,204,22,0.62)] ring-1 ring-white/10 transition-all hover:scale-[1.02] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_20px_36px_-16px_rgba(132,204,22,0.62),0_0_24px_rgba(132,204,22,0.28)] active:scale-[0.985] sm:px-6"
               >
                 Criar loja grátis
               </button>
@@ -390,7 +390,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <button
                 type="button"
                 onClick={() => navigate('/create?plan=trial')}
-                className="w-full inline-flex items-center justify-between rounded-xl px-4 py-3 bg-[linear-gradient(180deg,#a3e635_0%,#84cc16_100%)] text-[#0d1930] font-black shadow-[0_16px_30px_-20px_rgba(132,204,22,0.75)]"
+                className="w-full inline-flex items-center justify-between rounded-xl px-4 py-3 bg-[linear-gradient(180deg,#a3e635_0%,#5fd35a_100%)] text-[#0d1930] font-black shadow-[0_16px_30px_-20px_rgba(132,204,22,0.75)]"
               >
                 Criar loja grátis
                 <Storefront size={18} weight="duotone" />
@@ -446,7 +446,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                       <span className="block">{item.label}</span>
                       <span className="mt-1 block text-xs font-medium leading-5 text-slate-500 dark:text-slate-400">{item.helper}</span>
                     </span>
-                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#84cc16]" />
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#5fd35a]" />
                   </button>
                 ))}
               </div>
@@ -637,8 +637,8 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <h3 className="text-sm font-black text-white mb-3 uppercase tracking-[0.12em]">Integrações</h3>
               <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">
                 <div className="relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[linear-gradient(145deg,rgba(13,25,48,0.94),rgba(2,52,81,0.9))] p-4 shadow-[0_22px_48px_-28px_rgba(0,158,227,0.45)]">
-                  <div className="pointer-events-none absolute -left-4 top-4 h-14 w-14 rounded-full bg-[#009ee3]/25 blur-2xl" />
-                  <div className="pointer-events-none absolute -right-4 bottom-3 h-14 w-14 rounded-full bg-[#84cc16]/18 blur-2xl" />
+                  <div className="pointer-events-none absolute -left-4 top-4 h-14 w-14 rounded-full bg-[#4e96ae]/25 blur-2xl" />
+                  <div className="pointer-events-none absolute -right-4 bottom-3 h-14 w-14 rounded-full bg-[#5fd35a]/18 blur-2xl" />
                   <div className="relative rounded-[1rem] border border-white/70 bg-white/96 px-3 py-2 shadow-[0_18px_34px_-24px_rgba(255,255,255,0.65)]">
                     <img src="/mercado-pago-horizontal.png" alt="Mercado Pago" className="h-14 w-full object-contain object-left" />
                   </div>

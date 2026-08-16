@@ -2241,7 +2241,7 @@ export function MarketplacePage() {
                     <div className="absolute inset-y-0 right-0 w-[46%] bg-[radial-gradient(circle_at_center,rgba(95,211,90,0.16),transparent_66%)]" />
                   </div>
                   <div className="pointer-events-none absolute -right-8 top-4 h-20 w-20 rounded-full bg-[#5FD35A]/14 blur-3xl" />
-                  <div className="pointer-events-none absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-[#2f9df7]/12 blur-3xl" />
+                  <div className="pointer-events-none absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-[#336686]/12 blur-3xl" />
                   <div className="relative px-4 py-5 sm:px-5 sm:py-5">
                     <div className="flex items-start justify-between gap-3">
                       <button
@@ -2329,7 +2329,7 @@ export function MarketplacePage() {
                                 Feiras e eventos
                               </p>
                               {liveCount > 0 ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-1 text-2xs font-black uppercase tracking-[0.12em] text-white shadow-[0_10px_18px_-12px_rgba(16,185,129,0.6)]">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-1 text-2xs font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_10px_18px_-12px_rgba(16,185,129,0.6)]">
                                   <span className="relative flex h-1.5 w-1.5">
                                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
                                     <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
@@ -2515,7 +2515,7 @@ export function MarketplacePage() {
               >
                 <div className={`relative flex h-12 w-12 items-center justify-center rounded-[1.05rem] transition-all duration-200 ease-out ${
                   quickFilter === 'my_condo'
-                    ? 'scale-[1.04] bg-gradient-to-br from-[#2f9df7] to-[#336886] shadow-[0_18px_34px_-24px_rgba(47,157,247,0.75)]'
+                    ? 'scale-[1.04] bg-gradient-to-br from-[#336686] to-[#336886] shadow-[0_18px_34px_-24px_rgba(47,157,247,0.75)]'
                     : 'border border-sky-100/80 bg-gradient-to-br from-sky-50 to-[#336886]/10 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.18)] ring-1 ring-white/70 group-hover:scale-[1.03]'
                 }`}>
                   <Buildings
@@ -2924,7 +2924,7 @@ export function MarketplacePage() {
                         className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.25 py-1.75 text-2xs font-black tracking-[0.01em] transition-all duration-200 active:scale-95 ${isActive ? activeClasses : idleClasses}`}
                       >
                         {tone === 'live' && (
-                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-[#009ee3]'}`} />
+                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-[#4e96ae]'}`} />
                         )}
                         <span>{label}</span>
                         <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1.5 py-0.5 text-2xs font-black ${isActive ? 'bg-white/16 text-white' : 'bg-slate-100 text-slate-500'}`}>
@@ -2981,7 +2981,7 @@ export function MarketplacePage() {
                         <div className="mb-3 flex items-center gap-2">
                           <span className="relative flex h-2.5 w-2.5 shrink-0">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
-                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#009ee3]" />
+                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#4e96ae]" />
                           </span>
                           <div>
                             <span className="block text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Acontecendo agora</span>
@@ -3019,15 +3019,15 @@ export function MarketplacePage() {
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.24)_100%)]" />
                                     <div className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-2xs font-black uppercase tracking-[0.09em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(15,23,42,0.32)]">
                                       <span className="relative flex h-2 w-2">
-                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#009ee3] opacity-75" />
-                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-[#009ee3]" />
+                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#4e96ae] opacity-75" />
+                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-[#4e96ae]" />
                                       </span>
                                       Ao vivo
                                     </div>
                                     <div className="absolute bottom-2 left-2 h-10 w-10 overflow-hidden rounded-[0.95rem] border-2 border-white bg-white/96 p-1.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.52)]">
                                       <img src={logoUrl} alt={displayName} loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(slug, name); }} />
                                     </div>
-                                    <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white shadow-[0_10px_20px_-12px_rgba(16,185,129,0.88)]">
+                                    <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-slate-900 shadow-[0_10px_20px_-12px_rgba(16,185,129,0.88)]">
                                       <Sparkle size={10} weight="fill" />
                                     </span>
                                   </div>

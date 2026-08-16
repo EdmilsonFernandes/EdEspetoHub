@@ -277,7 +277,7 @@ export function OrderTypeSettingsCard() {
       {selected.includes('table') ? (
         <div className="mt-4 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/80 via-white to-slate-50 p-4">
           <div className="mb-3 flex items-start gap-3">
-            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-sm">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-slate-900 shadow-sm">
               <Receipt size={18} weight="duotone" />
             </span>
             <div>

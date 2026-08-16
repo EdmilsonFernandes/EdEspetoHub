@@ -183,7 +183,7 @@ export function StoreInfoTab({
                 href={`https://wa.me/${phoneDigits}${whatsappMessage ? `?text=${encodeURIComponent(whatsappMessage)}` : ''}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-600"
+                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-bold text-slate-900 transition-colors hover:bg-emerald-600"
               >
                 <WhatsappLogo size={15} weight="fill" />
                 WhatsApp

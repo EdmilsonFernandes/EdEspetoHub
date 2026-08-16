@@ -1180,7 +1180,7 @@ export function AdminOrders() {
                   <button type="button" onClick={() => setRefundModalOpen(false)} className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700">
                     Cancelar
                   </button>
-                  <button type="button" onClick={handleRefund} disabled={refundLoading || !refundReason.trim() || (refundType === 'partial' && !refundAmount)} className="flex-1 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50">
+                  <button type="button" onClick={handleRefund} disabled={refundLoading || !refundReason.trim() || (refundType === 'partial' && !refundAmount)} className="flex-1 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-slate-900 disabled:opacity-50">
                     {refundLoading ? 'Processando...' : 'Confirmar reembolso'}
                   </button>
                 </div>

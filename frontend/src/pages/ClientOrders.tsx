@@ -877,7 +877,7 @@ function OrderCard({
               if (!url) return;
               if (Capacitor.isNativePlatform()) { Browser.open({ url }); } else { window.open(url, '_blank'); }
             }}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#009ee3] py-3 text-sm font-black text-white shadow-[0_6px_18px_-8px_rgba(0,158,227,0.55)] active:scale-[0.98] transition-transform"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#4e96ae] py-3 text-sm font-black text-white shadow-[0_6px_18px_-8px_rgba(0,158,227,0.55)] active:scale-[0.98] transition-transform"
           >
             <img src={getPaymentProviderMeta('mercado_pago').icon} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
             Finalizar pagamento

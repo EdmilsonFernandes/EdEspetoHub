@@ -45,7 +45,7 @@ export function OrderTrackingProgressCard({
                   ? 'bg-rose-100 text-rose-600'
                   : isTerminal
                   ? 'bg-emerald-100 text-emerald-700'
-                  : 'bg-emerald-500 text-white shadow-[0_0_0_5px_rgba(16,185,129,0.12)]'
+                  : 'bg-emerald-500 text-slate-900 shadow-[0_0_0_5px_rgba(16,185,129,0.12)]'
               }`}
             >
               {isTerminal || isCancelled ? <CheckCircle size={17} weight="fill" /> : <Clock size={16} weight="bold" />}
@@ -109,7 +109,7 @@ export function OrderTrackingProgressCard({
                 className="pointer-events-none absolute left-[10px] top-3 w-[1.5px] rounded-full transition-all duration-700"
                 style={{
                   height: `${(currentIndex / Math.max(steps.length - 1, 1)) * 100}%`,
-                  background: isCancelled ? '#fda4af' : 'linear-gradient(180deg,#336886,#009ee3)',
+                  background: isCancelled ? '#fda4af' : 'linear-gradient(180deg,#336886,#4e96ae)',
                 }}
               />
             ) : null}
@@ -139,7 +139,7 @@ export function OrderTrackingProgressCard({
                           isCurrent
                             ? isCancelled
                               ? 'border-rose-500 bg-rose-500 text-white shadow-[0_0_0_4px_rgba(244,63,94,0.2)]'
-                              : 'border-emerald-500 bg-emerald-500 text-white ring-4 ring-emerald-500/20'
+                              : 'border-emerald-500 bg-emerald-500 text-slate-900 ring-4 ring-emerald-500/20'
                             : isCompleted
                             ? isCancelled
                               ? 'border-rose-200 bg-rose-100 text-rose-600'

@@ -26,7 +26,7 @@ const toneClasses: Record<ChipTone, { selected: string; idle: string }> = {
     idle: 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
   },
   warning: {
-    selected: 'border-amber-500 bg-amber-500 text-white',
+    selected: 'border-amber-500 bg-amber-500 text-slate-900',
     idle: 'border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100',
   },
   danger: {

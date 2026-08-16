@@ -21,7 +21,7 @@ export const PremiumCheckToggle = ({
     }}
     className={`relative z-20 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[10px] border-2 shadow-sm transition-all ${
       selected
-        ? "border-emerald-500 bg-emerald-500 text-white animate-[satinPop_180ms_ease-out]"
+        ? "border-emerald-500 bg-emerald-500 text-slate-900 animate-[satinPop_180ms_ease-out]"
         : disabled
           ? "border-slate-200 bg-slate-100 text-transparent opacity-60 cursor-not-allowed"
           : "border-slate-300 bg-white text-transparent hover:border-slate-400 hover:bg-slate-50"

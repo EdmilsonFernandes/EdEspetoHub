@@ -3,9 +3,9 @@
 // junto quando o logo da loja estava quebrado (404 em /uploads) ou offline no WebView.
 const PALETTES: Array<[string, string]> = [
   ['#153A4C', '#336886'],
-  ['#2f9df7', '#153A4C'],
+  ['#336686', '#153A4C'],
   ['#5FD35A', '#2d5f7b'],
-  ['#336886', '#2f9df7'],
+  ['#336886', '#336686'],
   ['#1A5068', '#5FD35A'],
 ];
 

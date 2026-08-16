@@ -585,7 +585,7 @@ export function AdminLogin() {
           <button
             type="button"
             onClick={handleLogoTap}
-            className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#0d4f66] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)] transition active:scale-95 sm:hover:scale-[1.03]"
+            className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#1c4b62] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)] transition active:scale-95 sm:hover:scale-[1.03]"
             aria-label="Acesso seguro"
           >
             <LockKey size={23} weight="duotone" />
@@ -616,7 +616,7 @@ export function AdminLogin() {
 
         {verifyPrompt ? (
           <div className="ds-card-elevated overflow-hidden border-white/40 bg-white/86 p-0 shadow-[0_30px_80px_-40px_rgba(13,79,102,0.5)] backdrop-blur-xl">
-            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0d4f66,#336886)] px-5 py-5 text-white sm:px-7 sm:py-7">
+            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#1c4b62,#336886)] px-5 py-5 text-white sm:px-7 sm:py-7">
               <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.24),transparent_70%)]" />
               <div className="relative flex items-start gap-3">
                 <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/20 bg-white/14 shadow-[0_18px_36px_-24px_rgba(15,23,42,0.75)]">
@@ -651,7 +651,7 @@ export function AdminLogin() {
                       onChange={(e) => handleActivationDigitChange(index, e.target.value)}
                       onKeyDown={(e) => handleActivationKeyDown(index, e)}
                       onPaste={handleActivationPaste}
-                      className="h-14 w-12 rounded-2xl border border-slate-200 bg-white text-center text-2xl font-black tracking-[0.1em] text-slate-900 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] outline-none transition focus:border-[#0d4f66] focus:bg-white focus:ring-4 focus:ring-[#0d4f66]/10 sm:h-16 sm:w-16"
+                      className="h-14 w-12 rounded-2xl border border-slate-200 bg-white text-center text-2xl font-black tracking-[0.1em] text-slate-900 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] outline-none transition focus:border-[#1c4b62] focus:bg-white focus:ring-4 focus:ring-[#1c4b62]/10 sm:h-16 sm:w-16"
                     />
                   ))}
                 </div>
@@ -678,7 +678,7 @@ export function AdminLogin() {
                   type="button"
                   onClick={handleConfirmActivation}
                   disabled={activationCode.length !== 4 || activationLoading}
-                  className="ds-btn-shine h-12 rounded-2xl bg-[linear-gradient(135deg,#0d4f66,#336886)] text-base font-black text-white shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] transition-all active:scale-[0.98] disabled:opacity-60 sm:h-14"
+                  className="ds-btn-shine h-12 rounded-2xl bg-[linear-gradient(135deg,#1c4b62,#336886)] text-base font-black text-white shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] transition-all active:scale-[0.98] disabled:opacity-60 sm:h-14"
                 >
                   {activationLoading ? 'Validando código...' : 'Confirmar código'}
                 </button>
@@ -801,7 +801,7 @@ export function AdminLogin() {
                   }}
                   className="sr-only"
                 />
-                <div className={`h-5 w-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberDevice ? 'bg-[#0d4f66] border-[#0d4f66]' : 'border-slate-300 group-hover:border-slate-400 bg-white'}`}>
+                <div className={`h-5 w-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberDevice ? 'bg-[#1c4b62] border-[#1c4b62]' : 'border-slate-300 group-hover:border-slate-400 bg-white'}`}>
                   {rememberDevice && <Check size={12} weight="bold" className="text-white" />}
                 </div>
               </div>
@@ -811,7 +811,7 @@ export function AdminLogin() {
             <button
               type="button"
               onClick={() => navigate('/forgot-password?perfil=lojista')}
-              className="inline-flex min-h-10 items-center rounded-full px-2 text-xs font-bold uppercase tracking-wider text-[#0d4f66] hover:text-[#0b3f52] hover:underline"
+              className="inline-flex min-h-10 items-center rounded-full px-2 text-xs font-bold uppercase tracking-wider text-[#1c4b62] hover:text-[#153a4c] hover:underline"
             >
               Recuperar senha
             </button>
@@ -820,7 +820,7 @@ export function AdminLogin() {
           <div className="space-y-3 pt-1 sm:pt-2">
             <button
               type="submit"
-              className="ds-btn-shine w-full h-12 rounded-2xl bg-[linear-gradient(135deg,#0d4f66,#336886)] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group sm:h-14"
+              className="ds-btn-shine w-full h-12 rounded-2xl bg-[linear-gradient(135deg,#1c4b62,#336886)] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group sm:h-14"
             >
               Acessar Painel
               <ArrowLeft size={20} weight="bold" className="rotate-180 group-hover:translate-x-1 transition-transform" />
@@ -853,7 +853,7 @@ export function AdminLogin() {
 
         <a
           href="mailto:contato@janocaminho.com.br"
-          className="hidden w-full items-center justify-center gap-2 py-2 text-xs font-bold text-slate-400 transition-colors hover:text-[#0d4f66] sm:flex"
+          className="hidden w-full items-center justify-center gap-2 py-2 text-xs font-bold text-slate-400 transition-colors hover:text-[#1c4b62] sm:flex"
         >
           Precisa de ajuda? contato@janocaminho.com.br
         </a>

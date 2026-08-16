@@ -1594,7 +1594,7 @@ export function SuperAdmin() {
             <button
               type="submit"
               disabled={loading || !loginForm.email || !loginForm.password}
-              className="w-full h-12 rounded-xl border-0 bg-[#0d4f66] text-white font-black shadow-[0_16px_28px_-18px_rgba(13,79,102,0.85)] hover:brightness-105 active:scale-[0.99] transition disabled:opacity-60"
+              className="w-full h-12 rounded-xl border-0 bg-[#1c4b62] text-white font-black shadow-[0_16px_28px_-18px_rgba(13,79,102,0.85)] hover:brightness-105 active:scale-[0.99] transition disabled:opacity-60"
             >
               {loading ? 'Entrando...' : 'Acessar administração'}
             </button>
@@ -2757,7 +2757,7 @@ export function SuperAdmin() {
                   onClick={() => setVipFilter('vip')}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
                     vipFilter === 'vip'
-                      ? 'bg-emerald-500 text-white border-emerald-500'
+                      ? 'bg-emerald-500 text-slate-900 border-emerald-500'
                       : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                   }`}
                 >
@@ -2829,7 +2829,7 @@ export function SuperAdmin() {
                               onClick={() => handleVipToggle(store, !isVip)}
                               className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition shadow-sm flex items-center justify-center gap-2 ${
                                 isVip
-                                  ? 'bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600'
+                                  ? 'bg-emerald-500 text-slate-900 border-emerald-500 hover:bg-emerald-600'
                                   : 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800'
                               }`}
                             >

@@ -79,7 +79,7 @@ export function HubAnonymousActiveOrders({
               onMouseEnter={() => onPrimeOrder(firstOrder?.id, firstOrder?.accessToken)}
               onFocus={() => onPrimeOrder(firstOrder?.id, firstOrder?.accessToken)}
               onTouchStart={() => onPrimeOrder(firstOrder?.id, firstOrder?.accessToken)}
-              className="jnc-hub-touch group inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(16,185,129,0.50)] hover:bg-emerald-600"
+              className="jnc-hub-touch group inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-black text-slate-900 shadow-[0_18px_34px_-24px_rgba(16,185,129,0.50)] hover:bg-emerald-600"
             >
               Acompanhar agora
               <CaretRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />

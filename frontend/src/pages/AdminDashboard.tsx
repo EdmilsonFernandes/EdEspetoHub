@@ -1057,7 +1057,7 @@ const GatewayView = ({ storeId }) => {
   return (
     <div className="space-y-4">
       <div className={`overflow-hidden rounded-[1.35rem] border shadow-[0_24px_70px_-46px_rgba(15,23,42,0.34)] ${
-        isConnected ? 'border-[#009ee3]/25 bg-[linear-gradient(145deg,#ffffff_0%,#f4fbff_48%,#ffffff_100%)]' : 'border-slate-200 bg-white'
+        isConnected ? 'border-[#4e96ae]/25 bg-[linear-gradient(145deg,#ffffff_0%,#f4fbff_48%,#ffffff_100%)]' : 'border-slate-200 bg-white'
       }`}>
         <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(300px,0.92fr)] lg:gap-6">
           <div className="min-w-0 space-y-5">
@@ -1112,7 +1112,7 @@ const GatewayView = ({ storeId }) => {
                 ) : gatewayState === 'error' ? (
                   <WarningCircle size={24} weight="duotone" className="mt-0.5 shrink-0 text-rose-600" />
                 ) : (
-                  <PlugsConnected size={24} weight="duotone" className="mt-0.5 shrink-0 text-[#009ee3]" />
+                  <PlugsConnected size={24} weight="duotone" className="mt-0.5 shrink-0 text-[#4e96ae]" />
                 )}
                 <div className="min-w-0">
                   <p className={`text-sm font-black ${stateTone.text}`}>
@@ -1220,7 +1220,7 @@ const GatewayView = ({ storeId }) => {
                         setMpActionLoading(false);
                       }
                     }}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#009ee3] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(0,158,227,0.75)] transition hover:bg-[#008dcc] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4e96ae] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(0,158,227,0.75)] transition hover:bg-[#008dcc] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <PlugsConnected size={18} weight="duotone" />
                     {mpActionLoading ? 'Abrindo Mercado Pago...' : 'Conectar Mercado Pago'}

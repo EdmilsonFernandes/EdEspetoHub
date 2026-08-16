@@ -12,7 +12,7 @@ export const defaultBranding = {
   espetoId: import.meta.env.VITE_DEFAULT_STORE || 'espetinhodatony',
   logoUrl: '/janocaminho.jpg',
   bannerUrl: '',
-  primaryColor: '#2f9df7',
+  primaryColor: '#336686',
   accentColor: '#5fd35a',
   tagline: 'Crie seu site de pedidos online em minutos',
   instagram: '',

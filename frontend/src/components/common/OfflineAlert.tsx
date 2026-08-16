@@ -66,7 +66,7 @@ export function OfflineAlert() {
               <span className="absolute left-[15px] top-[15px] h-1.5 w-1.5 animate-pulse rounded-full bg-[#5FD35A] shadow-[0_0_10px_rgba(95,211,90,0.9)]" />
               <span className="absolute right-[15px] top-[15px] h-1.5 w-1.5 animate-pulse rounded-full bg-[#5FD35A] shadow-[0_0_10px_rgba(95,211,90,0.9)]" />
               <img src="/janocaminho.jpg" alt="" className="mt-3 h-7 w-7 rounded-lg object-contain" />
-              <span className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-amber-400 text-white">
+              <span className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-amber-400 text-slate-900">
                 <WifiSlash size={11} weight="bold" />
               </span>
             </div>

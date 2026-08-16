@@ -334,7 +334,7 @@ export function MotoboyLogin() {
           <button
             type="button"
             onClick={handleLogoTap}
-            className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#0d4f66] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)] transition active:scale-95 sm:hover:scale-[1.03]"
+            className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#1c4b62] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)] transition active:scale-95 sm:hover:scale-[1.03]"
             aria-label="Acesso do entregador"
           >
             <Scooter size={24} weight="duotone" />
@@ -367,7 +367,7 @@ export function MotoboyLogin() {
           {alreadyLoggedIn ? (
             <div className="space-y-4">
               <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 flex items-center gap-4 backdrop-blur-sm">
-                <div className="h-12 w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-[#0d4f66] shadow-sm">
+                <div className="h-12 w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-[#1c4b62] shadow-sm">
                   <UserCircle size={24} weight="duotone" />
                 </div>
                 <div className="min-w-0">
@@ -380,7 +380,7 @@ export function MotoboyLogin() {
                 <button
                   type="button"
                   onClick={() => navigate('/motoboy/home')}
-                  className="ds-btn-shine w-full h-12 rounded-2xl bg-[#0d4f66] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 sm:h-14"
+                  className="ds-btn-shine w-full h-12 rounded-2xl bg-[#1c4b62] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 sm:h-14"
                 >
                   <ArrowSquareOut size={20} weight="bold" />
                   Ir para o Painel
@@ -414,7 +414,7 @@ export function MotoboyLogin() {
                       type="button"
                       onClick={handleResendVerification}
                       disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
-                      className="flex-1 rounded-xl bg-amber-500 px-3 py-2.5 text-white font-bold disabled:opacity-50 transition-all hover:bg-amber-600 shadow-sm active:scale-95"
+                      className="flex-1 rounded-xl bg-amber-500 px-3 py-2.5 text-slate-900 font-bold disabled:opacity-50 transition-all hover:bg-amber-600 shadow-sm active:scale-95"
                     >
                       {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código'}
                     </button>
@@ -516,7 +516,7 @@ export function MotoboyLogin() {
                       }}
                       className="sr-only"
                     />
-                    <div className={`h-5 w-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberDevice ? 'bg-[#0d4f66] border-[#0d4f66]' : 'border-slate-300 group-hover:border-slate-400 bg-white'}`}>
+                    <div className={`h-5 w-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberDevice ? 'bg-[#1c4b62] border-[#1c4b62]' : 'border-slate-300 group-hover:border-slate-400 bg-white'}`}>
                       {rememberDevice && <Check size={12} weight="bold" className="text-white" />}
                     </div>
                   </div>
@@ -526,7 +526,7 @@ export function MotoboyLogin() {
                 <button
                   type="button"
                   onClick={() => navigate('/forgot-password?perfil=entregador')}
-                  className="text-xs font-bold text-[#0d4f66] hover:text-[#0b3f52] hover:underline uppercase tracking-wider"
+                  className="text-xs font-bold text-[#1c4b62] hover:text-[#153a4c] hover:underline uppercase tracking-wider"
                 >
                   Recuperar senha
                 </button>
@@ -536,7 +536,7 @@ export function MotoboyLogin() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="ds-btn-shine w-full h-12 rounded-2xl bg-[linear-gradient(135deg,#0d4f66,#336886)] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-60 sm:h-14"
+                  className="ds-btn-shine w-full h-12 rounded-2xl bg-[linear-gradient(135deg,#1c4b62,#336886)] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-60 sm:h-14"
                 >
                   <Scooter size={22} weight="duotone" className="group-hover:translate-x-1 transition-transform" />
                   {loading ? 'Entrando...' : 'Acessar Painel'}
@@ -580,7 +580,7 @@ export function MotoboyLogin() {
             <button
               type="button"
               onClick={() => window.open('https://wa.me/5512991234567', '_blank')}
-              className="hidden w-full items-center justify-center gap-2 py-2 text-xs font-bold text-slate-400 transition-colors hover:text-[#0d4f66] sm:flex group"
+              className="hidden w-full items-center justify-center gap-2 py-2 text-xs font-bold text-slate-400 transition-colors hover:text-[#1c4b62] sm:flex group"
             >
               <WhatsappLogo size={18} weight="duotone" className="group-hover:animate-bounce" />
               Precisa de ajuda? Fale conosco

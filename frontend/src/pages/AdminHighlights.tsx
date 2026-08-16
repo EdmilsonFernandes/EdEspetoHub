@@ -752,7 +752,7 @@ function PushTab({ auth, pushes, loading, pushForm, setPushForm, pushSubmitting,
                       <div className="flex items-center text-xs font-bold text-slate-500">{formatDateTime(push.sentAt || push.createdAt)}</div>
                       <div className="flex items-center justify-end">
                         {isPendingPayment ? (
-                          <button type="button" onClick={() => onOpenPayment(push)} className="rounded-xl bg-amber-500 px-3 py-2 text-xs font-black text-white shadow-[0_12px_20px_-16px_rgba(245,158,11,0.8)]">
+                          <button type="button" onClick={() => onOpenPayment(push)} className="rounded-xl bg-amber-500 px-3 py-2 text-xs font-black text-slate-900 shadow-[0_12px_20px_-16px_rgba(245,158,11,0.8)]">
                             Pagar
                           </button>
                         ) : (
@@ -792,7 +792,7 @@ function PushTab({ auth, pushes, loading, pushForm, setPushForm, pushSubmitting,
                             <p className="mt-2 rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">Motivo: {push.rejectionReason}</p>
                           ) : null}
                           {isPendingPayment ? (
-                            <button type="button" onClick={() => onOpenPayment(push)} className="mt-3 rounded-xl bg-amber-500 px-3 py-2 text-xs font-black text-white shadow-[0_12px_20px_-16px_rgba(245,158,11,0.8)]">
+                            <button type="button" onClick={() => onOpenPayment(push)} className="mt-3 rounded-xl bg-amber-500 px-3 py-2 text-xs font-black text-slate-900 shadow-[0_12px_20px_-16px_rgba(245,158,11,0.8)]">
                               Pagar agora
                             </button>
                           ) : null}

@@ -823,7 +823,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   };
   const getPriorityTone = (position) => {
     if (position === 1) return "bg-red-600 text-white";
-    if (position === 2) return "bg-amber-500 text-white";
+    if (position === 2) return "bg-amber-500 text-slate-900";
     if (position === 3) return "bg-yellow-400 text-slate-900";
     return "bg-slate-100 text-slate-700";
   };
@@ -2864,7 +2864,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             onClick={() => { pulseCta(order.id + '-prep'); handleAdvance(order.id, "preparing"); }}
             disabled={updating === order.id}
             style={ctaPulseId === order.id + '-prep' ? { animation: 'btnPop 220ms ease' } : undefined}
-            className="w-full px-3 py-3 rounded-lg bg-amber-500 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
+            className="w-full px-3 py-3 rounded-lg bg-amber-500 text-slate-900 text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
           >
             <Clock size={16} weight="duotone" /> Iniciar atendimento
           </button>
@@ -3220,9 +3220,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       <div className="flex flex-nowrap items-center gap-2 overflow-x-auto snap-x snap-mandatory pb-1.5 pr-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                       {[
                         { id: 'all', label: 'Todos', value: allActiveQueue.length, activeClass: 'bg-slate-800 text-white' },
-                        { id: 'condominium', label: 'Condomínio', value: queueMetrics.condominium, activeClass: 'bg-emerald-500 text-white' },
+                        { id: 'condominium', label: 'Condomínio', value: queueMetrics.condominium, activeClass: 'bg-emerald-500 text-slate-900' },
         { id: 'reservations', label: 'Reservas', value: queueMetrics.reservations, activeClass: 'bg-indigo-500 text-white' },
-                        { id: 'pending', label: 'Pendentes', value: queueMetrics.pending, activeClass: 'bg-amber-500 text-white' },
+                        { id: 'pending', label: 'Pendentes', value: queueMetrics.pending, activeClass: 'bg-amber-500 text-slate-900' },
                         { id: 'preparing', label: 'Em Preparação', value: queueMetrics.preparing, activeClass: 'bg-sky-500 text-white' },
                         { id: 'ready', label: 'Prontos', value: queueMetrics.ready, activeClass: 'bg-violet-500 text-white' },
                         { id: 'late', label: 'Atrasados', value: queueMetrics.late, activeClass: 'bg-rose-500 text-white' },
@@ -4442,7 +4442,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   onClick={() => setReportRange(period.id as any)}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                     reportRange === period.id
-                      ? 'bg-amber-500 border-amber-500 text-white shadow-sm'
+                      ? 'bg-amber-500 border-amber-500 text-slate-900 shadow-sm'
                       : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-white'
                   }`}
                 >
@@ -4785,7 +4785,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         <p className="truncate text-sm font-bold text-slate-900">{entry.name}</p>
                         <div className="h-1 w-full overflow-hidden rounded-[4px] bg-[#EEEEEE]">
                           <div
-                            className="h-full rounded-[4px] bg-[#2F9DF7] transition-all duration-300"
+                            className="h-full rounded-[4px] bg-[#336686] transition-all duration-300"
                             style={{ width: `${progressPct}%` }}
                           />
                         </div>
@@ -4977,7 +4977,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                             onClick={() => setManualItemModal((prev) => ({ ...prev, quantity: String(people), error: "" }))}
                             className={`h-8 rounded-xl text-xs font-black transition active:scale-95 ${
                               currentQuantity === people
-                                ? "bg-amber-500 text-white shadow-[0_10px_22px_-16px_rgba(217,119,6,0.75)]"
+                                ? "bg-amber-500 text-slate-900 shadow-[0_10px_22px_-16px_rgba(217,119,6,0.75)]"
                                 : "border border-amber-100 bg-amber-50 text-amber-800 hover:bg-amber-100"
                             }`}
                           >
@@ -5036,7 +5036,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   type="button"
                   onClick={handleCreateManualItem}
                   disabled={manualItemModal.loading}
-                  className="h-11 rounded-xl border border-amber-300 bg-amber-500 px-3 text-xs font-bold text-white hover:bg-amber-600 disabled:opacity-60 sm:h-10"
+                  className="h-11 rounded-xl border border-amber-300 bg-amber-500 px-3 text-xs font-bold text-slate-900 hover:bg-amber-600 disabled:opacity-60 sm:h-10"
                 >
                   {manualItemModal.loading ? "Salvando..." : (manualItemModal.ctaLabel || "Salvar e incluir")}
                 </button>
@@ -5305,7 +5305,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   type="button"
                   onClick={handleConfirmReopen}
                   disabled={reopenModal.loading}
-                  className="h-10 rounded-xl bg-amber-500 px-3 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-60"
+                  className="h-10 rounded-xl bg-amber-500 px-3 text-xs font-semibold text-slate-900 hover:bg-amber-600 disabled:opacity-60"
                 >
                   {reopenModal.loading ? 'Reabrindo...' : 'Confirmar reabertura'}
                 </button>
@@ -5581,7 +5581,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   type="button"
                   disabled={!printSelectionModal.hasNewItems || isGeneratingPrint}
                   onClick={() => handleSelectPrintMode('new')}
-                  className="w-full h-11 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 disabled:opacity-50"
+                  className="w-full h-11 rounded-xl bg-amber-500 text-slate-900 text-sm font-bold hover:bg-amber-600 disabled:opacity-50"
                 >
                   {printSelectionModal.hasNewItems ? 'Imprimir Apenas Novos' : 'Sem itens novos para imprimir'}
                 </button>

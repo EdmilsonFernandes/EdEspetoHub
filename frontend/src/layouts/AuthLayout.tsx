@@ -54,7 +54,7 @@ export function AuthLayout({
       </div>
 
       <div className={`mx-auto grid w-full max-w-7xl ${shellMinHeightClass} items-stretch gap-3 sm:gap-6 lg:gap-7 lg:grid-cols-[1.06fr_minmax(520px,1fr)] relative z-10`}>
-        <aside className="hidden lg:flex flex-col justify-between rounded-[24px] border border-sky-800/25 bg-[linear-gradient(145deg,#0a3d52_0%,#0d4f66_45%,#0a3a4d_100%)] text-white px-10 py-12 shadow-[0_32px_64px_-24px_rgba(13,79,102,0.55)] relative overflow-hidden">
+        <aside className="hidden lg:flex flex-col justify-between rounded-[24px] border border-sky-800/25 bg-[linear-gradient(145deg,#0a3d52_0%,#1c4b62_45%,#0a3a4d_100%)] text-white px-10 py-12 shadow-[0_32px_64px_-24px_rgba(13,79,102,0.55)] relative overflow-hidden">
           {/* Background mesh */}
           <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '28px 28px' }} />
           {/* Orbs */}

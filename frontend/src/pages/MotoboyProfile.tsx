@@ -1200,7 +1200,7 @@ export function MotoboyProfile() {
       icon: <IdentificationCard size={16} weight="duotone" />,
       badge:
         docsProgress.pending + docsProgress.rejected + docsProgress.missing > 0 ? (
-          <span className="absolute -top-1.5 -right-1 h-4 min-w-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-black grid place-items-center">
+          <span className="absolute -top-1.5 -right-1 h-4 min-w-4 px-1 rounded-full bg-amber-500 text-slate-900 text-[9px] font-black grid place-items-center">
             {docsProgress.pending + docsProgress.rejected + docsProgress.missing}
           </span>
         ) : null,
@@ -1222,7 +1222,7 @@ export function MotoboyProfile() {
       icon: <ClockClockwise size={16} weight="duotone" />,
       badge:
         payoutStats.pendingCount > 0 ? (
-          <span className="absolute -top-1.5 -right-1 h-4 min-w-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-black grid place-items-center">
+          <span className="absolute -top-1.5 -right-1 h-4 min-w-4 px-1 rounded-full bg-amber-500 text-slate-900 text-[9px] font-black grid place-items-center">
             {payoutStats.pendingCount}
           </span>
         ) : null,

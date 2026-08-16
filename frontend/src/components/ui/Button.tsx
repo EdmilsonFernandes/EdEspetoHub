@@ -25,7 +25,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   success:
     'border-emerald-200 bg-emerald-600 text-white shadow-[0_16px_32px_-24px_rgba(5,150,105,0.58)] hover:bg-emerald-700',
   warning:
-    'border-amber-200 bg-amber-500 text-white shadow-[0_16px_32px_-24px_rgba(217,119,6,0.55)] hover:bg-amber-600',
+    'border-amber-200 bg-amber-500 text-slate-900 shadow-[0_16px_32px_-24px_rgba(217,119,6,0.55)] hover:bg-amber-600',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

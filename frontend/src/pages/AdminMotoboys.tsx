@@ -2577,7 +2577,7 @@ export function AdminMotoboys() {
                   <button
                     type="button"
                     onClick={() => openReuploadDocModal(previewDoc._motoboyId, previewDoc.id, previewDoc?.docType)}
-                    className="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-extrabold"
+                    className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-900 text-xs font-extrabold"
                   >
                     Pedir reenvio
                   </button>

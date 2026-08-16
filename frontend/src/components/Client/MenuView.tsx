@@ -671,7 +671,7 @@ export const MenuView = ({
   const canOrder = !isServiceStore && isOrderingEnabled !== false && !preOrderBlocked;
   const catalogTerm = isServiceStore ? "Serviços" : "Cardápio";
   const effectiveCompactHeader = compactHeader || autoCompactHeader;
-  const catalogPrimaryColor = branding?.primaryColor || "#2f9df7";
+  const catalogPrimaryColor = branding?.primaryColor || "#336686";
   const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
   const catalogPrimaryText = getContrastTextColor(catalogPrimaryColor);
   const categoryRefs = React.useRef({});

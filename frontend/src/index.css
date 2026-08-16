@@ -4,32 +4,45 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #2f9df7;
+  --color-primary: #336686;
   --color-brand-teal: #336886;
   --color-brand-navy: #153a4c;
   --color-brand-green: #5fd35a;
   --color-rating: #f5a623;
+  /* Rampa teal oficial (auditoria F5 16/08) — classes primary-50..950/accent-400/700 */
+  --color-primary-50: #f4fafc;
+  --color-primary-100: #edf5fa;
+  --color-primary-200: #d7e7ef;
+  --color-primary-300: #bfd6e4;
+  --color-primary-500: #4e96ae;
+  --color-primary-600: #336686;
+  --color-primary-700: #2d5f7b;
+  --color-primary-800: #1c4b62;
+  --color-primary-900: #153a4c;
+  --color-primary-950: #0b1220;
+  --color-accent-400: #5fd35a;
+  --color-accent-700: #15803d;
   /* Type scale — piso tipográfico da jornada cliente (badges/micro-labels ≥ 10px) */
   --text-2xs: 0.625rem;
 }
 
 :root {
-  --color-primary: #2f9df7;
+  --color-primary: #336686;
   --color-secondary: #0f172a;
-  --color-cta: #16a34a;
-  --color-success: #059669;
+  --color-cta: #15803d;
+  --color-success: #047857;
   --color-warning: #d97706;
   --color-danger: #dc2626;
-  --brand-blue: #2f9df7;
-  --brand-cyan: #18b3f9;
+  --brand-blue: #336686;
+  --brand-cyan: #4e96ae;
   --brand-green: #5fd35a;
-  --brand-navy: #0b1220;
-  --brand-ink: #111827;
+  --brand-navy: #153a4c;
+  --brand-ink: #0f172a;
   --surface-0: #ffffff;
   --surface-1: #E2EBF2;
   --surface-2: #f1f5f9;
   --text-strong: #0f172a;
-  --text-soft: #64748b;
+  --text-soft: #52708a;
   --radius-sm: 12px;
   --radius-md: 16px;
   --radius-lg: 16px;
@@ -688,7 +701,7 @@ body {
 
   .auth-segment-btn.active {
     color: #fff;
-    background: #0d4f66;
+    background: #1c4b62;
     box-shadow: 0 14px 28px -20px rgba(13, 79, 102, 0.78);
   }
 
@@ -713,7 +726,7 @@ body {
 
   .floating-input:focus {
     outline: none;
-    border-color: #0d4f66;
+    border-color: #1c4b62;
     border-width: 2px;
     background: #fff;
     box-shadow: 0 0 0 3px rgba(13, 79, 102, 0.14);
@@ -739,7 +752,7 @@ body {
   .floating-input:not(:placeholder-shown) + .floating-label {
     top: 0.34rem;
     transform: scale(0.88);
-    color: #0d4f66;
+    color: #1c4b62;
     font-weight: 700;
   }
 
@@ -770,8 +783,8 @@ body {
   }
 
   .premium-check-btn.checked {
-    border-color: #0d4f66;
-    background: #0d4f66;
+    border-color: #1c4b62;
+    background: #1c4b62;
     color: #ffffff;
     box-shadow: 0 10px 20px -16px rgba(13, 79, 102, 0.84);
   }
@@ -1560,8 +1573,8 @@ body {
   }
 
   .create-store-form {
-    --create-store-primary: #0d4f66;
-    --create-store-accent: #2c8c9f;
+    --create-store-primary: #1c4b62;
+    --create-store-accent: #4e96ae;
   }
 
   .create-store-form .ds-input,

@@ -158,7 +158,7 @@ export function NotificationsPage() {
                     className={`group relative grid w-full grid-cols-[4.25rem_minmax(0,1fr)_2.35rem] items-start gap-3 rounded-[1.35rem] px-3 py-3 text-left transition-all active:scale-[0.985] ${n.read ? 'bg-transparent hover:bg-white/55' : 'bg-white shadow-[0_18px_36px_-30px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/10'}`}
                   >
                     <div className="relative shrink-0">
-                      <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.15rem] bg-[linear-gradient(135deg,#0f3b53,#336886)] shadow-[0_16px_28px_-24px_rgba(15,23,42,0.38)]">
+                      <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.15rem] bg-[linear-gradient(135deg,#153a4c,#336886)] shadow-[0_16px_28px_-24px_rgba(15,23,42,0.38)]">
                         <img src={n.imageUrl || '/janocaminho.jpg'} alt="" className="h-full w-full object-cover opacity-90" />
                       </div>
                       {!n.read && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#336886] shadow-[0_0_8px_rgba(51,104,134,0.55)]" />}

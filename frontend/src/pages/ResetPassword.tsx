@@ -58,7 +58,7 @@ export function ResetPassword() {
     <AuthLayout>
       <div className="space-y-4 ds-login-card-enter w-full">
         <div className="text-center space-y-2.5">
-          <div className="mx-auto w-16 h-16 bg-sky-50 rounded-2xl flex items-center justify-center text-[#0d4f66] shadow-sm border border-sky-100">
+          <div className="mx-auto w-16 h-16 bg-sky-50 rounded-2xl flex items-center justify-center text-[#1c4b62] shadow-sm border border-sky-100">
             <LockSimple size={32} weight="duotone" />
           </div>
           <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-400">Segurança da Conta</p>
@@ -145,7 +145,7 @@ export function ResetPassword() {
             <button
               type="submit"
               disabled={loading || !token || !password || !confirm || !!message}
-              className="ds-btn-shine w-full h-14 rounded-2xl bg-[#0d4f66] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-60"
+              className="ds-btn-shine w-full h-14 rounded-2xl bg-[#1c4b62] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-60"
             >
               {loading ? 'Atualizando...' : 'Confirmar Nova Senha'}
             </button>

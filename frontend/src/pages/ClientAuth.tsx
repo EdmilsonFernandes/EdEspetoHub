@@ -572,7 +572,7 @@ export function ClientAuth() {
     >
       <div className="space-y-1.5 ds-login-card-enter w-full sm:space-y-4">
         <div className="hidden text-center sm:block">
-          <div className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#0d4f66] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)]">
+          <div className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#1c4b62] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)]">
             <LockKey size={23} weight="duotone" />
           </div>
           <h2 className="text-[2rem] font-black tracking-[-0.03em] text-slate-800">
@@ -725,7 +725,7 @@ export function ClientAuth() {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="inline-flex min-h-10 items-center rounded-full px-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#0d4f66] hover:text-[#0b3f52] hover:underline sm:text-xs"
+                  className="inline-flex min-h-10 items-center rounded-full px-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#1c4b62] hover:text-[#153a4c] hover:underline sm:text-xs"
                 >
                   Esqueci minha senha
                 </button>
@@ -765,7 +765,7 @@ export function ClientAuth() {
             <button
               type="submit"
               disabled={loading}
-              className="ds-btn-shine w-full rounded-2xl bg-[linear-gradient(135deg,#0d4f66,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] transition-all active:scale-[0.99] disabled:opacity-60 sm:py-3.5"
+              className="ds-btn-shine w-full rounded-2xl bg-[linear-gradient(135deg,#1c4b62,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] transition-all active:scale-[0.99] disabled:opacity-60 sm:py-3.5"
             >
               {loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : 'Entrar'}
             </button>
@@ -904,7 +904,7 @@ export function ClientAuth() {
       {verifyPrompt ? (
         <div className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/55 px-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
           <div className="flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-7rem)] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)] sm:max-h-[min(48rem,calc(100dvh-3rem))]">
-            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f3b53_0%,#0d4f66_55%,#2c8c9f_100%)] px-6 pb-8 pt-6 text-white">
+            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#153a4c_0%,#1c4b62_55%,#4e96ae_100%)] px-6 pb-8 pt-6 text-white">
               <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_68%)]" />
               <div className="relative flex items-start justify-between gap-4">
                 <div className="space-y-3">
@@ -952,7 +952,7 @@ export function ClientAuth() {
             <div className="space-y-5 overflow-y-auto px-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-5">
               <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                 <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
-                  <SealCheck size={16} weight="duotone" className="text-[#0d4f66]" />
+                  <SealCheck size={16} weight="duotone" className="text-[#1c4b62]" />
                   Confirmação segura
                 </div>
                 <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
@@ -976,7 +976,7 @@ export function ClientAuth() {
                       onChange={(e) => handleCodeDigitChange(index, e.target.value)}
                       onKeyDown={(e) => handleCodeKeyDown(index, e)}
                       onPaste={handleCodePaste}
-                      className="h-16 w-14 rounded-2xl border border-slate-200 bg-slate-50 text-center text-2xl font-black tracking-[0.1em] text-slate-900 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] outline-none transition focus:border-[#0d4f66] focus:bg-white focus:ring-4 focus:ring-[#0d4f66]/10 sm:w-16"
+                      className="h-16 w-14 rounded-2xl border border-slate-200 bg-slate-50 text-center text-2xl font-black tracking-[0.1em] text-slate-900 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] outline-none transition focus:border-[#1c4b62] focus:bg-white focus:ring-4 focus:ring-[#1c4b62]/10 sm:w-16"
                     />
                   ))}
                 </div>
@@ -1002,7 +1002,7 @@ export function ClientAuth() {
                   type="button"
                   onClick={handleVerifyCode}
                   disabled={verificationCode.length !== 4 || codeLoading}
-                  className="rounded-2xl bg-[linear-gradient(135deg,#0f3b53,#0d4f66,#2c8c9f)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
+                  className="rounded-2xl bg-[linear-gradient(135deg,#153a4c,#1c4b62,#4e96ae)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
                 >
                   {codeLoading ? 'Confirmando código...' : 'Confirmar e entrar'}
                 </button>

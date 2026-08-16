@@ -296,7 +296,7 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
                   window.open(url, '_blank');
                 }
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#009ee3] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.6)] transition hover:brightness-105 active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4e96ae] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.6)] transition hover:brightness-105 active:scale-[0.98]"
             >
               <ArrowSquareOut size={16} weight="bold" />
               Pagar via Mercado Pago
@@ -537,7 +537,7 @@ export const SuccessView = ({
               ].map(({ label, done, pending }: any, i) => (
                 <React.Fragment key={i}>
                   <div className="flex items-center gap-1">
-                    <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black transition-colors ${done ? 'bg-emerald-500 text-white' : pending ? 'bg-amber-400 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                    <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black transition-colors ${done ? 'bg-emerald-500 text-slate-900' : pending ? 'bg-amber-400 text-slate-900' : 'bg-slate-200 text-slate-500'}`}>
                       {done ? '✓' : i + 1}
                     </span>
                     <span className={`text-[9px] font-bold uppercase tracking-wide ${done ? 'text-emerald-600' : pending ? 'text-amber-600' : 'text-slate-400'}`}>{label}</span>

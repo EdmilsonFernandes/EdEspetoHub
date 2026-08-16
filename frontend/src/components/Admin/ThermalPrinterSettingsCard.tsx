@@ -78,7 +78,7 @@ function StepBadge({ number, label, active, completed }: {
       <span
         className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${
           completed
-            ? 'bg-emerald-500 text-white'
+            ? 'bg-emerald-500 text-slate-900'
             : active
               ? 'bg-[#153A4C] text-white'
               : 'bg-slate-100 text-slate-400'
@@ -712,7 +712,7 @@ export function ThermalPrinterSettingsCard() {
             data-testid="thermal-printer-test"
             className={`w-full inline-flex items-center justify-center gap-2.5 rounded-2xl px-6 py-4 text-sm font-black transition-all active:scale-[0.99] ${
               testPhase === 'success'
-                ? 'bg-emerald-500 text-white shadow-[0_18px_34px_-24px_rgba(16,185,129,0.75)]'
+                ? 'bg-emerald-500 text-slate-900 shadow-[0_18px_34px_-24px_rgba(16,185,129,0.75)]'
                 : testPhase === 'failed'
                   ? 'bg-rose-500 text-white shadow-[0_18px_34px_-24px_rgba(244,63,94,0.75)]'
                   : 'bg-[#153A4C] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.75)] disabled:opacity-60'

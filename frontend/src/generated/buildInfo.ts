@@ -5,285 +5,285 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "3e1e71f8",
-  "versionLabel": "v0.1.9.3e1e71f8",
-  "versionInternal": "0.1.9+20260615.203918.3e1e71f8",
-  "buildId": "0.1.9+20260615.203918.3e1e71f8-20260615.203918-3e1e71f8",
-  "builtAt": "2026-06-15T20:39:18.210Z",
-  "commitHash": "3e1e71f8c6687deac98492990ded218797ddb4cc",
-  "shortHash": "3e1e71f8",
+  "versionDisplaySuffix": "78dc848a",
+  "versionLabel": "v0.1.9.78dc848a",
+  "versionInternal": "0.1.9+20260816.123021.78dc848a",
+  "buildId": "0.1.9+20260816.123021.78dc848a-20260816.123021-78dc848a",
+  "builtAt": "2026-08-16T12:30:21.370Z",
+  "commitHash": "78dc848a8df0fa54beb4fb3452227adcd505b853",
+  "shortHash": "78dc848a",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
     {
-      "hash": "3e1e71f8c6687deac98492990ded218797ddb4cc",
-      "shortHash": "3e1e71f8",
-      "dateIso": "2026-06-15T17:38:58-03:00",
+      "hash": "78dc848a8df0fa54beb4fb3452227adcd505b853",
+      "shortHash": "78dc848a",
+      "dateIso": "2026-08-15T12:27:02-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): FGS keep-alive + isencao de bateria (auto-print sobrevive ao Doze)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3e1e71f8c6687deac98492990ded218797ddb4cc"
+      "subject": "fix(ux): P1 finais — tap targets 44px e imagens de destinos -30%",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/78dc848a8df0fa54beb4fb3452227adcd505b853"
     },
     {
-      "hash": "bbac01ae7f16684d0b1fcafaaf7310413c303eba",
-      "shortHash": "bbac01ae",
-      "dateIso": "2026-06-15T16:47:27-03:00",
+      "hash": "1786cee2aaf25a2ae5ea266b4cb6b46638f690dc",
+      "shortHash": "1786cee2",
+      "dateIso": "2026-08-15T11:19:23-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(release): v75 — fix QR CREAT ERR (module size 4)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bbac01ae7f16684d0b1fcafaaf7310413c303eba"
+      "subject": "chore(mobile): versionCode 91 (v1.0.91) — backlog P2 da auditoria UX",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1786cee2aaf25a2ae5ea266b4cb6b46638f690dc"
     },
     {
-      "hash": "87122fcff461de7c0ca66d0c5ea367fb88eb4b0f",
-      "shortHash": "87122fcf",
-      "dateIso": "2026-06-15T16:46:59-03:00",
+      "hash": "a9ff40ee8b61cc315d1c64843b3f7133ed3b73ea",
+      "shortHash": "a9ff40ee",
+      "dateIso": "2026-08-15T11:13:44-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): QR module size 6 -> 4 (corrige \"QR CREAT ERR\")",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/87122fcff461de7c0ca66d0c5ea367fb88eb4b0f"
+      "subject": "fix(ux): backlog P2 da auditoria — pedidos da conta, labels, h1, sheet, boas-vindas",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a9ff40ee8b61cc315d1c64843b3f7133ed3b73ea"
     },
     {
-      "hash": "fd4fce8c7f311df571e7964793b7b26d0705e8c0",
-      "shortHash": "fd4fce8c",
-      "dateIso": "2026-06-15T16:46:32-03:00",
+      "hash": "628907e44a485953faf9334d4a002b5c4a3a5f63",
+      "shortHash": "628907e4",
+      "dateIso": "2026-08-15T10:24:40-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(vitrine): slider de qualidade + pedido mínimo (default R$ 20)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fd4fce8c7f311df571e7964793b7b26d0705e8c0"
+      "subject": "feat(ux): ondas 2-5 da auditoria premium — nav única, feira como evento, landing duas vozes, conta limpa",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/628907e44a485953faf9334d4a002b5c4a3a5f63"
     },
     {
-      "hash": "61785afcb987bc6cc3d0a093df4fe62242d28c39",
-      "shortHash": "61785afc",
-      "dateIso": "2026-06-15T16:26:38-03:00",
+      "hash": "2cb5fd24589b6e00709100e45092037aa04f86e6",
+      "shortHash": "2cb5fd24",
+      "dateIso": "2026-08-15T09:25:12-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(vitrine): header mobile clean — status+nota numa linha, sem pílula preta",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/61785afcb987bc6cc3d0a093df4fe62242d28c39"
+      "subject": "feat(ux): onda 1 da auditoria premium — higiene P0/P1 (15/40 -> meta 25+)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2cb5fd24589b6e00709100e45092037aa04f86e6"
     },
     {
-      "hash": "38c6a7b8af7c57ebc9aa9fab1c7c16c545b47ec9",
-      "shortHash": "38c6a7b8",
-      "dateIso": "2026-06-15T16:20:40-03:00",
+      "hash": "3e52be73710f3b73197a07e2a603beb62c3624e5",
+      "shortHash": "3e52be73",
+      "dateIso": "2026-08-14T10:09:14-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "style(vitrine): header clean/premium estilo iFood (busca + info sem caixas)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/38c6a7b8af7c57ebc9aa9fab1c7c16c545b47ec9"
+      "subject": "chore(mobile): versionCode 90 (v1.0.90) — melhorias UX da auditoria (nav APK, tipografia, PaymentPage)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3e52be73710f3b73197a07e2a603beb62c3624e5"
     },
     {
-      "hash": "a67e5ee882a6875c16f0af50a00c959182555ea7",
-      "shortHash": "a67e5ee8",
-      "dateIso": "2026-06-15T15:50:36-03:00",
+      "hash": "2a6a49efe34f39dbb8a47c9e13ce93a4fd921272",
+      "shortHash": "2a6a49ef",
+      "dateIso": "2026-08-14T10:04:47-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(vitrine): gatilhos de Avaliações/Informações no header mobile (compact)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a67e5ee882a6875c16f0af50a00c959182555ea7"
+      "subject": "feat(ux): auditoria UX mobile — nav consistente no APK, piso tipográfico 10px, re-skin PaymentPage",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2a6a49efe34f39dbb8a47c9e13ce93a4fd921272"
     },
     {
-      "hash": "672ba635f4facca24a7c19e9f9d6e230f19c9755",
-      "shortHash": "672ba635",
-      "dateIso": "2026-06-15T15:46:41-03:00",
+      "hash": "8aca35b90c38c8a6482aca3151b6b84f7b9fb68e",
+      "shortHash": "8aca35b9",
+      "dateIso": "2026-08-14T09:13:11-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(release): v74 — auto-print em background + anti-duplicata + QR",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/672ba635f4facca24a7c19e9f9d6e230f19c9755"
+      "subject": "feat(sdd): processo SDD janocaminho — referência + 7 skills (sem processo FITec)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8aca35b90c38c8a6482aca3151b6b84f7b9fb68e"
     },
     {
-      "hash": "b27e836dde5ab7179789219d8ca6e02506ed7632",
-      "shortHash": "b27e836d",
-      "dateIso": "2026-06-15T15:42:48-03:00",
+      "hash": "4b3ba465e4dc2b2c9f61cf0a7631d6339eeba503",
+      "shortHash": "4b3ba465",
+      "dateIso": "2026-08-14T08:58:31-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(vitrine): esconder busca nas abas de detalhes + tabs Cardápio/Avaliações/Informações",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b27e836dde5ab7179789219d8ca6e02506ed7632"
+      "subject": "docs(claude): indexar skill pack UX/front-end (Claude_SKILLS, 24 skills, sem fitec-sdd)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4b3ba465e4dc2b2c9f61cf0a7631d6339eeba503"
     },
     {
-      "hash": "3f4f6ef97cf00c9e7dc7d7ea313f3753efe5d911",
-      "shortHash": "3f4f6ef9",
-      "dateIso": "2026-06-15T15:40:41-03:00",
+      "hash": "2d49e16132c9487c07c4ad665d8ac5dba48c36fc",
+      "shortHash": "2d49e161",
+      "dateIso": "2026-08-13T19:30:59-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): auto-print em background + anti-duplicata push×polling",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3f4f6ef97cf00c9e7dc7d7ea313f3753efe5d911"
+      "subject": "chore(mobile): versionCode 89 (v1.0.89) — tile Condominio premium no hub",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2d49e16132c9487c07c4ad665d8ac5dba48c36fc"
     },
     {
-      "hash": "4da45632f4d4319a817fc34c74d7b23c6c984802",
-      "shortHash": "4da45632",
-      "dateIso": "2026-06-15T15:00:32-03:00",
+      "hash": "1544cce1af03a1aceb2f532e7bd4cdb7a08fe41a",
+      "shortHash": "1544cce1",
+      "dateIso": "2026-08-13T19:17:53-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(vitrine): esconder categorias nas abas de detalhes + cabeçalho de detalhes limpo",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4da45632f4d4319a817fc34c74d7b23c6c984802"
+      "subject": "feat(condominio): tile Condominio premium nas categorias + remover loja no superadmin + save sem re-geocode",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1544cce1af03a1aceb2f532e7bd4cdb7a08fe41a"
     },
     {
-      "hash": "e1c3792c3023b27e810b869c071cc17d2a95668a",
-      "shortHash": "e1c3792c",
-      "dateIso": "2026-06-15T13:42:56-03:00",
+      "hash": "c1b24592c9fc12daa370e703087d898af59e26d3",
+      "shortHash": "c1b24592",
+      "dateIso": "2026-08-13T14:03:54-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(vitrine): acesso a Avaliações/Informações via setas › no header (estilo iFood), sem Tab Bar",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e1c3792c3023b27e810b869c071cc17d2a95668a"
+      "subject": "chore(mobile): versionCode 88 (v1.0.88) — inclui card dispensivel + seletor visual + fix CEP",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c1b24592c9fc12daa370e703087d898af59e26d3"
     },
     {
-      "hash": "fe8133bfddf9ba81cf32e6c8b4aa0ecc66fe08f3",
-      "shortHash": "fe8133bf",
-      "dateIso": "2026-06-15T13:37:33-03:00",
+      "hash": "e942d02fd84aca0a61542562aa1f679391feba37",
+      "shortHash": "e942d02f",
+      "dateIso": "2026-08-13T13:04:22-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(release): v73 — hotfix auto-print anti-loop + QR do cupom (P0 prod)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fe8133bfddf9ba81cf32e6c8b4aa0ecc66fe08f3"
+      "subject": "feat(hub): aviso \"Mora em condominio?\" e dispensavel (X) pra quem nao mora",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e942d02fd84aca0a61542562aa1f679391feba37"
     },
     {
-      "hash": "1d707d34aa0f85e4b4ac019c637a74d8c037d7f8",
-      "shortHash": "1d707d34",
-      "dateIso": "2026-06-15T13:25:30-03:00",
+      "hash": "eed778f0d4aba0afb3c0f0bcccff8bf6b3702cc0",
+      "shortHash": "eed778f0",
+      "dateIso": "2026-08-13T12:49:47-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): QR do cupom no auto-print foreground (executePrintOrder)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1d707d34aa0f85e4b4ac019c637a74d8c037d7f8"
+      "subject": "fix(cliente): geocoding fora da transacao no updateAddress (400 GEN-001 ao adicionar condominio)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eed778f0d4aba0afb3c0f0bcccff8bf6b3702cc0"
     },
     {
-      "hash": "f244e161a406172089660aa9e756cf2e8e10f634",
-      "shortHash": "f244e161",
-      "dateIso": "2026-06-15T13:09:40-03:00",
+      "hash": "c3e9376c989ff5d7c9dd4ba5798e9611ecb02703",
+      "shortHash": "c3e9376c",
+      "dateIso": "2026-08-13T10:35:17-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(release): v72 — hotfix auto-print anti-loop (P0 prod)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f244e161a406172089660aa9e756cf2e8e10f634"
+      "subject": "feat(ops): respondWithError loga erro nao-tratado com stack + CLAUDE.md documenta acesso SSH de diagnostico",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c3e9376c989ff5d7c9dd4ba5798e9611ecb02703"
     },
     {
-      "hash": "7bfa5dd1b6224b52e7bfb733412522a9c01ad983",
-      "shortHash": "7bfa5dd1",
-      "dateIso": "2026-06-15T13:02:38-03:00",
+      "hash": "3983d5ce390426e670b76c6d8f7c629c5e16a062",
+      "shortHash": "3983d5ce",
+      "dateIso": "2026-08-13T09:46:00-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(vitrine): tabs de texto com underline (estilo iFood) no lugar de botões grandes",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7bfa5dd1b6224b52e7bfb733412522a9c01ad983"
+      "subject": "chore(mobile): versionCode 87 (v1.0.87) — CEP fix + seletor de condominio visual",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3983d5ce390426e670b76c6d8f7c629c5e16a062"
     },
     {
-      "hash": "0a643d5e19df3e118763a9f5ffbb49b9779a42c3",
-      "shortHash": "0a643d5e",
-      "dateIso": "2026-06-15T13:00:56-03:00",
+      "hash": "023d89a3e17f07fc567e713f3c67c3ba4b1525f6",
+      "shortHash": "023d89a3",
+      "dateIso": "2026-08-13T09:44:17-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): auto-print native-only + cap anti-loop (P0 prod)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0a643d5e19df3e118763a9f5ffbb49b9779a42c3"
+      "subject": "fix(cliente): CEP nao re-busca ao editar endereço + seletor de condominio visual com logo",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/023d89a3e17f07fc567e713f3c67c3ba4b1525f6"
     },
     {
-      "hash": "7526aa8e0ff904fa535ed440aa80886ba93572ed",
-      "shortHash": "7526aa8e",
-      "dateIso": "2026-06-15T12:40:00-03:00",
+      "hash": "7716f0fc616c0c1c1ec212af5a8427ea96fca61e",
+      "shortHash": "7716f0fc",
+      "dateIso": "2026-08-13T09:31:54-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(vitrine): alinhar avaliações ao design iFood (card qualidade + sub-tabs + header com seta)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7526aa8e0ff904fa535ed440aa80886ba93572ed"
+      "subject": "chore(mobile): versionCode 86 (v1.0.86) — AAB com retirada persistida no pedido",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7716f0fc616c0c1c1ec212af5a8427ea96fca61e"
     },
     {
-      "hash": "009177f8ff7e35327f405490898416edf62883a8",
-      "shortHash": "009177f8",
-      "dateIso": "2026-06-15T12:23:19-03:00",
+      "hash": "e954555cf771fdd630e9498c51a3dcc73de728e4",
+      "shortHash": "e954555c",
+      "dateIso": "2026-08-13T09:24:44-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(ux): contador por categoria em /hub/destaques nao corta mais os numeros",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/009177f8ff7e35327f405490898416edf62883a8"
+      "subject": "feat(condominio): pedido persiste e exibe o local de retirada (Meus Pedidos + tracking)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e954555cf771fdd630e9498c51a3dcc73de728e4"
     },
     {
-      "hash": "19d808c847d884e3b871edacc20726ebb0310cd0",
-      "shortHash": "19d808c8",
-      "dateIso": "2026-06-15T11:37:40-03:00",
+      "hash": "d513b3cbc418768218f61d1696f2aea252147940",
+      "shortHash": "d513b3cb",
+      "dateIso": "2026-08-13T07:20:00-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(vitrine): abas Produtos/Avaliações/Informações + tela de avaliações iFood",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/19d808c847d884e3b871edacc20726ebb0310cd0"
+      "subject": "chore(mobile): versionCode 85 (v1.0.85) — AAB com local de retirada do condominio",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d513b3cbc418768218f61d1696f2aea252147940"
     },
     {
-      "hash": "dc25cd2ceb7832b6a5a89cbeca7535b80809da46",
-      "shortHash": "dc25cd2c",
-      "dateIso": "2026-06-15T09:43:13-03:00",
+      "hash": "8cb99473228b4a9fde77120cc2cb0310e13f3406",
+      "shortHash": "8cb99473",
+      "dateIso": "2026-08-13T07:14:14-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(print): device-side print queue com retry + ACK (idempotencia)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/dc25cd2ceb7832b6a5a89cbeca7535b80809da46"
+      "subject": "feat(condominio): local de retirada do vendedor no comercio permanente",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8cb99473228b4a9fde77120cc2cb0310e13f3406"
     },
     {
-      "hash": "118dff38b03e94530c09180022109784f15e1233",
-      "shortHash": "118dff38",
-      "dateIso": "2026-06-15T09:34:44-03:00",
+      "hash": "4a7f22f1823d046bb4eaadebc2523f98b3b1cb12",
+      "shortHash": "4a7f22f1",
+      "dateIso": "2026-08-12T21:36:28-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ux): migrar modais de destaque e push para PaymentQRCard",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/118dff38b03e94530c09180022109784f15e1233"
+      "subject": "feat(condominio): filtro \"Meu Condomínio\" no hub + endereço-condo no perfil",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4a7f22f1823d046bb4eaadebc2523f98b3b1cb12"
     },
     {
-      "hash": "df6adaaf716889b5dd929a32362897b30dd3c7e9",
-      "shortHash": "df6adaaf",
-      "dateIso": "2026-06-15T09:29:03-03:00",
+      "hash": "6c6257c5d8676ff78c5957df88ed059ff0f4e3e9",
+      "shortHash": "6c6257c5",
+      "dateIso": "2026-08-03T15:00:30-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ux): migrar painel de destaque de destino para PaymentQRCard",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/df6adaaf716889b5dd929a32362897b30dd3c7e9"
+      "subject": "feat(auth): aviso premium \"cliente vira lojista\" no criar-loja",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6c6257c5d8676ff78c5957df88ed059ff0f4e3e9"
     },
     {
-      "hash": "c143114bd48f7f441fbe77ab7c70d35407985868",
-      "shortHash": "c143114b",
-      "dateIso": "2026-06-15T09:27:28-03:00",
+      "hash": "a0f8c70a2b8261445cb010b2113698a83f542eca",
+      "shortHash": "a0f8c70a",
+      "dateIso": "2026-08-03T14:53:36-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): QR Code intermittente era causado pelo chunking de 512 bytes",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c143114bd48f7f441fbe77ab7c70d35407985868"
+      "subject": "feat(auth): cliente vira lojista no criar-loja (promove conta existente)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a0f8c70a2b8261445cb010b2113698a83f542eca"
     },
     {
-      "hash": "452b33e4991727f638d42b9ddcd995fcb42fda8e",
-      "shortHash": "452b33e4",
-      "dateIso": "2026-06-15T09:15:10-03:00",
+      "hash": "1cb5e4e1391759c70aabfe6596c96f32b26a21e4",
+      "shortHash": "1cb5e4e1",
+      "dateIso": "2026-07-28T23:03:57-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(payment): destaque usa email deterministico (evita 4390 no self-pay)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/452b33e4991727f638d42b9ddcd995fcb42fda8e"
+      "subject": "feat(superadmin): biblioteca de pushes prontos por tema (engajamento)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1cb5e4e1391759c70aabfe6596c96f32b26a21e4"
     },
     {
-      "hash": "f9cffe1a9c9b514af1af369647212806ee3822b4",
-      "shortHash": "f9cffe1a",
-      "dateIso": "2026-06-15T06:56:16-03:00",
+      "hash": "47c9be4fd9f1bb607823b8204ff4072922cac822",
+      "shortHash": "47c9be4f",
+      "dateIso": "2026-07-28T19:40:49-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(mobile): wake-lock mantem a tela acesa quando auto-print esta ligado",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f9cffe1a9c9b514af1af369647212806ee3822b4"
+      "subject": "fix(admin): Salvar segmento + cadastro Serviços + dropdown perfil sob banner",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/47c9be4fd9f1bb607823b8204ff4072922cac822"
     },
     {
-      "hash": "76932c9b2cac73a017b8fcbb4725430f7e39cb0d",
-      "shortHash": "76932c9b",
-      "dateIso": "2026-06-15T06:49:07-03:00",
+      "hash": "53df8f0e766f102e47f64113e53c28a4c39cdfba",
+      "shortHash": "53df8f0e",
+      "dateIso": "2026-07-28T18:43:07-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(auth): avaliacao/gorjeta de pedido feito por conta so pelo dono",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/76932c9b2cac73a017b8fcbb4725430f7e39cb0d"
+      "subject": "feat(admin): seletor de segmento no painel do lojista (troca pra Serviços sem banco)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/53df8f0e766f102e47f64113e53c28a4c39cdfba"
     },
     {
-      "hash": "75e71a4904b60f58b1acc35eb2fad28b22740275",
-      "shortHash": "75e71a49",
-      "dateIso": "2026-06-14T23:08:12-03:00",
+      "hash": "54f2d9e1ee35276102989f6308f44c0a983842e7",
+      "shortHash": "54f2d9e1",
+      "dateIso": "2026-07-28T13:08:02-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): auto-print pulava pedidos simultaneos (lock rejeitava a 2a impressao)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/75e71a4904b60f58b1acc35eb2fad28b22740275"
+      "subject": "chore(android): versionCode 84 + versionName 1.0.84 (AAB notificacao ongoing ajustada)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/54f2d9e1ee35276102989f6308f44c0a983842e7"
     },
     {
-      "hash": "ff028185de4e6f430515c8cfbb602b26eca01054",
-      "shortHash": "ff028185",
-      "dateIso": "2026-06-14T22:09:08-03:00",
+      "hash": "f7d45d6339a1f19cc200289403c5332357860d2d",
+      "shortHash": "f7d45d63",
+      "dateIso": "2026-07-28T11:00:49-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): coexistem polling (foreground) + push (background) sem duplicar",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ff028185de4e6f430515c8cfbb602b26eca01054"
+      "subject": "feat(marketplace): vitrine de serviços com lead via WhatsApp (lava-rápido, beleza, etc.)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f7d45d6339a1f19cc200289403c5332357860d2d"
     },
     {
-      "hash": "45f290683dde8a0126e9a437dc3407189754985d",
-      "shortHash": "45f29068",
-      "dateIso": "2026-06-14T22:00:58-03:00",
+      "hash": "c02a461776abc234a52326d8822567d3ea5a8a5a",
+      "shortHash": "c02a4617",
+      "dateIso": "2026-07-28T09:25:02-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ux): migrar gorjeta/motoboy para PaymentQRCard (fim do pisca)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/45f290683dde8a0126e9a437dc3407189754985d"
+      "subject": "feat(notifications): ajustes visuais da ongoing (ícone próprio, layout mínimo, dedup na central)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c02a461776abc234a52326d8822567d3ea5a8a5a"
     }
   ]
 } as const;

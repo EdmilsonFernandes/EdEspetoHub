@@ -202,7 +202,7 @@ export function CondominiumDashboard() {
     { label: 'Feiras na agenda', value: events.length, tone: 'bg-[#153A4C] text-white' },
     { label: 'Lojas aprovadas', value: approvedStores.length, tone: 'bg-emerald-600 text-white' },
     { label: 'Lojas em feiras', value: fairStoresCount, tone: 'bg-sky-600 text-white' },
-    { label: 'Solicitações pendentes', value: pendingRequests.length, tone: 'bg-amber-500 text-white' },
+    { label: 'Solicitações pendentes', value: pendingRequests.length, tone: 'bg-amber-500 text-slate-900' },
   ];
 
   useEffect(() => {

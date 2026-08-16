@@ -2413,7 +2413,7 @@ export const CartView = ({
 
               {customer.table && !isEditingTable ? (
                 <div className="flex items-center gap-3.5 bg-amber-500/10 border border-amber-500/25 rounded-2xl p-3 animate-in fade-in zoom-in-95 duration-200">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white font-black text-lg shadow-sm">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-slate-900 font-black text-lg shadow-sm">
                     {customer.table}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -2440,7 +2440,7 @@ export const CartView = ({
                         }}
                         className={`jnc-hub-touch py-2.5 rounded-xl text-sm font-semibold border transition shadow-sm ${
                           isSelected
-                            ? "bg-amber-500 text-white font-bold border-amber-500 ring-2 ring-amber-300/60 shadow-[inset_0_0_0_1px_rgba(217,119,6,0.35)]"
+                            ? "bg-amber-500 text-slate-900 font-bold border-amber-500 ring-2 ring-amber-300/60 shadow-[inset_0_0_0_1px_rgba(217,119,6,0.35)]"
                             : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
                         }`}
                       >

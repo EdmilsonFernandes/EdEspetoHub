@@ -2310,7 +2310,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   onClick={() => setInlineForm((prev) => ({ ...prev, isFeatured: !prev.isFeatured }))}
                   className={`py-3 rounded-xl text-sm font-semibold border ${
                     inlineForm.isFeatured
-                      ? 'bg-amber-500 text-white border-amber-500'
+                      ? 'bg-amber-500 text-slate-900 border-amber-500'
                       : 'bg-white text-slate-600 border-slate-200'
                   }`}
                 >
