@@ -1988,19 +1988,13 @@ export function MarketplacePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[linear-gradient(180deg,#DAE8F0_0%,#E6EEF3_8%,#EEF4F7_16%,#F5F9FB_28%,#FAFBFC_42%,#FFFFFF_60%,#F8FAFB_100%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
+    <div className="min-h-screen w-full overflow-x-hidden overscroll-x-none bg-[linear-gradient(180deg,#F3F8FB_0%,#F8FAFC_14%,#FFFFFF_36%)] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] text-slate-900 sm:pb-24">
       {/* Aurora Background — atmospheric depth with brand colors */}
       <div className="jnc-safe-area-glass pointer-events-none fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top)]" />
-      {/* Smooth transition band — header → body bridge */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[480px]" style={{ background: 'linear-gradient(180deg, #2A6078 0%, #3A7E96 4%, #4E96AE 8%, #72AEC2 13%, #96C4D4 18%, #B4D6E2 24%, #CEE4EC 30%, #E2EEF3 38%, transparent 50%)' }} />
-      {/* Aurora blob 1 — azul, canto superior esquerdo, animado */}
-      <div className="jnc-hub-aurora-1 fixed left-[-8%] top-[-4%] h-[36%] w-[42%] rounded-full bg-[#2A6078]/[0.10] blur-[160px] pointer-events-none -z-10" />
-      {/* Aurora blob 2 — verde, canto superior direito, animado */}
-      <div className="jnc-hub-aurora-2 fixed top-[-6%] right-[-6%] h-[38%] w-[45%] bg-[#5FD35A]/[0.04] blur-[140px] rounded-full pointer-events-none -z-10" />
-      {/* Aurora blob 3 — azul claro, inferior esquerdo, animado */}
-      <div className="jnc-hub-aurora-3 fixed bottom-[5%] left-[8%] h-[18%] w-[24%] bg-[#336886]/[0.04] blur-[120px] rounded-full pointer-events-none -z-10" />
-      {/* Soft light bloom — center top */}
-      <div className="fixed left-[25%] top-[3%] h-[16%] w-[32%] bg-white/12 blur-[100px] pointer-events-none -z-10" />
+      {/* Clareza 8K (benchmark iFood): corpo branco, véu azul MUITO sutil só na transição do header.
+          As 6 camadas de aurora/mesh/gradiente deram lugar a uma única respirada — o vidro do
+          header continua dando a profundidade; o olho descansa no branco. */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px]" style={{ background: 'linear-gradient(180deg, #E9F2F7 0%, #F4F8FB 38%, transparent 72%)' }} />
 
       <div
         className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-2xs font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
@@ -2074,11 +2068,6 @@ export function MarketplacePage() {
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}
       >
-        {/* Floating Ambient Mesh Gradients */}
-        <div className="pointer-events-none absolute -left-[10%] top-[8%] -z-10 h-[380px] w-[380px] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.06)_0%,rgba(20,184,166,0.02)_60%,transparent_100%)] blur-[60px]" />
-        <div className="pointer-events-none absolute -right-[10%] top-[35%] -z-10 h-[450px] w-[450px] rounded-full bg-[radial-gradient(circle,rgba(51,104,134,0.05)_0%,rgba(99,102,241,0.02)_60%,transparent_100%)] blur-[80px]" />
-        <div className="pointer-events-none absolute left-[15%] top-[65%] -z-10 h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.04)_0%,rgba(236,72,153,0.01)_60%,transparent_100%)] blur-[50px]" />
-
         <HubHeader
           isNativePlatform={isNativePlatform}
           isHeaderElevated={isHeaderElevated}
@@ -2115,7 +2104,7 @@ export function MarketplacePage() {
         <main className={`mx-auto flex max-w-[1200px] flex-col gap-4 px-4 sm:gap-5 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
           <h1 className="sr-only">Já no Caminho — lojas, feiras de condomínio e destinos</h1>
           {isCustomerLogged && welcomeOpen ? (
-            <section className="order-1 rounded-[1.35rem] border border-[#5FD35A]/25 bg-[linear-gradient(135deg,#f2fbf4_0%,#ffffff_60%,#f0f8ff_100%)] px-4 py-3.5 shadow-[0_18px_40px_-34px_rgba(21,58,76,0.3)]">
+            <section className="order-1 rounded-[1.35rem] border border-[#5FD35A]/30 bg-white px-4 py-3.5 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.18)]">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[13px] font-black tracking-[-0.02em] text-slate-900">Bem-vindo de volta ao seu bairro</p>
@@ -2158,7 +2147,7 @@ export function MarketplacePage() {
                     <Mountains size={12} weight="duotone" />
                     Guia da região
                   </p>
-                  <h2 className="mt-1 text-base font-black leading-tight tracking-[-0.03em] sm:text-lg bg-gradient-to-r from-[#153A4C] via-[#336886] to-[#5FD35A] bg-clip-text text-transparent">
+                  <h2 className="mt-1 text-base font-black leading-tight tracking-[-0.03em] sm:text-lg text-slate-900">
                     Descubra a região sem sair do app
                   </h2>
                   <p className="mt-1 max-w-[18rem] text-xs font-semibold leading-relaxed text-slate-500">
