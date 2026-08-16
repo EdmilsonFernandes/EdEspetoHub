@@ -216,7 +216,15 @@ const Header = ({
         .map((type) => String(type || "").toLowerCase())
         .filter(Boolean)
         .map((type) =>
-          type === "delivery" ? "Entrega" : type === "pickup" ? "Retirada" : type === "table" ? "Mesa" : type
+          type === "delivery"
+            ? "Entrega"
+            : type === "pickup"
+              ? "Retirada"
+              : type === "table"
+                ? "Mesa"
+                : type === "reservation"
+                  ? "Reserva"
+                  : type
         )
     : [];
   const normalizedTodayHoursLabel = String(todayHoursLabel || "").trim();
@@ -680,7 +688,13 @@ export const MenuView = ({
     if (!raw) return { line1: "", line2: "", cep: "" };
     const parts = raw.split("|").map((part) => part.trim()).filter(Boolean);
     const cepPart = parts.find((part) => /cep/i.test(part));
-    const cep = cepPart ? cepPart.replace(/cep/i, "").replace(/[:\-]/g, "").trim() : "";
+    const cep = cepPart
+      ? cepPart
+          .replace(/cep/i, "")
+          .replace(/[:\-]/g, "")
+          .trim()
+          .replace(/^(\d{5})(\d{3}).*$/, "$1-$2")
+      : "";
     const filtered = parts.filter((part) => part !== cepPart);
     const line1 = filtered[0] || raw;
     const line2 = filtered.slice(1).join(" · ");
@@ -707,7 +721,15 @@ export const MenuView = ({
         .map((type) => String(type || "").toLowerCase())
         .filter(Boolean)
         .map((type) =>
-          type === "delivery" ? "Entrega" : type === "pickup" ? "Retirada" : type === "table" ? "Mesa" : type
+          type === "delivery"
+            ? "Entrega"
+            : type === "pickup"
+              ? "Retirada"
+              : type === "table"
+                ? "Mesa"
+                : type === "reservation"
+                  ? "Reserva"
+                  : type
         )
     : [];
   const mapQuery = storeAddress ? encodeURIComponent(storeAddress) : "";
@@ -2181,6 +2203,7 @@ export const MenuView = ({
         confirmLabel="Sim, limpar sacola"
         cancelLabel="Não, manter itens"
         variant="danger"
+        confirmAsSecondary
         icon={<Trash size={32} weight="duotone" className="text-rose-500" />}
       />
 

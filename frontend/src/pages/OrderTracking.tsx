@@ -1844,7 +1844,7 @@ export function OrderTracking() {
         eyebrow={storeName}
         eyebrowLogoSrc={storeLogo}
         eyebrowLogoAlt={storeName}
-        subtitle={`Pedido #${String(order?.id || '').slice(0, 8)}`}
+        subtitle={`Pedido #${orderDisplayId}`}
         onBack={handleBack}
         maxWidthClassName="max-w-5xl"
         topSlot={(
@@ -1928,17 +1928,24 @@ export function OrderTracking() {
                         {isPostalDelivery ? <Package size={14} weight="duotone" /> : <Bicycle size={14} weight="duotone" />}
                         </span>
                       )}
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                          isCancelled
-                            ? 'bg-rose-50 text-rose-600 border-rose-200'
-                            : isReady
-                              ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                              : 'bg-amber-50 text-amber-700 border-amber-200'
-                        }`}
-                      >
-                      {isCancelled ? 'Cancelado' : isReady ? 'Finalizado' : 'Em andamento'}
-                    </span>
+                      {(() => {
+                        // Evita repetir o mesmo rótulo do h1 (statusLabel) num badge ao lado
+                        const quickBadge = isCancelled ? 'Cancelado' : isReady ? 'Finalizado' : 'Em andamento';
+                        if (quickBadge.toLowerCase() === String(statusLabel || '').toLowerCase()) return null;
+                        return (
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                              isCancelled
+                                ? 'bg-rose-50 text-rose-600 border-rose-200'
+                                : isReady
+                                  ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                                  : 'bg-amber-50 text-amber-700 border-amber-200'
+                            }`}
+                          >
+                            {quickBadge}
+                          </span>
+                        );
+                      })()}
                     {!isTerminal && polling && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-2xs font-bold text-emerald-600 ring-1 ring-emerald-100">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />

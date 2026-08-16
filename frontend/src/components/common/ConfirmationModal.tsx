@@ -12,6 +12,9 @@ type ConfirmationModalProps = {
   icon?: ReactNode;
   variant?: 'danger' | 'warning' | 'info';
   isLoading?: boolean;
+  /** Para ações destrutivas: mantém o cancelar como ação segura (primária) e
+   *  rebaixa o confirmar para botão de texto destrutivo — prevenção de erro. */
+  confirmAsSecondary?: boolean;
 };
 
 export function ConfirmationModal({
@@ -25,6 +28,7 @@ export function ConfirmationModal({
   icon,
   variant = 'danger',
   isLoading = false,
+  confirmAsSecondary = false,
 }: ConfirmationModalProps) {
   if (!isOpen) return null;
 
@@ -76,19 +80,39 @@ export function ConfirmationModal({
 
           {/* Actions */}
           <div className="mt-8 flex flex-col gap-3">
-            <button
-              onClick={onConfirm}
-              disabled={isLoading}
-              className={`w-full rounded-2xl py-4 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl transition-all active:scale-95 disabled:opacity-50 ${style.button}`}
-            >
-              {isLoading ? 'Aguarde...' : confirmLabel}
-            </button>
-            <button
-              onClick={onClose}
-              className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-4 text-sm font-black uppercase tracking-[0.12em] text-slate-500 transition-all hover:bg-slate-100 active:scale-95"
-            >
-              {cancelLabel}
-            </button>
+            {confirmAsSecondary ? (
+              <>
+                <button
+                  onClick={onClose}
+                  className="w-full rounded-2xl bg-slate-900 py-4 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl transition-all hover:bg-slate-800 active:scale-95"
+                >
+                  {cancelLabel}
+                </button>
+                <button
+                  onClick={onConfirm}
+                  disabled={isLoading}
+                  className={`w-full rounded-2xl border ${style.border} ${style.bg} py-4 text-sm font-bold uppercase tracking-[0.12em] ${style.text} transition-all hover:brightness-95 active:scale-95 disabled:opacity-50`}
+                >
+                  {isLoading ? 'Aguarde...' : confirmLabel}
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={onConfirm}
+                  disabled={isLoading}
+                  className={`w-full rounded-2xl py-4 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl transition-all active:scale-95 disabled:opacity-50 ${style.button}`}
+                >
+                  {isLoading ? 'Aguarde...' : confirmLabel}
+                </button>
+                <button
+                  onClick={onClose}
+                  className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-4 text-sm font-black uppercase tracking-[0.12em] text-slate-500 transition-all hover:bg-slate-100 active:scale-95"
+                >
+                  {cancelLabel}
+                </button>
+              </>
+            )}
           </div>
         </div>
 

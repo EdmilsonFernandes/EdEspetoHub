@@ -3341,12 +3341,12 @@ export const CartView = ({
                       ? 'Validar endereço'
                       : checkoutStep === 2 && isPostalQuoteMode
                       ? (postalQuoteLoading ? 'Calculando frete...' : 'Calcular frete postal')
-                      : 'Continuar'}
+                      : <>Continuar{checkoutStep === 1 && totalWithFee > 0 ? <>{' '}<span className="opacity-70">•</span>{' '}{formatCurrency(totalWithFee)}</> : null}</>}
                     <ArrowLeft size={18} weight="bold" className="rotate-180" />
                   </>
                 : checkoutStep === 3
                 ? <>
-                    Revisar pedido
+                    Revisar pedido{' '}<span className="opacity-70">•</span>{' '}{formatCurrency(totalWithFee)}
                     <ArrowLeft size={18} weight="bold" className="rotate-180" />
                   </>
                 : <>
