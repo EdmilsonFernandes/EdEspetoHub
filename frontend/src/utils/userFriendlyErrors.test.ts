@@ -51,6 +51,12 @@ describe('userFriendlyErrors', () => {
     );
   });
 
+  it('traduz AUTH-022 (sem loja vinculada) em vez de dizer sessao expirada', () => {
+    expect(normalizeUserFacingError(Object.assign(new Error('Usuário sem loja vinculada.'), { status: 403, code: 'AUTH-022' }))).toBe(
+      'Esta conta não tem loja vinculada. Entre com a conta do lojista da loja ou peça acesso ao responsável.'
+    );
+  });
+
   it('humaniza token ou sessao expirada', () => {
     expect(normalizeUserFacingError(Object.assign(new Error('jwt expired'), { status: 401 }))).toBe(
       'Sua sessão expirou. Entre novamente para continuar.'

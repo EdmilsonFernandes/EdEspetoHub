@@ -93,6 +93,11 @@ export const normalizeUserFacingError = (
     return 'Sua conta ainda precisa ser ativada. Reenvie o código e confirme o e-mail para continuar.';
   }
 
+  if (code === 'AUTH-022') {
+    // 403 "Usuário sem loja vinculada" — antes caía no 403 genérico "sessão expirou" (mentira no login)
+    return 'Esta conta não tem loja vinculada. Entre com a conta do lojista da loja ou peça acesso ao responsável.';
+  }
+
   if (INVALID_CREDENTIALS_CODES.includes(code) || INVALID_CREDENTIALS_PATTERNS.some((pattern) => pattern.test(message))) {
     return 'E-mail, usuário ou senha incorretos. Confira os dados e tente de novo.';
   }

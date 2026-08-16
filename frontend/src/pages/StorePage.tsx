@@ -1854,17 +1854,23 @@ export function StorePage() {
   const resolveDefaultOrderType = (types: string[]) => {
     if (!Array.isArray(types) || !types.length) return 'table';
     if (canUseAdminPrintFlow && types.includes('table')) return 'table';
-    if (types.includes('delivery')) return 'delivery';
-    return types[0];
+    // Cliente final nunca defaulta para mesa — a pill é oculta mas o tipo vazava na badge (auditoria 16/08)
+    const customerPool = canUseAdminPrintFlow ? types : types.filter((t) => t !== 'table');
+    const pool = customerPool.length ? customerPool : types;
+    if (pool.includes('delivery')) return 'delivery';
+    return pool[0];
   };
 
   useEffect(() => {
     if (!Array.isArray(orderTypes) || !orderTypes.length) return;
     const current = String(customer.type || '').trim();
-    if (orderTypes.includes(current)) return;
+    const currentInvalid =
+      !orderTypes.includes(current) ||
+      (!canUseAdminPrintFlow && Boolean(customerSession?.token) && current === 'table');
+    if (!currentInvalid) return;
     const fallbackType = resolveDefaultOrderType(orderTypes);
     setCustomer((prev) => ({ ...prev, type: fallbackType }));
-  }, [orderTypes, customer.type, canUseAdminPrintFlow]);
+  }, [orderTypes, customer.type, canUseAdminPrintFlow, customerSession?.token]);
 
   useEffect(() => {
     if (!canUseAdminPrintFlow) {
@@ -4410,6 +4416,7 @@ export function StorePage() {
             storeCoords={storeCoords}
             deliveryCoords={deliveryCoords}
             pickupDistanceKm={pickupDistanceKm}
+            minOrderValue={Number(branding?.minOrderValue ?? 20)}
             pickupDistanceWarningKm={PICKUP_DISTANCE_WARNING_KM}
             pickupDistanceConfirmationKm={PICKUP_DISTANCE_CONFIRMATION_KM}
             isCustomerLogged={Boolean(customerSession?.token)}
@@ -4471,11 +4478,11 @@ export function StorePage() {
             paymentStatus={!isStoreAdmin && !isCondominiumCheckout ? lastOrder?.paymentStatus : undefined}
             onPrintReceipt={canUseAdminPrintFlow ? printLastOrderReceipt : undefined}
             onTrackOrder={
-              canUseAdminPrintFlow || customerSession?.token
+              canUseAdminPrintFlow
                 ? undefined
                 : () => {
                     if (lastOrder?.id) {
-                      openOrderTracking(lastOrder.id);
+                      openOrderTracking(lastOrder.id, lastOrder?.accessToken);
                     }
                   }
             }
@@ -4907,10 +4914,13 @@ export function StorePage() {
             <div className="mt-4 flex gap-2">
               <button
                 type="button"
-                onClick={() => setShowPrintPrompt(false)}
+                onClick={() => {
+                  setShowPrintPrompt(false);
+                  setView('menu');
+                }}
                 className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700"
               >
-                Finalizar pedido
+                Novo pedido
               </button>
               <button
                 type="button"

@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "b6c16621",
-  "versionLabel": "v0.1.9.b6c16621",
-  "versionInternal": "0.1.9+20260816.141041.b6c16621",
-  "buildId": "0.1.9+20260816.141041.b6c16621-20260816.141041-b6c16621",
-  "builtAt": "2026-08-16T14:10:41.970Z",
-  "commitHash": "b6c16621e01f35549abc84a97e4bc5ab1bd55117",
-  "shortHash": "b6c16621",
+  "versionDisplaySuffix": "834c6dbd",
+  "versionLabel": "v0.1.9.834c6dbd",
+  "versionInternal": "0.1.9+20260816.144547.834c6dbd",
+  "buildId": "0.1.9+20260816.144547.834c6dbd-20260816.144547-834c6dbd",
+  "builtAt": "2026-08-16T14:45:47.824Z",
+  "commitHash": "834c6dbd598a3783042436b5c8682e6f74634b76",
+  "shortHash": "834c6dbd",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "834c6dbd598a3783042436b5c8682e6f74634b76",
+      "shortHash": "834c6dbd",
+      "dateIso": "2026-08-16T11:23:03-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(design): batch 4 order queue — paginacao historico, 403-guard motoboys, cancel-error a11y",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/834c6dbd598a3783042436b5c8682e6f74634b76"
+    },
     {
       "hash": "b6c16621e01f35549abc84a97e4bc5ab1bd55117",
       "shortHash": "b6c16621",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore(android): versionCode 84 + versionName 1.0.84 (AAB notificacao ongoing ajustada)",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/54f2d9e1ee35276102989f6308f44c0a983842e7"
-    },
-    {
-      "hash": "f7d45d6339a1f19cc200289403c5332357860d2d",
-      "shortHash": "f7d45d63",
-      "dateIso": "2026-07-28T11:00:49-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(marketplace): vitrine de serviços com lead via WhatsApp (lava-rápido, beleza, etc.)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f7d45d6339a1f19cc200289403c5332357860d2d"
     }
   ]
 } as const;

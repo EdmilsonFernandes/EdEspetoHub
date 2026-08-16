@@ -219,6 +219,7 @@ export const CartView = ({
   pickupDistanceKm = null,
   pickupDistanceWarningKm = 15,
   pickupDistanceConfirmationKm = 40,
+  minOrderValue = 0,
   checkoutDisabled = false,
   checkoutDisabledReason = "",
   checkoutLoading = false,
@@ -285,6 +286,7 @@ export const CartView = ({
   const [showEmptyCartSheet, setShowEmptyCartSheet] = useState(false);
   const [showFarPickupSheet, setShowFarPickupSheet] = useState(false);
   const [showPaymentSheet, setShowPaymentSheet] = useState(false);
+  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
   const [showCustomerNoteSheet, setShowCustomerNoteSheet] = useState(false);
   const [customerNoteDraft, setCustomerNoteDraft] = useState("");
   const [confirmedFarPickupContext, setConfirmedFarPickupContext] = useState("");
@@ -318,6 +320,9 @@ export const CartView = ({
   ).filter((t) => !(isEndCustomerLogged && t === "table"));
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
+  // Pedido mínimo na retirada — a vitrine anuncia "Min R$ X" mas o checkout não barrava (auditoria 16/08)
+  const pickupMinimumValue = normalizeNumber(minOrderValue) ?? 0;
+  const pickupBelowMinimum = isPickup && pickupMinimumValue > 0 && total < pickupMinimumValue;
   const isPostalDelivery = isDelivery && String(deliveryMode || "").toLowerCase() === "postal";
   const customerOrderNoteCopy = useMemo(() => {
     if (isPostalDelivery) {
@@ -466,7 +471,14 @@ export const CartView = ({
   const activePaymentLabel =
     selectedPaymentMethod?.id === activePaymentId ? selectedPaymentMethod.label : activePaymentMeta.label;
   const activePaymentTone = isOnlinePaymentMethod ? "online" : "local";
-  const openPaymentSheet = () => setShowPaymentSheet(true);
+  const openPaymentSheet = () => {
+    setPendingPaymentId(null);
+    setShowPaymentSheet(true);
+  };
+  const closePaymentSheet = () => {
+    setPendingPaymentId(null);
+    setShowPaymentSheet(false);
+  };
 
   useEffect(() => {
     if (!isPostalDelivery || !resolvedPaymentMethods.length) return;
@@ -554,7 +566,7 @@ export const CartView = ({
     ? (cepLoading || checkoutLoading)
     : isPostalQuoteMode
     ? (checkoutLoading || postalQuoteLoading)
-    : (checkoutLoading || checkoutDisabled || paymentValidation.blocked);
+    : (checkoutLoading || checkoutDisabled || paymentValidation.blocked || pickupBelowMinimum);
   const checkoutLoadingLabel = checkoutSlow ? "Internet lenta... confirmando" : "Processando...";
 
   const [selectedDdd, setSelectedDdd] = useState(() => extractPhoneParts(customer.phone || "").ddd);
@@ -1256,9 +1268,6 @@ export const CartView = ({
                 ? `Troco para ${formatCurrency(cashTenderedValue)}`
                 : methodDescription}
             </p>
-            <p className="mt-2 text-2xs font-bold leading-snug text-slate-400">
-              Quer usar Pix, cartão ou dinheiro? Toque em alterar forma.
-            </p>
           </div>
           <button
             type="button"
@@ -1410,20 +1419,26 @@ export const CartView = ({
   };
 
   const renderPaymentMethodCard = (method: any, tone: "online" | "local") => {
-    const selected = paymentMethod === method.id;
+    const selected = (pendingPaymentId || paymentMethod) === method.id;
     const accent = tone === "online" ? "#336886" : "#207A52";
     const selectedClasses =
       tone === "online"
         ? "jnc-payment-pressed border-[#336886]/70 text-slate-950 ring-2 ring-[#336886]/10"
         : "jnc-payment-pressed border-emerald-400/80 text-slate-950 ring-2 ring-emerald-200/60";
+    // Copy contextual por tipo de pedido — antes "Pague na entrega, retirada ou mesa" repetia 3× (auditoria 16/08)
+    const localMethodDescription =
+      customer.type === "pickup"
+        ? "Pague ao retirar o pedido."
+        : customer.type === "table"
+        ? "Pague no atendimento da mesa."
+        : "Pague quando receber o pedido.";
 
     return (
       <button
         key={method.id}
         type="button"
         onClick={() => {
-          onChangePayment(method.id);
-          setShowPaymentSheet(false);
+          setPendingPaymentId(method.id);
         }}
         className={`jnc-hub-touch group relative overflow-hidden rounded-[1.35rem] border p-3.5 text-left transition-all duration-300 ease-out active:scale-[0.985] ${
           selected
@@ -1460,7 +1475,7 @@ export const CartView = ({
               )}
             </div>
             <p className="text-[11px] leading-snug text-slate-500">
-              {method.description}
+              {tone === "local" ? localMethodDescription : method.description}
             </p>
             {tone === "online" && (
               <span className="inline-flex w-fit items-center gap-1 rounded-full border border-[#336886]/10 bg-[#edf5fa]/70 px-2 py-0.5 text-2xs font-black uppercase tracking-[0.12em] text-[#336886]">
@@ -2030,7 +2045,7 @@ export const CartView = ({
                                   onClick={() => onOpenAddressManager?.()}
                                   className="rounded-full border border-slate-200/80 bg-white px-2.5 py-1 text-2xs font-bold text-slate-600 shadow-sm hover:bg-slate-50 transition active:scale-[0.97]"
                                 >
-                                  Alterar
+                                  Alterar endereço
                                 </button>
                               </div>
                               <p className="mt-1 text-[15px] font-bold text-slate-900 leading-snug">{activeSavedAddress?.label || 'Endereço principal'}</p>
@@ -3246,6 +3261,11 @@ export const CartView = ({
                 Conexão lenta. Estamos confirmando com a loja. Não feche esta tela nem toque de novo.
               </p>
             )}
+            {pickupBelowMinimum && (
+              <p className="mb-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[11px] font-bold leading-snug text-amber-800" role="alert">
+                Pedido mínimo para retirada: {formatCurrency(pickupMinimumValue)} — faltam {formatCurrency(pickupMinimumValue - total)}.
+              </p>
+            )}
             <button
               onClick={async () => {
                 setCtaPulse(true);
@@ -3290,7 +3310,7 @@ export const CartView = ({
                 : checkoutStep === 3
                 ? (checkoutDisabled || paymentValidation.blocked)
                 : checkoutStep === 4
-                ? (checkoutLoading || checkoutDisabled || paymentValidation.blocked)
+                ? (checkoutLoading || checkoutDisabled || paymentValidation.blocked || pickupBelowMinimum)
                 : false}
               className={`relative w-full overflow-hidden font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
                 (checkoutStep === 2 && (
@@ -3300,7 +3320,7 @@ export const CartView = ({
                   (customer.type === 'table' && !String(customer.table || '').trim())
                 )) ||
                 (checkoutStep === 3 && (checkoutDisabled || paymentValidation.blocked)) ||
-                (checkoutStep === 4 && (checkoutLoading || checkoutDisabled || paymentValidation.blocked))
+                (checkoutStep === 4 && (checkoutLoading || checkoutDisabled || paymentValidation.blocked || pickupBelowMinimum))
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
                   : checkoutStep === 4
                   ? "bg-[linear-gradient(135deg,#0f172a,#153A4C)] text-white cursor-pointer shadow-[0_20px_42px_-26px_rgba(21,58,76,0.56)]"
@@ -3353,6 +3373,11 @@ export const CartView = ({
             {checkoutLoading && checkoutSlow && (
               <p className="mb-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[11px] font-bold leading-snug text-amber-800">
                 Conexão lenta. Estamos confirmando com a loja. Não feche esta tela nem toque de novo.
+              </p>
+            )}
+            {pickupBelowMinimum && (
+              <p className="mb-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[11px] font-bold leading-snug text-amber-800" role="alert">
+                Pedido mínimo para retirada: {formatCurrency(pickupMinimumValue)} — faltam {formatCurrency(pickupMinimumValue - total)}.
               </p>
             )}
             <button
@@ -3416,9 +3441,7 @@ export const CartView = ({
         <div className="fixed inset-0 z-[78]" data-testid="checkout-payment-method-sheet">
           <button
             type="button"
-            onClick={() => {
-              setShowPaymentSheet(false);
-            }}
+            onClick={closePaymentSheet}
             className="absolute inset-0 bg-slate-950/42 backdrop-blur-md"
             aria-label="Fechar formas de pagamento"
           />
@@ -3435,9 +3458,7 @@ export const CartView = ({
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowPaymentSheet(false);
-                  }}
+                  onClick={closePaymentSheet}
                   className="jnc-hub-touch grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-sm font-black text-slate-600 shadow-sm"
                   aria-label="Fechar"
                 >
@@ -3506,10 +3527,14 @@ export const CartView = ({
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-2xs font-black uppercase tracking-[0.24em] text-emerald-700">
-                        Pagar na entrega, retirada ou balcão
+                        {customer.type === "pickup" ? "Pagar na retirada" : customer.type === "table" ? "Pagar na mesa" : "Pagar na entrega"}
                       </p>
                       <p className="mt-1 text-[11px] leading-snug text-slate-500">
-                        Ideal para dinheiro, Pix da loja ou cartão na entrega, retirada ou mesa.
+                        {customer.type === "pickup"
+                          ? "Dinheiro, Pix da loja ou cartão na hora de buscar o pedido."
+                          : customer.type === "table"
+                          ? "Dinheiro, Pix da loja ou cartão no atendimento da mesa."
+                          : "Dinheiro, Pix da loja ou cartão quando o pedido chegar."}
                       </p>
                     </div>
                     <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-white/90 px-2.5 py-1.5 text-2xs font-black text-emerald-700">
@@ -3522,6 +3547,21 @@ export const CartView = ({
                   </div>
                 </section>
               )}
+
+              {pendingPaymentId && pendingPaymentId !== paymentMethod ? (
+                <div className="sticky bottom-0 -mx-4 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-xl">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onChangePayment(pendingPaymentId);
+                      closePaymentSheet();
+                    }}
+                    className="jnc-hub-touch w-full rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3.5 text-sm font-black uppercase tracking-[0.1em] text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)] transition hover:brightness-105 active:scale-[0.99]"
+                  >
+                    Confirmar forma de pagamento
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
