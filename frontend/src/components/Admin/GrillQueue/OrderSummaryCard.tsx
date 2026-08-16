@@ -144,7 +144,7 @@ export const OrderSummaryCard = ({
         ? 'border-slate-200/80 bg-slate-50/90 opacity-80'
         : `border-slate-200 bg-white shadow-[0_12px_32px_-24px_rgba(15,23,42,0.24)] hover:border-slate-300 hover:shadow-[0_20px_38px_-24px_rgba(15,23,42,0.28)] hover:-translate-y-0.5 ${
             selected ? 'ring-2 ring-emerald-100' : ''
-          }`
+          } ${isLate ? '!border-rose-300 !bg-rose-50/70 ring-1 ring-rose-300/60' : ''}`
     }`}
   >
     <div className="flex items-stretch h-full">

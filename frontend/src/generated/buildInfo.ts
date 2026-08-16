@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "834c6dbd",
-  "versionLabel": "v0.1.9.834c6dbd",
-  "versionInternal": "0.1.9+20260816.144547.834c6dbd",
-  "buildId": "0.1.9+20260816.144547.834c6dbd-20260816.144547-834c6dbd",
-  "builtAt": "2026-08-16T14:45:47.824Z",
-  "commitHash": "834c6dbd598a3783042436b5c8682e6f74634b76",
-  "shortHash": "834c6dbd",
+  "versionDisplaySuffix": "3eb05ced",
+  "versionLabel": "v0.1.9.3eb05ced",
+  "versionInternal": "0.1.9+20260816.185039.3eb05ced",
+  "buildId": "0.1.9+20260816.185039.3eb05ced-20260816.185039-3eb05ced",
+  "builtAt": "2026-08-16T18:50:39.497Z",
+  "commitHash": "3eb05ced7e5c2b942fe89112478566bb95a0d5cf",
+  "shortHash": "3eb05ced",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "3eb05ced7e5c2b942fe89112478566bb95a0d5cf",
+      "shortHash": "3eb05ced",
+      "dateIso": "2026-08-16T11:57:08-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(design): batch 6 checkout — default por papel, pagamento sem redundancia, confirm no sheet, min-retirada, AUTH-022",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3eb05ced7e5c2b942fe89112478566bb95a0d5cf"
+    },
     {
       "hash": "834c6dbd598a3783042436b5c8682e6f74634b76",
       "shortHash": "834c6dbd",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(admin): seletor de segmento no painel do lojista (troca pra Serviços sem banco)",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/53df8f0e766f102e47f64113e53c28a4c39cdfba"
-    },
-    {
-      "hash": "54f2d9e1ee35276102989f6308f44c0a983842e7",
-      "shortHash": "54f2d9e1",
-      "dateIso": "2026-07-28T13:08:02-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(android): versionCode 84 + versionName 1.0.84 (AAB notificacao ongoing ajustada)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/54f2d9e1ee35276102989f6308f44c0a983842e7"
     }
   ]
 } as const;

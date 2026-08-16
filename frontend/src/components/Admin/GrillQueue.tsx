@@ -3134,7 +3134,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
                     {
                       id: 'completed',
-                      label: 'Finalizados',
+                      label: 'Finalizados hoje',
                       count: reportCompleted.length,
                     },
                   ].map((tab) => (
@@ -3227,12 +3227,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         { id: 'ready', label: 'Prontos', value: queueMetrics.ready, activeClass: 'bg-violet-500 text-white' },
                         { id: 'late', label: 'Atrasados', value: queueMetrics.late, activeClass: 'bg-rose-500 text-white' },
                         { id: 'cancelled', label: 'Cancelados', value: queueMetrics.cancelled, activeClass: 'bg-slate-500 text-white' },
-                      ].map((kpi) => (
+                      ]
+                        // chips cronicamente zerados (Condomínio/Reservas) só aparecem quando existem — auditoria 16/08
+                        .filter((kpi) => kpi.id === 'all' || (Number(kpi.value) > 0) || queueFilter === kpi.id)
+                        .map((kpi) => (
                         <button
                           key={kpi.id}
                           type="button"
                           onClick={() => setQueueFilter(kpi.id as any)}
-                        className={`flex snap-start shrink-0 items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
+                        className={`flex snap-start shrink-0 items-center gap-1.5 min-h-[38px] px-3.5 py-2 rounded-full text-[11px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
                             queueFilter === kpi.id
                               ? kpi.activeClass
                               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'

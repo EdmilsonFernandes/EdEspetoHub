@@ -32,7 +32,9 @@ export function AdminOrders() {
   // expandidos (319 pedidos = 120k px de scroll, auditoria 16/08 P0)
   const [visibleCount, setVisibleCount] = useState(20);
   const [query, setQuery] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
+  // Período padrão 7 dias — antes o histórico listava TUDO por default (auditoria 16/08)
+  const [dateFilter, setDateFilter] = useState('7d');
+  const [expandedOrderItems, setExpandedOrderItems] = useState<Record<string, boolean>>({});
   const [postalSavingId, setPostalSavingId] = useState<string | null>(null);
   const [postalModalOrder, setPostalModalOrder] = useState<any | null>(null);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>(() => {
@@ -164,7 +166,7 @@ export function AdminOrders() {
     const orderId = String(params.get('orderId') || '').trim();
     if (!orderId) return;
     setStatusFilter('all');
-    setDateFilter('');
+    setDateFilter('7d');
     setQuery(orderId);
   }, [location.search]);
 
@@ -195,13 +197,14 @@ export function AdminOrders() {
         const st = canonicalStatus(order.status);
         if (st !== String(statusFilter).toLowerCase()) return false;
       }
-      if (dateFilter) {
+      if (dateFilter && dateFilter !== 'all') {
         const date = order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000) : new Date(order.createdAt);
         if (!Number.isFinite(date.getTime())) return false;
-        const localDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
-          date.getDate()
-        ).padStart(2, '0')}`;
-        if (localDate !== dateFilter) return false;
+        const days = dateFilter === 'today' ? 1 : Number(String(dateFilter).replace('d', '')) || 7;
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+        start.setDate(start.getDate() - (days - 1));
+        if (date.getTime() < start.getTime()) return false;
       }
       if (!normalized) return true;
       const haystack = [
@@ -350,7 +353,7 @@ export function AdminOrders() {
   const clearFilters = () => {
     setStatusFilter('all');
     setQuery('');
-    setDateFilter('');
+    setDateFilter('7d');
   };
 
   const refreshOrders = async () => {
@@ -584,12 +587,17 @@ export function AdminOrders() {
                 </div>
               </div>
             <div className="flex flex-col sm:flex-row gap-2 lg:ml-auto w-full lg:w-auto">
-              <input
-                type="date"
+              <select
                 value={dateFilter}
                 onChange={(event) => setDateFilter(event.target.value)}
+                aria-label="Período do histórico"
                 className="w-full sm:w-44 ds-select ds-focus-ring py-2 text-sm"
-              />
+              >
+                <option value="today">Hoje</option>
+                <option value="7d">Últimos 7 dias</option>
+                <option value="30d">Últimos 30 dias</option>
+                <option value="all">Todo o histórico</option>
+              </select>
               <SearchInput
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
@@ -623,7 +631,7 @@ export function AdminOrders() {
                   Tabela
                 </button>
               </div>
-              {(statusFilter !== 'all' || dateFilter || query) && (
+              {(statusFilter !== 'all' || dateFilter !== '7d' || query) && (
                 <Button variant="danger" size="sm" onClick={clearFilters} className="shrink-0">
                   Limpar
                 </Button>
@@ -935,7 +943,9 @@ export function AdminOrders() {
                       <div className="border-t border-slate-100 pt-3">
                         <p className="text-xs uppercase text-slate-400 mb-2">Itens</p>
                         <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-700">
-                          {groupOrderItems(order.items || []).map((item, itemIndex) => (
+                          {groupOrderItems(order.items || [])
+                            .slice(0, expandedOrderItems[String(order.id || index)] ? 200 : 4)
+                            .map((item, itemIndex) => (
                             <div key={`${item.id || item.productId || item.name || 'item'}-${itemIndex}`} className="flex items-center justify-between gap-3">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
@@ -983,6 +993,22 @@ export function AdminOrders() {
                             </div>
                           ))}
                         </div>
+                        {groupOrderItems(order.items || []).length > 4 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedOrderItems((prev) => ({
+                                ...prev,
+                                [String(order.id || index)]: !prev[String(order.id || index)],
+                              }))
+                            }
+                            className="ds-focus-ring mt-2 text-xs font-bold text-brand-teal hover:text-brand-teal-700"
+                          >
+                            {expandedOrderItems[String(order.id || index)]
+                              ? 'Ver menos'
+                              : `+ ${groupOrderItems(order.items || []).length - 4} itens`}
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
