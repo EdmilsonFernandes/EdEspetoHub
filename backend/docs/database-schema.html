@@ -7076,6 +7076,14 @@
                     <td><span class="muted">-</span></td>
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
                     <td>Nome textual para condominium name.</td>
+                  </tr>
+                  <tr>
+                    <td><code>condominium_pickup_location</code></td>
+                    <td>text</td>
+                    <td>sim</td>
+                    <td>—</td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></td>
+                    <td>Local de retirada da feira definido pela loja (migration 20260813_002).</td>
                   </tr><tr>
                     <td><code>condominium_unit</code></td>
                     <td>text</td>
@@ -7153,6 +7161,14 @@
                     <td><code>gen_random_uuid()</code></td>
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">pk</span></td>
                     <td>Identificador unico do pedido.</td>
+                  </tr>
+                  <tr>
+                    <td><code>origin</code></td>
+                    <td>varchar(12)</td>
+                    <td>sim</td>
+                    <td>—</td>
+                    <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span> <span class="badge badge-slate">ddl</span></td>
+                    <td>Origem do pedido: staff (garcom/balcao), app (cliente nativo) ou web (cliente no site). Migration 20260816_001.</td>
                   </tr><tr>
                     <td><code>party_size</code></td>
                     <td>integer</td>

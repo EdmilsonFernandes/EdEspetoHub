@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "6f015390",
-  "versionLabel": "v0.1.9.6f015390",
-  "versionInternal": "0.1.9+20260816.195403.6f015390",
-  "buildId": "0.1.9+20260816.195403.6f015390-20260816.195403-6f015390",
-  "builtAt": "2026-08-16T19:54:03.595Z",
-  "commitHash": "6f015390f6d40b60d778e921651779f09f19f1f0",
-  "shortHash": "6f015390",
+  "versionDisplaySuffix": "92e8270c",
+  "versionLabel": "v0.1.9.92e8270c",
+  "versionInternal": "0.1.9+20260816.202607.92e8270c",
+  "buildId": "0.1.9+20260816.202607.92e8270c-20260816.202607-92e8270c",
+  "builtAt": "2026-08-16T20:26:07.720Z",
+  "commitHash": "92e8270cfb21226457a42a05b4ab9e80fee0fe50",
+  "shortHash": "92e8270c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "92e8270cfb21226457a42a05b4ab9e80fee0fe50",
+      "shortHash": "92e8270c",
+      "dateIso": "2026-08-16T17:17:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(ux): onda 1 do benchmark iFood — quick wins de confiança",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/92e8270cfb21226457a42a05b4ab9e80fee0fe50"
+    },
+    {
+      "hash": "d183286f63604c47a20bc7eb6d08d404432e32a5",
+      "shortHash": "d183286f",
+      "dateIso": "2026-08-16T16:57:53-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(design): batch 3 admin navigation — URL por seção, Ajustes/Loja, 3 telas de dispositivo em 1, de-header",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d183286f63604c47a20bc7eb6d08d404432e32a5"
+    },
     {
       "hash": "6f015390f6d40b60d778e921651779f09f19f1f0",
       "shortHash": "6f015390",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(auth): aviso premium \"cliente vira lojista\" no criar-loja",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6c6257c5d8676ff78c5957df88ed059ff0f4e3e9"
-    },
-    {
-      "hash": "a0f8c70a2b8261445cb010b2113698a83f542eca",
-      "shortHash": "a0f8c70a",
-      "dateIso": "2026-08-03T14:53:36-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(auth): cliente vira lojista no criar-loja (promove conta existente)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a0f8c70a2b8261445cb010b2113698a83f542eca"
-    },
-    {
-      "hash": "1cb5e4e1391759c70aabfe6596c96f32b26a21e4",
-      "shortHash": "1cb5e4e1",
-      "dateIso": "2026-07-28T23:03:57-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(superadmin): biblioteca de pushes prontos por tema (engajamento)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1cb5e4e1391759c70aabfe6596c96f32b26a21e4"
     }
   ]
 } as const;

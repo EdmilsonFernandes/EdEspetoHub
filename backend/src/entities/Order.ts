@@ -98,6 +98,10 @@ export class Order {
   @Column({ name: 'condominium_pickup_location', type: 'text', nullable: true })
   condominiumPickupLocation?: string | null;
 
+  // Origem do pedido: 'staff' (garçom/balcão) | 'app' (cliente no app nativo) | 'web' (cliente no site)
+  @Column({ name: 'origin', type: 'varchar', length: 12, nullable: true })
+  origin?: string | null;
+
   @Column({ default: 'pending' })
   status!: string;
 

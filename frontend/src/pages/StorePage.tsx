@@ -2719,6 +2719,7 @@ export function StorePage() {
       customerName: effectiveCustomerName,
       customerNote: customerNote || undefined,
       guestPushId: getOrCreateGuestPushId(),
+      originClient: Capacitor.isNativePlatform() ? 'app' : 'web',
       phone: customer.phone,
       address: isCondominiumOrder ? condominiumAddress : (deliveryAddress || customer.address),
       table: isCondominiumOrder ? undefined : customer.table,

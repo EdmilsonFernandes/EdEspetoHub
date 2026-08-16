@@ -210,6 +210,7 @@ CREATE TABLE IF NOT EXISTS orders (
   condominium_fulfillment_mode TEXT,
   condominium_unit TEXT,
   condominium_pickup_location TEXT,
+  origin VARCHAR(12),
   canceled_at TIMESTAMPTZ,
   canceled_reason TEXT,
   customer_received_at TIMESTAMPTZ,
@@ -955,6 +956,30 @@ BEGIN
     ADD COLUMN IF NOT EXISTS store_id UUID;
   END IF;
 END $$;
+
+-- customer_addresses era criada apenas no bloco legado (runMigrations) — backport para banco do zero.
+-- condominium_id entra direto (equivalente ao estado pós-migration 20260812_001).
+CREATE TABLE IF NOT EXISTS customer_addresses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label TEXT,
+  recipient_name TEXT,
+  phone TEXT,
+  cep VARCHAR(8) NOT NULL,
+  street TEXT NOT NULL,
+  number TEXT,
+  complement TEXT,
+  neighborhood TEXT,
+  city TEXT NOT NULL,
+  state VARCHAR(2) NOT NULL,
+  lat NUMERIC(10,7),
+  lng NUMERIC(10,7),
+  is_default BOOLEAN NOT NULL DEFAULT FALSE,
+  condominium_id UUID,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_customer_addresses_user_id ON customer_addresses(user_id);
 
 ALTER TABLE IF EXISTS customer_addresses
 ADD COLUMN IF NOT EXISTS geo_source TEXT DEFAULT 'unknown';

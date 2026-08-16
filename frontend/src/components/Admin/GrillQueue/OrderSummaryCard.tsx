@@ -234,6 +234,29 @@ export const OrderSummaryCard = ({
               {order.customerName || order.name || 'Cliente'}
             </h3>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500">
+              {order?.origin ? (
+                <>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] ${
+                      order.origin === 'staff'
+                        ? 'border-amber-200 bg-amber-50 text-amber-700'
+                        : order.origin === 'app'
+                          ? 'border-sky-200 bg-sky-50 text-sky-700'
+                          : 'border-slate-200 bg-slate-50 text-slate-600'
+                    }`}
+                    title={
+                      order.origin === 'staff'
+                        ? 'Pedido criado pelo garçom/balcão'
+                        : order.origin === 'app'
+                          ? 'Pedido feito pelo app do cliente'
+                          : 'Pedido feito pelo site'
+                    }
+                  >
+                    {order.origin === 'staff' ? 'Balcão' : order.origin === 'app' ? 'App' : 'Site'}
+                  </span>
+                  {renderMetaDivider()}
+                </>
+              ) : null}
               {showTypeInMeta ? (
                 <>
                   <span className="font-semibold text-slate-700">{typeLabel}</span>

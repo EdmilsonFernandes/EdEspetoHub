@@ -96,6 +96,7 @@ export class OrderController {
         actorRole,
         clientIp: req.ip || req.socket?.remoteAddress || null,
         guestPushId,
+        originClient: String(req.body?.originClient || '').trim().toLowerCase() || null,
         storeId: req.params.storeId,
       });
       log.info('Order created', { orderId: order?.id, storeId: req.params.storeId });
@@ -168,6 +169,7 @@ export class OrderController {
         actorRole,
         clientIp: req.ip || req.socket?.remoteAddress || null,
         guestPushId,
+        originClient: String(req.body?.originClient || '').trim().toLowerCase() || null,
         storeSlug: req.params.slug,
       });
       log.info('Order created by slug', { orderId: order?.id, slug: req.params.slug });

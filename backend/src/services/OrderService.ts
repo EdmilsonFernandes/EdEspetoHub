@@ -105,6 +105,14 @@ export class OrderService
     return [ 'ADMIN', 'OPERATOR', 'LOJISTA', 'STORE_OWNER', 'SUPER_ADMIN' ].includes(normalized);
   }
 
+  // Origem do pedido para a fila (badge garçom×app×web) — staff vence sempre; cliente decide via hint app/web
+  private resolveOrderOrigin(input: Omit<CreateOrderDto, 'storeId'>): 'staff' | 'app' | 'web' {
+    if (this.isStaffActor(input?.actorRole)) return 'staff';
+    const hint = String((input as any)?.originClient || '').trim().toLowerCase();
+    if (hint === 'app') return 'app';
+    return 'web';
+  }
+
   private async attachOrderPaymentSnapshot(orders: any[]) {
     const rows = Array.isArray(orders) ? orders : [];
     const orderIds = Array.from(new Set(rows.map((order) => String(order?.id || '').trim()).filter(Boolean)));
@@ -2520,6 +2528,7 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
       condominiumFulfillmentMode: condominiumContext?.fulfillmentMode || null,
       condominiumUnit: condominiumContext?.unit || null,
       condominiumPickupLocation,
+      origin: this.resolveOrderOrigin(input),
       paymentMethod: input.paymentMethod,
       paymentStatus,
       cashTendered,
