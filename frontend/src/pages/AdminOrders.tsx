@@ -28,6 +28,9 @@ export function AdminOrders() {
   });
   const [orders, setOrders] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
+  // Paginacao client-side do modo Cards — antes renderizava TODOS os pedidos
+  // expandidos (319 pedidos = 120k px de scroll, auditoria 16/08 P0)
+  const [visibleCount, setVisibleCount] = useState(20);
   const [query, setQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [postalSavingId, setPostalSavingId] = useState<string | null>(null);
@@ -214,6 +217,11 @@ export function AdminOrders() {
       return haystack.includes(normalized);
     });
   }, [sortedOrders, statusFilter, query, dateFilter]);
+
+  const pagedOrders = filteredOrders.slice(0, visibleCount);
+  useEffect(() => {
+    setVisibleCount(20); // filtro mudou — volta ao primeiro lote
+  }, [statusFilter, query, dateFilter]);
 
   const statusCounts = useMemo(() => {
     const counts = (orders || []).reduce(
@@ -643,7 +651,7 @@ export function AdminOrders() {
           ) : viewMode === 'cards' ? (
             <div className="space-y-4">
               <div className="sm:hidden space-y-3">
-                {filteredOrders.map((order, index) => {
+                {pagedOrders.map((order, index) => {
                   const paymentMeta = getPaymentMethodMeta(order.payment);
                   const groupedItems = groupOrderItems(order.items || []);
                   const previewItems = groupedItems.slice(0, 2);
@@ -768,7 +776,7 @@ export function AdminOrders() {
               </div>
 
               <div className="hidden sm:block space-y-4">
-                {filteredOrders.map((order, index) => (
+                {pagedOrders.map((order, index) => (
                   <div
                     key={order.id || `${order.customerName}-${index}`}
                     className={`rounded-[24px] border border-l-4 ${statusAccent(order.status)} p-6 shadow-[0_8px_30px_rgba(15,23,42,0.04)] flex flex-col gap-4 ds-interactive-card`}
@@ -980,6 +988,15 @@ export function AdminOrders() {
                   </div>
                 ))}
               </div>
+              {visibleCount < filteredOrders.length ? (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((v) => v + 20)}
+                  className="ds-focus-ring w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-600 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.3)] transition hover:border-brand-teal/30 hover:text-brand-teal active:scale-[0.99]"
+                >
+                  Carregar mais pedidos ({filteredOrders.length - visibleCount} restantes)
+                </button>
+              ) : null}
             </div>
           ) : (
 	            <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">

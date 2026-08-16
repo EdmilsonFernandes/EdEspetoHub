@@ -12,7 +12,7 @@ describe('ClientBottomNav', () => {
     );
 
     expect(screen.getByRole('navigation', { name: 'Navegação principal do cliente' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Visite/i })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', { name: /Destinos/i })).toHaveAttribute('aria-current', 'page');
   });
 
   it('uses a custom orders handler when provided', () => {
@@ -29,14 +29,14 @@ describe('ClientBottomNav', () => {
     expect(opened).toBe(true);
   });
 
-  it('uses Mais as the account/profile entry point', () => {
+  it('uses Conta as the account/profile entry point', () => {
     render(
       <MemoryRouter>
         <ClientBottomNav active="profile" />
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('button', { name: /Mais/i })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', { name: /Conta/i })).toHaveAttribute('aria-current', 'page');
     expect(screen.queryByRole('button', { name: /Perfil/i })).not.toBeInTheDocument();
   });
 });

@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "78dc848a",
-  "versionLabel": "v0.1.9.78dc848a",
-  "versionInternal": "0.1.9+20260816.123021.78dc848a",
-  "buildId": "0.1.9+20260816.123021.78dc848a-20260816.123021-78dc848a",
-  "builtAt": "2026-08-16T12:30:21.370Z",
-  "commitHash": "78dc848a8df0fa54beb4fb3452227adcd505b853",
-  "shortHash": "78dc848a",
+  "versionDisplaySuffix": "b6c16621",
+  "versionLabel": "v0.1.9.b6c16621",
+  "versionInternal": "0.1.9+20260816.141041.b6c16621",
+  "buildId": "0.1.9+20260816.141041.b6c16621-20260816.141041-b6c16621",
+  "builtAt": "2026-08-16T14:10:41.970Z",
+  "commitHash": "b6c16621e01f35549abc84a97e4bc5ab1bd55117",
+  "shortHash": "b6c16621",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "b6c16621e01f35549abc84a97e4bc5ab1bd55117",
+      "shortHash": "b6c16621",
+      "dateIso": "2026-08-16T09:47:34-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(design): batch 1 foundation — rampa teal oficial + fixes WCAG AA",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b6c16621e01f35549abc84a97e4bc5ab1bd55117"
+    },
     {
       "hash": "78dc848a8df0fa54beb4fb3452227adcd505b853",
       "shortHash": "78dc848a",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(marketplace): vitrine de serviços com lead via WhatsApp (lava-rápido, beleza, etc.)",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f7d45d6339a1f19cc200289403c5332357860d2d"
-    },
-    {
-      "hash": "c02a461776abc234a52326d8822567d3ea5a8a5a",
-      "shortHash": "c02a4617",
-      "dateIso": "2026-07-28T09:25:02-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(notifications): ajustes visuais da ongoing (ícone próprio, layout mínimo, dedup na central)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c02a461776abc234a52326d8822567d3ea5a8a5a"
     }
   ]
 } as const;

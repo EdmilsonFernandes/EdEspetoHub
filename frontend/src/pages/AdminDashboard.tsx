@@ -2029,7 +2029,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }));
 
   useEffect(() => {
-    if (!storeId) return;
+    if (!storeId || !canUseMotoboys) return; // sem feature no plano: não chamar (403 em toda carga — auditoria 16/08)
     const loadRequests = async () => {
       try {
         const data = await motoboyAdminService.listRequests(storeId);
@@ -2040,7 +2040,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       }
     };
     loadRequests();
-  }, [storeId]);
+  }, [storeId, canUseMotoboys]);
 
   useEffect(() => {
     if (!storeId) return;
