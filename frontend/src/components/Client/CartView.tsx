@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   NotePencil,
   CalendarBlank,
+  X,
 } from "@phosphor-icons/react";
 import { formatAddressLines, formatCurrency } from "../../utils/format";
 import { getPaymentMethodMeta, getPaymentProviderMeta } from "../../utils/paymentAssets";
@@ -3459,10 +3460,10 @@ export const CartView = ({
                 <button
                   type="button"
                   onClick={closePaymentSheet}
-                  className="jnc-hub-touch grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-sm font-black text-slate-600 shadow-sm"
+                  className="jnc-hub-touch grid h-11 w-11 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm"
                   aria-label="Fechar"
                 >
-                  X
+                  <X size={18} weight="bold" />
                 </button>
               </div>
               <div className="mt-3 flex items-center gap-3 rounded-[1.25rem] border border-[#336886]/10 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)] p-3 shadow-[0_14px_30px_-26px_rgba(51,104,134,0.28)]">

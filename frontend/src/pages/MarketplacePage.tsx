@@ -692,7 +692,6 @@ export function MarketplacePage() {
     }
   };
 
-  const { searchPlaceholder, searchPlaceholderVisible } = useHubSearchPlaceholder(isSearchEditing);
   const [condoPickerFilter, setCondoPickerFilter] = useState<'all' | 'live' | 'upcoming' | 'none'>('all');
 
   useEffect(() => {
@@ -1606,6 +1605,18 @@ export function MarketplacePage() {
         count: counts[segment] ?? 0,
       }));
   }, [segmentOptions, scopedEnrichedStores]);
+
+  // Placeholder de busca orientado ao catálogo real da região (benchmark §4:
+  // não sugerir "hambúrguer" onde não há hamburgueria)
+  const searchPlaceholderTerms = useMemo(
+    () =>
+      categoryTiles
+        .filter((tile) => Number(tile.count) > 0)
+        .map((tile) => String(tile.label || '').trim())
+        .filter(Boolean),
+    [categoryTiles],
+  );
+  const { searchPlaceholder, searchPlaceholderVisible } = useHubSearchPlaceholder(isSearchEditing, searchPlaceholderTerms);
 
   const currency = useMemo(
     () =>
@@ -2532,7 +2543,7 @@ export function MarketplacePage() {
                 <span className={`text-center text-2xs font-black uppercase tracking-[0.08em] transition-colors ${
                   quickFilter === 'my_condo' ? 'text-[#336886]' : 'text-slate-600'
                 }`}>
-                  Condomínio{myCondominium ? <span className="font-semibold normal-case tracking-normal text-slate-400"> · {myCondoStoreIds.length}</span> : null}
+                  Condomínio{myCondominium && myCondoStoreIds.length >= 3 ? <span className="font-semibold normal-case tracking-normal text-slate-400"> · {myCondoStoreIds.length}</span> : null}
                 </span>
               </button>
 
@@ -2562,7 +2573,7 @@ export function MarketplacePage() {
                     </div>
                     <span className={`text-center text-2xs font-black uppercase tracking-[0.08em] transition-colors ${
                       active ? (colors ? colors.icon : 'text-[#336886]') : 'text-slate-600'
-                    }`}>{item.label} <span className="font-semibold normal-case tracking-normal text-slate-400">· {item.count}</span></span>
+                    }`}>{item.label} {Number(item.count) >= 3 ? <span className="font-semibold normal-case tracking-normal text-slate-400">· {item.count}</span> : null}</span>
                   </button>
                 );
               })}
