@@ -62,6 +62,9 @@ export const ProductModal = ({
   const isEspetoCategory = (category: any) =>
     (category || "").toString().trim().toLowerCase().includes("espeto");
   const showEspetoOptions = product ? isEspetoCategory(product.category) : false;
+  const hasSelectableOptions =
+    showEspetoOptions ||
+    (Array.isArray(product?.modifiers) && product.modifiers.some((modifier: any) => modifier?.active !== false));
   const selectedOptions =
     selectedModifiers.length > 0
       ? { ...(showEspetoOptions ? { cookingPoint, passSkewer } : {}), selectedModifiers }
@@ -162,9 +165,9 @@ export const ProductModal = ({
             type="button"
             onClick={handleClose}
             aria-label="Fechar detalhes do item"
-            className="absolute right-3 top-3 z-10 inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-white/35 bg-black/42 px-3 text-xs font-black uppercase tracking-[0.12em] text-white shadow-lg backdrop-blur-md transition hover:bg-black/55 active:scale-95"
+            className="absolute right-3 top-3 z-10 inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-white/35 bg-black/42 px-3.5 text-xs font-black uppercase tracking-[0.12em] text-white shadow-lg backdrop-blur-md transition hover:bg-black/55 active:scale-95"
           >
-            <X size={16} weight="bold" />
+            <X size={18} weight="bold" />
             <span>Fechar</span>
           </button>
 
@@ -201,8 +204,15 @@ export const ProductModal = ({
                   </span>
                 </div>
               ) : (
-                <p className="mt-1.5 text-[1.3rem] font-bold text-brand-primary sm:text-2xl">
-                  {formatCurrency(product?.price)}
+                <p className="mt-1.5 flex flex-wrap items-baseline gap-x-1.5">
+                  {!readOnly && hasSelectableOptions && (
+                    <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                      A partir de
+                    </span>
+                  )}
+                  <span className="text-[1.3rem] font-bold text-brand-primary sm:text-2xl">
+                    {formatCurrency(product?.price)}
+                  </span>
                 </p>
               )}
             </div>

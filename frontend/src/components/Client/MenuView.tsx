@@ -1652,6 +1652,19 @@ export const MenuView = ({
                           </div>
                         );
 
+                        // Configuráveis: o preço final depende das escolhas — sinaliza o valor-base
+                        if (hasConfigurableOptions && !resolvePromoPrice(item)) {
+                          return (
+                            <div className="flex items-baseline gap-1.5 leading-none">
+                              <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                                A partir de
+                              </span>
+                              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900">
+                                {formatCurrency(item.price)}
+                              </span>
+                            </div>
+                          );
+                        }
                         return priceNode;
                       })()}
 
