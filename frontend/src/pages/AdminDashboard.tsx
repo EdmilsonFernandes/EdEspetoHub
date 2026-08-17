@@ -2201,8 +2201,19 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       return;
     }
     if (nextTab === 'config') {
-      const nextSectionFromQuery = String(new URLSearchParams(location.search || '').get('section') || '').trim();
-      setConfigSection(isOperatorUser ? 'printer' : nextSectionFromQuery || 'hub');
+      // Auditoria 17/08 — bug "Ajustes não abre / volta pro hub":
+      // este efeito lia apenas `?section=` (usado pelo AdminLayout), mas o gravador de
+      // deep-link (useEffect [activeTab, configSection]) escreve `?cfg=`. Resultado:
+      // clique no submenu → editor abre → gravador escreve cfg=X na URL → este consumidor
+      // re-agia, não achava `section` e resetava para 'hub' ~100ms depois, fechando o
+      // editor (loop de 4 navegações capturado em reprodução).
+      // Correção: aceitar ambos os nomes e SÓ mexer na seção quando a query traz uma
+      // explícita — sem parâmetro, preserva a seção atual (o gravador é a fonte da verdade).
+      const params = new URLSearchParams(location.search || '');
+      const nextSectionFromQuery = String(params.get('cfg') || params.get('section') || '').trim();
+      if (nextSectionFromQuery) {
+        setConfigSection(isOperatorUser ? 'printer' : nextSectionFromQuery);
+      }
     }
     setActiveTab(nextTab as typeof activeTab);
     // Consome o estado de navegação para evitar "reaplicar" aba e causar pisca ao trocar de menu.
