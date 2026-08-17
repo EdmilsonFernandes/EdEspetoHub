@@ -5,16 +5,52 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "c431d767",
-  "versionLabel": "v0.1.9.c431d767",
-  "versionInternal": "0.1.9+20260816.220117.c431d767",
-  "buildId": "0.1.9+20260816.220117.c431d767-20260816.220117-c431d767",
-  "builtAt": "2026-08-16T22:01:17.044Z",
-  "commitHash": "c431d7672594cb65eef186838f3b19ae91ec0b28",
-  "shortHash": "c431d767",
+  "versionDisplaySuffix": "b9698e9d",
+  "versionLabel": "v0.1.9.b9698e9d",
+  "versionInternal": "0.1.9+20260817.000937.b9698e9d",
+  "buildId": "0.1.9+20260817.000937.b9698e9d-20260817.000937-b9698e9d",
+  "builtAt": "2026-08-17T00:09:37.509Z",
+  "commitHash": "b9698e9db74b3dbd166a2900cba372d80ad17d9d",
+  "shortHash": "b9698e9d",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "b9698e9db74b3dbd166a2900cba372d80ad17d9d",
+      "shortHash": "b9698e9d",
+      "dateIso": "2026-08-16T21:01:55-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): logo real das lojas no 'Peça de novo' — payload aninha em store.settings",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b9698e9db74b3dbd166a2900cba372d80ad17d9d"
+    },
+    {
+      "hash": "f81d9150e2fb89d35de5aaae06dbf61df21be0ca",
+      "shortHash": "f81d9150",
+      "dateIso": "2026-08-16T20:12:43-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(checkout): cupom E2E + CPF na nota + observação por item + countdown na lista",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f81d9150e2fb89d35de5aaae06dbf61df21be0ca"
+    },
+    {
+      "hash": "bbd398c64d6a13285ef7e22ca1c5cbd0f0322bf4",
+      "shortHash": "bbd398c6",
+      "dateIso": "2026-08-16T20:12:40-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(design): passo clareza 8K no hub — branco sólido, 1 véu, zero mesh",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bbd398c64d6a13285ef7e22ca1c5cbd0f0322bf4"
+    },
+    {
+      "hash": "85913bc4af00a43dc9c721fe596e59e1d55c4856",
+      "shortHash": "85913bc4",
+      "dateIso": "2026-08-16T19:11:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(design): batch 8 premium polish — focus ring AA, estoque com estado vazio honesto",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/85913bc4af00a43dc9c721fe596e59e1d55c4856"
+    },
     {
       "hash": "c431d7672594cb65eef186838f3b19ae91ec0b28",
       "shortHash": "c431d767",
@@ -248,42 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(hub): aviso \"Mora em condominio?\" e dispensavel (X) pra quem nao mora",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e942d02fd84aca0a61542562aa1f679391feba37"
-    },
-    {
-      "hash": "eed778f0d4aba0afb3c0f0bcccff8bf6b3702cc0",
-      "shortHash": "eed778f0",
-      "dateIso": "2026-08-13T12:49:47-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(cliente): geocoding fora da transacao no updateAddress (400 GEN-001 ao adicionar condominio)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eed778f0d4aba0afb3c0f0bcccff8bf6b3702cc0"
-    },
-    {
-      "hash": "c3e9376c989ff5d7c9dd4ba5798e9611ecb02703",
-      "shortHash": "c3e9376c",
-      "dateIso": "2026-08-13T10:35:17-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ops): respondWithError loga erro nao-tratado com stack + CLAUDE.md documenta acesso SSH de diagnostico",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c3e9376c989ff5d7c9dd4ba5798e9611ecb02703"
-    },
-    {
-      "hash": "3983d5ce390426e670b76c6d8f7c629c5e16a062",
-      "shortHash": "3983d5ce",
-      "dateIso": "2026-08-13T09:46:00-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 87 (v1.0.87) — CEP fix + seletor de condominio visual",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3983d5ce390426e670b76c6d8f7c629c5e16a062"
-    },
-    {
-      "hash": "023d89a3e17f07fc567e713f3c67c3ba4b1525f6",
-      "shortHash": "023d89a3",
-      "dateIso": "2026-08-13T09:44:17-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(cliente): CEP nao re-busca ao editar endereço + seletor de condominio visual com logo",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/023d89a3e17f07fc567e713f3c67c3ba4b1525f6"
     }
   ]
 } as const;
