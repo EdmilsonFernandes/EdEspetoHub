@@ -11,7 +11,7 @@
 import type { Request, Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { couponService, normalizeCouponCode } from '../services/CouponService';
-import { respondWithError } from '../utils/respondWithError';
+import { respondWithError } from '../errors/respondWithError';
 import { log } from '../utils/logger';
 
 const resolveStoreIdBySlug = async (slug: string): Promise<string | null> => {

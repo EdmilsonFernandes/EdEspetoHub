@@ -58,6 +58,7 @@ export class OrderService
   private readonly log = logger.child({ scope: 'OrderService' });
   private readonly queueActiveStatuses = [
     'pending',
+    'awaiting_payment',
     'preparing',
     'ready',
     'ready_for_delivery',
@@ -1738,6 +1739,9 @@ private async seedPostalShipmentFromCheckoutTx(
     if (order.type === 'delivery' && !isPostalFlow && deliveryStatuses.has(nextStatus)) {
       const transitions: Record<string, string[]> = {
         pending: [ 'preparing', 'cancelled' ],
+        // Auditoria 17/08: pedido Pix aguardando pagamento precisa ser cancelável
+        // (nenhum dos dois lados conseguia — beco sem saída até expirar sozinho).
+        awaiting_payment: [ 'cancelled' ],
         preparing: [ 'ready_for_delivery', 'waiting_for_motoboy', 'cancelled' ],
         ready_for_delivery: [ 'waiting_for_motoboy', 'in_delivery', 'cancelled' ],
         waiting_for_motoboy: [ 'in_delivery', 'cancelled' ],
@@ -1752,6 +1756,7 @@ private async seedPostalShipmentFromCheckoutTx(
     if (isPostalFlow) {
       const postalTransitions: Record<string, string[]> = {
         pending: [ 'preparing', 'cancelled' ],
+        awaiting_payment: [ 'cancelled' ],
         preparing: [ 'ready', 'dispatched', 'cancelled' ],
         ready: [ 'dispatched', 'cancelled' ],
         dispatched: [ 'delivered', 'finished' ],

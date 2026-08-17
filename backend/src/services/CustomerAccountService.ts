@@ -1314,7 +1314,10 @@ async setDefaultAddress(userId: string, addressId: string) {
     }
 
     const normalizedStatus = String(order.status || '').trim().toLowerCase();
-    const cancellableStatuses = new Set([ 'pending', 'accepted', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
+    // Auditoria 17/08: pedido aguardando pagamento (Pix pendente) é cancelável imediatamente —
+    // não houve pagamento nem preparo; deixar o pedido preso até expirar era um beco sem saída.
+    const isAwaitingPayment = normalizedStatus === 'awaiting_payment';
+    const cancellableStatuses = new Set([ 'awaiting_payment', 'pending', 'accepted', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
     if (!cancellableStatuses.has(normalizedStatus)) {
       throw new AppError('ORDER-004', 400, { message: 'Este pedido não pode mais ser cancelado pelo app.' });
     }
@@ -1324,24 +1327,28 @@ async setDefaultAddress(userId: string, addressId: string) {
       throw new AppError('GEN-002', 400, { message: 'Informe um motivo curto para o cancelamento.' });
     }
 
-    const publicPayload = await this.orderService.getPublicById(order.id);
-    if (!publicPayload?.order) {
-      throw new AppError('ORDER-001', 404, { message: 'Pedido não encontrado.' });
+    if (!isAwaitingPayment) {
+      const publicPayload = await this.orderService.getPublicById(order.id);
+      if (!publicPayload?.order) {
+        throw new AppError('ORDER-001', 404, { message: 'Pedido não encontrado.' });
+      }
+
+      const eta = await this.orderEtaService.calculateForOrder(publicPayload.order, publicPayload.queuePosition, undefined);
+      const etaMinutes = Number(eta?.windowMax || eta?.totalMinutes || eta?.windowMin || 0);
+      if (!(etaMinutes > 0)) {
+        throw new AppError('ORDER-004', 400, { message: 'Ainda não foi possível validar o prazo do pedido.' });
+      }
     }
 
-    const eta = await this.orderEtaService.calculateForOrder(publicPayload.order, publicPayload.queuePosition, undefined);
-    const etaMinutes = Number(eta?.windowMax || eta?.totalMinutes || eta?.windowMin || 0);
-    if (!(etaMinutes > 0)) {
-      throw new AppError('ORDER-004', 400, { message: 'Ainda não foi possível validar o prazo do pedido.' });
-    }
-
-    const createdAtMs = new Date(order.createdAt).getTime();
-    const graceMs = 15 * 60 * 1000;
-    const unlockAt = createdAtMs + etaMinutes * 60 * 1000 + graceMs;
-    if (Date.now() < unlockAt) {
-      throw new AppError('ORDER-004', 400, {
-        message: 'O cancelamento pelo app fica disponível apenas quando o pedido ultrapassa o prazo estimado.',
-      });
+    if (!isAwaitingPayment) {
+      const createdAtMs = new Date(order.createdAt).getTime();
+      const graceMs = 15 * 60 * 1000;
+      const unlockAt = createdAtMs + etaMinutes * 60 * 1000 + graceMs;
+      if (Date.now() < unlockAt) {
+        throw new AppError('ORDER-004', 400, {
+          message: 'O cancelamento pelo app fica disponível apenas quando o pedido ultrapassa o prazo estimado.',
+        });
+      }
     }
 
     const saved = await this.orderService.updateStatus(order.id, 'cancelled', undefined, reason);
