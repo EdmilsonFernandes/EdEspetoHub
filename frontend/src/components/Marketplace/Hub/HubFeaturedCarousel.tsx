@@ -53,7 +53,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
 
   return (
     <section
-      className="jnc-hub-surface order-7 overflow-hidden rounded-[1.8rem] px-3 py-2.5"
+      className="jnc-hub-surface order-3 overflow-hidden rounded-[1.8rem] px-3 py-2.5"
       style={{
         transition: 'all .45s ease',
         transitionDelay: '200ms',

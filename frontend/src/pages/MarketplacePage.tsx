@@ -2145,13 +2145,13 @@ export function MarketplacePage() {
 
           {/* Carrossel de Banners - Esconde na busca para focar no resultado */}
           {debouncedQuery.length < 2 && !selectedCondominium && homePromoSlides.length > 0 && (
-            <div className="order-3 animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
+            <div className="order-9 animate-in fade-in slide-in-from-top-4 duration-500" style={{ animationDelay: '80ms' }}>
               <SegmentPromoCarousel mode="hub" slides={homePromoSlides} className="mx-0 shadow-[0_22px_52px_-40px_rgba(15,23,42,0.44)]" />
             </div>
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
-            <section className="order-8 space-y-3">
+            <section className="order-7 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.22em] text-[#336886]">
@@ -2236,7 +2236,7 @@ export function MarketplacePage() {
           {debouncedQuery.length < 2 && condominiums.length > 0 && (
             <>
             <section
-              className={selectedCondominium ? 'order-2 sticky top-[max(env(safe-area-inset-top),0.65rem)] z-30 mb-4' : 'order-9'}
+              className={selectedCondominium ? 'order-2 sticky top-[max(env(safe-area-inset-top),0.65rem)] z-30 mb-4' : 'order-8'}
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               {selectedCondominium ? (
@@ -2446,7 +2446,7 @@ export function MarketplacePage() {
 
           {/* Filtro Meu Condomínio — somente clientes logados (comércio permanente diário) */}
           {isCustomerLogged && (myCondominium || !myCondoBannerDismissed) ? (
-            <section className="px-4">
+            <section className="order-10 px-4">
               <div className="flex items-stretch gap-2">
               <button
                 type="button"
