@@ -126,7 +126,7 @@ export function MotoboyHome() {
         title: accountStatus.label,
         description:
           pendingRequests > 0
-            ? `${pendingRequests} solicitação${pendingRequests === 1 ? '' : 'ões'} de loja aguardando resposta.`
+            ? `${pendingRequests} ${pendingRequests === 1 ? 'solicitação' : 'solicitações'} de loja aguardando resposta.`
             : approvedStores === 0
               ? 'Você precisa de pelo menos uma loja aprovada para receber entregas.'
               : 'Complete seu cadastro para liberar a operação.',
@@ -155,7 +155,7 @@ export function MotoboyHome() {
   return (
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader
-        title="Inicio"
+        title="Início"
         subtitle={hasActive ? 'Continue pela etapa atual.' : 'Entregas e fila em tempo real.'}
       />
 
@@ -167,7 +167,7 @@ export function MotoboyHome() {
             <p className="mt-1 text-sm text-slate-600">{primaryState.description}</p>
             <div className="mt-3 inline-flex flex-wrap items-center gap-2 text-xs text-slate-500">
               <span>
-                Ultima atualizacao: <span className="font-semibold text-slate-700">{lastUpdatedLabel}</span>
+                Última atualização: <span className="font-semibold text-slate-700">{lastUpdatedLabel}</span>
               </span>
               <button
                 type="button"
@@ -210,7 +210,7 @@ export function MotoboyHome() {
           <p className="font-extrabold">Conta: {accountStatus.label}</p>
           <p className="mt-1 text-amber-800">
             {pendingRequests > 0
-              ? `${pendingRequests} solicitação${pendingRequests === 1 ? '' : 'ões'} de loja aguardando resposta.`
+              ? `${pendingRequests} ${pendingRequests === 1 ? 'solicitação' : 'solicitações'} de loja aguardando resposta.`
               : approvedStores === 0
                 ? 'Você ainda precisa de uma loja aprovada para operar normalmente.'
                 : 'Complete seu cadastro para liberar todas as entregas.'}

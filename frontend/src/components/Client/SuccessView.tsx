@@ -582,10 +582,10 @@ export const SuccessView = ({
               </div>
               <div className="min-w-0">
                 <p className={`text-[10px] font-black uppercase tracking-[0.18em] ${isPaid ? 'text-emerald-700/75' : 'text-sky-700/75'}`}>
-                  {isPaid ? 'Pagamento aprovado' : 'Pedido recebido'}
+                  {isPaid ? 'Pagamento aprovado' : 'Próximos passos'}
                 </p>
                 <h2 className={`text-lg font-black leading-tight ${isPaid ? 'text-emerald-800' : 'text-slate-900'}`}>
-                  {isPaid ? 'Pedido confirmado!' : 'Pedido realizado!'}
+                  {isPaid ? 'Pedido confirmado!' : 'Acompanhe seu pedido'}
                 </h2>
                 <p className={`text-xs leading-relaxed mt-0.5 ${isPaid ? 'text-emerald-700/80' : 'text-slate-500'}`}>
                   {isPaid

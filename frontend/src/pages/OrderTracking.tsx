@@ -1709,10 +1709,13 @@ export function OrderTracking() {
         detail: etaForecastLabel,
       };
     }
+    // Auditoria 17/08: "PREVISÃO" sem previsão ("Acompanhe ao vivo") era label prometendo
+    // dado que não vinha. Sem dado real, dizer o que falta acontecer — não descrever a UI.
+    const isAwaitingPaymentOrder = String((order as any)?.status || '').toLowerCase() === 'awaiting_payment';
     return {
       label: 'Previsão',
-      value: isTerminal ? 'Concluído' : 'Acompanhe ao vivo',
-      detail: isTerminal ? orderLifecycleLabel : 'Atualiza automaticamente',
+      value: isTerminal ? 'Concluído' : isAwaitingPaymentOrder ? 'Após o pagamento' : 'Calculando…',
+      detail: isTerminal ? orderLifecycleLabel : isAwaitingPaymentOrder ? 'A loja inicia ao confirmar o pagamento' : 'Assim que a loja confirmar',
     };
   })();
   const quickFulfillmentDetail = isDelivery

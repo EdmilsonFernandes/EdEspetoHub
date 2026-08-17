@@ -79,7 +79,9 @@ export function HubFilterBar({
 
   return (
     <div className={`${isNativePlatform ? 'pt-0.5' : 'pt-1'}`}>
-      <div className="grid grid-cols-[repeat(3,minmax(0,1fr))_auto] gap-1.5 min-[390px]:gap-2">
+      {/* Auditoria 17/08: grid de colunas iguais + truncate cortava "Aberto"/"Grátis" no 360px
+          (Android entrada). Linha rolável com largura natural — label sempre inteiro. */}
+      <div className="-mx-1 flex items-center gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-[390px]:gap-2">
         {primaryOptions.map((filter) => {
           const Icon = filter.icon;
           const active = quickFilter === filter.key;
@@ -92,7 +94,7 @@ export function HubFilterBar({
                 onQuickFilterChange(nextFilter);
                 if (nextFilter !== 'all') onScrollStoresIntoView();
               }}
-              className={`jnc-hub-touch inline-flex min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-full px-2.5 py-2 text-[11px] font-black leading-none min-[390px]:min-h-11 min-[390px]:px-3 ${
+              className={`jnc-hub-touch inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-black leading-none ${
                 active
                   ? 'jnc-hub-pill-active'
                   : 'jnc-hub-pill text-slate-600 hover:text-[#153A4C]'
@@ -102,14 +104,14 @@ export function HubFilterBar({
               title={filter.label}
             >
               <Icon size={13} weight={active ? 'fill' : 'duotone'} className="shrink-0" />
-              <span className="truncate">{filter.compactLabel}</span>
+              <span>{filter.compactLabel}</span>
             </button>
           );
         })}
         <button
           type="button"
           onClick={onOpenFilters}
-          className={`jnc-hub-touch relative inline-flex h-full min-h-10 min-w-[3.35rem] items-center justify-center gap-1 rounded-full px-2.5 py-2 text-[11px] font-black leading-none min-[390px]:min-h-11 min-[390px]:px-3 ${
+          className={`jnc-hub-touch relative inline-flex min-h-10 shrink-0 items-center justify-center gap-1 rounded-full px-3 py-2 text-[11px] font-black leading-none ${
             hiddenFilterCount > 0
               ? 'border border-[#336886]/22 bg-[#edf5fa]/86 text-[#153A4C] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.34)]'
               : 'jnc-hub-pill text-slate-600 hover:text-[#153A4C]'
@@ -117,8 +119,7 @@ export function HubFilterBar({
           aria-label="Abrir filtros"
         >
           <SlidersHorizontal size={14} weight="bold" />
-          <span className="hidden min-[390px]:inline">Filtros</span>
-          <span className="min-[390px]:hidden">Mais</span>
+          <span>Filtros</span>
           {hiddenFilterCount > 0 ? (
             <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#153A4C] px-1 text-2xs font-black text-white ring-2 ring-white">
               {hiddenFilterCount}

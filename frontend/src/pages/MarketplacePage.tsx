@@ -139,7 +139,8 @@ const formatDestinationDisplayName = (destination: HubDestination) => {
 const formatDestinationMatchLabel = (destination: HubDestination) => {
   const match = destination.destinationMatch;
   const distance = Number(match?.distanceKm);
-  if (Number.isFinite(distance)) return `${distance < 10 ? distance.toFixed(1) : distance.toFixed(0)} km de você`;
+  // Honestidade numérica (auditoria 17/08): 0 km é ausência de dado, não distância — omitir
+  if (Number.isFinite(distance) && distance > 0.05) return `${distance < 10 ? distance.toFixed(1) : distance.toFixed(0)} km de você`;
   if (match?.reason === 'same_city') return 'Na sua cidade';
   if (match?.reason === 'same_state') return 'Mesma UF';
   return formatDestinationRegionLine(destination);
@@ -1927,12 +1928,22 @@ export function MarketplacePage() {
 
   const [storageUnread, setStorageUnread] = useState(0);
   useEffect(() => {
-    apiClient.get("/customer/notifications").then((r: any) => setStorageUnread(r?.unreadCount || 0)).catch(() => {});
-    const interval = setInterval(() => { apiClient.get("/customer/notifications").then((r: any) => setStorageUnread(r?.unreadCount || 0)).catch(() => {}); }, 5000);
-    const onFocus = () => { apiClient.get("/customer/notifications").then((r: any) => setStorageUnread(r?.unreadCount || 0)).catch(() => {}); };
+    // Auditoria 17/08: sem sessão esse poll gerava 401 a cada 5s no hub anônimo.
+    // Guard: só roda logado, a cada 30s, e desiste após falhas consecutivas.
+    if (!isCustomerLogged) return;
+    let failures = 0;
+    let disposed = false;
+    const poll = () => {
+      apiClient.get("/customer/notifications")
+        .then((r: any) => { failures = 0; if (!disposed) setStorageUnread(r?.unreadCount || 0); })
+        .catch(() => { failures += 1; });
+    };
+    poll();
+    const interval = setInterval(() => { if (failures < 3) poll(); }, 30000);
+    const onFocus = () => { if (failures < 3) poll(); };
     window.addEventListener('focus', onFocus);
-    return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };
-  }, []);
+    return () => { disposed = true; clearInterval(interval); window.removeEventListener('focus', onFocus); };
+  }, [isCustomerLogged]);
   const hubNotificationCount = storageUnread;
 
   const handleHubNotificationClick = useCallback(() => {

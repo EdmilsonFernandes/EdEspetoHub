@@ -389,10 +389,11 @@ export const CartView = ({
   ).filter((t) => !(isEndCustomerLogged && t === "table"));
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
-  // Pedido mínimo na retirada — a vitrine anuncia "Min R$ X" mas o checkout não barrava (auditoria 16/08)
-  const pickupMinimumValue = normalizeNumber(minOrderValue) ?? 0;
-  const pickupBelowMinimum = isPickup && pickupMinimumValue > 0 && total < pickupMinimumValue;
+  // Pedido mínimo — a vitrine anuncia "Min R$ X" mas o checkout não barrava (auditoria 16/08).
+  // 17/08: passa a valer para entrega presencial também (antes só retirada — delivery abaixo do mínimo atravessava as 4 etapas).
+  const minimumOrderValue = normalizeNumber(minOrderValue) ?? 0;
   const isPostalDelivery = isDelivery && String(deliveryMode || "").toLowerCase() === "postal";
+  const belowMinimum = (isPickup || (isDelivery && !isPostalDelivery)) && minimumOrderValue > 0 && total < minimumOrderValue;
   const customerOrderNoteCopy = useMemo(() => {
     if (isPostalDelivery) {
       return {
@@ -699,14 +700,15 @@ export const CartView = ({
       ? "Calcular frete postal"
       : isDelivery && !isDeliveryAddressValidated
       ? "Validar Endereço"
-      : actionLabel;
+      // Auditoria 17/08 (P0.3 conversão): CTA final do guest sem preço — decisão incompleta no ponto de ação
+      : `${actionLabel} • ${formatCurrency(totalWithFee)}`;
   const isDeliveryValidationMode = isDelivery && !isPostalDelivery && !isDeliveryAddressValidated;
   const isPostalQuoteMode = isPostalDelivery && !selectedPostalService;
   const primaryCtaDisabled = isDeliveryValidationMode
     ? (cepLoading || checkoutLoading)
     : isPostalQuoteMode
     ? (checkoutLoading || postalQuoteLoading)
-    : (checkoutLoading || checkoutDisabled || paymentValidation.blocked || pickupBelowMinimum);
+    : (checkoutLoading || checkoutDisabled || paymentValidation.blocked || belowMinimum);
   const checkoutLoadingLabel = checkoutSlow ? "Internet lenta... confirmando" : "Processando...";
 
   const [selectedDdd, setSelectedDdd] = useState(() => extractPhoneParts(customer.phone || "").ddd);
@@ -1381,13 +1383,6 @@ export const CartView = ({
         : customer.type === "table"
         ? "Você paga no atendimento da mesa."
         : "Você paga quando receber o pedido.";
-    const badgeLabel = isOnlinePaymentMethod ? "Seguro" : isManualPix ? "Pix da loja" : customer.type === "pickup" ? "Pague na retirada" : customer.type === "table" ? "Pague na mesa" : "Pague na entrega";
-    const badgeClass = isOnlinePaymentMethod
-      ? "border-[#336886]/12 bg-[#eef7fb] text-[#336886]"
-      : isManualPix
-      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-      : "border-slate-200 bg-slate-50 text-slate-600";
-
     return (
       <div
         className="relative overflow-hidden rounded-[1.55rem] border border-white/80 bg-white p-3.5 shadow-[0_20px_46px_-38px_rgba(15,23,42,0.35)]"
@@ -1399,9 +1394,6 @@ export const CartView = ({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm font-black tracking-tight text-slate-950 sm:text-base">{methodLabel}</p>
-              <span className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-2xs font-black uppercase tracking-[0.12em] ${badgeClass}`}>
-                {badgeLabel}
-              </span>
             </div>
             <p className="mt-1 text-[11.5px] font-semibold leading-snug text-slate-500">
               {isCash && cashNeedsChange && cashTenderedValue !== null && cashTenderedValue >= totalWithFee
@@ -1415,8 +1407,7 @@ export const CartView = ({
             className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#153A4C,#336886)] px-3 py-2.5 text-2xs font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)] transition hover:brightness-105 active:scale-[0.98]"
           >
             <CreditCard size={13} weight="duotone" />
-            <span>Alterar</span>
-            <span className="hidden min-[390px]:inline">forma</span>
+            <span>Alterar forma</span>
           </button>
         </div>
       </div>
@@ -1637,7 +1628,7 @@ export const CartView = ({
         <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
           {useMultiStepFlow && (
             <div className="mb-3.5 flex items-center gap-1.5">
-              {[{ label: 'Sacola', step: 1 }, { label: 'Entrega', step: 2 }, { label: 'Pagamento', step: 3 }, { label: 'Confirmar', step: 4 }].map(({ label, step }, i) => {
+              {[{ label: 'Sacola', step: 1 }, { label: 'Receber', step: 2 }, { label: 'Pagamento', step: 3 }, { label: 'Confirmar', step: 4 }].map(({ label, step }, i) => {
                 const isActive = checkoutStep === step;
                 const isDone = checkoutStep > step;
                 return (
@@ -1747,9 +1738,12 @@ export const CartView = ({
             </h2>
             {!useMultiStepFlow && <p className="text-xs text-slate-500 hidden sm:block">Complete as infos para enviarmos seu pedido.</p>}
           </div>
-          <span className="text-[11px] font-extrabold text-brand-primary bg-brand-primary-soft px-3 py-1 rounded-full border border-brand-primary/20">
-            {useMultiStepFlow ? 'Etapa 2/4' : 'Etapa 1/2'}
-          </span>
+          {/* Auditoria 17/08: "Etapa 1/2" fantasma — o fluxo guest é página única; badge só quando há etapas de verdade */}
+          {useMultiStepFlow && (
+            <span className="text-[11px] font-extrabold text-brand-primary bg-brand-primary-soft px-3 py-1 rounded-full border border-brand-primary/20">
+              Etapa 2/4
+            </span>
+          )}
         </div>
 
         <div className="space-y-4 sm:space-y-5">
@@ -2909,20 +2903,21 @@ export const CartView = ({
             className="flex justify-between items-center gap-2 py-2 sm:py-3 border-b border-gray-50 last:border-0"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-1 py-1">
+              {/* Auditoria 17/08: alvos de 24px em tela de conversão — mínimo ergonômico 44px (WCAG 2.5.5) */}
+              <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-1 py-1">
                 <button
                   type="button"
                   onClick={() => onUpdateCart?.(item, -1, buildCartOptions(item))}
-                  className="h-6 w-6 rounded-md text-slate-700 hover:bg-slate-100 transition"
+                  className="h-11 w-11 rounded-lg text-lg font-bold text-slate-700 hover:bg-slate-100 transition"
                   aria-label={`Diminuir quantidade de ${item.name}`}
                 >
-                  -
+                  −
                 </button>
-                <span className="min-w-[24px] text-center text-xs font-bold text-slate-800">{item.qty}</span>
+                <span className="min-w-[28px] text-center text-sm font-black text-slate-800">{item.qty}</span>
                 <button
                   type="button"
                   onClick={() => onUpdateCart?.(item, 1, buildCartOptions(item))}
-                  className="h-6 w-6 rounded-md bg-brand-primary text-white hover:brightness-110 transition"
+                  className="h-11 w-11 rounded-lg bg-brand-primary text-lg font-bold text-white hover:brightness-110 transition"
                   aria-label={`Aumentar quantidade de ${item.name}`}
                 >
                   +
@@ -3510,9 +3505,9 @@ export const CartView = ({
                 Conexão lenta. Estamos confirmando com a loja. Não feche esta tela nem toque de novo.
               </p>
             )}
-            {pickupBelowMinimum && (
+            {belowMinimum && (
               <p className="mb-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[11px] font-bold leading-snug text-amber-800" role="alert">
-                Pedido mínimo para retirada: {formatCurrency(pickupMinimumValue)} — faltam {formatCurrency(pickupMinimumValue - total)}.
+                Pedido mínimo da loja: {formatCurrency(minimumOrderValue)} — faltam {formatCurrency(minimumOrderValue - total)}.
               </p>
             )}
             <button
@@ -3559,7 +3554,7 @@ export const CartView = ({
                 : checkoutStep === 3
                 ? (checkoutDisabled || paymentValidation.blocked)
                 : checkoutStep === 4
-                ? (checkoutLoading || checkoutDisabled || paymentValidation.blocked || pickupBelowMinimum)
+                ? (checkoutLoading || checkoutDisabled || paymentValidation.blocked || belowMinimum)
                 : false}
               className={`relative w-full overflow-hidden font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
                 (checkoutStep === 2 && (
@@ -3569,13 +3564,11 @@ export const CartView = ({
                   (customer.type === 'table' && !String(customer.table || '').trim())
                 )) ||
                 (checkoutStep === 3 && (checkoutDisabled || paymentValidation.blocked)) ||
-                (checkoutStep === 4 && (checkoutLoading || checkoutDisabled || paymentValidation.blocked || pickupBelowMinimum))
+                (checkoutStep === 4 && (checkoutLoading || checkoutDisabled || paymentValidation.blocked || belowMinimum))
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
-                  : checkoutStep === 4
-                  ? "bg-[linear-gradient(135deg,#0f172a,#153A4C)] text-white cursor-pointer shadow-[0_20px_42px_-26px_rgba(21,58,76,0.56)]"
-                  : checkoutStep === 3
-                  ? "bg-[linear-gradient(135deg,#336886,#207A52)] text-white cursor-pointer shadow-[0_18px_36px_-24px_rgba(51,104,134,0.55)]"
-                  : "bg-[linear-gradient(135deg,#0f172a,#153A4C)] text-white cursor-pointer shadow-[0_20px_42px_-26px_rgba(21,58,76,0.56)]"
+                  /* Auditoria 17/08 — 1 CTA, 1 cor: verde transacional #15803d (AA 5.02:1 com branco).
+                     Antes: navy nas etapas 1-2-4 e teal→verde na 3 — três CTAs "primários" no mesmo fluxo. */
+                  : "bg-[#15803d] text-white cursor-pointer shadow-[0_20px_42px_-24px_rgba(21,128,61,0.55)]"
               }`}
               style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
             >
@@ -3624,9 +3617,9 @@ export const CartView = ({
                 Conexão lenta. Estamos confirmando com a loja. Não feche esta tela nem toque de novo.
               </p>
             )}
-            {pickupBelowMinimum && (
+            {belowMinimum && (
               <p className="mb-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[11px] font-bold leading-snug text-amber-800" role="alert">
-                Pedido mínimo para retirada: {formatCurrency(pickupMinimumValue)} — faltam {formatCurrency(pickupMinimumValue - total)}.
+                Pedido mínimo da loja: {formatCurrency(minimumOrderValue)} — faltam {formatCurrency(minimumOrderValue - total)}.
               </p>
             )}
             <button
@@ -3667,7 +3660,7 @@ export const CartView = ({
               className={`relative w-full overflow-hidden font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
                 primaryCtaDisabled
                   ? "bg-slate-300 text-slate-600 cursor-not-allowed"
-                  : "bg-[linear-gradient(135deg,#0f172a,#153A4C)] text-white cursor-pointer shadow-[0_20px_42px_-26px_rgba(21,58,76,0.56)]"
+                  : "bg-[#15803d] text-white cursor-pointer shadow-[0_20px_42px_-24px_rgba(21,128,61,0.55)]"
               }`}
               style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
             >

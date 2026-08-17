@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "187468d9",
-  "versionLabel": "v0.1.9.187468d9",
-  "versionInternal": "0.1.9+20260817.012659.187468d9",
-  "buildId": "0.1.9+20260817.012659.187468d9-20260817.012659-187468d9",
-  "builtAt": "2026-08-17T01:26:59.978Z",
-  "commitHash": "187468d9ed041a2d62ecc544525b16a8a9c463dc",
-  "shortHash": "187468d9",
+  "versionDisplaySuffix": "c0dccd1c",
+  "versionLabel": "v0.1.9.c0dccd1c",
+  "versionInternal": "0.1.9+20260817.041549.c0dccd1c",
+  "buildId": "0.1.9+20260817.041549.c0dccd1c-20260817.041549-c0dccd1c",
+  "builtAt": "2026-08-17T04:15:49.115Z",
+  "commitHash": "c0dccd1c939e7fa9e2065a9a3629f044be309cfe",
+  "shortHash": "c0dccd1c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "c0dccd1c939e7fa9e2065a9a3629f044be309cfe",
+      "shortHash": "c0dccd1c",
+      "dateIso": "2026-08-16T22:29:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(checkout): CPF na nota adiado — campo oculto atrás de flag até vir do perfil",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c0dccd1c939e7fa9e2065a9a3629f044be309cfe"
+    },
     {
       "hash": "187468d9ed041a2d62ecc544525b16a8a9c463dc",
       "shortHash": "187468d9",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore(mobile): versionCode 89 (v1.0.89) — tile Condominio premium no hub",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2d49e16132c9487c07c4ad665d8ac5dba48c36fc"
-    },
-    {
-      "hash": "1544cce1af03a1aceb2f532e7bd4cdb7a08fe41a",
-      "shortHash": "1544cce1",
-      "dateIso": "2026-08-13T19:17:53-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(condominio): tile Condominio premium nas categorias + remover loja no superadmin + save sem re-geocode",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1544cce1af03a1aceb2f532e7bd4cdb7a08fe41a"
     }
   ]
 } as const;

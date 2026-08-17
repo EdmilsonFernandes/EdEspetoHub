@@ -758,7 +758,10 @@ function OrderCard({
   const isDelayed = isPostalOrder
     ? !postalDelivered && isPostalShipmentDelayed(orderStatusCandidate, shipment)
     : Boolean(etaDeadlineMs && Date.now() > etaDeadlineMs);
-  const canCancel = Boolean(
+  // Auditoria 17/08: pedido Pix aguardando pagamento é cancelável imediatamente —
+  // não houve pagamento nem preparo; antes ficava preso até expirar sozinho.
+  const isAwaitingPayment = normalizeStatus(order.status) === 'AWAITING_PAYMENT';
+  const canCancel = isAwaitingPayment || Boolean(
     isActive &&
     !isPostalOrder &&
     isDelayed &&
@@ -766,6 +769,19 @@ function OrderCard({
     etaDeadlineMs &&
     Date.now() > etaDeadlineMs + DELAY_GRACE_MS
   );
+  // A API aninha link/expiração em payment.* e onlinePayment.* — antes o card lia
+  // order.paymentLink / paymentExpiresAt (nível raiz, sempre undefined) e o
+  // "Pagar agora" + countdown jamais renderizavam na lista (auditoria 17/08).
+  const paymentPayUrl =
+    (order as any).paymentLink ||
+    (order as any).payment?.paymentLink ||
+    (order as any).onlinePayment?.paymentLink ||
+    null;
+  const paymentExpiresAt =
+    (order as any).payment?.expiresAt ||
+    (order as any).onlinePayment?.expiresAt ||
+    (order as any).paymentExpiresAt ||
+    null;
   const handleRepeatOrder = () => {
     queueOrderForReorder(order, onOpenStore);
     showToast('Reabrindo seu pedido anterior na loja...', 'success');
@@ -898,16 +914,16 @@ function OrderCard({
       </div>
 
       {/* Botão pagar MP */}
-      {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && order.paymentLink && (
+      {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && paymentPayUrl && (
         <div className="px-4 pb-3">
           <div className="mb-2 flex items-center justify-between gap-2">
             <span className="text-2xs font-black uppercase tracking-[0.14em] text-slate-400">Pagar agora</span>
-            <PaymentCountdownPill expiresAt={(order as any).paymentExpiresAt} />
+            <PaymentCountdownPill expiresAt={paymentExpiresAt} />
           </div>
           <button
             type="button"
             onClick={() => {
-              const url = order.paymentLink;
+              const url = paymentPayUrl;
               if (!url) return;
               if (Capacitor.isNativePlatform()) { Browser.open({ url }); } else { window.open(url, '_blank'); }
             }}
@@ -937,7 +953,7 @@ function OrderCard({
                 <SpinnerGap size={11} weight="duotone" className="animate-spin" />
                 Confirme o pagamento para iniciar o preparo
               </span>
-              <PaymentCountdownPill expiresAt={(order as any).paymentExpiresAt} />
+              <PaymentCountdownPill expiresAt={paymentExpiresAt} />
             </div>
           )}
           {isActive && etaWindowLabel && (
