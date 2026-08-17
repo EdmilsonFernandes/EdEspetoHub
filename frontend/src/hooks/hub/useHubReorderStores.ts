@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { customerAccountService } from '../../services/customerAccountService';
+import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 
 export type HubReorderStore = {
   slug: string;
@@ -35,7 +36,11 @@ export function useHubReorderStores(isLogged: boolean) {
           bySlug.set(slug, {
             slug,
             name: String(store?.name || slug).trim() || slug,
-            logoUrl: store?.logoUrl || null,
+            // o payload de pedidos aninha o logo em store.settings (mesmo padrão do ClientOrders) —
+            // lendo só store.logoUrl a seção "Peça de novo" ficava sempre com iniciais
+            logoUrl: resolveAssetUrl(
+              store?.logoUrl || store?.logo_url || store?.settings?.logoUrl || store?.settings?.logo_url || null
+            ),
           });
         }
         if (!cancelled) setReorderStores(Array.from(bySlug.values()).slice(0, 4));
