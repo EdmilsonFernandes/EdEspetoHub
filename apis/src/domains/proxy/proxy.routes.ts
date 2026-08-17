@@ -129,6 +129,19 @@ export function createProxyRoutes(): Router {
     r.post('/stores/:storeId/postal/quote', authRequired, forward);
     // Order reviews
     r.get('/orders/:orderId/review', forward); r.post('/orders/:orderId/review', forward);
+    // Coupons (public validation/count + store admin CRUD)
+    // NOTA: sem estas rotas a feature de cupom morre no BFF (auditoria 17/08 — P0.1)
+    r.post('/public/stores/slug/:slug/coupons/validate', forward);
+    r.get('/public/stores/slug/:slug/coupons/count', forward);
+    r.get('/stores/:storeId/coupons', authRequired, forward);
+    r.post('/stores/:storeId/coupons', authRequired, forward);
+    r.delete('/stores/:storeId/coupons/:couponId', authRequired, forward);
+    // Rotas faltantes descobertas pelo contract-check (auditoria 17/08) — features mortas no BFF:
+    r.patch('/stores/:storeId/reviews/:reviewId/reply', authRequired, forward); // lojista responde avaliação
+    r.get('/motoboy/payment-accounts/mercadopago', authRequired, forward);
+    r.post('/motoboy/payment-accounts/mercadopago/connect', authRequired, forward);
+    r.delete('/motoboy/payment-accounts/mercadopago', authRequired, forward);
+    r.patch('/admin/destination-promotions/:promotionId/review', authRequired, forward);
     r.get('/stores/:storeId/reviews', authRequired, forward);
     r.get('/stores/:storeId/reviews/summary', authRequired, forward);
     r.get('/stores/:storeId/reviews/tip-payouts', authRequired, forward);
