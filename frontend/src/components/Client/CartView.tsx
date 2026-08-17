@@ -61,6 +61,40 @@ export const isValidTaxIdLength = (value: string): boolean => {
   return digits.length === 0 || digits.length === 11 || digits.length === 14;
 };
 
+// CPF/CNPJ com dígitos verificadores — obrigatório só SE o cliente usar o campo;
+// nunca bloqueia o checkout (campo opcional).
+export const isValidTaxId = (value: string): boolean => {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (!digits) return true;
+  if (digits.length === 11) {
+    if (/^(\d)\1{10}$/.test(digits)) return false;
+    let sum = 0;
+    for (let i = 0; i < 9; i++) sum += Number(digits[i]) * (10 - i);
+    let d1 = (sum * 10) % 11;
+    if (d1 === 10) d1 = 0;
+    if (d1 !== Number(digits[9])) return false;
+    sum = 0;
+    for (let i = 0; i < 10; i++) sum += Number(digits[i]) * (11 - i);
+    let d2 = (sum * 10) % 11;
+    if (d2 === 10) d2 = 0;
+    return d2 === Number(digits[10]);
+  }
+  if (digits.length === 14) {
+    if (/^(\d)\1{13}$/.test(digits)) return false;
+    const calc = (slice: string, weights: number[]): number => {
+      let sum = 0;
+      slice.split("").forEach((ch, i) => { sum += Number(ch) * weights[i]; });
+      const r = sum % 11;
+      return r < 2 ? 0 : 11 - r;
+    };
+    const d1 = calc(digits.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+    if (d1 !== Number(digits[12])) return false;
+    const d2 = calc(digits.slice(0, 13), [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+    return d2 === Number(digits[13]);
+  }
+  return false;
+};
+
 const BRAZIL_DDDS = [
   "11", "12", "13", "14", "15", "16", "17", "18", "19",
   "21", "22", "24", "27", "28",
@@ -426,6 +460,12 @@ export const CartView = ({
   // ---------- Cupom: contagem + aplicar/remover + revalidação automática ----------
   useEffect(() => {
     setTaxIdInput(customer?.taxId ? maskTaxId(String(customer.taxId)) : "");
+    // Cupom fantasma (draft antigo restaurado sem preview): se seguir no
+    // payload, o backend recusa o fechamento com COUPON-001. Cupom só vale
+    // se o cliente aplicar nesta sessão.
+    if (customer?.couponCode) {
+      onChangeCustomer?.({ ...customer, couponCode: "" });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -3119,8 +3159,8 @@ export const CartView = ({
         </div>
       )}
 
-      {/* Cupom de desconto (benchmark §12) */}
-      {(!useMultiStepFlow || checkoutStep === 3) && (
+      {/* Cupom de desconto (benchmark §12) — escondido para operator/admin */}
+      {!isProfessionalUser && (!useMultiStepFlow || checkoutStep === 3) && (
         <div className="relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
           <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#5FD35A]/25 to-transparent" />
           <div className="relative z-10 mb-3 flex items-center gap-3">
@@ -3187,8 +3227,8 @@ export const CartView = ({
         </div>
       )}
 
-      {/* CPF/CNPJ na nota (benchmark §12) */}
-      {(!useMultiStepFlow || checkoutStep === 3) && (
+      {/* CPF/CNPJ na nota (benchmark §12) — opcional; escondido para operator/admin */}
+      {!isProfessionalUser && (!useMultiStepFlow || checkoutStep === 3) && (
         <div className="relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
           <div className="relative z-10 flex flex-col gap-2">
             <div className="flex items-center gap-3">
@@ -3214,7 +3254,9 @@ export const CartView = ({
               data-testid="checkout-tax-id-input"
             />
             {taxIdInput && !isValidTaxIdLength(taxIdInput) ? (
-              <p className="text-xs font-semibold text-amber-600">Complete o CPF (11 dígitos) ou CNPJ (14).</p>
+              <p className="text-xs font-semibold text-amber-600">Complete o CPF (11 dígitos) ou CNPJ (14) — ou deixe vazio.</p>
+            ) : taxIdInput && !isValidTaxId(taxIdInput) ? (
+              <p className="text-xs font-semibold text-rose-600">CPF/CNPJ inválido — confira os números ou deixe vazio (é opcional).</p>
             ) : null}
           </div>
         </div>

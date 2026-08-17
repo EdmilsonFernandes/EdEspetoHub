@@ -13,7 +13,7 @@ import { storeService } from '../services/storeService';
 import { mapsService } from '../services/mapsService';
 import { condominiumService } from '../services/condominiumService';
 import { MenuView } from '../components/Client/MenuView';
-import { CartView } from '../components/Client/CartView';
+import { CartView, isValidTaxId } from '../components/Client/CartView';
 import { CartViewCondominium } from '../components/Client/CartViewCondominium';
 import { SuccessView } from '../components/Client/SuccessView';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
@@ -786,9 +786,13 @@ export function StorePage() {
         const hasCurrentItems = Object.values(prev || {}).some((item: any) => Number(item?.qty || 0) > 0);
         return hasCurrentItems ? prev : draft.cart;
       });
+      // Cupom NUNCA sobrevive de sessão: o preview some no remount e um cupom
+      // fantasma no payload faz o backend recusar o pedido (COUPON-001).
+      // CPF na nota (taxId) continua restaurado — é do cliente, opcional.
+      const { couponCode: _staleCoupon, ...draftCustomer } = draft.customer || {};
       setCustomer((prev: Record<string, any>) => ({
         ...prev,
-        ...(draft.customer || {}),
+        ...draftCustomer,
       }));
       if (draft.paymentMethod) setPaymentMethod(draft.paymentMethod);
       if (draft.deliveryMode) setDeliveryMode(draft.deliveryMode as any);
@@ -2719,12 +2723,15 @@ export function StorePage() {
         ].filter(Boolean).join(' | ')
       : '';
 
+    // CPF na nota e cupom são exclusivos do cliente final — operador/admin
+    // fechando pedido não envia (e valores vazios/inválidos nunca são enviados)
+    const isProfessionalCheckout = Boolean(checkoutIsProfessionalCheckoutUser);
     const taxIdDigits = String(customer.taxId || '').replace(/\D/g, '');
     const order = {
       customerName: effectiveCustomerName,
       customerNote: customerNote || undefined,
-      taxId: taxIdDigits.length === 11 || taxIdDigits.length === 14 ? taxIdDigits : undefined,
-      couponCode: String(customer.couponCode || '').trim().toUpperCase() || undefined,
+      taxId: !isProfessionalCheckout && isValidTaxId(taxIdDigits) && (taxIdDigits.length === 11 || taxIdDigits.length === 14) ? taxIdDigits : undefined,
+      couponCode: !isProfessionalCheckout ? (String(customer.couponCode || '').trim().toUpperCase() || undefined) : undefined,
       guestPushId: getOrCreateGuestPushId(),
       originClient: Capacitor.isNativePlatform() ? 'app' : 'web',
       phone: customer.phone,

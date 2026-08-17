@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "b9698e9d",
-  "versionLabel": "v0.1.9.b9698e9d",
-  "versionInternal": "0.1.9+20260817.000937.b9698e9d",
-  "buildId": "0.1.9+20260817.000937.b9698e9d-20260817.000937-b9698e9d",
-  "builtAt": "2026-08-17T00:09:37.509Z",
-  "commitHash": "b9698e9db74b3dbd166a2900cba372d80ad17d9d",
-  "shortHash": "b9698e9d",
+  "versionDisplaySuffix": "a467a521",
+  "versionLabel": "v0.1.9.a467a521",
+  "versionInternal": "0.1.9+20260817.010027.a467a521",
+  "buildId": "0.1.9+20260817.010027.a467a521-20260817.010027-a467a521",
+  "builtAt": "2026-08-17T01:00:27.797Z",
+  "commitHash": "a467a521dbec1001155a10e1c239b8e77d1527ad",
+  "shortHash": "a467a521",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "a467a521dbec1001155a10e1c239b8e77d1527ad",
+      "shortHash": "a467a521",
+      "dateIso": "2026-08-16T21:25:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 94 (v1.0.94) — AAB com todos os batches + cupom/CPF/observação-por-item do benchmark",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a467a521dbec1001155a10e1c239b8e77d1527ad"
+    },
     {
       "hash": "b9698e9db74b3dbd166a2900cba372d80ad17d9d",
       "shortHash": "b9698e9d",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore(mobile): versionCode 88 (v1.0.88) — inclui card dispensivel + seletor visual + fix CEP",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c1b24592c9fc12daa370e703087d898af59e26d3"
-    },
-    {
-      "hash": "e942d02fd84aca0a61542562aa1f679391feba37",
-      "shortHash": "e942d02f",
-      "dateIso": "2026-08-13T13:04:22-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): aviso \"Mora em condominio?\" e dispensavel (X) pra quem nao mora",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e942d02fd84aca0a61542562aa1f679391feba37"
     }
   ]
 } as const;
