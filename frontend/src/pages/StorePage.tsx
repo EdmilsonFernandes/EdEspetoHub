@@ -13,7 +13,7 @@ import { storeService } from '../services/storeService';
 import { mapsService } from '../services/mapsService';
 import { condominiumService } from '../services/condominiumService';
 import { MenuView } from '../components/Client/MenuView';
-import { CartView, isValidTaxId } from '../components/Client/CartView';
+import { CartView, isValidTaxId, TAX_ID_NOTE_FIELD_ENABLED } from '../components/Client/CartView';
 import { CartViewCondominium } from '../components/Client/CartViewCondominium';
 import { SuccessView } from '../components/Client/SuccessView';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
@@ -2730,7 +2730,7 @@ export function StorePage() {
     const order = {
       customerName: effectiveCustomerName,
       customerNote: customerNote || undefined,
-      taxId: !isProfessionalCheckout && isValidTaxId(taxIdDigits) && (taxIdDigits.length === 11 || taxIdDigits.length === 14) ? taxIdDigits : undefined,
+      taxId: TAX_ID_NOTE_FIELD_ENABLED && !isProfessionalCheckout && isValidTaxId(taxIdDigits) && (taxIdDigits.length === 11 || taxIdDigits.length === 14) ? taxIdDigits : undefined,
       couponCode: !isProfessionalCheckout ? (String(customer.couponCode || '').trim().toUpperCase() || undefined) : undefined,
       guestPushId: getOrCreateGuestPushId(),
       originClient: Capacitor.isNativePlatform() ? 'app' : 'web',

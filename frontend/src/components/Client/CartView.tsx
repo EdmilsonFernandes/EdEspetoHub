@@ -61,6 +61,10 @@ export const isValidTaxIdLength = (value: string): boolean => {
   return digits.length === 0 || digits.length === 11 || digits.length === 14;
 };
 
+// CPF/CNPJ na nota: campo ADIADO por decisão do Edmilson (16/08/2026) — religar
+// só quando passar a vir do perfil da conta do cliente (users ainda não tem CPF).
+export const TAX_ID_NOTE_FIELD_ENABLED = false;
+
 // CPF/CNPJ com dígitos verificadores — obrigatório só SE o cliente usar o campo;
 // nunca bloqueia o checkout (campo opcional).
 export const isValidTaxId = (value: string): boolean => {
@@ -3227,8 +3231,8 @@ export const CartView = ({
         </div>
       )}
 
-      {/* CPF/CNPJ na nota (benchmark §12) — opcional; escondido para operator/admin */}
-      {!isProfessionalUser && (!useMultiStepFlow || checkoutStep === 3) && (
+      {/* CPF/CNPJ na nota (benchmark §12) — ADIADO: religar com TAX_ID_NOTE_FIELD_ENABLED */}
+      {TAX_ID_NOTE_FIELD_ENABLED && !isProfessionalUser && (!useMultiStepFlow || checkoutStep === 3) && (
         <div className="relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
           <div className="relative z-10 flex flex-col gap-2">
             <div className="flex items-center gap-3">

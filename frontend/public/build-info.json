@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "a467a521",
-  "versionLabel": "v0.1.9.a467a521",
-  "versionInternal": "0.1.9+20260817.010027.a467a521",
-  "buildId": "0.1.9+20260817.010027.a467a521-20260817.010027-a467a521",
-  "builtAt": "2026-08-17T01:00:27.797Z",
-  "commitHash": "a467a521dbec1001155a10e1c239b8e77d1527ad",
-  "shortHash": "a467a521",
+  "versionDisplaySuffix": "187468d9",
+  "versionLabel": "v0.1.9.187468d9",
+  "versionInternal": "0.1.9+20260817.012659.187468d9",
+  "buildId": "0.1.9+20260817.012659.187468d9-20260817.012659-187468d9",
+  "builtAt": "2026-08-17T01:26:59.978Z",
+  "commitHash": "187468d9ed041a2d62ecc544525b16a8a9c463dc",
+  "shortHash": "187468d9",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "187468d9ed041a2d62ecc544525b16a8a9c463dc",
+      "shortHash": "187468d9",
+      "dateIso": "2026-08-16T22:12:10-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(checkout): CPF/cupom opcionais de verdade + fora do fluxo de operator/admin",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/187468d9ed041a2d62ecc544525b16a8a9c463dc"
+    },
     {
       "hash": "a467a521dbec1001155a10e1c239b8e77d1527ad",
       "shortHash": "a467a521",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(condominio): tile Condominio premium nas categorias + remover loja no superadmin + save sem re-geocode",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1544cce1af03a1aceb2f532e7bd4cdb7a08fe41a"
-    },
-    {
-      "hash": "c1b24592c9fc12daa370e703087d898af59e26d3",
-      "shortHash": "c1b24592",
-      "dateIso": "2026-08-13T14:03:54-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 88 (v1.0.88) — inclui card dispensivel + seletor visual + fix CEP",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c1b24592c9fc12daa370e703087d898af59e26d3"
     }
   ]
 }
