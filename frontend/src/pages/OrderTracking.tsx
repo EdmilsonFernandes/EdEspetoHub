@@ -1162,6 +1162,23 @@ export function OrderTracking() {
     return lines.join('\n');
   }, [orderDisplayId, shipmentTrackingCode]);
   const postalIssueWhatsappLink = buildWhatsAppContactUrl(storePhone, false, postalIssueWhatsappMessage);
+  // Comprovante do Pix manual (pix_loja): mensagem pronta com nº do pedido + valor —
+  // o cliente só anexa o print que o banco gerou (fechamento do ciclo 18/08).
+  const paymentProofWhatsappLink = buildWhatsAppContactUrl(
+    storePhone,
+    false,
+    `Olá! Segue o comprovante do Pix do pedido #${orderDisplayId} — ${formatCurrency(Number(order?.total || 0))}.`
+  );
+  const openPaymentProofWhatsApp = () => {
+    if (!paymentProofWhatsappLink) return;
+    if (Capacitor.isNativePlatform()) {
+      void import('@capacitor/browser')
+        .then(({ Browser }) => Browser.open({ url: paymentProofWhatsappLink }))
+        .catch(() => window.open(paymentProofWhatsappLink, '_blank', 'noopener,noreferrer'));
+      return;
+    }
+    window.open(paymentProofWhatsappLink, '_blank', 'noopener,noreferrer');
+  };
   const openWhatsApp = () => {
     if (!storeWhatsappLink) return;
     if (Capacitor.isNativePlatform()) {
@@ -2815,12 +2832,21 @@ export function OrderTracking() {
                       </div>
                     )}
 
-                    {isStaticPixPayment && !shouldHidePixPaymentBlockBase ? (
+                    {isStaticPixPayment && (!shouldHidePixPaymentBlockBase || isPaymentApproved) ? (
                       isCancelled ? (
                         <div id="order-static-pix-section" className="rounded-[1.35rem] border border-rose-200 bg-rose-50 p-4">
                           <span className="inline-flex items-center rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-bold text-rose-700">
                             Pagamento não concluído
                           </span>
+                        </div>
+                      ) : isPaymentApproved ? (
+                        <div id="order-static-pix-section" className="rounded-[1.35rem] border border-emerald-200 bg-emerald-50 p-4">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-bold text-emerald-700">
+                            <CheckCircle size={13} weight="fill" /> Pagamento confirmado pela loja
+                          </span>
+                          <p className="mt-2 text-xs font-semibold text-emerald-800">
+                            Recebemos o seu Pix. Obrigado!
+                          </p>
                         </div>
                       ) : (
                         <div id="order-static-pix-section" className="rounded-[1.35rem] border border-amber-100/80 bg-[linear-gradient(135deg,#fffdf7,#faf6ee)] p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
@@ -2860,6 +2886,25 @@ export function OrderTracking() {
                               A chave Pix da loja ainda não foi cadastrada.
                             </div>
                           )}
+                          <div className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-amber-200/70 bg-amber-50/60 px-3 py-2">
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-700">
+                              <Clock size={12} weight="duotone" /> Aguardando confirmação da loja
+                            </span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-600/80">Pix da loja</span>
+                          </div>
+                          <p className="mt-2 text-[11px] leading-snug text-stone-500">
+                            Já pagou? Envie o comprovante que o banco gerou pelo WhatsApp — a loja confirma aqui no app.
+                          </p>
+                          {storePhone ? (
+                            <button
+                              type="button"
+                              onClick={openPaymentProofWhatsApp}
+                              className="jnc-hub-touch mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-[linear-gradient(135deg,#12b76a,#0e9f5d)] px-3 py-2.5 text-xs font-black text-white shadow-[0_10px_24px_-14px_rgba(16,150,88,0.65)] transition hover:brightness-105 active:scale-[0.98]"
+                            >
+                              <WhatsappLogo size={14} weight="fill" />
+                              Enviar comprovante pelo WhatsApp
+                            </button>
+                          ) : null}
                         </div>
                       )
                     ) : null}

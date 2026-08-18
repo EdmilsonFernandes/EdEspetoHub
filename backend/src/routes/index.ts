@@ -324,6 +324,7 @@ routes.patch('/orders/:orderId/postal', requireAuth, requireRole('ADMIN', 'OPERA
 routes.patch('/orders/:orderId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.updateItems);
 routes.patch('/orders/:orderId/reopen', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.reopen);
 routes.patch('/orders/:orderId/mark-as-printed', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.markItemsAsPrinted);
+routes.patch('/orders/:orderId/confirm-payment', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), OrderController.confirmManualPayment);
 routes.get('/orders/:orderId/public', OrderController.getPublic);
 routes.get('/v2/orders/:orderId/tracking', OrderController.getTrackingV2);
 routes.get('/orders/:orderId/review', hydrateAuthOptional, OrderReviewController.getByOrder);

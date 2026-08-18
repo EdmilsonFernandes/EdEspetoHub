@@ -441,6 +441,11 @@ export const orderService = {
     return apiClient.patch(`/orders/${id}/mark-as-printed`, { itemIds: normalized });
   },
 
+  /** Loja confirma recebimento de pagamento manual (pix_loja/dinheiro/presencial). */
+  confirmManualPayment: async (id: string) => {
+    return apiClient.patch(`/orders/${id}/confirm-payment`, {});
+  },
+
   peekPublicById(orderId: string) {
     return readPublicOrderCache(orderId);
   },

@@ -392,6 +392,24 @@ static async updateFulfillmentMode(req: Request, res: Response) {
   }
 
     /**
+   * Confirms manual payment received by the store (pix_loja / dinheiro / presencial).
+   *
+   * @author Edmilson Lopes
+   */
+	static async confirmManualPayment(req: Request, res: Response) {
+    try {
+      const order = await orderService.confirmManualPayment(
+        req.params.orderId,
+        req.auth?.storeId
+      );
+      return res.json(order);
+    } catch (error: any) {
+      log.warn('Order manual payment confirm failed', { orderId: req.params.orderId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+    /**
    * Updates resources for update postal shipment.
    *
    * @author Edmilson Lopes

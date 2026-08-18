@@ -1,6 +1,6 @@
 # Proposta — Comprovante para pagamentos presenciais (pix_loja / dinheiro / débito na hora)
 
-**Data:** 18/08/2026 · **Status:** PROPOSTA (aguarda aprovação do Edmilson)
+**Data:** 18/08/2026 · **Status:** NÍVEL 1 + CONFIRMAÇÃO DA LOJA IMPLEMENTADOS (ver git log 18/08); anexo de comprovante (nível 2 completo) segue como evolução
 **Contexto:** pedidos pagos por chave Pix da loja ou na entrega/retirada/mesa não têm
 confirmação automática (só o Mercado Pago confirma sozinho). Hoje o ciclo fecha no olho:
 o cliente paga e a loja confia. O gap: cliente paga, loja não vê, pedido anda arrastado.
@@ -10,9 +10,15 @@ O iFood não tem Pix manual — tudo online. Nosso Pix da loja é feature de peq
 comércio; o que falta é o **fechamento do ciclo**: cliente PROVA, loja VALIDA, sistema
 REFLETE (`payment_status = PAID`).
 
-## Nível 1 — WhatsApp contextual (barato, sem migration, já)
+## Nível 1 — WhatsApp contextual (barato, sem migration, já) ✅ IMPLEMENTADO
 No detalhe do pedido (OrderTracking), para métodos presenciais **não pagos**:
-botão **"Enviar comprovante"** → deep link `wa.me/<loja>?text=` com mensagem pronta:
+bloco "Aguardando confirmação da loja" + botão **"Enviar comprovante pelo WhatsApp"**
+com mensagem pronta ( nº do pedido + valor ) — o cliente anexa o print do banco.
+Junto veio a **confirmação da loja**: `PATCH /orders/:id/confirm-payment` (lojista/
+operador/admin) marca `payment_status=PAID` + timeline `payment_confirmed_manual` +
+push "Pagamento confirmado" pro cliente; botão no modal Pagamento do pedido
+(AdminOrders) para pix_loja/dinheiro/presencial pendentes. Antes o pix_loja pendurava
+em PENDING para sempre — agora o ciclo fecha dos dois lados. Original da proposta:
 
 ```
 Comprovante do pedido #A1B2 (R$ 45,90) — Gustavão Espetos.

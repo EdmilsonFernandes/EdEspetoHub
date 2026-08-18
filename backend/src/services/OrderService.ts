@@ -1905,6 +1905,62 @@ private async seedPostalShipmentFromCheckoutTx(
   }
 
     /**
+   * Confirms manual payment (pix_loja / dinheiro / presencial) received by the store.
+   *
+   * Fecha o ciclo do pagamento manual: cliente paga por fora (chave Pix da loja,
+   * dinheiro/cartão na hora), envia comprovante via WhatsApp e a loja confirma
+   * aqui — o pedido passa a exibir "pagamento confirmado" em vez de pendurar
+   * no PENDING para sempre (18/08).
+   *
+   * @author Edmilson Lopes
+   */
+  async confirmManualPayment(orderId: string, authStoreId?: string) {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) throw new AppError('ORDER-001', 404);
+    this.ensureStoreAccess(order.store, authStoreId);
+    if (String(order.paymentStatus || '').toUpperCase() === 'PAID') return order;
+
+    const now = new Date();
+    await AppDataSource.getRepository(Order).update({ id: order.id }, { paymentStatus: 'PAID' });
+    try {
+      await AppDataSource.query(
+        "UPDATE orders SET status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $1::jsonb WHERE id = $2",
+        [buildOrderTimelineJson('payment_confirmed_manual', now), order.id]
+      );
+    } catch { /* timeline é best-effort */ }
+
+    // Push específico de pagamento (não de status do pedido): no Android entra
+    // na ongoing de acompanhamento; no web/sino aparece "Pagamento confirmado".
+    const storeName = String(order.store?.name || '').trim();
+    const userId = String(order.customerUserId || '').trim();
+    const guestId = String((order as any).guestPushId || '').trim();
+    if (userId || guestId) {
+      const title = 'Pagamento confirmado';
+      const body = storeName
+        ? `${storeName}: pagamento recebido. Obrigado!`
+        : 'Pagamento recebido. Obrigado!';
+      const payload = {
+        title,
+        body,
+        dataOnly: true,
+        data: {
+          url: `https://janocaminho.com.br/pedido/${order.id}`,
+          orderId: String(order.id),
+          status: String(order.status || ''),
+          notificationType: 'customer_order_update',
+          title,
+          body,
+          ...(storeName ? { storeName } : {}),
+        },
+      };
+      if (userId) void this.pushService.notifyCustomerOrderUpdate(userId, payload);
+      if (guestId) void this.pushService.notifyGuestOrderUpdate(guestId, payload);
+    }
+
+    return this.orderRepository.findById(orderId);
+  }
+
+    /**
    * Switches order fulfillment mode and aligns related shipping metadata.
    *
    * @author Edmilson Lopes

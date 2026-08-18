@@ -380,6 +380,30 @@ export function AdminOrders() {
     }
   };
 
+  // Pagamentos manuais (pix_loja/dinheiro/presencial) fecham o ciclo aqui: a loja
+  // recebe o comprovante (WhatsApp) e confirma — o cliente vê "confirmado" (18/08).
+  const MANUAL_PAYMENT_METHODS = ['pix_loja', 'dinheiro', 'debito_presencial', 'credito_presencial'];
+  const isManualPaymentPending = (order: any) =>
+    MANUAL_PAYMENT_METHODS.includes(String(order?.paymentMethod || '').toLowerCase()) &&
+    String(order?.paymentStatus || '').toUpperCase() !== 'PAID';
+  const [confirmingPaymentId, setConfirmingPaymentId] = useState<string | null>(null);
+  const handleConfirmManualPayment = async (order: any) => {
+    if (!order?.id) return;
+    if (!window.confirm('Confirmar que o pagamento deste pedido foi recebido?')) return;
+    try {
+      setConfirmingPaymentId(order.id);
+      await orderService.confirmManualPayment(order.id);
+      setSelectedOrder((prev: any) =>
+        prev && String(prev.id) === String(order.id) ? { ...prev, paymentStatus: 'PAID' } : prev
+      );
+      await refreshOrders();
+    } catch (error: any) {
+      alert(error?.message || 'Não foi possível confirmar o pagamento.');
+    } finally {
+      setConfirmingPaymentId(null);
+    }
+  };
+
   const handlePostalTrackAndPost = (order: any) => {
     if (!order?.id) return;
     setPostalModalOrder(order);
@@ -1150,6 +1174,17 @@ export function AdminOrders() {
             </div>
 
             <div className="mt-3 flex justify-end gap-2">
+              {isManualPaymentPending(selectedOrder) && (
+                <button
+                  type="button"
+                  onClick={() => handleConfirmManualPayment(selectedOrder)}
+                  disabled={confirmingPaymentId === selectedOrder.id}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  <CheckSquare size={14} weight="fill" />
+                  {confirmingPaymentId === selectedOrder.id ? 'Confirmando...' : 'Confirmar pagamento recebido'}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={closeOrderPayment}

@@ -113,6 +113,7 @@ export function createProxyRoutes(): Router {
     r.patch('/orders/:orderId', authRequired, forward);
     r.patch('/orders/:orderId/reopen', authRequired, forward);
     r.patch('/orders/:orderId/mark-as-printed', authRequired, forward);
+    r.patch('/orders/:orderId/confirm-payment', authRequired, forward);
     r.get('/orders/:orderId/public', forward);
     r.get('/v2/orders/:orderId/tracking', forward);
     // Products admin
