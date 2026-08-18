@@ -1185,6 +1185,7 @@ async setDefaultAddress(userId: string, addressId: string) {
     const paymentLinkMap: Record<string, string> = {};
     const paymentExpiresAtMap: Record<string, string> = {};
     const paymentQrMap: Record<string, { base64: string | null; text: string | null }> = {};
+    const paymentProviderMap: Record<string, string> = {};
     if (awaitingIds.length > 0) {
       const paymentRows: {
         order_id: string;
@@ -1192,8 +1193,9 @@ async setDefaultAddress(userId: string, addressId: string) {
         expires_at: Date | null;
         qr_code_base64: string | null;
         qr_code_text: string | null;
+        provider: string | null;
       }[] = await AppDataSource.query(
-        `SELECT order_id, payment_link, expires_at, qr_code_base64, qr_code_text FROM order_payments
+        `SELECT order_id, payment_link, expires_at, qr_code_base64, qr_code_text, provider FROM order_payments
          WHERE order_id = ANY($1) AND payment_status = 'PENDING'
            AND (payment_link IS NOT NULL OR qr_code_base64 IS NOT NULL OR qr_code_text IS NOT NULL)`,
         [awaitingIds]
@@ -1207,6 +1209,9 @@ async setDefaultAddress(userId: string, addressId: string) {
         }
         if (row.qr_code_base64 || row.qr_code_text) {
           paymentQrMap[row.order_id] = { base64: row.qr_code_base64, text: row.qr_code_text };
+        }
+        if (row.provider) {
+          paymentProviderMap[row.order_id] = row.provider;
         }
       }
     }
@@ -1263,6 +1268,7 @@ async setDefaultAddress(userId: string, addressId: string) {
       paymentExpiresAt: paymentExpiresAtMap[order.id] || null,
       paymentQrCodeBase64: paymentQrMap[order.id]?.base64 || null,
       paymentQrCodeText: paymentQrMap[order.id]?.text || null,
+      paymentProvider: paymentProviderMap[order.id] || null,
       total: Number(order.total || 0),
       refundStatus: refundMap[order.id]?.status || null,
       refundAmount: refundMap[order.id]?.amount || null,
@@ -1357,9 +1363,7 @@ async setDefaultAddress(userId: string, addressId: string) {
       if (!(etaMinutes > 0)) {
         throw new AppError('ORDER-004', 400, { message: 'Ainda não foi possível validar o prazo do pedido.' });
       }
-    }
 
-    if (!isAwaitingPayment) {
       const createdAtMs = new Date(order.createdAt).getTime();
       const graceMs = 15 * 60 * 1000;
       const unlockAt = createdAtMs + etaMinutes * 60 * 1000 + graceMs;

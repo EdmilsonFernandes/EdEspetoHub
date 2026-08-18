@@ -12,7 +12,9 @@ import type { Request, Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { couponService, normalizeCouponCode } from '../services/CouponService';
 import { respondWithError } from '../errors/respondWithError';
-import { log } from '../utils/logger';
+import { logger } from '../utils/logger';
+
+const log = logger.child({ scope: 'CouponController' });
 
 const resolveStoreIdBySlug = async (slug: string): Promise<string | null> => {
   const rows: { id: string }[] = await AppDataSource.query(

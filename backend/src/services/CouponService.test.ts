@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { computeCouponDiscount, couponLabel, normalizeCouponCode } from './CouponService';
 import type { Coupon } from '../entities/Coupon';
 
