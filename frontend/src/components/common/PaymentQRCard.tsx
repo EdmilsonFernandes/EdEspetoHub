@@ -131,19 +131,19 @@ export const PaymentQRCard = memo(function PaymentQRCard({
 
       <div className="px-4 py-4">
         {qrCodeBase64 ? (
-          <div className="flex justify-center">
+          <div className="flex w-full justify-center">
             <img
               src={qrCodeBase64}
               alt="QR Code PIX"
-              className="h-52 w-52 rounded-2xl border border-slate-100 object-contain"
+              className="aspect-square w-full max-w-[208px] rounded-2xl border border-slate-100 object-contain"
             />
           </div>
         ) : qrCodeText ? (
-          <div className="flex justify-center">
+          <div className="flex w-full justify-center">
             <img
               src={`https://api.qrserver.com/v1/create-qr-code/?size=208x208&data=${encodeURIComponent(String(qrCodeText))}`}
               alt="QR Code PIX"
-              className="h-52 w-52 rounded-2xl border border-slate-100 object-contain"
+              className="aspect-square w-full max-w-[208px] rounded-2xl border border-slate-100 object-contain"
             />
           </div>
         ) : null}

@@ -1225,6 +1225,47 @@ export function OrderTracking() {
     reveal?.();
     window.setTimeout(() => scrollToBlock(blockId), 40);
   };
+
+  // "Pagar agora" (Meus Pedidos) chega com ?focus=payment: expande os detalhes,
+  // rola até o QR do Mercado Pago e destaca a área por uns segundos (spec 18/08).
+  const focusPayment = useMemo(
+    () => new URLSearchParams(location.search).get('focus') === 'payment',
+    [location.search]
+  );
+  const [paymentSectionHighlighted, setPaymentSectionHighlighted] = useState(false);
+  useEffect(() => {
+    if (!focusPayment || !order?.id || !showOnlinePendingPayment) return;
+    setServiceDetailsExpanded(true);
+    const scrollTimer = window.setTimeout(() => {
+      scrollToBlock('order-online-payment-section');
+      setPaymentSectionHighlighted(true);
+      window.setTimeout(() => setPaymentSectionHighlighted(false), 2400);
+    }, 400);
+    return () => window.clearTimeout(scrollTimer);
+  }, [focusPayment, order?.id, showOnlinePendingPayment, location.search]);
+
+  // Pagamento online pendente sobe na hierarquia (status → PAGAMENTO → resumo):
+  // a prioridade de quem deve é pagar, não procurar o QR no fim da página.
+  const onlinePaymentSection = showOnlinePendingPayment ? (
+    <div
+      id="order-online-payment-section"
+      className={`px-4 py-2 transition-shadow duration-500 ${paymentSectionHighlighted ? 'rounded-3xl ring-2 ring-emerald-400 ring-offset-2' : ''}`}
+    >
+      <PaymentQRCard
+        qrCodeBase64={onlinePaymentQrBase64 || null}
+        qrCodeText={onlinePaymentQrText || null}
+        paymentLink={paymentActionUrl || null}
+        status={paymentStatusNormalized || 'PENDING'}
+        expiresAt={onlinePaymentExpiresAt}
+        amountLabel={formatCurrency(order?.total || 0)}
+        title="Conclua o pagamento"
+        subtitle="Mesmo QR gerado no checkout — confirma sozinho após o pagamento."
+        onVerifyNow={() => { void loadOrder(true); }}
+        onPaid={() => { void loadOrder(true); }}
+        verifyLabel="Já paguei — verificar"
+      />
+    </div>
+  ) : null;
   const handleOpenPaymentAction = () => {
     if (paymentActionUrl) {
       void openActionTarget(
@@ -2510,6 +2551,8 @@ export function OrderTracking() {
                 </section>
               )}
 
+              {onlinePaymentSection}
+
               <div className="grid sm:grid-cols-2 gap-4">
                 <div
                   id="order-items-section"
@@ -2907,27 +2950,6 @@ export function OrderTracking() {
                           ) : null}
                         </div>
                       )
-                    ) : null}
-
-                    {/* Pagamento ONLINE pendente (Pix/cartão MP): reabre o MESMO QR
-                        do checkout com o tempo restante. Aqui NUNCA aparece a chave
-                        da loja — pagar na chave manual não confirmaria nunca. */}
-                    {showOnlinePendingPayment ? (
-                      <div id="order-online-payment-section">
-                        <PaymentQRCard
-                          qrCodeBase64={onlinePaymentQrBase64 || null}
-                          qrCodeText={onlinePaymentQrText || null}
-                          paymentLink={paymentActionUrl || null}
-                          status={paymentStatusNormalized || 'PENDING'}
-                          expiresAt={onlinePaymentExpiresAt}
-                          amountLabel={formatCurrency(order?.total || 0)}
-                          title="Conclua o pagamento"
-                          subtitle="Mesmo QR gerado no checkout — confirma sozinho após o pagamento."
-                          onVerifyNow={() => { void loadOrder(true); }}
-                          onPaid={() => { void loadOrder(true); }}
-                          verifyLabel="Já paguei — verificar"
-                        />
-                      </div>
                     ) : null}
 
                     {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat && (

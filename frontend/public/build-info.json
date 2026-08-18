@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "af6071a3",
-  "versionLabel": "v0.1.9.af6071a3",
-  "versionInternal": "0.1.9+20260818.164944.af6071a3",
-  "buildId": "0.1.9+20260818.164944.af6071a3-20260818.164944-af6071a3",
-  "builtAt": "2026-08-18T16:49:44.881Z",
-  "commitHash": "af6071a32de1bfd03c59c841df42200eb1315d09",
-  "shortHash": "af6071a3",
+  "versionDisplaySuffix": "73e15334",
+  "versionLabel": "v0.1.9.73e15334",
+  "versionInternal": "0.1.9+20260818.194552.73e15334",
+  "buildId": "0.1.9+20260818.194552.73e15334-20260818.194552-73e15334",
+  "builtAt": "2026-08-18T19:45:52.574Z",
+  "commitHash": "73e1533476e2d3716f235a8d28e2ad4b138c7b15",
+  "shortHash": "73e15334",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "73e1533476e2d3716f235a8d28e2ad4b138c7b15",
+      "shortHash": "73e15334",
+      "dateIso": "2026-08-18T14:15:49-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(pix-pendente): refinamentos do spec — Continuar pagamento, paymentProvider, Refazer pedido",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/73e1533476e2d3716f235a8d28e2ad4b138c7b15"
+    },
+    {
+      "hash": "4f587b64f1165da987243fe34bcd19766790d609",
+      "shortHash": "4f587b64",
+      "dateIso": "2026-08-18T14:15:33-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(backend): destrava build Docker — 3 erros de tsc desde 16/08",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4f587b64f1165da987243fe34bcd19766790d609"
+    },
     {
       "hash": "af6071a32de1bfd03c59c841df42200eb1315d09",
       "shortHash": "af6071a3",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(orders): origem do pedido — migration + badge Balcao/App/Site na fila",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/71bf3c39d27a4952ced3af7d6fc522356a0d83d2"
-    },
-    {
-      "hash": "92e8270cfb21226457a42a05b4ab9e80fee0fe50",
-      "shortHash": "92e8270c",
-      "dateIso": "2026-08-16T17:17:45-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(ux): onda 1 do benchmark iFood — quick wins de confiança",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/92e8270cfb21226457a42a05b4ab9e80fee0fe50"
-    },
-    {
-      "hash": "d183286f63604c47a20bc7eb6d08d404432e32a5",
-      "shortHash": "d183286f",
-      "dateIso": "2026-08-16T16:57:53-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): batch 3 admin navigation — URL por seção, Ajustes/Loja, 3 telas de dispositivo em 1, de-header",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d183286f63604c47a20bc7eb6d08d404432e32a5"
     }
   ]
 }

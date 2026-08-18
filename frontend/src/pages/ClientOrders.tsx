@@ -38,7 +38,6 @@ import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/o
 import { getPostalExpectedDeliveryDeadlineMs, isPostalShipmentDelayed, isPostalShipmentDelivered } from '../utils/postalTracking';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
-import { PaymentQRCard } from '../components/common/PaymentQRCard';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
 import { Image } from '../components/common/Image';
 import { textareaAssistProps } from '../utils/inputAssist';
@@ -652,8 +651,18 @@ const getOrderStatusBadgeClass = (status: string, isActive?: boolean) => {
   return 'border-slate-100 bg-slate-50 text-slate-600 ring-slate-100';
 };
 
-/** Countdown honesto do pagamento pendente — usa expiresAt real do provider (benchmark §13). */
-function PaymentCountdownPill({ expiresAt, className = '' }: { expiresAt?: string | null; className?: string }) {
+/** Countdown honesto do pagamento pendente — usa expiresAt real do provider (benchmark §13).
+ *  `prominent`: frase completa "Conclua o pagamento em até: XX:XX" (spec 18/08,
+ *  hierarquia iFood) — mesma fonte de verdade, mesmo timer, só apresentação. */
+function PaymentCountdownPill({
+  expiresAt,
+  className = '',
+  prominent = false,
+}: {
+  expiresAt?: string | null;
+  className?: string;
+  prominent?: boolean;
+}) {
   const validExpiresAt = expiresAt ? new Date(expiresAt).getTime() : 0;
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
@@ -670,6 +679,15 @@ function PaymentCountdownPill({ expiresAt, className = '' }: { expiresAt?: strin
   const label = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   const urgent = totalSeconds <= 120;
   const warning = !urgent && totalSeconds <= 300;
+  const toneClass = urgent ? 'text-rose-600' : warning ? 'text-amber-600' : 'text-emerald-700';
+  if (prominent) {
+    return (
+      <span className={`flex flex-wrap items-baseline gap-x-1.5 ${className}`}>
+        <span className="text-[13px] font-bold text-slate-600">Conclua o pagamento em até:</span>
+        <span className={`font-mono text-lg font-black tabular-nums leading-none ${toneClass}`}>{label}</span>
+      </span>
+    );
+  }
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[11px] font-bold tabular-nums ${
@@ -692,7 +710,6 @@ function OrderCard({
   onOpenHelp,
   onOpenOrder,
   onOpenStore,
-  onRefreshOrder,
 }: {
   order: any;
   isActive: boolean;
@@ -701,9 +718,8 @@ function OrderCard({
   onConfirmReceipt: (order: any) => void;
   confirmReceiptLoading?: boolean;
   onOpenHelp: (order: any) => void;
-  onOpenOrder: (orderId: string) => void;
+  onOpenOrder: (orderId: string, focus?: 'payment') => void;
   onOpenStore: (slug?: string) => void;
-  onRefreshOrder?: (orderId: string) => void;
 }) {
   const { showToast } = useToast();
   const statusMeta = getStatusMeta(order.status, order.type);
@@ -797,8 +813,8 @@ function OrderCard({
     (order as any).payment?.qrCodeText ||
     (order as any).onlinePayment?.qrCodeText ||
     null;
-  const [showPaymentQrSheet, setShowPaymentQrSheet] = useState(false);
   const hasPendingPaymentMedia = Boolean(paymentPayUrl || paymentQrBase64 || paymentQrText);
+  const isAwaitingPaymentWithMedia = isAwaitingPayment && hasPendingPaymentMedia;
   const handleRepeatOrder = () => {
     queueOrderForReorder(order, onOpenStore);
     showToast('Reabrindo seu pedido anterior na loja...', 'success');
@@ -930,31 +946,54 @@ function OrderCard({
         </div>
       </div>
 
-      {/* Botão pagar MP — Pix reabre o MESMO QR do checkout; cartão abre o link */}
-      {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && hasPendingPaymentMedia && (
-        <div className="px-4 pb-3">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-2xs font-black uppercase tracking-[0.14em] text-slate-400">
-              Pix Mercado Pago · {formatCurrency(order.total || 0)}
-            </span>
-            <PaymentCountdownPill expiresAt={paymentExpiresAt} />
+      {/* Pagamento PIX pendente — hierarquia iFood (spec 18/08): uma frase, um
+          contador, duas ações. "Pagar agora" leva ao Detalhe já focado no
+          pagamento (mesma cobrança MP, sem recriar nada). */}
+      {isAwaitingPaymentWithMedia && (
+        <div className="border-t border-sky-100/70 bg-[linear-gradient(180deg,#eef6fa_0%,#ffffff_82%)] px-4 pb-4 pt-3.5">
+          <div className="flex items-center gap-1.5">
+            <img src={getPaymentProviderMeta('mercado_pago').icon} alt="" className="h-3.5 w-3.5 object-contain" />
+            <span className="text-2xs font-black uppercase tracking-[0.16em] text-[#336886]">Pagamento via Pix</span>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              if (paymentQrBase64 || paymentQrText) {
-                setShowPaymentQrSheet(true);
-                return;
-              }
-              const url = paymentPayUrl;
-              if (!url) return;
-              if (Capacitor.isNativePlatform()) { Browser.open({ url }); } else { window.open(url, '_blank'); }
-            }}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#4e96ae] py-3 text-sm font-black text-white shadow-[0_6px_18px_-8px_rgba(0,158,227,0.55)] active:scale-[0.98] transition-transform"
-          >
-            <img src={getPaymentProviderMeta('mercado_pago').icon} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
-            Continuar pagamento
-          </button>
+          <div className="mt-1.5">
+            <PaymentCountdownPill expiresAt={paymentExpiresAt} prominent />
+          </div>
+          {(() => {
+            // Barra derivada do MESMO expirationAt (nada de timer novo): fração
+            // restante sobre a janela total do pedido (criação → expiração).
+            const expiryMs = paymentExpiresAt ? new Date(paymentExpiresAt).getTime() : 0;
+            const totalMs = expiryMs && order.createdAt ? expiryMs - new Date(order.createdAt).getTime() : 0;
+            if (!totalMs || totalMs <= 0 || totalMs > 2 * 60 * 60 * 1000) return null;
+            const remainingMs = Math.max(0, expiryMs - Date.now());
+            const pct = Math.max(4, Math.min(100, (remainingMs / totalMs) * 100));
+            const totalSeconds = Math.floor(remainingMs / 1000);
+            const barTone = totalSeconds <= 120 ? 'bg-rose-400' : totalSeconds <= 300 ? 'bg-amber-400' : 'bg-emerald-500';
+            return (
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200/80">
+                <div className={`h-full rounded-full transition-all duration-1000 ${barTone}`} style={{ width: `${pct}%` }} />
+              </div>
+            );
+          })()}
+          <div className="mt-3.5 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onOpenHelp(order)}
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-500 transition-colors active:scale-[0.98] hover:text-slate-700"
+            >
+              Ajuda
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenOrder(order.id, 'payment')}
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-2xl bg-[#4e96ae] text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.65)] transition-transform active:scale-[0.98]"
+            >
+              <img src={getPaymentProviderMeta('mercado_pago').icon} alt="" className="h-4.5 w-4.5 object-contain brightness-0 invert" />
+              Pagar agora
+            </button>
+          </div>
+          <p className="mt-2.5 truncate text-[11px] font-semibold text-slate-400">
+            {itemsCount === 1 ? '1 item' : `${itemsCount} itens`} · {fulfillmentMeta.label} · {formatCurrency(order.total || 0)}
+          </p>
         </div>
       )}
 
@@ -970,15 +1009,8 @@ function OrderCard({
         className="block w-full text-left"
       >
         <div className="mx-4 mb-3">
-          {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && (
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-3 py-2">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-600">
-                <SpinnerGap size={11} weight="duotone" className="animate-spin" />
-                Confirme o pagamento para iniciar o preparo
-              </span>
-              <PaymentCountdownPill expiresAt={paymentExpiresAt} />
-            </div>
-          )}
+          {isAwaitingPaymentWithMedia ? null : (
+            <>
           {isActive && etaWindowLabel && (
             <div className="border-b border-slate-100 px-3 py-2">
               <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${isDelayed ? 'text-amber-600' : 'text-emerald-600'}`}>
@@ -1014,6 +1046,8 @@ function OrderCard({
               ) : null}
             </div>
           ) : null}
+            </>
+          )}
           {isCancelled && (!cancellationReason || hasRefundInfo) && (
             <div className="px-3 pb-3 flex flex-wrap items-center gap-2">
               {!cancellationReason ? (
@@ -1065,7 +1099,7 @@ function OrderCard({
               </button>
             )}
           </>
-        ) : isActive ? (
+        ) : isActive && !isAwaitingPaymentWithMedia ? (
           <div className="flex w-full items-center gap-2">
             <button
               type="button"
@@ -1154,47 +1188,6 @@ function OrderCard({
         </p>
       ) : null}
     </article>
-
-    {/* Reabre o MESMO QR Pix gerado no checkout, com o tempo que começou lá
-        (comportamento iFood). Pagando por aqui o MP confirma sozinho. */}
-    {showPaymentQrSheet && (
-      <div
-        className="fixed inset-0 z-[200] flex items-end justify-center sm:items-center"
-        role="dialog"
-        aria-label="Pagamento Pix do pedido"
-        onClick={() => setShowPaymentQrSheet(false)}
-      >
-        <div className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm" />
-        <div
-          className="relative z-10 max-h-[calc(100dvh-3rem)] w-full max-w-sm overflow-y-auto p-4"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex flex-col gap-3 rounded-3xl bg-white p-3 shadow-2xl">
-            <PaymentQRCard
-              qrCodeBase64={paymentQrBase64}
-              qrCodeText={paymentQrText}
-              paymentLink={paymentPayUrl}
-              status={String((order as any).paymentStatus || (details?.payment?.status ?? 'PENDING'))}
-              expiresAt={paymentExpiresAt}
-              amountLabel={formatCurrency(order.total || 0)}
-              title="Pix — mesmo QR do checkout"
-              subtitle={`${storeName} • ${orderDisplayId}`}
-              onVerifyNow={onRefreshOrder ? () => onRefreshOrder(order.id) : undefined}
-              autoVerifyMs={8000}
-              onPaid={() => setShowPaymentQrSheet(false)}
-              verifyLabel="Já paguei — verificar"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPaymentQrSheet(false)}
-              className="jnc-hub-touch w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-black text-slate-500 transition hover:text-slate-700 active:scale-[0.99]"
-            >
-              Fechar
-            </button>
-          </div>
-        </div>
-      </div>
-    )}
     </>
   );
 }
@@ -1502,9 +1495,10 @@ export function ClientOrders() {
   const offsetRef = useRef(0);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const PAGE_SIZE = 10;
-  const openOrderTracking = useCallback((orderId: string) => {
+  const openOrderTracking = useCallback((orderId: string, focus?: 'payment') => {
     primeOrderTrackingNavigation(orderId);
-    navigate(buildOrderTrackingPath(orderId));
+    const base = buildOrderTrackingPath(orderId);
+    navigate(focus === 'payment' ? `${base}${base.includes('?') ? '&' : '?'}focus=payment` : base);
   }, [navigate]);
 
   const refreshActiveOrderDetails = useCallback(async (targetOrders: any[]) => {
@@ -1577,12 +1571,6 @@ export function ClientOrders() {
       inFlightRef.current = false;
     }
   }, [refreshActiveOrderDetails, showToast]);
-
-  // "Já paguei" do sheet do QR na lista: rebusca silenciosa — se o MP confirmou,
-  // o pedido sai de awaiting_payment e o PaymentQRCard mostra "confirmado".
-  const handleRefreshOrderFromList = useCallback(() => {
-    void loadOrders({ silent: true });
-  }, [loadOrders]);
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore) return;
@@ -1894,7 +1882,7 @@ export function ClientOrders() {
         />
 
         <div className="px-4 py-4">
-          {statusFilter === 'all' && lastOrderMerged ? (
+          {statusFilter === 'all' && lastOrderMerged && !lastOrderIsActive ? (
             <section className="mb-4 overflow-hidden rounded-2xl bg-white p-3 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-3">
                 <button
@@ -2069,7 +2057,6 @@ export function ClientOrders() {
                     onOpenHelp={setHelpOrder}
                     onOpenOrder={openOrderTracking}
                     onOpenStore={openStore}
-                    onRefreshOrder={handleRefreshOrderFromList}
                   />
                 ))}
               </div>
@@ -2134,7 +2121,6 @@ export function ClientOrders() {
                           onOpenHelp={setHelpOrder}
                           onOpenOrder={openOrderTracking}
                           onOpenStore={openStore}
-                          onRefreshOrder={handleRefreshOrderFromList}
                         />
                       ))}
                     </div>

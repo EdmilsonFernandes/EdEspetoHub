@@ -162,11 +162,11 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
             {/* QR image */}
             <div className="flex flex-col items-center gap-3 px-6 pt-6 pb-4">
               {qrSrc ? (
-                <div className="relative">
+                <div className="relative w-full max-w-[224px]">
                   <img
                     src={qrSrc}
                     alt="QR Code Pix"
-                    className="h-56 w-56 rounded-2xl border border-slate-100 object-cover shadow-sm"
+                    className="aspect-square w-full rounded-2xl border border-slate-100 object-contain shadow-sm"
                   />
                   <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 rounded-b-2xl bg-white/90 py-1.5 backdrop-blur-sm">
                     <Spinner size={11} className="animate-spin text-slate-400" />
@@ -174,7 +174,7 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
                   </div>
                 </div>
               ) : (
-                <div className="flex h-56 w-56 items-center justify-center rounded-2xl bg-slate-100">
+                <div className="flex aspect-square w-full max-w-[224px] items-center justify-center rounded-2xl bg-slate-100">
                   <QrCode size={48} weight="thin" className="text-slate-400" />
                 </div>
               )}
