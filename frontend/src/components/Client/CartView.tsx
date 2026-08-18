@@ -348,6 +348,7 @@ export const CartView = ({
   const [showEmptyCartSheet, setShowEmptyCartSheet] = useState(false);
   const [showFarPickupSheet, setShowFarPickupSheet] = useState(false);
   const [showPaymentSheet, setShowPaymentSheet] = useState(false);
+
   // Cupom (benchmark §12): preview client-side; desconto real é sempre do backend
   const [couponCodeInput, setCouponCodeInput] = useState("");
   const [couponPreview, setCouponPreview] = useState(null);
@@ -355,7 +356,6 @@ export const CartView = ({
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponCount, setCouponCount] = useState(null);
   const [taxIdInput, setTaxIdInput] = useState("");
-  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
   const [showCustomerNoteSheet, setShowCustomerNoteSheet] = useState(false);
   const [customerNoteDraft, setCustomerNoteDraft] = useState("");
   const [confirmedFarPickupContext, setConfirmedFarPickupContext] = useState("");
@@ -612,14 +612,8 @@ export const CartView = ({
   const activePaymentLabel =
     selectedPaymentMethod?.id === activePaymentId ? selectedPaymentMethod.label : activePaymentMeta.label;
   const activePaymentTone = isOnlinePaymentMethod ? "online" : "local";
-  const openPaymentSheet = () => {
-    setPendingPaymentId(null);
-    setShowPaymentSheet(true);
-  };
-  const closePaymentSheet = () => {
-    setPendingPaymentId(null);
-    setShowPaymentSheet(false);
-  };
+  const openPaymentSheet = () => setShowPaymentSheet(true);
+  const closePaymentSheet = () => setShowPaymentSheet(false);
 
   useEffect(() => {
     if (!isPostalDelivery || !resolvedPaymentMethods.length) return;
@@ -1550,7 +1544,7 @@ export const CartView = ({
   };
 
   const renderPaymentMethodCard = (method: any, tone: "online" | "local") => {
-    const selected = (pendingPaymentId || paymentMethod) === method.id;
+    const selected = paymentMethod === method.id;
     const accent = tone === "online" ? "#336886" : "#207A52";
     const selectedClasses =
       tone === "online"
@@ -1569,7 +1563,11 @@ export const CartView = ({
         key={method.id}
         type="button"
         onClick={() => {
-          setPendingPaymentId(method.id);
+          // 1 toque aplica e fecha (padrão iFood) — o CTA "Confirmar" do batch 6
+          // ficava além do corte do sheet (overflow-hidden sem flex/min-h-0) e era
+          // inalcançável: a seleção pendente era descartada ao fechar.
+          onChangePayment?.(method.id);
+          closePaymentSheet();
         }}
         className={`jnc-hub-touch group relative overflow-hidden rounded-[1.35rem] border p-3.5 text-left transition-all duration-300 ease-out active:scale-[0.985] ${
           selected
@@ -3687,8 +3685,8 @@ export const CartView = ({
             className="absolute inset-0 bg-slate-950/42 backdrop-blur-md"
             aria-label="Fechar formas de pagamento"
           />
-          <div className="absolute bottom-0 left-0 right-0 mx-auto max-h-[calc(100dvh-4rem)] max-w-lg overflow-hidden rounded-t-[2rem] border border-white/80 bg-white/92 shadow-[0_-28px_60px_-30px_rgba(15,23,42,0.55)] backdrop-blur-2xl animate-in slide-in-from-bottom-4 fade-in duration-200">
-            <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/92 px-4 pb-3 pt-4 backdrop-blur-xl">
+          <div className="absolute bottom-0 left-0 right-0 mx-auto flex max-h-[calc(100dvh-4rem)] max-w-lg flex-col overflow-hidden rounded-t-[2rem] border border-white/80 bg-white/92 shadow-[0_-28px_60px_-30px_rgba(15,23,42,0.55)] backdrop-blur-2xl animate-in slide-in-from-bottom-4 fade-in duration-200">
+            <div className="shrink-0 border-b border-slate-100 bg-white/92 px-4 pb-3 pt-4 backdrop-blur-xl">
               <div className="mx-auto mb-3 h-1.5 w-11 rounded-full bg-slate-200" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -3721,7 +3719,7 @@ export const CartView = ({
               </div>
             </div>
 
-            <div className="space-y-4 overflow-y-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
               {paymentGroups.online.length === 0 && paymentGroups.local.length === 0 && isPostalDelivery && (
                 <section className="rounded-[1.55rem] border border-amber-200/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(255,248,235,0.92))] p-4 shadow-[0_22px_50px_-44px_rgba(245,158,11,0.34)]">
                   <div className="flex items-start gap-3">
@@ -3790,20 +3788,6 @@ export const CartView = ({
                 </section>
               )}
 
-              {pendingPaymentId && pendingPaymentId !== paymentMethod ? (
-                <div className="sticky bottom-0 -mx-4 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-xl">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onChangePayment(pendingPaymentId);
-                      closePaymentSheet();
-                    }}
-                    className="jnc-hub-touch w-full rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3.5 text-sm font-black uppercase tracking-[0.1em] text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)] transition hover:brightness-105 active:scale-[0.99]"
-                  >
-                    Confirmar forma de pagamento
-                  </button>
-                </div>
-              ) : null}
             </div>
           </div>
         </div>
