@@ -34,11 +34,17 @@ import java.util.Map;
 public final class OrderTrackingNotification {
     private static final String TAG = "JNC_ORDER_TRACK";
 
-    public static final String CHANNEL_ID = "customer_order_tracking_v1";
+    // v2 (18/08): IMPORTANCE_HIGH — o v1 era LOW e o cliente via a tela apagada,
+    // sem LED/vibração/heads-up (nada acordava). Importância de canal é imutável
+    // após a criação, então migração = novo id + delete do antigo.
+    public static final String CHANNEL_ID = "customer_order_tracking_v2";
+    private static final String LEGACY_CHANNEL_ID = "customer_order_tracking_v1";
     public static final String NOTIFICATION_TYPE = "customer_order_update";
 
     // Faixa de IDs separada do FCM (3000) e do print (2001) p/ evitar colisao.
     private static final int NOTIFICATION_ID_BASE = 5000;
+    // Offset do alerta heads-up de transição-chave (mesmo pedido, notificações distintas).
+    private static final int ALERT_ID_OFFSET = 100_000;
 
     private OrderTrackingNotification() {}
 
@@ -58,6 +64,11 @@ public final class OrderTrackingNotification {
             return;
         }
         showOngoing(context, orderId, status, orderType);
+        // iFood-like: as transições que o cliente REALMENTE precisa saber na hora
+        // ganham um heads-up curto além da barra silenciosa contínua.
+        if (isKeyTransition(status)) {
+            showAlert(context, orderId, orderType, status);
+        }
     }
 
     // ------------------------------------------------------------------ ongoing
@@ -73,7 +84,7 @@ public final class OrderTrackingNotification {
 
         PendingIntent contentIntent = buildContentIntent(context, orderId, notifId);
 
-        Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(headline)
             .setContentText(headline)
@@ -82,15 +93,42 @@ public final class OrderTrackingNotification {
             .setOngoing(true)          // persistente: nao desliza pra apagar
             .setOnlyAlertOnce(true)    // nao "bipa" a cada atualizacao de etapa
             .setContentIntent(contentIntent)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .build();
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            // Pre-O: sem canal, prioridade/vibração/LED vem do builder.
+            builder.setVibrate(new long[]{0, 120});
+            builder.setLights(0xFF2F9DF7, 1000, 1000);
+        }
 
-        notify(context, notifId, notification);
+        notify(context, notifId, builder.build());
     }
 
     // -------------------------------------------------------------------- final
+
+    /** Heads-up curto para transições-chave (pronto / saiu para entrega). */
+    private static void showAlert(Context context, String orderId, String orderType, String status) {
+        int notifId = notificationIdFor(orderId) + ALERT_ID_OFFSET;
+        String headline = keyTransitionHeadline(orderType, status);
+        PendingIntent contentIntent = buildContentIntent(context, orderId, notifId);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(headline)
+            .setContentText("Toque para acompanhar seu pedido")
+            .setAutoCancel(true)
+            .setContentIntent(contentIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            builder.setVibrate(new long[]{0, 180, 90, 180});
+            builder.setLights(0xFF2F9DF7, 1000, 1000);
+        }
+
+        notify(context, notifId, builder.build());
+    }
 
     private static void showFinal(Context context, String orderId, String orderType, String status) {
         int notifId = notificationIdFor(orderId);
@@ -212,6 +250,27 @@ public final class OrderTrackingNotification {
             || s.equals("canceled");
     }
 
+    /** Transições que merecem heads-up além da barra contínua silenciosa. */
+    private static boolean isKeyTransition(String status) {
+        String s = normalize(status);
+        return s.equals("ready")
+            || s.startsWith("ready_for")
+            || s.equals("in_delivery")
+            || s.equals("dispatched");
+    }
+
+    private static String keyTransitionHeadline(String orderType, String status) {
+        String s = normalize(status);
+        String type = normalize(orderType);
+        if (s.equals("in_delivery") || s.equals("dispatched")) return "Pedido saiu para entrega 🛵";
+        if (s.equals("ready") || s.startsWith("ready_for")) {
+            if ("pickup".equals(type)) return "Pedido pronto para retirada 🔔";
+            if ("table".equals(type)) return "Pedido pronto na mesa 🔔";
+            return "Pedido pronto 🔔";
+        }
+        return "Atualização do seu pedido";
+    }
+
     private static String finalHeadline(String orderType, String status) {
         String s = normalize(status);
         if (s.equals("cancelled") || s.equals("canceled")) return "Pedido cancelado";
@@ -247,16 +306,27 @@ public final class OrderTrackingNotification {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
         NotificationManager manager = getSystemService(context);
         if (manager == null) return;
+        // Migração: v1 era IMPORTANCE_LOW (imutável) — remover p/ o app-settings
+        // não listar canal morto.
+        if (manager.getNotificationChannel(LEGACY_CHANNEL_ID) != null) {
+            manager.deleteNotificationChannel(LEGACY_CHANNEL_ID);
+        }
         if (manager.getNotificationChannel(CHANNEL_ID) != null) return;
-        // IMPORTANCE_LOW: a barra atualiza em silencio a cada etapa. O alerta sonoro fica no
-        // canal de "novos pedidos" (loja). Assim o cliente nao e incomodado a cada mudanca.
+        // IMPORTANCE_HIGH (18/08): com tela apagada o cliente via NADA — sem LED,
+        // sem vibração, sem heads-up. HIGH acorda com LED + vibração + som e dá
+        // heads-up na primeira postagem; as reposições ficam silenciosas
+        // (setOnlyAlertOnce) e transições-chave ganham alerta próprio.
         NotificationChannel channel = new NotificationChannel(
             CHANNEL_ID,
             "Acompanhamento do pedido",
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_HIGH
         );
         channel.setDescription("Acompanhe o andamento do seu pedido em tempo real");
-        channel.setShowBadge(false);
+        channel.setShowBadge(true);
+        channel.enableLights(true);
+        channel.setLightColor(0xFF2F9DF7);
+        channel.enableVibration(true);
+        channel.setVibrationPattern(new long[]{0, 180, 90, 180});
         manager.createNotificationChannel(channel);
     }
 
