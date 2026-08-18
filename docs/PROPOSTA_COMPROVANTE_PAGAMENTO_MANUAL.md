@@ -41,5 +41,7 @@ Nível 1 agora (horas de trabalho, destrava operação); Nível 2 como evoluçã
 comprovante antecipado — o pagamento acontece na entrega; o texto do tracking já orienta.
 
 ## Fora de escopo (decisões pendentes separadas)
-- Janela de expiração do Pix MP: backend seta +5min mas envia +30min ao MP; auto-cancel
-  ~7min. Alinhar os três (sugerido: 15min countdown + cancel 17min + MP 30min) — decisão de negócio.
+- ~~Janela de expiração do Pix MP~~ **DECIDIDO 18/08: 30 minutos** — countdown, `date_of_expiration`
+  do MP, fallback local e barra de progresso do PaymentQRCard alinhados; cancelamento por
+  expires_at+2min (job/sweeps) com catch-all de 40min e **push "pedido cancelado — pagamento
+  não confirmado"** no mesmo ciclo.

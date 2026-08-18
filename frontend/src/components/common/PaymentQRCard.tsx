@@ -186,12 +186,12 @@ export const PaymentQRCard = memo(function PaymentQRCard({
           </p>
         ) : null}
 
-        {/* Barra de progresso sutil do tempo */}
+        {/* Barra de progresso sutil do tempo — janela Pix 30 min (decisão 18/08) */}
         {expiryMs > 0 ? (
           <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
             <div
               className={`h-full rounded-full transition-[width] duration-500 ${tone === 'rose' ? 'bg-rose-400' : tone === 'amber' ? 'bg-amber-400' : 'bg-emerald-400'}`}
-              style={{ width: `${Math.max(4, Math.min(100, (remainingMs / 300000) * 100))}%` }}
+              style={{ width: `${Math.max(4, Math.min(100, (remainingMs / 1800000) * 100))}%` }}
             />
           </div>
         ) : null}

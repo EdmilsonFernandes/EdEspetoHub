@@ -393,9 +393,11 @@ export class MercadoPagoService {
    */
   private async createPixPayment(input: CreatePaymentInput) {
     const url = `${env.mercadoPago.apiBaseUrl}/v1/payments`;
-    const pixExpiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-    // MP requires at least 30 min for date_of_expiration — send 30 min to MP but track 5 min internally
-    const mpExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    // Janela única de 30 min (decisão 18/08): countdown, MP e auto-cancel andam
+    // juntos — antes rastreávamos 5min internamente enquanto o QR valia 30min no
+    // MP (cliente podia pagar um pedido já cancelado).
+    const pixExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    const mpExpiresAt = pixExpiresAt;
     const body = {
       transaction_amount: input.amount,
       description: input.description,

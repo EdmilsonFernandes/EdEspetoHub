@@ -28,6 +28,7 @@ export class OrderPaymentService {
   private mercadoPago = new MercadoPagoService();
   private accountService = new StorePaymentAccountService();
   private paymentAuditService = new PaymentAuditService();
+  private pushService = new PushNotificationService();
   private log = logger.child({ scope: 'OrderPaymentService' });
 
   private normalizeQrCode(qrCode?: string | null) {
@@ -93,8 +94,10 @@ export class OrderPaymentService {
       row.qrCodeBase64 = this.normalizeQrCode(mpPayment?.qrCodeBase64);
       row.qrCodeText = mpPayment?.qrCodeText || null;
       if (providerMethod === 'PIX') {
-        // Always set a local expiry for PIX — never rely solely on provider value
-        const pixExpiry = new Date(Date.now() + 5 * 60 * 1000);
+        // Always set a local expiry for PIX — never rely solely on provider value.
+        // 30 min (decisão 18/08): mesma janela enviada ao MP — countdown da UI,
+        // validade do QR e auto-cancel andam juntos.
+        const pixExpiry = new Date(Date.now() + 30 * 60 * 1000);
         if (mpPayment?.expiresAt) {
           const parsed = new Date(mpPayment.expiresAt);
           row.expiresAt = (Number.isFinite(parsed.getTime()) && parsed.getTime() > Date.now() + 30_000)
@@ -213,10 +216,10 @@ export class OrderPaymentService {
     });
     // Update paymentStatus; cancel order if it was still awaiting payment
     await AppDataSource.getRepository(Order).update({ id: row.orderId }, { paymentStatus: 'FAILED' });
-    await AppDataSource.getRepository(Order)
+    const cancelUpdate = await AppDataSource.getRepository(Order)
       .createQueryBuilder()
       .update()
-      .set({ status: 'cancelled' })
+      .set({ status: 'cancelled', canceledReason: 'Pagamento não confirmado dentro do prazo.' })
       .where('id = :id AND status = :s', { id: row.orderId, s: 'awaiting_payment' })
       .execute();
     try {
@@ -225,6 +228,51 @@ export class OrderPaymentService {
         [buildOrderTimelineJson('cancelled', row.failedAt), row.orderId]
       );
     } catch {}
+    // O cliente só fica sabendo se avisarmos: o cancelamento por não pagamento
+    // antes era silencioso (sweep lazy/job SQL cru) — push na hora (18/08).
+    if ((cancelUpdate.affected || 0) > 0) {
+      await this.dispatchPaymentCancelledPush(row.orderId);
+    }
+  }
+
+  /**
+   * Push "pedido cancelado por não pagamento" — espelha o payload do
+   * dispatchOrderUpdatePush do OrderService (data-only; o Android monta a
+   * notificação final "Pedido cancelado" com o motivo no body).
+   */
+  private async dispatchPaymentCancelledPush(orderId: string) {
+    try {
+      const order = await AppDataSource.getRepository(Order).findOne({
+        where: { id: orderId },
+        relations: ['store'],
+      });
+      const userId = String(order?.customerUserId || '').trim();
+      const guestId = String((order as any)?.guestPushId || '').trim();
+      if (!order || (!userId && !guestId)) return;
+      const storeName = String(order.store?.name || '').trim();
+      const title = 'Pedido cancelado';
+      const body = storeName
+        ? `${storeName}: pagamento não confirmado no prazo — o pedido foi cancelado.`
+        : 'Pagamento não confirmado no prazo — o pedido foi cancelado.';
+      const payload = {
+        title,
+        body,
+        dataOnly: true,
+        data: {
+          url: `https://janocaminho.com.br/pedido/${order.id}`,
+          orderId: String(order.id),
+          status: 'cancelled',
+          notificationType: 'customer_order_update',
+          title,
+          body,
+          ...(storeName ? { storeName } : {}),
+        },
+      };
+      if (userId) await this.pushService.notifyCustomerOrderUpdate(userId, payload);
+      if (guestId) await this.pushService.notifyGuestOrderUpdate(guestId, payload);
+    } catch (error: any) {
+      this.log.warn('Payment cancelled push failed', { orderId, error: error?.message || String(error) });
+    }
   }
 
   async refreshFromProvider(orderPaymentId: string) {

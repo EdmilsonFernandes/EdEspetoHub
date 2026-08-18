@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "a0d1f300",
-  "versionLabel": "v0.1.9.a0d1f300",
-  "versionInternal": "0.1.9+20260818.135712.a0d1f300",
-  "buildId": "0.1.9+20260818.135712.a0d1f300-20260818.135712-a0d1f300",
-  "builtAt": "2026-08-18T13:57:12.489Z",
-  "commitHash": "a0d1f300799da1284478388f53a0a7a004b65e5d",
-  "shortHash": "a0d1f300",
+  "versionDisplaySuffix": "5ee6dfb6",
+  "versionLabel": "v0.1.9.5ee6dfb6",
+  "versionInternal": "0.1.9+20260818.141840.5ee6dfb6",
+  "buildId": "0.1.9+20260818.141840.5ee6dfb6-20260818.141840-5ee6dfb6",
+  "builtAt": "2026-08-18T14:18:40.509Z",
+  "commitHash": "5ee6dfb686926b5c9f61df26f3395e88fe8ac5ce",
+  "shortHash": "5ee6dfb6",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "5ee6dfb686926b5c9f61df26f3395e88fe8ac5ce",
+      "shortHash": "5ee6dfb6",
+      "dateIso": "2026-08-18T11:01:54-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(mobile): canal cliente v2 HIGH — LED/vibração/heads-up acordam a tela",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5ee6dfb686926b5c9f61df26f3395e88fe8ac5ce"
+    },
+    {
+      "hash": "8fa8a779bf9ce7dd4a3f9b4b1f1737a7123ab392",
+      "shortHash": "8fa8a779",
+      "dateIso": "2026-08-18T11:01:38-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(pix): pedido pendente cidadão de verdade — mesmo QR na lista, QR certo no detalhe",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8fa8a779bf9ce7dd4a3f9b4b1f1737a7123ab392"
+    },
     {
       "hash": "a0d1f300799da1284478388f53a0a7a004b65e5d",
       "shortHash": "a0d1f300",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(design): batch 4 order queue — paginacao historico, 403-guard motoboys, cancel-error a11y",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/834c6dbd598a3783042436b5c8682e6f74634b76"
-    },
-    {
-      "hash": "b6c16621e01f35549abc84a97e4bc5ab1bd55117",
-      "shortHash": "b6c16621",
-      "dateIso": "2026-08-16T09:47:34-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): batch 1 foundation — rampa teal oficial + fixes WCAG AA",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b6c16621e01f35549abc84a97e4bc5ab1bd55117"
-    },
-    {
-      "hash": "78dc848a8df0fa54beb4fb3452227adcd505b853",
-      "shortHash": "78dc848a",
-      "dateIso": "2026-08-15T12:27:02-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(ux): P1 finais — tap targets 44px e imagens de destinos -30%",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/78dc848a8df0fa54beb4fb3452227adcd505b853"
     }
   ]
 } as const;

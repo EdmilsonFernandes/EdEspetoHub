@@ -10,12 +10,13 @@
 
 import { AppDataSource } from '../config/database';
 import { logger } from '../utils/logger';
-import { buildOrderTimelineJson } from '../utils/orderTimeline';
+import { OrderPaymentService } from '../services/OrderPaymentService';
 
 const log = logger.child({ scope: 'AwaitingPaymentExpirationJob' });
 
-// PIX expires in 5 min, credit/debit MP preference in ~30 min.
-// 40-minute threshold gives enough grace for late webhooks before we force-cancel.
+// PIX expira em 30 min (janela única, decisão 18/08); crédito/débito MP ~30 min.
+// O catch-all por created_at cobre pagamentos sem expires_at e dá graça pra
+// webhooks atrasados antes do force-cancel.
 const DEFAULT_THRESHOLD_MINUTES = 40;
 
 export function scheduleAwaitingPaymentExpirationJob() {
@@ -36,27 +37,31 @@ export function scheduleAwaitingPaymentExpirationJob() {
 
   const tick = async () => {
     try {
-      const result = await AppDataSource.query(`
-        WITH cancelled AS (
-          UPDATE orders
-          SET status = 'cancelled',
-              payment_status = 'FAILED',
-              status_timeline = COALESCE(status_timeline, '[]'::jsonb) || $2::jsonb,
-              updated_at = NOW()
-          WHERE status = 'awaiting_payment'
-            AND created_at < NOW() - ($1 || ' minutes')::INTERVAL
-          RETURNING id
-        )
-        UPDATE order_payments
-        SET payment_status = 'FAILED',
-            failed_at = NOW()
-        WHERE order_id IN (SELECT id FROM cancelled)
-          AND payment_status NOT IN ('PAID', 'FAILED')
-      `, [thresholdMinutes, buildOrderTimelineJson('cancelled')]);
+      // Roteia pelo markFailedFromWebhook (choke point): falha o pagamento,
+      // cancela o pedido com reason/timeline e DISPARA O PUSH pro cliente —
+      // antes o cancelamento era SQL cru silencioso (18/08).
+      const rows: { id: string }[] = await AppDataSource.query(
+        `
+        SELECT op.id
+        FROM order_payments op
+        INNER JOIN orders o ON o.id = op.order_id
+        WHERE o.status = 'awaiting_payment'
+          AND op.payment_status = 'PENDING'
+          AND (
+            (op.expires_at IS NOT NULL AND op.expires_at < NOW() - INTERVAL '2 minutes')
+            OR o.created_at < NOW() - ($1 || ' minutes')::INTERVAL
+          )
+        `,
+        [thresholdMinutes]
+      );
+      if (!rows?.length) return;
 
-      const count = result?.[1]?.rowCount ?? 0;
-      if (count > 0) {
-        log.info('Cancelled stale awaiting_payment orders', { count, thresholdMinutes });
+      const orderPaymentService = new OrderPaymentService();
+      for (const row of rows) {
+        await orderPaymentService.markFailedFromWebhook(row.id);
+      }
+      if (rows.length > 0) {
+        log.info('Cancelled stale awaiting_payment orders', { count: rows.length, thresholdMinutes });
       }
     } catch (error: any) {
       log.warn('Awaiting payment expiration tick failed', { error: error?.message || String(error) });
