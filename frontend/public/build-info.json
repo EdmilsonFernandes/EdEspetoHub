@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "5ee6dfb6",
-  "versionLabel": "v0.1.9.5ee6dfb6",
-  "versionInternal": "0.1.9+20260818.141840.5ee6dfb6",
-  "buildId": "0.1.9+20260818.141840.5ee6dfb6-20260818.141840-5ee6dfb6",
-  "builtAt": "2026-08-18T14:18:40.509Z",
-  "commitHash": "5ee6dfb686926b5c9f61df26f3395e88fe8ac5ce",
-  "shortHash": "5ee6dfb6",
+  "versionDisplaySuffix": "41258111",
+  "versionLabel": "v0.1.9.41258111",
+  "versionInternal": "0.1.9+20260818.160246.41258111",
+  "buildId": "0.1.9+20260818.160246.41258111-20260818.160246-41258111",
+  "builtAt": "2026-08-18T16:02:46.679Z",
+  "commitHash": "412581110a189d101fc5ef46842f139c8635b79d",
+  "shortHash": "41258111",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "412581110a189d101fc5ef46842f139c8635b79d",
+      "shortHash": "41258111",
+      "dateIso": "2026-08-18T12:00:00-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 96 (v1.0.96) — AAB com Pix cidadão completo",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/412581110a189d101fc5ef46842f139c8635b79d"
+    },
+    {
+      "hash": "9940ad5e0da1122780ce77252152653d91b1fed9",
+      "shortHash": "9940ad5e",
+      "dateIso": "2026-08-18T11:32:42-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(pix): janela única de 30min + push de cancelamento por não pagamento",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9940ad5e0da1122780ce77252152653d91b1fed9"
+    },
     {
       "hash": "5ee6dfb686926b5c9f61df26f3395e88fe8ac5ce",
       "shortHash": "5ee6dfb6",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(design): batch 4 restante — default 7d no historico, colapso de itens, Finalizados hoje, chips sem zero-cronico, atrasado com peso",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/56a7922c0a619d1ed48f53469fd7cbbbd2b49f29"
-    },
-    {
-      "hash": "3eb05ced7e5c2b942fe89112478566bb95a0d5cf",
-      "shortHash": "3eb05ced",
-      "dateIso": "2026-08-16T11:57:08-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): batch 6 checkout — default por papel, pagamento sem redundancia, confirm no sheet, min-retirada, AUTH-022",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3eb05ced7e5c2b942fe89112478566bb95a0d5cf"
-    },
-    {
-      "hash": "834c6dbd598a3783042436b5c8682e6f74634b76",
-      "shortHash": "834c6dbd",
-      "dateIso": "2026-08-16T11:23:03-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): batch 4 order queue — paginacao historico, 403-guard motoboys, cancel-error a11y",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/834c6dbd598a3783042436b5c8682e6f74634b76"
     }
   ]
 }

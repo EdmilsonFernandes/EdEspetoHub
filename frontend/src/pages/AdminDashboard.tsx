@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, Compass, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck, ShieldCheck, Printer, Stack, Sparkle, ChatCircle, ForkKnife, IdentificationCard, DeviceMobile } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, Compass, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck, ShieldCheck, Printer, Stack, Sparkle, ChatCircle, ForkKnife, IdentificationCard, DeviceMobile, Ticket } from '@phosphor-icons/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -1905,6 +1905,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Stack },
             { id: 'destaques', label: 'Destaques', icon: Sparkle },
+            { id: 'cupons', label: 'Cupons de desconto', icon: Ticket, standalone: true },
             { id: 'pagamentos', label: 'Assinatura e plano', icon: CreditCard },
             { id: 'gateway', label: 'Pagamentos online', icon: PlugsConnected },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
@@ -1984,6 +1985,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             }
             if (item.id === 'destaques') {
               navigate('/admin/highlights');
+              return;
+            }
+            if (item.id === 'cupons') {
+              navigate('/admin/coupons');
               return;
             }
             if (item.id === 'config') {
@@ -3095,6 +3100,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       }
       if (id === 'destaques') {
         navigate('/admin/highlights');
+        return;
+      }
+      if (id === 'cupons') {
+        navigate('/admin/coupons');
         return;
       }
       if (id === 'config') {
