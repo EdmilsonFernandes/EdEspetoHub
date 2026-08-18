@@ -1504,10 +1504,6 @@ export function MarketplacePage() {
 
   const [myCondoStoreIds, setMyCondoStoreIds] = useState<string[]>([]);
   const [myCondoPickupByStoreId, setMyCondoPickupByStoreId] = useState<Record<string, string>>({});
-  // Quem não mora em condomínio pode dispensar o aviso (senão fica eternamente no hub).
-  const [myCondoBannerDismissed, setMyCondoBannerDismissed] = useState(() => {
-    try { return localStorage.getItem('jnc:my-condo-banner-dismissed') === '1'; } catch { return false; }
-  });
   useEffect(() => {
     const slug = myCondominium?.slug;
     if (!slug) { setMyCondoStoreIds([]); setMyCondoPickupByStoreId({}); return; }
@@ -2443,58 +2439,6 @@ export function MarketplacePage() {
             </section>
             </>
           )}
-
-          {/* Filtro Meu Condomínio — somente clientes logados (comércio permanente diário) */}
-          {isCustomerLogged && (myCondominium || !myCondoBannerDismissed) ? (
-            <section className="order-10 px-4">
-              <div className="flex items-stretch gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (myCondominium) {
-                    setQuickFilter(quickFilter === 'my_condo' ? 'all' : 'my_condo');
-                  } else {
-                    navigate('/cliente/enderecos?mode=new');
-                  }
-                }}
-                className={`flex flex-1 items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all active:scale-[0.99] ${
-                  quickFilter === 'my_condo'
-                    ? 'border-[#336886] bg-[#336886] text-white shadow-[0_18px_34px_-26px_rgba(51,104,134,0.66)]'
-                    : 'border-slate-200 bg-white text-slate-700 shadow-sm'
-                }`}
-              >
-                <span className="flex items-center gap-2.5">
-                  <span className="text-lg leading-none">🏢</span>
-                  <span className="flex flex-col">
-                    <span className="text-[11px] font-black uppercase tracking-[0.14em] opacity-70">
-                      {myCondominium ? 'Meu condomínio' : 'Mora em condomínio?'}
-                    </span>
-                    <span className="text-sm font-extrabold leading-tight">
-                      {myCondominium ? myCondominium.name : 'Cadastre e veja quem entrega aqui'}
-                    </span>
-                  </span>
-                </span>
-                <span className={`text-[11px] font-black uppercase tracking-[0.12em] ${quickFilter === 'my_condo' ? 'text-white' : 'text-[#336886]'}`}>
-                  {myCondominium ? (quickFilter === 'my_condo' ? 'Todos' : 'Filtrar') : 'Atualizar'}
-                </span>
-              </button>
-              {!myCondominium ? (
-                <button
-                  type="button"
-                  aria-label="Dispensar aviso de condomínio"
-                  title="Não mostrar mais"
-                  onClick={() => {
-                    setMyCondoBannerDismissed(true);
-                    try { localStorage.setItem('jnc:my-condo-banner-dismissed', '1'); } catch { /* noop */ }
-                  }}
-                  className="flex w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400 shadow-sm transition-colors hover:text-slate-600 active:scale-95"
-                >
-                  <X size={16} weight="bold" />
-                </button>
-              ) : null}
-              </div>
-            </section>
-          ) : null}
 
           {/* Seção Categorias Premium Squircle */}
           <section className="order-4 relative" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
