@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "73e15334",
-  "versionLabel": "v0.1.9.73e15334",
-  "versionInternal": "0.1.9+20260818.194552.73e15334",
-  "buildId": "0.1.9+20260818.194552.73e15334-20260818.194552-73e15334",
-  "builtAt": "2026-08-18T19:45:52.574Z",
-  "commitHash": "73e1533476e2d3716f235a8d28e2ad4b138c7b15",
-  "shortHash": "73e15334",
+  "versionDisplaySuffix": "62df7ec2",
+  "versionLabel": "v0.1.9.62df7ec2",
+  "versionInternal": "0.1.9+20260818.210220.62df7ec2",
+  "buildId": "0.1.9+20260818.210220.62df7ec2-20260818.210220-62df7ec2",
+  "builtAt": "2026-08-18T21:02:20.233Z",
+  "commitHash": "62df7ec207dc1e26d2dfec48b2f395883e067d21",
+  "shortHash": "62df7ec2",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "62df7ec207dc1e26d2dfec48b2f395883e067d21",
+      "shortHash": "62df7ec2",
+      "dateIso": "2026-08-18T16:58:42-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 97 (v1.0.97) — AAB com o redesign de retomada Pix",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/62df7ec207dc1e26d2dfec48b2f395883e067d21"
+    },
+    {
+      "hash": "37be27fe09b91ca0c414305403c0506fa9788d30",
+      "shortHash": "37be27fe",
+      "dateIso": "2026-08-18T16:50:59-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ux): retomada do Pix iFood-like — card de pagamento no foco, detalhe na hierarquia certa",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/37be27fe09b91ca0c414305403c0506fa9788d30"
+    },
     {
       "hash": "73e1533476e2d3716f235a8d28e2ad4b138c7b15",
       "shortHash": "73e15334",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(ux): onda 5 do benchmark iFood — placeholder orientado ao catálogo e polimento",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ad059b79549838e3f6c7c681da70c6c6533b1658"
-    },
-    {
-      "hash": "88f47691dc64ef8351ea788895ecb8e67b1a70b4",
-      "shortHash": "88f47691",
-      "dateIso": "2026-08-16T17:29:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ux): onda 2 do benchmark iFood — configuráveis e alvo de toque",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/88f47691dc64ef8351ea788895ecb8e67b1a70b4"
-    },
-    {
-      "hash": "71bf3c39d27a4952ced3af7d6fc522356a0d83d2",
-      "shortHash": "71bf3c39",
-      "dateIso": "2026-08-16T17:26:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(orders): origem do pedido — migration + badge Balcao/App/Site na fila",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/71bf3c39d27a4952ced3af7d6fc522356a0d83d2"
     }
   ]
 } as const;

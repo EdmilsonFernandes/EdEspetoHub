@@ -700,6 +700,106 @@ function PaymentCountdownPill({
   );
 }
 
+/** Pedido aguardando PIX online tem mídia de pagamento (QR/link) pendente? */
+function orderHasPendingPaymentMedia(order: any) {
+  if (normalizeStatus(order?.status) !== 'AWAITING_PAYMENT') return false;
+  return Boolean(
+    order?.paymentLink || order?.payment?.paymentLink || order?.onlinePayment?.paymentLink ||
+    order?.paymentQrCodeBase64 || order?.payment?.qrCodeBase64 || order?.onlinePayment?.qrCodeBase64 ||
+    order?.paymentQrCodeText || order?.payment?.qrCodeText || order?.onlinePayment?.qrCodeText
+  );
+}
+
+function getOrderPendingPaymentExpiresAt(order: any) {
+  return order?.payment?.expiresAt || order?.onlinePayment?.expiresAt || order?.paymentExpiresAt || null;
+}
+
+/**
+ * Card COMPACTO de pagamento pendente (spec 18/08, referência iFood): no topo de
+ * "Em andamento", só o que importa — loja, Pix, prazo, Ajuda e Pagar agora.
+ * Nada de status/thumbnails/itens: isso fica no card completo e no Detalhe.
+ */
+function AwaitingPaymentCard({
+  order,
+  onOpenHelp,
+  onOpenOrder,
+}: {
+  order: any;
+  onOpenHelp: (order: any) => void;
+  onOpenOrder: (orderId: string, focus?: 'payment') => void;
+}) {
+  const storeName = order?.store?.name || 'Loja parceira';
+  const logoUrl = resolveAssetUrl(order?.store?.settings?.logoUrl || '');
+  const items = Array.isArray(order?.items) ? order.items : [];
+  const itemsCount = getOrderItemsCount(items);
+  const expiresAt = getOrderPendingPaymentExpiresAt(order);
+  const expiryMs = expiresAt ? new Date(expiresAt).getTime() : 0;
+  const totalMs = expiryMs && order?.createdAt ? expiryMs - new Date(order.createdAt).getTime() : 0;
+  const remainingMs = Math.max(0, expiryMs - Date.now());
+  const totalSeconds = Math.floor(remainingMs / 1000);
+  const barTone = totalSeconds <= 120 ? 'bg-rose-400' : totalSeconds <= 300 ? 'bg-amber-400' : 'bg-emerald-500';
+
+  return (
+    <article
+      aria-label={`Pagamento pendente em ${storeName}`}
+      className="overflow-hidden rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] ring-1 ring-sky-100"
+    >
+      <button
+        type="button"
+        onClick={() => onOpenOrder(order.id)}
+        className="flex w-full items-center gap-3 px-4 pb-2 pt-3.5 text-left"
+      >
+        <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-100">
+          {logoUrl ? (
+            <Image src={logoUrl} alt={storeName} className="h-full w-full object-cover" eager />
+          ) : (
+            <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-xs font-black text-white">
+              {getStoreInitials(storeName)}
+            </span>
+          )}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[15px] font-black text-slate-900">{storeName}</span>
+          <span className="mt-0.5 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+            <img src={getPaymentProviderMeta('mercado_pago').icon} alt="" className="h-3 w-3 object-contain" />
+            Pagamento via Pix · {formatCurrency(order?.total || 0)}
+            {itemsCount ? <span className="text-slate-300">· {itemsCount === 1 ? '1 item' : `${itemsCount} itens`}</span> : null}
+          </span>
+        </span>
+      </button>
+
+      <div className="px-4">
+        <PaymentCountdownPill expiresAt={expiresAt} prominent />
+        {totalMs > 0 && totalMs <= 2 * 60 * 60 * 1000 ? (
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200/80">
+            <div
+              className={`h-full rounded-full transition-all duration-1000 ${barTone}`}
+              style={{ width: `${Math.max(4, Math.min(100, (remainingMs / totalMs) * 100))}%` }}
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <div className="mt-3 flex items-center gap-2 border-t border-slate-100 p-3">
+        <button
+          type="button"
+          onClick={() => onOpenHelp(order)}
+          className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-500 transition-colors active:scale-[0.98] hover:text-slate-700"
+        >
+          Ajuda
+        </button>
+        <button
+          type="button"
+          onClick={() => onOpenOrder(order.id, 'payment')}
+          className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-[#4e96ae] text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.65)] transition-transform active:scale-[0.98]"
+        >
+          Pagar agora
+        </button>
+      </div>
+    </article>
+  );
+}
+
 function OrderCard({
   order,
   isActive,
@@ -946,56 +1046,8 @@ function OrderCard({
         </div>
       </div>
 
-      {/* Pagamento PIX pendente — hierarquia iFood (spec 18/08): uma frase, um
-          contador, duas ações. "Pagar agora" leva ao Detalhe já focado no
-          pagamento (mesma cobrança MP, sem recriar nada). */}
-      {isAwaitingPaymentWithMedia && (
-        <div className="border-t border-sky-100/70 bg-[linear-gradient(180deg,#eef6fa_0%,#ffffff_82%)] px-4 pb-4 pt-3.5">
-          <div className="flex items-center gap-1.5">
-            <img src={getPaymentProviderMeta('mercado_pago').icon} alt="" className="h-3.5 w-3.5 object-contain" />
-            <span className="text-2xs font-black uppercase tracking-[0.16em] text-[#336886]">Pagamento via Pix</span>
-          </div>
-          <div className="mt-1.5">
-            <PaymentCountdownPill expiresAt={paymentExpiresAt} prominent />
-          </div>
-          {(() => {
-            // Barra derivada do MESMO expirationAt (nada de timer novo): fração
-            // restante sobre a janela total do pedido (criação → expiração).
-            const expiryMs = paymentExpiresAt ? new Date(paymentExpiresAt).getTime() : 0;
-            const totalMs = expiryMs && order.createdAt ? expiryMs - new Date(order.createdAt).getTime() : 0;
-            if (!totalMs || totalMs <= 0 || totalMs > 2 * 60 * 60 * 1000) return null;
-            const remainingMs = Math.max(0, expiryMs - Date.now());
-            const pct = Math.max(4, Math.min(100, (remainingMs / totalMs) * 100));
-            const totalSeconds = Math.floor(remainingMs / 1000);
-            const barTone = totalSeconds <= 120 ? 'bg-rose-400' : totalSeconds <= 300 ? 'bg-amber-400' : 'bg-emerald-500';
-            return (
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200/80">
-                <div className={`h-full rounded-full transition-all duration-1000 ${barTone}`} style={{ width: `${pct}%` }} />
-              </div>
-            );
-          })()}
-          <div className="mt-3.5 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onOpenHelp(order)}
-              className="inline-flex h-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-500 transition-colors active:scale-[0.98] hover:text-slate-700"
-            >
-              Ajuda
-            </button>
-            <button
-              type="button"
-              onClick={() => onOpenOrder(order.id, 'payment')}
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-2xl bg-[#4e96ae] text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.65)] transition-transform active:scale-[0.98]"
-            >
-              <img src={getPaymentProviderMeta('mercado_pago').icon} alt="" className="h-4.5 w-4.5 object-contain brightness-0 invert" />
-              Pagar agora
-            </button>
-          </div>
-          <p className="mt-2.5 truncate text-[11px] font-semibold text-slate-400">
-            {itemsCount === 1 ? '1 item' : `${itemsCount} itens`} · {fulfillmentMeta.label} · {formatCurrency(order.total || 0)}
-          </p>
-        </div>
-      )}
+      {/* Pagamento pendente renderiza pelo AwaitingPaymentCard compacto (topo da
+          seção); o OrderCard completo só aparece se não houver mídia de pagamento. */}
 
       {/* Itens */}
       <div
@@ -2046,18 +2098,27 @@ export function ClientOrders() {
               </div>
               <div className="space-y-3">
                 {filteredActiveOrders.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    isActive
-                    details={orderDetails[order.id]}
-                    onCancelRequest={(selectedOrder) => setCancelModal({ order: selectedOrder, reason: '', details: '', submitting: false })}
-                    onConfirmReceipt={handleConfirmReceiptFromList}
-                    confirmReceiptLoading={confirmingReceiptOrderId === String(order.id)}
-                    onOpenHelp={setHelpOrder}
-                    onOpenOrder={openOrderTracking}
-                    onOpenStore={openStore}
-                  />
+                  orderHasPendingPaymentMedia(order) ? (
+                    <AwaitingPaymentCard
+                      key={order.id}
+                      order={order}
+                      onOpenHelp={setHelpOrder}
+                      onOpenOrder={openOrderTracking}
+                    />
+                  ) : (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      isActive
+                      details={orderDetails[order.id]}
+                      onCancelRequest={(selectedOrder) => setCancelModal({ order: selectedOrder, reason: '', details: '', submitting: false })}
+                      onConfirmReceipt={handleConfirmReceiptFromList}
+                      confirmReceiptLoading={confirmingReceiptOrderId === String(order.id)}
+                      onOpenHelp={setHelpOrder}
+                      onOpenOrder={openOrderTracking}
+                      onOpenStore={openStore}
+                    />
+                  )
                 ))}
               </div>
             </section>
