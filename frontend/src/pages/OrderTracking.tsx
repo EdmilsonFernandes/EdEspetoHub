@@ -1886,7 +1886,7 @@ export function OrderTracking() {
         }
         if (isTerminal && order?.items?.length) {
           return {
-            label: 'Pedir novamente',
+            label: isCancelled ? 'Refazer pedido' : 'Pedir novamente',
             detail: 'Adicione os mesmos itens ao carrinho.',
             icon: <ArrowClockwise size={16} weight="bold" />,
             onClick: handleRepeatOrder,

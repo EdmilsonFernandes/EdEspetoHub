@@ -934,7 +934,9 @@ function OrderCard({
       {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && hasPendingPaymentMedia && (
         <div className="px-4 pb-3">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-2xs font-black uppercase tracking-[0.14em] text-slate-400">Pagar agora</span>
+            <span className="text-2xs font-black uppercase tracking-[0.14em] text-slate-400">
+              Pix Mercado Pago · {formatCurrency(order.total || 0)}
+            </span>
             <PaymentCountdownPill expiresAt={paymentExpiresAt} />
           </div>
           <button
@@ -951,7 +953,7 @@ function OrderCard({
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#4e96ae] py-3 text-sm font-black text-white shadow-[0_6px_18px_-8px_rgba(0,158,227,0.55)] active:scale-[0.98] transition-transform"
           >
             <img src={getPaymentProviderMeta('mercado_pago').icon} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
-            Finalizar pagamento
+            Continuar pagamento
           </button>
         </div>
       )}

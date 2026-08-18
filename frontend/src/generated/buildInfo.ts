@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "41258111",
-  "versionLabel": "v0.1.9.41258111",
-  "versionInternal": "0.1.9+20260818.160246.41258111",
-  "buildId": "0.1.9+20260818.160246.41258111-20260818.160246-41258111",
-  "builtAt": "2026-08-18T16:02:46.679Z",
-  "commitHash": "412581110a189d101fc5ef46842f139c8635b79d",
-  "shortHash": "41258111",
+  "versionDisplaySuffix": "af6071a3",
+  "versionLabel": "v0.1.9.af6071a3",
+  "versionInternal": "0.1.9+20260818.164944.af6071a3",
+  "buildId": "0.1.9+20260818.164944.af6071a3-20260818.164944-af6071a3",
+  "builtAt": "2026-08-18T16:49:44.881Z",
+  "commitHash": "af6071a32de1bfd03c59c841df42200eb1315d09",
+  "shortHash": "af6071a3",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "af6071a32de1bfd03c59c841df42200eb1315d09",
+      "shortHash": "af6071a3",
+      "dateIso": "2026-08-18T13:06:28-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): Cupons de desconto no menu vertical — saem do dropdown do avatar",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/af6071a32de1bfd03c59c841df42200eb1315d09"
+    },
+    {
+      "hash": "c74a4e23acb770069b1348600d15be1826f7cfd7",
+      "shortHash": "c74a4e23",
+      "dateIso": "2026-08-18T13:06:04-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(pix_loja): loop de comprovante — WhatsApp do cliente + confirmação da loja",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c74a4e23acb770069b1348600d15be1826f7cfd7"
+    },
     {
       "hash": "412581110a189d101fc5ef46842f139c8635b79d",
       "shortHash": "41258111",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(design): batch 3 admin navigation — URL por seção, Ajustes/Loja, 3 telas de dispositivo em 1, de-header",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d183286f63604c47a20bc7eb6d08d404432e32a5"
-    },
-    {
-      "hash": "6f015390f6d40b60d778e921651779f09f19f1f0",
-      "shortHash": "6f015390",
-      "dateIso": "2026-08-16T16:42:25-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): batch 5 storefront — desktop 3 colunas, toast fora da sacola, spacing do +, singular",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6f015390f6d40b60d778e921651779f09f19f1f0"
-    },
-    {
-      "hash": "56a7922c0a619d1ed48f53469fd7cbbbd2b49f29",
-      "shortHash": "56a7922c",
-      "dateIso": "2026-08-16T16:07:43-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): batch 4 restante — default 7d no historico, colapso de itens, Finalizados hoje, chips sem zero-cronico, atrasado com peso",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/56a7922c0a619d1ed48f53469fd7cbbbd2b49f29"
     }
   ]
 } as const;
