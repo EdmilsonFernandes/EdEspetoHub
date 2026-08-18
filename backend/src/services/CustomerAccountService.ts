@@ -1173,23 +1173,40 @@ async setDefaultAddress(userId: string, addressId: string) {
       skip: offset,
     });
 
-    // Fetch paymentLink + expiresAt for awaiting_payment orders so the client can
-    // show a direct pay button and an honest countdown (benchmark iFood §13)
+    // Fetch payment data for awaiting_payment orders so the client can show a
+    // direct pay button, an honest countdown and REOPEN the same Pix QR
+    // (benchmark iFood §13). Pix do MP não tem payment_link — o QR (base64/copia-
+    // e-cola) é o meio de pagamento; o filtro antigo `payment_link IS NOT NULL`
+    // excluía exatamente os pedidos Pix e o "Pagar agora"/countdown nunca
+    // renderizavam na lista (diagnóstico 18/08).
     const awaitingIds = rows
       .filter((o) => o.status === 'awaiting_payment')
       .map((o) => o.id);
     const paymentLinkMap: Record<string, string> = {};
     const paymentExpiresAtMap: Record<string, string> = {};
+    const paymentQrMap: Record<string, { base64: string | null; text: string | null }> = {};
     if (awaitingIds.length > 0) {
-      const paymentRows: { order_id: string; payment_link: string; expires_at: Date | null }[] = await AppDataSource.query(
-        `SELECT order_id, payment_link, expires_at FROM order_payments
-         WHERE order_id = ANY($1) AND payment_status = 'PENDING' AND payment_link IS NOT NULL`,
+      const paymentRows: {
+        order_id: string;
+        payment_link: string | null;
+        expires_at: Date | null;
+        qr_code_base64: string | null;
+        qr_code_text: string | null;
+      }[] = await AppDataSource.query(
+        `SELECT order_id, payment_link, expires_at, qr_code_base64, qr_code_text FROM order_payments
+         WHERE order_id = ANY($1) AND payment_status = 'PENDING'
+           AND (payment_link IS NOT NULL OR qr_code_base64 IS NOT NULL OR qr_code_text IS NOT NULL)`,
         [awaitingIds]
       );
       for (const row of paymentRows) {
-        paymentLinkMap[row.order_id] = row.payment_link;
+        if (row.payment_link) {
+          paymentLinkMap[row.order_id] = row.payment_link;
+        }
         if (row.expires_at) {
           paymentExpiresAtMap[row.order_id] = new Date(row.expires_at).toISOString();
+        }
+        if (row.qr_code_base64 || row.qr_code_text) {
+          paymentQrMap[row.order_id] = { base64: row.qr_code_base64, text: row.qr_code_text };
         }
       }
     }
@@ -1244,6 +1261,8 @@ async setDefaultAddress(userId: string, addressId: string) {
       paymentStatus: order.paymentStatus || null,
       paymentLink: paymentLinkMap[order.id] || null,
       paymentExpiresAt: paymentExpiresAtMap[order.id] || null,
+      paymentQrCodeBase64: paymentQrMap[order.id]?.base64 || null,
+      paymentQrCodeText: paymentQrMap[order.id]?.text || null,
       total: Number(order.total || 0),
       refundStatus: refundMap[order.id]?.status || null,
       refundAmount: refundMap[order.id]?.amount || null,

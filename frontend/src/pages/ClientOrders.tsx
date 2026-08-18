@@ -38,6 +38,7 @@ import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/o
 import { getPostalExpectedDeliveryDeadlineMs, isPostalShipmentDelayed, isPostalShipmentDelivered } from '../utils/postalTracking';
 import { AppGlassHeader } from '../components/common/AppGlassHeader';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
+import { PaymentQRCard } from '../components/common/PaymentQRCard';
 import { ClientBottomNav } from '../components/common/ClientBottomNav';
 import { Image } from '../components/common/Image';
 import { textareaAssistProps } from '../utils/inputAssist';
@@ -691,6 +692,7 @@ function OrderCard({
   onOpenHelp,
   onOpenOrder,
   onOpenStore,
+  onRefreshOrder,
 }: {
   order: any;
   isActive: boolean;
@@ -701,6 +703,7 @@ function OrderCard({
   onOpenHelp: (order: any) => void;
   onOpenOrder: (orderId: string) => void;
   onOpenStore: (slug?: string) => void;
+  onRefreshOrder?: (orderId: string) => void;
 }) {
   const { showToast } = useToast();
   const statusMeta = getStatusMeta(order.status, order.type);
@@ -782,6 +785,20 @@ function OrderCard({
     (order as any).onlinePayment?.expiresAt ||
     (order as any).paymentExpiresAt ||
     null;
+  // Mesmo QR do checkout (persistido em order_payments) — reabrir da lista é o
+  // comportamento iFood: tocar em Pagar agora mostra ESTE QR com o tempo restante.
+  const paymentQrBase64 =
+    (order as any).paymentQrCodeBase64 ||
+    (order as any).payment?.qrCodeBase64 ||
+    (order as any).onlinePayment?.qrCodeBase64 ||
+    null;
+  const paymentQrText =
+    (order as any).paymentQrCodeText ||
+    (order as any).payment?.qrCodeText ||
+    (order as any).onlinePayment?.qrCodeText ||
+    null;
+  const [showPaymentQrSheet, setShowPaymentQrSheet] = useState(false);
+  const hasPendingPaymentMedia = Boolean(paymentPayUrl || paymentQrBase64 || paymentQrText);
   const handleRepeatOrder = () => {
     queueOrderForReorder(order, onOpenStore);
     showToast('Reabrindo seu pedido anterior na loja...', 'success');
@@ -913,8 +930,8 @@ function OrderCard({
         </div>
       </div>
 
-      {/* Botão pagar MP */}
-      {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && paymentPayUrl && (
+      {/* Botão pagar MP — Pix reabre o MESMO QR do checkout; cartão abre o link */}
+      {normalizeStatus(order.status) === 'AWAITING_PAYMENT' && hasPendingPaymentMedia && (
         <div className="px-4 pb-3">
           <div className="mb-2 flex items-center justify-between gap-2">
             <span className="text-2xs font-black uppercase tracking-[0.14em] text-slate-400">Pagar agora</span>
@@ -923,6 +940,10 @@ function OrderCard({
           <button
             type="button"
             onClick={() => {
+              if (paymentQrBase64 || paymentQrText) {
+                setShowPaymentQrSheet(true);
+                return;
+              }
               const url = paymentPayUrl;
               if (!url) return;
               if (Capacitor.isNativePlatform()) { Browser.open({ url }); } else { window.open(url, '_blank'); }
@@ -1131,6 +1152,47 @@ function OrderCard({
         </p>
       ) : null}
     </article>
+
+    {/* Reabre o MESMO QR Pix gerado no checkout, com o tempo que começou lá
+        (comportamento iFood). Pagando por aqui o MP confirma sozinho. */}
+    {showPaymentQrSheet && (
+      <div
+        className="fixed inset-0 z-[200] flex items-end justify-center sm:items-center"
+        role="dialog"
+        aria-label="Pagamento Pix do pedido"
+        onClick={() => setShowPaymentQrSheet(false)}
+      >
+        <div className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm" />
+        <div
+          className="relative z-10 max-h-[calc(100dvh-3rem)] w-full max-w-sm overflow-y-auto p-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex flex-col gap-3 rounded-3xl bg-white p-3 shadow-2xl">
+            <PaymentQRCard
+              qrCodeBase64={paymentQrBase64}
+              qrCodeText={paymentQrText}
+              paymentLink={paymentPayUrl}
+              status={String((order as any).paymentStatus || (details?.payment?.status ?? 'PENDING'))}
+              expiresAt={paymentExpiresAt}
+              amountLabel={formatCurrency(order.total || 0)}
+              title="Pix — mesmo QR do checkout"
+              subtitle={`${storeName} • ${orderDisplayId}`}
+              onVerifyNow={onRefreshOrder ? () => onRefreshOrder(order.id) : undefined}
+              autoVerifyMs={8000}
+              onPaid={() => setShowPaymentQrSheet(false)}
+              verifyLabel="Já paguei — verificar"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPaymentQrSheet(false)}
+              className="jnc-hub-touch w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-black text-slate-500 transition hover:text-slate-700 active:scale-[0.99]"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   );
 }
@@ -1513,6 +1575,12 @@ export function ClientOrders() {
       inFlightRef.current = false;
     }
   }, [refreshActiveOrderDetails, showToast]);
+
+  // "Já paguei" do sheet do QR na lista: rebusca silenciosa — se o MP confirmou,
+  // o pedido sai de awaiting_payment e o PaymentQRCard mostra "confirmado".
+  const handleRefreshOrderFromList = useCallback(() => {
+    void loadOrders({ silent: true });
+  }, [loadOrders]);
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore) return;
@@ -1999,6 +2067,7 @@ export function ClientOrders() {
                     onOpenHelp={setHelpOrder}
                     onOpenOrder={openOrderTracking}
                     onOpenStore={openStore}
+                    onRefreshOrder={handleRefreshOrderFromList}
                   />
                 ))}
               </div>
@@ -2063,6 +2132,7 @@ export function ClientOrders() {
                           onOpenHelp={setHelpOrder}
                           onOpenOrder={openOrderTracking}
                           onOpenStore={openStore}
+                          onRefreshOrder={handleRefreshOrderFromList}
                         />
                       ))}
                     </div>

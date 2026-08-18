@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "c4699388",
-  "versionLabel": "v0.1.9.c4699388",
-  "versionInternal": "0.1.9+20260818.123343.c4699388",
-  "buildId": "0.1.9+20260818.123343.c4699388-20260818.123343-c4699388",
-  "builtAt": "2026-08-18T12:33:43.299Z",
-  "commitHash": "c46993881df553f8e12d989f78a4da9603d88d9b",
-  "shortHash": "c4699388",
+  "versionDisplaySuffix": "a0d1f300",
+  "versionLabel": "v0.1.9.a0d1f300",
+  "versionInternal": "0.1.9+20260818.135712.a0d1f300",
+  "buildId": "0.1.9+20260818.135712.a0d1f300-20260818.135712-a0d1f300",
+  "builtAt": "2026-08-18T13:57:12.489Z",
+  "commitHash": "a0d1f300799da1284478388f53a0a7a004b65e5d",
+  "shortHash": "a0d1f300",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "a0d1f300799da1284478388f53a0a7a004b65e5d",
+      "shortHash": "a0d1f300",
+      "dateIso": "2026-08-18T09:35:39-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(hub): remove banner 'Meu condomínio' do rodapé — redundante com a categoria",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a0d1f300799da1284478388f53a0a7a004b65e5d"
+    },
     {
       "hash": "c46993881df553f8e12d989f78a4da9603d88d9b",
       "shortHash": "c4699388",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(ux): P1 finais — tap targets 44px e imagens de destinos -30%",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/78dc848a8df0fa54beb4fb3452227adcd505b853"
-    },
-    {
-      "hash": "1786cee2aaf25a2ae5ea266b4cb6b46638f690dc",
-      "shortHash": "1786cee2",
-      "dateIso": "2026-08-15T11:19:23-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 91 (v1.0.91) — backlog P2 da auditoria UX",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1786cee2aaf25a2ae5ea266b4cb6b46638f690dc"
     }
   ]
 } as const;

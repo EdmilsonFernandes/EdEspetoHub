@@ -755,7 +755,6 @@ export function OrderTracking() {
     order?.store?.settings?.pixKey ||
     order?.pixKey ||
     '';
-  const isPixPayment = normalizedPaymentMethod === 'pix';
   const paymentStatusNormalized = (() => {
     const direct = String(order?.paymentStatus || '').trim().toUpperCase();
     const nested = String(order?.payment?.status || '').trim().toUpperCase();
@@ -765,6 +764,22 @@ export function OrderTracking() {
   })();
   const hasOnlinePayment = ONLINE_PAYMENT_METHODS.has(normalizedPaymentMethod);
   const isPaymentApproved = paymentStatusNormalized === 'PAID';
+  const isPixMethod = normalizedPaymentMethod === 'pix';
+  // QR manual da loja (chave estática) só existe em pedido SEM pagamento online
+  // (pix_loja ou pix manual legado). Pedido Pix do Mercado Pago que exibisse a
+  // chave da loja concorreria com o QR do MP: pagar nele NUNCA confirma
+  // automaticamente (crítico 18/08 — guard espelha o SuccessView).
+  const isStaticPixPayment = !hasOnlinePayment && (isPixMethod || normalizedPaymentMethod === 'pix_loja');
+  // Mesmo QR gerado no checkout (persistido pelo backend) — reaberto aqui com o
+  // tempo restante, comportamento iFood.
+  const onlinePaymentQrBase64 = String(order?.payment?.qrCodeBase64 || order?.onlinePayment?.qrCodeBase64 || '').trim();
+  const onlinePaymentQrText = String(order?.payment?.qrCodeText || order?.onlinePayment?.qrCodeText || '').trim();
+  const onlinePaymentExpiresAt = order?.payment?.expiresAt || order?.onlinePayment?.expiresAt || null;
+  const showOnlinePendingPayment =
+    hasOnlinePayment &&
+    !isPaymentApproved &&
+    !isCancelled &&
+    Boolean(onlinePaymentQrBase64 || onlinePaymentQrText || paymentActionUrl);
   const refundSnapshot = getOrderRefundSnapshot(order);
   const refundStatusNormalized = refundSnapshot.status;
   const refundAmountValue = refundSnapshot.amount;
@@ -772,7 +787,7 @@ export function OrderTracking() {
   const friendlyCancellationReason = getFriendlyCancellationReason(order?.canceledReason);
   const showMercadoPagoApproved = isPaymentApproved && [ 'mercado_pago', 'mercadopago' ].includes(normalizedPaymentProvider);
   const shouldHidePixPaymentBlockBase =
-    isPixPayment &&
+    isStaticPixPayment &&
     (
       paymentStatusNormalized === 'PAID' ||
       [ 'ready', 'ready_for_delivery', 'done', 'delivered', 'finished' ].includes(status) ||
@@ -1204,7 +1219,12 @@ export function OrderTracking() {
       );
       return;
     }
-    revealAndScrollToBlock('order-info-section', () => setServiceDetailsExpanded(true));
+    // Sem link (Pix MP): o pagamento é o QR — levar até ele, não à seção genérica
+    // (que já não exibe mais a chave manual da loja em pedido online).
+    revealAndScrollToBlock(
+      showOnlinePendingPayment ? 'order-online-payment-section' : 'order-info-section',
+      () => setServiceDetailsExpanded(true)
+    );
   };
   const handleOpenTrackingAction = () => {
     if (isPostalDelivery) {
@@ -1768,6 +1788,33 @@ export function OrderTracking() {
       icon: isDelivery ? <MapPin size={15} weight="duotone" /> : normalizedOrderType === 'reservation' ? <CalendarBlank size={15} weight="duotone" /> : <Package size={15} weight="duotone" />,
     },
   ];
+  // A barra fixa de próxima ação só entra quando o conteúdo-alvo sai da tela —
+  // antes ela flutuava sobre o QR do pagamento durante o scroll (bem feio, 18/08).
+  const [primarySectionInView, setPrimarySectionInView] = useState(false);
+  useEffect(() => {
+    const ids = ['order-online-payment-section', 'order-static-pix-section', 'order-status-section'];
+    const els = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (!els.length) {
+      setPrimarySectionInView(false);
+      return;
+    }
+    const visible = new Set<Element>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target);
+          else visible.delete(entry.target);
+        }
+        setPrimarySectionInView(visible.size > 0);
+      },
+      { threshold: 0.2 }
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [order?.id, status, paymentStatusNormalized, showOnlinePendingPayment, isStaticPixPayment, serviceDetailsExpanded, timelineExpanded]);
+
   const stickyOrderAction = !isAdminForStore
     ? (() => {
         if (canConfirmReceipt) {
@@ -2649,7 +2696,7 @@ export function OrderTracking() {
                     (isCancelled && refundStatusNormalized === 'DENIED') ? (
                     <div className="grid gap-3 sm:grid-cols-2">
                       {isCancelled && hasOnlinePayment && isPaymentApproved && !refundStatusNormalized && (
-                        <TrackingMetaCard label="Reembolso" value="Em andamento" detail={isPixPayment ? "O estorno do Pix está sendo processado. Geralmente o valor retorna em até 2 horas." : "A devolução foi solicitada ao provedor de pagamento."} accent="default" />
+                        <TrackingMetaCard label="Reembolso" value="Em andamento" detail={isPixMethod ? "O estorno do Pix está sendo processado. Geralmente o valor retorna em até 2 horas." : "A devolução foi solicitada ao provedor de pagamento."} accent="default" />
                       )}
                       {isCancelled && refundStatusNormalized === 'REFUNDED' && (
                         <TrackingMetaCard label="Reembolso" value="Processado" detail={refundAmountValue ? `${formatCurrency(refundAmountValue)} devolvido para a forma de pagamento` : 'Valor total devolvido'} accent="success" />
@@ -2768,15 +2815,15 @@ export function OrderTracking() {
                       </div>
                     )}
 
-                    {isPixPayment && !shouldHidePixPaymentBlockBase ? (
+                    {isStaticPixPayment && !shouldHidePixPaymentBlockBase ? (
                       isCancelled ? (
-                        <div className="rounded-[1.35rem] border border-rose-200 bg-rose-50 p-4">
+                        <div id="order-static-pix-section" className="rounded-[1.35rem] border border-rose-200 bg-rose-50 p-4">
                           <span className="inline-flex items-center rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-bold text-rose-700">
                             Pagamento não concluído
                           </span>
                         </div>
                       ) : (
-                        <div className="rounded-[1.35rem] border border-amber-100/80 bg-[linear-gradient(135deg,#fffdf7,#faf6ee)] p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
+                        <div id="order-static-pix-section" className="rounded-[1.35rem] border border-amber-100/80 bg-[linear-gradient(135deg,#fffdf7,#faf6ee)] p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
                           <div className="flex items-center justify-between gap-3">
                             <span className="text-sm font-black text-stone-900">Pagamento via Pix</span>
                             <span className="text-xs font-semibold text-stone-500">Use o QR Code ou chave</span>
@@ -2815,6 +2862,27 @@ export function OrderTracking() {
                           )}
                         </div>
                       )
+                    ) : null}
+
+                    {/* Pagamento ONLINE pendente (Pix/cartão MP): reabre o MESMO QR
+                        do checkout com o tempo restante. Aqui NUNCA aparece a chave
+                        da loja — pagar na chave manual não confirmaria nunca. */}
+                    {showOnlinePendingPayment ? (
+                      <div id="order-online-payment-section">
+                        <PaymentQRCard
+                          qrCodeBase64={onlinePaymentQrBase64 || null}
+                          qrCodeText={onlinePaymentQrText || null}
+                          paymentLink={paymentActionUrl || null}
+                          status={paymentStatusNormalized || 'PENDING'}
+                          expiresAt={onlinePaymentExpiresAt}
+                          amountLabel={formatCurrency(order?.total || 0)}
+                          title="Conclua o pagamento"
+                          subtitle="Mesmo QR gerado no checkout — confirma sozinho após o pagamento."
+                          onVerifyNow={() => { void loadOrder(true); }}
+                          onPaid={() => { void loadOrder(true); }}
+                          verifyLabel="Já paguei — verificar"
+                        />
+                      </div>
                     ) : null}
 
                     {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat && (
@@ -3068,7 +3136,7 @@ export function OrderTracking() {
         </div>
       </main>
 
-      {stickyOrderAction ? (
+      {stickyOrderAction && !primarySectionInView ? (
         <OrderTrackingActionBar
           label={stickyOrderAction.label}
           detail={stickyOrderAction.detail}
