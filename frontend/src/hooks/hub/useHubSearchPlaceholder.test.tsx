@@ -17,12 +17,13 @@ afterEach(() => {
 });
 
 describe('useHubSearchPlaceholder', () => {
-  it('rotates the placeholder after the transition delay', () => {
+  it('abre com a pergunta humana e rotaciona para o catálogo após o delay', () => {
     vi.useFakeTimers();
 
     render(<PlaceholderHarness />);
 
-    expect(screen.getByTestId('placeholder')).toHaveTextContent('Buscar espetinho...');
+    // Auditoria 2 (18/08): o repouso é o opener humano; a rotação ensina o catálogo.
+    expect(screen.getByTestId('placeholder')).toHaveTextContent('O que você procura hoje?');
     expect(screen.getByTestId('visible')).toHaveTextContent('true');
 
     act(() => {
@@ -33,8 +34,13 @@ describe('useHubSearchPlaceholder', () => {
     act(() => {
       vi.advanceTimersByTime(350);
     });
-    expect(screen.getByTestId('placeholder')).toHaveTextContent('Buscar hambúrguer...');
+    expect(screen.getByTestId('placeholder')).toHaveTextContent('Buscar espetinho...');
     expect(screen.getByTestId('visible')).toHaveTextContent('true');
+
+    act(() => {
+      vi.advanceTimersByTime(2800 + 350);
+    });
+    expect(screen.getByTestId('placeholder')).toHaveTextContent('Buscar hambúrguer...');
   });
 
   it('does not rotate while search is active', () => {
@@ -46,7 +52,7 @@ describe('useHubSearchPlaceholder', () => {
       vi.advanceTimersByTime(4000);
     });
 
-    expect(screen.getByTestId('placeholder')).toHaveTextContent('Buscar espetinho...');
+    expect(screen.getByTestId('placeholder')).toHaveTextContent('O que você procura hoje?');
     expect(screen.getByTestId('visible')).toHaveTextContent('true');
   });
 });

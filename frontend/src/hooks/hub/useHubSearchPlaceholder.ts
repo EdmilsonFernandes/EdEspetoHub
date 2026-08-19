@@ -21,16 +21,21 @@ const normalizeTerm = (term: string) =>
  * a região não tem.
  */
 export function useHubSearchPlaceholder(isPaused: boolean, dynamicTerms?: string[]) {
-  const pool = (Array.isArray(dynamicTerms) && dynamicTerms.length > 0
-    ? Array.from(
-        new Set(
-          dynamicTerms
-            .map(normalizeTerm)
-            .filter(Boolean),
-        ),
-      ).slice(0, 6)
-    : SEARCH_PLACEHOLDERS
-  ).map((term) => (term.toLowerCase().startsWith('buscar ') ? term : `Buscar ${term.toLowerCase()}...`));
+  // Auditoria 2 (18/08): o repouso da busca é uma pergunta humana — a rotação
+  // pelo catálogo real continua ensinando o que existe na região.
+  const pool = [
+    'O que você procura hoje?',
+    ...(Array.isArray(dynamicTerms) && dynamicTerms.length > 0
+      ? Array.from(
+          new Set(
+            dynamicTerms
+              .map(normalizeTerm)
+              .filter(Boolean),
+          ),
+        ).slice(0, 6)
+      : SEARCH_PLACEHOLDERS
+    ).map((term) => (term.toLowerCase().startsWith('buscar ') ? term : `Buscar ${term.toLowerCase()}...`)),
+  ];
 
   const [searchPlaceholderIndex, setSearchPlaceholderIndex] = useState(0);
   const [searchPlaceholderVisible, setSearchPlaceholderVisible] = useState(true);

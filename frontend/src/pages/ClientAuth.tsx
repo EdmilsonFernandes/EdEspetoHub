@@ -904,7 +904,7 @@ export function ClientAuth() {
       {verifyPrompt ? (
         <div className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/55 px-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
           <div className="flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-7rem)] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)] sm:max-h-[min(48rem,calc(100dvh-3rem))]">
-            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#153a4c_0%,#1c4b62_55%,#4e96ae_100%)] px-6 pb-8 pt-6 text-white">
+            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#153a4c_0%,#1c4b62_55%,#336886_100%)] px-6 pb-8 pt-6 text-white">
               <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_68%)]" />
               <div className="relative flex items-start justify-between gap-4">
                 <div className="space-y-3">
@@ -1002,7 +1002,7 @@ export function ClientAuth() {
                   type="button"
                   onClick={handleVerifyCode}
                   disabled={verificationCode.length !== 4 || codeLoading}
-                  className="rounded-2xl bg-[linear-gradient(135deg,#153a4c,#1c4b62,#4e96ae)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
+                  className="rounded-2xl bg-[linear-gradient(135deg,#153a4c,#1c4b62,#336886)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
                 >
                   {codeLoading ? 'Confirmando código...' : 'Confirmar e entrar'}
                 </button>

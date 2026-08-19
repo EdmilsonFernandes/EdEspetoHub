@@ -166,17 +166,20 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                       
                       <div className="absolute inset-x-0 bottom-0 h-9 bg-gradient-to-t from-black/24 to-transparent" />
                       
+                      {/* Auditoria 2 (18/08): 1 badge por card — o lead já diz
+                          "Escolha de hoje"; o canto só entra nos demais/sponsored.
+                          Piso tipográfico 2xs (12px), fim dos 7px. */}
                       <div className="absolute right-1.5 top-1.5 z-20">
                         {item.sponsored ? (
-                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] bg-[#5FD35A]/88 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.1em] text-[#153A4C] shadow-sm">
+                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] bg-[#5FD35A]/88 px-1.5 py-0.5 text-2xs font-black uppercase tracking-[0.08em] text-[#153A4C] shadow-sm">
                             <Star size={9} weight="fill" /> {item.badge || 'Patrocinado'}
                           </span>
-                        ) : (
-                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] px-1.5 py-0.5 text-[7px] font-black italic uppercase tracking-[0.16em] text-[#153A4C] ring-1 ring-black/5 shadow-sm">
-                            <Sparkle size={7} weight="fill" className="text-[#336886]" />
+                        ) : !isLead ? (
+                          <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] px-1.5 py-0.5 text-2xs font-black italic uppercase tracking-[0.08em] text-[#153A4C] ring-1 ring-black/5 shadow-sm">
+                            <Sparkle size={9} weight="fill" className="text-[#336886]" />
                             Seleção
                           </span>
-                        )}
+                        ) : null}
                       </div>
 
                       <div className={`absolute bottom-1 right-1 z-20 overflow-hidden rounded-full border-2 border-white bg-white shadow-[0_8px_16px_-10px_rgba(15,23,42,0.36)] ${
@@ -196,8 +199,8 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
 
                     <div className="flex min-w-0 flex-1 flex-col py-1 pr-1">
                       {isLead ? (
-                        <span className="mb-1 inline-flex w-fit items-center gap-1 rounded-full border border-[#d7e7ef]/80 bg-white/72 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.45)]">
-                          <Sparkle size={8} weight="fill" />
+                        <span className="mb-1 inline-flex w-fit items-center gap-1 rounded-full border border-[#d7e7ef]/80 bg-white/72 px-2 py-0.5 text-2xs font-black uppercase tracking-[0.08em] text-[#336886] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.45)]">
+                          <Sparkle size={9} weight="fill" />
                           Escolha de hoje
                         </span>
                       ) : null}
@@ -211,7 +214,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                         </span>
                         
                         <span className={`inline-flex items-center gap-1 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.76)] transition-all duration-300 group-hover:bg-[#336886] group-hover:text-white group-hover:shadow-[0_12px_22px_-16px_rgba(51,104,134,0.42)] ${
-                          isLead ? 'h-8 bg-[#153A4C] px-3 text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.48)]' : 'h-7 bg-[#edf5fa]/82 px-2 text-[#336886] group-hover:px-3'
+                          isLead ? 'h-11 bg-[#153A4C] px-3.5 text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.48)]' : 'h-10 bg-[#edf5fa]/82 px-2.5 text-[#336886] group-hover:px-3'
                         }`}>
                           <span className={`${isLead ? 'max-w-none scale-100 opacity-100' : 'max-w-0 scale-0 opacity-0 group-hover:max-w-[40px] group-hover:scale-100 group-hover:opacity-100'} text-2xs font-black uppercase tracking-wider transition-all duration-300`}>Pedir</span>
                           <CaretRight size={11} weight="bold" />

@@ -64,7 +64,9 @@ export function ClientBottomNav({
   if (!shouldRender) return null;
 
   const itemBaseClass =
-    'group flex min-h-[3.2rem] flex-col items-center justify-center gap-1 rounded-2xl px-0.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] transition-[transform] duration-150 ease-out active:scale-[0.96]';
+    // Auditoria 2 (18/08): title-case + 12px — labels uppercase 10px davam tom de
+    // painel; alvo mínimo já coberto pelo min-h do item.
+    'group flex min-h-[3.2rem] flex-col items-center justify-center gap-1 rounded-2xl px-0.5 py-1.5 text-xs font-bold capitalize transition-[transform] duration-150 ease-out active:scale-[0.96]';
   const inactiveItemClass = 'text-slate-500 hover:text-slate-700';
 
   const iconClass = (selected: boolean) =>

@@ -934,7 +934,7 @@ export function OrderTracking() {
   const paymentIconToneClass = normalizedPaymentMethod === 'dinheiro'
     ? 'border-amber-100 bg-[linear-gradient(135deg,#fff8e7,#ffffff)] text-amber-700'
     : hasOnlinePayment
-    ? 'border-sky-100 bg-[linear-gradient(135deg,#ecfeff,#ffffff)] text-[#4e96ae]'
+    ? 'border-sky-100 bg-[linear-gradient(135deg,#ecfeff,#ffffff)] text-[#336886]'
     : 'border-[#d6e4ed] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] text-[#336886]';
   const postalStatusLabel = isCancelled
     ? 'Cancelado'
@@ -1959,7 +1959,7 @@ export function OrderTracking() {
           <div className="h-[2.5px] w-full overflow-hidden bg-[#dce9f1]/80">
             <div
               className={`relative h-full transition-all duration-700 ease-out overflow-hidden ${isCancelled ? "" : "jnc-progress-sweep"}`}
-              style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#336886,#4e96ae)' }}
+              style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#336886,#336886)' }}
             >
               <div className="jnc-animate-shimmer absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-white/40 to-transparent" />
             </div>
@@ -2741,7 +2741,7 @@ export function OrderTracking() {
                         </div>
                       </div>
                       {showMercadoPagoApproved ? (
-                        <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#4e96ae]/15 bg-white/85 px-3 py-2">
+                        <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#336886]/15 bg-white/85 px-3 py-2">
                           <span className="text-[11px] font-semibold leading-4 text-slate-500">{mercadoPagoApprovalDetail}</span>
                           <span className="flex h-9 w-[124px] shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-white px-2">
                             <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-7 w-[104px] object-contain" />

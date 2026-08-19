@@ -637,7 +637,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <h3 className="text-sm font-black text-white mb-3 uppercase tracking-[0.12em]">Integrações</h3>
               <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">
                 <div className="relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[linear-gradient(145deg,rgba(13,25,48,0.94),rgba(2,52,81,0.9))] p-4 shadow-[0_22px_48px_-28px_rgba(0,158,227,0.45)]">
-                  <div className="pointer-events-none absolute -left-4 top-4 h-14 w-14 rounded-full bg-[#4e96ae]/25 blur-2xl" />
+                  <div className="pointer-events-none absolute -left-4 top-4 h-14 w-14 rounded-full bg-[#336886]/25 blur-2xl" />
                   <div className="pointer-events-none absolute -right-4 bottom-3 h-14 w-14 rounded-full bg-[#5fd35a]/18 blur-2xl" />
                   <div className="relative rounded-[1rem] border border-white/70 bg-white/96 px-3 py-2 shadow-[0_18px_34px_-24px_rgba(255,255,255,0.65)]">
                     <img src="/mercado-pago-horizontal.png" alt="Mercado Pago" className="h-14 w-full object-contain object-left" />

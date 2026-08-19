@@ -296,7 +296,7 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
                   window.open(url, '_blank');
                 }
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4e96ae] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.6)] transition hover:brightness-105 active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#336886] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(51,104,134,0.55)] transition hover:brightness-105 active:scale-[0.98]"
             >
               <ArrowSquareOut size={16} weight="bold" />
               Pagar via Mercado Pago

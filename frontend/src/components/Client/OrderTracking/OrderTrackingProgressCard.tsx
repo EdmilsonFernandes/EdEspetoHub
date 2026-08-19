@@ -109,7 +109,7 @@ export function OrderTrackingProgressCard({
                 className="pointer-events-none absolute left-[10px] top-3 w-[1.5px] rounded-full transition-all duration-700"
                 style={{
                   height: `${(currentIndex / Math.max(steps.length - 1, 1)) * 100}%`,
-                  background: isCancelled ? '#fda4af' : 'linear-gradient(180deg,#336886,#4e96ae)',
+                  background: isCancelled ? '#fda4af' : 'linear-gradient(180deg,#336886,#336886)',
                 }}
               />
             ) : null}

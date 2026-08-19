@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "62df7ec2",
-  "versionLabel": "v0.1.9.62df7ec2",
-  "versionInternal": "0.1.9+20260818.210220.62df7ec2",
-  "buildId": "0.1.9+20260818.210220.62df7ec2-20260818.210220-62df7ec2",
-  "builtAt": "2026-08-18T21:02:20.233Z",
-  "commitHash": "62df7ec207dc1e26d2dfec48b2f395883e067d21",
-  "shortHash": "62df7ec2",
+  "versionDisplaySuffix": "c45e8130",
+  "versionLabel": "v0.1.9.c45e8130",
+  "versionInternal": "0.1.9+20260819.010957.c45e8130",
+  "buildId": "0.1.9+20260819.010957.c45e8130-20260819.010957-c45e8130",
+  "builtAt": "2026-08-19T01:09:57.192Z",
+  "commitHash": "c45e8130077908d28a41dcffa81d225927a90920",
+  "shortHash": "c45e8130",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "c45e8130077908d28a41dcffa81d225927a90920",
+      "shortHash": "c45e8130",
+      "dateIso": "2026-08-18T18:23:08-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 98 (v1.0.98) — AAB com card compacto de pagamento",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c45e8130077908d28a41dcffa81d225927a90920"
+    },
+    {
+      "hash": "fe9f93de3e00d02c2967250489f56b3a950cc53c",
+      "shortHash": "fe9f93de",
+      "dateIso": "2026-08-18T18:20:40-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(ux): card COMPACTO de pagamento pendente no topo — igual ao conceito iFood",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fe9f93de3e00d02c2967250489f56b3a950cc53c"
+    },
     {
       "hash": "62df7ec207dc1e26d2dfec48b2f395883e067d21",
       "shortHash": "62df7ec2",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(ux): benchmark iFood — complemento: undo, buscas recentes, retry e reorder na home",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6b3527a11c421723bda787df950015dc4d5b58d3"
-    },
-    {
-      "hash": "2defa0eb9c331ed015a25c24a8f6b0c8fb1248f4",
-      "shortHash": "2defa0eb",
-      "dateIso": "2026-08-16T17:53:41-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): batch 7 customer flow — cancelamento com regra explícita + resposta do lojista nas avaliações",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2defa0eb9c331ed015a25c24a8f6b0c8fb1248f4"
-    },
-    {
-      "hash": "ad059b79549838e3f6c7c681da70c6c6533b1658",
-      "shortHash": "ad059b79",
-      "dateIso": "2026-08-16T17:50:52-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ux): onda 5 do benchmark iFood — placeholder orientado ao catálogo e polimento",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ad059b79549838e3f6c7c681da70c6c6533b1658"
     }
   ]
 } as const;

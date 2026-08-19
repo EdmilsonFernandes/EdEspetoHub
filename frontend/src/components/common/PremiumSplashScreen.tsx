@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Buildings, ForkKnife, MapPin, Sparkle, Storefront, Truck, WifiSlash } from '@phosphor-icons/react';
 
+// Auditoria 2 (18/08): o robô é a mascote — fala com o usuário, não log de
+// sistema ("sincronizando" → voz humana).
 const loadingSteps = [
-  'Encontrando lojas por perto',
-  'Preparando destinos e condomínios',
-  'Sincronizando pedidos e entregas',
+  'Procurando o que tem por perto...',
+  'Separando feiras, lojas e destinos...',
+  'Conferindo seus pedidos...',
   'Abrindo o Já no Caminho',
 ];
 
@@ -178,7 +180,7 @@ export function PremiumSplashScreen() {
           ) : (
             <span className="h-2 w-2 rounded-full bg-[#5FD35A] shadow-[0_0_14px_rgba(95,211,90,0.9)] motion-safe:animate-pulse" />
           )}
-          {isOffline ? 'Aguardando conexão' : 'Conectando com segurança'}
+          {isOffline ? 'Sem conexão — assim que voltar, continuo' : 'Chegando com tudo...'}
         </div>
       </div>
 

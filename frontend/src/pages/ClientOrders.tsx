@@ -791,7 +791,7 @@ function AwaitingPaymentCard({
         <button
           type="button"
           onClick={() => onOpenOrder(order.id, 'payment')}
-          className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-[#4e96ae] text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(0,158,227,0.65)] transition-transform active:scale-[0.98]"
+          className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-[#336886] text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(51,104,134,0.55)] transition-transform active:scale-[0.98]"
         >
           Pagar agora
         </button>

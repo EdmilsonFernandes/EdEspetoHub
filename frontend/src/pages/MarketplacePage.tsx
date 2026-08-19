@@ -1656,7 +1656,7 @@ export function MarketplacePage() {
     ? `Condomínio · ${String(selectedCondominium.name || 'Agenda local').trim() || 'Agenda local'}`
     : isCustomerLogged
       ? `${currentDayGreeting}, ${customerFirstName}`
-      : `${currentDayGreeting} — descubra o que pedir hoje`;
+      : currentDayGreeting;
   const canOpenMarketingPopup =
     homeConfig.marketingPopup.active &&
     Boolean(marketingPopupImageUrl) &&
@@ -2769,45 +2769,9 @@ export function MarketplacePage() {
             />
           )}
 
-          {/* CTA compacto para lojistas — premium style.
-              Oculto dentro da feira de condomínio: recrutamento B2B não interrompe
-              o morador no meio do evento (auditoria UX 15/08). */}
-          {!selectedCondominium && (
-          <section className="order-11 px-3 pb-2 pt-0">
-            <button
-              type="button"
-              onClick={() => navigate('/create?plan=trial')}
-              className="jnc-hub-touch group relative w-full overflow-hidden rounded-[1.5rem] px-3.5 py-3.5 text-left shadow-[0_22px_52px_-38px_rgba(21,58,76,0.32)]"
-              style={{ background: 'linear-gradient(135deg, #153A4C 0%, #1A5068 40%, #245F78 70%, #2A6E88 100%)' }}
-            >
-              <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/28 to-transparent" />
-              <div className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#5FD35A]/[0.1] blur-3xl" />
-              <div className="pointer-events-none absolute -left-6 bottom-[-8px] h-24 w-24 rounded-full bg-[#5FD35A]/[0.08] blur-2xl" />
-              <div className="relative flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.05rem] bg-white/[0.12] text-white shadow-[0_12px_24px_-18px_rgba(0,0,0,0.3)] border border-white/[0.08]">
-                  <Storefront size={22} weight="duotone" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <p className="text-[0.92rem] font-black leading-tight tracking-[-0.03em] text-white">
-                      Tem um negócio local?
-                    </p>
-                    <span className="rounded-full bg-[#5FD35A] px-2.5 py-0.5 text-2xs font-black uppercase tracking-[0.1em] text-[#153A4C] shadow-[0_6px_16px_-8px_rgba(95,211,90,0.5)]">
-                      3 meses VIP
-                    </span>
-                  </div>
-                  <p className="mt-0.5 text-[11px] font-semibold leading-4 text-white/78">
-                    Crie sua loja e venda online pelo app.
-                  </p>
-                </div>
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#5FD35A] px-3.5 py-2.5 text-2xs font-black uppercase tracking-[0.08em] text-[#153A4C] shadow-[0_12px_28px_-16px_rgba(95,211,90,0.55)] transition-all group-hover:translate-x-0.5 group-hover:shadow-[0_16px_32px_-14px_rgba(95,211,90,0.65)]">
-                  Começar
-                  <CaretRight size={11} weight="bold" />
-                </span>
-              </div>
-            </button>
-          </section>
-          )}
+          {/* Banner B2B REMOVIDO do hub (auditoria 2, 18/08): captação de lojista
+              não interrompe o consumidor — recrutamento vive em /create e no
+              rodapé. Aprovado no lote quick wins. */}
           <section className="order-12 pb-2 sm:pb-4">
             <div className="mx-3 overflow-hidden rounded-[1.35rem] border border-white/80 bg-white/68 px-4 py-3.5 text-center shadow-[0_16px_36px_-30px_rgba(15,23,42,0.2)] ring-1 ring-slate-200/30 backdrop-blur-xl">
               <div className="flex items-center justify-center gap-2">
@@ -2926,7 +2890,7 @@ export function MarketplacePage() {
                         className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.25 py-1.75 text-2xs font-black tracking-[0.01em] transition-all duration-200 active:scale-95 ${isActive ? activeClasses : idleClasses}`}
                       >
                         {tone === 'live' && (
-                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-[#4e96ae]'}`} />
+                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-[#336886]'}`} />
                         )}
                         <span>{label}</span>
                         <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1.5 py-0.5 text-2xs font-black ${isActive ? 'bg-white/16 text-white' : 'bg-slate-100 text-slate-500'}`}>
@@ -2983,7 +2947,7 @@ export function MarketplacePage() {
                         <div className="mb-3 flex items-center gap-2">
                           <span className="relative flex h-2.5 w-2.5 shrink-0">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
-                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#4e96ae]" />
+                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#336886]" />
                           </span>
                           <div>
                             <span className="block text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">Acontecendo agora</span>
@@ -3021,8 +2985,8 @@ export function MarketplacePage() {
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.24)_100%)]" />
                                     <div className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-2xs font-black uppercase tracking-[0.09em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(15,23,42,0.32)]">
                                       <span className="relative flex h-2 w-2">
-                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#4e96ae] opacity-75" />
-                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-[#4e96ae]" />
+                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#336886] opacity-75" />
+                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-[#336886]" />
                                       </span>
                                       Ao vivo
                                     </div>
