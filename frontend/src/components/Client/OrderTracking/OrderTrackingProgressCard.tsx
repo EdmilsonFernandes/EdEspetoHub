@@ -29,7 +29,7 @@ export function OrderTrackingProgressCard({
   return (
     <section
       id="order-status-section"
-      className="overflow-hidden rounded-[1.55rem] border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.96))] shadow-[0_20px_40px_-34px_rgba(51,104,134,0.18)]"
+      className="overflow-hidden rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.96))] shadow-[0_20px_40px_-34px_rgba(51,104,134,0.18)]"
       aria-labelledby="order-status-title"
     >
       <div className="px-4 pb-3 pt-4">

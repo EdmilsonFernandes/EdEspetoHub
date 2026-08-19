@@ -2710,7 +2710,7 @@ export function OrderTracking() {
                     id="order-service-details"
                     className={`${serviceDetailsExpanded ? 'block' : 'hidden lg:block'} space-y-4 border-t border-[#dce9f1] px-4 py-4 sm:px-5`}
                   >
-                    <div className="rounded-[1.35rem] border border-[#d6e4ed] bg-[linear-gradient(135deg,#ffffff_0%,#f5fafd_58%,#edf6fb_100%)] p-4 shadow-[0_20px_40px_-32px_rgba(51,104,134,0.22)]">
+                    <div className="rounded-2xl border border-[#d6e4ed] bg-[linear-gradient(135deg,#ffffff_0%,#f5fafd_58%,#edf6fb_100%)] p-4 shadow-[0_20px_40px_-32px_rgba(51,104,134,0.22)]">
                       <div className="flex items-start gap-3">
                         <span className={`grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-[1.15rem] border shadow-[0_16px_30px_-22px_rgba(51,104,134,0.36)] ${paymentIconToneClass}`}>
                           {paymentMeta?.icon ? (
@@ -2845,7 +2845,7 @@ export function OrderTracking() {
                     </div>
 
                     {cashTenderedValue !== null ? (
-                      <div className="rounded-[1.35rem] border border-amber-100/80 bg-[linear-gradient(135deg,#fffdf7,#faf6ee)] p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
+                      <div className="rounded-2xl border border-amber-100/80 bg-[linear-gradient(135deg,#fffdf7,#faf6ee)] p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
                         <p className="text-2xs font-black uppercase tracking-[0.16em] text-amber-700">Pagamento em dinheiro</p>
                         <div className="mt-3 grid gap-3 sm:grid-cols-2">
                           <TrackingMetaCard
@@ -2863,7 +2863,7 @@ export function OrderTracking() {
                     ) : null}
 
                     {isCondominiumOrder && (
-                      <div className="rounded-[1.35rem] border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-emerald-900 shadow-[0_18px_36px_-30px_rgba(16,185,129,0.22)]">
+                      <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-emerald-900 shadow-[0_18px_36px_-30px_rgba(16,185,129,0.22)]">
                         <p className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Feira no condomínio</p>
                         <p className="mt-1 font-black">{condominiumOrder?.condominiumName || (order as any)?.condominiumName}</p>
                         <p className="mt-1 text-xs font-semibold text-emerald-800">{condominiumFulfillmentLabel}</p>
@@ -2877,13 +2877,13 @@ export function OrderTracking() {
 
                     {isStaticPixPayment && (!shouldHidePixPaymentBlockBase || isPaymentApproved) ? (
                       isCancelled ? (
-                        <div id="order-static-pix-section" className="rounded-[1.35rem] border border-rose-200 bg-rose-50 p-4">
+                        <div id="order-static-pix-section" className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
                           <span className="inline-flex items-center rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-bold text-rose-700">
                             Pagamento não concluído
                           </span>
                         </div>
                       ) : isPaymentApproved ? (
-                        <div id="order-static-pix-section" className="rounded-[1.35rem] border border-emerald-200 bg-emerald-50 p-4">
+                        <div id="order-static-pix-section" className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                           <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-bold text-emerald-700">
                             <CheckCircle size={13} weight="fill" /> Pagamento confirmado pela loja
                           </span>
@@ -2892,7 +2892,7 @@ export function OrderTracking() {
                           </p>
                         </div>
                       ) : (
-                        <div id="order-static-pix-section" className="rounded-[1.35rem] border border-amber-100/80 bg-[linear-gradient(135deg,#fffdf7,#faf6ee)] p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
+                        <div id="order-static-pix-section" className="rounded-2xl border border-amber-100/80 bg-[linear-gradient(135deg,#fffdf7,#faf6ee)] p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
                           <div className="flex items-center justify-between gap-3">
                             <span className="text-sm font-black text-stone-900">Pagamento via Pix</span>
                             <span className="text-xs font-semibold text-stone-500">Use o QR Code ou chave</span>
@@ -2953,7 +2953,7 @@ export function OrderTracking() {
                     ) : null}
 
                     {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat && (
-                      <div id="order-delivery-route-section" className="rounded-[1.35rem] border border-amber-100/80 bg-white/92 p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
+                      <div id="order-delivery-route-section" className="rounded-2xl border border-amber-100/80 bg-white/92 p-4 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.16)]">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-black text-stone-900">Rota da entrega</span>
                           {deliveryRoute?.distanceKm ? (

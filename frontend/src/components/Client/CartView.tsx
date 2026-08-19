@@ -1253,7 +1253,7 @@ export const CartView = ({
       <button
         type="button"
         onClick={openCustomerNoteSheet}
-        className={`group w-full rounded-[1.55rem] border p-3 text-left transition-all duration-300 active:scale-[0.99] ${
+        className={`group w-full rounded-3xl border p-3 text-left transition-all duration-300 active:scale-[0.99] ${
           note
             ? "border-[#336886]/14 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)] shadow-[0_18px_38px_-34px_rgba(51,104,134,0.34)]"
             : "border-slate-100 bg-white shadow-[0_18px_38px_-34px_rgba(15,23,42,0.25)] hover:border-[#336886]/16"
@@ -1291,7 +1291,7 @@ export const CartView = ({
 
     return (
       <div
-        className={`rounded-[1.35rem] border p-3.5 shadow-sm ${
+        className={`rounded-2xl border p-3.5 shadow-sm ${
           note
             ? "border-[#336886]/10 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)]"
             : "border-slate-100 bg-white"
@@ -1338,7 +1338,7 @@ export const CartView = ({
     if (isPostalDelivery && !resolvedPaymentMethods.length) {
       return (
         <div
-          className="relative overflow-hidden rounded-[1.55rem] border border-amber-200/80 bg-[linear-gradient(135deg,#ffffff_0%,#fff8eb_100%)] p-3.5 shadow-[0_20px_46px_-38px_rgba(245,158,11,0.45)]"
+          className="relative overflow-hidden rounded-3xl border border-amber-200/80 bg-[linear-gradient(135deg,#ffffff_0%,#fff8eb_100%)] p-3.5 shadow-[0_20px_46px_-38px_rgba(245,158,11,0.45)]"
           data-testid="checkout-payment-summary-card"
         >
           <div className="flex items-start gap-3">
@@ -1379,7 +1379,7 @@ export const CartView = ({
         : "Você paga quando receber o pedido.";
     return (
       <div
-        className="relative overflow-hidden rounded-[1.55rem] border border-white/80 bg-white p-3.5 shadow-[0_20px_46px_-38px_rgba(15,23,42,0.35)]"
+        className="relative overflow-hidden rounded-3xl border border-white/80 bg-white p-3.5 shadow-[0_20px_46px_-38px_rgba(15,23,42,0.35)]"
         data-testid="checkout-payment-summary-card"
       >
         <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-[#336886]/18 to-transparent" />
@@ -1515,7 +1515,7 @@ export const CartView = ({
     const theme = getPaymentIconTheme(methodId, tone, selected);
     const sizeClass =
       size === "lg"
-        ? "h-16 w-16 rounded-[1.35rem]"
+        ? "h-16 w-16 rounded-2xl"
         : size === "sm"
         ? "h-11 w-11 rounded-[1rem]"
         : "h-[3.25rem] w-[3.25rem] rounded-[1.15rem]";
@@ -1569,7 +1569,7 @@ export const CartView = ({
           onChangePayment?.(method.id);
           closePaymentSheet();
         }}
-        className={`jnc-hub-touch group relative overflow-hidden rounded-[1.35rem] border p-3.5 text-left transition-all duration-300 ease-out active:scale-[0.985] ${
+        className={`jnc-hub-touch group relative overflow-hidden rounded-2xl border p-3.5 text-left transition-all duration-300 ease-out active:scale-[0.985] ${
           selected
             ? selectedClasses
             : "border-slate-200/80 bg-white/88 text-slate-500 shadow-[0_14px_36px_-34px_rgba(15,23,42,0.3)] hover:-translate-y-0.5 hover:border-[#336886]/22 hover:bg-white hover:shadow-[0_22px_46px_-38px_rgba(51,104,134,0.32)]"
@@ -1623,7 +1623,7 @@ export const CartView = ({
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[max(env(safe-area-inset-top),0.85rem)] bg-[linear-gradient(180deg,rgba(238,245,247,0.98),rgba(238,245,247,0.74))]" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4 sm:mb-6`}>
-        <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
+        <div className="rounded-3xl border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
           {useMultiStepFlow && (
             <div className="mb-3.5 flex items-center gap-1.5">
               {[{ label: 'Sacola', step: 1 }, { label: 'Receber', step: 2 }, { label: 'Pagamento', step: 3 }, { label: 'Confirmar', step: 4 }].map(({ label, step }, i) => {
@@ -1967,7 +1967,7 @@ export const CartView = ({
               })}
             </div>
             {customer.type === "delivery" && postalEnabled && (
-              <div className="mt-3 rounded-[1.35rem] border border-slate-200 bg-white/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+              <div className="mt-3 rounded-2xl border border-slate-200 bg-white/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                 <div className="grid grid-cols-1 gap-1.5 min-[340px]:grid-cols-2">
                   <button
                     type="button"
@@ -2211,7 +2211,7 @@ export const CartView = ({
                     </div>
                   ) : null}
                   {!isLoggedDeliveryFlow && (
-                  <div className={`rounded-[1.35rem] border px-3 py-3 text-xs shadow-[0_14px_24px_-26px_rgba(15,23,42,0.2)] ${
+                  <div className={`rounded-2xl border px-3 py-3 text-xs shadow-[0_14px_24px_-26px_rgba(15,23,42,0.2)] ${
                     isPostalDelivery
                       ? "border-amber-200 bg-amber-50/70 text-amber-800"
                       : "border-sky-200 bg-sky-50/70 text-sky-800"
@@ -2423,7 +2423,7 @@ export const CartView = ({
                       <p className="text-xs text-slate-500">CEP de origem: <span className="font-semibold text-slate-700">{postalOriginZip}</span></p>
                     ) : null}
                     {isPostalDelivery && (
-                      <div className="rounded-[1.35rem] border border-slate-200 bg-slate-50/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] space-y-3">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] space-y-3">
                         <div className="space-y-1">
                           <h4 className="text-sm font-semibold text-slate-900">Escolha o frete</h4>
                           <p className="text-xs text-slate-500">
@@ -2712,7 +2712,7 @@ export const CartView = ({
                 }`;
 
               return (
-                <div className="rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(238,247,251,0.6)_0%,rgba(255,255,255,0.98)_100%)] p-3.5 shadow-[0_20px_42px_-34px_rgba(51,104,134,0.32)] space-y-4 animate-in fade-in duration-200">
+                <div className="rounded-3xl border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(238,247,251,0.6)_0%,rgba(255,255,255,0.98)_100%)] p-3.5 shadow-[0_20px_42px_-34px_rgba(51,104,134,0.32)] space-y-4 animate-in fade-in duration-200">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] bg-[#336886]/10 text-[#336886] ring-1 ring-[#336886]/12">
@@ -3039,7 +3039,7 @@ export const CartView = ({
                 key={prod.id}
                 type="button"
                 onClick={() => onUpdateCart?.(prod, 1, { cookingPoint: '', passSkewer: false, selectedModifiers: [] })}
-                className="group flex-none w-[216px] snap-start flex items-center gap-3 rounded-[1.35rem] border border-slate-100 bg-white px-3 py-3 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.24)] active:scale-[0.97] transition-all hover:-translate-y-0.5"
+                className="group flex-none w-[216px] snap-start flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.24)] active:scale-[0.97] transition-all hover:-translate-y-0.5"
               >
                 <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-100">
                   {prod.imageUrl ? (
@@ -3064,7 +3064,7 @@ export const CartView = ({
 
       {/* Compact pricing + Forma de Pagamento (multi-step step 3) */}
       {useMultiStepFlow && checkoutStep === 3 && (
-        <div className="jnc-receipt-card relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 sm:p-6">
+        <div className="jnc-receipt-card relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 sm:p-6">
           <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -3158,7 +3158,7 @@ export const CartView = ({
 
       {/* Cupom de desconto (benchmark §12) — escondido para operator/admin */}
       {!isProfessionalUser && (!useMultiStepFlow || checkoutStep === 3) && (
-        <div className="relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
+        <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
           <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#5FD35A]/25 to-transparent" />
           <div className="relative z-10 mb-3 flex items-center gap-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.1rem] bg-[#5FD35A]/12 text-[#1F7A3D] shadow-[0_16px_30px_-24px_rgba(95,211,90,0.5)] ring-1 ring-[#5FD35A]/15">
@@ -3226,7 +3226,7 @@ export const CartView = ({
 
       {/* CPF/CNPJ na nota (benchmark §12) — ADIADO: religar com TAX_ID_NOTE_FIELD_ENABLED */}
       {TAX_ID_NOTE_FIELD_ENABLED && !isProfessionalUser && (!useMultiStepFlow || checkoutStep === 3) && (
-        <div className="relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
+        <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
           <div className="relative z-10 flex flex-col gap-2">
             <div className="flex items-center gap-3">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.1rem] bg-slate-50 text-slate-500 ring-1 ring-slate-100">
@@ -3261,7 +3261,7 @@ export const CartView = ({
 
       {/* Forma de Pagamento */}
       {(!useMultiStepFlow || checkoutStep === 3) && (
-        <div className="relative mb-4 overflow-hidden rounded-[1.85rem] border border-white/80 bg-[radial-gradient(circle_at_top_right,rgba(95,211,90,0.14),transparent_26%),linear-gradient(145deg,rgba(255,255,255,0.98),rgba(241,247,249,0.92))] p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
+        <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-[radial-gradient(circle_at_top_right,rgba(95,211,90,0.14),transparent_26%),linear-gradient(145deg,rgba(255,255,255,0.98),rgba(241,247,249,0.92))] p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
           <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#336886]/22 to-transparent" />
           <div className="relative z-10 mb-3 flex items-center gap-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.1rem] bg-white text-[#336886] shadow-[0_16px_30px_-24px_rgba(51,104,134,0.44)] ring-1 ring-[#336886]/10">
@@ -3420,7 +3420,7 @@ export const CartView = ({
                 </div>
               </div>
               {hasPickupDistanceWarning && (
-                <div className="mt-3 rounded-[1.35rem] border border-amber-200/80 bg-[linear-gradient(135deg,rgba(255,251,235,0.98)_0%,rgba(255,247,237,0.98)_100%)] p-3 shadow-[0_18px_34px_-28px_rgba(245,158,11,0.55)]">
+                <div className="mt-3 rounded-2xl border border-amber-200/80 bg-[linear-gradient(135deg,rgba(255,251,235,0.98)_0%,rgba(255,247,237,0.98)_100%)] p-3 shadow-[0_18px_34px_-28px_rgba(245,158,11,0.55)]">
                   <div className="flex items-start gap-3">
                     <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-amber-600 ring-1 ring-amber-200/80">
                       <MapPinLine size={18} weight="duotone" />
@@ -3442,7 +3442,7 @@ export const CartView = ({
 
           {/* Pagamento */}
           <div
-            className="rounded-[1.55rem] border border-white/80 bg-white p-3.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.28)]"
+            className="rounded-3xl border border-white/80 bg-white p-3.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.28)]"
             data-testid="checkout-review-payment-card"
             style={{ scrollMarginBottom: 'calc(env(safe-area-inset-bottom) + 9rem)' }}
           >
@@ -3721,7 +3721,7 @@ export const CartView = ({
 
             <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
               {paymentGroups.online.length === 0 && paymentGroups.local.length === 0 && isPostalDelivery && (
-                <section className="rounded-[1.55rem] border border-amber-200/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(255,248,235,0.92))] p-4 shadow-[0_22px_50px_-44px_rgba(245,158,11,0.34)]">
+                <section className="rounded-3xl border border-amber-200/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(255,248,235,0.92))] p-4 shadow-[0_22px_50px_-44px_rgba(245,158,11,0.34)]">
                   <div className="flex items-start gap-3">
                     <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-amber-200 bg-white text-amber-700 shadow-[0_14px_28px_-24px_rgba(245,158,11,0.42)]">
                       <ShieldCheck size={18} weight="duotone" />
@@ -3737,7 +3737,7 @@ export const CartView = ({
               )}
 
               {paymentGroups.online.length > 0 && (
-                <section className="rounded-[1.55rem] border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(232,244,248,0.86))] p-3.5 shadow-[0_22px_50px_-44px_rgba(51,104,134,0.32)]">
+                <section className="rounded-3xl border border-[#336886]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(232,244,248,0.86))] p-3.5 shadow-[0_22px_50px_-44px_rgba(51,104,134,0.32)]">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-2xs font-black uppercase tracking-[0.24em] text-[#336886]">
@@ -3763,7 +3763,7 @@ export const CartView = ({
               )}
 
               {paymentGroups.local.length > 0 && (
-                <section className="rounded-[1.55rem] border border-emerald-200/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(238,250,241,0.86))] p-3.5 shadow-[0_22px_50px_-44px_rgba(32,122,82,0.28)]">
+                <section className="rounded-3xl border border-emerald-200/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(238,250,241,0.86))] p-3.5 shadow-[0_22px_50px_-44px_rgba(32,122,82,0.28)]">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-2xs font-black uppercase tracking-[0.24em] text-emerald-700">
@@ -3938,7 +3938,7 @@ export const CartView = ({
           />
           <div className="absolute bottom-0 left-0 right-0 rounded-t-[2rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#fffaf1_100%)] p-4 pb-[max(env(safe-area-inset-bottom),1rem)] shadow-[0_-24px_54px_-28px_rgba(15,23,42,0.52)]">
             <div className="flex items-start gap-3">
-              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.35rem] bg-slate-900 text-white shadow-[0_16px_32px_-20px_rgba(15,23,42,0.7)]">
+              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-[0_16px_32px_-20px_rgba(15,23,42,0.7)]">
                 <House size={22} weight="duotone" />
               </span>
               <div className="min-w-0">

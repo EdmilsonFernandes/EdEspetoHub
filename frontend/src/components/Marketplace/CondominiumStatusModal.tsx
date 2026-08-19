@@ -25,7 +25,7 @@ export function CondominiumStatusModal({
       role="dialog"
       aria-modal="true"
     >
-      <div className="relative w-full max-w-[360px] overflow-hidden rounded-[2rem] bg-white shadow-[0_30px_60px_-20px_rgba(15,23,42,0.5)] animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-[360px] overflow-hidden rounded-3xl bg-white shadow-[0_30px_60px_-20px_rgba(15,23,42,0.5)] animate-in zoom-in-95 duration-200">
         <button
           onClick={onClose}
           className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm transition-colors hover:bg-white hover:text-slate-900"

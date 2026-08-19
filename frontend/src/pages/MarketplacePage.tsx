@@ -2111,7 +2111,7 @@ export function MarketplacePage() {
         <main className={`mx-auto flex max-w-[1200px] flex-col gap-4 px-4 sm:gap-5 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
           <h1 className="sr-only">Já no Caminho — lojas, feiras de condomínio e destinos</h1>
           {isCustomerLogged && welcomeOpen ? (
-            <section className="order-1 rounded-[1.35rem] border border-[#5FD35A]/30 bg-white px-4 py-3.5 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.18)]">
+            <section className="order-1 rounded-2xl border border-[#5FD35A]/30 bg-white px-4 py-3.5 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.18)]">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[13px] font-black tracking-[-0.02em] text-slate-900">Bem-vindo de volta ao seu bairro</p>
@@ -2150,16 +2150,15 @@ export function MarketplacePage() {
             <section className="order-7 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.22em] text-[#336886]">
+                  {/* E3 (18/08): guarda-chuva "Seu bairro" unifica Guia+Feiras+Condomínio
+                      num só conceito — fim das 3 seções que pareciam 3 apps. */}
+                  <p className="inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.18em] text-[#336886]">
                     <Mountains size={12} weight="duotone" />
-                    Guia da região
+                    Seu bairro · explorar
                   </p>
                   <h2 className="mt-1 text-base font-black leading-tight tracking-[-0.03em] sm:text-lg text-slate-900">
-                    Descubra a região sem sair do app
+                    Destinos e experiências por perto
                   </h2>
-                  <p className="mt-1 max-w-[18rem] text-xs font-semibold leading-relaxed text-slate-500">
-                    Chalés, delivery, passeios e serviços organizados por cidade.
-                  </p>
                 </div>
                 <Link
                   to={destinationListHref}
@@ -2192,7 +2191,7 @@ export function MarketplacePage() {
                       onPointerEnter={warmupDestination}
                       onFocus={warmupDestination}
                       onTouchStart={warmupDestination}
-                      className="jnc-hub-touch jnc-hub-lift group relative flex h-[11.25rem] min-w-0 flex-[0_0_86%] overflow-hidden rounded-[1.55rem] bg-slate-900 text-left shadow-[0_26px_62px_-48px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition-transform duration-300 active:scale-[0.98] sm:flex-[0_0_48%] lg:flex-[0_0_32%]"
+                      className="jnc-hub-touch jnc-hub-lift group relative flex h-[11.25rem] min-w-0 flex-[0_0_86%] overflow-hidden rounded-3xl bg-slate-900 text-left shadow-[0_26px_62px_-48px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition-transform duration-300 active:scale-[0.98] sm:flex-[0_0_48%] lg:flex-[0_0_32%]"
                     >
                       <img
                         src={resolveDestinationAssetUrl(destination)}
@@ -2348,7 +2347,7 @@ export function MarketplacePage() {
                                 </span>
                               ) : null}
                             </div>
-                            <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-[#0F172A]">Agenda em condomínios</h2>
+                            <h2 className="mt-1 line-clamp-1 text-base font-black tracking-[-0.03em] text-[#0F172A]">Seu bairro · condomínio</h2>
                           </div>
                           <button
                             type="button"
@@ -2386,7 +2385,7 @@ export function MarketplacePage() {
                                 key={slug}
                                 type="button"
                                 onClick={() => handleCondominiumSelection(slug, name, event)}
-                                className="jnc-hub-touch group relative min-w-0 flex-[0_0_88%] overflow-hidden rounded-[1.35rem] bg-slate-900 bg-cover bg-center p-3.5 text-left text-white shadow-[0_18px_44px_-32px_rgba(15,23,42,0.55)] ring-1 ring-white/70 transition hover:-translate-y-0.5 hover:shadow-[0_24px_54px_-34px_rgba(15,23,42,0.66)] active:scale-[0.99] sm:flex-[0_0_48%] lg:flex-[0_0_32%]"
+                                className="jnc-hub-touch group relative min-w-0 flex-[0_0_88%] overflow-hidden rounded-2xl bg-slate-900 bg-cover bg-center p-3.5 text-left text-white shadow-[0_18px_44px_-32px_rgba(15,23,42,0.55)] ring-1 ring-white/70 transition hover:-translate-y-0.5 hover:shadow-[0_24px_54px_-34px_rgba(15,23,42,0.66)] active:scale-[0.99] sm:flex-[0_0_48%] lg:flex-[0_0_32%]"
                                 style={{ backgroundImage: cardBackgroundImage }}
                               >
                                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_0%,rgba(95,211,90,0.18),transparent_36%)] opacity-90" />
@@ -2773,7 +2772,7 @@ export function MarketplacePage() {
               não interrompe o consumidor — recrutamento vive em /create e no
               rodapé. Aprovado no lote quick wins. */}
           <section className="order-12 pb-2 sm:pb-4">
-            <div className="mx-3 overflow-hidden rounded-[1.35rem] border border-white/80 bg-white/68 px-4 py-3.5 text-center shadow-[0_16px_36px_-30px_rgba(15,23,42,0.2)] ring-1 ring-slate-200/30 backdrop-blur-xl">
+            <div className="mx-3 overflow-hidden rounded-2xl border border-white/80 bg-white/68 px-4 py-3.5 text-center shadow-[0_16px_36px_-30px_rgba(15,23,42,0.2)] ring-1 ring-slate-200/30 backdrop-blur-xl">
               <div className="flex items-center justify-center gap-2">
                 <span className="grid h-7 w-7 place-items-center overflow-hidden rounded-[0.75rem] border border-white bg-white shadow-[0_10px_20px_-16px_rgba(15,23,42,0.35)]">
                   <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
@@ -2816,7 +2815,7 @@ export function MarketplacePage() {
             <div className="relative overflow-x-hidden px-4 pb-4 pt-3">
               <div className="pointer-events-none absolute -right-12 -top-10 h-56 w-56 rounded-full bg-[#336886]/12 blur-3xl" />
 
-              <div className="relative rounded-[2rem] bg-white/92 px-4 py-5 shadow-[0_24px_52px_-38px_rgba(15,23,42,0.24)] ring-1 ring-white/85 backdrop-blur">
+              <div className="relative rounded-3xl bg-white/92 px-4 py-5 shadow-[0_24px_52px_-38px_rgba(15,23,42,0.24)] ring-1 ring-white/85 backdrop-blur">
                 <div className="relative mb-4 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="mb-2 flex items-center gap-2">
@@ -2835,7 +2834,7 @@ export function MarketplacePage() {
                   </div>
                 </div>
 
-                <div className="relative flex items-center gap-3 rounded-[1.35rem] bg-slate-100/92 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] ring-1 ring-slate-200/75">
+                <div className="relative flex items-center gap-3 rounded-2xl bg-slate-100/92 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] ring-1 ring-slate-200/75">
                     <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
                     <input
                       {...inputAssistProps.search}
@@ -2980,7 +2979,7 @@ export function MarketplacePage() {
                                 }`}
                               >
                                 <div className="relative flex items-center gap-3">
-                                  <div className="relative h-[5.45rem] w-[6.8rem] shrink-0 overflow-hidden rounded-[1.35rem] bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.34)] ring-1 ring-white/80">
+                                  <div className="relative h-[5.45rem] w-[6.8rem] shrink-0 overflow-hidden rounded-2xl bg-slate-100 shadow-[0_16px_28px_-24px_rgba(15,23,42,0.34)] ring-1 ring-white/80">
                                     <img src={bannerUrl} alt="" aria-hidden loading="lazy" decoding="async" className="h-full w-full object-cover" />
                                     <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.18)_0%,rgba(15,23,42,0.06)_45%,rgba(15,23,42,0.24)_100%)]" />
                                     <div className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-2xs font-black uppercase tracking-[0.09em] text-[#336886] shadow-[0_10px_24px_-18px_rgba(15,23,42,0.32)]">
@@ -3252,7 +3251,7 @@ export function MarketplacePage() {
             aria-modal="true"
             aria-label={`Feira do condomínio ${condominiumPromoModal.name}`}
           >
-            <div className="relative w-full max-w-[430px] max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-t-[1.6rem] border border-white/80 bg-white shadow-[0_32px_74px_-34px_rgba(15,23,42,0.74)] animate-in slide-in-from-bottom-4 duration-200 sm:max-h-[calc(100vh-2rem)] sm:rounded-[2rem]">
+            <div className="relative w-full max-w-[430px] max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-t-[1.6rem] border border-white/80 bg-white shadow-[0_32px_74px_-34px_rgba(15,23,42,0.74)] animate-in slide-in-from-bottom-4 duration-200 sm:max-h-[calc(100vh-2rem)] sm:rounded-3xl">
               <button
                 type="button"
                 onClick={() => setCondominiumPromoModal(null)}
@@ -3305,7 +3304,7 @@ export function MarketplacePage() {
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-[1.35rem] border border-[#d8e4ec] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] px-4 py-3 shadow-[0_18px_30px_-24px_rgba(51,104,134,0.16)]">
+                <div className="mt-4 rounded-2xl border border-[#d8e4ec] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] px-4 py-3 shadow-[0_18px_30px_-24px_rgba(51,104,134,0.16)]">
                   <p className="text-sm font-black text-slate-900">{promoTitle}</p>
                   <p className="mt-1 text-xs font-medium leading-5 text-slate-600">{promoDescription}</p>
                 </div>

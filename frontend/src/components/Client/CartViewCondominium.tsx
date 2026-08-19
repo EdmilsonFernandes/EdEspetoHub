@@ -231,7 +231,7 @@ export const CartViewCondominium = ({
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[max(env(safe-area-inset-top),0.85rem)] bg-[linear-gradient(180deg,rgba(238,245,247,0.98),rgba(238,245,247,0.74))]" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4 sm:mb-6`}>
-        <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
+        <div className="rounded-3xl border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -262,7 +262,7 @@ export const CartViewCondominium = ({
       </div>
 
       {/* Dados do cliente */}
-      <div className="relative mb-4 overflow-hidden rounded-[2rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(244,248,252,0.94)_58%,rgba(255,255,255,0.94)_100%)] p-4 shadow-[0_24px_52px_-38px_rgba(15,23,42,0.24)] sm:mb-6 sm:p-6">
+      <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(244,248,252,0.94)_58%,rgba(255,255,255,0.94)_100%)] p-4 shadow-[0_24px_52px_-38px_rgba(15,23,42,0.24)] sm:mb-6 sm:p-6">
         <div className="pointer-events-none absolute -right-10 top-0 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
         <div className="relative flex items-start justify-between gap-4 mb-4">
           <div className="flex min-w-0 items-center gap-3">
@@ -293,7 +293,7 @@ export const CartViewCondominium = ({
 
         <div className="relative space-y-4">
           {/* Nome */}
-          <div className="rounded-[1.55rem] border border-slate-100 bg-white/90 p-3 shadow-[0_16px_28px_-26px_rgba(15,23,42,0.22)] sm:p-4">
+          <div className="rounded-3xl border border-slate-100 bg-white/90 p-3 shadow-[0_16px_28px_-26px_rgba(15,23,42,0.22)] sm:p-4">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Seu Nome</label>
             <div className="relative mt-2">
               <input
@@ -308,7 +308,7 @@ export const CartViewCondominium = ({
           </div>
 
           {/* WhatsApp */}
-          <div className="rounded-[1.55rem] border border-slate-100 bg-white/90 p-3 shadow-[0_16px_28px_-26px_rgba(15,23,42,0.22)] sm:p-4">
+          <div className="rounded-3xl border border-slate-100 bg-white/90 p-3 shadow-[0_16px_28px_-26px_rgba(15,23,42,0.22)] sm:p-4">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               WhatsApp {guestPhoneRequired ? <span className="text-rose-500 font-extrabold">Obrigatório</span> : null}
             </label>
@@ -334,7 +334,7 @@ export const CartViewCondominium = ({
           </div>
 
           {/* Modo de Entrega */}
-          <div className="rounded-[1.55rem] border border-slate-100 bg-white/90 p-3 shadow-[0_16px_28px_-26px_rgba(15,23,42,0.22)] sm:p-4">
+          <div className="rounded-3xl border border-slate-100 bg-white/90 p-3 shadow-[0_16px_28px_-26px_rgba(15,23,42,0.22)] sm:p-4">
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Como deseja receber?</p>
             <div className="grid grid-cols-1 gap-1 rounded-2xl bg-slate-100 p-1 min-[340px]:grid-cols-2">
               <button
@@ -414,7 +414,7 @@ export const CartViewCondominium = ({
         </div>
       </div>
 
-      <div className="mb-4 rounded-[2rem] border border-[#336886]/10 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.25)] sm:p-6">
+      <div className="mb-4 rounded-3xl border border-[#336886]/10 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.25)] sm:p-6">
         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Observação para a loja</p>
         <p className="mt-1 text-xs leading-relaxed text-slate-500">
           Opcional. Avise algo simples sobre preparo, retirada ou entrega no apartamento.
@@ -436,7 +436,7 @@ export const CartViewCondominium = ({
       </div>
 
       {/* Resumo */}
-      <div className="mb-4 rounded-[2rem] border border-slate-100 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.2)] sm:p-6">
+      <div className="mb-4 rounded-3xl border border-slate-100 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.2)] sm:p-6">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Resumo da compra</p>
@@ -494,7 +494,7 @@ export const CartViewCondominium = ({
       </div>
 
       {/* Pagamento */}
-      <div className="mb-4 rounded-[2rem] border border-slate-100 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.2)] sm:p-6">
+      <div className="mb-4 rounded-3xl border border-slate-100 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.2)] sm:p-6">
         <h2 className="font-black text-slate-900 mb-4 text-base flex items-center gap-2">
           <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
         </h2>

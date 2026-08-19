@@ -54,7 +54,7 @@ export function HubMarketingPopup({
             event.preventDefault();
             onOpenAction();
           }}
-          className="group block overflow-hidden rounded-[1.85rem] border border-white/80 bg-white shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] transition-all duration-200 ease-out active:scale-[0.985]"
+          className="group block overflow-hidden rounded-3xl border border-white/80 bg-white shadow-[0_28px_70px_-32px_rgba(15,23,42,0.72)] transition-all duration-200 ease-out active:scale-[0.985]"
           aria-label={title || 'Abrir popup de marketing do Já no Caminho'}
         >
           <div className="relative aspect-[3/4] bg-slate-950">

@@ -119,7 +119,7 @@ export function PremiumSplashScreen() {
             );
           })}
 
-          <div className="splash-brand-card absolute left-1/2 top-[76px] flex h-[86px] w-[86px] -translate-x-1/2 items-center justify-center rounded-[1.55rem] border border-white/10 bg-[linear-gradient(145deg,rgba(21,58,76,0.94),rgba(51,104,134,0.86))] shadow-[0_28px_62px_-34px_rgba(15,49,84,0.8)] ring-1 ring-[#336886]/10">
+          <div className="splash-brand-card absolute left-1/2 top-[76px] flex h-[86px] w-[86px] -translate-x-1/2 items-center justify-center rounded-3xl border border-white/10 bg-[linear-gradient(145deg,rgba(21,58,76,0.94),rgba(51,104,134,0.86))] shadow-[0_28px_62px_-34px_rgba(15,49,84,0.8)] ring-1 ring-[#336886]/10">
             <div className="absolute inset-2 rounded-[1.15rem] bg-[#336886]/10 blur-xl" />
             <span className="splash-robot-antenna absolute -top-3 left-1/2 h-5 w-[2px] -translate-x-1/2 rounded-full bg-[#5FD35A]/70" />
             <span className="splash-robot-eye absolute left-[26px] top-[27px] h-2 w-2 rounded-full bg-[#5FD35A] shadow-[0_0_12px_rgba(95,211,90,0.9)]" />

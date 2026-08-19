@@ -134,7 +134,7 @@ export const HubHeader = memo(function HubHeader({
                   hasNotification={!isCustomerLogged}
                   onClick={onOpenProfileDrawer}
                 />
-                <div className="min-w-0 flex-1 rounded-[1.35rem] px-2.5 py-1.5 min-[390px]:px-3 min-[390px]:py-2">
+                <div className="min-w-0 flex-1 rounded-2xl px-2.5 py-1.5 min-[390px]:px-3 min-[390px]:py-2">
                   <div className="mb-0.5 flex items-center gap-1.5">
                     <img
                       src="/janocaminho.jpg"
@@ -189,8 +189,8 @@ export const HubHeader = memo(function HubHeader({
               <div
                 className={`group relative isolate flex items-center gap-3 overflow-hidden border border-white/68 bg-white/58 px-3.5 shadow-[0_16px_34px_-30px_rgba(21,58,76,0.38)] transition-[border-color,box-shadow,transform] duration-300 ease-out hover:border-white/80 focus-within:-translate-y-0.5 focus-within:border-[#5FD35A]/25 focus-within:shadow-[0_22px_54px_-34px_rgba(95,211,90,0.28)] focus-within:ring-2 focus-within:ring-[#5FD35A]/15 ${
                   isNativePlatform
-                    ? 'min-h-[50px] rounded-[1.35rem]'
-                    : 'min-h-[54px] rounded-[1.55rem]'
+                    ? 'min-h-[50px] rounded-2xl'
+                    : 'min-h-[54px] rounded-3xl'
                 }`}
                 onClick={(event) => {
                   if ((event.target as HTMLElement).closest('button')) return;
@@ -438,7 +438,7 @@ export const HubHeader = memo(function HubHeader({
       {/* Buscas recentes — aparece ao focar a busca vazia (benchmark §5) */}
       {isSearchEditing && !query && recentSearches.length > 0 && (
         <div className="absolute inset-x-0 top-full z-[61] px-4 pt-2">
-          <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-2 rounded-[1.35rem] border border-white/70 bg-white/95 p-3 shadow-[0_26px_58px_-34px_rgba(21,58,76,0.4)] backdrop-blur-xl animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-2 rounded-2xl border border-white/70 bg-white/95 p-3 shadow-[0_26px_58px_-34px_rgba(21,58,76,0.4)] backdrop-blur-xl animate-in fade-in slide-in-from-top-1 duration-150">
             <span className="inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.16em] text-slate-400">
               <ClockCounterClockwise size={13} weight="duotone" />
               Recentes

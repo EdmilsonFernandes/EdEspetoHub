@@ -188,7 +188,7 @@ export function HubFilterSheet({
               </button>
             </div>
 
-            <div className="mt-4 rounded-[1.35rem] border border-[#336886]/10 bg-[#edf5fa]/68 px-3.5 py-3 text-[#153A4C] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+            <div className="mt-4 rounded-2xl border border-[#336886]/10 bg-[#edf5fa]/68 px-3.5 py-3 text-[#153A4C] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#336886]/75">Agora na lista</p>

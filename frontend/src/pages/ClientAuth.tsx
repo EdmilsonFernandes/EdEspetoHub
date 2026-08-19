@@ -587,7 +587,7 @@ export function ClientAuth() {
 
         <div className="ds-card-elevated space-y-3 border-white/40 bg-white/82 p-4 backdrop-blur-xl sm:space-y-5 sm:p-7 lg:p-8">
           {mode === 'login' ? (
-            <div className="relative overflow-hidden rounded-[1.35rem] border border-white/75 bg-[radial-gradient(circle_at_8%_0%,rgba(95,211,90,0.14),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.96),rgba(241,248,251,0.88))] p-3 shadow-[0_18px_42px_-34px_rgba(21,58,76,0.38)]">
+            <div className="relative overflow-hidden rounded-2xl border border-white/75 bg-[radial-gradient(circle_at_8%_0%,rgba(95,211,90,0.14),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.96),rgba(241,248,251,0.88))] p-3 shadow-[0_18px_42px_-34px_rgba(21,58,76,0.38)]">
               <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-[#336886]/10 blur-2xl" />
               <div className="relative flex items-center gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white bg-white p-0.5 shadow-[0_14px_30px_-22px_rgba(21,58,76,0.52)]">
@@ -838,7 +838,7 @@ export function ClientAuth() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="professional-access-title"
-            className="relative flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.25rem)] w-full max-w-lg flex-col overflow-y-auto overscroll-contain rounded-[1.85rem] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,248,251,0.96)_62%,rgba(236,244,248,0.94))] p-3.5 shadow-[0_38px_120px_-38px_rgba(15,23,42,0.78)] ring-1 ring-white/40 animate-in zoom-in-95 duration-200 sm:p-5"
+            className="relative flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.25rem)] w-full max-w-lg flex-col overflow-y-auto overscroll-contain rounded-3xl border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,248,251,0.96)_62%,rgba(236,244,248,0.94))] p-3.5 shadow-[0_38px_120px_-38px_rgba(15,23,42,0.78)] ring-1 ring-white/40 animate-in zoom-in-95 duration-200 sm:p-5"
           >
             <div className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#336886]/14 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-14 left-2 h-40 w-40 rounded-full bg-emerald-300/16 blur-3xl" />
@@ -903,7 +903,7 @@ export function ClientAuth() {
       ) : null}
       {verifyPrompt ? (
         <div className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/55 px-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
-          <div className="flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-7rem)] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)] sm:max-h-[min(48rem,calc(100dvh-3rem))]">
+          <div className="flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-7rem)] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)] sm:max-h-[min(48rem,calc(100dvh-3rem))]">
             <div className="relative overflow-hidden bg-[linear-gradient(135deg,#153a4c_0%,#1c4b62_55%,#336886_100%)] px-6 pb-8 pt-6 text-white">
               <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_68%)]" />
               <div className="relative flex items-start justify-between gap-4">

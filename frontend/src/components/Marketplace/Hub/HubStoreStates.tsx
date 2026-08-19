@@ -30,7 +30,7 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
 }: HubStoreDiscoveryNoticeProps) {
   if (isShowingAllStores) {
     return (
-      <div className="jnc-hub-surface-soft rounded-[1.55rem] px-4 py-3">
+      <div className="jnc-hub-surface-soft rounded-3xl px-4 py-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#336886]/10 text-[#336886]">
@@ -66,7 +66,7 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
 
   if (geoDiscovery?.mode === 'nearby_fallback') {
     return (
-      <div className="rounded-[1.55rem] border border-sky-100 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] px-4 py-3 shadow-[0_18px_40px_-34px_rgba(2,132,199,0.22)]">
+      <div className="rounded-3xl border border-sky-100 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] px-4 py-3 shadow-[0_18px_40px_-34px_rgba(2,132,199,0.22)]">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-100 text-sky-700">
             <MapPinLine size={18} weight="duotone" />
@@ -164,7 +164,7 @@ export const HubStoreEmptyState = memo(function HubStoreEmptyState({
 
   if (geoDiscovery?.mode === 'no_coverage') {
     return (
-      <div className="jnc-hub-surface relative overflow-hidden rounded-[2rem] p-5">
+      <div className="jnc-hub-surface relative overflow-hidden rounded-3xl p-5">
         <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[#336886]/10 blur-3xl" />
         <div className="pointer-events-none absolute -left-10 bottom-0 h-36 w-36 rounded-full bg-emerald-300/12 blur-3xl" />
         <div className="relative flex flex-col gap-5">

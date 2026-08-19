@@ -25,7 +25,7 @@ export function HeaderAvatarTrigger({
     <button
       type="button"
       onClick={onClick}
-      className="relative inline-flex h-[3.2rem] w-[3.2rem] items-center justify-center overflow-hidden rounded-[1.35rem] border border-white/90 bg-[linear-gradient(145deg,#ffffff_0%,#eef6f4_100%)] text-slate-700 shadow-[0_18px_34px_-18px_rgba(15,23,42,0.42)] ring-1 ring-slate-950/5 backdrop-blur-sm transition hover:bg-white active:scale-95"
+      className="relative inline-flex h-[3.2rem] w-[3.2rem] items-center justify-center overflow-hidden rounded-2xl border border-white/90 bg-[linear-gradient(145deg,#ffffff_0%,#eef6f4_100%)] text-slate-700 shadow-[0_18px_34px_-18px_rgba(15,23,42,0.42)] ring-1 ring-slate-950/5 backdrop-blur-sm transition hover:bg-white active:scale-95"
       aria-label="Abrir menu de perfil"
       title="Abrir menu de perfil"
     >

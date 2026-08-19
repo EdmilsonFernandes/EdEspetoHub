@@ -36,7 +36,7 @@ export class AppErrorBoundary extends React.Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(circle_at_top,#ecfeff_0%,#e7f0f6_42%,#e2ebf2_100%)] px-4">
-          <div className="w-full max-w-md rounded-[2rem] border border-white/80 bg-white/92 p-6 text-center shadow-[0_24px_70px_-36px_rgba(15,23,42,0.55)] backdrop-blur-xl">
+          <div className="w-full max-w-md rounded-3xl border border-white/80 bg-white/92 p-6 text-center shadow-[0_24px_70px_-36px_rgba(15,23,42,0.55)] backdrop-blur-xl">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-50 text-2xl shadow-inner">
               <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-9 w-9 rounded-xl object-cover" />
             </div>

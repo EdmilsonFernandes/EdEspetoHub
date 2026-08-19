@@ -325,7 +325,7 @@ const StaticPixBlock = ({ pixKey, phone }) => {
   };
 
   return (
-    <div className="mb-8 w-full rounded-[2rem] border border-[#d8e5ee] bg-[linear-gradient(145deg,#ffffff_0%,#f4f8fb_100%)] p-6 shadow-[0_22px_42px_-30px_rgba(51,104,134,0.18)]">
+    <div className="mb-8 w-full rounded-3xl border border-[#d8e5ee] bg-[linear-gradient(145deg,#ffffff_0%,#f4f8fb_100%)] p-6 shadow-[0_22px_42px_-30px_rgba(51,104,134,0.18)]">
       <div className="flex flex-col items-center gap-3 mb-4 text-center">
         <div className="rounded-full bg-[#edf5fa] p-3 shadow-inner">
           <QrCode size={24} weight="duotone" className="text-[#336886]" />
@@ -493,7 +493,7 @@ export const SuccessView = ({
     <div className={`animate-in fade-in duration-300 relative overflow-x-clip min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.10),transparent_34%),linear-gradient(180deg,#eef5f7_0%,#f8fafc_8.5rem,#f8fafc_100%)] ${checkoutTopPaddingClass} ${isNativePlatform ? "ds-native-nav-content-lg" : "pb-24"}`}>
       {showCelebration && (
         <div className="pointer-events-none fixed inset-x-0 top-0 z-[75] flex justify-center px-4 pt-20 sm:pt-24">
-          <div className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-emerald-200/80 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.28),rgba(255,255,255,0.98)_48%)] px-5 py-5 shadow-[0_40px_100px_-52px_rgba(5,150,105,0.65)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-emerald-200/80 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.28),rgba(255,255,255,0.98)_48%)] px-5 py-5 shadow-[0_40px_100px_-52px_rgba(5,150,105,0.65)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-300">
             <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-emerald-300/35 blur-3xl" />
             <div className="absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-sky-200/35 blur-3xl" />
             <span className="absolute left-5 top-4 h-2.5 w-2.5 rounded-full bg-amber-300 shadow-[0_0_0_6px_rgba(252,211,77,0.18)]" />
@@ -523,7 +523,7 @@ export const SuccessView = ({
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[max(env(safe-area-inset-top),0.85rem)] bg-[linear-gradient(180deg,rgba(238,245,247,0.98),rgba(238,245,247,0.74))]" />
       {/* Sticky header */}
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4`}>
-        <div className="rounded-[1.85rem] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
+        <div className="rounded-3xl border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
           {/* Step indicator */}
           <div className="mb-3 flex items-center gap-1">
             {(() => {
@@ -575,7 +575,7 @@ export const SuccessView = ({
       {/* Content */}
       <div className="space-y-4 px-4 sm:px-6">
         {!isAwaitingPayment && (
-          <div className={`rounded-[2rem] border p-5 shadow-[0_20px_42px_-32px_rgba(15,23,42,0.22)] ${isPaid ? 'bg-[linear-gradient(145deg,rgba(236,253,245,0.98),rgba(255,255,255,0.98)_48%,rgba(236,253,245,0.9)_100%)] border-emerald-200' : 'bg-[linear-gradient(145deg,rgba(239,246,255,0.98),rgba(255,255,255,0.98)_52%,rgba(238,245,247,0.94)_100%)] border-sky-200'}`}>
+          <div className={`rounded-3xl border p-5 shadow-[0_20px_42px_-32px_rgba(15,23,42,0.22)] ${isPaid ? 'bg-[linear-gradient(145deg,rgba(236,253,245,0.98),rgba(255,255,255,0.98)_48%,rgba(236,253,245,0.9)_100%)] border-emerald-200' : 'bg-[linear-gradient(145deg,rgba(239,246,255,0.98),rgba(255,255,255,0.98)_52%,rgba(238,245,247,0.94)_100%)] border-sky-200'}`}>
             <div className="flex items-center gap-3">
               <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-inner ${isPaid ? 'bg-emerald-100' : 'bg-sky-100'}`}>
                 <CheckCircle size={28} weight="duotone" className={isPaid ? 'text-emerald-600' : 'text-sky-600'} />
@@ -624,7 +624,7 @@ export const SuccessView = ({
         {isStaticPix && <StaticPixBlock pixKey={pixKey} phone={phone} />}
 
         {isLocalPayment && (
-          <div className="rounded-[2rem] border border-[#d8e5ee] bg-[linear-gradient(145deg,#ffffff_0%,#f4f8fb_100%)] p-4 shadow-[0_20px_40px_-34px_rgba(51,104,134,0.18)]">
+          <div className="rounded-3xl border border-[#d8e5ee] bg-[linear-gradient(145deg,#ffffff_0%,#f4f8fb_100%)] p-4 shadow-[0_20px_40px_-34px_rgba(51,104,134,0.18)]">
             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]">Forma de pagamento</p>
             <div className="flex items-center gap-2">
               {(() => {
@@ -641,7 +641,7 @@ export const SuccessView = ({
           </div>
         )}
 
-        <div className="rounded-[2rem] border border-slate-200/80 bg-white/86 p-3 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.2)] backdrop-blur-xl">
+        <div className="rounded-3xl border border-slate-200/80 bg-white/86 p-3 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.2)] backdrop-blur-xl">
           <p className="px-2 pb-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Próximos passos</p>
           <div className="flex flex-col gap-3">
             <button

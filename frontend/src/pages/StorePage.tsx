@@ -3774,7 +3774,7 @@ export function StorePage() {
       ) : null}
       {showClientWebCheckoutContext && (
         <section className="mx-auto w-full max-w-6xl px-4 pt-2 sm:pt-3">
-          <div className="relative overflow-hidden rounded-[1.55rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.92)_0%,rgba(247,250,252,0.88)_100%)] px-3.5 py-3 shadow-[0_22px_52px_-38px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/55 backdrop-blur-2xl sm:px-4">
+          <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.92)_0%,rgba(247,250,252,0.88)_100%)] px-3.5 py-3 shadow-[0_22px_52px_-38px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/55 backdrop-blur-2xl sm:px-4">
             <div className="pointer-events-none absolute -right-10 -top-14 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-12 left-8 h-24 w-24 rounded-full bg-emerald-300/12 blur-3xl" />
             <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -4068,7 +4068,7 @@ export function StorePage() {
 
               <div className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)] md:items-start">
                 <div className="space-y-4">
-                  <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.92)_0%,rgba(241,247,246,0.9)_54%,rgba(255,255,255,0.94)_100%)] shadow-[0_26px_60px_-38px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+                  <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.92)_0%,rgba(241,247,246,0.9)_54%,rgba(255,255,255,0.94)_100%)] shadow-[0_26px_60px_-38px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
                     <div className="relative h-40 overflow-hidden sm:h-48">
                       <div className="absolute inset-0 bg-[#153A4C]">
                         <Image
@@ -4089,7 +4089,7 @@ export function StorePage() {
                       <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(7,13,25,0.72)_0%,rgba(9,16,32,0.54)_40%,rgba(15,23,42,0.24)_100%)]" />
                       <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
                         <div className="flex items-end gap-4">
-                          <div className="h-18 w-18 shrink-0 overflow-hidden rounded-[1.35rem] border border-white/65 bg-white/90 shadow-[0_16px_30px_-18px_rgba(15,23,42,0.45)] sm:h-20 sm:w-20">
+                          <div className="h-18 w-18 shrink-0 overflow-hidden rounded-2xl border border-white/65 bg-white/90 shadow-[0_16px_30px_-18px_rgba(15,23,42,0.45)] sm:h-20 sm:w-20">
                             <Image
                               src={branding?.logoUrl || '/janocaminho.jpg'}
                               alt={closedStateStoreName}
@@ -4110,7 +4110,7 @@ export function StorePage() {
                     </div>
 
                     <div className="space-y-4 px-5 py-5 sm:px-6 sm:py-6">
-                      <div className="rounded-[1.55rem] border border-slate-200/85 bg-white/88 p-4 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.22)]">
+                      <div className="rounded-3xl border border-slate-200/85 bg-white/88 p-4 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.22)]">
                         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Próximo atendimento</p>
                         <p className="mt-1 text-base font-black text-slate-900">
                           {todayHoursLabel || 'Sem horário configurado para hoje'}
@@ -4121,7 +4121,7 @@ export function StorePage() {
                       </div>
 
                       {storeDescription && (
-                        <div className="rounded-[1.55rem] border border-slate-200/85 bg-white/88 p-4 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.16)]">
+                        <div className="rounded-3xl border border-slate-200/85 bg-white/88 p-4 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.16)]">
                           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Sobre a loja</p>
                           <p className="mt-2 break-words text-sm leading-relaxed text-slate-600">{storeDescription}</p>
                         </div>
@@ -4131,7 +4131,7 @@ export function StorePage() {
                 </div>
 
                 <div className="space-y-4">
-                  <section className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(247,250,252,0.92)_100%)] p-5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+                  <section className="rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(247,250,252,0.92)_100%)] p-5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Contato e endereço</p>
                     <div className="mt-4 space-y-3">
                       {instagramHandle && (
@@ -4158,7 +4158,7 @@ export function StorePage() {
                   </section>
 
                   {weeklyHoursRows.length > 0 && (
-                    <section className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(247,250,252,0.92)_100%)] p-5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+                    <section className="rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(247,250,252,0.92)_100%)] p-5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
                       <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Horários da semana</p>
                       <div className="mt-4 space-y-2">
                         {weeklyHoursRows.map((row) => (
@@ -4186,7 +4186,7 @@ export function StorePage() {
         )}
         {!showInactiveState && !showClosedState && view === 'menu' && products.length === 0 && productsLoading ? (
           <div className="mx-auto min-h-[68vh] w-full max-w-5xl px-4 py-8">
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_28px_72px_-46px_rgba(15,23,42,0.35)] ring-1 ring-white/70 backdrop-blur-xl">
+            <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/88 p-5 shadow-[0_28px_72px_-46px_rgba(15,23,42,0.35)] ring-1 ring-white/70 backdrop-blur-xl">
               <div className="pointer-events-none absolute -right-12 -top-14 h-36 w-36 rounded-full bg-[#336886]/10 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-amber-300/12 blur-3xl" />
               <div className="flex items-center gap-3">
@@ -4215,7 +4215,7 @@ export function StorePage() {
           </div>
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length === 0 && productsLoadError ? (
           <div className="min-h-[70vh] flex items-center justify-center px-4">
-            <div className="max-w-md rounded-[2rem] border border-white/80 bg-white/90 p-6 text-center shadow-[0_24px_54px_-36px_rgba(15,23,42,0.3)] ring-1 ring-white/70 backdrop-blur-xl">
+            <div className="max-w-md rounded-3xl border border-white/80 bg-white/90 p-6 text-center shadow-[0_24px_54px_-36px_rgba(15,23,42,0.3)] ring-1 ring-white/70 backdrop-blur-xl">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 shadow-[0_16px_34px_-28px_rgba(245,158,11,0.5)]">
                 <WarningCircle size={28} weight="duotone" />
               </div>
@@ -4545,7 +4545,7 @@ export function StorePage() {
 
       {showCustomerAccount && !isStoreAdmin && (
         <div className="fixed inset-0 z-[9998] bg-slate-950/65 backdrop-blur-sm flex items-center justify-center px-3 py-5">
-          <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-[2rem] bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] border border-slate-200/80 shadow-[0_28px_80px_-42px_rgba(15,23,42,0.75)] p-4 sm:p-5">
+          <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] border border-slate-200/80 shadow-[0_28px_80px_-42px_rgba(15,23,42,0.75)] p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400 font-extrabold">Conta do cliente</p>

@@ -681,7 +681,7 @@ export function ProfileDrawer({
           <button
             type="button"
             onClick={() => setAboutOpen(true)}
-            className="group flex w-full items-center gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/86 p-3 text-left shadow-[0_18px_34px_-28px_rgba(15,23,42,0.24)] transition-all active:scale-[0.98]"
+            className="group flex w-full items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/86 p-3 text-left shadow-[0_18px_34px_-28px_rgba(15,23,42,0.24)] transition-all active:scale-[0.98]"
           >
             <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border border-white bg-white p-0.5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.44)] ring-1 ring-slate-100">
               <img src="/janocaminho.jpg" alt="Logo" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full rounded-[0.85rem] object-cover opacity-95" />
@@ -709,7 +709,7 @@ export function ProfileDrawer({
             </div>
             <div className="relative flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="grid h-14 w-14 place-items-center overflow-hidden rounded-[1.35rem] bg-white p-1 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.52)] ring-1 ring-slate-100">
+                <span className="grid h-14 w-14 place-items-center overflow-hidden rounded-2xl bg-white p-1 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.52)] ring-1 ring-slate-100">
                   <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-[1rem] object-cover" />
                 </span>
                 <div>
@@ -728,7 +728,7 @@ export function ProfileDrawer({
             </div>
 
             <div className="relative mt-5 space-y-3">
-              <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/82 p-4">
+              <div className="rounded-2xl border border-slate-200/80 bg-white/82 p-4">
                 <p className="text-sm font-black text-slate-950">Marketplace local, pedidos e entregas em um só lugar.</p>
                 <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-500">
                   Plataforma desenvolvida para clientes, lojas, entregadores, condomínios e destinos turísticos operarem com uma experiência simples e segura.
@@ -753,7 +753,7 @@ export function ProfileDrawer({
                   </div>
                 </div>
               </div>
-              <div className="rounded-[1.35rem] border border-slate-200/80 bg-slate-50/80 p-4">
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4">
                 <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Desenvolvimento</p>
                 <p className="mt-1 text-sm font-black text-slate-900">Edmilson Santos</p>
                 <p className="mt-1 text-[11px] font-semibold leading-5 text-slate-500">
@@ -863,7 +863,7 @@ export function ProfileDrawer({
                       onRegisterClient();
                       onClose();
                     }}
-                    className="group flex min-h-[5rem] items-center gap-3.5 rounded-[1.35rem] border border-sky-100 bg-[linear-gradient(135deg,#f8fbff,#eef7ff)] px-3.5 py-3 text-left text-slate-700 shadow-[0_14px_28px_-24px_rgba(51,104,134,0.32)] transition-all active:scale-[0.98]"
+                    className="group flex min-h-[5rem] items-center gap-3.5 rounded-2xl border border-sky-100 bg-[linear-gradient(135deg,#f8fbff,#eef7ff)] px-3.5 py-3 text-left text-slate-700 shadow-[0_14px_28px_-24px_rgba(51,104,134,0.32)] transition-all active:scale-[0.98]"
                   >
                     <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.05rem] border border-white/80 bg-white/86 text-[#336886] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.35)]">
                       <UserCircle size={25} weight="duotone" />
@@ -881,7 +881,7 @@ export function ProfileDrawer({
                       onRegisterStore();
                       onClose();
                     }}
-                    className="group flex min-h-[5rem] items-center gap-3.5 rounded-[1.35rem] border border-emerald-100 bg-[linear-gradient(135deg,#f3fff8,#e8f8ef)] px-3.5 py-3 text-left text-emerald-900 shadow-[0_14px_28px_-24px_rgba(16,185,129,0.32)] transition-all active:scale-[0.98]"
+                    className="group flex min-h-[5rem] items-center gap-3.5 rounded-2xl border border-emerald-100 bg-[linear-gradient(135deg,#f3fff8,#e8f8ef)] px-3.5 py-3 text-left text-emerald-900 shadow-[0_14px_28px_-24px_rgba(16,185,129,0.32)] transition-all active:scale-[0.98]"
                   >
                     <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.05rem] border border-white/80 bg-white/82 text-emerald-700 shadow-[0_12px_24px_-20px_rgba(16,185,129,0.35)]">
                       <Storefront size={25} weight="duotone" />
@@ -899,7 +899,7 @@ export function ProfileDrawer({
                       onRegisterMotoboy();
                       onClose();
                     }}
-                    className="group flex min-h-[5rem] items-center gap-3.5 rounded-[1.35rem] border border-amber-100 bg-[linear-gradient(135deg,#fffbed,#fbf4d4)] px-3.5 py-3 text-left text-amber-900 shadow-[0_14px_28px_-24px_rgba(245,158,11,0.32)] transition-all active:scale-[0.98]"
+                    className="group flex min-h-[5rem] items-center gap-3.5 rounded-2xl border border-amber-100 bg-[linear-gradient(135deg,#fffbed,#fbf4d4)] px-3.5 py-3 text-left text-amber-900 shadow-[0_14px_28px_-24px_rgba(245,158,11,0.32)] transition-all active:scale-[0.98]"
                   >
                     <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.05rem] border border-white/80 bg-white/80 text-amber-700 shadow-[0_12px_24px_-20px_rgba(245,158,11,0.35)]">
                       <Motorcycle size={25} weight="duotone" />

@@ -147,7 +147,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                     }`}
                   >
                     <div className={`relative shrink-0 overflow-hidden bg-slate-100 shadow-[0_20px_38px_-32px_rgba(15,23,42,0.30)] ring-1 ring-white/80 ${
-                      isLead ? 'h-[110px] w-[110px] rounded-[1.35rem]' : 'h-[92px] w-[92px] rounded-[1.2rem]'
+                      isLead ? 'h-[110px] w-[110px] rounded-2xl' : 'h-[92px] w-[92px] rounded-[1.2rem]'
                     }`}>
                       <Image
                         src={item.imageUrl}

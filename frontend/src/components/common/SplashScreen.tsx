@@ -34,7 +34,7 @@ export function SplashScreen() {
         {/* Logo/Mascote com Animação Premium */}
         <div className="relative animate-in zoom-in-90 duration-1000 ease-out">
           <div className="relative h-32 w-32 sm:h-36 sm:w-36">
-            <div className="h-full w-full overflow-hidden rounded-[2rem] border border-[#336886]/20 bg-white p-1 shadow-[0_20px_60px_-16px_rgba(13,79,102,0.35)]">
+            <div className="h-full w-full overflow-hidden rounded-3xl border border-[#336886]/20 bg-white p-1 shadow-[0_20px_60px_-16px_rgba(13,79,102,0.35)]">
               <img
                 src="/janocaminho.jpg"
                 alt="Já no Caminho"

@@ -79,7 +79,7 @@ export function AppImagePreviewDialog({
       onClick={onClose}
     >
       <figure
-        className="relative grid max-h-[calc(100dvh_-_2rem_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-full max-w-4xl grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-[2rem] border border-white/14 bg-white/10 p-2 shadow-[0_36px_110px_-46px_rgba(0,0,0,0.96)] ring-1 ring-white/10 animate-in zoom-in-95 duration-200"
+        className="relative grid max-h-[calc(100dvh_-_2rem_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-full max-w-4xl grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-3xl border border-white/14 bg-white/10 p-2 shadow-[0_36px_110px_-46px_rgba(0,0,0,0.96)] ring-1 ring-white/10 animate-in zoom-in-95 duration-200"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between gap-3 px-2 pb-2 text-white">
@@ -102,7 +102,7 @@ export function AppImagePreviewDialog({
         </div>
 
         <div
-          className="relative grid min-h-0 place-items-center overflow-hidden rounded-[1.55rem] bg-slate-950/45"
+          className="relative grid min-h-0 place-items-center overflow-hidden rounded-3xl bg-slate-950/45"
           onTouchStart={(event) => setTouchStartX(event.touches[0]?.clientX ?? null)}
           onTouchEnd={(event) => {
             if (touchStartX === null || !hasGallery) return;
