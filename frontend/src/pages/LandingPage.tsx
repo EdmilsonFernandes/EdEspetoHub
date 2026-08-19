@@ -1,1147 +1,335 @@
-import { useEffect, useState } from 'react';
+// @ts-nocheck
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
-  ArrowRight,
-  Buildings,
-  EnvelopeSimple,
-  Eye,
-  EyeSlash,
-  GooglePlayLogo,
-  Handshake,
-  Lock,
-  MapPin,
-  Motorcycle,
-  Package,
-  Phone,
-  PlayCircle,
-  Rocket,
-  ShieldCheck,
   Storefront,
-  User,
-  UserCircle,
+  ForkKnife,
+  Buildings,
+  MapPin,
+  CaretRight,
+  Sparkle,
+  Tent,
+  ShoppingCart,
+  Scooter,
+  SealCheck,
   WhatsappLogo,
-  X,
 } from '@phosphor-icons/react';
-import { useNavigate } from 'react-router-dom';
-import { useRoleRedirect } from '../hooks/useRoleRedirect';
-import { LandingPageLayout } from '../layouts/LandingPageLayout';
-import { storeService } from '../services/storeService';
-import { customerAccountService } from '../services/customerAccountService';
-import { resolveAssetUrl } from '../utils/resolveAssetUrl';
-import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
-import { HubFlowSimulator } from '../components/Landing/HubFlowSimulator';
-import { BentoFeatures } from '../components/Landing/BentoFeatures';
-import { LandingUseCases } from '../components/Landing/LandingUseCases';
-import { PricingSection } from '../components/Landing/PricingSection';
-import { EcosystemDeckShowcase } from '../components/Landing/EcosystemDeckShowcase';
 
-const mercadoPagoLandingLogo = '/mercado-pago-horizontal.png';
+/**
+ * Landing CONSUMER do Já no Caminho (auditoria 2, 18/08).
+ *
+ * A landing antiga era dark-SaaS com voz dupla ("peça OU venda") e virou
+ * /parceiros (PartnersPage). Esta página fala com quem PEDE, usando os tokens
+ * do hub (light #E2EBF2, teal #336886, verde ao-vivo) — a porta de entrada do
+ * mesmo produto que o usuário encontra depois em /hub.
+ *
+ * Hero aprovado pelo Edmilson: "O seu bairro tem mais sabor do que você imagina."
+ */
 
-const upsertMeta = (name: string, content: string, attr: 'name' | 'property' = 'name') => {
-  if (typeof document === 'undefined') return;
-  const selector = `meta[${attr}="${name}"]`;
-  let tag = document.head.querySelector(selector) as HTMLMetaElement | null;
-  if (!tag) {
-    tag = document.createElement('meta');
-    tag.setAttribute(attr, name);
-    document.head.appendChild(tag);
-  }
-  tag.setAttribute('content', content);
-};
+const WHAT_YOU_CAN_DO = [
+  {
+    icon: ForkKnife,
+    title: 'Restaurantes e lanches',
+    text: 'Escolha, peça e acompanhe até a porta — ou retire na hora.',
+  },
+  {
+    icon: ShoppingCart,
+    title: 'Mercados e comércio',
+    text: 'Adega, hortifruti, farmácia e o brechó da vizinha.',
+  },
+  {
+    icon: Buildings,
+    title: 'Seu condomínio',
+    text: 'Vendedores moradores, feiras e entrega no bloco.',
+  },
+  {
+    icon: MapPin,
+    title: 'Destinos por perto',
+    text: 'Chalés, pousadas e experiências para o fim de semana.',
+  },
+];
 
-const formatPhoneBr = (value: string) => {
-  const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-};
+const STEPS = [
+  { icon: MapPin, title: 'Abra e veja perto de você', text: 'Sem cadastro pra explorar: as lojas da sua região aparecem na hora.' },
+  { icon: Storefront, title: 'Escolha e peça', text: 'Delivery, retirada, mesa ou feira do condomínio — Pix, cartão ou dinheiro.' },
+  { icon: SealCheck, title: 'Acompanhe tudo', text: 'Status em tempo real, Pix que confirma sozinho e ajuda a um toque.' },
+];
 
 export function LandingPage() {
-  const navigate = useNavigate();
-  const googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.janocaminho.app';
-  const googlePlayQrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=4&data=${encodeURIComponent(googlePlayUrl)}`;
-  // Tour em vídeo (YouTube) — botão no hero (modal) + seção "Veja como funciona".
-  const tourVideoId = 'HtU1t1zp43I';
-  const tourVideoSrc = `https://www.youtube-nocookie.com/embed/${tourVideoId}?rel=0`;
-  const [featuredStores, setFeaturedStores] = useState<Array<{ id: string; name: string; slug: string; logoUrl?: string | null }>>([]);
-  const [showCustomerAuth, setShowCustomerAuth] = useState(false);
-  const [hasCustomerSession, setHasCustomerSession] = useState(false);
-  const [customerAuthMode, setCustomerAuthMode] = useState<'login' | 'register'>('login');
-  const [customerAuthForm, setCustomerAuthForm] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    password: '',
-    termsAccepted: false,
-    lgpdAccepted: false,
-  });
-  const [customerAuthLoading, setCustomerAuthLoading] = useState(false);
-  const [customerAuthError, setCustomerAuthError] = useState('');
-  const [customerAuthNotice, setCustomerAuthNotice] = useState('');
-  const [customerVerifyPrompt, setCustomerVerifyPrompt] = useState<{ email: string; emailMasked?: string | null } | null>(null);
-  const [customerVerifyCode, setCustomerVerifyCode] = useState('');
-  const [customerVerifyLoading, setCustomerVerifyLoading] = useState(false);
-  const [customerResendLoading, setCustomerResendLoading] = useState(false);
-  const [customerResendCooldown, setCustomerResendCooldown] = useState(0);
-  const [targetStoreSlug, setTargetStoreSlug] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [tourOpen, setTourOpen] = useState(false);
-
   useEffect(() => {
-    document.title = 'Já no Caminho | Venda online, organize pedidos e entregue melhor';
-    const description =
-      'Peça de lojas, feiras de condomínio e destinos turísticos num só app — ou coloque seu negócio online sem comissão por pedido, com cardápio digital, entregas e pagamentos.';
-    upsertMeta('description', description, 'name');
-    upsertMeta('og:title', 'Já no Caminho | Venda online, organize pedidos e entregue melhor', 'property');
-    upsertMeta('og:description', description, 'property');
-    upsertMeta('og:image', 'https://www.janocaminho.com.br/janocaminho.jpg', 'property');
-    upsertMeta('og:type', 'website', 'property');
+    document.title = 'Já no Caminho — Peça, retire e descubra perto de você';
   }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || window.location.hash !== '#solucao-hospedagens') return;
-    const timer = window.setTimeout(() => {
-      document.getElementById('solucao-hospedagens')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 120);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  useRoleRedirect();
-
-  useEffect(() => {
-    const sync = () => {
-      try {
-        const raw = localStorage.getItem('customerSession');
-        const parsed = raw ? JSON.parse(raw) : null;
-        setHasCustomerSession(Boolean(parsed?.token));
-      } catch {
-        setHasCustomerSession(false);
-      }
-    };
-    sync();
-    window.addEventListener('storage', sync);
-    return () => window.removeEventListener('storage', sync);
-  }, []);
-
-  useEffect(() => {
-    if (!targetStoreSlug && featuredStores.length > 0) {
-      setTargetStoreSlug(featuredStores[0].slug);
-    }
-  }, [featuredStores, targetStoreSlug]);
-
-  useEffect(() => {
-    if (customerResendCooldown <= 0) return;
-    const timer = window.setTimeout(() => setCustomerResendCooldown((value) => Math.max(0, value - 1)), 1000);
-    return () => window.clearTimeout(timer);
-  }, [customerResendCooldown]);
-
-  const handleCustomerAuthSubmit = async () => {
-    if (customerAuthLoading) return;
-    setCustomerAuthLoading(true);
-    setCustomerAuthError('');
-    setCustomerAuthNotice('');
-    try {
-      let result: any;
-      if (customerAuthMode === 'register') {
-        if (!customerAuthForm.termsAccepted || !customerAuthForm.lgpdAccepted) {
-          throw new Error('Aceite os termos de uso e a política de privacidade para criar sua conta.');
-        }
-        result = await customerAccountService.register({
-          fullName: String(customerAuthForm.fullName || '').trim(),
-          email: String(customerAuthForm.email || '').trim(),
-          phone: String(customerAuthForm.phone || '').trim(),
-          password: String(customerAuthForm.password || ''),
-          termsAccepted: Boolean(customerAuthForm.termsAccepted),
-          lgpdAccepted: Boolean(customerAuthForm.lgpdAccepted),
-        });
-        if (result?.next === 'VERIFY_EMAIL_CODE') {
-          const targetEmail = String(result?.email || customerAuthForm.email || '').trim().toLowerCase();
-          setCustomerVerifyPrompt({
-            email: targetEmail,
-            emailMasked: result?.emailMasked || targetEmail,
-          });
-          setCustomerVerifyCode('');
-          {
-            const cooldown = Number(result?.cooldownSec);
-            setCustomerResendCooldown(Number.isFinite(cooldown) ? Math.max(0, cooldown) : 60);
-          }
-          setCustomerAuthNotice(
-            result?.emailDeliveryStatus === 'failed' && result?.reason === 'ACCOUNT_PENDING_EMAIL_VERIFICATION'
-              ? 'Encontramos sua conta aguardando confirmação, mas não conseguimos enviar um novo código agora. Se você já recebeu um código, pode tentar usá-lo; se não, toque em Reenviar código em instantes.'
-              : result?.emailDeliveryStatus === 'failed'
-              ? 'Sua conta foi criada, mas o envio do código falhou agora. Toque em Reenviar código para tentar novamente.'
-              : result?.reason === 'ACCOUNT_PENDING_EMAIL_VERIFICATION'
-              ? 'Encontramos sua conta. Falta só confirmar o e-mail; enviamos um novo código para você continuar.'
-              : 'Enviamos um código de 4 dígitos para concluir seu cadastro.'
-          );
-          return;
-        }
-      } else {
-        result = await customerAccountService.login({
-          email: String(customerAuthForm.email || '').trim(),
-          password: String(customerAuthForm.password || ''),
-        });
-      }
-      if (!result?.token) throw new Error('Não foi possível autenticar.');
-      localStorage.setItem('customerSession', JSON.stringify(result));
-      setHasCustomerSession(true);
-      const slug = String(targetStoreSlug || '').trim();
-      if (slug) {
-        navigate(`/${slug}`);
-      } else {
-        navigate('/');
-      }
-    } catch (error: any) {
-      if (error?.code === 'AUTH-005') {
-        const targetEmail = String(error?.details?.email || customerAuthForm.email || '').trim().toLowerCase();
-        setCustomerVerifyPrompt({
-          email: targetEmail,
-          emailMasked: error?.details?.emailMasked || targetEmail,
-        });
-        setCustomerVerifyCode('');
-        setCustomerResendCooldown(Number(error?.details?.resendCooldownSec || 60));
-        setCustomerAuthNotice('Sua conta já existe e só falta confirmar o e-mail. Reenvie o código se precisar.');
-        return;
-      }
-      setCustomerAuthError(error?.message || 'Falha ao autenticar cliente.');
-    } finally {
-      setCustomerAuthLoading(false);
-    }
-  };
-
-  const finishCustomerAuth = (result: any) => {
-    if (!result?.token) throw new Error('Não foi possível autenticar.');
-    localStorage.setItem('customerSession', JSON.stringify(result));
-    setHasCustomerSession(true);
-    setShowCustomerAuth(false);
-    setCustomerVerifyPrompt(null);
-    setCustomerVerifyCode('');
-    const slug = String(targetStoreSlug || '').trim();
-    navigate(slug ? `/${slug}` : '/');
-  };
-
-  const handleCustomerVerifyCode = async () => {
-    const email = String(customerVerifyPrompt?.email || customerAuthForm.email || '').trim().toLowerCase();
-    const code = String(customerVerifyCode || '').replace(/\D/g, '').slice(0, 4);
-    if (!email || code.length !== 4 || customerVerifyLoading) return;
-    setCustomerVerifyLoading(true);
-    setCustomerAuthError('');
-    setCustomerAuthNotice('');
-    try {
-      const result = await customerAccountService.verifyEmailCode({ email, code });
-      finishCustomerAuth(result);
-    } catch (error: any) {
-      setCustomerAuthError(error?.message || 'Código inválido ou expirado.');
-    } finally {
-      setCustomerVerifyLoading(false);
-    }
-  };
-
-  const handleCustomerResendVerification = async () => {
-    const email = String(customerVerifyPrompt?.email || customerAuthForm.email || '').trim().toLowerCase();
-    if (!email || customerResendLoading || customerResendCooldown > 0) return;
-    setCustomerResendLoading(true);
-    setCustomerAuthError('');
-    setCustomerAuthNotice('');
-    try {
-      const result = await customerAccountService.resendEmailCode(email);
-      setCustomerVerifyPrompt((prev) => ({
-        email,
-        emailMasked: result?.emailMasked || prev?.emailMasked || email,
-      }));
-      setCustomerVerifyCode('');
-      {
-        const cooldown = Number(result?.cooldownSec);
-        setCustomerResendCooldown(Number.isFinite(cooldown) ? Math.max(0, cooldown) : 60);
-      }
-      if (result?.emailDeliveryStatus === 'failed') {
-        setCustomerAuthError('Não conseguimos enviar o código agora. Tente reenviar novamente em instantes.');
-      } else {
-        setCustomerAuthNotice(result?.message || 'Novo código enviado para seu e-mail.');
-      }
-    } catch (error: any) {
-      setCustomerAuthError(error?.message || 'Não foi possível reenviar o código agora.');
-    } finally {
-      setCustomerResendLoading(false);
-    }
-  };
-
-  const handleCustomerForgotPassword = async () => {
-    const email = String(customerAuthForm.email || '').trim();
-    if (!email) {
-      setCustomerAuthError('Informe seu e-mail para recuperar a senha.');
-      return;
-    }
-    setCustomerAuthLoading(true);
-    setCustomerAuthError('');
-    try {
-      await customerAccountService.forgotPassword(email);
-      setCustomerAuthError('Enviamos um link de recuperação para seu e-mail.');
-    } catch (error: any) {
-      setCustomerAuthError(error?.message || 'Não foi possível enviar recuperação.');
-    } finally {
-      setCustomerAuthLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let mounted = true;
-    storeService
-      .listPortfolio()
-      .then((data: any) => {
-        if (!mounted) return;
-        const normalized = Array.isArray(data)
-          ? data
-              .map((store: any, index: number) => ({
-                id: String(store?.id || store?.slug || `store-${index}`),
-                name: String(store?.name || 'Loja ativa'),
-                slug: String(store?.slug || ''),
-                logoUrl: resolveAssetUrl(store?.settings?.logoUrl || undefined) || '/janocaminho.jpg',
-              }))
-              .filter((store: any) => Boolean(store.slug))
-          : [];
-        setFeaturedStores(normalized.slice(0, 20));
-      })
-      .catch(() => {
-        if (!mounted) return;
-        setFeaturedStores([]);
-      });
-    return () => { mounted = false; };
-  }, []);
-
-  const whatsAppBusinessMessage = encodeURIComponent('Olá, quero garantir uma das 50 vagas com 3 meses VIP no Já no Caminho.');
-  const whatsAppBusinessHref = `https://wa.me/551239334979?text=${whatsAppBusinessMessage}`;
-  const ctaPrimaryHref = whatsAppBusinessHref;
-
-  const heroHighlights = [
-    { icon: Storefront, title: 'Peça de lojas e feiras', desc: 'Cardápio, checkout e entrega no mesmo app — inclusive feira ao vivo do seu condomínio.' },
-    { icon: Package, title: 'Pedido pronto para produzir', desc: 'Cardápio, checkout e impressão no mesmo fluxo.' },
-    { icon: Motorcycle, title: 'Entrega conectada à loja', desc: 'Entregador recebe oferta, aceita e atualiza o cliente.' },
-  ];
 
   return (
-    <LandingPageLayout>
-      <div className="bg-[#030712] text-slate-100 selection:bg-sky-500 selection:text-white">
-        
-        {/* ══════════════════════════════════════════════════════════════
-            HERO (MODERN DARK CINEMATIC)
-        ══════════════════════════════════════════════════════════════ */}
-        <section className="relative overflow-hidden pt-12 pb-24 sm:pt-16 sm:pb-32 lg:pt-24">
-          {/* Malha de Grade CSS em background */}
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-[0.12]" />
-          
-          {/* Glowing blobs */}
-          <div className="pointer-events-none absolute left-[15%] top-[-10%] h-[350px] w-[350px] rounded-full bg-sky-500/10 blur-[100px]" />
-          <div className="pointer-events-none absolute right-[10%] top-[20%] h-[400px] w-[400px] rounded-full bg-[#5FD35A]/[0.08] blur-[120px]" />
-          
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
-              
-              {/* Left Copy */}
-              <div className="space-y-8 text-center lg:col-span-7 lg:text-left">
-                {/* Badge VIP */}
-                <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-500/5 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-sky-300">
-                  <Rocket size={14} weight="fill" className="animate-bounce" />
-                  3 meses VIP para as 50 primeiras lojas
-                </div>
-
-                <div className="space-y-4">
-                  <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl leading-[1.05]">
-                    Peça perto de você.<br />
-                    <span className="bg-gradient-to-r from-cyan-400 via-[#5FD35A] to-cyan-400 bg-[size:200%_auto] bg-clip-text text-transparent animate-pulse">
-                      Ou venda sem comissão por pedido.
-                    </span>
-                  </h1>
-                  <p className="mx-auto max-w-xl text-slate-300 text-sm sm:text-base font-medium leading-relaxed lg:mx-0">
-                    Do lanche da feira do condomínio ao fim de semana num chalé: lojas, feiras ao vivo e destinos da sua região num só app. E se o negócio é seu, ele vende online com o dinheiro caindo direto no seu Mercado Pago — planos a partir de R$ 69,90/mês.
-                  </p>
-                </div>
-
-                {/* CTAs — duas vozes em igualdade: consumidor primeiro (quem pede financia o marketplace) */}
-                <div className="flex flex-col gap-3 sm:flex-row justify-center lg:justify-start">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/hub')}
-                    className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-black text-slate-950 shadow-[0_20px_40px_-15px_rgba(255,255,255,0.25)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    Pedir agora
-                    <ArrowRight size={16} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/create?plan=trial')}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-sm font-black text-white backdrop-blur-md transition-colors hover:bg-white/10 active:scale-[0.98]"
-                  >
-                    <Storefront size={18} weight="fill" className="text-[#5FD35A]" />
-                    Criar minha loja
-                  </button>
-                </div>
-
-                {/* Assistir tour + WhatsApp */}
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setTourOpen(true)}
-                    className="inline-flex items-center gap-2 text-xs font-bold text-slate-300 transition-colors hover:text-white"
-                  >
-                    <PlayCircle size={18} weight="fill" className="text-sky-400" />
-                    Assistir tour do app
-                  </button>
-                  <a
-                    href={ctaPrimaryHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 text-xs font-bold text-slate-300 transition-colors hover:text-white"
-                  >
-                    <WhatsappLogo size={16} weight="fill" className="text-[#5FD35A]" />
-                    Falar no WhatsApp
-                  </a>
-                </div>
-
-                {/* Mini Highlights */}
-                <div className="grid gap-3 sm:grid-cols-3 pt-4">
-                  {heroHighlights.map(({ icon: Icon, title, desc }) => (
-                    <div
-                      key={title}
-                      className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-left backdrop-blur-xl"
-                    >
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-sky-400">
-                        <Icon size={18} weight="duotone" />
-                      </div>
-                      <p className="mt-3 text-xs font-black text-white leading-snug">{title}</p>
-                      <p className="mt-1 text-[11px] font-semibold text-slate-400 leading-normal">{desc}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Login de cliente */}
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (hasCustomerSession) { navigate('/cliente/conta'); return; }
-                      setShowCustomerAuth(true);
-                    }}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
-                  >
-                    <UserCircle size={15} weight="duotone" />
-                    {hasCustomerSession ? 'Minha conta de cliente →' : 'Já tenho conta de cliente →'}
-                  </button>
-                </div>
-              </div>
-
-              {/* Right Panel Showcase */}
-              <div className="lg:col-span-5 relative flex items-center justify-center lg:justify-end">
-                <div className="absolute -inset-4 rounded-full bg-sky-500/10 blur-[80px]" />
-                
-                {/* Cartão de visualização do Mercado Pago Checkout */}
-                <div className="relative w-full max-w-[380px] rounded-3xl border border-white/10 bg-slate-900/60 p-4 shadow-2xl backdrop-blur-2xl">
-                  
-                  {/* Status do checkout */}
-                  <div className="mb-3.5 flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-3.5 py-2.5">
-                    <div>
-                      <p className="text-[9px] font-black uppercase tracking-wider text-sky-300">Checkout Unificado</p>
-                      <p className="text-[12px] font-black text-white mt-0.5">Pagamento Direto na sua Conta</p>
-                    </div>
-                    <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[#5FD35A] animate-pulse" />
-                  </div>
-
-                  {/* Detalhes do Pedido Simulado */}
-                  <div className="rounded-2xl border border-white/5 bg-slate-950 p-4 space-y-4">
-                    <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                      <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wide">Pedido #1027</p>
-                        <p className="text-[14px] font-black text-white mt-0.5">Combo Família VIP</p>
-                      </div>
-                      <span className="rounded-full bg-[#5FD35A]/10 border border-[#5FD35A]/20 px-2.5 py-0.5 text-[9px] font-black uppercase text-[#5FD35A]">
-                        Pago via Pix
-                      </span>
-                    </div>
-
-                    {/* Simulação da conexão Mercado Pago */}
-                    <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-black text-slate-400 uppercase">Gateway Seguro</span>
-                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-sky-300 bg-sky-500/10 px-2 py-0.5 rounded-full">
-                          <Lock size={10} weight="fill" />
-                          Conexão Direta
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3 bg-white px-3 py-1.5 rounded-xl border border-slate-200">
-                        <img src={mercadoPagoLandingLogo} alt="Mercado Pago Logo" className="h-6 object-contain" />
-                        <span className="text-[9.5px] font-black text-[#15803D]">✓ Ativo</span>
-                      </div>
-                    </div>
-
-                    {/* Preços */}
-                    <div className="space-y-1.5 text-xs text-slate-400">
-                      <div className="flex justify-between">
-                        <span>Itens (Combo)</span>
-                        <span className="text-white">R$ 89,90</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Taxa de Entrega</span>
-                        <span className="text-white">R$ 6,00</span>
-                      </div>
-                      <div className="flex justify-between text-sm font-black text-white border-t border-white/5 pt-2">
-                        <span>Total Recebido</span>
-                        <span className="text-[#5FD35A]">R$ 95,90</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold">
-                    Dinheiro direto no seu Mercado Pago · Sem reter saldo
-                  </p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════════════════════
-            SIMULADOR INTERATIVO (O FLUXO ORQUESTRADO)
-        ══════════════════════════════════════════════════════════════ */}
-        <section className="relative bg-slate-950 py-20 sm:py-28 overflow-hidden border-t border-b border-white/5">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(139,92,246,0.06),transparent_50%)]" />
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <HubFlowSimulator />
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════════════════════
-            SOCIAL PROOF (MARQUEE DE LOJAS PORTFÓLIO)
-        ══════════════════════════════════════════════════════════════ */}
-        {featuredStores.length > 0 && (
-          <section className="bg-[#030712] py-8 border-b border-white/5">
-            <div className="max-w-7xl mx-auto px-4 text-center mb-4">
-              <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-500">
-                Lojas do portfólio ativas na plataforma
-              </p>
-            </div>
-            <SocialProofMarquee clients={featuredStores} />
-          </section>
-        )}
-
-        {/* ══════════════════════════════════════════════════════════════
-            BENTO GRID (FUNCIONALIDADES)
-        ══════════════════════════════════════════════════════════════ */}
-        <section className="relative bg-[#030712] py-20 sm:py-28 overflow-hidden">
-          <div className="pointer-events-none absolute left-0 bottom-0 h-96 w-96 rounded-full bg-[#5FD35A]/[0.05] blur-[120px]" />
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <BentoFeatures />
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════════════════════
-            VEJA COMO FUNCIONA — tour em vídeo (YouTube embed)
-        ══════════════════════════════════════════════════════════════ */}
-        <section className="relative bg-[#030712] py-20 sm:py-28 overflow-hidden border-t border-b border-white/5">
-          <div className="pointer-events-none absolute left-1/2 top-0 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-sky-500/10 blur-[120px]" />
-          <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-10 text-center">
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-sky-300">Veja como funciona</p>
-              <h2 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">Tour completo pelo app</h2>
-              <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">Do cardápio à entrega — veja o Já no Caminho em ação, sem comissão por pedido.</p>
-            </div>
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl" style={{ aspectRatio: '16 / 9' }}>
-              <iframe
-                src={tourVideoSrc}
-                title="Já no Caminho — tour pelo app"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                loading="lazy"
-                className="absolute inset-0 h-full w-full border-0"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════════════════════
-            APRESENTAÇÃO DO ECOSSISTEMA (SLIDESHOW DO PITCH DECK)
-        ══════════════════════════════════════════════════════════════ */}
-        <EcosystemDeckShowcase />
-
-        <PricingSection />
-
-        {/* ══════════════════════════════════════════════════════════════
-            CASOS DE USO REAIS (SIMULADORES INTERATIVOS)
-        ══════════════════════════════════════════════════════════════ */}
-        <section className="relative bg-[#030712] pb-20 sm:pb-28 overflow-hidden">
-          <div className="pointer-events-none absolute right-0 top-0 h-96 w-96 rounded-full bg-cyan-500/5 blur-[120px]" />
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <LandingUseCases />
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════════════════════
-            CAMPANHA VIP E SUPORTE
-        ══════════════════════════════════════════════════════════════ */}
-        <section className="relative bg-slate-950 py-16 sm:py-24 border-t border-b border-white/5">
-          <div className="relative mx-auto max-w-6xl px-4">
-            <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
-              
-              <div className="lg:col-span-6 space-y-4 text-center lg:text-left">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/20 bg-violet-500/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-violet-400">
-                  Sem burocracia
-                </span>
-                <h2 className="text-3xl font-black text-white sm:text-5xl leading-tight">
-                  Como funciona os 3 meses VIP?
-                </h2>
-                <p className="text-slate-400 text-sm sm:text-base font-medium leading-relaxed">
-                  A nossa campanha de lançamento quer que você valide a plataforma sem risco financeiro. Nós ajudamos no setup inicial e tiramos todas as suas dúvidas.
-                </p>
-              </div>
-
-              <div className="lg:col-span-6 grid gap-4 sm:grid-cols-3">
-                {[
-                  { icon: Storefront, title: 'Loja pronta', desc: 'Cardápio, vitrine digital, horários e links estruturados.' },
-                  { icon: WhatsappLogo, title: 'Suporte Oficial', desc: 'Contato direto e atendimento via WhatsApp Business.' },
-                  { icon: ShieldCheck, title: 'Taxa Zero', desc: 'Teste sem taxas de adesão ou de intermediação.' },
-                ].map(({ icon: Icon, title, desc }) => (
-                  <div key={title} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 space-y-3 backdrop-blur-xl">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-sky-400">
-                      <Icon size={18} weight="duotone" />
-                    </div>
-                    <p className="text-sm font-black text-white leading-snug">{title}</p>
-                    <p className="text-xs font-semibold text-slate-400 leading-normal">{desc}</p>
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════════════════════
-            COMO COMEÇAR (3 PASSOS RÁPIDOS)
-        ══════════════════════════════════════════════════════════════ */}
-        <section className="relative bg-[#030712] py-20 sm:py-28 overflow-hidden">
-          <div className="mx-auto max-w-5xl px-4">
-            
-            <div className="mb-16 text-center space-y-3">
-              <p className="text-xs font-black uppercase tracking-[0.3em] text-sky-400">Praticidade</p>
-              <h2 className="text-3xl font-black text-white sm:text-5xl">
-                Crie e configure sua loja em minutos
-              </h2>
-              <p className="mx-auto max-w-xl text-slate-400 text-sm sm:text-base font-medium">
-                Sem cadastros gigantescos ou necessidade de desenvolvedores. Gerencie tudo do celular ou computador.
-              </p>
-            </div>
-
-            <div className="relative grid gap-6 sm:grid-cols-3">
-              {/* Linha conectora no desktop */}
-              <div className="pointer-events-none absolute left-[15%] right-[15%] top-11 hidden h-px bg-white/10 sm:block" />
-
-              {[
-                {
-                  step: '01',
-                  icon: User,
-                  title: '1. Crie seu Login',
-                  desc: 'Inscreva sua loja para garantir os 3 meses VIP de lançamento sem custos iniciais.'
-                },
-                {
-                  step: '02',
-                  icon: Storefront,
-                  title: '2. Insira o Cardápio',
-                  desc: 'Adicione seus produtos, fotos, adicionais, configure as formas de pagamento e entrega.'
-                },
-                {
-                  step: '03',
-                  icon: Rocket,
-                  title: '3. Divulgue e Venda',
-                  desc: 'Divulgue o link nos seus canais. O pedido cai direto no seu painel em tempo real.'
-                }
-              ].map(({ step, icon: Icon, title, desc }) => (
-                <div key={step} className="relative flex flex-col items-center gap-4 rounded-3xl border border-white/5 bg-white/[0.02] p-6 text-center backdrop-blur-xl">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 text-sky-400 shadow-lg">
-                    <Icon size={22} weight="duotone" />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-base font-black text-white">{title}</h3>
-                    <p className="text-xs font-medium text-slate-400 leading-relaxed">{desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-14 text-center space-y-3">
-              <button
-                type="button"
-                onClick={() => navigate('/create?plan=trial')}
-                className="inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4.5 text-sm font-black text-slate-950 shadow-2xl transition-transform hover:scale-[1.01] active:scale-[0.98]"
-              >
-                Garantir 3 Meses VIP Grátis
-                <ArrowRight size={16} weight="bold" />
-              </button>
-              <p className="text-xs font-semibold text-slate-500">Sem burocracias ou cartão no cadastro</p>
-            </div>
-
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════════════════════
-            HUB DE CONDOMÍNIOS (BANNER DE COMÉRCIO LOCAL)
-        ══════════════════════════════════════════════════════════════ */}
-        {/* ══════════════════════════════════════════════════════════════
-            OUTRAS SOLUÇÕES (CONDOMÍNIOS, DESTINOS E HOSPEDAGENS) — secundário
-        ══════════════════════════════════════════════════════════════ */}
-        <section className="relative bg-slate-950 py-14 overflow-hidden border-t border-b border-white/5">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Outras soluções</p>
-              <h3 className="mt-2 text-lg font-black text-white sm:text-xl">Mais do que uma vitrine online</h3>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {[
-                { icon: Buildings, title: 'Condomínios e feiras', desc: 'Vitrine hiperlocal: moradores veem quem entrega na portaria.', href: '/condominio/login', cta: 'Entrar no condomínio' },
-                { icon: MapPin, title: 'Destinos e pousadas', desc: 'Hóspede escaneia o QR e vê quem entrega no chalé.', href: '/destinos', cta: 'Ver destinos' },
-                { icon: Handshake, title: 'Sou parceiro de hospedagem', desc: 'Cadastre seu chalé/pousada e conecte comércios do entorno.', href: '/destinos/cadastrar', cta: 'Cadastrar hospedagem' },
-              ].map(({ icon: Icon, title, desc, href, cta }) => (
-                <button
-                  key={title}
-                  type="button"
-                  onClick={() => navigate(href)}
-                  className="group text-left rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-colors hover:border-white/20 hover:bg-white/[0.04]"
-                >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-sky-400">
-                    <Icon size={18} weight="duotone" />
-                  </div>
-                  <h4 className="mt-3 text-sm font-black text-white">{title}</h4>
-                  <p className="mt-1 text-xs font-medium text-slate-400 leading-relaxed">{desc}</p>
-                  <p className="mt-3 inline-flex items-center gap-1 text-[11px] font-black text-sky-400 transition-transform group-hover:translate-x-0.5">
-                    {cta} <ArrowRight size={12} weight="bold" />
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════════════════════
-            HOSPEDAGENS E TURISMO
-        ══════════════════════════════════════════════════════════════ */}
-        {/* (seção de hospedagens/turismo consolidada em "Outras soluções" acima) */}
-{/* ══════════════════════════════════════════════════════════════
-            DOWNLOAD DO APP (GOOGLE PLAY & SAFARI PWA)
-        ══════════════════════════════════════════════════════════════ */}
-        <section className="relative bg-slate-950 py-20 sm:py-28 overflow-hidden border-t border-white/5">
-          <div className="pointer-events-none absolute left-1/3 top-0 h-[300px] w-[300px] rounded-full bg-violet-500/5 blur-[90px]" />
-          
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
-              
-              {/* Copy & Qr Code */}
-              <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/20 bg-sky-500/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-sky-400">
-                  Mobilidade Completa
-                </span>
-                
-                <h2 className="text-3xl font-black text-white sm:text-5xl leading-tight">
-                  Toda a experiência em suas mãos
-                </h2>
-                
-                <p className="text-slate-400 text-sm sm:text-base font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
-                  Clientes pedem, entregadores entregam e lojistas gerenciam o painel de produção direto pelo nosso aplicativo oficial ou via Web.
-                </p>
-
-                {/* QR Code Container */}
-                <div className="flex flex-col sm:flex-row items-center gap-5 justify-center lg:justify-start bg-white/[0.02] border border-white/5 p-4 rounded-2xl max-w-md mx-auto lg:mx-0">
-                  <div className="bg-white p-2 rounded-xl shrink-0">
-                    <img src={googlePlayQrSrc} alt="QR Code Google Play" className="h-24 w-24 sm:h-28 sm:w-28 rounded-md" />
-                  </div>
-                  <div className="space-y-1 text-center sm:text-left">
-                    <p className="text-xs font-black uppercase tracking-wider text-slate-400">Google Play Store</p>
-                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-                      Escaneie o QR Code com a câmera do celular para baixar direto na loja oficial Android.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-                  <a
-                    href={googlePlayUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#01875f] px-5 py-3 text-xs font-black text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    <GooglePlayLogo size={16} weight="fill" />
-                    Download Google Play
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/hub')}
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-xs font-black text-white hover:bg-white/10 active:scale-[0.98] transition-colors"
-                  >
-                    Acessar App Web
-                  </button>
-                </div>
-              </div>
-
-              {/* Preview da Playstore e App */}
-              <div className="lg:col-span-5 relative flex flex-col gap-4 items-center">
-                <div className="absolute -inset-4 rounded-full bg-[#5FD35A]/[0.05] blur-[80px]" />
-                
-                {/* Banner de Rastreamento Real no Celular */}
-                <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900 shadow-2xl p-2.5 max-w-[320px]">
-                  <div className="overflow-hidden rounded-[1.5rem]">
-                    <img
-                      src="/marketing/certo_play.png"
-                      alt="Já no Caminho App Playstore Mockup"
-                      className="w-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════════════════════
-            FINAL CTA & URGENCE
-        ══════════════════════════════════════════════════════════════ */}
-        <section className="relative bg-[#030712] py-24 sm:py-32 overflow-hidden">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.08),transparent_50%)]" />
-          
-          <div className="relative mx-auto max-w-4xl px-4 text-center space-y-8">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#5FD35A]/20 bg-[#5FD35A]/[0.05] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#5FD35A]">
-              <span className="h-2 w-2 rounded-full bg-[#5FD35A] animate-ping" />
-              Lançamento Oficial VIP
-            </span>
-
-            <h2 className="text-4xl font-black text-white sm:text-6xl tracking-tight leading-none">
-              Garanta sua vaga<br /> com 3 meses grátis.
-            </h2>
-            
-            <p className="mx-auto max-w-xl text-slate-400 text-sm sm:text-base font-medium leading-relaxed">
-              Inicie seu cardápio digital, receba pagamentos e despache entregas hoje mesmo. Sem compromissos, cancele a qualquer momento.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                type="button"
-                onClick={() => navigate('/create?plan=trial')}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-8 py-4.5 text-base font-black text-slate-950 shadow-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Garantir Vaga VIP (3 Meses Grátis)
-                <ArrowRight size={16} weight="bold" />
-              </button>
-              <a
-                href={whatsAppBusinessHref}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-8 py-4.5 text-base font-black text-white hover:bg-white/10 active:scale-[0.98] transition-colors"
-              >
-                <WhatsappLogo size={18} weight="fill" className="text-[#5FD35A]" />
-                Tirar Dúvidas no WhatsApp
-              </a>
-            </div>
-
-            <p className="text-xs font-semibold text-slate-500 pt-2">
-              Campanha exclusiva limitada para comerciantes locais do entorno.
-            </p>
-          </div>
-        </section>
-
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════
-          MODAL: CUSTOMER AUTH (INTEGRIDADE TOTAL PRESERVADA)
-      ══════════════════════════════════════════════════════════════ */}
-      {showCustomerAuth && (
-        <div
-          className="fixed inset-0 z-[130] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
-          onClick={() => { setShowCustomerAuth(false); setShowPassword(false); }}
-        >
-          <div
-            className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl animate-in zoom-in-95 duration-200 sm:p-7"
-            onClick={(e) => e.stopPropagation()}
+    <div className="min-h-screen overflow-x-clip bg-[#E2EBF2] text-slate-900">
+      {/* ── Navbar glass (mesma linguagem do hub) ─────────────────────── */}
+      <header className="sticky top-0 z-40 border-b border-[#153a4c]/8 bg-white/78 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
+          <Link to="/hub" className="flex items-center gap-2.5">
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-9 w-9 rounded-xl object-cover ring-1 ring-white" />
+            <span className="text-[15px] font-black tracking-[-0.02em] text-slate-950">Já no Caminho</span>
+          </Link>
+          <nav className="hidden items-center gap-6 text-sm font-bold text-slate-600 sm:flex">
+            <a href="#o-que-da-pra-fazer" className="transition-colors hover:text-[#336886]">O que dá pra fazer</a>
+            <a href="#seu-bairro" className="transition-colors hover:text-[#336886]">Seu bairro</a>
+            <a href="#como-funciona" className="transition-colors hover:text-[#336886]">Como funciona</a>
+          </nav>
+          <Link
+            to="/hub"
+            className="inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl bg-[#336886] px-4 text-sm font-black text-white shadow-[0_10px_24px_-12px_rgba(51,104,134,0.6)] transition hover:brightness-105 active:scale-[0.98]"
           >
-            <div className="flex items-start justify-between gap-3 text-slate-900">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Área do cliente</p>
-                <h3 className="mt-0.5 text-xl font-black text-slate-900">
-                  {customerAuthMode === 'register' ? 'Criar conta de cliente' : 'Entrar na sua conta'}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => { setShowCustomerAuth(false); setShowPassword(false); }}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:text-slate-900"
-              >
-                <X size={18} weight="bold" />
-              </button>
-            </div>
+            Entrar no app
+            <CaretRight size={13} weight="bold" />
+          </Link>
+        </div>
+      </header>
 
-            {/* Mode toggle — segmented pill */}
-            <div className="mt-5 flex rounded-2xl border border-slate-200 bg-slate-50 p-1 text-slate-900">
-              {(['login', 'register'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => { setCustomerAuthMode(mode); setShowPassword(false); }}
-                  className={`flex-1 rounded-xl py-2 text-xs font-black transition-all ${
-                    customerAuthMode === mode
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                >
-                  {mode === 'login' ? 'Já tenho conta' : 'Criar conta grátis'}
-                </button>
+      {/* ── Hero ───────────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden px-4 pb-14 pt-12 sm:pt-20">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[#336886]/12 blur-[110px]" />
+        <div className="pointer-events-none absolute -left-20 top-40 h-64 w-64 rounded-full bg-[#5fd35a]/10 blur-[100px]" />
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d7e7ef] bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#336886] shadow-sm">
+              <Sparkle size={12} weight="fill" className="text-[#5fd35a]" />
+              O app do que está perto de você
+            </span>
+            <h1 className="mt-5 text-4xl font-black leading-[1.05] tracking-[-0.035em] text-slate-950 sm:text-5xl lg:text-6xl">
+              O seu bairro tem mais <span className="text-[#336886]">sabor</span> do que você imagina.
+            </h1>
+            <p className="mt-5 max-w-md text-base font-semibold leading-relaxed text-slate-600 sm:text-lg">
+              Restaurantes, mercados e vendedores do seu condomínio — entrega, retirada e feiras num só app.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                to="/hub"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#336886] px-6 py-3.5 text-base font-black text-white shadow-[0_16px_32px_-16px_rgba(51,104,134,0.65)] transition hover:brightness-105 active:scale-[0.98]"
+              >
+                Ver o que tem perto
+                <CaretRight size={16} weight="bold" />
+              </Link>
+              <Link
+                to="/cliente?mode=login"
+                className="inline-flex items-center justify-center rounded-2xl border border-[#d7e7ef] bg-white px-6 py-3.5 text-base font-bold text-[#336886] transition hover:bg-[#edf5fa] active:scale-[0.98]"
+              >
+                Já tenho conta
+              </Link>
+            </div>
+            <p className="mt-4 text-xs font-semibold text-slate-500">
+              Grátis pra pedir · Sem cadastro pra explorar · Pix, cartão ou dinheiro
+            </p>
+          </div>
+
+          {/* Composição de produto: cards reais do hub em cima da página */}
+          <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
+            <div className="rounded-3xl border border-white/80 bg-[linear-gradient(180deg,#ffffff,#f4f8fb)] p-4 shadow-[var(--shadow-overlay)] ring-1 ring-white/60">
+              <div className="flex items-center gap-2 rounded-2xl border border-[#d7e7ef] bg-white px-3.5 py-3 shadow-[var(--shadow-flat)]">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#edf5fa] text-[#336886]">
+                  <Storefront size={17} weight="duotone" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-black text-slate-950">Gustavão Espetos</p>
+                  <p className="text-xs font-semibold text-emerald-600">Aberto agora · entrega e retirada</p>
+                </div>
+                <span className="rounded-full bg-[#336886] px-3 py-1.5 text-xs font-black text-white">Pedir</span>
+              </div>
+
+              <div className="mt-3 overflow-hidden rounded-2xl">
+                <div className="flex items-center gap-3 border border-[#d7e7ef] bg-white p-3">
+                  <img src="/janocaminho.jpg" alt="" className="h-14 w-14 rounded-xl object-cover" />
+                  <div className="min-w-0 flex-1">
+                    <p className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-[0.08em] text-[#336886]">
+                      <Tent size={12} weight="fill" className="text-[#5fd35a]" /> Feira do condomínio
+                    </p>
+                    <p className="mt-0.5 text-sm font-black text-slate-950">Quinta, no salão de festas</p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#5fd35a] px-2.5 py-1 text-xs font-black text-[#153a4c]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#153a4c]" /> ao vivo
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center gap-3 rounded-2xl border border-[#d7e7ef] bg-white p-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#edf5fa] text-[#336886]">
+                  <Scooter size={18} weight="duotone" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-black text-slate-950">Seu pedido saiu pra entrega</p>
+                  <p className="text-xs font-semibold text-slate-500">Chega em ~15 min · Pix confirmado</p>
+                </div>
+                <SealCheck size={18} weight="fill" className="shrink-0 text-[#5fd35a]" />
+              </div>
+            </div>
+            <div className="pointer-events-none absolute -bottom-5 -right-3 hidden rotate-2 rounded-2xl border-2 border-dashed border-[#336886]/30 bg-white px-4 py-2.5 shadow-[var(--shadow-raised)] sm:block">
+              <p className="text-xs font-black text-[#336886]">Do lanche de quinta…</p>
+              <p className="text-xs font-bold text-slate-500">à escapada no chalé ✦</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── O que dá pra fazer ─────────────────────────────────────────── */}
+      <section id="o-que-da-pra-fazer" className="px-4 py-14">
+        <div className="mx-auto max-w-6xl">
+          <p className="text-center text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Descubra perto de você</p>
+          <h2 className="mx-auto mt-2 max-w-lg text-center text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
+            Um app, tudo que existe na sua região
+          </h2>
+          <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {WHAT_YOU_CAN_DO.map(({ icon: Icon, title, text }) => (
+              <div
+                key={title}
+                className="rounded-3xl border border-white/80 bg-white p-5 shadow-[var(--shadow-raised)]"
+              >
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#edf5fa] text-[#336886]">
+                  <Icon size={20} weight="duotone" />
+                </span>
+                <h3 className="mt-3.5 text-[15px] font-black tracking-[-0.02em] text-slate-950">{title}</h3>
+                <p className="mt-1.5 text-sm font-semibold leading-relaxed text-slate-500">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Seu bairro (condomínio + feira) ─────────────────────────────── */}
+      <section id="seu-bairro" className="px-4 py-14">
+        <div className="mx-auto grid max-w-6xl items-center gap-8 rounded-[2rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#f0f7fa_100%)] p-6 shadow-[var(--shadow-raised)] sm:p-10 lg:grid-cols-2">
+          <div>
+            <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.18em] text-[#336886]">
+              <Buildings size={13} weight="duotone" /> Seu bairro
+            </p>
+            <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
+              A feira chegou no seu condomínio.
+            </h2>
+            <p className="mt-3 max-w-md text-base font-semibold leading-relaxed text-slate-600">
+              Vizinhos que vendem, pequenos mercados internos e feiras no salão de festas — com entrega no bloco ou retirada na portaria. Só o Já no Caminho faz isso.
+            </p>
+            <ul className="mt-5 space-y-2.5">
+              {[
+                'Vendedores moradores com entrega dentro do condomínio',
+                'Feiras com data, horário e pedidos antecipados',
+                'Retirada combinada (bloco B, portaria 2…)',
+              ].map((line) => (
+                <li key={line} className="flex items-start gap-2.5 text-sm font-bold text-slate-700">
+                  <SealCheck size={16} weight="fill" className="mt-0.5 shrink-0 text-[#5fd35a]" />
+                  {line}
+                </li>
+              ))}
+            </ul>
+            <Link
+              to="/hub"
+              className="mt-7 inline-flex items-center gap-2 rounded-2xl bg-[#336886] px-5 py-3 text-sm font-black text-white shadow-[0_12px_26px_-14px_rgba(51,104,134,0.6)] transition hover:brightness-105 active:scale-[0.98]"
+            >
+              Ver o meu condomínio
+              <CaretRight size={13} weight="bold" />
+            </Link>
+          </div>
+          <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-white p-5 shadow-[var(--shadow-raised)]">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-black text-slate-950">Feira de quinta</p>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#5fd35a] px-2.5 py-1 text-xs font-black text-[#153a4c]">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#153a4c] opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#153a4c]" />
+                </span>
+                Ao vivo
+              </span>
+            </div>
+            <div className="mt-4 space-y-2.5">
+              {['Espetinho da Dona Marta', 'Geleia artesanal', 'Pão de queijo do 12º andar'].map((item) => (
+                <div key={item} className="flex items-center justify-between rounded-xl border border-[#d7e7ef] bg-[#f4f8fb] px-3.5 py-2.5">
+                  <span className="text-sm font-bold text-slate-800">{item}</span>
+                  <span className="rounded-full bg-white px-2.5 py-1 text-xs font-black text-[#336886] ring-1 ring-[#d7e7ef]">Pedir</span>
+                </div>
               ))}
             </div>
-
-            <div className="mt-5 space-y-3 text-slate-900">
-              {customerVerifyPrompt ? (
-                <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
-                      <EnvelopeSimple size={22} weight="duotone" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Confirmar e-mail</p>
-                      <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-700">
-                        Digite o código enviado para{' '}
-                        <span className="rounded-lg bg-white px-2 py-0.5 font-black text-slate-950">
-                          {customerVerifyPrompt.emailMasked || customerVerifyPrompt.email}
-                        </span>
-                        .
-                      </p>
-                    </div>
-                  </div>
-                  <input
-                    value={customerVerifyCode}
-                    onChange={(e) => setCustomerVerifyCode(String(e.target.value || '').replace(/\D/g, '').slice(0, 4))}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        void handleCustomerVerifyCode();
-                      }
-                    }}
-                    placeholder="0000"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    autoCorrect="off"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center text-2xl font-black tracking-[0.35em] text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/15"
-                  />
-                  {customerAuthNotice ? (
-                    <p className="rounded-xl border border-[#15803D]/20 bg-[#15803D]/[0.06] px-3 py-2 text-xs font-semibold leading-relaxed text-[#15803D]">{customerAuthNotice}</p>
-                  ) : null}
-                  {customerAuthError ? (
-                    <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold leading-relaxed text-rose-600">{customerAuthError}</p>
-                  ) : null}
-                  <button
-                    type="button"
-                    disabled={customerVerifyCode.length !== 4 || customerVerifyLoading}
-                    onClick={handleCustomerVerifyCode}
-                    className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white transition-opacity disabled:opacity-60 hover:opacity-90"
-                  >
-                    {customerVerifyLoading ? 'Validando...' : 'Confirmar e entrar'}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={customerResendLoading || customerResendCooldown > 0}
-                    onClick={handleCustomerResendVerification}
-                    className="w-full text-center text-xs font-black uppercase tracking-[0.12em] text-slate-500 transition-colors hover:text-slate-900 disabled:text-slate-300"
-                  >
-                    {customerResendLoading
-                      ? 'Reenviando...'
-                      : customerResendCooldown > 0
-                      ? `Reenviar em ${customerResendCooldown}s`
-                      : 'Reenviar código'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCustomerVerifyPrompt(null);
-                      setCustomerVerifyCode('');
-                      setCustomerAuthError('');
-                      setCustomerAuthNotice('');
-                    }}
-                    className="w-full text-center text-xs font-semibold text-slate-400 transition-colors hover:text-slate-700"
-                  >
-                    Voltar para login
-                  </button>
-                </div>
-              ) : null}
-
-              {!customerVerifyPrompt ? (
-                <>
-              {customerAuthMode === 'register' && (
-                <div className="relative">
-                  <User size={15} weight="duotone" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    value={customerAuthForm.fullName}
-                    onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, fullName: e.target.value }))}
-                    placeholder="Nome completo"
-                    className="w-full rounded-xl border border-slate-200 py-2.5 bg-white text-slate-900 pl-10 pr-4 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                  />
-                </div>
-              )}
-              {customerAuthMode === 'register' && (
-                <div className="relative">
-                  <Phone size={15} weight="duotone" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    value={customerAuthForm.phone}
-                    onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, phone: formatPhoneBr(e.target.value) }))}
-                    placeholder="Telefone (opcional)"
-                    className="w-full rounded-xl border border-slate-200 py-2.5 bg-white text-slate-900 pl-10 pr-4 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                  />
-                </div>
-              )}
-              <div className="relative">
-                <EnvelopeSimple size={15} weight="duotone" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="email"
-                  value={customerAuthForm.email}
-                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, email: e.target.value }))}
-                  placeholder="E-mail"
-                  className="w-full rounded-xl border border-slate-200 py-2.5 bg-white text-slate-900 pl-10 pr-4 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                />
-              </div>
-              <div className="relative">
-                <Lock size={15} weight="duotone" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={customerAuthForm.password}
-                  onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, password: e.target.value }))}
-                  placeholder="Senha"
-                  className="w-full rounded-xl border border-slate-200 py-2.5 bg-white text-slate-900 pl-10 pr-10 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((p) => !p)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                >
-                  {showPassword ? <EyeSlash size={16} weight="duotone" /> : <Eye size={16} weight="duotone" />}
-                </button>
-              </div>
-
-              {customerAuthMode === 'register' && (
-                <div className="space-y-2 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-                  <label className="flex cursor-pointer items-start gap-2.5 text-[11px] font-semibold leading-relaxed text-slate-600">
-                    <input
-                      type="checkbox"
-                      checked={customerAuthForm.termsAccepted}
-                      onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, termsAccepted: e.target.checked }))}
-                      className="mt-0.5 h-4 w-4 rounded border-slate-300 bg-white accent-slate-900"
-                    />
-                    <span>
-                      Li e aceito os{' '}
-                      <a href="/terms" target="_blank" rel="noreferrer" className="font-black text-slate-900 underline underline-offset-2">
-                        Termos de Uso
-                      </a>
-                      .
-                    </span>
-                  </label>
-                  <label className="flex cursor-pointer items-start gap-2.5 text-[11px] font-semibold leading-relaxed text-slate-600">
-                    <input
-                      type="checkbox"
-                      checked={customerAuthForm.lgpdAccepted}
-                      onChange={(e) => setCustomerAuthForm((prev) => ({ ...prev, lgpdAccepted: e.target.checked }))}
-                      className="mt-0.5 h-4 w-4 rounded border-slate-300 bg-white accent-slate-900"
-                    />
-                    <span>
-                      Autorizo o uso dos meus dados conforme a{' '}
-                      <a href="/terms#lgpd" target="_blank" rel="noreferrer" className="font-black text-slate-900 underline underline-offset-2">
-                        Política de Privacidade
-                      </a>
-                      .
-                    </span>
-                  </label>
-                </div>
-              )}
-
-              <div className="space-y-1">
-                <label className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Ir para loja</label>
-                <select
-                  value={targetStoreSlug}
-                  onChange={(e) => setTargetStoreSlug(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-slate-400"
-                >
-                  {featuredStores.length === 0 ? (
-                    <option value="">Selecionar depois</option>
-                  ) : (
-                    featuredStores.map((store) => (
-                      <option key={store.id} value={store.slug}>
-                        {store.name} ({store.slug})
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-
-              {customerAuthError && (
-                <p className={`rounded-xl px-3 py-2 text-xs font-semibold ${customerAuthError.includes('recuperação') ? 'bg-[#15803D]/[0.06] text-[#15803D]' : 'bg-rose-50 text-rose-600'}`}>
-                  {customerAuthError}
-                </p>
-              )}
-
-              <button
-                type="button"
-                disabled={customerAuthLoading}
-                onClick={handleCustomerAuthSubmit}
-                className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white transition-opacity disabled:opacity-60 hover:opacity-90"
-              >
-                {customerAuthLoading
-                  ? 'Processando...'
-                  : customerAuthMode === 'register'
-                  ? 'Criar conta e entrar'
-                  : 'Entrar'}
-              </button>
-
-              {customerAuthMode === 'login' && (
-                <button
-                  type="button"
-                  onClick={handleCustomerForgotPassword}
-                  className="w-full text-center text-xs font-semibold text-slate-400 transition-colors hover:text-slate-700"
-                >
-                  Esqueci minha senha
-                </button>
-              )}
-                </>
-              ) : null}
-            </div>
+            <p className="mt-4 text-xs font-semibold text-slate-500">Retirada no salão · ou entrega no seu bloco</p>
           </div>
         </div>
-      )}
+      </section>
 
-      {/* MODAL — tour em vídeo (aberto pelo botão "Assistir tour" do hero). Iframe só monta ao abrir. */}
-      {tourOpen && (
-        <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
-          onClick={() => setTourOpen(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Tour em vídeo"
-        >
-          <div className="relative w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              onClick={() => setTourOpen(false)}
-              aria-label="Fechar vídeo"
-              className="absolute -top-9 right-0 inline-flex items-center gap-1 text-xs font-bold text-slate-300 transition-colors hover:text-white"
+      {/* ── Destinos ───────────────────────────────────────────────────── */}
+      <section className="px-4 py-14">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.18em] text-[#336886]">
+                <MapPin size={13} weight="duotone" /> Seu bairro · explorar
+              </p>
+              <h2 className="mt-2 max-w-md text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
+                E quando a fome bate longe de casa?
+              </h2>
+              <p className="mt-2 max-w-md text-sm font-semibold leading-relaxed text-slate-600">
+                Viajou, achou o destino, descobriu onde comer — e pediu por lá mesmo. Chalés, pousadas e experiências da região, no mesmo app.
+              </p>
+            </div>
+            <Link
+              to="/destinos"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#d7e7ef] bg-white px-4 py-2.5 text-sm font-black text-[#336886] transition hover:bg-[#edf5fa] active:scale-[0.98]"
             >
-              <X size={16} weight="bold" /> Fechar
-            </button>
-            <div className="overflow-hidden rounded-xl border border-white/10 bg-black shadow-2xl" style={{ aspectRatio: '16 / 9' }}>
-              <iframe
-                src={`https://www.youtube-nocookie.com/embed/${tourVideoId}?autoplay=1&rel=0`}
-                title="Já no Caminho — tour pelo app"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="h-full w-full border-0"
-              />
-            </div>
+              Conhecer destinos
+              <CaretRight size={12} weight="bold" />
+            </Link>
           </div>
         </div>
-      )}
-    </LandingPageLayout>
+      </section>
+
+      {/* ── Como funciona ──────────────────────────────────────────────── */}
+      <section id="como-funciona" className="px-4 py-14">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-center text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">Como funciona</h2>
+          <div className="mt-9 grid gap-4 sm:grid-cols-3">
+            {STEPS.map(({ icon: Icon, title, text }, index) => (
+              <div key={title} className="relative rounded-3xl border border-white/80 bg-white p-6 shadow-[var(--shadow-raised)]">
+                <span className="absolute right-5 top-5 font-mono text-2xl font-black text-[#d7e7ef]">{index + 1}</span>
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#edf5fa] text-[#336886]">
+                  <Icon size={20} weight="duotone" />
+                </span>
+                <h3 className="mt-3.5 text-[15px] font-black tracking-[-0.02em] text-slate-950">{title}</h3>
+                <p className="mt-1.5 text-sm font-semibold leading-relaxed text-slate-500">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA final ──────────────────────────────────────────────────── */}
+      <section className="px-4 pb-16 pt-6">
+        <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#153a4c_0%,#336886_100%)] px-6 py-12 text-center shadow-[var(--shadow-overlay)] sm:px-10">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#5fd35a]/15 blur-[90px]" />
+          <h2 className="relative text-2xl font-black tracking-[-0.03em] text-white sm:text-3xl">
+            O que está perto de você está esperando.
+          </h2>
+          <p className="relative mx-auto mt-3 max-w-md text-sm font-semibold leading-relaxed text-white/85 sm:text-base">
+            Abra o app, veja as lojas da sua região e faça seu primeiro pedido hoje.
+          </p>
+          <Link
+            to="/hub"
+            className="relative mt-7 inline-flex items-center gap-2 rounded-2xl bg-[#5fd35a] px-7 py-3.5 text-base font-black text-[#153a4c] shadow-[0_16px_32px_-14px_rgba(95,211,90,0.7)] transition hover:brightness-105 active:scale-[0.98]"
+          >
+            Ver o que tem perto
+            <CaretRight size={16} weight="bold" />
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Footer ─────────────────────────────────────────────────────── */}
+      <footer className="border-t border-[#153a4c]/8 bg-white/70 px-4 py-8 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
+          <div className="flex items-center gap-2.5">
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-8 w-8 rounded-lg object-cover" />
+            <span className="text-sm font-black text-slate-950">Já no Caminho</span>
+          </div>
+          <div className="flex items-center gap-5 text-sm font-bold text-slate-500">
+            <Link to="/hub" className="transition-colors hover:text-[#336886]">Explorar o app</Link>
+            <Link to="/parceiros" className="transition-colors hover:text-[#336886]">Quero vender</Link>
+          </div>
+        </div>
+        <p className="mt-5 text-center text-xs font-semibold text-slate-400">
+          Feito no interior, para o interior · <WhatsappLogo size={11} weight="fill" className="inline" /> suporte por WhatsApp dentro do app
+        </p>
+      </footer>
+    </div>
   );
 }

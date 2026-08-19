@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "c45e8130",
-  "versionLabel": "v0.1.9.c45e8130",
-  "versionInternal": "0.1.9+20260819.010957.c45e8130",
-  "buildId": "0.1.9+20260819.010957.c45e8130-20260819.010957-c45e8130",
-  "builtAt": "2026-08-19T01:09:57.192Z",
-  "commitHash": "c45e8130077908d28a41dcffa81d225927a90920",
-  "shortHash": "c45e8130",
+  "versionDisplaySuffix": "27680659",
+  "versionLabel": "v0.1.9.27680659",
+  "versionInternal": "0.1.9+20260819.024036.27680659",
+  "buildId": "0.1.9+20260819.024036.27680659-20260819.024036-27680659",
+  "builtAt": "2026-08-19T02:40:36.316Z",
+  "commitHash": "276806595da53d2ddcd4d144638d573eaa7fdeb6",
+  "shortHash": "27680659",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "276806595da53d2ddcd4d144638d573eaa7fdeb6",
+      "shortHash": "27680659",
+      "dateIso": "2026-08-18T23:11:39-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 99 (v1.0.99) — AAB com lote 1 da auditoria 2",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/276806595da53d2ddcd4d144638d573eaa7fdeb6"
+    },
+    {
+      "hash": "eb85a1ecc4c3ec8efdbc225cd2c842ae6aebf622",
+      "shortHash": "eb85a1ec",
+      "dateIso": "2026-08-18T22:44:25-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ux): lote 1 da auditoria 2 — 9 quick wins de tipografia, CTA e header",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eb85a1ecc4c3ec8efdbc225cd2c842ae6aebf622"
+    },
     {
       "hash": "c45e8130077908d28a41dcffa81d225927a90920",
       "shortHash": "c45e8130",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(design): batch 8 premium polish — focus ring AA, estoque com estado vazio honesto",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/85913bc4af00a43dc9c721fe596e59e1d55c4856"
-    },
-    {
-      "hash": "c431d7672594cb65eef186838f3b19ae91ec0b28",
-      "shortHash": "c431d767",
-      "dateIso": "2026-08-16T18:52:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): batch 2 native splash/login + batch 8 landing ponte-verde",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c431d7672594cb65eef186838f3b19ae91ec0b28"
-    },
-    {
-      "hash": "6b3527a11c421723bda787df950015dc4d5b58d3",
-      "shortHash": "6b3527a1",
-      "dateIso": "2026-08-16T18:37:58-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ux): benchmark iFood — complemento: undo, buscas recentes, retry e reorder na home",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6b3527a11c421723bda787df950015dc4d5b58d3"
     }
   ]
 } as const;

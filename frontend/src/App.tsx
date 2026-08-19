@@ -62,6 +62,7 @@ const lazyPage = (loader: () => Promise<any>, exportName: string) =>
   );
 
 const LandingPage = lazyPage(() => import('./pages/LandingPage'), 'LandingPage');
+const PartnersPage = lazyPage(() => import('./pages/PartnersPage'), 'PartnersPage');
 const CreateStore = lazyPage(() => import('./pages/CreateStore'), 'CreateStore');
 const StorePage = lazyPage(loadStorePage, 'StorePage');
 const OrdersQueue = lazyPage(() => import('./pages/OrdersQueue'), 'OrdersQueue');
@@ -188,6 +189,7 @@ function App() {
           <Suspense fallback={<AppRouteFallback />}>
             <Routes>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/parceiros" element={<PartnersPage />} />
               <Route path="/hub" element={<MarketplacePage />} />
               <Route path="/hub/destaques" element={<HubHighlightsPage />} />
               <Route path="/destinos" element={<DestinationsPage />} />
