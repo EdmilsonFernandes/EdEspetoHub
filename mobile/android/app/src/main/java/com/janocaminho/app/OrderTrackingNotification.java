@@ -90,6 +90,10 @@ public final class OrderTrackingNotification {
             .setContentText(headline)
             .setCustomContentView(collapsed)
             .setCustomBigContentView(expanded)
+            // DecoratedCustomViewStyle (19/08): o SISTEMA desenha o fundo do card
+            // — acabou o notification transparente — e os estilos de texto nativos
+            // (TextAppearance...Notification) adaptam claro/escuro da bandeja.
+            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
             .setOngoing(true)          // persistente: nao desliza pra apagar
             .setOnlyAlertOnce(true)    // nao "bipa" a cada atualizacao de etapa
             .setContentIntent(contentIntent)

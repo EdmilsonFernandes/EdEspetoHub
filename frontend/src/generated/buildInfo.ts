@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "4e74f796",
-  "versionLabel": "v0.1.9.4e74f796",
-  "versionInternal": "0.1.9+20260819.175211.4e74f796",
-  "buildId": "0.1.9+20260819.175211.4e74f796-20260819.175211-4e74f796",
-  "builtAt": "2026-08-19T17:52:11.350Z",
-  "commitHash": "4e74f7961431e358055b749465bc22fc91c30a9f",
-  "shortHash": "4e74f796",
+  "versionDisplaySuffix": "aedec0e7",
+  "versionLabel": "v0.1.9.aedec0e7",
+  "versionInternal": "0.1.9+20260819.214201.aedec0e7",
+  "buildId": "0.1.9+20260819.214201.aedec0e7-20260819.214201-aedec0e7",
+  "builtAt": "2026-08-19T21:42:01.949Z",
+  "commitHash": "aedec0e74359eb3726d0887f8dec0053a86c5ea9",
+  "shortHash": "aedec0e7",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "aedec0e74359eb3726d0887f8dec0053a86c5ea9",
+      "shortHash": "aedec0e7",
+      "dateIso": "2026-08-19T15:09:34-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 102 (v1.0.102) — cupom no dashboard + card Pix com copiar",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/aedec0e74359eb3726d0887f8dec0053a86c5ea9"
+    },
+    {
+      "hash": "e713e21f5beaf54e1cf7c8584f6e8fe7e840a173",
+      "shortHash": "e713e21f",
+      "dateIso": "2026-08-19T15:06:32-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin+pedidos): Cupons vira aba do dashboard + card Pix compacto com copiar",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e713e21f5beaf54e1cf7c8584f6e8fe7e840a173"
+    },
     {
       "hash": "4e74f7961431e358055b749465bc22fc91c30a9f",
       "shortHash": "4e74f796",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(backend): Pix pendente vira cidadão — cancelável e visível na fila",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ba78ba77790fbf865890f6f2336c6428f13aee5a"
-    },
-    {
-      "hash": "3fed2c4a238b2d3149069476d44c96728b66b5e6",
-      "shortHash": "3fed2c4a",
-      "dateIso": "2026-08-17T01:29:32-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(apis): rotas de coupons no proxy BFF + contract-check backend↔frontend",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3fed2c4a238b2d3149069476d44c96728b66b5e6"
-    },
-    {
-      "hash": "c0dccd1c939e7fa9e2065a9a3629f044be309cfe",
-      "shortHash": "c0dccd1c",
-      "dateIso": "2026-08-16T22:29:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(checkout): CPF na nota adiado — campo oculto atrás de flag até vir do perfil",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c0dccd1c939e7fa9e2065a9a3629f044be309cfe"
     }
   ]
 } as const;

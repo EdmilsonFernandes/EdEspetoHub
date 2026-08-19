@@ -15,9 +15,9 @@
 
     <TextView
         android:id="@+id/notif_track_status"
+        style="@android:style/TextAppearance.DeviceDefault.Notification.Title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="?android:attr/textColorPrimary"
         android:textSize="16sp"
         android:textStyle="bold"
         android:singleLine="true"
@@ -26,10 +26,10 @@
 
     <TextView
         android:id="@+id/notif_track_order"
+        style="@android:style/TextAppearance.DeviceDefault.Notification"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:textColor="?android:attr/textColorSecondary"
         android:textSize="12.5sp"
         android:singleLine="true"
         android:ellipsize="end"
