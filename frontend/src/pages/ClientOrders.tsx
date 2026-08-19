@@ -11,6 +11,7 @@ import {
   CaretDown,
   CalendarBlank,
   CheckCircle,
+  CopySimple,
   ChatCircleDots,
   Clock,
   CreditCard,
@@ -730,14 +731,24 @@ function AwaitingPaymentCard({
 }) {
   const storeName = order?.store?.name || 'Loja parceira';
   const logoUrl = resolveAssetUrl(order?.store?.settings?.logoUrl || '');
-  const items = Array.isArray(order?.items) ? order.items : [];
-  const itemsCount = getOrderItemsCount(items);
   const expiresAt = getOrderPendingPaymentExpiresAt(order);
+  const paymentQrText =
+    order?.paymentQrCodeText || order?.payment?.qrCodeText || order?.onlinePayment?.qrCodeText || null;
   const expiryMs = expiresAt ? new Date(expiresAt).getTime() : 0;
   const totalMs = expiryMs && order?.createdAt ? expiryMs - new Date(order.createdAt).getTime() : 0;
   const remainingMs = Math.max(0, expiryMs - Date.now());
   const totalSeconds = Math.floor(remainingMs / 1000);
   const barTone = totalSeconds <= 120 ? 'bg-rose-400' : totalSeconds <= 300 ? 'bg-amber-400' : 'bg-emerald-500';
+  const [pixCopied, setPixCopied] = useState(false);
+
+  const handleCopyPix = async () => {
+    if (!paymentQrText) return;
+    try {
+      await navigator.clipboard?.writeText(String(paymentQrText));
+      setPixCopied(true);
+      window.setTimeout(() => setPixCopied(false), 2000);
+    } catch { /* clipboard pode estar bloqueado no webview */ }
+  };
 
   return (
     <article
@@ -747,44 +758,63 @@ function AwaitingPaymentCard({
       <button
         type="button"
         onClick={() => onOpenOrder(order.id)}
-        className="flex w-full items-center gap-3 px-4 pb-2 pt-3.5 text-left"
+        className="flex w-full items-center gap-2.5 px-3.5 pb-1.5 pt-3 text-left"
       >
-        <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-100">
+        <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full bg-slate-100">
           {logoUrl ? (
             <Image src={logoUrl} alt={storeName} className="h-full w-full object-cover" eager />
           ) : (
-            <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-xs font-black text-white">
+            <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-[10px] font-black text-white">
               {getStoreInitials(storeName)}
             </span>
           )}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[15px] font-black text-slate-900">{storeName}</span>
+          <span className="block truncate text-sm font-black text-slate-900">{storeName}</span>
           <span className="mt-0.5 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
             <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#5fd35a] opacity-70" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[#5fd35a]" />
             </span>
             <img src={getPaymentProviderMeta('mercado_pago').icon} alt="" className="h-3 w-3 object-contain" />
-            Pagamento via Pix · {formatCurrency(order?.total || 0)}
-            {itemsCount ? <span className="text-slate-300">· {itemsCount === 1 ? '1 item' : `${itemsCount} itens`}</span> : null}
+            Pix · {formatCurrency(order?.total || 0)}
           </span>
         </span>
       </button>
 
-      <div className="px-4">
+      <div className="px-3.5">
         <PaymentCountdownPill expiresAt={expiresAt} prominent />
         {totalMs > 0 && totalMs <= 2 * 60 * 60 * 1000 ? (
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200/80">
+          <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-200/80">
             <div
               className={`h-full rounded-full transition-all duration-1000 ${barTone}`}
               style={{ width: `${Math.max(4, Math.min(100, (remainingMs / totalMs) * 100))}%` }}
             />
           </div>
         ) : null}
+        {/* Copia-e-cola na cara (ref. do Edmilson 19/08): copiar sem abrir nada */}
+        {paymentQrText ? (
+          <div className="mt-2 flex items-center gap-2">
+            <span className="min-w-0 flex-1 truncate rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 font-mono text-[11px] text-slate-500 select-all">
+              {String(paymentQrText)}
+            </span>
+            <button
+              type="button"
+              onClick={handleCopyPix}
+              className={`inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-xs font-black transition-transform active:scale-[0.98] ${
+                pixCopied
+                  ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                  : 'bg-[#5fd35a] text-[#153a4c] shadow-[0_8px_18px_-10px_rgba(95,211,90,0.7)]'
+              }`}
+            >
+              {pixCopied ? <CheckCircle size={13} weight="fill" /> : <CopySimple size={13} weight="bold" />}
+              {pixCopied ? 'Copiado!' : 'Copiar PIX'}
+            </button>
+          </div>
+        ) : null}
       </div>
 
-      <div className="mt-3 flex items-center gap-2 border-t border-slate-100 p-3">
+      <div className="mt-2.5 flex items-center gap-2 border-t border-slate-100 p-2.5">
         <button
           type="button"
           onClick={() => onOpenHelp(order)}

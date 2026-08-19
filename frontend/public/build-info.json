@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "01530709",
-  "versionLabel": "v0.1.9.01530709",
-  "versionInternal": "0.1.9+20260819.141541.01530709",
-  "buildId": "0.1.9+20260819.141541.01530709-20260819.141541-01530709",
-  "builtAt": "2026-08-19T14:15:41.675Z",
-  "commitHash": "01530709538999b9d166a3539f14dcf823efe656",
-  "shortHash": "01530709",
+  "versionDisplaySuffix": "4e74f796",
+  "versionLabel": "v0.1.9.4e74f796",
+  "versionInternal": "0.1.9+20260819.175211.4e74f796",
+  "buildId": "0.1.9+20260819.175211.4e74f796-20260819.175211-4e74f796",
+  "builtAt": "2026-08-19T17:52:11.350Z",
+  "commitHash": "4e74f7961431e358055b749465bc22fc91c30a9f",
+  "shortHash": "4e74f796",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "4e74f7961431e358055b749465bc22fc91c30a9f",
+      "shortHash": "4e74f796",
+      "dateIso": "2026-08-19T11:32:16-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 101 (v1.0.101) — Pix pendente no topo + pulso verde",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4e74f7961431e358055b749465bc22fc91c30a9f"
+    },
+    {
+      "hash": "39b46d31f2587490f35dc9b8739afd402b59a41b",
+      "shortHash": "39b46d31",
+      "dateIso": "2026-08-19T11:29:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(pedidos): Pix pendente no TOPO absoluto + pulso verde (padrão iFood)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/39b46d31f2587490f35dc9b8739afd402b59a41b"
+    },
     {
       "hash": "01530709538999b9d166a3539f14dcf823efe656",
       "shortHash": "01530709",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(checkout): CPF na nota adiado — campo oculto atrás de flag até vir do perfil",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c0dccd1c939e7fa9e2065a9a3629f044be309cfe"
-    },
-    {
-      "hash": "187468d9ed041a2d62ecc544525b16a8a9c463dc",
-      "shortHash": "187468d9",
-      "dateIso": "2026-08-16T22:12:10-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(checkout): CPF/cupom opcionais de verdade + fora do fluxo de operator/admin",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/187468d9ed041a2d62ecc544525b16a8a9c463dc"
-    },
-    {
-      "hash": "a467a521dbec1001155a10e1c239b8e77d1527ad",
-      "shortHash": "a467a521",
-      "dateIso": "2026-08-16T21:25:09-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 94 (v1.0.94) — AAB com todos os batches + cupom/CPF/observação-por-item do benchmark",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a467a521dbec1001155a10e1c239b8e77d1527ad"
     }
   ]
 }

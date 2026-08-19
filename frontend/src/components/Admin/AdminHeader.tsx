@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Store as StoreIcon,
   Target,
-  TicketPercent,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -596,17 +595,6 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                   Minha vitrine
                 </button>
               ) : null}
-              <button
-                type="button"
-                onClick={() => {
-                  setOpenUserMenu(false);
-                  navigate('/admin/coupons');
-                }}
-                className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
-              >
-                <TicketPercent size={14} />
-                Cupons de desconto
-              </button>
               <button
                 type="button"
                 onClick={() => {

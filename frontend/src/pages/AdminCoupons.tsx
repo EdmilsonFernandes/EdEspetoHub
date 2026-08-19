@@ -26,7 +26,7 @@ const formatBRL = (value: number) =>
  * Criar/desativar cupons; o cliente aplica no checkout e o desconto é
  * sempre revalidado pelo backend no fechamento do pedido.
  */
-export function AdminCoupons() {
+export function AdminCoupons({ embedded = false }: { embedded?: boolean }) {
   const { auth } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -101,36 +101,8 @@ export function AdminCoupons() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-slate-50 pb-16">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => navigate('/admin/dashboard')}
-              className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 active:scale-95"
-              aria-label="Voltar"
-            >
-              <X size={16} className="rotate-45" />
-            </button>
-            <div>
-              <p className="text-2xs font-black uppercase tracking-[0.18em] text-slate-400">Sua loja</p>
-              <h1 className="text-base font-black tracking-tight text-slate-900">Cupons de desconto</h1>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setFormOpen((prev) => !prev)}
-            className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 text-xs font-black uppercase tracking-[0.1em] text-white active:scale-95"
-          >
-            {formOpen ? <X size={14} /> : <Plus size={14} />}
-            {formOpen ? 'Fechar' : 'Novo cupom'}
-          </button>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-3xl space-y-4 px-4 py-5">
+  const couponsBody = (
+    <>
         {formOpen && (
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="grid gap-3 sm:grid-cols-2">
@@ -267,7 +239,60 @@ export function AdminCoupons() {
             ))}
           </ul>
         )}
-      </main>
+    </>
+  );
+
+  // Modo embutido (aba do AdminDashboard, 19/08): sem header próprio — o
+  // dashboard já dá título/navegação; só o toggle de novo cupom + conteúdo.
+  if (embedded) {
+    return (
+      <div>
+        <div className="flex items-center justify-between gap-3 px-1 pb-3">
+          <p className="text-sm font-black text-slate-900">Cupons da sua loja</p>
+          <button
+            type="button"
+            onClick={() => setFormOpen((prev) => !prev)}
+            className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 text-xs font-black uppercase tracking-[0.1em] text-white active:scale-95"
+          >
+            {formOpen ? <X size={14} /> : <Plus size={14} />}
+            {formOpen ? 'Fechar' : 'Novo cupom'}
+          </button>
+        </div>
+        <div className="mx-auto max-w-3xl space-y-4">{couponsBody}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 pb-16">
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => navigate('/admin/dashboard')}
+              className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 active:scale-95"
+              aria-label="Voltar"
+            >
+              <X size={16} className="rotate-45" />
+            </button>
+            <div>
+              <p className="text-2xs font-black uppercase tracking-[0.18em] text-slate-400">Sua loja</p>
+              <h1 className="text-base font-black tracking-tight text-slate-900">Cupons de desconto</h1>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFormOpen((prev) => !prev)}
+            className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 text-xs font-black uppercase tracking-[0.1em] text-white active:scale-95"
+          >
+            {formOpen ? <X size={14} /> : <Plus size={14} />}
+            {formOpen ? 'Fechar' : 'Novo cupom'}
+          </button>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-3xl space-y-4 px-4 py-5">{couponsBody}</main>
     </div>
   );
 }

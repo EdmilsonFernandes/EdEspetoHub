@@ -9,6 +9,7 @@ import { BrandingSettings } from '../components/Admin/BrandingSettings';
 import { StoreCondominiumPanel } from '../components/Admin/StoreCondominiumPanel';
 import { StoreDestinationPanel } from '../components/Admin/StoreDestinationPanel';
 import DashboardView from '../components/Admin/DashboardView';
+import { AdminCoupons } from './AdminCoupons';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
 import { ProductManager } from '../components/Admin/ProductManager';
@@ -1905,7 +1906,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Stack },
             { id: 'destaques', label: 'Destaques', icon: Sparkle },
-            { id: 'cupons', label: 'Cupons de desconto', icon: Ticket, standalone: true },
+            { id: 'cupons', label: 'Cupons', icon: Ticket },
             { id: 'pagamentos', label: 'Assinatura e plano', icon: CreditCard },
             { id: 'gateway', label: 'Pagamentos online', icon: PlugsConnected },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
@@ -1947,6 +1948,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       produtos: { title: 'Produtos', subtitle: 'Gerencie catálogo, preço, disponibilidade e destaque da vitrine.' },
       estoque: { title: 'Estoque', subtitle: 'Monitore níveis, alertas e movimentações dos produtos.' },
       destaques: { title: 'Destaques patrocinados', subtitle: 'Solicite e acompanhe campanhas de destaque para o Hub.' },
+      cupons: { title: 'Cupons de desconto', subtitle: 'Crie cupons para seus clientes aplicarem no checkout.' },
       pagamentos: { title: 'Minha assinatura', subtitle: 'Controle assinatura, ciclo e eventos de cobrança da loja.' },
       gateway: { title: 'Pagamentos Online', subtitle: 'Conecte o Mercado Pago para aceitar Pix, crédito e débito online.' },
       config: { title: 'Configurar loja', subtitle: 'Organize perfil, canais, logística, pedidos e horários em blocos separados.' },
@@ -1985,10 +1987,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             }
             if (item.id === 'destaques') {
               navigate('/admin/highlights');
-              return;
-            }
-            if (item.id === 'cupons') {
-              navigate('/admin/coupons');
               return;
             }
             if (item.id === 'config') {
@@ -2199,7 +2197,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     const allowedTabs = new Set(
       isOperatorUser
         ? ['produtos', 'cardapio', 'config']
-        : ['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'gateway', 'motoboys', 'condominios', 'destinos', 'usuarios']
+        : ['resumo', 'avaliacoes', 'produtos', 'estoque', 'cupons', 'config', 'pagamentos', 'gateway', 'motoboys', 'condominios', 'destinos', 'usuarios']
     );
     if (!allowedTabs.has(nextTab)) {
       navigate('/admin/dashboard', { replace: true, state: {} });
@@ -3102,10 +3100,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         navigate('/admin/highlights');
         return;
       }
-      if (id === 'cupons') {
-        navigate('/admin/coupons');
-        return;
-      }
       if (id === 'config') {
         openConfigSection('hub');
         return;
@@ -3605,6 +3599,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             onProductsChange={setProducts}
           />
         )}
+
+        {activeTab === 'cupons' && <AdminCoupons embedded />}
 
         {activeTab === 'pagamentos' && (
           <FormSection
