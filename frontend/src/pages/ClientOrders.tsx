@@ -761,6 +761,10 @@ function AwaitingPaymentCard({
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] font-black text-slate-900">{storeName}</span>
           <span className="mt-0.5 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+            <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#5fd35a] opacity-70" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#5fd35a]" />
+            </span>
             <img src={getPaymentProviderMeta('mercado_pago').icon} alt="" className="h-3 w-3 object-contain" />
             Pagamento via Pix · {formatCurrency(order?.total || 0)}
             {itemsCount ? <span className="text-slate-300">· {itemsCount === 1 ? '1 item' : `${itemsCount} itens`}</span> : null}
@@ -1693,6 +1697,16 @@ export function ClientOrders() {
     () => filteredOrders.filter((order) => !isTerminalOrder(mergeOrderForStatus(order, orderDetails[order.id]))),
     [filteredOrders, orderDetails]
   );
+  // Pix pendente sobe pro TOPO da página (acima de 'Peça de novo', padrão iFood):
+  // é a única ação que o usuário PRECISA tomar agora (18/08).
+  const awaitingPaymentOrders = useMemo(
+    () => filteredActiveOrders.filter((order) => orderHasPendingPaymentMedia(order)),
+    [filteredActiveOrders]
+  );
+  const otherActiveOrders = useMemo(
+    () => filteredActiveOrders.filter((order) => !orderHasPendingPaymentMedia(order)),
+    [filteredActiveOrders]
+  );
   const groupedFilteredPastOrders = useMemo(() => groupOrdersByDate(filteredPastOrders), [filteredPastOrders]);
   const deliveredOrdersCount = useMemo(
     () => orders.filter((order) => {
@@ -1992,6 +2006,21 @@ export function ClientOrders() {
             </section>
           ) : null}
 
+          {/* Pagamento pendente em destaque no topo — acima de 'Peça de novo'
+              (padrão iFood: a dívida com o app vem antes da conveniência). */}
+          {awaitingPaymentOrders.length > 0 ? (
+            <section className="mb-4 space-y-3">
+              {awaitingPaymentOrders.map((order) => (
+                <AwaitingPaymentCard
+                  key={order.id}
+                  order={order}
+                  onOpenHelp={setHelpOrder}
+                  onOpenOrder={openOrderTracking}
+                />
+              ))}
+            </section>
+          ) : null}
+
           {statusFilter === 'all' && recentStoreShortcuts.length > 0 ? (
             <section className="mb-4">
               <div className="mb-2 flex items-center justify-between gap-3 px-1">
@@ -2033,7 +2062,7 @@ export function ClientOrders() {
             <div className="mb-2 flex items-center justify-between gap-3 px-1">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Pedidos</p>
-                <p className="text-xs font-semibold text-slate-500">Filtre sem perder o histórico.</p>
+                <p className="text-xs font-semibold text-slate-500">Do mais recente ao primeiro.</p>
               </div>
               <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-2xs font-bold text-[#336886] shadow-sm">
                 {filteredOrders.length}
@@ -2097,28 +2126,19 @@ export function ClientOrders() {
                 </span>
               </div>
               <div className="space-y-3">
-                {filteredActiveOrders.map((order) => (
-                  orderHasPendingPaymentMedia(order) ? (
-                    <AwaitingPaymentCard
-                      key={order.id}
-                      order={order}
-                      onOpenHelp={setHelpOrder}
-                      onOpenOrder={openOrderTracking}
-                    />
-                  ) : (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      isActive
-                      details={orderDetails[order.id]}
-                      onCancelRequest={(selectedOrder) => setCancelModal({ order: selectedOrder, reason: '', details: '', submitting: false })}
-                      onConfirmReceipt={handleConfirmReceiptFromList}
-                      confirmReceiptLoading={confirmingReceiptOrderId === String(order.id)}
-                      onOpenHelp={setHelpOrder}
-                      onOpenOrder={openOrderTracking}
-                      onOpenStore={openStore}
-                    />
-                  )
+                {otherActiveOrders.map((order) => (
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    isActive
+                    details={orderDetails[order.id]}
+                    onCancelRequest={(selectedOrder) => setCancelModal({ order: selectedOrder, reason: '', details: '', submitting: false })}
+                    onConfirmReceipt={handleConfirmReceiptFromList}
+                    confirmReceiptLoading={confirmingReceiptOrderId === String(order.id)}
+                    onOpenHelp={setHelpOrder}
+                    onOpenOrder={openOrderTracking}
+                    onOpenStore={openStore}
+                  />
                 ))}
               </div>
             </section>

@@ -2,16 +2,52 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "27680659",
-  "versionLabel": "v0.1.9.27680659",
-  "versionInternal": "0.1.9+20260819.024036.27680659",
-  "buildId": "0.1.9+20260819.024036.27680659-20260819.024036-27680659",
-  "builtAt": "2026-08-19T02:40:36.316Z",
-  "commitHash": "276806595da53d2ddcd4d144638d573eaa7fdeb6",
-  "shortHash": "27680659",
+  "versionDisplaySuffix": "01530709",
+  "versionLabel": "v0.1.9.01530709",
+  "versionInternal": "0.1.9+20260819.141541.01530709",
+  "buildId": "0.1.9+20260819.141541.01530709-20260819.141541-01530709",
+  "builtAt": "2026-08-19T14:15:41.675Z",
+  "commitHash": "01530709538999b9d166a3539f14dcf823efe656",
+  "shortHash": "01530709",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "01530709538999b9d166a3539f14dcf823efe656",
+      "shortHash": "01530709",
+      "dateIso": "2026-08-19T10:36:31-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Fix admin coupons lazy export",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/01530709538999b9d166a3539f14dcf823efe656"
+    },
+    {
+      "hash": "f33abaa06ce5069e222ac79b7992afb2f2e11e37",
+      "shortHash": "f33abaa0",
+      "dateIso": "2026-08-19T00:27:19-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 100 (v1.0.100) — AAB com E2-E5 da auditoria 2",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f33abaa06ce5069e222ac79b7992afb2f2e11e37"
+    },
+    {
+      "hash": "f1052413de48be6e13d6f25d71945211b32d05b5",
+      "shortHash": "f1052413",
+      "dateIso": "2026-08-19T00:13:55-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(landing): E4 — landing consumer com identidade do hub + /parceiros",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f1052413de48be6e13d6f25d71945211b32d05b5"
+    },
+    {
+      "hash": "5954c6d8deddc58fff8f6b07bd98de1a394d4532",
+      "shortHash": "5954c6d8",
+      "dateIso": "2026-08-19T00:12:57-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(design): E2+E3+E5 da auditoria 2 — tokens, Seu bairro, estados",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5954c6d8deddc58fff8f6b07bd98de1a394d4532"
+    },
     {
       "hash": "276806595da53d2ddcd4d144638d573eaa7fdeb6",
       "shortHash": "27680659",
@@ -245,42 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore(mobile): versionCode 94 (v1.0.94) — AAB com todos os batches + cupom/CPF/observação-por-item do benchmark",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a467a521dbec1001155a10e1c239b8e77d1527ad"
-    },
-    {
-      "hash": "b9698e9db74b3dbd166a2900cba372d80ad17d9d",
-      "shortHash": "b9698e9d",
-      "dateIso": "2026-08-16T21:01:55-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): logo real das lojas no 'Peça de novo' — payload aninha em store.settings",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b9698e9db74b3dbd166a2900cba372d80ad17d9d"
-    },
-    {
-      "hash": "f81d9150e2fb89d35de5aaae06dbf61df21be0ca",
-      "shortHash": "f81d9150",
-      "dateIso": "2026-08-16T20:12:43-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(checkout): cupom E2E + CPF na nota + observação por item + countdown na lista",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f81d9150e2fb89d35de5aaae06dbf61df21be0ca"
-    },
-    {
-      "hash": "bbd398c64d6a13285ef7e22ca1c5cbd0f0322bf4",
-      "shortHash": "bbd398c6",
-      "dateIso": "2026-08-16T20:12:40-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): passo clareza 8K no hub — branco sólido, 1 véu, zero mesh",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bbd398c64d6a13285ef7e22ca1c5cbd0f0322bf4"
-    },
-    {
-      "hash": "85913bc4af00a43dc9c721fe596e59e1d55c4856",
-      "shortHash": "85913bc4",
-      "dateIso": "2026-08-16T19:11:09-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): batch 8 premium polish — focus ring AA, estoque com estado vazio honesto",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/85913bc4af00a43dc9c721fe596e59e1d55c4856"
     }
   ]
 }
