@@ -26,7 +26,7 @@ const formatBRL = (value: number) =>
  * Criar/desativar cupons; o cliente aplica no checkout e o desconto é
  * sempre revalidado pelo backend no fechamento do pedido.
  */
-export default function AdminCoupons() {
+export function AdminCoupons() {
   const { auth } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -271,3 +271,5 @@ export default function AdminCoupons() {
     </div>
   );
 }
+
+export default AdminCoupons;
