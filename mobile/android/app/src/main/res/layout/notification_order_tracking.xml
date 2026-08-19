@@ -16,7 +16,7 @@
 
     <TextView
         android:id="@+id/notif_track_status"
-        style="@android:style/TextAppearance.DeviceDefault.Notification.Title"
+        style="@style/TextAppearance.Compat.Notification.Title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="15sp"
