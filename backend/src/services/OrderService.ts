@@ -57,8 +57,10 @@ export class OrderService
 {
   private readonly log = logger.child({ scope: 'OrderService' });
   private readonly queueActiveStatuses = [
+    // 'awaiting_payment' NÃO entra mais (19/08): pedido online só chega à
+    // fila da loja quando o Mercado Pago confirma o pagamento (vira pending).
+    // Lojista não prepara — nem vê — pedido não pago.
     'pending',
-    'awaiting_payment',
     'preparing',
     'ready',
     'ready_for_delivery',
@@ -1419,12 +1421,39 @@ private async seedPostalShipmentFromCheckoutTx(
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
+  /**
+   * Um pedido aguardando pagamento por vez (19/08, pedido do Edmilson): sem
+   * isso o cliente empilha Pix não pagos — spam de cobranças MP, vários QRs
+   * competindo e confusão de retomada. Staff (lojista criando) não é afetado.
+   */
+  private async assertNoAwaitingPaymentOrder(input: CreateOrderDto) {
+    if (this.isStaffActor(input?.actorRole)) return;
+    const userId = String(input.customerUserId || '').trim();
+    const guestId = String((input as any).guestPushId || '').trim();
+    if (!userId && !guestId) return;
+    const rows = await AppDataSource.query(
+      `SELECT id FROM orders
+        WHERE status = 'awaiting_payment'
+          AND created_at > NOW() - INTERVAL '45 minutes'
+          AND (($1 <> '' AND customer_user_id::text = $1) OR ($2 <> '' AND guest_push_id = $2))
+        LIMIT 1`,
+      [userId, guestId]
+    );
+    if (rows?.length) {
+      throw new AppError('ORDER-013', 409, {
+        message:
+          'Você já tem um pedido aguardando pagamento. Conclua (ou cancele) em Meus Pedidos antes de criar um novo.',
+      });
+    }
+  }
+
   async create(input: CreateOrderDto)
   {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new AppError('STORE-001', 404);
     const customerNote = normalizeCustomerOrderNote((input as any).customerNote);
     await this.customerSecurityService.assertCustomerAllowed(input.customerUserId, 'order');
+    await this.assertNoAwaitingPaymentOrder(input);
     await this.ensureAnonymousOrderPolicy(input, store.id);
     await this.ensureFarPickupPolicy(input, store);
     const saved = await AppDataSource.transaction(async (manager) => {
@@ -1459,7 +1488,9 @@ private async seedPostalShipmentFromCheckoutTx(
     });
     (saved as any).customerNote = customerNote;
     await this.registerAnonymousOrderAttempt(input, store.id);
-      if (!this.isStaffActor(input?.actorRole)) {
+      // Lojista só é notificado de pedido QUE PAGOU (19/08): awaiting_payment
+      // não entra na fila nem bipa — pagamento confirma e aí sim vira news.
+      if (saved.status !== 'awaiting_payment' && !this.isStaffActor(input?.actorRole)) {
         this.dispatchStoreNewOnlineOrderPush({
           ...(saved as any),
           storeId: store.id,
@@ -1497,6 +1528,7 @@ private async seedPostalShipmentFromCheckoutTx(
     if (!store) throw new AppError('STORE-001', 404);
     const customerNote = normalizeCustomerOrderNote((input as any).customerNote);
     await this.customerSecurityService.assertCustomerAllowed(input.customerUserId, 'order');
+    await this.assertNoAwaitingPaymentOrder({ ...input, storeId: store.id } as CreateOrderDto);
     await this.ensureAnonymousOrderPolicy({ ...input, storeId: store.id }, store.id);
     await this.ensureFarPickupPolicy({ ...input, storeId: store.id } as CreateOrderDto, store);
     const saved = await AppDataSource.transaction(async (manager) => {
@@ -1541,7 +1573,9 @@ private async seedPostalShipmentFromCheckoutTx(
     });
     (saved as any).customerNote = customerNote;
     await this.registerAnonymousOrderAttempt({ ...input, storeId: store.id }, store.id);
-      if (!this.isStaffActor(input?.actorRole)) {
+      // Lojista só é notificado de pedido QUE PAGOU (19/08): awaiting_payment
+      // não entra na fila nem bipa — pagamento confirma e aí sim vira news.
+      if (saved.status !== 'awaiting_payment' && !this.isStaffActor(input?.actorRole)) {
         this.dispatchStoreNewOnlineOrderPush({
           ...(saved as any),
           storeId: store.id,
