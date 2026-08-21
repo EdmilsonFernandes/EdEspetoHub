@@ -4071,7 +4071,7 @@ export function StorePage() {
                   {/* Vitrine-balcão (21/08): fechada = cartão compacto de contexto
                       (o MenuView abaixo já traz banner/logo/status) + cardápio
                       navegável em modo visita. */}
-                  <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(241,247,246,0.92)_54%,rgba(255,255,255,0.96)_100%)] p-5 shadow-[0_22px_54px_-38px_rgba(15,23,42,0.26)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+                  <section className="relative mx-auto w-full max-w-xl overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(241,247,246,0.92)_54%,rgba(255,255,255,0.96)_100%)] p-5 shadow-[0_22px_54px_-38px_rgba(15,23,42,0.26)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
                     <div className="flex items-center gap-4">
                       <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-white/70 bg-white/90 shadow-[0_14px_28px_-18px_rgba(15,23,42,0.4)]">
                         <Image

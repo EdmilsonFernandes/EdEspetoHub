@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "3eb8b823",
-  "versionLabel": "v0.1.9.3eb8b823",
-  "versionInternal": "0.1.9+20260821.171606.3eb8b823",
-  "buildId": "0.1.9+20260821.171606.3eb8b823-20260821.171606-3eb8b823",
-  "builtAt": "2026-08-21T17:16:06.750Z",
-  "commitHash": "3eb8b82314cfb1b68d1217a4203e06abd9d27744",
-  "shortHash": "3eb8b823",
+  "versionDisplaySuffix": "b2ee7fcd",
+  "versionLabel": "v0.1.9.b2ee7fcd",
+  "versionInternal": "0.1.9+20260821.183754.b2ee7fcd",
+  "buildId": "0.1.9+20260821.183754.b2ee7fcd-20260821.183754-b2ee7fcd",
+  "builtAt": "2026-08-21T18:37:54.275Z",
+  "commitHash": "b2ee7fcd6c2d45cd8006bf94c8985c505a92106a",
+  "shortHash": "b2ee7fcd",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "b2ee7fcd6c2d45cd8006bf94c8985c505a92106a",
+      "shortHash": "b2ee7fcd",
+      "dateIso": "2026-08-21T14:49:58-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(apis): redirect 308 de slug no BFF — /api nunca passa pelo nginx do front",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b2ee7fcd6c2d45cd8006bf94c8985c505a92106a"
+    },
+    {
+      "hash": "a22f8374b77a1e2d9a8eb2c62f0037ee28ce5300",
+      "shortHash": "a22f8374",
+      "dateIso": "2026-08-21T14:20:42-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(vitrine): fim da costura 'dois sites' no modo visita",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a22f8374b77a1e2d9a8eb2c62f0037ee28ce5300"
+    },
     {
       "hash": "3eb8b82314cfb1b68d1217a4203e06abd9d27744",
       "shortHash": "3eb8b823",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(pix): janela única de 30min + push de cancelamento por não pagamento",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9940ad5e0da1122780ce77252152653d91b1fed9"
-    },
-    {
-      "hash": "5ee6dfb686926b5c9f61df26f3395e88fe8ac5ce",
-      "shortHash": "5ee6dfb6",
-      "dateIso": "2026-08-18T11:01:54-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(mobile): canal cliente v2 HIGH — LED/vibração/heads-up acordam a tela",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5ee6dfb686926b5c9f61df26f3395e88fe8ac5ce"
-    },
-    {
-      "hash": "8fa8a779bf9ce7dd4a3f9b4b1f1737a7123ab392",
-      "shortHash": "8fa8a779",
-      "dateIso": "2026-08-18T11:01:38-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(pix): pedido pendente cidadão de verdade — mesmo QR na lista, QR certo no detalhe",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8fa8a779bf9ce7dd4a3f9b4b1f1737a7123ab392"
     }
   ]
 }
