@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "b2ee7fcd",
-  "versionLabel": "v0.1.9.b2ee7fcd",
-  "versionInternal": "0.1.9+20260821.183754.b2ee7fcd",
-  "buildId": "0.1.9+20260821.183754.b2ee7fcd-20260821.183754-b2ee7fcd",
-  "builtAt": "2026-08-21T18:37:54.275Z",
-  "commitHash": "b2ee7fcd6c2d45cd8006bf94c8985c505a92106a",
-  "shortHash": "b2ee7fcd",
+  "versionDisplaySuffix": "a23fa036",
+  "versionLabel": "v0.1.9.a23fa036",
+  "versionInternal": "0.1.9+20260821.190108.a23fa036",
+  "buildId": "0.1.9+20260821.190108.a23fa036-20260821.190108-a23fa036",
+  "builtAt": "2026-08-21T19:01:08.259Z",
+  "commitHash": "a23fa036b3b2b0e85c316e712b6514fcda925d7d",
+  "shortHash": "a23fa036",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "a23fa036b3b2b0e85c316e712b6514fcda925d7d",
+      "shortHash": "a23fa036",
+      "dateIso": "2026-08-21T15:42:24-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(ux): cartão de loja fechada centrado (max-w-xl) — fim da laje no desktop",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a23fa036b3b2b0e85c316e712b6514fcda925d7d"
+    },
     {
       "hash": "b2ee7fcd6c2d45cd8006bf94c8985c505a92106a",
       "shortHash": "b2ee7fcd",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore(mobile): versionCode 96 (v1.0.96) — AAB com Pix cidadão completo",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/412581110a189d101fc5ef46842f139c8635b79d"
-    },
-    {
-      "hash": "9940ad5e0da1122780ce77252152653d91b1fed9",
-      "shortHash": "9940ad5e",
-      "dateIso": "2026-08-18T11:32:42-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(pix): janela única de 30min + push de cancelamento por não pagamento",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9940ad5e0da1122780ce77252152653d91b1fed9"
     }
   ]
 } as const;

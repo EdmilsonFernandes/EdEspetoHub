@@ -4048,7 +4048,7 @@ export function StorePage() {
           </div>
         )}
         {showClosedState && (
-          <div className="min-h-[72vh] bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.16),transparent_36%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.08),transparent_42%),linear-gradient(180deg,#E2EBF2_0%,#E7F0F6_54%,#E2EBF2_100%)]">
+          <div className={`${products.length > 0 ? '' : 'min-h-[72vh]'} bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.16),transparent_36%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.08),transparent_42%),linear-gradient(180deg,#E2EBF2_0%,#E7F0F6_54%,#E2EBF2_100%)]`}>
             <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:py-7">
               {!showPublicStoreAppHeader ? (
                 <button
