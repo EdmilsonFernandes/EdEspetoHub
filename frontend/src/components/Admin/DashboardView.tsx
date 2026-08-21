@@ -235,6 +235,7 @@ export const DashboardView = ({
   const [movementData, setMovementData] = useState(null);
   const [movementLoading, setMovementLoading] = useState(false);
   const [movementError, setMovementError] = useState("");
+  const [movementExporting, setMovementExporting] = useState(false);
   const [reportExporting, setReportExporting] = useState(false);
   const [reportExportError, setReportExportError] = useState("");
   const [hiddenCustomers, setHiddenCustomers] = useState(() => {
@@ -1062,6 +1063,172 @@ export const DashboardView = ({
     }
   };
 
+  /** PDF do MOVIMENTO (21/08): pedidos × itens × horários — sem preço. */
+  const handlePrintMovementReport = async () => {
+    if (typeof window === "undefined") return;
+    setMovementExporting(true);
+    setMovementError("");
+    try {
+      // Se o painel fechou antes do clique, busca o dado na hora.
+      let payload = movementData;
+      if (!payload && storeId) {
+        payload = await storeService.getDashboardMovement(storeId, {
+          periodDays: customRange ? null : periodDays,
+          startDate: customRange?.startDate || null,
+          endDate: customRange?.endDate || null,
+        });
+        setMovementData(payload || null);
+      }
+      if (!payload || !payload?.summary || payload.summary.totalOrders === 0) {
+        setMovementError("Sem pedidos no período para gerar o PDF do movimento.");
+        return;
+      }
+
+      const [{ jsPDF }, { default: autoTable }] = await Promise.all([
+        import("jspdf"),
+        import("jspdf-autotable"),
+      ]);
+      const logoDataUrl = await fetchAssetAsDataUrl(storeLogo);
+      const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const marginX = 38;
+      const contentWidth = pageWidth - marginX * 2;
+      const compactViewport = isCompactPdfViewport();
+      const generatedAtLabel = new Date().toLocaleString("pt-BR", {
+        timeZone: APP_TIMEZONE,
+        dateStyle: "short",
+        timeStyle: "short",
+      });
+      const fileName = `movimento-${sanitizeFileSegment(storeName, "loja")}-${sanitizeFileSegment(
+        customRange ? `${customRange.startDate}-${customRange.endDate}` : periodDays === "all" ? "todo-periodo" : metrics.periodLabel,
+        "periodo"
+      )}.pdf`;
+
+      // ── Cabeçalho (mesma família visual do gerencial) ──
+      doc.setFillColor(254, 251, 235);
+      doc.roundedRect(marginX, 34, contentWidth, 104, 24, 24, "F");
+      doc.setDrawColor(253, 230, 138);
+      doc.roundedRect(marginX, 34, contentWidth, 104, 24, 24, "S");
+      if (logoDataUrl) {
+        doc.addImage(logoDataUrl, resolveImageFormat(logoDataUrl), marginX + 18, 54, 56, 56);
+      }
+      const textStartX = marginX + 92;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(180, 83, 9);
+      doc.text("MOVIMENTO DA OPERAÇÃO", textStartX, 58);
+      doc.setFontSize(22);
+      doc.setTextColor(15, 23, 42);
+      doc.text(String(storeName || "Já no Caminho"), textStartX, 84, { maxWidth: contentWidth - 200 });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text(
+        `${payload.summary.periodLabel || metrics.periodLabel} · pedidos confirmados (cancelados e não pagos fora) · gerado em ${generatedAtLabel}`,
+        textStartX,
+        104,
+        { maxWidth: contentWidth - 200 }
+      );
+
+      // ── Cards de resumo ──
+      const summary = payload.summary;
+      const cards = [
+        ["Pedidos", String(summary.totalOrders), `${summary.daysWithOrders} dia(s) com venda`],
+        ["Média por dia", String(summary.avgOrdersPerDay), "dias com pelo menos 1 pedido"],
+        ["Itens vendidos", String(summary.totalItemsSold), "soma das quantidades"],
+        ["Produtos distintos", String(summary.distinctProducts), "itens que giraram"],
+        ["Pico", `${summary.bestWeekdayLabel || "—"} · ${summary.bestHourLabel || "—"}`, "dia da semana e horário mais fortes"],
+        ["Preço", "fora da análise", "relatório 100% movimento"],
+      ];
+      const cardGap = 12;
+      const cardWidth = (contentWidth - cardGap * 2) / 3;
+      const cardHeight = 72;
+      cards.forEach((card, index) => {
+        const col = index % 3;
+        const row = Math.floor(index / 3);
+        const x = marginX + col * (cardWidth + cardGap);
+        const y = 158 + row * (cardHeight + cardGap);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(x, y, cardWidth, cardHeight, 14, 14, "F");
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(x, y, cardWidth, cardHeight, 14, 14, "S");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(card[0].toUpperCase(), x + 12, y + 16);
+        doc.setFontSize(15);
+        doc.setTextColor(15, 23, 42);
+        doc.text(card[1], x + 12, y + 38, { maxWidth: cardWidth - 24 });
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(doc.splitTextToSize(card[2], cardWidth - 24), x + 12, y + 52);
+      });
+
+      // ── Tabelas (autoTable cuida da paginação) ──
+      const tableTheme = {
+        styles: { font: "helvetica", fontSize: 9, cellPadding: 5 },
+        headStyles: { fillColor: [51, 104, 134], textColor: 255, fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        margin: { left: marginX, right: marginX },
+      };
+      autoTable(doc, {
+        ...tableTheme,
+        startY: 158 + 2 * (cardHeight + cardGap) + 10,
+        head: [["Horário", "Pedidos"]],
+        body: payload.byHour.map((slot) => [slot.label, slot.orders]),
+        foot: [["Pico", summary.bestHourLabel || "—"]],
+        footStyles: { fillColor: [251, 191, 36], textColor: 15, fontStyle: "bold" },
+      });
+      autoTable(doc, {
+        ...tableTheme,
+        head: [["Dia da semana", "Pedidos"]],
+        body: payload.byWeekday.map((day) => [day.label, day.orders]),
+        foot: [["Pico", summary.bestWeekdayLabel || "—"]],
+        footStyles: { fillColor: [251, 191, 36], textColor: 15, fontStyle: "bold" },
+      });
+      autoTable(doc, {
+        ...tableTheme,
+        head: [["Data", "Pedidos"]],
+        body: payload.topDays.map((day) => [formatDate(day.date) || day.date, day.orders]),
+      });
+      autoTable(doc, {
+        ...tableTheme,
+        head: [["#", "Produto", "Quantidade"]],
+        body: payload.items.map((item, index) => [index + 1, item.name, `${item.qty}x`]),
+      });
+
+      const pdfBlob = doc.output("blob");
+      if (compactViewport) {
+        try {
+          const shared = await sharePdfBlob({
+            blob: pdfBlob,
+            fileName,
+            title: `Movimento - ${storeName}`,
+          });
+          if (shared) return;
+        } catch (error) {
+          if (error?.name === "AbortError") return;
+          throw error;
+        }
+      }
+      if (compactViewport) {
+        const saved = await savePdfDocument(doc, fileName);
+        if (!saved) throw new Error("pdf-save-failed");
+        return;
+      }
+      const opened = openPdfBlob({ blob: pdfBlob, fileName });
+      if (opened) return;
+      const saved = await savePdfDocument(doc, fileName);
+      if (!saved) throw new Error("pdf-open-failed");
+    } catch (error) {
+      console.error("movement report pdf export failed", error);
+      setMovementError("Não foi possível gerar o PDF do movimento agora.");
+    } finally {
+      setMovementExporting(false);
+    }
+  };
+
   const handlePrintQr = async () => {
     if (!storeUrl || typeof window === "undefined") return;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=420x420&data=${encodeURIComponent(storeUrl)}`;
@@ -1619,11 +1786,19 @@ export const DashboardView = ({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-amber-700">Movimento da operação</p>
-                <h4 className="mt-1 text-lg font-black tracking-tight text-slate-900">Quando o povo chega — sem olhar preço</h4>
+                <h4 className="mt-1 text-lg font-black tracking-tight text-slate-900">Pedidos, itens e horários</h4>
                 <p className="mt-0.5 text-xs font-semibold text-slate-500">
                   {movementData?.summary?.periodLabel || metrics.periodLabel} · pedidos confirmados (cancelados e não pagos fora da conta)
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={handlePrintMovementReport}
+                disabled={movementLoading || movementExporting || !movementData}
+                className="shrink-0 rounded-2xl bg-slate-900 px-4 py-2.5 text-[11px] font-extrabold text-white shadow-[0_12px_24px_-12px_rgba(15,23,42,0.4)] transition-all hover:-translate-y-0.5 hover:opacity-95 active:scale-[0.98] disabled:opacity-60"
+              >
+                {movementExporting ? "Gerando PDF..." : "Gerar PDF do movimento"}
+              </button>
             </div>
 
             {movementLoading ? (

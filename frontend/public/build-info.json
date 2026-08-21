@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "9c27ad16",
-  "versionLabel": "v0.1.9.9c27ad16",
-  "versionInternal": "0.1.9+20260821.195857.9c27ad16",
-  "buildId": "0.1.9+20260821.195857.9c27ad16-20260821.195857-9c27ad16",
-  "builtAt": "2026-08-21T19:58:57.027Z",
-  "commitHash": "9c27ad16d29ea7dd70115889a2eeb72376dba566",
-  "shortHash": "9c27ad16",
+  "versionDisplaySuffix": "e4907f23",
+  "versionLabel": "v0.1.9.e4907f23",
+  "versionInternal": "0.1.9+20260821.211501.e4907f23",
+  "buildId": "0.1.9+20260821.211501.e4907f23-20260821.211501-e4907f23",
+  "builtAt": "2026-08-21T21:15:01.974Z",
+  "commitHash": "e4907f23b92dbefbc7a7b79c874d5c2907d5d178",
+  "shortHash": "e4907f23",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "e4907f23b92dbefbc7a7b79c874d5c2907d5d178",
+      "shortHash": "e4907f23",
+      "dateIso": "2026-08-21T18:03:20-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(dashboard): 42P18 no movimento — param $2 (tz) órfão na query de itens",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e4907f23b92dbefbc7a7b79c874d5c2907d5d178"
+    },
+    {
+      "hash": "1624a46f6140c1386e85deaf0d75dc4e54ee29af",
+      "shortHash": "1624a46f",
+      "dateIso": "2026-08-21T17:12:32-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(dashboard): relatório de Movimento & horários — pedidos/itens/tempo sem preço",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1624a46f6140c1386e85deaf0d75dc4e54ee29af"
+    },
     {
       "hash": "9c27ad16d29ea7dd70115889a2eeb72376dba566",
       "shortHash": "9c27ad16",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(pix-pendente): refinamentos do spec — Continuar pagamento, paymentProvider, Refazer pedido",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/73e1533476e2d3716f235a8d28e2ad4b138c7b15"
-    },
-    {
-      "hash": "4f587b64f1165da987243fe34bcd19766790d609",
-      "shortHash": "4f587b64",
-      "dateIso": "2026-08-18T14:15:33-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(backend): destrava build Docker — 3 erros de tsc desde 16/08",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4f587b64f1165da987243fe34bcd19766790d609"
-    },
-    {
-      "hash": "af6071a32de1bfd03c59c841df42200eb1315d09",
-      "shortHash": "af6071a3",
-      "dateIso": "2026-08-18T13:06:28-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): Cupons de desconto no menu vertical — saem do dropdown do avatar",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/af6071a32de1bfd03c59c841df42200eb1315d09"
     }
   ]
 }
