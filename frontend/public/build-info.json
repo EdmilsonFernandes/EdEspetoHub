@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "2a0c2a81",
-  "versionLabel": "v0.1.9.2a0c2a81",
-  "versionInternal": "0.1.9+20260821.164143.2a0c2a81",
-  "buildId": "0.1.9+20260821.164143.2a0c2a81-20260821.164143-2a0c2a81",
-  "builtAt": "2026-08-21T16:41:43.262Z",
-  "commitHash": "2a0c2a81431f4177b53084ee2b40429d050d62c1",
-  "shortHash": "2a0c2a81",
+  "versionDisplaySuffix": "3eb8b823",
+  "versionLabel": "v0.1.9.3eb8b823",
+  "versionInternal": "0.1.9+20260821.171606.3eb8b823",
+  "buildId": "0.1.9+20260821.171606.3eb8b823-20260821.171606-3eb8b823",
+  "builtAt": "2026-08-21T17:16:06.750Z",
+  "commitHash": "3eb8b82314cfb1b68d1217a4203e06abd9d27744",
+  "shortHash": "3eb8b823",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "3eb8b82314cfb1b68d1217a4203e06abd9d27744",
+      "shortHash": "3eb8b823",
+      "dateIso": "2026-08-21T14:06:02-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 104 (v1.0.104) — vitrine-balcão no app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3eb8b82314cfb1b68d1217a4203e06abd9d27744"
+    },
+    {
+      "hash": "28f84d4e360df75b8f24cc9bd37bbfe792b8c1de",
+      "shortHash": "28f84d4e",
+      "dateIso": "2026-08-21T14:02:02-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(vitrine): loja fechada vira vitrine-balcão — cardápio aberto pra visita",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/28f84d4e360df75b8f24cc9bd37bbfe792b8c1de"
+    },
     {
       "hash": "2a0c2a81431f4177b53084ee2b40429d050d62c1",
       "shortHash": "2a0c2a81",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(pix): pedido pendente cidadão de verdade — mesmo QR na lista, QR certo no detalhe",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8fa8a779bf9ce7dd4a3f9b4b1f1737a7123ab392"
-    },
-    {
-      "hash": "a0d1f300799da1284478388f53a0a7a004b65e5d",
-      "shortHash": "a0d1f300",
-      "dateIso": "2026-08-18T09:35:39-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(hub): remove banner 'Meu condomínio' do rodapé — redundante com a categoria",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a0d1f300799da1284478388f53a0a7a004b65e5d"
-    },
-    {
-      "hash": "c46993881df553f8e12d989f78a4da9603d88d9b",
-      "shortHash": "c4699388",
-      "dateIso": "2026-08-18T09:31:18-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(checkout): troca de forma de pagamento — 1 toque aplica e fecha",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c46993881df553f8e12d989f78a4da9603d88d9b"
     }
   ]
 }

@@ -4066,7 +4066,7 @@ export function StorePage() {
                 </button>
               ) : null}
 
-              <div className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)] md:items-start">
+              <div className={products.length > 0 ? '' : 'grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)] md:items-start'}>
                 <div className="space-y-4">
                   {/* Vitrine-balcão (21/08): fechada = cartão compacto de contexto
                       (o MenuView abaixo já traz banner/logo/status) + cardápio
@@ -4110,6 +4110,10 @@ export function StorePage() {
                   </section>
                 </div>
 
+                {/* Coluna de contato/horários/rodapé só quando NÃO há cardápio:
+                    com menu, a aba Informações do MenuView já cobre — evita a
+                    costura "dois sites" (21/08). */}
+                {products.length === 0 && (
                 <div className="space-y-4">
                   <section className="rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(247,250,252,0.92)_100%)] p-5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Contato e endereço</p>
@@ -4160,6 +4164,7 @@ export function StorePage() {
 
                   <PlatformTrustFooter className="pt-1" compact />
                 </div>
+                )}
               </div>
             </div>
           </div>
