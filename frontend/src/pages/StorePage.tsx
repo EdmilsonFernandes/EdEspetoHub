@@ -4068,57 +4068,37 @@ export function StorePage() {
 
               <div className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)] md:items-start">
                 <div className="space-y-4">
-                  <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.92)_0%,rgba(241,247,246,0.9)_54%,rgba(255,255,255,0.94)_100%)] shadow-[0_26px_60px_-38px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
-                    <div className="relative h-40 overflow-hidden sm:h-48">
-                      <div className="absolute inset-0 bg-[#153A4C]">
+                  {/* Vitrine-balcão (21/08): fechada = cartão compacto de contexto
+                      (o MenuView abaixo já traz banner/logo/status) + cardápio
+                      navegável em modo visita. */}
+                  <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94)_0%,rgba(241,247,246,0.92)_54%,rgba(255,255,255,0.96)_100%)] p-5 shadow-[0_22px_54px_-38px_rgba(15,23,42,0.26)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+                    <div className="flex items-center gap-4">
+                      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-white/70 bg-white/90 shadow-[0_14px_28px_-18px_rgba(15,23,42,0.4)]">
                         <Image
-                          src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.jpg'}
-                          alt=""
-                          aria-hidden="true"
-                          className="absolute inset-[-22px] h-[calc(100%+44px)] w-[calc(100%+44px)] scale-110 object-cover opacity-95 blur-md saturate-125"
-                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-                        />
-                        <Image
-                          src={branding?.bannerUrl || branding?.logoUrl || '/janocaminho.jpg'}
+                          src={branding?.logoUrl || branding?.bannerUrl || '/janocaminho.jpg'}
                           alt={closedStateStoreName}
-                          className="relative h-full w-full object-contain p-2 drop-shadow-[0_20px_34px_rgba(15,23,42,0.32)] sm:p-3"
+                          className="h-full w-full object-cover"
                           eager
                           onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
                         />
                       </div>
-                      <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(7,13,25,0.72)_0%,rgba(9,16,32,0.54)_40%,rgba(15,23,42,0.24)_100%)]" />
-                      <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                        <div className="flex items-end gap-4">
-                          <div className="h-18 w-18 shrink-0 overflow-hidden rounded-2xl border border-white/65 bg-white/90 shadow-[0_16px_30px_-18px_rgba(15,23,42,0.45)] sm:h-20 sm:w-20">
-                            <Image
-                              src={branding?.logoUrl || '/janocaminho.jpg'}
-                              alt={closedStateStoreName}
-                              className="h-full w-full object-cover"
-                              onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, branding?.brandName); }}
-                            />
-                          </div>
-                          <div className="min-w-0 text-white">
-                            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70">Loja temporariamente fechada</p>
-                            <h1 className="mt-1 break-words text-2xl font-black leading-tight sm:text-3xl">{closedStateStoreName}</h1>
-                            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-rose-200/30 bg-rose-500/18 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-rose-50 backdrop-blur-md">
-                              <Clock size={14} weight="bold" />
-                              Fechado agora
-                            </div>
-                          </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h1 className="break-words text-xl font-black leading-tight text-slate-950 sm:text-2xl">{closedStateStoreName}</h1>
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/70 bg-amber-50 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.1em] text-amber-700">
+                            <Clock size={12} weight="bold" />
+                            Fechado agora
+                          </span>
                         </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 px-5 py-5 sm:px-6 sm:py-6">
-                      <div className="rounded-3xl border border-slate-200/85 bg-white/88 p-4 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.22)]">
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Próximo atendimento</p>
-                        <p className="mt-1 text-base font-black text-slate-900">
+                        <p className="mt-1.5 text-sm font-bold text-slate-600">
                           {todayHoursLabel || 'Sem horário configurado para hoje'}
                         </p>
-                        <p className="mt-1 text-sm text-slate-500">
-                          A vitrine continua visível, mas os pedidos voltam a abrir no próximo período da operação.
-                        </p>
                       </div>
+                    </div>
+                    <p className="mt-4 rounded-2xl border border-sky-100/80 bg-[#f0f7fa]/80 px-4 py-3 text-[13px] font-semibold leading-relaxed text-slate-600">
+                      O cardápio está aberto logo abaixo — dá uma espiada e mata a vontade. Os pedidos voltam no próximo horário de atendimento.
+                    </p>
+                    <div className="space-y-4">
 
                       {storeDescription && (
                         <div className="rounded-3xl border border-slate-200/85 bg-white/88 p-4 shadow-[0_14px_32px_-26px_rgba(15,23,42,0.16)]">
@@ -4259,7 +4239,7 @@ export function StorePage() {
               </div>
             </div>
           </div>
-        ) : !showInactiveState && !showClosedState && view === 'menu' && products.length > 0 && (
+        ) : !showInactiveState && view === 'menu' && products.length > 0 && (
           <div className="space-y-4">
               {!isStoreAdmin && !customerSession?.token && recentPublicOrders.length > 0 && (
               <div className="fixed bottom-20 left-4 right-4 z-[110] sm:relative sm:bottom-0 sm:left-0 sm:right-0 sm:mx-6 rounded-[1.75rem] border border-emerald-200/60 bg-white/92 backdrop-blur-xl px-4 py-3 shadow-[0_18px_42px_-22px_rgba(16,185,129,0.35)] flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">

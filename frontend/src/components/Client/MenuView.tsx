@@ -700,7 +700,11 @@ export const MenuView = ({
   const isServiceStore = isServiceSegmentValue(segment);
   // Loja de servico e sempre "modo lead" (agenda no WhatsApp) — nunca mostra carrinho,
   // mesmo que isOrderingEnabled esteja ligado.
-  const canOrder = !isServiceStore && isOrderingEnabled !== false && !preOrderBlocked;
+  // 21/08 — vitrine-balcão: loja fechada = cardápio aberto pra VISITA.
+  // canOrder só bloqueia quando isOpenNow é explicitamente false (defensivo
+  // contra callers sem a prop): fechado → sem botão de adicionar, modal
+  // readOnly e sacola escondida — mas o cardápio inteiro navegável.
+  const canOrder = !isServiceStore && isOrderingEnabled !== false && !preOrderBlocked && isOpenNow !== false;
   const catalogTerm = isServiceStore ? "Serviços" : "Cardápio";
   const effectiveCompactHeader = compactHeader || autoCompactHeader;
   const catalogPrimaryColor = branding?.primaryColor || "#336686";
@@ -1522,14 +1526,22 @@ export const MenuView = ({
             </div>
           </div>
         ) : !canOrder ? (
-          <div className="rounded-[1.75rem] border border-indigo-200 bg-indigo-50 px-4 py-4 shadow-[0_12px_24px_-18px_rgba(99,102,241,0.15)]">
+          <div className={`rounded-[1.75rem] border px-4 py-4 shadow-[0_12px_24px_-18px_rgba(99,102,241,0.15)] ${isOpenNow === false ? 'border-amber-200 bg-amber-50' : 'border-indigo-200 bg-indigo-50'}`}>
             <div className="flex items-start gap-3">
-              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600">
-                <Storefront size={18} weight="duotone" />
+              <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isOpenNow === false ? 'bg-amber-100 text-amber-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                {isOpenNow === false ? <Clock size={18} weight="duotone" /> : <Storefront size={18} weight="duotone" />}
               </span>
               <span className="min-w-0">
-                <span className="block text-sm font-black text-indigo-900">{isServiceStore ? "Agende pelo WhatsApp" : `Apenas ${catalogTerm.toLowerCase()}`}</span>
-                <span className="mt-1 block text-xs font-medium leading-relaxed text-indigo-700/80">{isServiceStore ? "Esta loja oferece serviços. Toque em um serviço para falar com a loja e agendar um horário." : "Esta loja não aceita pedidos online. Consulte os produtos e faça o pedido presencialmente."}</span>
+                <span className={`block text-sm font-black ${isOpenNow === false ? 'text-amber-900' : 'text-indigo-900'}`}>
+                  {isOpenNow === false ? 'Cardápio aberto pra visita' : isServiceStore ? 'Agende pelo WhatsApp' : `Apenas ${catalogTerm.toLowerCase()}`}
+                </span>
+                <span className={`mt-1 block text-xs font-medium leading-relaxed ${isOpenNow === false ? 'text-amber-800/80' : 'text-indigo-700/80'}`}>
+                  {isOpenNow === false
+                    ? `A loja está fechada agora${todayHoursLabel ? ` — ${todayHoursLabel}` : ''}. Dá uma olhada no cardápio e volte na hora de pedir.`
+                    : isServiceStore
+                    ? 'Esta loja oferece serviços. Toque em um serviço para falar com a loja e agendar um horário.'
+                    : 'Esta loja não aceita pedidos online. Consulte os produtos e faça o pedido presencialmente.'}
+                </span>
               </span>
             </div>
           </div>
@@ -2128,6 +2140,8 @@ export const MenuView = ({
         readOnlyMessage={
           preOrderBlocked
             ? (preOrderBlockedMessage || "Os pedidos deste condomínio ainda não foram liberados.")
+            : isOpenNow === false
+            ? "Loja fechada agora — o cardápio é só pra conhecer. Volte no horário de atendimento pra pedir."
             : !canOrder
             ? "Pedidos apenas no balcão/mesa."
             : "Produto esgotado no momento."

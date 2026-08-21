@@ -2,16 +2,70 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "aedec0e7",
-  "versionLabel": "v0.1.9.aedec0e7",
-  "versionInternal": "0.1.9+20260819.214201.aedec0e7",
-  "buildId": "0.1.9+20260819.214201.aedec0e7-20260819.214201-aedec0e7",
-  "builtAt": "2026-08-19T21:42:01.949Z",
-  "commitHash": "aedec0e74359eb3726d0887f8dec0053a86c5ea9",
-  "shortHash": "aedec0e7",
+  "versionDisplaySuffix": "2a0c2a81",
+  "versionLabel": "v0.1.9.2a0c2a81",
+  "versionInternal": "0.1.9+20260821.164143.2a0c2a81",
+  "buildId": "0.1.9+20260821.164143.2a0c2a81-20260821.164143-2a0c2a81",
+  "builtAt": "2026-08-21T16:41:43.262Z",
+  "commitHash": "2a0c2a81431f4177b53084ee2b40429d050d62c1",
+  "shortHash": "2a0c2a81",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "2a0c2a81431f4177b53084ee2b40429d050d62c1",
+      "shortHash": "2a0c2a81",
+      "dateIso": "2026-08-21T11:45:03-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(nginx): redirect API cobre paths reais (/api/stores/slug e /api/public/stores/slug)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2a0c2a81431f4177b53084ee2b40429d050d62c1"
+    },
+    {
+      "hash": "431de6cedb84f1bc4af65d04505c3b02eda90335",
+      "shortHash": "431de6ce",
+      "dateIso": "2026-08-21T11:31:48-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(nginx): redirect 308 permanente edsertaneja → espetinho-datony-bacabal",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/431de6cedb84f1bc4af65d04505c3b02eda90335"
+    },
+    {
+      "hash": "381b30120e62353582161d22df2b7ec27ab931cd",
+      "shortHash": "381b3012",
+      "dateIso": "2026-08-19T19:20:44-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(mobile): estilos de notificação públicos (Compat) — DeviceDefault é privado",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/381b30120e62353582161d22df2b7ec27ab931cd"
+    },
+    {
+      "hash": "2306e9da19565cd59bb270a439fca47e6dc8aa2f",
+      "shortHash": "2306e9da",
+      "dateIso": "2026-08-19T19:11:00-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 103 (v1.0.103) — notificação adaptiva + fluxo pago-entra-na-fila",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2306e9da19565cd59bb270a439fca47e6dc8aa2f"
+    },
+    {
+      "hash": "eea66fc57fddca280a4357b8fdb91a773159dd26",
+      "shortHash": "eea66fc5",
+      "dateIso": "2026-08-19T19:07:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(ux+push): 'Pagar agora' sutil (outline) + notificação quebrava em bandeja escura",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eea66fc57fddca280a4357b8fdb91a773159dd26"
+    },
+    {
+      "hash": "413abf493f4ce6eaee6afdc90371b4c356688746",
+      "shortHash": "413abf49",
+      "dateIso": "2026-08-19T19:06:13-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(flow): pedido online só entra na fila quando PAGO + guard 1-Pix-pendente",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/413abf493f4ce6eaee6afdc90371b4c356688746"
+    },
     {
       "hash": "aedec0e74359eb3726d0887f8dec0053a86c5ea9",
       "shortHash": "aedec0e7",
@@ -227,60 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(checkout): troca de forma de pagamento — 1 toque aplica e fecha",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c46993881df553f8e12d989f78a4da9603d88d9b"
-    },
-    {
-      "hash": "baaa6bead595dc05ca41ce9d0d384b59b7d35bb5",
-      "shortHash": "baaa6bea",
-      "dateIso": "2026-08-17T20:54:32-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(ops): plano de contingência de certificado SSL — 3 camadas + runbook de emergência",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/baaa6bead595dc05ca41ce9d0d384b59b7d35bb5"
-    },
-    {
-      "hash": "ba5a06ad726029e469eff9212a64ef9949e96fe9",
-      "shortHash": "ba5a06ad",
-      "dateIso": "2026-08-17T09:42:56-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): submenu Ajustes abria e fechava sozinho — loop cfg×section no deep-link",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ba5a06ad726029e469eff9212a64ef9949e96fe9"
-    },
-    {
-      "hash": "31760c6d5e9187f89206f4c90bb58be98c333e97",
-      "shortHash": "31760c6d",
-      "dateIso": "2026-08-17T07:08:14-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 95 (v1.0.95) — AAB com as ondas 0-3 da auditoria consiliar",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/31760c6d5e9187f89206f4c90bb58be98c333e97"
-    },
-    {
-      "hash": "28e2f06036f0ae004bc394ad5b6b77d8d6df8643",
-      "shortHash": "28e2f060",
-      "dateIso": "2026-08-17T01:46:15-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(hub): comida primeiro — destaques sobem, supply B2B desce (B1-lite)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/28e2f06036f0ae004bc394ad5b6b77d8d6df8643"
-    },
-    {
-      "hash": "4c879c1e95a4e45ee487eb673bdb43cf73c04cb9",
-      "shortHash": "4c879c1e",
-      "dateIso": "2026-08-17T01:30:14-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(ux): ondas 0-2 da auditoria consiliar — confiança, Pix pendente e consistência",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4c879c1e95a4e45ee487eb673bdb43cf73c04cb9"
-    },
-    {
-      "hash": "ba78ba77790fbf865890f6f2336c6428f13aee5a",
-      "shortHash": "ba78ba77",
-      "dateIso": "2026-08-17T01:30:13-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(backend): Pix pendente vira cidadão — cancelável e visível na fila",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ba78ba77790fbf865890f6f2336c6428f13aee5a"
     }
   ]
 }
