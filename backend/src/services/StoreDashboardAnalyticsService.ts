@@ -582,22 +582,17 @@ export class StoreDashboardAnalyticsService {
         ? `${normalizedPeriodDays} dias`
         : 'Todo período';
 
-    const periodFilter = customRange
-      ? `timezone($2, o.created_at)::date BETWEEN $3::date AND $4::date`
+    // TZ como literal inline (config de servidor, não input) — parâmetro $2
+    // órfão na branch periodDays causava 42P18 na query de itens (21/08).
+    const tz = this.timezone;
+    // Params contíguos por branch: $1=storeId (+$2/$3 quando há período).
+    const periodClause = customRange
+      ? { text: `timezone('${tz}', o.created_at)::date BETWEEN $2::date AND $3::date`, params: [storeId, customRange.startDate, customRange.endDate] }
       : periodStart
-        ? `o.created_at >= $3::timestamptz`
-        : null;
-    // Ordem dos params: $1=storeId, $2=tz, $3/$4=range OU $3=periodStart.
-    const periodParams = customRange
-      ? [storeId, this.timezone, customRange.startDate, customRange.endDate]
-      : periodStart
-        ? [storeId, this.timezone, periodStart]
-        : [storeId, this.timezone];
-    // Queries sem filtro de período usam apenas ($1, $2) — por isso o filtro
-    // é sempre embutido por texto (periodFilter já referencia os índices).
-    const baseWhere = `o.store_id = $1 AND o.status NOT IN ('cancelled', 'awaiting_payment')${periodFilter ? ` AND ${periodFilter}` : ''}`;
-    // Quando não há filtro de período, os índices $3/$4 não existem — normaliza:
-    const where = periodFilter ? baseWhere : `o.store_id = $1 AND o.status NOT IN ('cancelled', 'awaiting_payment')`;
+        ? { text: `o.created_at >= $2::timestamptz`, params: [storeId, periodStart] }
+        : { text: null, params: [storeId] };
+    const where = `o.store_id = $1 AND o.status NOT IN ('cancelled', 'awaiting_payment')${periodClause.text ? ` AND ${periodClause.text}` : ''}`;
+    const periodParams = periodClause.params;
 
     const [itemRows, weekdayRows, hourRows, topDayRows, summaryRows] = await Promise.all([
       AppDataSource.query(
@@ -614,7 +609,7 @@ export class StoreDashboardAnalyticsService {
       ),
       AppDataSource.query(
         `
-          SELECT EXTRACT(ISODOW FROM timezone($2, o.created_at))::int AS "dow", COUNT(*)::int AS "orders"
+          SELECT EXTRACT(ISODOW FROM timezone('${tz}', o.created_at))::int AS "dow", COUNT(*)::int AS "orders"
           FROM orders o
           WHERE ${where}
           GROUP BY 1
@@ -624,7 +619,7 @@ export class StoreDashboardAnalyticsService {
       ),
       AppDataSource.query(
         `
-          SELECT EXTRACT(HOUR FROM timezone($2, o.created_at))::int AS "hour", COUNT(*)::int AS "orders"
+          SELECT EXTRACT(HOUR FROM timezone('${tz}', o.created_at))::int AS "hour", COUNT(*)::int AS "orders"
           FROM orders o
           WHERE ${where}
           GROUP BY 1
@@ -634,7 +629,7 @@ export class StoreDashboardAnalyticsService {
       ),
       AppDataSource.query(
         `
-          SELECT to_char(timezone($2, o.created_at), 'YYYY-MM-DD') AS "date", COUNT(*)::int AS "orders"
+          SELECT to_char(timezone('${tz}', o.created_at), 'YYYY-MM-DD') AS "date", COUNT(*)::int AS "orders"
           FROM orders o
           WHERE ${where}
           GROUP BY 1
@@ -646,7 +641,7 @@ export class StoreDashboardAnalyticsService {
       AppDataSource.query(
         `
           SELECT COUNT(*)::int AS "orders",
-                 COUNT(DISTINCT timezone($2, o.created_at)::date)::int AS "daysWithOrders"
+                 COUNT(DISTINCT timezone('${tz}', o.created_at)::date)::int AS "daysWithOrders"
           FROM orders o
           WHERE ${where}
         `,
