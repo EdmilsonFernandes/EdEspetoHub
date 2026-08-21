@@ -138,6 +138,23 @@ async function bootstrap()
   app.use('/api/docs', swaggerUi.serve as any, swaggerUi.setup(swaggerSpec) as any);
   app.get('/api/docs.json', (_, res) => res.json(swaggerSpec));
 
+  // ── Redirects permanentes de slug de loja (21/08) ──────────────────────────
+  // Na produção o nginx da EC2 manda /api DIRETO pra cá (bypassa BFF e nginx do
+  // front) — o redirect de API mora AQUI. 308 preserva método+body: drafts de
+  // checkout no localStorage que ainda chamam o slug antigo seguem funcionando.
+  const STORE_SLUG_REDIRECTS: Record<string, string> = {
+    edsertaneja: 'espetinho-datony-bacabal',
+  };
+  const storeSlugRedirectRegex = /^\/(api\/(?:public\/)?stores\/slug\/)([^/?]+)(\/[^?]*)?/;
+  app.use((req, res, next) => {
+    const match = storeSlugRedirectRegex.exec(req.originalUrl.split('?')[0]);
+    if (!match) return next();
+    const target = STORE_SLUG_REDIRECTS[match[2]];
+    if (!target) return next();
+    const queryString = req.originalUrl.includes('?') ? `?${req.originalUrl.split('?')[1]}` : '';
+    res.redirect(308, `/${match[1]}${target}${match[3] || ''}${queryString}`);
+  });
+
   app.use('/api', routes);
 
 	  scheduleSubscriptionExpirationJob();
