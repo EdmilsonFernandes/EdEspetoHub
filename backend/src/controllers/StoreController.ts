@@ -934,6 +934,30 @@ private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?
 
 
   /**
+   * Movimento da operação (21/08): pedidos × produtos × tempo, sem preço.
+   *
+   * @author Edmilson Lopes
+   */
+  static async getDashboardMovement(req: Request, res: Response) {
+    try {
+      const storeId = req.params.storeId;
+      if (!storeId) throw new AppError('STORE-001', 404);
+      const periodRaw = String(req.query?.periodDays || '').trim().toLowerCase();
+      const periodDays = !periodRaw || periodRaw === 'all' ? null : Number(periodRaw);
+      const payload = await storeDashboardAnalyticsService.getMovementReport(storeId, req.auth?.storeId, {
+        periodDays,
+        monthKey: String(req.query?.monthKey || '').trim() || undefined,
+        startDate: String(req.query?.startDate || '').trim() || undefined,
+        endDate: String(req.query?.endDate || '').trim() || undefined,
+      });
+      return res.json(payload);
+    } catch (error: any) {
+      log.warn('Store dashboard movement failed', { storeId: req.params.storeId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
    * Executes update logic.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)

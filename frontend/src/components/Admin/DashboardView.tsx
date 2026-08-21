@@ -230,6 +230,11 @@ export const DashboardView = ({
   const [analyticsReport, setAnalyticsReport] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsError, setAnalyticsError] = useState("");
+  // Movimento da operação (21/08): pedidos × itens × horários, sem preço.
+  const [showMovement, setShowMovement] = useState(false);
+  const [movementData, setMovementData] = useState(null);
+  const [movementLoading, setMovementLoading] = useState(false);
+  const [movementError, setMovementError] = useState("");
   const [reportExporting, setReportExporting] = useState(false);
   const [reportExportError, setReportExportError] = useState("");
   const [hiddenCustomers, setHiddenCustomers] = useState(() => {
@@ -421,6 +426,42 @@ export const DashboardView = ({
       active = false;
     };
   }, [storeId, periodDays, selectedMonth, customRange]);
+
+  // Movimento: busca lazy — só quando o painel está aberto (e re-busca se o
+  // período mudar com ele aberto). Sem preço: contagem de pedidos/itens/horários.
+  useEffect(() => {
+    if (!showMovement || !storeId) {
+      setMovementData(null);
+      setMovementError("");
+      return;
+    }
+
+    let active = true;
+    setMovementLoading(true);
+    setMovementError("");
+
+    storeService
+      .getDashboardMovement(storeId, {
+        periodDays: customRange ? null : periodDays,
+        startDate: customRange?.startDate || null,
+        endDate: customRange?.endDate || null,
+      })
+      .then((payload) => {
+        if (active) setMovementData(payload || null);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setMovementData(null);
+        setMovementError(error?.message || "Não foi possível carregar o movimento agora.");
+      })
+      .finally(() => {
+        if (active) setMovementLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [showMovement, storeId, periodDays, customRange]);
 
   const resolveDateKey = (order) => {
     const raw = order.createdAt || order.created_at;
@@ -1561,9 +1602,147 @@ export const DashboardView = ({
                   {reportExporting ? "Gerando PDF..." : analyticsLoading ? "Atualizando..." : "Gerar PDF gerencial"}
                 </button>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowMovement((prev) => !prev)}
+                className="mt-2 w-full px-4 py-3 rounded-2xl border border-amber-300/70 bg-amber-50 text-amber-800 text-xs font-extrabold transition-all hover:-translate-y-0.5 hover:bg-amber-100 active:scale-[0.98]"
+              >
+                {showMovement ? "Ocultar movimento" : "Ver movimento & horários"}
+              </button>
             </div>
           </div>
         </div>
+
+        {/* ---------- PAINEL DE MOVIMENTO (sem preço) ---------- */}
+        {showMovement ? (
+          <div className="mt-5 rounded-[26px] border border-amber-200/70 bg-white/95 p-5 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.18)]">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-amber-700">Movimento da operação</p>
+                <h4 className="mt-1 text-lg font-black tracking-tight text-slate-900">Quando o povo chega — sem olhar preço</h4>
+                <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                  {movementData?.summary?.periodLabel || metrics.periodLabel} · pedidos confirmados (cancelados e não pagos fora da conta)
+                </p>
+              </div>
+            </div>
+
+            {movementLoading ? (
+              <p className="mt-4 text-sm font-semibold text-slate-500">Carregando movimento do período...</p>
+            ) : movementError ? (
+              <p className="mt-4 text-sm font-semibold text-rose-600">{movementError}</p>
+            ) : !movementData || !movementData.summary || movementData.summary.totalOrders === 0 ? (
+              <div className="mt-4 rounded-2xl border border-dashed border-amber-200 bg-amber-50/60 px-4 py-6 text-center">
+                <p className="text-sm font-black text-slate-700">Sem pedidos no período</p>
+                <p className="mt-1 text-xs font-semibold text-slate-500">Quando chegarem, o movimento por dia e horário aparece aqui.</p>
+              </div>
+            ) : (
+              <>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                  {[
+                    { label: "Pedidos", value: movementData.summary.totalOrders, helper: `em ${movementData.summary.daysWithOrders} dia(s) com venda` },
+                    { label: "Média por dia", value: movementData.summary.avgOrdersPerDay, helper: "dias com pelo menos 1 pedido" },
+                    { label: "Itens vendidos", value: movementData.summary.totalItemsSold, helper: "soma das quantidades" },
+                    { label: "Produtos distintos", value: movementData.summary.distinctProducts, helper: "itens que giraram" },
+                    {
+                      label: "Pico",
+                      value: [movementData.summary.bestWeekdayLabel, movementData.summary.bestHourLabel].filter(Boolean).join(" · ") || "—",
+                      helper: "dia da semana e horário mais fortes",
+                    },
+                  ].map((chip) => (
+                    <div key={chip.label} className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{chip.label}</p>
+                      <p className="mt-1.5 truncate text-base font-black tracking-tight text-slate-900">{chip.value}</p>
+                      <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{chip.helper}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-5 grid gap-5 lg:grid-cols-2">
+                  {/* Pedidos por horário */}
+                  <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Pedidos por horário</p>
+                    <div className="mt-3 space-y-1.5">
+                      {movementData.byHour.map((slot) => {
+                        const maxHour = Math.max(...movementData.byHour.map((s) => s.orders), 1);
+                        return (
+                          <div key={slot.hour} className="flex items-center gap-2.5">
+                            <span className="w-10 shrink-0 text-right font-mono text-[11px] font-bold text-slate-500">{slot.label}</span>
+                            <div className="h-4 flex-1 overflow-hidden rounded-md bg-slate-100">
+                              <div
+                                className={`h-full rounded-md ${slot.orders === maxHour ? "bg-amber-500" : "bg-[#336886]"}`}
+                                style={{ width: `${Math.max(6, Math.round((slot.orders / maxHour) * 100))}%` }}
+                              />
+                            </div>
+                            <span className="w-8 shrink-0 text-right text-[11px] font-black text-slate-700">{slot.orders}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Por dia da semana */}
+                  <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Pedidos por dia da semana</p>
+                    <div className="mt-3 space-y-1.5">
+                      {movementData.byWeekday.map((day) => {
+                        const maxDay = Math.max(...movementData.byWeekday.map((d) => d.orders), 1);
+                        return (
+                          <div key={day.dow} className="flex items-center gap-2.5">
+                            <span className="w-16 shrink-0 text-[11px] font-bold text-slate-500">{day.label}</span>
+                            <div className="h-4 flex-1 overflow-hidden rounded-md bg-slate-100">
+                              <div
+                                className={`h-full rounded-md ${day.orders === maxDay ? "bg-amber-500" : "bg-[#336886]"}`}
+                                style={{ width: `${Math.max(6, Math.round((day.orders / maxDay) * 100))}%` }}
+                              />
+                            </div>
+                            <span className="w-8 shrink-0 text-right text-[11px] font-black text-slate-700">{day.orders}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Dias com mais pedidos</p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {movementData.topDays.map((day) => (
+                        <span key={day.date} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-600">
+                          {formatDate(day.date)}
+                          <span className="font-black text-slate-900">{day.orders}x</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Todos os itens (quantidade) */}
+                <div className="mt-5 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Tudo que vendeu — por quantidade</p>
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
+                      {movementData.items.length} produtos
+                    </span>
+                  </div>
+                  <div className="mt-3 max-h-80 space-y-1.5 overflow-y-auto pr-1">
+                    {movementData.items.map((item, index) => {
+                      const maxQty = movementData.items[0]?.qty || 1;
+                      return (
+                        <div key={`${item.name}-${index}`} className="flex items-center gap-2.5">
+                          <span className="w-5 shrink-0 text-right font-mono text-[10px] font-bold text-slate-400">{index + 1}</span>
+                          <span className="w-40 shrink-0 truncate text-[12px] font-bold text-slate-700 sm:w-52">{item.name}</span>
+                          <div className="h-3.5 flex-1 overflow-hidden rounded-md bg-slate-100">
+                            <div
+                              className={`h-full rounded-md ${index === 0 ? "bg-amber-500" : "bg-[#336886]"}`}
+                              style={{ width: `${Math.max(5, Math.round((item.qty / maxQty) * 100))}%` }}
+                            />
+                          </div>
+                          <span className="w-10 shrink-0 text-right text-[11px] font-black text-slate-700">{item.qty}x</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        ) : null}
       </div>
       {/* ---------- CARDS RESUMO ---------- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">

@@ -88,6 +88,7 @@ export function createProxyRoutes(): Router {
     r.put('/stores/:storeId', authRequired, forward); r.put('/stores/:storeId/status', authRequired, forward);
     r.get('/stores/:storeId/link-stats', authRequired, forward);
     r.get('/stores/:storeId/dashboard-analytics', authRequired, forward);
+    r.get('/stores/:storeId/dashboard-movement', authRequired, forward);
     r.get('/stores/:storeId/payment-accounts/mercadopago', authRequired, forward);
     r.post('/stores/:storeId/payment-accounts/mercadopago/connect', authRequired, forward);
     r.delete('/stores/:storeId/payment-accounts/mercadopago', authRequired, forward);

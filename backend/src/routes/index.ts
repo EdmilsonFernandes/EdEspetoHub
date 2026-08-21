@@ -267,6 +267,7 @@ routes.put('/stores/:storeId', requireAuth, requireRole('ADMIN'), StoreControlle
 routes.put('/stores/:storeId/status', requireAuth, requireRole('ADMIN'), StoreController.updateStatus);
 routes.get('/stores/:storeId/link-stats', requireAuth, requireRole('ADMIN'), StoreController.getLinkStats);
 routes.get('/stores/:storeId/dashboard-analytics', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), StoreController.getDashboardAnalytics);
+routes.get('/stores/:storeId/dashboard-movement', requireAuth, requireRole('ADMIN', 'OPERATOR', 'LOJISTA'), StoreController.getDashboardMovement);
 routes.get('/stores/:storeId/payment-accounts/mercadopago', requireAuth, requireRole('ADMIN'), StorePaymentAccountController.getMercadoPagoStatus);
 routes.post('/stores/:storeId/payment-accounts/mercadopago/connect', requireAuth, requireRole('ADMIN'), StorePaymentAccountController.createMercadoPagoConnectUrl);
 routes.delete('/stores/:storeId/payment-accounts/mercadopago', requireAuth, requireRole('ADMIN'), StorePaymentAccountController.disconnectMercadoPago);

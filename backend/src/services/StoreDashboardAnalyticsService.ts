@@ -561,4 +561,137 @@ export class StoreDashboardAnalyticsService {
       periodLabel,
     });
   }
+
+  /* =====================================================================
+   * RELATÓRIO DE MOVIMENTO (21/08) — pedidos × produtos × tempo, SEM preço.
+   * Pergunta que responde: "que dia e que hora o povo costuma chegar?"
+   * Contagem viva direto do banco (snapshots são orientados a receita);
+   * exclui cancelled e awaiting_payment (pedido não pago não é demanda).
+   * ===================================================================== */
+  async getMovementReport(storeId: string, authStoreId?: string, options: DashboardOptions = {}) {
+    const store = await this.storeRepository.findById(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    this.ensureStoreAccess(store.id, authStoreId);
+
+    const customRange = this.resolveCustomRange(options.startDate, options.endDate);
+    const normalizedPeriodDays = this.normalizePeriodDays(options.periodDays);
+    const periodStart = this.resolvePeriodStart(normalizedPeriodDays);
+    const periodLabel = customRange
+      ? this.formatRangeLabel(customRange.startDate, customRange.endDate)
+      : normalizedPeriodDays
+        ? `${normalizedPeriodDays} dias`
+        : 'Todo período';
+
+    const periodFilter = customRange
+      ? `timezone($2, o.created_at)::date BETWEEN $3::date AND $4::date`
+      : periodStart
+        ? `o.created_at >= $3::timestamptz`
+        : null;
+    // Ordem dos params: $1=storeId, $2=tz, $3/$4=range OU $3=periodStart.
+    const periodParams = customRange
+      ? [storeId, this.timezone, customRange.startDate, customRange.endDate]
+      : periodStart
+        ? [storeId, this.timezone, periodStart]
+        : [storeId, this.timezone];
+    // Queries sem filtro de período usam apenas ($1, $2) — por isso o filtro
+    // é sempre embutido por texto (periodFilter já referencia os índices).
+    const baseWhere = `o.store_id = $1 AND o.status NOT IN ('cancelled', 'awaiting_payment')${periodFilter ? ` AND ${periodFilter}` : ''}`;
+    // Quando não há filtro de período, os índices $3/$4 não existem — normaliza:
+    const where = periodFilter ? baseWhere : `o.store_id = $1 AND o.status NOT IN ('cancelled', 'awaiting_payment')`;
+
+    const [itemRows, weekdayRows, hourRows, topDayRows, summaryRows] = await Promise.all([
+      AppDataSource.query(
+        `
+          SELECT p.name AS "name", SUM(oi.quantity)::int AS "qty"
+          FROM order_items oi
+          JOIN orders o ON o.id = oi.order_id
+          JOIN products p ON p.id = oi.product_id
+          WHERE ${where}
+          GROUP BY p.name
+          ORDER BY "qty" DESC, "name" ASC
+        `,
+        periodParams
+      ),
+      AppDataSource.query(
+        `
+          SELECT EXTRACT(ISODOW FROM timezone($2, o.created_at))::int AS "dow", COUNT(*)::int AS "orders"
+          FROM orders o
+          WHERE ${where}
+          GROUP BY 1
+          ORDER BY 1
+        `,
+        periodParams
+      ),
+      AppDataSource.query(
+        `
+          SELECT EXTRACT(HOUR FROM timezone($2, o.created_at))::int AS "hour", COUNT(*)::int AS "orders"
+          FROM orders o
+          WHERE ${where}
+          GROUP BY 1
+          ORDER BY 1
+        `,
+        periodParams
+      ),
+      AppDataSource.query(
+        `
+          SELECT to_char(timezone($2, o.created_at), 'YYYY-MM-DD') AS "date", COUNT(*)::int AS "orders"
+          FROM orders o
+          WHERE ${where}
+          GROUP BY 1
+          ORDER BY "orders" DESC, 1 DESC
+          LIMIT 10
+        `,
+        periodParams
+      ),
+      AppDataSource.query(
+        `
+          SELECT COUNT(*)::int AS "orders",
+                 COUNT(DISTINCT timezone($2, o.created_at)::date)::int AS "daysWithOrders"
+          FROM orders o
+          WHERE ${where}
+        `,
+        periodParams
+      ),
+    ]);
+
+    const WEEKDAYS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+    const byWeekday = WEEKDAYS.map((label, index) => ({
+      label,
+      dow: index + 1,
+      orders: Number((weekdayRows as any[]).find((row: any) => Number(row?.dow) === index + 1)?.orders || 0),
+    }));
+    const byHour = Array.from({ length: 24 }, (_, hour) => ({
+      hour,
+      label: `${String(hour).padStart(2, '0')}h`,
+      orders: Number((hourRows as any[]).find((row: any) => Number(row?.hour) === hour)?.orders || 0),
+    }));
+    const items = (Array.isArray(itemRows) ? itemRows : []).map((row) => ({
+      name: String(row?.name || 'Produto'),
+      qty: this.toInt(row?.qty),
+    }));
+    const totalOrders = this.toInt(summaryRows?.[0]?.orders);
+    const daysWithOrders = this.toInt(summaryRows?.[0]?.daysWithOrders);
+    const bestWeekday = [...byWeekday].sort((a, b) => b.orders - a.orders)[0] || null;
+    const bestHour = [...byHour].sort((a, b) => b.orders - a.orders)[0] || null;
+
+    return {
+      summary: {
+        totalOrders,
+        daysWithOrders,
+        avgOrdersPerDay: daysWithOrders > 0 ? Math.round((totalOrders / daysWithOrders) * 10) / 10 : 0,
+        totalItemsSold: items.reduce((acc, item) => acc + item.qty, 0),
+        distinctProducts: items.length,
+        bestWeekdayLabel: bestWeekday && bestWeekday.orders > 0 ? bestWeekday.label : null,
+        bestHourLabel: bestHour && bestHour.orders > 0 ? bestHour.label : null,
+        periodLabel,
+      },
+      items,
+      byWeekday,
+      byHour: byHour.filter((slot) => slot.orders > 0),
+      topDays: (Array.isArray(topDayRows) ? topDayRows : []).map((row) => ({
+        date: String(row?.date || ''),
+        orders: this.toInt(row?.orders),
+      })),
+    };
+  }
 }

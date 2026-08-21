@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "a23fa036",
-  "versionLabel": "v0.1.9.a23fa036",
-  "versionInternal": "0.1.9+20260821.190108.a23fa036",
-  "buildId": "0.1.9+20260821.190108.a23fa036-20260821.190108-a23fa036",
-  "builtAt": "2026-08-21T19:01:08.259Z",
-  "commitHash": "a23fa036b3b2b0e85c316e712b6514fcda925d7d",
-  "shortHash": "a23fa036",
+  "versionDisplaySuffix": "9c27ad16",
+  "versionLabel": "v0.1.9.9c27ad16",
+  "versionInternal": "0.1.9+20260821.195857.9c27ad16",
+  "buildId": "0.1.9+20260821.195857.9c27ad16-20260821.195857-9c27ad16",
+  "builtAt": "2026-08-21T19:58:57.027Z",
+  "commitHash": "9c27ad16d29ea7dd70115889a2eeb72376dba566",
+  "shortHash": "9c27ad16",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "9c27ad16d29ea7dd70115889a2eeb72376dba566",
+      "shortHash": "9c27ad16",
+      "dateIso": "2026-08-21T16:26:01-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(backend): redirect 308 de slug no BACKEND — quem vê o /api na produção",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9c27ad16d29ea7dd70115889a2eeb72376dba566"
+    },
+    {
+      "hash": "aeb9c9923e779743f618a36c1a08d97c46018d3e",
+      "shortHash": "aeb9c992",
+      "dateIso": "2026-08-21T16:04:43-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(ux): morto o vão de 72vh entre o card fechado e o cardápio",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/aeb9c9923e779743f618a36c1a08d97c46018d3e"
+    },
     {
       "hash": "a23fa036b3b2b0e85c316e712b6514fcda925d7d",
       "shortHash": "a23fa036",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(admin): Cupons de desconto no menu vertical — saem do dropdown do avatar",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/af6071a32de1bfd03c59c841df42200eb1315d09"
-    },
-    {
-      "hash": "c74a4e23acb770069b1348600d15be1826f7cfd7",
-      "shortHash": "c74a4e23",
-      "dateIso": "2026-08-18T13:06:04-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(pix_loja): loop de comprovante — WhatsApp do cliente + confirmação da loja",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c74a4e23acb770069b1348600d15be1826f7cfd7"
-    },
-    {
-      "hash": "412581110a189d101fc5ef46842f139c8635b79d",
-      "shortHash": "41258111",
-      "dateIso": "2026-08-18T12:00:00-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 96 (v1.0.96) — AAB com Pix cidadão completo",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/412581110a189d101fc5ef46842f139c8635b79d"
     }
   ]
 }
