@@ -1244,14 +1244,14 @@ export const MenuView = ({
         ref={stickySearchContainerRef}
         className={`${activeTab === "products" ? "" : "hidden"} sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-white/70 bg-white/92 shadow-[0_10px_32px_-26px_rgba(15,23,42,0.26)] backdrop-blur-2xl`}
       >
-        <div className="mx-auto w-full max-w-6xl px-4 pt-3 pb-2">
+        <div className="mx-auto w-full max-w-6xl px-4 pt-2.5 pb-1.5">
           <div className="relative flex items-center gap-2.5 rounded-full bg-slate-100 px-4 transition-colors focus-within:bg-white focus-within:ring-2 focus-within:ring-slate-200">
             <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
             <input
               {...inputAssistProps.search}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className="min-h-[44px] flex-1 bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
+              className="min-h-[42px] flex-1 bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
               placeholder={`Buscar ${isServiceStore ? "nos serviços" : "no cardápio"}...`}
             />
             {query ? (
@@ -1266,29 +1266,29 @@ export const MenuView = ({
           </div>
         </div>
         {activeTab === "products" && filteredGrouped.length > 1 && (
-          <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-3">
-            <div className="flex w-full items-stretch gap-2 rounded-[1.65rem] border border-white/85 bg-white/70 p-1.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.32),inset_0_1px_0_rgba(255,255,255,0.82)] ring-1 ring-slate-900/[0.025] backdrop-blur-xl">
+          <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-2">
+            {/* Auditoria 22/08: chips-mini-card (3 linhas + caixa externa) → pills horizontais compactos.
+                Contagem sai do visual (ruído de navegação) e fica só no aria-label. */}
+            <div className="flex w-full items-center gap-2">
               {useCompactCategoryCarousel && (
                 <button
                   type="button"
                   aria-label="Abrir categorias"
                   onClick={() => setIsCategorySheetOpen(true)}
-                  className="inline-flex w-[3.45rem] shrink-0 flex-col items-center justify-center gap-1 rounded-[1.2rem] border border-white/90 bg-white text-slate-700 shadow-[0_14px_28px_-22px_rgba(15,23,42,0.36)] ring-1 ring-slate-100 transition-all active:scale-95"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-600 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.35)] transition-all active:scale-95"
                 >
-                  <List size={17} weight="bold" style={{ color: catalogPrimaryColor }} />
-                  <span className="text-2xs font-black uppercase tracking-[0.08em] text-slate-400">{catalogTerm}</span>
+                  <List size={16} weight="bold" style={{ color: catalogPrimaryColor }} />
                 </button>
               )}
               <div className={`${
                 useCompactCategoryCarousel
-                  ? "min-w-0 flex-1 snap-x overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide sm:overflow-visible sm:whitespace-normal [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                  : `flex-1 grid gap-2 ${filteredGrouped.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`
+                  ? "min-w-0 flex-1 snap-x overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] sm:overflow-visible sm:whitespace-normal"
+                  : "min-w-0 flex-1 overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] sm:overflow-visible sm:whitespace-normal"
               }`}>
-                <div className={`${useCompactCategoryCarousel ? "inline-flex items-stretch gap-2.5 pr-10 sm:flex sm:flex-wrap sm:gap-2 sm:pr-0" : "contents"}`}>
+                <div className="inline-flex items-center gap-2 pr-2 sm:flex sm:flex-wrap sm:pr-0">
                 {filteredGrouped.map((category) => {
                   const isActive = activeCategoryKey === category.key;
                   const Icon = categoryGlyph(category.key);
-                  const meta = categoryVisualMeta(category.key);
                   const categoryCountLabel = category.items.length === 1 ? '1 item' : `${category.items.length} itens`;
                   return (
                     <button
@@ -1301,31 +1301,25 @@ export const MenuView = ({
                         setActiveCategoryKey(category.key);
                         scrollToCategory(category.key);
                       }}
-                      className={`jnc-hub-touch group relative flex min-h-[3.3rem] flex-col items-center justify-center overflow-hidden rounded-[1.12rem] border px-2 py-1.5 text-center snap-start transition-all duration-200 ${
-                        useCompactCategoryCarousel ? "w-[5.55rem] shrink-0 sm:min-w-0" : "w-full min-w-0"
-                      } ${isActive ? 'shadow-[0_18px_34px_-22px_rgba(15,23,42,0.38)]' : 'shadow-[0_10px_24px_-22px_rgba(15,23,42,0.28)] hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-24px_rgba(15,23,42,0.34)]'}`}
+                      className={`jnc-hub-touch group relative inline-flex h-10 shrink-0 snap-start items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-[13px] transition-all duration-200 active:scale-95 sm:min-w-0 ${
+                        isActive
+                          ? "shadow-[0_10px_26px_-16px_rgba(15,23,42,0.42)]"
+                          : "bg-white/85 text-slate-600 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.3)] hover:bg-white hover:text-slate-800"
+                      }`}
                       style={
                         isActive
                           ? {
                               background: `linear-gradient(135deg, ${catalogPrimaryColor} 0%, ${catalogPrimaryColor}e8 100%)`,
                               color: catalogPrimaryText,
-                              borderColor: catalogPrimaryColor,
                             }
-                          : { backgroundColor: "#ffffff", color: "#334155", borderColor: "#eef2f7" }
+                          : undefined
                       }
                       aria-label={`Ir para ${category.label}, ${categoryCountLabel}`}
+                      aria-current={isActive ? "true" : undefined}
                     >
-                      {isActive ? <span className="pointer-events-none absolute -right-5 -top-5 h-14 w-14 rounded-full bg-white/16 blur-xl" /> : null}
-                      <span
-                        className={`relative inline-flex h-[1.35rem] w-[1.35rem] shrink-0 items-center justify-center rounded-full border transition-transform duration-300 group-hover:scale-105 ${isActive ? "border-white/24 bg-white/16 text-current" : `${meta.tone} bg-opacity-70`}`}
-                      >
-                        <Icon size={13} weight={isActive ? "fill" : "duotone"} />
-                      </span>
-                      <span className={`mt-0.5 block w-full truncate text-2xs font-black leading-tight tracking-[-0.02em] sm:text-[11px] ${isActive ? "text-current" : "text-slate-800"}`}>
+                      <Icon size={14} weight={isActive ? "fill" : "duotone"} className={isActive ? "opacity-90" : "text-slate-400"} />
+                      <span className={`truncate font-semibold leading-none tracking-[-0.01em] ${isActive ? "text-current" : "text-slate-700"}`}>
                         {category.label}
-                      </span>
-                      <span className={`mt-0.5 block text-2xs font-black uppercase tracking-[0.1em] ${isActive ? "text-current/70" : "text-slate-400"}`}>
-                        {categoryCountLabel}
                       </span>
                     </button>
                   );
@@ -1399,7 +1393,7 @@ export const MenuView = ({
             wazeUrl={wazeUrl}
           />
         )}
-        <div id="menu-list" className={`space-y-7 sm:space-y-8 ${activeTab === "products" ? "" : "hidden"}`}>
+        <div id="menu-list" className={`-mx-3 space-y-6 rounded-t-[1.75rem] bg-white px-3 pt-4 shadow-[0_-16px_36px_-32px_rgba(15,23,42,0.3)] sm:-mx-4 sm:px-4 lg:mx-0 lg:space-y-8 lg:rounded-none lg:bg-transparent lg:px-0 lg:pt-0 lg:shadow-none ${activeTab === "products" ? "" : "hidden"}`}>
         {promoMessage && (
           <div className="rounded-3xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
             <p className="text-[11px] uppercase tracking-[0.3em] text-fuchsia-500 font-semibold">Mensagem do dia</p>
@@ -1548,30 +1542,29 @@ export const MenuView = ({
         ) : null}
         {filteredGrouped.map((category, index) => {
           return (
-          <div key={category.key} className={`scroll-mt-[9.5rem] space-y-2.5 sm:space-y-3 ${index > 0 ? 'pt-1 sm:pt-2' : ''}`} id={`cat-${category.key}`} ref={registerCategoryRef(category.key)}>
+          <div key={category.key} className={`scroll-mt-[7.5rem] space-y-1 sm:space-y-3 ${index > 0 ? 'pt-2 sm:pt-2' : ''}`} id={`cat-${category.key}`} ref={registerCategoryRef(category.key)}>
 
-            {/* Título da categoria */}
+            {/* Título da categoria — auditoria 22/08: barra + h2 bold (sem underline decorativo) */}
             <div className="flex items-end justify-between gap-3 px-1.5">
               <div className="min-w-0">
-                <div className="flex min-w-0 items-center gap-2.5">
+                <div className="flex min-w-0 items-center gap-2">
                   <span
-                    className="h-6 w-1 shrink-0 rounded-full shadow-[0_8px_18px_-10px_rgba(15,23,42,0.35)]"
+                    className="h-5 w-1 shrink-0 rounded-full shadow-[0_8px_18px_-10px_rgba(15,23,42,0.35)]"
                     style={{ backgroundColor: catalogPrimaryColor }}
                     aria-hidden="true"
                   />
-                  <h2 className="truncate text-[1.18rem] font-black capitalize leading-tight tracking-[-0.035em] text-slate-950 sm:text-[1.28rem]">
+                  <h2 className="truncate text-base font-bold capitalize leading-tight tracking-[-0.02em] text-slate-950 sm:text-[1.05rem]">
                     {category.label}
                   </h2>
                 </div>
-                <div className="mt-1 h-px w-16 rounded-full bg-gradient-to-r from-slate-200 via-slate-100 to-transparent" />
               </div>
-              <span className="shrink-0 pb-0.5 text-[11px] font-bold text-slate-400 sm:text-xs">
+              <span className="shrink-0 pb-0.5 text-[11px] font-medium text-slate-400 sm:text-xs">
                 {category.items.length === 1 ? '1 item' : `${category.items.length} itens`}
               </span>
             </div>
 
-            {/* Lista de itens */}
-            <div className="space-y-3 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4 lg:space-y-0">
+            {/* Lista de itens — mobile: lista corrida com hairline; lg: grid de cards */}
+            <div className="lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4">
               {category.items.map((item) => {
                 const hasActiveModifiers = Array.isArray(item?.modifiers)
                   ? item.modifiers.some((modifier: any) => modifier?.active !== false)
@@ -1642,13 +1635,13 @@ export const MenuView = ({
                 <div
                   key={item.id}
                   data-menu-card
-                  className={`jnc-hub-touch jnc-hub-lift group relative grid grid-cols-[minmax(0,1fr)_auto] lg:grid-cols-1 gap-4 overflow-hidden rounded-3xl border border-slate-100/70 bg-white/96 p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.34)] ring-1 ring-white/75 transition-all duration-300 hover:border-slate-200/60 hover:shadow-[0_26px_58px_-44px_rgba(15,23,42,0.42)] active:scale-[0.985] sm:gap-5 sm:p-5 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
+                  className={`jnc-hub-touch group relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border-b border-slate-100 py-3 pl-1 pr-1 transition-colors last:border-b-0 active:bg-slate-50/70 lg:grid-cols-1 lg:gap-4 lg:overflow-hidden lg:rounded-3xl lg:border lg:border-slate-100/70 lg:bg-white/96 lg:p-4 lg:shadow-[0_18px_42px_-36px_rgba(15,23,42,0.34)] lg:ring-1 lg:ring-white/75 lg:transition-all lg:duration-300 lg:hover:border-slate-200/60 lg:hover:shadow-[0_26px_58px_-44px_rgba(15,23,42,0.42)] sm:lg:gap-5 sm:lg:p-5 ${!staffView ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
                   }}
                 >
-                  <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-90" />
-                  <span className="jnc-glare-sweep opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <span className="pointer-events-none absolute inset-x-6 top-0 hidden h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-90 lg:block" />
+                  <span className="jnc-glare-sweep hidden opacity-0 transition-opacity duration-300 group-hover:opacity-100 lg:block" />
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                     <div>
                       <button
@@ -1659,30 +1652,30 @@ export const MenuView = ({
                             openProductModal(item);
                           }
                         }}
-                        className={`text-left font-black text-slate-900 tracking-tight text-[15px] sm:text-[17px] leading-snug line-clamp-2 transition-colors ${(!staffView || allowStaffModal) ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
+                        className={`text-left font-semibold text-slate-900 tracking-[-0.01em] text-[15px] sm:text-[16px] leading-snug line-clamp-2 transition-colors ${(!staffView || allowStaffModal) ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
                       >
                         {item.name}
                       </button>
                       {item.description && (
-                        <p className="mt-2 text-[13px] sm:text-sm text-slate-500 leading-relaxed line-clamp-2 font-medium">{item.description}</p>
+                        <p className="mt-1 text-[13px] text-slate-500 leading-snug line-clamp-2 font-normal">{item.description}</p>
                       )}
                     </div>
 
-                    <div className="mt-4 flex flex-col items-start gap-2.5">
+                    <div className="mt-2.5 flex flex-col items-start gap-1.5">
                       {(() => {
                         const priceNode = (
                           <div className="flex items-baseline gap-1.5 leading-none">
                             {resolvePromoPrice(item) ? (
                               <>
-                                <span className="text-lg sm:text-xl font-black tracking-tight text-[#336886]">
+                                <span className="text-[15px] font-bold tabular-nums tracking-tight text-[#336886]">
                                   {formatCurrency(resolvePromoPrice(item))}
                                 </span>
-                                <span className="text-[11px] font-bold text-slate-300 line-through">
+                                <span className="text-[11px] font-medium text-slate-400 line-through">
                                   {formatCurrency(item.price)}
                                 </span>
                               </>
                             ) : (
-                              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900">
+                              <span className="text-[15px] font-bold tabular-nums tracking-tight text-slate-900">
                                 {formatCurrency(item.price)}
                               </span>
                             )}
@@ -1693,10 +1686,10 @@ export const MenuView = ({
                         if (hasConfigurableOptions && !resolvePromoPrice(item)) {
                           return (
                             <div className="flex items-baseline gap-1.5 leading-none">
-                              <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                              <span className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                                 A partir de
                               </span>
-                              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900">
+                              <span className="text-[15px] font-bold tabular-nums tracking-tight text-slate-900">
                                 {formatCurrency(item.price)}
                               </span>
                             </div>
@@ -1707,30 +1700,18 @@ export const MenuView = ({
 
                       <div className="flex flex-wrap items-center gap-1.5">
                         {item.isFeatured && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-black uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100/50">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-bold uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100/50">
                             <Sparkle size={10} weight="fill" />
                             Destaque
                           </span>
                         )}
                         {!item.isFeatured && isTopItem && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-100/30 shadow-[0_4px_12px_rgba(249,115,22,0.08)]">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-bold uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-100/30">
                             🔥 Mais pedido
                           </span>
                         )}
-                        {hasConfigurableOptions && (
-                          <span
-                            className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-2xs font-black uppercase tracking-wider"
-                            style={{
-                              backgroundColor: `${catalogPrimaryColor}10`,
-                              borderColor: `${catalogPrimaryColor}18`,
-                              color: catalogPrimaryColor,
-                            }}
-                          >
-                            Customizável
-                          </span>
-                        )}
                         {stockState.soldOut && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-black uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
                             Esgotado
                           </span>
                         )}
@@ -1738,8 +1719,8 @@ export const MenuView = ({
                     </div>
                   </div>
 
-                  <div className={`flex flex-col items-end justify-center flex-shrink-0 lg:order-first lg:w-full lg:items-stretch lg:min-w-0 ${staffView ? "min-w-[124px]" : "min-w-[112px]"}`}>
-                    <div data-menu-item-media className="relative h-[112px] w-[112px] sm:h-[124px] sm:w-[124px] lg:h-44 lg:w-full">
+                  <div className={`flex flex-col items-end justify-center self-start flex-shrink-0 pt-1 lg:order-first lg:w-full lg:items-stretch lg:min-w-0 lg:pt-0 ${staffView ? "min-w-[100px]" : "min-w-[88px]"} sm:min-w-[96px]`}>
+                    <div data-menu-item-media className="relative h-[88px] w-[88px] sm:h-[96px] sm:w-[96px] lg:h-44 lg:w-full">
                       <button
                         type="button"
                         onClick={(event) => {
@@ -1752,7 +1733,7 @@ export const MenuView = ({
                             openProductModal(item);
                           }
                         }}
-                        className={`h-full w-full rounded-2xl overflow-hidden bg-slate-50 border border-white shadow-[0_12px_24px_-16px_rgba(15,23,42,0.3)] ring-1 ring-slate-100/50 ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
+                        className={`h-full w-full rounded-xl overflow-hidden bg-slate-50 ring-1 ring-slate-100/60 lg:rounded-2xl lg:border lg:border-white lg:shadow-[0_12px_24px_-16px_rgba(15,23,42,0.3)] ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
                       >
                         {item.imageUrl ? (
                           <Image
@@ -2180,7 +2161,7 @@ export const MenuView = ({
                 }
                 onProceed?.();
               }}
-              className={`jnc-hub-touch group relative isolate flex w-full items-center justify-between overflow-hidden rounded-[2.2rem] px-5 py-4 ${
+              className={`jnc-hub-touch group relative isolate flex w-full items-center justify-between overflow-hidden rounded-[2.2rem] px-4 py-3.5 ${
                 cartPulse ? "scale-[1.04] shadow-[0_24px_50px_-12px_rgba(15,23,42,0.45)]" : "shadow-[0_20px_48px_-14px_rgba(15,23,42,0.35)] active:scale-[0.985]"
               }`}
               style={{
@@ -2193,7 +2174,7 @@ export const MenuView = ({
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative">
                   <span
-                    className={`h-8 w-8 rounded-xl text-[13px] font-black inline-flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${cartPulse ? "animate-pop" : ""}`}
+                    className={`h-8 w-8 rounded-xl text-[13px] font-bold inline-flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${cartPulse ? "animate-pop" : ""}`}
                     style={{ color: catalogPrimaryColor, backgroundColor: "#ffffff" }}
                   >
                     {cartItemsCount}
@@ -2202,11 +2183,11 @@ export const MenuView = ({
                     <span className="absolute inset-0 animate-ping rounded-xl bg-white/40" />
                   )}
                 </div>
-                <span className="font-black text-[15px] uppercase tracking-wider">Ver minha sacola</span>
+                <span className="font-bold text-[15px] tracking-wide">Ver minha sacola</span>
               </div>
               <div className="flex flex-col items-end leading-none">
                 <span className="text-2xs font-bold opacity-80 uppercase tracking-tight">Total</span>
-                <span className="font-black text-lg sm:text-xl tracking-tighter">{formatCurrency(cartTotalValue)}</span>
+                <span className="font-bold text-lg sm:text-xl tabular-nums tracking-tight">{formatCurrency(cartTotalValue)}</span>
               </div>
             </button>
           )}

@@ -1731,7 +1731,7 @@ export const CartView = ({
       {(!useMultiStepFlow || checkoutStep === 2) && <div className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">
+            <h2 className="font-bold text-slate-900 text-base sm:text-lg tracking-tight">
               {useMultiStepFlow ? 'Como você quer receber?' : 'Detalhes do Pedido'}
             </h2>
             {!useMultiStepFlow && <p className="text-xs text-slate-500 hidden sm:block">Complete as infos para enviarmos seu pedido.</p>}
@@ -1745,13 +1745,13 @@ export const CartView = ({
         </div>
 
         <div className="space-y-4 sm:space-y-5">
-          {/* Nome */}
+          {/* Nome — auditoria 22/08: sem caixa aninhada (campo direto no card de Detalhes) */}
           {!canUseLockedContactSummary && !isEndCustomerLogged && (
-          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <div>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Seu Nome
             </label>
-              <div className="relative mt-2">
+              <div className="relative mt-1.5">
                 <input
                   {...inputAssistProps.name}
                   ref={nameInputRef}
@@ -1811,13 +1811,13 @@ export const CartView = ({
             </div>
           )}
 
-          {/* WhatsApp */}
+          {/* WhatsApp — auditoria 22/08: sem caixa aninhada */}
           {!isOptionalPhoneMode && !canUseLockedContactSummary && !isEndCustomerLogged && (
-            <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                WhatsApp <span className="text-rose-500 font-extrabold">Obrigatório</span>
+            <div>
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                WhatsApp <span className="text-rose-500 font-bold">Obrigatório</span>
               </label>
-              <div className="mt-2 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
+              <div className="mt-1.5 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
                 <div>
                   <span className="text-[11px] font-semibold text-slate-500">DDD</span>
                   <DddSelect
@@ -1846,22 +1846,20 @@ export const CartView = ({
           )}
 
           {isOptionalPhoneMode && !showOptionalPhoneFields && !canUseLockedContactSummary && !isEndCustomerLogged && (
-            <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
-              <button
-                type="button"
-                onClick={() => setShowOptionalPhoneFields(true)}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-700 shadow-sm transition-all hover:bg-amber-100 hover:border-amber-300 active:scale-[0.98]"
-              >
-                <Phone size={14} weight="duotone" />
-                Adicionar WhatsApp / Telefone (Opcional)
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowOptionalPhoneFields(true)}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-700 transition-all hover:bg-amber-100 hover:border-amber-300 active:scale-[0.98]"
+            >
+              <Phone size={14} weight="duotone" />
+              Adicionar WhatsApp / Telefone (Opcional)
+            </button>
           )}
 
           {isOptionalPhoneMode && showOptionalPhoneFields && !canUseLockedContactSummary && (
-            <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+            <div>
               <div className="flex items-center justify-between gap-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   WhatsApp (opcional)
                 </label>
                 <button
@@ -1872,7 +1870,7 @@ export const CartView = ({
                   Ocultar
                 </button>
               </div>
-              <div className="mt-2 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
+              <div className="mt-1.5 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
                 <div>
                   <span className="text-[11px] font-semibold text-slate-500">DDD</span>
                   <DddSelect
@@ -1909,22 +1907,12 @@ export const CartView = ({
             </p>
           )}
 
-          {/* Tipo de pedido */}
-          <div className="rounded-[1.7rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(248,250,252,0.96)_0%,rgba(255,255,255,0.98)_100%)] p-3 sm:p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.28)]">
-            <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
-                  Tipo de pedido
-                </p>
-                <p className="mt-1 text-sm font-semibold text-slate-700">
-                  Escolha como quer receber este pedido.
-                </p>
-              </div>
-              <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.16em] text-[#153A4C] shadow-sm">
-                {orderTypeVisuals[customer.type]?.label || "Pedido"}
-              </span>
-            </div>
-            <div className="grid grid-cols-1 gap-2 min-[340px]:grid-cols-2 lg:grid-cols-4">
+          {/* Tipo de pedido — auditoria 22/08: sem caixa gradiente, sem frase-helper e sem pill redundante do tipo */}
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Tipo de pedido
+            </p>
+            <div className="mt-1.5 grid grid-cols-1 gap-2 min-[340px]:grid-cols-2 lg:grid-cols-4">
               {visibleOrderTypes.map((type) => {
                 const typeMeta = orderTypeVisuals[type] || orderTypeVisuals.delivery;
                 const isActive = customer.type === type;
@@ -1941,24 +1929,24 @@ export const CartView = ({
                       }
                       onChangeCustomer({ ...customer, type });
                     }}
-                    className={`jnc-hub-touch flex min-h-[74px] w-full min-w-0 items-center gap-2.5 overflow-hidden rounded-[1.2rem] border px-3 py-3 text-left ${
+                    className={`jnc-hub-touch flex min-h-[56px] w-full min-w-0 items-center gap-2 overflow-hidden rounded-[1.05rem] border px-3 py-2.5 text-left ${
                       isActive
-                        ? "border-slate-900 bg-white text-slate-900 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.45)] active:scale-[0.985]"
-                        : "border-transparent bg-white/60 text-slate-500 hover:border-slate-200 hover:bg-white active:scale-[0.985]"
+                        ? "border-slate-900 bg-white text-slate-900 shadow-[0_14px_28px_-22px_rgba(15,23,42,0.45)] active:scale-[0.985]"
+                        : "border-transparent bg-slate-50 text-slate-500 hover:border-slate-200 hover:bg-white active:scale-[0.985]"
                     }`}
                   >
                     <span
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
                         isActive ? "bg-slate-900 text-white shadow-sm" : "bg-slate-100 text-slate-600"
                       }`}
                     >
                       {typeMeta.icon}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-black leading-tight tracking-tight break-words">
+                      <span className="block text-[13px] font-bold leading-tight tracking-tight break-words">
                         {typeMeta.label}
                       </span>
-                      <span className={`mt-0.5 block break-words text-[11px] font-semibold leading-snug ${isActive ? "text-slate-500" : "text-slate-400"}`}>
+                      <span className={`mt-0.5 block break-words text-[11px] font-medium leading-snug ${isActive ? "text-slate-500" : "text-slate-400"}`}>
                         {typeMeta.helper}
                       </span>
                     </span>
@@ -2551,7 +2539,7 @@ export const CartView = ({
                   <button
                     type="button"
                     onClick={() => setIsEditingTable(true)}
-                    className="jnc-hub-touch text-xs font-black uppercase tracking-wider text-[#336886] hover:text-[#153A4C]"
+                    className="jnc-hub-touch text-xs font-bold uppercase tracking-wider text-[#336886] hover:text-[#153A4C]"
                   >
                     Alterar
                   </button>
@@ -2611,7 +2599,7 @@ export const CartView = ({
                       <button
                         type="button"
                         onClick={() => setIsEditingTable(false)}
-                        className="jnc-hub-touch px-4 rounded-xl bg-slate-900 text-white text-xs font-black uppercase tracking-wider shadow-sm"
+                        className="jnc-hub-touch px-4 rounded-xl bg-slate-900 text-white text-xs font-bold uppercase tracking-wider shadow-sm"
                       >
                         OK
                       </button>
