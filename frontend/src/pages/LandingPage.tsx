@@ -267,41 +267,46 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Quem já está na plataforma (marquee auto-scroll) ── */}
+      {/* ── Quem já está na plataforma (marquee dentro do container) ── */}
       {featuredStores.length > 0 && (
-        <motion.section {...revealSm()} className="overflow-hidden border-y border-white/40 bg-white/40 py-6 backdrop-blur-sm">
-          <p className="mb-4 px-4 text-center text-xs font-black uppercase tracking-[0.18em] text-[#336886]">
-            Quem já está na plataforma
-          </p>
-          <div
-            className="relative"
-            style={{
-              maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
-              WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
-            }}
-          >
+        <motion.section {...revealSm()} className="px-4 py-8">
+          <div className="mx-auto max-w-6xl">
+            <p className="mb-4 text-center text-xs font-black uppercase tracking-[0.18em] text-[#336886]">
+              Quem já está na plataforma
+            </p>
             <div
-              className="flex w-max items-center gap-5 px-4 [animation:marquee_30s_linear_infinite] hover:[animation-play-state:paused]"
-              style={{ '--marquee-w': '50%' } as any}
+              className="relative rounded-[1.75rem] border border-white/50 bg-white/55 py-4 shadow-[0_14px_36px_-24px_rgba(15,23,42,0.12)] backdrop-blur-sm"
             >
-              <style>{`
-                @keyframes marquee {
-                  from { transform: translateX(0); }
-                  to { transform: translateX(calc(-50% - 20px)); }
-                }
-              `}</style>
-              {[...featuredStores, ...featuredStores].map((store, i) => (
-                <Link key={`${store.id}-${i}`} to={`/${store.slug}`} className="group flex shrink-0 flex-col items-center gap-1.5">
-                  <span className="jnc-glass grid h-16 w-16 place-items-center overflow-hidden rounded-2xl transition-transform duration-300 group-hover:scale-110 group-hover:ring-2 group-hover:ring-[#336886]/30">
-                    {store.logoUrl || store.bannerUrl ? (
-                      <img src={store.logoUrl || store.bannerUrl} alt={store.name} className="h-full w-full object-cover" loading="lazy" />
-                    ) : (
-                      <Storefront size={24} weight="duotone" className="text-[#336886]/50" />
-                    )}
-                  </span>
-                  <span className="max-w-[72px] truncate text-[10px] font-bold text-slate-500 group-hover:text-[#336886]">{store.name}</span>
-                </Link>
-              ))}
+              <div
+                className="overflow-hidden rounded-[1.5rem]"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+                }}
+              >
+                <div
+                  className="flex w-max items-center gap-5 px-4 [animation:marquee_30s_linear_infinite] hover:[animation-play-state:paused]"
+                >
+                  <style>{`
+                    @keyframes marquee {
+                      from { transform: translateX(0); }
+                      to { transform: translateX(calc(-50% - 20px)); }
+                    }
+                  `}</style>
+                  {[...featuredStores, ...featuredStores].map((store, i) => (
+                    <Link key={`${store.id}-${i}`} to={`/${store.slug}`} className="group flex shrink-0 flex-col items-center gap-1.5">
+                      <span className="grid h-[4.5rem] w-[4.5rem] place-items-center overflow-hidden rounded-2xl border border-white/60 bg-white shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:ring-2 group-hover:ring-[#336886]/25">
+                        {store.logoUrl || store.bannerUrl ? (
+                          <img src={store.logoUrl || store.bannerUrl} alt={store.name} className="h-full w-full object-cover" loading="lazy" />
+                        ) : (
+                          <Storefront size={24} weight="duotone" className="text-[#336886]/40" />
+                        )}
+                      </span>
+                      <span className="max-w-[76px] truncate text-[10px] font-bold text-slate-500 group-hover:text-[#33688886]">{store.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </motion.section>

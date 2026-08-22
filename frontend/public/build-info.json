@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "26702b3c",
-  "versionLabel": "v0.1.9.26702b3c",
-  "versionInternal": "0.1.9+20260822.105058.26702b3c",
-  "buildId": "0.1.9+20260822.105058.26702b3c-20260822.105058-26702b3c",
-  "builtAt": "2026-08-22T10:50:58.050Z",
-  "commitHash": "26702b3c1c9bb92c1d403902fd4afeb86101adaf",
-  "shortHash": "26702b3c",
+  "versionDisplaySuffix": "363a8402",
+  "versionLabel": "v0.1.9.363a8402",
+  "versionInternal": "0.1.9+20260822.112006.363a8402",
+  "buildId": "0.1.9+20260822.112006.363a8402-20260822.112006-363a8402",
+  "builtAt": "2026-08-22T11:20:06.630Z",
+  "commitHash": "363a8402d5a3425af01db2debc6af0e4fc85927f",
+  "shortHash": "363a8402",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "363a8402d5a3425af01db2debc6af0e4fc85927f",
+      "shortHash": "363a8402",
+      "dateIso": "2026-08-22T08:03:23-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(landing): carrossel marquee, dedup lojas, hero com logo real, destinos com foto",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/363a8402d5a3425af01db2debc6af0e4fc85927f"
+    },
     {
       "hash": "26702b3c1c9bb92c1d403902fd4afeb86101adaf",
       "shortHash": "26702b3c",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(design): E2+E3+E5 da auditoria 2 — tokens, Seu bairro, estados",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5954c6d8deddc58fff8f6b07bd98de1a394d4532"
-    },
-    {
-      "hash": "276806595da53d2ddcd4d144638d573eaa7fdeb6",
-      "shortHash": "27680659",
-      "dateIso": "2026-08-18T23:11:39-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 99 (v1.0.99) — AAB com lote 1 da auditoria 2",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/276806595da53d2ddcd4d144638d573eaa7fdeb6"
     }
   ]
 }
