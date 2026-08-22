@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Buildings, Compass, MagnifyingGlass, MapTrifold, Mountains, Sparkle, X } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { DestinationPartnerCta } from '../components/Destinations/DestinationPartnerCta';
@@ -149,18 +150,29 @@ export function DestinationsPage() {
 
   return (
     <PublicDestinationShell active="destinations" backTo="/hub" backLabel="Voltar" contextLabel="Destinos turísticos">
+      {/* Instrument Serif (innovation skill): voz editorial de revista de viagem
+          sem trair a paleta warm sand do JNC — serif itálico só nos destaques. */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+        .dest-serif-i { font-family: 'Instrument Serif', serif; font-style: italic; letter-spacing: -0.01em; }
+      `}</style>
       <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,#d7f4e8_0,#f4f1ea_38%,#efe5d1_100%)] px-4 pb-4 pt-3 sm:pt-4">
         <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-emerald-300/25 blur-3xl" />
         <div className="absolute -left-20 bottom-0 h-56 w-56 rounded-full bg-amber-300/25 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
-          <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
+            className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end"
+          >
             <div className="min-w-0">
               <p className="inline-flex items-center gap-2 rounded-full bg-[#153A4C] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-[0_14px_28px_-20px_rgba(21,58,76,0.46)] ring-1 ring-white/25">
                 <Mountains size={14} weight="duotone" />
                 Destinos turísticos
               </p>
               <h1 className="mt-2 max-w-3xl text-2xl font-black leading-[1.02] tracking-[-0.05em] text-slate-950 sm:text-4xl">
-                Explore cidades turísticas com apoio local.
+                Explore <em className="dest-serif-i text-[#153A4C]/70">cidades turísticas</em> com apoio local.
               </h1>
               <p className="mt-2 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
                 Encontre hospedagens, comida, passeios e serviços próximos em poucos toques.
@@ -181,7 +193,7 @@ export function DestinationsPage() {
                 </button>
               ))}
             </SurfaceCard>
-          </div>
+          </motion.div>
           {/* ... Search Term field ... */}
           <SurfaceCard padding="sm" className="mt-4 rounded-[1.5rem] border-white/80 bg-white/86 backdrop-blur transition-all duration-300 focus-within:border-[#336886]/35 focus-within:shadow-[0_20px_48px_-30px_rgba(51,104,134,0.25)] focus-within:ring-2 focus-within:ring-[#336886]/10">
             <label className="flex min-h-[3.25rem] items-center gap-3 rounded-[1.15rem] bg-slate-50 px-4 ring-1 ring-slate-200/60 focus-within:ring-transparent transition-all">
@@ -235,7 +247,7 @@ export function DestinationsPage() {
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Cidades disponíveis</p>
             <h2 className="mt-1 text-2xl font-black tracking-[-0.03em] text-slate-950">
-              {searchTerm || selectedState !== 'ALL' ? destinationResultLabel : 'Escolha uma cidade'}
+              {searchTerm || selectedState !== 'ALL' ? destinationResultLabel : <>Escolha uma <em className="dest-serif-i text-[#153A4C]/60">cidade</em></>}
             </h2>
             <p className="mt-1 max-w-xl text-sm font-semibold text-slate-500">Toque em uma cidade para ver hospedagens, comida, passeios e serviços.</p>
           </div>
@@ -271,9 +283,16 @@ export function DestinationsPage() {
 
         {!loading && (
           <div className="grid gap-4 md:grid-cols-2">
-            {filteredDestinations.map((destination) => {
+            {filteredDestinations.map((destination, cardIndex) => {
               const displayName = destinationDisplayName(destination);
               return (
+                <motion.div
+                  key={destination.id}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{ duration: 0.8, delay: (cardIndex % 4) * 0.12, ease: [0.23, 1, 0.32, 1] }}
+                >
                 <Link
                   key={destination.id}
                   to={`/destinos/${destination.slug}`}
@@ -291,7 +310,7 @@ export function DestinationsPage() {
                   </div>
                   <div className="flex flex-col justify-between gap-4 p-4">
                     <div>
-                      <h3 className="text-xl font-black tracking-[-0.04em] text-slate-900 transition-colors duration-200 group-hover:text-[#336886] sm:text-2xl">{displayName}</h3>
+                      <h3 className="text-xl font-black tracking-[-0.04em] text-slate-900 transition-colors duration-200 group-hover:text-[#336886] sm:text-2xl"><span className="dest-serif-i">{displayName}</span></h3>
                       <p className="mt-2 line-clamp-2 text-sm font-semibold leading-relaxed text-slate-600">
                         {destination.description || destination.heroSubtitle || 'Um destino pronto para receber sua próxima viagem.'}
                       </p>
@@ -312,6 +331,7 @@ export function DestinationsPage() {
                     </div>
                   </div>
                 </Link>
+                </motion.div>
               );
             })}
           </div>

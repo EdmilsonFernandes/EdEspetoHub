@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
+import { motion } from 'framer-motion';
 import { ArrowRight, Bed, ForkKnife, GlobeHemisphereWest, MagnifyingGlass, MapPinLine, Mountains, PhoneCall, Sparkle, WhatsappLogo } from '@phosphor-icons/react';
 import { PublicDestinationShell } from '../components/Destinations/PublicDestinationShell';
 import { DestinationPartnerCta } from '../components/Destinations/DestinationPartnerCta';
@@ -358,11 +359,20 @@ export function DestinationDetailPage() {
 
           {!loading && !error ? (
             <div className="space-y-4 py-1.5 sm:py-3">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+                .dest-serif-i { font-family: 'Instrument Serif', serif; font-style: italic; letter-spacing: -0.01em; }
+              `}</style>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
+                className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+              >
                 <div className="min-w-0 max-w-3xl">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Explore a região</p>
                   <h1 className="mt-2 text-2xl font-black leading-[0.98] tracking-[-0.045em] text-slate-950 sm:text-4xl">
-                    Explore {destination.name}
+                    Explore <em className="dest-serif-i text-[#153A4C]/70">{destination.name}</em>
                   </h1>
                   <p className="mt-2 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600 sm:text-base">
                     {destination.heroSubtitle || destination.description || 'Hospedagens, comida, passeios e serviços perto de você, sem complicar.'}
@@ -388,7 +398,7 @@ export function DestinationDetailPage() {
                     {listings.length} serviços
                   </button>
                 </div>
-              </div>
+              </motion.div>
 
               <SurfaceCard padding="sm" className="grid min-w-0 gap-2.5 rounded-[1.55rem] border-white/55 bg-white/42 ring-1 ring-white/35 backdrop-blur-xl lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
                 <label className="group flex min-h-[50px] min-w-0 max-w-full items-center gap-3 rounded-[1.2rem] bg-white/90 px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition focus-within:bg-white focus-within:ring-4 focus-within:ring-[#336886]/12">

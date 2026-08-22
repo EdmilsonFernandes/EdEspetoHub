@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "314e4c34",
-  "versionLabel": "v0.1.9.314e4c34",
-  "versionInternal": "0.1.9+20260822.012435.314e4c34",
-  "buildId": "0.1.9+20260822.012435.314e4c34-20260822.012435-314e4c34",
-  "builtAt": "2026-08-22T01:24:35.522Z",
-  "commitHash": "314e4c348af5bd89bbd59ede9b550d602a4aaf8a",
-  "shortHash": "314e4c34",
+  "versionDisplaySuffix": "bcde381c",
+  "versionLabel": "v0.1.9.bcde381c",
+  "versionInternal": "0.1.9+20260822.021409.bcde381c",
+  "buildId": "0.1.9+20260822.021409.bcde381c-20260822.021409-bcde381c",
+  "builtAt": "2026-08-22T02:14:09.007Z",
+  "commitHash": "bcde381cf97b77227e9b456e90a356097651082a",
+  "shortHash": "bcde381c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "bcde381cf97b77227e9b456e90a356097651082a",
+      "shortHash": "bcde381c",
+      "dateIso": "2026-08-21T22:33:08-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 105 (v1.0.105) — QR fora do cupom da fila",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bcde381cf97b77227e9b456e90a356097651082a"
+    },
+    {
+      "hash": "5f79e7df9ef8285b308e23e2044d7f53699ff1ef",
+      "shortHash": "5f79e7df",
+      "dateIso": "2026-08-21T22:29:15-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(print): QR removido do cupom da fila — suspeito nº 1 do fallback RawBT",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5f79e7df9ef8285b308e23e2044d7f53699ff1ef"
+    },
     {
       "hash": "314e4c348af5bd89bbd59ede9b550d602a4aaf8a",
       "shortHash": "314e4c34",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(ux): card COMPACTO de pagamento pendente no topo — igual ao conceito iFood",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fe9f93de3e00d02c2967250489f56b3a950cc53c"
-    },
-    {
-      "hash": "62df7ec207dc1e26d2dfec48b2f395883e067d21",
-      "shortHash": "62df7ec2",
-      "dateIso": "2026-08-18T16:58:42-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 97 (v1.0.97) — AAB com o redesign de retomada Pix",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/62df7ec207dc1e26d2dfec48b2f395883e067d21"
-    },
-    {
-      "hash": "37be27fe09b91ca0c414305403c0506fa9788d30",
-      "shortHash": "37be27fe",
-      "dateIso": "2026-08-18T16:50:59-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ux): retomada do Pix iFood-like — card de pagamento no foco, detalhe na hierarquia certa",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/37be27fe09b91ca0c414305403c0506fa9788d30"
     }
   ]
 }
