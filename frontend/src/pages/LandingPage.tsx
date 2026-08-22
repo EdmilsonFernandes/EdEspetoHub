@@ -380,42 +380,46 @@ export function LandingPage() {
         </motion.section>
       )}
 
-      {/* ── Prove do cardápio (produtos REAIS com foto) ── */}
+      {/* ── Direto das lojas (carrossel horizontal com snap) ── */}
       {showcaseProducts.length > 0 && (
-        <section className="px-4 py-8">
+        <section className="py-8">
           <div className="mx-auto max-w-6xl">
-            <motion.div {...revealSm()} className="mb-5 text-center">
+            <motion.div {...revealSm()} className="mb-4 px-4 text-center">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Direto das lojas</p>
               <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
                 O que você encontra <em className="jnc-serif-i text-[#153A4C]/60">perto de você</em>
               </h2>
             </motion.div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {showcaseProducts.map((prod, i) => (
+            <div
+              className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+            >
+              {showcaseProducts.slice(0, 8).map((prod, i) => (
                 <motion.div
                   key={`${prod.storeSlug}-${prod.name}-${i}`}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-60px' }}
-                  transition={{ duration: 0.7, delay: (i % 4) * 0.1, ease: EASE }}
-                  whileHover={{ scale: 1.03, y: -4 }}
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.06, ease: EASE }}
+                  className="shrink-0 snap-start"
                 >
                   <Link to={`/${prod.storeSlug}`} className="group block">
-                    <div className="relative aspect-square overflow-hidden rounded-2xl border border-white/50 shadow-sm">
+                    <div className={`relative overflow-hidden rounded-2xl border border-white/50 shadow-sm ${
+                      i === 0 ? 'h-[9rem] w-[9rem] sm:h-[10rem] sm:w-[10rem]' : 'h-[8rem] w-[8rem] sm:h-[9rem] sm:w-[9rem]'
+                    }`}>
                       <img
                         src={prod.imageUrl}
                         alt={prod.name}
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                         loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,rgba(21,58,76,0.8)_100%)]" />
-                      <div className="absolute inset-x-0 bottom-0 p-2.5">
-                        <p className="truncate text-[12px] font-black text-white">{prod.name}</p>
-                        <div className="mt-0.5 flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-white/60">{prod.storeName}</span>
+                      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_25%,rgba(21,58,76,0.85)_100%)]" />
+                      <div className="absolute inset-x-0 bottom-0 p-2">
+                        <p className="truncate text-[11px] font-black leading-tight text-white">{prod.name}</p>
+                        <div className="mt-0.5 flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-bold text-white/50">{prod.storeName}</span>
                           {prod.price > 0 && (
-                            <span className="rounded-full bg-[#5fd35a] px-2 py-0.5 text-[10px] font-black text-[#153a4c]">
-                              R$ {prod.price.toFixed(2).replace('.', ',')}
+                            <span className="shrink-0 rounded-full bg-[#5fd35a] px-1.5 py-0.5 text-[8px] font-black text-[#153a4c]">
+                              {prod.price % 1 === 0 ? `R$${prod.price}` : `R$${prod.price.toFixed(2).replace('.', ',')}`}
                             </span>
                           )}
                         </div>

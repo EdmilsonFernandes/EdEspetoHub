@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "f8899321",
-  "versionLabel": "v0.1.9.f8899321",
-  "versionInternal": "0.1.9+20260822.130020.f8899321",
-  "buildId": "0.1.9+20260822.130020.f8899321-20260822.130020-f8899321",
-  "builtAt": "2026-08-22T13:00:20.243Z",
-  "commitHash": "f88993210e7b8a22c8b2aad2842e37ba417e8dff",
-  "shortHash": "f8899321",
+  "versionDisplaySuffix": "836e1f04",
+  "versionLabel": "v0.1.9.836e1f04",
+  "versionInternal": "0.1.9+20260822.134342.836e1f04",
+  "buildId": "0.1.9+20260822.134342.836e1f04-20260822.134342-836e1f04",
+  "builtAt": "2026-08-22T13:43:42.968Z",
+  "commitHash": "836e1f043ffd9b0d732a9d46db1424139e2aed09",
+  "shortHash": "836e1f04",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "836e1f043ffd9b0d732a9d46db1424139e2aed09",
+      "shortHash": "836e1f04",
+      "dateIso": "2026-08-22T10:02:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(landing): condomínios estáticos quando poucos + showcase genérico com import estático",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/836e1f043ffd9b0d732a9d46db1424139e2aed09"
+    },
     {
       "hash": "f88993210e7b8a22c8b2aad2842e37ba417e8dff",
       "shortHash": "f8899321",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore(mobile): versionCode 101 (v1.0.101) — Pix pendente no topo + pulso verde",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4e74f7961431e358055b749465bc22fc91c30a9f"
-    },
-    {
-      "hash": "39b46d31f2587490f35dc9b8739afd402b59a41b",
-      "shortHash": "39b46d31",
-      "dateIso": "2026-08-19T11:29:06-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(pedidos): Pix pendente no TOPO absoluto + pulso verde (padrão iFood)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/39b46d31f2587490f35dc9b8739afd402b59a41b"
     }
   ]
 }
