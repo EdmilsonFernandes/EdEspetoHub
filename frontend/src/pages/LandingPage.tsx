@@ -84,6 +84,7 @@ export function LandingPage() {
   const [featuredStores, setFeaturedStores] = useState<any[]>([]);
   const [showVideo, setShowVideo] = useState(false);
   const [destinationPhotos, setDestinationPhotos] = useState<Record<string, string>>({});
+  const [condominiums, setCondominiums] = useState<any[]>([]);
 
   useEffect(() => {
     document.title = 'Já no Caminho — Peça, retire e descubra perto de você';
@@ -118,6 +119,36 @@ export function LandingPage() {
         setFeaturedStores(withMedia.slice(0, 12));
       })
       .catch(() => { if (mounted) setFeaturedStores([]); });
+    return () => { mounted = false; };
+  }, []);
+
+  // Condomínios reais com logo pra marquee no 'Seu bairro'
+  useEffect(() => {
+    let mounted = true;
+    import('../services/condominiumService')
+      .then(({ condominiumService }) => condominiumService.listPublic())
+      .then((data: any) => {
+        if (!mounted || !Array.isArray(data)) return;
+        const seen = new Set<string>();
+        const normalized = data
+          .filter((c: any) => c?.active !== false)
+          .filter((c: any) => {
+            const slug = String(c?.slug || '');
+            if (!slug || seen.has(slug)) return false;
+            seen.add(slug);
+            return true;
+          })
+          .map((c: any) => ({
+            slug: String(c?.slug || ''),
+            name: String(c?.name || 'Condomínio'),
+            logoUrl: resolveAssetUrl(c?.logoUrl || '') || '',
+            bannerUrl: resolveAssetUrl(c?.bannerUrl || '') || '',
+            city: String(c?.city || ''),
+          }))
+          .filter((c: any) => c.logoUrl || c.bannerUrl);
+        setCondominiums(normalized.slice(0, 10));
+      })
+      .catch(() => {});
     return () => { mounted = false; };
   }, []);
 
@@ -368,6 +399,54 @@ export function LandingPage() {
             <p className="mt-4 text-xs font-semibold text-slate-500">Retirada no salão · ou entrega no seu bloco</p>
           </motion.div>
         </motion.div>
+
+        {/* Condomínios reais (marquee de logos) */}
+        {condominiums.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.7, ease: EASE }}
+            className="mt-5"
+          >
+            <p className="mb-2.5 text-center text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+              Condomínios na plataforma
+            </p>
+            <div
+              className="relative overflow-hidden rounded-2xl border border-white/50 bg-white/60 py-3 shadow-sm"
+              style={{
+                maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+              }}
+            >
+              <div
+                className="flex w-max items-center gap-4 px-4 [animation:marquee-condo_35s_linear_infinite] hover:[animation-play-state:paused]"
+              >
+                <style>{`@keyframes marquee-condo { from { transform: translateX(0); } to { transform: translateX(calc(-50% - 16px)); } }`}</style>
+                {[...condominiums, ...condominiums].map((condo, i) => (
+                  <Link
+                    key={`${condo.slug}-${i}`}
+                    to={`/hub?condominio=${condo.slug}`}
+                    className="group flex shrink-0 items-center gap-2"
+                  >
+                    <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/60 bg-white shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:ring-2 group-hover:ring-[#5fd35a]/30">
+                      <img
+                        src={condo.logoUrl || condo.bannerUrl}
+                        alt={condo.name}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    </span>
+                    <span className="flex flex-col">
+                      <span className="max-w-[110px] truncate text-[11px] font-black text-slate-700 group-hover:text-[#153A4C]">{condo.name}</span>
+                      {condo.city ? <span className="max-w-[110px] truncate text-[9px] font-bold text-slate-400">{condo.city}</span> : null}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
       </section>
 
       {/* ── Destinos (carrossel lento, enxuto) ── */}

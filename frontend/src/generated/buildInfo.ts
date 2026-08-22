@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "cced4dbb",
-  "versionLabel": "v0.1.9.cced4dbb",
-  "versionInternal": "0.1.9+20260822.121116.cced4dbb",
-  "buildId": "0.1.9+20260822.121116.cced4dbb-20260822.121116-cced4dbb",
-  "builtAt": "2026-08-22T12:11:16.106Z",
-  "commitHash": "cced4dbb61e258eafe4960bb2579cbd634ef8726",
-  "shortHash": "cced4dbb",
+  "versionDisplaySuffix": "6861be77",
+  "versionLabel": "v0.1.9.6861be77",
+  "versionInternal": "0.1.9+20260822.123810.6861be77",
+  "buildId": "0.1.9+20260822.123810.6861be77-20260822.123810-6861be77",
+  "builtAt": "2026-08-22T12:38:10.195Z",
+  "commitHash": "6861be77aacd30cdb9932346023cc7acbdf0b453",
+  "shortHash": "6861be77",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "6861be77aacd30cdb9932346023cc7acbdf0b453",
+      "shortHash": "6861be77",
+      "dateIso": "2026-08-22T09:22:11-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(landing): ecossistema 'Faça parte' + carrossel destinos + filtro lojas",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6861be77aacd30cdb9932346023cc7acbdf0b453"
+    },
     {
       "hash": "cced4dbb61e258eafe4960bb2579cbd634ef8726",
       "shortHash": "cced4dbb",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "Fix admin coupons lazy export",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/01530709538999b9d166a3539f14dcf823efe656"
-    },
-    {
-      "hash": "f33abaa06ce5069e222ac79b7992afb2f2e11e37",
-      "shortHash": "f33abaa0",
-      "dateIso": "2026-08-19T00:27:19-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 100 (v1.0.100) — AAB com E2-E5 da auditoria 2",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f33abaa06ce5069e222ac79b7992afb2f2e11e37"
     }
   ]
 } as const;
