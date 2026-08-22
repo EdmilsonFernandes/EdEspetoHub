@@ -113,10 +113,9 @@ export function LandingPage() {
             bannerUrl: resolveAssetUrl(store?.settings?.bannerUrl || '') || '',
           }))
           .filter((s: any) => Boolean(s.slug));
-        // Prioriza quem tem logo; quem não tem, usa banner; último recurso: avatar
+        // Só quem tem foto (logo ou banner) — sem foto queima o carrossel
         const withMedia = normalized.filter((s: any) => s.logoUrl || s.bannerUrl);
-        const withoutMedia = normalized.filter((s: any) => !s.logoUrl && !s.bannerUrl);
-        setFeaturedStores([...withMedia, ...withoutMedia].slice(0, 14));
+        setFeaturedStores(withMedia.slice(0, 12));
       })
       .catch(() => { if (mounted) setFeaturedStores([]); });
     return () => { mounted = false; };
@@ -371,48 +370,54 @@ export function LandingPage() {
         </motion.div>
       </section>
 
-      {/* ── Destinos (cidades reais) ── */}
-      <section className="px-4 py-14">
+      {/* ── Destinos (carrossel lento, enxuto) ── */}
+      <section className="px-4 py-10">
         <div className="mx-auto max-w-6xl">
-          <motion.div {...revealSm()} className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+          <motion.div {...revealSm()} className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.18em] text-[#336886]"><MapPin size={13} weight="duotone" /> Seu bairro · explorar</p>
-              <h2 className="mt-2 max-w-md text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
-                E quando a fome bate <em className="jnc-serif-i text-[#153A4C]/60">longe de casa?</em>
+              <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.18em] text-[#336886]"><MapPin size={13} weight="duotone" /> Explorar</p>
+              <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
+                Destinos <em className="jnc-serif-i text-[#153A4C]/60">perto de você</em>
               </h2>
-              <p className="mt-2 max-w-md text-sm font-semibold leading-relaxed text-slate-600">
-                Viajou, achou o destino, descobriu onde comer — e pediu por lá mesmo.
-              </p>
             </div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link to="/destinos" className="jnc-glass inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-black text-[#336886]">
-                Ver todos os destinos
-                <CaretRight size={12} weight="bold" />
+              <Link to="/destinos" className="jnc-glass inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-black text-[#336886]">
+                Ver todos
+                <CaretRight size={11} weight="bold" />
               </Link>
             </motion.div>
           </motion.div>
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {DESTINATION_CITIES.map((city, i) => {
-              const photo = destinationPhotos[city.slug];
-              return (
-                <motion.div key={city.slug} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: i * 0.1, ease: EASE }} whileHover={{ scale: 1.03 }}>
-                  <Link to={`/destinos/${city.slug}`} className="group relative block aspect-[4/3] overflow-hidden rounded-2xl border border-white/50 shadow-sm">
+          <div
+            className="relative overflow-hidden rounded-[1.5rem] border border-white/50 bg-white/50 py-3 shadow-sm"
+            style={{
+              maskImage: 'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
+            }}
+          >
+            <div
+              className="flex w-max items-center gap-3.5 px-4 [animation:marquee-slow_50s_linear_infinite] hover:[animation-play-state:paused]"
+            >
+              <style>{`@keyframes marquee-slow { from { transform: translateX(0); } to { transform: translateX(calc(-50% - 14px)); } }`}</style>
+              {[...DESTINATION_CITIES, ...DESTINATION_CITIES].map((city, i) => {
+                const photo = destinationPhotos[city.slug];
+                return (
+                  <Link key={`${city.slug}-${i}`} to={`/destinos/${city.slug}`} className="group relative block h-[7rem] w-[10rem] shrink-0 overflow-hidden rounded-2xl border border-white/50 shadow-sm sm:h-[8rem] sm:w-[12rem]">
                     {photo ? (
                       <img src={photo} alt={city.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                     ) : (
                       <div className="absolute inset-0 grid place-items-center bg-[linear-gradient(135deg,#edf5fa,#d7e7ef)]">
-                        <MapPin size={24} weight="duotone" className="text-[#336886]/50" />
+                        <MapPin size={20} weight="duotone" className="text-[#336886]/40" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_35%,rgba(21,58,76,0.75)_100%)]" />
-                    <div className="absolute inset-x-0 bottom-0 p-2.5">
-                      <p className="truncate text-[12px] font-black text-white">{city.name}</p>
-                      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-white/60">{city.state}</p>
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_30%,rgba(21,58,76,0.75)_100%)]" />
+                    <div className="absolute inset-x-0 bottom-0 p-2">
+                      <p className="truncate text-[11px] font-black text-white">{city.name}</p>
+                      <p className="text-[8px] font-black uppercase tracking-[0.14em] text-white/60">{city.state}</p>
                     </div>
                   </Link>
-                </motion.div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
@@ -509,7 +514,53 @@ export function LandingPage() {
         </motion.div>
       </section>
 
-      {/* ── CTA final ── */}
+      {/* ── Faça parte (ecossistema: 5 papéis) ── */}
+      <section className="relative overflow-hidden bg-[#153A4C] px-4 py-16">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-[#336886]/30 blur-[100px]" />
+        <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-[#5fd35a]/10 blur-[90px]" />
+        <div className="relative mx-auto max-w-6xl">
+          <motion.div {...revealSm()} className="mb-8 text-center">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#5fd35a]">Faça parte</p>
+            <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white sm:text-3xl">
+              Tem um lugar pra você no <em className="jnc-serif-i text-[#5fd35a]">Já no Caminho</em>
+            </h2>
+            <p className="mx-auto mt-2 max-w-lg text-sm font-semibold text-white/60">
+              Do cliente que pede um espetinho ao dono do chalé que recebe hóspedes — o ecossistema é de todos.
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {[
+              { icon: '🛍️', title: 'Cliente', desc: 'Peça comida, mercado e mais do seu bairro.', to: '/hub', cta: 'Pedir agora' },
+              { icon: '🏪', title: 'Lojista', desc: 'Venda online sem comissão por pedido.', to: '/create', cta: 'Abrir minha loja' },
+              { icon: '🛵', title: 'Entregador', desc: 'Receba entregas na sua região, no seu horário.', to: '/motoboy/register', cta: 'Começar a entregar' },
+              { icon: '🏢', title: 'Condomínio', desc: 'Traga feiras e vendedores pro seu prédio.', to: '/condominio/solicitar', cta: 'Cadastrar condomínio' },
+              { icon: '⛰', title: 'Parceiro', desc: 'Chalés, pousadas e experiências da região.', to: '/destinos/cadastrar', cta: 'Anunciar meu espaço' },
+            ].map((role, i) => (
+              <motion.div
+                key={role.title}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-60px' }}
+                transition={{ duration: 0.7, delay: i * 0.12, ease: EASE }}
+                whileHover={{ scale: 1.04, y: -4 }}
+                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-all hover:border-[#5fd35a]/25 hover:bg-white/8"
+              >
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(95,211,90,0.3),transparent)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <span className="text-2xl">{role.icon}</span>
+                <h3 className="mt-2.5 text-sm font-black text-white">{role.title}</h3>
+                <p className="mt-1 text-[11px] font-semibold leading-snug text-white/50">{role.desc}</p>
+                <Link
+                  to={role.to}
+                  className="mt-3 inline-flex items-center gap-1 text-[11px] font-black text-[#5fd35a] transition-all group-hover:gap-2"
+                >
+                  {role.cta}
+                  <CaretRight size={10} weight="bold" />
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
       <section className="px-4 pb-16 pt-6">
         <motion.div initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.9, ease: EASE }} className="relative mx-auto max-w-3xl overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#153a4c_0%,#336886_100%)] px-6 py-12 text-center shadow-[0_32px_72px_-32px_rgba(21,58,76,0.5)] sm:px-10">
           <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#5fd35a]/15 blur-[90px]" />

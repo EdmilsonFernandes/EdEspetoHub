@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "09e3c5b6",
-  "versionLabel": "v0.1.9.09e3c5b6",
-  "versionInternal": "0.1.9+20260822.113919.09e3c5b6",
-  "buildId": "0.1.9+20260822.113919.09e3c5b6-20260822.113919-09e3c5b6",
-  "builtAt": "2026-08-22T11:39:19.938Z",
-  "commitHash": "09e3c5b66548a366af95f634ffdb9c35300c3c51",
-  "shortHash": "09e3c5b6",
+  "versionDisplaySuffix": "cced4dbb",
+  "versionLabel": "v0.1.9.cced4dbb",
+  "versionInternal": "0.1.9+20260822.121116.cced4dbb",
+  "buildId": "0.1.9+20260822.121116.cced4dbb-20260822.121116-cced4dbb",
+  "builtAt": "2026-08-22T12:11:16.106Z",
+  "commitHash": "cced4dbb61e258eafe4960bb2579cbd634ef8726",
+  "shortHash": "cced4dbb",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "cced4dbb61e258eafe4960bb2579cbd634ef8726",
+      "shortHash": "cced4dbb",
+      "dateIso": "2026-08-22T08:52:44-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(landing): devolve vídeo com thumbnail real, badge Play Store, MP, rodapé completo",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cced4dbb61e258eafe4960bb2579cbd634ef8726"
+    },
     {
       "hash": "09e3c5b66548a366af95f634ffdb9c35300c3c51",
       "shortHash": "09e3c5b6",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore(mobile): versionCode 100 (v1.0.100) — AAB com E2-E5 da auditoria 2",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f33abaa06ce5069e222ac79b7992afb2f2e11e37"
-    },
-    {
-      "hash": "f1052413de48be6e13d6f25d71945211b32d05b5",
-      "shortHash": "f1052413",
-      "dateIso": "2026-08-19T00:13:55-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(landing): E4 — landing consumer com identidade do hub + /parceiros",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f1052413de48be6e13d6f25d71945211b32d05b5"
     }
   ]
 }
