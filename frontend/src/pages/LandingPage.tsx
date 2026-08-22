@@ -436,12 +436,19 @@ export function LandingPage() {
               );
             })}
           </div>
-          {/* Tour em vídeo */}
+          {/* Tour em vídeo — thumbnail REAL do YouTube */}
           <motion.div initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.9, ease: EASE }} className="mx-auto mt-10 max-w-3xl">
-            <button type="button" onClick={() => setShowVideo(true)} className="jnc-glass group relative aspect-video w-full overflow-hidden rounded-3xl">
-              <div className="absolute inset-0 grid place-items-center bg-[linear-gradient(135deg,#153a4c_0%,#336886_100%)]">
-                <motion.div whileHover={{ scale: 1.1 }} className="grid h-20 w-20 place-items-center rounded-full bg-white/15 backdrop-blur-md ring-2 ring-white/30">
-                  <PlayCircle size={36} weight="fill" className="text-white" />
+            <button type="button" onClick={() => setShowVideo(true)} className="group relative aspect-video w-full overflow-hidden rounded-3xl border border-white/50 shadow-[0_24px_56px_-28px_rgba(15,23,42,0.35)]">
+              <img
+                src={`https://img.youtube.com/vi/${TOUR_VIDEO_ID}/maxresdefault.jpg`}
+                alt="Tour do Já no Caminho"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => { (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${TOUR_VIDEO_ID}/hqdefault.jpg`; }}
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(21,58,76,0.1)_0%,rgba(21,58,76,0.5)_100%)]" />
+              <div className="absolute inset-0 grid place-items-center">
+                <motion.div whileHover={{ scale: 1.12 }} className="grid h-[4.5rem] w-[4.5rem] place-items-center rounded-full bg-white/90 shadow-[0_16px_32px_-12px_rgba(0,0,0,0.4)] ring-4 ring-white/30 transition-transform">
+                  <PlayCircle size={32} weight="fill" className="text-[#336886]" />
                 </motion.div>
               </div>
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3">
@@ -449,38 +456,54 @@ export function LandingPage() {
                   <p className="text-xs font-black uppercase tracking-[0.16em] text-white/70">Tour completo</p>
                   <p className="text-sm font-black text-white">Veja o Já no Caminho em ação</p>
                 </div>
-                <span className="jnc-glass rounded-full px-4 py-2 text-xs font-black text-[#153A4C]">Assistir</span>
+                <span className="rounded-full bg-white/90 px-4 py-2 text-xs font-black text-[#153A4C] shadow-sm">▶ Assistir</span>
               </div>
             </button>
           </motion.div>
         </div>
       </section>
 
-      {/* ── Baixar o app (QR Code) ── */}
+      {/* ── Baixar o app + integrações ── */}
       <section id="app" className="px-4 py-14">
-        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.8, ease: EASE }} className="mx-auto max-w-2xl">
-          <div className="jnc-glass flex flex-col items-center gap-6 rounded-[2rem] p-8 text-center sm:flex-row sm:text-left">
-            <div className="shrink-0 rounded-2xl bg-white p-3 shadow-lg ring-1 ring-slate-200">
-              <img src={GOOGLE_PLAY_QR} alt="QR Code Google Play" className="h-32 w-32 sm:h-36 sm:w-36" />
+        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.8, ease: EASE }} className="mx-auto max-w-4xl">
+          <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
+            {/* QR + Download */}
+            <div className="jnc-glass flex flex-col items-center gap-5 rounded-[2rem] p-6 text-center sm:flex-row sm:text-left">
+              <div className="shrink-0 rounded-2xl bg-white p-3 shadow-lg ring-1 ring-slate-200">
+                <img src={GOOGLE_PLAY_QR} alt="QR Code Google Play" className="h-28 w-28 sm:h-32 sm:w-32" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Google Play Store</p>
+                <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Baixe o app no seu Android</h3>
+                <p className="mt-1.5 text-sm font-semibold leading-relaxed text-slate-500">
+                  Escaneie o QR Code ou toque no badge oficial.
+                </p>
+                <motion.a
+                  href={GOOGLE_PLAY_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="mt-3 inline-flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm transition-all hover:shadow"
+                >
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true">
+                    <path fill="#EA4335" d="M3.6 1.8l10.4 10.2L3.6 22.2c-.4-.2-.6-.7-.6-1.3V3.1c0-.6.2-1.1.6-1.3z"/>
+                    <path fill="#FBBC04" d="M17.3 8.3l-3.3 3.7-10-9.9c.2-.1.5-.2.8-.1l12.5 6.3z"/>
+                    <path fill="#4285F4" d="M21.8 12c0 .5-.3 1-.7 1.2l-3.8 2.1-3.4-3.3 3.4-3.4 3.8 2.1c.4.3.7.7.7 1.3z"/>
+                    <path fill="#34A853" d="M17.3 15.7L4.8 22c-.3.1-.6 0-.8-.1l10-9.9 3.3 3.7z"/>
+                  </svg>
+                  <span className="flex flex-col leading-none">
+                    <span className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Get it on</span>
+                    <span className="text-sm font-black text-slate-900">Google Play</span>
+                  </span>
+                </motion.a>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Google Play Store</p>
-              <h3 className="mt-1 text-xl font-black tracking-tight text-slate-950">Baixe o app no seu Android</h3>
-              <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-500">
-                Escaneie o QR Code com a câmera do celular para baixar direto na loja oficial —
-                ou toque no botão abaixo se já está no celular.
-              </p>
-              <motion.a
-                href={GOOGLE_PLAY_URL}
-                target="_blank"
-                rel="noreferrer"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#153A4C] px-5 py-3 text-sm font-black text-white shadow-lg transition-all"
-              >
-                Abrir no Google Play
-                <CaretRight size={13} weight="bold" />
-              </motion.a>
+            {/* Mercado Pago */}
+            <div className="jnc-glass flex flex-col items-center justify-center gap-2 rounded-[2rem] px-6 py-5 text-center">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Pagamentos por</p>
+              <img src="/mercado-pago-horizontal.png" alt="Mercado Pago" className="h-7 w-auto object-contain" />
+              <p className="text-[11px] font-semibold text-slate-500">Pix, crédito e débito com confirmação automática</p>
             </div>
           </div>
         </motion.div>
@@ -505,21 +528,58 @@ export function LandingPage() {
         </motion.div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="border-t border-white/30 bg-white/50 px-4 py-8 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
-          <div className="flex items-center gap-2.5">
-            <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-8 w-8 rounded-lg object-cover" />
-            <span className="text-sm font-black text-slate-950">Já no Caminho</span>
+      {/* ── Footer completo ── */}
+      <footer className="border-t border-white/30 bg-[#153A4C] px-4 pb-6 pt-10 text-white">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-8 sm:grid-cols-3">
+            {/* Marca */}
+            <div>
+              <div className="flex items-center gap-2.5">
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-9 w-9 rounded-xl object-cover ring-1 ring-white/20" />
+                <div>
+                  <p className="text-sm font-black text-white">Já no Caminho</p>
+                  <p className="text-[10px] font-bold text-white/50">Peça, retire e descubra perto de você</p>
+                </div>
+              </div>
+              <p className="mt-3 text-xs font-semibold leading-relaxed text-white/50">
+                Feito no interior, para o interior. Comida, comércio local, feiras de condomínio
+                e destinos turísticos da sua região num só app.
+              </p>
+            </div>
+            {/* Links */}
+            <div className="flex flex-col gap-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">Plataforma</p>
+              <Link to="/hub" className="text-sm font-bold text-white/70 transition-colors hover:text-white">Explorar lojas</Link>
+              <Link to="/destinos" className="text-sm font-bold text-white/70 transition-colors hover:text-white">Destinos</Link>
+              <Link to="/parceiros" className="text-sm font-bold text-white/70 transition-colors hover:text-white">Quero vender</Link>
+              <Link to="/cliente?mode=login" className="text-sm font-bold text-white/70 transition-colors hover:text-white">Minha conta</Link>
+            </div>
+            {/* Integrações + confiança */}
+            <div className="flex flex-col gap-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">Integrações</p>
+              <div className="flex items-center gap-3">
+                <img src="/mercado-pago-horizontal.png" alt="Mercado Pago" className="h-5 w-auto object-contain brightness-0 invert" />
+              </div>
+              <p className="text-[11px] font-semibold text-white/40">
+                Pagamentos processados com confirmação automática via Mercado Pago.
+              </p>
+              <a href={GOOGLE_PLAY_URL} target="_blank" rel="noreferrer" className="inline-flex w-fit items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 transition hover:bg-white/10">
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path fill="#EA4335" d="M3.6 1.8l10.4 10.2L3.6 22.2c-.4-.2-.6-.7-.6-1.3V3.1c0-.6.2-1.1.6-1.3z"/><path fill="#FBBC04" d="M17.3 8.3l-3.3 3.7-10-9.9c.2-.1.5-.2.8-.1l12.5 6.3z"/><path fill="#4285F4" d="M21.8 12c0 .5-.3 1-.7 1.2l-3.8 2.1-3.4-3.3 3.4-3.4 3.8 2.1c.4.3.7.7.7 1.3z"/><path fill="#34A853" d="M17.3 15.7L4.8 22c-.3.1-.6 0-.8-.1l10-9.9 3.3 3.7z"/></svg>
+                <span className="text-[11px] font-bold text-white/70">Google Play</span>
+              </a>
+            </div>
           </div>
-          <div className="flex items-center gap-5 text-sm font-bold text-slate-500">
-            <Link to="/hub" className="transition-colors hover:text-[#336886]">Explorar o app</Link>
-            <Link to="/parceiros" className="transition-colors hover:text-[#336886]">Quero vender</Link>
+          <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-5 sm:flex-row">
+            <p className="text-[11px] font-semibold text-white/40">
+              © {new Date().getFullYear()} Já no Caminho · Todos os direitos reservados
+            </p>
+            <div className="flex items-center gap-4 text-[11px] font-bold text-white/40">
+              <a href="/terms" className="transition-colors hover:text-white/70">Termos de Uso</a>
+              <a href="/privacidade" className="transition-colors hover:text-white/70">Privacidade</a>
+              <a href="/lgpd" className="transition-colors hover:text-white/70">LGPD</a>
+            </div>
           </div>
         </div>
-        <p className="mt-5 text-center text-xs font-semibold text-slate-400">
-          Feito no interior, para o interior · <WhatsappLogo size={11} weight="fill" className="inline" /> suporte por WhatsApp dentro do app
-        </p>
       </footer>
 
       {/* ── Modal do vídeo ── */}

@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "363a8402",
-  "versionLabel": "v0.1.9.363a8402",
-  "versionInternal": "0.1.9+20260822.112006.363a8402",
-  "buildId": "0.1.9+20260822.112006.363a8402-20260822.112006-363a8402",
-  "builtAt": "2026-08-22T11:20:06.630Z",
-  "commitHash": "363a8402d5a3425af01db2debc6af0e4fc85927f",
-  "shortHash": "363a8402",
+  "versionDisplaySuffix": "09e3c5b6",
+  "versionLabel": "v0.1.9.09e3c5b6",
+  "versionInternal": "0.1.9+20260822.113919.09e3c5b6",
+  "buildId": "0.1.9+20260822.113919.09e3c5b6-20260822.113919-09e3c5b6",
+  "builtAt": "2026-08-22T11:39:19.938Z",
+  "commitHash": "09e3c5b66548a366af95f634ffdb9c35300c3c51",
+  "shortHash": "09e3c5b6",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "09e3c5b66548a366af95f634ffdb9c35300c3c51",
+      "shortHash": "09e3c5b6",
+      "dateIso": "2026-08-22T08:23:21-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(landing): marquee de lojas dentro do container — fim da banda full-bleed",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/09e3c5b66548a366af95f634ffdb9c35300c3c51"
+    },
     {
       "hash": "363a8402d5a3425af01db2debc6af0e4fc85927f",
       "shortHash": "363a8402",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(landing): E4 — landing consumer com identidade do hub + /parceiros",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f1052413de48be6e13d6f25d71945211b32d05b5"
-    },
-    {
-      "hash": "5954c6d8deddc58fff8f6b07bd98de1a394d4532",
-      "shortHash": "5954c6d8",
-      "dateIso": "2026-08-19T00:12:57-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): E2+E3+E5 da auditoria 2 — tokens, Seu bairro, estados",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5954c6d8deddc58fff8f6b07bd98de1a394d4532"
     }
   ]
 } as const;
