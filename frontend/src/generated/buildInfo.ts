@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "bcde381c",
-  "versionLabel": "v0.1.9.bcde381c",
-  "versionInternal": "0.1.9+20260822.021409.bcde381c",
-  "buildId": "0.1.9+20260822.021409.bcde381c-20260822.021409-bcde381c",
-  "builtAt": "2026-08-22T02:14:09.007Z",
-  "commitHash": "bcde381cf97b77227e9b456e90a356097651082a",
-  "shortHash": "bcde381c",
+  "versionDisplaySuffix": "09dfe5d2",
+  "versionLabel": "v0.1.9.09dfe5d2",
+  "versionInternal": "0.1.9+20260822.093558.09dfe5d2",
+  "buildId": "0.1.9+20260822.093558.09dfe5d2-20260822.093558-09dfe5d2",
+  "builtAt": "2026-08-22T09:35:58.462Z",
+  "commitHash": "09dfe5d2ca6a5f63c3956989d46d5ba757967288",
+  "shortHash": "09dfe5d2",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "09dfe5d2ca6a5f63c3956989d46d5ba757967288",
+      "shortHash": "09dfe5d2",
+      "dateIso": "2026-08-21T23:28:00-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 106 (v1.0.106) — premium innovation layer",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/09dfe5d2ca6a5f63c3956989d46d5ba757967288"
+    },
+    {
+      "hash": "448ee1c52f31412991d5bb9924d23c19e4a2d823",
+      "shortHash": "448ee1c5",
+      "dateIso": "2026-08-21T23:24:07-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ux): premium innovation layer — landing, destinos e /parceiros",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/448ee1c52f31412991d5bb9924d23c19e4a2d823"
+    },
     {
       "hash": "bcde381cf97b77227e9b456e90a356097651082a",
       "shortHash": "bcde381c",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(ux): lote 1 da auditoria 2 — 9 quick wins de tipografia, CTA e header",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eb85a1ecc4c3ec8efdbc225cd2c842ae6aebf622"
-    },
-    {
-      "hash": "c45e8130077908d28a41dcffa81d225927a90920",
-      "shortHash": "c45e8130",
-      "dateIso": "2026-08-18T18:23:08-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 98 (v1.0.98) — AAB com card compacto de pagamento",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c45e8130077908d28a41dcffa81d225927a90920"
-    },
-    {
-      "hash": "fe9f93de3e00d02c2967250489f56b3a950cc53c",
-      "shortHash": "fe9f93de",
-      "dateIso": "2026-08-18T18:20:40-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(ux): card COMPACTO de pagamento pendente no topo — igual ao conceito iFood",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fe9f93de3e00d02c2967250489f56b3a950cc53c"
     }
   ]
 } as const;
