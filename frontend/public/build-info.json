@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "836e1f04",
-  "versionLabel": "v0.1.9.836e1f04",
-  "versionInternal": "0.1.9+20260822.134342.836e1f04",
-  "buildId": "0.1.9+20260822.134342.836e1f04-20260822.134342-836e1f04",
-  "builtAt": "2026-08-22T13:43:42.968Z",
-  "commitHash": "836e1f043ffd9b0d732a9d46db1424139e2aed09",
-  "shortHash": "836e1f04",
+  "versionDisplaySuffix": "f369c349",
+  "versionLabel": "v0.1.9.f369c349",
+  "versionInternal": "0.1.9+20260822.202420.f369c349",
+  "buildId": "0.1.9+20260822.202420.f369c349-20260822.202420-f369c349",
+  "builtAt": "2026-08-22T20:24:20.899Z",
+  "commitHash": "f369c349963c524666e000c81a6f226a3eb2930c",
+  "shortHash": "f369c349",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "f369c349963c524666e000c81a6f226a3eb2930c",
+      "shortHash": "f369c349",
+      "dateIso": "2026-08-22T16:40:01-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(loja): densidade mobile iFood-like — pills de categoria, lista flat e checkout sem caixas aninhadas",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f369c349963c524666e000c81a6f226a3eb2930c"
+    },
+    {
+      "hash": "5e6c98a7c42159f8560a3a3aba821808fb7ba008",
+      "shortHash": "5e6c98a7",
+      "dateIso": "2026-08-22T10:56:46-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(landing): 'Direto das lojas' vira carrossel horizontal com snap",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e6c98a7c42159f8560a3a3aba821808fb7ba008"
+    },
     {
       "hash": "836e1f043ffd9b0d732a9d46db1424139e2aed09",
       "shortHash": "836e1f04",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore(mobile): versionCode 102 (v1.0.102) — cupom no dashboard + card Pix com copiar",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/aedec0e74359eb3726d0887f8dec0053a86c5ea9"
-    },
-    {
-      "hash": "e713e21f5beaf54e1cf7c8584f6e8fe7e840a173",
-      "shortHash": "e713e21f",
-      "dateIso": "2026-08-19T15:06:32-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin+pedidos): Cupons vira aba do dashboard + card Pix compacto com copiar",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e713e21f5beaf54e1cf7c8584f6e8fe7e840a173"
-    },
-    {
-      "hash": "4e74f7961431e358055b749465bc22fc91c30a9f",
-      "shortHash": "4e74f796",
-      "dateIso": "2026-08-19T11:32:16-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 101 (v1.0.101) — Pix pendente no topo + pulso verde",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4e74f7961431e358055b749465bc22fc91c30a9f"
     }
   ]
 }
