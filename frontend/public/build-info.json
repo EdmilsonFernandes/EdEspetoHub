@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "09dfe5d2",
-  "versionLabel": "v0.1.9.09dfe5d2",
-  "versionInternal": "0.1.9+20260822.093558.09dfe5d2",
-  "buildId": "0.1.9+20260822.093558.09dfe5d2-20260822.093558-09dfe5d2",
-  "builtAt": "2026-08-22T09:35:58.462Z",
-  "commitHash": "09dfe5d2ca6a5f63c3956989d46d5ba757967288",
-  "shortHash": "09dfe5d2",
+  "versionDisplaySuffix": "26702b3c",
+  "versionLabel": "v0.1.9.26702b3c",
+  "versionInternal": "0.1.9+20260822.105058.26702b3c",
+  "buildId": "0.1.9+20260822.105058.26702b3c-20260822.105058-26702b3c",
+  "builtAt": "2026-08-22T10:50:58.050Z",
+  "commitHash": "26702b3c1c9bb92c1d403902fd4afeb86101adaf",
+  "shortHash": "26702b3c",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "26702b3c1c9bb92c1d403902fd4afeb86101adaf",
+      "shortHash": "26702b3c",
+      "dateIso": "2026-08-22T06:47:42-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(landing): devolve o conteúdo real — QR Play Store, tour em vídeo, logos de lojas, cidades de destinos",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/26702b3c1c9bb92c1d403902fd4afeb86101adaf"
+    },
     {
       "hash": "09dfe5d2ca6a5f63c3956989d46d5ba757967288",
       "shortHash": "09dfe5d2",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore(mobile): versionCode 99 (v1.0.99) — AAB com lote 1 da auditoria 2",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/276806595da53d2ddcd4d144638d573eaa7fdeb6"
-    },
-    {
-      "hash": "eb85a1ecc4c3ec8efdbc225cd2c842ae6aebf622",
-      "shortHash": "eb85a1ec",
-      "dateIso": "2026-08-18T22:44:25-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ux): lote 1 da auditoria 2 — 9 quick wins de tipografia, CTA e header",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eb85a1ecc4c3ec8efdbc225cd2c842ae6aebf622"
     }
   ]
 }

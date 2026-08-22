@@ -55,6 +55,12 @@ const DESTINATION_CITIES = [
   { name: 'Monte Verde', state: 'MG', slug: 'monte-verde' },
 ];
 
+/* ── Filtra lojas de teste/duplicadas, prioriza quem tem logo ── */
+const isRealStore = (store: any) => {
+  const name = String(store?.name || '').toLowerCase().trim();
+  return !name.includes('teste') && !name.includes('test ') && name !== 'test' && name.length > 2;
+};
+
 /* ── Motion ── */
 const reveal = (delay = 0) => ({
   initial: { opacity: 0, y: 40 },
@@ -77,6 +83,7 @@ const heroIn = (delay = 0) => ({
 export function LandingPage() {
   const [featuredStores, setFeaturedStores] = useState<any[]>([]);
   const [showVideo, setShowVideo] = useState(false);
+  const [destinationPhotos, setDestinationPhotos] = useState<Record<string, string>>({});
 
   useEffect(() => {
     document.title = 'Já no Caminho — Peça, retire e descubra perto de você';
@@ -84,19 +91,52 @@ export function LandingPage() {
 
   useEffect(() => {
     let mounted = true;
+    // Lojas reais: dedup por slug + sem testes + prioriza quem tem logo
     import('../services/storeService')
       .then(({ storeService }) => storeService.listPortfolio())
       .then((data: any) => {
         if (!mounted) return;
-        const normalized = Array.isArray(data)
-          ? data.map((store: any, i: number) => ({
-              id: String(store?.id || store?.slug || `store-${i}`),
-              name: String(store?.name || 'Loja ativa'),
-              slug: String(store?.slug || ''),
-              logoUrl: resolveAssetUrl(store?.settings?.logoUrl || '') || '/janocaminho.jpg',
-            })).filter((s: any) => Boolean(s.slug))
-          : [];
-        setFeaturedStores(normalized.slice(0, 12));
+        const seen = new Set<string>();
+        const normalized = (Array.isArray(data) ? data : [])
+          .filter(isRealStore)
+          .filter((store: any) => {
+            const slug = String(store?.slug || '').trim();
+            if (!slug || seen.has(slug)) return false;
+            seen.add(slug);
+            return true;
+          })
+          .map((store: any, i: number) => ({
+            id: String(store?.id || store?.slug || `store-${i}`),
+            name: String(store?.name || 'Loja ativa'),
+            slug: String(store?.slug || ''),
+            logoUrl: resolveAssetUrl(store?.settings?.logoUrl || '') || '',
+            bannerUrl: resolveAssetUrl(store?.settings?.bannerUrl || '') || '',
+          }))
+          .filter((s: any) => Boolean(s.slug));
+        // Prioriza quem tem logo; quem não tem, usa banner; último recurso: avatar
+        const withMedia = normalized.filter((s: any) => s.logoUrl || s.bannerUrl);
+        const withoutMedia = normalized.filter((s: any) => !s.logoUrl && !s.bannerUrl);
+        setFeaturedStores([...withMedia, ...withoutMedia].slice(0, 14));
+      })
+      .catch(() => { if (mounted) setFeaturedStores([]); });
+    return () => { mounted = false; };
+  }, []);
+
+  // Banners reais dos destinos (fotos das cidades)
+  useEffect(() => {
+    let mounted = true;
+    import('../services/destinationService')
+      .then(({ destinationService }) => destinationService.listPublic())
+      .then((data: any) => {
+        if (!mounted || !Array.isArray(data)) return;
+        const photos: Record<string, string> = {};
+        for (const dest of data) {
+          const slug = String(dest?.slug || '');
+          const banners = Array.isArray(dest?.banners) ? dest.banners : [];
+          const first = banners.find((b: any) => b?.imageUrl);
+          if (slug && first?.imageUrl) photos[slug] = resolveAssetUrl(first.imageUrl);
+        }
+        setDestinationPhotos(photos);
       })
       .catch(() => {});
     return () => { mounted = false; };
@@ -191,9 +231,15 @@ export function LandingPage() {
           >
             <div className="jnc-glass rounded-3xl p-4">
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.4, ease: EASE }} className="jnc-glass flex items-center gap-2 rounded-2xl px-3.5 py-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#edf5fa] text-[#336886]"><Storefront size={17} weight="duotone" /></span>
+                {featuredStores[0]?.logoUrl || featuredStores[0]?.bannerUrl ? (
+                  <span className="h-9 w-9 shrink-0 overflow-hidden rounded-xl">
+                    <img src={featuredStores[0].logoUrl || featuredStores[0].bannerUrl} alt={featuredStores[0].name} className="h-full w-full object-cover" />
+                  </span>
+                ) : (
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#edf5fa] text-[#336886]"><Storefront size={17} weight="duotone" /></span>
+                )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-black text-slate-950">Gustavão Espetos</p>
+                  <p className="truncate text-sm font-black text-slate-950">{featuredStores[0]?.name || 'Sua loja favorita'}</p>
                   <p className="text-xs font-semibold text-emerald-600">Aberto agora · entrega e retirada</p>
                 </div>
                 <span className="rounded-full bg-[#336886] px-3 py-1.5 text-xs font-black text-white">Pedir</span>
@@ -221,30 +267,42 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Quem já está na plataforma (logos reais) ── */}
+      {/* ── Quem já está na plataforma (marquee auto-scroll) ── */}
       {featuredStores.length > 0 && (
-        <motion.section {...revealSm()} className="overflow-hidden border-y border-white/40 bg-white/40 px-4 py-6 backdrop-blur-sm">
-          <p className="mb-4 text-center text-xs font-black uppercase tracking-[0.18em] text-[#336886]">
+        <motion.section {...revealSm()} className="overflow-hidden border-y border-white/40 bg-white/40 py-6 backdrop-blur-sm">
+          <p className="mb-4 px-4 text-center text-xs font-black uppercase tracking-[0.18em] text-[#336886]">
             Quem já está na plataforma
           </p>
-          <div className="flex items-center gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {featuredStores.map((store, i) => (
-              <motion.div
-                key={store.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.05, ease: EASE }}
-                className="shrink-0"
-              >
-                <Link to={`/${store.slug}`} className="group flex flex-col items-center gap-1.5">
-                  <span className="jnc-glass grid h-16 w-16 place-items-center overflow-hidden rounded-2xl transition-transform duration-300 group-hover:scale-110">
-                    <img src={store.logoUrl} alt={store.name} className="h-full w-full object-cover" loading="lazy" />
+          <div
+            className="relative"
+            style={{
+              maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+            }}
+          >
+            <div
+              className="flex w-max items-center gap-5 px-4 [animation:marquee_30s_linear_infinite] hover:[animation-play-state:paused]"
+              style={{ '--marquee-w': '50%' } as any}
+            >
+              <style>{`
+                @keyframes marquee {
+                  from { transform: translateX(0); }
+                  to { transform: translateX(calc(-50% - 20px)); }
+                }
+              `}</style>
+              {[...featuredStores, ...featuredStores].map((store, i) => (
+                <Link key={`${store.id}-${i}`} to={`/${store.slug}`} className="group flex shrink-0 flex-col items-center gap-1.5">
+                  <span className="jnc-glass grid h-16 w-16 place-items-center overflow-hidden rounded-2xl transition-transform duration-300 group-hover:scale-110 group-hover:ring-2 group-hover:ring-[#336886]/30">
+                    {store.logoUrl || store.bannerUrl ? (
+                      <img src={store.logoUrl || store.bannerUrl} alt={store.name} className="h-full w-full object-cover" loading="lazy" />
+                    ) : (
+                      <Storefront size={24} weight="duotone" className="text-[#336886]/50" />
+                    )}
                   </span>
                   <span className="max-w-[72px] truncate text-[10px] font-bold text-slate-500 group-hover:text-[#336886]">{store.name}</span>
                 </Link>
-              </motion.div>
-            ))}
+              ))}
+            </div>
           </div>
         </motion.section>
       )}
@@ -329,15 +387,27 @@ export function LandingPage() {
             </motion.div>
           </motion.div>
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {DESTINATION_CITIES.map((city, i) => (
-              <motion.div key={city.slug} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: i * 0.1, ease: EASE }} whileHover={{ scale: 1.03 }}>
-                <Link to={`/destinos/${city.slug}`} className="jnc-glass group flex flex-col items-center rounded-2xl px-3 py-4 text-center">
-                  <MapPin size={20} weight="duotone" className="text-[#336886] transition-transform duration-300 group-hover:scale-125" />
-                  <p className="mt-2 text-[13px] font-black leading-tight text-slate-950">{city.name}</p>
-                  <p className="mt-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{city.state}</p>
-                </Link>
-              </motion.div>
-            ))}
+            {DESTINATION_CITIES.map((city, i) => {
+              const photo = destinationPhotos[city.slug];
+              return (
+                <motion.div key={city.slug} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: i * 0.1, ease: EASE }} whileHover={{ scale: 1.03 }}>
+                  <Link to={`/destinos/${city.slug}`} className="group relative block aspect-[4/3] overflow-hidden rounded-2xl border border-white/50 shadow-sm">
+                    {photo ? (
+                      <img src={photo} alt={city.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                    ) : (
+                      <div className="absolute inset-0 grid place-items-center bg-[linear-gradient(135deg,#edf5fa,#d7e7ef)]">
+                        <MapPin size={24} weight="duotone" className="text-[#336886]/50" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_35%,rgba(21,58,76,0.75)_100%)]" />
+                    <div className="absolute inset-x-0 bottom-0 p-2.5">
+                      <p className="truncate text-[12px] font-black text-white">{city.name}</p>
+                      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-white/60">{city.state}</p>
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
