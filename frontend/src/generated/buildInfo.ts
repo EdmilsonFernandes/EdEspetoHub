@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "6861be77",
-  "versionLabel": "v0.1.9.6861be77",
-  "versionInternal": "0.1.9+20260822.123810.6861be77",
-  "buildId": "0.1.9+20260822.123810.6861be77-20260822.123810-6861be77",
-  "builtAt": "2026-08-22T12:38:10.195Z",
-  "commitHash": "6861be77aacd30cdb9932346023cc7acbdf0b453",
-  "shortHash": "6861be77",
+  "versionDisplaySuffix": "f8899321",
+  "versionLabel": "v0.1.9.f8899321",
+  "versionInternal": "0.1.9+20260822.130020.f8899321",
+  "buildId": "0.1.9+20260822.130020.f8899321-20260822.130020-f8899321",
+  "builtAt": "2026-08-22T13:00:20.243Z",
+  "commitHash": "f88993210e7b8a22c8b2aad2842e37ba417e8dff",
+  "shortHash": "f8899321",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "f88993210e7b8a22c8b2aad2842e37ba417e8dff",
+      "shortHash": "f8899321",
+      "dateIso": "2026-08-22T09:40:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(landing): carrossel de condomínios reais com logo na seção Seu bairro",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f88993210e7b8a22c8b2aad2842e37ba417e8dff"
+    },
     {
       "hash": "6861be77aacd30cdb9932346023cc7acbdf0b453",
       "shortHash": "6861be77",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(pedidos): Pix pendente no TOPO absoluto + pulso verde (padrão iFood)",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/39b46d31f2587490f35dc9b8739afd402b59a41b"
-    },
-    {
-      "hash": "01530709538999b9d166a3539f14dcf823efe656",
-      "shortHash": "01530709",
-      "dateIso": "2026-08-19T10:36:31-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Fix admin coupons lazy export",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/01530709538999b9d166a3539f14dcf823efe656"
     }
   ]
 } as const;

@@ -19,6 +19,7 @@ import {
 } from '@phosphor-icons/react';
 import { Image } from '../components/common/Image';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { productService } from '../services/productService';
 
 /**
  * Landing CONSUMER — edição premium innovation + conteúdo real (22/08).
@@ -85,6 +86,7 @@ export function LandingPage() {
   const [showVideo, setShowVideo] = useState(false);
   const [destinationPhotos, setDestinationPhotos] = useState<Record<string, string>>({});
   const [condominiums, setCondominiums] = useState<any[]>([]);
+  const [showcaseProducts, setShowcaseProducts] = useState<any[]>([]);
 
   useEffect(() => {
     document.title = 'Já no Caminho — Peça, retire e descubra perto de você';
@@ -121,6 +123,42 @@ export function LandingPage() {
       .catch(() => { if (mounted) setFeaturedStores([]); });
     return () => { mounted = false; };
   }, []);
+
+  // Produtos/serviços REAIS com foto — genérico: comida, serviço, brechó, o que for
+  useEffect(() => {
+    if (featuredStores.length === 0) return;
+    let mounted = true;
+    const picks = featuredStores.slice(0, 4);
+    Promise.all(
+      picks.map((store) =>
+        productService.listBySlug(store.slug)
+          .then((data: any) => {
+            const items = Array.isArray(data) ? data : (data?.data || data?.products || []);
+            return items
+              .filter((p: any) => {
+                const img = p?.imageUrl || p?.image || '';
+                return img && String(img).trim();
+              })
+              .slice(0, 2)
+              .map((p: any) => ({
+                storeSlug: store.slug,
+                storeName: store.name,
+                name: String(p?.name || 'Produto'),
+                price: Number(p?.price || p?.unitPrice || 0),
+                imageUrl: resolveAssetUrl(p?.imageUrl || p?.image || ''),
+              }));
+          })
+          .catch(() => [])
+      )
+    )
+      .then((results) => {
+        if (!mounted) return;
+        const flat = results.flat().filter((p: any) => p.imageUrl);
+        setShowcaseProducts(flat.slice(0, 8));
+      })
+      .catch(() => {});
+    return () => { mounted = false; };
+  }, [featuredStores]);
 
   // Condomínios reais com logo pra marquee no 'Seu bairro'
   useEffect(() => {
@@ -342,6 +380,55 @@ export function LandingPage() {
         </motion.section>
       )}
 
+      {/* ── Prove do cardápio (produtos REAIS com foto) ── */}
+      {showcaseProducts.length > 0 && (
+        <section className="px-4 py-8">
+          <div className="mx-auto max-w-6xl">
+            <motion.div {...revealSm()} className="mb-5 text-center">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Direto das lojas</p>
+              <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
+                O que você encontra <em className="jnc-serif-i text-[#153A4C]/60">perto de você</em>
+              </h2>
+            </motion.div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {showcaseProducts.map((prod, i) => (
+                <motion.div
+                  key={`${prod.storeSlug}-${prod.name}-${i}`}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-60px' }}
+                  transition={{ duration: 0.7, delay: (i % 4) * 0.1, ease: EASE }}
+                  whileHover={{ scale: 1.03, y: -4 }}
+                >
+                  <Link to={`/${prod.storeSlug}`} className="group block">
+                    <div className="relative aspect-square overflow-hidden rounded-2xl border border-white/50 shadow-sm">
+                      <img
+                        src={prod.imageUrl}
+                        alt={prod.name}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,rgba(21,58,76,0.8)_100%)]" />
+                      <div className="absolute inset-x-0 bottom-0 p-2.5">
+                        <p className="truncate text-[12px] font-black text-white">{prod.name}</p>
+                        <div className="mt-0.5 flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-white/60">{prod.storeName}</span>
+                          {prod.price > 0 && (
+                            <span className="rounded-full bg-[#5fd35a] px-2 py-0.5 text-[10px] font-black text-[#153a4c]">
+                              R$ {prod.price.toFixed(2).replace('.', ',')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── O que dá pra fazer ── */}
       <section id="descobrir" className="px-4 py-14">
         <div className="mx-auto max-w-6xl">
@@ -400,7 +487,7 @@ export function LandingPage() {
           </motion.div>
         </motion.div>
 
-        {/* Condomínios reais (marquee de logos) */}
+        {/* Condomínios reais (linha centrada quando poucos, marquee quando muitos) */}
         {condominiums.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -412,39 +499,50 @@ export function LandingPage() {
             <p className="mb-2.5 text-center text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
               Condomínios na plataforma
             </p>
-            <div
-              className="relative overflow-hidden rounded-2xl border border-white/50 bg-white/60 py-3 shadow-sm"
-              style={{
-                maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
-                WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
-              }}
-            >
-              <div
-                className="flex w-max items-center gap-4 px-4 [animation:marquee-condo_35s_linear_infinite] hover:[animation-play-state:paused]"
-              >
-                <style>{`@keyframes marquee-condo { from { transform: translateX(0); } to { transform: translateX(calc(-50% - 16px)); } }`}</style>
-                {[...condominiums, ...condominiums].map((condo, i) => (
-                  <Link
-                    key={`${condo.slug}-${i}`}
-                    to={`/hub?condominio=${condo.slug}`}
-                    className="group flex shrink-0 items-center gap-2"
-                  >
+            {condominiums.length <= 5 ? (
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                {condominiums.map((condo) => (
+                  <Link key={condo.slug} to={`/hub?condominio=${condo.slug}`} className="group flex items-center gap-2.5 rounded-2xl border border-white/50 bg-white/70 px-4 py-2.5 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                     <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/60 bg-white shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:ring-2 group-hover:ring-[#5fd35a]/30">
-                      <img
-                        src={condo.logoUrl || condo.bannerUrl}
-                        alt={condo.name}
-                        className="h-full w-full object-cover"
-                        loading="lazy"
-                      />
+                      <img src={condo.logoUrl || condo.bannerUrl} alt={condo.name} className="h-full w-full object-cover" loading="lazy" />
                     </span>
                     <span className="flex flex-col">
-                      <span className="max-w-[110px] truncate text-[11px] font-black text-slate-700 group-hover:text-[#153A4C]">{condo.name}</span>
-                      {condo.city ? <span className="max-w-[110px] truncate text-[9px] font-bold text-slate-400">{condo.city}</span> : null}
+                      <span className="max-w-[130px] truncate text-[12px] font-black text-slate-700 group-hover:text-[#153A4C]">{condo.name}</span>
+                      {condo.city ? <span className="max-w-[130px] truncate text-[10px] font-bold text-slate-400">{condo.city}</span> : null}
                     </span>
                   </Link>
                 ))}
               </div>
-            </div>
+            ) : (
+              <div
+                className="relative overflow-hidden rounded-2xl border border-white/50 bg-white/60 py-3 shadow-sm"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+                }}
+              >
+                <div
+                  className="flex w-max items-center gap-4 px-4 [animation:marquee-condo_35s_linear_infinite] hover:[animation-play-state:paused]"
+                >
+                  <style>{`@keyframes marquee-condo { from { transform: translateX(0); } to { transform: translateX(calc(-50% - 16px)); } }`}</style>
+                  {[...condominiums, ...condominiums].map((condo, i) => (
+                    <Link
+                      key={`${condo.slug}-${i}`}
+                      to={`/hub?condominio=${condo.slug}`}
+                      className="group flex shrink-0 items-center gap-2"
+                    >
+                      <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/60 bg-white shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:ring-2 group-hover:ring-[#5fd35a]/30">
+                        <img src={condo.logoUrl || condo.bannerUrl} alt={condo.name} className="h-full w-full object-cover" loading="lazy" />
+                      </span>
+                      <span className="flex flex-col">
+                        <span className="max-w-[110px] truncate text-[11px] font-black text-slate-700 group-hover:text-[#153A4C]">{condo.name}</span>
+                        {condo.city ? <span className="max-w-[110px] truncate text-[9px] font-bold text-slate-400">{condo.city}</span> : null}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
       </section>
