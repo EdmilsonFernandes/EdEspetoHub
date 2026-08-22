@@ -535,7 +535,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         }),
         totalLabel: formatCurrency(payload.total),
         allowRawBtFallback,
-        qrData: `https://janocaminho.com.br/pedido/${order.id}`,
+        // QR REMOVIDO do cupom da fila (21/08, Edmilson): cupom operacional não
+        // rastreia pedido — e os bytes ESC/POS do QR eram o suspeito nº 1 do
+        // PRINT_FAILED nativo que derrubava a impressão no fallback RawBT
+        // (quebrando com RawBT desinstalado). Página de teste (sem QR) sempre
+        // funcionou; agora o pedido segue o mesmo caminho limpo.
       });
       printMode = result?.mode || '';
     } catch (printError) {

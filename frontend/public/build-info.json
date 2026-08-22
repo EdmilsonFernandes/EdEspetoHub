@@ -2,16 +2,25 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "e4907f23",
-  "versionLabel": "v0.1.9.e4907f23",
-  "versionInternal": "0.1.9+20260821.211501.e4907f23",
-  "buildId": "0.1.9+20260821.211501.e4907f23-20260821.211501-e4907f23",
-  "builtAt": "2026-08-21T21:15:01.974Z",
-  "commitHash": "e4907f23b92dbefbc7a7b79c874d5c2907d5d178",
-  "shortHash": "e4907f23",
+  "versionDisplaySuffix": "314e4c34",
+  "versionLabel": "v0.1.9.314e4c34",
+  "versionInternal": "0.1.9+20260822.012435.314e4c34",
+  "buildId": "0.1.9+20260822.012435.314e4c34-20260822.012435-314e4c34",
+  "builtAt": "2026-08-22T01:24:35.522Z",
+  "commitHash": "314e4c348af5bd89bbd59ede9b550d602a4aaf8a",
+  "shortHash": "314e4c34",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "314e4c348af5bd89bbd59ede9b550d602a4aaf8a",
+      "shortHash": "314e4c34",
+      "dateIso": "2026-08-21T18:26:24-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(dashboard): PDF do movimento + título enxuto",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/314e4c348af5bd89bbd59ede9b550d602a4aaf8a"
+    },
     {
       "hash": "e4907f23b92dbefbc7a7b79c874d5c2907d5d178",
       "shortHash": "e4907f23",
@@ -272,15 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(ux): retomada do Pix iFood-like — card de pagamento no foco, detalhe na hierarquia certa",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/37be27fe09b91ca0c414305403c0506fa9788d30"
-    },
-    {
-      "hash": "73e1533476e2d3716f235a8d28e2ad4b138c7b15",
-      "shortHash": "73e15334",
-      "dateIso": "2026-08-18T14:15:49-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(pix-pendente): refinamentos do spec — Continuar pagamento, paymentProvider, Refazer pedido",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/73e1533476e2d3716f235a8d28e2ad4b138c7b15"
     }
   ]
 }
