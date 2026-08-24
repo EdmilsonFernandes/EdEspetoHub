@@ -27,6 +27,11 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 1024 * 1024,
         runtimeCaching: [
           {
+            // Auditoria 24/08 (config não refletia no app): CacheFirst 30d prendia
+            // imagem de URL igual (logo/banner reutilizados) sem nunca consultar a
+            // rede. StaleWhileRevalidate mostra a do cache e atualiza em background
+            // → próxima exibição já é a nova. Uploads geram nome único (immutable),
+            // então o caso comum continua instantâneo.
             urlPattern: ({ request, url, sameOrigin }) =>
               request.destination === 'image' &&
               (sameOrigin ||
@@ -34,12 +39,12 @@ export default defineConfig({
                 url.hostname === 'www.janocaminho.com.br' ||
                 url.hostname.endsWith('.amazonaws.com') ||
                 url.hostname.endsWith('.cloudfront.net')),
-            handler: 'CacheFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'jnc-public-images-v1',
+              cacheName: 'jnc-public-images-v2',
               expiration: {
                 maxEntries: 320,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
               },
               cacheableResponse: {
                 statuses: [0, 200],
