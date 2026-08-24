@@ -5,16 +5,61 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "f369c349",
-  "versionLabel": "v0.1.9.f369c349",
-  "versionInternal": "0.1.9+20260822.202420.f369c349",
-  "buildId": "0.1.9+20260822.202420.f369c349-20260822.202420-f369c349",
-  "builtAt": "2026-08-22T20:24:20.899Z",
-  "commitHash": "f369c349963c524666e000c81a6f226a3eb2930c",
-  "shortHash": "f369c349",
+  "versionDisplaySuffix": "7f7aa050",
+  "versionLabel": "v0.1.9.7f7aa050",
+  "versionInternal": "0.1.9+20260824.222846.7f7aa050",
+  "buildId": "0.1.9+20260824.222846.7f7aa050-20260824.222846-7f7aa050",
+  "builtAt": "2026-08-24T22:28:46.533Z",
+  "commitHash": "7f7aa050d21e9b8e55e7e58b1e274d46cf14c321",
+  "shortHash": "7f7aa050",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "7f7aa050d21e9b8e55e7e58b1e274d46cf14c321",
+      "shortHash": "7f7aa050",
+      "dateIso": "2026-08-24T16:23:50-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(drawer): critique impeccable — sheet↔modal, cadastro exposto, badge honesta, a11y",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7f7aa050d21e9b8e55e7e58b1e274d46cf14c321"
+    },
+    {
+      "hash": "f756f60867710325a8871d726aee857406c1fcb6",
+      "shortHash": "f756f608",
+      "dateIso": "2026-08-24T14:41:44-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(checkout): observação premium de 1 toque — chips instantâneos no card",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f756f60867710325a8871d726aee857406c1fcb6"
+    },
+    {
+      "hash": "605052d0ce0b173c39dc8774e61ed083790fddf6",
+      "shortHash": "605052d0",
+      "dateIso": "2026-08-24T12:20:50-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(mobile): captureInput false — devolve InputConnection nativo e as sugestões do Gboard",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/605052d0ce0b173c39dc8774e61ed083790fddf6"
+    },
+    {
+      "hash": "5eeef7374872e4b2ca4df5a3381091bddd547432",
+      "shortHash": "5eeef737",
+      "dateIso": "2026-08-24T10:16:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(pwa): imagens CacheFirst 30d → StaleWhileRevalidate — config da loja reflete no app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5eeef7374872e4b2ca4df5a3381091bddd547432"
+    },
+    {
+      "hash": "0cdf5fc455edec79c7f707e79903416fea1d3c3a",
+      "shortHash": "0cdf5fc4",
+      "dateIso": "2026-08-22T17:41:15-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 107 (v1.0.107) — AAB com densidade iFood-like da Loja Online",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0cdf5fc455edec79c7f707e79903416fea1d3c3a"
+    },
     {
       "hash": "f369c349963c524666e000c81a6f226a3eb2930c",
       "shortHash": "f369c349",
@@ -239,51 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(nginx): redirect 308 permanente edsertaneja → espetinho-datony-bacabal",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/431de6cedb84f1bc4af65d04505c3b02eda90335"
-    },
-    {
-      "hash": "381b30120e62353582161d22df2b7ec27ab931cd",
-      "shortHash": "381b3012",
-      "dateIso": "2026-08-19T19:20:44-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(mobile): estilos de notificação públicos (Compat) — DeviceDefault é privado",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/381b30120e62353582161d22df2b7ec27ab931cd"
-    },
-    {
-      "hash": "2306e9da19565cd59bb270a439fca47e6dc8aa2f",
-      "shortHash": "2306e9da",
-      "dateIso": "2026-08-19T19:11:00-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 103 (v1.0.103) — notificação adaptiva + fluxo pago-entra-na-fila",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2306e9da19565cd59bb270a439fca47e6dc8aa2f"
-    },
-    {
-      "hash": "eea66fc57fddca280a4357b8fdb91a773159dd26",
-      "shortHash": "eea66fc5",
-      "dateIso": "2026-08-19T19:07:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(ux+push): 'Pagar agora' sutil (outline) + notificação quebrava em bandeja escura",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/eea66fc57fddca280a4357b8fdb91a773159dd26"
-    },
-    {
-      "hash": "413abf493f4ce6eaee6afdc90371b4c356688746",
-      "shortHash": "413abf49",
-      "dateIso": "2026-08-19T19:06:13-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(flow): pedido online só entra na fila quando PAGO + guard 1-Pix-pendente",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/413abf493f4ce6eaee6afdc90371b4c356688746"
-    },
-    {
-      "hash": "aedec0e74359eb3726d0887f8dec0053a86c5ea9",
-      "shortHash": "aedec0e7",
-      "dateIso": "2026-08-19T15:09:34-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 102 (v1.0.102) — cupom no dashboard + card Pix com copiar",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/aedec0e74359eb3726d0887f8dec0053a86c5ea9"
     }
   ]
 } as const;
