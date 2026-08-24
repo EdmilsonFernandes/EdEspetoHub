@@ -237,6 +237,19 @@ export function ProfileDrawer({
     };
   }, [isOpen]);
 
+  // Auditoria 24/08 (a11y): Esc fecha os overlays do drawer (picker e Sobre)
+  useEffect(() => {
+    if (!accessPickerOpen && !aboutOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setAccessPickerOpen(false);
+        setAboutOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [accessPickerOpen, aboutOpen]);
+
   const getAccessStateLabel = (profile: { biometric: boolean; hasSession: boolean }) => {
     if (profile.biometric) return 'Entrar rápido';
     if (profile.hasSession) return 'Disponível neste aparelho';
@@ -698,7 +711,13 @@ export function ProfileDrawer({
       </aside>
 
       {aboutOpen && (
-        <div className="absolute inset-0 z-[12] flex items-center justify-center bg-slate-950/45 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-[12px] animate-in fade-in duration-200" onClick={() => setAboutOpen(false)}>
+        <div
+          className="absolute inset-0 z-[12] flex items-center justify-center bg-slate-950/45 px-4 py-[max(1rem,env(safe-area-inset-top))] backdrop-blur-[12px] animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Sobre o app"
+          onClick={() => setAboutOpen(false)}
+        >
           <div
             className="relative w-full max-w-[345px] overflow-hidden rounded-[1.9rem] border border-white/86 bg-[linear-gradient(180deg,rgba(255,255,255,0.985)_0%,rgba(248,250,252,0.98)_100%)] p-5 shadow-[0_30px_76px_-34px_rgba(15,23,42,0.78)] animate-in zoom-in-95 duration-200"
             onClick={(event) => event.stopPropagation()}
@@ -766,18 +785,26 @@ export function ProfileDrawer({
       )}
 
       {accessPickerOpen && (
-        <div className="absolute inset-0 z-[10] flex items-end justify-center bg-slate-950/36 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-[10px] animate-in fade-in duration-200 sm:items-center" onClick={() => setAccessPickerOpen(false)}>
+        <div
+          className="absolute inset-0 z-[10] flex items-end justify-center bg-slate-950/36 pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-[10px] animate-in fade-in duration-200 sm:items-center sm:px-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Escolher área de acesso"
+          onClick={() => setAccessPickerOpen(false)}
+        >
           <div
-            className="relative max-h-[calc(100vh-2rem)] w-full max-w-[345px] overflow-y-auto overscroll-contain rounded-[1.75rem] border border-white/86 bg-[linear-gradient(180deg,rgba(255,255,255,0.985)_0%,rgba(248,250,252,0.98)_100%)] p-4 shadow-[0_26px_68px_-30px_rgba(15,23,42,0.72)] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200"
+            className="relative max-h-[calc(100vh-1rem)] w-full overflow-y-auto overscroll-contain rounded-t-[1.75rem] border border-white/86 bg-[linear-gradient(180deg,rgba(255,255,255,0.985)_0%,rgba(248,250,252,0.98)_100%)] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_26px_68px_-30px_rgba(15,23,42,0.72)] animate-in slide-in-from-bottom-full duration-300 ease-out sm:max-h-[calc(100vh-2rem)] sm:max-w-[345px] sm:rounded-[1.75rem] sm:zoom-in-95 sm:slide-in-from-bottom-3 sm:duration-200"
             onClick={(event) => event.stopPropagation()}
           >
+            {/* Auditoria 24/08: alça de sheet no mobile (idioma sheet↔modal escolhido pelo dono) */}
+            <div className="mx-auto mb-2 h-1.5 w-11 rounded-full bg-slate-300/80 sm:hidden" aria-hidden="true" />
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
               <div className="absolute -left-12 top-4 h-28 w-28 rounded-full bg-[#336886]/8 blur-3xl" />
               <div className="absolute -right-10 bottom-4 h-28 w-28 rounded-full bg-emerald-200/28 blur-3xl" />
             </div>
             <div className="relative mb-3.5 flex items-start justify-between gap-3">
               <div className="min-w-0 pr-2">
-                <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
                   {hasActiveContext ? 'Outros acessos' : 'Escolha sua área'}
                 </p>
                 <h3 className="mt-1 text-[1.18rem] font-black tracking-[-0.035em] text-slate-950">
@@ -794,24 +821,51 @@ export function ProfileDrawer({
               <button
                 type="button"
                 onClick={() => setAccessPickerOpen(false)}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200/70 bg-white/88 text-slate-400 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.32)] transition-all active:scale-95"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200/70 bg-white/88 text-slate-400 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.32)] transition-all active:scale-95"
                 aria-label="Fechar escolha de acesso"
               >
                 <X size={17} weight="bold" />
               </button>
             </div>
 
+            {/* Auditoria 24/08 (P0): toggle Entrar/Criar conta — o bloco de cadastro existia
+                mas era inalcançável (setAccessPickerMode('register') nunca era chamado). */}
+            {!hasActiveContext && (
+              <div className="relative mb-3 grid grid-cols-2 gap-1 rounded-full border border-slate-200/80 bg-slate-100/80 p-1" role="tablist" aria-label="Modo de acesso">
+                {(['login', 'register'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    role="tab"
+                    aria-selected={accessPickerMode === mode}
+                    onClick={() => setAccessPickerMode(mode)}
+                    className={`min-h-[38px] rounded-full px-3 text-[13px] font-bold transition-all duration-200 active:scale-[0.97] ${
+                      accessPickerMode === mode
+                        ? 'bg-white text-slate-950 shadow-[0_8px_18px_-12px_rgba(15,23,42,0.4)]'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    {mode === 'login' ? 'Entrar' : 'Criar conta'}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {(hasActiveContext || accessPickerMode === 'login') ? (
               <div className="relative grid gap-2.5">
                 {visibleAccessProfiles.map((item) => {
                   const classes = getAccessCardClasses(item);
+                  // Auditoria 24/08 (P1): parceiro/condomínio não têm sessão local —
+                  // caíam no estado do motoboy e mostravam "Entrar rápido" falso.
                   const stateLabel = item.current
                     ? 'Atual'
-                    : item.id === 'client'
-                      ? getAccessStateLabel(savedAccessProfiles.customer)
-                      : item.id === 'store'
-                        ? getAccessStateLabel(savedAccessProfiles.admin)
-                        : getAccessStateLabel(savedAccessProfiles.motoboy);
+                    : !item.ready && (item.id === 'parceiro' || item.id === 'condominio')
+                      ? 'Acessar'
+                      : item.id === 'client'
+                        ? getAccessStateLabel(savedAccessProfiles.customer)
+                        : item.id === 'store'
+                          ? getAccessStateLabel(savedAccessProfiles.admin)
+                          : getAccessStateLabel(savedAccessProfiles.motoboy);
                   return (
                     <button
                       key={item.id}
@@ -830,11 +884,11 @@ export function ProfileDrawer({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <p className={`truncate text-[14px] font-black leading-tight ${classes.title}`}>{item.title}</p>
-                          <span className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.16em] ${classes.badge}`}>
+                          <span className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${classes.badge}`}>
                             {stateLabel}
                           </span>
                         </div>
-                        <p className={`mt-0.5 truncate text-[10.5px] font-semibold ${classes.subtitle}`}>{item.subtitle}</p>
+                        <p className={`mt-0.5 truncate text-xs font-semibold ${classes.subtitle}`}>{item.subtitle}</p>
                       </div>
                       <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border transition-transform group-hover:translate-x-0.5 group-active:translate-x-0.5 ${classes.caret}`}>
                         <CaretRight size={16} weight="bold" />
