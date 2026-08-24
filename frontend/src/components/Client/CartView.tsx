@@ -3,7 +3,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import {
   ArrowLeft,
+  ArrowRight,
   Bicycle,
+  Check,
   Crosshair,
   Phone,
   House,
@@ -1232,15 +1234,28 @@ export const CartView = ({
   const handleCustomerOrderNoteChange = (value: string) => {
     onChangeCustomer({ ...customer, customerNote: limitCustomerOrderNoteInput(value) });
   };
+  // Observação premium 24/08 — chips de 1 toque: adicionam/removem o segmento na hora,
+  // sem abrir painel e sem botão salvar (segmentos separados por "; ").
+  const toggleCustomerNoteSegment = (value: string, suggestion: string) => {
+    const segments = String(value || "")
+      .split(";")
+      .map((part) => part.trim())
+      .filter(Boolean);
+    const exists = segments.some((segment) => segment.toLowerCase() === suggestion.toLowerCase());
+    const next = exists
+      ? segments.filter((segment) => segment.toLowerCase() !== suggestion.toLowerCase())
+      : [...segments, suggestion];
+    return limitCustomerOrderNoteInput(next.join("; "));
+  };
+  const toggleLiveCustomerNoteSuggestion = (suggestion: string) => {
+    handleCustomerOrderNoteChange(toggleCustomerNoteSegment(customerOrderNoteValue, suggestion));
+  };
+  const toggleCustomerNoteDraftSuggestion = (suggestion: string) => {
+    setCustomerNoteDraft((current) => toggleCustomerNoteSegment(current, suggestion));
+  };
   const openCustomerNoteSheet = () => {
     setCustomerNoteDraft(customerOrderNoteValue);
     setShowCustomerNoteSheet(true);
-  };
-  const applyCustomerNoteSuggestion = (suggestion: string) => {
-    setCustomerNoteDraft((current) => {
-      const next = current.trim() ? `${current.trim()}; ${suggestion}` : suggestion;
-      return limitCustomerOrderNoteInput(next);
-    });
   };
   const saveCustomerNoteDraft = () => {
     handleCustomerOrderNoteChange(customerNoteDraft);
@@ -1248,42 +1263,75 @@ export const CartView = ({
   };
   const renderCustomerOrderNoteCard = () => {
     const note = customerOrderNoteValue.trim();
+    const noteSegments = note
+      ? note.split(";").map((part) => part.trim().toLowerCase()).filter(Boolean)
+      : [];
+    const inlineSuggestions = customerOrderNoteCopy.suggestions.slice(0, 3);
 
     return (
-      <button
-        type="button"
-        onClick={openCustomerNoteSheet}
-        className={`group w-full rounded-3xl border p-3 text-left transition-all duration-300 active:scale-[0.99] ${
+      <div
+        className={`rounded-3xl border p-3 transition-all duration-300 ${
           note
             ? "border-[#336886]/14 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)] shadow-[0_18px_38px_-34px_rgba(51,104,134,0.34)]"
-            : "border-slate-100 bg-white shadow-[0_18px_38px_-34px_rgba(15,23,42,0.25)] hover:border-[#336886]/16"
+            : "border-slate-100 bg-white shadow-[0_18px_38px_-34px_rgba(15,23,42,0.25)]"
         }`}
         data-testid="customer-order-note-card"
       >
-        <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={openCustomerNoteSheet}
+          className="group flex w-full items-center gap-3 rounded-2xl text-left"
+        >
           <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] ring-1 ${
             note ? "bg-[#336886]/10 text-[#336886] ring-[#336886]/12" : "bg-slate-50 text-slate-500 ring-slate-200/70"
           }`}>
             <NotePencil size={18} weight="duotone" />
           </span>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-black tracking-tight text-slate-950">
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center justify-between gap-3">
+              <span className="text-sm font-bold tracking-tight text-slate-950">
                 {note ? "Observação adicionada" : "Alguma observação?"}
-              </p>
-              <span className={`shrink-0 rounded-full px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] ${
-                note ? "bg-white text-[#336886] ring-1 ring-[#cfe0ea]" : "bg-[#336886]/8 text-[#336886] ring-1 ring-[#336886]/10"
-              }`}>
-                {note ? "Editar" : "+ Adicionar"}
               </span>
-            </div>
-            <p className={`mt-1 line-clamp-2 text-[12.5px] font-semibold leading-snug ${note ? "text-slate-800" : "text-slate-500"}`}>
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-2xs font-bold uppercase tracking-[0.12em] transition-colors ${
+                note ? "bg-white text-[#336886] ring-1 ring-[#cfe0ea]" : "bg-[#336886]/8 text-[#336886] ring-1 ring-[#336886]/10 group-hover:bg-[#336886]/12"
+              }`}>
+                {note ? "Editar" : "Escrever"}
+              </span>
+            </span>
+            <span className={`mt-1 line-clamp-2 text-[12.5px] font-medium leading-snug ${note ? "text-slate-800" : "text-slate-500"}`}>
               {note || customerOrderNoteCopy.preview}
-            </p>
+            </span>
+          </span>
+          <ArrowRight size={16} weight="bold" className="shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5" />
+        </button>
+        {inlineSuggestions.length > 0 && (
+          <div className="mt-2.5 flex flex-wrap gap-2 border-t border-slate-100 pt-2.5" data-testid="customer-order-note-quick-chips">
+            {inlineSuggestions.map((suggestion) => {
+              const active = noteSegments.includes(suggestion.toLowerCase());
+              return (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => toggleLiveCustomerNoteSuggestion(suggestion)}
+                  aria-pressed={active}
+                  className={`jnc-hub-touch inline-flex min-h-[36px] items-center gap-1.5 rounded-full border px-3 text-[12px] font-semibold transition-all duration-200 active:scale-95 ${
+                    active
+                      ? "border-[#336886] bg-[#336886]/10 text-[#153A4C]"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-[#336886]/24 hover:text-[#153A4C]"
+                  }`}
+                >
+                  {active ? (
+                    <Check size={13} weight="bold" className="text-emerald-600" />
+                  ) : (
+                    <Plus size={13} weight="bold" className="text-slate-400" />
+                  )}
+                  {suggestion}
+                </button>
+              );
+            })}
           </div>
-          <ArrowLeft size={16} weight="bold" className="shrink-0 rotate-180 text-slate-300 transition-transform group-hover:translate-x-0.5" />
-        </div>
-      </button>
+        )}
+      </div>
     );
   };
   const renderCustomerOrderNoteSummaryCard = () => {
@@ -3790,51 +3838,63 @@ export const CartView = ({
             aria-label="Fechar observação"
           />
           <div className="absolute bottom-0 left-0 right-0 mx-auto max-h-[calc(100dvh-4rem)] max-w-lg overflow-hidden rounded-t-[2rem] border border-white/80 bg-white/92 shadow-[0_-28px_60px_-30px_rgba(15,23,42,0.55)] backdrop-blur-2xl animate-in slide-in-from-bottom-4 fade-in duration-200">
-            <div className="border-b border-[#336886]/10 bg-white/86 px-4 pb-3 pt-4 backdrop-blur-xl">
-              <div className="mx-auto mb-3 h-1.5 w-11 rounded-full bg-[#336886]/18" />
+            <div className="border-b border-[#336886]/10 bg-white/86 px-4 pb-3 pt-3 backdrop-blur-xl">
+              <div className="mx-auto mb-2.5 h-1.5 w-11 rounded-full bg-[#336886]/18" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-2xs font-black uppercase tracking-[0.22em] text-[#336886]">Observação</p>
-                  <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Alguma instrução para a loja?</h3>
-                  <p className="mt-1 text-xs font-semibold leading-snug text-slate-500">
+                  <h3 className="text-base font-bold tracking-tight text-slate-950">Alguma instrução para a loja?</h3>
+                  <p className="mt-0.5 text-xs font-medium leading-snug text-slate-500">
                     {customerOrderNoteCopy.helper}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowCustomerNoteSheet(false)}
-                  className="jnc-hub-touch inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white px-3 text-xs font-black text-slate-600 shadow-sm"
-                  aria-label="Fechar"
+                  className="jnc-hub-touch inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm active:scale-95"
+                  aria-label="Fechar observação"
                 >
-                  Fechar
+                  <X size={16} weight="bold" />
                 </button>
               </div>
             </div>
-            <div className="space-y-4 overflow-y-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
+            <div className="space-y-3.5 overflow-y-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
               <div>
-                <p className="mb-2 text-2xs font-black uppercase tracking-[0.18em] text-slate-400">
-                  Atalhos rápidos
+                <p className="mb-2 text-2xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                  Toque para adicionar ou tirar
                 </p>
-                <div className="grid grid-cols-2 gap-2">
-                {customerOrderNoteCopy.suggestions.map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    onClick={() => applyCustomerNoteSuggestion(suggestion)}
-                    className={`jnc-hub-touch rounded-[1rem] border px-3 py-2 text-left text-[11px] font-black shadow-sm transition ${
-                      customerNoteDraft.toLowerCase().includes(suggestion.toLowerCase())
-                        ? "border-[#336886]/24 bg-[#336886]/8 text-[#153A4C] ring-1 ring-[#336886]/12"
-                        : "border-slate-200 bg-white text-[#336886] hover:border-[#336886]/18"
-                    }`}
-                  >
-                    + {suggestion}
-                  </button>
-                ))}
+                <div className="flex flex-wrap gap-2">
+                  {customerOrderNoteCopy.suggestions.map((suggestion) => {
+                    const active = customerNoteDraft
+                      .split(";")
+                      .map((part) => part.trim().toLowerCase())
+                      .filter(Boolean)
+                      .includes(suggestion.toLowerCase());
+                    return (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => toggleCustomerNoteDraftSuggestion(suggestion)}
+                        aria-pressed={active}
+                        className={`jnc-hub-touch inline-flex min-h-[38px] items-center gap-1.5 rounded-full border px-3.5 text-[12.5px] font-semibold transition-all duration-200 active:scale-95 ${
+                          active
+                            ? "border-[#336886] bg-[#336886]/10 text-[#153A4C]"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-[#336886]/24 hover:text-[#153A4C]"
+                        }`}
+                      >
+                        {active ? (
+                          <Check size={13} weight="bold" className="text-emerald-600" />
+                        ) : (
+                          <Plus size={13} weight="bold" className="text-slate-400" />
+                        )}
+                        {suggestion}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-              <div className="rounded-[1.4rem] border border-slate-100 bg-slate-50/80 p-3 ring-1 ring-white/80">
-                <label htmlFor="customer-order-note-input" className="mb-2 block text-xs font-black text-slate-800">
-                  Escreva uma observação
+              <div>
+                <label htmlFor="customer-order-note-input" className="mb-1.5 block text-xs font-semibold text-slate-600">
+                  Ou escreva do seu jeito
                 </label>
                 <textarea
                   id="customer-order-note-input"
@@ -3842,33 +3902,38 @@ export const CartView = ({
                   value={customerNoteDraft}
                   onChange={(event) => setCustomerNoteDraft(limitCustomerOrderNoteInput(event.target.value))}
                   maxLength={CUSTOMER_ORDER_NOTE_MAX_LENGTH}
-                  rows={5}
+                  rows={4}
+                  autoFocus
                   placeholder={customerOrderNoteCopy.placeholder}
-                  className="min-h-[118px] w-full resize-none rounded-[1.2rem] border border-white bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-[#336886]/45 focus:ring-4 focus:ring-[#336886]/10"
+                  className="min-h-[96px] w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-[#336886]/45 focus:ring-4 focus:ring-[#336886]/10"
                   data-testid="customer-order-note-input"
                 />
-                <div className="mt-2 flex items-center justify-between gap-3 text-2xs font-bold text-slate-400">
+                <div className="mt-1.5 flex items-center justify-between gap-3 text-2xs font-medium text-slate-400">
                   <span>Evite pedir item extra por aqui; use o cardápio para adicionais.</span>
-                  <span className="shrink-0 tabular-nums rounded-full bg-white px-2 py-0.5 shadow-sm">
+                  <span className="shrink-0 tabular-nums rounded-full bg-slate-50 px-2 py-0.5">
                     {customerNoteDraft.length}/{CUSTOMER_ORDER_NOTE_MAX_LENGTH}
                   </span>
                 </div>
               </div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setCustomerNoteDraft("");
-                    handleCustomerOrderNoteChange("");
-                    setShowCustomerNoteSheet(false);
-                  }}
-                >
-                  {customerNoteDraft.trim() ? "Remover observação" : "Continuar sem observação"}
-                </Button>
+              <div className="flex items-center gap-2">
+                {customerNoteDraft.trim() ? (
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setCustomerNoteDraft("");
+                      handleCustomerOrderNoteChange("");
+                      setShowCustomerNoteSheet(false);
+                    }}
+                    className="shrink-0"
+                  >
+                    Remover
+                  </Button>
+                ) : null}
                 <Button
                   onClick={saveCustomerNoteDraft}
+                  className="flex-1"
                 >
-                  Salvar observação
+                  Pronto
                 </Button>
               </div>
             </div>
