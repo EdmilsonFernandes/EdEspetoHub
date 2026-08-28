@@ -3936,10 +3936,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     type="button"
                     onClick={() => handleAddItem(order.id)}
                     data-testid="admin-add-selected-product-button"
-                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center gap-1 rounded-xl bg-brand-primary text-xs font-bold text-white transition-all hover:-translate-y-0.5 hover:opacity-90 active:scale-95 sm:w-auto sm:px-3"
+                    className={`flex h-11 w-11 flex-shrink-0 items-center justify-center gap-1 rounded-xl text-xs font-bold text-white transition-all hover:-translate-y-0.5 hover:opacity-90 active:scale-95 sm:w-auto sm:px-3 ${
+                      selectedProducts[order.id]
+                        ? 'bg-emerald-600 shadow-[0_10px_22px_-14px_rgba(5,150,105,0.7)]'
+                        : 'bg-brand-primary'
+                    }`}
                   >
                     <Plus size={14} weight="duotone" />
-                    <span className="hidden sm:inline">Incluir</span>
+                    <span className="hidden min-[380px]:inline">Incluir</span>
                   </button>
                 </div>
 
