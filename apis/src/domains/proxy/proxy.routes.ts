@@ -92,6 +92,7 @@ export function createProxyRoutes(): Router {
     r.get('/stores/:storeId/payment-accounts/mercadopago', authRequired, forward);
     r.post('/stores/:storeId/payment-accounts/mercadopago/connect', authRequired, forward);
     r.delete('/stores/:storeId/payment-accounts/mercadopago', authRequired, forward);
+    r.get('/stores/:storeId/payment-accounts/mercadopago/point/terminals', authRequired, forward);
     r.get('/stores/:storeId/users', authRequired, forward); r.post('/stores/:storeId/users', authRequired, forward);
     r.patch('/stores/:storeId/users/:userId/password', authRequired, forward);
     r.delete('/stores/:storeId/users/:userId', authRequired, forward);

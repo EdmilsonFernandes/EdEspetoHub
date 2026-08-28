@@ -1,0 +1,102 @@
+import { env } from '../config/env';
+import { AppError } from '../errors/AppError';
+import { logger } from '../utils/logger';
+import { StorePaymentAccountService } from './StorePaymentAccountService';
+
+export type PointTerminal = {
+  id: string;
+  serialNumber: string | null;
+  posId: string | null;
+  mpStoreId: string | null;
+  externalPosId: string | null;
+  operatingMode: string;
+  /** true somente em modo PDV — único modo que aceita integração via API */
+  integrationReady: boolean;
+};
+
+/**
+ * Extrai o número de série físico do id do terminal.
+ * Formato do MP: `{MODELO}__{SERIAL}` (ex.: `NEWLAND_N950__N950NCB801293324`) —
+ * o serial bate com a etiqueta traseira da maquininha.
+ */
+export const terminalSerial = (id: string): string | null => {
+  const parts = String(id || '').split('__');
+  const serial = parts.length >= 2 ? parts[parts.length - 1] : '';
+  return serial || null;
+};
+
+/**
+ * Normaliza a resposta de `GET /terminals/v1/list`.
+ * Tolera forma ausente/estranha sem explodir (terminal novo, campo do MP renomeado).
+ */
+export const normalizeTerminalList = (body: any): PointTerminal[] => {
+  const rows = Array.isArray(body?.data?.terminals) ? body.data.terminals : [];
+  return rows
+    .filter((terminal: any) => Boolean(terminal?.id))
+    .map((terminal: any) => ({
+      id: String(terminal.id),
+      serialNumber: terminalSerial(String(terminal.id)),
+      posId: terminal.pos_id != null ? String(terminal.pos_id) : null,
+      mpStoreId: terminal.store_id != null ? String(terminal.store_id) : null,
+      externalPosId: terminal.external_pos_id != null ? String(terminal.external_pos_id) : null,
+      operatingMode: String(terminal.operating_mode || 'UNDEFINED'),
+      integrationReady: String(terminal.operating_mode || '').toUpperCase() === 'PDV',
+    }));
+};
+
+export class MercadoPagoPointService {
+  private accounts = new StorePaymentAccountService();
+  private log = logger.child({ scope: 'MercadoPagoPointService' });
+
+  /**
+   * Lista as maquininhas Point da conta Mercado Pago conectada da loja.
+   * Sempre com o token OAuth do lojista (a maquininha pertence à conta dele).
+   */
+  async listTerminals(storeId: string, authStoreId?: string) {
+    if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
+
+    const accessToken = await this.accounts.getActiveAccessToken(storeId);
+    if (!accessToken) {
+      throw new AppError('PAY-017', 400, {
+        message: 'Conecte a conta Mercado Pago da loja antes de listar maquininhas Point.',
+      });
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(`${env.mercadoPago.apiBaseUrl}/terminals/v1/list?limit=50&offset=0`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+    } catch (error: any) {
+      this.log.warn('Point terminals request failed', { storeId, error: error?.message });
+      throw new AppError('PAY-018', 502, {
+        message: 'Não foi possível falar com o Mercado Pago agora. Tente novamente em instantes.',
+      });
+    }
+
+    if (!response.ok) {
+      const bodyText = await response.text().catch(() => '');
+      this.log.warn('Point terminals list rejected', {
+        storeId,
+        status: response.status,
+        body: bodyText.slice(0, 400),
+      });
+      // 403 aqui em geral = escopo "In-store Terminal List" ausente no token:
+      // permissão foi adicionada à app DEPOIS da conexão — lojista precisa reconectar.
+      const permissionHint =
+        response.status === 403
+          ? ' A conta conectada pode estar sem permissão de terminais — desconecte e reconecte o Mercado Pago da loja.'
+          : '';
+      throw new AppError('PAY-018', 502, {
+        message: `Mercado Pago recusou listar maquininhas (HTTP ${response.status}).${permissionHint}`,
+      });
+    }
+
+    const body = await response.json().catch(() => null);
+    return {
+      connected: true,
+      terminals: normalizeTerminalList(body),
+      paging: body?.paging || null,
+    };
+  }
+}

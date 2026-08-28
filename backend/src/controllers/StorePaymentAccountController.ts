@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { StorePaymentAccountService } from '../services/StorePaymentAccountService';
 import { MotoboyPaymentAccountService } from '../services/MotoboyPaymentAccountService';
 import { MercadoPagoConnectedAccountService } from '../services/MercadoPagoConnectedAccountService';
+import { MercadoPagoPointService } from '../services/MercadoPagoPointService';
 import { respondWithError } from '../errors/respondWithError';
 import { logger } from '../utils/logger';
 import { env } from '../config/env';
@@ -9,6 +10,7 @@ import { env } from '../config/env';
 const service = new StorePaymentAccountService();
 const motoboyService = new MotoboyPaymentAccountService();
 const sharedService = new MercadoPagoConnectedAccountService();
+const pointService = new MercadoPagoPointService();
 const log = logger.child({ scope: 'StorePaymentAccountController' });
 
 const appBaseUrl = () => env.appUrl.replace(/\/$/, '').replace('https://www.', 'https://');
@@ -106,6 +108,15 @@ export class StorePaymentAccountController {
   static async disconnectMercadoPago(req: Request, res: Response) {
     try {
       const result = await service.disconnect(req.params.storeId, req.auth?.storeId);
+      return res.json(result);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async listMercadoPagoPointTerminals(req: Request, res: Response) {
+    try {
+      const result = await pointService.listTerminals(req.params.storeId, req.auth?.storeId);
       return res.json(result);
     } catch (error: any) {
       return respondWithError(req, res, error, 400);
