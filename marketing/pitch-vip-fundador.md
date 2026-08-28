@@ -60,7 +60,7 @@ Não argumente — **faça a conta do lojista na frente dele**, com o ticket del
 > Posso passar aí amanhã e te mostrar em 5 minutos no seu celular? Ou te mando o link pra você mesmo ver?
 
 ### Follow-up (48h depois, sem resposta)
-> [Nome], só pra não perder a vaga: já reservei [X] das 50 de fundador. Não é contrato longo nem pegadinha — 90 dias grátis e a comissão é zero no contrato, sem prazo de validade. Se quiser ver funcionando: janocaminho.com.br
+> [Nome], só pra não perder a vaga: já reservei [X] das 50 de fundador. Não é pegadinha — 90 dias grátis, e depois você paga R$69,90 (Basic) ou R$119,90 (Pro) **travado pra sempre**; quem vem depois paga R$89,90/149,90 de tabela. Comissão é zero no contrato, sem prazo de validade. Se quiser ver funcionando: janocaminho.com.br
 
 ### Depois da visita
 > [Nome], como combinado — o link de cadastro de Fundador: [link]. Qualquer dúvida me chama aqui. Quando subir o primeiro pedido, o dinheiro já cai direto no Pix que você cadastrou. 👊
@@ -76,7 +76,7 @@ Não argumente — **faça a conta do lojista na frente dele**, com o ticket del
 > "O iFood também era desconhecido em 2011. A pergunta certa é: o que você ganha por entrar antes? Fundador fica no topo da vitrine do bairro, entra nas campanhas pro consumidor, e trava a condição. Depois de 50 lojas, essa porta fecha."
 
 **"E depois dos 90 dias? Vai me cobrar uma mensalidade absurda."**
-> "A mensalidade de depois vai ser fixa e anunciada — na faixa do que o mercado já cobra por sistema de delivery próprio (R$90–350/mês). E Fundador tem condição diferenciada pra sempre. Comissão, nunca: isso tá no contrato, não no meu palavreado."
+> "Direto, sem letra miúda: depois dos 90 dias a tabela é R$89,90 (Basic) e R$149,90 (Pro) — na faixa do que o mercado já cobra por sistema de delivery sem comissão. Mas **Fundador trava o preço de lançamento pra sempre**: R$69,90 no Basic, R$119,90 no Pro. Quem entra depois paga tabela cheia. E comissão, nunca: isso tá no contrato, não no meu palavreado."
 
 **"App pequeno é golpe / some com meu dinheiro."**
 > "O contrário: aqui o dinheiro NÃO passa pela plataforma. O cliente paga, cai no SEU Pix, na hora. A plataforma nem toca no fluxo. Se eu sumir amanhã, o que você vendeu é seu."
@@ -113,13 +113,17 @@ Não argumente — **faça a conta do lojista na frente dele**, com o ticket del
 
 ---
 
-## 8. Âncoras internas de precificação (não vai pro cliente)
+## 8. Tabela de preços (decisão 28/08/2026 — ver docs/PLANOS_PRECOS.md)
 
-Para calibrar a mensalidade pós-90-dias e o preço Fundador (dossiê, todos verificados):
+| | Basic | Pro |
+|---|---|---|
+| O que libera | vitrine, cardápio, pedidos, retirada, mesa, Pix direto | tudo + entregadores, entrega c/ tracking, gorjetas, Modo Balcão/fila TV, impressora, condomínios/feiras |
+| **Tabela (depois dos 90 dias)** | **R$ 89,90/mês** | **R$ 149,90/mês** |
+| **Fundador (vitalício, travado)** | **R$ 69,90/mês** | **R$ 119,90/mês** |
+| Anual fundador | R$ 838,80 → **R$ 712,98** (15% off) | R$ 1.438,80 → **R$ 1.222,98** (15% off) |
 
-- Corredor BR de SaaS de delivery sem comissão: **R$90–350/mês** (FoodHouse R$90–130; Go Delivery R$99–349,90 por teto de pedidos; Gama desde R$60).
-- **Mensalidade isenta abaixo de faturamento mínimo** é prática de mercado (AiQFome isenta até R$1.500/mês) — lojista de bairro não paga fixo antes de faturar.
-- **Fee fixo por pedido** (não %) é alternativa praticável se quiser híbrido (FoodHouse: R$0,91/pedido no plano grátis) — **mas** violaria o princípio nº2 se destinada à plataforma: comissão zero é inegociável, fee de plataforma por pedido nem fixo.
-- **Desconto de fidelidade anual ~31%** (R$130→R$90) valida assinatura longa — mecanismo disponível pro Fundador.
+Âncoras que sustentam a tabela (dossiê, verificadas): corredor BR de SaaS de delivery sem comissão R$90–350/mês (FoodHouse R$90–130; Go Delivery R$99–349,90; AiQFome R$89,90 **mais** 14,99–19,99% por pedido — nossa Basic empata a mensalidade deles e zera o percentual). Fee fixo por pedido destinado à plataforma fica **proibido**: comissão zero é inegociável, taxa por pedido nem fixa (princípio nº2).
+
+**Meta de conversão (50 Fundadores, mix 70/30):** 100% = R$4.245/mês · 60% = R$2.547 · 40% = R$1.698 · 20% = R$849.
 
 **A brecha (argumento interno):** ninguém em escala oferece comissão zero incondicional + permanente + demanda agregada. A 99 condicionou a paridade de preço e descontinuou; a Rappi tem prazo de 3 anos; white-label isola o lojista num app próprio sem vitrine. O VIP Fundador ocupa exatamente esse espaço — é defensável porque o modelo de receita dos grandes **não pode copiar** sem quebrar.
