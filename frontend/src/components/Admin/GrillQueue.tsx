@@ -3566,24 +3566,19 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#336886]">
                           Detalhe do pedido
                         </p>
-                        <h2 className="mt-1 min-w-0 text-[1.05rem] font-black leading-tight tracking-[-0.035em] text-slate-950 [overflow-wrap:anywhere]" title={resolveLocationIdentifier(selectedOrder || {}) || 'Detalhes do pedido'}>
-                          {(() => {
-                            const drawerLocation = resolveLocationIdentifier(selectedOrder || {});
-                            const drawerMesa = parseMesaIdentifier(drawerLocation);
-                            if (!drawerLocation) return 'Detalhes do pedido';
-                            if (!drawerMesa.isMesa) return `Pedido ${drawerLocation}`;
-                            return (
-                              <span className="inline-flex items-center gap-1.5">
-                                <span>Pedido</span>
-                                <span className="rounded-full bg-[#FFF3E0] px-2 py-0.5 text-[10px] font-black tracking-[0.08em] text-[#E65100]">MESA</span>
-                                <span className="text-lg font-black text-[#E65100] leading-none">{drawerMesa.number}</span>
-                              </span>
-                            );
-                          })()}
+                        <h2 className="mt-1 min-w-0 text-[1.05rem] font-black leading-tight tracking-[-0.035em] text-slate-950 [overflow-wrap:anywhere]">
+                          {(selectedOrder?.customerName || selectedOrder?.name || '').trim() || 'Detalhes do pedido'}
                         </h2>
                         {selectedOrder ? (
-                          <p className="mt-1 text-[11px] font-bold text-slate-500">
-                            #{formatOrderDisplayId(selectedOrder.id, storeSlug)} · {formatOrderType(selectedOrder.type)} · {formatCurrency(Number(selectedOrder.total || 0))}
+                          <p className="mt-1 min-w-0 text-[11px] font-bold text-slate-500 [overflow-wrap:anywhere]">
+                            {(() => {
+                              const drawerLocation = resolveLocationIdentifier(selectedOrder);
+                              const drawerMesa = parseMesaIdentifier(drawerLocation);
+                              const locLabel = drawerMesa.isMesa
+                                ? `Mesa ${drawerMesa.number}`
+                                : String(drawerLocation || '').trim() || formatOrderType(selectedOrder.type);
+                              return `#${formatOrderDisplayId(selectedOrder.id, storeSlug)} · ${locLabel} · ${formatCurrency(Number(selectedOrder.total || 0))}`;
+                            })()}
                           </p>
                         ) : null}
                       </div>
@@ -3636,22 +3631,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             const drawerIsCondo = isCondominiumOrder(order);
             const drawerTypeMeta = orderTypeMeta(order);
             const drawerStatusMeta = getStatusStyles(order.status, order.type, order);
-            const drawerDisplayLabel = formatOrderDisplayId(order.id, storeSlug);
             const drawerPaymentMeta = getPaymentMethodMeta(order.payment);
             const drawerItemsCount = (Array.isArray(order?.items) ? order.items : []).reduce(
               (sum: number, item: any) => sum + Number(item?.qty || 0),
               0
             );
-            const drawerCardLocationIdentifier = drawerIsCondo ? resolveCondominiumCardIdentifier(order) : drawerLocationIdentifier;
-            const drawerHasLocationIdentifier = Boolean(drawerCardLocationIdentifier);
-            const drawerMesaMeta = parseMesaIdentifier(drawerCardLocationIdentifier);
-            const drawerIsMesaLocation = drawerMesaMeta.isMesa;
-            const drawerLocationLine = drawerIsCondo ? String(drawerLocationIdentifier || '').trim() : drawerCardLocationIdentifier;
-            const drawerLocationBadgeTone = drawerIsMesaLocation
-              ? 'bg-[#FFF3E0] text-[#E65100] border-[#E65100]'
-              : drawerIsCondo
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                : 'bg-slate-100 text-slate-900 border-slate-200';
+            const drawerHasLocationIdentifier = Boolean(drawerLocationIdentifier);
             const drawerShowTypeInMeta = !drawerHasLocationIdentifier && Boolean(drawerTypeMeta?.label);
             const drawerPaymentStatus = String(order.paymentStatus || '').toUpperCase();
             const drawerItemGroups = buildVisualOrderItemGroups(order.id, order.items || []);
@@ -3704,43 +3689,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   </div>
 
                   <div className="min-w-0">
-                    {drawerHasLocationIdentifier && (
-                      <div
-                        className={`mb-2.5 inline-flex max-w-full items-start gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold shadow-sm ${drawerLocationBadgeTone}`}
-                        title={drawerLocationIdentifier || drawerCardLocationIdentifier}
-                      >
-                        {drawerIsMesaLocation ? (
-                          <>
-                            <Monitor size={14} weight="duotone" className="mt-0.5 shrink-0" />
-                            <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.14em]">Mesa</span>
-                            <span className="text-sm font-black leading-none">{drawerMesaMeta.number}</span>
-                          </>
-                        ) : (
-                          <>
-                            {drawerIsCondo ? <Buildings size={14} weight="duotone" className="mt-0.5 shrink-0" /> : order.type === 'delivery' ? <Truck size={14} weight="duotone" className="mt-0.5 shrink-0" /> : <Storefront size={14} weight="duotone" className="mt-0.5 shrink-0" />}
-                            <span className="min-w-0 leading-snug [overflow-wrap:anywhere]">
-                              {drawerLocationLine}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    )}
-
+                    {/* Local, código e cliente vivem no header do drawer — aqui só a
+                        data (única fonte). Sem pill de mesa/código repetida. */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black tracking-[0.08em] text-slate-600 shadow-sm">
-                        <Hash size={11} weight="duotone" className="shrink-0 text-slate-400" />
-                        <span className="truncate">{drawerDisplayLabel}</span>
-                      </span>
                       <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-semibold text-slate-500 shadow-sm whitespace-nowrap">
                         {formatDateTime(order.createdAt)}
                       </span>
                     </div>
 
-                    <h3 className="mt-2 text-[1.08rem] font-black leading-tight text-slate-900 truncate">
-                      {order.customerName || order.name || "Cliente"}
-                    </h3>
-
-                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500">
                       {drawerShowTypeInMeta ? (
                         <>
                           <span className="font-semibold text-slate-700">{drawerTypeMeta.label}</span>
@@ -3753,7 +3710,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         {drawerPaymentMeta.icon && (
                           <img
                             src={drawerPaymentMeta.icon}
-                            alt={drawerPaymentMeta.label}
+                            alt=""
+                            aria-hidden="true"
                             className="h-4 w-4 object-contain"
                           />
                         )}
@@ -3871,7 +3829,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       {itemImageUrl ? (
                             <img
                           src={resolveAssetUrl(itemImageUrl)}
-                          alt={group.name}
+                          alt=""
+                          aria-hidden="true"
                               className="w-full h-full object-cover"
                             />
                           ) : (

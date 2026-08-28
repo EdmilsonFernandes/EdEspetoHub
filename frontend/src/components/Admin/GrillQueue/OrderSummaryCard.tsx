@@ -157,7 +157,12 @@ export const OrderSummaryCard = ({
     const showReservationChip = orderType === 'reservation' && Boolean(reservationTimeLabel);
 
     // Endereço/linha completa do local: quebra (wrap-anywhere), nunca corta.
-    const showLocationLine = hasLocationIdentifier && !isMesaLocation;
+    // Pickup sem endereço real ("Retirada") não repete o label do header.
+    const showLocationLine = (() => {
+      if (!hasLocationIdentifier || isMesaLocation) return false;
+      const norm = (s: unknown) => String(s || '').trim().toLowerCase();
+      return norm(locationLine) !== norm(locationHeader?.label || '');
+    })();
 
     return (
       <div
