@@ -219,7 +219,7 @@ export const OrderSummaryCard = ({
               {locationHeader && (
                 <span className={`inline-flex min-w-0 items-center gap-1 text-[11px] font-bold uppercase tracking-[0.08em] ${locationHeader.tone}`}>
                   <locationHeader.icon size={13} weight="duotone" className="shrink-0" />
-                  <span className="truncate">{locationHeader.label}</span>
+                  <span className="shrink-0">{locationHeader.label}</span>
                 </span>
               )}
 
