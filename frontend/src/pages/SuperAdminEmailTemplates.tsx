@@ -31,7 +31,7 @@ const sampleValueFor = (name: string) => {
   if (key.includes('NAME')) return 'Edmilson';
   if (key.includes('URL') || key.includes('LINK')) return 'https://janocaminho.com.br';
   if (key.includes('CODE')) return key.includes('SPACED') ? '1 2 3 4' : '1234';
-  if (key.includes('AMOUNT')) return 'R$ 69,90';
+  if (key.includes('AMOUNT')) return 'R$ 89,90';
   if (key.includes('DAYS')) return '7';
   if (key.includes('STORE')) return 'Gustavão Espetos';
   if (key.includes('MOTOBOY')) return 'Carlos Entregas';

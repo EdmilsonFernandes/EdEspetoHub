@@ -26,6 +26,15 @@ import { PaymentRepository } from '../repositories/PaymentRepository';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { MercadoPagoService } from './MercadoPagoService';
+import { Plan } from '../entities/Plan';
+import { PlanName } from '../entities/Plan';
+import { Store } from '../entities/Store';
+import {
+  fromFounderPlanName,
+  isFounderPlanName,
+  isFounderStore,
+  toFounderPlanName,
+} from '../utils/founderPlans';
 /**
  * Provides SubscriptionService functionality.
  *
@@ -42,6 +51,27 @@ export class SubscriptionService {
   private mercadoPago = new MercadoPagoService();
   private log = logger.child({ scope: 'SubscriptionService' });
   private readonly pendingCooldownMs = 30 * 60 * 1000;
+
+  /**
+   * Resolve o plano cobrado considerando a condição fundador da loja:
+   * - loja fundadora + plano regular -> variante fundador (preço vitalício travado);
+   * - loja fundadora + plano fundador -> mantém;
+   * - loja não-fundadora + plano fundador -> SUB-004 (condição exclusiva da campanha).
+   */
+  private async resolvePlanForStore(store: Store, plan: Plan): Promise<Plan> {
+    const founderStore = isFounderStore(store);
+
+    if (!isFounderPlanName(plan.name)) {
+      if (!founderStore) return plan;
+      const founderName = toFounderPlanName(plan.name);
+      if (!founderName) return plan;
+      const founderPlan = await this.planRepository.findByName(founderName as PlanName);
+      return founderPlan && founderPlan.enabled ? founderPlan : plan;
+    }
+
+    if (founderStore) return plan;
+    throw new AppError('SUB-004', 400);
+  }
   /**
    * Creates data.
    *
@@ -67,12 +97,14 @@ export class SubscriptionService {
       throw new AppError('SUB-004', 400);
     }
 
+    const planForStore = await this.resolvePlanForStore(store, resolvedPlan);
+
     const now = input.startDate || new Date();
-    const endDate = input.endDate || this.addDays(now, resolvedPlan.durationDays);
+    const endDate = input.endDate || this.addDays(now, planForStore.durationDays);
 
     const subscription = this.subscriptionRepository.create({
       store,
-      plan: resolvedPlan,
+      plan: planForStore,
       startDate: now,
       endDate,
       status: input.status || 'ACTIVE',
@@ -171,6 +203,10 @@ export class SubscriptionService {
       plan = resolved;
     }
 
+    if (subscription.store) {
+      plan = await this.resolvePlanForStore(subscription.store, plan);
+    }
+
     const now = new Date();
     const baseDate = subscription.endDate > now ? subscription.endDate : now;
     subscription.startDate = now;
@@ -204,6 +240,8 @@ export class SubscriptionService {
       plan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
     if (!resolvedPlan || !resolvedPlan.enabled) throw new AppError('SUB-003', 400);
 
+    const planForStore = await this.resolvePlanForStore(store, resolvedPlan);
+
     const existingPending = await this.paymentRepository.findLatestPendingByStoreId(storeId);
     if (existingPending) {
       const createdAt = existingPending.createdAt ? new Date(existingPending.createdAt) : now;
@@ -232,7 +270,7 @@ export class SubscriptionService {
       const subscriptionRepo = manager.getRepository(Subscription);
       const subscription = subscriptionRepo.create({
         store,
-        plan: resolvedPlan,
+        plan: planForStore,
         startDate: now,
         endDate: now,
         status: 'PENDING',
@@ -245,7 +283,7 @@ export class SubscriptionService {
         user: store.owner,
         store,
         subscription,
-        plan: resolvedPlan,
+        plan: planForStore,
         method: paymentMethod,
       });
     });

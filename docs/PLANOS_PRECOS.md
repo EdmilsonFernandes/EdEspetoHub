@@ -50,15 +50,17 @@ Divisão atual documentada em `docs/user-guide.md` §6; colunas de Modo Balcão/
 
 Base: 35×69,90 + 15×119,90 = R$4.245.
 
-## Implementação (quando for a hora — NÃO executado)
+## Implementação (EXECUTADA — 28/08/2026)
 
-- Tabela `plans` já suporta via colunas existentes: `price` = tabela cheia, `promo_price` = preço Fundador.
-  - `basic_monthly`: price 69,90 → **89,90**; promo_price → **69,90**
-  - `pro_monthly`: price 119,90 → **149,90**; promo_price → **119,90**
-  - Anuais idem (price ×12; promo com 15% off).
-- Falta mecanismo para **limitar o promo_price às 50 Fundadores** (flag de campanha/contagem de assinaturas fundadoras) — decidir forma (coluna, feature flag ou janela de campanha) na implementação.
-- Linhas `premium_monthly`/`premium_yearly` estão `enabled=f` (legado) — manter desabilitadas.
-- Mudança de preço em linha já usada exige migration seguindo `backend/docs/MIGRATION_STANDARD.md` + registro em `index.ts` + atualização de `schema.sql`.
+Mecanismo escolhido: **planos fundador como rows próprias** (`founder_basic_monthly` 69,90 · `founder_pro_monthly` 119,90 · anuais derivados ×12/−15%), em vez de `promo_price` (que valeria para qualquer loja). Gate vitalício = `acquisitionAttribution.founderVipPromotion.applied` persistida no signup.
+
+- Migration `20260828_001_planos_fundador`: sobe tabela (89,90/149,90), insere rows fundador, ativa campanha (`founder_vip_enabled=true`, limit 50, days 90, `founder_vip_count_from` = momento da migration).
+- Contagem das 50 vagas: só lojas com `created_at >= founder_vip_count_from` — as lojas pré-campanha ficam fora.
+- Signup na campanha nasce com trial **no plano fundador** → renovação cobra o preço travado (trial de 90 dias = PRO liberado, como todo trial).
+- Guard no backend (`resolvePlanForStore`): fundador + plano regular → swap founder; não-fundador + plano founder → SUB-004.
+- `GET /stores/:storeId/plans` (autenticado): loja fundadora recebe as variantes founder (AdminRenewal mostra tabela riscada + preço fundador + badge "vitalício").
+- Upsert legado do boot (`runMigrations.ts`) atualizado com a tabela nova — sem isso ele reverteria os preços a cada restart.
+- `docs:schema` não foi regenerado: migration é data-only (sem mudança estrutural), o HTML documenta só estrutura.
 
 ## Dados que sustentam a decisão (produção, 28/08/2026)
 

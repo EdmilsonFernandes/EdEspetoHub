@@ -78,6 +78,13 @@ describe('Auth — Registro e Login', () => {
           label: 'Campanha fundador teste',
           days: 90,
         });
+
+        // O trial nasce no plano fundador: o preço travado vitalício vem do plano da assinatura
+        const planRows = await AppDataSource.query(
+          `SELECT p.name AS plan_name FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.store_id = $1 ORDER BY s.created_at DESC LIMIT 1`,
+          [res.body.store.id]
+        );
+        expect(planRows[0].plan_name).toBe('founder_basic_monthly');
       } finally {
         await AppDataSource.query(`DELETE FROM site_settings WHERE "key" = ANY($1)`, [keys]);
       }

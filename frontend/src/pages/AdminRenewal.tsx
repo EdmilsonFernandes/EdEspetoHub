@@ -13,6 +13,7 @@ import {
   getPlanName,
   resolveAnnualPromoTotal,
   resolveMonthlyEquivalent,
+  toFounderPlanName,
 } from '../constants/planCatalog';
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 
@@ -21,6 +22,8 @@ export function AdminRenewal() {
   const location = useLocation();
   const { auth } = useAuth();
   const [plans, setPlans] = useState([]);
+  const [founderPlans, setFounderPlans] = useState([]);
+  const [isFounder, setIsFounder] = useState(false);
   const [selectedTierKey, setSelectedTierKey] = useState<'basic' | 'pro'>('basic');
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [isAnnual, setIsAnnual] = useState(false);
@@ -70,8 +73,18 @@ export function AdminRenewal() {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const response = await planService.list();
-        setPlans(response || []);
+        // Loja autenticada enxerga suas variantes fundador (preço vitalício travado);
+        // sem loja na sessão, cai na listagem pública.
+        let response: any = null;
+        if (storeId) {
+          response = await planService.listForStore(storeId);
+        } else {
+          response = await planService.list();
+        }
+        const regular = Array.isArray(response) ? response : response?.plans || [];
+        setPlans(regular);
+        setFounderPlans(Array.isArray(response?.founderPlans) ? response.founderPlans : []);
+        setIsFounder(Boolean(response?.founder));
         const defaultTier =
           preferredTier && allowedTierKeys.includes(preferredTier)
             ? preferredTier
@@ -79,19 +92,33 @@ export function AdminRenewal() {
         setSelectedTierKey(defaultTier as 'basic' | 'pro');
       } catch (error) {
         console.error('Não foi possível carregar os planos', error);
+        try {
+          const fallback = await planService.list();
+          setPlans(fallback || []);
+        } catch {
+          /* sem planos, tela mostra indisponível */
+        }
       }
     };
 
     fetchPlans();
-  }, [allowedTierKeys, currentTier, preferredTier]);
+  }, [allowedTierKeys, currentTier, preferredTier, storeId]);
 
   const billingKey = 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
-  const plansByName = plans.reduce((acc, plan) => {
+  const useFounderPricing = isFounder && founderPlans.length > 0;
+  const planNameForTier = (tierKey: string) =>
+    useFounderPricing ? toFounderPlanName(tierKey, billingKey) : getPlanName(tierKey, billingKey);
+  const selectablePlans = useFounderPricing ? founderPlans : plans;
+  const plansByName = selectablePlans.reduce((acc, plan) => {
     acc[plan.name] = plan;
     return acc;
   }, {});
-  const selectedPlan = plansByName[getPlanName(selectedTierKey, billingKey)];
+  const regularPlansByName = plans.reduce((acc, plan) => {
+    acc[plan.name] = plan;
+    return acc;
+  }, {});
+  const selectedPlan = plansByName[planNameForTier(selectedTierKey)];
   const selectedPlanId = selectedPlan?.id || '';
   const selectedPlanDisplayValue = useMemo(() => {
     if (!selectedPlan) return null;
@@ -105,12 +132,13 @@ export function AdminRenewal() {
   }, [selectedPlan, billingKey]);
 
   useEffect(() => {
-    if (!plans.length) return;
-    if (!plansByName[getPlanName(selectedTierKey, billingKey)]?.id) {
-      const fallbackTier = (PLAN_TIERS.find((tier) => plansByName[getPlanName(tier.key, billingKey)]?.id)?.key || 'basic') as 'basic' | 'pro';
+    if (!selectablePlans.length) return;
+    if (!plansByName[planNameForTier(selectedTierKey)]?.id) {
+      const fallbackTier = (PLAN_TIERS.find((tier) => plansByName[planNameForTier(tier.key)]?.id)?.key || 'basic') as 'basic' | 'pro';
       setSelectedTierKey(fallbackTier);
     }
-  }, [billingKey, plans, plansByName, selectedTierKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [billingKey, founderPlans, plans, selectedTierKey]);
 
   const handleRenew = async () => {
     if (!storeId) return;
@@ -182,6 +210,11 @@ export function AdminRenewal() {
                   Trial ativo com recursos Pro liberados.
                 </p>
               ) : null}
+              {useFounderPricing ? (
+                <p className="mt-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2 inline-flex">
+                  Condição Fundador vitalícia: você paga o preço de lançamento para sempre.
+                </p>
+              ) : null}
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-[0_14px_26px_-22px_rgba(15,23,42,0.45)]">
               <p className="text-xs text-slate-500">Expiração</p>
@@ -209,8 +242,9 @@ export function AdminRenewal() {
                 .filter((tier) => allowedTierKeys.includes(tier.key))
                 .filter((tier) => (showOnlyProUpgrade ? tier.key === 'pro' : true))
                 .map((tier) => {
-                const planKey = getPlanName(tier.key, billingKey);
+                const planKey = planNameForTier(tier.key);
                 const plan = plansByName[planKey];
+                const tabelaPlan = useFounderPricing ? regularPlansByName[getPlanName(tier.key, billingKey)] : null;
                 const full = plan ? Number(plan.price) : null;
                 const promoFromApi = plan?.promoPrice != null ? Number(plan.promoPrice) : null;
                 const promo = billingKey === 'yearly'
@@ -245,9 +279,14 @@ export function AdminRenewal() {
                         MAIS POPULAR
                       </span>
                     )}
-                    {billing.savings && (
+                    {billing.savings && !useFounderPricing && (
                       <span className="absolute -top-3 left-4 bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full">
                         {billing.savings}
+                      </span>
+                    )}
+                    {useFounderPricing && (
+                      <span className="absolute -top-3 left-4 bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-full">
+                        FUNDADOR • vitalício
                       </span>
                     )}
                     <p className="text-sm uppercase font-semibold text-slate-500">{tier.label}</p>
@@ -259,6 +298,11 @@ export function AdminRenewal() {
                       <div className="mt-1">
                         <p className="text-xs text-slate-400 line-through">R$ {Number(full).toFixed(2)}</p>
                         <p className="text-2xl font-black text-slate-900">R$ {Number(displayPrice).toFixed(2)}</p>
+                      </div>
+                    ) : useFounderPricing && tabelaPlan ? (
+                      <div className="mt-1">
+                        <p className="text-xs text-slate-400 line-through">R$ {Number(tabelaPlan.price).toFixed(2)} na tabela</p>
+                        <p className="text-2xl font-black text-emerald-600">R$ {Number(displayPrice).toFixed(2)}</p>
                       </div>
                     ) : (
                       <p className="text-2xl font-black text-slate-900">R$ {Number(displayPrice).toFixed(2)}</p>

@@ -52,6 +52,13 @@ import { CustomerSecurityService } from './CustomerSecurityService';
 import { AuditNotificationService } from './AuditNotificationService';
 import { MfaService } from './MfaService';
 import { resolveFounderVipPromotion } from '../utils/founderVipPromotion';
+import { Repository } from 'typeorm';
+import { PlanService } from './PlanService';
+import {
+  fromFounderPlanName,
+  isFounderPlanName,
+  toFounderPlanName,
+} from '../utils/founderPlans';
 import { DestinationService } from './DestinationService';
 
 type MfaLoginOptions = {
@@ -129,6 +136,7 @@ export class AuthService
   private paymentRepository = new PaymentRepository();
   private subscriptionService = new SubscriptionService();
   private settingsService = new SettingsService();
+  private planService = new PlanService();
   private storeUserRepository = new StoreUserRepository();
   private securityService = new CustomerSecurityService();
   private auditNotificationService = new AuditNotificationService();
@@ -151,6 +159,40 @@ export class AuthService
       existingStoresCount,
       fallbackTrialDays,
     });
+  }
+
+  /**
+   * Resolve o plano do trial considerando a campanha fundador:
+   * - loja fundadora + plano regular -> variante fundador (o trial nasce no plano
+   *   fundador, então o preço travado vitalício emerge do plano da assinatura);
+   * - loja não-fundadora + plano fundador -> variante regular (defesa contra
+   *   planId fundador vazando do client quando a campanha não aplica).
+   */
+  private async resolveSignupPlanForPromotion(
+    planRepo: Repository<Plan>,
+    plan: Plan,
+    promotionApplies: boolean
+  ): Promise<Plan> {
+    if (promotionApplies) {
+      if (isFounderPlanName(plan.name)) return plan;
+      const founderName = toFounderPlanName(plan.name);
+      if (founderName) {
+        const founderPlan = await planRepo.findOne({ where: { name: founderName, enabled: true } });
+        if (founderPlan) return founderPlan;
+      }
+      return plan;
+    }
+
+    if (isFounderPlanName(plan.name)) {
+      const regularName = fromFounderPlanName(plan.name);
+      const regularPlan = regularName
+        ? await planRepo.findOne({ where: { name: regularName, enabled: true } })
+        : null;
+      if (regularPlan) return regularPlan;
+      throw new AppError('SUB-003', 400);
+    }
+
+    return plan;
   }
 
     /**
@@ -929,7 +971,8 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         normalizePostalZip((storePayload as any).postalOriginZip) ||
         extractPostalZipFromAddress(trimmedAddress);
       const baseTrialDays = await this.settingsService.getNumber('trial_days', env.trialDays);
-      const existingStoresCount = await storeRepo.count();
+      // Contagem da campanha fundador respeita founder_vip_count_from (lojas pré-campanha não ocupam vaga).
+      const existingStoresCount = await this.planService.countCampaignStores();
       const signupPromotion = await this.resolveStoreSignupPromotion(existingStoresCount, baseTrialDays);
       const attributionWithPromotion = signupPromotion.applies
         ? {
@@ -980,10 +1023,13 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         if (preferred) {
           resolvedPlanId = preferred.id;
         } else {
-          const fallback = await planRepo.findOne({
+          // Fallback mais barato nunca pode cair numa variante fundador (preço travado
+          // é exclusivo de loja fundadora).
+          const fallbackCandidates = await planRepo.find({
             where: { enabled: true },
             order: { price: 'ASC' },
           });
+          const fallback = fallbackCandidates.find((candidate) => !isFounderPlanName(candidate.name));
           resolvedPlanId = fallback?.id;
         }
       }
@@ -996,12 +1042,14 @@ private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
         throw new AppError('SUB-003', 400);
       }
 
+      const trialPlan = await this.resolveSignupPlanForPromotion(planRepo, plan, signupPromotion.applies);
+
       const now = new Date();
       const trialDays = signupPromotion.trialDays;
       const trialEnd = this.addDays(now, trialDays);
       const subscription = subscriptionRepo.create({
         store,
-        plan,
+        plan: trialPlan,
         startDate: now,
         endDate: trialEnd,
         status: 'TRIAL',

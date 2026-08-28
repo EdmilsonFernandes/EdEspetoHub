@@ -748,21 +748,28 @@ export async function runMigrations() {
     SET enabled = false
     WHERE name IN ('premium_monthly', 'premium_yearly');
   `);
+  // Tabela pública: Basic 89,90 / Pro 149,90 (migration 20260828_001_planos_fundador).
+  // Planos fundador: preço vitalício travado p/ lojas da campanha — os valores abaixo
+  // servem de pin (rede de segurança contra drift manual no banco).
   await AppDataSource.query(`
     INSERT INTO plans (name, display_name, price, promo_price, duration_days, enabled)
     VALUES
-      ('basic_monthly', 'Basic Mensal', 69.90, NULL, 30, true),
-      ('pro_monthly', 'Pro Mensal', 119.90, NULL, 30, true),
-      ('basic_yearly', 'Basic Anual', 838.80, 712.98, 365, true),
-      ('pro_yearly', 'Pro Anual', 1438.80, 1222.98, 365, true)
+      ('basic_monthly', 'Basic Mensal', 89.90, NULL, 30, true),
+      ('pro_monthly', 'Pro Mensal', 149.90, NULL, 30, true),
+      ('basic_yearly', 'Basic Anual', 1078.80, 916.98, 365, true),
+      ('pro_yearly', 'Pro Anual', 1798.80, 1528.98, 365, true),
+      ('founder_basic_monthly', 'Basic Mensal Fundador', 69.90, NULL, 30, true),
+      ('founder_pro_monthly', 'Pro Mensal Fundador', 119.90, NULL, 30, true),
+      ('founder_basic_yearly', 'Basic Anual Fundador', 838.80, 712.98, 365, true),
+      ('founder_pro_yearly', 'Pro Anual Fundador', 1438.80, 1222.98, 365, true)
     ON CONFLICT (name) DO UPDATE
     SET display_name = EXCLUDED.display_name,
         price = CASE
-          WHEN EXCLUDED.name IN ('basic_monthly', 'pro_monthly', 'basic_yearly', 'pro_yearly') THEN EXCLUDED.price
+          WHEN EXCLUDED.name IN ('basic_monthly', 'pro_monthly', 'basic_yearly', 'pro_yearly', 'founder_basic_monthly', 'founder_pro_monthly', 'founder_basic_yearly', 'founder_pro_yearly') THEN EXCLUDED.price
           ELSE plans.price
         END,
         promo_price = CASE
-          WHEN EXCLUDED.name IN ('basic_monthly', 'pro_monthly', 'basic_yearly', 'pro_yearly') THEN EXCLUDED.promo_price
+          WHEN EXCLUDED.name IN ('basic_monthly', 'pro_monthly', 'basic_yearly', 'pro_yearly', 'founder_basic_monthly', 'founder_pro_monthly', 'founder_basic_yearly', 'founder_pro_yearly') THEN EXCLUDED.promo_price
           ELSE plans.promo_price
         END,
         duration_days = EXCLUDED.duration_days,

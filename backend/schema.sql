@@ -326,11 +326,17 @@ CREATE TABLE IF NOT EXISTS plans (
 
 INSERT INTO plans (name, display_name, price, promo_price, duration_days, enabled)
 VALUES
-  ('basic_monthly', 'Basic Mensal', 69.90, NULL, 30, true),
-  ('pro_monthly', 'Pro Mensal', 119.90, NULL, 30, true),
+  ('basic_monthly', 'Basic Mensal', 89.90, NULL, 30, true),
+  ('pro_monthly', 'Pro Mensal', 149.90, NULL, 30, true),
   -- No anual: valor cheio = mensal * 12, promo_price = 15% de desconto.
-  ('basic_yearly', 'Basic Anual', 838.80, 712.98, 365, true),
-  ('pro_yearly', 'Pro Anual', 1438.80, 1222.98, 365, true)
+  ('basic_yearly', 'Basic Anual', 1078.80, 916.98, 365, true),
+  ('pro_yearly', 'Pro Anual', 1798.80, 1528.98, 365, true),
+  -- Planos fundador (campanha 50 primeiras lojas): preço vitalício travado,
+  -- restrito a lojas com attribution founderVipPromotion.
+  ('founder_basic_monthly', 'Basic Mensal Fundador', 69.90, NULL, 30, true),
+  ('founder_pro_monthly', 'Pro Mensal Fundador', 119.90, NULL, 30, true),
+  ('founder_basic_yearly', 'Basic Anual Fundador', 838.80, 712.98, 365, true),
+  ('founder_pro_yearly', 'Pro Anual Fundador', 1438.80, 1222.98, 365, true)
 ON CONFLICT (name) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS order_eta_estimates (
@@ -559,6 +565,16 @@ CREATE TABLE IF NOT EXISTS site_settings (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Campanha Fundador: 50 vagas de 90 dias para lojas criadas a partir da ativação
+-- (founder_vip_count_from; a migration 20260828_001 semeia o mesmo bloco em bases existentes).
+INSERT INTO site_settings (key, value)
+VALUES
+  ('founder_vip_enabled', 'true'),
+  ('founder_vip_store_limit', '50'),
+  ('founder_vip_days', '90'),
+  ('founder_vip_count_from', NOW()::text)
+ON CONFLICT (key) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS email_templates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

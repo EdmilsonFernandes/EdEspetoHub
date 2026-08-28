@@ -19,6 +19,13 @@ describe('planFeatures', () => {
       expect(resolvePlanTier('PRO')).toBe('pro');
     });
 
+    it('resolves founder variants by tier', () => {
+      expect(resolvePlanTier('founder_basic_monthly')).toBe('basic');
+      expect(resolvePlanTier('founder_basic_yearly')).toBe('basic');
+      expect(resolvePlanTier('founder_pro_monthly')).toBe('pro');
+      expect(resolvePlanTier('founder_pro_yearly')).toBe('pro');
+    });
+
     it('resolves vip tier', () => {
       expect(resolvePlanTier('VIP Anual')).toBe('vip');
     });

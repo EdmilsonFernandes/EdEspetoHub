@@ -46,8 +46,8 @@ export const BILLING_OPTIONS = {
     label: 'Mensal',
     period: '/mês',
     priceByTier: {
-      basic: 69.9,
-      pro: 119.9,
+      basic: 89.9,
+      pro: 149.9,
     },
   },
   yearly: {
@@ -55,11 +55,23 @@ export const BILLING_OPTIONS = {
     period: '/ano',
     savings: 'Economize 15%',
     priceByTier: {
-      basic: 838.8,
-      pro: 1438.8,
+      basic: 1078.8,
+      pro: 1798.8,
     },
   },
 };
+
+// Condição Fundador (campanha 50 primeiras lojas): preço vitalício travado.
+export const FOUNDER_PRICE_BY_TIER = {
+  basic: 69.9,
+  pro: 119.9,
+} as const;
+
+export const isFounderPlanName = (name?: string | null) =>
+  typeof name === 'string' && name.startsWith('founder_');
+
+export const toFounderPlanName = (tierKey: string, billing: 'monthly' | 'yearly') =>
+  `founder_${getPlanName(tierKey, billing)}`;
 
 export const getPlanName = (tierKey: string, billing: 'monthly' | 'yearly') =>
   `${tierKey}_${billing}`;

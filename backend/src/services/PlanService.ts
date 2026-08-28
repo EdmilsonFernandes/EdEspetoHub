@@ -11,6 +11,7 @@
  * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
+import { MoreThanOrEqual } from 'typeorm';
 import { PlanRepository } from '../repositories/PlanRepository';
 import { Plan, PlanName } from '../entities/Plan';
 import { AppDataSource } from '../config/database';
@@ -18,9 +19,16 @@ import { env } from '../config/env';
 import { Store } from '../entities/Store';
 import { SettingsService } from './SettingsService';
 import { resolveFounderVipPromotion } from '../utils/founderVipPromotion';
+import {
+  FOUNDER_BASIC_MONTHLY_DEFAULT,
+  FOUNDER_MONTHLY_SEEDS,
+  FOUNDER_PRO_MONTHLY_DEFAULT,
+  isFounderPlanName,
+  isFounderStore,
+} from '../utils/founderPlans';
 
-const BASIC_MONTHLY_DEFAULT = 69.9;
-const PRO_MONTHLY_DEFAULT = 119.9;
+const BASIC_MONTHLY_DEFAULT = 89.9;
+const PRO_MONTHLY_DEFAULT = 149.9;
 const YEARLY_DISCOUNT = 0.15;
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
@@ -51,20 +59,57 @@ export class PlanService {
    *
    * @author Edmilson Lopes
    */
-private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly' | 'pro_monthly', fallback: number) {
+private resolveMonthlyPrice(byName: Map<string, Plan>, planName: PlanName, fallback: number) {
     const existing = byName.get(planName);
     const value = Number((existing as any)?.price);
     return Number.isFinite(value) && value > 0 ? value : fallback;
   }
   /**
-   * Lists enabled.
+   * Lists enabled plans públicos (variantes fundador ficam fora da listagem geral).
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async listEnabled() {
     await this.ensureSeededPlans();
-    return this.planRepository.findEnabled();
+    const plans = await this.planRepository.findEnabled();
+    return plans.filter((plan) => !isFounderPlanName(plan.name));
+  }
+
+  /**
+   * Planos visíveis para uma loja específica: loja fundadora enxerga também as
+   * variantes fundador (preço vitalício travado) além da tabela pública.
+   */
+  async listForStore(storeId: string) {
+    await this.ensureSeededPlans();
+    const plans = await this.planRepository.findEnabled();
+    const store = await AppDataSource.getRepository(Store).findOne({
+      where: { id: storeId },
+      relations: ['settings'],
+    });
+    const founder = isFounderStore(store);
+    return {
+      founder,
+      plans: plans.filter((plan) => !isFounderPlanName(plan.name)),
+      founderPlans: founder ? plans.filter((plan) => isFounderPlanName(plan.name)) : [],
+    };
+  }
+
+  /**
+   * Contagem de lojas válida para a campanha fundador: quando founder_vip_count_from
+   * está definido, conta apenas lojas criadas a partir da ativação (as lojas pré-campanha
+   * não ocupam vaga nem recebem a condição).
+   */
+  async countCampaignStores() {
+    const countFromRaw = await this.settingsService.getValue('founder_vip_count_from');
+    const repo = AppDataSource.getRepository(Store);
+    if (countFromRaw) {
+      const countFrom = new Date(String(countFromRaw));
+      if (!Number.isNaN(countFrom.getTime())) {
+        return repo.count({ where: { createdAt: MoreThanOrEqual(countFrom) } });
+      }
+    }
+    return repo.count();
   }
 
   async getSignupPromotionStatus() {
@@ -74,7 +119,7 @@ private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly'
       this.settingsService.getValue('founder_vip_days'),
       this.settingsService.getValue('founder_vip_label'),
       this.settingsService.getNumber('trial_days', env.trialDays),
-      AppDataSource.getRepository(Store).count(),
+      this.countCampaignStores(),
     ]);
     const promotion = resolveFounderVipPromotion({
       enabledValue,
@@ -118,7 +163,8 @@ private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly'
     const byName = new Map(existing.map((plan) => [plan.name, plan]));
 
     // 1) Guarantee monthly plans exist, but NEVER overwrite monthly DB prices.
-    for (const seed of MONTHLY_SEEDS) {
+    // Variantes fundador seguem a mesma regra: preço vitalício definido uma vez, nunca regravado.
+    for (const seed of [...MONTHLY_SEEDS, ...FOUNDER_MONTHLY_SEEDS]) {
       const planExists = byName.get(seed.name);
       if (!planExists) {
         const plan = this.planRepository.create(seed as Plan);
@@ -142,6 +188,8 @@ private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly'
     // 2) Yearly is derived from current monthly DB prices (single source of truth).
     const basicMonthly = this.resolveMonthlyPrice(byName, 'basic_monthly', BASIC_MONTHLY_DEFAULT);
     const proMonthly = this.resolveMonthlyPrice(byName, 'pro_monthly', PRO_MONTHLY_DEFAULT);
+    const founderBasicMonthly = this.resolveMonthlyPrice(byName, 'founder_basic_monthly', FOUNDER_BASIC_MONTHLY_DEFAULT);
+    const founderProMonthly = this.resolveMonthlyPrice(byName, 'founder_pro_monthly', FOUNDER_PRO_MONTHLY_DEFAULT);
     const yearlySeeds: Array<Pick<Plan, 'name' | 'displayName' | 'price' | 'promoPrice' | 'durationDays' | 'enabled'>> = [
       {
         name: 'basic_yearly',
@@ -156,6 +204,22 @@ private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly'
         displayName: 'Pro Anual',
         price: yearlyFull(proMonthly),
         promoPrice: yearlyPromo(proMonthly),
+        durationDays: 365,
+        enabled: true,
+      },
+      {
+        name: 'founder_basic_yearly',
+        displayName: 'Basic Anual Fundador',
+        price: yearlyFull(founderBasicMonthly),
+        promoPrice: yearlyPromo(founderBasicMonthly),
+        durationDays: 365,
+        enabled: true,
+      },
+      {
+        name: 'founder_pro_yearly',
+        displayName: 'Pro Anual Fundador',
+        price: yearlyFull(founderProMonthly),
+        promoPrice: yearlyPromo(founderProMonthly),
         durationDays: 365,
         enabled: true,
       },

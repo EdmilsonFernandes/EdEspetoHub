@@ -18,6 +18,10 @@ export type PlanName =
   | 'pro_monthly'
   | 'basic_yearly'
   | 'pro_yearly'
+  | 'founder_basic_monthly'
+  | 'founder_pro_monthly'
+  | 'founder_basic_yearly'
+  | 'founder_pro_yearly'
   | 'monthly'
   | 'yearly'
   | string;

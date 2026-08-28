@@ -47,3 +47,28 @@ describe('SubscriptionService — resolveStatus', () => {
     expect(resolveStatus(sub({ endDate }))).toBe('ACTIVE');
   });
 });
+
+describe('SubscriptionService — resolvePlanForStore', () => {
+  const resolvePlanForStore = (service as any).resolvePlanForStore.bind(service);
+  const plan = (name: string) => ({ name, enabled: true }) as any;
+  const founderStore = {
+    settings: { acquisitionAttribution: { founderVipPromotion: { applied: true } } },
+  } as any;
+  const regularStore = { settings: {} } as any;
+
+  it('loja não-fundadora mantém plano regular', async () => {
+    const basic = plan('basic_monthly');
+    await expect(resolvePlanForStore(regularStore, basic)).resolves.toBe(basic);
+  });
+
+  it('loja não-fundadora não pode assinar plano fundador (SUB-004)', async () => {
+    await expect(resolvePlanForStore(regularStore, plan('founder_pro_monthly'))).rejects.toMatchObject({
+      code: 'SUB-004',
+    });
+  });
+
+  it('loja fundadora mantém plano fundador', async () => {
+    const founderPlan = plan('founder_basic_monthly');
+    await expect(resolvePlanForStore(founderStore, founderPlan)).resolves.toBe(founderPlan);
+  });
+});

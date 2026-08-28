@@ -15,6 +15,7 @@ import { Request, Response } from 'express';
 import { PlanService } from '../services/PlanService';
 import { logger } from '../utils/logger';
 import { respondWithError } from '../errors/respondWithError';
+import { AppError } from '../errors/AppError';
 
 const planService = new PlanService();
 const log = logger.child({ scope: 'PlanController' });
@@ -49,6 +50,25 @@ export class PlanController {
       return res.json(promotion);
     } catch (error: any) {
       log.warn('Signup promotion failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Planos visíveis para a loja autenticada: loja fundadora recebe também as
+   * variantes fundador (preço vitalício travado) além da tabela pública.
+   */
+  static async listForStore(req: Request, res: Response) {
+    try {
+      const storeId = req.params.storeId;
+      const authStoreId = (req as any).auth?.storeId;
+      if (authStoreId && authStoreId !== storeId) {
+        throw new AppError('AUTH-003', 403);
+      }
+      const result = await planService.listForStore(storeId);
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Plan list for store failed', { storeId: req.params.storeId, error });
       return respondWithError(req, res, error, 400);
     }
   }

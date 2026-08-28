@@ -111,7 +111,7 @@ export function PricingSection() {
       </div>
 
       <p className="mx-auto mt-8 max-w-xl text-center text-[11px] font-semibold text-slate-500">
-        Sem cartão no cadastro · 3 meses VIP grátis para as primeiras lojas · Cancele quando quiser
+        Sem cartão no cadastro · 3 meses VIP grátis + preço de lançamento vitalício para os 50 primeiros fundadores · Cancele quando quiser
       </p>
     </section>
   );
