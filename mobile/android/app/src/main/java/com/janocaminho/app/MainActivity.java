@@ -418,6 +418,9 @@ public class MainActivity extends BridgeActivity {
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     super.onPageFinished(view, url);
+                    // Error page do Chromium também dispara onPageFinished: sem o
+                    // guard, marcaria a página de erro como app pronto.
+                    if (pageFailedToLoad) return;
                     String trustedUrl = normalizeTrustedWebUrl(url);
                     if (trustedUrl != null) {
                         mainFrameLoadInProgress = false;
@@ -454,7 +457,9 @@ public class MainActivity extends BridgeActivity {
                     if (normalizeTrustedWebUrl(failingUrl) == null) return;
 
                     int statusCode = errorResponse == null ? 0 : errorResponse.getStatusCode();
-                    if (statusCode >= 500) {
+                    // >= 400 (não só 5xx): janela de deploy pode 404 o index —
+                    // recovery com retry resolve assim que o deploy assenta.
+                    if (statusCode >= 400) {
                         mainFrameLoadInProgress = false;
                         pageFailedToLoad = true;
                         webAppReady = false;
@@ -490,6 +495,10 @@ public class MainActivity extends BridgeActivity {
                 public void onPageCommitVisible(WebView view, String url) {
                     super.onPageCommitVisible(view, url);
                     if (normalizeTrustedWebUrl(url) == null) return;
+                    // Error page do Chromium commita visível com a URL original do
+                    // request (que é trusted). Sem este guard ela dismissava o
+                    // overlay de recovery e deixava o ERR_TIMED_OUT em tela cheia.
+                    if (pageFailedToLoad) return;
                     mainFrameLoadInProgress = false;
                     pageFailedToLoad = false;
                     webAppReady = true;
