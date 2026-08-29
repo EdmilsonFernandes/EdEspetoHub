@@ -122,8 +122,10 @@ Instaladas em `.claude/skills/` (formato pasta `SKILL.md`, invocáveis via Skill
 ## Processo SDD — janocaminho-sdd
 
 Desenvolvimento Spec-Driven adaptado à realidade do projeto (sem Jira/PMO — regras em
-`.ai/sdd/referencia-janocaminho.md`). Usar quando uma feature merecer spec → design → tarefas
-→ implementação → verificação antes do código (mudança grande, arriscada, ou quando pedido):
+`.ai/sdd/referencia-janocaminho.md`; princípios inegociáveis em
+[`constitution.md`](constitution.md) na raiz, que prevalece). Usar quando uma feature merecer
+spec → design → tarefas → implementação → verificação antes do código (mudança grande,
+arriscada, ou quando pedido):
 
 - `sdd-constitution` (Fase 0 — análise do projeto + `constitution.md`)
 - `sdd-specify` (G1 — `specs/<feature>/requirements.md` em EARS)
