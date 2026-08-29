@@ -72,6 +72,17 @@ export class BalcaoChargeService {
     if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
   }
 
+  /**
+   * MP devolve o QR em base64 CRU (sem prefixo data:) — sem isso o <img> quebra
+   * e o lojista vê "QR Code Pix" no lugar da imagem (bug de prod 29/08, o
+   * "pix não gera QR"). Mesma normalização do checkout (OrderPaymentService).
+   */
+  private normalizeQrCode(qrCode?: string | null) {
+    if (!qrCode) return null;
+    if (qrCode.startsWith('data:image')) return qrCode;
+    return `data:image/png;base64,${qrCode}`;
+  }
+
   /** REQ-16: número, > 0, no máximo 2 casas decimais. */
   private normalizeAmount(raw: unknown): number | null {
     return normalizeChargeAmount(raw);
@@ -102,7 +113,8 @@ export class BalcaoChargeService {
       amount: Number(row.amount),
       terminalId: row.terminalId || null,
       qrCodeText: row.qrCodeText || null,
-      qrCodeBase64: row.qrCodeBase64 || null,
+      // defensivo: linhas antigas salvaram base64 cru → normaliza na saída
+      qrCodeBase64: this.normalizeQrCode(row.qrCodeBase64),
       expiresAt: row.expiresAt || null,
     };
   }
@@ -290,7 +302,7 @@ export class BalcaoChargeService {
         },
       });
       row.providerId = mpPayment?.providerId ? String(mpPayment.providerId) : null;
-      row.qrCodeBase64 = mpPayment?.qrCodeBase64 || null;
+      row.qrCodeBase64 = this.normalizeQrCode(mpPayment?.qrCodeBase64);
       row.qrCodeText = mpPayment?.qrCodeText || null;
       row.paymentLink = mpPayment?.paymentLink || null;
       row = await this.repo.save(row);
