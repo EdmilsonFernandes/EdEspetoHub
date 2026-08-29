@@ -15,6 +15,7 @@ import {
 } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { buildPixPayload } from '../../utils/pixPayload';
+import QRCode from 'qrcode';
 
 /**
  * SDD cobranca-balcao — momento do pagamento no balcão (fila).
@@ -222,6 +223,27 @@ export function ChargeSheet({
     });
   }, [storePixKey, storeName, amountInput, payload, orderId]);
 
+  /** QR gerado LOCALMENTE (lib qrcode) — pagamento não depende de site externo
+   *  (qrserver.com quebrava o QR em prod 29/08). */
+  const [pixLojaQr, setPixLojaQr] = useState('');
+  useEffect(() => {
+    if (!pixLojaPayload) {
+      setPixLojaQr('');
+      return;
+    }
+    let alive = true;
+    QRCode.toDataURL(pixLojaPayload, { width: 440, margin: 1 })
+      .then((url) => {
+        if (alive) setPixLojaQr(url);
+      })
+      .catch(() => {
+        if (alive) setPixLojaQr('');
+      });
+    return () => {
+      alive = false;
+    };
+  }, [pixLojaPayload]);
+
   const adjustedDelta = useMemo(() => {
     const amount = parseAmount();
     if (amount === null || !payload) return 0;
@@ -339,6 +361,7 @@ export function ChargeSheet({
   // (z-9999) — sem isso o drawer intercepta os cliques do sheet (bug achado no E2E).
   return createPortal(
     <BottomSheet
+      mobileCentered
       open={open}
       onClose={onClose}
       title={
@@ -500,18 +523,18 @@ export function ChargeSheet({
                 {methodButton(
                   'pix',
                   <QrCode weight="duotone" />,
-                  'Pix',
-                  caps?.pix === false ? 'conecte o MP' : 'QR na hora',
+                  'Pix MP',
+                  caps?.pix === false ? 'conecte o MP' : 'QR na hora · confirma sozinho',
                   Boolean(caps?.pix)
                 )}
                 {methodButton(
                   'point',
                   <CreditCard weight="duotone" />,
                   'Cartão',
-                  caps?.point === false ? 'conecte o MP' : 'na maquininha',
+                  caps?.point === false ? 'conecte o MP' : 'crédito/débito na maquininha',
                   Boolean(caps?.point)
                 )}
-                {methodButton('cash', <Money weight="duotone" />, 'Dinheiro', 'registrar', true)}
+                {methodButton('cash', <Money weight="duotone" />, 'Dinheiro', 'registrar recebimento', true)}
               </div>
 
               {pixLojaPayload ? (
@@ -521,7 +544,7 @@ export function ChargeSheet({
                   onClick={() => setPhase('pix-loja')}
                   className="jnc-ds-touch jnc-ds-focus-ring flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/60 px-3 py-2.5 text-xs font-black text-emerald-800 active:scale-[0.98]"
                 >
-                  <QrCode size={16} weight="duotone" /> Pix da chave da loja (confirmo na minha conta)
+                  <QrCode size={16} weight="duotone" /> Pix da loja (sua chave) — confirmo na tela
                 </button>
               ) : null}
               </>
@@ -623,11 +646,13 @@ export function ChargeSheet({
               <span className="rounded-xl bg-emerald-600 px-3 py-1 text-[11px] font-black text-white">MANUAL</span>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_18px_40px_-30px_rgba(5,150,105,0.7)]">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixLojaPayload)}`}
-                alt="QR Code Pix da loja"
-                className="h-56 w-56 object-contain"
-              />
+              {pixLojaQr ? (
+                <img src={pixLojaQr} alt="QR Code Pix da loja" className="h-56 w-56 object-contain" />
+              ) : (
+                <div className="flex h-56 w-56 items-center justify-center rounded-2xl bg-slate-50 text-xs font-bold text-slate-400">
+                  Gerando QR…
+                </div>
+              )}
             </div>
             <button
               type="button"
