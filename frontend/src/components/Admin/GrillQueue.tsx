@@ -4049,8 +4049,19 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           onClose={() => setChargeOrder(null)}
           storeId={String(auth?.store?.id || '')}
           order={chargeOrder}
-          onPaid={() => {
+          onPaid={(paidOrderId) => {
             loadQueue({ silent: true });
+            // Paradigma balcão (PO 29/08): pago = ciclo fechado. Pedido presencial
+            // pronto avança sozinho pra concluído — sem "confirmar retirada" extra.
+            // Online/delivery segue o fluxo antigo, intocado.
+            const paid = chargeOrder;
+            if (
+              paid &&
+              String(paid.type || '') !== 'delivery' &&
+              String(paid.status || '') === 'ready'
+            ) {
+              handleAdvance(paidOrderId, 'done').catch(() => {});
+            }
           }}
         />
       ) : null}

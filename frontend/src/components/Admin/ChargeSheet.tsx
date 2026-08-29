@@ -229,7 +229,8 @@ export function ChargeSheet({
         setError('Escolha a maquininha para enviar a cobrança.');
         return;
       }
-      setError(err?.message || 'Não foi possível criar a cobrança agora.');
+      // respondWithError põe texto amigável em details.message (message genérico)
+      setError(err?.details?.message || err?.message || 'Não foi possível criar a cobrança agora.');
       setPhase('choose');
     }
   };

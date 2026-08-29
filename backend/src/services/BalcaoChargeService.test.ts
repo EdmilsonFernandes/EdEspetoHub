@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { BALCAO_PRESELECT_MAP, normalizeChargeAmount } from './BalcaoChargeService';
+import { BALCAO_PRESELECT_MAP, normalizeChargeAmount, resolveBalcaoPixPayerEmail } from './BalcaoChargeService';
 
 /**
  * SDD cobranca-balcao — purezas do momento do pagamento no balcão.
@@ -41,5 +41,23 @@ describe('BALCAO_PRESELECT_MAP (design D7 — continuidade com o checkout)', () 
   it('método online desconhecido não pré-seleciona nada', () => {
     expect(BALCAO_PRESELECT_MAP['boleto'] || null).toBeNull();
     expect(BALCAO_PRESELECT_MAP[''] || null).toBeNull();
+  });
+});
+
+describe('resolveBalcaoPixPayerEmail (anti-4390 — self-pay proibido pelo MP)', () => {
+  const owner = 'dono@gustavao.com.br';
+
+  it('NUNCA devolve o e-mail do dono da loja — sem cliente, endereço neutro do pedido', () => {
+    const email = resolveBalcaoPixPayerEmail(null, owner, 'abc12345-xxxx');
+    expect(email).toBe('balcao-abc12345@pedidos.janocaminho.com.br');
+    expect(email).not.toContain(owner);
+  });
+
+  it('e-mail do dono como "cliente" também vira neutro (auto-pagamento bloqueado)', () => {
+    expect(resolveBalcaoPixPayerEmail(owner.toUpperCase(), owner, 'abc12345')).not.toContain(owner);
+  });
+
+  it('cliente real e diferente do dono é usado normalmente', () => {
+    expect(resolveBalcaoPixPayerEmail('cliente@email.com', owner, 'abc')).toBe('cliente@email.com');
   });
 });

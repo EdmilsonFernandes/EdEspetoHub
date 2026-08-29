@@ -34,6 +34,24 @@ export const normalizeChargeAmount = (raw: unknown): number | null => {
   return Math.round(value * 100) / 100;
 };
 
+/**
+ * E-mail do pagador do Pix no balcão (anti-4390 "Payer email forbidden"):
+ * o MP proíbe a conta cobradora de pagar a si mesma — pedido de balcão sem
+ * e-mail de cliente caía no e-mail do DONO da loja (= self-pay → 403).
+ * Nunca devolvemos o e-mail do dono; sem cliente válido, endereço neutro
+ * derivado do pedido. (Mesma lição do bug 4390 dos destaques — bd9f52c5.)
+ */
+export const resolveBalcaoPixPayerEmail = (
+  customerEmail: unknown,
+  ownerEmail: unknown,
+  orderId: unknown
+): string => {
+  const customer = String(customerEmail || '').trim().toLowerCase();
+  const owner = String(ownerEmail || '').trim().toLowerCase();
+  if (customer && customer !== owner) return customer;
+  return `balcao-${String(orderId || '').slice(0, 8)}@pedidos.janocaminho.com.br`;
+};
+
 export class BalcaoChargeService {
   private repo = AppDataSource.getRepository(OrderPayment);
   private orders = AppDataSource.getRepository(Order);
@@ -239,15 +257,15 @@ export class BalcaoChargeService {
           message: 'Conecte a conta Mercado Pago da loja antes de gerar Pix no balcão.',
         });
       }
-      const payerEmail = String(
-        (order as any)?.customerUser?.email || order.store?.owner?.email || ''
-      ).trim();
-      const payerName = String(order.customerName || order.store?.name || 'Cliente').trim();
-      if (!payerEmail) {
-        throw new AppError('PAY-018', 400, {
-          message: 'Não há e-mail de pagador para gerar o Pix — cadastre um responsável pela loja.',
-        });
-      }
+      // 4390 "Payer email forbidden": o MP proíbe a conta cobradora de pagar a si
+      // mesma. Pedido de balcão costuma cair no fallback do e-mail do DONO da loja
+      // (= self-pay → 403). Pagador do balcão é o cliente na frente do caixa, sem
+      // e-mail obrigatório — usamos endereço neutro derivado do pedido (nunca o
+      // e-mail do dono). Mesma lição do bug 4390 dos destaques (bd9f52c5).
+      const customerEmail = String((order as any)?.customerUser?.email || '').trim().toLowerCase();
+      const ownerEmail = String(order.store?.owner?.email || '').trim().toLowerCase();
+      const payerEmail = resolveBalcaoPixPayerEmail(customerEmail, ownerEmail, order.id);
+      const payerName = String(order.customerName || 'Cliente balcão').trim();
       const mpPayment: any = await this.mercadoPago.createPayment({
         amount: rawAmount,
         method: 'PIX',
