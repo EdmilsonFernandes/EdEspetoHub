@@ -450,11 +450,11 @@ export const orderService = {
   getChargeStatus: (storeId: string, orderId: string) =>
     apiClient.get(`/stores/${storeId}/orders/${orderId}/charge`),
 
-  /** Cria cobrança no balcão: { method: 'pix' | 'point' | 'cash', amount?, terminalId? }. */
+  /** Cria cobrança no balcão: { method: 'pix' | 'point' | 'cash' | 'pix_loja', amount?, terminalId? }. */
   createCharge: (
     storeId: string,
     orderId: string,
-    body: { method: 'pix' | 'point' | 'cash'; amount?: number; terminalId?: string }
+    body: { method: 'pix' | 'point' | 'cash' | 'pix_loja'; amount?: number; terminalId?: string }
   ) => apiClient.post(`/stores/${storeId}/orders/${orderId}/charge`, body),
 
   /** Encerra a cobrança pendente do balcão. */

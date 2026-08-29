@@ -14,6 +14,7 @@ import {
   ArrowsClockwise,
 } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
+import { buildPixPayload } from '../../utils/pixPayload';
 
 /**
  * SDD cobranca-balcao — momento do pagamento no balcão (fila).
@@ -42,7 +43,7 @@ type ChargeStatusPayload = {
 
 type Terminal = { id: string; serialNumber: string | null; integrationReady: boolean };
 
-type Phase = 'loading' | 'choose' | 'creating' | 'pix' | 'point' | 'cash-confirm' | 'paid' | 'expired';
+type Phase = 'loading' | 'choose' | 'creating' | 'pix' | 'point' | 'cash-confirm' | 'pix-loja' | 'paid' | 'expired';
 
 const formatBRL = (value: number) =>
   value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -58,12 +59,17 @@ export function ChargeSheet({
   storeId,
   order,
   onPaid,
+  storePixKey,
+  storeName,
 }: {
   open: boolean;
   onClose: () => void;
   storeId: string;
   order: any;
   onPaid?: (orderId: string) => void;
+  /** Chave Pix cadastrada pela própria loja (Pix sem integração — manual). */
+  storePixKey?: string | null;
+  storeName?: string | null;
 }) {
   const [phase, setPhase] = useState<Phase>('loading');
   const [payload, setPayload] = useState<ChargeStatusPayload | null>(null);
@@ -183,6 +189,18 @@ export function ChargeSheet({
     return `${mm}:${ss}`;
   }, [charge?.expiresAt, now]);
 
+  /** Pix sem integração: payload BR Code da chave da loja (reuso do fluxo antigo). */
+  const pixLojaPayload = useMemo(() => {
+    const key = String(storePixKey || '').trim();
+    if (!key) return '';
+    return buildPixPayload({
+      key,
+      name: String(storeName || 'Loja'),
+      amount: Number(parseAmount() ?? payload?.suggestedAmount ?? 0),
+      txid: orderId ? `PEDIDO${orderId.slice(0, 8)}` : 'PEDIDO',
+    });
+  }, [storePixKey, storeName, amountInput, payload, orderId]);
+
   const parseAmount = (): number | null => {
     const raw = String(amountInput || '').trim().replace(',', '.');
     const value = Number(raw);
@@ -197,7 +215,7 @@ export function ChargeSheet({
     return Math.round((amount - Number(payload.suggestedAmount)) * 100) / 100;
   }, [amountInput, payload]);
 
-  const createCharge = async (method: 'pix' | 'point' | 'cash', terminalId?: string) => {
+  const createCharge = async (method: 'pix' | 'point' | 'cash' | 'pix_loja', terminalId?: string) => {
     const amount = parseAmount();
     if (amount === null) {
       setError('Valor inválido — use um número maior que zero com até 2 casas decimais.');
@@ -350,7 +368,14 @@ export function ChargeSheet({
             <p className="text-xl font-black tracking-tight text-slate-900">Pago!</p>
             <p className="text-sm font-semibold text-slate-500">
               {formatBRL(Number(charge?.amount || amount || 0))} recebidos via{' '}
-              {charge?.method === 'pix' ? 'Pix' : charge?.method === 'point' ? 'maquininha' : 'dinheiro'}.
+              {charge?.method === 'pix'
+                ? 'Pix'
+                : charge?.method === 'point'
+                  ? 'maquininha'
+                  : charge?.method === 'pix_loja'
+                    ? 'Pix (chave da loja)'
+                    : 'dinheiro'}
+              .
             </p>
           </div>
         ) : null}
@@ -422,6 +447,7 @@ export function ChargeSheet({
             ) : null}
 
             {phase !== 'cash-confirm' ? (
+              <>
               <div className="flex gap-2.5">
                 {methodButton(
                   'pix',
@@ -439,6 +465,18 @@ export function ChargeSheet({
                 )}
                 {methodButton('cash', <Money weight="duotone" />, 'Dinheiro', 'registrar', true)}
               </div>
+
+              {pixLojaPayload ? (
+                <button
+                  type="button"
+                  disabled={!canCharge}
+                  onClick={() => setPhase('pix-loja')}
+                  className="jnc-ds-touch jnc-ds-focus-ring flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/60 px-3 py-2.5 text-xs font-black text-emerald-800 active:scale-[0.98]"
+                >
+                  <QrCode size={16} weight="duotone" /> Pix da chave da loja (confirmo na minha conta)
+                </button>
+              ) : null}
+              </>
             ) : null}
 
             {phase === 'cash-confirm' ? (
@@ -526,6 +564,40 @@ export function ChargeSheet({
               <p className="max-w-[260px] text-center text-[11px] font-semibold text-slate-400">
                 O cliente escolhe crédito, débito e parcelas no terminal.
               </p>
+            </div>
+          </div>
+        ) : null}
+
+        {phase === 'pix-loja' && pixLojaPayload ? (
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex w-full items-center justify-between rounded-2xl border border-emerald-200 bg-[linear-gradient(135deg,#ecfdf5,#d1fae5)] px-4 py-2.5">
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-emerald-800">Pix da chave da loja</p>
+              <span className="rounded-xl bg-emerald-600 px-3 py-1 text-[11px] font-black text-white">MANUAL</span>
+            </div>
+            <div className="rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_18px_40px_-30px_rgba(5,150,105,0.7)]">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixLojaPayload)}`}
+                alt="QR Code Pix da loja"
+                className="h-56 w-56 object-contain"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => navigator.clipboard.writeText(pixLojaPayload).catch(() => {})}
+              className="jnc-ds-touch jnc-ds-focus-ring flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 active:scale-[0.98]"
+            >
+              <CopySimple size={16} /> Copiar código Pix
+            </button>
+            <p className="text-center text-[11px] font-semibold text-slate-400">
+              Sem confirmação automática — confira a conta da loja e confirme o recebimento.
+            </p>
+            <div className="flex w-full gap-2">
+              <Button variant="secondary" size="md" className="flex-1" onClick={() => setPhase('choose')}>
+                Voltar
+              </Button>
+              <Button variant="primary" size="md" className="flex-1" onClick={() => createCharge('pix_loja')}>
+                Já recebi o Pix
+              </Button>
             </div>
           </div>
         ) : null}

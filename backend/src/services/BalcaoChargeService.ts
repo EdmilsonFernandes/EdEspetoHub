@@ -17,6 +17,12 @@ import { StorePaymentAccountService } from './StorePaymentAccountService';
 /** Minutos de validade da cobrança do balcão — REQ-5/REQ-11 (PO 28/08). */
 export const BALCAO_EXPIRY_MINUTES = 5;
 
+/** Métodos manuais (sem gateway): dinheiro e Pix da chave da loja — confirmados
+ *  pelo lojista, pagos na hora com auditoria (design D4 + plano PO 29/08). */
+export const BALCAO_MANUAL_METHODS = ['cash', 'pix_loja'] as const;
+export const isBalcaoManualMethod = (method: string) =>
+  (BALCAO_MANUAL_METHODS as readonly string[]).includes(String(method || ''));
+
 /** Método presencial escolhido no checkout pré-seleciona o sheet — design D7. */
 export const BALCAO_PRESELECT_MAP: Record<string, string> = {
   pix_loja: 'pix',
@@ -143,7 +149,7 @@ export class BalcaoChargeService {
   async createCharge(input: {
     storeId: string;
     orderId: string;
-    method: 'pix' | 'point' | 'cash';
+    method: 'pix' | 'point' | 'cash' | 'pix_loja';
     amount?: unknown;
     terminalId?: string | null;
     actorUserId?: string | null;
@@ -189,7 +195,7 @@ export class BalcaoChargeService {
         amount: rawAmount,
         paymentMethod: input.method,
         paymentStatus: 'PENDING',
-        provider: input.method === 'cash' ? 'MANUAL' : 'MERCADO_PAGO',
+        provider: isBalcaoManualMethod(input.method) ? 'MANUAL' : 'MERCADO_PAGO',
       });
     }
 
@@ -233,7 +239,7 @@ export class BalcaoChargeService {
     row.amount = rawAmount;
     row.paymentMethod = input.method;
     row.paymentStatus = 'PENDING';
-    row.provider = input.method === 'cash' ? 'MANUAL' : 'MERCADO_PAGO';
+    row.provider = isBalcaoManualMethod(input.method) ? 'MANUAL' : 'MERCADO_PAGO';
     row.paidAt = null;
     row.failedAt = null;
     row.providerOrderId = null;
@@ -329,7 +335,7 @@ export class BalcaoChargeService {
       row = await this.repo.save(row);
     }
 
-    if (input.method === 'cash') {
+    if (isBalcaoManualMethod(input.method)) {
       // REQ-12/13: registro manual imediato com trilha de auditoria.
       // Reusa a transição completa do webhook (idempotente): order.payment_status,
       // promoção awaiting_payment → pending (entra na fila), timeline e audit.
@@ -362,7 +368,7 @@ export class BalcaoChargeService {
     }
 
     await this.audit.record({
-      provider: input.method === 'cash' ? 'MANUAL' : 'MERCADO_PAGO',
+      provider: isBalcaoManualMethod(input.method) ? 'MANUAL' : 'MERCADO_PAGO',
       flowType: PAYMENT_AUDIT_FLOW.ORDER,
       eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
       entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,

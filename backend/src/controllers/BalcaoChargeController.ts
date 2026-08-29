@@ -30,12 +30,12 @@ export class BalcaoChargeController {
   static async createCharge(req: Request, res: Response) {
     try {
       const method = String(req.body?.method || '').toLowerCase();
-      if (!['pix', 'point', 'cash'].includes(method)) {
+      if (!['pix', 'point', 'cash', 'pix_loja'].includes(method)) {
         return respondWithError(
           req,
           res,
           new AppError('PAY-019', 400, {
-            message: 'Forma de recebimento inválida — use pix, point ou cash.',
+            message: 'Forma de recebimento inválida — use pix, point, cash ou pix_loja.',
           }),
           400
         );
@@ -43,7 +43,7 @@ export class BalcaoChargeController {
       const result = await service.createCharge({
         storeId: req.params.storeId,
         orderId: req.params.orderId,
-        method: method as 'pix' | 'point' | 'cash',
+        method: method as 'pix' | 'point' | 'cash' | 'pix_loja',
         amount: req.body?.amount,
         terminalId: req.body?.terminalId,
         actorUserId: req.auth?.sub || null,

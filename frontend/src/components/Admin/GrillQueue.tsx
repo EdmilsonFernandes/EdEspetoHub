@@ -4049,6 +4049,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           onClose={() => setChargeOrder(null)}
           storeId={String(auth?.store?.id || '')}
           order={chargeOrder}
+          storePixKey={storePixKey}
+          storeName={auth?.store?.name}
           onPaid={(paidOrderId) => {
             loadQueue({ silent: true });
             // Paradigma balcão (PO 29/08): pago = ciclo fechado. Pedido presencial
