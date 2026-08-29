@@ -10,9 +10,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { Hash, Storefront, Truck, ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, UsersThree, CheckSquare, SquaresFour, Rows, Printer, MapPin, Phone, MagnifyingGlass, DeviceMobileCamera } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
-import { useAdminNav } from '../navigation/useAdminNav';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
 import { ChargeSheet } from '../components/Admin/ChargeSheet';
 import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
@@ -24,10 +22,6 @@ export function AdminOrders() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isDesktopLayout, setIsDesktopLayout] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return window.matchMedia('(min-width: 1024px)').matches;
-  });
   const [orders, setOrders] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
   // Paginacao client-side do modo Cards — antes renderizava TODOS os pedidos
@@ -64,38 +58,7 @@ export function AdminOrders() {
   const [denyLoading, setDenyLoading] = useState(false);
   const [denyReason, setDenyReason] = useState('');
   const storeSlug = auth?.store?.slug;
-  const [sidebarCompact, setSidebarCompact] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const savedPreference = localStorage.getItem('adminSidebar:compact');
-    if (savedPreference === null) {
-      return window.matchMedia('(min-width: 1024px)').matches;
-    }
-    return savedPreference === 'true';
-  });
   const userRole = String(auth?.user?.role || '').toUpperCase();
-
-  useEffect(() => {
-    localStorage.setItem('adminSidebar:compact', String(sidebarCompact));
-  }, [sidebarCompact]);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const media = window.matchMedia('(min-width: 1024px)');
-    const onChange = () => setIsDesktopLayout(media.matches);
-    onChange();
-    if (media.addEventListener) {
-      media.addEventListener('change', onChange);
-      return () => media.removeEventListener('change', onChange);
-    }
-    media.addListener(onChange);
-    return () => media.removeListener(onChange);
-  }, []);
-  useEffect(() => {
-    if (!isDesktopLayout || !sidebarCompact) return;
-    setSidebarCompact(false);
-  }, [isDesktopLayout, sidebarCompact]);
-
-  // Fonte única de navegação (antes: desktopNavItems + handleNavSelect locais).
-  const { sidebarItems, selectItem, logout: navLogout } = useAdminNav({ activeIdOverride: 'pedidos' });
 
   useEffect(() => {
     if (!storeId && !storeSlug) return;
@@ -489,21 +452,8 @@ export function AdminOrders() {
   }
 
   return (
-    <AdminLayout contextLabel="Pedidos" showHeader={false} fluid>
-      <div
-        className={`w-full space-y-6 lg:space-y-0 lg:grid lg:items-start lg:gap-0 ${
-          sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
-        }`}
-      >
-        <AdminDesktopSidebar
-          items={sidebarItems}
-          activeId="pedidos"
-          compact={sidebarCompact}
-          onToggleCompact={() => setSidebarCompact((prev) => !prev)}
-          onSelect={selectItem}
-          onLogout={navLogout}
-        />
-        <div className="min-w-0 flex-1 space-y-6">
+    <AdminLayout contextLabel="Pedidos" showHeader={false} fluid withSidebar>
+      <div className="min-w-0 flex-1 space-y-6">
         <AdminHeader contextLabel="Pedidos" />
 
         <div className="rounded-[24px] border border-slate-100 bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,0.04)] relative z-20">
@@ -1083,7 +1033,6 @@ export function AdminOrders() {
 	              </table>
 	            </div>
 	          )}
-      </div>
       </div>
       </div>
       <PostalShipmentModal

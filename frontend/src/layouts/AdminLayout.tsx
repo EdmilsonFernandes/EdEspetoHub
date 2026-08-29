@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AdminHeader } from '../components/Admin/AdminHeader';
+import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +19,15 @@ interface AdminLayoutProps {
   contextLabel?: string;
   showHeader?: boolean;
   fluid?: boolean;
+  /** Renderiza sidebar desktop da loja. Default false = comportamento antigo
+   *  (páginas standalone/SuperAdmin); as 4 telas principais optam por true. */
+  withSidebar?: boolean;
+  /** Override do item ativo (dashboard usa a aba corrente). */
+  navActiveId?: string;
+  /** Seleção guardada pela página (dashboard: runOrConfirmDiscard). */
+  onNavSelect?: (id: string) => void;
+  /** Badges do sidebar (ex: solicitações de motoboy pendentes). */
+  navBadges?: { queueCount?: number; motoboysPending?: number };
 }
 
 export function AdminLayout({
@@ -25,6 +35,10 @@ export function AdminLayout({
   contextLabel = 'Painel',
   showHeader = true,
   fluid = false,
+  withSidebar = false,
+  navActiveId,
+  onNavSelect,
+  navBadges,
 }: AdminLayoutProps) {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
@@ -72,7 +86,44 @@ export function AdminLayout({
     activeItemId: activeMobileId,
     selectItem,
     logout: navLogout,
-  } = useAdminNav();
+  } = useAdminNav({ activeIdOverride: navActiveId, badges: navBadges });
+
+  // Chrome desktop centralizado (antes: grid 260/80px + sidebar + compact
+  // duplicados em Dashboard/Orders/Queue/Highlights). Keys preservadas.
+  const [sidebarCompact, setSidebarCompact] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const saved = localStorage.getItem('adminSidebar:compact');
+    if (saved === null) return window.matchMedia('(min-width: 1024px)').matches;
+    return saved === 'true';
+  });
+  const [isDesktopLayout, setIsDesktopLayout] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.matchMedia('(min-width: 1024px)').matches;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('adminSidebar:compact', String(sidebarCompact));
+  }, [sidebarCompact]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(min-width: 1024px)');
+    const onChange = () => setIsDesktopLayout(media.matches);
+    onChange();
+    if (media.addEventListener) {
+      media.addEventListener('change', onChange);
+      return () => media.removeEventListener('change', onChange);
+    }
+    media.addListener(onChange);
+    return () => media.removeListener(onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!isDesktopLayout || !sidebarCompact) return;
+    setSidebarCompact(false);
+  }, [isDesktopLayout, sidebarCompact]);
+
+  const handleSidebarSelect = onNavSelect || ((id: string) => selectItem(id));
 
   useEffect(() => {
     if (!mobileNavOpen) return;
@@ -159,7 +210,25 @@ export function AdminLayout({
         {showHeader && (
           <AdminHeader contextLabel={contextLabel} />
         )}
-        {children}
+        {withSidebar ? (
+          <div
+            className={`w-full min-w-0 lg:grid lg:items-start lg:gap-0 ${
+              sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
+            }`}
+          >
+            <AdminDesktopSidebar
+              items={mobileNavItems}
+              activeId={activeMobileId}
+              compact={sidebarCompact}
+              onToggleCompact={() => setSidebarCompact((prev) => !prev)}
+              onSelect={handleSidebarSelect}
+              onLogout={navLogout}
+            />
+            <div className="min-w-0 flex-1">{children}</div>
+          </div>
+        ) : (
+          children
+        )}
       </div>
       <AdminMobileBottomNav />
       {mobileNavOpen && (

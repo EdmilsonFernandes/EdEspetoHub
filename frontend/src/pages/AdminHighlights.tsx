@@ -21,8 +21,6 @@ import {
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
-import { useAdminNav } from '../navigation/useAdminNav';
-import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { productService } from '../services/productService';
@@ -822,25 +820,6 @@ export function AdminHighlights() {
   const userRole = String(auth?.user?.role || '').toUpperCase();
   const isOperatorUser = userRole === 'OPERATOR';
   const canViewTechnical = userRole === 'ADMIN';
-  const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
-  const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
-  const subscriptionStatus = String(auth?.subscription?.status || '').toUpperCase();
-  const canUseMotoboys = Boolean(
-    isVip ||
-      auth?.features?.motoboyManagement ||
-      subscriptionStatus === 'TRIAL' ||
-      planName.includes('pro') ||
-      planName.includes('vip')
-  );
-  const [sidebarCompact, setSidebarCompact] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const savedPreference = localStorage.getItem('adminSidebar:compact');
-    if (savedPreference === null) {
-      return window.matchMedia('(min-width: 1024px)').matches;
-    }
-    return savedPreference === 'true';
-  });
-
   const [products, setProducts] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -893,13 +872,6 @@ export function AdminHighlights() {
     paymentMethod: 'PIX' as 'PIX' | 'CREDIT_CARD',
     publicNote: '',
   });
-  // Fonte única de navegação (antes: navItems local com labels divergentes —
-  // "Visibilidade", "Minha assinatura", cardapio BookOpen...).
-  const { sidebarItems, selectItem, logout: navLogout } = useAdminNav({
-    activeIdOverride: 'destaques',
-    notify: (message, kind) => showToast(message, kind),
-  });
-
   const productOptions = useMemo(
     () =>
       (products || [])
@@ -1193,21 +1165,7 @@ export function AdminHighlights() {
   const selectedDays = DURATION_META[form.durationUnit]?.days || 1;
 
   return (
-    <AdminLayout contextLabel="Visibilidade" fluid>
-      <div
-        className={`w-full lg:grid lg:items-start lg:gap-0 ${
-          sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
-        }`}
-      >
-        <AdminDesktopSidebar
-          items={sidebarItems}
-          activeId="destaques"
-          compact={sidebarCompact}
-          onToggleCompact={() => setSidebarCompact((prev) => !prev)}
-          onSelect={selectItem}
-          onLogout={navLogout}
-        />
-
+    <AdminLayout contextLabel="Visibilidade" fluid withSidebar>
         <VisibilityShell
           activeTab={activeVisibilityTab}
           onTabChange={handleVisibilityTabChange}
@@ -1244,7 +1202,6 @@ export function AdminHighlights() {
             />
           )}
         </VisibilityShell>
-      </div>
 
       {paymentOpen && selectedRequest && (
         <div className="fixed inset-0 z-[320] bg-slate-950/55 backdrop-blur-[1px] flex items-end sm:items-center justify-center p-3">

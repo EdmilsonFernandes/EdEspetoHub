@@ -1,11 +1,12 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, Compass, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck, ShieldCheck, Printer, Stack, Sparkle, ChatCircle, ForkKnife, IdentificationCard, DeviceMobile, Ticket } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, Buildings, CheckSquare, ClipboardText, Clock, Compass, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree, PlugsConnected, CheckCircle, SealCheck, ShieldCheck, Printer, Stack, Sparkle, ChatCircle, ForkKnife, IdentificationCard, DeviceMobile, Ticket, DeviceMobileCamera, ArrowsClockwise } from '@phosphor-icons/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAdminNav } from '../navigation/useAdminNav';
+
 import { BrandingSettings } from '../components/Admin/BrandingSettings';
 import { StoreCondominiumPanel } from '../components/Admin/StoreCondominiumPanel';
 import { StoreDestinationPanel } from '../components/Admin/StoreDestinationPanel';
@@ -40,8 +41,6 @@ import { nativeBiometricService } from '../services/nativeBiometricService';
 import { FormSection } from '../components/common/FormSection';
 import { PremiumSelect } from '../components/common/PremiumSelect';
 import { AppRobotLoader } from '../components/common/AppRobotLoader';
-import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
-import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
 import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
 import { AccountMfaPanel } from '../components/Auth/AccountMfaPanel';
 import mercadoPagoLogo from '../assets/mercado-pago-logo.svg';
@@ -1803,18 +1802,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('adminHeader:visible') !== 'false';
   });
-  const [isDesktopLayout, setIsDesktopLayout] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return window.matchMedia('(min-width: 1024px)').matches;
-  });
-  const [sidebarCompact, setSidebarCompact] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const savedPreference = localStorage.getItem('adminSidebar:compact');
-    if (savedPreference === null) {
-      return window.matchMedia('(min-width: 1024px)').matches;
-    }
-    return savedPreference === 'true';
-  });
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState('');
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
@@ -1898,9 +1885,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const hookSidebarActiveId = !isOperatorUser && activeTab === 'config' ? `cfg-${configSection}` : activeTab;
   const {
     items: adminNavItems,
-    sidebarItems,
     selectItem: navSelectItem,
-    logout: navLogout,
   } = useAdminNav({
     activeIdOverride: hookSidebarActiveId,
     badges: { motoboysPending: pendingMotoboyRequests },
@@ -2803,15 +2788,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('adminSidebar:compact', String(sidebarCompact));
-  }, [sidebarCompact]);
-  useEffect(() => {
-    if (!isDesktopLayout || !sidebarCompact) return;
-    setSidebarCompact(false);
-  }, [isDesktopLayout, sidebarCompact]);
-
-  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const isShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k';
       if (!isShortcut) return;
@@ -3222,22 +3198,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const showBrandingSaveBar = activeTab === 'config' && (configSection === 'hub' || focusedBrandingSection);
 
   return (
-    <AdminLayout contextLabel="Painel da Loja" fluid>
-      <div
-        className={`w-full lg:grid lg:items-start lg:gap-0 ${
-          sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
-        }`}
-      >
-        <AdminDesktopSidebar
-          items={sidebarItems}
-          activeId={sidebarActiveId}
-          compact={sidebarCompact}
-          onToggleCompact={() => setSidebarCompact((prev) => !prev)}
-          onSelect={navSelectItem}
-          onLogout={navLogout}
-        />
-
-        <div className="min-w-0 space-y-4 flex-1">
+    <AdminLayout
+      contextLabel="Painel da Loja"
+      fluid
+      withSidebar
+      navActiveId={sidebarActiveId}
+      onNavSelect={navSelectItem}
+      navBadges={{ motoboysPending: pendingMotoboyRequests }}
+    >
+      <div className="min-w-0 space-y-4 flex-1">
       {isConfigDirty && (
         <div className="fixed top-2 left-1/2 z-[12500] -translate-x-1/2 w-[calc(100%-1rem)] max-w-3xl">
           <div className="rounded-2xl border border-amber-200 bg-amber-50/95 backdrop-blur px-4 py-2.5 shadow-[0_14px_32px_-24px_rgba(180,83,9,0.55)] flex items-center justify-between gap-3">
@@ -3823,7 +3792,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
         </div>
-      </div>
 
       {notificationsOpen && (
         <div className="fixed inset-0 z-[13000] bg-black/45 backdrop-blur-sm p-4 sm:p-6 flex items-center justify-center" onClick={() => setNotificationsOpen(false)}>
