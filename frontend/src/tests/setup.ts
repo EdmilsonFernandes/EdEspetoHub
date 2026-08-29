@@ -46,6 +46,7 @@ vi.mock('@phosphor-icons/react', () => {
     ListPlus: Icon,
     LockKey: Icon,
     MagnifyingGlass: Icon,
+    List: Icon,
     MapPinLine: Icon,
     MapTrifold: Icon,
     Minus: Icon,

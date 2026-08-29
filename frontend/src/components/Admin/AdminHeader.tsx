@@ -6,6 +6,7 @@ import {
   CaretDown,
   Crosshair,
   Key,
+  List,
   MapPinLine,
   ShieldCheck,
   SignOut,
@@ -489,7 +490,20 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
         </div>
       </div>
 
-      <div className="mt-2 md:hidden rounded-2xl border border-slate-200 bg-white px-3 sm:px-4 py-2.5 flex items-center justify-end gap-2 sm:gap-3">
+      <div className="mt-2 md:hidden rounded-2xl border border-slate-200 bg-white px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 sm:gap-3">
+        {/* ☰ abre o menu completo da operação (drawer principal) — antes o avatar
+            era o único botão nesta barra e, com a Conta enxuta, parecia que o
+            menu tinha sumido fora do dashboard (relato 29/08). */}
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent('admin:open-global-nav'))}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100 transition-colors"
+          title="Menu da operação"
+          aria-label="Abrir menu da operação"
+        >
+          <List size={18} weight="bold" />
+        </button>
+        <div className="flex items-center gap-2 sm:gap-3">
         <button
           type="button"
           onClick={() => navigate('/admin/dashboard', { state: { openNotifications: true } })}
@@ -513,6 +527,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
               <span className="text-[11px] font-black">{userInitials}</span>
             )}
           </button>
+        </div>
         </div>
       </div>
 
