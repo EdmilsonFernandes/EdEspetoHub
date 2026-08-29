@@ -173,7 +173,7 @@ export function AdminDesktopSidebar({
           <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition-all duration-200 ${
             isActive
               ? 'bg-white/12 text-white'
-              : 'border border-white/80 bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.88))] text-[#336886] shadow-[0_12px_22px_-20px_rgba(15,23,42,0.25)] group-hover:scale-105 group-hover:shadow-[0_14px_24px_-18px_rgba(15,23,42,0.35)]'
+              : 'border border-white/80 bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.88))] text-[#1b77ba] shadow-[0_12px_22px_-20px_rgba(15,23,42,0.25)] group-hover:scale-105 group-hover:shadow-[0_14px_24px_-18px_rgba(15,23,42,0.35)]'
           }`}>
             <Icon size={17} weight={isActive ? 'fill' : 'duotone'} />
           </span>
@@ -226,9 +226,7 @@ export function AdminDesktopSidebar({
       }`}
     >
       <div className="ds-admin-sidebar h-full overflow-hidden flex flex-col rounded-none shadow-none">
-        <div className={`px-3 pt-3 pb-2 flex items-center shrink-0 ${compact ? 'justify-center' : 'justify-start'}`}>
-          {!compact && <p className="px-2 ds-admin-sidebar-title">Navegação</p>}
-        </div>
+        <div className={`pt-3 pb-1 shrink-0 ${compact ? 'justify-center' : 'justify-start'}`} />
 
         <div className="space-y-1.5 min-h-0 flex-1 overflow-y-auto overflow-x-visible px-2 pb-2">
           {(!isGroupedMode || compact) &&
@@ -247,16 +245,16 @@ export function AdminDesktopSidebar({
             return (
               <div key={section.id} className="space-y-1">
                 {isSingleItem ? (
-                  <p className={`px-3 text-[11px] font-black uppercase tracking-[0.18em] ${hasActiveChild ? 'text-[#336886]' : 'text-slate-400'}`}>
+                  <p className={`px-3 text-[11px] font-semibold ${hasActiveChild ? 'text-[#1b77ba]' : 'text-slate-400'}`}>
                     {section.label}
                   </p>
                 ) : (
                   <button
                     type="button"
                     onClick={() => setOpenGroups((prev) => ({ ...prev, [section.id]: !isOpen }))}
-                    className={`w-full min-h-11 rounded-[1rem] border px-3 text-left text-[12px] font-black transition flex items-center justify-between ${
+                    className={`w-full min-h-11 rounded-[1rem] border px-3 text-left text-[12px] font-bold transition flex items-center justify-between ${
                       hasActiveChild
-                        ? 'border-[#336886]/12 bg-white/86 text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)]'
+                        ? 'border-[#2f9df7]/20 bg-white/86 text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)]'
                         : 'border-transparent bg-transparent text-slate-500 hover:border-white/80 hover:bg-white/80 hover:text-slate-950'
                     }`}
                     aria-expanded={isOpen}
@@ -271,7 +269,7 @@ export function AdminDesktopSidebar({
                   </button>
                 )}
                 {isOpen && (
-                  <div id={`sidebar-group-${section.id}`} className={`space-y-1 ${isSingleItem ? '' : 'ml-2 pl-2.5 border-l border-[#336886]/12'}`}>
+                  <div id={`sidebar-group-${section.id}`} className={`space-y-1 ${isSingleItem ? '' : 'ml-2 pl-2.5 border-l border-[#2f9df7]/20'}`}>
                     {section.children.map((child: SidebarItem) => renderNavItem(child, !isSingleItem))}
                   </div>
                 )}

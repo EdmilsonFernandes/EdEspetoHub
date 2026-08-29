@@ -477,6 +477,11 @@ export type AdminNavSection =
   | { type: 'group'; id: string; label: string; children: AdminNavItem[] }
   | { type: 'logout' };
 
+export type AdminNavGroupSection = Extract<AdminNavSection, { type: 'group' }>;
+
+export const isAdminNavGroupSection = (section: AdminNavSection): section is AdminNavGroupSection =>
+  section.type === 'group';
+
 const GROUP_ITEM_ORDER: Record<string, string[]> = {
   operacao: ['fila', 'pedidos', 'vendas', 'avaliacoes'],
   loja: ['produtos', 'estoque', 'cardapio'],

@@ -1,17 +1,15 @@
-// @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Bell, Buildings, CaretDown, ChartBar, ChatCircle, CheckSquare, ClipboardText, Clock, Compass, CreditCard, ForkKnife, Gear, IdentificationCard, LockKey, Package, PlugsConnected, Printer, ShieldCheck, ShoppingCart, SignOut, Scooter, Sparkle, Stack, Star, Storefront, Truck, UserCircle, X, UsersThree } from '@phosphor-icons/react';
+import { CaretDown, SignOut, UserCircle, X } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
-import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
-import { getAdminAccountItems, resolveCanUseMotoboys } from '../navigation/adminNavigation';
+import { hexToRgba } from '../utils/hexToRgba';
+import { getAdminAccountItems, isAdminNavGroupSection, type AdminNavGroupSection } from '../navigation/adminNavigation';
 import { useAdminNav } from '../navigation/useAdminNav';
 
 interface AdminLayoutProps {
@@ -40,21 +38,18 @@ export function AdminLayout({
   onNavSelect,
   navBadges,
 }: AdminLayoutProps) {
-  const { auth, logout } = useAuth();
-  const navigate = useNavigate();
+  const { auth } = useAuth();
   const location = useLocation();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [accountDrawerOpen, setAccountDrawerOpen] = useState(false);
   const [mobileOpenGroup, setMobileOpenGroup] = useState<string | null>(null);
   const userRole = String(auth?.user?.role || '').toUpperCase();
-  const isOperatorUser = userRole === 'OPERATOR';
   const operatorRoleLabel =
     userRole === 'ADMIN' || userRole === 'LOJISTA'
       ? 'Administrador da loja'
       : userRole === 'OPERATOR'
         ? 'Operador da loja'
         : 'Conta da operação';
-  const storeSlug = String(auth?.store?.slug || '').trim();
   const storeName = String(auth?.store?.name || 'Minha loja').trim() || 'Minha loja';
   const operatorName = String(auth?.user?.fullName || auth?.user?.name || '').trim();
   const storeEmail = String(auth?.user?.email || '').trim();
@@ -62,20 +57,11 @@ export function AdminLayout({
   const storeState = String(auth?.store?.settings?.state || '').trim().toUpperCase();
   const storeLocation = [storeCity, storeState].filter(Boolean).join(' · ');
   const storeLogo = resolveAssetUrl(String(auth?.store?.settings?.logoUrl || '')) || '';
-  const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
-  const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
-  const subscriptionStatus = String(auth?.subscription?.status || '').toUpperCase();
   const primaryColor = String(
     auth?.store?.settings?.primaryColor ||
     auth?.store?.settings?.primary_color ||
-    '#334155'
+    '#2f9df7'
   );
-  const hexToRgba = (hex: string, alpha: number) => {
-    const n = hex.replace('#', '');
-    if (!/^[0-9a-fA-F]{6}$/.test(n)) return `rgba(51,65,85,${alpha})`;
-    return `rgba(${parseInt(n.slice(0,2),16)},${parseInt(n.slice(2,4),16)},${parseInt(n.slice(4,6),16)},${alpha})`;
-  };
-  const canUseMotoboys = resolveCanUseMotoboys(auth);
 
   // Fonte única de navegação (antes: mobileNavItems + groupedMobileSections +
   // activeMobileId próprios, com cfg-operation/cfg-printer/cfg-permissions
@@ -128,9 +114,10 @@ export function AdminLayout({
   useEffect(() => {
     if (!mobileNavOpen) return;
     const activeGroup = groupedMobileSections.find(
-      (section: any) => section.type === 'group' && section.children.some((child: any) => child.id === activeMobileId)
+      (section): section is AdminNavGroupSection =>
+        isAdminNavGroupSection(section) && section.children.some((child) => child.id === activeMobileId)
     );
-    if (activeGroup?.id) setMobileOpenGroup(activeGroup.id);
+    if (activeGroup) setMobileOpenGroup(activeGroup.id);
   }, [mobileNavOpen, groupedMobileSections, activeMobileId]);
 
   useEffect(() => {
@@ -234,27 +221,24 @@ export function AdminLayout({
       {mobileNavOpen && (
         <div className="lg:hidden fixed inset-0 z-[9999] bg-slate-950/40 backdrop-blur-[2px]" onClick={() => setMobileNavOpen(false)}>
           <aside
-            className="h-full w-[85%] max-w-[360px] border-r border-white/[0.1] shadow-[4px_0_32px_rgba(15,23,42,0.5)] px-4 pb-4 flex flex-col"
-            style={{
-              paddingTop: 'calc(1rem + env(safe-area-inset-top))',
-              background: `linear-gradient(160deg, #1a3a52 0%, #153A4C 40%, #0f2535 100%)`,
-            }}
+            className="h-full w-[85%] max-w-[360px] border-r border-slate-200/90 bg-white shadow-[4px_0_32px_rgba(15,23,42,0.14)] px-4 pb-4 flex flex-col"
+            style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/[0.12]">
+            <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
               <div className="min-w-0 flex items-center gap-2.5">
-                <div className="h-8 w-8 shrink-0 overflow-hidden rounded-[0.6rem] border border-white/15 bg-white/10">
+                <div className="h-8 w-8 shrink-0 overflow-hidden rounded-[0.6rem] border border-slate-200 bg-slate-50">
                   <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-[0.22em] text-[#336886]/80 font-bold truncate">{auth?.store?.name || 'Painel'}</p>
-                  <p className="text-[13px] font-bold text-white truncate leading-tight">{auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Usuário'}</p>
+                  <p className="text-[11px] font-semibold text-slate-500 truncate">{auth?.store?.name || 'Painel'}</p>
+                  <p className="text-[15px] font-bold text-slate-900 truncate leading-tight">{auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Usuário'}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileNavOpen(false)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.15] bg-white/[0.1] text-slate-300 active:scale-95"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 active:scale-95 hover:bg-slate-100"
                 aria-label="Fechar menu"
               >
                 <X size={15} weight="bold" />
@@ -273,18 +257,18 @@ export function AdminLayout({
                       onClick={() => handleNavSelect(item.id)}
                       className={`w-full min-h-[44px] px-3 py-2.5 rounded-xl text-left text-[14px] font-medium flex items-center justify-between transition-all duration-150 active:scale-[0.98] ${
                         item.disabled
-                          ? 'bg-violet-500/[0.12] text-violet-300'
+                          ? 'bg-violet-500/[0.08] text-violet-600'
                           : isActive
-                          ? 'text-white font-semibold'
-                          : 'text-slate-300/80 hover:bg-white/[0.08] hover:text-white'
+                          ? 'text-slate-950 font-semibold'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                       }`}
-                      style={isActive && !item.disabled ? { backgroundColor: hexToRgba(primaryColor, 0.18) } : undefined}
+                      style={isActive && !item.disabled ? { backgroundColor: hexToRgba(primaryColor, 0.18, 'rgba(51,65,85,0.18)') } : undefined}
                     >
                       <span className="inline-flex items-center gap-2.5">
                         <Icon
                           size={15}
                           weight={isActive ? 'fill' : 'duotone'}
-                          className={`shrink-0 transition-colors ${item.disabled ? 'text-violet-400' : isActive ? '' : 'text-slate-500'}`}
+                          className={`shrink-0 transition-colors ${item.disabled ? 'text-violet-500' : isActive ? '' : 'text-slate-400'}`}
                           style={isActive && !item.disabled ? { color: primaryColor } : undefined}
                         />
                         {item.label}
@@ -300,8 +284,8 @@ export function AdminLayout({
                     <button
                       type="button"
                       onClick={() => setMobileOpenGroup((prev) => (prev === section.id ? null : section.id))}
-                      className={`w-full px-3 py-2 rounded-lg text-left text-[11px] font-black uppercase tracking-[0.14em] flex items-center justify-between transition-colors ${
-                        hasActiveChild ? 'text-white' : 'text-slate-400/70 hover:text-slate-200'
+                      className={`w-full px-3 py-2 rounded-lg text-left text-[11px] font-semibold flex items-center justify-between transition-colors ${
+                        hasActiveChild ? 'text-[#1b77ba]' : 'text-slate-400 hover:text-slate-600'
                       }`}
                       aria-expanded={isOpen}
                     >
@@ -309,7 +293,7 @@ export function AdminLayout({
                       <CaretDown size={12} weight="bold" className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {isOpen && (
-                      <div className="space-y-0.5 ml-1 pl-3 border-l border-white/[0.12]">
+                      <div className="space-y-0.5 ml-1 pl-3 border-l border-slate-200">
                         {section.children.map((item: any) => {
                           const Icon = item.icon;
                           const isActive = activeMobileId === item.id;
@@ -318,20 +302,20 @@ export function AdminLayout({
                               key={item.id}
                               type="button"
                               onClick={() => handleNavSelect(item.id)}
-                              className={`w-full min-h-[42px] px-3 py-2 rounded-xl text-left text-[14px] flex items-center justify-between transition-all duration-150 active:scale-[0.98] ${
+                              className={`w-full min-h-[44px] px-3 py-2 rounded-xl text-left text-[14px] flex items-center justify-between transition-all duration-150 active:scale-[0.98] ${
                                 item.disabled
-                                  ? 'bg-violet-500/[0.12] text-violet-300 font-medium'
+                                  ? 'bg-violet-500/[0.08] text-violet-600 font-medium'
                                   : isActive
-                                  ? 'text-white font-semibold'
-                                  : 'text-slate-300/80 hover:bg-white/[0.08] hover:text-white font-normal'
+                                  ? 'text-slate-950 font-semibold'
+                                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-normal'
                               }`}
-                              style={isActive && !item.disabled ? { backgroundColor: hexToRgba(primaryColor, 0.18) } : undefined}
+                              style={isActive && !item.disabled ? { backgroundColor: hexToRgba(primaryColor, 0.18, 'rgba(51,65,85,0.18)') } : undefined}
                             >
                               <span className="inline-flex items-center gap-2.5">
                                 <Icon
                                   size={13}
                                   weight={isActive ? 'fill' : 'duotone'}
-                                  className={`shrink-0 transition-colors ${item.disabled ? 'text-violet-400' : isActive ? '' : 'text-slate-500'}`}
+                                  className={`shrink-0 transition-colors ${item.disabled ? 'text-violet-500' : isActive ? '' : 'text-slate-400'}`}
                                   style={isActive && !item.disabled ? { color: primaryColor } : undefined}
                                 />
                                 {item.label}
@@ -352,12 +336,12 @@ export function AdminLayout({
                 setMobileNavOpen(false);
                 navLogout();
               }}
-              className="mt-3 w-full min-h-11 px-3 py-2.5 rounded-xl border border-rose-500/[0.22] bg-rose-500/[0.1] text-rose-400 text-sm font-semibold flex items-center justify-center gap-2 transition-colors hover:bg-rose-500/[0.16] active:scale-[0.98]"
+              className="mt-3 w-full min-h-11 px-3 py-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-semibold flex items-center justify-center gap-2 transition-colors hover:bg-rose-100 active:scale-[0.98]"
             >
               <SignOut size={15} weight="bold" />
               Sair
             </button>
-            <PlatformTrustFooter className="mt-3 pt-1 opacity-40" compact mode="minimal" />
+            <PlatformTrustFooter className="mt-3 pt-1 opacity-80" compact mode="minimal" />
           </aside>
         </div>
       )}

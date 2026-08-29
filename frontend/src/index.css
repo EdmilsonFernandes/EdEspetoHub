@@ -1397,19 +1397,11 @@ body {
     border-top: 0;
     border-bottom: 0;
     background:
-      radial-gradient(180px 180px at 0% 6%, rgba(51, 104, 134, 0.14), transparent 72%),
-      radial-gradient(220px 220px at 100% 18%, rgba(16, 185, 129, 0.16), transparent 74%),
+      radial-gradient(180px 180px at 0% 6%, rgba(47, 157, 247, 0.1), transparent 72%),
+      radial-gradient(220px 220px at 100% 18%, rgba(95, 211, 90, 0.08), transparent 74%),
       linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(248,250,252,0.985) 46%, rgba(241,248,248,0.98) 100%);
     box-shadow: 18px 0 46px -34px rgba(15, 23, 42, 0.38);
     backdrop-filter: blur(18px);
-  }
-
-  .ds-admin-sidebar-title {
-    color: rgba(51, 104, 134, 0.86);
-    font-size: 11px;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    font-weight: 900;
   }
 
   .ds-admin-sidebar-item {

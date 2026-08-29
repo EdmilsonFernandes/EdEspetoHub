@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChartBar, ChefHat, CurrencyDollar, DotsThreeCircle, Package, SignOut, UserCircle } from '@phosphor-icons/react';
+import { hexToRgba } from '../utils/hexToRgba';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
 import { loadAdminDashboardPage, loadAdminQueuePage, loadStorePage } from '../../utils/adminRoutePrefetch';
@@ -16,7 +17,7 @@ import {
   type SuperAdminNavigationItem,
 } from '../../navigation/superAdminNavigation';
 
-export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => void } = {}) {
+export function AdminMobileBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const { auth } = useAuth();
@@ -136,14 +137,6 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
     return luminance > 0.62 ? '#0f172a' : '#ffffff';
   };
 
-  const hexToRgba = (hexColor = '', alpha = 0.1, fallback = 'rgba(15,23,42,0.08)') => {
-    const normalized = String(hexColor || '').trim().replace('#', '');
-    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return fallback;
-    const r = parseInt(normalized.slice(0, 2), 16);
-    const g = parseInt(normalized.slice(2, 4), 16);
-    const b = parseInt(normalized.slice(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  };
 
   const activePillColor = hexToRgba(secondaryColor, 0.16, hexToRgba(primaryColor, 0.1));
   const activeTextColor = primaryColor;
@@ -328,10 +321,6 @@ export function AdminMobileBottomNav({ onOpenAccount }: { onOpenAccount?: () => 
       icon: UserCircle,
       active: false,
       onClick: () => {
-        if (typeof onOpenAccount === 'function') {
-          onOpenAccount();
-          return;
-        }
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('admin:open-account-drawer'));
         }

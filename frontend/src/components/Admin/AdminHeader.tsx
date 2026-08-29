@@ -3,14 +3,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bell,
-  ChevronDown,
-  KeyRound,
-  LogOut,
-  MapPin,
+  CaretDown,
+  Crosshair,
+  Key,
+  MapPinLine,
   ShieldCheck,
-  Store as StoreIcon,
-  Target,
-} from 'lucide-react';
+  SignOut,
+  Storefront,
+} from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -434,14 +434,14 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                   title="Trocar loja (em breve)"
                 >
                   <span className="truncate max-w-[480px]">{storeName}</span>
-                  <ChevronDown size={18} />
+                  <CaretDown size={18} />
                 </button>
                 <div className="mt-1 flex items-center gap-2 text-sm text-white/90">
-                  <MapPin size={14} className="shrink-0" />
+                  <MapPinLine size={14} className="shrink-0" />
                   <span className="truncate">{storeLocation}</span>
                 </div>
                 <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/20 border border-white/25 text-white text-xs px-2.5 py-1">
-                  <StoreIcon size={12} />
+                  <Storefront size={12} />
                   {storeSegment}
                 </div>
               </div>
@@ -480,7 +480,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
               <div className="min-w-0 pb-0.5">
                 <p className="truncate text-lg font-black text-white">{storeName}</p>
                 <div className="mt-0.5 flex items-center gap-1.5 text-xs text-white/90">
-                  <MapPin size={12} className="shrink-0" />
+                  <MapPinLine size={12} className="shrink-0" />
                   <span className="truncate">{storeLocation}</span>
                 </div>
               </div>
@@ -526,7 +526,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
           title="Modo foco"
           aria-label="Modo foco"
         >
-          <Target size={16} />
+          <Crosshair size={16} />
         </button>
 
         <button
@@ -547,7 +547,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
             aria-label="Abrir detalhes da assinatura"
           >
             {planLabel}
-            <ChevronDown size={12} />
+            <CaretDown size={12} />
           </button>
           {openPlanMenu && (
             <div className="absolute right-0 top-[calc(100%+10px)] w-64 rounded-lg border border-slate-100 bg-white shadow-lg p-3 z-[1200]">
@@ -591,7 +591,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
               )}
             </span>
             <span className="hidden lg:inline text-sm font-medium text-white">{userDisplay}</span>
-            <ChevronDown size={15} className="text-white/80" />
+            <CaretDown size={15} className="text-white/80" />
           </button>
 
           {openUserMenu && (
@@ -605,7 +605,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                   }}
                   className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
                 >
-                  <StoreIcon size={14} />
+                  <Storefront size={14} />
                   Minha vitrine
                 </button>
               ) : null}
@@ -617,7 +617,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                 }}
                 className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
               >
-                <KeyRound size={14} />
+                <Key size={14} />
                 Trocar senha
               </button>
               <button
@@ -641,7 +641,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                 }}
                 className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
               >
-                <LogOut size={14} />
+                <SignOut size={14} />
                 Sair
               </button>
             </div>
@@ -662,7 +662,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                 className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
                 aria-label="Fechar"
               >
-                <ChevronDown size={14} className="rotate-45" />
+                <CaretDown size={14} className="rotate-45" />
               </button>
             </div>
             <div className="p-4 space-y-3">

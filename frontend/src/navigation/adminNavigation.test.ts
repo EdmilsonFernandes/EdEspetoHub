@@ -71,6 +71,27 @@ describe('adminNavigation — inventário congelado', () => {
     expect(config?.action).toEqual({ type: 'config', section: 'printer' });
   });
 
+  it('isolamento por papel (regra de produto): operador NÃO vê item de lojista em nenhuma superfície', () => {
+    const lojistaOnly = [
+      'resumo', 'pedidos', 'avaliacoes', 'vendas', 'estoque', 'cupons',
+      'destaques', 'destinos', 'condominios', 'pagamentos', 'gateway',
+      'motoboys', 'usuarios', 'renewal',
+      'cfg-hub', 'cfg-profile', 'cfg-channels', 'cfg-delivery', 'cfg-ordering', 'cfg-hours', 'cfg-device',
+    ];
+    for (const surface of ['sidebar', 'drawer', 'bottom', 'palette', 'account'] as const) {
+      const operatorIds = getAdminNavItems({ role: OPERATOR, canUseMotoboys: true, surfaces: [surface] }).map((i) => i.id);
+      const vazamentos = operatorIds.filter((id) => lojistaOnly.includes(id));
+      expect(vazamentos, `superfície ${surface}`).toEqual([]);
+    }
+  });
+
+  it('lojista vê TODAS as opções de menu (regra de produto)', () => {
+    const lojistaIds = getAdminNavItems({ role: LOJISTA, canUseMotoboys: true }).map((i) => i.id);
+    for (const obrigatorio of ['resumo', 'fila', 'pedidos', 'avaliacoes', 'produtos', 'estoque', 'cardapio', 'destaques', 'cupons', 'destinos', 'condominios', 'pagamentos', 'gateway', 'motoboys', 'usuarios', 'config', 'cfg-hub', 'cfg-device']) {
+      expect(lojistaIds, `falta ${obrigatorio} pro lojista`).toContain(obrigatorio);
+    }
+  });
+
   it('bottom nav: lojista 5 destinos (fila, cardapio, vendas, resumo), operador mantém produtos', () => {
     const bottom = getAdminNavItems({ role: LOJISTA, canUseMotoboys: true, surfaces: ['bottom'] }).map((i) => i.id);
     expect(bottom).toEqual(['resumo', 'fila', 'vendas', 'produtos', 'cardapio']);
