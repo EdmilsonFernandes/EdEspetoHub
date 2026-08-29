@@ -21,6 +21,7 @@ import {
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
+import { useAdminNav } from '../navigation/useAdminNav';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -892,31 +893,12 @@ export function AdminHighlights() {
     paymentMethod: 'PIX' as 'PIX' | 'CREDIT_CARD',
     publicNote: '',
   });
-  const navItems = useMemo(
-    () =>
-      (isOperatorUser
-        ? [
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'cardapio', label: 'Loja Online', icon: Package },
-            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-          ]
-        : [
-            { id: 'resumo', label: 'Resumo', icon: ChartBar },
-            { id: 'pedidos', label: 'Histórico de Pedidos', icon: ClipboardText },
-            { id: 'avaliacoes', label: 'Avaliações', icon: Star },
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'estoque', label: 'Estoque', icon: Package },
-            { id: 'cardapio', label: 'Loja Online', icon: BookOpen },
-            { id: 'destaques', label: 'Visibilidade', icon: Star },
-            { id: 'pagamentos', label: 'Minha assinatura', icon: CreditCard },
-            { id: 'gateway', label: 'Pagamentos Online', icon: PlugsConnected },
-            { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
-            { id: 'usuarios', label: 'Usuários', icon: UsersThree },
-            { id: 'config', label: 'Configurações', icon: Gear },
-            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-          ]),
-    [canUseMotoboys, isOperatorUser]
-  );
+  // Fonte única de navegação (antes: navItems local com labels divergentes —
+  // "Visibilidade", "Minha assinatura", cardapio BookOpen...).
+  const { sidebarItems, selectItem, logout: navLogout } = useAdminNav({
+    activeIdOverride: 'destaques',
+    notify: (message, kind) => showToast(message, kind),
+  });
 
   const productOptions = useMemo(
     () =>
@@ -1209,36 +1191,6 @@ export function AdminHighlights() {
 
   const selectedPrice = Number(pricing?.prices?.[form.durationUnit] || 0);
   const selectedDays = DURATION_META[form.durationUnit]?.days || 1;
-  const handleNavSelect = (id: string) => {
-    if (id === 'destaques') {
-      if (typeof window !== 'undefined') sessionStorage.setItem('admin:activeTab', 'destaques');
-      return;
-    }
-    if (id === 'cardapio') {
-      if (storeSlug) navigate(`/${storeSlug}`);
-      return;
-    }
-    if (id === 'fila') {
-      navigate('/admin/queue');
-      return;
-    }
-    if (id === 'pedidos') {
-      navigate('/admin/orders');
-      return;
-    }
-    if (id === 'usuarios') {
-      if (typeof window !== 'undefined') sessionStorage.setItem('admin:activeTab', 'usuarios');
-      navigate('/admin/dashboard', { state: { activeTab: 'usuarios' } });
-      return;
-    }
-    if (id === 'motoboys' && !canUseMotoboys) {
-      showToast('Disponível no plano Pro. Faça o upgrade para liberar entregadores.', 'info');
-      navigate('/admin/renewal?focus=pro');
-      return;
-    }
-    if (typeof window !== 'undefined') sessionStorage.setItem('admin:activeTab', id);
-    navigate('/admin/dashboard', { state: { activeTab: id } });
-  };
 
   return (
     <AdminLayout contextLabel="Visibilidade" fluid>
@@ -1248,23 +1200,12 @@ export function AdminHighlights() {
         }`}
       >
         <AdminDesktopSidebar
-          items={navItems.map((item) => ({
-            id: item.id,
-            label: item.label,
-            icon: item.icon,
-            disabled: item.disabled,
-            badge: item.id === 'motoboys' && item.disabled ? 'Pro' : undefined,
-            tone: item.id === 'motoboys' && item.disabled ? 'violet' : 'default',
-          }))}
+          items={sidebarItems}
           activeId="destaques"
           compact={sidebarCompact}
           onToggleCompact={() => setSidebarCompact((prev) => !prev)}
-          onSelect={handleNavSelect}
-          onLogout={() => {
-            markManualLogoutRedirect('admin', '/hub');
-            logout();
-            navigate('/hub', { replace: true });
-          }}
+          onSelect={selectItem}
+          onLogout={navLogout}
         />
 
         <VisibilityShell

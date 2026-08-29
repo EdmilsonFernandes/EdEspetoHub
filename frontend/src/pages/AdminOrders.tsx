@@ -10,6 +10,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { Hash, Storefront, Truck, ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, UsersThree, CheckSquare, SquaresFour, Rows, Printer, MapPin, Phone, MagnifyingGlass, DeviceMobileCamera } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
+import { useAdminNav } from '../navigation/useAdminNav';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
@@ -72,17 +73,6 @@ export function AdminOrders() {
     return savedPreference === 'true';
   });
   const userRole = String(auth?.user?.role || '').toUpperCase();
-  const isOperatorUser = userRole === 'OPERATOR';
-  const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
-  const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
-  const subscriptionStatus = String(auth?.subscription?.status || '').toUpperCase();
-  const canUseMotoboys = Boolean(
-    isVip ||
-      auth?.features?.motoboyManagement ||
-      subscriptionStatus === 'TRIAL' ||
-      planName.includes('pro') ||
-      planName.includes('vip')
-  );
 
   useEffect(() => {
     localStorage.setItem('adminSidebar:compact', String(sidebarCompact));
@@ -104,50 +94,8 @@ export function AdminOrders() {
     setSidebarCompact(false);
   }, [isDesktopLayout, sidebarCompact]);
 
-  const desktopNavItems = useMemo(
-    () =>
-      (isOperatorUser
-        ? [
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'cardapio', label: 'Loja Online', icon: Package },
-            { id: 'config', label: 'Impressora', icon: Printer },
-            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-          ]
-        : [
-            { id: 'resumo', label: 'Resumo', icon: ChartBar },
-            { id: 'pedidos', label: 'Histórico de Pedidos', icon: ClipboardText },
-            { id: 'avaliacoes', label: 'Avaliações', icon: Star },
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'estoque', label: 'Estoque', icon: Package },
-            { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
-            { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
-            { id: 'usuarios', label: 'Usuários', icon: UsersThree },
-            { id: 'config', label: 'Configurações', icon: Gear },
-            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-            { id: 'cardapio', label: 'Loja Online', icon: Package },
-          ]),
-    [isOperatorUser, canUseMotoboys]
-  );
-
-  const handleNavSelect = (id: string) => {
-    if (id === 'cardapio') {
-      if (storeSlug) navigate(`/${storeSlug}`);
-      return;
-    }
-    if (id === 'fila') {
-      navigate('/admin/queue');
-      return;
-    }
-    if (id === 'pedidos') {
-      navigate('/admin/orders');
-      return;
-    }
-    if (id === 'motoboys' && !canUseMotoboys) {
-      navigate('/admin/renewal?focus=pro');
-      return;
-    }
-    navigate('/admin/dashboard', { state: { activeTab: id } });
-  };
+  // Fonte única de navegação (antes: desktopNavItems + handleNavSelect locais).
+  const { sidebarItems, selectItem, logout: navLogout } = useAdminNav({ activeIdOverride: 'pedidos' });
 
   useEffect(() => {
     if (!storeId && !storeSlug) return;
@@ -548,23 +496,12 @@ export function AdminOrders() {
         }`}
       >
         <AdminDesktopSidebar
-          items={desktopNavItems.map((item) => ({
-            id: item.id,
-            label: item.label,
-            icon: item.icon,
-            disabled: item.disabled,
-            badge: item.id === 'motoboys' && item.disabled ? 'Pro' : undefined,
-            tone: item.id === 'motoboys' && item.disabled ? 'violet' : 'default',
-          }))}
+          items={sidebarItems}
           activeId="pedidos"
           compact={sidebarCompact}
           onToggleCompact={() => setSidebarCompact((prev) => !prev)}
-          onSelect={handleNavSelect}
-          onLogout={() => {
-            markManualLogoutRedirect('admin', '/hub');
-            logout();
-            navigate('/hub', { replace: true });
-          }}
+          onSelect={selectItem}
+          onLogout={navLogout}
         />
         <div className="min-w-0 flex-1 space-y-6">
         <AdminHeader contextLabel="Pedidos" />

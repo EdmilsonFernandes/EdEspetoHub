@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
+import { useAdminNav } from '../navigation/useAdminNav';
 import { BrandingSettings } from '../components/Admin/BrandingSettings';
 import { StoreCondominiumPanel } from '../components/Admin/StoreCondominiumPanel';
 import { StoreDestinationPanel } from '../components/Admin/StoreDestinationPanel';
@@ -1890,56 +1891,24 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     setActiveTab('config');
   }, [isOperatorUser]);
 
-  const desktopTabItems = useMemo(
-    () =>
-      (isOperatorUser
-        ? [
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'cardapio', label: 'Loja Online', icon: Package },
-            { id: 'config', label: 'Impressora', icon: Printer },
-            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-          ]
-        : [
-            { id: 'resumo', label: 'Resumo', icon: ChartBar },
-            { id: 'pedidos', label: 'Histórico de Pedidos', icon: ClipboardText },
-            { id: 'avaliacoes', label: 'Avaliações', icon: Star },
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'estoque', label: 'Estoque', icon: Stack },
-            { id: 'destaques', label: 'Destaques', icon: Sparkle },
-            { id: 'cupons', label: 'Cupons', icon: Ticket },
-            { id: 'pagamentos', label: 'Assinatura e plano', icon: CreditCard },
-            { id: 'gateway', label: 'Pagamentos online', icon: PlugsConnected },
-            { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
-            { id: 'condominios', label: 'Condomínios', icon: Buildings },
-            { id: 'destinos', label: 'Destinos', icon: Compass },
-            { id: 'usuarios', label: 'Usuários', icon: UsersThree, standalone: true },
-            { id: 'config', label: 'Configurar loja', icon: Gear },
-            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-          ]),
-    [canUseMotoboys, isOperatorUser]
-  );
-  // Submenu direto de Configurações (lojista): cada item abre a seção correspondente
-  // (perfil, horários, entrega...), pulando o hub de cards. O item 'config' (hub)
-  // segue no array para a paleta de comandos Ctrl+K e para o activeNavItem; o sidebar
-  // o oculta quando estes sub-itens existem. Operador (sem cfg-*) continua com 'config' único.
-  const configNavItems = [
-    { id: 'cfg-hub', label: 'Visão geral', icon: Gear },
-    { id: 'cfg-profile', label: 'Perfil e marca', icon: IdentificationCard },
-    { id: 'cfg-channels', label: 'Promo e contato', icon: ChatCircle },
-    { id: 'cfg-delivery', label: 'Entrega e frete', icon: Truck },
-    { id: 'cfg-ordering', label: 'Tipos de pedido', icon: ForkKnife },
-    { id: 'cfg-hours', label: 'Horários', icon: Clock },
-    // 3 telas "do celular da loja" fundidas em 1 — auditoria 16/08 (menu 9 -> 7)
-    { id: 'cfg-device', label: 'Preferências do dispositivo', icon: DeviceMobile },
-  ];
-  const navItems = useMemo(() => {
-    if (isOperatorUser) return desktopTabItems;
-    return [
-      ...desktopTabItems,
-      { id: 'cardapio', label: 'Loja Online', icon: Storefront, disabled: false, standalone: true },
-      ...configNavItems,
-    ];
-  }, [desktopTabItems, isOperatorUser]);
+  // Fonte única de navegação (antes: desktopTabItems + configNavItems + navItems
+  // locais, com cópias divergentes em Orders/Queue/Highlights/Layout).
+  // wrapRun/notify entram como lambda: runOrConfirmDiscard e showToast existem
+  // abaixo/lá embaixo — avaliar no clique evita TDZ (gotcha 29/08 do CLAUDE.md).
+  const hookSidebarActiveId = !isOperatorUser && activeTab === 'config' ? `cfg-${configSection}` : activeTab;
+  const {
+    items: adminNavItems,
+    sidebarItems,
+    selectItem: navSelectItem,
+    logout: navLogout,
+  } = useAdminNav({
+    activeIdOverride: hookSidebarActiveId,
+    badges: { motoboysPending: pendingMotoboyRequests },
+    wrapRun: (run) => runOrConfirmDiscard(run),
+    onLocalTab: (tab) => setActiveTab(tab as typeof activeTab),
+    onOpenConfig: (section) => openConfigSection(section),
+    notify: (message, kind) => showToast(message, kind),
+  });
   const tabMeta = useMemo(
     () => ({
       resumo: { title: 'Resumo executivo', subtitle: 'Visão consolidada da operação, receita e qualidade da loja.' },
@@ -1970,13 +1939,23 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   );
   const commandActions = useMemo(() => {
     const items = [
-      ...desktopTabItems
-        .filter((item) => !item.disabled && item.id !== 'resumo')
+      ...adminNavItems
+        .filter(
+          (item) =>
+            !item.disabled &&
+            item.id !== 'resumo' &&
+            item.id !== 'renewal' &&
+            (item.surfaces || []).includes('palette')
+        )
         .map((item) => ({
           id: `tab-${item.id}`,
           label: item.label,
-          description: tabMeta[item.id]?.subtitle || 'Abrir seção',
+          description: tabMeta[item.id]?.subtitle || item.description || 'Abrir seção',
           run: () => {
+            if (item.id.startsWith('cfg-')) {
+              openConfigSection(item.id.slice(4) || 'hub');
+              return;
+            }
             if (item.id === 'cardapio') {
               if (storeSlug) navigate(`/${storeSlug}`);
               return;
@@ -2028,7 +2007,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       const haystack = `${item.id} ${item.label} ${item.description}`.toLowerCase();
       return !haystack.includes('resumo executivo') && !/^tab-resumo$/.test(item.id) && item.label.toLowerCase() !== 'resumo';
     });
-  }, [desktopTabItems, tabMeta, storeSlug, navigate, openQueueMonitor, openConfigSection]);
+  }, [adminNavItems, tabMeta, storeSlug, navigate, openQueueMonitor, openConfigSection]);
   const filteredCommandActions = useMemo(() => {
     const q = commandQuery.trim().toLowerCase();
     if (!q) return commandActions;
@@ -3074,46 +3053,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, [isConfigDirty]);
 
 
-  const handleNavSelect = (id: string) => {
-    runOrConfirmDiscard(() => {
-      if (id.startsWith('cfg-')) {
-        openConfigSection(id.slice(4) || 'hub');
-        return;
-      }
-      if (id === 'cardapio') {
-        if (storeSlug) navigate(`/${storeSlug}`);
-        return;
-      }
-      if (id === 'usuarios') {
-        setActiveTab('usuarios' as typeof activeTab);
-        return;
-      }
-      if (id === 'fila') {
-        openQueueMonitor();
-        return;
-      }
-      if (id === 'pedidos') {
-        navigate('/admin/orders');
-        return;
-      }
-      if (id === 'destaques') {
-        navigate('/admin/highlights');
-        return;
-      }
-      if (id === 'config') {
-        openConfigSection('hub');
-        return;
-      }
-      if (id === 'motoboys' && !canUseMotoboys) {
-        showToast('Disponível no plano Pro. Faça o upgrade para liberar entregadores.', 'info');
-        navigate('/admin/renewal?focus=pro');
-        return;
-      }
-      setActiveTab(id as typeof activeTab);
-    });
-  };
-
-  const activeNavItem = (navItems || []).find((item) => item.id === activeTab);
+  const activeNavItem = (adminNavItems || []).find((item) => item.id === activeTab);
   // No submenu de Configurações, destaca o sub-item ativo (ex: cfg-hours em vez de só 'config').
   const sidebarActiveId = !isOperatorUser && activeTab === 'config' ? `cfg-${configSection}` : activeTab;
   const ActiveTabIcon = activeNavItem?.icon || null;
@@ -3289,31 +3229,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         }`}
       >
         <AdminDesktopSidebar
-          items={navItems.map((item) => ({
-            id: item.id,
-            label: item.label,
-            icon: item.icon,
-            disabled: item.disabled,
-            badge:
-              item.id === 'motoboys'
-                ? item.disabled
-                  ? 'Pro'
-                  : pendingMotoboyRequests > 0
-                  ? pendingMotoboyRequests
-                  : undefined
-                : undefined,
-            tone: item.id === 'motoboys' && item.disabled ? 'violet' : item.id === 'motoboys' ? 'amber' : 'default',
-          }))}
+          items={sidebarItems}
           activeId={sidebarActiveId}
           compact={sidebarCompact}
           onToggleCompact={() => setSidebarCompact((prev) => !prev)}
-          onSelect={handleNavSelect}
-          onLogout={() => {
-            markManualLogoutRedirect('admin', '/hub');
-            logout();
-            navigate('/hub', { replace: true });
-          }}
-
+          onSelect={navSelectItem}
+          onLogout={navLogout}
         />
 
         <div className="min-w-0 space-y-4 flex-1">

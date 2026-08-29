@@ -8,7 +8,7 @@ interface SidebarItem {
   icon: any;
   disabled?: boolean;
   badge?: string | number;
-  tone?: 'violet' | 'amber' | 'default';
+  tone?: 'violet' | 'amber' | 'default' | 'danger';
 }
 
 interface AdminDesktopSidebarProps {

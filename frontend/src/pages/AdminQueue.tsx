@@ -1,15 +1,13 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuth } from '../contexts/AuthContext';
-import { markManualLogoutRedirect } from '../utils/sessionRedirect';
-import { ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, CheckSquare, UsersThree, Printer } from '@phosphor-icons/react';
+import { useAdminNav } from '../navigation/useAdminNav';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 
 export function AdminQueue() {
-  const { auth, logout } = useAuth();
-  const navigate = useNavigate();
+  const { auth } = useAuth();
   const location = useLocation();
   const [isDesktopLayout, setIsDesktopLayout] = React.useState(() => {
     if (typeof window === 'undefined') return true;
@@ -23,19 +21,6 @@ export function AdminQueue() {
     }
     return savedPreference === 'true';
   });
-  const userRole = String(auth?.user?.role || '').toUpperCase();
-  const isOperatorUser = userRole === 'OPERATOR';
-  const storeSlug = String(auth?.store?.slug || '').trim();
-  const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
-  const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
-  const subscriptionStatus = String(auth?.subscription?.status || '').toUpperCase();
-  const canUseMotoboys = Boolean(
-    isVip ||
-      auth?.features?.motoboyManagement ||
-      subscriptionStatus === 'TRIAL' ||
-      planName.includes('pro') ||
-      planName.includes('vip')
-  );
   React.useEffect(() => {
     localStorage.setItem('adminSidebar:compact', String(sidebarCompact));
   }, [sidebarCompact]);
@@ -56,50 +41,8 @@ export function AdminQueue() {
     setSidebarCompact(false);
   }, [isDesktopLayout, sidebarCompact]);
 
-  const desktopNavItems = React.useMemo(
-    () =>
-      (isOperatorUser
-        ? [
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'cardapio', label: 'Loja Online', icon: Package },
-            { id: 'config', label: 'Impressora', icon: Printer },
-            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-          ]
-        : [
-            { id: 'resumo', label: 'Resumo', icon: ChartBar },
-            { id: 'pedidos', label: 'Histórico de Pedidos', icon: ClipboardText },
-            { id: 'avaliacoes', label: 'Avaliações', icon: Star },
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'estoque', label: 'Estoque', icon: Package },
-            { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
-            { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
-            { id: 'usuarios', label: 'Usuários', icon: UsersThree },
-            { id: 'config', label: 'Configurações', icon: Gear },
-            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
-            { id: 'cardapio', label: 'Loja Online', icon: Package },
-          ]),
-    [isOperatorUser, canUseMotoboys]
-  );
-
-  const handleNavSelect = (id: string) => {
-    if (id === 'cardapio') {
-      if (storeSlug) navigate(`/${storeSlug}`);
-      return;
-    }
-    if (id === 'fila') {
-      navigate('/admin/queue');
-      return;
-    }
-    if (id === 'pedidos') {
-      navigate('/admin/orders');
-      return;
-    }
-    if (id === 'motoboys' && !canUseMotoboys) {
-      navigate('/admin/renewal?focus=pro');
-      return;
-    }
-    navigate('/admin/dashboard', { state: { activeTab: id } });
-  };
+  // Fonte única de navegação (antes: desktopNavItems + handleNavSelect locais).
+  const { sidebarItems, selectItem, logout: navLogout } = useAdminNav({ activeIdOverride: 'fila' });
   const forcedTab = (() => {
     const tab = String((location.state as any)?.activeTab || '').toLowerCase();
     if (tab === 'completed' || tab === 'inroute' || tab === 'queue') return tab;
@@ -124,23 +67,12 @@ export function AdminQueue() {
         }`}
       >
         <AdminDesktopSidebar
-          items={desktopNavItems.map((item) => ({
-            id: item.id,
-            label: item.label,
-            icon: item.icon,
-            disabled: item.disabled,
-            badge: item.id === 'motoboys' && item.disabled ? 'Pro' : undefined,
-            tone: item.id === 'motoboys' && item.disabled ? 'violet' : 'default',
-          }))}
+          items={sidebarItems}
           activeId="fila"
           compact={sidebarCompact}
           onToggleCompact={() => setSidebarCompact((prev) => !prev)}
-          onSelect={handleNavSelect}
-          onLogout={() => {
-            markManualLogoutRedirect('admin', '/hub');
-            logout();
-            navigate('/hub', { replace: true });
-          }}
+          onSelect={selectItem}
+          onLogout={navLogout}
         />
         <div className="min-w-0 flex-1 space-y-4">
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden relative z-20">
