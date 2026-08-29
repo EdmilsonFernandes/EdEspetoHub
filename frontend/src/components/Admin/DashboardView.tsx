@@ -192,6 +192,7 @@ export const DashboardView = ({
   storeLogo = "",
   storeDescription = "",
   linkStats = null,
+  onOpenQueue,
 }) => {
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -1474,6 +1475,57 @@ export const DashboardView = ({
 
   return (
     <div className="space-y-6 animate-in fade-in">
+      {/* KPI na dobra — veredito RETHINK da auditoria de 17/08 ("KPI-first"):
+          antes, receita só aparecia depois de listas inteiras de clientes. */}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-[12px] font-semibold text-slate-500">Receita do mês</p>
+          <p className="mt-1 text-2xl font-black tracking-tight text-[#1b77ba]">
+            {formatCurrency(metrics.monthRevenue)}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-[12px] font-semibold text-slate-500">Pedidos</p>
+          <p className="mt-1 text-2xl font-black tracking-tight text-slate-900">{metrics.totalOrders}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-[12px] font-semibold text-slate-500">Ticket médio</p>
+          <p className="mt-1 text-2xl font-black tracking-tight text-slate-900">
+            {formatCurrency(metrics.avgTicket)}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-[12px] font-semibold text-slate-500">Receita total</p>
+          <p className="mt-1 text-2xl font-black tracking-tight text-slate-900">
+            {formatCurrency(metrics.totalSales)}
+          </p>
+        </div>
+      </div>
+
+      {/* Ações do ritmo de balcão: fila em 1 toque */}
+      <div className="flex flex-wrap items-center gap-2">
+        {onOpenQueue && (
+          <button
+            type="button"
+            onClick={onOpenQueue}
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-bold text-white shadow-[0_10px_24px_-14px_rgba(47,157,247,0.7)] transition hover:opacity-90 active:scale-[0.98]"
+          >
+            <Package size={16} weight="fill" />
+            Gestor de Pedidos
+          </button>
+        )}
+        {storeUrl && (
+          <a
+            href={storeUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 active:scale-[0.98]"
+          >
+            Ver minha loja
+          </a>
+        )}
+      </div>
+
       {setupChecklist.length > 0 && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="md:hidden mb-4 flex items-center justify-between">
@@ -1844,7 +1896,7 @@ export const DashboardView = ({
                             <span className="w-10 shrink-0 text-right font-mono text-[11px] font-bold text-slate-500">{slot.label}</span>
                             <div className="h-4 flex-1 overflow-hidden rounded-md bg-slate-100">
                               <div
-                                className={`h-full rounded-md ${slot.orders === maxHour ? "bg-amber-500" : "bg-[#336886]"}`}
+                                className={`h-full rounded-md ${slot.orders === maxHour ? "bg-amber-500" : "bg-[#2f9df7]"}`}
                                 style={{ width: `${Math.max(6, Math.round((slot.orders / maxHour) * 100))}%` }}
                               />
                             </div>
@@ -1866,7 +1918,7 @@ export const DashboardView = ({
                             <span className="w-16 shrink-0 text-[11px] font-bold text-slate-500">{day.label}</span>
                             <div className="h-4 flex-1 overflow-hidden rounded-md bg-slate-100">
                               <div
-                                className={`h-full rounded-md ${day.orders === maxDay ? "bg-amber-500" : "bg-[#336886]"}`}
+                                className={`h-full rounded-md ${day.orders === maxDay ? "bg-amber-500" : "bg-[#2f9df7]"}`}
                                 style={{ width: `${Math.max(6, Math.round((day.orders / maxDay) * 100))}%` }}
                               />
                             </div>
@@ -1904,7 +1956,7 @@ export const DashboardView = ({
                           <span className="w-40 shrink-0 truncate text-[12px] font-bold text-slate-700 sm:w-52">{item.name}</span>
                           <div className="h-3.5 flex-1 overflow-hidden rounded-md bg-slate-100">
                             <div
-                              className={`h-full rounded-md ${index === 0 ? "bg-amber-500" : "bg-[#336886]"}`}
+                              className={`h-full rounded-md ${index === 0 ? "bg-amber-500" : "bg-[#2f9df7]"}`}
                               style={{ width: `${Math.max(5, Math.round((item.qty / maxQty) * 100))}%` }}
                             />
                           </div>

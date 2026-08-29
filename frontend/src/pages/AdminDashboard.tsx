@@ -3435,6 +3435,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             storeLogo={brandingDraft.logoUrl}
             storeDescription={brandingDraft.description}
             linkStats={linkStats}
+            onOpenQueue={() => openQueueMonitor()}
           />
         </div>
       )}
