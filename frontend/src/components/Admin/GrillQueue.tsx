@@ -27,6 +27,8 @@ import {
   CalendarBlank,
   Users,
 } from "@phosphor-icons/react";
+import { DeviceMobileCamera } from "@phosphor-icons/react";
+import { ChargeSheet } from "./ChargeSheet";
 import { orderService } from "../../services/orderService";
 import { PostalShipmentModal } from "./PostalShipmentModal";
 import { storeService } from "../../services/storeService";
@@ -251,6 +253,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [completedPageSize, setCompletedPageSize] = useState(9);
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [confirmModal, setConfirmModal] = useState(null);
+  const [chargeOrder, setChargeOrder] = useState(null); // cobranca-balcao: sheet Pix/Cartão/Dinheiro
   const [postalModalOrder, setPostalModalOrder] = useState<any | null>(null);
   const [postalSubmitAfterSave, setPostalSubmitAfterSave] = useState<(() => void) | null>(null);
   const [pixCopied, setPixCopied] = useState(false);
@@ -2967,14 +2970,41 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
       {order.status === "ready" && !isPostalOrder(order) && (() => {
         const alreadyPaid = String(order.paymentStatus || '').toUpperCase() === 'PAID';
+        // cobranca-balcao: retirada/mesa não paga → Cobrar (Pix/maquininha/dinheiro);
+        // confirmação manual "por fora" vira secundária. Delivery segue fluxo antigo.
+        if (!alreadyPaid && order.type !== "delivery") {
+          return (
+            <div className="w-full">
+              <div className="mb-2 text-[11px] font-semibold border rounded-lg px-2.5 py-1 text-emerald-700 bg-emerald-50 border-emerald-100">
+                Cliente chegou? Cobre no Pix, maquininha ou dinheiro.
+              </div>
+              <button
+                onClick={() => {
+                  pulseCta(order.id + '-pay');
+                  setChargeOrder(order);
+                }}
+                disabled={updating === order.id}
+                style={ctaPulseId === order.id + '-pay' ? { animation: 'btnPop 220ms ease' } : undefined}
+                className="w-full px-3 py-3 rounded-lg bg-emerald-600 text-white text-sm font-bold flex items-center justify-center gap-1.5 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
+              >
+                <DeviceMobileCamera size={17} weight="fill" /> Cobrar
+              </button>
+              <button
+                onClick={() => openPaymentConfirm(order)}
+                disabled={updating === order.id}
+                className="mt-1.5 w-full px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-500 hover:text-slate-800 transition"
+              >
+                Já recebi por fora — só confirmar
+              </button>
+            </div>
+          );
+        }
         return (
           <div className="w-full">
             <div className="mb-2 text-[11px] font-semibold border rounded-lg px-2.5 py-1 text-emerald-700 bg-emerald-50 border-emerald-100">
               {alreadyPaid
                 ? "Pagamento confirmado. Confirme quando o cliente retirar."
-                : order.type === "delivery"
-                ? "Motoboy saiu? Confirme o pagamento."
-                : "Cliente chegou? Confirme o pagamento."}
+                : "Motoboy saiu? Confirme o pagamento."}
             </div>
             <button
               onClick={() => {
@@ -2986,7 +3016,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               className="w-full px-3 py-3 rounded-lg bg-emerald-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
             >
               <CheckSquare size={16} weight="duotone" />
-              {alreadyPaid ? "Confirmar retirada" : order.type === "delivery" ? "Saiu para entrega" : "Confirmar pagamento"}
+              {alreadyPaid ? "Confirmar retirada" : "Saiu para entrega"}
             </button>
           </div>
         );
@@ -4012,6 +4042,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           )}
         </div>
       )}
+
+      {chargeOrder ? (
+        <ChargeSheet
+          open
+          onClose={() => setChargeOrder(null)}
+          storeId={String(auth?.store?.id || '')}
+          order={chargeOrder}
+          onPaid={() => {
+            loadQueue({ silent: true });
+          }}
+        />
+      ) : null}
 
       {isPaymentModalOpen && createPortal(
         <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-slate-900/50 px-4">

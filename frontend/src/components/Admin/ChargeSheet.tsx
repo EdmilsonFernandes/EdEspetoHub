@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { BottomSheet } from '../ui/BottomSheet';
 import { Button } from '../ui/Button';
 import {
@@ -268,8 +269,18 @@ export function ChargeSheet({
     <button
       key={key}
       type="button"
-      disabled={!enabled || !canCharge}
+      disabled={!canCharge}
       onClick={() => {
+        // Método sem conta MP conectada NÃO fica mudo (lição do teste 28/08):
+        // o toque explica o que falta em vez de "nada acontecer".
+        if (!enabled) {
+          setError(
+            key === 'cash'
+              ? 'Recebimento em dinheiro indisponível agora.'
+              : `${label} precisa da conta Mercado Pago da loja conectada — em Configurações → Gateway. Dinheiro continua funcionando.`
+          );
+          return;
+        }
         if (key === 'cash') {
           setPhase('cash-confirm');
           return;
@@ -280,17 +291,21 @@ export function ChargeSheet({
       className={`jnc-ds-focus-ring group flex min-h-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl border-2 px-2 py-3 text-center transition active:scale-[0.97] ${
         enabled && canCharge
           ? 'border-slate-200 bg-white shadow-[0_10px_24px_-18px_rgba(15,23,42,0.45)] hover:border-[var(--jnc-primary,#2f9df7)] hover:shadow-[0_14px_28px_-16px_rgba(47,157,247,0.55)]'
-          : 'cursor-not-allowed border-slate-100 bg-slate-50 opacity-55'
+          : 'border-slate-200 bg-slate-50 opacity-55'
       }`}
-      aria-label={`Cobrar via ${label}`}
+      aria-label={`Cobrar via ${label}${enabled ? '' : ' (indisponível)'}`}
     >
       <span className="text-[26px] leading-none text-[var(--jnc-primary,#2f9df7)]">{icon}</span>
       <span className="text-sm font-black tracking-tight text-slate-900">{label}</span>
-      <span className="text-[10.5px] font-semibold leading-tight text-slate-500">{sub}</span>
+      <span className="text-[10.5px] font-semibold leading-tight text-slate-500">
+        {enabled ? sub : 'conecte o MP'}
+      </span>
     </button>
   );
 
-  return (
+  // Portal pro body: competir de igual pra igual com os drawers/overlays da fila
+  // (z-9999) — sem isso o drawer intercepta os cliques do sheet (bug achado no E2E).
+  return createPortal(
     <BottomSheet
       open={open}
       onClose={onClose}
@@ -320,7 +335,7 @@ export function ChargeSheet({
         ) : undefined
       }
     >
-      <div className="flex min-h-0 flex-col gap-4 overflow-y-auto px-5 pb-5 pt-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 pb-5 pt-4">
         {phase === 'loading' ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 text-slate-500">
             <SpinnerGap size={30} className="animate-spin text-[var(--jnc-primary,#2f9df7)]" />
@@ -520,6 +535,7 @@ export function ChargeSheet({
           </p>
         ) : null}
       </div>
-    </BottomSheet>
+    </BottomSheet>,
+    document.body
   );
 }

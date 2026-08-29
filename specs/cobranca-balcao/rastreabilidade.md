@@ -55,3 +55,18 @@
 5. **Smoke com Point Pro 3** (quando o hardware chegar): listar → cobrar real → webhook → PAID na fila
 
 **Status G5: EM CONSTRUÇÃO — não aceito.**
+
+## Adendo 29/08 (madrugada) — E2E local com dados reais (dump de prod)
+
+**E2E Playwright (localhost, loja Gustavão Espetos, dados reais):**
+- Desktop 1280: login → fila → Prontos → pedido → Cobrar → Dinheiro → Confirmar → **"Pago!"** ✅ (screenshots 40/41 em .ux-audit/balcao-charge/)
+- Prova do fix fantasma (API): `point` sem terminal → 400 PAY-020 limpo; `cash` logo após → **201 PAID** (antes: PAY-021 bloqueado) ✅
+- Mobile: sheet é o mesmo componente (BottomSheet mobile-first); navegação drawer por script ficou pendente — validação manual no celular pelo PO
+
+**Bugs achados e corrigidos no E2E (commits desta noite):**
+1. Cobrar estava só no AdminOrders ("Gestor de Pedidos") — integrado ao **GrillQueue** (drawer da fila, onde o lojista opera: "Cliente chegou? Cobre no Pix, maquininha ou dinheiro" + Cobrar primário + "Já recebi por fora" secundário)
+2. Drawer interceptava cliques do sheet → ChargeSheet via createPortal(body) + z-10 na section do BottomSheet
+3. **Cobrança fantasma**: falha de provedor deixava linha PENDING bloqueando 5min → snapshot+revert no BalcaoChargeService
+4. Sheet bottom cortado (lição recorrente): conteúdo sem `flex-1` → botões fora da área clicável
+
+**Validações:** backend build+339 unit+100 int · frontend 202 unit+build — 100% verdes.

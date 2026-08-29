@@ -188,6 +188,29 @@ export class BalcaoChargeService {
         : {}),
     };
 
+    // Snapshot pré-mudança: se o provedor falhar (sem terminal, MP fora, etc.),
+    // a linha volta ao estado anterior — NUNCA deixar cobrança fantasma PENDING
+    // bloqueando o pedido por 5 min (bug achado no E2E local 29/08).
+    const rowExisted = Boolean(row?.id);
+    const snapshot: Partial<OrderPayment> | null = rowExisted && row
+      ? {
+          amount: row.amount,
+          paymentMethod: row.paymentMethod,
+          paymentStatus: row.paymentStatus,
+          provider: row.provider,
+          paidAt: row.paidAt,
+          failedAt: row.failedAt,
+          providerId: row.providerId,
+          providerOrderId: row.providerOrderId,
+          terminalId: row.terminalId,
+          qrCodeBase64: row.qrCodeBase64,
+          qrCodeText: row.qrCodeText,
+          paymentLink: row.paymentLink,
+          expiresAt: row.expiresAt,
+          metadata: row.metadata,
+        }
+      : null;
+
     // RESET do estado da linha p/ nova tentativa (uq order_id impõe uma por pedido)
     row.amount = rawAmount;
     row.paymentMethod = input.method;
@@ -206,6 +229,8 @@ export class BalcaoChargeService {
 
     const description = `Pedido ${String(order.id).slice(0, 8)} - ${order.store?.name || 'Loja'}`;
     const externalReference = `order_payment:${row.id}`;
+
+    try {
 
     if (input.method === 'pix') {
       const accessToken = await this.accounts.getActiveAccessToken(input.storeId);
@@ -297,6 +322,25 @@ export class BalcaoChargeService {
         status_detail: 'balcao_cash',
       });
       row = (await this.repo.findOne({ where: { id: row.id } }))!;
+    }
+    } catch (error) {
+      // Falha de provedor/terminal: reverte a linha ao estado anterior — nunca
+      // deixar PENDING fantasma bloqueando novas cobranças por 5 min (bug do E2E
+      // 29/08: point sem maquininha deixava a linha pendente + PAY-021 em sequência).
+      try {
+        if (rowExisted && snapshot && row?.id) {
+          const fresh = await this.repo.findOne({ where: { id: row.id } });
+          if (fresh && String(fresh.paymentStatus).toUpperCase() !== 'PAID') {
+            Object.assign(fresh, snapshot);
+            await this.repo.save(fresh);
+          }
+        } else if (row?.id) {
+          await this.repo.delete(row.id as any);
+        }
+      } catch (revertError: any) {
+        this.log.error('Balcão charge revert failed', { orderId: order.id, error: revertError?.message });
+      }
+      throw error;
     }
 
     await this.audit.record({

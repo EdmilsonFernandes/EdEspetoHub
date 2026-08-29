@@ -11,6 +11,7 @@
 | 2026-08-28 | Emissão inicial | agente |
 | 2026-08-28 | Ajustes do PO: expiração = 5 min (REQ-5/11); cobrança por ADMIN, LOJISTA e OPERATOR (REQ-1/19 — respostas unificam "admin e operador" + "lojista e operator"); acréscimo confirmado nas duas direções (REQ-15) | PO via agente |
 | 2026-08-28 | Pagamento misto: bloqueado por hora (PO) | PO via agente |
+| 2026-08-28 | **REQ-28 adicionado** (direção do PO após teste local): pedido criado por lojista/operador no balcão/mesa NÃO pergunta forma de pagamento no checkout — decide-se no fechamento (Cobrar). Fluxo do cliente online permanece intacto. Também: botão de método indisponível no sheet passa a explicar o motivo ao toque (lição do teste — loja sem MP conectada ficava muda). Idea de backlog registrada: ação rápida "play" no card para pedidos presenciais. | PO via agente |
 
 ## 1. Objetivo e valor
 
@@ -167,6 +168,22 @@ está tudo certo sem aprender nada novo.
   novas à jornada de acompanhamento existente.
 - **REQ-25** — QUANDO o cliente já pagou no checkout O SISTEMA DEVE manter o
   comportamento atual de rastreio inalterado.
+
+### História 7: Pedido criado por lojista/operador no balcão (v1.1 — a implementar)
+
+**Como** lojista/operador, **quero** criar o pedido de mesa/balcão **sem escolher forma
+de pagamento no checkout**, **para** decidir na hora de fechar a conta (Pix, cartão na
+maquininha ou dinheiro) — que é quando o cliente realmente paga.
+
+- **REQ-28** — QUANDO um usuário ADMIN, LOJISTA ou OPERATOR da loja cria um pedido pelo
+  checkout O SISTEMA DEVE omitir a etapa de forma de pagamento, criar o pedido com
+  pagamento pendente e sem método definido; a forma é escolhida depois em "Cobrar".
+- **REQ-29** — QUANDO um pedido sem método definido aparece na fila e no rastreio O
+  SISTEMA DEVE exibir "pagar no balcão/fechamento" de forma clara, sem erro ou campo
+  vazio.
+- **REQ-30** (invariante reafirmada) — QUANDO o pedido é criado por cliente online
+  (visitante ou conta cliente) O SISTEMA DEVE manter a etapa de pagamento do checkout
+  exatamente como hoje — nenhuma mudança perceptível.
 
 ---
 

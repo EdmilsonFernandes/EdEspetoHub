@@ -48,7 +48,7 @@ export function BottomSheet({
   return (
     <div className="fixed inset-0 z-[10000] flex items-end justify-center bg-slate-950/45 px-3 pb-0 pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-[3px] sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby={labelledById}>
       <button type="button" aria-label="Fechar" className="absolute inset-0 cursor-default" onClick={onClose} />
-      <section className={cn('jnc-ds-surface relative flex max-h-[calc(100dvh-env(safe-area-inset-top)-0.75rem)] w-full max-w-lg flex-col overflow-hidden rounded-b-none rounded-t-[2rem] shadow-[var(--jnc-shadow-sheet)] sm:max-h-[min(44rem,calc(100dvh-2rem))] sm:rounded-[2rem]', className)}>
+      <section className={cn('jnc-ds-surface relative z-10 flex max-h-[calc(100dvh-env(safe-area-inset-top)-0.75rem)] w-full max-w-lg flex-col overflow-hidden rounded-b-none rounded-t-[2rem] shadow-[var(--jnc-shadow-sheet)] sm:max-h-[min(44rem,calc(100dvh-2rem))] sm:rounded-[2rem]', className)}>
         <div className="shrink-0 border-b border-slate-200/70 px-5 pb-4 pt-3">
           <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-300/80 sm:hidden" />
           <div className="flex items-start justify-between gap-3">
