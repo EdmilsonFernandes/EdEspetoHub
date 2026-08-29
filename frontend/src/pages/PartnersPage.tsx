@@ -174,7 +174,6 @@ export function PartnersPage() {
               <div className="ml-8 hidden items-center gap-8 md:flex">
                 <a href="#como-funciona" className="text-sm font-medium text-white/80 transition-colors hover:text-white">Como funciona</a>
                 <a href="#parceria" className="text-sm font-medium text-white/80 transition-colors hover:text-white">Parceria</a>
-                <a href="#pagamentos" className="text-sm font-medium text-white/80 transition-colors hover:text-white">Pagamentos</a>
                 <a href="#servicos" className="text-sm font-medium text-white/80 transition-colors hover:text-white">Serviços</a>
               </div>
             </div>
@@ -314,110 +313,6 @@ export function PartnersPage() {
         </div>
       </section>
 
-      {/* ══════ SECTION 4.5 — COBRANÇA NO BALCÃO (Point) ══════ */}
-      <section id="pagamentos" className="overflow-hidden bg-black px-6 py-28 md:py-40">
-        <div className="mx-auto max-w-6xl">
-          <motion.h2 {...reveal()} className="serif mb-16 text-5xl tracking-tight text-white md:mb-24 md:text-7xl">
-            Da mesa direto pra <em className="serif-i text-white/40">maquininha</em>.
-          </motion.h2>
-          <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2 md:gap-12">
-            <motion.div {...revealLeft()} className="flex flex-col justify-center gap-8">
-              <div>
-                <p className="mb-4 text-xs uppercase tracking-widest text-white/40">Novo · Pagamentos presenciais</p>
-                <p className="text-base leading-relaxed text-white/70 md:text-lg">
-                  Quem atende monta o pedido no app — mesa, balcão ou fila — e toca em
-                  Cobrar. O valor vai certinho pra maquininha Point do seu Mercado Pago:
-                  ninguém digita nada no terminal, e o pedido fecha sozinho quando o
-                  cliente paga.
-                </p>
-              </div>
-              <div className="h-px w-full bg-white/10" />
-              <ol className="flex flex-col gap-6">
-                {[
-                  {
-                    n: '01',
-                    t: 'Mesa, balcão ou fila',
-                    d: 'Garçom ou balconista lança os itens em segundos, sem cadastro de cliente.',
-                  },
-                  {
-                    n: '02',
-                    t: 'Um toque em Cobrar',
-                    d: 'Pix com QR na hora, dinheiro registrado ou cartão na maquininha — crédito, débito e aproximação.',
-                  },
-                  {
-                    n: '03',
-                    t: 'Pagou, fechou',
-                    d: 'O pagamento confirma e o pedido avança sozinho. Nada de digitar valor no terminal nem conferir venda por venda no fim do dia.',
-                  },
-                ].map((step) => (
-                  <li key={step.n} className="flex gap-5">
-                    <span className="serif shrink-0 text-2xl text-white/25">{step.n}</span>
-                    <div>
-                      <p className="text-sm font-semibold text-white md:text-base">{step.t}</p>
-                      <p className="mt-1 text-sm leading-relaxed text-white/50">{step.d}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-              <div className="h-px w-full bg-white/10" />
-              <div>
-                <p className="mb-4 text-xs uppercase tracking-widest text-white/40">Taxas</p>
-                <p className="text-base leading-relaxed text-white/70 md:text-lg">
-                  Sem comissão nossa por pagamento e sem taxa extra por maquininha
-                  conectada — você só paga as taxas da sua conta Mercado Pago, com as
-                  maquininhas Point que já são suas.
-                </p>
-              </div>
-            </motion.div>
-            <motion.div {...revealRight()} className="relative">
-              <div className="liquid-glass relative overflow-visible rounded-3xl px-8 py-10 md:px-12 md:py-14">
-                <div
-                  className="pointer-events-none absolute inset-0 rounded-3xl"
-                  style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.05) 0%, transparent 65%)' }}
-                />
-                <img
-                  src="/assets/point-pro-3.png"
-                  alt="Maquininha Mercado Pago Point Pro 3 integrada ao Já no Caminho"
-                  className="relative mx-auto w-full max-w-sm drop-shadow-[0_32px_64px_rgba(0,0,0,0.65)]"
-                  loading="lazy"
-                />
-                <div className="relative mt-6 flex flex-col items-center gap-1 text-center">
-                  <span className="text-xs uppercase tracking-widest text-white/40">Mercado Pago Point</span>
-                  <span className="text-sm font-medium text-white/70">Pro 3 e outros terminais da sua conta</span>
-                </div>
-                {/* Recibo flutuante — o que o lojista vê no app ao cobrar */}
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-60px' }}
-                  transition={{ duration: 0.7, delay: 0.5, ease: EASE }}
-                  className="liquid-glass relative mt-6 w-max max-w-full rounded-2xl px-4 py-3 md:absolute md:-bottom-6 md:left-1/2 md:mt-0 md:-translate-x-1/2 md:px-5 md:py-3.5"
-                >
-                  <p className="flex items-center gap-2 text-xs font-medium text-white">
-                    <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#5fd35a] opacity-60" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-[#5fd35a]" />
-                    </span>
-                    Cobrança enviada · R$ 47,50
-                  </p>
-                  <p className="mt-0.5 pl-4 text-[11px] text-white/50">Aguardando pagamento na maquininha</p>
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
-          <motion.div {...revealSm(0.2)} className="mt-16 flex justify-center md:mt-20">
-            <motion.a
-              href="/create"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="liquid-glass rounded-full px-8 py-3 text-sm font-medium text-white"
-            >
-              Quero cobrar assim na minha loja
-            </motion.a>
-          </motion.div>
-        </div>
-      </section>
-
       {/* ══════ SECTION 5 — SERVICES ══════ */}
       <section id="servicos" className="overflow-hidden bg-black px-6 py-28 md:py-40">
         <div
@@ -440,7 +335,7 @@ export function PartnersPage() {
               {
                 tag: 'Operação',
                 title: 'Pagamentos & Entregas',
-                desc: 'Pix Mercado Pago que confirma sozinho, cobrança no balcão com maquininha Point, auto-impressão térmica, tracking em tempo real e integração com motoboys da região.',
+                desc: 'Pix Mercado Pago que confirma sozinho, auto-impressão térmica, tracking em tempo real e integração com motoboys da região.',
                 video: SERVICE_2_VIDEO,
               },
             ].map((card, index) => (
