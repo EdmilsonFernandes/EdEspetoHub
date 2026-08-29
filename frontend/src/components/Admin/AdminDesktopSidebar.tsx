@@ -185,7 +185,7 @@ export function AdminDesktopSidebar({
 
   return (
     <aside
-      className={`hidden lg:block sticky top-0 self-start h-[100dvh] z-[50] transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+      className={`hidden md:block sticky top-0 self-start h-[100dvh] z-[50] transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
         compact ? 'w-[80px]' : 'w-[260px]'
       }`}
     >

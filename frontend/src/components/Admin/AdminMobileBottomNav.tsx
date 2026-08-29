@@ -221,41 +221,9 @@ export function AdminMobileBottomNav() {
     };
   }, [isSuperAdminPath, path]);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    let lastY = window.scrollY || 0;
-    let anchorY = lastY;
-    let ticking = false;
-    const HIDE_DELTA = 28;
-    const SHOW_DELTA = 18;
-
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(() => {
-        const currentY = window.scrollY || 0;
-        const delta = currentY - lastY;
-        if (Math.abs(delta) >= 4) {
-          if (delta > 0 && currentY > 80) {
-            if (isVisible && currentY - anchorY >= HIDE_DELTA) {
-              setIsVisible(false);
-              anchorY = currentY;
-            }
-          } else if (delta < 0) {
-            if (!isVisible && anchorY - currentY >= SHOW_DELTA) {
-              setIsVisible(true);
-              anchorY = currentY;
-            }
-          }
-        }
-        lastY = currentY;
-        ticking = false;
-      });
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [isVisible]);
+  // (relato 29/08 "o menu sobe e some") — o antigo hide-on-scroll escondia a
+  // barra ao rolar, matando o único menu do layout mobile. Barra SEMPRE visível;
+  // só um drawer/carrinho aberto a cobre (hiddenByCart/hiddenByOverlay).
 
   const openCatalog = () => {
     if (storeSlug) {
@@ -493,7 +461,7 @@ export function AdminMobileBottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-[220] pointer-events-none transition-transform duration-300 ease-in-out flex justify-center lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-[220] pointer-events-none transition-transform duration-300 ease-in-out flex justify-center md:hidden"
       style={{
         transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
       }}

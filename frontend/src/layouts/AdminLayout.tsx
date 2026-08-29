@@ -79,12 +79,12 @@ export function AdminLayout({
   const [sidebarCompact, setSidebarCompact] = useState(() => {
     if (typeof window === 'undefined') return false;
     const saved = localStorage.getItem('adminSidebar:compact');
-    if (saved === null) return window.matchMedia('(min-width: 1024px)').matches;
+    if (saved === null) return window.matchMedia('(min-width: 768px)').matches;
     return saved === 'true';
   });
   const [isDesktopLayout, setIsDesktopLayout] = useState(() => {
     if (typeof window === 'undefined') return true;
-    return window.matchMedia('(min-width: 1024px)').matches;
+    return window.matchMedia('(min-width: 768px)').matches;
   });
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export function AdminLayout({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const media = window.matchMedia('(min-width: 1024px)');
+    const media = window.matchMedia('(min-width: 768px)');
     const onChange = () => setIsDesktopLayout(media.matches);
     onChange();
     if (media.addEventListener) {
@@ -185,7 +185,7 @@ export function AdminLayout({
   });
 
   return (
-    <div className="ds-admin-bg min-h-screen overflow-x-clip pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+    <div className="ds-admin-bg min-h-screen overflow-x-clip pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:pb-0">
       <div
         key={location.pathname}
         className={
@@ -199,8 +199,8 @@ export function AdminLayout({
         )}
         {withSidebar ? (
           <div
-            className={`w-full min-w-0 lg:grid lg:items-start lg:gap-0 ${
-              sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
+            className={`w-full min-w-0 md:grid md:items-start md:gap-0 ${
+              sidebarCompact ? 'md:grid-cols-[80px_minmax(0,1fr)]' : 'md:grid-cols-[260px_minmax(0,1fr)]'
             }`}
           >
             <AdminDesktopSidebar
@@ -219,7 +219,7 @@ export function AdminLayout({
       </div>
       <AdminMobileBottomNav />
       {mobileNavOpen && (
-        <div className="lg:hidden fixed inset-0 z-[9999] bg-slate-950/40 backdrop-blur-[2px]" onClick={() => setMobileNavOpen(false)}>
+        <div className="md:hidden fixed inset-0 z-[9999] bg-slate-950/40 backdrop-blur-[2px]" onClick={() => setMobileNavOpen(false)}>
           <aside
             className="h-full w-[85%] max-w-[360px] border-r border-slate-200/90 bg-white shadow-[4px_0_32px_rgba(15,23,42,0.14)] px-4 pb-4 flex flex-col"
             style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}
