@@ -45,6 +45,8 @@ type CreatePaymentInput = {
   method: 'PIX' | 'CREDIT_CARD' | 'BOLETO';
   description: string;
   externalReference: string;
+  /** Validade do QR em minutos (default 30 — checkout). Balcão usa 5 (REQ-5). */
+  expiresInMinutes?: number;
   payer: {
     email: string;
     name: string;
@@ -393,10 +395,12 @@ export class MercadoPagoService {
    */
   private async createPixPayment(input: CreatePaymentInput) {
     const url = `${env.mercadoPago.apiBaseUrl}/v1/payments`;
-    // Janela única de 30 min (decisão 18/08): countdown, MP e auto-cancel andam
-    // juntos — antes rastreávamos 5min internamente enquanto o QR valia 30min no
-    // MP (cliente podia pagar um pedido já cancelado).
-    const pixExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    // Janela única (decisão 18/08, revisada p/ balcão 28/08): countdown, MP e
+    // auto-cancel andam juntos — antes rastreávamos 5min internamente enquanto o QR
+    // valia 30min no MP (cliente podia pagar um pedido já cancelado).
+    // Checkout: 30 min. Balcão (cobranca-balcao REQ-5): 5 min.
+    const pixMinutes = Number(input.expiresInMinutes) > 0 ? Number(input.expiresInMinutes) : 30;
+    const pixExpiresAt = new Date(Date.now() + pixMinutes * 60 * 1000).toISOString();
     const mpExpiresAt = pixExpiresAt;
     const body = {
       transaction_amount: input.amount,

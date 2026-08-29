@@ -42,6 +42,10 @@ export function createProxyRoutes(): Router {
     r.post('/webhooks/payment-confirmed', forward); r.post('/webhooks/mercadopago', forward);
     r.get('/payment-accounts/mercadopago/callback', forward);
     r.get('/stores/:storeId/payments', authRequired, forward);
+    // Cobrança no balcão (SDD cobranca-balcao)
+    r.get('/stores/:storeId/orders/:orderId/charge', authRequired, forward);
+    r.post('/stores/:storeId/orders/:orderId/charge', authRequired, forward);
+    r.post('/stores/:storeId/orders/:orderId/charge/cancel', authRequired, forward);
     r.get('/payments/:paymentId', forward); r.get('/payments/:paymentId/events', forward);
     r.post('/payments/:paymentId/renew', forward);
     // Maps (public)

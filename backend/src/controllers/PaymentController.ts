@@ -24,11 +24,13 @@ import { respondWithError } from '../errors/respondWithError';
 import { AppDataSource } from '../config/database';
 import { Payment } from '../entities/Payment';
 import { OrderPaymentService } from '../services/OrderPaymentService';
+import { BalcaoChargeService } from '../services/BalcaoChargeService';
 
 const paymentService = new PaymentService();
 const subscriptionService = new SubscriptionService();
 const paymentEventRepository = new PaymentEventRepository();
 const orderPaymentService = new OrderPaymentService();
+const balcaoChargeService = new BalcaoChargeService();
 const log = logger.child({ scope: 'PaymentController' });
 /**
  * Provides PaymentController functionality.
@@ -120,6 +122,18 @@ export class PaymentController {
     const paymentId = payload?.data?.id;
     if (!paymentId) {
       return respondWithError(req, res, new AppError('PAY-009', 200), 200);
+    }
+
+    // Point (cobranca-balcao): tópico `order` — data.id é a ORDER do MP, não payment
+    if (String(payload?.type || '').toLowerCase() === 'order') {
+      try {
+        const result = await balcaoChargeService.handleProviderWebhookOrder(String(paymentId));
+        log.info('Mercado Pago order webhook processed', { mpOrderId: paymentId, result });
+        return res.json({ status: 'ok', result });
+      } catch (error: any) {
+        log.warn('Mercado Pago order webhook failed', { mpOrderId: paymentId, error });
+        return respondWithError(req, res, error, 400);
+      }
     }
 
     try {

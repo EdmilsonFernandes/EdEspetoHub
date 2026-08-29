@@ -25,6 +25,7 @@ import { PlatformAdminController } from '../controllers/PlatformAdminController'
 import { PromoPushController } from '../controllers/PromoPushController';
 import { PlatformPublicController } from '../controllers/PlatformPublicController';
 import { PaymentController } from '../controllers/PaymentController';
+import { BalcaoChargeController } from '../controllers/BalcaoChargeController';
 import { MotoboyController } from '../controllers/MotoboyController';
 import { MotoboyKycController } from '../controllers/MotoboyKycController';
 import { DeliveryController } from '../controllers/DeliveryController';
@@ -138,6 +139,10 @@ routes.post('/webhooks/payment-confirmed', PaymentController.confirm);
 routes.post('/webhooks/mercadopago', PaymentController.mercadoPagoWebhook);
 routes.get('/payment-accounts/mercadopago/callback', StorePaymentAccountController.mercadoPagoCallback);
 routes.get('/stores/:storeId/payments', requireAuth, requireRole('ADMIN'), PaymentController.listByStore);
+// Cobrança no balcão (SDD cobranca-balcao) — fila cobra pedido via Pix/Point/dinheiro
+routes.get('/stores/:storeId/orders/:orderId/charge', requireAuth, requireRole('ADMIN', 'LOJISTA', 'OPERATOR'), BalcaoChargeController.getStatus);
+routes.post('/stores/:storeId/orders/:orderId/charge', requireAuth, requireRole('ADMIN', 'LOJISTA', 'OPERATOR'), BalcaoChargeController.createCharge);
+routes.post('/stores/:storeId/orders/:orderId/charge/cancel', requireAuth, requireRole('ADMIN', 'LOJISTA', 'OPERATOR'), BalcaoChargeController.cancelCharge);
 routes.get('/payments/:paymentId', PaymentController.getById);
 routes.get('/payments/:paymentId/events', PaymentController.getEvents);
 routes.post('/payments/:paymentId/renew', PaymentController.renewFromPayment);

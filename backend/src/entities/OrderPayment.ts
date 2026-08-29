@@ -25,13 +25,15 @@ export class OrderPayment {
   paymentMethod!: string;
 
   @Column({ name: 'payment_status', type: 'varchar', default: 'PENDING' })
-  paymentStatus!: 'PENDING' | 'PAID' | 'FAILED';
+  /** Balcão (cobranca-balcao) acrescenta CANCELED (lojista encerrou) e EXPIRED (5min). */
+  paymentStatus!: 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED' | 'EXPIRED';
 
   @Column({ name: 'amount', type: 'numeric', precision: 10, scale: 2 })
   amount!: number;
 
   @Column({ name: 'provider', type: 'varchar', default: 'MERCADO_PAGO' })
-  provider!: 'MERCADO_PAGO';
+  /** MANUAL = registro de dinheiro no balcão (sem integração). */
+  provider!: 'MERCADO_PAGO' | 'MANUAL';
 
   @Column({ name: 'provider_id', type: 'varchar', nullable: true })
   providerId?: string | null;
@@ -56,6 +58,18 @@ export class OrderPayment {
 
   @Column({ name: 'provider_payload', type: 'jsonb', nullable: true })
   providerPayload?: Record<string, any> | null;
+
+  /** Id da ORDER do Mercado Pago (Point) — webhook tópico `order` resolve por aqui. */
+  @Column({ name: 'provider_order_id', type: 'varchar', nullable: true })
+  providerOrderId?: string | null;
+
+  /** Maquininha Point que recebeu a cobrança do balcão. */
+  @Column({ name: 'terminal_id', type: 'varchar', nullable: true })
+  terminalId?: string | null;
+
+  /** Rastro do balcão: chargeSource, ajuste de valor (original/autor), cash audit. */
+  @Column({ name: 'metadata', type: 'jsonb', nullable: true })
+  metadata?: Record<string, any> | null;
 
   @Column({ name: 'refund_status', type: 'varchar', nullable: true })
   refundStatus?: string | null;

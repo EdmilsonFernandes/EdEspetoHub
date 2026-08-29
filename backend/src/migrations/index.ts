@@ -14,6 +14,7 @@ import orderOrigin from './20260816_001_order_origin';
 import orderReviewReply from './20260816_002_order_review_reply';
 import checkoutExtras from './20260816_003_checkout_extras';
 import planosFundador from './20260828_001_planos_fundador';
+import orderPaymentPointCharge from './20260828_002_order_payment_point_charge';
 
 export const schemaMigrations = [
   baselineCurrentSchema,
@@ -32,4 +33,5 @@ export const schemaMigrations = [
   orderReviewReply,
   checkoutExtras,
   planosFundador,
+  orderPaymentPointCharge,
 ] as const;

@@ -99,4 +99,118 @@ export class MercadoPagoPointService {
       paging: body?.paging || null,
     };
   }
+
+  /**
+   * Cria cobrança na maquininha (Orders API, type=point) — REQ-6.
+   * Crédito/débito/parcelas o cliente escolhe NO terminal (design D3).
+   * Expira em 5 min (REQ-5/11) — MP auto-cancela orders expiradas.
+   */
+  async createPointCharge(input: {
+    storeId: string;
+    accessToken: string;
+    amount: number;
+    terminalId: string;
+    externalReference: string;
+    description: string;
+  }): Promise<{ orderId: string; status: string; expiresAt: Date }> {
+    const idempotencyKey = `point:${input.externalReference}:${Math.round(input.amount * 100)}`;
+    let response: Response;
+    try {
+      response = await fetch(`${env.mercadoPago.apiBaseUrl}/v1/orders`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${input.accessToken}`,
+          'Content-Type': 'application/json',
+          'X-Idempotency-Key': idempotencyKey,
+        },
+        body: JSON.stringify({
+          type: 'point',
+          external_reference: input.externalReference,
+          expiration_time: 'PT5M',
+          transactions: {
+            payments: [{ amount: Number(input.amount.toFixed(2)), description: input.description }],
+          },
+          config: { point: { terminal_id: input.terminalId } },
+        }),
+      });
+    } catch (error: any) {
+      this.log.warn('Point charge request failed', { storeId: input.storeId, error: error?.message });
+      throw new AppError('PAY-018', 502, {
+        message: 'Não foi possível falar com o Mercado Pago agora. Tente novamente.',
+      });
+    }
+
+    if (!response.ok) {
+      const bodyText = await response.text().catch(() => '');
+      this.log.warn('Point charge rejected', {
+        storeId: input.storeId,
+        status: response.status,
+        body: bodyText.slice(0, 400),
+      });
+      const hint =
+        response.status === 403
+          ? ' A conta conectada pode estar sem permissão — desconecte e reconecte o Mercado Pago da loja.'
+          : response.status === 404
+            ? ' Maquininha não encontrada — confira se o terminal está no modo PDV.'
+            : '';
+      throw new AppError('PAY-018', 502, {
+        message: `Mercado Pago recusou a cobrança na maquininha (HTTP ${response.status}).${hint}`,
+      });
+    }
+
+    const order: any = await response.json().catch(() => null);
+    const orderId = String(order?.id || '');
+    if (!orderId) {
+      throw new AppError('PAY-018', 502, { message: 'Mercado Pago não retornou o id da cobrança.' });
+    }
+    return {
+      orderId,
+      status: String(order?.status || 'OPEN'),
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    };
+  }
+
+  /** Consulta a order Point no MP (reconcile REQ-21 / webhook REQ-8). */
+  async getPointOrder(accessToken: string, mpOrderId: string): Promise<any> {
+    let response: Response;
+    try {
+      response = await fetch(`${env.mercadoPago.apiBaseUrl}/v1/orders/${encodeURIComponent(mpOrderId)}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+    } catch (error: any) {
+      this.log.warn('Point order lookup failed', { mpOrderId, error: error?.message });
+      return null;
+    }
+    if (!response.ok) {
+      this.log.warn('Point order lookup rejected', { mpOrderId, status: response.status });
+      return null;
+    }
+    return response.json().catch(() => null);
+  }
+
+  /** Cancela a order Point (REQ-18) — best-effort; expirada cancela sozinha no MP. */
+  async cancelPointCharge(accessToken: string, mpOrderId: string): Promise<boolean> {
+    try {
+      const response = await fetch(
+        `${env.mercadoPago.apiBaseUrl}/v1/orders/${encodeURIComponent(mpOrderId)}/cancel`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'X-Idempotency-Key': `pointcancel:${mpOrderId}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        const bodyText = await response.text().catch(() => '');
+        this.log.warn('Point charge cancel rejected', { mpOrderId, status: response.status, body: bodyText.slice(0, 200) });
+        return false;
+      }
+      return true;
+    } catch (error: any) {
+      this.log.warn('Point charge cancel failed', { mpOrderId, error: error?.message });
+      return false;
+    }
+  }
 }
