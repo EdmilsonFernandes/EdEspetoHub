@@ -10,6 +10,8 @@ import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { markManualLogoutRedirect } from '../utils/sessionRedirect';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { getAdminAccountItems, resolveCanUseMotoboys } from '../navigation/adminNavigation';
+import { useAdminNav } from '../navigation/useAdminNav';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -59,110 +61,18 @@ export function AdminLayout({
     if (!/^[0-9a-fA-F]{6}$/.test(n)) return `rgba(51,65,85,${alpha})`;
     return `rgba(${parseInt(n.slice(0,2),16)},${parseInt(n.slice(2,4),16)},${parseInt(n.slice(4,6),16)},${alpha})`;
   };
-  const canUseMotoboys = Boolean(
-    isVip ||
-      auth?.features?.motoboyManagement ||
-      subscriptionStatus === 'TRIAL' ||
-      planName.includes('pro') ||
-      planName.includes('vip')
-  );
+  const canUseMotoboys = resolveCanUseMotoboys(auth);
 
-  const mobileNavItems = useMemo(
-    () =>
-      (isOperatorUser
-        ? [
-            { id: 'fila', label: 'Fila ao Vivo', icon: CheckSquare },
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'cardapio', label: 'Loja Online', icon: Package },
-            { id: 'config', label: 'Impressora', icon: Printer },
-          ]
-        : [
-            { id: 'resumo', label: 'Início', icon: ChartBar },
-            { id: 'fila', label: 'Fila ao Vivo', icon: CheckSquare },
-            { id: 'vendas', label: 'Vendas', icon: ClipboardText },
-            { id: 'avaliacoes', label: 'Avaliações', icon: Star },
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'estoque', label: 'Estoque', icon: Stack },
-            { id: 'cardapio', label: 'Loja Online', icon: Storefront },
-            { id: 'destaques', label: 'Destaques', icon: Sparkle },
-            { id: 'destinos', label: 'Destinos', icon: Compass },
-            { id: 'condominios', label: 'Condomínios', icon: Buildings },
-            { id: 'pagamentos', label: 'Assinatura e plano', icon: CreditCard },
-            { id: 'gateway', label: 'Pagamentos online', icon: PlugsConnected },
-            { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
-            { id: 'usuarios', label: 'Usuários', icon: UsersThree },
-            { id: 'cfg-hub', label: 'Visão geral', icon: Gear },
-            { id: 'cfg-profile', label: 'Perfil e marca', icon: IdentificationCard },
-            { id: 'cfg-channels', label: 'Promo e contato', icon: ChatCircle },
-            { id: 'cfg-delivery', label: 'Entrega e frete', icon: Truck },
-            { id: 'cfg-ordering', label: 'Tipos de pedido', icon: ForkKnife },
-            { id: 'cfg-hours', label: 'Horários', icon: Clock },
-            { id: 'cfg-operation', label: 'Operação e som', icon: Bell },
-            { id: 'cfg-printer', label: 'Impressora térmica', icon: Printer },
-            { id: 'cfg-permissions', label: 'Permissões do app', icon: ShieldCheck },
-          ]),
-    [isOperatorUser, canUseMotoboys]
-  );
-
-  const groupedMobileSections = useMemo(() => {
-    if (isOperatorUser) {
-      return [
-        { type: 'item', item: mobileNavItems.find((i) => i.id === 'fila') },
-        { type: 'item', item: mobileNavItems.find((i) => i.id === 'produtos') },
-        { type: 'item', item: mobileNavItems.find((i) => i.id === 'cardapio') },
-        { type: 'item', item: mobileNavItems.find((i) => i.id === 'config') },
-      ].filter((entry) => Boolean(entry?.item));
-    }
-    const byId = new Map((mobileNavItems || []).map((item) => [item.id, item]));
-    const consumeIds = new Set<string>();
-    const consume = (id: string) => {
-      if (byId.has(id)) consumeIds.add(id);
-      return byId.get(id);
-    };
-    const consumeMany = (ids: string[]) => ids.map(consume).filter(Boolean);
-    const sections: any[] = [];
-    const principal = consume('resumo');
-    if (principal) sections.push({ type: 'item', item: principal });
-    const operacao = consumeMany(['fila', 'vendas', 'avaliacoes']);
-    if (operacao.length) sections.push({ type: 'group', id: 'operacao', label: 'Operação', children: operacao });
-    const catalogo = consumeMany(['produtos', 'estoque', 'cardapio']);
-    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Catálogo', children: catalogo });
-    const crescer = consumeMany(['destaques', 'destinos', 'condominios']);
-    if (crescer.length) sections.push({ type: 'group', id: 'crescer', label: 'Crescer', children: crescer });
-    const financeiro = consumeMany(['pagamentos', 'gateway']);
-    if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
-    const equipe = consumeMany(['motoboys', 'usuarios']);
-    if (equipe.length) sections.push({ type: 'group', id: 'equipe', label: 'Equipe', children: equipe });
-    // Configurações como submenu (cfg-*); operador sem cfg-* mantém 'config' como item único.
-    const configChildren = (mobileNavItems || []).filter((item) => item.id.startsWith('cfg-'));
-    if (configChildren.length) {
-      configChildren.forEach((item) => consumeIds.add(item.id));
-      sections.push({ type: 'group', id: 'config', label: 'Configurações', children: configChildren });
-    } else {
-      const sistema = consume('config');
-      if (sistema) sections.push({ type: 'item', item: sistema });
-    }
-    const leftovers = (mobileNavItems || []).filter((item) => !consumeIds.has(item.id));
-    leftovers.forEach((item) => sections.push({ type: 'item', item }));
-    return sections;
-  }, [mobileNavItems, isOperatorUser]);
-
-  const activeMobileId = useMemo(() => {
-    const path = String(location.pathname || '');
-    const persistedTab = typeof window !== 'undefined' ? String(sessionStorage.getItem('admin:activeTab') || '') : '';
-    if (path.startsWith('/admin/queue')) return 'fila';
-    if (path.startsWith('/admin/orders')) return 'vendas';
-    if (path.startsWith('/admin/highlights')) return 'destaques';
-    if (path.startsWith('/admin/dashboard')) {
-      const tab = String((location.state as any)?.activeTab || persistedTab || '');
-      if (tab === 'config') {
-        const section = String(new URLSearchParams(location.search || '').get('section') || 'hub');
-        return `cfg-${section}`;
-      }
-      return tab;
-    }
-    return '';
-  }, [location.pathname, location.state, location.search]);
+  // Fonte única de navegação (antes: mobileNavItems + groupedMobileSections +
+  // activeMobileId próprios, com cfg-operation/cfg-printer/cfg-permissions
+  // extintos e id fantasma 'vendas' apontando pra /admin/orders).
+  const {
+    sidebarItems: mobileNavItems,
+    sections: groupedMobileSections,
+    activeItemId: activeMobileId,
+    selectItem,
+    logout: navLogout,
+  } = useAdminNav();
 
   useEffect(() => {
     if (!mobileNavOpen) return;
@@ -214,223 +124,27 @@ export function AdminLayout({
   };
 
   const handleNavSelect = (id: string) => {
-    if (id.startsWith('cfg-')) {
-      const section = id.slice(4) || 'hub';
-      runAfterMobileNavClose(() => navigate(`/admin/dashboard?section=${encodeURIComponent(section)}`, { state: { activeTab: 'config' } }));
-      return;
-    }
-    if (id === 'fila') {
-      runAfterMobileNavClose(() => navigate('/admin/queue'));
-      return;
-    }
-    if (id === 'vendas') {
-      runAfterMobileNavClose(() => navigate('/admin/orders'));
-      return;
-    }
-    if (id === 'cardapio') {
-      runAfterMobileNavClose(() => {
-        if (storeSlug) navigate(`/${storeSlug}`);
-      });
-      return;
-    }
-    if (id === 'destaques') {
-      runAfterMobileNavClose(() => navigate('/admin/highlights'));
-      return;
-    }
-    if (id === 'motoboys' && !canUseMotoboys) {
-      runAfterMobileNavClose(() => navigate('/admin/renewal?focus=pro'));
-      return;
-    }
-    runAfterMobileNavClose(() => navigate('/admin/dashboard', { state: { activeTab: id } }));
+    runAfterMobileNavClose(() => selectItem(id));
   };
 
-  const accountActions = [
-    ...(!isOperatorUser
-      ? [{
-          section: 'Painel',
-          id: 'summary',
-          label: 'Resumo da operação',
-          description: 'Visão geral da loja, vendas e atalhos do painel.',
-          icon: <ChartBar size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
-        }]
-      : []),
-    {
-      section: 'Pedidos',
-      id: 'queue',
-      label: 'Pedidos em operação',
-      description: 'Acompanhe fila, produção e pedidos aguardando ação.',
-      icon: <CheckSquare size={22} weight="duotone" />,
-      onClick: () => navigate('/admin/queue'),
-    },
-    ...(!isOperatorUser
-      ? [{
-          section: 'Pedidos',
-          id: 'orders',
-          label: 'Histórico de pedidos',
-          description: 'Pedidos finalizados, filtros e buscas da operação.',
-          icon: <ClipboardText size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/orders'),
-        }]
-      : []),
-    ...(!isOperatorUser
-      ? [{
-          section: 'Pedidos',
-          id: 'sales',
-          label: 'Vendas concluídas',
-          description: 'Atalho para a fila com pedidos já finalizados.',
-          icon: <ClipboardText size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/queue', { state: { activeTab: 'completed' } }),
-        }]
-      : []),
-    ...(!isOperatorUser
-      ? [{
-          section: 'Pedidos',
-          id: 'reviews',
-          label: 'Avaliações',
-          description: 'Notas e comentários dos clientes por pedido.',
-          icon: <Star size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'avaliacoes' } }),
-        }]
-      : []),
-    ...(storeSlug
-      ? [{
-          section: 'Loja',
-          id: 'storefront',
-          label: 'Minha vitrine',
-          description: 'Abra a loja pública sem sair da operação.',
-          icon: <ShoppingCart size={22} weight="duotone" />,
-          onClick: () => navigate(`/${storeSlug}`),
-        }]
-      : []),
-    {
-      section: 'Loja',
-      id: 'products',
-      label: 'Produtos',
-      description: 'Abra o catálogo e ajustes da vitrine.',
-      icon: <Package size={22} weight="duotone" />,
-      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
-    },
-    {
-      section: 'Loja',
-      id: 'printer',
-      label: 'Impressora',
-      description: 'Configure a impressora Bluetooth deste aparelho.',
-      icon: <Printer size={22} weight="duotone" />,
-      onClick: () => navigate('/admin/dashboard?tab=config&section=printer'),
-    },
-    ...(!isOperatorUser
-      ? [{
-          section: 'Loja',
-          id: 'stock',
-          label: 'Estoque',
-          description: 'Monitore níveis, alertas e movimentações dos produtos.',
-          icon: <Package size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'estoque' } }),
-        }]
-      : []),
-    ...(!isOperatorUser
-      ? [{
-          section: 'Loja',
-          id: 'highlights',
-          label: 'Destaques',
-          description: 'Solicite e acompanhe campanhas de visibilidade da loja.',
-          icon: <Star size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/highlights'),
-        }]
-      : []),
-    ...(!isOperatorUser
-      ? [{
-          section: 'Financeiro',
-          id: 'subscription',
-          label: 'Minha assinatura',
-          description: 'Controle assinatura, ciclo e renovação da loja.',
-          icon: <CreditCard size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'pagamentos' } }),
-        }]
-      : []),
-    ...(!isOperatorUser
-      ? [{
-          section: 'Financeiro',
-          id: 'gateway',
-          label: 'Pagamentos online',
-          description: 'Conecte e acompanhe Pix, crédito e débito online.',
-          icon: <CreditCard size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'gateway' } }),
-        }]
-      : []),
-    ...(!isOperatorUser
-      ? [{
-          section: 'Operação',
-          id: 'condominiums',
-          label: 'Condomínios',
-          description: 'Gerencie feiras, vínculos e aprovações da operação.',
-          icon: <Buildings size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'condominios' } }),
-        }]
-      : []),
-    ...(!isOperatorUser
-      ? [{
-          section: 'Operação',
-          id: 'destinations',
-          label: 'Destinos',
-          description: 'Solicite presença em chalés e pousadas atendidos pela loja.',
-          icon: <Compass size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'destinos' } }),
-        }]
-      : []),
-    ...(canUseMotoboys && ['ADMIN', 'LOJISTA'].includes(userRole)
-      ? [{
-          section: 'Operação',
-          id: 'motoboys',
-          label: 'Entregadores',
-          description: 'Gestão de equipe, repasses e vínculo das entregas.',
-          icon: <Scooter size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/motoboys'),
-        }]
-      : []),
-    ...(!isOperatorUser
-      ? [{
-          section: 'Operação',
-          id: 'users',
-          label: 'Usuários',
-          description: 'Cadastre e gerencie acessos de admin e operador da loja.',
-          icon: <UsersThree size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'usuarios' } }),
-        }]
-      : []),
-    ...(!isOperatorUser
-      ? [{
-          section: 'Operação',
-          id: 'settings',
-          label: 'Configurações da loja',
-          description: 'Marca, atendimento e ajustes principais da operação.',
-          icon: <Gear size={22} weight="duotone" />,
-          onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'config' } }),
-        }]
-      : []),
-    {
+  // Conta enxuta (decisão 29/08): só o que é de conta — assinatura, senha, MFA e
+  // sair. Os 15 atalhos de navegação que duplicavam o menu moram no drawer
+  // principal; nenhum destino deixou de existir.
+  const accountActions = getAdminAccountItems(userRole).map((item) => {
+    const Icon = item.icon;
+    return {
       section: 'Conta',
-      id: 'password',
-      label: 'Trocar senha',
-      description: 'Atualize a senha deste acesso sem sair da operação.',
-      icon: <LockKey size={22} weight="duotone" />,
-      onClick: () => window.dispatchEvent(new CustomEvent('admin:open-change-password')),
-    },
-    {
-      section: 'Conta',
-      id: 'logout',
-      label: 'Sair',
-      description: '',
-      icon: <SignOut size={22} weight="duotone" />,
+      id: item.id,
+      label: item.label,
+      description: item.description || '',
+      icon: <Icon size={22} weight="duotone" />,
       onClick: () => {
-        markManualLogoutRedirect('admin', '/hub');
-        logout();
-        navigate('/hub', { replace: true });
+        setAccountDrawerOpen(false);
+        selectItem(item.id);
       },
-      tone: 'danger' as const,
-    },
-  ];
+      ...(item.tone === 'danger' ? { tone: 'danger' as const } : {}),
+    };
+  });
 
   return (
     <div className="ds-admin-bg min-h-screen overflow-x-clip pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-0">
@@ -478,7 +192,7 @@ export function AdminLayout({
               </button>
             </div>
             <div className="pt-2 space-y-0.5 flex-1 overflow-y-auto">
-              {groupedMobileSections.map((section: any) => {
+              {groupedMobileSections.filter((section: any) => section.type !== 'logout').map((section: any) => {
                 if (section.type === 'item') {
                   const item = section.item;
                   const Icon = item.icon;
@@ -566,10 +280,8 @@ export function AdminLayout({
             <button
               type="button"
               onClick={() => {
-                markManualLogoutRedirect('admin', '/hub');
-                logout();
                 setMobileNavOpen(false);
-                navigate('/hub', { replace: true });
+                navLogout();
               }}
               className="mt-3 w-full min-h-11 px-3 py-2.5 rounded-xl border border-rose-500/[0.22] bg-rose-500/[0.1] text-rose-400 text-sm font-semibold flex items-center justify-center gap-2 transition-colors hover:bg-rose-500/[0.16] active:scale-[0.98]"
             >

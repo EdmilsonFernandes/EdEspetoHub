@@ -102,10 +102,10 @@ export function ChargeSheet({
       } else if (active && active.status === 'PAID') {
         setCharge(active);
         setPhase('paid');
-      } else if (active && (active.status === 'EXPIRED' || active.status === 'CANCELED' || active.status === 'FAILED')) {
-        setCharge(active);
-        setPhase('expired');
       } else {
+        // Cobrança morta (expirada/cancelada/recusada) é HISTÓRICO, não muro —
+        // o sheet abre na escolha pronta pra cobrar de novo (bug do loop 29/08:
+        // "Expirou ou foi cancelada" reaparecia pra sempre em pedido antigo).
         setCharge(null);
         setPhase('choose');
       }
@@ -179,15 +179,8 @@ export function ChargeSheet({
     };
   }, [phase, onClose]);
 
-  /** (declarado ANTES dos useMemos que o usam — TDZ quebrou prod 29/08) */
-  const parseAmount = (): number | null => {
-    const raw = String(amountInput || '').trim().replace(',', '.');
-    const value = Number(raw);
-    if (!Number.isFinite(value) || value <= 0) return null;
-    if (Math.round(value * 100) !== value * 100) return null;
-    return value;
-  };
-
+  // (ANTES do efeito que o lê nas deps — deps de useEffect avaliam no render;
+  // mesma classe de TDZ que quebrou prod 29/08 no parseAmount)
   const countdown = useMemo(() => {
     if (!charge?.expiresAt) return null;
     const diff = new Date(charge.expiresAt).getTime() - now;
@@ -197,6 +190,25 @@ export function ChargeSheet({
     const ss = String(totalSeconds % 60).padStart(2, '0');
     return `${mm}:${ss}`;
   }, [charge?.expiresAt, now]);
+
+  // Countdown zerou = cobrança morreu (MP cancela sozinho) — estado transitório
+  // com retry REAL (volta pra escolha; nunca fica preso no muro)
+  useEffect(() => {
+    if ((phase === 'pix' || phase === 'point') && countdown === '00:00') {
+      stopPolling();
+      setCharge(null);
+      setPhase('expired');
+    }
+  }, [countdown, phase, stopPolling]);
+
+  /** (declarado ANTES dos useMemos que o usam — TDZ quebrou prod 29/08) */
+  const parseAmount = (): number | null => {
+    const raw = String(amountInput || '').trim().replace(',', '.');
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value <= 0) return null;
+    if (Math.round(value * 100) !== value * 100) return null;
+    return value;
+  };
 
   /** Pix sem integração: payload BR Code da chave da loja (reuso do fluxo antigo). */
   const pixLojaPayload = useMemo(() => {
@@ -318,7 +330,7 @@ export function ChargeSheet({
       <span className="text-[26px] leading-none text-[var(--jnc-primary,#2f9df7)]">{icon}</span>
       <span className="text-sm font-black tracking-tight text-slate-900">{label}</span>
       <span className="text-[10.5px] font-semibold leading-tight text-slate-500">
-        {enabled ? sub : 'conecte o MP'}
+        {enabled ? sub : caps ? 'conecte o MP' : 'reconectando…'}
       </span>
     </button>
   );
@@ -382,12 +394,25 @@ export function ChargeSheet({
         ) : null}
 
         {phase === 'expired' ? (
-          <div className="flex min-h-[180px] flex-col items-center justify-center gap-3 text-center">
-            <XCircle size={44} weight="fill" className="text-amber-500" />
-            <p className="text-lg font-black tracking-tight text-slate-900">Cobrança encerrada</p>
-            <p className="max-w-[280px] text-sm font-semibold text-slate-500">
-              Expirou ou foi cancelada — pode cobrar de novo quando quiser.
+          <div className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-3xl border border-amber-100 bg-[linear-gradient(160deg,#fffbeb,#fef3c7)] px-6 text-center">
+            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-amber-100">
+              <XCircle size={30} weight="duotone" className="text-amber-600" />
+            </span>
+            <p className="text-lg font-black tracking-tight text-amber-900">Tempo esgotado</p>
+            <p className="max-w-[280px] text-sm font-semibold leading-relaxed text-amber-800/80">
+              A cobrança de 5 minutos expirou sem pagamento — nada foi cobrado do cliente.
             </p>
+            <Button
+              variant="primary"
+              size="md"
+              className="mt-1 w-full max-w-[280px]"
+              onClick={() => {
+                setCharge(null);
+                setPhase('choose');
+              }}
+            >
+              <ArrowsClockwise size={16} /> Gerar nova cobrança
+            </Button>
           </div>
         ) : null}
 
@@ -449,6 +474,28 @@ export function ChargeSheet({
 
             {phase !== 'cash-confirm' ? (
               <>
+              {caps ? (
+                <div
+                  className={`flex items-center gap-2 rounded-2xl border px-3 py-2 text-[11px] font-bold ${
+                    caps.pix
+                      ? 'border-emerald-100 bg-emerald-50/70 text-emerald-800'
+                      : 'border-amber-100 bg-amber-50/70 text-amber-800'
+                  }`}
+                >
+                  <span className={`h-2 w-2 rounded-full ${caps.pix ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  {caps.pix
+                    ? 'Mercado Pago conectado — Pix e maquininha ativos nesta loja.'
+                    : 'Sem Mercado Pago conectado — Pix MP e maquininha desativados (Dinheiro funciona). Conecte em Configurações → Gateway.'}
+                </div>
+              ) : phase === 'choose' ? (
+                <button
+                  type="button"
+                  onClick={() => loadStatus(false)}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] font-bold text-slate-500 active:scale-[0.99]"
+                >
+                  <ArrowsClockwise size={13} /> Não consegui confirmar a conexão Mercado Pago — tocar para tentar de novo
+                </button>
+              ) : null}
               <div className="flex gap-2.5">
                 {methodButton(
                   'pix',

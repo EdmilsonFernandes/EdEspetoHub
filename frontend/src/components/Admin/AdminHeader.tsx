@@ -281,6 +281,20 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
     };
   }, []);
 
+  // Ação "Segurança da conta" do drawer de Conta (adminNavigation) — antes só
+  // existia no menu do avatar do header.
+  useEffect(() => {
+    const onOpenMfa = () => {
+      setOpenPlanMenu(false);
+      setOpenUserMenu(false);
+      setMfaPanelOpen(true);
+    };
+    window.addEventListener('admin:open-mfa', onOpenMfa as EventListener);
+    return () => {
+      window.removeEventListener('admin:open-mfa', onOpenMfa as EventListener);
+    };
+  }, []);
+
   useEffect(() => {
     let frame = 0;
     let ticking = false;
