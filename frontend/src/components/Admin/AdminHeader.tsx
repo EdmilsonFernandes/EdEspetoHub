@@ -491,17 +491,18 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
       </div>
 
       <div className="mt-2 md:hidden rounded-2xl border border-slate-200 bg-white px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 sm:gap-3">
-        {/* ☰ abre o menu completo da operação (drawer principal) — antes o avatar
-            era o único botão nesta barra e, com a Conta enxuta, parecia que o
-            menu tinha sumido fora do dashboard (relato 29/08). */}
+        {/* ☰ abre o menu completo da operação (drawer principal). Botão de
+            DESTAQUE (relato 29/08: "minimalista e difícil de ver") — o menu é a
+            ação mais importante da barra; Conta fica no avatar. */}
         <button
           type="button"
           onClick={() => window.dispatchEvent(new CustomEvent('admin:open-global-nav'))}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100 transition-colors"
+          className="inline-flex h-10 items-center gap-2 rounded-xl bg-brand-primary px-4 text-sm font-bold text-white shadow-[0_8px_20px_-10px_rgba(47,157,247,0.8)] transition active:scale-[0.98]"
           title="Menu da operação"
           aria-label="Abrir menu da operação"
         >
           <List size={18} weight="bold" />
+          Menu
         </button>
         <div className="flex items-center gap-2 sm:gap-3">
         <button

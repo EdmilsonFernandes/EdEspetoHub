@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChartBar, ChefHat, CurrencyDollar, DotsThreeCircle, Package, SignOut, UserCircle } from '@phosphor-icons/react';
+import { ChartBar, ChefHat, CurrencyDollar, DotsThreeCircle, List, Package, SignOut, UserCircle } from '@phosphor-icons/react';
 import { hexToRgba } from '../utils/hexToRgba';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -284,13 +284,15 @@ export function AdminMobileBottomNav() {
   const navItems = [
     ...items,
     {
-      id: 'account',
-      label: 'Conta',
-      icon: UserCircle,
+      // Esquema 29/08: o último slot do rodapé é o MENU (☰ abre o drawer
+      // completo da operação) — antes era "Conta", que já vive no avatar.
+      id: 'menu',
+      label: 'Menu',
+      icon: List,
       active: false,
       onClick: () => {
         if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('admin:open-account-drawer'));
+          window.dispatchEvent(new CustomEvent('admin:open-global-nav'));
         }
       },
     },
