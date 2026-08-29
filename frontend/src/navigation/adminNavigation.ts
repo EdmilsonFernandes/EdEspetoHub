@@ -472,14 +472,14 @@ export const getAdminNavItems = ({
   });
 };
 
-export type AdminNavSection =
-  | { type: 'item'; item: AdminNavItem }
-  | { type: 'group'; id: string; label: string; children: AdminNavItem[] }
+export type AdminNavSection<T = AdminNavItem> =
+  | { type: 'item'; item: T }
+  | { type: 'group'; id: string; label: string; children: T[] }
   | { type: 'logout' };
 
-export type AdminNavGroupSection = Extract<AdminNavSection, { type: 'group' }>;
+export type AdminNavGroupSection<T = AdminNavItem> = Extract<AdminNavSection<T>, { type: 'group' }>;
 
-export const isAdminNavGroupSection = (section: AdminNavSection): section is AdminNavGroupSection =>
+export const isAdminNavGroupSection = <T>(section: AdminNavSection<T>): section is AdminNavGroupSection<T> =>
   section.type === 'group';
 
 const GROUP_ITEM_ORDER: Record<string, string[]> = {
@@ -498,7 +498,7 @@ const GROUP_ITEM_ORDER: Record<string, string[]> = {
  * AdminLayout — até então duas cópias com labels diferentes ("Loja" vs "Catálogo").
  * Itens sem grupo conhecido não são descartados silenciosamente: vão pro fim.
  */
-export const groupAdminNavItems = (items: AdminNavItem[]): AdminNavSection[] => {
+export const groupAdminNavItems = <T extends { id: string }>(items: T[]): AdminNavSection<T>[] => {
   const byId = new Map(items.map((item) => [item.id, item]));
   const consumed = new Set<string>();
   const consume = (id: string) => {
@@ -509,9 +509,9 @@ export const groupAdminNavItems = (items: AdminNavItem[]): AdminNavSection[] => 
     }
     return item;
   };
-  const consumeMany = (ids: string[]) => ids.map(consume).filter(Boolean) as AdminNavItem[];
+  const consumeMany = (ids: string[]) => ids.map(consume).filter(Boolean) as T[];
 
-  const sections: AdminNavSection[] = [];
+  const sections: AdminNavSection<T>[] = [];
   const resumo = consume('resumo');
   if (resumo) sections.push({ type: 'item', item: resumo });
 

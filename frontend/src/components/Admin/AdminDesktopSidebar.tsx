@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CaretDown, SignOut } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../common/PlatformTrustFooter';
+import { groupAdminNavItems, isAdminNavGroupSection, type AdminNavGroupSection } from '../../navigation/adminNavigation';
 
 interface SidebarItem {
   id: string;
@@ -38,56 +39,14 @@ export function AdminDesktopSidebar({
     [items, allItemIds]
   );
 
-  const groupedSections = useMemo(() => {
-    const byId = new Map((items || []).map((item) => [item.id, item]));
-    const consumeIds = new Set<string>();
-    const consume = (id: string) => {
-      if (byId.has(id)) consumeIds.add(id);
-      return byId.get(id);
-    };
-    const consumeMany = (ids: string[]) => ids.map(consume).filter(Boolean);
-    const sections: any[] = [];
-
-    const principal = consume('resumo');
-    if (principal) sections.push({ type: 'item', item: principal });
-
-    const operacao = consumeMany(['fila', 'pedidos', 'avaliacoes']);
-    if (operacao.length) sections.push({ type: 'group', id: 'operacao', label: 'Operação', children: operacao });
-
-    const catalogo = consumeMany(['produtos', 'estoque', 'cardapio']);
-    if (catalogo.length) sections.push({ type: 'group', id: 'catalogo', label: 'Loja', children: catalogo });
-
-    const crescer = consumeMany(['destaques', 'destinos', 'condominios']);
-    if (crescer.length) sections.push({ type: 'group', id: 'crescer', label: 'Crescer', children: crescer });
-
-    const financeiro = consumeMany(['pagamentos', 'gateway']);
-    if (financeiro.length) sections.push({ type: 'group', id: 'financeiro', label: 'Financeiro', children: financeiro });
-
-    const equipe = consumeMany(['motoboys', 'usuarios']);
-    if (equipe.length) sections.push({ type: 'group', id: 'equipe', label: 'Equipe', children: equipe });
-
-    // Configurações como submenu (lojista): se houver sub-itens cfg-*, o item
-    // 'config' (hub) é consumido/ocultado aqui, mas segue no array para a paleta
-    // de comandos e para o activeNavItem. Operador (sem cfg-*) vê 'config' como item único.
-    const configChildren = (items || []).filter((item) => item.id.startsWith('cfg-'));
-    if (configChildren.length) {
-      consume('config');
-      configChildren.forEach((item) => consumeIds.add(item.id));
-      sections.push({ type: 'group', id: 'config', label: 'Ajustes', children: configChildren });
-    } else {
-      const sistema = consume('config');
-      if (sistema) sections.push({ type: 'item', item: sistema });
-    }
-    sections.push({ type: 'logout' });
-
-    const leftovers = (items || []).filter((item) => !consumeIds.has(item.id));
-    leftovers.forEach((item) => sections.push({ type: 'item', item }));
-    return sections;
-  }, [items]);
+  // Agrupamento da fonte única — antes era hard-coded aqui (cópia nº 6) e não
+  // conhecia 'cupons' no grupo Crescer, que renderizava DEPOIS do botão Sair.
+  const groupedSections = useMemo(() => groupAdminNavItems(items || []), [items]);
 
   const activeGroupId = useMemo(() => {
     const hit = groupedSections.find(
-      (section) => section.type === 'group' && section.children.some((child: SidebarItem) => child.id === activeId)
+      (section): section is AdminNavGroupSection<SidebarItem> =>
+        isAdminNavGroupSection(section) && section.children.some((child) => child.id === activeId)
     );
     return hit?.id || '';
   }, [groupedSections, activeId]);

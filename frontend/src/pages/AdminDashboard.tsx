@@ -2769,25 +2769,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, [location.state, navigate]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const media = window.matchMedia('(min-width: 1024px)');
-    const onChange = () => setIsDesktopLayout(media.matches);
-    onChange();
-    if (media.addEventListener) {
-      media.addEventListener('change', onChange);
-    } else {
-      media.addListener(onChange);
-    }
-    return () => {
-      if (media.removeEventListener) {
-        media.removeEventListener('change', onChange);
-      } else {
-        media.removeListener(onChange);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const isShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k';
       if (!isShortcut) return;
