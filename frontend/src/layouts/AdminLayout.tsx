@@ -9,7 +9,7 @@ import { PlatformTrustFooter } from '../components/common/PlatformTrustFooter';
 import { ContextSideDrawer } from '../components/common/ContextSideDrawer';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { hexToRgba } from '../utils/hexToRgba';
-import { getAdminAccountItems, isAdminNavGroupSection, type AdminNavGroupSection } from '../navigation/adminNavigation';
+import { getAdminAccountItems, getAdminNavGroup, isAdminNavGroupSection, type AdminNavGroupSection } from '../navigation/adminNavigation';
 import { useAdminNav } from '../navigation/useAdminNav';
 
 interface AdminLayoutProps {
@@ -289,7 +289,15 @@ export function AdminLayout({
                       }`}
                       aria-expanded={isOpen}
                     >
-                      <span>{section.label}</span>
+                      <span className="inline-flex min-w-0 items-center gap-1.5">
+                        {(() => {
+                          const GroupIcon = getAdminNavGroup(section.id)?.icon;
+                          return GroupIcon ? (
+                            <GroupIcon size={13} weight="duotone" className="shrink-0" />
+                          ) : null;
+                        })()}
+                        {section.label}
+                      </span>
                       <CaretDown size={12} weight="bold" className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {isOpen && (

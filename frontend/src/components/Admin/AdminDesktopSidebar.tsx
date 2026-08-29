@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CaretDown, SignOut } from '@phosphor-icons/react';
 import { PlatformTrustFooter } from '../common/PlatformTrustFooter';
-import { groupAdminNavItems, isAdminNavGroupSection, type AdminNavGroupSection } from '../../navigation/adminNavigation';
+import {
+  getAdminNavGroup,
+  groupAdminNavItems,
+  isAdminNavGroupSection,
+  type AdminNavGroupSection,
+} from '../../navigation/adminNavigation';
 
 interface SidebarItem {
   id: string;
@@ -199,7 +204,10 @@ export function AdminDesktopSidebar({
             }
             if (section.type === 'item') return renderNavItem(section.item);
             const isSingleItem = section.children.length === 1;
-            const isOpen = isSingleItem || Boolean(openGroups?.[section.id]);
+            // Grupos ABERTOS por padrão (relato 29/08: fechados viravam "lista
+            // de pontos de interrogação"); localStorage só fecha o que o
+            // lojista fechou de propósito.
+            const isOpen = isSingleItem || openGroups?.[section.id] !== false;
             const hasActiveChild = section.children.some((child: SidebarItem) => child.id === activeId);
             return (
               <div key={section.id} className="space-y-1">
@@ -211,7 +219,7 @@ export function AdminDesktopSidebar({
                   <button
                     type="button"
                     onClick={() => setOpenGroups((prev) => ({ ...prev, [section.id]: !isOpen }))}
-                    className={`w-full min-h-11 rounded-[1rem] border px-3 text-left text-[12px] font-bold transition flex items-center justify-between ${
+                    className={`w-full min-h-11 rounded-[1rem] border px-3 text-left text-[12px] font-bold transition flex items-center justify-between gap-2 ${
                       hasActiveChild
                         ? 'border-[#2f9df7]/20 bg-white/86 text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)]'
                         : 'border-transparent bg-transparent text-slate-500 hover:border-white/80 hover:bg-white/80 hover:text-slate-950'
@@ -219,11 +227,19 @@ export function AdminDesktopSidebar({
                     aria-expanded={isOpen}
                     aria-controls={`sidebar-group-${section.id}`}
                   >
-                    <span>{section.label}</span>
+                    <span className="inline-flex min-w-0 items-center gap-2">
+                      {(() => {
+                        const GroupIcon = getAdminNavGroup(section.id)?.icon;
+                        return GroupIcon ? (
+                          <GroupIcon size={14} weight="duotone" className="shrink-0 text-[#1b77ba]" />
+                        ) : null;
+                      })()}
+                      {section.label}
+                    </span>
                     <CaretDown
                       size={14}
                       weight="bold"
-                      className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                      className={`shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
                     />
                   </button>
                 )}

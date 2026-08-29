@@ -493,7 +493,7 @@ export function AdminMobileBottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-[220] pointer-events-none transition-transform duration-300 ease-in-out flex justify-center"
+      className="fixed inset-x-0 bottom-0 z-[220] pointer-events-none transition-transform duration-300 ease-in-out flex justify-center lg:hidden"
       style={{
         transform: effectiveVisibility ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
       }}

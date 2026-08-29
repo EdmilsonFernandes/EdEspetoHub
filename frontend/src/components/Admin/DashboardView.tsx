@@ -2421,7 +2421,7 @@ export const DashboardView = ({
             return (
               <div
                 key={customer.id || customer.name}
-                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 border-l-4 px-4 py-3 shadow-sm ${accentTone}`}
+                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3 shadow-sm ${accentTone}`}
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-700">

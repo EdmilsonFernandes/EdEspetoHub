@@ -12,10 +12,12 @@ import {
   Clock,
   Compass,
   CreditCard,
+  CurrencyDollar,
   DeviceMobile,
   ForkKnife,
   Gear,
   IdentificationCard,
+  Lightning,
   LockKey,
   Package,
   PlugsConnected,
@@ -29,7 +31,9 @@ import {
   Star,
   Storefront,
   Ticket,
+  TrendUp,
   Truck,
+  UserCircle,
   UsersThree,
 } from '@phosphor-icons/react';
 
@@ -83,17 +87,25 @@ export type AdminNavItem = {
   operatorIcon?: any;
 };
 
-export const ADMIN_NAV_GROUPS: Array<{ id: AdminNavGroupId; label: string; order: number }> = [
-  { id: 'operacao', label: 'Operação', order: 1 },
-  { id: 'loja', label: 'Loja', order: 2 },
-  { id: 'crescer', label: 'Crescer', order: 3 },
-  { id: 'financeiro', label: 'Financeiro', order: 4 },
-  { id: 'equipe', label: 'Equipe', order: 5 },
-  { id: 'ajustes', label: 'Ajustes', order: 6 },
-  { id: 'conta', label: 'Conta', order: 7 },
+export const ADMIN_NAV_GROUPS: Array<{
+  id: AdminNavGroupId;
+  label: string;
+  order: number;
+  /** Ícone do cabeçalho do grupo — sem ele, grupo fechado vira ponto de interrogação. */
+  icon: any;
+}> = [
+  { id: 'operacao', label: 'Operação', order: 1, icon: Lightning },
+  { id: 'loja', label: 'Loja', order: 2, icon: Storefront },
+  { id: 'crescer', label: 'Crescer', order: 3, icon: TrendUp },
+  { id: 'financeiro', label: 'Financeiro', order: 4, icon: CurrencyDollar },
+  { id: 'equipe', label: 'Equipe', order: 5, icon: UsersThree },
+  { id: 'ajustes', label: 'Ajustes', order: 6, icon: Gear },
+  { id: 'conta', label: 'Conta', order: 7, icon: UserCircle },
 ];
 
 const STORE_SIDES: AdminNavSurface[] = ['sidebar', 'drawer', 'palette'];
+
+export const getAdminNavGroup = (id: string) => ADMIN_NAV_GROUPS.find((group) => group.id === id);
 
 export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   // — Operação —
