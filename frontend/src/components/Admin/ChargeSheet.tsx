@@ -1,0 +1,525 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BottomSheet } from '../ui/BottomSheet';
+import { Button } from '../ui/Button';
+import {
+  QrCode,
+  CreditCard,
+  Money,
+  SpinnerGap,
+  CheckCircle,
+  XCircle,
+  CopySimple,
+  DeviceMobileCamera,
+  ArrowsClockwise,
+} from '@phosphor-icons/react';
+import { orderService } from '../../services/orderService';
+
+/**
+ * SDD cobranca-balcao — momento do pagamento no balcão (fila).
+ * Pix da loja · Cartão na maquininha Point · Dinheiro — valor ajustável
+ * (desconto/acréscimo), expira em 5 min, um método por pedido.
+ * Crédito/débito/parcelas o cliente escolhe no terminal (design D3).
+ */
+
+type ChargeStatusPayload = {
+  orderId: string;
+  paymentStatus: string;
+  suggestedAmount: number;
+  preselectedMethod: string | null;
+  charge: {
+    id: string;
+    method: string;
+    status: string;
+    amount: number;
+    terminalId: string | null;
+    qrCodeText: string | null;
+    qrCodeBase64: string | null;
+    expiresAt: string | null;
+  } | null;
+  capabilities: { pix: boolean; point: boolean; cash: boolean; reason: string | null };
+};
+
+type Terminal = { id: string; serialNumber: string | null; integrationReady: boolean };
+
+type Phase = 'loading' | 'choose' | 'creating' | 'pix' | 'point' | 'cash-confirm' | 'paid' | 'expired';
+
+const formatBRL = (value: number) =>
+  value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+const shortSerial = (terminalId: string | null) => {
+  const serial = String(terminalId || '').split('__').pop() || '';
+  return serial ? serial.slice(-6) : '—';
+};
+
+export function ChargeSheet({
+  open,
+  onClose,
+  storeId,
+  order,
+  onPaid,
+}: {
+  open: boolean;
+  onClose: () => void;
+  storeId: string;
+  order: any;
+  onPaid?: (orderId: string) => void;
+}) {
+  const [phase, setPhase] = useState<Phase>('loading');
+  const [payload, setPayload] = useState<ChargeStatusPayload | null>(null);
+  const [amountInput, setAmountInput] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [terminals, setTerminals] = useState<Terminal[] | null>(null);
+  const [charge, setCharge] = useState<ChargeStatusPayload['charge']>(null);
+  const [now, setNow] = useState(Date.now());
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const orderId = String(order?.id || '');
+  const orderTotal = Number(order?.total || payload?.suggestedAmount || 0);
+
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
+  const applyStatus = useCallback(
+    (data: ChargeStatusPayload, opts?: { silent?: boolean }) => {
+      setPayload(data);
+      if (!opts?.silent) setAmountInput(String(data.suggestedAmount.toFixed(2)).replace('.', ','));
+      const active = data.charge;
+      if (active && active.status === 'PENDING' && active.expiresAt && new Date(active.expiresAt).getTime() > Date.now()) {
+        setCharge(active);
+        setPhase(active.method === 'pix' ? 'pix' : active.method === 'point' ? 'point' : 'choose');
+      } else if (active && active.status === 'PAID') {
+        setCharge(active);
+        setPhase('paid');
+      } else if (active && (active.status === 'EXPIRED' || active.status === 'CANCELED' || active.status === 'FAILED')) {
+        setCharge(active);
+        setPhase('expired');
+      } else {
+        setCharge(null);
+        setPhase('choose');
+      }
+    },
+    []
+  );
+
+  const loadStatus = useCallback(
+    async (silent = false) => {
+      if (!orderId) return null;
+      try {
+        const data: any = await orderService.getChargeStatus(storeId, orderId);
+        applyStatus(data as ChargeStatusPayload, { silent });
+        if (!silent) setError(null);
+        return data;
+      } catch (err: any) {
+        if (!silent) {
+          setError(err?.message || 'Não foi possível carregar a cobrança agora.');
+          setPhase('choose');
+        }
+        return null;
+      }
+    },
+    [orderId, storeId, applyStatus]
+  );
+
+  useEffect(() => {
+    if (!open) {
+      stopPolling();
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      setError(null);
+      setTerminals(null);
+      setPayload(null);
+      setCharge(null);
+      return;
+    }
+    setPhase('loading');
+    loadStatus(false);
+  }, [open, loadStatus, stopPolling]);
+
+  // Polling da cobrança ativa (Pix/Point): confirma mesmo se o webhook atrasar (REQ-21 na UI)
+  useEffect(() => {
+    if (!open || (phase !== 'pix' && phase !== 'point')) {
+      stopPolling();
+      return;
+    }
+    pollRef.current = setInterval(() => {
+      setNow(Date.now());
+      loadStatus(true).then((data) => {
+        if (!data) return;
+        const active = (data as ChargeStatusPayload).charge;
+        if (active?.status === 'PAID') {
+          stopPolling();
+          setPhase('paid');
+          onPaid?.(orderId);
+        } else if (active && active.status !== 'PENDING') {
+          stopPolling();
+          setPhase('expired');
+        }
+      });
+    }, 4000);
+    return stopPolling;
+  }, [open, phase, loadStatus, stopPolling, onPaid, orderId]);
+
+  // Auto-fechar no pago (ritmo de balcão)
+  useEffect(() => {
+    if (phase !== 'paid') return;
+    closeTimerRef.current = setTimeout(() => onClose(), 1400);
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, [phase, onClose]);
+
+  const countdown = useMemo(() => {
+    if (!charge?.expiresAt) return null;
+    const diff = new Date(charge.expiresAt).getTime() - now;
+    if (diff <= 0) return '00:00';
+    const totalSeconds = Math.floor(diff / 1000);
+    const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const ss = String(totalSeconds % 60).padStart(2, '0');
+    return `${mm}:${ss}`;
+  }, [charge?.expiresAt, now]);
+
+  const parseAmount = (): number | null => {
+    const raw = String(amountInput || '').trim().replace(',', '.');
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value <= 0) return null;
+    if (Math.round(value * 100) !== value * 100) return null;
+    return value;
+  };
+
+  const adjustedDelta = useMemo(() => {
+    const amount = parseAmount();
+    if (amount === null || !payload) return 0;
+    return Math.round((amount - Number(payload.suggestedAmount)) * 100) / 100;
+  }, [amountInput, payload]);
+
+  const createCharge = async (method: 'pix' | 'point' | 'cash', terminalId?: string) => {
+    const amount = parseAmount();
+    if (amount === null) {
+      setError('Valor inválido — use um número maior que zero com até 2 casas decimais.');
+      return;
+    }
+    setError(null);
+    setPhase('creating');
+    try {
+      const result: any = await orderService.createCharge(storeId, orderId, {
+        method,
+        amount,
+        terminalId,
+      });
+      const active = result?.charge;
+      if (method === 'cash' || active?.status === 'PAID') {
+        setCharge(active || null);
+        setPhase('paid');
+        onPaid?.(orderId);
+        return;
+      }
+      setCharge(active || null);
+      setPhase(method === 'pix' ? 'pix' : 'point');
+      setTerminals(null);
+    } catch (err: any) {
+      const detailTerminals = (err?.details as any)?.terminals as Terminal[] | undefined;
+      if (detailTerminals?.length) {
+        setTerminals(detailTerminals);
+        setPhase('choose');
+        setError('Escolha a maquininha para enviar a cobrança.');
+        return;
+      }
+      setError(err?.message || 'Não foi possível criar a cobrança agora.');
+      setPhase('choose');
+    }
+  };
+
+  const cancelCharge = async () => {
+    try {
+      await orderService.cancelCharge(storeId, orderId);
+      setCharge(null);
+      setPhase('choose');
+      setError(null);
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível cancelar a cobrança.');
+    }
+  };
+
+  const copyPix = async () => {
+    if (!charge?.qrCodeText) return;
+    try {
+      await navigator.clipboard.writeText(charge.qrCodeText);
+      setError(null);
+    } catch {
+      setError('Não consegui copiar — segure e copie o código manualmente.');
+    }
+  };
+
+  const caps = payload?.capabilities;
+  const amount = parseAmount();
+  const canCharge = amount !== null && phase === 'choose';
+
+  const methodButton = (
+    key: 'pix' | 'point' | 'cash',
+    icon: React.ReactNode,
+    label: string,
+    sub: string,
+    enabled: boolean
+  ) => (
+    <button
+      key={key}
+      type="button"
+      disabled={!enabled || !canCharge}
+      onClick={() => {
+        if (key === 'cash') {
+          setPhase('cash-confirm');
+          return;
+        }
+        if (key === 'point' && terminals?.length) return; // seletor abaixo
+        createCharge(key);
+      }}
+      className={`jnc-ds-focus-ring group flex min-h-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl border-2 px-2 py-3 text-center transition active:scale-[0.97] ${
+        enabled && canCharge
+          ? 'border-slate-200 bg-white shadow-[0_10px_24px_-18px_rgba(15,23,42,0.45)] hover:border-[var(--jnc-primary,#2f9df7)] hover:shadow-[0_14px_28px_-16px_rgba(47,157,247,0.55)]'
+          : 'cursor-not-allowed border-slate-100 bg-slate-50 opacity-55'
+      }`}
+      aria-label={`Cobrar via ${label}`}
+    >
+      <span className="text-[26px] leading-none text-[var(--jnc-primary,#2f9df7)]">{icon}</span>
+      <span className="text-sm font-black tracking-tight text-slate-900">{label}</span>
+      <span className="text-[10.5px] font-semibold leading-tight text-slate-500">{sub}</span>
+    </button>
+  );
+
+  return (
+    <BottomSheet
+      open={open}
+      onClose={onClose}
+      title={
+        <span className="flex items-center gap-2">
+          <DeviceMobileCamera className="text-[var(--jnc-primary,#2f9df7)]" size={22} weight="duotone" />
+          Cobrar pedido
+        </span>
+      }
+      description={
+        order?.customerName ? `${String(order.customerName).slice(0, 40)} · ${formatBRL(orderTotal)}` : formatBRL(orderTotal)
+      }
+      footer={
+        phase === 'pix' || phase === 'point' ? (
+          <div className="flex w-full items-center gap-2">
+            <Button variant="secondary" size="md" className="flex-1" onClick={cancelCharge}>
+              Cancelar cobrança
+            </Button>
+            <Button variant="primary" size="md" className="flex-1" onClick={() => loadStatus(false)}>
+              <ArrowsClockwise size={16} /> Atualizar
+            </Button>
+          </div>
+        ) : phase === 'expired' ? (
+          <Button variant="primary" size="md" className="w-full" onClick={() => loadStatus(false)}>
+            Cobrar de novo
+          </Button>
+        ) : undefined
+      }
+    >
+      <div className="flex min-h-0 flex-col gap-4 overflow-y-auto px-5 pb-5 pt-4">
+        {phase === 'loading' ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 text-slate-500">
+            <SpinnerGap size={30} className="animate-spin text-[var(--jnc-primary,#2f9df7)]" />
+            <p className="text-sm font-semibold">Carregando cobrança…</p>
+          </div>
+        ) : null}
+
+        {phase === 'paid' ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 text-center">
+            <CheckCircle size={52} weight="fill" className="text-emerald-500" />
+            <p className="text-xl font-black tracking-tight text-slate-900">Pago!</p>
+            <p className="text-sm font-semibold text-slate-500">
+              {formatBRL(Number(charge?.amount || amount || 0))} recebidos via{' '}
+              {charge?.method === 'pix' ? 'Pix' : charge?.method === 'point' ? 'maquininha' : 'dinheiro'}.
+            </p>
+          </div>
+        ) : null}
+
+        {phase === 'expired' ? (
+          <div className="flex min-h-[180px] flex-col items-center justify-center gap-3 text-center">
+            <XCircle size={44} weight="fill" className="text-amber-500" />
+            <p className="text-lg font-black tracking-tight text-slate-900">Cobrança encerrada</p>
+            <p className="max-w-[280px] text-sm font-semibold text-slate-500">
+              Expirou ou foi cancelada — pode cobrar de novo quando quiser.
+            </p>
+          </div>
+        ) : null}
+
+        {phase === 'choose' || phase === 'creating' || phase === 'cash-confirm' ? (
+          <>
+            <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/80 p-4 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.5)]">
+              <label htmlFor="charge-amount" className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+                Valor a cobrar
+              </label>
+              <div className="mt-1.5 flex items-baseline gap-2">
+                <span className="text-lg font-black text-slate-400">R$</span>
+                <input
+                  id="charge-amount"
+                  inputMode="decimal"
+                  autoComplete="off"
+                  value={amountInput}
+                  onChange={(e) => setAmountInput(e.target.value.replace(/[^0-9,]/g, ''))}
+                  disabled={phase !== 'choose'}
+                  className="w-full border-0 bg-transparent p-0 text-3xl font-black tracking-tight text-slate-900 outline-none placeholder:text-slate-300 focus:ring-0"
+                  placeholder="0,00"
+                  aria-label="Valor a cobrar em reais"
+                />
+              </div>
+              <div className="mt-1.5 flex items-center justify-between gap-2">
+                <p className="text-[11px] font-semibold text-slate-400">
+                  Total do pedido: {formatBRL(Number(payload?.suggestedAmount || orderTotal))}
+                </p>
+                {adjustedDelta !== 0 ? (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10.5px] font-black ${
+                      adjustedDelta < 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                    }`}
+                  >
+                    {adjustedDelta < 0 ? 'desconto' : 'acréscimo'} {formatBRL(Math.abs(adjustedDelta))}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            {terminals?.length ? (
+              <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-3">
+                <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-sky-800">Escolha a maquininha</p>
+                <div className="flex flex-col gap-2">
+                  {terminals.map((terminal) => (
+                    <button
+                      key={terminal.id}
+                      type="button"
+                      disabled={phase === 'creating'}
+                      onClick={() => createCharge('point', terminal.id)}
+                      className="jnc-ds-touch jnc-ds-focus-ring flex min-h-11 items-center justify-between rounded-xl border border-sky-200 bg-white px-3 py-2 text-left text-sm font-bold text-slate-800 active:scale-[0.98]"
+                    >
+                      Maquininha …{shortSerial(terminal.id)}
+                      <CreditCard size={18} className="text-[var(--jnc-primary,#2f9df7)]" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {phase !== 'cash-confirm' ? (
+              <div className="flex gap-2.5">
+                {methodButton(
+                  'pix',
+                  <QrCode weight="duotone" />,
+                  'Pix',
+                  caps?.pix === false ? 'conecte o MP' : 'QR na hora',
+                  Boolean(caps?.pix)
+                )}
+                {methodButton(
+                  'point',
+                  <CreditCard weight="duotone" />,
+                  'Cartão',
+                  caps?.point === false ? 'conecte o MP' : 'na maquininha',
+                  Boolean(caps?.point)
+                )}
+                {methodButton('cash', <Money weight="duotone" />, 'Dinheiro', 'registrar', true)}
+              </div>
+            ) : null}
+
+            {phase === 'cash-confirm' ? (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-center">
+                <p className="text-sm font-bold text-emerald-900">
+                  Confirmar recebimento de {formatBRL(Number(amount || 0))} em dinheiro?
+                </p>
+                <p className="mt-1 text-[11px] font-semibold text-emerald-700">
+                  Fica registrado quem recebeu e quando.
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <Button variant="secondary" size="md" className="flex-1" onClick={() => setPhase('choose')}>
+                    Voltar
+                  </Button>
+                  <Button variant="primary" size="md" className="flex-1" onClick={() => createCharge('cash')}>
+                    Confirmar
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
+            {caps && !caps.pix ? (
+              <p className="rounded-xl bg-slate-50 px-3 py-2 text-center text-[11px] font-semibold text-slate-500">
+                {caps.reason}
+              </p>
+            ) : null}
+          </>
+        ) : null}
+
+        {phase === 'creating' ? (
+          <div className="flex items-center justify-center gap-2 py-2 text-sm font-bold text-slate-500">
+            <SpinnerGap size={18} className="animate-spin text-[var(--jnc-primary,#2f9df7)]" />
+            Enviando cobrança…
+          </div>
+        ) : null}
+
+        {phase === 'pix' && charge ? (
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex w-full items-center justify-between rounded-2xl border border-amber-200 bg-[linear-gradient(135deg,#fff7ed,#ffedd5)] px-4 py-2.5">
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-amber-700">Aguardando Pix</p>
+              <span className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-sm font-black text-white tabular-nums">
+                {countdown}
+              </span>
+            </div>
+            {charge.qrCodeBase64 ? (
+              <div className="rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.6)]">
+                <img src={charge.qrCodeBase64} alt="QR Code Pix" className="h-56 w-56 object-contain" />
+              </div>
+            ) : (
+              <div className="flex h-56 w-56 items-center justify-center rounded-3xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-400">
+                QR indisponível
+              </div>
+            )}
+            {charge.qrCodeText ? (
+              <button
+                type="button"
+                onClick={copyPix}
+                className="jnc-ds-touch jnc-ds-focus-ring flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 active:scale-[0.98]"
+              >
+                <CopySimple size={16} /> Copiar código Pix
+              </button>
+            ) : null}
+            <p className="text-center text-[11px] font-semibold text-slate-400">
+              Peça para o cliente escanear e pagar. Confirma sozinho quando cair.
+            </p>
+          </div>
+        ) : null}
+
+        {phase === 'point' && charge ? (
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex w-full items-center justify-between rounded-2xl border border-sky-200 bg-[linear-gradient(135deg,#f0f9ff,#e0f2fe)] px-4 py-2.5">
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-sky-800">Aguardando cartão</p>
+              <span className="rounded-xl bg-gradient-to-r from-sky-500 to-[var(--jnc-primary,#2f9df7)] px-3 py-1 text-sm font-black text-white tabular-nums">
+                {countdown}
+              </span>
+            </div>
+            <div className="flex min-h-[180px] w-full flex-col items-center justify-center gap-2 rounded-3xl border border-sky-200 bg-white p-5 shadow-[0_18px_40px_-30px_rgba(47,157,247,0.7)]">
+              <CreditCard size={44} weight="duotone" className="animate-pulse text-[var(--jnc-primary,#2f9df7)]" />
+              <p className="text-lg font-black tracking-tight text-slate-900">
+                {formatBRL(Number(charge.amount))}
+              </p>
+              <p className="text-xs font-bold text-slate-500">
+                Enviado para a maquininha …{shortSerial(charge.terminalId)}
+              </p>
+              <p className="max-w-[260px] text-center text-[11px] font-semibold text-slate-400">
+                O cliente escolhe crédito, débito e parcelas no terminal.
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        {error ? (
+          <p className="rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-center text-xs font-bold text-rose-600">
+            {error}
+          </p>
+        ) : null}
+      </div>
+    </BottomSheet>
+  );
+}

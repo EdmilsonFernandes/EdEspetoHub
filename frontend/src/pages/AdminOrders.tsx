@@ -8,11 +8,12 @@ import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, fo
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
-import { Hash, Storefront, Truck, ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, UsersThree, CheckSquare, SquaresFour, Rows, Printer, MapPin, Phone, MagnifyingGlass } from '@phosphor-icons/react';
+import { Hash, Storefront, Truck, ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, UsersThree, CheckSquare, SquaresFour, Rows, Printer, MapPin, Phone, MagnifyingGlass, DeviceMobileCamera } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 import { PaymentAuditPanel } from '../components/Admin/PaymentAuditPanel';
+import { ChargeSheet } from '../components/Admin/ChargeSheet';
 import { PaymentTechnicalModal } from '../components/Admin/PaymentTechnicalModal';
 import { PostalShipmentModal } from '../components/Admin/PostalShipmentModal';
 import { Button } from '../components/ui/Button';
@@ -387,6 +388,7 @@ export function AdminOrders() {
     MANUAL_PAYMENT_METHODS.includes(String(order?.paymentMethod || '').toLowerCase()) &&
     String(order?.paymentStatus || '').toUpperCase() !== 'PAID';
   const [confirmingPaymentId, setConfirmingPaymentId] = useState<string | null>(null);
+  const [chargeOrder, setChargeOrder] = useState<any | null>(null);
   const handleConfirmManualPayment = async (order: any) => {
     if (!order?.id) return;
     if (!window.confirm('Confirmar que o pagamento deste pedido foi recebido?')) return;
@@ -728,6 +730,16 @@ export function AdminOrders() {
                           <Phone size={12} weight="duotone" className="shrink-0" />
                           <span className="truncate">{order.phone || 'Sem telefone'}</span>
                         </span>
+                        {String(order?.paymentStatus || '').toUpperCase() !== 'PAID' && String(order?.status || '').toLowerCase() !== 'cancelled' && (
+                          <button
+                            type="button"
+                            onClick={() => setChargeOrder(order)}
+                            className="ml-auto inline-flex min-h-[30px] items-center gap-1 rounded-full bg-emerald-600 px-3 py-1 text-[10.5px] font-black text-white shadow-[0_6px_14px_-8px_rgba(5,150,105,0.8)] active:scale-95"
+                          >
+                            <DeviceMobileCamera size={12} weight="fill" />
+                            Cobrar
+                          </button>
+                        )}
                         {order?.paymentMethod === 'MERCADO_PAGO' && (
                           <button type="button" onClick={() => openOrderPayment(order)} className="ml-auto rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                             Ver pagamento
@@ -1174,15 +1186,14 @@ export function AdminOrders() {
             </div>
 
             <div className="mt-3 flex justify-end gap-2">
-              {isManualPaymentPending(selectedOrder) && (
+              {String(selectedOrder?.paymentStatus || '').toUpperCase() !== 'PAID' && (
                 <button
                   type="button"
-                  onClick={() => handleConfirmManualPayment(selectedOrder)}
-                  disabled={confirmingPaymentId === selectedOrder.id}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+                  onClick={() => setChargeOrder(selectedOrder)}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-700 active:scale-[0.98]"
                 >
-                  <CheckSquare size={14} weight="fill" />
-                  {confirmingPaymentId === selectedOrder.id ? 'Confirmando...' : 'Confirmar pagamento recebido'}
+                  <DeviceMobileCamera size={16} weight="fill" />
+                  Cobrar
                 </button>
               )}
               <button
@@ -1196,6 +1207,19 @@ export function AdminOrders() {
           </div>
         </div>
       )}
+
+      <ChargeSheet
+        open={Boolean(chargeOrder)}
+        onClose={() => setChargeOrder(null)}
+        storeId={String(storeId || '')}
+        order={chargeOrder}
+        onPaid={(paidOrderId) => {
+          setSelectedOrder((prev: any) =>
+            prev && String(prev.id) === String(paidOrderId) ? { ...prev, paymentStatus: 'PAID' } : prev
+          );
+          refreshOrders();
+        }}
+      />
 
       <PaymentTechnicalModal
         open={orderPaymentTechnicalOpen}

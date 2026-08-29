@@ -79,11 +79,9 @@ describe('createPointCharge (REQ-6)', () => {
 
   it('404 do MP vira PAY-018 com dica de modo PDV (REQ-9)', async () => {
     stubFetch(async () => jsonResponse(404, { message: 'not found' }));
-    const error = await service
-      .createPointCharge(baseInput)
-      .catch((error: AppError) => error);
+    const error: any = await service.createPointCharge(baseInput).catch((e) => e);
     expect(error.code).toBe('PAY-018');
-    expect(String((error.details as any)?.message || error.message)).toContain('PDV');
+    expect(String(error?.details?.message || error?.message || '')).toContain('PDV');
   });
 
   it('falha de rede vira PAY-018 sem estourar fetch cru (REQ-23)', async () => {

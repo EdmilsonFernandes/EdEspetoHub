@@ -346,6 +346,22 @@ export class BalcaoChargeService {
     return { status: 'CANCELED' };
   }
 
+  /**
+   * REQ-22: pedido cancelado → encerra cobrança pendente do balcão.
+   * Best-effort: chamado fora da transação de cancelamento, nunca bloqueia.
+   */
+  async cancelPendingChargeForCanceledOrder(orderId: string) {
+    const row = await this.repo.findOne({ where: { orderId } });
+    if (!row || String(row.paymentStatus).toUpperCase() !== 'PENDING') return;
+    if (row.providerOrderId) {
+      const token = await this.accounts.getActiveAccessToken(row.storeId).catch(() => null);
+      if (token) await this.point.cancelPointCharge(token, row.providerOrderId);
+    }
+    row.paymentStatus = 'CANCELED';
+    await this.repo.save(row);
+    this.log.info('Balcão charge closed on order cancel', { orderId });
+  }
+
   /** REQ-8: webhook do tópico `order` (Point) — resolve pela order do MP. */
   async handleProviderWebhookOrder(mpOrderId: string) {
     const row = await this.repo.findOne({

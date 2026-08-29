@@ -446,6 +446,21 @@ export const orderService = {
     return apiClient.patch(`/orders/${id}/confirm-payment`, {});
   },
 
+  /** Cobrança no balcão (SDD cobranca-balcao): estado do momento do pagamento. */
+  getChargeStatus: (storeId: string, orderId: string) =>
+    apiClient.get(`/stores/${storeId}/orders/${orderId}/charge`),
+
+  /** Cria cobrança no balcão: { method: 'pix' | 'point' | 'cash', amount?, terminalId? }. */
+  createCharge: (
+    storeId: string,
+    orderId: string,
+    body: { method: 'pix' | 'point' | 'cash'; amount?: number; terminalId?: string }
+  ) => apiClient.post(`/stores/${storeId}/orders/${orderId}/charge`, body),
+
+  /** Encerra a cobrança pendente do balcão. */
+  cancelCharge: (storeId: string, orderId: string) =>
+    apiClient.post(`/stores/${storeId}/orders/${orderId}/charge/cancel`, {}),
+
   peekPublicById(orderId: string) {
     return readPublicOrderCache(orderId);
   },

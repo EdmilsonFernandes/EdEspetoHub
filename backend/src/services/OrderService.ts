@@ -34,6 +34,7 @@ import { OrderShipment } from '../entities/OrderShipment';
 import { OrderPayment } from '../entities/OrderPayment';
 import { PushNotificationService } from './PushNotificationService';
 import { OrderPaymentService } from './OrderPaymentService';
+import { BalcaoChargeService } from './BalcaoChargeService';
 import { calculateDistanceKm, roundDistanceKm } from '../utils/geo';
 import { env } from '../config/env';
 import { CustomerSecurityService } from './CustomerSecurityService';
@@ -56,6 +57,7 @@ import {
 export class OrderService
 {
   private readonly log = logger.child({ scope: 'OrderService' });
+  private readonly balcaoCharges = new BalcaoChargeService();
   private readonly queueActiveStatuses = [
     // 'awaiting_payment' NÃO entra mais (19/08): pedido online só chega à
     // fila da loja quando o Mercado Pago confirma o pagamento (vira pending).
@@ -1933,6 +1935,16 @@ private async seedPostalShipmentFromCheckoutTx(
     this.dispatchMotoboyAvailableOrderPush(saved as any);
     if (saved.type === 'delivery' && !isPostalFlow && [ 'delivered', 'finished' ].includes(nextStatus)) {
       await this.deliveryBillingService.recordDelivery(saved);
+    }
+    // REQ-22 (cobranca-balcao): pedido cancelado encerra cobrança pendente no MP.
+    // Best-effort e fora da transação — falha aqui nunca bloqueia o cancelamento.
+    if (nextStatus === 'cancelled' && currentStatus !== 'cancelled') {
+      this.balcaoCharges.cancelPendingChargeForCanceledOrder(saved.id).catch((error: any) => {
+        this.log.warn('Falha ao encerrar cobrança do balcão no cancelamento', {
+          orderId: saved.id,
+          error: error?.message,
+        });
+      });
     }
     this.dispatchOrderUpdatePush(saved as any);
     return saved;
