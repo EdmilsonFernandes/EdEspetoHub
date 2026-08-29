@@ -77,10 +77,19 @@ export function ChargeSheet({
   const [amountInput, setAmountInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [terminals, setTerminals] = useState<Terminal[] | null>(null);
+  const [terminalsLink, setTerminalsLink] = useState(false);
   const [charge, setCharge] = useState<ChargeStatusPayload['charge']>(null);
   const [now, setNow] = useState(Date.now());
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Ticker visual de 1s — independente do polling de status (o contador não pode
+  // "travar" esperando a rede; bug de prod 29/08: tickava só de 4s em 4s)
+  useEffect(() => {
+    if (!open || (phase !== 'pix' && phase !== 'point' && phase !== 'pix-loja')) return undefined;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [open, phase]);
 
   const orderId = String(order?.id || '');
   const orderTotal = Number(order?.total || payload?.suggestedAmount || 0);
@@ -154,7 +163,6 @@ export function ChargeSheet({
       return;
     }
     pollRef.current = setInterval(() => {
-      setNow(Date.now());
       loadStatus(true).then((data) => {
         if (!data) return;
         const active = (data as ChargeStatusPayload).charge;
@@ -284,6 +292,7 @@ export function ChargeSheet({
       }
       // respondWithError põe texto amigável em details.message (message genérico)
       setError(err?.details?.message || err?.message || 'Não foi possível criar a cobrança agora.');
+      setTerminalsLink(String(err?.code || '').includes('PAY-020') || /maquininha/i.test(String(err?.details?.message || '')));
       setPhase('choose');
     }
   };
@@ -676,9 +685,21 @@ export function ChargeSheet({
         ) : null}
 
         {error ? (
-          <p className="rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-center text-xs font-bold text-rose-600">
+          <div className="rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-center text-xs font-bold text-rose-600">
             {error}
-          </p>
+            {terminalsLink ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  window.location.assign('/admin/dashboard?tab=gateway');
+                }}
+                className="jnc-ds-focus-ring mt-2 block w-full rounded-xl bg-slate-900 px-3 py-2 text-[11px] font-black text-white active:scale-[0.98]"
+              >
+                Ver maquininhas em Pagamentos →
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </BottomSheet>,

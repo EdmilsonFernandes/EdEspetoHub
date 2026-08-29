@@ -1333,6 +1333,96 @@ const GatewayView = ({ storeId }) => {
   );
 };
 
+/** Maquininhas Point da conta conectada — setup e status (cobranca-balcao). */
+const PointTerminalsCard = ({ storeId }) => {
+  const [loading, setLoading] = useState(true);
+  const [terminals, setTerminals] = useState<any[]>([]);
+  const [error, setError] = useState('');
+
+  const load = async () => {
+    if (!storeId) return;
+    setLoading(true);
+    setError('');
+    try {
+      const data = await storeService.getPointTerminals(storeId);
+      setTerminals(data?.terminals || []);
+    } catch (e: any) {
+      setError(e?.details?.message || e?.message || 'Não foi possível listar as maquininhas agora.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId]);
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-sky-50">
+            <DeviceMobileCamera size={21} weight="duotone" className="text-[#2f9df7]" />
+          </span>
+          <div>
+            <p className="text-sm font-black text-slate-900">Maquininhas Point</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
+              Terminais da conta Mercado Pago conectada — o Cartão do “Cobrar” usa a maquininha em modo PDV.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={load}
+          disabled={loading}
+          className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-black text-slate-600 disabled:opacity-50"
+        >
+          <ArrowsClockwise size={13} /> {loading ? 'Buscando...' : 'Atualizar'}
+        </button>
+      </div>
+
+      <div className="mt-4">
+        {loading ? (
+          <div className="ds-skeleton h-14 w-full" />
+        ) : error ? (
+          <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-bold text-amber-800">{error}</div>
+        ) : terminals.length === 0 ? (
+          <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-4">
+            <p className="text-xs font-black text-slate-700">Nenhuma maquininha pronta encontrada</p>
+            <ol className="mt-2 list-decimal space-y-1 pl-4 text-[11px] font-semibold leading-relaxed text-slate-500">
+              <li>Ligue o terminal Point e vincule à conta Mercado Pago da loja (QR com o app do MP).</li>
+              <li>No terminal: <strong>Mais opções → Configurações → Modo de vinculação → PDV</strong>.</li>
+              <li>Toque em Atualizar — a maquininha aparece aqui e o Cartão do “Cobrar” acende.</li>
+            </ol>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {terminals.map((t: any) => (
+              <div key={t.id} className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <CreditCard size={18} weight="duotone" className="text-slate-400" />
+                  <div>
+                    <p className="text-xs font-black text-slate-800">Maquininha …{String(t.id || '').split('__').pop()?.slice(-6)}</p>
+                    <p className="text-[10.5px] font-semibold text-slate-400">Serial confere com a etiqueta traseira</p>
+                  </div>
+                </div>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-black ${
+                    t.integrationReady ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                  }`}
+                >
+                  {t.integrationReady ? 'PDV · pronta' : 'Modo avulso'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const PaymentsView = ({
   subscription,
   loading,
@@ -3503,6 +3593,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             className="bg-white premium-card"
           >
             <GatewayView storeId={storeId} />
+            <div className="mt-4">
+              <PointTerminalsCard storeId={storeId} />
+            </div>
           </FormSection>
         )}
 

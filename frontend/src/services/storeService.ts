@@ -258,6 +258,12 @@ export const storeService = {
     return toJson(response);
   },
 
+  /** Maquininhas Point da conta Mercado Pago conectada da loja (cobranca-balcao). */
+  async getPointTerminals(storeId: string) {
+    const response = await apiClient.rawGet(`/stores/${storeId}/payment-accounts/mercadopago/point/terminals`);
+    return toJson(response);
+  },
+
   async updateSettings(slug: any, payload: any) {
     const response = await apiClient.rawPut(`/stores/${slug}/settings`, payload);
     return toJson(response);
