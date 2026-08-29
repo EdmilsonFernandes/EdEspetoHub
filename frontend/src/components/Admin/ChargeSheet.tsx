@@ -179,6 +179,15 @@ export function ChargeSheet({
     };
   }, [phase, onClose]);
 
+  /** (declarado ANTES dos useMemos que o usam — TDZ quebrou prod 29/08) */
+  const parseAmount = (): number | null => {
+    const raw = String(amountInput || '').trim().replace(',', '.');
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value <= 0) return null;
+    if (Math.round(value * 100) !== value * 100) return null;
+    return value;
+  };
+
   const countdown = useMemo(() => {
     if (!charge?.expiresAt) return null;
     const diff = new Date(charge.expiresAt).getTime() - now;
@@ -200,14 +209,6 @@ export function ChargeSheet({
       txid: orderId ? `PEDIDO${orderId.slice(0, 8)}` : 'PEDIDO',
     });
   }, [storePixKey, storeName, amountInput, payload, orderId]);
-
-  const parseAmount = (): number | null => {
-    const raw = String(amountInput || '').trim().replace(',', '.');
-    const value = Number(raw);
-    if (!Number.isFinite(value) || value <= 0) return null;
-    if (Math.round(value * 100) !== value * 100) return null;
-    return value;
-  };
 
   const adjustedDelta = useMemo(() => {
     const amount = parseAmount();
