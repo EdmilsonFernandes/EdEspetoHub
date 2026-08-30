@@ -3769,11 +3769,11 @@ export function StorePage() {
           hideBack={view === 'cart'}
           right={publicStoreHeaderRight}
           className={publicStoreHeaderIsSolid ? 'jnc-app-glass-header--solid' : 'jnc-app-glass-header--ambient'}
-          maxWidthClassName="max-w-6xl"
+          maxWidthClassName="max-w-[50rem]"
         />
       ) : null}
       {showClientWebCheckoutContext && (
-        <section className="mx-auto w-full max-w-6xl px-4 pt-2 sm:pt-3">
+        <section className="mx-auto w-full max-w-[50rem] px-4 pt-2 sm:pt-3">
           <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.92)_0%,rgba(247,250,252,0.88)_100%)] px-3.5 py-3 shadow-[0_22px_52px_-38px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/55 backdrop-blur-2xl sm:px-4">
             <div className="pointer-events-none absolute -right-10 -top-14 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-12 left-8 h-24 w-24 rounded-full bg-emerald-300/12 blur-3xl" />
@@ -3846,7 +3846,7 @@ export function StorePage() {
       )}
       {isDemo && view === 'menu' && (
         <div className="bg-amber-50 border-b border-amber-200">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-amber-900">
+          <div className="max-w-[50rem] mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-amber-900">
             <span>
               Demo da vitrine ativa. Veja o fluxo completo para entender como funciona.
             </span>
@@ -3955,7 +3955,7 @@ export function StorePage() {
           </div>
         )}
         {!showInactiveState && !showClosedState && hubCoverageNotice && (view === 'menu' || view === 'cart') && (
-          <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6">
+          <div className="mx-auto w-full max-w-[50rem] px-4 pt-4 sm:px-6">
             <div className="relative overflow-hidden rounded-[1.8rem] border border-amber-200/70 bg-[linear-gradient(140deg,rgba(255,251,235,0.96)_0%,rgba(255,247,237,0.98)_56%,rgba(255,255,255,0.95)_100%)] px-4 py-4 shadow-[0_20px_42px_-28px_rgba(245,158,11,0.42)] ring-1 ring-amber-100/70 sm:px-5">
               <div className="absolute inset-y-0 left-0 w-1.5 bg-[linear-gradient(180deg,#f59e0b_0%,#f97316_100%)]" />
               <div className="flex items-start gap-3 pl-2 sm:gap-4">
@@ -4049,7 +4049,7 @@ export function StorePage() {
         )}
         {showClosedState && (
           <div className={`${products.length > 0 ? '' : 'min-h-[72vh]'} bg-[radial-gradient(ellipse_at_top_right,rgba(51,104,134,0.16),transparent_36%),radial-gradient(ellipse_at_bottom_left,rgba(21,58,76,0.08),transparent_42%),linear-gradient(180deg,#E2EBF2_0%,#E7F0F6_54%,#E2EBF2_100%)]`}>
-            <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:py-7">
+            <div className="mx-auto w-full max-w-[50rem] px-4 py-5 sm:py-7">
               {!showPublicStoreAppHeader ? (
                 <button
                   type="button"
@@ -4170,7 +4170,7 @@ export function StorePage() {
           </div>
         )}
         {!showInactiveState && !showClosedState && view === 'menu' && products.length === 0 && productsLoading ? (
-          <div className="mx-auto min-h-[68vh] w-full max-w-5xl px-4 py-8">
+          <div className="mx-auto min-h-[68vh] w-full max-w-[50rem] px-4 py-8">
             <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/88 p-5 shadow-[0_28px_72px_-46px_rgba(15,23,42,0.35)] ring-1 ring-white/70 backdrop-blur-xl">
               <div className="pointer-events-none absolute -right-12 -top-14 h-36 w-36 rounded-full bg-[#336886]/10 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-amber-300/12 blur-3xl" />

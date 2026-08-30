@@ -345,7 +345,7 @@ const Header = ({
 
   return (
     <div className={`w-full ${compact ? 'pb-1' : 'pb-3'} pt-2`}>
-      <div className="max-w-6xl mx-auto px-3 sm:px-4">
+      <div className="max-w-[50rem] mx-auto px-3 sm:px-4">
         <div className="relative overflow-hidden">
           <div
             className={`relative overflow-hidden transition-all duration-300 ${
@@ -353,7 +353,7 @@ const Header = ({
                 ? mobileCollapsedStable
                   ? "h-0 opacity-0"
                   : "h-[260px] opacity-100"
-                : "h-[320px] sm:h-[380px] lg:h-[440px]"
+                : "h-[320px] sm:h-[380px] lg:h-[320px]"
             }`}
           >
             <div
@@ -368,13 +368,13 @@ const Header = ({
                     src={headerBanner}
                     alt=""
                     aria-hidden="true"
-                    className="absolute inset-[-22px] h-[calc(100%+44px)] w-[calc(100%+44px)] scale-110 object-cover opacity-95 blur-md saturate-125"
+                    className="absolute inset-[-22px] h-[calc(100%+44px)] w-[calc(100%+44px)] scale-110 object-cover opacity-95 blur-md saturate-125 lg:hidden"
                     onError={(event) => { event.currentTarget.style.display = "none"; }}
                   />
                   <Image
                     src={headerBanner}
                     alt={branding?.brandName ? `Banner de ${branding.brandName}` : "Banner da loja"}
-                    className="absolute inset-0 h-full w-full object-contain p-2 drop-shadow-[0_20px_34px_rgba(15,23,42,0.28)] sm:p-3"
+                    className="absolute inset-0 h-full w-full object-contain p-2 drop-shadow-[0_20px_34px_rgba(15,23,42,0.28)] sm:p-3 lg:object-cover lg:p-0 lg:drop-shadow-none"
                     onError={(event) => { event.currentTarget.style.display = "none"; }}
                   />
                 </>
@@ -1244,7 +1244,7 @@ export const MenuView = ({
         ref={stickySearchContainerRef}
         className={`${activeTab === "products" ? "" : "hidden"} sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-white/70 bg-white/92 shadow-[0_10px_32px_-26px_rgba(15,23,42,0.26)] backdrop-blur-2xl`}
       >
-        <div className="mx-auto w-full max-w-6xl px-4 pt-2.5 pb-1.5">
+        <div className="mx-auto w-full max-w-[50rem] px-4 pt-2.5 pb-1.5">
           <div className="relative flex items-center gap-2.5 rounded-full bg-slate-100 px-4 transition-colors focus-within:bg-white focus-within:ring-2 focus-within:ring-slate-200">
             <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-slate-400" />
             <input
@@ -1266,7 +1266,7 @@ export const MenuView = ({
           </div>
         </div>
         {activeTab === "products" && filteredGrouped.length > 1 && (
-          <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-6xl px-4 pb-2">
+          <div ref={categoryTabsContainerRef} className="mx-auto w-full max-w-[50rem] px-4 pb-2">
             {/* Auditoria 22/08: chips-mini-card (3 linhas + caixa externa) → pills horizontais compactos.
                 Contagem sai do visual (ruído de navegação) e fica só no aria-label. */}
             <div className="flex w-full items-center gap-2">
@@ -1331,7 +1331,7 @@ export const MenuView = ({
         )}
       </div>
 
-      <div className={`space-y-6 sm:space-y-8 px-3 sm:px-4 py-3 sm:py-4 max-w-6xl mx-auto ${cartItemsCount > 0 ? 'pb-32 sm:pb-8' : ''}`}>
+      <div className={`space-y-6 sm:space-y-8 px-3 sm:px-4 py-3 sm:py-4 max-w-[50rem] mx-auto ${cartItemsCount > 0 ? 'pb-32 sm:pb-8' : ''}`}>
         {!showHeader && (
           <section className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">Bem-vindo à sua vitrine</p>
@@ -1340,7 +1340,7 @@ export const MenuView = ({
         )}
         {showHeader && activeTab !== "products" && (
           <div className={`-mx-3 sm:-mx-4 sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 border-b border-slate-200 bg-white/92 shadow-[0_10px_32px_-26px_rgba(15,23,42,0.26)] backdrop-blur-2xl`}>
-            <div className="mx-auto flex max-w-6xl items-center gap-3 px-3 sm:px-4">
+            <div className="mx-auto flex max-w-[50rem] items-center gap-3 px-3 sm:px-4">
               {onBack && (
                 <button
                   type="button"
@@ -1944,7 +1944,7 @@ export const MenuView = ({
                         src={resolveAssetUrl(branding?.bannerUrl || "")}
                         alt=""
                         aria-hidden="true"
-                        className="absolute inset-[-22px] h-[calc(100%+44px)] w-[calc(100%+44px)] scale-110 object-cover opacity-95 blur-md saturate-125"
+                        className="absolute inset-[-22px] h-[calc(100%+44px)] w-[calc(100%+44px)] scale-110 object-cover opacity-95 blur-md saturate-125 lg:hidden"
                         onError={(event) => { event.currentTarget.style.display = "none"; }}
                       />
                       <Image
