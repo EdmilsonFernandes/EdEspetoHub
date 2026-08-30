@@ -1,6 +1,19 @@
 # EdEspetoHub (Já no Caminho) — Regras do Projeto
 
-> **Guia completo**: `.ai/SKILL.md` (arquitetura, deploy, migrations, operações, integrações).
+> **Startup de toda sessão**: ler `.planning/STATE.md` primeiro ("onde paramos"),
+> depois carregar só o que a tarefa pedir. Este arquivo é um ÍNDICE — a informação
+> mora nos alvos abaixo.
+
+| Assunto | Onde |
+|---|---|
+| Estado atual / roadmap | `.planning/STATE.md` · `.planning/ROADMAP.md` |
+| Decisões (por que é assim) | `docs/decisions/` (ADRs 001-005) |
+| Stack · Arquitetura · Convenções · Testes · Integrações · Riscos | `.planning/codebase/*.md` |
+| Produto (verdade profunda) | `PRODUCT.md` (raiz) |
+| Fluxo padrão de trabalho | `.claude/agents/orchestrator.md` (triage → discover → delega → gates → memory) |
+| Organização do setup Claude | `docs/claude-platform/` (playbook + diagnóstico) |
+
+> **Guia completo de ops**: `.ai/SKILL.md` (arquitetura, deploy, migrations, operações, integrações).
 > **Graphify**: knowledge graph em `graphify-out/` — use `graphify query "<pergunta>"` para navegar o código.
 
 ## 📂 Framework `.claude/` (ler on-demand conforme a tarefa)
@@ -39,6 +52,8 @@ Browser/App → Nginx (EC2:443)
 | Frontend | `cd frontend && npm run test:unit && npm run build` |
 | Migration | `cd backend && npm run migrate:status` (0 pending) + `yarn test` |
 | Mobile | `npm --prefix frontend run build && npm --prefix mobile run android:sync` |
+
+- **TDZ mata em prod e o tsc não vê** (2×: MenuView onBack 07/26, ChargeSheet parseAmount 29/08): helper usado em `useMemo`/render **precisa estar declarado ANTES** no componente. Em arquivo com `@ts-nocheck`, revisar ordem de declaração no diff manualmente.
 
 - **NUNCA** rodar E2E contra o banco de produção.
 - **NUNCA** editar migration já aplicada — criar nova corretiva.
