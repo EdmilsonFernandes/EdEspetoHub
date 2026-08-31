@@ -389,6 +389,7 @@ export class BalcaoChargeService {
         externalReference,
         paymentType: input.paymentType,
         idempotencyToken: String(new Date(row.expiresAt || Date.now()).getTime()),
+        ticketNumber: String(order.id).slice(0, 8).toUpperCase(),
       });
       row.providerOrderId = charge.orderId;
       row.terminalId = terminalId;

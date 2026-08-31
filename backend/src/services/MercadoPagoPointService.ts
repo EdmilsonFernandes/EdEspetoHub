@@ -125,6 +125,8 @@ export class MercadoPagoPointService {
      *  recobrar o mesmo pedido com o mesmo valor reusava a key da cobrança
      *  morta e o MP recusava com 409). Caller passa o expiresAt novo da linha. */
     idempotencyToken?: string;
+    /** Número impresso no comprovante do terminal (bater comanda×comprovante). */
+    ticketNumber?: string;
   }): Promise<{ orderId: string; status: string; expiresAt: Date }> {
     const idempotencyKey = `point:${input.externalReference}:${Math.round(input.amount * 100)}:${input.idempotencyToken || 'v1'}`;
     const externalReference = String(input.externalReference).replace(/[:_]/g, '-');
@@ -145,7 +147,15 @@ export class MercadoPagoPointService {
             payments: [{ amount: input.amount.toFixed(2) }],
           },
           config: {
-            point: { terminal_id: input.terminalId },
+            point: {
+              terminal_id: input.terminalId,
+              // Comprovante: sempre imprimir a via do vendedor. A Orders API
+              // até tem seller_ticket como default, mas deixamos explícito —
+              // comprovante parou de sair em terminal de prod (31/08) e não
+              // dependemos de default remoto.
+              print_on_terminal: 'seller_ticket',
+              ...(input.ticketNumber ? { ticket_number: input.ticketNumber } : {}),
+            },
             ...(input.paymentType
               ? { payment_method: { default_type: input.paymentType } }
               : {}),
