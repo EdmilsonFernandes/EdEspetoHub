@@ -81,17 +81,12 @@ describe('createPointCharge (REQ-6)', () => {
     expect(bodies[0].config.payment_method).toBeUndefined();
     expect(bodies[1].config.payment_method).toEqual({ default_type: 'debit_card' });
     expect(bodies[2].config.payment_method).toEqual({ default_type: 'qr' });
-    // Comprovante sempre explícito + ticket_number identifica o pedido
+    // Comprovante sempre explícito (ticket_number é rejeitado pelo schema real
+    // da Orders API — "additionalProperties 'ticket_number' not allowed")
     for (const b of bodies) {
       expect(b.config.point.print_on_terminal).toBe('seller_ticket');
+      expect(b.config.point.ticket_number).toBeUndefined();
     }
-    expect(bodies[0].config.point.ticket_number).toBeUndefined();
-    await (async () => {
-      const captured: any[] = [];
-      stubFetch(async (_u, init) => { captured.push(JSON.parse(String(init!.body))); return jsonResponse(201, { id: 'ord-2', status: 'OPEN' }); });
-      await service.createPointCharge({ ...baseInput, ticketNumber: 'D4A09DF9' });
-      expect(captured[0].config.point.ticket_number).toBe('D4A09DF9');
-    })();
   });
 
   it('idempotencyToken muda a key — recobrança do mesmo pedido/valor não colide com a key da tentativa morta (bug 409 de prod 31/08)', async () => {
