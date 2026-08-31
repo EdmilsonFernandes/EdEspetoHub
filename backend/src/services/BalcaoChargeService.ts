@@ -41,6 +41,31 @@ export const normalizeChargeAmount = (raw: unknown): number | null => {
 };
 
 /**
+ * Decisão de uma order Point da Orders API (vocabulário próprio: 'processed' +
+ * 'accredited' onde a Payments API dizia 'approved'). Bug de prod 31/08:
+ * pagamento acreditado ficava PENDING porque o reconcile só entendia
+ * 'approved'. Fallback pro nível da order quando o payment vem sem status.
+ */
+export const resolvePointOrderOutcome = (
+  order: any
+): 'paid' | 'failed' | 'expired' | 'pending' => {
+  const payment = order?.transactions?.payments?.[0];
+  const rawStatus = String(payment?.status || order?.status || '').toLowerCase();
+  const detail = String(payment?.status_detail || order?.status_detail || '').toLowerCase();
+  if (
+    rawStatus === 'approved' ||
+    (rawStatus === 'processed' && ['accredited', 'accredited_pending_funds'].includes(detail))
+  ) {
+    return 'paid';
+  }
+  if (['rejected', 'cancelled', 'canceled', 'failed'].includes(rawStatus) || detail === 'rejected') {
+    return 'failed';
+  }
+  if (String(order?.status || '').toLowerCase() === 'expired') return 'expired';
+  return 'pending';
+};
+
+/**
  * E-mail do pagador do Pix no balcão (anti-4390 "Payer email forbidden"):
  * o MP proíbe a conta cobradora de pagar a si mesma — pedido de balcão sem
  * e-mail de cliente caía no e-mail do DONO da loja (= self-pay → 403).
@@ -128,8 +153,11 @@ export class BalcaoChargeService {
     const order = await this.loadOrder(storeId, orderId);
     const row = await this.repo.findOne({ where: { orderId: order.id } });
 
-    // REQ-21: reconciliar com o MP antes de responder (webhook pode ter caído)
-    if (row?.providerOrderId && this.isChargeActive(row)) {
+    // REQ-21: reconciliar com o MP antes de responder (webhook pode ter caído).
+    // PENDING com order Point = sempre reconciliar, mesmo expirada localmente:
+    // a maquininha pode ter pago depois do nosso prazo de 5min — se o MP diz
+    // accredited, o dinheiro caiu e o pedido precisa fechar.
+    if (row?.providerOrderId && String(row.paymentStatus).toUpperCase() === 'PENDING') {
       try {
         const accessToken = await this.accounts.getActiveAccessToken(storeId);
         if (accessToken) await this.reconcilePointCharge(row, accessToken);
@@ -185,6 +213,22 @@ export class BalcaoChargeService {
     }
 
     let row = await this.repo.findOne({ where: { orderId: order.id } });
+    // Anti-duplicidade (PO 31/08): reconciliar a order Point anterior ANTES de
+    // qualquer decisão — pode ter sido paga na maquininha sem o sistema ver
+    // (webhook fora/tela fechada). Paga = recusa com mensagem clara, nunca
+    // cobrança nova por cima de dinheiro já recebido.
+    if (row?.providerOrderId && String(row.paymentStatus).toUpperCase() === 'PENDING') {
+      const prevToken = await this.accounts.getActiveAccessToken(input.storeId).catch(() => null);
+      if (prevToken) {
+        await this.reconcilePointCharge(row, prevToken).catch(() => null);
+        const fresh = await this.repo.findOne({ where: { id: row.id } });
+        if (String(fresh?.paymentStatus || '').toUpperCase() === 'PAID') {
+          throw new AppError('PAY-021', 409, {
+            message: 'Este pedido já foi pago na maquininha — nenhuma cobrança nova foi criada.',
+          });
+        }
+      }
+    }
     if (this.isChargeActive(row)) {
       throw new AppError('PAY-021', 409, {
         message: 'Já existe uma cobrança em andamento para este pedido — cancele-a antes de cobrar de novo.',
@@ -460,13 +504,13 @@ export class BalcaoChargeService {
   private async reconcilePointCharge(row: OrderPayment, accessToken: string, mpOrder?: any) {
     const order: any = mpOrder || (await this.point.getPointOrder(accessToken, String(row.providerOrderId)));
     if (!order) return;
+    const outcome = resolvePointOrderOutcome(order);
     const payment = order?.transactions?.payments?.[0];
-    const status = String(payment?.status || '').toLowerCase();
-    if (status === 'approved') {
-      await this.orderPayments.markPaidFromWebhook(row.id, payment);
-    } else if (['rejected', 'cancelled', 'canceled', 'failed'].includes(status)) {
-      await this.orderPayments.markFailedFromWebhook(row.id, payment);
-    } else if (String(order.status || '').toLowerCase() === 'expired' && this.isChargeActive(row)) {
+    if (outcome === 'paid') {
+      await this.orderPayments.markPaidFromWebhook(row.id, payment || order);
+    } else if (outcome === 'failed') {
+      await this.orderPayments.markFailedFromWebhook(row.id, payment || order);
+    } else if (outcome === 'expired' && this.isChargeActive(row)) {
       row.paymentStatus = 'EXPIRED';
       await this.repo.save(row);
     }

@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { BALCAO_PRESELECT_MAP, normalizeChargeAmount, resolveBalcaoPixPayerEmail } from './BalcaoChargeService';
+import {
+  BALCAO_PRESELECT_MAP,
+  normalizeChargeAmount,
+  resolveBalcaoPixPayerEmail,
+  resolvePointOrderOutcome,
+} from './BalcaoChargeService';
 
 /**
  * SDD cobranca-balcao — purezas do momento do pagamento no balcão.
@@ -59,5 +64,55 @@ describe('resolveBalcaoPixPayerEmail (anti-4390 — self-pay proibido pelo MP)',
 
   it('cliente real e diferente do dono é usado normalmente', () => {
     expect(resolveBalcaoPixPayerEmail('cliente@email.com', owner, 'abc')).toBe('cliente@email.com');
+  });
+});
+
+describe('resolvePointOrderOutcome (vocabulário da Orders API — bug de prod 31/08)', () => {
+  const mpOrder = (payment: any, orderExtras: any = {}) => ({
+    status: 'open',
+    transactions: { payments: [payment] },
+    ...orderExtras,
+  });
+
+  it('payment processed + accredited = PAGO (formato real observado em prod)', () => {
+    const outcome = resolvePointOrderOutcome(
+      mpOrder({ status: 'processed', status_detail: 'accredited' })
+    );
+    expect(outcome).toBe('paid');
+  });
+
+  it('processed + accredited_pending_funds também é pago (dinheiro a creditar)', () => {
+    const outcome = resolvePointOrderOutcome(
+      mpOrder({ status: 'processed', status_detail: 'accredited_pending_funds' })
+    );
+    expect(outcome).toBe('paid');
+  });
+
+  it('approved legado (Payments API) continua pago', () => {
+    expect(resolvePointOrderOutcome(mpOrder({ status: 'approved' }))).toBe('paid');
+  });
+
+  it('sem status no payment, cai pro status da order (processed/accredited)', () => {
+    const outcome = resolvePointOrderOutcome({
+      status: 'processed',
+      status_detail: 'accredited',
+      transactions: { payments: [{ amount: '1.00' }] },
+    });
+    expect(outcome).toBe('paid');
+  });
+
+  it('rejected/cancelled/failed = falha (payment ou order)', () => {
+    expect(resolvePointOrderOutcome(mpOrder({ status: 'rejected' }))).toBe('failed');
+    expect(resolvePointOrderOutcome(mpOrder({ status: 'canceled' }))).toBe('failed');
+    expect(resolvePointOrderOutcome(mpOrder(null, { status: 'cancelled' }))).toBe('failed');
+  });
+
+  it('order expirada sem pagamento = expired', () => {
+    expect(resolvePointOrderOutcome(mpOrder(null, { status: 'expired' }))).toBe('expired');
+  });
+
+  it('aberto sem pagamento ainda = pending (não fecha, não falha)', () => {
+    expect(resolvePointOrderOutcome(mpOrder({ status: 'processed', status_detail: '' }, { status: 'open' }))).toBe('pending');
+    expect(resolvePointOrderOutcome(null)).toBe('pending');
   });
 });
