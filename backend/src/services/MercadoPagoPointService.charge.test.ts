@@ -29,7 +29,6 @@ describe('createPointCharge (REQ-6)', () => {
     amount: 47.5,
     terminalId: 'NEWLAND_N950__N950NCB801293324',
     externalReference: 'order_payment:abc',
-    description: 'Pedido abc12345 - Loja',
   };
 
   it('monta body da order point com type/terminal/PT5M/valor 2 decimais e idempotency-key estável', async () => {
@@ -44,10 +43,11 @@ describe('createPointCharge (REQ-6)', () => {
     expect(captured!.url).toContain('/v1/orders');
     const body = JSON.parse(String(captured!.init!.body));
     expect(body.type).toBe('point');
-    expect(body.external_reference).toBe('order_payment:abc');
+    // Orders API: reference sem ':' (pattern) e amount como string
+    expect(body.external_reference).toBe('order-payment-abc');
     expect(body.expiration_time).toBe('PT5M');
-    expect(body.transactions.payments[0].amount).toBe(47.5);
-    expect(body.transactions.payments[0].description).toBe(baseInput.description);
+    expect(body.transactions.payments[0].amount).toBe('47.50');
+    expect(body.transactions.payments[0].description).toBeUndefined();
     expect(body.config.point.terminal_id).toBe(baseInput.terminalId);
     const headers = captured!.init!.headers as Record<string, string>;
     expect(headers['X-Idempotency-Key']).toContain('point:order_payment:abc:4750');

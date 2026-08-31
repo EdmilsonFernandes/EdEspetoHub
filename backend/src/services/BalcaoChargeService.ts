@@ -340,7 +340,6 @@ export class BalcaoChargeService {
         amount: rawAmount,
         terminalId,
         externalReference,
-        description,
       });
       row.providerOrderId = charge.orderId;
       row.terminalId = terminalId;

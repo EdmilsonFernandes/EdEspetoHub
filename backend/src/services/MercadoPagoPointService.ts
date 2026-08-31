@@ -103,7 +103,13 @@ export class MercadoPagoPointService {
   /**
    * Cria cobrança na maquininha (Orders API, type=point) — REQ-6.
    * Crédito/débito/parcelas o cliente escolhe NO terminal (design D3).
-   * Expira em 5 min (REQ-5/11) — MP auto-cancela orders expiradas.
+   * Expira em 5 min (REQ-5/11) — MP auto-cancela order expiradas.
+   *
+   * Schema da Orders API (validado em prod 31/08): `amount` é STRING com 2
+   * decimais; `description` NÃO é aceito em transactions.payments; e
+   * `external_reference` tem pattern que rejeita ':' — o prefixo
+   * `order_payment:` vira `order-payment-` aqui (webhook casa por
+   * provider_order_id, então o formato da reference não afeta o reconcile).
    */
   async createPointCharge(input: {
     storeId: string;
@@ -111,9 +117,9 @@ export class MercadoPagoPointService {
     amount: number;
     terminalId: string;
     externalReference: string;
-    description: string;
   }): Promise<{ orderId: string; status: string; expiresAt: Date }> {
     const idempotencyKey = `point:${input.externalReference}:${Math.round(input.amount * 100)}`;
+    const externalReference = String(input.externalReference).replace(/[:_]/g, '-');
     let response: Response;
     try {
       response = await fetch(`${env.mercadoPago.apiBaseUrl}/v1/orders`, {
@@ -125,10 +131,10 @@ export class MercadoPagoPointService {
         },
         body: JSON.stringify({
           type: 'point',
-          external_reference: input.externalReference,
+          external_reference: externalReference,
           expiration_time: 'PT5M',
           transactions: {
-            payments: [{ amount: Number(input.amount.toFixed(2)), description: input.description }],
+            payments: [{ amount: input.amount.toFixed(2) }],
           },
           config: { point: { terminal_id: input.terminalId } },
         }),
