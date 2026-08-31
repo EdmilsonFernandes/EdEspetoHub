@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   BALCAO_PRESELECT_MAP,
+  buildPointReceiptContent,
   normalizeChargeAmount,
   resolveBalcaoPixPayerEmail,
   resolvePointOrderOutcome,
@@ -114,5 +115,39 @@ describe('resolvePointOrderOutcome (vocabulário da Orders API — bug de prod 3
   it('aberto sem pagamento ainda = pending (não fecha, não falha)', () => {
     expect(resolvePointOrderOutcome(mpOrder({ status: 'processed', status_detail: '' }, { status: 'open' }))).toBe('pending');
     expect(resolvePointOrderOutcome(null)).toBe('pending');
+  });
+});
+
+describe('buildPointReceiptContent (comprovante na maquininha — PO 31/08)', () => {
+  const base = {
+    storeName: 'Gustavao Espetos',
+    orderId: 'c97079eb-b9a8-4a40-94a2-9cfb72f57939',
+    items: [
+      { name: 'Espetinho Carne', quantity: 3 },
+      { name: 'Coca-Cola Lata', quantity: 2 },
+    ],
+    total: 39.97,
+    methodLabel: 'Pago na maquininha (cartao)',
+    paidAt: new Date('2026-08-31T17:28:25Z'),
+  };
+
+  it('monta com as tags do Point dentro do range exigido (100–4096)', () => {
+    const content = buildPointReceiptContent(base);
+    expect(content).toContain('{w}{b}GUSTAVAO ESPETOS');
+    expect(content).toContain('Pedido: C97079EB');
+    expect(content).toContain('Espetinho Carne x3');
+    expect(content).toContain('TOTAL: R$ 39,97');
+    expect(content.length).toBeGreaterThanOrEqual(100);
+    expect(content.length).toBeLessThanOrEqual(4096);
+  });
+
+  it('trunca itens/nomes longos e suporta pedido sem itens sem estourar o limite', () => {
+    const many = Array.from({ length: 60 }, (_, i) => ({ name: `Item numero bem longo numero ${i}`, quantity: 2 }));
+    const content = buildPointReceiptContent({ ...base, items: many });
+    expect(content).not.toContain('Item numero bem longo numero 25'); // cap 20 itens
+    expect(content.length).toBeLessThanOrEqual(4096);
+    const empty = buildPointReceiptContent({ ...base, items: [] });
+    expect(empty).toContain('(sem itens)');
+    expect(empty.length).toBeGreaterThanOrEqual(100);
   });
 });

@@ -217,6 +217,58 @@ export class MercadoPagoPointService {
     return response.json().catch(() => null);
   }
 
+  /**
+   * Imprime conteúdo custom na maquininha (API de ações do terminal —
+   * POST /terminals/v1/actions, type=print, subtype=custom). Best-effort:
+   * terminal offline/expirado não bloqueia nada — ação morre no MP sozinha.
+   * content: 100–4096 chars, tags {b} {w} {s} {br} {center} {qr} {pdf417}.
+   */
+  async printTerminalAction(input: {
+    storeId: string;
+    accessToken: string;
+    terminalId: string;
+    externalReference: string;
+    content: string;
+  }): Promise<boolean> {
+    if (input.content.length < 100 || input.content.length > 4096) {
+      this.log.warn('Point print action invalid content length', {
+        storeId: input.storeId,
+        len: input.content.length,
+      });
+      return false;
+    }
+    const reference = String(input.externalReference).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
+    try {
+      const response = await fetch(`${env.mercadoPago.apiBaseUrl}/terminals/v1/actions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${input.accessToken}`,
+          'Content-Type': 'application/json',
+          'X-Idempotency-Key': `print:${reference}`,
+        },
+        body: JSON.stringify({
+          type: 'print',
+          external_reference: reference,
+          config: { point: { terminal_id: input.terminalId, subtype: 'custom' } },
+          content: input.content,
+        }),
+      });
+      if (!response.ok) {
+        const bodyText = await response.text().catch(() => '');
+        this.log.warn('Point print action rejected', {
+          storeId: input.storeId,
+          status: response.status,
+          body: bodyText.slice(0, 200),
+        });
+        return false;
+      }
+      return true;
+    } catch (error: any) {
+      this.log.warn('Point print action failed', { storeId: input.storeId, error: error?.message });
+      return false;
+    }
+  }
+
   /** Cancela a order Point (REQ-18) — best-effort; expirada cancela sozinha no MP. */
   async cancelPointCharge(accessToken: string, mpOrderId: string): Promise<boolean> {
     try {

@@ -41,6 +41,52 @@ export const normalizeChargeAmount = (raw: unknown): number | null => {
 };
 
 /**
+ * Comprovante impresso NA MAQUININHA via API de ações (POST /terminals/v1/actions).
+ * Mesmo conteúdo da comanda térmica, traduzido pras tags do Point
+ * ({w} grande, {s} pequeno, {b} negrito, {center}, {br}). Via do vendedor:
+ * itens + total + forma — o papel que fecha a boca do caixa. 100–4096 chars.
+ */
+export const buildPointReceiptContent = (input: {
+  storeName: string;
+  orderId: string;
+  items: { name?: string | null; quantity?: number | null }[];
+  total: number;
+  methodLabel: string;
+  paidAt?: Date | null;
+}): string => {
+  const sep = '{br}--------------------------------{br}';
+  const shortId = String(input.orderId || '').slice(0, 8).toUpperCase();
+  const hora = (input.paidAt ? new Date(input.paidAt) : new Date()).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'America/Sao_Paulo',
+  });
+  const items = (input.items || [])
+    .slice(0, 20)
+    .map(
+      (item) =>
+        `{s}- ${String(item.name || 'Item').slice(0, 28)} x${Number(item.quantity || 1)}{/s}{br}`
+    )
+    .join('');
+  const total = input.total.toFixed(2).replace('.', ',');
+  return [
+    sep,
+    `{center}{w}{b}${String(input.storeName || 'Loja').slice(0, 24).toUpperCase()}{/b}{/w}{br}`,
+    `{center}{s}COMPROVANTE DE PAGAMENTO{/s}{br}`,
+    sep,
+    `{s}Pedido: ${shortId}{/s}{br}`,
+    `{s}${hora} - via do vendedor{/s}{br}`,
+    sep,
+    items || '{s}(sem itens){/s}{br}',
+    sep,
+    `{b}TOTAL: R$ ${total}{/b}{br}`,
+    `{s}${String(input.methodLabel || 'maquininha').slice(0, 30)}{/s}{br}`,
+    sep,
+    '{center}{s}Obrigado! Jano Caminho{/s}{br}',
+  ].join('');
+};
+
+/**
  * Decisão de uma order Point da Orders API (vocabulário próprio: 'processed' +
  * 'accredited' onde a Payments API dizia 'approved'). Bug de prod 31/08:
  * pagamento acreditado ficava PENDING porque o reconcile só entendia
@@ -513,6 +559,7 @@ export class BalcaoChargeService {
     const payment = order?.transactions?.payments?.[0];
     if (outcome === 'paid') {
       await this.orderPayments.markPaidFromWebhook(row.id, payment || order);
+      await this.printPointReceiptBestEffort(row, order, accessToken);
     } else if (outcome === 'failed') {
       await this.orderPayments.markFailedFromWebhook(row.id, payment || order);
     } else if (outcome === 'expired') {
@@ -521,6 +568,39 @@ export class BalcaoChargeService {
       // de prod 31/08: polling do front morria e o pagamento tardio sumia da UI).
       row.paymentStatus = 'EXPIRED';
       await this.repo.save(row);
+    }
+  }
+
+  /**
+   * Comprovante na maquininha ao confirmar pagamento Point (PO 31/08 — mesma
+   * comanda da térmica, no papel da maquininha). Best-effort: idempotency-key
+   * por cobrança evita reimpressão em reconcile repetido; falha nunca derruba
+   * o fluxo de pagamento.
+   */
+  private async printPointReceiptBestEffort(row: OrderPayment, mpOrder: any, accessToken: string) {
+    try {
+      if (!row.terminalId || String(row.paymentMethod) !== 'point') return;
+      const full = await this.loadOrder(row.storeId, row.orderId);
+      const content = buildPointReceiptContent({
+        storeName: full.store?.name || 'Loja',
+        orderId: full.id,
+        items: (full.items || []).map((item: any) => ({
+          name: item?.product?.name || item?.productName || null,
+          quantity: item?.quantity,
+        })),
+        total: Number(full.total || row.amount || 0),
+        methodLabel: 'Pago na maquininha (cartao)',
+        paidAt: row.paidAt || new Date(),
+      });
+      await this.point.printTerminalAction({
+        storeId: row.storeId,
+        accessToken,
+        terminalId: row.terminalId,
+        externalReference: String(row.id),
+        content,
+      });
+    } catch (error: any) {
+      this.log.warn('Point receipt print skipped', { orderId: row.orderId, error: error?.message });
     }
   }
 }
