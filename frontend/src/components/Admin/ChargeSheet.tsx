@@ -7,7 +7,6 @@ import {
   CreditCard,
   Money,
   SpinnerGap,
-  CheckCircle,
   XCircle,
   CopySimple,
   DeviceMobileCamera,
@@ -202,10 +201,11 @@ export function ChargeSheet({
     return stopPolling;
   }, [open, phase, loadStatus, stopPolling]);
 
-  // Auto-fechar no pago (ritmo de balcão)
+  // Auto-fechar no pago (ritmo de balcão — tempo de LER a confirmação:
+  // "R$ X recebidos" é o momento de segurança do operador, PO 31/08)
   useEffect(() => {
     if (phase !== 'paid') return;
-    closeTimerRef.current = setTimeout(() => onClose(), 1400);
+    closeTimerRef.current = setTimeout(() => onClose(), 2600);
     return () => {
       if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     };
@@ -443,11 +443,30 @@ export function ChargeSheet({
         ) : null}
 
         {phase === 'paid' ? (
-          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 text-center">
-            <CheckCircle size={52} weight="fill" className="text-emerald-500" />
-            <p className="text-xl font-black tracking-tight text-slate-900">Pago!</p>
-            <p className="text-sm font-semibold text-slate-500">
-              {formatBRL(Number(charge?.amount || amount || 0))} recebidos via{' '}
+          <div className="paid-card relative overflow-hidden rounded-3xl border border-emerald-100 bg-[linear-gradient(165deg,#f0fdf4,#d1fae5)] px-6 py-7 text-center shadow-[0_18px_40px_-28px_rgba(16,185,129,0.55)]">
+            <style>{`
+              .paid-card { animation: paidPop 420ms cubic-bezier(.2,1.4,.4,1) both; }
+              .paid-circle { stroke-dasharray: 151; stroke-dashoffset: 151; animation: paidDraw 340ms 80ms ease-out forwards; }
+              .paid-check { stroke-dasharray: 34; stroke-dashoffset: 34; animation: paidDraw 260ms 400ms ease-out forwards; }
+              .paid-bar { transform-origin: left; animation: paidBar 2600ms linear forwards; }
+              @keyframes paidPop { from { transform: scale(.88); opacity: 0; } 70% { transform: scale(1.02); } to { transform: scale(1); opacity: 1; } }
+              @keyframes paidDraw { to { stroke-dashoffset: 0; } }
+              @keyframes paidBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+            `}</style>
+            <span className="mx-auto mb-3 grid h-16 w-16 place-items-center">
+              <svg viewBox="0 0 52 52" className="h-16 w-16" aria-hidden="true">
+                <circle cx="26" cy="26" r="24" fill="none" stroke="#10b981" strokeWidth="2.5" className="paid-circle" />
+                <path d="M15 27l7.5 7.5L38 20" fill="none" stroke="#059669" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="paid-check" />
+              </svg>
+            </span>
+            <p className="text-[13px] font-black uppercase tracking-[0.22em] text-emerald-700">
+              Pagamento aprovado
+            </p>
+            <p className="mt-1 text-[34px] font-black leading-none tracking-tight text-emerald-900">
+              {formatBRL(Number(charge?.amount || amount || 0))}
+            </p>
+            <p className="mt-2 text-[13px] font-bold text-emerald-800/80">
+              recebidos via{' '}
               {charge?.method === 'pix'
                 ? 'Pix'
                 : charge?.method === 'point'
@@ -455,7 +474,16 @@ export function ChargeSheet({
                   : charge?.method === 'pix_loja'
                     ? 'Pix (chave da loja)'
                     : 'dinheiro'}
-              .
+              {storeName ? ` — na conta de ${storeName}` : ''}
+            </p>
+            <p className="mt-0.5 text-[11px] font-semibold text-emerald-700/60">
+              Aprovado às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+            </p>
+            <div className="mt-5 h-1 overflow-hidden rounded-full bg-emerald-200/70">
+              <div className="paid-bar h-full w-full rounded-full bg-emerald-500" />
+            </div>
+            <p className="mt-1.5 text-[10.5px] font-bold uppercase tracking-[0.14em] text-emerald-700/50">
+              fechando automaticamente
             </p>
           </div>
         ) : null}
