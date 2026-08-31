@@ -651,7 +651,7 @@ export function ChargeSheet({
                 {methodButton(
                   'pix',
                   <QrCode weight="duotone" />,
-                  'Pix MP',
+                  'Pix',
                   caps?.pix === false ? 'conecte o MP' : 'QR na hora · confirma sozinho',
                   Boolean(caps?.pix)
                 )}
@@ -665,14 +665,17 @@ export function ChargeSheet({
                 {methodButton('cash', <Money weight="duotone" />, 'Dinheiro', 'registrar recebimento', true)}
               </div>
 
-              {pixLojaPayload ? (
+              {/* Pix da loja é FALLBACK: só aparece quando o Pix MP não está
+                  disponível (sem conta MP) — dois botões de Pix lado a lado
+                  confundiam o operador (PO 31/08). */}
+              {pixLojaPayload && !caps?.pix ? (
                 <button
                   type="button"
                   disabled={!canCharge}
                   onClick={() => setPhase('pix-loja')}
                   className="jnc-ds-touch jnc-ds-focus-ring flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/60 px-3 py-2.5 text-xs font-black text-emerald-800 active:scale-[0.98]"
                 >
-                  <QrCode size={16} weight="duotone" /> Pix da loja (sua chave) — confirmo na tela
+                  <QrCode size={16} weight="duotone" /> Pix com a chave da loja — confirmo na tela
                 </button>
               ) : null}
               </>
