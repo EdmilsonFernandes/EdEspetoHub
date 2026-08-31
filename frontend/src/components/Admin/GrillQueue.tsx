@@ -254,6 +254,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [confirmModal, setConfirmModal] = useState(null);
   const [chargeOrder, setChargeOrder] = useState(null); // cobranca-balcao: sheet Pix/Cartão/Dinheiro
+  // cobranca-balcao: pedido presencial pago ENQUANTO preparava. Quando o
+  // operador marcar pronto, conclui sozinho (retirada confirmada — o cliente
+  // pagou no balcão, paradigma "pago = ciclo fechado" do PO). Antecipado
+  // (Pix online) não entra aqui: segue com confirmação manual.
+  const [autoDoneOnReady, setAutoDoneOnReady] = useState<Set<string>>(new Set());
   const [postalModalOrder, setPostalModalOrder] = useState<any | null>(null);
   const [postalSubmitAfterSave, setPostalSubmitAfterSave] = useState<(() => void) | null>(null);
   const [pixCopied, setPixCopied] = useState(false);
@@ -2938,13 +2943,26 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
       {order.status === "preparing" && order.type !== "pickup" && order.type !== "delivery" && (
         <div className="w-full">
+          {autoDoneOnReady.has(order.id) ? (
+            <div className="mb-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1">
+              Pago no balcão — ao marcar pronto, a retirada é confirmada automaticamente.
+            </div>
+          ) : null}
           <button
-            onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "ready"); }}
+            onClick={() => {
+              pulseCta(order.id + '-ready');
+              if (autoDoneOnReady.has(order.id)) {
+                setAutoDoneOnReady((prev) => { const s = new Set(prev); s.delete(order.id); return s; });
+                handleAdvance(order.id, "done");
+                return;
+              }
+              handleAdvance(order.id, "ready");
+            }}
             disabled={updating === order.id}
             style={ctaPulseId === order.id + '-ready' ? { animation: 'btnPop 220ms ease' } : undefined}
             className="w-full px-3 py-3 rounded-lg bg-emerald-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
           >
-            <CheckSquare size={16} weight="duotone" /> Marcar pronto
+            <CheckSquare size={16} weight="duotone" /> {autoDoneOnReady.has(order.id) ? 'Pronto — concluir' : 'Marcar pronto'}
           </button>
         </div>
       )}
@@ -2952,18 +2970,25 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       {order.status === "preparing" && order.type === "pickup" && (
         <div className="w-full">
           <div className="mb-2 text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-100 rounded-lg px-2.5 py-1">
-            Pedido pronto para retirada.
+            {autoDoneOnReady.has(order.id)
+              ? 'Pago no balcão — ao marcar pronto, a retirada é confirmada automaticamente.'
+              : 'Pedido pronto para retirada.'}
           </div>
           <button
             onClick={async () => {
               pulseCta(order.id + '-ready');
+              if (autoDoneOnReady.has(order.id)) {
+                setAutoDoneOnReady((prev) => { const s = new Set(prev); s.delete(order.id); return s; });
+                await handleAdvance(order.id, "done");
+                return;
+              }
               await handleAdvance(order.id, "ready");
             }}
             disabled={updating === order.id}
             style={ctaPulseId === order.id + '-ready' ? { animation: 'btnPop 220ms ease' } : undefined}
             className="w-full px-3 py-3 rounded-lg bg-sky-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
           >
-            <CheckSquare size={16} weight="duotone" /> Pronto p/ retirada
+            <CheckSquare size={16} weight="duotone" /> {autoDoneOnReady.has(order.id) ? 'Pronto — concluir' : 'Pronto p/ retirada'}
           </button>
         </div>
       )}
@@ -4055,14 +4080,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             loadQueue({ silent: true });
             // Paradigma balcão (PO 29/08): pago = ciclo fechado. Pedido presencial
             // pronto avança sozinho pra concluído — sem "confirmar retirada" extra.
+            // Pago ENQUANTO preparava: marca pra concluir no "pronto" (PO 31/08).
             // Online/delivery segue o fluxo antigo, intocado.
             const paid = chargeOrder;
-            if (
-              paid &&
-              String(paid.type || '') !== 'delivery' &&
-              String(paid.status || '') === 'ready'
-            ) {
-              handleAdvance(paidOrderId, 'done').catch(() => {});
+            if (paid && String(paid.type || '') !== 'delivery') {
+              if (String(paid.status || '') === 'ready') {
+                handleAdvance(paidOrderId, 'done').catch(() => {});
+              } else {
+                setAutoDoneOnReady((prev) => new Set(prev).add(paidOrderId));
+              }
             }
           }}
         />

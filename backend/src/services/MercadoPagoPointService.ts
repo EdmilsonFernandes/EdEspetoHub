@@ -117,6 +117,10 @@ export class MercadoPagoPointService {
     amount: number;
     terminalId: string;
     externalReference: string;
+    /** Pré-seleciona a forma no terminal (Orders API config.payment_method.
+     *  default_type: debit_card | credit_card | qr). Omitir = terminal
+     *  pergunta ao cliente (fluxo padrão da maquininha). */
+    paymentType?: 'debit_card' | 'credit_card' | 'qr';
   }): Promise<{ orderId: string; status: string; expiresAt: Date }> {
     const idempotencyKey = `point:${input.externalReference}:${Math.round(input.amount * 100)}`;
     const externalReference = String(input.externalReference).replace(/[:_]/g, '-');
@@ -136,7 +140,12 @@ export class MercadoPagoPointService {
           transactions: {
             payments: [{ amount: input.amount.toFixed(2) }],
           },
-          config: { point: { terminal_id: input.terminalId } },
+          config: {
+            point: { terminal_id: input.terminalId },
+            ...(input.paymentType
+              ? { payment_method: { default_type: input.paymentType } }
+              : {}),
+          },
         }),
       });
     } catch (error: any) {

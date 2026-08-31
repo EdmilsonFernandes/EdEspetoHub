@@ -79,6 +79,9 @@ export function ChargeSheet({
   const [terminals, setTerminals] = useState<Terminal[] | null>(null);
   const [terminalsLink, setTerminalsLink] = useState(false);
   const [charge, setCharge] = useState<ChargeStatusPayload['charge']>(null);
+  // Forma pré-selecionada na maquininha (Orders API default_type): null = o
+  // cliente escolhe na telinha do terminal (fluxo padrão, design D3).
+  const [pointPaymentType, setPointPaymentType] = useState<'debit_card' | 'credit_card' | 'qr' | null>(null);
   const [now, setNow] = useState(Date.now());
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -258,7 +261,11 @@ export function ChargeSheet({
     return Math.round((amount - Number(payload.suggestedAmount)) * 100) / 100;
   }, [amountInput, payload]);
 
-  const createCharge = async (method: 'pix' | 'point' | 'cash' | 'pix_loja', terminalId?: string) => {
+  const createCharge = async (
+    method: 'pix' | 'point' | 'cash' | 'pix_loja',
+    terminalId?: string,
+    paymentType?: 'debit_card' | 'credit_card' | 'qr'
+  ) => {
     const amount = parseAmount();
     if (amount === null) {
       setError('Valor inválido — use um número maior que zero com até 2 casas decimais.');
@@ -271,6 +278,7 @@ export function ChargeSheet({
         method,
         amount,
         terminalId,
+        paymentType,
       });
       const active = result?.charge;
       if (method === 'cash' || active?.status === 'PAID') {
@@ -349,7 +357,7 @@ export function ChargeSheet({
           return;
         }
         if (key === 'point' && terminals?.length) return; // seletor abaixo
-        createCharge(key);
+        createCharge(key, undefined, pointPaymentType || undefined);
       }}
       className={`jnc-ds-focus-ring group flex min-h-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl border-2 px-2 py-3 text-center transition active:scale-[0.97] ${
         enabled && canCharge
@@ -484,6 +492,42 @@ export function ChargeSheet({
               </div>
             </div>
 
+            {/* Forma na maquininha (opcional): pré-seleciona no terminal
+                (config.payment_method.default_type). Sem seleção, o cliente
+                escolhe na telinha — fluxo padrão da maquininha (design D3). */}
+            {phase === 'choose' && caps?.point ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-2.5">
+                <p className="mb-1.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-slate-500">
+                  Forma na maquininha
+                  {pointPaymentType ? '' : ' — cliente escolhe nela'}
+                </p>
+                <div className="flex gap-1.5">
+                  {([
+                    { key: 'debit_card', label: 'Débito' },
+                    { key: 'credit_card', label: 'Crédito' },
+                    { key: 'qr', label: 'Pix' },
+                  ] as const).map((option) => {
+                    const selected = pointPaymentType === option.key;
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => setPointPaymentType(selected ? null : option.key)}
+                        aria-pressed={selected}
+                        className={`jnc-ds-focus-ring flex-1 rounded-xl border px-2 py-2 text-xs font-black transition active:scale-[0.97] ${
+                          selected
+                            ? 'border-[var(--jnc-primary,#2f9df7)] bg-[var(--jnc-primary,#2f9df7)] text-white shadow-sm'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+
             {terminals?.length ? (
               <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-3">
                 <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-sky-800">Escolha a maquininha</p>
@@ -493,7 +537,7 @@ export function ChargeSheet({
                       key={terminal.id}
                       type="button"
                       disabled={phase === 'creating'}
-                      onClick={() => createCharge('point', terminal.id)}
+                      onClick={() => createCharge('point', terminal.id, pointPaymentType || undefined)}
                       className="jnc-ds-touch jnc-ds-focus-ring flex min-h-11 items-center justify-between rounded-xl border border-sky-200 bg-white px-3 py-2 text-left text-sm font-bold text-slate-800 active:scale-[0.98]"
                     >
                       Maquininha …{shortSerial(terminal.id)}

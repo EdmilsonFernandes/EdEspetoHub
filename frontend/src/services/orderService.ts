@@ -454,7 +454,13 @@ export const orderService = {
   createCharge: (
     storeId: string,
     orderId: string,
-    body: { method: 'pix' | 'point' | 'cash' | 'pix_loja'; amount?: number; terminalId?: string }
+    body: {
+      method: 'pix' | 'point' | 'cash' | 'pix_loja';
+      amount?: number;
+      terminalId?: string;
+      /** Forma pré-selecionada na maquininha (só com method=point): debit_card | credit_card | qr */
+      paymentType?: 'debit_card' | 'credit_card' | 'qr';
+    }
   ) => apiClient.post(`/stores/${storeId}/orders/${orderId}/charge`, body),
 
   /** Encerra a cobrança pendente do balcão. */

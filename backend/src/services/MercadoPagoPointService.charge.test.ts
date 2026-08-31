@@ -69,6 +69,20 @@ describe('createPointCharge (REQ-6)', () => {
     expect(keys[0]).not.toBe(keys[1]);
   });
 
+  it('paymentType pré-seleciona a forma no terminal (config.payment_method.default_type); sem ele, config não traz payment_method', async () => {
+    const bodies: any[] = [];
+    stubFetch(async (_url, init) => {
+      bodies.push(JSON.parse(String(init!.body)));
+      return jsonResponse(201, { id: 'ord-1', status: 'OPEN' });
+    });
+    await service.createPointCharge(baseInput);
+    await service.createPointCharge({ ...baseInput, paymentType: 'debit_card' });
+    await service.createPointCharge({ ...baseInput, paymentType: 'qr' });
+    expect(bodies[0].config.payment_method).toBeUndefined();
+    expect(bodies[1].config.payment_method).toEqual({ default_type: 'debit_card' });
+    expect(bodies[2].config.payment_method).toEqual({ default_type: 'qr' });
+  });
+
   it('403 do MP vira PAY-018 com dica de reconexão (REQ-10)', async () => {
     stubFetch(async () => jsonResponse(403, { message: 'forbidden' }));
     await expect(service.createPointCharge(baseInput)).rejects.toMatchObject({

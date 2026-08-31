@@ -192,6 +192,9 @@ export class BalcaoChargeService {
     method: 'pix' | 'point' | 'cash' | 'pix_loja';
     amount?: unknown;
     terminalId?: string | null;
+    /** Forma pré-selecionada no terminal (debit_card/credit_card/qr) — opcional,
+     *  só com method=point. Sem ela o terminal pergunta ao cliente (design D3). */
+    paymentType?: 'debit_card' | 'credit_card' | 'qr';
     actorUserId?: string | null;
     authStoreId?: string;
   }) {
@@ -384,6 +387,7 @@ export class BalcaoChargeService {
         amount: rawAmount,
         terminalId,
         externalReference,
+        paymentType: input.paymentType,
       });
       row.providerOrderId = charge.orderId;
       row.terminalId = terminalId;

@@ -40,12 +40,31 @@ export class BalcaoChargeController {
           400
         );
       }
+      // Forma pré-selecionada na maquininha (Orders API config.payment_method.
+      // default_type): debit_card | credit_card | qr (Pix no terminal). Só faz
+      // sentido com method=point — sem valor, o terminal pergunta ao cliente.
+      const rawPaymentType = String(req.body?.paymentType || '').toLowerCase();
+      let paymentType: 'debit_card' | 'credit_card' | 'qr' | undefined;
+      if (rawPaymentType) {
+        if (method !== 'point' || !['debit_card', 'credit_card', 'qr'].includes(rawPaymentType)) {
+          return respondWithError(
+            req,
+            res,
+            new AppError('PAY-019', 400, {
+              message: 'Forma inválida — use debit_card, credit_card ou qr (apenas em cobrança de maquininha).',
+            }),
+            400
+          );
+        }
+        paymentType = rawPaymentType as 'debit_card' | 'credit_card' | 'qr';
+      }
       const result = await service.createCharge({
         storeId: req.params.storeId,
         orderId: req.params.orderId,
         method: method as 'pix' | 'point' | 'cash' | 'pix_loja',
         amount: req.body?.amount,
         terminalId: req.body?.terminalId,
+        paymentType,
         actorUserId: req.auth?.sub || null,
         authStoreId: req.auth?.storeId,
       });
