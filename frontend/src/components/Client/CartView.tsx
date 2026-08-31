@@ -36,7 +36,6 @@ import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productModifiers";
 import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderPricing";
-import { DddSelect } from "../common/DddSelect";
 import { addressLookupService } from "../../services/addressLookupService";
 import { inputAssistProps, textareaAssistProps } from "../../utils/inputAssist";
 import { Button } from '../ui/Button';
@@ -137,6 +136,17 @@ const buildPhoneFromParts = (ddd = "", local = "") => {
   const localDigits = String(local || "").replace(/\D/g, "").slice(0, 9);
   if (!safeDdd || !localDigits) return "";
   return `(${safeDdd}) ${formatLocalPhoneNumber(localDigits)}`;
+};
+
+// Campo único de telefone — máscara progressiva: "(1" → "(12)" → "(12) 98765-4321".
+// Mantém os dígitos crus num estado só do input: sem isso o React reseta o DOM a
+// cada tecla (value controlado só refletia DDD válido) e o usuário nunca acumula
+// os 2 primeiros dígitos.
+const maskPhoneField = (digits = "") => {
+  const raw = String(digits || "").replace(/\D/g, "").slice(0, 11);
+  if (!raw) return "";
+  if (raw.length <= 2) return `(${raw}`;
+  return `(${raw.slice(0, 2)}) ${formatLocalPhoneNumber(raw.slice(2))}`;
 };
 
 // ---- Reservation date/time helpers ----
@@ -708,6 +718,11 @@ export const CartView = ({
   const checkoutLoadingLabel = checkoutSlow ? "Internet lenta... confirmando" : "Processando...";
 
   const [selectedDdd, setSelectedDdd] = useState(() => extractPhoneParts(customer.phone || "").ddd);
+  // Dígitos crus do campo único (ddd+numero) — fonte do que se exibe na máscara.
+  const [phoneFieldDigits, setPhoneFieldDigits] = useState(() => {
+    const parts = extractPhoneParts(customer.phone || "");
+    return `${parts.ddd}${parts.localNumber}`.replace(/\D/g, "");
+  });
   const [localPhoneDigits, setLocalPhoneDigits] = useState(() => extractPhoneParts(customer.phone || "").localNumber);
 
   useEffect(() => {
@@ -733,6 +748,11 @@ export const CartView = ({
     }
     if (parsed.localNumber !== localPhoneDigits) {
       setLocalPhoneDigits(parsed.localNumber);
+    }
+    const externalDigits = `${parsed.ddd}${parsed.localNumber}`.replace(/\D/g, "");
+    // Autocomplete/outras fontes mudando customer.phone refletem no campo único.
+    if (customer.phone && externalDigits !== `${selectedDdd}${localPhoneDigits}`.replace(/\D/g, "")) {
+      setPhoneFieldDigits(externalDigits);
     }
   }, [customer.phone]);
 
@@ -1769,10 +1789,6 @@ export const CartView = ({
             </p>
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-[11px] text-slate-400">Total</p>
-          <p className="text-base font-bold text-slate-900">{formatCurrency(totalWithFee)}</p>
-        </div>
       </div>}
 
       {/* Dados do cliente */}
@@ -1865,31 +1881,30 @@ export const CartView = ({
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 WhatsApp <span className="text-rose-500 font-bold">Obrigatório</span>
               </label>
-              <div className="mt-1.5 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
-                <div>
-                  <span className="text-[11px] font-semibold text-slate-500">DDD</span>
-                  <DddSelect
-                    value={selectedDdd || ""}
-                    onChange={(ddd) => handleDddChange(ddd)}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <span className="text-[11px] font-semibold text-slate-500">Número</span>
-                  <input
-                    {...inputAssistProps.phoneNational}
-                    name="customerPhone"
-                    type="tel"
-                    inputMode="numeric"
-                    enterKeyHint="next"
-                    value={formatLocalPhoneNumber(localPhoneDigits)}
-                    onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
-                    placeholder={selectedDdd ? "90000-0000" : "Selecione o DDD"}
-                    disabled={!selectedDdd}
-                    className={`${premiumInputClass} mt-1 text-base sm:text-lg disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed`}
-                  />
-                </div>
-              </div>
+              <input
+                {...inputAssistProps.phoneNational}
+                name="customerPhone"
+                type="tel"
+                inputMode="numeric"
+                enterKeyHint="next"
+                value={maskPhoneField(phoneFieldDigits)}
+                onChange={(e) => {
+                  const digits = (e.target.value || "").replace(/\D/g, "").slice(0, 11);
+                  setPhoneFieldDigits(digits);
+                  const ddd = digits.slice(0, 2);
+                  const rest = digits.slice(2);
+                  if (ddd.length === 2) {
+                    if (ddd !== selectedDdd) handleDddChange(ddd);
+                    handlePhoneLocalNumberChange(rest);
+                  } else if (digits.length < 2 && (selectedDdd || localPhoneDigits)) {
+                    // apagou o DDD: limpa o telefone sincronizado também
+                    handleDddChange("");
+                    handlePhoneLocalNumberChange("");
+                  }
+                }}
+                placeholder="(12) 91234-5678"
+                className={`${premiumInputClass} mt-1.5 text-base sm:text-lg`}
+              />
             </div>
           )}
 
@@ -1918,31 +1933,30 @@ export const CartView = ({
                   Ocultar
                 </button>
               </div>
-              <div className="mt-1.5 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
-                <div>
-                  <span className="text-[11px] font-semibold text-slate-500">DDD</span>
-                  <DddSelect
-                    value={selectedDdd || ""}
-                    onChange={(ddd) => handleDddChange(ddd)}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <span className="text-[11px] font-semibold text-slate-500">Número</span>
-                  <input
-                    {...inputAssistProps.phoneNational}
-                    name="customerPhone"
-                    type="tel"
-                    inputMode="numeric"
-                    enterKeyHint="next"
-                    value={formatLocalPhoneNumber(localPhoneDigits)}
-                    onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
-                    placeholder={selectedDdd ? "90000-0000" : "Selecione o DDD"}
-                    disabled={!selectedDdd}
-                    className={`${premiumInputClass} mt-1 text-base sm:text-lg disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed`}
-                  />
-                </div>
-              </div>
+              <input
+                {...inputAssistProps.phoneNational}
+                name="customerPhone"
+                type="tel"
+                inputMode="numeric"
+                enterKeyHint="next"
+                value={maskPhoneField(phoneFieldDigits)}
+                onChange={(e) => {
+                  const digits = (e.target.value || "").replace(/\D/g, "").slice(0, 11);
+                  setPhoneFieldDigits(digits);
+                  const ddd = digits.slice(0, 2);
+                  const rest = digits.slice(2);
+                  if (ddd.length === 2) {
+                    if (ddd !== selectedDdd) handleDddChange(ddd);
+                    handlePhoneLocalNumberChange(rest);
+                  } else if (digits.length < 2 && (selectedDdd || localPhoneDigits)) {
+                    // apagou o DDD: limpa o telefone sincronizado também
+                    handleDddChange("");
+                    handlePhoneLocalNumberChange("");
+                  }
+                }}
+                placeholder="(12) 91234-5678"
+                className={`${premiumInputClass} mt-1.5 text-base sm:text-lg`}
+              />
               <p className="mt-1 text-[11px] text-gray-400">
                 Para pedidos na mesa ou retirada, o telefone pode ficar em branco.
               </p>
@@ -3780,7 +3794,7 @@ export const CartView = ({
                         Pagar online
                       </p>
                       <p className="mt-1 text-[11px] leading-snug text-slate-500">
-                        Processado com segurança antes do pedido seguir para a loja.
+                        Pix e cartão confirmam na hora — o pedido segue direto pra loja, sem esperar.
                       </p>
                     </div>
                     <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/92 px-2.5 py-1.5 text-2xs font-black text-slate-600 shadow-[0_14px_26px_-22px_rgba(51,104,134,0.34)]">
