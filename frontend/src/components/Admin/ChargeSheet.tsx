@@ -12,6 +12,7 @@ import {
   CopySimple,
   DeviceMobileCamera,
   ArrowsClockwise,
+  Question,
 } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { buildPixPayload } from '../../utils/pixPayload';
@@ -44,7 +45,7 @@ type ChargeStatusPayload = {
 
 type Terminal = { id: string; serialNumber: string | null; integrationReady: boolean };
 
-type Phase = 'loading' | 'choose' | 'creating' | 'pix' | 'point' | 'cash-confirm' | 'pix-loja' | 'paid' | 'expired';
+type Phase = 'loading' | 'choose' | 'point-form' | 'creating' | 'pix' | 'point' | 'cash-confirm' | 'pix-loja' | 'paid' | 'expired';
 
 const formatBRL = (value: number) =>
   value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -79,9 +80,13 @@ export function ChargeSheet({
   const [terminals, setTerminals] = useState<Terminal[] | null>(null);
   const [terminalsLink, setTerminalsLink] = useState(false);
   const [charge, setCharge] = useState<ChargeStatusPayload['charge']>(null);
-  // Forma pré-selecionada na maquininha (Orders API default_type): null = o
+  // Forma pré-selecionada na maquininha (Orders API default_type), escolhida na
+  // fase "point-form" (dentro do contexto do Cartão — PO 31/08): null = o
   // cliente escolhe na telinha do terminal (fluxo padrão, design D3).
   const [pointPaymentType, setPointPaymentType] = useState<'debit_card' | 'credit_card' | 'qr' | null>(null);
+  // true após escolher a forma na point-form (com múltiplas maquininhas,
+  // controla se já pode mostrar o seletor de terminal)
+  const [pointFormAsked, setPointFormAsked] = useState(false);
   const [now, setNow] = useState(Date.now());
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -356,8 +361,15 @@ export function ChargeSheet({
           setPhase('cash-confirm');
           return;
         }
-        if (key === 'point' && terminals?.length) return; // seletor abaixo
-        createCharge(key, undefined, pointPaymentType || undefined);
+        if (key === 'point') {
+          // PO 31/08: a forma (débito/crédito/cliente escolhe) é perguntada
+          // DENTRO do contexto do cartão, não em chips soltos fora dele.
+          setPointPaymentType(null);
+          setPointFormAsked(false);
+          setPhase('point-form');
+          return;
+        }
+        createCharge(key);
       }}
       className={`jnc-ds-focus-ring group flex min-h-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl border-2 px-2 py-3 text-center transition active:scale-[0.97] ${
         enabled && canCharge
@@ -456,6 +468,90 @@ export function ChargeSheet({
           </div>
         ) : null}
 
+        {phase === 'point-form' ? (
+          <div className="flex flex-col gap-3">
+            <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-3">
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-sky-800">
+                Pagamento no cartão
+              </p>
+              <p className="mt-1 text-[11px] font-semibold text-sky-700/80">
+                Como o cliente vai pagar na maquininha?
+              </p>
+              <div className="mt-2 flex flex-col gap-2">
+                {([
+                  { type: 'debit_card' as const, label: 'Débito', sub: 'Já abre pronto no terminal' },
+                  { type: 'credit_card' as const, label: 'Crédito', sub: 'Parcelas o cliente escolhe na telinha' },
+                ]).map((option) => (
+                  <button
+                    key={option.type}
+                    type="button"
+                    onClick={() => {
+                      setPointPaymentType(option.type);
+                      setPointFormAsked(true);
+                      if (!terminals?.length) createCharge('point', undefined, option.type);
+                    }}
+                    className={`jnc-ds-focus-ring flex min-h-[60px] items-center justify-between rounded-xl border-2 px-3 py-2 text-left transition active:scale-[0.98] ${
+                      pointPaymentType === option.type
+                        ? 'border-[var(--jnc-primary,#2f9df7)] bg-white shadow-sm'
+                        : 'border-sky-200 bg-white hover:border-sky-300'
+                    }`}
+                  >
+                    <span>
+                      <span className="block text-sm font-black tracking-tight text-slate-900">{option.label}</span>
+                      <span className="block text-[10.5px] font-semibold text-slate-500">{option.sub}</span>
+                    </span>
+                    <CreditCard size={18} className="text-[var(--jnc-primary,#2f9df7)]" />
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPointPaymentType(null);
+                    setPointFormAsked(true);
+                    if (!terminals?.length) createCharge('point', undefined, undefined);
+                  }}
+                  className="jnc-ds-focus-ring flex min-h-[60px] items-center justify-between rounded-xl border-2 border-slate-200 bg-white px-3 py-2 text-left transition hover:border-slate-300 active:scale-[0.98]"
+                >
+                  <span>
+                    <span className="block text-sm font-black tracking-tight text-slate-900">Cliente escolhe na maquininha</span>
+                    <span className="block text-[10.5px] font-semibold text-slate-500">Terminal pergunta na hora do pagamento</span>
+                  </span>
+                  <Question size={18} className="text-slate-400" />
+                </button>
+              </div>
+            </div>
+
+            {terminals?.length && pointFormAsked ? (
+              <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-3">
+                <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-sky-800">
+                  Enviar{pointPaymentType ? ` (${pointPaymentType === 'debit_card' ? 'débito' : 'crédito'})` : ''} para:
+                </p>
+                <div className="flex flex-col gap-2">
+                  {terminals.map((terminal) => (
+                    <button
+                      key={terminal.id}
+                      type="button"
+                      onClick={() => createCharge('point', terminal.id, pointPaymentType || undefined)}
+                      className="jnc-ds-touch jnc-ds-focus-ring flex min-h-11 items-center justify-between rounded-xl border border-sky-200 bg-white px-3 py-2 text-left text-sm font-bold text-slate-800 active:scale-[0.98]"
+                    >
+                      Maquininha …{shortSerial(terminal.id)}
+                      <CreditCard size={18} className="text-[var(--jnc-primary,#2f9df7)]" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={() => setPhase('choose')}
+              className="jnc-ds-focus-ring self-start rounded-lg px-2 py-1 text-xs font-bold text-slate-500 transition hover:text-slate-800"
+            >
+              ‹ Voltar
+            </button>
+          </div>
+        ) : null}
+
         {phase === 'choose' || phase === 'creating' || phase === 'cash-confirm' ? (
           <>
             <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/80 p-4 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.5)]">
@@ -491,42 +587,6 @@ export function ChargeSheet({
                 ) : null}
               </div>
             </div>
-
-            {/* Forma na maquininha (opcional): pré-seleciona no terminal
-                (config.payment_method.default_type). Sem seleção, o cliente
-                escolhe na telinha — fluxo padrão da maquininha (design D3). */}
-            {phase === 'choose' && caps?.point ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-2.5">
-                <p className="mb-1.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-slate-500">
-                  Forma na maquininha
-                  {pointPaymentType ? '' : ' — cliente escolhe nela'}
-                </p>
-                <div className="flex gap-1.5">
-                  {([
-                    { key: 'debit_card', label: 'Débito' },
-                    { key: 'credit_card', label: 'Crédito' },
-                    { key: 'qr', label: 'Pix' },
-                  ] as const).map((option) => {
-                    const selected = pointPaymentType === option.key;
-                    return (
-                      <button
-                        key={option.key}
-                        type="button"
-                        onClick={() => setPointPaymentType(selected ? null : option.key)}
-                        aria-pressed={selected}
-                        className={`jnc-ds-focus-ring flex-1 rounded-xl border px-2 py-2 text-xs font-black transition active:scale-[0.97] ${
-                          selected
-                            ? 'border-[var(--jnc-primary,#2f9df7)] bg-[var(--jnc-primary,#2f9df7)] text-white shadow-sm'
-                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : null}
 
             {terminals?.length ? (
               <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-3">
