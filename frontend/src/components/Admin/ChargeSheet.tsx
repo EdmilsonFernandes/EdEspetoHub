@@ -90,6 +90,8 @@ export function ChargeSheet({
   const [now, setNow] = useState(Date.now());
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // onPaid dispara 1x por abertura, venha do polling ou do carregamento manual
+  const paidNotifiedRef = useRef(false);
 
   // Ticker visual de 1s — independente do polling de status (o contador não pode
   // "travar" esperando a rede; bug de prod 29/08: tickava só de 4s em 4s)
@@ -120,6 +122,13 @@ export function ChargeSheet({
       } else if (active && active.status === 'PAID') {
         setCharge(active);
         setPhase('paid');
+        // Pago visto por QUALQUER caminho (polling, reabertura, refresh manual)
+        // dispara o ciclo — antes só o polling chamava onPaid e o pago tardio
+        // (cliente demorou no terminal) ficava sem retirada automática (31/08).
+        if (!paidNotifiedRef.current) {
+          paidNotifiedRef.current = true;
+          onPaid?.(orderId);
+        }
       } else {
         // Cobrança morta (expirada/cancelada/recusada) é HISTÓRICO, não muro —
         // o sheet abre na escolha pronta pra cobrar de novo (bug do loop 29/08:
@@ -128,7 +137,7 @@ export function ChargeSheet({
         setPhase('choose');
       }
     },
-    []
+    [onPaid, orderId]
   );
 
   const loadStatus = useCallback(
@@ -158,6 +167,7 @@ export function ChargeSheet({
       setTerminals(null);
       setPayload(null);
       setCharge(null);
+      paidNotifiedRef.current = false;
       return;
     }
     setPhase('loading');
@@ -174,18 +184,15 @@ export function ChargeSheet({
       loadStatus(true).then((data) => {
         if (!data) return;
         const active = (data as ChargeStatusPayload).charge;
-        if (active?.status === 'PAID') {
+        // applyStatus (dentro do loadStatus) já trata PAID (phase+onPaid) e
+        // cobrança morta (volta pro choose) — aqui só encerramos o relógio.
+        if (active?.status === 'PAID' || (active && active.status !== 'PENDING')) {
           stopPolling();
-          setPhase('paid');
-          onPaid?.(orderId);
-        } else if (active && active.status !== 'PENDING') {
-          stopPolling();
-          setPhase('expired');
         }
       });
     }, 4000);
     return stopPolling;
-  }, [open, phase, loadStatus, stopPolling, onPaid, orderId]);
+  }, [open, phase, loadStatus, stopPolling]);
 
   // Auto-fechar no pago (ritmo de balcão)
   useEffect(() => {

@@ -83,6 +83,19 @@ describe('createPointCharge (REQ-6)', () => {
     expect(bodies[2].config.payment_method).toEqual({ default_type: 'qr' });
   });
 
+  it('idempotencyToken muda a key — recobrança do mesmo pedido/valor não colide com a key da tentativa morta (bug 409 de prod 31/08)', async () => {
+    const keys: string[] = [];
+    stubFetch(async (_url, init) => {
+      keys.push((init!.headers as Record<string, string>)['X-Idempotency-Key']);
+      return jsonResponse(201, { id: 'ord-1', status: 'OPEN' });
+    });
+    await service.createPointCharge(baseInput);
+    await service.createPointCharge({ ...baseInput, idempotencyToken: '1725123456789' });
+    expect(keys[0]).toContain(':v1');
+    expect(keys[1]).toContain(':1725123456789');
+    expect(keys[0]).not.toBe(keys[1]);
+  });
+
   it('403 do MP vira PAY-018 com dica de reconexão (REQ-10)', async () => {
     stubFetch(async () => jsonResponse(403, { message: 'forbidden' }));
     await expect(service.createPointCharge(baseInput)).rejects.toMatchObject({

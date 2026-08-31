@@ -388,6 +388,7 @@ export class BalcaoChargeService {
         terminalId,
         externalReference,
         paymentType: input.paymentType,
+        idempotencyToken: String(new Date(row.expiresAt || Date.now()).getTime()),
       });
       row.providerOrderId = charge.orderId;
       row.terminalId = terminalId;
@@ -514,7 +515,10 @@ export class BalcaoChargeService {
       await this.orderPayments.markPaidFromWebhook(row.id, payment || order);
     } else if (outcome === 'failed') {
       await this.orderPayments.markFailedFromWebhook(row.id, payment || order);
-    } else if (outcome === 'expired' && this.isChargeActive(row)) {
+    } else if (outcome === 'expired') {
+      // MP diz expirada = marca sempre (o gate de isChargeActive aqui deixava
+      // linhas PENDING pra sempre quando o prazo local já tinha passado — bug
+      // de prod 31/08: polling do front morria e o pagamento tardio sumia da UI).
       row.paymentStatus = 'EXPIRED';
       await this.repo.save(row);
     }

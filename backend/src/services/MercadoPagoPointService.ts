@@ -121,8 +121,12 @@ export class MercadoPagoPointService {
      *  default_type: debit_card | credit_card | qr). Omitir = terminal
      *  pergunta ao cliente (fluxo padrão da maquininha). */
     paymentType?: 'debit_card' | 'credit_card' | 'qr';
+    /** Componente único POR TENTATIVA da idempotency-key (bug de prod 31/08:
+     *  recobrar o mesmo pedido com o mesmo valor reusava a key da cobrança
+     *  morta e o MP recusava com 409). Caller passa o expiresAt novo da linha. */
+    idempotencyToken?: string;
   }): Promise<{ orderId: string; status: string; expiresAt: Date }> {
-    const idempotencyKey = `point:${input.externalReference}:${Math.round(input.amount * 100)}`;
+    const idempotencyKey = `point:${input.externalReference}:${Math.round(input.amount * 100)}:${input.idempotencyToken || 'v1'}`;
     const externalReference = String(input.externalReference).replace(/[:_]/g, '-');
     let response: Response;
     try {
