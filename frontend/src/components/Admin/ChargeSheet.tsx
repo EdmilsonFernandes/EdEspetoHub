@@ -92,6 +92,14 @@ export function ChargeSheet({
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // onPaid dispara 1x por abertura, venha do polling ou do carregamento manual
   const paidNotifiedRef = useRef(false);
+  // onPaid via ref: callers passam arrow inline (nova referência a cada render
+  // da fila) — como dependência do useCallback ele recriava applyStatus→
+  // loadStatus em cadeia e o effect do open recarregava o sheet em loop
+  // (tela piscando e fase do Cartão resetando — bug de prod 31/08 à noite).
+  const onPaidRef = useRef(onPaid);
+  useEffect(() => {
+    onPaidRef.current = onPaid;
+  }, [onPaid]);
 
   // Ticker visual de 1s — independente do polling de status (o contador não pode
   // "travar" esperando a rede; bug de prod 29/08: tickava só de 4s em 4s)
@@ -127,7 +135,7 @@ export function ChargeSheet({
         // (cliente demorou no terminal) ficava sem retirada automática (31/08).
         if (!paidNotifiedRef.current) {
           paidNotifiedRef.current = true;
-          onPaid?.(orderId);
+          onPaidRef.current?.(orderId);
         }
       } else {
         // Cobrança morta (expirada/cancelada/recusada) é HISTÓRICO, não muro —
@@ -137,7 +145,7 @@ export function ChargeSheet({
         setPhase('choose');
       }
     },
-    [onPaid, orderId]
+    [orderId]
   );
 
   const loadStatus = useCallback(
