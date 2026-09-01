@@ -3388,11 +3388,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
           {/* Setup guiado — "Configure sua loja" com sinais reais (IA 01/09). */}
           {(() => {
+            // Hotfix escopo: isConnected/terminals pertencem ao GatewayView — guard
+            // typeof evita ReferenceError sem depender de onde a var vive (nocheck).
+            const mpConnected = typeof isConnected !== 'undefined' ? Boolean(isConnected) : false;
+            const pointReady = typeof terminals !== 'undefined' ? Array.isArray(terminals) && terminals.length > 0 : false;
             const setupSteps = [
               { done: true, label: 'Criar a loja', hint: 'nome, segmento e identidade', cta: null },
               { done: products.length > 0, label: 'Publicar produtos', hint: 'cardápio da vitrine', cta: () => setActiveTab('produtos') },
-              { done: Boolean(isConnected), label: 'Conectar Mercado Pago', hint: 'Pix e cartão com confirmação automática', cta: () => setActiveTab('gateway') },
-              { done: terminals.length > 0, label: 'Maquininha Point', hint: 'cobrança no balcão pelo app', cta: () => setActiveTab('gateway') },
+              { done: mpConnected, label: 'Conectar Mercado Pago', hint: 'Pix e cartão com confirmação automática', cta: () => setActiveTab('gateway') },
+              { done: pointReady, label: 'Maquininha Point', hint: 'cobrança no balcão pelo app', cta: () => setActiveTab('gateway') },
             ] as Array<{ done: boolean; label: string; hint: string; cta: (() => void) | null }>;
             const doneCount = setupSteps.filter((step) => step.done).length;
             if (doneCount === setupSteps.length) return null;
