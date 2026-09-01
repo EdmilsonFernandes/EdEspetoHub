@@ -3375,6 +3375,57 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {activeTab === 'resumo' && (
         <div className="space-y-4">
+          {/* Busca universal (paleta Ctrl+K já existente — agora visível). IA 01/09. */}
+          <button
+            type="button"
+            onClick={() => { setCommandOpen(true); setCommandQuery(''); }}
+            className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-400 shadow-[0_16px_32px_-26px_rgba(15,23,42,0.35)] transition-all hover:border-slate-300 hover:text-slate-500 active:scale-[0.995]"
+          >
+            <span className="text-base">🔍</span>
+            <span className="flex-1 font-semibold">O que você procura?</span>
+            <kbd className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-500">Ctrl K</kbd>
+          </button>
+
+          {/* Setup guiado — "Configure sua loja" com sinais reais (IA 01/09). */}
+          {(() => {
+            const setupSteps = [
+              { done: true, label: 'Criar a loja', hint: 'nome, segmento e identidade', cta: null },
+              { done: products.length > 0, label: 'Publicar produtos', hint: 'cardápio da vitrine', cta: () => setActiveTab('produtos') },
+              { done: Boolean(isConnected), label: 'Conectar Mercado Pago', hint: 'Pix e cartão com confirmação automática', cta: () => setActiveTab('gateway') },
+              { done: terminals.length > 0, label: 'Maquininha Point', hint: 'cobrança no balcão pelo app', cta: () => setActiveTab('gateway') },
+            ] as Array<{ done: boolean; label: string; hint: string; cta: (() => void) | null }>;
+            const doneCount = setupSteps.filter((step) => step.done).length;
+            if (doneCount === setupSteps.length) return null;
+            return (
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.3)]">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Configure sua loja</p>
+                  <span className="text-[11px] font-black text-[#336886]">{doneCount} de {setupSteps.length}</span>
+                </div>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#336886] to-[#5FD35A] transition-all" style={{ width: `${(doneCount / setupSteps.length) * 100}%` }} />
+                </div>
+                <div className="mt-1 divide-y divide-slate-100">
+                  {setupSteps.map((step) => (
+                    <div key={step.label} className="flex items-center gap-3 py-2.5">
+                      <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg border text-[11px] font-black ${step.done ? 'border-emerald-300 bg-emerald-400 text-white' : 'border-slate-200 bg-white text-transparent'}`}>✓</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-bold text-slate-800">{step.label}</p>
+                        <p className="truncate text-[11px] text-slate-500">{step.hint}</p>
+                      </div>
+                      {step.done ? (
+                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600">Feito</span>
+                      ) : step.cta ? (
+                        <button type="button" onClick={step.cta} className="rounded-full border border-[#336886]/20 bg-[#336886]/5 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-[#336886] transition-colors hover:bg-[#336886]/10">
+                          Fazer
+                        </button>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
           {showReviewsCardMobile && (
           <FormSection
             title="Avaliações e gorjetas"

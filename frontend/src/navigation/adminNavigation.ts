@@ -17,7 +17,6 @@ import {
   ForkKnife,
   Gear,
   IdentificationCard,
-  Lightning,
   LockKey,
   Package,
   PlugsConnected,
@@ -31,7 +30,6 @@ import {
   Star,
   Storefront,
   Ticket,
-  TrendUp,
   Truck,
   UserCircle,
   UsersThree,
@@ -94,16 +92,18 @@ export const ADMIN_NAV_GROUPS: Array<{
   /** Ícone do cabeçalho do grupo — sem ele, grupo fechado vira ponto de interrogação. */
   icon: any;
 }> = [
-  { id: 'operacao', label: 'Operação', order: 1, icon: Lightning },
+  // IA em 4 destinos (mock aprovado 01/09): Pedidos · Loja · Financeiro · Ajustes.
+  // "Crescer" e "Equipe" foram absorvidos por Loja e Ajustes — mental model do lojista.
+  { id: 'operacao', label: 'Pedidos', order: 1, icon: ClipboardText },
   { id: 'loja', label: 'Loja', order: 2, icon: Storefront },
-  { id: 'crescer', label: 'Crescer', order: 3, icon: TrendUp },
-  { id: 'financeiro', label: 'Financeiro', order: 4, icon: CurrencyDollar },
-  { id: 'equipe', label: 'Equipe', order: 5, icon: UsersThree },
-  { id: 'ajustes', label: 'Ajustes', order: 6, icon: Gear },
-  { id: 'conta', label: 'Conta', order: 7, icon: UserCircle },
+  { id: 'financeiro', label: 'Financeiro', order: 3, icon: CurrencyDollar },
+  { id: 'ajustes', label: 'Ajustes', order: 4, icon: Gear },
+  { id: 'conta', label: 'Conta', order: 5, icon: UserCircle },
 ];
 
 const STORE_SIDES: AdminNavSurface[] = ['sidebar', 'drawer', 'palette'];
+// Seções de config vivem DENTRO do hub "Configurações da loja" — no menu só a porta.
+const CFG_SIDES: AdminNavSurface[] = ['palette'];
 
 export const getAdminNavGroup = (id: string) => ADMIN_NAV_GROUPS.find((group) => group.id === id);
 
@@ -129,7 +129,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     icon: CheckSquare,
     group: 'operacao',
     action: { type: 'queue', forcedTab: 'queue' },
-    surfaces: ['sidebar', 'drawer', 'bottom'],
+    surfaces: ['sidebar', 'drawer', 'bottom', 'palette'],
     badgeKey: 'queueCount',
     aliases: ['fila', 'pedidos ao vivo', 'monitor'],
   },
@@ -164,7 +164,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     group: 'operacao',
     action: { type: 'queue', forcedTab: 'completed' },
     roles: ['ADMIN', 'LOJISTA'],
-    surfaces: ['bottom', 'account'],
+    surfaces: ['account'],
     aliases: ['concluidos', 'finalizados'],
   },
   // — Loja —
@@ -196,7 +196,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     icon: Storefront,
     group: 'loja',
     action: { type: 'storefront' },
-    surfaces: ['sidebar', 'drawer', 'bottom', 'account'],
+    surfaces: ['sidebar', 'drawer', 'account'],
     aliases: ['vitrine', 'menu', 'cardapio publico', 'minha vitrine'],
   },
   // — Crescer —
@@ -205,7 +205,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: 'Destaques',
     description: 'Solicite e acompanhe campanhas de destaque para o Hub.',
     icon: Sparkle,
-    group: 'crescer',
+    group: 'loja',
     action: { type: 'route', to: '/admin/highlights' },
     roles: ['ADMIN', 'LOJISTA'],
     surfaces: STORE_SIDES,
@@ -216,7 +216,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: 'Cupons',
     description: 'Crie cupons para seus clientes aplicarem no checkout.',
     icon: Ticket,
-    group: 'crescer',
+    group: 'loja',
     action: { type: 'tab', tab: 'cupons' },
     roles: ['ADMIN', 'LOJISTA'],
     surfaces: STORE_SIDES,
@@ -227,7 +227,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: 'Destinos',
     description: 'Solicite vínculo com chalés e pousadas onde sua loja entrega.',
     icon: Compass,
-    group: 'crescer',
+    group: 'loja',
     action: { type: 'tab', tab: 'destinos' },
     roles: ['ADMIN', 'LOJISTA'],
     surfaces: STORE_SIDES,
@@ -238,7 +238,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: 'Condomínios',
     description: 'Solicite participação em condomínios e acompanhe aprovações da loja.',
     icon: Buildings,
-    group: 'crescer',
+    group: 'loja',
     action: { type: 'tab', tab: 'condominios' },
     roles: ['ADMIN', 'LOJISTA'],
     surfaces: STORE_SIDES,
@@ -264,7 +264,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     group: 'financeiro',
     action: { type: 'tab', tab: 'gateway' },
     roles: ['ADMIN', 'LOJISTA'],
-    surfaces: STORE_SIDES,
+    surfaces: ['sidebar', 'drawer', 'bottom', 'palette'],
     aliases: ['pagamentos online', 'mercado pago', 'gateway', 'pix'],
   },
   // — Equipe —
@@ -273,7 +273,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: 'Entregadores',
     description: 'Vínculos, documentos, solicitações e status de entrega.',
     icon: Scooter,
-    group: 'equipe',
+    group: 'ajustes',
     action: { type: 'tab', tab: 'motoboys' },
     roles: ['ADMIN', 'LOJISTA'],
     gate: 'motoboys',
@@ -286,7 +286,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: 'Usuários',
     description: 'Cadastre e gerencie acessos de admin e operador da loja.',
     icon: UsersThree,
-    group: 'equipe',
+    group: 'ajustes',
     action: { type: 'tab', tab: 'usuarios' },
     roles: ['ADMIN', 'LOJISTA'],
     surfaces: STORE_SIDES,
@@ -298,15 +298,15 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   // Operador vê este item como "Impressora" apontando direto pra seção printer.
   {
     id: 'config',
-    label: 'Configurar loja',
-    description: 'Organize perfil, canais, logística, pedidos e horários em blocos separados.',
+    label: 'Configurações da loja',
+    description: 'Perfil, canais, logística, pedidos, horários e dispositivo — tudo em um só lugar.',
     icon: Gear,
     group: 'ajustes',
     action: { type: 'config', section: 'hub' },
     operatorLabel: 'Impressora',
     operatorIcon: Printer,
-    surfaces: STORE_SIDES,
-    aliases: ['configuracoes', 'ajustes', 'impressora'],
+    surfaces: ['sidebar', 'drawer', 'bottom', 'palette'],
+    aliases: ['configuracoes', 'todas as configuracoes', 'configurar loja', 'ajustes', 'impressora'],
   },
   {
     id: 'cfg-hub',
@@ -315,7 +315,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     group: 'ajustes',
     action: { type: 'config', section: 'hub' },
     roles: ['ADMIN', 'LOJISTA'],
-    surfaces: STORE_SIDES,
+    surfaces: CFG_SIDES,
     aliases: ['configuracoes gerais'],
   },
   {
@@ -325,7 +325,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     group: 'ajustes',
     action: { type: 'config', section: 'profile' },
     roles: ['ADMIN', 'LOJISTA'],
-    surfaces: STORE_SIDES,
+    surfaces: CFG_SIDES,
     aliases: ['marca', 'logo', 'identidade'],
   },
   {
@@ -335,7 +335,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     group: 'ajustes',
     action: { type: 'config', section: 'channels' },
     roles: ['ADMIN', 'LOJISTA'],
-    surfaces: STORE_SIDES,
+    surfaces: CFG_SIDES,
     aliases: ['contato', 'redes', 'whatsapp'],
   },
   {
@@ -345,7 +345,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     group: 'ajustes',
     action: { type: 'config', section: 'delivery' },
     roles: ['ADMIN', 'LOJISTA'],
-    surfaces: STORE_SIDES,
+    surfaces: CFG_SIDES,
     aliases: ['frete', 'taxa de entrega', 'logistica'],
   },
   {
@@ -355,7 +355,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     group: 'ajustes',
     action: { type: 'config', section: 'ordering' },
     roles: ['ADMIN', 'LOJISTA'],
-    surfaces: STORE_SIDES,
+    surfaces: CFG_SIDES,
     aliases: ['modalidades', 'delivery mesa retirada'],
   },
   {
@@ -365,7 +365,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     group: 'ajustes',
     action: { type: 'config', section: 'hours' },
     roles: ['ADMIN', 'LOJISTA'],
-    surfaces: STORE_SIDES,
+    surfaces: CFG_SIDES,
     aliases: ['funcionamento', 'abertura fechamento'],
   },
   // 3 telas "do celular da loja" fundidas em 1 — auditoria 16/08 (menu 9 -> 7).
@@ -377,7 +377,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     group: 'ajustes',
     action: { type: 'config', section: 'device' },
     roles: ['ADMIN', 'LOJISTA'],
-    surfaces: STORE_SIDES,
+    surfaces: CFG_SIDES,
     aliases: ['impressora', 'operacao e som', 'permissoes do app', 'celular da loja'],
   },
   // — Só na paleta —
@@ -495,12 +495,10 @@ export const isAdminNavGroupSection = <T>(section: AdminNavSection<T>): section 
   section.type === 'group';
 
 const GROUP_ITEM_ORDER: Record<string, string[]> = {
-  operacao: ['fila', 'pedidos', 'vendas', 'avaliacoes'],
-  loja: ['produtos', 'estoque', 'cardapio'],
-  crescer: ['destaques', 'cupons', 'destinos', 'condominios'],
-  financeiro: ['pagamentos', 'gateway', 'renewal'],
-  equipe: ['motoboys', 'usuarios'],
-  ajustes: ['config', 'cfg-hub', 'cfg-profile', 'cfg-channels', 'cfg-delivery', 'cfg-ordering', 'cfg-hours', 'cfg-device'],
+  operacao: ['fila', 'pedidos', 'avaliacoes'],
+  loja: ['produtos', 'estoque', 'cardapio', 'destaques', 'cupons', 'destinos', 'condominios'],
+  financeiro: ['gateway', 'pagamentos', 'renewal'],
+  ajustes: ['config', 'usuarios', 'motoboys', 'cfg-hub', 'cfg-profile', 'cfg-channels', 'cfg-delivery', 'cfg-ordering', 'cfg-hours', 'cfg-device'],
 };
 
 /**
@@ -581,10 +579,7 @@ export const getAdminActiveItemId = ({
     const params = new URLSearchParams(queryString);
     const tab = stateTab || String(params.get('tab') || '').trim() || String(persistedTab || '').trim();
     if (tab === 'pedidos') return 'fila';
-    if (tab === 'config') {
-      const section = String(params.get('cfg') || params.get('section') || 'hub').trim();
-      return `cfg-${section}`;
-    }
+    if (tab === 'config') return 'config'; // porta destacada; cfg-* segue na paleta
     return tab || 'fila';
   }
   return '';

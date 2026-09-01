@@ -36,7 +36,7 @@ describe('adminNavigation — inventário congelado', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('mantém todos os itens do sidebar lojista (17 + cfg-*)', () => {
+  it('IA em 4 destinos (01/09): sidebar lojista com 16 itens, cfg-* só na paleta', () => {
     expect(sidebarIdsFor(LOJISTA)).toEqual([
       'resumo',
       'fila',
@@ -54,13 +54,6 @@ describe('adminNavigation — inventário congelado', () => {
       'motoboys',
       'usuarios',
       'config',
-      'cfg-hub',
-      'cfg-profile',
-      'cfg-channels',
-      'cfg-delivery',
-      'cfg-ordering',
-      'cfg-hours',
-      'cfg-device',
     ]);
   });
 
@@ -92,11 +85,11 @@ describe('adminNavigation — inventário congelado', () => {
     }
   });
 
-  it('bottom nav: lojista 5 destinos (fila, cardapio, vendas, resumo), operador mantém produtos', () => {
+  it('bottom nav 5 fixos (01/09): Início, Pedidos, Loja, Financeiro, Ajustes', () => {
     const bottom = getAdminNavItems({ role: LOJISTA, canUseMotoboys: true, surfaces: ['bottom'] }).map((i) => i.id);
-    expect(bottom).toEqual(['resumo', 'fila', 'vendas', 'produtos', 'cardapio']);
+    expect(bottom).toEqual(['resumo', 'fila', 'produtos', 'gateway', 'config']);
     const bottomOperator = getAdminNavItems({ role: OPERATOR, canUseMotoboys: false, surfaces: ['bottom'] }).map((i) => i.id);
-    expect(bottomOperator).toEqual(['fila', 'produtos', 'cardapio']);
+    expect(bottomOperator).toEqual(['fila', 'produtos', 'config']);
   });
 
   it('drawer de conta: só grupo conta + assinatura (decisão 29/08)', () => {
@@ -127,6 +120,7 @@ describe('adminNavigation — inventário congelado', () => {
     expect(getAdminItemById('gateway')?.label).toBe('Pagamentos online');
     expect(getAdminItemById('estoque')?.label).toBe('Estoque');
     expect(getAdminItemById('cardapio')?.label).toBe('Loja Online');
+    expect(getAdminItemById('config')?.label).toBe('Configurações da loja');
   });
 
   it('motoboys continua TAB do dashboard (não rota) com gate', () => {
@@ -142,26 +136,22 @@ describe('adminNavigation — inventário congelado', () => {
 });
 
 describe('adminNavigation — agrupamento', () => {
-  it('ordem canônica: Resumo solo → Operação → Loja → Crescer → Financeiro → Equipe → Ajustes → Sair', () => {
+  it('agrupamento IA 01/09: Resumo solo → Pedidos → Loja → Financeiro → Ajustes → Sair', () => {
     const sections = groupAdminNavItems(getAdminNavItems({ role: LOJISTA, canUseMotoboys: true, surfaces: ['sidebar'] }));
     expect(sections.map((section) => section.type === 'group' ? `${section.id}:${section.children.length}` : section.type === 'item' ? `item:${section.item.id}` : 'logout')).toEqual([
       'item:resumo',
       'operacao:3',
-      'loja:3',
-      'crescer:4',
+      'loja:7',
       'financeiro:2',
-      'equipe:2',
-      'ajustes:7',
+      'ajustes:3',
       'logout',
     ]);
   });
 
-  it('com cfg-*, o hub "config" fica oculto no grupo Ajustes', () => {
+  it('Ajustes = porta única de config + equipe (cfg-* fora do menu)', () => {
     const sections = groupAdminNavItems(getAdminNavItems({ role: LOJISTA, canUseMotoboys: true, surfaces: ['sidebar'] }));
     const ajustes = sections.find((section) => section.type === 'group' && section.id === 'ajustes') as any;
-    expect(ajustes.children.map((child: any) => child.id)).toEqual([
-      'cfg-hub', 'cfg-profile', 'cfg-channels', 'cfg-delivery', 'cfg-ordering', 'cfg-hours', 'cfg-device',
-    ]);
+    expect(ajustes.children.map((child: any) => child.id)).toEqual(['config', 'usuarios', 'motoboys']);
   });
 
   it('operador: config (Impressora) aparece como filho de Ajustes, sem leftover', () => {
@@ -185,8 +175,8 @@ describe('adminNavigation — estado ativo unificado', () => {
     expect(getAdminActiveItemId({ pathname: '/admin/dashboard', state: { activeTab: 'produtos' } })).toBe('produtos');
     expect(getAdminActiveItemId({ pathname: '/admin/dashboard', search: '?tab=estoque' })).toBe('estoque');
     expect(getAdminActiveItemId({ pathname: '/admin/dashboard', persistedTab: 'gateway' })).toBe('gateway');
-    expect(getAdminActiveItemId({ pathname: '/admin/dashboard', search: '?tab=config&cfg=hours' })).toBe('cfg-hours');
-    expect(getAdminActiveItemId({ pathname: '/admin/dashboard?tab=config&section=profile' })).toBe('cfg-profile');
+    expect(getAdminActiveItemId({ pathname: '/admin/dashboard', search: '?tab=config&cfg=hours' })).toBe('config');
+    expect(getAdminActiveItemId({ pathname: '/admin/dashboard?tab=config&section=profile' })).toBe('config');
     expect(getAdminActiveItemId({ pathname: '/admin/dashboard' })).toBe('fila');
   });
 });
