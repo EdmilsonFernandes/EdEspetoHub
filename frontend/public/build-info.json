@@ -2,285 +2,285 @@
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "7f7aa050",
-  "versionLabel": "v0.1.9.7f7aa050",
-  "versionInternal": "0.1.9+20260824.222846.7f7aa050",
-  "buildId": "0.1.9+20260824.222846.7f7aa050-20260824.222846-7f7aa050",
-  "builtAt": "2026-08-24T22:28:46.533Z",
-  "commitHash": "7f7aa050d21e9b8e55e7e58b1e274d46cf14c321",
-  "shortHash": "7f7aa050",
+  "versionDisplaySuffix": "392180e7",
+  "versionLabel": "v0.1.9.392180e7",
+  "versionInternal": "0.1.9+20260901.150423.392180e7",
+  "buildId": "0.1.9+20260901.150423.392180e7-20260901.150423-392180e7",
+  "builtAt": "2026-09-01T15:04:23.578Z",
+  "commitHash": "392180e75fb9825f3b1698a676754e0f5106960f",
+  "shortHash": "392180e7",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
     {
-      "hash": "7f7aa050d21e9b8e55e7e58b1e274d46cf14c321",
-      "shortHash": "7f7aa050",
-      "dateIso": "2026-08-24T16:23:50-03:00",
+      "hash": "392180e75fb9825f3b1698a676754e0f5106960f",
+      "shortHash": "392180e7",
+      "dateIso": "2026-09-01T10:26:15-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(drawer): critique impeccable — sheet↔modal, cadastro exposto, badge honesta, a11y",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7f7aa050d21e9b8e55e7e58b1e274d46cf14c321"
+      "subject": "fix(admin): crash isConnected ao logar — checklist usa guard typeof (escopo GatewayView)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/392180e75fb9825f3b1698a676754e0f5106960f"
     },
     {
-      "hash": "f756f60867710325a8871d726aee857406c1fcb6",
-      "shortHash": "f756f608",
-      "dateIso": "2026-08-24T14:41:44-03:00",
+      "hash": "15e451fde67bb58cfd5c10071569c265727f0aed",
+      "shortHash": "15e451fd",
+      "dateIso": "2026-09-01T09:54:18-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(checkout): observação premium de 1 toque — chips instantâneos no card",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f756f60867710325a8871d726aee857406c1fcb6"
+      "subject": "feat(admin): IA em 4 destinos — Pedidos/Loja/Financeiro/Ajustes + busca Ctrl+K visível + setup guiado",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/15e451fde67bb58cfd5c10071569c265727f0aed"
     },
     {
-      "hash": "605052d0ce0b173c39dc8774e61ed083790fddf6",
-      "shortHash": "605052d0",
-      "dateIso": "2026-08-24T12:20:50-03:00",
+      "hash": "1e232083ba2c10dc7c3f01c2a8314e97ef1ad903",
+      "shortHash": "1e232083",
+      "dateIso": "2026-08-31T15:23:04-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(mobile): captureInput false — devolve InputConnection nativo e as sugestões do Gboard",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/605052d0ce0b173c39dc8774e61ed083790fddf6"
+      "subject": "feat(point): comprovante do pedido impresso NA maquininha via API de ações",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1e232083ba2c10dc7c3f01c2a8314e97ef1ad903"
     },
     {
-      "hash": "5eeef7374872e4b2ca4df5a3381091bddd547432",
-      "shortHash": "5eeef737",
-      "dateIso": "2026-08-24T10:16:06-03:00",
+      "hash": "655fdac59c7493a0ba3f2c58516ad36111e1b797",
+      "shortHash": "655fdac5",
+      "dateIso": "2026-08-31T14:53:12-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(pwa): imagens CacheFirst 30d → StaleWhileRevalidate — config da loja reflete no app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5eeef7374872e4b2ca4df5a3381091bddd547432"
+      "subject": "feat(balcao): celebração do pagamento — check desenhando, valor em destaque e barra de fechamento",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/655fdac59c7493a0ba3f2c58516ad36111e1b797"
     },
     {
-      "hash": "0cdf5fc455edec79c7f707e79903416fea1d3c3a",
-      "shortHash": "0cdf5fc4",
-      "dateIso": "2026-08-22T17:41:15-03:00",
+      "hash": "3300aca2e298f171e92889fbc97dda8ac0cb216f",
+      "shortHash": "3300aca2",
+      "dateIso": "2026-08-31T14:29:21-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 107 (v1.0.107) — AAB com densidade iFood-like da Loja Online",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0cdf5fc455edec79c7f707e79903416fea1d3c3a"
+      "subject": "fix(balcao): UX do Pix — 'Pix da loja' só aparece sem Pix MP; label 'Pix MP' vira 'Pix'",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3300aca2e298f171e92889fbc97dda8ac0cb216f"
     },
     {
-      "hash": "f369c349963c524666e000c81a6f226a3eb2930c",
-      "shortHash": "f369c349",
-      "dateIso": "2026-08-22T16:40:01-03:00",
+      "hash": "5d2018a6a784a594ae840b56c62f34acbeaaa825",
+      "shortHash": "5d2018a6",
+      "dateIso": "2026-08-31T14:14:15-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(loja): densidade mobile iFood-like — pills de categoria, lista flat e checkout sem caixas aninhadas",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f369c349963c524666e000c81a6f226a3eb2930c"
+      "subject": "fix(point): remover ticket_number do payload — Orders API real rejeita (400 additionalProperties)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5d2018a6a784a594ae840b56c62f34acbeaaa825"
     },
     {
-      "hash": "5e6c98a7c42159f8560a3a3aba821808fb7ba008",
-      "shortHash": "5e6c98a7",
-      "dateIso": "2026-08-22T10:56:46-03:00",
+      "hash": "9ffa3ee647107f0772c99bb9d461f54a0183f48c",
+      "shortHash": "9ffa3ee6",
+      "dateIso": "2026-08-31T14:03:13-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(landing): 'Direto das lojas' vira carrossel horizontal com snap",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e6c98a7c42159f8560a3a3aba821808fb7ba008"
+      "subject": "feat(point): comprovante sempre explícito (print_on_terminal=seller_ticket) + ticket_number com o nº do pedido",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9ffa3ee647107f0772c99bb9d461f54a0183f48c"
     },
     {
-      "hash": "836e1f043ffd9b0d732a9d46db1424139e2aed09",
-      "shortHash": "836e1f04",
-      "dateIso": "2026-08-22T10:02:30-03:00",
+      "hash": "c00f7b57b10a9f6736c4da4814478714521ba515",
+      "shortHash": "c00f7b57",
+      "dateIso": "2026-08-31T13:48:14-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(landing): condomínios estáticos quando poucos + showcase genérico com import estático",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/836e1f043ffd9b0d732a9d46db1424139e2aed09"
+      "subject": "fix(balcao): sheet de cobrança piscando em loop — onPaid via ref",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c00f7b57b10a9f6736c4da4814478714521ba515"
     },
     {
-      "hash": "f88993210e7b8a22c8b2aad2842e37ba417e8dff",
-      "shortHash": "f8899321",
-      "dateIso": "2026-08-22T09:40:06-03:00",
+      "hash": "2bd2dd1721082a06a187238f8a3adb1ceead7273",
+      "shortHash": "2bd2dd17",
+      "dateIso": "2026-08-31T12:42:43-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(landing): carrossel de condomínios reais com logo na seção Seu bairro",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f88993210e7b8a22c8b2aad2842e37ba417e8dff"
+      "subject": "fix(balcao): 3 bugs de prod do Point — 409 na recobrança, pago não visto pela UI, EXPIRED fantasma",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2bd2dd1721082a06a187238f8a3adb1ceead7273"
     },
     {
-      "hash": "6861be77aacd30cdb9932346023cc7acbdf0b453",
-      "shortHash": "6861be77",
-      "dateIso": "2026-08-22T09:22:11-03:00",
+      "hash": "d8f7c5f63625c402c7e8ea0957c019a0c8ea4c45",
+      "shortHash": "d8f7c5f6",
+      "dateIso": "2026-08-31T12:03:22-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(landing): ecossistema 'Faça parte' + carrossel destinos + filtro lojas",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6861be77aacd30cdb9932346023cc7acbdf0b453"
+      "subject": "refactor(balcao): forma de pagamento pergunta DENTRO do contexto do Cartão",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d8f7c5f63625c402c7e8ea0957c019a0c8ea4c45"
     },
     {
-      "hash": "cced4dbb61e258eafe4960bb2579cbd634ef8726",
-      "shortHash": "cced4dbb",
-      "dateIso": "2026-08-22T08:52:44-03:00",
+      "hash": "3cf8466f09de2150aa067dcc7aa3b6988f50a5af",
+      "shortHash": "3cf8466f",
+      "dateIso": "2026-08-31T11:35:10-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(landing): devolve vídeo com thumbnail real, badge Play Store, MP, rodapé completo",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cced4dbb61e258eafe4960bb2579cbd634ef8726"
+      "subject": "feat(balcao): seletor de forma na maquininha + retirada automática em pagamento presencial",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3cf8466f09de2150aa067dcc7aa3b6988f50a5af"
     },
     {
-      "hash": "09e3c5b66548a366af95f634ffdb9c35300c3c51",
-      "shortHash": "09e3c5b6",
-      "dateIso": "2026-08-22T08:23:21-03:00",
+      "hash": "b52ac877fa2838bb8e91cb694f0fbe82534cfec7",
+      "shortHash": "b52ac877",
+      "dateIso": "2026-08-31T10:50:19-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(landing): marquee de lojas dentro do container — fim da banda full-bleed",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/09e3c5b66548a366af95f634ffdb9c35300c3c51"
+      "subject": "fix(point): reconcile entende Orders API (processed/accredited) + anti-duplicidade na recobrança",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b52ac877fa2838bb8e91cb694f0fbe82534cfec7"
     },
     {
-      "hash": "363a8402d5a3425af01db2debc6af0e4fc85927f",
-      "shortHash": "363a8402",
-      "dateIso": "2026-08-22T08:03:23-03:00",
+      "hash": "d20c48f8aec122c90a9e6f6d5091ece6aff4bec4",
+      "shortHash": "d20c48f8",
+      "dateIso": "2026-08-31T10:17:57-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(landing): carrossel marquee, dedup lojas, hero com logo real, destinos com foto",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/363a8402d5a3425af01db2debc6af0e4fc85927f"
+      "subject": "fix(point): payload da Orders API aceito pelo MP — amount string, sem description, external_reference sem :/_",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d20c48f8aec122c90a9e6f6d5091ece6aff4bec4"
     },
     {
-      "hash": "26702b3c1c9bb92c1d403902fd4afeb86101adaf",
-      "shortHash": "26702b3c",
-      "dateIso": "2026-08-22T06:47:42-03:00",
+      "hash": "f34b98da69f38ee53b632a039de9fa8c1a8d4f28",
+      "shortHash": "f34b98da",
+      "dateIso": "2026-08-31T10:04:30-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(landing): devolve o conteúdo real — QR Play Store, tour em vídeo, logos de lojas, cidades de destinos",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/26702b3c1c9bb92c1d403902fd4afeb86101adaf"
+      "subject": "fix(checkout): telefone unico com mascara (12) 98765-4321 + total triplo resolvido + copy 'confirma na hora'",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f34b98da69f38ee53b632a039de9fa8c1a8d4f28"
     },
     {
-      "hash": "09dfe5d2ca6a5f63c3956989d46d5ba757967288",
-      "shortHash": "09dfe5d2",
-      "dateIso": "2026-08-21T23:28:00-03:00",
+      "hash": "ca31682c9c7b2e5a4a135d4272f91af841cbaccc",
+      "shortHash": "ca31682c",
+      "dateIso": "2026-08-29T21:13:05-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 106 (v1.0.106) — premium innovation layer",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/09dfe5d2ca6a5f63c3956989d46d5ba757967288"
+      "subject": "fix(vitrine): desktop container 800px + hero full-bleed — fim do mobile esticado no web",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ca31682c9c7b2e5a4a135d4272f91af841cbaccc"
     },
     {
-      "hash": "448ee1c52f31412991d5bb9924d23c19e4a2d823",
-      "shortHash": "448ee1c5",
-      "dateIso": "2026-08-21T23:24:07-03:00",
+      "hash": "4a2957d02f3ac2664f75000cf27f3f35334e4c99",
+      "shortHash": "4a2957d0",
+      "dateIso": "2026-08-29T21:00:29-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(ux): premium innovation layer — landing, destinos e /parceiros",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/448ee1c52f31412991d5bb9924d23c19e4a2d823"
+      "subject": "feat(claude-platform): roteiro §5 executado — STATE, ADRs, codebase-map, índice CLAUDE.md",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4a2957d02f3ac2664f75000cf27f3f35334e4c99"
     },
     {
-      "hash": "bcde381cf97b77227e9b456e90a356097651082a",
-      "shortHash": "bcde381c",
-      "dateIso": "2026-08-21T22:33:08-03:00",
+      "hash": "5c5ea43c843183a324b2b5a45931b5e98ea33861",
+      "shortHash": "5c5ea43c",
+      "dateIso": "2026-08-29T20:55:19-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 105 (v1.0.105) — QR fora do cupom da fila",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bcde381cf97b77227e9b456e90a356097651082a"
+      "subject": "docs(claude-platform): base de conhecimento portátil de organização do setup Claude",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5c5ea43c843183a324b2b5a45931b5e98ea33861"
     },
     {
-      "hash": "5f79e7df9ef8285b308e23e2044d7f53699ff1ef",
-      "shortHash": "5f79e7df",
-      "dateIso": "2026-08-21T22:29:15-03:00",
+      "hash": "590f5303fd660dadd4b676a929dac00f9776adfa",
+      "shortHash": "590f5303",
+      "dateIso": "2026-08-29T18:58:43-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(print): QR removido do cupom da fila — suspeito nº 1 do fallback RawBT",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5f79e7df9ef8285b308e23e2044d7f53699ff1ef"
+      "subject": "chore(mobile): versionCode 117 — esquema ☰ Menu em destaque + slot Menu no rodapé",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/590f5303fd660dadd4b676a929dac00f9776adfa"
     },
     {
-      "hash": "314e4c348af5bd89bbd59ede9b550d602a4aaf8a",
-      "shortHash": "314e4c34",
-      "dateIso": "2026-08-21T18:26:24-03:00",
+      "hash": "5f6f57d48b24ea96f9fdc425d86ed004411f1304",
+      "shortHash": "5f6f57d4",
+      "dateIso": "2026-08-29T18:49:08-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(dashboard): PDF do movimento + título enxuto",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/314e4c348af5bd89bbd59ede9b550d602a4aaf8a"
+      "subject": "feat(admin): esquema ☰=Menu em destaque, rodapé ganha slot Menu — Conta só no avatar",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5f6f57d48b24ea96f9fdc425d86ed004411f1304"
     },
     {
-      "hash": "e4907f23b92dbefbc7a7b79c874d5c2907d5d178",
-      "shortHash": "e4907f23",
-      "dateIso": "2026-08-21T18:03:20-03:00",
+      "hash": "7e5e393d734b73bd2471917ec76aa70f9d16d715",
+      "shortHash": "7e5e393d",
+      "dateIso": "2026-08-29T18:30:16-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(dashboard): 42P18 no movimento — param $2 (tz) órfão na query de itens",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e4907f23b92dbefbc7a7b79c874d5c2907d5d178"
+      "subject": "Revert \"feat(landing): seção Point no balcão em /parceiros — PNG oficial da Pro 3, fluxo garçom→maquininha, copy pautada em research\"",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7e5e393d734b73bd2471917ec76aa70f9d16d715"
     },
     {
-      "hash": "1624a46f6140c1386e85deaf0d75dc4e54ee29af",
-      "shortHash": "1624a46f",
-      "dateIso": "2026-08-21T17:12:32-03:00",
+      "hash": "abfbfc48f53596fa6dd6f9f2f0b0dec623fb920d",
+      "shortHash": "abfbfc48",
+      "dateIso": "2026-08-29T14:06:26-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(dashboard): relatório de Movimento & horários — pedidos/itens/tempo sem preço",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1624a46f6140c1386e85deaf0d75dc4e54ee29af"
+      "subject": "chore(mobile): versionCode 116 — menu admin legível no app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/abfbfc48f53596fa6dd6f9f2f0b0dec623fb920d"
     },
     {
-      "hash": "9c27ad16d29ea7dd70115889a2eeb72376dba566",
-      "shortHash": "9c27ad16",
-      "dateIso": "2026-08-21T16:26:01-03:00",
+      "hash": "e00f3b9f5513919927eb356bb97476200322306d",
+      "shortHash": "e00f3b9f",
+      "dateIso": "2026-08-29T14:05:21-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(backend): redirect 308 de slug no BACKEND — quem vê o /api na produção",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9c27ad16d29ea7dd70115889a2eeb72376dba566"
+      "subject": "feat(landing): seção Point no balcão em /parceiros — PNG oficial da Pro 3, fluxo garçom→maquininha, copy pautada em research",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e00f3b9f5513919927eb356bb97476200322306d"
     },
     {
-      "hash": "aeb9c9923e779743f618a36c1a08d97c46018d3e",
-      "shortHash": "aeb9c992",
-      "dateIso": "2026-08-21T16:04:43-03:00",
+      "hash": "7d2bd38ad240b018fe184085f6b84516acf65f61",
+      "shortHash": "7d2bd38a",
+      "dateIso": "2026-08-29T13:57:53-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(ux): morto o vão de 72vh entre o card fechado e o cardápio",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/aeb9c9923e779743f618a36c1a08d97c46018d3e"
+      "subject": "fix(admin): layout de desktop vale a partir de 768px + bottom nav não some mais no scroll",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7d2bd38ad240b018fe184085f6b84516acf65f61"
     },
     {
-      "hash": "a23fa036b3b2b0e85c316e712b6514fcda925d7d",
-      "shortHash": "a23fa036",
-      "dateIso": "2026-08-21T15:42:24-03:00",
+      "hash": "226ef535327293077b874560717ffa3b22b5e083",
+      "shortHash": "226ef535",
+      "dateIso": "2026-08-29T13:30:33-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(ux): cartão de loja fechada centrado (max-w-xl) — fim da laje no desktop",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a23fa036b3b2b0e85c316e712b6514fcda925d7d"
+      "subject": "fix(admin): menu web legível — grupos abertos com ícone, bottom nav só no mobile",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/226ef535327293077b874560717ffa3b22b5e083"
     },
     {
-      "hash": "b2ee7fcd6c2d45cd8006bf94c8985c505a92106a",
-      "shortHash": "b2ee7fcd",
-      "dateIso": "2026-08-21T14:49:58-03:00",
+      "hash": "36c43d66c3e26248ed89dd15a3f370b749767d33",
+      "shortHash": "36c43d66",
+      "dateIso": "2026-08-29T12:21:07-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(apis): redirect 308 de slug no BFF — /api nunca passa pelo nginx do front",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b2ee7fcd6c2d45cd8006bf94c8985c505a92106a"
+      "subject": "fix(admin): ☰ no header mobile abre o menu completo da operação",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/36c43d66c3e26248ed89dd15a3f370b749767d33"
     },
     {
-      "hash": "a22f8374b77a1e2d9a8eb2c62f0037ee28ce5300",
-      "shortHash": "a22f8374",
-      "dateIso": "2026-08-21T14:20:42-03:00",
+      "hash": "51de79dd633697493ecd8f5ab721af20d916b9f2",
+      "shortHash": "51de79dd",
+      "dateIso": "2026-08-29T11:56:32-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(vitrine): fim da costura 'dois sites' no modo visita",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a22f8374b77a1e2d9a8eb2c62f0037ee28ce5300"
+      "subject": "feat(balcao): card Maquininhas Point no Pagamentos + contador 1s + link no erro",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/51de79dd633697493ecd8f5ab721af20d916b9f2"
     },
     {
-      "hash": "3eb8b82314cfb1b68d1217a4203e06abd9d27744",
-      "shortHash": "3eb8b823",
-      "dateIso": "2026-08-21T14:06:02-03:00",
+      "hash": "9bafd47471d240c9316cd34f21ebd4f429b25c91",
+      "shortHash": "9bafd474",
+      "dateIso": "2026-08-29T11:43:50-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 104 (v1.0.104) — vitrine-balcão no app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3eb8b82314cfb1b68d1217a4203e06abd9d27744"
+      "subject": "chore(mobile): versionCode 115 — menu admin unificado no app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9bafd47471d240c9316cd34f21ebd4f429b25c91"
     },
     {
-      "hash": "28f84d4e360df75b8f24cc9bd37bbfe792b8c1de",
-      "shortHash": "28f84d4e",
-      "dateIso": "2026-08-21T14:02:02-03:00",
+      "hash": "5607ba020a591599e15107192e91b16fc674bcc9",
+      "shortHash": "5607ba02",
+      "dateIso": "2026-08-29T11:31:11-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(vitrine): loja fechada vira vitrine-balcão — cardápio aberto pra visita",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/28f84d4e360df75b8f24cc9bd37bbfe792b8c1de"
+      "subject": "fix(balcao): Pix MP com QR quebrado — faltava o prefixo data:image do base64",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5607ba020a591599e15107192e91b16fc674bcc9"
     },
     {
-      "hash": "2a0c2a81431f4177b53084ee2b40429d050d62c1",
-      "shortHash": "2a0c2a81",
-      "dateIso": "2026-08-21T11:45:03-03:00",
+      "hash": "048570924a8a81517f19253a0075fbe8d9cdc417",
+      "shortHash": "04857092",
+      "dateIso": "2026-08-29T11:13:29-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(nginx): redirect API cobre paths reais (/api/stores/slug e /api/public/stores/slug)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2a0c2a81431f4177b53084ee2b40429d050d62c1"
+      "subject": "fix(admin-nav): crash setIsDesktopLayout + Cupons pós-Sair — correções do smoke",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/048570924a8a81517f19253a0075fbe8d9cdc417"
     },
     {
-      "hash": "431de6cedb84f1bc4af65d04505c3b02eda90335",
-      "shortHash": "431de6ce",
-      "dateIso": "2026-08-21T11:31:48-03:00",
+      "hash": "07437726cc156b8dab394c2165849bf87a0eaabf",
+      "shortHash": "07437726",
+      "dateIso": "2026-08-29T10:59:15-03:00",
       "authorName": "Edmilson Fernandes",
       "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(nginx): redirect 308 permanente edsertaneja → espetinho-datony-bacabal",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/431de6cedb84f1bc4af65d04505c3b02eda90335"
+      "subject": "feat(admin): home KPI-first — Fase 10 (veredito RETHINK auditoria 17/08)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/07437726cc156b8dab394c2165849bf87a0eaabf"
     }
   ]
 }

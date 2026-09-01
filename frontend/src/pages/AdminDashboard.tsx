@@ -1864,6 +1864,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   const session = useMemo(() => sessionProp || auth, [sessionProp, auth]);
   const [products, setProducts] = useState<any[]>([]);
+  // Setup guiado (IA 01/09): sinais reais de MP/Point/abertura no escopo principal —
+  // GatewayView tem os dele, mas isolado. fetch único e barato pro checklist/hero.
+  const [homeMpConnected, setHomeMpConnected] = useState(false);
+  const [homePointReady, setHomePointReady] = useState(false);
+  const [storeOpenNow, setStoreOpenNow] = useState<boolean | null>(null);
   const [orders, setOrders] = useState<any[]>([]);
   const [error, setError] = useState('');
   const [subscriptionDetails, setSubscriptionDetails] = useState<any>(null);
@@ -1884,6 +1889,35 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (requestedTab === 'pedidos') return 'fila';
     return (requestedTab as any) || 'fila';
   });
+
+  // Sinais do setup guiado + hero de status (uma chamada, cache no serviço público).
+  // storeId é declarado mais abaixo no componente — derivar do session (TDZ lição v4).
+  useEffect(() => {
+    let alive = true;
+    const store = (session as any)?.store || {};
+    const slug = String(store.slug || '').trim();
+    const sid = String(store.id || '').trim();
+    if (slug) {
+      storeService.fetchBySlug(slug)
+        .then((data: any) => { if (alive) setStoreOpenNow(Boolean(data?.isOpenNow ?? data?.openNow ?? data?.open)); })
+        .catch(() => {});
+    }
+    if (sid) {
+      storeService.getMercadoPagoAccount(sid)
+        .then((data: any) => {
+          if (!alive) return;
+          const connected = Boolean(data?.connected);
+          setHomeMpConnected(connected);
+          if (!connected) return null;
+          return storeService.getPointTerminals(sid)
+            .then((t: any) => { if (alive) setHomePointReady((t?.terminals || []).length > 0); })
+            .catch(() => {});
+        })
+        .catch(() => {});
+    }
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.store?.slug, session?.store?.id]);
   const [configSection, setConfigSection] = useState(() => {
     const fromQuery = String(new URLSearchParams(location.search || '').get('cfg') || '').trim();
     return fromQuery || 'hub';
@@ -3379,24 +3413,55 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           <button
             type="button"
             onClick={() => { setCommandOpen(true); setCommandQuery(''); }}
-            className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-400 shadow-[0_16px_32px_-26px_rgba(15,23,42,0.35)] transition-all hover:border-slate-300 hover:text-slate-500 active:scale-[0.995]"
+            className="flex w-full items-center gap-3 rounded-2xl border border-white/70 bg-white/92 px-4 py-3 text-left text-sm text-slate-400 shadow-[0_18px_38px_-28px_rgba(21,58,76,0.4)] ring-1 ring-slate-200/60 backdrop-blur-xl transition-all hover:border-slate-300 hover:text-slate-500 active:scale-[0.995]"
           >
-            <span className="text-base">🔍</span>
+            <MagnifyingGlass size={18} weight="bold" className="text-slate-400" />
             <span className="flex-1 font-semibold">O que você procura?</span>
             <kbd className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-500">Ctrl K</kbd>
           </button>
 
+          {/* Hero de status — a primeira pergunta do lojista: "como está a loja agora?" */}
+          <div className="relative overflow-hidden rounded-[1.5rem] bg-[linear-gradient(150deg,#153A4C_0%,#336886_100%)] p-5 text-white shadow-[0_26px_54px_-30px_rgba(21,58,76,0.65)]">
+            <div className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#5FD35A]/10 blur-3xl" />
+            <div className="relative flex items-center gap-3">
+              <span className="relative flex h-3 w-3 shrink-0">
+                <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${storeOpenNow === false ? 'bg-orange-400' : 'bg-emerald-400'} opacity-60`} />
+                <span className={`relative inline-flex h-3 w-3 rounded-full ${storeOpenNow === false ? 'bg-orange-400' : 'bg-emerald-400'}`} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-lg font-black leading-tight tracking-tight">
+                  {storeOpenNow === null ? 'Loja…' : storeOpenNow ? 'Loja aberta' : 'Loja fechada'}
+                </p>
+                <p className="mt-0.5 text-[11px] font-semibold text-white/60">
+                  {storeOpenNow ? 'recebendo pedidos agora' : 'os clientes veem a vitrine em modo fechado'}
+                </p>
+              </div>
+            </div>
+            <div className="relative mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => navigate('/admin/queue')}
+                className="flex-1 rounded-2xl bg-white px-4 py-2.5 text-center text-[13px] font-black text-[#153A4C] shadow-[0_14px_28px_-14px_rgba(0,0,0,0.45)] transition-transform active:scale-[0.97]"
+              >
+                Ver fila de pedidos
+              </button>
+              <button
+                type="button"
+                onClick={() => { setActiveTab('config'); setConfigSection('hours'); }}
+                className="rounded-2xl border border-white/20 bg-white/10 px-4 py-2.5 text-[13px] font-bold text-white transition-colors hover:bg-white/16"
+              >
+                Editar horários
+              </button>
+            </div>
+          </div>
+
           {/* Setup guiado — "Configure sua loja" com sinais reais (IA 01/09). */}
           {(() => {
-            // Hotfix escopo: isConnected/terminals pertencem ao GatewayView — guard
-            // typeof evita ReferenceError sem depender de onde a var vive (nocheck).
-            const mpConnected = typeof isConnected !== 'undefined' ? Boolean(isConnected) : false;
-            const pointReady = typeof terminals !== 'undefined' ? Array.isArray(terminals) && terminals.length > 0 : false;
             const setupSteps = [
               { done: true, label: 'Criar a loja', hint: 'nome, segmento e identidade', cta: null },
               { done: products.length > 0, label: 'Publicar produtos', hint: 'cardápio da vitrine', cta: () => setActiveTab('produtos') },
-              { done: mpConnected, label: 'Conectar Mercado Pago', hint: 'Pix e cartão com confirmação automática', cta: () => setActiveTab('gateway') },
-              { done: pointReady, label: 'Maquininha Point', hint: 'cobrança no balcão pelo app', cta: () => setActiveTab('gateway') },
+              { done: homeMpConnected, label: 'Conectar Mercado Pago', hint: 'Pix e cartão com confirmação automática', cta: () => setActiveTab('gateway') },
+              { done: homePointReady, label: 'Maquininha Point', hint: 'cobrança no balcão pelo app', cta: () => setActiveTab('gateway') },
             ] as Array<{ done: boolean; label: string; hint: string; cta: (() => void) | null }>;
             const doneCount = setupSteps.filter((step) => step.done).length;
             if (doneCount === setupSteps.length) return null;
