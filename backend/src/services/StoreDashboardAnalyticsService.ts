@@ -192,9 +192,13 @@ export class StoreDashboardAnalyticsService {
   }
 
   /**
-   * Como o cliente pagou + saúde do Pix (01/09). Vivo em orders/order_payments
-   * (snapshots não guardam método de pagamento). Só pedidos PAGOS entram —
-   * "como pagou" de pedido cancelado não é receita.
+   * Como o cliente pagou + saúde do Pix + comparação entre janelas (01/09).
+   * Vivo em orders/order_payments (snapshots não guardam método).
+   * - byPaymentMethod/pixHealth: só pedidos PAGOS ("como pagou" de pedido
+   *   cancelado não é receita);
+   * - comparison: totais SEM filtro de status — a mesma base do resumo,
+   *   do gráfico diário e do PDF, senão o delta conta história diferente
+   *   do número ao lado dele.
    */
   private async queryPaymentInsights(storeId: string, windows: ComparisonWindows) {
     const current = windows.current;
@@ -205,8 +209,22 @@ export class StoreDashboardAnalyticsService {
     const prevParams = current && windows.previous
       ? [storeId, this.timezone, windows.previous.startKey, windows.previous.endKey]
       : null;
+    const windowTotals = (windowParams: unknown[] | null) =>
+      windowParams
+        ? AppDataSource.query(
+            `
+              SELECT
+                COUNT(*)::int AS orders,
+                COALESCE(SUM(o.total), 0) AS revenue
+              FROM orders o
+              WHERE o.store_id = $1
+                AND timezone($2, o.created_at)::date BETWEEN $3::date AND $4::date
+            `,
+            windowParams
+          )
+        : Promise.resolve([]);
 
-    const [methodRows, previousRows, pixRows] = await Promise.all([
+    const [methodRows, currentRows, previousRows, pixRows] = await Promise.all([
       AppDataSource.query(
         `
           SELECT
@@ -222,20 +240,8 @@ export class StoreDashboardAnalyticsService {
         `,
         params
       ),
-      prevParams
-        ? AppDataSource.query(
-            `
-              SELECT
-                COUNT(*)::int AS orders,
-                COALESCE(SUM(o.total), 0) AS revenue
-              FROM orders o
-              WHERE o.store_id = $1
-                AND o.payment_status = 'PAID'
-                AND timezone($2, o.created_at)::date BETWEEN $3::date AND $4::date
-            `,
-            prevParams
-          )
-        : Promise.resolve([]),
+      windowTotals(current ? [storeId, this.timezone, current.startKey, current.endKey] : null),
+      windowTotals(prevParams),
       AppDataSource.query(
         `
           SELECT
@@ -256,11 +262,10 @@ export class StoreDashboardAnalyticsService {
       orders: this.toInt(row?.orders),
       revenue: this.toNumber(row?.revenue),
     }));
-    const currentPaidTotals = byPaymentMethod.reduce(
-      (acc, row) => ({ orders: acc.orders + row.orders, revenue: acc.revenue + row.revenue }),
-      { orders: 0, revenue: 0 }
-    );
-    const previousRow = Array.isArray(previousRows) && previousRows.length ? previousRows[0] : null;
+    const totalsRow = (rows: Array<Record<string, unknown>>) => {
+      const row = Array.isArray(rows) && rows.length ? rows[0] : null;
+      return row ? { orders: this.toInt(row?.orders), revenue: this.toNumber(row?.revenue) } : null;
+    };
 
     const pixHealth = { paid: 0, failed: 0, total: 0 };
     for (const row of Array.isArray(pixRows) ? pixRows : []) {
@@ -274,10 +279,8 @@ export class StoreDashboardAnalyticsService {
     return {
       byPaymentMethod,
       comparison: {
-        current: current ? currentPaidTotals : null,
-        previous: previousRow
-          ? { orders: this.toInt(previousRow?.orders), revenue: this.toNumber(previousRow?.revenue) }
-          : null,
+        current: totalsRow(currentRows),
+        previous: totalsRow(previousRows),
       },
       pixHealth,
     };

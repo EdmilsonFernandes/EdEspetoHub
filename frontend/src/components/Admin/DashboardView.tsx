@@ -23,7 +23,9 @@ const TOP_PRODUCT_BAR_COLORS = ["#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
   debito: "Débito (maquininha)",
+  debito_presencial: "Débito (maquininha)",
   credito: "Crédito",
+  credito_presencial: "Crédito (maquininha)",
   pix: "Pix",
   dinheiro: "Dinheiro",
   outros: "Outros",
@@ -31,7 +33,9 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 
 const paymentMethodLabel = (method) =>
   PAYMENT_METHOD_LABELS[String(method || "").trim().toLowerCase()] ||
-  String(method || "Outros").replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+  String(method || "Outros")
+    .replace(/_/g, " ")
+    .replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 
 /** Delta % entre período atual e anterior; null quando não há base comparável. */
 const deltaPct = (current, previous) => {
@@ -767,9 +771,9 @@ export const DashboardView = ({
     };
   }, [analyticsReport]);
 
-  /** Tiles contam UMA história: quando há leitura do período (live, pagos),
-   *  pedidos e ticket preferem ela ao all-time — o delta ao lado compara
-   *  exatamente essa janela. */
+  /** Tiles contam UMA história: quando há leitura do período, pedidos e
+   *  ticket preferem ela ao all-time — o delta ao lado compara exatamente
+   *  essa janela (mesma base do gráfico e do PDF). */
   const periodStats = useMemo(() => {
     const current = analyticsReport?.comparison?.current;
     const orders = Number(current?.orders || 0);
@@ -1592,7 +1596,7 @@ export const DashboardView = ({
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             <DeltaPill pct={comparisonDeltas.orders} />
             <span className="text-[10px] font-semibold text-slate-400">
-              {periodStats ? "pedidos pagos no período" : "todo o histórico da loja"}
+              {periodStats ? "pedidos no período" : "todo o histórico da loja"}
             </span>
           </div>
         </div>
@@ -1607,7 +1611,7 @@ export const DashboardView = ({
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             <DeltaPill pct={comparisonDeltas.ticket} />
             <span className="text-[10px] font-semibold text-slate-400">
-              {periodStats ? "por pedido pago no período" : "média histórica"}
+              {periodStats ? "por pedido no período" : "média histórica"}
             </span>
           </div>
         </div>
