@@ -767,6 +767,17 @@ export const DashboardView = ({
     };
   }, [analyticsReport]);
 
+  /** Tiles contam UMA história: quando há leitura do período (live, pagos),
+   *  pedidos e ticket preferem ela ao all-time — o delta ao lado compara
+   *  exatamente essa janela. */
+  const periodStats = useMemo(() => {
+    const current = analyticsReport?.comparison?.current;
+    const orders = Number(current?.orders || 0);
+    const revenue = Number(current?.revenue || 0);
+    if (!orders || !Number.isFinite(orders) || !Number.isFinite(revenue)) return null;
+    return { orders, ticket: revenue / orders };
+  }, [analyticsReport]);
+
   const bestDayInfo = useMemo(() => {
     const fromReport = analyticsReport?.bestDay;
     if (fromReport && Number(fromReport.total) > 0) {
@@ -1576,11 +1587,13 @@ export const DashboardView = ({
             <Package size={15} weight="duotone" className="text-slate-300" />
           </div>
           <p className="mt-1.5 text-2xl font-black tracking-tight tabular-nums text-slate-900">
-            {metrics.totalOrders}
+            {periodStats ? periodStats.orders : metrics.totalOrders}
           </p>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             <DeltaPill pct={comparisonDeltas.orders} />
-            <span className="text-[10px] font-semibold text-slate-400">todo o histórico da loja</span>
+            <span className="text-[10px] font-semibold text-slate-400">
+              {periodStats ? "pedidos pagos no período" : "todo o histórico da loja"}
+            </span>
           </div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.35)]">
@@ -1589,11 +1602,13 @@ export const DashboardView = ({
             <TrendUp size={15} weight="duotone" className="text-slate-300" />
           </div>
           <p className="mt-1.5 text-2xl font-black tracking-tight tabular-nums text-slate-900">
-            {formatCurrency(metrics.avgTicket)}
+            {formatCurrency(periodStats ? periodStats.ticket : metrics.avgTicket)}
           </p>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             <DeltaPill pct={comparisonDeltas.ticket} />
-            <span className="text-[10px] font-semibold text-slate-400">por pedido pago</span>
+            <span className="text-[10px] font-semibold text-slate-400">
+              {periodStats ? "por pedido pago no período" : "média histórica"}
+            </span>
           </div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.35)]">
