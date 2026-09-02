@@ -1800,6 +1800,10 @@ export const CartView = ({
         </div>
       </div>}
 
+      {/* Checkout desktop 2 colunas (visitante): form à esquerda, resumo/pagamento à direita.
+          Logado segue multi-step em página única de coluna — sem phantom column. */}
+      <div className={useMultiStepFlow ? "" : "lg:grid lg:grid-cols-[minmax(0,1fr)_min(360px,36vw)] lg:items-start lg:gap-5"}>
+      <div className="lg:col-start-1 min-w-0">
       {/* Dados do cliente */}
       {(!useMultiStepFlow || checkoutStep === 2) && <div className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -2938,7 +2942,9 @@ export const CartView = ({
           )}
         </div>
       </div>}
+      </div>
 
+      <div className="lg:col-start-2 min-w-0">
       {/* Resumo */}
       {(!useMultiStepFlow || checkoutStep === 1) && (
         <div className="space-y-4 mb-4 sm:mb-6">
@@ -4101,6 +4107,8 @@ export const CartView = ({
           </div>
         </div>
       )}
+      </div>
+      </div>
     </div>
   );
 };
