@@ -1398,24 +1398,37 @@ const PointTerminalsCard = ({ storeId }) => {
           </div>
         ) : (
           <div className="space-y-2">
-            {terminals.map((t: any) => (
-              <div key={t.id} className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <CreditCard size={18} weight="duotone" className="text-slate-400" />
-                  <div>
-                    <p className="text-xs font-black text-slate-800">Maquininha …{String(t.id || '').split('__').pop()?.slice(-6)}</p>
-                    <p className="text-[10.5px] font-semibold text-slate-400">Serial confere com a etiqueta traseira</p>
+            {terminals.map((t: any) => {
+              const [rawModel] = String(t.id || '').split('__');
+              const model = String(rawModel || '').replace(/[_-]+/g, ' ').toUpperCase();
+              const isPro3 = /Q92|PRO\s*3/i.test(model);
+              return (
+                <div key={t.id} className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <CreditCard size={18} weight="duotone" className="text-slate-400" />
+                    <div>
+                      <p className="text-xs font-black text-slate-800">
+                        Maquininha …{String(t.id || '').split('__').pop()?.slice(-6)}
+                        {model ? <span className="ml-1.5 rounded-md bg-slate-100 px-1.5 py-0.5 text-[9.5px] font-black tracking-wide text-slate-500">{model}</span> : null}
+                      </p>
+                      <p className="text-[10.5px] font-semibold text-slate-400">
+                        {isPro3 ? 'Recebe a cobrança ao apertar o botão verde (Atualizar)' : 'Recebe a cobrança automaticamente na tela'}
+                      </p>
+                    </div>
                   </div>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-[10px] font-black ${
+                      t.integrationReady ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                    }`}
+                  >
+                    {t.integrationReady ? 'PDV · pronta' : 'Modo avulso'}
+                  </span>
                 </div>
-                <span
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-black ${
-                    t.integrationReady ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
-                  }`}
-                >
-                  {t.integrationReady ? 'PDV · pronta' : 'Modo avulso'}
-                </span>
-              </div>
-            ))}
+              );
+            })}
+            <p className="pt-1 text-[10.5px] font-semibold leading-relaxed text-slate-400">
+              Point Smart recebe o valor sozinha; Point Pro 3 mostra ao apertar Atualizar (comportamento do fabricante).
+            </p>
           </div>
         )}
       </div>

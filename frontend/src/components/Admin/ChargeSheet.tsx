@@ -794,6 +794,9 @@ export function ChargeSheet({
               <p className="max-w-[260px] text-center text-[11px] font-semibold text-slate-400">
                 O cliente escolhe crédito, débito e parcelas no terminal.
               </p>
+              <p className="max-w-[280px] rounded-xl bg-amber-50 px-2.5 py-1.5 text-center text-[11px] font-bold text-amber-700 ring-1 ring-amber-200">
+                Não apareceu na tela? Aperte o botão verde (Atualizar) na maquininha — Point Pro 3 recebe assim.
+              </p>
             </div>
           </div>
         ) : null}

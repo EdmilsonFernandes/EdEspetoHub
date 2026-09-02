@@ -944,6 +944,7 @@ export const CartView = ({
     }
   };
 
+  const addressNumberInputRef = useRef<HTMLInputElement | null>(null);
   const handleCepLookup = async () => {
     if (cepLookupLockRef.current || cepLoading) return;
     const rawCep = (customer.cep || "").replace(/\D/g, "");
@@ -964,6 +965,14 @@ export const CartView = ({
       };
       next.address = buildDeliveryAddress(next);
       onChangeCustomer(next);
+      // CEP-first premium: achou o endereço → ja leva o dedo pro proximo campo
+      // obrigatorio que falta (numero), sem o cliente cacar onde digitar.
+      if ((data.street || data.city) && !next.number) {
+        requestAnimationFrame(() => {
+          const el = addressNumberInputRef.current;
+          if (el) { el.focus({ preventScroll: false }); el.scrollIntoView({ block: "center", behavior: "smooth" }); }
+        });
+      }
     } catch (error: any) {
       setCepError(error?.message || "Não foi possível consultar o CEP agora.");
     } finally {
@@ -2333,6 +2342,7 @@ export const CartView = ({
                           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Numero</label>
                           <input
                             {...inputAssistProps.addressLine2}
+                            ref={addressNumberInputRef}
                             name="addressNumber"
                             value={customer.number || ""}
                             onChange={(e) => updateDeliveryField("number", e.target.value)}
