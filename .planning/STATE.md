@@ -10,6 +10,16 @@ do orchestrator. Produto estável em `gha.2617` (29/08 à noite).
 
 ## Últimos fechados
 
+- 02/09 — **Pendências do dashboard mortas** (64348832, deployado e validado):
+  (1) Pix 4390 já estava morto (91e90f33 na imagem + Pix pago 01/09 sem falhas
+  novas; alerta decai com a janela); (2) delivery-billing virou fetch lazy na
+  aba Pagamentos — console do dashboard sem 4xx; (3) receita agora conta só
+  pedidos reais: snapshot + analytics + clientes excluem cancelled e
+  awaiting_payment (filtro canônico do movimento); migration 20260902_001
+  purgou snapshots → recompute 250ms depois. Efeito: loja-guinea 30d
+  R$1.922→R$1.364 (R$546 cancelados fora), all-time R$10.752→R$7.905 (26%
+  de inflação histórica removida), 369→268 pedidos. periodRevenue agora ==
+  comparison.current até o centavo.
 - 01/09 — **Dashboard admin "em números" — NO AR e verificado** (c6bd964f +
   fixes 9c4580e1 e 0bc93dd7): Onda A backend ganha byPaymentMethod +
   comparison + pixHealth + bestDay no dashboard-analytics; Onda B frontend
