@@ -29,6 +29,13 @@ type DashboardAggregatePayload = {
   topRows: Array<Record<string, unknown>>;
 };
 
+type DateWindow = { startKey: string; endKey: string };
+
+type ComparisonWindows = {
+  current: DateWindow | null;
+  previous: DateWindow | null;
+};
+
 export class StoreDashboardAnalyticsService {
   private storeRepository = new StoreRepository();
   private snapshotService = new StoreDashboardSnapshotService();
@@ -122,6 +129,158 @@ export class StoreDashboardAnalyticsService {
     const raw = String(value || '').trim();
     if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
     return '';
+  }
+
+  /* ── Janelas de comparação (01/09) ─────────────────────────────────
+   * Delta "vs. período anterior": janela atual e a imediatamente anterior
+   * de mesmo comprimento, em chaves de data (YYYY-MM-DD) na TZ da loja.
+   * "Todo período" não tem anterior comparável → previous = null.      */
+
+  static shiftDateKey(key: string, days: number) {
+    const [year, month, day] = key.split('-').map((value) => Number(value));
+    if (!year || !month || !day) return key;
+    const base = new Date(Date.UTC(year, month - 1, day, 12));
+    base.setUTCDate(base.getUTCDate() + days);
+    return base.toISOString().slice(0, 10);
+  }
+
+  static daysBetweenKeys(startKey: string, endKey: string) {
+    const [y1, m1, d1] = startKey.split('-').map((value) => Number(value));
+    const [y2, m2, d2] = endKey.split('-').map((value) => Number(value));
+    if (!y1 || !m1 || !d1 || !y2 || !m2 || !d2) return 0;
+    return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000);
+  }
+
+  static resolveComparisonWindows(params: {
+    customRange?: { startDate: string; endDate: string } | null;
+    periodDays?: number | null;
+    todayKey: string;
+  }): ComparisonWindows {
+    const { customRange, periodDays, todayKey } = params;
+    let current: DateWindow | null = null;
+    if (customRange) {
+      current = { startKey: customRange.startDate, endKey: customRange.endDate };
+    } else if (periodDays && Number.isFinite(periodDays) && periodDays > 0) {
+      const normalized = Math.min(Math.floor(periodDays), 3660);
+      current = { startKey: StoreDashboardAnalyticsService.shiftDateKey(todayKey, -(normalized - 1)), endKey: todayKey };
+    }
+    if (!current) return { current: null, previous: null };
+
+    const length = StoreDashboardAnalyticsService.daysBetweenKeys(current.startKey, current.endKey) + 1;
+    const previousEnd = StoreDashboardAnalyticsService.shiftDateKey(current.startKey, -1);
+    const previous = { startKey: StoreDashboardAnalyticsService.shiftDateKey(previousEnd, -(length - 1)), endKey: previousEnd };
+    return { current, previous };
+  }
+
+  /** Dia de maior receita do período (ties → mais recente). Zero queries. */
+  static pickBestDay(salesRows: Array<Record<string, unknown>>): { date: string; total: number } | null {
+    let best: { date: string; total: number } | null = null;
+    for (const row of Array.isArray(salesRows) ? salesRows : []) {
+      const rawDateValue = row?.date;
+      const rawDate =
+        rawDateValue instanceof Date
+          ? rawDateValue.toISOString().slice(0, 10)
+          : String(rawDateValue || '').slice(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) continue;
+      const total = Number(row?.total);
+      if (!Number.isFinite(total) || total <= 0) continue;
+      if (!best || total > best.total || (total === best.total && rawDate > best.date)) {
+        best = { date: rawDate, total };
+      }
+    }
+    return best;
+  }
+
+  /**
+   * Como o cliente pagou + saúde do Pix (01/09). Vivo em orders/order_payments
+   * (snapshots não guardam método de pagamento). Só pedidos PAGOS entram —
+   * "como pagou" de pedido cancelado não é receita.
+   */
+  private async queryPaymentInsights(storeId: string, windows: ComparisonWindows) {
+    const current = windows.current;
+    const params = [storeId, this.timezone, current?.startKey || null, current?.endKey || null];
+    const periodGuard = (alias: string) =>
+      `AND ($3::date IS NULL OR $4::date IS NULL OR timezone($2, ${alias}.created_at)::date BETWEEN $3::date AND $4::date)`;
+
+    const prevParams = current && windows.previous
+      ? [storeId, this.timezone, windows.previous.startKey, windows.previous.endKey]
+      : null;
+
+    const [methodRows, previousRows, pixRows] = await Promise.all([
+      AppDataSource.query(
+        `
+          SELECT
+            COALESCE(NULLIF(trim(o.payment_method), ''), 'outros') AS method,
+            COUNT(*)::int AS orders,
+            COALESCE(SUM(o.total), 0) AS revenue
+          FROM orders o
+          WHERE o.store_id = $1
+            AND o.payment_status = 'PAID'
+            ${periodGuard('o')}
+          GROUP BY 1
+          ORDER BY orders DESC, revenue DESC
+        `,
+        params
+      ),
+      prevParams
+        ? AppDataSource.query(
+            `
+              SELECT
+                COUNT(*)::int AS orders,
+                COALESCE(SUM(o.total), 0) AS revenue
+              FROM orders o
+              WHERE o.store_id = $1
+                AND o.payment_status = 'PAID'
+                AND timezone($2, o.created_at)::date BETWEEN $3::date AND $4::date
+            `,
+            prevParams
+          )
+        : Promise.resolve([]),
+      AppDataSource.query(
+        `
+          SELECT
+            op.payment_status AS status,
+            COUNT(*)::int AS attempts
+          FROM order_payments op
+          WHERE op.store_id = $1
+            AND op.payment_method = 'pix'
+            ${periodGuard('op')}
+          GROUP BY 1
+        `,
+        params
+      ),
+    ]);
+
+    const byPaymentMethod = (Array.isArray(methodRows) ? methodRows : []).map((row) => ({
+      method: String(row?.method || 'outros'),
+      orders: this.toInt(row?.orders),
+      revenue: this.toNumber(row?.revenue),
+    }));
+    const currentPaidTotals = byPaymentMethod.reduce(
+      (acc, row) => ({ orders: acc.orders + row.orders, revenue: acc.revenue + row.revenue }),
+      { orders: 0, revenue: 0 }
+    );
+    const previousRow = Array.isArray(previousRows) && previousRows.length ? previousRows[0] : null;
+
+    const pixHealth = { paid: 0, failed: 0, total: 0 };
+    for (const row of Array.isArray(pixRows) ? pixRows : []) {
+      const attempts = this.toInt(row?.attempts);
+      const status = String(row?.status || '').trim().toUpperCase();
+      pixHealth.total += attempts;
+      if (status === 'PAID') pixHealth.paid = attempts;
+      if (status === 'FAILED') pixHealth.failed = attempts;
+    }
+
+    return {
+      byPaymentMethod,
+      comparison: {
+        current: current ? currentPaidTotals : null,
+        previous: previousRow
+          ? { orders: this.toInt(previousRow?.orders), revenue: this.toNumber(previousRow?.revenue) }
+          : null,
+      },
+      pixHealth,
+    };
   }
 
   private async queryCustomers(
@@ -481,8 +640,13 @@ export class StoreDashboardAnalyticsService {
     monthKey: string;
     normalizedPeriodDays: number | null;
     periodLabel: string;
+    paymentInsights?: {
+      byPaymentMethod: Array<{ method: string; orders: number; revenue: number }>;
+      comparison: { current: { orders: number; revenue: number } | null; previous: { orders: number; revenue: number } | null };
+      pixHealth: { paid: number; failed: number; total: number };
+    } | null;
   }) {
-    const { aggregates, customers, periodCustomers, monthKey, normalizedPeriodDays, periodLabel } = params;
+    const { aggregates, customers, periodCustomers, monthKey, normalizedPeriodDays, periodLabel, paymentInsights } = params;
     const summaryRow = aggregates.summaryRow || {};
     const totalOrders = this.toInt(summaryRow?.totalOrders);
     const totalRevenue = this.toNumber(summaryRow?.totalRevenue);
@@ -513,6 +677,10 @@ export class StoreDashboardAnalyticsService {
         qty: this.toInt(row?.qty),
         revenue: this.toNumber(row?.revenue),
       })),
+      bestDay: StoreDashboardAnalyticsService.pickBestDay(aggregates.salesRows || []),
+      byPaymentMethod: paymentInsights?.byPaymentMethod || [],
+      comparison: paymentInsights?.comparison || { current: null, previous: null },
+      pixHealth: paymentInsights?.pixHealth || { paid: 0, failed: 0, total: 0 },
       customers,
       periodCustomers,
     };
@@ -545,11 +713,26 @@ export class StoreDashboardAnalyticsService {
       aggregates = await this.getLiveAggregates(store.id, monthKey, periodStart, customRange);
     }
 
-    const [customers, periodCustomers] = await Promise.all([
+    const [customers, periodCustomers, paymentInsights] = await Promise.all([
       this.queryCustomers(store.id),
       this.queryCustomers(store.id, customRange
         ? { startDate: customRange.startDate, endDate: customRange.endDate }
         : { periodStart }),
+      this.queryPaymentInsights(
+        store.id,
+        StoreDashboardAnalyticsService.resolveComparisonWindows({
+          customRange,
+          periodDays: normalizedPeriodDays,
+          todayKey: this.formatDateInTimezone(new Date()) || '',
+        })
+      ).catch((error: any) => {
+        // Dado novo é best-effort: falha aqui não derruba o relatório.
+        this.log.warn('Dashboard payment insights failed', {
+          storeId: store.id,
+          error: error?.message || String(error),
+        });
+        return null;
+      }),
     ]);
 
     return this.buildReport({
@@ -559,6 +742,7 @@ export class StoreDashboardAnalyticsService {
       monthKey,
       normalizedPeriodDays,
       periodLabel,
+      paymentInsights,
     });
   }
 

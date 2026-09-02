@@ -1,10 +1,11 @@
 ﻿// @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
 import { Capacitor } from "@capacitor/core";
-import { Package, CurrencyDollar, CheckCircle, CircleDashed, LinkSimple, CalendarBlank, TrendUp, CaretDown } from "@phosphor-icons/react";
+import { Package, CurrencyDollar, CheckCircle, CircleDashed, LinkSimple, CalendarBlank, TrendUp, TrendDown, WarningCircle, CaretDown } from "@phosphor-icons/react";
 import {
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
+  ReferenceDot,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -17,6 +18,66 @@ import { exportToCsv } from "../../utils/export";
 import { storeService } from "../../services/storeService";
 
 const TOP_PRODUCT_BAR_COLORS = ["#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"];
+
+/* ── Seção "em números" (01/09) — helpers fora do componente (TDZ-safe) ── */
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  debito: "Débito (maquininha)",
+  credito: "Crédito",
+  pix: "Pix",
+  dinheiro: "Dinheiro",
+  outros: "Outros",
+};
+
+const paymentMethodLabel = (method) =>
+  PAYMENT_METHOD_LABELS[String(method || "").trim().toLowerCase()] ||
+  String(method || "Outros").replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+
+/** Delta % entre período atual e anterior; null quando não há base comparável. */
+const deltaPct = (current, previous) => {
+  const c = Number(current);
+  const p = Number(previous);
+  if (!Number.isFinite(c) || !Number.isFinite(p) || p <= 0 || c < 0) return null;
+  return Math.round(((c - p) / p) * 1000) / 10;
+};
+
+const DeltaPill = ({ pct, suffix = "vs. período anterior" }) => {
+  if (pct === null || pct === undefined) return null;
+  const up = pct > 0;
+  const flat = pct === 0;
+  const Icon = flat ? null : up ? TrendUp : TrendDown;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black tabular-nums ${
+        flat
+          ? "bg-slate-100 text-slate-500"
+          : up
+            ? "bg-emerald-50 text-emerald-700"
+            : "bg-rose-50 text-rose-600"
+      }`}
+    >
+      {Icon ? <Icon size={11} weight="bold" /> : null}
+      {flat ? "estável" : `${up ? "+" : ""}${pct.toLocaleString("pt-BR")}%`}
+      <span className="font-semibold opacity-70">{suffix}</span>
+    </span>
+  );
+};
+
+/** Tooltip customizado do gráfico de receita (crosshair do Recharts). */
+const RevenueTooltip = ({ active, payload, bestDayDate }) => {
+  if (!active || !payload || !payload.length) return null;
+  const entry = payload[0]?.payload || {};
+  const isRecord = bestDayDate && entry.date === bestDayDate;
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-[0_18px_34px_-24px_rgba(15,23,42,0.55)]">
+      <p className="text-[11px] font-bold text-slate-500">{entry.fullLabel || entry.label}</p>
+      <p className="mt-0.5 text-sm font-black tabular-nums text-slate-900">{formatCurrency(entry.total)}</p>
+      {isRecord ? (
+        <p className="mt-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-600">Recorde do período</p>
+      ) : null}
+    </div>
+  );
+};
 const toDateInputValue = (date) =>
   new Intl.DateTimeFormat("en-CA", {
     timeZone: APP_TIMEZONE,
@@ -619,16 +680,19 @@ export const DashboardView = ({
 
   const analyticsSummary = analyticsReport?.summary || null;
   const chartSource = useMemo(() => {
+    const mapEntry = (entry) => {
+      const full = resolveDateLabel(entry.date);
+      return {
+        date: entry.date,
+        label: full.slice(-5), // "sex 29/08" → "29/08" (eixo X enxuto)
+        fullLabel: full,
+        total: Number(entry.total || 0),
+      };
+    };
     if (Array.isArray(analyticsReport?.salesByDay) && analyticsReport.salesByDay.length > 0) {
-      return analyticsReport.salesByDay
-        .map((entry) => ({
-          date: entry.date,
-          label: resolveDateLabel(entry.date),
-          total: Number(entry.total || 0),
-        }))
-        .sort((a, b) => (a.date > b.date ? 1 : -1));
+      return analyticsReport.salesByDay.map(mapEntry).sort((a, b) => (a.date > b.date ? 1 : -1));
     }
-    return stats.chartData;
+    return (stats.chartData || []).map(mapEntry);
   }, [analyticsReport, stats.chartData]);
 
   const topProductsSource = useMemo(() => {
@@ -672,6 +736,59 @@ export const DashboardView = ({
     if (Number.isNaN(date.getTime())) return "Sem pedidos ainda";
     return `Desde ${date.toLocaleDateString("pt-BR")}`;
   }, [metrics.firstOrderAt]);
+
+  /* ── Seção "em números" (01/09): como pagou, delta vs. anterior, recorde, Pix ── */
+  const paymentMethods = useMemo(() => {
+    const rows = Array.isArray(analyticsReport?.byPaymentMethod) ? analyticsReport.byPaymentMethod : [];
+    const totalOrders = rows.reduce((acc, row) => acc + Number(row?.orders || 0), 0);
+    return rows.map((row) => {
+      const orders = Number(row?.orders || 0);
+      return {
+        method: String(row?.method || "outros"),
+        label: paymentMethodLabel(row?.method),
+        orders,
+        revenue: Number(row?.revenue || 0),
+        pct: totalOrders > 0 ? (orders / totalOrders) * 100 : 0,
+      };
+    });
+  }, [analyticsReport]);
+
+  const comparisonDeltas = useMemo(() => {
+    const comparison = analyticsReport?.comparison;
+    const current = comparison?.current;
+    const previous = comparison?.previous;
+    if (!current || !previous) return { revenue: null, orders: null, ticket: null };
+    const currentTicket = current.orders > 0 ? current.revenue / current.orders : 0;
+    const previousTicket = previous.orders > 0 ? previous.revenue / previous.orders : 0;
+    return {
+      revenue: deltaPct(current.revenue, previous.revenue),
+      orders: deltaPct(current.orders, previous.orders),
+      ticket: deltaPct(currentTicket, previousTicket),
+    };
+  }, [analyticsReport]);
+
+  const bestDayInfo = useMemo(() => {
+    const fromReport = analyticsReport?.bestDay;
+    if (fromReport && Number(fromReport.total) > 0) {
+      return { date: String(fromReport.date), total: Number(fromReport.total) };
+    }
+    const rows = [...(chartSource || [])]
+      .filter((entry) => Number(entry.total) > 0)
+      .sort((a, b) => b.total - a.total || (a.date < b.date ? 1 : -1));
+    return rows.length ? { date: rows[0].date, total: rows[0].total } : null;
+  }, [analyticsReport, chartSource]);
+
+  const pixHealth = useMemo(() => {
+    const health = analyticsReport?.pixHealth;
+    if (!health || !Number(health.total)) return null;
+    return {
+      paid: Number(health.paid || 0),
+      failed: Number(health.failed || 0),
+      total: Number(health.total || 0),
+    };
+  }, [analyticsReport]);
+
+  const showPixAlert = Boolean(pixHealth && pixHealth.failed >= 3 && pixHealth.failed > pixHealth.paid);
 
   const sortedTopProducts = useMemo(() => {
     const list = [...topProductsSource];
@@ -1425,45 +1542,6 @@ export const DashboardView = ({
     printWindow.document.close();
   };
 
-  const metricCards = [
-    {
-      id: "total",
-      label: "Receita total",
-      value: formatCurrency(metrics.totalSales),
-      helper: firstOrderLabel,
-      icon: CurrencyDollar,
-      tone: "ds-metric-card-neutral",
-      iconTone: "text-slate-700 bg-slate-100 border-slate-200",
-    },
-    {
-      id: "month",
-      label: "Receita do mês",
-      value: formatCurrency(metrics.monthRevenue),
-      helper: formatMonthLabel(selectedMonth),
-      icon: CalendarBlank,
-      tone: "ds-metric-card-success",
-      iconTone: "text-emerald-700 bg-emerald-100 border-emerald-200",
-      monthSelector: true,
-    },
-    {
-      id: "period",
-      label: "Receita do período",
-      value: formatCurrency(metrics.periodRevenue),
-      helper: `Período: ${metrics.periodLabel}`,
-      icon: TrendUp,
-      tone: "ds-metric-card-warning",
-      iconTone: "text-amber-700 bg-amber-100 border-amber-200",
-    },
-    {
-      id: "orders",
-      label: "Pedidos realizados",
-      value: String(metrics.totalOrders),
-      helper: `Ticket médio: ${formatCurrency(metrics.avgTicket)}`,
-      icon: Package,
-      tone: "ds-metric-card-neutral",
-      iconTone: "text-brand-primary bg-brand-primary-soft border-brand-primary/20",
-    },
-  ];
   const periodOptions = [
     { id: "30", label: "30d" },
     { id: "60", label: "60d" },
@@ -1475,29 +1553,59 @@ export const DashboardView = ({
 
   return (
     <div className="space-y-6 animate-in fade-in">
-      {/* KPI na dobra — veredito RETHINK da auditoria de 17/08 ("KPI-first"):
-          antes, receita só aparecia depois de listas inteiras de clientes. */}
+      {/* ══ O BALCÃO EM NÚMEROS (01/09) — a primeira pergunta primeiro:
+          "quanto entrou?" vem com contexto (delta vs. período anterior,
+          recorde do período). Substitui os 2 blocos de KPI duplicados. ══ */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-[12px] font-semibold text-slate-500">Receita do mês</p>
-          <p className="mt-1 text-2xl font-black tracking-tight text-[#1b77ba]">
-            {formatCurrency(metrics.monthRevenue)}
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.35)]">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Recebido no período</p>
+            <CurrencyDollar size={15} weight="duotone" className="text-slate-300" />
+          </div>
+          <p className="mt-1.5 text-2xl font-black tracking-tight tabular-nums text-slate-900">
+            {formatCurrency(metrics.periodRevenue)}
           </p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <DeltaPill pct={comparisonDeltas.revenue} />
+            <span className="text-[10px] font-semibold text-slate-400">{metrics.periodLabel}</span>
+          </div>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-[12px] font-semibold text-slate-500">Pedidos</p>
-          <p className="mt-1 text-2xl font-black tracking-tight text-slate-900">{metrics.totalOrders}</p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.35)]">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Pedidos</p>
+            <Package size={15} weight="duotone" className="text-slate-300" />
+          </div>
+          <p className="mt-1.5 text-2xl font-black tracking-tight tabular-nums text-slate-900">
+            {metrics.totalOrders}
+          </p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <DeltaPill pct={comparisonDeltas.orders} />
+            <span className="text-[10px] font-semibold text-slate-400">todo o histórico da loja</span>
+          </div>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-[12px] font-semibold text-slate-500">Ticket médio</p>
-          <p className="mt-1 text-2xl font-black tracking-tight text-slate-900">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.35)]">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Ticket médio</p>
+            <TrendUp size={15} weight="duotone" className="text-slate-300" />
+          </div>
+          <p className="mt-1.5 text-2xl font-black tracking-tight tabular-nums text-slate-900">
             {formatCurrency(metrics.avgTicket)}
           </p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <DeltaPill pct={comparisonDeltas.ticket} />
+            <span className="text-[10px] font-semibold text-slate-400">por pedido pago</span>
+          </div>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-[12px] font-semibold text-slate-500">Receita total</p>
-          <p className="mt-1 text-2xl font-black tracking-tight text-slate-900">
-            {formatCurrency(metrics.totalSales)}
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.35)]">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Melhor dia</p>
+            <span className="text-[10px] font-black text-emerald-600">recorde</span>
+          </div>
+          <p className="mt-1.5 text-2xl font-black tracking-tight tabular-nums text-slate-900">
+            {bestDayInfo ? formatCurrency(bestDayInfo.total) : "—"}
+          </p>
+          <p className="mt-1.5 text-[10px] font-semibold text-slate-400">
+            {bestDayInfo ? formatDate(bestDayInfo.date) : "sem vendas no período"}
           </p>
         </div>
       </div>
@@ -1525,6 +1633,312 @@ export const DashboardView = ({
           </a>
         )}
       </div>
+
+      {/* Período — controla tiles, gráficos, produtos e PDF (mesmo estado de sempre,
+          agora perto dos números em vez de escondido no card de exportação). */}
+      <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+            Período analisado
+          </p>
+          <p className="text-xs font-bold text-slate-600">{metrics.periodLabel}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {periodOptions.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => {
+                if (option.id === "custom") {
+                  activateCustomRange();
+                  return;
+                }
+                setPeriodDays(option.id);
+              }}
+              className={`rounded-full px-3 py-1.5 text-[11px] font-bold transition-all active:scale-95 ${
+                periodDays === option.id
+                  ? "bg-slate-900 text-white shadow-[0_8px_18px_-10px_rgba(15,23,42,0.6)]"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {isCustomPeriod ? (
+          <div className="grid gap-2 sm:grid-cols-2">
+            <label className="block">
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Data inicial</span>
+              <input
+                type="date"
+                value={customRange?.startDate || customStartDate}
+                max={customRange?.endDate || customEndDate || todayDateKey}
+                onChange={(event) => handleCustomStartDateChange(event.target.value)}
+                className="ds-focus-ring mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+              />
+            </label>
+            <label className="block">
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Data final</span>
+              <input
+                type="date"
+                value={customRange?.endDate || customEndDate}
+                min={customRange?.startDate || customStartDate}
+                max={todayDateKey}
+                onChange={(event) => handleCustomEndDateChange(event.target.value)}
+                className="ds-focus-ring mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+              />
+            </label>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Aviso operacional — só aparece quando o dado manda (cor semântica + ícone,
+          nunca cor sozinha). Pix com mais falhas que sucessos ≥3 = algo quebrado. */}
+      {showPixAlert && pixHealth ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3">
+          <WarningCircle size={18} weight="duotone" className="mt-0.5 shrink-0 text-rose-500" />
+          <div className="min-w-0">
+            <p className="text-[13px] font-bold text-rose-800">
+              Pix com {pixHealth.failed} tentativas falhas × {pixHealth.paid} pagos no período
+            </p>
+            <p className="mt-0.5 text-[11px] font-semibold text-rose-700/80">
+              Cliente tenta pagar por Pix e a cobrança não conclui — verifique os meios de pagamento em Pagamentos Online.
+            </p>
+          </div>
+        </div>
+      ) : null}
+
+      {/* ══ RECEBIDO POR DIA ══ área com crosshair, recorde marcado em verde.
+           Substitui o bar-chart apertado — leitura de tendência, não de barras. */}
+      <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+        <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-5">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h4 className="text-sm font-black text-slate-800">Recebido por dia</h4>
+              <p className="mt-0.5 text-[11px] font-semibold text-slate-500">{metrics.periodLabel}</p>
+            </div>
+            {bestDayInfo ? (
+              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-black tabular-nums text-emerald-700">
+                recorde {formatCurrency(bestDayInfo.total)} · {bestDayInfo.date.slice(8)}/{bestDayInfo.date.slice(5, 7)}
+              </span>
+            ) : null}
+          </div>
+          {chartSource.length === 0 ? (
+            <div className="flex flex-1 items-center justify-center py-10 text-center">
+              <div className="space-y-2">
+                <div className="text-4xl">📊</div>
+                <p className="text-sm font-semibold text-slate-600">Sem vendas registradas ainda.</p>
+                <p className="text-xs text-slate-400">As vendas do período aparecerão aqui.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="h-56 md:h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartSource} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="revenueArea" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#1e80d6" stopOpacity={0.28} />
+                      <stop offset="100%" stopColor="#1e80d6" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                    interval="preserveStartEnd"
+                    minTickGap={18}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    width={52}
+                    tick={{ fontSize: 10, fontWeight: 500, fill: "#94a3b8" }}
+                    tickFormatter={(value) =>
+                      value >= 1000
+                        ? `R$ ${(value / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}k`
+                        : `R$ ${value}`
+                    }
+                  />
+                  <RechartsTooltip
+                    content={<RevenueTooltip bestDayDate={bestDayInfo?.date || null} />}
+                    cursor={{ stroke: "#1e80d6", strokeWidth: 1, strokeDasharray: "4 4" }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="total"
+                    stroke="#1e80d6"
+                    strokeWidth={2}
+                    fill="url(#revenueArea)"
+                    dot={false}
+                    activeDot={{ r: 4, strokeWidth: 2, stroke: "#ffffff", fill: "#1e80d6" }}
+                  />
+                  {bestDayInfo && chartSource.some((entry) => entry.date === bestDayInfo.date) ? (
+                    <ReferenceDot
+                      x={chartSource.find((entry) => entry.date === bestDayInfo.date)?.label}
+                      y={bestDayInfo.total}
+                      r={5}
+                      fill="#2f9e52"
+                      stroke="#ffffff"
+                      strokeWidth={2}
+                      ifOverflow="extendDomain"
+                    />
+                  ) : null}
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+
+        {/* ══ COMO O CLIENTE PAGOU ══ magnitude = comprimento (matiz único),
+             identidade no rótulo — mesmo princípio do "Balcão em números". */}
+        <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5">
+          <div className="mb-3">
+            <h4 className="text-sm font-black text-slate-800">Como o cliente pagou</h4>
+            <p className="mt-0.5 text-[11px] font-semibold text-slate-500">pedidos pagos · {metrics.periodLabel}</p>
+          </div>
+          {paymentMethods.length === 0 ? (
+            <div className="flex flex-1 items-center justify-center py-10 text-center">
+              <div className="space-y-2">
+                <div className="text-4xl">💳</div>
+                <p className="text-sm font-semibold text-slate-600">Sem pagamentos no período.</p>
+                <p className="text-xs text-slate-400">Quando vender, a divisão por forma aparece aqui.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 space-y-3">
+              {paymentMethods.map((row, index) => {
+                const maxOrders = paymentMethods[0]?.orders || 1;
+                const width = Math.max(4, Math.round((row.orders / maxOrders) * 100));
+                return (
+                  <div key={`${row.method}-${index}`}>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className={`truncate text-xs ${index === 0 ? "font-black text-slate-800" : "font-bold text-slate-600"}`}>
+                        {row.label}
+                      </p>
+                      <p className="shrink-0 text-[11px] font-bold tabular-nums text-slate-500">
+                        {row.orders} · <span className="font-black text-slate-800">{row.pct.toFixed(1).replace(".", ",")}%</span>
+                      </p>
+                    </div>
+                    <div className="mt-1 h-3 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full rounded-full bg-[#1e80d6]" style={{ width: `${width}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <p className="mt-3 border-t border-slate-100 pt-2 text-[10px] font-semibold text-slate-400">
+            Só pedidos efetivamente pagos entram nesta divisão.
+          </p>
+        </div>
+      </div>
+
+      {/* ---------- TOP PRODUTOS DO PERÍODO ---------- */}
+        <div className={`bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-400 ${isMobile ? 'h-48' : 'h-80'} overflow-hidden`}>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h4 className="font-bold text-gray-700">
+              Top 5 Produtos do Período
+            </h4>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-slate-400 uppercase tracking-wide">Ordenar</span>
+              <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
+                {[
+                  { id: "qty", label: "Qtd" },
+                  { id: "name", label: "Nome" },
+                ].map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => setTopSort(option.id)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
+                      topSort === option.id
+                        ? "bg-brand-primary text-white"
+                        : "text-slate-500 hover:bg-white"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          {sortedTopProducts.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-sm text-gray-400">
+              <div className="text-center space-y-2">
+                <div className="text-4xl">🥩</div>
+                <p className="text-sm font-semibold text-slate-600">Sem produtos vendidos ainda.</p>
+                <p className="text-xs text-slate-400">Quando vender, o ranking aparece aqui.</p>
+              </div>
+            </div>
+          ) : isMobile ? (
+            <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+              {sortedTopProducts.map((product, index) => {
+                const maxQty = sortedTopProducts[0]?.qty || 1;
+                const percent = Math.max(8, Math.round((product.qty / maxQty) * 100));
+                const barColor = TOP_PRODUCT_BAR_COLORS[index] || TOP_PRODUCT_BAR_COLORS[TOP_PRODUCT_BAR_COLORS.length - 1];
+                return (
+                  <div
+                    key={`${product.name}-${index}`}
+                    className="min-w-[210px] rounded-xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-3 py-2"
+                  >
+                    <div className="flex items-center justify-between text-sm text-slate-700">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ background: barColor }}
+                        />
+                        <span className="font-semibold truncate">{product.name}</span>
+                      </div>
+                      <span className="text-xs text-slate-500">{product.qty}x</span>
+                    </div>
+                    <div className="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${percent}%`,
+                          background: barColor,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {sortedTopProducts.map((product, index) => {
+                const maxQty = sortedTopProducts[0]?.qty || 1;
+                const percent = Math.max(8, Math.round((product.qty / maxQty) * 100));
+                const barColor = TOP_PRODUCT_BAR_COLORS[index] || TOP_PRODUCT_BAR_COLORS[TOP_PRODUCT_BAR_COLORS.length - 1];
+                return (
+                  <div key={`${product.name}-${index}`} className="space-y-1 rounded-xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-3 py-2">
+                    <div className="flex items-center justify-between text-sm text-slate-700">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ background: barColor }}
+                        />
+                        <span className="font-semibold truncate">{product.name}</span>
+                      </div>
+                      <span className="text-xs text-slate-500">{product.qty}x</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${percent}%`,
+                          background: barColor,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
 
       {setupChecklist.length > 0 && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -1742,58 +2156,32 @@ export const DashboardView = ({
                       </p>
                     </div>
                     <div className="rounded-2xl border border-white/90 bg-white/85 px-4 py-3 shadow-sm sm:col-span-2 xl:col-span-1">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">Mês de referência</p>
-                      <p className="mt-2 text-base font-black tracking-tight text-slate-900">{formatMonthLabel(selectedMonth)}</p>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400" htmlFor="dashboard-month-select">
+                        Mês de referência
+                      </label>
+                      <select
+                        id="dashboard-month-select"
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                        className="ds-select ds-focus-ring mt-1.5 w-full py-1.5 text-xs font-bold text-slate-800"
+                      >
+                        {availableMonths.map((monthKey) => (
+                          <option key={monthKey} value={monthKey}>
+                            {formatMonthLabel(monthKey)}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="mt-1 text-[10px] font-semibold text-slate-400 tabular-nums">
+                        Receita do mês: {formatCurrency(metrics.monthRevenue)}
+                      </p>
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 xl:max-w-[320px] xl:justify-end">
-                  {periodOptions.map((option) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => {
-                        if (option.id === "custom") {
-                          activateCustomRange();
-                          return;
-                        }
-                        setPeriodDays(option.id);
-                      }}
-                      className={`px-3 py-2 rounded-full text-[11px] font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 shadow-sm ${
-                        periodDays === option.id
-                          ? "bg-slate-900 text-white border-slate-900"
-                          : "bg-white/85 text-slate-600 border-white/80 hover:bg-white"
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
               </div>
               {isCustomPeriod ? (
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <label className="block rounded-2xl border border-white/90 bg-white/85 p-3 shadow-sm">
-                    <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">Data inicial</span>
-                    <input
-                      type="date"
-                      value={customRange?.startDate || customStartDate}
-                      max={customRange?.endDate || customEndDate || todayDateKey}
-                      onChange={(event) => handleCustomStartDateChange(event.target.value)}
-                      className="ds-focus-ring mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                    />
-                  </label>
-                  <label className="block rounded-2xl border border-white/90 bg-white/85 p-3 shadow-sm">
-                    <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">Data final</span>
-                    <input
-                      type="date"
-                      value={customRange?.endDate || customEndDate}
-                      min={customRange?.startDate || customStartDate}
-                      max={todayDateKey}
-                      onChange={(event) => handleCustomEndDateChange(event.target.value)}
-                      className="ds-focus-ring mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                    />
-                  </label>
-                </div>
+                <p className="mt-3 rounded-2xl border border-amber-200/70 bg-white/80 px-4 py-2 text-[11px] font-semibold text-amber-800">
+                  Período personalizado ativo — ajuste as datas na barra "Período analisado" no topo da página.
+                </p>
               ) : null}
             </div>
           </div>
@@ -1971,44 +2359,8 @@ export const DashboardView = ({
           </div>
         ) : null}
       </div>
-      {/* ---------- CARDS RESUMO ---------- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {metricCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div key={card.id} className={`ds-metric-card ${card.tone} p-5`}>
-              <div className="relative">
-                <div className="min-w-0 pr-16 lg:pr-14">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 font-bold">{card.label}</p>
-                  <h3 className="mt-1 whitespace-nowrap leading-tight font-black tracking-tight text-slate-900 text-[clamp(1.22rem,1.65vw,1.7rem)] lg:text-[clamp(1.15rem,1.25vw,1.52rem)]">
-                    {card.value}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1">{card.helper}</p>
-                </div>
-                <span className={`absolute top-0.5 right-0.5 h-9 w-9 lg:h-8 lg:w-8 rounded-xl border flex items-center justify-center shrink-0 ${card.iconTone}`}>
-                  <Icon size={16} weight="duotone" />
-                </span>
-              </div>
-              {card.monthSelector && (
-                <div className="mt-3">
-                  <label className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Mês selecionado</label>
-                  <select
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="ds-select ds-focus-ring mt-1 w-full py-1.5 text-xs text-slate-700"
-                  >
-                    {availableMonths.map((monthKey) => (
-                      <option key={monthKey} value={monthKey}>
-                        {formatMonthLabel(monthKey)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {/* CARDS RESUMO removido (01/09): KPIs duplicavam os tiles do topo.
+          O seletor de mês migrou para o card do relatório gerencial. */}
 
       <div className="grid lg:grid-cols-[1.25fr_0.75fr] gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -2201,178 +2553,6 @@ export const DashboardView = ({
             </div>
           </div>
         </div>
-        </div>
-      </div>
-
-      {/* ---------- GRÁFICOS ---------- */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Faturamento por dia */}
-        <div className={`bg-white p-6 rounded-2xl shadow-sm border border-slate-200 ${isMobile ? 'h-48' : 'h-80'} overflow-hidden flex flex-col`}>
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <div>
-              <h4 className="font-bold text-gray-700">Vendas por dia</h4>
-              <p className="mt-1 text-[11px] text-slate-500">Segue o período definido no relatório gerencial.</p>
-            </div>
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-600">
-              {metrics.periodLabel}
-            </span>
-          </div>
-          {chartSource.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
-              <div className="text-center space-y-2">
-                <div className="text-4xl">📊</div>
-                <p className="text-sm font-semibold text-slate-600">Sem vendas registradas ainda.</p>
-                <p className="text-xs text-slate-400">As vendas do período aparecerão aqui.</p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex-1">
-              <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartSource} barSize={24}>
-                <defs>
-                  <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2563eb" stopOpacity={0.96} />
-                    <stop offset="70%" stopColor="#3b82f6" stopOpacity={0.72} />
-                    <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.14} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
-                <XAxis
-                  dataKey="label"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 11, fontWeight: 500, fill: "#64748b" }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 11, fontWeight: 400, fill: "#64748b" }}
-                  tickFormatter={(value) => `R$ ${value}`}
-                />
-                <RechartsTooltip
-                  formatter={(value) => formatCurrency(value)}
-                  labelFormatter={(label) => `Dia ${label}`}
-                  contentStyle={{
-                    borderRadius: "14px",
-                    border: "1px solid #dbeafe",
-                    boxShadow: "0 18px 34px -24px rgba(15,23,42,0.55)",
-                    backgroundColor: "#ffffff",
-                    color: "#0f172a",
-                  }}
-                  labelStyle={{ color: "#475569", fontWeight: 500, marginBottom: 6 }}
-                  itemStyle={{ color: "#1d4ed8", fontWeight: 700 }}
-                  cursor={{ fill: "rgba(37,99,235,0.06)" }}
-                />
-                <Bar dataKey="total" fill="url(#salesGradient)" radius={[8, 8, 0, 0]} />
-              </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
-
-        {/* Top produtos */}
-        <div className={`bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-400 ${isMobile ? 'h-48' : 'h-80'} overflow-hidden`}>
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <h4 className="font-bold text-gray-700">
-              Top 5 Produtos do Período
-            </h4>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-400 uppercase tracking-wide">Ordenar</span>
-              <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
-                {[
-                  { id: "qty", label: "Qtd" },
-                  { id: "name", label: "Nome" },
-                ].map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => setTopSort(option.id)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
-                      topSort === option.id
-                        ? "bg-brand-primary text-white"
-                        : "text-slate-500 hover:bg-white"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          {sortedTopProducts.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-sm text-gray-400">
-              <div className="text-center space-y-2">
-                <div className="text-4xl">🥩</div>
-                <p className="text-sm font-semibold text-slate-600">Sem produtos vendidos ainda.</p>
-                <p className="text-xs text-slate-400">Quando vender, o ranking aparece aqui.</p>
-              </div>
-            </div>
-          ) : isMobile ? (
-            <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
-              {sortedTopProducts.map((product, index) => {
-                const maxQty = sortedTopProducts[0]?.qty || 1;
-                const percent = Math.max(8, Math.round((product.qty / maxQty) * 100));
-                const barColor = TOP_PRODUCT_BAR_COLORS[index] || TOP_PRODUCT_BAR_COLORS[TOP_PRODUCT_BAR_COLORS.length - 1];
-                return (
-                  <div
-                    key={`${product.name}-${index}`}
-                    className="min-w-[210px] rounded-xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-3 py-2"
-                  >
-                    <div className="flex items-center justify-between text-sm text-slate-700">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ background: barColor }}
-                        />
-                        <span className="font-semibold truncate">{product.name}</span>
-                      </div>
-                      <span className="text-xs text-slate-500">{product.qty}x</span>
-                    </div>
-                    <div className="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${percent}%`,
-                          background: barColor,
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {sortedTopProducts.map((product, index) => {
-                const maxQty = sortedTopProducts[0]?.qty || 1;
-                const percent = Math.max(8, Math.round((product.qty / maxQty) * 100));
-                const barColor = TOP_PRODUCT_BAR_COLORS[index] || TOP_PRODUCT_BAR_COLORS[TOP_PRODUCT_BAR_COLORS.length - 1];
-                return (
-                  <div key={`${product.name}-${index}`} className="space-y-1 rounded-xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-3 py-2">
-                    <div className="flex items-center justify-between text-sm text-slate-700">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ background: barColor }}
-                        />
-                        <span className="font-semibold truncate">{product.name}</span>
-                      </div>
-                      <span className="text-xs text-slate-500">{product.qty}x</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${percent}%`,
-                          background: barColor,
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
       </div>
 
