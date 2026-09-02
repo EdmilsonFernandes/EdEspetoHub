@@ -2759,26 +2759,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     const loadSubscription = async () => {
       setSubscriptionLoading(true);
       setSubscriptionError('');
-      if (!isOperatorUser) {
-        setDeliveryBillingLoading(true);
-        setDeliveryBillingError('');
-      }
       try {
-        const [data, billingResponse] = await Promise.all([
-          subscriptionService.getByStore(storeId),
-          isOperatorUser ? Promise.resolve(null) : deliveryBillingService.getCurrentCycle(storeId).catch((error) => ({ __error: error })),
-        ]);
+        const data = await subscriptionService.getByStore(storeId);
         if (active) {
           setSubscriptionDetails(data);
-          if (!isOperatorUser) {
-            if (billingResponse && (billingResponse as any).__error) {
-              setDeliveryBillingCycle(null);
-              setDeliveryBillingError((billingResponse as any).__error?.message || 'Não foi possível carregar a cobrança de entregas agora.');
-            } else {
-              setDeliveryBillingCycle((billingResponse as any)?.cycle || null);
-              setDeliveryBillingError('');
-            }
-          }
           if (auth?.token && auth?.store) {
             const status = String(data?.status || '').toUpperCase();
             const planName = String(data?.plan?.name || '').toLowerCase();
@@ -2806,7 +2790,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       } finally {
         if (active) {
           setSubscriptionLoading(false);
-          if (!isOperatorUser) setDeliveryBillingLoading(false);
         }
       }
     };
@@ -2817,6 +2800,34 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       active = false;
     };
   }, [storeId, isOperatorUser]);
+
+  /* Ciclo de cobrança de entregas (02/09): busca lazy — só quando a superfície
+   * de Pagamentos abre. Antes ia no boot do dashboard e logava 400 no console
+   * pra toda loja sem ciclo ativo. Refetch a cada visita = dado fresco. */
+  useEffect(() => {
+    if (!storeId || isOperatorUser || activeTab !== 'pagamentos') return;
+    let active = true;
+    setDeliveryBillingLoading(true);
+    setDeliveryBillingError('');
+    deliveryBillingService
+      .getCurrentCycle(storeId)
+      .then((response) => {
+        if (!active) return;
+        setDeliveryBillingCycle((response as any)?.cycle || null);
+        setDeliveryBillingError('');
+      })
+      .catch((error) => {
+        if (!active) return;
+        setDeliveryBillingCycle(null);
+        setDeliveryBillingError(error?.message || 'Não foi possível carregar a cobrança de entregas agora.');
+      })
+      .finally(() => {
+        if (active) setDeliveryBillingLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [storeId, isOperatorUser, activeTab]);
 
   const handleOpenDeliveryBillingPayment = useCallback(async () => {
     if (!storeId || isOperatorUser) return;

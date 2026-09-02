@@ -218,6 +218,7 @@ export class StoreDashboardAnalyticsService {
                 COALESCE(SUM(o.total), 0) AS revenue
               FROM orders o
               WHERE o.store_id = $1
+            AND o.status NOT IN ('cancelled', 'awaiting_payment')
                 AND timezone($2, o.created_at)::date BETWEEN $3::date AND $4::date
             `,
             windowParams
@@ -233,6 +234,7 @@ export class StoreDashboardAnalyticsService {
             COALESCE(SUM(o.total), 0) AS revenue
           FROM orders o
           WHERE o.store_id = $1
+            AND o.status NOT IN ('cancelled', 'awaiting_payment')
             AND o.payment_status = 'PAID'
             ${periodGuard('o')}
           GROUP BY 1
@@ -318,6 +320,7 @@ export class StoreDashboardAnalyticsService {
           LEFT JOIN users u
             ON u.id = o.customer_user_id
           WHERE o.store_id = $1
+            AND o.status NOT IN ('cancelled', 'awaiting_payment')
             AND (
               ($2::date IS NOT NULL AND $3::date IS NOT NULL AND timezone($4, o.created_at)::date BETWEEN $2::date AND $3::date)
               OR
@@ -389,6 +392,7 @@ export class StoreDashboardAnalyticsService {
               MIN(o.created_at) AS "firstOrderAt"
             FROM orders o
             WHERE o.store_id = $1
+            AND o.status NOT IN ('cancelled', 'awaiting_payment')
           `,
           [storeId, this.timezone, monthKey, customRange.startDate, customRange.endDate]
         )
@@ -418,6 +422,7 @@ export class StoreDashboardAnalyticsService {
               MIN(o.created_at) AS "firstOrderAt"
             FROM orders o
             WHERE o.store_id = $1
+            AND o.status NOT IN ('cancelled', 'awaiting_payment')
           `,
           [storeId, this.timezone, monthKey, periodStart]
         );
@@ -430,6 +435,7 @@ export class StoreDashboardAnalyticsService {
               COALESCE(SUM(o.total), 0) AS total
             FROM orders o
             WHERE o.store_id = $1
+            AND o.status NOT IN ('cancelled', 'awaiting_payment')
               AND timezone($2, o.created_at)::date BETWEEN $3::date AND $4::date
             GROUP BY 1
             ORDER BY 1 ASC
@@ -443,6 +449,7 @@ export class StoreDashboardAnalyticsService {
               COALESCE(SUM(o.total), 0) AS total
             FROM orders o
             WHERE o.store_id = $1
+            AND o.status NOT IN ('cancelled', 'awaiting_payment')
               AND ($3::timestamptz IS NULL OR o.created_at >= $3)
             GROUP BY 1
             ORDER BY 1 ASC
@@ -463,6 +470,7 @@ export class StoreDashboardAnalyticsService {
             LEFT JOIN products p
               ON p.id = oi.product_id
             WHERE o.store_id = $1
+            AND o.status NOT IN ('cancelled', 'awaiting_payment')
               AND timezone($2, o.created_at)::date BETWEEN $3::date AND $4::date
             GROUP BY 1
             ORDER BY qty DESC, revenue DESC, name ASC
@@ -482,6 +490,7 @@ export class StoreDashboardAnalyticsService {
             LEFT JOIN products p
               ON p.id = oi.product_id
             WHERE o.store_id = $1
+            AND o.status NOT IN ('cancelled', 'awaiting_payment')
               AND ($2::timestamptz IS NULL OR o.created_at >= $2)
             GROUP BY 1
             ORDER BY qty DESC, revenue DESC, name ASC

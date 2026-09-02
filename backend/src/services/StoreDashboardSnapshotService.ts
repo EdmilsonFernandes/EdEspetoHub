@@ -114,6 +114,7 @@ export class StoreDashboardSnapshotService {
             INNER JOIN target_dates td
               ON td.snapshot_date = timezone($1, o.created_at)::date
             WHERE o.store_id = $3
+              AND o.status NOT IN ('cancelled', 'awaiting_payment')
           ),
           daily_orders AS (
             SELECT
@@ -128,6 +129,7 @@ export class StoreDashboardSnapshotService {
             INNER JOIN target_dates td
               ON td.snapshot_date = timezone($1, o.created_at)::date
             WHERE o.store_id = $3
+              AND o.status NOT IN ('cancelled', 'awaiting_payment')
             GROUP BY o.store_id, timezone($1, o.created_at)::date
           ),
           daily_customers AS (
@@ -200,6 +202,7 @@ export class StoreDashboardSnapshotService {
             LEFT JOIN products p
               ON p.id = oi.product_id
             WHERE o.store_id = $3
+              AND o.status NOT IN ('cancelled', 'awaiting_payment')
             GROUP BY
               o.store_id,
               timezone($1, o.created_at)::date,
