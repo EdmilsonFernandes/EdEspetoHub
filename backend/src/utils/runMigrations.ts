@@ -3095,16 +3095,6 @@ export async function runMigrations() {
     ON CONFLICT (slug) DO NOTHING;
   `);
 
-  // Piloto Jano KYC: vincula CPF/nascimento ao motoboy no primeiro KYC
-  // (impede verificar com a identidade de outra pessoa).
-  // FIXME(kyc-didit): vira migration formal 20260908_001 no commit seguinte.
-  await AppDataSource.query(`
-    ALTER TABLE motoboys ADD COLUMN IF NOT EXISTS kyc_cpf TEXT;
-  `);
-  await AppDataSource.query(`
-    ALTER TABLE motoboys ADD COLUMN IF NOT EXISTS kyc_birth_date TEXT;
-  `);
-
   // Forward-only migrations live in src/migrations and are tracked by checksum.
   const { runAppMigrations } = await import('./migrationRunner');
   await runAppMigrations(AppDataSource);

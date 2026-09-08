@@ -380,6 +380,9 @@ CREATE TABLE IF NOT EXISTS motoboys (
   state TEXT,
   address TEXT,
   pix_key TEXT,
+  -- Vínculo de identidade KYC (Didit): gravado no primeiro KYC, travado nas verificações seguintes.
+  kyc_cpf TEXT,
+  kyc_birth_date TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
