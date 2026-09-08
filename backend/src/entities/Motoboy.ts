@@ -92,6 +92,12 @@ export class Motoboy {
   @Column({ name: 'address', type: 'text', nullable: true })
   address?: string | null;
 
+  @Column({ name: 'kyc_cpf', type: 'text', nullable: true })
+  kycCpf?: string | null;
+
+  @Column({ name: 'kyc_birth_date', type: 'text', nullable: true })
+  kycBirthDate?: string | null;
+
   @Column({ name: 'pix_key', type: 'text', nullable: true })
   pixKey?: string | null;
 

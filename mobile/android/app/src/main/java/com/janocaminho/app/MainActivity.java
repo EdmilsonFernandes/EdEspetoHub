@@ -99,6 +99,9 @@ public class MainActivity extends BridgeActivity {
     private static final long RESUME_WEBVIEW_HEALTH_CHECK_DELAY_MS = 1800L;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 4401;
     private static final int APP_UPDATE_REQUEST_CODE = 4403;
+    // Piloto KYC Jano: câmera dentro do WebView (captura hospedada do Didit)
+    private static final int WEBVIEW_CAMERA_PERMISSION_REQUEST_CODE = 4404;
+    private android.webkit.PermissionRequest pendingWebViewPermissionRequest;
 
     /**
      * Rastreia se a Activity (WebView) esta em primeiro plano. Lido pelo
@@ -276,6 +279,23 @@ public class MainActivity extends BridgeActivity {
             public boolean onShowFileChooser(WebView webView, android.webkit.ValueCallback<android.net.Uri[]> filePathCallback, WebChromeClient.FileChooserParams fileChooserParams) {
                 return super.onShowFileChooser(webView, filePathCallback, fileChooserParams);
             }
+
+            // Piloto KYC Jano: getUserMedia (câmera) do WebView — sem isto a
+            // captura de documento/selfie dentro do app é negada.
+            @Override
+            public void onPermissionRequest(final android.webkit.PermissionRequest request) {
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    request.grant(request.getResources());
+                    return;
+                }
+                pendingWebViewPermissionRequest = request;
+                ActivityCompat.requestPermissions(
+                    MainActivity.this,
+                    new String[] { Manifest.permission.CAMERA },
+                    WEBVIEW_CAMERA_PERMISSION_REQUEST_CODE
+                );
+            }
         });
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
@@ -286,6 +306,18 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == WEBVIEW_CAMERA_PERMISSION_REQUEST_CODE) {
+            if (pendingWebViewPermissionRequest == null) return;
+            boolean granted = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                    == PackageManager.PERMISSION_GRANTED;
+            if (granted) {
+                pendingWebViewPermissionRequest.grant(pendingWebViewPermissionRequest.getResources());
+            } else {
+                pendingWebViewPermissionRequest.deny();
+            }
+            pendingWebViewPermissionRequest = null;
+            return;
+        }
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (pendingGeoCallback == null || pendingGeoOrigin == null) return;
             boolean granted = hasLocationPermission();

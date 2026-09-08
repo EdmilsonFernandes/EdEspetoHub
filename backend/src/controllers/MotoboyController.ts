@@ -20,6 +20,7 @@ import { logger } from '../utils/logger';
 import { AppDataSource } from '../config/database';
 import { PushNotificationService } from '../services/PushNotificationService';
 import { AppError } from '../errors/AppError';
+import { janoKycService } from '../services/JanoKycService';
 
 const motoboyService = new MotoboyService();
 const motoboyOrderService = new MotoboyOrderService();
@@ -289,6 +290,41 @@ export class MotoboyController {
       const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
       const documents = await motoboyService.listOwnDocuments(motoboy);
       return res.json(documents);
+    } catch (error) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Starts a Jano hosted KYC verification (document + selfie + liveness)
+   * for the authenticated motoboy. Returns the capture URL to be opened
+   * in the app (Browser.open) — the result arrives via /webhooks/jano.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-09-08
+   */
+  static async startJanoKyc(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
+      const result = await janoKycService.start(motoboy, req.body);
+      return res.status(201).json(result);
+    } catch (error) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Finalizes the pending Jano KYC after the user completes the hosted
+   * capture (fetches decision + score; result also arrives via webhook).
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-09-08
+   */
+  static async checkJanoKyc(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
+      const result = await janoKycService.check(motoboy);
+      return res.json(result);
     } catch (error) {
       return respondWithError(req, res, error, 400);
     }

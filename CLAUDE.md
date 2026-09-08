@@ -187,3 +187,6 @@ Quando eu pedir melhoria de tela, layout, mobile, desktop, web, painel admin ou 
 3. Usar Graphify antes de mexer no código.
 4. Usar Serena para localizar arquivos reais.
 5. Usar Playwright para validar visualmente quando houver alteração de tela.
+## Piloto KYC Uai ID (verificação de identidade do motoboy)
+
+Integração ativa com a plataforma Jano (repo irmão `../kyc-janocaminho`). Antes de mexer em qualquer coisa relacionada a KYC/motoboy/webhook jano, LEIA: **`docs/JANO_KYC_PILOTO.md`** (arquitetura, mapa de arquivos, env, decisões e limitações). Rotas novas de `/api/motoboy/*` precisam também do bypass no `frontend/nginx.conf`.

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LinkSimpleHorizontal, Storefront, ClockClockwise, CheckCircle, ShieldCheck, ShieldWarning, Clock, Info, IdentificationCard, Camera, Car } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
+import { Browser } from '@capacitor/browser';
 import { storeService } from '../services/storeService';
 import { orderService } from '../services/orderService';
 import { useToast } from '../contexts/ToastContext';
@@ -36,6 +37,56 @@ export function MotoboyProfile() {
   const [refreshingDocs, setRefreshingDocs] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [profile, setProfile] = useState<any | null>(null);
+  // Piloto Jano KYC (verificação hospedada: doc + selfie + liveness)
+  // NOTA: este bloco precisa ficar DEPOIS da declaração de `profile` —
+  // janoBound/useEffect leem profile em escopo imediato (TDZ mata em prod).
+  const [janoCpf, setJanoCpf] = useState('');
+  const [janoBirth, setJanoBirth] = useState('');
+  const [janoBusy, setJanoBusy] = useState(false);
+  const [janoError, setJanoError] = useState('');
+  // Identidade já vinculada (primeiro KYC grava CPF/nascimento) → campos travados
+  const janoBound = Boolean(profile?.kycCpf && profile?.kycBirthDate);
+  useEffect(() => {
+    if (profile?.kycCpf) setJanoCpf(String(profile.kycCpf));
+    if (profile?.kycBirthDate) {
+      const d = String(profile.kycBirthDate); // DDMMAAAA
+      if (d.length === 8) setJanoBirth(`${d.slice(4)}-${d.slice(2, 4)}-${d.slice(0, 2)}`);
+    }
+  }, [profile?.kycCpf, profile?.kycBirthDate]);
+
+  const startJanoKyc = async () => {
+    const cpf = janoCpf.replace(/\D+/g, '');
+    const rawBirth = janoBirth.includes('-') ? janoBirth.split('-').reverse().join('') : janoBirth.replace(/\D+/g, '');
+    setJanoError('');
+    if (cpf.length !== 11 || rawBirth.length !== 8) {
+      setJanoError('Preencha CPF e data de nascimento.');
+      return;
+    }
+    setJanoBusy(true);
+    try {
+      const res: any = await motoboyService.startJanoKyc({ cpf, birthDate: rawBirth });
+      const payload = res?.data ?? res;
+      const url = payload?.captureUrl as string | undefined;
+      if (!url) throw new Error(payload?.message || 'Falha ao iniciar verificação.');
+      // No app nativo (APK/AAB): abre DENTRO do WebView do próprio app —
+      // parece parte do aplicativo (allowNavigation no capacitor.config).
+      // No navegador (web/PWA): navegador embutido em cima (Browser.open).
+      const w = window as typeof window & { Capacitor?: { isNativePlatform?: () => boolean } };
+      if (w.Capacitor?.isNativePlatform?.()) {
+        window.location.href = url;
+      } else {
+        try {
+          await Browser.open({ url });
+        } catch {
+          window.open(url, '_blank');
+        }
+      }
+    } catch (err: any) {
+      setJanoError(err?.response?.data?.message || err?.message || 'Não foi possível iniciar a verificação.');
+    } finally {
+      setJanoBusy(false);
+    }
+  };
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState('');
   const [profileDraft, setProfileDraft] = useState<any>({
@@ -275,6 +326,10 @@ export function MotoboyProfile() {
     });
     return map;
   }, [documents]);
+
+  // Piloto Jano KYC: documento KYC_JANO criado ao iniciar a verificação hospedada.
+  const janoDoc = documentsByType.get('KYC_JANO');
+  const janoDocStatus = String(janoDoc?.status || '').toUpperCase();
 
   const shouldPollDocs = useMemo(() => {
     if (!Array.isArray(documents) || documents.length === 0) return false;
@@ -1387,6 +1442,86 @@ export function MotoboyProfile() {
               {docsProgress.pending} em análise
             </span>
           ) : null}
+        </div>
+        {/* Piloto Jano KYC — verificação hospedada (documento + selfie + liveness) */}
+        <div className="rounded-2xl border border-indigo-200 bg-indigo-50/60 text-indigo-950 px-3 py-3 text-sm">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 rounded-2xl border border-indigo-200 bg-white grid place-items-center shrink-0">
+              <ShieldCheck size={18} weight="duotone" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="font-extrabold leading-tight">
+                {janoDocStatus === 'APPROVED'
+                  ? 'Identidade verificada pela Jano'
+                  : janoDocStatus === 'REJECTED'
+                  ? 'Verificação Jano recusada'
+                  : 'Verificação rápida de identidade'}
+              </div>
+              <div className="text-xs text-slate-700 mt-0.5">
+                {janoDocStatus === 'APPROVED'
+                  ? `Score de confiança: ${Math.round(((janoDoc?.metadata?.face?.score ?? 0) * 1000))}/1000. Cadastro liberado automaticamente.`
+                  : janoDocStatus === 'PENDING' && janoDoc
+                  ? 'Aguardando você concluir a captura — toque em "Já concluí a captura" quando terminar.'
+                  : 'Documento + selfie com detecção de vida em 2–3 minutos. Libera o cadastro automaticamente quando aprovado.'}
+              </div>
+              {janoDocStatus !== 'APPROVED' ? (
+                <>
+                  {!janoDoc ? (
+                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                      <input
+                        value={janoCpf}
+                        onChange={(e) => setJanoCpf(e.target.value)}
+                        placeholder="CPF (somente números)"
+                        inputMode="numeric"
+                        disabled={janoBound}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
+                      />
+                      <input
+                        type="date"
+                        value={janoBirth}
+                        onChange={(e) => setJanoBirth(e.target.value)}
+                        disabled={janoBound}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
+                      />
+                    </div>
+                  ) : null}
+                  {janoError ? <div className="text-xs text-rose-700 mt-1">{janoError}</div> : null}
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {!janoDoc ? (
+                      <button
+                        type="button"
+                        disabled={janoBusy}
+                        onClick={startJanoKyc}
+                        className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-extrabold text-white disabled:opacity-50"
+                      >
+                        {janoBusy ? 'Iniciando…' : 'Iniciar verificação'}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={janoBusy}
+                        onClick={async () => {
+                          setJanoBusy(true);
+                          setJanoError('');
+                          try {
+                            await motoboyService.checkJanoKyc();
+                          } catch (err: any) {
+                            setJanoError(err?.response?.data?.message || err?.message || '');
+                          } finally {
+                            setJanoBusy(false);
+                            refreshDocuments().catch(() => null);
+                          }
+                        }}
+                        className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-extrabold text-white disabled:opacity-50"
+                      >
+                        {janoBusy ? 'Verificando…' : 'Já concluí a captura — verificar'}
+                      </button>
+                    )}
+                  </div>
+                </>
+              ) : null}
+            </div>
+          </div>
         </div>
         {faceBanner && (
           <div

@@ -129,6 +129,13 @@ export const env = {
     webhookUrl: (process.env.MP_WEBHOOK_URL || '').replace('https://www.', 'https://'),
     debug: process.env.MP_DEBUG === 'true',
   },
+  jano: {
+    // Piloto KYC Jano (kyc-janocaminho). A API key fica SÓ no backend — nunca no app.
+    enabled: process.env.JANO_KYC_ENABLED === 'true',
+    apiBaseUrl: process.env.JANO_API_BASE_URL || 'http://localhost:8000',
+    apiKey: process.env.JANO_API_KEY || '',
+    webhookSecret: process.env.JANO_WEBHOOK_SECRET || '',
+  },
   email: {
     from: process.env.EMAIL_FROM || 'Já no Caminho <no-reply@janocaminho.com.br>',
     smtpHost: process.env.SMTP_HOST || '',

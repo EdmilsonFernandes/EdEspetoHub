@@ -10,7 +10,13 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
     allowNavigation: [
       'janocaminho.com.br',
-      '*.janocaminho.com.br'
+      '*.janocaminho.com.br',
+      // Piloto KYC Jano: captura hospedada abre DENTRO do WebView do app
+      // (parece nativo — sem browser externo). Câmera: o WebView do Capacitor
+      // repassa a permissão se o AndroidManifest declarar CAMERA (já declara,
+      // usado pelo CameraCaptureModal).
+      'verify.didit.me',
+      '*.didit.me'
     ]
   },
   android: {
