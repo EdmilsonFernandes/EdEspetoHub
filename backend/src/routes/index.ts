@@ -25,7 +25,7 @@ import { PlatformAdminController } from '../controllers/PlatformAdminController'
 import { PromoPushController } from '../controllers/PromoPushController';
 import { PlatformPublicController } from '../controllers/PlatformPublicController';
 import { PaymentController } from '../controllers/PaymentController';
-import { JanoController } from '../controllers/JanoController';
+import { DiditWebhookController } from '../controllers/DiditWebhookController';
 import { BalcaoChargeController } from '../controllers/BalcaoChargeController';
 import { MotoboyController } from '../controllers/MotoboyController';
 import { MotoboyKycController } from '../controllers/MotoboyKycController';
@@ -138,7 +138,7 @@ routes.post('/subscriptions/:id/renew', SubscriptionController.renew);
 routes.patch('/subscriptions/:id/status', SubscriptionController.updateStatus);
 routes.post('/webhooks/payment-confirmed', PaymentController.confirm);
 routes.post('/webhooks/mercadopago', PaymentController.mercadoPagoWebhook);
-routes.post('/webhooks/jano', JanoController.webhook);
+routes.post('/webhooks/didit', DiditWebhookController.webhook);
 routes.get('/payment-accounts/mercadopago/callback', StorePaymentAccountController.mercadoPagoCallback);
 routes.get('/stores/:storeId/payments', requireAuth, requireRole('ADMIN'), PaymentController.listByStore);
 // Cobrança no balcão (SDD cobranca-balcao) — fila cobra pedido via Pix/Point/dinheiro
@@ -373,8 +373,8 @@ routes.post('/deliveries/:deliveryId/cancel', requireAuth, requireRole('ADMIN'),
 routes.post('/deliveries/:deliveryId/issues', requireAuth, requireRole('ADMIN'), DeliveryController.reportIssue);
 routes.post('/deliveries/:deliveryId/confirmation-code/reset', requireAuth, requireRole('ADMIN'), DeliveryController.resetConfirmationCode);
 routes.post('/motoboy/documents', requireAuth, MotoboyController.uploadDocument);
-routes.post('/motoboy/kyc/jano/start', requireAuth, MotoboyController.startJanoKyc);
-routes.post('/motoboy/kyc/jano/check', requireAuth, MotoboyController.checkJanoKyc);
+routes.post('/motoboy/kyc/didit/start', requireAuth, MotoboyController.startDiditKyc);
+routes.post('/motoboy/kyc/didit/check', requireAuth, MotoboyController.checkDiditKyc);
 routes.get('/motoboy/documents', requireAuth, MotoboyController.listOwnDocuments);
 routes.get('/motoboy/profile', requireAuth, MotoboyController.getProfile);
 routes.put('/motoboy/profile', requireAuth, MotoboyController.updateProfile);

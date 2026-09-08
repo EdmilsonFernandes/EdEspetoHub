@@ -20,7 +20,8 @@ import { logger } from '../utils/logger';
 import { AppDataSource } from '../config/database';
 import { PushNotificationService } from '../services/PushNotificationService';
 import { AppError } from '../errors/AppError';
-import { janoKycService } from '../services/JanoKycService';
+import { diditKycService } from '../services/DiditKycService';
+import { env } from '../config/env';
 
 const motoboyService = new MotoboyService();
 const motoboyOrderService = new MotoboyOrderService();
@@ -296,17 +297,17 @@ export class MotoboyController {
   }
 
   /**
-   * Starts a Jano hosted KYC verification (document + selfie + liveness)
+   * Starts a Didit hosted KYC verification (document + selfie + liveness)
    * for the authenticated motoboy. Returns the capture URL to be opened
-   * in the app (Browser.open) — the result arrives via /webhooks/jano.
+   * in the app (Browser.open) — the result arrives via /webhooks/didit.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-09-08
    */
-  static async startJanoKyc(req: Request, res: Response) {
+  static async startDiditKyc(req: Request, res: Response) {
     try {
       const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
-      const result = await janoKycService.start(motoboy, req.body);
+      const result = await diditKycService.start(motoboy, req.body);
       return res.status(201).json(result);
     } catch (error) {
       return respondWithError(req, res, error, 400);
@@ -314,16 +315,16 @@ export class MotoboyController {
   }
 
   /**
-   * Finalizes the pending Jano KYC after the user completes the hosted
-   * capture (fetches decision + score; result also arrives via webhook).
+   * Checks the pending Didit session decision after the user completes the
+   * hosted capture (applies the same decision as the webhook).
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-09-08
    */
-  static async checkJanoKyc(req: Request, res: Response) {
+  static async checkDiditKyc(req: Request, res: Response) {
     try {
       const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
-      const result = await janoKycService.check(motoboy);
+      const result = await diditKycService.check(motoboy);
       return res.json(result);
     } catch (error) {
       return respondWithError(req, res, error, 400);
@@ -342,7 +343,9 @@ export class MotoboyController {
       if (motoboy?.user) {
         (motoboy as any).user = motoboyService.sanitizeMotoboyUser(motoboy.user);
       }
-      return res.json(motoboy);
+      // Backend-driven UI toggle: com Didit ativo a tela esconde o fluxo
+      // manual de docs; flag off volta pra UI manual sem redeploy do front.
+      return res.json({ ...motoboy, kycProvider: env.didit.enabled ? 'didit' : 'manual' });
     } catch (error) {
       return respondWithError(req, res, error, 400);
     }

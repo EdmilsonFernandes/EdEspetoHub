@@ -1,5 +1,5 @@
 /**
- * Jano KYC webhook controller (server-to-server, no auth — HMAC validated
+ * Didit KYC webhook controller (server-to-server, no auth — HMAC validated
  * inside the service, same pattern as the Mercado Pago webhook).
  *
  * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
@@ -7,19 +7,21 @@
  */
 import { Request, Response } from 'express';
 import { respondWithError } from '../errors/respondWithError';
-import { janoKycService } from '../services/JanoKycService';
+import { diditKycService } from '../services/DiditKycService';
 
-export class JanoController {
+export class DiditWebhookController {
   /**
-   * Handles Jano verification result webhooks.
+   * Handles Didit `status.updated` webhooks (session decision).
    */
   static async webhook(req: Request, res: Response) {
     try {
-      // HMAC must be computed over the exact bytes sent by Jano — the raw
+      // HMAC must be computed over the exact bytes sent by Didit — the raw
       // body is captured by the express.json `verify` hook in app.ts.
       const rawBody = (req as Request & { rawBody?: string }).rawBody ?? JSON.stringify(req.body);
-      const signature = req.headers['x-jano-signature'] as string | undefined;
-      const result = await janoKycService.handleWebhook(rawBody, signature, req.body);
+      const signature = req.headers['x-signature'] as string | undefined;
+      const timestamp = req.headers['x-timestamp'] as string | undefined;
+      const isTest = req.headers['x-didit-test-webhook'] === 'true';
+      const result = await diditKycService.handleWebhook(rawBody, signature, timestamp, req.body, isTest);
       return res.json({ status: 'ok', result });
     } catch (error) {
       return respondWithError(req, res, error, 401);

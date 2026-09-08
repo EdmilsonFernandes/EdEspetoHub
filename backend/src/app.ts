@@ -117,7 +117,7 @@ async function bootstrap()
     exposedHeaders: ['Retry-After'],
     optionsSuccessStatus: 204,
   }));
-  // rawBody capture: HMAC de webhooks (Jano) precisa dos bytes exatos enviados.
+  // rawBody capture: HMAC de webhooks (Didit) precisa dos bytes exatos enviados.
   app.use(express.json({ limit: '10mb', verify: (req, _res, buf) => { (req as any).rawBody = buf.toString('utf8'); } }));
   app.use(accessLogger);
   // Avoid browser/proxy caching for dynamic APIs (prevents 304 "Not Modified" hiding new queue/orders).

@@ -254,6 +254,19 @@ private async listLatestDocsByType(motoboyId: string) {
   }
 
   /**
+   * Status of the latest KYC_DIDIT doc (Didit direto): APPROVED counts as
+   * the FULL verification (dispensa CNH/SELFIE/CRLV), PENDING mirrors
+   * "docs submetidos", REJECTED blocks. NONE → legacy manual flow.
+   *
+   * @author Edmilson Lopes
+   */
+  private getLatestDiditDocStatus(byType: Map<string, MotoboyDocument>): 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED' {
+    const status = String(byType.get('KYC_DIDIT')?.status || '').toUpperCase();
+    if (status === 'APPROVED' || status === 'PENDING' || status === 'REJECTED') return status;
+    return 'NONE';
+  }
+
+  /**
    * Gate for creating store link requests.
    * - Requires profile completeness
    * - Requires required docs to be submitted (PENDING or APPROVED)
@@ -267,6 +280,14 @@ private async listLatestDocsByType(motoboyId: string) {
     await this.ensureMotoboyProfileIsComplete(motoboy);
 
     const byType = await this.listLatestDocsByType(motoboy.id);
+    // Didit direto: KYC_DIDIT APPROVED = verificação completa; PENDING segue
+    // o espírito "docs submetidos" (loja vê o pedido enquanto analisa).
+    const diditStatus = this.getLatestDiditDocStatus(byType);
+    if (diditStatus === 'APPROVED' || diditStatus === 'PENDING') return;
+    if (diditStatus === 'REJECTED') {
+      throw new AppError('MOTO-030', 400, { pending: ['KYC_DIDIT'], documents: [{ type: 'KYC_DIDIT', status: 'REJECTED' }] });
+    }
+
     const mustHave = this.getRequiredDocTypesForMotoboy(motoboy);
 
     const missingOrRejected: Array<{ type: string; status: string }> = [];
@@ -292,6 +313,14 @@ private async listLatestDocsByType(motoboyId: string) {
  */
   private async ensureMotoboyKycApproved(motoboy: Motoboy) {
     const byType = await this.listLatestDocsByType(motoboy.id);
+    // Didit direto: KYC_DIDIT APPROVED = verificação completa (dispensa
+    // CNH/SELFIE/CRLV). PENDING/REJECTED bloqueiam a aprovação do vínculo.
+    const diditStatus = this.getLatestDiditDocStatus(byType);
+    if (diditStatus === 'APPROVED') return;
+    if (diditStatus === 'PENDING' || diditStatus === 'REJECTED') {
+      throw new AppError('MOTO-031', 409, { pending: ['KYC_DIDIT'], documents: [{ type: 'KYC_DIDIT', status: diditStatus }] });
+    }
+
     const mustHave = this.getRequiredDocTypesForMotoboy(motoboy);
 
     const notApproved: Array<{ type: string; status: string }> = [];
@@ -644,6 +673,22 @@ async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: 
       },
     };
     await repo.save(document);
+
+    // Didit direto: quando um humano resolve um "In Review" aprovando, o
+    // motoboy ATIVA (docs CNH/SELFIE/CRLV manuais não ativam sozinhos —
+    // os gates cuidam deles; aqui o doc Didit É a verificação completa).
+    if (String(document.docType).toUpperCase() === 'KYC_DIDIT' && String(status).toUpperCase() === 'APPROVED') {
+      await AppDataSource.getRepository(Motoboy).update(
+        { id: motoboyId },
+        { status: 'ACTIVE', approvedAt: new Date() },
+      );
+      await this.logAudit({
+        motoboyId,
+        action: 'MOTOBOY_KYC_DIDIT_MANUAL_APPROVED',
+        performedByUserId: reviewedByUserId,
+        metadata: { documentId },
+      });
+    }
     return document;
   }
 
