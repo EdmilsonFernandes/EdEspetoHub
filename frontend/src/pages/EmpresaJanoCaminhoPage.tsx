@@ -222,10 +222,10 @@ export function EmpresaJanoCaminhoPage() {
                 <div style={styles.cardTop}>
                   <div style={{ ...styles.productLogoBox, background: "rgba(10, 18, 40, 0.9)", borderColor: "rgba(0, 210, 255, 0.4)", padding: "4px 12px" }}>
                     <img
-                      src="/logos/logo-uai-full.svg"
+                      src="/logos/uai-logo.jpg"
                       alt="Uai ID"
-                      style={{ maxHeight: 36, maxWidth: 130, objectFit: "contain" }}
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/logos/uai-logo.jpg'; }}
+                      style={{ height: 44, width: 44, borderRadius: 12, objectFit: "cover" }}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
                   </div>
                   <span style={{ ...styles.statusBadge, ...styles.statusBadgeLive }}>Biometria & KYC</span>
