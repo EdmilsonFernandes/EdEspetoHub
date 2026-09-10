@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="40%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+    <linearGradient id="cyanLine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#67E8F9" />
+    </linearGradient>
+    <linearGradient id="greenBadge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#2563EB" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Main Tech Shield -->
+  <path d="M24 3 L40 9.5 C40 27 24 43 24 43 C24 43 8 27 8 9.5 Z" 
+        fill="url(#shieldGrad)" filter="url(#shadow)" />
+
+  <!-- Shield inner bevel/border -->
+  <path d="M24 5.5 L37.5 11 C37.5 25.5 24 39.5 24 39.5 C24 39.5 10.5 25.5 10.5 11 Z" 
+        fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" />
+
+  <!-- Biometric Face / Fingerprint Scan lines (Crisp White/Cyan) -->
+  <!-- Top Mountain / Brow Arc -->
+  <path d="M16 18 Q20 14 24 14 Q28 14 32 18" 
+        fill="none" stroke="url(#cyanLine)" stroke-width="2" stroke-linecap="round" />
+
+  <!-- Center Biometric Node / Face Contour -->
+  <path d="M19 23 C19 20 29 20 29 23 C29 28 24 30 24 33" 
+        fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" />
+
+  <!-- ID Chip / Data Dots -->
+  <circle cx="24" cy="36.5" r="1.5" fill="#67E8F9" />
+  <circle cx="16" cy="26" r="1.5" fill="#34D399" />
+  <circle cx="32" cy="26" r="1.5" fill="#67E8F9" />
+
+  <!-- Security Verified Checkmark Badge -->
+  <g transform="translate(28, 28)">
+    <circle cx="9" cy="9" r="7.5" fill="url(#greenBadge)" stroke="#FFFFFF" stroke-width="1.5" />
+    <path d="M6 9.2 L8 11.2 L12 6.8" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>

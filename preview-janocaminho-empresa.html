@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Já No Caminho — Tecnologia & Ecossistema de Soluções Inteligentes</title>
+  <meta name="description" content="Já No Caminho é uma holding de tecnologia desenvolvendo soluções inovadoras: Dr. Exame (Saúde), Já No Caminho App (Comércio e Delivery) e Uai ID (Identidade Biométrica e KYC)." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-dark:       #060C1A;
+      --bg-dark-2:     #0A1228;
+      --bg-card:       rgba(15, 26, 56, 0.72);
+      --bg-card-hover: rgba(20, 34, 72, 0.88);
+      --border-subtle: rgba(59, 114, 247, 0.22);
+      --border-glow:   rgba(0, 210, 255, 0.5);
+      --cyan:          #00D2FF;
+      --blue:          #3B72F7;
+      --blue-light:    #5B8EFF;
+      --indigo:        #1E1B5E;
+      --emerald:       #10B981;
+      --purple:        #8B5CF6;
+      --amber:         #F59E0B;
+      --text-white:    #FFFFFF;
+      --text-muted:    #94A3B8;
+      --text-soft:     #CBD5E1;
+      --radius-sm:     8px;
+      --radius-md:     14px;
+      --radius-lg:     22px;
+      --radius-xl:     30px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* Ambient Background Effect */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(110px);
+      opacity: 0.35;
+      animation: float 20s infinite alternate ease-in-out;
+    }
+    .orb-1 { width: 550px; height: 550px; background: radial-gradient(circle, #3B72F7 0%, transparent 70%); top: -100px; left: -100px; }
+    .orb-2 { width: 600px; height: 600px; background: radial-gradient(circle, #00D2FF 0%, transparent 70%); top: 40%; right: -150px; animation-delay: -5s; opacity: 0.25; }
+    .orb-3 { width: 500px; height: 500px; background: radial-gradient(circle, #10B981 0%, transparent 70%); bottom: -100px; left: 20%; animation-delay: -10s; opacity: 0.2; }
+
+    @keyframes float {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(40px) scale(1.08); }
+    }
+
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,114,247,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,114,247,0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 78px;
+      background: rgba(6, 12, 26, 0.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+    }
+    .brand-logo-img {
+      height: 38px;
+      width: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+      background: #FFFFFF;
+      padding: 4px;
+    }
+    .brand-title-accent {
+      color: var(--cyan);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    .nav-links a {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: color 0.2s ease;
+    }
+    .nav-links a:hover {
+      color: #FFFFFF;
+    }
+    .nav-cta-btn {
+      background: linear-gradient(135deg, #3B72F7 0%, #00D2FF 100%);
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 10px 22px;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 4px 20px rgba(59, 114, 247, 0.35);
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 210, 255, 0.5);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      padding: 165px 0 95px;
+      text-align: center;
+      position: relative;
+    }
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(0, 210, 255, 0.08);
+      border: 1px solid rgba(0, 210, 255, 0.3);
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 24px;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 16px var(--cyan); }
+      100% { transform: scale(0.95); opacity: 0.7; }
+    }
+
+    .hero-title {
+      font-size: clamp(38px, 5.5vw, 64px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.12;
+      max-width: 960px;
+      margin: 0 auto 24px;
+    }
+    .hero-title-gradient {
+      background: linear-gradient(135deg, #FFFFFF 20%, #00D2FF 60%, #3B72F7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--text-soft);
+      max-width: 760px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+      line-height: 1.65;
+    }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .btn-hero-primary {
+      padding: 14px 32px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, #3B72F7 0%, #00D2FF 100%);
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 30px rgba(59, 114, 247, 0.4);
+      transition: all 0.25s ease;
+    }
+    .btn-hero-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0, 210, 255, 0.6);
+    }
+    .btn-hero-secondary {
+      padding: 14px 28px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 15px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(10px);
+    }
+    .btn-hero-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--cyan);
+      transform: translateY(-3px);
+    }
+
+    /* Products Bento Grid Section */
+    .products-section {
+      padding: 60px 0 120px;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .section-tag {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+    .section-heading {
+      font-size: clamp(28px, 3.5vw, 42px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+    .section-subheading {
+      color: var(--text-muted);
+      font-size: 16px;
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 28px;
+    }
+
+    /* Card Item Style */
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 34px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .product-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--card-accent, #3B72F7), transparent);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--card-accent, var(--cyan));
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.6), 0 0 35px -5px var(--card-glow, rgba(59, 114, 247, 0.25));
+      background: var(--bg-card-hover);
+    }
+    .product-card:hover::before {
+      opacity: 1;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    
+    /* Logo Showcase Box inside each card */
+    .product-logo-box {
+      height: 52px;
+      padding: 6px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+    }
+    .product-logo-box img {
+      max-height: 38px;
+      max-width: 140px;
+      object-fit: contain;
+    }
+    .product-card:hover .product-logo-box {
+      transform: scale(1.05);
+      border-color: var(--card-accent);
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-soft);
+    }
+    .badge-live {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34D399;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-live::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #34D399;
+    }
+    .badge-soon {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.4);
+      color: #C084FC;
+    }
+
+    .product-name {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+      color: #FFFFFF;
+    }
+    .product-desc {
+      color: var(--text-soft);
+      font-size: 14.5px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      min-height: 68px;
+    }
+
+    /* Key Features Pills in Card */
+    .feature-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .feature-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      flex-wrap: wrap;
+    }
+    .btn-card-primary {
+      flex: 1;
+      padding: 12px 18px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 13.5px;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--card-accent, #3B72F7);
+      color: #FFFFFF;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    }
+    .btn-card-primary:hover {
+      filter: brightness(1.15);
+      transform: translateY(-2px);
+    }
+    .btn-card-secondary {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 13px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #FFFFFF;
+      transition: all 0.2s ease;
+    }
+    .btn-card-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Individual Product Card Color Accents */
+    .card-drexame {
+      --card-accent: #EC4899;
+      --card-glow: rgba(236, 72, 153, 0.3);
+    }
+
+    .card-app {
+      --card-accent: #10B981;
+      --card-glow: rgba(16, 185, 129, 0.3);
+    }
+
+    .card-uaiid {
+      --card-accent: #00D2FF;
+      --card-glow: rgba(0, 210, 255, 0.3);
+    }
+
+    .card-soon {
+      --card-accent: #8B5CF6;
+      --card-glow: rgba(139, 92, 246, 0.3);
+      border-style: dashed;
+      background: rgba(15, 23, 42, 0.4);
+    }
+
+    /* Architecture / Ecosystem Integration Banner */
+    .integration-banner {
+      margin: 80px 0;
+      background: linear-gradient(135deg, rgba(15, 26, 56, 0.85) 0%, rgba(10, 18, 40, 0.98) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 50px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      flex-wrap: wrap;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .banner-text {
+      flex: 1;
+      min-width: 300px;
+    }
+    .banner-title {
+      font-size: clamp(22px, 2.5vw, 32px);
+      font-weight: 900;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    .banner-desc {
+      color: var(--text-soft);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+    .banner-stats {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .stat-box {
+      text-align: left;
+    }
+    .stat-number {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--cyan);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      background: rgba(6, 12, 26, 0.95);
+      padding: 60px 0 30px;
+      margin-top: 60px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 50px;
+    }
+    @media (max-width: 860px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 540px) {
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+    .footer-brand p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 14px;
+      max-width: 320px;
+    }
+    .footer-col h4 {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #FFFFFF;
+      margin-bottom: 16px;
+    }
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footer-col a {
+      color: var(--text-muted);
+      font-size: 14px;
+      transition: color 0.2s ease;
+    }
+    .footer-col a:hover {
+      color: var(--cyan);
+    }
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .preview-chip {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(14px);
+      padding: 10px 18px;
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 999;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Light Effect -->
+  <div class="ambient-bg">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="brand-logo">
+        <img src="frontend/public/janocaminho.jpg" alt="Já No Caminho" class="brand-logo-img" onerror="this.style.display='none'" />
+        <span>Já No Caminho <span class="brand-title-accent">Tecnologia</span></span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#solucoes">Produtos</a>
+        <a href="#ecossistema">Ecossistema</a>
+        <a href="#empresa">A Empresa</a>
+        <a href="#contato">Contato</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://app.janocaminho.com.br/hub" target="_blank" class="nav-cta-btn">
+          Acessar o Hub ↗
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero-section">
+      <div class="container">
+        <div class="pill-badge">
+          <span class="pulse-dot"></span>
+          Ecossistema Integrado de Tecnologia
+        </div>
+
+        <h1 class="hero-title">
+          Inovação, Inteligência e Confiança <br />
+          <span class="hero-title-gradient">no seu dia a dia.</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          A <strong>Já No Caminho</strong> desenvolve plataformas escaláveis de alta tecnologia conectando saúde preventiva, comércio de proximidade e validação biométrica forense em uma só holding.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#solucoes" class="btn-hero-primary">
+            Explorar Nossos Produtos ↓
+          </a>
+          <a href="/app" class="btn-hero-secondary" title="Ver o site que apresenta o app Já No Caminho">
+            <span>📱 Conhecer o App Delivery</span>
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Soluções / Produtos Grid -->
+    <section class="products-section" id="solucoes">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Nossas Soluções</span>
+          <h2 class="section-heading">Um ecossistema completo para cada desafio</h2>
+          <p class="section-subheading">
+            Cada plataforma foi construída com identidade própria, alta tecnologia e foco na melhor experiência do usuário.
+          </p>
+        </div>
+
+        <div class="products-grid">
+          
+          <!-- 1. Dr. Exame -->
+          <div class="product-card card-drexame">
+            <div>
+              <div class="card-top">
+                <div class="product-logo-box">
+                  <img src="frontend/public/logos/dr-exame-app-icon.png" alt="Dr. Exame" onerror="this.src='frontend/public/logos/dr-exame-app-icon.png'" />
+                </div>
+                <span class="status-badge badge-live">Saúde Digital</span>
+              </div>
+
+              <h3 class="product-name">
+                Dr. Exame
+              </h3>
+              <p class="product-desc">
+                Inteligência médica e gestão preventiva de saúde. Análise automatizada de exames laboratoriais, histórico unificado do paciente e apoio a decisões clínicas.
+              </p>
+              <div class="feature-tags">
+                <span class="feature-tag">Análise de Laudos</span>
+                <span class="feature-tag">Saúde Preventiva</span>
+                <span class="feature-tag">LGPD Saúde</span>
+                <span class="feature-tag">Histórico Unificado</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <a href="https://drexame.janocaminho.com.br" target="_blank" class="btn-card-primary">
+                Acessar Dr. Exame ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- 2. Já No Caminho App -->
+          <div class="product-card card-app">
+            <div>
+              <div class="card-top">
+                <div class="product-logo-box" style="background: rgba(255, 255, 255, 0.95); padding: 4px 10px;">
+                  <img src="frontend/public/janocaminho.jpg" alt="Já No Caminho" onerror="this.src='frontend/public/janocaminho.jpg'" />
+                </div>
+                <span class="status-badge badge-live">Delivery & Hub</span>
+              </div>
+
+              <h3 class="product-name">
+                Já No Caminho (App)
+              </h3>
+              <p class="product-desc">
+                Hub completo de comércio de proximidade e delivery. Conecta condomínios, restaurantes, mercados e destinos locais com checkout rápido e logística ágil.
+              </p>
+              <div class="feature-tags">
+                <span class="feature-tag">Delivery Ágil</span>
+                <span class="feature-tag">Condomínios</span>
+                <span class="feature-tag">Google Play</span>
+                <span class="feature-tag">Lojas & Destinos</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <!-- Botão 1: Leva para a página institucional/landing que explica o app -->
+              <a href="/app" class="btn-card-primary" title="Acessa a landing page detalhada que apresenta o aplicativo Já No Caminho">
+                Conhecer o App →
+              </a>
+              <!-- Botão 2: Leva direto para o Hub/App de compras -->
+              <a href="https://app.janocaminho.com.br/hub" target="_blank" class="btn-card-secondary" title="Abrir direto o Hub de pedidos e lojas">
+                Abrir o Hub ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- 3. Uai ID -->
+          <div class="product-card card-uaiid">
+            <div>
+              <div class="card-top">
+                <div class="product-logo-box" style="background: rgba(10, 18, 40, 0.9); padding: 4px 12px; border-color: rgba(0, 210, 255, 0.4);">
+                  <img src="frontend/public/logos/logo-uai-full.svg" alt="Uai ID" onerror="this.src='frontend/public/logos/uai-logo.jpg'" />
+                </div>
+                <span class="status-badge badge-live">Biometria & KYC</span>
+              </div>
+
+              <h3 class="product-name">
+                Uai ID
+              </h3>
+              <p class="product-desc">
+                Infraestrutura de identidade digital para o Brasil. Verificação facial 3D, prova de vida ativa, OCR forense de CNH/RG e motor de score antifraude em milissegundos.
+              </p>
+              <div class="feature-tags">
+                <span class="feature-tag">Liveness 3D</span>
+                <span class="feature-tag">OCR Forense</span>
+                <span class="feature-tag">Anti-Spoofing</span>
+                <span class="feature-tag">API REST</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <a href="https://uaiid.com.br" target="_blank" class="btn-card-primary">
+                Acessar Uai ID ↗
+              </a>
+              <a href="https://uaiid.com.br/landing/index.html" target="_blank" class="btn-card-secondary">
+                Ver Demo
+              </a>
+            </div>
+          </div>
+
+          <!-- 4. Novo Produto (Em Breve) -->
+          <div class="product-card card-soon">
+            <div>
+              <div class="card-top">
+                <div class="product-logo-box" style="background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.4); color: #C084FC; font-size: 24px; font-weight: 900;">
+                  🚀 JNC
+                </div>
+                <span class="status-badge badge-soon">Em Breve · Q4</span>
+              </div>
+
+              <h3 class="product-name">
+                Nova Solução
+              </h3>
+              <p class="product-desc">
+                Uma nova tecnologia inovadora está sendo preparada para expandir ainda mais o ecossistema Já No Caminho. Em breve disponível para clientes e parceiros.
+              </p>
+              <div class="feature-tags">
+                <span class="feature-tag">Inovação Contínua</span>
+                <span class="feature-tag">Inteligência Artificial</span>
+                <span class="feature-tag">Em Homologação</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button class="btn-card-primary" style="background: rgba(139, 92, 246, 0.3); color: #C084FC; cursor: default;">
+                Lançamento em Breve ⏳
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Banner de Integração do Ecossistema -->
+        <div class="integration-banner" id="ecossistema">
+          <div class="banner-text">
+            <span class="section-tag">Holding & Segurança</span>
+            <h3 class="banner-title">Conectividade robusta sob a mesma governança tecnológica</h3>
+            <p class="banner-desc">
+              Todas as soluções da <strong>Já No Caminho</strong> compartilham a mesma infraestrutura em nuvem de alta disponibilidade, rigorosos protocolos de proteção de dados (LGPD) e autenticação biométrica unificada.
+            </p>
+          </div>
+
+          <div class="banner-stats">
+            <div class="stat-box">
+              <div class="stat-number">3+</div>
+              <div class="stat-label">Plataformas Ativas</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number">99.9%</div>
+              <div class="stat-label">Disponibilidade Cloud</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number">LGPD</div>
+              <div class="stat-label">Conformidade Total</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Rodapé Institucional -->
+  <footer class="site-footer" id="empresa">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand-logo">
+            <img src="frontend/public/janocaminho.jpg" alt="Já No Caminho" class="brand-logo-img" onerror="this.style.display='none'" />
+            <span>Já No Caminho</span>
+          </div>
+          <p>
+            Construindo soluções digitais que transformam a experiência de pessoas, empresas e comunidades em todo o Brasil.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Plataformas</h4>
+          <ul>
+            <li><a href="https://drexame.janocaminho.com.br" target="_blank">Dr. Exame (Saúde)</a></li>
+            <li><a href="/app">Já No Caminho (Site do App)</a></li>
+            <li><a href="https://app.janocaminho.com.br/hub" target="_blank">Já No Caminho (Hub / Pedidos)</a></li>
+            <li><a href="https://uaiid.com.br" target="_blank">Uai ID (Biometria & KYC)</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Institucional</h4>
+          <ul>
+            <li><a href="#empresa">Sobre a Empresa</a></li>
+            <li><a href="#ecossistema">Tecnologia & Cloud</a></li>
+            <li><a href="#solucoes">Novos Lançamentos</a></li>
+            <li><a href="mailto:contato@janocaminho.com.br">Parcerias Corporativas</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col" id="contato">
+          <h4>Contato</h4>
+          <ul>
+            <li><a href="mailto:contato@janocaminho.com.br">contato@janocaminho.com.br</a></li>
+            <li><a href="https://wa.me/5512999999999" target="_blank">Suporte WhatsApp</a></li>
+            <li><span style="color: var(--text-muted); font-size: 13px;">Brasil · São Paulo & Minas</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          © 2026 Já No Caminho Tecnologia. Todos os direitos reservados.
+        </div>
+        <div style="display: flex; gap: 20px;">
+          <a href="/termos">Termos de Uso</a>
+          <a href="/privacidade">Política de Privacidade</a>
+          <a href="#top">Voltar ao topo ↑</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Preview Badge -->
+  <div class="preview-chip">
+    <span class="pulse-dot"></span>
+    Mockup Oficial com Logos Reais — Já No Caminho
+  </div>
+
+</body>
+</html>

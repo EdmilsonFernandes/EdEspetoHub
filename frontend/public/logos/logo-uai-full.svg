@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 48" fill="none">
+  <defs>
+    <linearGradient id="fullShieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="40%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+    <linearGradient id="fullGreenBadge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="textCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+  </defs>
+
+  <!-- Logo Mark -->
+  <g transform="translate(2, 3)">
+    <!-- Main Shield -->
+    <path d="M18 2 L32 7.5 C32 22 18 36 18 36 C18 36 4 22 4 7.5 Z" fill="url(#fullShieldGrad)" />
+    <!-- Inner border -->
+    <path d="M18 4.5 L29.5 9 C29.5 21 18 32.5 18 32.5 C18 32.5 6.5 21 6.5 9 Z" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
+    <!-- Biometrics lines -->
+    <path d="M11 15 Q14.5 11.5 18 11.5 Q21.5 11.5 25 15" fill="none" stroke="#67E8F9" stroke-width="1.8" stroke-linecap="round" />
+    <path d="M14 19 C14 16.5 22 16.5 22 19 C22 23 18 25 18 27.5" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
+    <circle cx="18" cy="30" r="1.2" fill="#67E8F9" />
+    <!-- Green security badge -->
+    <g transform="translate(21, 22)">
+      <circle cx="7" cy="7" r="6" fill="url(#fullGreenBadge)" stroke="#FFFFFF" stroke-width="1.2" />
+      <path d="M4.5 7.2 L6.2 8.8 L9.5 5.2" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+  </g>
+
+  <!-- Typography -->
+  <text x="48" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', sans-serif" font-weight="800" font-size="22" letter-spacing="-0.03em" fill="#0F172A">Uai<tspan fill="#2563EB">ID</tspan></text>
+  <text x="49" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', sans-serif" font-weight="700" font-size="8" letter-spacing="0.14em" fill="#94A3B8">KYC &amp; BIOMETRIA</text>
+</svg>

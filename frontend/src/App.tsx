@@ -61,6 +61,12 @@ const lazyPage = (loader: () => Promise<any>, exportName: string) =>
       })
   );
 
+// Raiz "/" por hostname: app.janocaminho.com.br é o site do app (LandingPage, que
+// apresenta o Já No Caminho e as lojas); demais hosts (www/raiz/localhost) mostram
+// o portal institucional da holding.
+const isAppSubdomainHost = typeof window !== 'undefined' && window.location.hostname.startsWith('app.');
+
+const EmpresaJanoCaminhoPage = lazyPage(() => import('./pages/EmpresaJanoCaminhoPage'), 'EmpresaJanoCaminhoPage');
 const LandingPage = lazyPage(() => import('./pages/LandingPage'), 'LandingPage');
 const PartnersPage = lazyPage(() => import('./pages/PartnersPage'), 'PartnersPage');
 const CreateStore = lazyPage(() => import('./pages/CreateStore'), 'CreateStore');
@@ -188,7 +194,9 @@ function App() {
           <NativeAppNavigator />
           <Suspense fallback={<AppRouteFallback />}>
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={isAppSubdomainHost ? <LandingPage /> : <EmpresaJanoCaminhoPage />} />
+              <Route path="/app" element={<LandingPage />} />
+              <Route path="/conheca-o-app" element={<LandingPage />} />
               <Route path="/parceiros" element={<PartnersPage />} />
               <Route path="/hub" element={<MarketplacePage />} />
               <Route path="/hub/destaques" element={<HubHighlightsPage />} />
