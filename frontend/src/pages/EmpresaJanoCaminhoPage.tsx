@@ -23,15 +23,20 @@ export function EmpresaJanoCaminhoPage() {
       <header style={styles.navbar}>
         <div style={styles.navContainer}>
           <div style={styles.brandGroup}>
-            <img
-              src="/logos/janocaminho.jpg"
-              alt="Já No Caminho"
-              style={styles.brandLogoImg}
-              onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-            />
-            <span style={styles.brandName}>
-              Já No Caminho <span style={styles.brandAccent}>Tecnologia</span>
-            </span>
+            <div style={styles.brandLogoFrame}>
+              <img
+                src="/logos/jnc-ecossistema-oficial.jpg"
+                alt="JNC Logo Oficial"
+                style={styles.brandLogoImg}
+                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+              />
+            </div>
+            <div style={styles.brandTextWrap}>
+              <span style={styles.brandName}>
+                <span style={styles.brandBadgeText}>JNC</span> Já No Caminho
+              </span>
+              <span style={styles.brandTag}>Ecossistema Tecnológico</span>
+            </div>
           </div>
 
           <nav style={styles.navLinks}>
@@ -117,17 +122,18 @@ export function EmpresaJanoCaminhoPage() {
             <motion.div
               whileHover={{ y: -6 }}
               transition={{ duration: 0.25 }}
-              style={{ ...styles.productCard, borderColor: "rgba(236, 72, 153, 0.35)" }}
+              style={{ ...styles.productCard, borderColor: "rgba(16, 185, 129, 0.4)" }}
             >
               <div>
                 <div style={styles.cardTop}>
-                  <div style={styles.productLogoBox}>
+                  <div style={{ ...styles.productLogoBox, background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(16, 185, 129, 0.4)", display: "flex", alignItems: "center", gap: 8, padding: "6px 14px" }}>
                     <img
-                      src="/logos/dr-exame-app-icon.png"
+                      src="/logos/dr-exame.svg"
                       alt="Dr. Exame"
-                      style={{ height: 42, width: 42, borderRadius: 12, objectFit: "cover" }}
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      style={{ height: 40, width: 40, objectFit: "contain" }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/logos/dr-exame-brand.png'; }}
                     />
+                    <span style={{ fontWeight: 900, color: "#10B981", fontSize: 17 }}>Dr. Exame</span>
                   </div>
                   <span style={{ ...styles.statusBadge, ...styles.statusBadgeLive }}>Saúde Digital</span>
                 </div>
@@ -150,7 +156,7 @@ export function EmpresaJanoCaminhoPage() {
                   href="https://drexame.janocaminho.com.br"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ ...styles.btnCardPrimary, background: "linear-gradient(135deg, #EC4899 0%, #DB2777 100%)" }}
+                  style={{ ...styles.btnCardPrimary, background: "linear-gradient(135deg, #10B981 0%, #059669 100%)" }}
                 >
                   <span>Acessar Dr. Exame</span>
                   <ArrowUpRight size={16} weight="bold" />
@@ -162,16 +168,16 @@ export function EmpresaJanoCaminhoPage() {
             <motion.div
               whileHover={{ y: -6 }}
               transition={{ duration: 0.25 }}
-              style={{ ...styles.productCard, borderColor: "rgba(16, 185, 129, 0.35)" }}
+              style={{ ...styles.productCard, borderColor: "rgba(255, 122, 0, 0.45)" }}
             >
               <div>
                 <div style={styles.cardTop}>
-                  <div style={{ ...styles.productLogoBox, background: "rgba(255, 255, 255, 0.95)", padding: "4px 10px" }}>
+                  <div style={{ ...styles.productLogoBox, background: "rgba(255, 255, 255, 0.95)", border: "1px solid rgba(255, 122, 0, 0.4)", padding: "4px 12px" }}>
                     <img
-                      src="/janocaminho.jpg"
+                      src="/logos/janocaminho-logo.svg"
                       alt="Já No Caminho"
-                      style={{ height: 38, width: 38, borderRadius: 10, objectFit: "cover" }}
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      style={{ height: 38, width: "auto", objectFit: "contain" }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/logos/janocaminho.jpg'; }}
                     />
                   </div>
                   <span style={{ ...styles.statusBadge, ...styles.statusBadgeLive }}>Delivery & Hub</span>
@@ -191,14 +197,14 @@ export function EmpresaJanoCaminhoPage() {
               </div>
 
               <div style={styles.cardActions}>
-                {/* Leva para o site do app (app.janocaminho.com.br) — primeiro o site do app, depois o hub */}
-                <a
-                  href="https://app.janocaminho.com.br"
-                  style={{ ...styles.btnCardPrimary, background: "linear-gradient(135deg, #10B981 0%, #059669 100%)" }}
-                  title="Site oficial do aplicativo Já No Caminho (apresentação e lojas)"
+                {/* Leva para a apresentação do app em /app */}
+                <Link
+                  to="/app"
+                  style={{ ...styles.btnCardPrimary, background: "linear-gradient(135deg, #FF7A00 0%, #EA580C 100%)" }}
+                  title="Conhecer a apresentação detalhada do aplicativo Já No Caminho"
                 >
                   <span>Conhecer o App →</span>
-                </a>
+                </Link>
                 {/* Leva direto para o hub de pedidos */}
                 <a
                   href="https://app.janocaminho.com.br/hub"
@@ -216,16 +222,16 @@ export function EmpresaJanoCaminhoPage() {
             <motion.div
               whileHover={{ y: -6 }}
               transition={{ duration: 0.25 }}
-              style={{ ...styles.productCard, borderColor: "rgba(0, 210, 255, 0.35)" }}
+              style={{ ...styles.productCard, borderColor: "rgba(0, 210, 255, 0.45)" }}
             >
               <div>
                 <div style={styles.cardTop}>
-                  <div style={{ ...styles.productLogoBox, background: "rgba(10, 18, 40, 0.9)", borderColor: "rgba(0, 210, 255, 0.4)", padding: "4px 12px" }}>
+                  <div style={{ ...styles.productLogoBox, background: "rgba(8, 16, 36, 0.95)", border: "1px solid rgba(0, 210, 255, 0.5)", padding: "6px 14px" }}>
                     <img
-                      src="/logos/uai-logo.jpg"
+                      src="/logos/logo-uai-full.svg"
                       alt="Uai ID"
-                      style={{ height: 44, width: 44, borderRadius: 12, objectFit: "cover" }}
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      style={{ height: 36, width: "auto", objectFit: "contain" }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/logos/uai-logo.jpg'; }}
                     />
                   </div>
                   <span style={{ ...styles.statusBadge, ...styles.statusBadgeLive }}>Biometria & KYC</span>
