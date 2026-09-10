@@ -1,331 +1,357 @@
 // @ts-nocheck
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import {
-  ArrowUpRight,
-  DeviceMobile,
-  RocketLaunch,
-} from '@phosphor-icons/react';
+import { ArrowUpRight, DeviceMobile } from '@phosphor-icons/react';
+import './EmpresaJanoCaminhoPage.css';
 
 export function EmpresaJanoCaminhoPage() {
+  const [modalOpen, setModalOpen] = useState(false);
+
   return (
-    <div style={styles.pageWrap}>
-      {/* Background Orbs Glow */}
-      <div style={styles.ambientOrbs}>
-        <div style={{ ...styles.orb, ...styles.orb1 }} />
-        <div style={{ ...styles.orb, ...styles.orb2 }} />
-        <div style={{ ...styles.orb, ...styles.orb3 }} />
-        <div style={styles.gridOverlay} />
+    <div className="jnc-page">
+      {/* Ambient Light Effect */}
+      <div className="jnc-ambient-bg">
+        <div className="jnc-ambient-orb jnc-orb-1" />
+        <div className="jnc-ambient-orb jnc-orb-2" />
+        <div className="jnc-ambient-orb jnc-orb-3" />
+        <div className="jnc-grid-overlay" />
+        <div className="jnc-ecg-line" />
       </div>
 
-      {/* Header / Navbar Institucional */}
-      <header style={styles.navbar}>
-        <div style={styles.navContainer}>
-          <div style={styles.brandGroup}>
-            <div style={styles.brandLogoFrame}>
+      {/* Navbar Oficial */}
+      <header className="jnc-navbar">
+        <div className="jnc-container jnc-nav-inner">
+          <a href="#" className="jnc-brand-group" title="JNC — Já No Caminho Tecnologia">
+            <div className="jnc-brand-logo-frame">
               <img
                 src="/logos/jnc-ecossistema-oficial.jpg"
                 alt="JNC Logo Oficial"
-                style={styles.brandLogoImg}
-                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                className="jnc-brand-logo-img-top"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/logos/janocaminho-logo.svg';
+                }}
               />
             </div>
-            <div style={styles.brandTextWrap}>
-              <span style={styles.brandName}>
-                <span style={styles.brandBadgeText}>JNC</span> Já No Caminho
-              </span>
-              <span style={styles.brandTag}>Ecossistema Tecnológico</span>
+            <div className="jnc-brand-text">
+              <div className="jnc-brand-header-title">
+                <span className="jnc-brand-badge-text">JNC</span>
+                <span>Já No Caminho</span>
+              </div>
+              <div className="jnc-brand-tag">Ecossistema Tecnológico</div>
             </div>
-          </div>
+          </a>
 
-          <nav style={styles.navLinks}>
-            <a href="#solucoes" style={styles.navLink}>Produtos</a>
-            <a href="#ecossistema" style={styles.navLink}>Ecossistema</a>
-            <a href="#empresa" style={styles.navLink}>A Empresa</a>
-            <a href="#contato" style={styles.navLink}>Contato</a>
+          <nav className="jnc-nav-links">
+            <a href="#solucoes">Soluções</a>
+            <a href="#drexame">🩺 Dr. Exame</a>
+            <a href="#janocaminho">🛒 Já No Caminho</a>
+            <a href="#uaiid">🛡️ Uai ID</a>
+            <a href="#sobre">A Empresa</a>
           </nav>
 
-          <a
-            href="https://app.janocaminho.com.br/hub"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={styles.navCta}
-          >
-            Acessar o Hub ↗
-          </a>
+          <div className="jnc-nav-actions">
+            <a href="https://app.janocaminho.com.br/hub" target="_blank" rel="noopener noreferrer" className="jnc-nav-cta-btn">
+              Acessar o Hub ↗
+            </a>
+          </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <main style={styles.mainContent}>
-        <section style={styles.heroSection}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            style={styles.pillBadge}
-          >
-            <span style={styles.pulseDot} />
-            ECOSSISTEMA INTEGRADO DE TECNOLOGIA
-          </motion.div>
+      {/* Main Content */}
+      <main>
+        {/* Hero Section */}
+        <section className="jnc-hero-section">
+          <div className="jnc-container">
+            <div className="jnc-hero-grid">
+              
+              {/* Coluna Esquerda: Texto e Ações */}
+              <div className="jnc-hero-content">
+                <div className="jnc-pill-badge">
+                  <span className="jnc-pulse-dot" />
+                  Plataforma Unificada Ativa
+                </div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            style={styles.heroTitle}
-          >
-            Inovação, Inteligência e Confiança <br />
-            <span style={styles.heroGradientText}>no seu dia a dia.</span>
-          </motion.h1>
+                <h1 className="jnc-hero-title">
+                  JNC — Tecnologia que conecta <br />
+                  <span className="jnc-hero-title-gradient">Saúde, Gestão e Identidade.</span>
+                </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            style={styles.heroSubtitle}
-          >
-            A <strong>Já No Caminho</strong> desenvolve plataformas escaláveis de alta tecnologia conectando saúde preventiva, comércio de proximidade e validação biométrica forense em uma só holding.
-          </motion.p>
+                <p className="jnc-hero-subtitle">
+                  Um ecossistema proprietário de alta performance unindo três verticais estratégicas sob a mesma infraestrutura de inteligência artificial e confiança.
+                </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            style={styles.heroActions}
-          >
-            <a href="#solucoes" style={styles.btnHeroPrimary}>
-              Explorar Nossos Produtos ↓
-            </a>
-            <a href="https://app.janocaminho.com.br" style={styles.btnHeroSecondary} title="Site oficial do app Já No Caminho">
-              <DeviceMobile size={18} weight="bold" />
-              <span>Conhecer o App Delivery</span>
-              <span>→</span>
-            </a>
-          </motion.div>
+                <div className="jnc-hero-motto-quote">
+                  “Um ecossistema completo para cada desafio. Saúde, Gestão e Identidade.”
+                </div>
+
+                <div className="jnc-hero-actions">
+                  <a href="#solucoes" className="jnc-btn-hero-primary">
+                    Conhecer o Ecossistema ↓
+                  </a>
+                  <Link to="/app" className="jnc-btn-hero-secondary" title="Ver apresentação exclusiva do app Já No Caminho">
+                    <DeviceMobile size={18} weight="bold" />
+                    <span>Apresentação do App</span>
+                    <span>→</span>
+                  </Link>
+                </div>
+
+                {/* Fast Pillars Navigation Chips */}
+                <div className="jnc-hero-pills">
+                  <a href="#drexame" className="jnc-pillar-chip">
+                    <span className="dot dot-health" />
+                    <strong>Dr. Exame</strong> (Saúde Digital)
+                  </a>
+                  <a href="#janocaminho" className="jnc-pillar-chip">
+                    <span className="dot dot-delivery" />
+                    <strong>Já No Caminho</strong> (Gestão SaaS)
+                  </a>
+                  <a href="#uaiid" className="jnc-pillar-chip">
+                    <span className="dot dot-security" />
+                    <strong>UAIID</strong> (Identidade & Segurança)
+                  </a>
+                </div>
+              </div>
+
+              {/* Coluna Direita: 3D Artwork Centerpiece Card */}
+              <div
+                className="jnc-hero-artwork-card"
+                id="logoCard"
+                onClick={() => setModalOpen(true)}
+                title="Clique para ampliar o logo oficial"
+              >
+                <div className="jnc-artwork-img-wrapper">
+                  <img
+                    src="/logos/jnc-ecossistema-oficial.jpg"
+                    alt="JNC Ecossistema Tecnológico — Logo Oficial"
+                    className="jnc-artwork-img"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/logo-janocaminho-oficial.jpg';
+                    }}
+                  />
+                </div>
+                <div className="jnc-artwork-badge-floating">
+                  <div className="jnc-badge-label-main">
+                    <span style={{ color: "var(--mint)" }}>🛡️</span>
+                    <span>JNC | Plataforma Unificada</span>
+                  </div>
+                  <span className="jnc-badge-status-tag">OFICIAL 2026</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </section>
 
-        {/* Seção de Soluções e Produtos (Bento Grid) */}
-        <section id="solucoes" style={styles.productsSection}>
-          <div style={styles.sectionHeader}>
-            <span style={styles.sectionTag}>Nossas Soluções</span>
-            <h2 style={styles.sectionHeading}>Um ecossistema completo para cada desafio</h2>
-            <p style={styles.sectionSubheading}>
-              Cada plataforma foi construída com identidade própria, alta tecnologia e foco na melhor experiência do usuário.
-            </p>
+        {/* Metrics Banner */}
+        <div className="jnc-container">
+          <div className="jnc-metrics-banner">
+            <div className="jnc-banner-text">
+              <h3 className="jnc-banner-title">Uma só holding, múltiplos motores de impacto</h3>
+              <p className="jnc-banner-desc">
+                Integrando visão computacional, inteligência de exames preventivos e comércio ultra-local com checkout ágil.
+              </p>
+            </div>
+            <div className="jnc-banner-stats">
+              <div className="jnc-stat-box">
+                <div className="jnc-stat-number">3</div>
+                <div className="jnc-stat-label">Verticais Ativas</div>
+              </div>
+              <div className="jnc-stat-box">
+                <div className="jnc-stat-number">&lt;400ms</div>
+                <div className="jnc-stat-label">Latência Forense</div>
+              </div>
+              <div className="jnc-stat-box">
+                <div className="jnc-stat-number">99.9%</div>
+                <div className="jnc-stat-label">Uptime AWS Cloud</div>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div style={styles.productsGrid}>
-            
-            {/* 1. Dr. Exame */}
-            <motion.div
-              whileHover={{ y: -6 }}
-              transition={{ duration: 0.25 }}
-              style={{ ...styles.productCard, borderColor: "rgba(16, 185, 129, 0.4)" }}
-            >
-              <div>
-                <div style={styles.cardTop}>
-                  <div style={{ ...styles.productLogoBox, background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(16, 185, 129, 0.4)", display: "flex", alignItems: "center", gap: 8, padding: "6px 14px" }}>
-                    <img
-                      src="/logos/dr-exame.svg"
-                      alt="Dr. Exame"
-                      style={{ height: 40, width: 40, objectFit: "contain" }}
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/logos/dr-exame-brand.png'; }}
-                    />
-                    <span style={{ fontWeight: 900, color: "#10B981", fontSize: 17 }}>Dr. Exame</span>
-                  </div>
-                  <span style={{ ...styles.statusBadge, ...styles.statusBadgeLive }}>Saúde Digital</span>
-                </div>
-
-                <h3 style={styles.productName}>Dr. Exame</h3>
-                <p style={styles.productDesc}>
-                  Inteligência médica e gestão preventiva de saúde. Análise automatizada de exames laboratoriais, histórico unificado do paciente e apoio a decisões clínicas.
-                </p>
-
-                <div style={styles.featureTags}>
-                  <span style={styles.featureTag}>Análise de Laudos</span>
-                  <span style={styles.featureTag}>Saúde Preventiva</span>
-                  <span style={styles.featureTag}>LGPD Saúde</span>
-                  <span style={styles.featureTag}>Histórico Digital</span>
-                </div>
-              </div>
-
-              <div style={styles.cardActions}>
-                <a
-                  href="https://drexame.janocaminho.com.br"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ ...styles.btnCardPrimary, background: "linear-gradient(135deg, #10B981 0%, #059669 100%)" }}
-                >
-                  <span>Acessar Dr. Exame</span>
-                  <ArrowUpRight size={16} weight="bold" />
-                </a>
-              </div>
-            </motion.div>
-
-            {/* 2. Já No Caminho (App) */}
-            <motion.div
-              whileHover={{ y: -6 }}
-              transition={{ duration: 0.25 }}
-              style={{ ...styles.productCard, borderColor: "rgba(255, 122, 0, 0.45)" }}
-            >
-              <div>
-                <div style={styles.cardTop}>
-                  <div style={{ ...styles.productLogoBox, background: "rgba(255, 255, 255, 0.95)", border: "1px solid rgba(255, 122, 0, 0.4)", padding: "4px 12px" }}>
-                    <img
-                      src="/logos/janocaminho-logo.svg"
-                      alt="Já No Caminho"
-                      style={{ height: 38, width: "auto", objectFit: "contain" }}
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/logos/janocaminho.jpg'; }}
-                    />
-                  </div>
-                  <span style={{ ...styles.statusBadge, ...styles.statusBadgeLive }}>Delivery & Hub</span>
-                </div>
-
-                <h3 style={styles.productName}>Já No Caminho (App)</h3>
-                <p style={styles.productDesc}>
-                  Hub completo de comércio de proximidade e delivery. Conecta condomínios, restaurantes, mercados e destinos locais com checkout rápido e logística ágil.
-                </p>
-
-                <div style={styles.featureTags}>
-                  <span style={styles.featureTag}>Delivery Ágil</span>
-                  <span style={styles.featureTag}>Condomínios</span>
-                  <span style={styles.featureTag}>Google Play</span>
-                  <span style={styles.featureTag}>Lojas & Destinos</span>
-                </div>
-              </div>
-
-              <div style={styles.cardActions}>
-                {/* Leva para a apresentação do app em /app */}
-                <Link
-                  to="/app"
-                  style={{ ...styles.btnCardPrimary, background: "linear-gradient(135deg, #FF7A00 0%, #EA580C 100%)" }}
-                  title="Conhecer a apresentação detalhada do aplicativo Já No Caminho"
-                >
-                  <span>Conhecer o App →</span>
-                </Link>
-                {/* Leva direto para o hub de pedidos */}
-                <a
-                  href="https://app.janocaminho.com.br/hub"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={styles.btnCardSecondary}
-                  title="Abrir direto o Hub de pedidos e lojas"
-                >
-                  <span>Abrir o Hub ↗</span>
-                </a>
-              </div>
-            </motion.div>
-
-            {/* 3. Uai ID */}
-            <motion.div
-              whileHover={{ y: -6 }}
-              transition={{ duration: 0.25 }}
-              style={{ ...styles.productCard, borderColor: "rgba(0, 210, 255, 0.45)" }}
-            >
-              <div>
-                <div style={styles.cardTop}>
-                  <div style={{ ...styles.productLogoBox, background: "rgba(8, 16, 36, 0.95)", border: "1px solid rgba(0, 210, 255, 0.5)", padding: "6px 14px" }}>
-                    <img
-                      src="/logos/logo-uai-full.svg"
-                      alt="Uai ID"
-                      style={{ height: 36, width: "auto", objectFit: "contain" }}
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/logos/uai-logo.jpg'; }}
-                    />
-                  </div>
-                  <span style={{ ...styles.statusBadge, ...styles.statusBadgeLive }}>Biometria & KYC</span>
-                </div>
-
-                <h3 style={styles.productName}>Uai ID</h3>
-                <p style={styles.productDesc}>
-                  Infraestrutura de identidade digital para o Brasil. Verificação facial 3D, prova de vida ativa, OCR forense de CNH/RG e motor de score antifraude em milissegundos.
-                </p>
-
-                <div style={styles.featureTags}>
-                  <span style={styles.featureTag}>Liveness 3D</span>
-                  <span style={styles.featureTag}>OCR Forense</span>
-                  <span style={styles.featureTag}>Anti-Spoofing</span>
-                  <span style={styles.featureTag}>API REST</span>
-                </div>
-              </div>
-
-              <div style={styles.cardActions}>
-                <a
-                  href="https://uaiid.com.br"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ ...styles.btnCardPrimary, background: "linear-gradient(135deg, #00D2FF 0%, #2563EB 100%)" }}
-                >
-                  <span>Acessar Uai ID</span>
-                  <ArrowUpRight size={16} weight="bold" />
-                </a>
-                <a href="https://uaiid.com.br/landing/index.html" target="_blank" rel="noopener noreferrer" style={styles.btnCardSecondary}>
-                  Ver Demo
-                </a>
-              </div>
-            </motion.div>
-
-            {/* 4. Novo Produto (Em Breve) */}
-            <motion.div
-              whileHover={{ y: -6 }}
-              transition={{ duration: 0.25 }}
-              style={{ ...styles.productCard, borderColor: "rgba(139, 92, 246, 0.35)", background: "rgba(15, 23, 42, 0.45)", borderStyle: "dashed" }}
-            >
-              <div>
-                <div style={styles.cardTop}>
-                  <div style={{ ...styles.productLogoBox, background: "rgba(139, 92, 246, 0.15)", borderColor: "rgba(139, 92, 246, 0.4)", color: "#C084FC", fontWeight: 900 }}>
-                    <RocketLaunch size={24} weight="fill" />
-                    <span style={{ marginLeft: 6, fontSize: 14 }}>JNC</span>
-                  </div>
-                  <span style={{ ...styles.statusBadge, background: "rgba(139, 92, 246, 0.15)", color: "#C084FC", borderColor: "rgba(139, 92, 246, 0.4)" }}>
-                    Em Breve · Q4
-                  </span>
-                </div>
-
-                <h3 style={styles.productName}>Nova Solução</h3>
-                <p style={styles.productDesc}>
-                  Uma nova tecnologia inovadora está sendo desenvolvida para expandir ainda mais o ecossistema Já No Caminho. Em breve disponível para nossos clientes e parceiros.
-                </p>
-
-                <div style={styles.featureTags}>
-                  <span style={styles.featureTag}>Inovação Contínua</span>
-                  <span style={styles.featureTag}>Inteligência Artificial</span>
-                  <span style={styles.featureTag}>Em Homologação</span>
-                </div>
-              </div>
-
-              <div style={styles.cardActions}>
-                <div style={{ ...styles.btnCardPrimary, background: "rgba(139, 92, 246, 0.25)", color: "#C084FC", cursor: "default" }}>
-                  <span>Lançamento em Breve ⏳</span>
-                </div>
-              </div>
-            </motion.div>
-
-          </div>
-
-          {/* Banner Institucional de Ecossistema */}
-          <div id="ecossistema" style={styles.integrationBanner}>
-            <div style={{ flex: "1 1 300px" }}>
-              <span style={styles.sectionTag}>Holding & Governança</span>
-              <h3 style={styles.bannerTitle}>Conectividade robusta sob a mesma excelência tecnológica</h3>
-              <p style={styles.bannerDesc}>
-                Todas as soluções da <strong>Já No Caminho</strong> compartilham a mesma infraestrutura em nuvem de alta disponibilidade, rigorosos protocolos de proteção de dados (LGPD) e autenticação biométrica unificada.
+        {/* Soluções / Produtos Bento Grid */}
+        <section className="jnc-products-section" id="solucoes">
+          <div className="jnc-container">
+            <div className="jnc-section-header">
+              <span className="jnc-section-tag">Nossas Verticais</span>
+              <h2 className="jnc-section-heading">Os 3 Pilares do Ecossistema JNC</h2>
+              <p className="jnc-section-subheading">
+                Cada plataforma foi desenhada com identidade visual própria, arquitetura moderna e os logotipos oficiais integrados.
               </p>
             </div>
 
-            <div style={styles.bannerStats}>
-              <div style={styles.statBox}>
-                <div style={styles.statNumber}>3+</div>
-                <div style={styles.statLabel}>Plataformas Ativas</div>
+            <div className="jnc-products-grid">
+              
+              {/* 1. Dr. Exame */}
+              <div className="jnc-product-card card-drexame" id="drexame">
+                <div>
+                  <div className="jnc-card-top">
+                    <div className="jnc-product-logo-box" style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(16, 185, 129, 0.45)", display: "flex", alignItems: "center", gap: 8, padding: "6px 14px" }}>
+                      <img
+                        src="/logos/dr-exame.svg"
+                        alt="Dr. Exame"
+                        style={{ height: 40, width: 40, objectFit: "contain" }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/logos/dr-exame-brand.png'; }}
+                      />
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <span style={{ fontWeight: 900, color: "#10B981", fontSize: 18, letterSpacing: "-0.02em", lineHeight: 1.1 }}>Dr. Exame</span>
+                        <span style={{ fontSize: 11, color: "var(--text-soft)", fontWeight: 600 }}>Saúde Digital</span>
+                      </div>
+                    </div>
+                    <span className="jnc-status-badge badge-live">Saúde Digital</span>
+                  </div>
+
+                  <h3 className="jnc-product-name">Dr. Exame</h3>
+                  <p className="jnc-product-desc">
+                    Inteligência médica e gestão preventiva de saúde. Análise automatizada de exames laboratoriais, histórico unificado do paciente e apoio a decisões clínicas com IA.
+                  </p>
+                  <div className="jnc-feature-tags">
+                    <span className="jnc-feature-tag">Análise de Laudos</span>
+                    <span className="jnc-feature-tag">Saúde Preventiva</span>
+                    <span className="jnc-feature-tag">LGPD Saúde</span>
+                    <span className="jnc-feature-tag">Histórico Unificado</span>
+                  </div>
+                </div>
+
+                <div className="jnc-card-actions">
+                  <a href="https://drexame.janocaminho.com.br" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-primary" style={{ background: "linear-gradient(135deg, #10B981 0%, #059669 100%)" }}>
+                    <span>Acessar Dr. Exame</span>
+                    <ArrowUpRight size={16} weight="bold" />
+                  </a>
+                  <a href="https://drexame.janocaminho.com.br" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-secondary">
+                    Ver Plataforma
+                  </a>
+                </div>
               </div>
-              <div style={styles.statBox}>
-                <div style={styles.statNumber}>99.9%</div>
-                <div style={styles.statLabel}>Disponibilidade Cloud</div>
+
+              {/* 2. Já No Caminho (App & Hub) */}
+              <div className="jnc-product-card card-app" id="janocaminho">
+                <div>
+                  <div className="jnc-card-top">
+                    <div className="jnc-product-logo-box" style={{ background: "rgba(255, 255, 255, 0.95)", border: "1px solid rgba(255, 122, 0, 0.5)", padding: "6px 14px" }}>
+                      <img
+                        src="/logos/janocaminho-logo.svg"
+                        alt="Já No Caminho"
+                        style={{ maxHeight: 40, width: "auto", objectFit: "contain" }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/logos/janocaminho.jpg'; }}
+                      />
+                    </div>
+                    <span className="jnc-status-badge badge-live">Gestão SaaS & App</span>
+                  </div>
+
+                  <h3 className="jnc-product-name">Já No Caminho (App & Hub)</h3>
+                  <p className="jnc-product-desc">
+                    Hub completo de pedidos, logística e comércio de proximidade. Conecta condomínios fechados, restaurantes, feiras e moradores locais com entrega ágil e marketplace sem atrito.
+                  </p>
+                  <div className="jnc-feature-tags">
+                    <span className="jnc-feature-tag">Delivery Ágil</span>
+                    <span className="jnc-feature-tag">Condomínios</span>
+                    <span className="jnc-feature-tag">Google Play</span>
+                    <span className="jnc-feature-tag">Lojas & Hub</span>
+                  </div>
+                </div>
+
+                <div className="jnc-card-actions">
+                  <Link to="/app" className="jnc-btn-card-primary" style={{ background: "linear-gradient(135deg, #FF7A00 0%, #EA580C 100%)" }} title="Acessa a apresentação detalhada do aplicativo Já No Caminho">
+                    <span>Conhecer o App →</span>
+                  </Link>
+                  <a href="https://app.janocaminho.com.br/hub" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-secondary" title="Abrir direto o Hub de pedidos">
+                    <span>Abrir o Hub ↗</span>
+                  </a>
+                </div>
               </div>
-              <div style={styles.statBox}>
-                <div style={styles.statNumber}>LGPD</div>
-                <div style={styles.statLabel}>Conformidade Total</div>
+
+              {/* 3. Uai ID */}
+              <div className="jnc-product-card card-uaiid" id="uaiid">
+                <div>
+                  <div className="jnc-card-top">
+                    <div className="jnc-product-logo-box" style={{ background: "rgba(8, 16, 36, 0.95)", border: "1px solid rgba(0, 210, 255, 0.5)", padding: "8px 16px" }}>
+                      <img
+                        src="/logos/logo-uai-full.svg"
+                        alt="Uai ID"
+                        style={{ maxHeight: 38, width: "auto", objectFit: "contain" }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/logos/uai-logo.jpg'; }}
+                      />
+                    </div>
+                    <span className="jnc-status-badge badge-live">Identidade & KYC</span>
+                  </div>
+
+                  <h3 className="jnc-product-name">Uai ID</h3>
+                  <p className="jnc-product-desc">
+                    Infraestrutura de identidade digital e validação biométrica facial 3D. Prova de vida ativa, OCR forense de CNH/RG e motor antifraude em milissegundos para empresas e fintechs.
+                  </p>
+                  <div className="jnc-feature-tags">
+                    <span className="jnc-feature-tag">Liveness 3D</span>
+                    <span className="jnc-feature-tag">OCR Forense</span>
+                    <span className="jnc-feature-tag">Anti-Spoofing</span>
+                    <span className="jnc-feature-tag">Auditoria 1:1</span>
+                  </div>
+                </div>
+
+                <div className="jnc-card-actions">
+                  <a href="https://uaiid.com.br" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-primary" style={{ background: "linear-gradient(135deg, #00D2FF 0%, #3B72F7 100%)" }}>
+                    <span>Acessar Uai ID</span>
+                    <ArrowUpRight size={16} weight="bold" />
+                  </a>
+                  <a href="https://uaiid.com.br/landing/index.html" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-secondary">
+                    Ver Demo
+                  </a>
+                </div>
+              </div>
+
+              {/* 4. Novo Módulo JNC (Em Breve) */}
+              <div className="jnc-product-card card-soon">
+                <div>
+                  <div className="jnc-card-top">
+                    <div className="jnc-product-logo-box" style={{ background: "rgba(139, 92, 246, 0.12)", border: "1px solid rgba(139, 92, 246, 0.35)", padding: "8px 14px" }}>
+                      <span style={{ fontSize: 26 }}>✨</span>
+                    </div>
+                    <span className="jnc-status-badge badge-soon">Em Desenvolvimento</span>
+                  </div>
+
+                  <h3 className="jnc-product-name">Novo Módulo JNC</h3>
+                  <p className="jnc-product-desc">
+                    Um novo motor de automação e inteligência está sendo desenvolvido pelos times de engenharia para integrar ainda mais o ecossistema.
+                  </p>
+                  <div className="jnc-feature-tags">
+                    <span className="jnc-feature-tag">Automação</span>
+                    <span className="jnc-feature-tag">Inteligência Artificial</span>
+                    <span className="jnc-feature-tag">Expansão</span>
+                  </div>
+                </div>
+
+                <div className="jnc-card-actions">
+                  <span className="jnc-btn-card-secondary" style={{ opacity: 0.6, cursor: "not-allowed", width: "100%", textAlign: "center" }}>
+                    Lançamento em Breve
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* Sobre a Holding Section */}
+        <section className="jnc-container" id="sobre" style={{ padding: "40px 24px 100px" }}>
+          <div style={{ background: "rgba(13, 23, 48, 0.5)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)", padding: "50px 40px" }}>
+            <span className="jnc-section-tag">A Holding</span>
+            <h2 style={{ fontSize: 32, fontWeight: 900, marginBottom: 18, letterSpacing: "-0.02em" }}>
+              Construindo a Infraestrutura do Amanhã
+            </h2>
+            <p style={{ color: "var(--text-soft)", fontSize: 16, lineHeight: 1.7, maxWidth: 860, marginBottom: 24 }}>
+              A <strong>Já No Caminho Tecnologia (JNC)</strong> nasceu da convicção de que inteligência de dados, proximidade e segurança devem caminhar lado a lado. Nossas três plataformas compartilham uma espinha dorsal de engenharia baseada em microsserviços na nuvem AWS, padrões rigorosos de segurança e IA aplicada para resolver problemas reais de pessoas e organizações.
+            </p>
+            <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+              <div style={{ flex: 1, minWidth: 240, background: "rgba(255,255,255,0.03)", padding: 20, borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ fontWeight: 800, color: "var(--mint)", marginBottom: 8 }}>🔒 Segurança &amp; LGPD</div>
+                <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Criptografia de ponta a ponta e conformidade com diretrizes nacionais de dados em todas as pontas.</div>
+              </div>
+              <div style={{ flex: 1, minWidth: 240, background: "rgba(255,255,255,0.03)", padding: 20, borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ fontWeight: 800, color: "var(--cyan)", marginBottom: 8 }}>⚡ Alta Disponibilidade</div>
+                <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Arquitetura escalável em nuvem com latência submétrica e monitoramento 24/7.</div>
+              </div>
+              <div style={{ flex: 1, minWidth: 240, background: "rgba(255,255,255,0.03)", padding: 20, borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ fontWeight: 800, color: "var(--orange)", marginBottom: 8 }}>🤝 DNA de Proximidade</div>
+                <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Soluções pensadas para gerar impacto direto na vida de cidadãos, médicos e empreendedores.</div>
               </div>
             </div>
           </div>
@@ -333,497 +359,79 @@ export function EmpresaJanoCaminhoPage() {
       </main>
 
       {/* Footer */}
-      <footer id="empresa" style={styles.footer}>
-        <div style={styles.footerInner}>
-          <div style={styles.footerColBrand}>
-            <div style={styles.brandGroup}>
-              <img
-                src="/logos/janocaminho.jpg"
-                alt="Já No Caminho"
-                style={{ height: 32, width: "auto", borderRadius: 6 }}
-                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-              />
-              <span style={{ fontWeight: 800, fontSize: 18, color: "#FFFFFF" }}>Já No Caminho</span>
+      <footer className="jnc-site-footer">
+        <div className="jnc-container">
+          <div className="jnc-footer-grid">
+            <div className="jnc-footer-brand">
+              <div className="jnc-brand-group">
+                <div className="jnc-brand-logo-frame" style={{ width: 38, height: 38 }}>
+                  <img src="/logos/jnc-ecossistema-oficial.jpg" className="jnc-brand-logo-img-top" alt="JNC Logo" />
+                </div>
+                <span style={{ fontWeight: 800, fontSize: 18 }}>Já No Caminho</span>
+              </div>
+              <p>
+                Ecossistema tecnológico integrado. Plataforma unificada de saúde digital, gestão SaaS e identidade biométrica forense.
+              </p>
             </div>
-            <p style={{ color: "#94A3B8", fontSize: 14, marginTop: 14, lineHeight: 1.6, maxWidth: 320 }}>
-              Construindo soluções digitais que transformam a experiência de pessoas, empresas e comunidades em todo o Brasil.
-            </p>
+
+            <div className="jnc-footer-col">
+              <h4>Plataformas</h4>
+              <ul>
+                <li><a href="https://drexame.janocaminho.com.br" target="_blank" rel="noopener noreferrer">Dr. Exame (Saúde)</a></li>
+                <li><a href="https://app.janocaminho.com.br/hub" target="_blank" rel="noopener noreferrer">Já No Caminho (Hub)</a></li>
+                <li><Link to="/app">Já No Caminho (App)</Link></li>
+                <li><a href="https://uaiid.com.br" target="_blank" rel="noopener noreferrer">Uai ID (KYC &amp; Biometria)</a></li>
+              </ul>
+            </div>
+
+            <div className="jnc-footer-col">
+              <h4>Institucional</h4>
+              <ul>
+                <li><a href="#sobre">A Empresa</a></li>
+                <li><a href="#solucoes">Ecossistema</a></li>
+                <li><a href="https://uaiid.com.br/landing/index.html" target="_blank" rel="noopener noreferrer">Documentação API</a></li>
+                <li><a href="#">Privacidade &amp; LGPD</a></li>
+              </ul>
+            </div>
+
+            <div className="jnc-footer-col">
+              <h4>Rede &amp; Acesso</h4>
+              <ul>
+                <li><a href="https://app.janocaminho.com.br/hub" target="_blank" rel="noopener noreferrer">Painel Operacional ↗</a></li>
+                <li><a href="https://uaiid.com.br/dashboard" target="_blank" rel="noopener noreferrer">Dashboard Uai ID ↗</a></li>
+                <li><a href="https://drexame.janocaminho.com.br" target="_blank" rel="noopener noreferrer">Portal Dr. Exame ↗</a></li>
+              </ul>
+            </div>
           </div>
 
-          <div style={styles.footerCol}>
-            <h4 style={styles.footerColTitle}>Plataformas</h4>
-            <div style={styles.footerLinksList}>
-              <a href="https://drexame.janocaminho.com.br" target="_blank" rel="noopener noreferrer" style={styles.footerLink}>Dr. Exame (Saúde)</a>
-              <a href="https://app.janocaminho.com.br" style={styles.footerLink}>Já No Caminho (Site do App)</a>
-              <a href="https://app.janocaminho.com.br/hub" target="_blank" rel="noopener noreferrer" style={styles.footerLink}>Já No Caminho (Hub / Pedidos)</a>
-              <a href="https://uaiid.com.br" target="_blank" rel="noopener noreferrer" style={styles.footerLink}>Uai ID (Biometria & KYC)</a>
+          <div className="jnc-footer-bottom">
+            <div>
+              © 2026 Já No Caminho Tecnologia Ltda. Todos os direitos reservados.
             </div>
-          </div>
-
-          <div style={styles.footerCol}>
-            <h4 style={styles.footerColTitle}>Institucional</h4>
-            <div style={styles.footerLinksList}>
-              <a href="#empresa" style={styles.footerLink}>Sobre a Empresa</a>
-              <a href="#ecossistema" style={styles.footerLink}>Tecnologia & Cloud</a>
-              <a href="#solucoes" style={styles.footerLink}>Novos Lançamentos</a>
-              <a href="mailto:contato@janocaminho.com.br" style={styles.footerLink}>Parcerias Corporativas</a>
+            <div style={{ display: "flex", gap: 20 }}>
+              <span>CNPJ em conformidade</span>
+              <span>Belo Horizonte / MG</span>
             </div>
-          </div>
-
-          <div style={styles.footerCol} id="contato">
-            <h4 style={styles.footerColTitle}>Contato</h4>
-            <div style={styles.footerLinksList}>
-              <a href="mailto:contato@janocaminho.com.br" style={styles.footerLink}>contato@janocaminho.com.br</a>
-              <a href="https://wa.me/5512999999999" target="_blank" rel="noopener noreferrer" style={styles.footerLink}>Suporte WhatsApp</a>
-              <span style={{ color: "#64748B", fontSize: 13 }}>Brasil · São Paulo & Minas Gerais</span>
-            </div>
-          </div>
-        </div>
-
-        <div style={styles.footerBottom}>
-          <div>
-            © 2026 Já No Caminho Tecnologia. Todos os direitos reservados.
-          </div>
-          <div style={{ display: "flex", gap: 20 }}>
-            <Link to="/termos" style={{ color: "#94A3B8" }}>Termos de Uso</Link>
-            <a href="#top" style={{ color: "#94A3B8" }}>Voltar ao topo ↑</a>
           </div>
         </div>
       </footer>
+
+      {/* Lightbox Modal */}
+      {modalOpen && (
+        <div className="jnc-modal-overlay" onClick={() => setModalOpen(false)}>
+          <div className="jnc-modal-card" onClick={(e) => e.stopPropagation()}>
+            <button className="jnc-modal-close" onClick={() => setModalOpen(false)}>
+              &times;
+            </button>
+            <div style={{ fontWeight: 800, marginBottom: 12, color: "var(--mint)" }}>
+              JNC Ecossistema Tecnológico — Identidade Oficial
+            </div>
+            <img src="/logos/jnc-ecossistema-oficial.jpg" className="jnc-modal-img" alt="Logo Oficial JNC" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  pageWrap: {
-    minHeight: "100vh",
-    backgroundColor: "#060C1A",
-    color: "#FFFFFF",
-    position: "relative",
-    overflowX: "hidden",
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
-  },
-  ambientOrbs: {
-    position: "fixed",
-    inset: 0,
-    pointerEvents: "none",
-    zIndex: 0,
-  },
-  orb: {
-    position: "absolute",
-    borderRadius: "50%",
-    filter: "blur(110px)",
-    opacity: 0.35,
-  },
-  orb1: {
-    width: 550,
-    height: 550,
-    background: "radial-gradient(circle, #3B72F7 0%, transparent 70%)",
-    top: -100,
-    left: -100,
-  },
-  orb2: {
-    width: 600,
-    height: 600,
-    background: "radial-gradient(circle, #00D2FF 0%, transparent 70%)",
-    top: "40%",
-    right: -150,
-    opacity: 0.25,
-  },
-  orb3: {
-    width: 500,
-    height: 500,
-    background: "radial-gradient(circle, #10B981 0%, transparent 70%)",
-    bottom: -100,
-    left: "20%",
-    opacity: 0.2,
-  },
-  gridOverlay: {
-    position: "absolute",
-    inset: 0,
-    backgroundImage: "linear-gradient(rgba(59,114,247,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(59,114,247,0.05) 1px, transparent 1px)",
-    backgroundSize: "40px 40px",
-  },
-  navbar: {
-    position: "fixed",
-    top: 0, left: 0, right: 0,
-    height: 78,
-    background: "rgba(6, 12, 26, 0.88)",
-    backdropFilter: "blur(18px)",
-    WebkitBackdropFilter: "blur(18px)",
-    borderBottom: "1px solid rgba(59, 114, 247, 0.22)",
-    zIndex: 100,
-    display: "flex",
-    alignItems: "center",
-  },
-  navContainer: {
-    maxWidth: 1200,
-    width: "100%",
-    margin: "0 auto",
-    padding: "0 24px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  brandGroup: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-  },
-  brandLogoImg: {
-    height: 38,
-    width: "auto",
-    borderRadius: 8,
-    boxShadow: "0 0 15px rgba(0, 210, 255, 0.3)",
-    background: "#FFFFFF",
-    padding: 4,
-  },
-  brandName: {
-    fontWeight: 900,
-    fontSize: 20,
-    letterSpacing: "-0.03em",
-    color: "#FFFFFF",
-  },
-  brandAccent: {
-    color: "#00D2FF",
-  },
-  navLinks: {
-    display: "flex",
-    alignItems: "center",
-    gap: 32,
-  },
-  navLink: {
-    fontSize: 14.5,
-    fontWeight: 600,
-    color: "#94A3B8",
-    textDecoration: "none",
-    transition: "color 0.2s",
-  },
-  navCta: {
-    background: "linear-gradient(135deg, #3B72F7 0%, #00D2FF 100%)",
-    color: "#FFFFFF",
-    fontWeight: 700,
-    fontSize: 14,
-    padding: "10px 22px",
-    borderRadius: 8,
-    boxShadow: "0 4px 20px rgba(59, 114, 247, 0.35)",
-    textDecoration: "none",
-  },
-  mainContent: {
-    position: "relative",
-    zIndex: 1,
-    maxWidth: 1200,
-    margin: "0 auto",
-    padding: "0 24px",
-  },
-  heroSection: {
-    padding: "165px 0 95px",
-    textAlign: "center",
-  },
-  pillBadge: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    padding: "6px 16px",
-    borderRadius: 999,
-    background: "rgba(0, 210, 255, 0.08)",
-    border: "1px solid rgba(0, 210, 255, 0.3)",
-    color: "#00D2FF",
-    fontSize: 12,
-    fontWeight: 800,
-    letterSpacing: "0.1em",
-    marginBottom: 24,
-  },
-  pulseDot: {
-    width: 8,
-    height: 8,
-    borderRadius: "50%",
-    background: "#00D2FF",
-    boxShadow: "0 0 12px #00D2FF",
-  },
-  heroTitle: {
-    fontSize: "clamp(36px, 5.2vw, 62px)",
-    fontWeight: 900,
-    letterSpacing: "-0.04em",
-    lineHeight: 1.15,
-    maxWidth: 920,
-    margin: "0 auto 24px",
-  },
-  heroGradientText: {
-    background: "linear-gradient(135deg, #FFFFFF 20%, #00D2FF 60%, #3B72F7 100%)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-  },
-  heroSubtitle: {
-    fontSize: "clamp(16px, 2vw, 19.5px)",
-    color: "#CBD5E1",
-    maxWidth: 750,
-    margin: "0 auto 40px",
-    fontWeight: 400,
-    lineHeight: 1.65,
-  },
-  heroActions: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 16,
-    flexWrap: "wrap",
-  },
-  btnHeroPrimary: {
-    padding: "14px 32px",
-    borderRadius: 8,
-    background: "linear-gradient(135deg, #3B72F7 0%, #00D2FF 100%)",
-    color: "#FFFFFF",
-    fontWeight: 800,
-    fontSize: 16,
-    textDecoration: "none",
-    boxShadow: "0 8px 30px rgba(59, 114, 247, 0.4)",
-  },
-  btnHeroSecondary: {
-    padding: "14px 28px",
-    borderRadius: 8,
-    background: "rgba(255, 255, 255, 0.05)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-    color: "#FFFFFF",
-    fontWeight: 700,
-    fontSize: 15,
-    textDecoration: "none",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    backdropFilter: "blur(10px)",
-  },
-  productsSection: {
-    padding: "60px 0 120px",
-  },
-  sectionHeader: {
-    textAlign: "center",
-    marginBottom: 56,
-  },
-  sectionTag: {
-    fontSize: 12,
-    fontWeight: 800,
-    color: "#00D2FF",
-    textTransform: "uppercase",
-    letterSpacing: "0.15em",
-    marginBottom: 12,
-    display: "inline-block",
-  },
-  sectionHeading: {
-    fontSize: "clamp(28px, 3.5vw, 42px)",
-    fontWeight: 900,
-    letterSpacing: "-0.03em",
-    marginBottom: 16,
-  },
-  sectionSubheading: {
-    color: "#94A3B8",
-    fontSize: 16,
-    maxWidth: 620,
-    margin: "0 auto",
-  },
-  productsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-    gap: 28,
-  },
-  productCard: {
-    background: "rgba(15, 26, 56, 0.72)",
-    border: "1px solid rgba(59, 114, 247, 0.22)",
-    borderRadius: 22,
-    padding: "34px 30px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    backdropFilter: "blur(16px)",
-    WebkitBackdropFilter: "blur(16px)",
-  },
-  cardTop: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 24,
-  },
-  productLogoBox: {
-    height: 52,
-    padding: "6px 14px",
-    borderRadius: 12,
-    background: "rgba(255, 255, 255, 0.07)",
-    border: "1px solid rgba(255, 255, 255, 0.15)",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)",
-  },
-  statusBadge: {
-    fontSize: 11,
-    fontWeight: 800,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase",
-    padding: "4px 10px",
-    borderRadius: 999,
-    border: "1px solid",
-  },
-  statusBadgeLive: {
-    background: "rgba(16, 185, 129, 0.15)",
-    borderColor: "rgba(16, 185, 129, 0.4)",
-    color: "#34D399",
-  },
-  productName: {
-    fontSize: 24,
-    fontWeight: 800,
-    letterSpacing: "-0.02em",
-    marginBottom: 10,
-    color: "#FFFFFF",
-  },
-  productDesc: {
-    color: "#CBD5E1",
-    fontSize: 14.5,
-    lineHeight: 1.6,
-    marginBottom: 24,
-    minHeight: 68,
-  },
-  featureTags: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 28,
-  },
-  featureTag: {
-    fontSize: 12,
-    fontWeight: 600,
-    color: "#94A3B8",
-    background: "rgba(255, 255, 255, 0.04)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
-    padding: "3px 10px",
-    borderRadius: 6,
-  },
-  cardActions: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    paddingTop: 20,
-    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
-    flexWrap: "wrap",
-  },
-  btnCardPrimary: {
-    flex: 1,
-    padding: "12px 18px",
-    borderRadius: 8,
-    fontWeight: 700,
-    fontSize: 13.5,
-    textAlign: "center",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    color: "#FFFFFF",
-    textDecoration: "none",
-  },
-  btnCardSecondary: {
-    padding: "12px 14px",
-    borderRadius: 8,
-    fontWeight: 700,
-    fontSize: 13,
-    background: "rgba(255, 255, 255, 0.06)",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
-    color: "#FFFFFF",
-    textDecoration: "none",
-  },
-  integrationBanner: {
-    marginTop: 80,
-    background: "linear-gradient(135deg, rgba(15, 26, 56, 0.85) 0%, rgba(10, 18, 40, 0.98) 100%)",
-    border: "1px solid rgba(59, 114, 247, 0.22)",
-    borderRadius: 30,
-    padding: "50px 40px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 40,
-    flexWrap: "wrap",
-  },
-  bannerTitle: {
-    fontSize: "clamp(22px, 2.5vw, 32px)",
-    fontWeight: 900,
-    marginBottom: 12,
-    letterSpacing: "-0.02em",
-  },
-  bannerDesc: {
-    color: "#CBD5E1",
-    fontSize: 15,
-    lineHeight: 1.65,
-  },
-  bannerStats: {
-    display: "flex",
-    gap: 32,
-    flexWrap: "wrap",
-  },
-  statBox: {
-    textAlign: "left",
-  },
-  statNumber: {
-    fontSize: 32,
-    fontWeight: 900,
-    color: "#00D2FF",
-    lineHeight: 1,
-    marginBottom: 6,
-    fontFamily: "'JetBrains Mono', monospace",
-  },
-  statLabel: {
-    fontSize: 12,
-    fontWeight: 700,
-    textTransform: "uppercase",
-    letterSpacing: "0.08em",
-    color: "#94A3B8",
-  },
-  footer: {
-    borderTop: "1px solid rgba(59, 114, 247, 0.22)",
-    background: "rgba(6, 12, 26, 0.95)",
-    padding: "60px 0 30px",
-    position: "relative",
-    zIndex: 1,
-  },
-  footerInner: {
-    maxWidth: 1200,
-    margin: "0 auto",
-    padding: "0 24px",
-    display: "grid",
-    gridTemplateColumns: "2fr 1fr 1fr 1fr",
-    gap: 40,
-    marginBottom: 50,
-  },
-  footerColBrand: {},
-  footerCol: {},
-  footerColTitle: {
-    fontSize: 13,
-    fontWeight: 800,
-    textTransform: "uppercase",
-    letterSpacing: "0.1em",
-    color: "#FFFFFF",
-    marginBottom: 16,
-  },
-  footerLinksList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
-  },
-  footerLink: {
-    color: "#94A3B8",
-    fontSize: 14,
-    textDecoration: "none",
-  },
-  footerBottom: {
-    maxWidth: 1200,
-    margin: "0 auto",
-    padding: "24px 24px 0",
-    borderTop: "1px solid rgba(255, 255, 255, 0.06)",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 16,
-    fontSize: 13,
-    color: "#94A3B8",
-  },
-};
 
 export default EmpresaJanoCaminhoPage;

@@ -1,0 +1,816 @@
+/* EmpresaJanoCaminhoPage.css — Estilos Oficiais da Holding JNC */
+.jnc-page {
+  --bg-dark:        #050B17;
+  --bg-dark-2:      #091224;
+  --bg-card:        rgba(13, 23, 48, 0.75);
+  --bg-card-hover:  rgba(18, 32, 66, 0.9);
+  --border-subtle:  rgba(0, 210, 255, 0.16);
+  --border-glow:    rgba(0, 242, 176, 0.4);
+  --cyan:           #00D2FF;
+  --mint:           #00F2B0;
+  --blue:           #3B72F7;
+  --emerald:        #10B981;
+  --orange:         #FF7A00;
+  --purple:         #8B5CF6;
+  --text-white:     #FFFFFF;
+  --text-soft:      #CBD5E1;
+  --text-muted:     #8293B0;
+  --radius-sm:      10px;
+  --radius-md:      16px;
+  --radius-lg:      24px;
+  --radius-xl:      32px;
+
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-white);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+.jnc-page *,
+.jnc-page *::before,
+.jnc-page *::after {
+  box-sizing: border-box;
+}
+
+.jnc-page a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Ambient Background Effect */
+.jnc-ambient-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.jnc-ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.35;
+  animation: jncFloat 22s infinite alternate ease-in-out;
+}
+.jnc-orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, #00D2FF 0%, transparent 70%); top: -150px; right: 5%; }
+.jnc-orb-2 { width: 650px; height: 650px; background: radial-gradient(circle, #00F2B0 0%, transparent 70%); top: 35%; left: -150px; animation-delay: -6s; opacity: 0.22; }
+.jnc-orb-3 { width: 550px; height: 550px; background: radial-gradient(circle, #3B72F7 0%, transparent 70%); bottom: -100px; right: 15%; animation-delay: -12s; opacity: 0.25; }
+
+@keyframes jncFloat {
+  0%   { transform: translateY(0) scale(1); }
+  100% { transform: translateY(45px) scale(1.08); }
+}
+
+.jnc-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 210, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 210, 255, 0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at center, black 45%, transparent 85%);
+}
+
+.jnc-ecg-line {
+  position: absolute;
+  top: 180px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  opacity: 0.12;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60' preserveAspectRatio='none'%3E%3Cpath d='M0,30 L300,30 L330,30 L345,10 L360,50 L375,15 L390,45 L405,30 L700,30 L730,30 L745,5 L760,55 L775,15 L790,40 L805,30 L1200,30' fill='none' stroke='%2300F2B0' stroke-width='2'/%3E%3C/svg%3E") repeat-x;
+  background-size: 800px 60px;
+  animation: jncEcgMove 15s linear infinite;
+}
+@keyframes jncEcgMove {
+  from { background-position: 0 0; }
+  to   { background-position: 800px 0; }
+}
+
+/* Container */
+.jnc-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Navbar */
+.jnc-navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 84px;
+  background: rgba(5, 11, 23, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+}
+.jnc-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.jnc-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.jnc-brand-group:hover {
+  opacity: 0.95;
+}
+.jnc-brand-logo-frame {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1.5px solid var(--mint);
+  box-shadow: 0 0 22px rgba(0, 242, 176, 0.45);
+  background: #091224;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.jnc-brand-logo-img-top {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  transform: scale(1.15);
+  display: block;
+}
+.jnc-brand-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.jnc-brand-header-title {
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+.jnc-brand-badge-text {
+  color: var(--mint);
+  font-weight: 900;
+}
+.jnc-brand-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-top: 2px;
+}
+
+.jnc-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+.jnc-nav-links a {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.jnc-nav-links a:hover {
+  color: #FFFFFF;
+}
+.jnc-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.jnc-nav-cta-btn {
+  background: linear-gradient(135deg, #00D2FF 0%, #00F2B0 100%);
+  color: #050B17;
+  font-weight: 800;
+  font-size: 13.5px;
+  padding: 10px 22px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 20px rgba(0, 242, 176, 0.35);
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.jnc-nav-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 242, 176, 0.55);
+}
+
+/* Hero Section */
+.jnc-hero-section {
+  padding: 155px 0 90px;
+  position: relative;
+}
+.jnc-hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.95fr;
+  gap: 56px;
+  align-items: center;
+}
+@media (max-width: 980px) {
+  .jnc-hero-grid { grid-template-columns: 1fr; text-align: center; gap: 40px; }
+  .jnc-hero-actions { justify-content: center; }
+  .jnc-hero-pills { justify-content: center; }
+  .jnc-nav-links { display: none; }
+}
+
+.jnc-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(0, 242, 176, 0.08);
+  border: 1px solid rgba(0, 242, 176, 0.3);
+  color: var(--mint);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 22px;
+}
+.jnc-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 10px var(--mint);
+  animation: jncPulseDot 2s infinite ease-in-out;
+}
+@keyframes jncPulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(1.3); }
+}
+
+.jnc-hero-title {
+  font-size: clamp(34px, 4.4vw, 54px);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  margin-bottom: 20px;
+}
+.jnc-hero-title-gradient {
+  background: linear-gradient(135deg, #FFFFFF 15%, #00F2B0 50%, #00D2FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.jnc-hero-subtitle {
+  font-size: clamp(16px, 1.8vw, 18.5px);
+  color: var(--text-soft);
+  font-weight: 400;
+  line-height: 1.65;
+  margin-bottom: 30px;
+}
+.jnc-hero-motto-quote {
+  border-left: 3px solid var(--mint);
+  padding-left: 16px;
+  margin-bottom: 32px;
+  font-style: italic;
+  color: #E2E8F0;
+  font-size: 15.5px;
+}
+
+.jnc-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+.jnc-btn-hero-primary {
+  padding: 14px 30px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #00D2FF 0%, #00F2B0 100%);
+  color: #050B17;
+  font-weight: 800;
+  font-size: 15.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 25px rgba(0, 242, 176, 0.35);
+  transition: all 0.25s ease;
+}
+.jnc-btn-hero-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(0, 242, 176, 0.55);
+}
+.jnc-btn-hero-secondary {
+  padding: 14px 26px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 14.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(10px);
+}
+.jnc-btn-hero-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--mint);
+  transform: translateY(-3px);
+}
+
+/* Fast 3-Pillar Selector in Hero */
+.jnc-hero-pills {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.jnc-pillar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(13, 23, 48, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-soft);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.jnc-pillar-chip:hover {
+  border-color: var(--mint);
+  color: #FFFFFF;
+  background: rgba(0, 242, 176, 0.1);
+  transform: translateY(-2px);
+}
+.jnc-pillar-chip span.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.dot-health { background: var(--mint); box-shadow: 0 0 8px var(--mint); }
+.dot-delivery { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+.dot-security { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+
+/* Hero Logo Artwork Card (Centerpiece) */
+.jnc-hero-artwork-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, rgba(13, 27, 56, 0.85) 0%, rgba(7, 14, 30, 0.95) 100%);
+  border: 1px solid rgba(0, 242, 176, 0.35);
+  padding: 16px;
+  box-shadow: 
+    0 25px 60px -15px rgba(0, 0, 0, 0.8),
+    0 0 45px -5px rgba(0, 242, 176, 0.25);
+  overflow: hidden;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  cursor: pointer;
+}
+.jnc-hero-artwork-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 
+    0 35px 75px -15px rgba(0, 0, 0, 0.85),
+    0 0 60px -5px rgba(0, 242, 176, 0.4);
+}
+.jnc-hero-artwork-card::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 15%; right: 15%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--mint), transparent);
+}
+.jnc-artwork-img-wrapper {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #020712;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.jnc-artwork-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.jnc-hero-artwork-card:hover .jnc-artwork-img {
+  transform: scale(1.02);
+}
+.jnc-artwork-badge-floating {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
+  background: rgba(5, 11, 23, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 242, 176, 0.3);
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.jnc-badge-label-main {
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.jnc-badge-status-tag {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(0, 242, 176, 0.15);
+  color: var(--mint);
+  border: 1px solid rgba(0, 242, 176, 0.4);
+  letter-spacing: 0.05em;
+}
+
+/* Products Bento Section */
+.jnc-products-section {
+  padding: 70px 0 120px;
+}
+.jnc-section-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+.jnc-section-tag {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--mint);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 12px;
+  display: inline-block;
+}
+.jnc-section-heading {
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+}
+.jnc-section-subheading {
+  color: var(--text-muted);
+  font-size: 16px;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.jnc-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 28px;
+}
+
+/* Product Card */
+.jnc-product-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 34px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.jnc-product-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--card-accent, #00F2B0), transparent);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.jnc-product-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--card-accent, var(--mint));
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.65), 0 0 35px -5px var(--card-glow, rgba(0, 242, 176, 0.25));
+  background: var(--bg-card-hover);
+}
+.jnc-product-card:hover::before {
+  opacity: 1;
+}
+
+.jnc-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.jnc-product-logo-box {
+  min-height: 56px;
+  padding: 8px 16px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  transition: transform 0.3s ease;
+}
+.jnc-product-card:hover .jnc-product-logo-box {
+  transform: scale(1.04);
+}
+.jnc-product-logo-box img {
+  max-height: 40px;
+  max-width: 170px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.jnc-status-badge {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.badge-live {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.badge-soon {
+  background: rgba(139, 92, 246, 0.15);
+  color: #A78BFA;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+}
+
+.jnc-product-name {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+.jnc-product-desc {
+  color: var(--text-soft);
+  font-size: 15px;
+  line-height: 1.65;
+  margin-bottom: 24px;
+}
+
+.jnc-feature-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 30px;
+}
+.jnc-feature-tag {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-soft);
+}
+
+.jnc-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.jnc-btn-card-primary {
+  flex: 1;
+  padding: 11px 18px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--card-accent, #00D2FF), #3B72F7);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 13.5px;
+  text-align: center;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.jnc-btn-card-primary:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+}
+.jnc-btn-card-secondary {
+  padding: 11px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+.jnc-btn-card-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--cyan);
+}
+
+/* Card Themes */
+.card-drexame {
+  --card-accent: #10B981;
+  --card-glow: rgba(16, 185, 129, 0.3);
+}
+.card-app {
+  --card-accent: #FF7A00;
+  --card-glow: rgba(255, 122, 0, 0.3);
+}
+.card-uaiid {
+  --card-accent: #00D2FF;
+  --card-glow: rgba(0, 210, 255, 0.35);
+}
+.card-soon {
+  --card-accent: #8B5CF6;
+  --card-glow: rgba(139, 92, 246, 0.3);
+  border-style: dashed;
+}
+
+/* Ecosystem Metrics Bar */
+.jnc-metrics-banner {
+  background: linear-gradient(135deg, rgba(13, 27, 56, 0.9), rgba(6, 12, 26, 0.95));
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-lg);
+  padding: 40px 48px;
+  margin: 80px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+.jnc-banner-text {
+  flex: 1;
+  min-width: 300px;
+}
+.jnc-banner-title {
+  font-size: clamp(22px, 2.5vw, 30px);
+  font-weight: 900;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+.jnc-banner-desc {
+  color: var(--text-soft);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.jnc-banner-stats {
+  display: flex;
+  gap: 36px;
+  flex-wrap: wrap;
+}
+.jnc-stat-number {
+  font-size: 34px;
+  font-weight: 900;
+  color: var(--mint);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 6px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.jnc-stat-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+/* Footer */
+.jnc-site-footer {
+  border-top: 1px solid var(--border-subtle);
+  background: rgba(4, 8, 18, 0.96);
+  padding: 60px 0 30px;
+  margin-top: 60px;
+}
+.jnc-footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 50px;
+}
+@media (max-width: 860px) {
+  .jnc-footer-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 540px) {
+  .jnc-footer-grid { grid-template-columns: 1fr; }
+}
+.jnc-footer-brand p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 14px;
+  max-width: 320px;
+}
+.jnc-footer-col h4 {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #FFFFFF;
+  margin-bottom: 16px;
+}
+.jnc-footer-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+}
+.jnc-footer-col a {
+  color: var(--text-muted);
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+.jnc-footer-col a:hover {
+  color: var(--mint);
+}
+.jnc-footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Modal / Lightbox for Logo */
+.jnc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 15, 0.92);
+  backdrop-filter: blur(16px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.jnc-modal-card {
+  max-width: 900px;
+  width: 100%;
+  background: #091224;
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+  position: relative;
+}
+.jnc-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #FFF;
+  font-size: 24px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.jnc-modal-img {
+  width: 100%;
+  border-radius: 12px;
+  display: block;
+}
