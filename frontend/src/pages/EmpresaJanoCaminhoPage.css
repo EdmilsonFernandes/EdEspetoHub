@@ -371,6 +371,7 @@
 .dot-health { background: var(--mint); box-shadow: 0 0 8px var(--mint); }
 .dot-delivery { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
 .dot-security { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+.dot-crypto { background: #F59E0B; box-shadow: 0 0 8px #F59E0B; }
 
 /* Hero Logo Artwork Card (Centerpiece) */
 .jnc-hero-artwork-card {
@@ -527,47 +528,128 @@
   margin-bottom: 22px;
 }
 
-.jnc-product-logo-box {
-  min-height: 56px;
-  padding: 8px 16px;
+.jnc-product-brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.jnc-brand-avatar-box {
+  width: 52px;
+  height: 52px;
   border-radius: 14px;
-  display: inline-flex;
+  overflow: hidden;
+  display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
-  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.jnc-product-card:hover .jnc-product-logo-box {
-  transform: scale(1.04);
+.jnc-product-card:hover .jnc-brand-avatar-box {
+  transform: scale(1.08);
 }
-.jnc-product-logo-box img {
-  max-height: 40px;
-  max-width: 170px;
-  width: auto;
-  object-fit: contain;
+
+.jnc-avatar-drexame {
+  border-radius: 50%;
+  background: #04181a;
+  border: 2px solid rgba(16, 185, 129, 0.75);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.45);
+}
+.jnc-avatar-app {
+  border-radius: 16px;
+  background: #0a192e;
+  border: 2px solid rgba(255, 122, 0, 0.75);
+  box-shadow: 0 0 20px rgba(255, 122, 0, 0.4);
+}
+.jnc-avatar-uaiid {
+  border-radius: 16px;
+  background: #061124;
+  border: 2px solid rgba(0, 210, 255, 0.75);
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+}
+.jnc-avatar-gemhunter {
+  border-radius: 16px;
+  background: #091322;
+  border: 2px solid rgba(245, 158, 11, 0.75);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+  padding: 3px;
+}
+
+.jnc-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
+}
+.jnc-img-circle-crop {
+  transform: scale(1.1);
+}
+.jnc-gemhunter-img {
+  object-fit: contain;
+  width: 100%;
+  height: auto;
+}
+
+.jnc-brand-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.jnc-brand-title {
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.jnc-brand-title-emerald { color: #10B981; }
+.jnc-brand-title-orange { color: #FF7A00; }
+.jnc-brand-title-cyan { color: #00D2FF; }
+.jnc-brand-title-gold { color: #F59E0B; }
+.jnc-brand-sub {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-soft);
+  letter-spacing: 0.02em;
+  margin-top: 2px;
 }
 
 .jnc-status-badge {
   font-size: 11px;
   font-weight: 800;
-  padding: 5px 12px;
+  padding: 6px 12px;
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
+  white-space: nowrap;
 }
-.badge-live {
-  background: rgba(16, 185, 129, 0.15);
+.jnc-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.badge-health {
+  background: rgba(16, 185, 129, 0.14);
   color: #34D399;
-  border: 1px solid rgba(16, 185, 129, 0.35);
+  border: 1px solid rgba(16, 185, 129, 0.4);
 }
-.badge-soon {
-  background: rgba(139, 92, 246, 0.15);
-  color: #A78BFA;
-  border: 1px solid rgba(139, 92, 246, 0.35);
+.badge-delivery {
+  background: rgba(255, 122, 0, 0.14);
+  color: #FB923C;
+  border: 1px solid rgba(255, 122, 0, 0.4);
+}
+.badge-security {
+  background: rgba(0, 210, 255, 0.14);
+  color: #38BDF8;
+  border: 1px solid rgba(0, 210, 255, 0.4);
+}
+.badge-crypto {
+  background: rgba(245, 158, 11, 0.14);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
 }
 
 .jnc-product-name {
@@ -643,20 +725,37 @@
 /* Card Themes */
 .card-drexame {
   --card-accent: #10B981;
-  --card-glow: rgba(16, 185, 129, 0.3);
+  --card-glow: rgba(16, 185, 129, 0.32);
 }
 .card-app {
   --card-accent: #FF7A00;
-  --card-glow: rgba(255, 122, 0, 0.3);
+  --card-glow: rgba(255, 122, 0, 0.32);
 }
 .card-uaiid {
   --card-accent: #00D2FF;
   --card-glow: rgba(0, 210, 255, 0.35);
 }
-.card-soon {
-  --card-accent: #8B5CF6;
-  --card-glow: rgba(139, 92, 246, 0.3);
-  border-style: dashed;
+.card-gemhunter {
+  --card-accent: #F59E0B;
+  --card-glow: rgba(245, 158, 11, 0.35);
+}
+
+.btn-emerald {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+  color: #FFFFFF !important;
+}
+.btn-orange {
+  background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
+  color: #FFFFFF !important;
+}
+.btn-cyan {
+  background: linear-gradient(135deg, #00D2FF 0%, #3B72F7 100%) !important;
+  color: #FFFFFF !important;
+}
+.btn-gold {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
+  color: #050B17 !important;
+  font-weight: 800 !important;
 }
 
 /* Ecosystem Metrics Bar */

@@ -532,49 +532,134 @@
       justify-content: space-between;
       margin-bottom: 22px;
     }
-    
-    /* Official Logo Box inside each product card */
-    .product-logo-box {
-      min-height: 56px;
-      padding: 8px 16px;
+
+    .dot-health { background: var(--mint); box-shadow: 0 0 8px var(--mint); }
+    .dot-delivery { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+    .dot-security { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+    .dot-crypto { background: #F59E0B; box-shadow: 0 0 8px #F59E0B; }
+
+    .product-brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-avatar-box {
+      width: 52px;
+      height: 52px;
       border-radius: 14px;
-      display: inline-flex;
+      overflow: hidden;
+      display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
-      transition: transform 0.3s ease;
+      flex-shrink: 0;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    .product-card:hover .product-logo-box {
-      transform: scale(1.04);
+    .product-card:hover .brand-avatar-box {
+      transform: scale(1.08);
     }
-    .product-logo-box img {
-      max-height: 40px;
-      max-width: 170px;
-      width: auto;
-      object-fit: contain;
+
+    .avatar-drexame {
+      border-radius: 50%;
+      background: #04181a;
+      border: 2px solid rgba(16, 185, 129, 0.75);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.45);
+    }
+    .avatar-app {
+      border-radius: 16px;
+      background: #0a192e;
+      border: 2px solid rgba(255, 122, 0, 0.75);
+      box-shadow: 0 0 20px rgba(255, 122, 0, 0.4);
+    }
+    .avatar-uaiid {
+      border-radius: 16px;
+      background: #061124;
+      border: 2px solid rgba(0, 210, 255, 0.75);
+      box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+    }
+    .avatar-gemhunter {
+      border-radius: 16px;
+      background: #091322;
+      border: 2px solid rgba(245, 158, 11, 0.75);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+      padding: 3px;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
     }
-    
+    .img-circle-crop {
+      transform: scale(1.1);
+    }
+    .gemhunter-img {
+      object-fit: contain;
+      width: 100%;
+      height: auto;
+    }
+
+    .brand-meta {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .brand-title {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    .brand-title-emerald { color: #10B981; }
+    .brand-title-orange { color: #FF7A00; }
+    .brand-title-cyan { color: #00D2FF; }
+    .brand-title-gold { color: #F59E0B; }
+    .brand-sub {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-soft);
+      letter-spacing: 0.02em;
+      margin-top: 2px;
+    }
+
     .status-badge {
       font-size: 11px;
       font-weight: 800;
-      padding: 5px 12px;
+      padding: 6px 12px;
       border-radius: 999px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
+      white-space: nowrap;
     }
-    .badge-live {
-      background: rgba(16, 185, 129, 0.15);
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .badge-health {
+      background: rgba(16, 185, 129, 0.14);
       color: #34D399;
-      border: 1px solid rgba(16, 185, 129, 0.35);
+      border: 1px solid rgba(16, 185, 129, 0.4);
     }
-    .badge-soon {
-      background: rgba(139, 92, 246, 0.15);
-      color: #A78BFA;
-      border: 1px solid rgba(139, 92, 246, 0.35);
+    .badge-delivery {
+      background: rgba(255, 122, 0, 0.14);
+      color: #FB923C;
+      border: 1px solid rgba(255, 122, 0, 0.4);
+    }
+    .badge-security {
+      background: rgba(0, 210, 255, 0.14);
+      color: #38BDF8;
+      border: 1px solid rgba(0, 210, 255, 0.4);
+    }
+    .badge-crypto {
+      background: rgba(245, 158, 11, 0.14);
+      color: #FBBF24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
     }
 
     .product-name {
@@ -650,20 +735,37 @@
     /* Product card themes */
     .card-drexame {
       --card-accent: #10B981;
-      --card-glow: rgba(16, 185, 129, 0.3);
+      --card-glow: rgba(16, 185, 129, 0.32);
     }
     .card-app {
       --card-accent: #FF7A00;
-      --card-glow: rgba(255, 122, 0, 0.3);
+      --card-glow: rgba(255, 122, 0, 0.32);
     }
     .card-uaiid {
       --card-accent: #00D2FF;
       --card-glow: rgba(0, 210, 255, 0.35);
     }
-    .card-soon {
-      --card-accent: #8B5CF6;
-      --card-glow: rgba(139, 92, 246, 0.3);
-      border-style: dashed;
+    .card-gemhunter {
+      --card-accent: #F59E0B;
+      --card-glow: rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-emerald {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+      color: #FFFFFF !important;
+    }
+    .btn-orange {
+      background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
+      color: #FFFFFF !important;
+    }
+    .btn-cyan {
+      background: linear-gradient(135deg, #00D2FF 0%, #3B72F7 100%) !important;
+      color: #FFFFFF !important;
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
+      color: #050B17 !important;
+      font-weight: 800 !important;
     }
 
     /* Ecosystem Metrics Bar */
@@ -862,6 +964,7 @@
         <a href="#drexame">🩺 Dr. Exame</a>
         <a href="#janocaminho">🛒 Já No Caminho</a>
         <a href="#uaiid">🛡️ Uai ID</a>
+        <a href="#gemhunter">💎 GemHunter AI</a>
         <a href="#sobre">A Empresa</a>
       </nav>
 
@@ -883,20 +986,20 @@
           <div class="hero-content">
             <div class="pill-badge">
               <span class="pulse-dot"></span>
-              Plataforma Unificada Ativa
+              Ecossistema Tecnológico Unificado 2026
             </div>
 
             <h1 class="hero-title">
               JNC — Tecnologia que conecta <br />
-              <span class="hero-title-gradient">Saúde, Gestão e Identidade.</span>
+              <span class="hero-title-gradient">Saúde, Gestão, Identidade &amp; Web3.</span>
             </h1>
 
             <p class="hero-subtitle">
-              Um ecossistema proprietário de alta performance unindo três verticais estratégicas sob a mesma infraestrutura de inteligência artificial e confiança.
+              Um ecossistema proprietário de alta performance unindo quatro verticais estratégicas sob a mesma infraestrutura de inteligência artificial, dados e segurança.
             </p>
 
             <div class="hero-motto-quote">
-              “Um ecossistema completo para cada desafio. Saúde, Gestão e Identidade.”
+              “Um ecossistema completo para cada desafio. Saúde, Gestão, Identidade e Inteligência On-Chain.”
             </div>
 
             <div class="hero-actions">
@@ -921,7 +1024,11 @@
               </a>
               <a href="#uaiid" class="pillar-chip">
                 <span class="dot dot-security"></span>
-                <strong>UAIID</strong> (Identidade & Segurança)
+                <strong>UAIID</strong> (Identidade 3D)
+              </a>
+              <a href="#gemhunter" class="pillar-chip">
+                <span class="dot dot-crypto"></span>
+                <strong>GemHunter AI</strong> (Web3 &amp; Anti-Golpe)
               </a>
             </div>
           </div>
@@ -930,10 +1037,10 @@
           <div class="hero-artwork-card" id="logoCard" onclick="openModal()" title="Clique para ampliar o logo oficial">
             <div class="artwork-img-wrapper">
               <img 
-                src="logo-janocaminho-oficial.jpg" 
+                src="logos/jnc-ecossistema-oficial.jpg" 
                 alt="JNC Ecossistema Tecnológico — Logo Oficial" 
                 class="artwork-img"
-                onerror="this.src='logos/jnc-ecossistema-oficial.jpg';"
+                onerror="this.src='logo-janocaminho-oficial.jpg';"
               />
             </div>
             <div class="artwork-badge-floating">
@@ -955,17 +1062,21 @@
         <div class="banner-text">
           <h3 class="banner-title">Uma só holding, múltiplos motores de impacto</h3>
           <p class="banner-desc">
-            Integrando visão computacional, inteligência de exames preventivos e comércio ultra-local com checkout ágil.
+            Integrando exames preventivos com IA, comércio de proximidade, biometria facial forense e radar on-chain em tempo real.
           </p>
         </div>
         <div class="banner-stats">
           <div class="stat-box">
-            <div class="stat-number">3</div>
+            <div class="stat-number">4</div>
             <div class="stat-label">Verticais Ativas</div>
           </div>
           <div class="stat-box">
             <div class="stat-number">&lt;400ms</div>
             <div class="stat-label">Latência Forense</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">&lt;30min</div>
+            <div class="stat-label">Radar Mempool</div>
           </div>
           <div class="stat-box">
             <div class="stat-number">99.9%</div>
@@ -980,36 +1091,39 @@
       <div class="container">
         <div class="section-header">
           <span class="section-tag">Nossas Verticais</span>
-          <h2 class="section-heading">Os 3 Pilares do Ecossistema JNC</h2>
+          <h2 class="section-heading">As 4 Plataformas do Ecossistema JNC</h2>
           <p class="section-subheading">
-            Cada plataforma foi desenhada com identidade visual própria, arquitetura moderna e os logotipos oficiais integrados.
+            Cada plataforma foi desenhada com identidade visual própria, tecnologia de ponta e os logotipos oficiais integrados.
           </p>
         </div>
 
         <div class="products-grid">
           
-          <!-- 1. Dr. Exame (Saúde Digital) com Logo Oficial dr-exame.svg / brand.png -->
+          <!-- 1. Dr. Exame (Saúde Digital) com Logo Oficial dr-exame-robot.png -->
           <div class="product-card card-drexame" id="drexame">
             <div>
               <div class="card-top">
-                <div class="product-logo-box" style="background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(16, 185, 129, 0.45); padding: 6px 14px; gap: 10px;">
-                  <img 
-                    src="logos/dr-exame.svg" 
-                    alt="Dr. Exame Logo Oficial" 
-                    onerror="this.src='logos/dr-exame-brand.png'; this.onerror=function(){this.src='logos/dr-exame-icon.png';}" 
-                    style="height: 42px; width: 42px; object-fit: contain;"
-                  />
-                  <div style="display: flex; flex-direction: column;">
-                    <span style="font-weight: 900; color: #10B981; font-size: 18px; letter-spacing: -0.02em; line-height: 1.1;">Dr. Exame</span>
-                    <span style="font-size: 11px; color: var(--text-soft); font-weight: 600;">Saúde Digital</span>
+                <div class="product-brand-badge">
+                  <div class="brand-avatar-box avatar-drexame">
+                    <img 
+                      src="logos/dr-exame-robot.png" 
+                      alt="Dr. Exame Robô Oficial" 
+                      class="avatar-img img-circle-crop"
+                      onerror="this.src='logos/dr-exame-icon.png';" 
+                    />
+                  </div>
+                  <div class="brand-meta">
+                    <span class="brand-title brand-title-emerald">Dr. Exame</span>
+                    <span class="brand-sub">Saúde Digital &amp; IA</span>
                   </div>
                 </div>
-                <span class="status-badge badge-live">Saúde Digital</span>
+                <span class="status-badge badge-health">
+                  <span class="badge-dot" style="background: var(--mint); box-shadow: 0 0 8px var(--mint);"></span>
+                  Saúde Digital
+                </span>
               </div>
 
-              <h3 class="product-name">
-                Dr. Exame
-              </h3>
+              <h3 class="product-name">Dr. Exame</h3>
               <p class="product-desc">
                 Inteligência médica e gestão preventiva de saúde. Análise automatizada de exames laboratoriais, histórico unificado do paciente e apoio a decisões clínicas com IA.
               </p>
@@ -1018,11 +1132,12 @@
                 <span class="feature-tag">Saúde Preventiva</span>
                 <span class="feature-tag">LGPD Saúde</span>
                 <span class="feature-tag">Histórico Unificado</span>
+                <span class="feature-tag">IA Clínica</span>
               </div>
             </div>
 
             <div class="card-actions">
-              <a href="https://drexame.janocaminho.com.br" target="_blank" class="btn-card-primary">
+              <a href="https://drexame.janocaminho.com.br" target="_blank" class="btn-card-primary btn-emerald">
                 Acessar Dr. Exame ↗
               </a>
               <a href="https://drexame.janocaminho.com.br" target="_blank" class="btn-card-secondary">
@@ -1031,24 +1146,31 @@
             </div>
           </div>
 
-          <!-- 2. Já No Caminho com Logo Oficial janocaminho-logo.svg / janocaminho.jpg -->
+          <!-- 2. Já No Caminho com Logo Oficial janocaminho-robot.png -->
           <div class="product-card card-app" id="janocaminho">
             <div>
               <div class="card-top">
-                <div class="product-logo-box" style="background: rgba(255, 255, 255, 0.96); border: 1px solid rgba(255, 122, 0, 0.5); padding: 6px 14px;">
-                  <img 
-                    src="logos/janocaminho-logo.svg" 
-                    alt="Já No Caminho Logo Oficial" 
-                    onerror="this.src='logos/janocaminho.jpg';" 
-                    style="max-height: 40px; width: auto; object-fit: contain;"
-                  />
+                <div class="product-brand-badge">
+                  <div class="brand-avatar-box avatar-app">
+                    <img 
+                      src="logos/janocaminho-robot.png" 
+                      alt="Já No Caminho Robô Oficial" 
+                      class="avatar-img"
+                      onerror="this.src='logos/janocaminho.jpg';" 
+                    />
+                  </div>
+                  <div class="brand-meta">
+                    <span class="brand-title brand-title-orange">Já No Caminho</span>
+                    <span class="brand-sub">App &amp; Hub Local</span>
+                  </div>
                 </div>
-                <span class="status-badge badge-live">Gestão SaaS & App</span>
+                <span class="status-badge badge-delivery">
+                  <span class="badge-dot" style="background: var(--orange); box-shadow: 0 0 8px var(--orange);"></span>
+                  Gestão SaaS &amp; App
+                </span>
               </div>
 
-              <h3 class="product-name">
-                Já No Caminho (App & Hub)
-              </h3>
+              <h3 class="product-name">Já No Caminho (App &amp; Hub)</h3>
               <p class="product-desc">
                 Hub completo de pedidos, logística e comércio de proximidade. Conecta condomínios fechados, restaurantes, feiras e moradores locais com entrega ágil e marketplace sem atrito.
               </p>
@@ -1056,40 +1178,46 @@
                 <span class="feature-tag">Delivery Ágil</span>
                 <span class="feature-tag">Condomínios</span>
                 <span class="feature-tag">Google Play</span>
-                <span class="feature-tag">Lojas & Hub</span>
+                <span class="feature-tag">Lojas &amp; Hub</span>
+                <span class="feature-tag">Logística de Proximidade</span>
               </div>
             </div>
 
             <div class="card-actions">
-              <!-- Botão 1: Leva para a apresentação do app -->
-              <a href="/app" class="btn-card-primary" title="Acessa a landing page detalhada do aplicativo Já No Caminho">
+              <a href="/app" class="btn-card-primary btn-orange" title="Acessa a landing page detalhada do aplicativo Já No Caminho">
                 Conhecer o App →
               </a>
-              <!-- Botão 2: Leva direto ao Hub operacional -->
               <a href="https://app.janocaminho.com.br/hub" target="_blank" class="btn-card-secondary" title="Abrir direto o Hub de pedidos">
                 Abrir o Hub ↗
               </a>
             </div>
           </div>
 
-          <!-- 3. UAIID com Logo Oficial logo-uai-full.svg / uai-logo.jpg -->
+          <!-- 3. UAIID com Logo Oficial uaiid-shield.png -->
           <div class="product-card card-uaiid" id="uaiid">
             <div>
               <div class="card-top">
-                <div class="product-logo-box" style="background: rgba(8, 16, 36, 0.95); border: 1px solid rgba(0, 210, 255, 0.5); padding: 8px 16px;">
-                  <img 
-                    src="logos/logo-uai-full.svg" 
-                    alt="Uai ID Logo Oficial" 
-                    onerror="this.src='logos/uai-logo.jpg'; this.onerror=function(){this.src='logos/logo-uai-mark.svg';}" 
-                    style="max-height: 38px; width: auto; object-fit: contain;"
-                  />
+                <div class="product-brand-badge">
+                  <div class="brand-avatar-box avatar-uaiid">
+                    <img 
+                      src="logos/uaiid-shield.png" 
+                      alt="Uai ID Escudo Oficial" 
+                      class="avatar-img"
+                      onerror="this.src='logos/uai-logo.jpg';" 
+                    />
+                  </div>
+                  <div class="brand-meta">
+                    <span class="brand-title brand-title-cyan">Uai ID</span>
+                    <span class="brand-sub">Biometria &amp; KYC</span>
+                  </div>
                 </div>
-                <span class="status-badge badge-live">Identidade & KYC</span>
+                <span class="status-badge badge-security">
+                  <span class="badge-dot" style="background: var(--cyan); box-shadow: 0 0 8px var(--cyan);"></span>
+                  Identidade &amp; KYC
+                </span>
               </div>
 
-              <h3 class="product-name">
-                Uai ID
-              </h3>
+              <h3 class="product-name">Uai ID</h3>
               <p class="product-desc">
                 Infraestrutura de identidade digital e validação biométrica facial 3D. Prova de vida ativa, OCR forense de CNH/RG e motor antifraude em milissegundos para empresas e fintechs.
               </p>
@@ -1098,11 +1226,12 @@
                 <span class="feature-tag">OCR Forense</span>
                 <span class="feature-tag">Anti-Spoofing</span>
                 <span class="feature-tag">Auditoria 1:1</span>
+                <span class="feature-tag">Latência &lt;400ms</span>
               </div>
             </div>
 
             <div class="card-actions">
-              <a href="https://uaiid.com.br" target="_blank" class="btn-card-primary">
+              <a href="https://uaiid.com.br" target="_blank" class="btn-card-primary btn-cyan">
                 Acessar Uai ID ↗
               </a>
               <a href="https://uaiid.com.br/landing/index.html" target="_blank" class="btn-card-secondary">
@@ -1111,33 +1240,50 @@
             </div>
           </div>
 
-          <!-- 4. Novo Produto (Em Breve) -->
-          <div class="product-card card-soon">
+          <!-- 4. GemHunter AI (v3.2) com Logo Oficial gemhunter-badge.png -->
+          <div class="product-card card-gemhunter" id="gemhunter">
             <div>
               <div class="card-top">
-                <div class="product-logo-box" style="background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.35); padding: 8px 14px;">
-                  <span style="font-size: 26px;">✨</span>
+                <div class="product-brand-badge">
+                  <div class="brand-avatar-box avatar-gemhunter">
+                    <img 
+                      src="logos/gemhunter-badge.png" 
+                      alt="GemHunter AI Logo Oficial" 
+                      class="avatar-img gemhunter-img"
+                    />
+                  </div>
+                  <div class="brand-meta">
+                    <span class="brand-title brand-title-gold">GemHunter AI</span>
+                    <span class="brand-sub">Radar Web3 &amp; Anti-Golpe</span>
+                  </div>
                 </div>
-                <span class="status-badge badge-soon">Em Desenvolvimento</span>
+                <span class="status-badge badge-crypto">
+                  <span class="badge-dot" style="background: #F59E0B; box-shadow: 0 0 8px #F59E0B;"></span>
+                  v3.2 • On-Chain
+                </span>
               </div>
 
-              <h3 class="product-name">
-                Novo Módulo JNC
-              </h3>
+              <h3 class="product-name">GemHunter AI (v3.2)</h3>
               <p class="product-desc">
-                Um novo motor de automação e inteligência está sendo desenvolvido pelos times de engenharia para integrar ainda mais o ecossistema.
+                Radar inteligente em tempo real e escudo anti-golpe para Web3. Simula transações de compra/venda (anti-honeypot), audita liquidez on-chain no nascimento da pool (&lt;30 min) e protege seu capital de forma 100% não-custodial na rede Base.
               </p>
               <div class="feature-tags">
-                <span class="feature-tag">Automação</span>
-                <span class="feature-tag">Inteligência Artificial</span>
-                <span class="feature-tag">Expansão</span>
+                <span class="feature-tag">Radar On-Chain</span>
+                <span class="feature-tag">Simulação Honeypot</span>
+                <span class="feature-tag">Mempool Scanner</span>
+                <span class="feature-tag">Auditoria DeFi</span>
+                <span class="feature-tag">Rede Base (EVM)</span>
+                <span class="feature-tag">Não-Custodial</span>
               </div>
             </div>
 
             <div class="card-actions">
-              <span class="btn-card-secondary" style="opacity: 0.6; cursor: not-allowed; width: 100%; text-align: center;">
-                Lançamento em Breve
-              </span>
+              <a href="https://uaiid.com.br/gemhunter" target="_blank" class="btn-card-primary btn-gold">
+                Acessar GemHunter AI ↗
+              </a>
+              <a href="https://uaiid.com.br/gemhunter#radar" target="_blank" class="btn-card-secondary">
+                Ver Radar Ao Vivo
+              </a>
             </div>
           </div>
 
@@ -1153,20 +1299,24 @@
           Construindo a Infraestrutura do Amanhã
         </h2>
         <p style="color: var(--text-soft); font-size: 16px; line-height: 1.7; max-width: 860px; margin-bottom: 24px;">
-          A <strong>Já No Caminho Tecnologia (JNC)</strong> nasceu da convicção de que inteligência de dados, proximidade e segurança devem caminhar lado a lado. Nossas três plataformas compartilham uma espinha dorsal de engenharia baseada em microsserviços na nuvem AWS, padrões rigorosos de segurança e IA aplicada para resolver problemas reais de pessoas e organizações.
+          A <strong>Já No Caminho Tecnologia (JNC)</strong> nasceu da convicção de que inteligência de dados, proximidade, segurança e auditoria devem caminhar lado a lado. Nossas quatro plataformas compartilham uma espinha dorsal de engenharia baseada em microsserviços na nuvem AWS, padrões rigorosos de segurança e IA aplicada para resolver problemas reais de pessoas, médicos, comerciantes e investidores.
         </p>
-        <div style="display: flex; gap: 24px; flex-wrap: wrap;">
-          <div style="flex: 1; min-width: 240px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
-            <div style="font-weight: 800; color: var(--mint); margin-bottom: 8px;">🔒 Segurança & LGPD</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+          <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="font-weight: 800; color: var(--mint); margin-bottom: 8px;">🔒 Segurança &amp; LGPD Médica</div>
             <div style="font-size: 14px; color: var(--text-muted);">Criptografia de ponta a ponta e conformidade com diretrizes nacionais de dados em todas as pontas.</div>
           </div>
-          <div style="flex: 1; min-width: 240px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
-            <div style="font-weight: 800; color: var(--cyan); margin-bottom: 8px;">⚡ Alta Disponibilidade</div>
+          <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="font-weight: 800; color: var(--cyan); margin-bottom: 8px;">⚡ Alta Disponibilidade Cloud</div>
             <div style="font-size: 14px; color: var(--text-muted);">Arquitetura escalável em nuvem com latência submétrica e monitoramento 24/7.</div>
           </div>
-          <div style="flex: 1; min-width: 240px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
-            <div style="font-weight: 800; color: var(--orange); margin-bottom: 8px;">🤝 DNA de Proximidade</div>
-            <div style="font-size: 14px; color: var(--text-muted);">Soluções pensadas para gerar impacto direto na vida de cidadãos, médicos e empreendedores.</div>
+          <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="font-weight: 800; color: var(--orange); margin-bottom: 8px;">🤝 DNA de Proximidade &amp; App</div>
+            <div style="font-size: 14px; color: var(--text-muted);">Soluções desenhadas para gerar impacto direto em condomínios, feiras e comércio local.</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="font-weight: 800; color: #F59E0B; margin-bottom: 8px;">💎 Inteligência On-Chain &amp; DeFi</div>
+            <div style="font-size: 14px; color: var(--text-muted);">Auditoria algorítmica de contratos inteligentes, honeypots e liquidez on-chain em tempo real.</div>
           </div>
         </div>
       </div>
@@ -1180,12 +1330,12 @@
         <div class="footer-brand">
           <div class="brand-group">
             <div class="brand-logo-frame" style="width: 38px; height: 38px;">
-              <img src="logo-janocaminho-oficial.jpg" class="brand-logo-img-top" alt="JNC Logo" onerror="this.src='logos/jnc-ecossistema-oficial.jpg';" />
+              <img src="logos/jnc-ecossistema-oficial.jpg" class="brand-logo-img-top" alt="JNC Logo" onerror="this.src='logo-janocaminho-oficial.jpg';" />
             </div>
             <span style="font-weight: 800; font-size: 18px;">Já No Caminho</span>
           </div>
           <p>
-            Ecossistema tecnológico integrado. Plataforma unificada de saúde digital, gestão SaaS e identidade biométrica forense.
+            Ecossistema tecnológico integrado. Plataforma unificada de saúde digital, gestão SaaS de comércio, identidade biométrica forense e inteligência on-chain Web3.
           </p>
         </div>
 
@@ -1195,7 +1345,8 @@
             <li><a href="https://drexame.janocaminho.com.br" target="_blank">Dr. Exame (Saúde)</a></li>
             <li><a href="https://app.janocaminho.com.br/hub" target="_blank">Já No Caminho (Hub)</a></li>
             <li><a href="/app">Já No Caminho (App)</a></li>
-            <li><a href="https://uaiid.com.br" target="_blank">Uai ID (KYC & Biometria)</a></li>
+            <li><a href="https://uaiid.com.br" target="_blank">Uai ID (KYC &amp; Biometria)</a></li>
+            <li><a href="https://uaiid.com.br/gemhunter" target="_blank">GemHunter AI (Web3 &amp; DeFi)</a></li>
           </ul>
         </div>
 
@@ -1205,16 +1356,17 @@
             <li><a href="#sobre">A Empresa</a></li>
             <li><a href="#solucoes">Ecossistema</a></li>
             <li><a href="https://uaiid.com.br/landing/index.html" target="_blank">Documentação API</a></li>
-            <li><a href="#">Privacidade & LGPD</a></li>
+            <li><a href="#">Privacidade &amp; LGPD</a></li>
           </ul>
         </div>
 
         <div class="footer-col">
-          <h4>Rede & Acesso</h4>
+          <h4>Rede &amp; Acesso</h4>
           <ul>
             <li><a href="https://app.janocaminho.com.br/hub" target="_blank">Painel Operacional ↗</a></li>
             <li><a href="https://uaiid.com.br/dashboard" target="_blank">Dashboard Uai ID ↗</a></li>
             <li><a href="https://drexame.janocaminho.com.br" target="_blank">Portal Dr. Exame ↗</a></li>
+            <li><a href="https://uaiid.com.br/gemhunter#radar" target="_blank">Radar GemHunter Ao Vivo ↗</a></li>
           </ul>
         </div>
       </div>

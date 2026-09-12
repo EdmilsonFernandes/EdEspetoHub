@@ -46,6 +46,7 @@ export function EmpresaJanoCaminhoPage() {
             <a href="#drexame">🩺 Dr. Exame</a>
             <a href="#janocaminho">🛒 Já No Caminho</a>
             <a href="#uaiid">🛡️ Uai ID</a>
+            <a href="#gemhunter">💎 GemHunter AI</a>
             <a href="#sobre">A Empresa</a>
           </nav>
 
@@ -68,20 +69,20 @@ export function EmpresaJanoCaminhoPage() {
               <div className="jnc-hero-content">
                 <div className="jnc-pill-badge">
                   <span className="jnc-pulse-dot" />
-                  Plataforma Unificada Ativa
+                  Ecossistema Tecnológico Unificado 2026
                 </div>
 
                 <h1 className="jnc-hero-title">
                   JNC — Tecnologia que conecta <br />
-                  <span className="jnc-hero-title-gradient">Saúde, Gestão e Identidade.</span>
+                  <span className="jnc-hero-title-gradient">Saúde, Gestão, Identidade &amp; Web3.</span>
                 </h1>
 
                 <p className="jnc-hero-subtitle">
-                  Um ecossistema proprietário de alta performance unindo três verticais estratégicas sob a mesma infraestrutura de inteligência artificial e confiança.
+                  Um ecossistema proprietário de alta performance unindo quatro verticais estratégicas sob a mesma infraestrutura de inteligência artificial, dados e segurança.
                 </p>
 
                 <div className="jnc-hero-motto-quote">
-                  “Um ecossistema completo para cada desafio. Saúde, Gestão e Identidade.”
+                  “Um ecossistema completo para cada desafio. Saúde, Gestão, Identidade e Inteligência On-Chain.”
                 </div>
 
                 <div className="jnc-hero-actions">
@@ -107,7 +108,11 @@ export function EmpresaJanoCaminhoPage() {
                   </a>
                   <a href="#uaiid" className="jnc-pillar-chip">
                     <span className="dot dot-security" />
-                    <strong>UAIID</strong> (Identidade & Segurança)
+                    <strong>UAIID</strong> (Identidade 3D)
+                  </a>
+                  <a href="#gemhunter" className="jnc-pillar-chip">
+                    <span className="dot dot-crypto" />
+                    <strong>GemHunter AI</strong> (Web3 &amp; Anti-Golpe)
                   </a>
                 </div>
               </div>
@@ -148,17 +153,21 @@ export function EmpresaJanoCaminhoPage() {
             <div className="jnc-banner-text">
               <h3 className="jnc-banner-title">Uma só holding, múltiplos motores de impacto</h3>
               <p className="jnc-banner-desc">
-                Integrando visão computacional, inteligência de exames preventivos e comércio ultra-local com checkout ágil.
+                Integrando exames preventivos com IA, comércio de proximidade, biometria facial forense e radar on-chain em tempo real.
               </p>
             </div>
             <div className="jnc-banner-stats">
               <div className="jnc-stat-box">
-                <div className="jnc-stat-number">3</div>
+                <div className="jnc-stat-number">4</div>
                 <div className="jnc-stat-label">Verticais Ativas</div>
               </div>
               <div className="jnc-stat-box">
                 <div className="jnc-stat-number">&lt;400ms</div>
                 <div className="jnc-stat-label">Latência Forense</div>
+              </div>
+              <div className="jnc-stat-box">
+                <div className="jnc-stat-number">&lt;30min</div>
+                <div className="jnc-stat-label">Radar Mempool</div>
               </div>
               <div className="jnc-stat-box">
                 <div className="jnc-stat-number">99.9%</div>
@@ -173,9 +182,9 @@ export function EmpresaJanoCaminhoPage() {
           <div className="jnc-container">
             <div className="jnc-section-header">
               <span className="jnc-section-tag">Nossas Verticais</span>
-              <h2 className="jnc-section-heading">Os 3 Pilares do Ecossistema JNC</h2>
+              <h2 className="jnc-section-heading">As 4 Plataformas do Ecossistema JNC</h2>
               <p className="jnc-section-subheading">
-                Cada plataforma foi desenhada com identidade visual própria, arquitetura moderna e os logotipos oficiais integrados.
+                Cada plataforma foi concebida com identidade visual própria, arquitetura de alta performance e os logotipos oficiais integrados.
               </p>
             </div>
 
@@ -185,19 +194,24 @@ export function EmpresaJanoCaminhoPage() {
               <div className="jnc-product-card card-drexame" id="drexame">
                 <div>
                   <div className="jnc-card-top">
-                    <div className="jnc-product-logo-box" style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(16, 185, 129, 0.45)", display: "flex", alignItems: "center", gap: 8, padding: "6px 14px" }}>
-                      <img
-                        src="/logos/dr-exame.svg"
-                        alt="Dr. Exame"
-                        style={{ height: 40, width: 40, objectFit: "contain" }}
-                        onError={(e) => { (e.target as HTMLImageElement).src = '/logos/dr-exame-brand.png'; }}
-                      />
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        <span style={{ fontWeight: 900, color: "#10B981", fontSize: 18, letterSpacing: "-0.02em", lineHeight: 1.1 }}>Dr. Exame</span>
-                        <span style={{ fontSize: 11, color: "var(--text-soft)", fontWeight: 600 }}>Saúde Digital</span>
+                    <div className="jnc-product-brand-badge">
+                      <div className="jnc-brand-avatar-box jnc-avatar-drexame">
+                        <img
+                          src="/logos/dr-exame-robot.png"
+                          alt="Dr. Exame Robô Oficial"
+                          className="jnc-avatar-img jnc-img-circle-crop"
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/logos/dr-exame-icon.png'; }}
+                        />
+                      </div>
+                      <div className="jnc-brand-meta">
+                        <span className="jnc-brand-title jnc-brand-title-emerald">Dr. Exame</span>
+                        <span className="jnc-brand-sub">Saúde Digital &amp; IA</span>
                       </div>
                     </div>
-                    <span className="jnc-status-badge badge-live">Saúde Digital</span>
+                    <span className="jnc-status-badge badge-live badge-health">
+                      <span className="jnc-badge-dot dot-health" />
+                      Saúde Digital
+                    </span>
                   </div>
 
                   <h3 className="jnc-product-name">Dr. Exame</h3>
@@ -209,11 +223,12 @@ export function EmpresaJanoCaminhoPage() {
                     <span className="jnc-feature-tag">Saúde Preventiva</span>
                     <span className="jnc-feature-tag">LGPD Saúde</span>
                     <span className="jnc-feature-tag">Histórico Unificado</span>
+                    <span className="jnc-feature-tag">IA Clínica</span>
                   </div>
                 </div>
 
                 <div className="jnc-card-actions">
-                  <a href="https://drexame.janocaminho.com.br" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-primary" style={{ background: "linear-gradient(135deg, #10B981 0%, #059669 100%)" }}>
+                  <a href="https://drexame.janocaminho.com.br" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-primary btn-emerald">
                     <span>Acessar Dr. Exame</span>
                     <ArrowUpRight size={16} weight="bold" />
                   </a>
@@ -227,18 +242,27 @@ export function EmpresaJanoCaminhoPage() {
               <div className="jnc-product-card card-app" id="janocaminho">
                 <div>
                   <div className="jnc-card-top">
-                    <div className="jnc-product-logo-box" style={{ background: "rgba(255, 255, 255, 0.95)", border: "1px solid rgba(255, 122, 0, 0.5)", padding: "6px 14px" }}>
-                      <img
-                        src="/logos/janocaminho-logo.svg"
-                        alt="Já No Caminho"
-                        style={{ maxHeight: 40, width: "auto", objectFit: "contain" }}
-                        onError={(e) => { (e.target as HTMLImageElement).src = '/logos/janocaminho.jpg'; }}
-                      />
+                    <div className="jnc-product-brand-badge">
+                      <div className="jnc-brand-avatar-box jnc-avatar-app">
+                        <img
+                          src="/logos/janocaminho-robot.png"
+                          alt="Já No Caminho Robô Oficial"
+                          className="jnc-avatar-img"
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/logos/janocaminho.jpg'; }}
+                        />
+                      </div>
+                      <div className="jnc-brand-meta">
+                        <span className="jnc-brand-title jnc-brand-title-orange">Já No Caminho</span>
+                        <span className="jnc-brand-sub">App &amp; Hub Local</span>
+                      </div>
                     </div>
-                    <span className="jnc-status-badge badge-live">Gestão SaaS & App</span>
+                    <span className="jnc-status-badge badge-live badge-delivery">
+                      <span className="jnc-badge-dot dot-delivery" />
+                      Gestão SaaS &amp; App
+                    </span>
                   </div>
 
-                  <h3 className="jnc-product-name">Já No Caminho (App & Hub)</h3>
+                  <h3 className="jnc-product-name">Já No Caminho (App &amp; Hub)</h3>
                   <p className="jnc-product-desc">
                     Hub completo de pedidos, logística e comércio de proximidade. Conecta condomínios fechados, restaurantes, feiras e moradores locais com entrega ágil e marketplace sem atrito.
                   </p>
@@ -246,12 +270,13 @@ export function EmpresaJanoCaminhoPage() {
                     <span className="jnc-feature-tag">Delivery Ágil</span>
                     <span className="jnc-feature-tag">Condomínios</span>
                     <span className="jnc-feature-tag">Google Play</span>
-                    <span className="jnc-feature-tag">Lojas & Hub</span>
+                    <span className="jnc-feature-tag">Lojas &amp; Hub</span>
+                    <span className="jnc-feature-tag">Logística de Proximidade</span>
                   </div>
                 </div>
 
                 <div className="jnc-card-actions">
-                  <Link to="/app" className="jnc-btn-card-primary" style={{ background: "linear-gradient(135deg, #FF7A00 0%, #EA580C 100%)" }} title="Acessa a apresentação detalhada do aplicativo Já No Caminho">
+                  <Link to="/app" className="jnc-btn-card-primary btn-orange" title="Acessa a apresentação detalhada do aplicativo Já No Caminho">
                     <span>Conhecer o App →</span>
                   </Link>
                   <a href="https://app.janocaminho.com.br/hub" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-secondary" title="Abrir direto o Hub de pedidos">
@@ -264,15 +289,24 @@ export function EmpresaJanoCaminhoPage() {
               <div className="jnc-product-card card-uaiid" id="uaiid">
                 <div>
                   <div className="jnc-card-top">
-                    <div className="jnc-product-logo-box" style={{ background: "rgba(8, 16, 36, 0.95)", border: "1px solid rgba(0, 210, 255, 0.5)", padding: "8px 16px" }}>
-                      <img
-                        src="/logos/logo-uai-full.svg"
-                        alt="Uai ID"
-                        style={{ maxHeight: 38, width: "auto", objectFit: "contain" }}
-                        onError={(e) => { (e.target as HTMLImageElement).src = '/logos/uai-logo.jpg'; }}
-                      />
+                    <div className="jnc-product-brand-badge">
+                      <div className="jnc-brand-avatar-box jnc-avatar-uaiid">
+                        <img
+                          src="/logos/uaiid-shield.png"
+                          alt="Uai ID Escudo Oficial"
+                          className="jnc-avatar-img"
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/logos/uai-logo.jpg'; }}
+                        />
+                      </div>
+                      <div className="jnc-brand-meta">
+                        <span className="jnc-brand-title jnc-brand-title-cyan">Uai ID</span>
+                        <span className="jnc-brand-sub">Biometria &amp; KYC</span>
+                      </div>
                     </div>
-                    <span className="jnc-status-badge badge-live">Identidade & KYC</span>
+                    <span className="jnc-status-badge badge-live badge-security">
+                      <span className="jnc-badge-dot dot-security" />
+                      Identidade &amp; KYC
+                    </span>
                   </div>
 
                   <h3 className="jnc-product-name">Uai ID</h3>
@@ -284,11 +318,12 @@ export function EmpresaJanoCaminhoPage() {
                     <span className="jnc-feature-tag">OCR Forense</span>
                     <span className="jnc-feature-tag">Anti-Spoofing</span>
                     <span className="jnc-feature-tag">Auditoria 1:1</span>
+                    <span className="jnc-feature-tag">Latência &lt;400ms</span>
                   </div>
                 </div>
 
                 <div className="jnc-card-actions">
-                  <a href="https://uaiid.com.br" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-primary" style={{ background: "linear-gradient(135deg, #00D2FF 0%, #3B72F7 100%)" }}>
+                  <a href="https://uaiid.com.br" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-primary btn-cyan">
                     <span>Acessar Uai ID</span>
                     <ArrowUpRight size={16} weight="bold" />
                   </a>
@@ -298,31 +333,51 @@ export function EmpresaJanoCaminhoPage() {
                 </div>
               </div>
 
-              {/* 4. Novo Módulo JNC (Em Breve) */}
-              <div className="jnc-product-card card-soon">
+              {/* 4. GemHunter AI (v3.2) */}
+              <div className="jnc-product-card card-gemhunter" id="gemhunter">
                 <div>
                   <div className="jnc-card-top">
-                    <div className="jnc-product-logo-box" style={{ background: "rgba(139, 92, 246, 0.12)", border: "1px solid rgba(139, 92, 246, 0.35)", padding: "8px 14px" }}>
-                      <span style={{ fontSize: 26 }}>✨</span>
+                    <div className="jnc-product-brand-badge">
+                      <div className="jnc-brand-avatar-box jnc-avatar-gemhunter">
+                        <img
+                          src="/logos/gemhunter-badge.png"
+                          alt="GemHunter AI Logo Oficial"
+                          className="jnc-avatar-img jnc-gemhunter-img"
+                        />
+                      </div>
+                      <div className="jnc-brand-meta">
+                        <span className="jnc-brand-title jnc-brand-title-gold">GemHunter AI</span>
+                        <span className="jnc-brand-sub">Radar Web3 &amp; Anti-Golpe</span>
+                      </div>
                     </div>
-                    <span className="jnc-status-badge badge-soon">Em Desenvolvimento</span>
+                    <span className="jnc-status-badge badge-live badge-crypto">
+                      <span className="jnc-badge-dot dot-crypto" />
+                      v3.2 • On-Chain
+                    </span>
                   </div>
 
-                  <h3 className="jnc-product-name">Novo Módulo JNC</h3>
+                  <h3 className="jnc-product-name">GemHunter AI (v3.2)</h3>
                   <p className="jnc-product-desc">
-                    Um novo motor de automação e inteligência está sendo desenvolvido pelos times de engenharia para integrar ainda mais o ecossistema.
+                    Radar inteligente em tempo real e escudo anti-golpe para Web3. Simula transações de compra/venda (anti-honeypot), audita liquidez on-chain no nascimento da pool (&lt;30 min) e protege seu capital de forma 100% não-custodial na rede Base.
                   </p>
                   <div className="jnc-feature-tags">
-                    <span className="jnc-feature-tag">Automação</span>
-                    <span className="jnc-feature-tag">Inteligência Artificial</span>
-                    <span className="jnc-feature-tag">Expansão</span>
+                    <span className="jnc-feature-tag">Radar On-Chain</span>
+                    <span className="jnc-feature-tag">Simulação Honeypot</span>
+                    <span className="jnc-feature-tag">Mempool Scanner</span>
+                    <span className="jnc-feature-tag">Auditoria DeFi</span>
+                    <span className="jnc-feature-tag">Rede Base (EVM)</span>
+                    <span className="jnc-feature-tag">Não-Custodial</span>
                   </div>
                 </div>
 
                 <div className="jnc-card-actions">
-                  <span className="jnc-btn-card-secondary" style={{ opacity: 0.6, cursor: "not-allowed", width: "100%", textAlign: "center" }}>
-                    Lançamento em Breve
-                  </span>
+                  <a href="https://uaiid.com.br/gemhunter" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-primary btn-gold">
+                    <span>Acessar GemHunter AI</span>
+                    <ArrowUpRight size={16} weight="bold" />
+                  </a>
+                  <a href="https://uaiid.com.br/gemhunter#radar" target="_blank" rel="noopener noreferrer" className="jnc-btn-card-secondary">
+                    Ver Radar Ao Vivo
+                  </a>
                 </div>
               </div>
 
@@ -338,20 +393,24 @@ export function EmpresaJanoCaminhoPage() {
               Construindo a Infraestrutura do Amanhã
             </h2>
             <p style={{ color: "var(--text-soft)", fontSize: 16, lineHeight: 1.7, maxWidth: 860, marginBottom: 24 }}>
-              A <strong>Já No Caminho Tecnologia (JNC)</strong> nasceu da convicção de que inteligência de dados, proximidade e segurança devem caminhar lado a lado. Nossas três plataformas compartilham uma espinha dorsal de engenharia baseada em microsserviços na nuvem AWS, padrões rigorosos de segurança e IA aplicada para resolver problemas reais de pessoas e organizações.
+              A <strong>Já No Caminho Tecnologia (JNC)</strong> nasceu da convicção de que inteligência de dados, proximidade, segurança e auditoria devem caminhar lado a lado. Nossas quatro plataformas compartilham uma espinha dorsal de engenharia baseada em microsserviços na nuvem AWS, padrões rigorosos de segurança e IA aplicada para resolver problemas reais de pessoas, médicos, comerciantes e investidores.
             </p>
-            <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-              <div style={{ flex: 1, minWidth: 240, background: "rgba(255,255,255,0.03)", padding: 20, borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
-                <div style={{ fontWeight: 800, color: "var(--mint)", marginBottom: 8 }}>🔒 Segurança &amp; LGPD</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
+              <div style={{ background: "rgba(255,255,255,0.03)", padding: 20, borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ fontWeight: 800, color: "var(--mint)", marginBottom: 8 }}>🔒 Segurança &amp; LGPD Médica</div>
                 <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Criptografia de ponta a ponta e conformidade com diretrizes nacionais de dados em todas as pontas.</div>
               </div>
-              <div style={{ flex: 1, minWidth: 240, background: "rgba(255,255,255,0.03)", padding: 20, borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
-                <div style={{ fontWeight: 800, color: "var(--cyan)", marginBottom: 8 }}>⚡ Alta Disponibilidade</div>
+              <div style={{ background: "rgba(255,255,255,0.03)", padding: 20, borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ fontWeight: 800, color: "var(--cyan)", marginBottom: 8 }}>⚡ Alta Disponibilidade Cloud</div>
                 <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Arquitetura escalável em nuvem com latência submétrica e monitoramento 24/7.</div>
               </div>
-              <div style={{ flex: 1, minWidth: 240, background: "rgba(255,255,255,0.03)", padding: 20, borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
-                <div style={{ fontWeight: 800, color: "var(--orange)", marginBottom: 8 }}>🤝 DNA de Proximidade</div>
-                <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Soluções pensadas para gerar impacto direto na vida de cidadãos, médicos e empreendedores.</div>
+              <div style={{ background: "rgba(255,255,255,0.03)", padding: 20, borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ fontWeight: 800, color: "var(--orange)", marginBottom: 8 }}>🤝 DNA de Proximidade &amp; App</div>
+                <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Soluções desenhadas para gerar impacto direto em condomínios, feiras e comércio local.</div>
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.03)", padding: 20, borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ fontWeight: 800, color: "#F59E0B", marginBottom: 8 }}>💎 Inteligência On-Chain &amp; DeFi</div>
+                <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Auditoria algorítmica de contratos inteligentes, honeypots e liquidez on-chain em tempo real.</div>
               </div>
             </div>
           </div>
@@ -370,7 +429,7 @@ export function EmpresaJanoCaminhoPage() {
                 <span style={{ fontWeight: 800, fontSize: 18 }}>Já No Caminho</span>
               </div>
               <p>
-                Ecossistema tecnológico integrado. Plataforma unificada de saúde digital, gestão SaaS e identidade biométrica forense.
+                Ecossistema tecnológico integrado. Plataforma unificada de saúde digital, gestão SaaS de comércio, identidade biométrica forense e inteligência on-chain Web3.
               </p>
             </div>
 
@@ -381,6 +440,7 @@ export function EmpresaJanoCaminhoPage() {
                 <li><a href="https://app.janocaminho.com.br/hub" target="_blank" rel="noopener noreferrer">Já No Caminho (Hub)</a></li>
                 <li><Link to="/app">Já No Caminho (App)</Link></li>
                 <li><a href="https://uaiid.com.br" target="_blank" rel="noopener noreferrer">Uai ID (KYC &amp; Biometria)</a></li>
+                <li><a href="https://uaiid.com.br/gemhunter" target="_blank" rel="noopener noreferrer">GemHunter AI (Web3 &amp; DeFi)</a></li>
               </ul>
             </div>
 
@@ -400,6 +460,7 @@ export function EmpresaJanoCaminhoPage() {
                 <li><a href="https://app.janocaminho.com.br/hub" target="_blank" rel="noopener noreferrer">Painel Operacional ↗</a></li>
                 <li><a href="https://uaiid.com.br/dashboard" target="_blank" rel="noopener noreferrer">Dashboard Uai ID ↗</a></li>
                 <li><a href="https://drexame.janocaminho.com.br" target="_blank" rel="noopener noreferrer">Portal Dr. Exame ↗</a></li>
+                <li><a href="https://uaiid.com.br/gemhunter#radar" target="_blank" rel="noopener noreferrer">Radar GemHunter Ao Vivo ↗</a></li>
               </ul>
             </div>
           </div>
