@@ -76,13 +76,12 @@ export function EmpresaJanoCaminhoPage() {
 
           <div className="wibx-nav-cta-wrapper">
             <a
-              href="https://app.janocaminho.com.br/hub"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#solucoes"
               className="wibx-btn-neon-pill"
+              title="Conhecer as soluções do ecossistema"
             >
-              <span>Acessar o Hub</span>
-              <ArrowUpRight size={16} weight="bold" />
+              <span>Ver Soluções</span>
+              <CaretDown size={15} weight="bold" />
             </a>
           </div>
         </div>
@@ -99,7 +98,7 @@ export function EmpresaJanoCaminhoPage() {
               <div className="wibx-hero-left">
                 <div className="wibx-status-pill">
                   <span className="wibx-pulse-neon" />
-                  <span className="wibx-status-pill-text">ECOSSISTEMA TECNOLÓGICO UNIFICADO 2026</span>
+                  <span className="wibx-status-pill-text">ECOSSISTEMA TECNOLÓGICO 2026</span>
                 </div>
 
                 <h1 className="wibx-hero-headline">
@@ -118,7 +117,7 @@ export function EmpresaJanoCaminhoPage() {
 
                 <div className="wibx-hero-actions">
                   <a href="#solucoes" className="wibx-btn-hero-primary">
-                    <span>Explorar Verticais</span>
+                    <span>Explorar Soluções</span>
                     <CaretDown size={18} weight="bold" />
                   </a>
                   <Link to="/app" className="wibx-btn-hero-secondary" title="Ver apresentação exclusiva do app Já No Caminho">
@@ -132,19 +131,19 @@ export function EmpresaJanoCaminhoPage() {
                 <div className="wibx-pillar-tags">
                   <a href="#drexame" className="wibx-tag-pill">
                     <span className="wibx-tag-indicator dot-health" />
-                    <strong>01</strong> Dr. Exame <span className="wibx-tag-muted">(Saúde Digital)</span>
+                    <span><strong>01</strong> Dr. Exame</span>
                   </a>
                   <a href="#janocaminho" className="wibx-tag-pill">
                     <span className="wibx-tag-indicator dot-delivery" />
-                    <strong>02</strong> Já No Caminho <span className="wibx-tag-muted">(Gestão SaaS)</span>
+                    <span><strong>02</strong> Já No Caminho</span>
                   </a>
                   <a href="#uaiid" className="wibx-tag-pill">
                     <span className="wibx-tag-indicator dot-security" />
-                    <strong>03</strong> Uai ID <span className="wibx-tag-muted">(Identidade 3D)</span>
+                    <span><strong>03</strong> Uai ID</span>
                   </a>
                   <a href="#gemhunter" className="wibx-tag-pill">
                     <span className="wibx-tag-indicator dot-crypto" />
-                    <strong>04</strong> GemHunter AI <span className="wibx-tag-muted">(Web3 &amp; DeFi)</span>
+                    <span><strong>04</strong> GemHunter AI</span>
                   </a>
                 </div>
               </div>
@@ -362,19 +361,19 @@ export function EmpresaJanoCaminhoPage() {
                   </div>
                   <div className="wibx-brand-text-col">
                     <h3 className="wibx-product-title">Já No Caminho</h3>
-                    <span className="wibx-product-sub">App &amp; Hub de Proximidade</span>
+                    <span className="wibx-product-sub">App &amp; Logística de Proximidade</span>
                   </div>
                 </div>
 
                 <p className="wibx-product-desc">
-                  Hub completo de pedidos, logística e comércio de proximidade. Conecta condomínios residenciais fechados, restaurantes, comércios locais e moradores com rotas otimizadas, fila de produção em tempo real e marketplace sem comissões abusivas.
+                  Plataforma completa de pedidos, logística e comércio de proximidade. Conecta condomínios residenciais fechados, restaurantes, comércios locais e moradores com rotas inteligentes, fila de produção em tempo real e ecossistema sem atritos.
                 </p>
 
                 <div className="wibx-tag-list">
                   <span className="wibx-mini-tag">Delivery Ágil</span>
                   <span className="wibx-mini-tag">Condomínios</span>
                   <span className="wibx-mini-tag">Google Play</span>
-                  <span className="wibx-mini-tag">Lojas &amp; Hub</span>
+                  <span className="wibx-mini-tag">Lojas Parceiras</span>
                   <span className="wibx-mini-tag">Logística Local</span>
                 </div>
 
@@ -384,7 +383,7 @@ export function EmpresaJanoCaminhoPage() {
                     className="wibx-btn-card-neon"
                     title="Acessar a apresentação detalhada do aplicativo Já No Caminho"
                   >
-                    <span>Conhecer o App</span>
+                    <span>Apresentação do App</span>
                     <ArrowRight size={16} weight="bold" />
                   </Link>
                   <a
@@ -392,9 +391,9 @@ export function EmpresaJanoCaminhoPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="wibx-btn-card-outline"
-                    title="Abrir o Hub de pedidos e lojas"
+                    title="Acessar a plataforma web Já No Caminho"
                   >
-                    <span>Abrir o Hub ↗</span>
+                    <span>Acessar Plataforma Web ↗</span>
                   </a>
                 </div>
               </div>
