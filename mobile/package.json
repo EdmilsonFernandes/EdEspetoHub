@@ -8,6 +8,12 @@
     "android:sync": "npx cap sync android",
     "android:open": "npx cap open android",
     "android:run": "npx cap run android",
+    "ios:init": "npx cap add ios",
+    "ios:sync": "npx cap sync ios",
+    "ios:open": "npx cap open ios",
+    "ios:run": "npx cap run ios",
+    "ios:devices": "npx cap run ios --list",
+    "ios:deploy": "npm --prefix ../frontend run build && npx cap sync ios && npx cap run ios --no-sync",
     "apk:debug": "cd android && ./gradlew assembleDebug",
     "doctor": "npx cap doctor"
   },
@@ -19,6 +25,7 @@
     "@capacitor/clipboard": "^7.0.4",
     "@capacitor/core": "^7.4.3",
     "@capacitor/filesystem": "^7.1.8",
+    "@capacitor/ios": "^7.4.3",
     "@capacitor/push-notifications": "file:../frontend/node_modules/@capacitor/push-notifications",
     "@capacitor/share": "^7.0.4",
     "edespetohub": "file:.."
