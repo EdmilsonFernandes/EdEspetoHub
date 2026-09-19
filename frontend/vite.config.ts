@@ -16,16 +16,45 @@ export default defineConfig({
       injectRegister: false,
       manifestFilename: 'manifest.json',
       workbox: {
+        // undefined EXPLÍCITO (19/09): o vite-plugin-pwa injeta
+        // navigateFallback "index.html" por default, o que reativa a rota de
+        // navegação cache-first (registrada antes das runtimeCaching, vence
+        // o match). Navegação é tratada pela 1ª runtimeCaching abaixo.
+        navigateFallback: undefined,
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//, /^\/minhasaude/, /^\/meus-exames/],
         // Keep SW install light in production: route chunks are fetched on demand.
         globPatterns: ['index.html', 'assets/*.{css,ico,png,svg,webp,jpg,jpeg,woff2}'],
         globIgnores: ['**/*.js', '**/*.map', '**/stats.html'],
         maximumFileSizeToCacheInBytes: 1024 * 1024,
         runtimeCaching: [
+          {
+            // Navegação network-first (19/09): o navigateFallback cache-first
+            // servia o index.html do precache VELHO após cada deploy → entry
+            // chunk 404 → página presa até reload manual (o recovery mora no
+            // JS que nem chegou a carregar). Index é no-cache e 3KB: rede
+            // primeiro sempre, cache só como fallback offline. /minhasaude e
+            // /meus-exames seguem direto pra rede, como no denylist antigo.
+            urlPattern: ({ request, url, sameOrigin }) =>
+              sameOrigin &&
+              request.mode === 'navigate' &&
+              !url.pathname.startsWith('/api/') &&
+              !url.pathname.startsWith('/minhasaude') &&
+              !url.pathname.startsWith('/meus-exames'),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'jnc-navigations-v1',
+              networkTimeoutSeconds: 8,
+              expiration: {
+                maxEntries: 12,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
           {
             // Auditoria 24/08 (config não refletia no app): CacheFirst 30d prendia
             // imagem de URL igual (logo/banner reutilizados) sem nunca consultar a

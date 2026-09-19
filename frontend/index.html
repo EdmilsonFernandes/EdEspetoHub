@@ -64,6 +64,47 @@
     <footer style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">
       <a href="https://www.siterastreio.com.br/" target="_blank">Rastreamento</a>
     </footer>
+    <!-- Watchdog de build velho (19/09): se o entry chunk falhar (404 pós-deploy),
+         nem o staleBuildRecovery roda — ele mora no JS que não carregou. Aqui é
+         HTML puro: unregister do SW + reload único (guard de sessão evita loop). -->
+    <script>
+      (function () {
+        var KEY = 'jnc:entry-watchdog-at';
+        function recent() {
+          try {
+            var t = Number(sessionStorage.getItem(KEY) || 0);
+            return t > 0 && Date.now() - t < 45000;
+          } catch (e) {
+            return false;
+          }
+        }
+        function reload() {
+          var sep = location.search ? '&' : '?';
+          location.replace(location.pathname + location.search + sep + '_recover=' + Date.now());
+        }
+        window.addEventListener(
+          'error',
+          function (ev) {
+            var el = ev.target;
+            if (!el || el.tagName !== 'SCRIPT' || !el.src || recent()) return;
+            try {
+              sessionStorage.setItem(KEY, String(Date.now()));
+            } catch (e) {}
+            var sw = navigator.serviceWorker;
+            if (!sw) {
+              reload();
+              return;
+            }
+            sw.getRegistrations()
+              .then(function (rs) {
+                return Promise.all(rs.map(function (r) { return r.unregister(); }));
+              })
+              .then(reload, reload);
+          },
+          true
+        );
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
