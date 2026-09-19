@@ -35,7 +35,7 @@ export function EmpresaJanoCaminhoPage() {
           <a href="#" className="wibx-brand-group" title="JNC — Já No Caminho Tecnologia">
             <div className="wibx-brand-emblem">
               <img
-                src="/logos/jnc-ecossistema-oficial.jpg"
+                src="/logos/jnc-ecossistema-oficial.webp"
                 alt="JNC Logo Oficial"
                 className="wibx-brand-logo-img"
                 onError={(e) => {
@@ -158,7 +158,7 @@ export function EmpresaJanoCaminhoPage() {
                   <div className="wibx-artwork-glow" />
                   <div className="wibx-artwork-inner">
                     <img
-                      src="/logos/jnc-ecossistema-oficial.jpg"
+                      src="/logos/jnc-ecossistema-oficial.webp"
                       alt="JNC Ecossistema Tecnológico — Logo Oficial"
                       className="wibx-artwork-img"
                       onError={(e) => {
@@ -295,7 +295,7 @@ export function EmpresaJanoCaminhoPage() {
                 <div className="wibx-card-brand-row">
                   <div className="wibx-brand-avatar-frame frame-health">
                     <img
-                      src="/logos/dr-exame-robot.png"
+                      src="/logos/dr-exame-robot.webp"
                       alt="Dr. Exame Robô Oficial"
                       className="wibx-avatar-img"
                       onError={(e) => { (e.target as HTMLImageElement).src = '/logos/dr-exame-icon.png'; }}
@@ -353,7 +353,7 @@ export function EmpresaJanoCaminhoPage() {
                 <div className="wibx-card-brand-row">
                   <div className="wibx-brand-avatar-frame frame-delivery">
                     <img
-                      src="/logos/janocaminho-robot.png"
+                      src="/logos/janocaminho-robot.webp"
                       alt="Já No Caminho Robô Oficial"
                       className="wibx-avatar-img"
                       onError={(e) => { (e.target as HTMLImageElement).src = '/logos/janocaminho.jpg'; }}
@@ -411,10 +411,10 @@ export function EmpresaJanoCaminhoPage() {
                 <div className="wibx-card-brand-row">
                   <div className="wibx-brand-avatar-frame frame-security">
                     <img
-                      src="/logos/uaiid-shield.png"
+                      src="/logos/uaiid-shield.webp"
                       alt="Uai ID Escudo Oficial"
                       className="wibx-avatar-img"
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/logos/uai-logo.jpg'; }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/logos/uai-logo.webp'; }}
                     />
                   </div>
                   <div className="wibx-brand-text-col">
@@ -641,7 +641,7 @@ export function EmpresaJanoCaminhoPage() {
             <div className="wibx-footer-brand-col">
               <div className="wibx-brand-group">
                 <div className="wibx-brand-emblem" style={{ width: 42, height: 42 }}>
-                  <img src="/logos/jnc-ecossistema-oficial.jpg" className="wibx-brand-logo-img" alt="JNC Logo" />
+                  <img src="/logos/jnc-ecossistema-oficial.webp" className="wibx-brand-logo-img" alt="JNC Logo" />
                 </div>
                 <div className="wibx-brand-text-col">
                   <span className="wibx-brand-name" style={{ fontSize: 18 }}>Já No Caminho</span>
@@ -712,7 +712,7 @@ export function EmpresaJanoCaminhoPage() {
             <div className="wibx-modal-title">
               JNC Ecossistema Tecnológico — Identidade Oficial
             </div>
-            <img src="/logos/jnc-ecossistema-oficial.jpg" className="wibx-modal-img" alt="Logo Oficial JNC" />
+            <img src="/logos/jnc-ecossistema-oficial.webp" className="wibx-modal-img" alt="Logo Oficial JNC" />
           </div>
         </div>
       )}
