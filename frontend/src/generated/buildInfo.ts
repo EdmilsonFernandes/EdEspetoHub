@@ -5,16 +5,196 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "392180e7",
-  "versionLabel": "v0.1.9.392180e7",
-  "versionInternal": "0.1.9+20260901.150423.392180e7",
-  "buildId": "0.1.9+20260901.150423.392180e7-20260901.150423-392180e7",
-  "builtAt": "2026-09-01T15:04:23.578Z",
-  "commitHash": "392180e75fb9825f3b1698a676754e0f5106960f",
-  "shortHash": "392180e7",
+  "versionDisplaySuffix": "38f59dbf",
+  "versionLabel": "v0.1.9.38f59dbf",
+  "versionInternal": "0.1.9+20260918.204504.38f59dbf",
+  "buildId": "0.1.9+20260918.204504.38f59dbf-20260918.204504-38f59dbf",
+  "builtAt": "2026-09-18T20:45:04.184Z",
+  "commitHash": "38f59dbf87068690375449cec4b27b4f4089d6b6",
+  "shortHash": "38f59dbf",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "38f59dbf87068690375449cec4b27b4f4089d6b6",
+      "shortHash": "38f59dbf",
+      "dateIso": "2026-09-18T10:06:30-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(portal): ajustar responsividade mobile, impedir quebra de rotulos e substituir cta do hub por solucoes institucionais",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/38f59dbf87068690375449cec4b27b4f4089d6b6"
+    },
+    {
+      "hash": "50963c4d904bd9c3b4e82d49ffef7659f15ab076",
+      "shortHash": "50963c4d",
+      "dateIso": "2026-09-17T23:13:01-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(portal): reformular identidade visual do portal JNC inspirada no Wibx.io com neon green e design futurista",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/50963c4d904bd9c3b4e82d49ffef7659f15ab076"
+    },
+    {
+      "hash": "4793d7282f83c5cde3cccddf9ae08e8d86e4c5bc",
+      "shortHash": "4793d728",
+      "dateIso": "2026-09-12T18:05:19-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(portal): modernizar portal JNC com logos oficiais sem borda branca e novo modulo GemHunter AI",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4793d7282f83c5cde3cccddf9ae08e8d86e4c5bc"
+    },
+    {
+      "hash": "2ad85bb33f4751365d57c3760e4b2b9595c873c3",
+      "shortHash": "2ad85bb3",
+      "dateIso": "2026-09-10T19:01:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(portal): alinha componente React EmpresaJanoCaminhoPage com 100% de paridade visual do HTML (Hero 3D, metricas, mascote e logos)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2ad85bb33f4751365d57c3760e4b2b9595c873c3"
+    },
+    {
+      "hash": "db2f8f47cf17599469483c04c446a713046f4691",
+      "shortHash": "db2f8f47",
+      "dateIso": "2026-09-10T18:16:57-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(portal): integra identidade oficial JNC com logos e robos oficiais (Dr. Exame, Já No Caminho, Uai ID)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/db2f8f47cf17599469483c04c446a713046f4691"
+    },
+    {
+      "hash": "a359ec2404708012e7eac28c0638cdd0bca4c6eb",
+      "shortHash": "a359ec24",
+      "dateIso": "2026-09-10T16:51:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(portal): card Uai ID usa logo.jpg oficial do repo kyc como primário",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a359ec2404708012e7eac28c0638cdd0bca4c6eb"
+    },
+    {
+      "hash": "be2a469227fd762e8dfbc089beebb2750cf6134d",
+      "shortHash": "be2a4692",
+      "dateIso": "2026-09-10T15:53:27-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(portal): portal institucional na raiz + logos oficiais dos 3 produtos",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/be2a469227fd762e8dfbc089beebb2750cf6134d"
+    },
+    {
+      "hash": "6644c7cae5f2e27529d8e35d21186bd0dcc58c25",
+      "shortHash": "6644c7ca",
+      "dateIso": "2026-09-08T19:04:33-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(kyc): integração Didit direta — DiditKycService, webhook, gates KYC_DIDIT; remove Jano",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6644c7cae5f2e27529d8e35d21186bd0dcc58c25"
+    },
+    {
+      "hash": "5e7207c45dcd062b6810387ba41bf311fbe01dc4",
+      "shortHash": "5e7207c4",
+      "dateIso": "2026-09-08T18:38:44-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(db): migration 20260908_001 — colunas kyc_* + rebrand docs KYC_JANO→KYC_DIDIT",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e7207c45dcd062b6810387ba41bf311fbe01dc4"
+    },
+    {
+      "hash": "ab28a1b2cfba862af422d6d4d49d4cadbbba065e",
+      "shortHash": "ab28a1b2",
+      "dateIso": "2026-09-08T18:28:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "checkpoint(kyc): piloto Jano — serviço, webhook, rotas, card no perfil (flag off)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ab28a1b2cfba862af422d6d4d49d4cadbbba065e"
+    },
+    {
+      "hash": "ed872fb86ba4a0dc3536b073184fa76f66553d24",
+      "shortHash": "ed872fb8",
+      "dateIso": "2026-09-02T17:58:08-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "Revert \"feat(checkout): desktop 2 colunas — form à esquerda, resumo/pagamento à direita\"",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ed872fb86ba4a0dc3536b073184fa76f66553d24"
+    },
+    {
+      "hash": "628928b3ea495e98ddd07f79a2ab1c768950c4e3",
+      "shortHash": "628928b3",
+      "dateIso": "2026-09-02T17:48:20-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(checkout): desktop 2 colunas — form à esquerda, resumo/pagamento à direita",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/628928b3ea495e98ddd07f79a2ab1c768950c4e3"
+    },
+    {
+      "hash": "61a8b92f84ce92ae4fcbdfc59f3508a77e44d38a",
+      "shortHash": "61a8b92f",
+      "dateIso": "2026-09-02T16:52:20-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "ux(balcao+checkout): Pro 3 explica o botao verde + card mostra modelo do terminal + CEP foca o numero",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/61a8b92f84ce92ae4fcbdfc59f3508a77e44d38a"
+    },
+    {
+      "hash": "5e659f84e1874dc6993391b5d24d62c978624c33",
+      "shortHash": "5e659f84",
+      "dateIso": "2026-09-02T10:02:10-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "docs(state): pendências do dashboard mortas — receita real (sem cancelados), billing lazy, 4390 verificado morto",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e659f84e1874dc6993391b5d24d62c978624c33"
+    },
+    {
+      "hash": "64348832ba1a19bb2c83570dd0538fab83d036e0",
+      "shortHash": "64348832",
+      "dateIso": "2026-09-02T09:55:53-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(dashboard): receita conta só pedidos reais + delivery-billing lazy",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/64348832ba1a19bb2c83570dd0538fab83d036e0"
+    },
+    {
+      "hash": "a9b766060feab6ed59174180f41744bd0138c2f4",
+      "shortHash": "a9b76606",
+      "dateIso": "2026-09-02T09:34:07-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "docs(state): dashboard em números no ar e verificado — lições de coerência de base",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a9b766060feab6ed59174180f41744bd0138c2f4"
+    },
+    {
+      "hash": "0bc93dd7e50250de1b2fdd2a3e282df050882d5e",
+      "shortHash": "0bc93dd7",
+      "dateIso": "2026-09-02T09:28:22-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): comparison usa a mesma base do resumo (sem filtro de status) e labels cobrem debito_presencial",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0bc93dd7e50250de1b2fdd2a3e282df050882d5e"
+    },
+    {
+      "hash": "9c4580e127da64402a542a52a464c20fda9feb69",
+      "shortHash": "9c4580e1",
+      "dateIso": "2026-09-01T23:26:47-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): tiles de pedidos e ticket mostram o período (pagos) quando há leitura — delta ao lado compara exatamente essa janela",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9c4580e127da64402a542a52a464c20fda9feb69"
+    },
+    {
+      "hash": "c6bd964fa6f5b94b5daef03832323a66d598cdf6",
+      "shortHash": "c6bd964f",
+      "dateIso": "2026-09-01T23:10:35-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(admin): dashboard em números — delta vs período anterior, recorde, formas de pagamento e alerta Pix",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c6bd964fa6f5b94b5daef03832323a66d598cdf6"
+    },
+    {
+      "hash": "7c6163fc1df4ac62da1ce565cb1d03aa50e0b0d2",
+      "shortHash": "7c6163fc",
+      "dateIso": "2026-09-01T12:08:54-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(admin): home premium fase 2 — hero de status escuro + sinais REAIS de MP/Point no checklist",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7c6163fc1df4ac62da1ce565cb1d03aa50e0b0d2"
+    },
     {
       "hash": "392180e75fb9825f3b1698a676754e0f5106960f",
       "shortHash": "392180e7",
@@ -104,186 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "refactor(balcao): forma de pagamento pergunta DENTRO do contexto do Cartão",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d8f7c5f63625c402c7e8ea0957c019a0c8ea4c45"
-    },
-    {
-      "hash": "3cf8466f09de2150aa067dcc7aa3b6988f50a5af",
-      "shortHash": "3cf8466f",
-      "dateIso": "2026-08-31T11:35:10-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(balcao): seletor de forma na maquininha + retirada automática em pagamento presencial",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3cf8466f09de2150aa067dcc7aa3b6988f50a5af"
-    },
-    {
-      "hash": "b52ac877fa2838bb8e91cb694f0fbe82534cfec7",
-      "shortHash": "b52ac877",
-      "dateIso": "2026-08-31T10:50:19-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(point): reconcile entende Orders API (processed/accredited) + anti-duplicidade na recobrança",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b52ac877fa2838bb8e91cb694f0fbe82534cfec7"
-    },
-    {
-      "hash": "d20c48f8aec122c90a9e6f6d5091ece6aff4bec4",
-      "shortHash": "d20c48f8",
-      "dateIso": "2026-08-31T10:17:57-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(point): payload da Orders API aceito pelo MP — amount string, sem description, external_reference sem :/_",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d20c48f8aec122c90a9e6f6d5091ece6aff4bec4"
-    },
-    {
-      "hash": "f34b98da69f38ee53b632a039de9fa8c1a8d4f28",
-      "shortHash": "f34b98da",
-      "dateIso": "2026-08-31T10:04:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(checkout): telefone unico com mascara (12) 98765-4321 + total triplo resolvido + copy 'confirma na hora'",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f34b98da69f38ee53b632a039de9fa8c1a8d4f28"
-    },
-    {
-      "hash": "ca31682c9c7b2e5a4a135d4272f91af841cbaccc",
-      "shortHash": "ca31682c",
-      "dateIso": "2026-08-29T21:13:05-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(vitrine): desktop container 800px + hero full-bleed — fim do mobile esticado no web",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ca31682c9c7b2e5a4a135d4272f91af841cbaccc"
-    },
-    {
-      "hash": "4a2957d02f3ac2664f75000cf27f3f35334e4c99",
-      "shortHash": "4a2957d0",
-      "dateIso": "2026-08-29T21:00:29-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(claude-platform): roteiro §5 executado — STATE, ADRs, codebase-map, índice CLAUDE.md",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4a2957d02f3ac2664f75000cf27f3f35334e4c99"
-    },
-    {
-      "hash": "5c5ea43c843183a324b2b5a45931b5e98ea33861",
-      "shortHash": "5c5ea43c",
-      "dateIso": "2026-08-29T20:55:19-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(claude-platform): base de conhecimento portátil de organização do setup Claude",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5c5ea43c843183a324b2b5a45931b5e98ea33861"
-    },
-    {
-      "hash": "590f5303fd660dadd4b676a929dac00f9776adfa",
-      "shortHash": "590f5303",
-      "dateIso": "2026-08-29T18:58:43-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 117 — esquema ☰ Menu em destaque + slot Menu no rodapé",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/590f5303fd660dadd4b676a929dac00f9776adfa"
-    },
-    {
-      "hash": "5f6f57d48b24ea96f9fdc425d86ed004411f1304",
-      "shortHash": "5f6f57d4",
-      "dateIso": "2026-08-29T18:49:08-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(admin): esquema ☰=Menu em destaque, rodapé ganha slot Menu — Conta só no avatar",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5f6f57d48b24ea96f9fdc425d86ed004411f1304"
-    },
-    {
-      "hash": "7e5e393d734b73bd2471917ec76aa70f9d16d715",
-      "shortHash": "7e5e393d",
-      "dateIso": "2026-08-29T18:30:16-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "Revert \"feat(landing): seção Point no balcão em /parceiros — PNG oficial da Pro 3, fluxo garçom→maquininha, copy pautada em research\"",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7e5e393d734b73bd2471917ec76aa70f9d16d715"
-    },
-    {
-      "hash": "abfbfc48f53596fa6dd6f9f2f0b0dec623fb920d",
-      "shortHash": "abfbfc48",
-      "dateIso": "2026-08-29T14:06:26-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 116 — menu admin legível no app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/abfbfc48f53596fa6dd6f9f2f0b0dec623fb920d"
-    },
-    {
-      "hash": "e00f3b9f5513919927eb356bb97476200322306d",
-      "shortHash": "e00f3b9f",
-      "dateIso": "2026-08-29T14:05:21-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(landing): seção Point no balcão em /parceiros — PNG oficial da Pro 3, fluxo garçom→maquininha, copy pautada em research",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e00f3b9f5513919927eb356bb97476200322306d"
-    },
-    {
-      "hash": "7d2bd38ad240b018fe184085f6b84516acf65f61",
-      "shortHash": "7d2bd38a",
-      "dateIso": "2026-08-29T13:57:53-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): layout de desktop vale a partir de 768px + bottom nav não some mais no scroll",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7d2bd38ad240b018fe184085f6b84516acf65f61"
-    },
-    {
-      "hash": "226ef535327293077b874560717ffa3b22b5e083",
-      "shortHash": "226ef535",
-      "dateIso": "2026-08-29T13:30:33-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): menu web legível — grupos abertos com ícone, bottom nav só no mobile",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/226ef535327293077b874560717ffa3b22b5e083"
-    },
-    {
-      "hash": "36c43d66c3e26248ed89dd15a3f370b749767d33",
-      "shortHash": "36c43d66",
-      "dateIso": "2026-08-29T12:21:07-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin): ☰ no header mobile abre o menu completo da operação",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/36c43d66c3e26248ed89dd15a3f370b749767d33"
-    },
-    {
-      "hash": "51de79dd633697493ecd8f5ab721af20d916b9f2",
-      "shortHash": "51de79dd",
-      "dateIso": "2026-08-29T11:56:32-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(balcao): card Maquininhas Point no Pagamentos + contador 1s + link no erro",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/51de79dd633697493ecd8f5ab721af20d916b9f2"
-    },
-    {
-      "hash": "9bafd47471d240c9316cd34f21ebd4f429b25c91",
-      "shortHash": "9bafd474",
-      "dateIso": "2026-08-29T11:43:50-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 115 — menu admin unificado no app",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9bafd47471d240c9316cd34f21ebd4f429b25c91"
-    },
-    {
-      "hash": "5607ba020a591599e15107192e91b16fc674bcc9",
-      "shortHash": "5607ba02",
-      "dateIso": "2026-08-29T11:31:11-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(balcao): Pix MP com QR quebrado — faltava o prefixo data:image do base64",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5607ba020a591599e15107192e91b16fc674bcc9"
-    },
-    {
-      "hash": "048570924a8a81517f19253a0075fbe8d9cdc417",
-      "shortHash": "04857092",
-      "dateIso": "2026-08-29T11:13:29-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(admin-nav): crash setIsDesktopLayout + Cupons pós-Sair — correções do smoke",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/048570924a8a81517f19253a0075fbe8d9cdc417"
-    },
-    {
-      "hash": "07437726cc156b8dab394c2165849bf87a0eaabf",
-      "shortHash": "07437726",
-      "dateIso": "2026-08-29T10:59:15-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(admin): home KPI-first — Fase 10 (veredito RETHINK auditoria 17/08)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/07437726cc156b8dab394c2165849bf87a0eaabf"
     }
   ]
 } as const;

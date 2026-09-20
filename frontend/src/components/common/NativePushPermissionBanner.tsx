@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { App as CapacitorApp } from '@capacitor/app';
-import { BellSimple } from '@phosphor-icons/react';
+import { BellSimple, X } from '@phosphor-icons/react';
 import { useLocation } from 'react-router-dom';
 
 const isEligiblePath = (pathname: string) => {
@@ -23,6 +23,7 @@ export function NativePushPermissionBanner() {
   const [isGranted, setIsGranted] = useState(true);
   const [loading, setLoading] = useState(false);
   const [supported, setSupported] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const canRender = useMemo(
     () => Capacitor.isNativePlatform() && isEligiblePath(location.pathname),
     [location.pathname]
@@ -94,7 +95,7 @@ export function NativePushPermissionBanner() {
     };
   }, [canRender, refreshPermission]);
 
-  if (!canRender || !supported || isGranted) return null;
+  if (!canRender || !supported || isGranted || dismissed) return null;
 
   return (
     <div className="fixed bottom-[88px] left-1/2 z-[290] w-[calc(100%-1rem)] max-w-md -translate-x-1/2 rounded-2xl border border-sky-200/70 bg-white/95 px-3 py-2 shadow-lg backdrop-blur">
@@ -112,14 +113,24 @@ export function NativePushPermissionBanner() {
           <p className="truncate text-xs font-semibold text-slate-800">Ative notificações de pedido</p>
           <p className="truncate text-[11px] text-slate-500">Receba atualização de status em tempo real.</p>
         </div>
-        <button
-          type="button"
-          onClick={handleEnable}
-          disabled={loading}
-          className="rounded-full bg-sky-600 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {loading ? 'Abrindo...' : 'Ativar'}
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={handleEnable}
+            disabled={loading}
+            className="rounded-full bg-sky-600 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? 'Abrindo...' : 'Ativar'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setDismissed(true)}
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            aria-label="Fechar aviso de notificações"
+          >
+            <X size={16} weight="bold" />
+          </button>
+        </div>
       </div>
     </div>
   );
