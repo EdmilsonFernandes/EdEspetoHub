@@ -313,10 +313,17 @@ export class EmailService {
       payment.method === 'BOLETO'
         ? 'Boletos podem levar até 3 dias úteis para compensar.'
         : 'A aprovação costuma ser imediata.';
-    const qrBlock =
+    // WAVE 1 OpenPix: qrCodeBase64 pode vir como data-uri (OpenPix/MP normalizado)
+    // ou base64 crua — normaliza inline para o src do <img>.
+    const qrSrc =
       payment.method === 'PIX' && payment.qrCodeBase64
-        ? `<div style="margin-top: 18px; text-align: center;"><img src="${payment.qrCodeBase64}" alt="QR Code PIX" style="width: 220px; height: 220px; border-radius: 18px; border: 1px solid #e2e8f0;" /></div>`
-        : '';
+        ? String(payment.qrCodeBase64).startsWith('data:')
+          ? payment.qrCodeBase64
+          : `data:image/png;base64,${payment.qrCodeBase64}`
+        : null;
+    const qrBlock = qrSrc
+      ? `<div style="margin-top: 18px; text-align: center;"><img src="${qrSrc}" alt="QR Code PIX" style="width: 220px; height: 220px; border-radius: 18px; border: 1px solid #e2e8f0;" /></div>`
+      : '';
     const providerLinkBlock = payment.paymentLink
       ? `<p style="margin: 16px 0 0;"><a href="${payment.paymentLink}" style="color: #153A4C; font-weight: 800; text-decoration: none;">Abrir link do provedor</a></p>`
       : '';

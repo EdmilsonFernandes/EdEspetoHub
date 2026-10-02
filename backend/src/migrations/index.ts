@@ -17,6 +17,7 @@ import planosFundador from './20260828_001_planos_fundador';
 import orderPaymentPointCharge from './20260828_002_order_payment_point_charge';
 import dashboardSnapshotPurgeCancelled from './20260902_001_dashboard_snapshot_purge_cancelled';
 import kycDidit from './20260908_001_kyc_didit';
+import openpixWave1 from './20261002_001_openpix_wave1';
 
 export const schemaMigrations = [
   baselineCurrentSchema,
@@ -38,4 +39,5 @@ export const schemaMigrations = [
   orderPaymentPointCharge,
   dashboardSnapshotPurgeCancelled,
   kycDidit,
+  openpixWave1,
 ] as const;

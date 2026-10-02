@@ -129,6 +129,19 @@ export const env = {
     webhookUrl: (process.env.MP_WEBHOOK_URL || '').replace('https://www.', 'https://'),
     debug: process.env.MP_DEBUG === 'true',
   },
+  openpix: {
+    // WAVE 1 OpenPix (02/10): PIX de plataforma (assinatura, destaques, push,
+    // taxa de entrega, gorjeta plataforma). appId = valor CRU do header
+    // Authorization ("Application <id>..." — padrão validado no Dr. Exame).
+    appId: process.env.OPENPIX_APP_ID || '',
+    apiBaseUrl: process.env.OPENPIX_API_BASE_URL || 'https://api.openpix.com.br',
+  },
+  payments: {
+    // Provedor default do PIX de plataforma: 'mp' (Mercado Pago, default) | 'openpix'.
+    // Env do processo (nunca commitada): PAYMENT_PROVIDER_DEFAULT=openpix ativa a Wave 1.
+    // Point/maquininha e checkout-de-pedido/balcão ficam SEMPRE no Mercado Pago.
+    providerDefault: normalizeEnum(process.env.PAYMENT_PROVIDER_DEFAULT, ['mp', 'openpix'] as const, 'mp'),
+  },
   didit: {
     // KYC direto no provedor Didit (verification.didit.me, sem intermediários).
     // API key e webhook secret ficam SÓ no backend — nunca no app.

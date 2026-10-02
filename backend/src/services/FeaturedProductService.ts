@@ -5,7 +5,9 @@ import { Product } from '../entities/Product';
 import { Store } from '../entities/Store';
 import { User } from '../entities/User';
 import { AppError } from '../errors/AppError';
+import { logger } from '../utils/logger';
 import { MercadoPagoService } from './MercadoPagoService';
+import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
 import { PaymentAuditService } from './PaymentAuditService';
 import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
 import { isMercadoPagoApprovedStatus, isMercadoPagoFailedStatus, isMercadoPagoPendingStatus } from '../utils/mercadoPagoStatus';
@@ -30,7 +32,9 @@ type PricingConfig = {
 export class FeaturedProductService {
   private repo = AppDataSource.getRepository(FeaturedProductRequest);
   private mercadoPago = new MercadoPagoService();
+  private openPix = new OpenPixService();
   private paymentAuditService = new PaymentAuditService();
+  private log = logger.child({ scope: 'FeaturedProductService' });
 
   private async resolveStore(storeId: string) {
     const store = await AppDataSource.getRepository(Store).findOne({ where: { id: storeId }, relations: ['owner'] });
@@ -236,34 +240,59 @@ export class FeaturedProductService {
     const payerName = String(user?.fullName || store?.owner?.fullName || store?.name || 'Cliente').trim();
 
     if (mpEnabled && payerEmail) {
-      const mp: any = await this.mercadoPago.createPayment({
-        amount,
-        method: paymentMethod,
-        description: `Destaque Hub ${durationUnit} - ${store.name}`,
-        externalReference: `featured_request:${created.id}`,
-        payer: {
-          email: payerEmail,
-          name: payerName,
-        },
-        auditContext: {
-          flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
-          entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
-          entityId: created.id,
-          storeId,
+      const description = `Destaque Hub ${durationUnit} - ${store.name}`;
+      // WAVE 1 OpenPix: PIX de plataforma. Cartão segue Mercado Pago (intacto).
+      if (paymentMethod === 'PIX' && isOpenPixPlatformPixEnabled()) {
+        try {
+          const charge = await this.openPix.createCharge({
+            correlationID: `featured_request:${created.id}`,
+            valueBrlCents: toOpenPixCents(amount),
+            expiresInSec: 30 * 60,
+            comment: description,
+          });
+          provider = 'OPENPIX';
+          providerId = charge.providerId;
+          paymentLink = null;
+          qrCodeBase64 = charge.qrCodeImageBase64;
+          qrCodeText = charge.brCode;
+          if (charge.expiresAt) providerExpiresAt = charge.expiresAt;
+        } catch (error) {
+          this.log.warn('OpenPix charge failed for featured request, falling back to Mercado Pago', {
+            requestId: created.id,
+            error,
+          });
+        }
+      }
+      if (provider !== 'OPENPIX') {
+        const mp: any = await this.mercadoPago.createPayment({
+          amount,
+          method: paymentMethod,
+          description,
           externalReference: `featured_request:${created.id}`,
-          eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
-        },
-      });
-      provider = 'MERCADO_PAGO';
-      providerId = String(mp?.providerId || '');
-      paymentLink = mp?.paymentLink || null;
-      qrCodeBase64 = mp?.qrCodeBase64
-        ? (String(mp.qrCodeBase64).startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`)
-        : null;
-      qrCodeText = mp?.qrCodeText || null;
-      if (mp?.expiresAt) {
-        const parsed = new Date(mp.expiresAt);
-        providerExpiresAt = Number.isFinite(parsed.getTime()) ? parsed : providerExpiresAt;
+          payer: {
+            email: payerEmail,
+            name: payerName,
+          },
+          auditContext: {
+            flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
+            entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
+            entityId: created.id,
+            storeId,
+            externalReference: `featured_request:${created.id}`,
+            eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
+          },
+        });
+        provider = 'MERCADO_PAGO';
+        providerId = String(mp?.providerId || '');
+        paymentLink = mp?.paymentLink || null;
+        qrCodeBase64 = mp?.qrCodeBase64
+          ? (String(mp.qrCodeBase64).startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`)
+          : null;
+        qrCodeText = mp?.qrCodeText || null;
+        if (mp?.expiresAt) {
+          const parsed = new Date(mp.expiresAt);
+          providerExpiresAt = Number.isFinite(parsed.getTime()) ? parsed : providerExpiresAt;
+        }
       }
     }
 
@@ -361,7 +390,7 @@ export class FeaturedProductService {
     return latest || current;
   }
 
-  async markPaidFromWebhook(requestId: string, mpPayment?: any) {
+  async markPaidFromWebhook(requestId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     const config = await this.loadPricingConfig();
     await AppDataSource.transaction(async (manager) => {
       const locked = await manager
@@ -375,7 +404,7 @@ export class FeaturedProductService {
 
       locked.paymentStatus = 'PAID';
       locked.paymentPaidAt = new Date();
-      locked.paymentProvider = 'MERCADO_PAGO';
+      locked.paymentProvider = provider;
       if (mpPayment?.id) locked.paymentProviderId = String(mpPayment.id);
       const mpQr = mpPayment?.point_of_interaction?.transaction_data?.qr_code_base64;
       const mpQrText = mpPayment?.point_of_interaction?.transaction_data?.qr_code;
@@ -400,7 +429,7 @@ export class FeaturedProductService {
       }
       await manager.save(locked);
       await this.paymentAuditService.record({
-        provider: 'MERCADO_PAGO',
+        provider,
         flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
         eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
         entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
@@ -419,17 +448,17 @@ export class FeaturedProductService {
     });
   }
 
-  async markFailedFromWebhook(requestId: string, mpPayment?: any) {
+  async markFailedFromWebhook(requestId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     const row = await this.repo.findOne({ where: { id: requestId } });
     if (!row) return;
     if (String(row.paymentStatus || '').toUpperCase() === 'PAID') return;
     row.paymentStatus = 'FAILED';
     row.status = 'PAYMENT_FAILED';
-    row.paymentProvider = 'MERCADO_PAGO';
+    row.paymentProvider = provider;
     if (mpPayment?.id) row.paymentProviderId = String(mpPayment.id);
     const saved = await this.repo.save(row);
     await this.paymentAuditService.record({
-      provider: 'MERCADO_PAGO',
+      provider,
       flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
       eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
       entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
@@ -447,7 +476,7 @@ export class FeaturedProductService {
     });
   }
 
-  async markPendingFromProvider(requestId: string, mpPayment?: any) {
+  async markPendingFromProvider(requestId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     const row = await this.repo.findOne({ where: { id: requestId }, relations: [ 'store' ] });
     if (!row) return;
     if (String(row.paymentStatus || '').toUpperCase() === 'PAID') return;
@@ -462,14 +491,14 @@ export class FeaturedProductService {
     if (previousFeaturedStatus === 'PAYMENT_FAILED') {
       row.status = 'PENDING_PAYMENT';
     }
-    row.paymentProvider = 'MERCADO_PAGO';
+    row.paymentProvider = provider;
     if (mpPayment?.id) row.paymentProviderId = String(mpPayment.id);
 
     const saved = await this.repo.save(row);
     if (!shouldRepair) return;
 
     await this.paymentAuditService.record({
-      provider: 'MERCADO_PAGO',
+      provider,
       flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
       eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
       entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,

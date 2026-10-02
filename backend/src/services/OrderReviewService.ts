@@ -14,6 +14,7 @@
 import { AppError } from '../errors/AppError';
 import { env } from '../config/env';
 import { MercadoPagoService } from './MercadoPagoService';
+import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
 import { OrderDeliveryRepository } from '../repositories/OrderDeliveryRepository';
 import { OrderRepository } from '../repositories/OrderRepository';
 import { OrderReviewRepository } from '../repositories/OrderReviewRepository';
@@ -47,6 +48,7 @@ type MarkTipPayoutInput = {
 
 export class OrderReviewService {
   private mercadoPagoService = new MercadoPagoService();
+  private openPixService = new OpenPixService();
   private accountService = new StorePaymentAccountService();
   private motoboyPaymentAccountService = new MotoboyPaymentAccountService();
   private orderRepository = new OrderRepository();
@@ -199,6 +201,33 @@ private async ensureTipPayment(order: any, review: any) {
     }
 
     if (chargeScope !== 'mock') {
+      // WAVE 1 OpenPix: gorjeta só migra quando a cobrança é da PLATAFORMA
+      // (sem token de loja/motoboy). Token de terceiro = settlement direto na
+      // conta MP do lojista/motoboy → PERMANECE Mercado Pago.
+      if (chargeScope === 'platform' && isOpenPixPlatformPixEnabled()) {
+        try {
+          const charge = await this.openPixService.createCharge({
+            correlationID: externalReference,
+            valueBrlCents: toOpenPixCents(tipAmount),
+            expiresInSec: 5 * 60,
+            comment: description,
+          });
+          provider = 'OPENPIX';
+          providerId = charge.providerId;
+          paymentLink = null;
+          qrCodeBase64 = charge.qrCodeImageBase64;
+          qrCodeText = charge.brCode;
+          expiresAt = charge.expiresAt || expiresAt;
+          tipSettlementMode = 'STORE_PAYOUT';
+        } catch (error) {
+          this.log.warn('Tip OpenPix charge failed, falling back to Mercado Pago platform charge', {
+            reviewId: review.id,
+            orderId: order.id,
+            error,
+          });
+        }
+      }
+      if (provider !== 'OPENPIX') {
       try {
         const mp = await this.mercadoPagoService.createPayment({
           amount: tipAmount,
@@ -280,6 +309,7 @@ private async ensureTipPayment(order: any, review: any) {
             message: 'Nao foi possivel gerar o Pix da gorjeta agora. Tente novamente em instantes.',
           });
         }
+      }
       }
     }
 
@@ -677,11 +707,11 @@ async publicStoreReviewsBySlug(slug: string, limit = 20, offset = 0) {
    *
    * @author Edmilson Lopes
    */
-async markTipPaidFromWebhook(reviewId: string, mpPayment: any) {
+async markTipPaidFromWebhook(reviewId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     const review = await this.orderReviewRepository.findById(reviewId);
     if (!review) return null;
     review.tipStatus = 'PAID';
-    review.tipProvider = 'MERCADO_PAGO';
+    review.tipProvider = provider;
     review.tipProviderId = mpPayment?.id ? String(mpPayment.id) : review.tipProviderId;
     review.tipPaymentLink = review.tipPaymentLink || mpPayment?.transaction_details?.external_resource_url || null;
     review.tipQrCodeText =
@@ -702,7 +732,7 @@ async markTipPaidFromWebhook(reviewId: string, mpPayment: any) {
     }
     const saved = await this.orderReviewRepository.saveReview(review);
     await this.paymentAuditService.record({
-      provider: 'MERCADO_PAGO',
+      provider,
       flowType: PAYMENT_AUDIT_FLOW.TIP,
       eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
       entityType: PAYMENT_AUDIT_ENTITY.ORDER_REVIEW,
@@ -736,16 +766,16 @@ async markTipPaidFromWebhook(reviewId: string, mpPayment: any) {
    *
    * @author Edmilson Lopes
    */
-async markTipFailedFromWebhook(reviewId: string, mpPayment: any) {
+async markTipFailedFromWebhook(reviewId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     const review = await this.orderReviewRepository.findById(reviewId);
     if (!review) return null;
     review.tipStatus = 'FAILED';
-    review.tipProvider = 'MERCADO_PAGO';
+    review.tipProvider = provider;
     review.tipProviderId = mpPayment?.id ? String(mpPayment.id) : review.tipProviderId;
     review.tipPaymentLink = review.tipPaymentLink || mpPayment?.transaction_details?.external_resource_url || null;
     const saved = await this.orderReviewRepository.saveReview(review);
     await this.paymentAuditService.record({
-      provider: 'MERCADO_PAGO',
+      provider,
       flowType: PAYMENT_AUDIT_FLOW.TIP,
       eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
       entityType: PAYMENT_AUDIT_ENTITY.ORDER_REVIEW,

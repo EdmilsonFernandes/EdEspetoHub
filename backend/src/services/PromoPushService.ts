@@ -4,6 +4,7 @@ import { PromoPush } from '../entities/PromoPush';
 import { Store } from '../entities/Store';
 import { AppError } from '../errors/AppError';
 import { MercadoPagoService } from './MercadoPagoService';
+import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
 import { PushNotificationService } from './PushNotificationService';
 import { logger } from '../utils/logger';
 
@@ -13,6 +14,7 @@ const log = logger.child({ scope: 'PromoPushService' });
 export class PromoPushService {
   private repo = AppDataSource.getRepository(PromoPush);
   private mercadoPago = new MercadoPagoService();
+  private openPix = new OpenPixService();
   private pushService = new PushNotificationService();
 
   async create(storeId: string, authStoreId: string | undefined, body: { title: string; message: string }) {
@@ -51,8 +53,32 @@ export class PromoPushService {
     let qrCodeBase64: string | null = null;
     let qrCodeText: string | null = null;
     let providerExpiresAt: Date | null = expiresAt;
+    let provider: string | null = null;
 
-    if (mpEnabled && payerEmail) {
+    // WAVE 1 OpenPix: PIX de plataforma (sempre token da plataforma neste fluxo).
+    if (isOpenPixPlatformPixEnabled()) {
+      try {
+        const charge = await this.openPix.createCharge({
+          correlationID: `promo_push:${created.id}`,
+          valueBrlCents: toOpenPixCents(PROMO_PUSH_PRICE),
+          expiresInSec: 30 * 60,
+          comment: `Push Promocional - ${store.name}`,
+        });
+        provider = 'OPENPIX';
+        providerId = charge.providerId;
+        paymentLink = null;
+        qrCodeBase64 = charge.qrCodeImageBase64;
+        qrCodeText = charge.brCode;
+        if (charge.expiresAt) providerExpiresAt = charge.expiresAt;
+      } catch (error) {
+        log.warn('OpenPix charge failed for promo push, falling back to Mercado Pago', {
+          pushId: created.id,
+          error,
+        });
+      }
+    }
+
+    if (!qrCodeText && mpEnabled && payerEmail) {
       const mp: any = await this.mercadoPago.createPayment({
         amount: PROMO_PUSH_PRICE,
         method: 'PIX',
@@ -66,6 +92,7 @@ export class PromoPushService {
         ? (String(mp.qrCodeBase64).startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`)
         : null;
       qrCodeText = mp?.qrCodeText || null;
+      provider = 'MERCADO_PAGO';
       if (mp?.expiresAt) {
         const parsed = new Date(mp.expiresAt);
         if (Number.isFinite(parsed.getTime())) providerExpiresAt = parsed;
@@ -81,6 +108,7 @@ export class PromoPushService {
       });
     }
 
+    created.paymentProvider = provider;
     created.paymentProviderId = providerId;
     created.paymentLink = paymentLink;
     created.paymentQrCodeBase64 = qrCodeBase64;
@@ -123,7 +151,29 @@ export class PromoPushService {
     if (authStoreId && authStoreId !== storeId) throw new AppError('AUTH-003', 403);
     const row = await this.repo.findOne({ where: { id: pushId, storeId } });
     if (!row) throw new AppError('NOT-001', 404);
-    if (!row.paymentProviderId || !env.mercadoPago.accessToken) return this.serialize(row);
+    if (!row.paymentProviderId) return this.serialize(row);
+
+    // WAVE 1 OpenPix: polling por correlationID.
+    if (String(row.paymentProvider || '').toUpperCase() === 'OPENPIX') {
+      try {
+        const charge = await this.openPix.getCharge(row.paymentProviderId);
+        const status = String(charge?.status || '').toUpperCase();
+        if (status === 'COMPLETED') {
+          row.paymentStatus = 'PAID';
+          row.paymentPaidAt = new Date();
+          row.status = 'PENDING_APPROVAL';
+          await this.repo.save(row);
+        } else if (status === 'EXPIRED') {
+          row.paymentStatus = 'FAILED';
+          await this.repo.save(row);
+        }
+      } catch (err) {
+        log.warn('PromoPush OpenPix refresh payment failed', { pushId, error: err });
+      }
+      return this.serialize(row);
+    }
+
+    if (!env.mercadoPago.accessToken) return this.serialize(row);
 
     try {
       const response = await fetch(`${env.mercadoPago.apiBaseUrl}/v1/payments/${row.paymentProviderId}`, {
@@ -145,6 +195,35 @@ export class PromoPushService {
       log.warn('PromoPush refresh payment failed', { pushId, error: err });
     }
     return this.serialize(row);
+  }
+
+  /**
+   * WAVE 1: webhook compartilhado (PaymentService.applyProviderStatus) marca o
+   * push como pago → entra na fila de aprovação do super admin (mesmo estado
+   * que o polling de refreshPayment aplica). Idempotente pelo paymentStatus.
+   */
+  async markPaidFromWebhook(pushId: string, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+    const row = await this.repo.findOne({ where: { id: pushId } });
+    if (!row) return null;
+    if (String(row.paymentStatus || '').toUpperCase() === 'PAID') return row;
+    row.paymentStatus = 'PAID';
+    row.paymentPaidAt = new Date();
+    row.paymentProvider = provider;
+    row.status = 'PENDING_APPROVAL';
+    const saved = await this.repo.save(row);
+    log.info('PromoPush marked paid from webhook', { pushId, provider });
+    return saved;
+  }
+
+  async markFailedFromWebhook(pushId: string, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+    const row = await this.repo.findOne({ where: { id: pushId } });
+    if (!row) return null;
+    if (String(row.paymentStatus || '').toUpperCase() === 'PAID') return row;
+    row.paymentStatus = 'FAILED';
+    row.paymentProvider = provider;
+    const saved = await this.repo.save(row);
+    log.warn('PromoPush marked failed from webhook', { pushId, provider });
+    return saved;
   }
 
   async approve(pushId: string) {
@@ -204,6 +283,7 @@ export class PromoPushService {
       priceAmount: Number(row.priceAmount),
       paymentMethod: row.paymentMethod,
       paymentStatus: row.paymentStatus,
+      paymentProvider: row.paymentProvider || null,
       paymentProviderId: row.paymentProviderId || null,
       paymentLink: row.paymentLink || null,
       paymentQrCodeBase64: row.paymentQrCodeBase64 || null,

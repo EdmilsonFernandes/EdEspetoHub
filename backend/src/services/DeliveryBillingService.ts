@@ -19,6 +19,7 @@ import { Order } from '../entities/Order';
 import { SettingsService } from './SettingsService';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { MercadoPagoService } from './MercadoPagoService';
+import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
 import { logger } from '../utils/logger';
 import { PaymentAuditService } from './PaymentAuditService';
 import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
@@ -41,6 +42,7 @@ export class DeliveryBillingService {
   private settingsService = new SettingsService();
   private storeRepository = new StoreRepository();
   private mpService = new MercadoPagoService();
+  private openPixService = new OpenPixService();
   private paymentAuditService = new PaymentAuditService();
   private log = logger.child({ scope: 'DeliveryBillingService' });
 
@@ -165,6 +167,32 @@ private async ensurePayment(cycle: DeliveryBillingCycle) {
 
     const amount = Number(cycle.totalDue || cycle.subtotal || 0);
     if (amount <= 0) return cycle;
+
+    // WAVE 1 OpenPix: taxa de entrega (sempre token da PLATAFORMA) migra o PIX
+    // pro OpenPix quando habilitado; falha cai pro Mercado Pago (intacto).
+    if (isOpenPixPlatformPixEnabled()) {
+      try {
+        const charge = await this.openPixService.createCharge({
+          correlationID: `delivery_cycle:${cycle.id}`,
+          valueBrlCents: toOpenPixCents(amount),
+          expiresInSec: 30 * 60,
+          comment: `Taxa de entregas - ${store.name}`,
+        });
+        cycle.provider = 'OPENPIX';
+        cycle.providerId = charge.providerId;
+        cycle.paymentLink = null;
+        cycle.qrCodeBase64 = charge.qrCodeImageBase64;
+        cycle.qrCodeText = charge.brCode;
+        if (charge.expiresAt) cycle.expiresAt = charge.expiresAt;
+        const openPixRepo = AppDataSource.getRepository(DeliveryBillingCycle);
+        return openPixRepo.save(cycle);
+      } catch (error) {
+        this.log.warn('OpenPix charge failed for delivery cycle, falling back to Mercado Pago', {
+          cycleId: cycle.id,
+          error,
+        });
+      }
+    }
 
     const mpPayment = await this.mpService.createPayment({
       amount,
@@ -291,18 +319,18 @@ async ensurePaymentForCycle(storeId: string) {
    *
    * @author Edmilson Lopes
    */
-async markPaidFromWebhook(cycleId: string, mpPayment: any) {
+async markPaidFromWebhook(cycleId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);
     const cycle = await repo.findOne({ where: { id: cycleId } });
     if (!cycle) return null;
     cycle.paymentStatus = 'PAID';
     cycle.status = 'PAID';
     cycle.paidAt = new Date();
-    cycle.provider = 'MERCADO_PAGO';
+    cycle.provider = provider;
     cycle.providerId = mpPayment?.id ? String(mpPayment.id) : cycle.providerId;
     const saved = await repo.save(cycle);
     await this.paymentAuditService.record({
-      provider: 'MERCADO_PAGO',
+      provider,
       flowType: PAYMENT_AUDIT_FLOW.DELIVERY_CYCLE,
       eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
       entityType: PAYMENT_AUDIT_ENTITY.DELIVERY_BILLING_CYCLE,
@@ -323,17 +351,17 @@ async markPaidFromWebhook(cycleId: string, mpPayment: any) {
    *
    * @author Edmilson Lopes
    */
-async markFailedFromWebhook(cycleId: string, mpPayment: any) {
+async markFailedFromWebhook(cycleId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);
     const cycle = await repo.findOne({ where: { id: cycleId } });
     if (!cycle) return null;
     cycle.paymentStatus = 'FAILED';
     cycle.status = 'OVERDUE';
-    cycle.provider = 'MERCADO_PAGO';
+    cycle.provider = provider;
     cycle.providerId = mpPayment?.id ? String(mpPayment.id) : cycle.providerId;
     const saved = await repo.save(cycle);
     await this.paymentAuditService.record({
-      provider: 'MERCADO_PAGO',
+      provider,
       flowType: PAYMENT_AUDIT_FLOW.DELIVERY_CYCLE,
       eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
       entityType: PAYMENT_AUDIT_ENTITY.DELIVERY_BILLING_CYCLE,

@@ -2,7 +2,9 @@ import { AppDataSource } from '../config/database';
 import { env } from '../config/env';
 import { DestinationPromotion } from '../entities/DestinationPromotion';
 import { AppError } from '../errors/AppError';
+import { logger } from '../utils/logger';
 import { MercadoPagoService } from './MercadoPagoService';
+import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
 import { PaymentAuditService } from './PaymentAuditService';
 import {
   PAYMENT_AUDIT_ENTITY,
@@ -33,7 +35,9 @@ const PROMO_PREFIX = 'destination_promo';
 export class DestinationPromotionService {
   private repo = AppDataSource.getRepository(DestinationPromotion);
   private mercadoPago = new MercadoPagoService();
+  private openPix = new OpenPixService();
   private paymentAuditService = new PaymentAuditService();
+  private log = logger.child({ scope: 'DestinationPromotionService' });
 
   private normalizeDurationUnit(input?: string): DurationUnit {
     const value = String(input || '').trim().toUpperCase();
@@ -234,34 +238,60 @@ export class DestinationPromotionService {
     let paymentLink: string | null = null;
     let qrCodeBase64: string | null = null;
     let qrCodeText: string | null = null;
+    let usedProvider: string | null = null;
 
     if (mpEnabled) {
-      const mp: any = await this.mercadoPago.createPayment({
-        amount,
-        method: paymentMethod,
-        description: `Destaque Destino ${durationUnit} - ${resource.name}`,
-        externalReference: `${PROMO_PREFIX}:${created.id}`,
-        // Email determinístico, nunca o dono da conta MP (evita 4390 payer email forbidden).
-        payer: {
-          email: `destaque.destino+${created.id}@janocaminho.com.br`,
-          name: `Parceiro - ${resource.name}`.slice(0, 80),
-        },
-        auditContext: {
-          flowType: PAYMENT_AUDIT_FLOW.DESTINATION_PROMO,
-          entityType: PAYMENT_AUDIT_ENTITY.DESTINATION_PROMO,
-          entityId: created.id,
+      const description = `Destaque Destino ${durationUnit} - ${resource.name}`;
+      // WAVE 1 OpenPix: PIX de plataforma. Cartão segue Mercado Pago (intacto).
+      if (paymentMethod === 'PIX' && isOpenPixPlatformPixEnabled()) {
+        try {
+          const charge = await this.openPix.createCharge({
+            correlationID: `${PROMO_PREFIX}:${created.id}`,
+            valueBrlCents: toOpenPixCents(amount),
+            expiresInSec: 30 * 60,
+            comment: description,
+          });
+          providerId = charge.providerId;
+          paymentLink = null;
+          qrCodeBase64 = charge.qrCodeImageBase64;
+          qrCodeText = charge.brCode;
+          usedProvider = 'OPENPIX';
+        } catch (error) {
+          this.log.warn('OpenPix charge failed for destination promo, falling back to Mercado Pago', {
+            promotionId: created.id,
+            error,
+          });
+        }
+      }
+      if (!qrCodeText) {
+        const mp: any = await this.mercadoPago.createPayment({
+          amount,
+          method: paymentMethod,
+          description,
           externalReference: `${PROMO_PREFIX}:${created.id}`,
-          eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
-        },
-      });
-      providerId = String(mp?.providerId || '');
-      paymentLink = mp?.paymentLink || null;
-      qrCodeBase64 = mp?.qrCodeBase64
-        ? String(mp.qrCodeBase64).startsWith('data:image')
-          ? mp.qrCodeBase64
-          : `data:image/png;base64,${mp.qrCodeBase64}`
-        : null;
-      qrCodeText = mp?.qrCodeText || null;
+          // Email determinístico, nunca o dono da conta MP (evita 4390 payer email forbidden).
+          payer: {
+            email: `destaque.destino+${created.id}@janocaminho.com.br`,
+            name: `Parceiro - ${resource.name}`.slice(0, 80),
+          },
+          auditContext: {
+            flowType: PAYMENT_AUDIT_FLOW.DESTINATION_PROMO,
+            entityType: PAYMENT_AUDIT_ENTITY.DESTINATION_PROMO,
+            entityId: created.id,
+            externalReference: `${PROMO_PREFIX}:${created.id}`,
+            eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
+          },
+        });
+        providerId = String(mp?.providerId || '');
+        paymentLink = mp?.paymentLink || null;
+        qrCodeBase64 = mp?.qrCodeBase64
+          ? String(mp.qrCodeBase64).startsWith('data:image')
+            ? mp.qrCodeBase64
+            : `data:image/png;base64,${mp.qrCodeBase64}`
+          : null;
+        qrCodeText = mp?.qrCodeText || null;
+        usedProvider = 'MERCADO_PAGO';
+      }
     }
 
     // Nunca gerar QR fake: se não veio payload válido, propagar erro claro.
@@ -273,7 +303,7 @@ export class DestinationPromotionService {
       });
     }
 
-    created.paymentProvider = mpEnabled ? 'MERCADO_PAGO' : null;
+    created.paymentProvider = usedProvider;
     created.paymentProviderId = providerId;
     created.paymentLink = paymentLink;
     created.paymentQrCodeBase64 = qrCodeBase64;
@@ -309,6 +339,21 @@ export class DestinationPromotionService {
 
     const provider = normalizeStatus(current.paymentProvider || undefined);
     const providerId = String(current.paymentProviderId || '').trim();
+
+    // WAVE 1 OpenPix: polling por correlationID (providerId = correlationID).
+    if (provider === 'OPENPIX' && providerId) {
+      try {
+        const charge = await this.openPix.getCharge(providerId);
+        const openPixStatus = String(charge?.status || '').toUpperCase();
+        if (openPixStatus === 'COMPLETED') await this.markPaidFromWebhook(promotionId, { id: providerId, status: 'approved' }, 'OPENPIX');
+        else if (openPixStatus === 'EXPIRED') await this.markFailedFromWebhook(promotionId, { id: providerId, status: 'cancelled' }, 'OPENPIX');
+      } catch {
+        /* mantém estado atual */
+      }
+      const latest = await this.repo.findOne({ where: { id: promotionId } });
+      return latest || current;
+    }
+
     if (provider !== 'MERCADO_PAGO' || !providerId || !env.mercadoPago.accessToken) return current;
 
     try {
@@ -331,7 +376,7 @@ export class DestinationPromotionService {
     return latest || current;
   }
 
-  async markPaidFromWebhook(promotionId: string, mpPayment?: any) {
+  async markPaidFromWebhook(promotionId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     await AppDataSource.transaction(async (manager) => {
       const locked = await manager
         .getRepository(DestinationPromotion)
@@ -344,7 +389,7 @@ export class DestinationPromotionService {
 
       locked.paymentStatus = 'PAID';
       locked.paymentPaidAt = new Date();
-      locked.paymentProvider = 'MERCADO_PAGO';
+      locked.paymentProvider = provider;
       if (mpPayment?.id) locked.paymentProviderId = String(mpPayment.id);
 
       const durationDays = Math.max(1, Number(locked.durationDays || 1));
@@ -356,7 +401,7 @@ export class DestinationPromotionService {
       await manager.save(locked);
       await this.paymentAuditService.record(
         {
-          provider: 'MERCADO_PAGO',
+          provider,
           flowType: PAYMENT_AUDIT_FLOW.DESTINATION_PROMO,
           eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
           entityType: PAYMENT_AUDIT_ENTITY.DESTINATION_PROMO,
@@ -374,17 +419,17 @@ export class DestinationPromotionService {
     await this.reconcileExpired();
   }
 
-  async markFailedFromWebhook(promotionId: string, mpPayment?: any) {
+  async markFailedFromWebhook(promotionId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     const row = await this.repo.findOne({ where: { id: promotionId } });
     if (!row) return;
     if (normalizeStatus(row.paymentStatus) === 'PAID') return;
     row.paymentStatus = 'FAILED';
     row.status = 'PAYMENT_FAILED';
-    row.paymentProvider = 'MERCADO_PAGO';
+    row.paymentProvider = provider;
     if (mpPayment?.id) row.paymentProviderId = String(mpPayment.id);
     const saved = await this.repo.save(row);
     await this.paymentAuditService.record({
-      provider: 'MERCADO_PAGO',
+      provider,
       flowType: PAYMENT_AUDIT_FLOW.DESTINATION_PROMO,
       eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
       entityType: PAYMENT_AUDIT_ENTITY.DESTINATION_PROMO,
@@ -398,13 +443,13 @@ export class DestinationPromotionService {
     });
   }
 
-  async markPendingFromProvider(promotionId: string, mpPayment?: any) {
+  async markPendingFromProvider(promotionId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     const row = await this.repo.findOne({ where: { id: promotionId } });
     if (!row) return;
     if (normalizeStatus(row.paymentStatus) === 'PAID') return;
     row.paymentStatus = 'PENDING';
     if (normalizeStatus(row.status) === 'PAYMENT_FAILED') row.status = 'PENDING_PAYMENT';
-    row.paymentProvider = 'MERCADO_PAGO';
+    row.paymentProvider = provider;
     if (mpPayment?.id) row.paymentProviderId = String(mpPayment.id);
     await this.repo.save(row);
   }

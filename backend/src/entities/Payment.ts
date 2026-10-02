@@ -25,7 +25,8 @@ import { Subscription } from './Subscription';
 
 export type PaymentMethod = 'PIX' | 'CREDIT_CARD' | 'BOLETO';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED';
-export type PaymentProvider = 'MERCADO_PAGO' | 'MOCK';
+// WAVE 1 OpenPix: coluna varchar aceita 'OPENPIX' sem DDL (default segue MOCK).
+export type PaymentProvider = 'MERCADO_PAGO' | 'MOCK' | 'OPENPIX';
 
 @Entity({ name: 'payments' })
 /**

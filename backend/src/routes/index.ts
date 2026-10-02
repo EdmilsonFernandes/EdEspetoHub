@@ -138,6 +138,8 @@ routes.post('/subscriptions/:id/renew', SubscriptionController.renew);
 routes.patch('/subscriptions/:id/status', SubscriptionController.updateStatus);
 routes.post('/webhooks/payment-confirmed', PaymentController.confirm);
 routes.post('/webhooks/mercadopago', PaymentController.mercadoPagoWebhook);
+// WAVE 1 OpenPix: PIX de plataforma (assinatura/destaques/push/taxa-entrega/gorjeta).
+routes.post('/webhooks/openpix', PaymentController.openPixWebhook);
 routes.post('/webhooks/didit', DiditWebhookController.webhook);
 routes.get('/payment-accounts/mercadopago/callback', StorePaymentAccountController.mercadoPagoCallback);
 routes.get('/stores/:storeId/payments', requireAuth, requireRole('ADMIN'), PaymentController.listByStore);

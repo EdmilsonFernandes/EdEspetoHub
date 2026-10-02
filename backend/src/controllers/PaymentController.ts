@@ -156,6 +156,46 @@ export class PaymentController {
 
 
   /**
+   * Webhook OpenPix (WAVE 1 PIX de plataforma). O OpenPix NÃO assina o payload
+   * (sem HMAC como o x-signature do MP) — a defesa é interna no service:
+   * registro PENDING existe + valor bate + idempotente pelo status local.
+   * Sempre responde 200: o OpenPix re-tenta em loop qualquer não-2xx.
+   *
+   * Payload oficial: { event, charge: { correlationID, status, value },
+   * payment: { correlationID?, status, value } } — parse defensivo.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-10-02
+   */
+  static async openPixWebhook(req: Request, res: Response) {
+    const body = req.body || {};
+    const charge = body.charge || {};
+    const payment = body.payment || {};
+    const correlationID = String(
+      charge.correlationID ?? payment.correlationID ?? body.correlationID ?? ''
+    );
+    const status = String(charge.status ?? payment.status ?? body.status ?? '');
+    const valueCents = Number(payment.value ?? charge.value ?? body.value ?? 0);
+
+    log.info('OpenPix webhook received', { correlationID, status, valueCents });
+    if (!correlationID) {
+      return res.status(200).json({ status: 'ok', ignored: 'sem correlationID' });
+    }
+
+    try {
+      const result = await paymentService.confirmOpenPixWebhookCharge({
+        correlationID,
+        status,
+        valueCents,
+      });
+      return res.status(200).json({ status: 'ok', result });
+    } catch (error: any) {
+      log.warn('OpenPix webhook failed', { correlationID, error });
+      return res.status(200).json({ status: 'ok', ignored: 'erro interno' });
+    }
+  }
+
+  /**
    * Gets by id.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)

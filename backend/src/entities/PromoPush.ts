@@ -32,6 +32,10 @@ export class PromoPush {
   @Column({ name: 'payment_status', type: 'varchar', default: 'PENDING' })
   paymentStatus!: string;
 
+  // WAVE 1 OpenPix: null = legado Mercado Pago; 'OPENPIX' = cobrança por correlationID.
+  @Column({ name: 'payment_provider', type: 'varchar', nullable: true })
+  paymentProvider?: string | null;
+
   @Column({ name: 'payment_provider_id', type: 'varchar', nullable: true })
   paymentProviderId?: string | null;
 

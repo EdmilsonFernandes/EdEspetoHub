@@ -18,8 +18,15 @@ import { Subscription } from '../entities/Subscription';
 import { Plan } from '../entities/Plan';
 import { User } from '../entities/User';
 import { Store } from '../entities/Store';
+import { DeliveryBillingCycle } from '../entities/DeliveryBillingCycle';
+import { FeaturedProductRequest } from '../entities/FeaturedProductRequest';
+import { DestinationPromotion } from '../entities/DestinationPromotion';
+import { OrderReview } from '../entities/OrderReview';
+import { PromoPush } from '../entities/PromoPush';
 import { AppDataSource } from '../config/database';
 import { MercadoPagoService } from './MercadoPagoService';
+import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
+import { PromoPushService } from './PromoPushService';
 import { DestinationPromotionService } from './DestinationPromotionService';
 import { env } from '../config/env';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
@@ -44,6 +51,8 @@ import { isMercadoPagoApprovedStatus, isMercadoPagoFailedStatus, isMercadoPagoPe
  */
 export class PaymentService {
   private mercadoPago = new MercadoPagoService();
+  private openPix = new OpenPixService();
+  private promoPushService = new PromoPushService();
   private paymentEventRepository = new PaymentEventRepository();
   private emailService = new EmailService();
   private deliveryBillingService = new DeliveryBillingService();
@@ -250,6 +259,33 @@ private resolvePlanChargeAmount(plan: Plan) {
     const description = `Assinatura ${planLabel} - ${data.store.name}`;
     const mercadoPagoEnabled = Boolean(env.mercadoPago.accessToken);
 
+    // WAVE 1 OpenPix: PIX de plataforma com correlationID = payment.id (mesma
+    // external reference do fluxo MP). Cartão/boleto seguem Mercado Pago.
+    if (data.method === 'PIX' && isOpenPixPlatformPixEnabled()) {
+      try {
+        const charge = await this.openPix.createCharge({
+          correlationID: String(payment.id),
+          valueBrlCents: toOpenPixCents(chargeAmount),
+          expiresInSec: 30 * 60,
+          comment: description,
+        });
+        payment.provider = 'OPENPIX';
+        payment.providerId = charge.providerId;
+        payment.qrCodeBase64 = charge.qrCodeImageBase64;
+        payment.qrCodeText = charge.brCode;
+        if (charge.expiresAt) payment.expiresAt = charge.expiresAt;
+        await paymentRepo.save(payment);
+        await this.notifySubscriptionCreated(payment, data);
+        return payment;
+      } catch (error) {
+        // OpenPix fora do ar → cai pro Mercado Pago (resiliência, MP intacto).
+        this.log.warn('OpenPix charge failed, falling back to Mercado Pago', {
+          paymentId: payment.id,
+          error,
+        });
+      }
+    }
+
     if (mercadoPagoEnabled) {
       try {
         const mpPayment = await this.mercadoPago.createPayment({
@@ -389,7 +425,7 @@ private resolvePlanChargeAmount(plan: Plan) {
       throw new AppError('PAY-004', 404);
     }
 
-    return this.applyMercadoPagoStatus(mpPayment);
+    return this.applyProviderStatus('MERCADO_PAGO', mpPayment);
   }
 
   /**
@@ -411,12 +447,163 @@ private resolvePlanChargeAmount(plan: Plan) {
       throw new AppError('PAY-005', 400);
     }
 
+    // WAVE 1 OpenPix: polling por correlationID (status COMPLETED/EXPIRED/GENERATED).
+    if (String(payment.provider || '').toUpperCase() === 'OPENPIX') {
+      const charge = await this.openPix.getCharge(mpId);
+      if (!charge) throw new AppError('PAY-004', 404);
+      const providerStatus = String(charge?.status || '').toUpperCase();
+      const mapped =
+        providerStatus === 'COMPLETED' ? 'approved' : providerStatus === 'EXPIRED' ? 'cancelled' : 'pending';
+      return this.applyProviderStatus(
+        'OPENPIX',
+        {
+          external_reference: String(charge?.correlationID || mpId),
+          status: mapped,
+          status_detail: `openpix_${providerStatus.toLowerCase() || 'unknown'}`,
+          id: String(charge?.correlationID || mpId),
+          transaction_amount: Number(charge?.value || 0) / 100,
+        },
+        charge
+      );
+    }
+
     const mpPayment = await this.getMercadoPagoPaymentAnyAccessToken(mpId);
     if (!mpPayment) {
       throw new AppError('PAY-004', 404);
     }
 
-    return this.applyMercadoPagoStatus(mpPayment);
+    return this.applyProviderStatus('MERCADO_PAGO', mpPayment);
+  }
+
+  /**
+   * Webhook OpenPix (Wave 1). O OpenPix NÃO assina o payload (sem HMAC) — a
+   * defesa é tripla: registro PENDING existe + valor bate + idempotente pelo
+   * status local. Só despacha COMPLETED (approved) / EXPIRED (cancelled);
+   * demais status são ack sem efeito. correlationID nunca vem do cliente.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-10-02
+   */
+  async confirmOpenPixWebhookCharge(payload: {
+    correlationID: string;
+    status: string;
+    valueCents?: number | null;
+  }) {
+    const correlationID = String(payload?.correlationID || '').trim();
+    const providerStatus = String(payload?.status || '').toUpperCase();
+    const valueCents = Math.round(Number(payload?.valueCents ?? 0));
+    this.log.info('OpenPix webhook received', { correlationID, status: providerStatus, valueCents });
+
+    if (!correlationID) return { status: 'ignored', reason: 'sem correlationID' };
+    if (providerStatus && providerStatus !== 'COMPLETED' && providerStatus !== 'EXPIRED') {
+      return { status: 'ignored', reason: `status=${providerStatus}` };
+    }
+
+    const guard = await this.validateOpenPixWebhookCharge(correlationID, valueCents);
+    if (!guard.ok) {
+      this.log.warn('OpenPix webhook recusado', { correlationID, valueCents, reason: guard.reason });
+      return { status: 'ignored', reason: guard.reason };
+    }
+
+    const mappedStatus = providerStatus === 'EXPIRED' ? 'cancelled' : 'approved';
+    const pseudoPayment = {
+      external_reference: correlationID,
+      status: mappedStatus,
+      status_detail: `openpix_${String(providerStatus || 'unknown').toLowerCase()}`,
+      id: correlationID,
+      transaction_amount: valueCents / 100,
+    };
+    const result = await this.applyProviderStatus('OPENPIX', pseudoPayment, {
+      correlationID,
+      status: providerStatus,
+      value: valueCents,
+    });
+    this.log.info('OpenPix webhook processed', { correlationID, result: result?.status });
+    return result;
+  }
+
+  /**
+   * Defesas do webhook OpenPix por prefixo do correlationID: registro existe,
+   * está PENDING (idempotência em reenvio) e o valor bate com o cobrado.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-10-02
+   */
+  private async validateOpenPixWebhookCharge(
+    correlationID: string,
+    valueCents: number
+  ): Promise<{ ok: true } | { ok: false; reason: string }> {
+    const matchesCents = (expectedBrl: unknown) => {
+      const expectedCents = Math.round(Number(expectedBrl || 0) * 100);
+      return Number.isFinite(valueCents) && valueCents > 0 && valueCents === expectedCents;
+    };
+    try {
+      if (correlationID.startsWith('delivery_cycle:')) {
+        const cycle = await AppDataSource.getRepository(DeliveryBillingCycle).findOne({
+          where: { id: correlationID.replace('delivery_cycle:', '') },
+        });
+        if (!cycle) return { ok: false, reason: 'ciclo inexistente' };
+        if (cycle.paymentStatus === 'PAID') return { ok: false, reason: 'ciclo já pago (idempotente)' };
+        if (!matchesCents(cycle.totalDue ?? cycle.subtotal)) return { ok: false, reason: 'valor divergente' };
+        return { ok: true };
+      }
+      if (correlationID.startsWith('review_tip:')) {
+        const review = await AppDataSource.getRepository(OrderReview).findOne({
+          where: { id: correlationID.replace('review_tip:', '') },
+        });
+        if (!review) return { ok: false, reason: 'avaliação inexistente' };
+        if (String(review.tipStatus || '').toUpperCase() === 'PAID') {
+          return { ok: false, reason: 'gorjeta já paga (idempotente)' };
+        }
+        if (!matchesCents(review.tipAmount)) return { ok: false, reason: 'valor divergente' };
+        return { ok: true };
+      }
+      if (correlationID.startsWith('featured_request:')) {
+        const request = await AppDataSource.getRepository(FeaturedProductRequest).findOne({
+          where: { id: correlationID.replace('featured_request:', '') },
+        });
+        if (!request) return { ok: false, reason: 'solicitação inexistente' };
+        if (String(request.paymentStatus || '').toUpperCase() === 'PAID') {
+          return { ok: false, reason: 'destaque já pago (idempotente)' };
+        }
+        if (!matchesCents(request.priceAmount)) return { ok: false, reason: 'valor divergente' };
+        return { ok: true };
+      }
+      if (correlationID.startsWith('destination_promo:')) {
+        const promo = await AppDataSource.getRepository(DestinationPromotion).findOne({
+          where: { id: correlationID.replace('destination_promo:', '') },
+        });
+        if (!promo) return { ok: false, reason: 'promoção inexistente' };
+        if (String(promo.paymentStatus || '').toUpperCase() === 'PAID') {
+          return { ok: false, reason: 'promoção já paga (idempotente)' };
+        }
+        if (!matchesCents(promo.priceAmount)) return { ok: false, reason: 'valor divergente' };
+        return { ok: true };
+      }
+      if (correlationID.startsWith('promo_push:')) {
+        const push = await AppDataSource.getRepository(PromoPush).findOne({
+          where: { id: correlationID.replace('promo_push:', '') },
+        });
+        if (!push) return { ok: false, reason: 'push inexistente' };
+        if (String(push.paymentStatus || '').toUpperCase() === 'PAID') {
+          return { ok: false, reason: 'push já pago (idempotente)' };
+        }
+        if (!matchesCents(push.priceAmount)) return { ok: false, reason: 'valor divergente' };
+        return { ok: true };
+      }
+      // Default = assinatura (correlationID = payment.id, sem prefixo).
+      const payment = await AppDataSource.getRepository(Payment).findOne({
+        where: { id: correlationID },
+      });
+      if (!payment) return { ok: false, reason: 'pagamento inexistente' };
+      if (payment.status === 'PAID') return { ok: false, reason: 'pagamento já pago (idempotente)' };
+      if (payment.status === 'FAILED') return { ok: false, reason: 'pagamento falido' };
+      if (!matchesCents(payment.amount)) return { ok: false, reason: 'valor divergente' };
+      return { ok: true };
+    } catch (error) {
+      this.log.warn('OpenPix webhook validation error', { correlationID, error });
+      return { ok: false, reason: 'erro na validação local' };
+    }
   }
 
 
@@ -445,17 +632,23 @@ private resolvePlanChargeAmount(plan: Plan) {
 
 
   /**
-   * Maps Mercado Pago status to local payment/subscription transitions.
+   * Maps provider status to local payment/subscription transitions.
+   * WAVE 1: dispatch por prefixo do external_reference compartilhado entre
+   * Mercado Pago (webhook oficial) e OpenPix (webhook/polling — pseudo-payment).
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
-  private async applyMercadoPagoStatus(mpPayment: any) {
+  private async applyProviderStatus(
+    provider: 'MERCADO_PAGO' | 'OPENPIX',
+    mpPayment: any,
+    rawPayload?: any
+  ) {
     if (mpPayment.external_reference) {
       const paymentId = String(mpPayment.external_reference);
       const auditByReference = async (flowType: string, entityType: string, entityId: string, storeId?: string | null) => {
         await this.paymentAuditService.record({
-          provider: 'MERCADO_PAGO',
+          provider,
           flowType,
           eventStage: PAYMENT_AUDIT_STAGE.WEBHOOK_RECEIVED,
           entityType,
@@ -465,7 +658,7 @@ private resolvePlanChargeAmount(plan: Plan) {
           providerPaymentId: mpPayment?.id ? String(mpPayment.id) : null,
           providerStatus: mpPayment?.status || null,
           providerStatusDetail: mpPayment?.status_detail || null,
-          responsePayload: mpPayment || null,
+          responsePayload: rawPayload || mpPayment || null,
           success: String(mpPayment?.status || '').toLowerCase() === 'approved',
         });
       };
@@ -473,9 +666,9 @@ private resolvePlanChargeAmount(plan: Plan) {
         const cycleId = paymentId.replace('delivery_cycle:', '');
         await auditByReference(PAYMENT_AUDIT_FLOW.DELIVERY_CYCLE, PAYMENT_AUDIT_ENTITY.DELIVERY_BILLING_CYCLE, cycleId);
         if (isMercadoPagoApprovedStatus(mpPayment.status)) {
-          await this.deliveryBillingService.markPaidFromWebhook(cycleId, mpPayment);
+          await this.deliveryBillingService.markPaidFromWebhook(cycleId, mpPayment, provider);
         } else if (isMercadoPagoFailedStatus(mpPayment.status)) {
-          await this.deliveryBillingService.markFailedFromWebhook(cycleId, mpPayment);
+          await this.deliveryBillingService.markFailedFromWebhook(cycleId, mpPayment, provider);
         }
         return { status: mpPayment.status };
       }
@@ -485,9 +678,9 @@ private resolvePlanChargeAmount(plan: Plan) {
         const tipStatus = String(mpPayment?.status || '').toLowerCase();
         const failedTipStatuses = new Set(['rejected', 'cancelled', 'charged_back', 'refunded', 'failed']);
         if (tipStatus === 'approved') {
-          await this.orderReviewService.markTipPaidFromWebhook(reviewId, mpPayment);
+          await this.orderReviewService.markTipPaidFromWebhook(reviewId, mpPayment, provider);
         } else if (failedTipStatuses.has(tipStatus)) {
-          await this.orderReviewService.markTipFailedFromWebhook(reviewId, mpPayment);
+          await this.orderReviewService.markTipFailedFromWebhook(reviewId, mpPayment, provider);
         } else {
           this.log.debug('Ignoring non-terminal Mercado Pago tip status', {
             reviewId,
@@ -501,11 +694,11 @@ private resolvePlanChargeAmount(plan: Plan) {
         const requestId = paymentId.replace('featured_request:', '');
         await auditByReference(PAYMENT_AUDIT_FLOW.FEATURED_REQUEST, PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST, requestId);
         if (isMercadoPagoApprovedStatus(mpPayment.status)) {
-          await this.featuredProductService.markPaidFromWebhook(requestId, mpPayment);
+          await this.featuredProductService.markPaidFromWebhook(requestId, mpPayment, provider);
         } else if (isMercadoPagoFailedStatus(mpPayment.status)) {
-          await this.featuredProductService.markFailedFromWebhook(requestId, mpPayment);
+          await this.featuredProductService.markFailedFromWebhook(requestId, mpPayment, provider);
         } else if (isMercadoPagoPendingStatus(mpPayment.status)) {
-          await this.featuredProductService.markPendingFromProvider(requestId, mpPayment);
+          await this.featuredProductService.markPendingFromProvider(requestId, mpPayment, provider);
         }
         return { status: mpPayment.status };
       }
@@ -513,11 +706,11 @@ private resolvePlanChargeAmount(plan: Plan) {
         const promoId = paymentId.replace('destination_promo:', '');
         await auditByReference(PAYMENT_AUDIT_FLOW.DESTINATION_PROMO, PAYMENT_AUDIT_ENTITY.DESTINATION_PROMO, promoId);
         if (isMercadoPagoApprovedStatus(mpPayment.status)) {
-          await this.destinationPromotionService.markPaidFromWebhook(promoId, mpPayment);
+          await this.destinationPromotionService.markPaidFromWebhook(promoId, mpPayment, provider);
         } else if (isMercadoPagoFailedStatus(mpPayment.status)) {
-          await this.destinationPromotionService.markFailedFromWebhook(promoId, mpPayment);
+          await this.destinationPromotionService.markFailedFromWebhook(promoId, mpPayment, provider);
         } else if (isMercadoPagoPendingStatus(mpPayment.status)) {
-          await this.destinationPromotionService.markPendingFromProvider(promoId, mpPayment);
+          await this.destinationPromotionService.markPendingFromProvider(promoId, mpPayment, provider);
         }
         return { status: mpPayment.status };
       }
@@ -531,13 +724,25 @@ private resolvePlanChargeAmount(plan: Plan) {
         }
         return { status: mpPayment.status };
       }
+      if (paymentId.startsWith('promo_push:')) {
+        // WAVE 1 OpenPix (e correção de roteamento p/ webhooks MP dessas charges):
+        // antes caía no default de assinatura e quebrava FK em payment_events.
+        const pushId = paymentId.replace('promo_push:', '');
+        await auditByReference(PAYMENT_AUDIT_FLOW.PUSH_PROMO, PAYMENT_AUDIT_ENTITY.PROMO_PUSH, pushId);
+        if (isMercadoPagoApprovedStatus(mpPayment.status)) {
+          await this.promoPushService.markPaidFromWebhook(pushId, provider);
+        } else if (isMercadoPagoFailedStatus(mpPayment.status)) {
+          await this.promoPushService.markFailedFromWebhook(pushId, provider);
+        }
+        return { status: mpPayment.status };
+      }
       await auditByReference(PAYMENT_AUDIT_FLOW.SUBSCRIPTION, PAYMENT_AUDIT_ENTITY.PAYMENT, paymentId);
       await this.paymentEventRepository.save(
         this.paymentEventRepository.create({
           payment: { id: paymentId } as any,
-          provider: 'MERCADO_PAGO',
+          provider,
           status: mpPayment.status || 'unknown',
-          payload: mpPayment as any,
+          payload: (rawPayload || mpPayment) as any,
         })
       );
 
@@ -549,8 +754,8 @@ private resolvePlanChargeAmount(plan: Plan) {
         const providerId = mpPayment?.id ? String(mpPayment.id) : null;
 
         let hasChanges = false;
-        if (payment.provider !== 'MERCADO_PAGO') {
-          payment.provider = 'MERCADO_PAGO';
+        if (payment.provider !== provider) {
+          payment.provider = provider;
           hasChanges = true;
         }
         if (providerId && !payment.providerId) {
@@ -575,7 +780,7 @@ private resolvePlanChargeAmount(plan: Plan) {
       if (mpPayment.external_reference) {
         await this.updatePaymentStatus(String(mpPayment.external_reference), mpPayment.status);
         await this.paymentAuditService.record({
-          provider: 'MERCADO_PAGO',
+          provider,
           flowType: PAYMENT_AUDIT_FLOW.SUBSCRIPTION,
           eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
           entityType: PAYMENT_AUDIT_ENTITY.PAYMENT,
@@ -600,7 +805,7 @@ private resolvePlanChargeAmount(plan: Plan) {
 
     const confirmed = await this.confirmPayment(String(internalId));
     await this.paymentAuditService.record({
-      provider: 'MERCADO_PAGO',
+      provider,
       flowType: PAYMENT_AUDIT_FLOW.SUBSCRIPTION,
       eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
       entityType: PAYMENT_AUDIT_ENTITY.PAYMENT,

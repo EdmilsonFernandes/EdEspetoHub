@@ -40,6 +40,7 @@ export function createProxyRoutes(): Router {
     r.post('/subscriptions/:id/renew', forward); r.patch('/subscriptions/:id/status', forward);
     // Payments / Webhooks
     r.post('/webhooks/payment-confirmed', forward); r.post('/webhooks/mercadopago', forward);
+    r.post('/webhooks/openpix', forward); // WAVE 1 OpenPix: PIX de plataforma
     r.get('/payment-accounts/mercadopago/callback', forward);
     r.get('/stores/:storeId/payments', authRequired, forward);
     // Cobrança no balcão (SDD cobranca-balcao)
