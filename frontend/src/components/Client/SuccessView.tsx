@@ -5,6 +5,7 @@ import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
 import { formatOrderDisplayId, formatPaymentMethod } from "../../utils/format";
 import { getPaymentMethodMeta, getPaymentProviderMeta, mercadoPagoHorizontal } from "../../utils/paymentAssets";
+import { copyToClipboard } from "../../utils/clipboard";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 
@@ -19,7 +20,7 @@ const formatCountdown = (ms: number) => {
 };
 
 // ─── PIX DEDICATED SCREEN ───────────────────────────────────────────────────
-const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel, storeLogoUrl, storeSlug, systemHeaderOffset = false }) => {
+const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, onTrackOrder, onMyOrders, storeLabel, storeLogoUrl, storeSlug, amount, orderId, systemHeaderOffset = false }) => {
   const isPaid = String(paymentStatus || "").toUpperCase() === "PAID";
   const isFailed = String(paymentStatus || "").toUpperCase() === "FAILED";
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -30,13 +31,14 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
     const expiryMs = (reported - Date.now() > 30_000) ? reported : Date.now() + 5 * 60 * 1000;
     const update = () => setTimeLeft(Math.max(0, expiryMs - Date.now()));
     update();
-    const id = setInterval(update, 500);
+    const id = setInterval(update, 1000);
     return () => clearInterval(id);
   }, [onlinePayment?.expiresAt]);
 
   const isExpired = timeLeft !== null && timeLeft === 0;
   const isNative = Capacitor.isNativePlatform();
   const storeLogo = resolveAssetUrl(storeLogoUrl || "") || getStoreAvatarUrl(storeSlug, storeLabel || "Loja");
+  const providerMeta = getPaymentProviderMeta(onlinePayment?.provider || "mercado_pago");
   const stickyTop = systemHeaderOffset
     ? "top-[calc(env(safe-area-inset-top)+4.1rem)]"
     : isNative
@@ -48,17 +50,22 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
     ? "pt-[max(calc(env(safe-area-inset-top)+0.45rem),0.7rem)]"
     : "pt-0";
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     if (!onlinePayment?.qrCodeText) return;
-    navigator.clipboard.writeText(onlinePayment.qrCodeText).catch(() => {});
+    const ok = await copyToClipboard(onlinePayment.qrCodeText);
+    if (!ok) return;
     setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const qrSrc = onlinePayment?.qrCodeBase64 ||
     (onlinePayment?.qrCodeText
       ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(onlinePayment.qrCodeText)}`
       : null);
+  const isGeneratingPix = !qrSrc;
+  const amountLabel = Number(amount) > 0
+    ? Number(amount).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+    : "";
 
   // urgency colour
   const urgent = timeLeft !== null && timeLeft < 60_000;
@@ -85,7 +92,7 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
             </div>
             <div className="min-w-0">
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Pagar via</p>
-              <p className="truncate text-sm font-black text-slate-900">PIX · Mercado Pago</p>
+              <p className="truncate text-sm font-black text-slate-900">PIX · {providerMeta.label}</p>
             </div>
           </div>
           {/* live status pill */}
@@ -94,7 +101,7 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
               <SealCheck size={12} weight="fill" className="text-emerald-500 shrink-0" />
               <span className="text-[10px] font-black text-emerald-700">Pago</span>
               <span className="h-3 w-px bg-slate-200 shrink-0" />
-              <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-3.5 object-contain" />
+              <img src={providerMeta.icon || mercadoPagoHorizontal} alt={providerMeta.label} className="h-3.5 object-contain" />
             </span>
           ) : isFailed || isExpired ? (
             <span className="flex items-center gap-1.5 rounded-full bg-rose-100 px-2.5 py-1 text-[11px] font-black text-rose-700 border border-rose-200">
@@ -114,8 +121,28 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
           <span className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 shadow-inner">
             <SealCheck size={44} weight="duotone" className="text-emerald-600" />
           </span>
-          <h2 className="text-2xl font-black text-emerald-800">Pagamento confirmado!</h2>
+          <h2 className="text-2xl font-black text-emerald-800">Pagamento aprovado!</h2>
           <p className="text-sm text-emerald-700/80">Seu pedido já entrou na fila de produção.</p>
+          <div className="mt-2 flex w-full max-w-xs flex-col gap-2">
+            {onTrackOrder ? (
+              <button
+                type="button"
+                onClick={onTrackOrder}
+                className="min-h-[44px] rounded-2xl bg-emerald-600 px-6 text-sm font-black text-white shadow-sm active:scale-[0.98]"
+              >
+                Acompanhar pedido
+              </button>
+            ) : null}
+            {onMyOrders ? (
+              <button
+                type="button"
+                onClick={onMyOrders}
+                className="min-h-[44px] rounded-2xl border border-slate-200 bg-white px-6 text-sm font-black text-slate-700 active:scale-[0.98]"
+              >
+                Meus pedidos
+              </button>
+            ) : null}
+          </div>
         </div>
       )}
 
@@ -125,13 +152,13 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
           <span className="flex h-20 w-20 items-center justify-center rounded-full bg-rose-100 shadow-inner">
             <XCircle size={44} weight="duotone" className="text-rose-500" />
           </span>
-          <h2 className="text-xl font-black text-rose-800">Código PIX expirado</h2>
+          <h2 className="text-xl font-black text-rose-800">⏰ O PIX expirou</h2>
           <p className="text-sm text-rose-700/80">Faça um novo pedido para gerar um novo código.</p>
           <button
             onClick={onNewOrder}
-            className="mt-2 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-black text-white shadow-sm active:scale-[0.98]"
+            className="mt-2 min-h-[44px] rounded-2xl bg-slate-900 px-6 py-3 text-sm font-black text-white shadow-sm active:scale-[0.98]"
           >
-            Novo pedido
+            Gerar novo pedido
           </button>
         </div>
       )}
@@ -139,11 +166,25 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
       {/* ── QR ACTIVE ── */}
       {!isPaid && !isFailed && !isExpired && (
         <div className="flex flex-col items-center gap-0 px-4 pt-5 pb-8">
+          {/* Resumo da compra */}
+          <div className="mb-4 w-full max-w-sm rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Resumo da compra</p>
+            <div className="mt-1 flex items-end justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-slate-700">{storeLabel || "Pedido"}</p>
+                {orderId ? <p className="text-[11px] text-slate-400">Pedido #{formatOrderDisplayId(orderId, storeSlug)}</p> : null}
+              </div>
+              {amountLabel ? (
+                <p className="shrink-0 text-2xl font-black leading-none tracking-tight text-slate-900 tabular-nums">{amountLabel}</p>
+              ) : null}
+            </div>
+          </div>
+
           {/* Countdown bar */}
-          {timeLeft !== null && (
+          {timeLeft !== null && !isGeneratingPix && (
             <div className={`w-full max-w-sm rounded-2xl border bg-gradient-to-b ${timerBg} px-5 py-4 text-center mb-5 shadow-sm`}>
               <p className={`mb-0.5 text-[10px] font-black uppercase tracking-widest ${urgent ? 'text-rose-500' : warning ? 'text-amber-500' : 'text-emerald-600'}`}>
-                Tempo para pagar
+                Expira em
               </p>
               <p className={`text-[3.25rem] font-black tabular-nums leading-none ${timerColor} ${urgent ? 'animate-pulse' : ''}`}>
                 {formatCountdown(timeLeft)}
@@ -157,56 +198,78 @@ const PixPaymentScreen = ({ onlinePayment, paymentStatus, onNewOrder, storeLabel
             </div>
           )}
 
-          {/* QR Code card */}
-          <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            {/* QR image */}
-            <div className="flex flex-col items-center gap-3 px-6 pt-6 pb-4">
-              {qrSrc ? (
-                <div className="relative w-full max-w-[224px]">
-                  <img
-                    src={qrSrc}
-                    alt="QR Code Pix"
-                    className="aspect-square w-full rounded-2xl border border-slate-100 object-contain shadow-sm"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 rounded-b-2xl bg-white/90 py-1.5 backdrop-blur-sm">
-                    <Spinner size={11} className="animate-spin text-slate-400" />
-                    <span className="text-[10px] font-semibold text-slate-500">Aguardando pagamento…</span>
+          {/* Generating PIX */}
+          {isGeneratingPix ? (
+            <div className="flex w-full max-w-sm flex-col items-center justify-center gap-3 rounded-3xl border border-slate-200 bg-white px-6 py-14 shadow-sm">
+              <Spinner size={30} className="animate-spin text-emerald-600" />
+              <p className="text-sm font-bold text-slate-500">Gerando seu PIX…</p>
+            </div>
+          ) : (
+            <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+              {/* Pix code + copy — em destaque, acima do QR (mobile-first) */}
+              {onlinePayment?.qrCodeText ? (
+                <div className="px-6 pt-5 pb-4 space-y-2.5">
+                  <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">PIX copia e cola</p>
+                  <div
+                    className="cursor-pointer truncate rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 font-mono text-[11px] text-slate-500"
+                    onClick={handleCopy}
+                    title="Copiar código PIX"
+                  >
+                    {onlinePayment.qrCodeText}
                   </div>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className={`flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl text-sm font-black transition-all active:scale-[0.98] shadow-sm ${
+                      copied ? "bg-emerald-600 text-white" : "bg-slate-900 text-white hover:bg-slate-800"
+                    }`}
+                  >
+                    {copied ? <Check size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
+                    {copied ? "Copiado!" : "Copiar código PIX"}
+                  </button>
                 </div>
-              ) : (
-                <div className="flex aspect-square w-full max-w-[224px] items-center justify-center rounded-2xl bg-slate-100">
-                  <QrCode size={48} weight="thin" className="text-slate-400" />
-                </div>
-              )}
-              <p className="text-xs text-slate-500 text-center">Escaneie o QR Code com o app do seu banco</p>
-            </div>
+              ) : null}
 
-            {/* Divider */}
-            <div className="mx-6 flex items-center gap-3 py-1">
-              <div className="h-px flex-1 bg-slate-100" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">ou copie o código</span>
-              <div className="h-px flex-1 bg-slate-100" />
-            </div>
-
-            {/* Pix code + copy */}
-            {onlinePayment?.qrCodeText && (
-              <div className="px-6 pb-6 pt-3 space-y-3">
-                <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 font-mono text-[10px] text-slate-600 break-all select-all leading-relaxed max-h-20 overflow-y-auto">
-                  {onlinePayment.qrCodeText}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-black transition-all active:scale-[0.98] shadow-sm ${
-                    copied ? "bg-emerald-600 text-white" : "bg-slate-900 text-white hover:bg-slate-800"
-                  }`}
-                >
-                  {copied ? <Check size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
-                  {copied ? "Copiado!" : "Copiar código Pix"}
-                </button>
+              {/* Divider */}
+              <div className="mx-6 flex items-center gap-3 py-1">
+                <div className="h-px flex-1 bg-slate-100" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">ou escaneie</span>
+                <div className="h-px flex-1 bg-slate-100" />
               </div>
-            )}
-          </div>
+
+              {/* QR image — card branco sempre (legível em dark mode) */}
+              <div className="flex flex-col items-center gap-3 px-6 pt-4 pb-5">
+                {qrSrc ? (
+                  <div className="relative w-full max-w-[224px]">
+                    <div className="rounded-2xl bg-white p-3 shadow-[0_10px_28px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-100">
+                      <img
+                        src={qrSrc}
+                        alt="QR Code Pix"
+                        className="aspect-square w-full min-w-[200px] rounded-lg bg-white object-contain"
+                      />
+                    </div>
+                    <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 rounded-b-2xl bg-white/90 py-1.5 backdrop-blur-sm">
+                      <Spinner size={11} className="animate-spin text-slate-400" />
+                      <span className="text-[10px] font-semibold text-slate-500">Aguardando pagamento…</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex aspect-square w-full max-w-[224px] items-center justify-center rounded-2xl bg-slate-100">
+                    <QrCode size={48} weight="thin" className="text-slate-400" />
+                  </div>
+                )}
+                <p className="text-xs text-slate-500 text-center">Aponte a câmera do app do seu banco para o QR Code</p>
+              </div>
+
+              {/* Gateway logo */}
+              {providerMeta.icon ? (
+                <div className="flex items-center justify-center gap-1.5 border-t border-slate-100 bg-slate-50/60 px-6 py-2.5">
+                  <span className="text-[10px] font-semibold text-slate-400">Processado por</span>
+                  <img src={providerMeta.icon} alt={providerMeta.label} className="h-4 object-contain" />
+                </div>
+              ) : null}
+            </div>
+          )}
 
           <p className="mt-4 text-[11px] text-slate-400 text-center">
             Seu pedido será confirmado automaticamente após o pagamento.
@@ -318,10 +381,11 @@ const StaticPixBlock = ({ pixKey, phone }) => {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(qrData)}`;
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(qrData).catch(() => {});
+  const handleCopy = async () => {
+    const ok = await copyToClipboard(qrData);
+    if (!ok) return;
     setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -369,6 +433,7 @@ export const SuccessView = ({
   storeLabel = "",
   storeLogoUrl = "",
   storeSlug = "",
+  amount,
   systemHeaderOffset = false,
 }) => {
   const hasOnlinePayment = Boolean(
@@ -467,9 +532,13 @@ export const SuccessView = ({
         onlinePayment={onlinePayment}
         paymentStatus={paymentStatus}
         onNewOrder={onNewOrder}
+        onTrackOrder={orderId ? onTrackOrder : undefined}
+        onMyOrders={onMyOrders}
         storeLabel={storeLabel}
         storeLogoUrl={storeLogoUrl}
         storeSlug={storeSlug}
+        amount={amount}
+        orderId={orderId}
         systemHeaderOffset={systemHeaderOffset}
       />
     );

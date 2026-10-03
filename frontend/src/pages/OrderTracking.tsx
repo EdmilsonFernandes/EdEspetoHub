@@ -775,6 +775,9 @@ export function OrderTracking() {
   const onlinePaymentQrBase64 = String(order?.payment?.qrCodeBase64 || order?.onlinePayment?.qrCodeBase64 || '').trim();
   const onlinePaymentQrText = String(order?.payment?.qrCodeText || order?.onlinePayment?.qrCodeText || '').trim();
   const onlinePaymentExpiresAt = order?.payment?.expiresAt || order?.onlinePayment?.expiresAt || null;
+  const onlinePaymentProvider = String(
+    (order?.payment as any)?.provider || (order?.onlinePayment as any)?.provider || 'mercado_pago'
+  );
   const showOnlinePendingPayment =
     hasOnlinePayment &&
     !isPaymentApproved &&
@@ -1260,6 +1263,7 @@ export function OrderTracking() {
         amountLabel={formatCurrency(order?.total || 0)}
         title="Conclua o pagamento"
         subtitle="Mesmo QR gerado no checkout — confirma sozinho após o pagamento."
+        provider={onlinePaymentProvider}
         onVerifyNow={() => { void loadOrder(true); }}
         onPaid={() => { void loadOrder(true); }}
         verifyLabel="Já paguei — verificar"

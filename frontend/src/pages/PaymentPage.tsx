@@ -1,10 +1,12 @@
 // @ts-nocheck
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Check, Copy } from '@phosphor-icons/react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { paymentService } from '../services/paymentService';
 import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
+import { copyToClipboard } from '../utils/clipboard';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 import { normalizePixCode } from '../utils/pixPayload';
 
@@ -56,25 +58,10 @@ export function PaymentPage() {
   const handleCopyPix = async (value: string) => {
     const normalizedValue = normalizePixCode(value);
     if (!normalizedValue) return;
-    try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(normalizedValue);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = normalizedValue;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'absolute';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-      }
-      setPixCopied(true);
-      window.setTimeout(() => setPixCopied(false), 2000);
-    } catch (error) {
-      console.error('Falha ao copiar PIX', error);
-    }
+    const ok = await copyToClipboard(normalizedValue);
+    if (!ok) return;
+    setPixCopied(true);
+    window.setTimeout(() => setPixCopied(false), 2000);
   };
 
   useEffect(() => {
@@ -146,7 +133,7 @@ export function PaymentPage() {
     id: isPixPending ? paymentId : null,
     enabled: Boolean(paymentId && isPixPending),
     status: payment?.status,
-    intervalMs: 5000,
+    intervalMs: 3000,
     timeoutMs: 5 * 60 * 1000,
     checkStatus: async () => {
       const next = await loadPayment({ silent: true, withEvents: false });
@@ -288,6 +275,32 @@ export function PaymentPage() {
                   <p className="text-xs text-emerald-700">Redirecionando em alguns segundos...</p>
                 </div>
               )}
+
+              {/* Resumo da compra — valor em destaque */}
+              <div className="rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-white px-5 py-4">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Resumo da compra</p>
+                <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-slate-700">{payment.storeName || 'Assinatura da loja'}</p>
+                    <p className="text-xs text-slate-500">Pagamento #{String(payment.id || '').slice(0, 8)}</p>
+                  </div>
+                  <p className="text-4xl font-black leading-none tracking-tight text-slate-900 tabular-nums">
+                    R$ {Number(payment.amount || 0).toFixed(2)}
+                  </p>
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-xs text-slate-600">
+                  {methodMeta.icon && (
+                    <img src={methodMeta.icon} alt={methodMeta.label} className="h-5 w-5 object-contain" />
+                  )}
+                  <span className="font-semibold">{methodMeta.label}</span>
+                  {providerMeta.icon && (
+                    <>
+                      <span className="text-slate-300">·</span>
+                      <img src={providerMeta.icon} alt={providerMeta.label} className="h-4 object-contain" />
+                    </>
+                  )}
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="p-5 border border-gray-100 rounded-2xl bg-gray-50">
@@ -478,16 +491,33 @@ export function PaymentPage() {
                         )}
                         <span>Escaneie o QR Code PIX</span>
                       </div>
-                      <img src={payment.qrCodeBase64} alt="QR Code PIX" className="w-64 h-64 object-contain" />
+                      {/* QR em card branco com padding — legível em qualquer tema */}
+                      <div className="w-full max-w-[240px] rounded-2xl bg-white p-4 shadow-[0_10px_28px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-100">
+                        <img
+                          src={payment.qrCodeBase64}
+                          alt="QR Code PIX"
+                          className="mx-auto aspect-square w-full min-w-[200px] max-w-[208px] rounded-lg bg-white object-contain"
+                        />
+                      </div>
                       {payment.qrCodeText && (
-                        <div className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left space-y-2">
-                          <p className="text-xs text-gray-500">Código copia e cola</p>
-                          <p className="text-xs text-gray-700 break-all">{payment.qrCodeText}</p>
-                          <button
+                        <div className="w-full space-y-2 text-left">
+                          <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">PIX copia e cola</p>
+                          <div
+                            className="cursor-pointer truncate rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-mono text-[11px] text-slate-500"
                             onClick={() => handleCopyPix(payment.qrCodeText)}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
+                            title="Copiar código PIX"
                           >
-                            {pixCopied ? 'Copiado!' : 'Copiar código'}
+                            {payment.qrCodeText}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyPix(payment.qrCodeText)}
+                            className={`flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl text-sm font-black transition-all active:scale-[0.98] ${
+                              pixCopied ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white hover:bg-slate-800'
+                            }`}
+                          >
+                            {pixCopied ? <Check size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
+                            {pixCopied ? 'Copiado!' : 'Copiar código PIX'}
                           </button>
                         </div>
                       )}

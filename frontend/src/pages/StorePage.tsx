@@ -4471,6 +4471,7 @@ export function StorePage() {
           <SuccessView
             orderType={lastOrder?.type}
             paymentMethod={lastOrder?.payment}
+            amount={lastOrder?.total}
             pixKey={lastOrder?.pixKey}
             phone={lastOrder?.phone}
             table={lastOrder?.table}

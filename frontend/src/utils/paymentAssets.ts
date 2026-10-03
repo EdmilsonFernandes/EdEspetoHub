@@ -57,11 +57,15 @@ const METHOD_ICONS: Record<string, string> = {
 const PROVIDER_LABELS: Record<string, string> = {
   mercado_pago: 'Mercado Pago',
   mercadopago: 'Mercado Pago',
+  openpix: 'OpenPix',
+  asaas: 'Asaas',
 };
 
 const PROVIDER_ICONS: Record<string, string> = {
   mercado_pago: mercadoPagoLogo,
   mercadopago: mercadoPagoLogo,
+  openpix: resolveAssetUrl('/logo-openpix.webp'),
+  asaas: resolveAssetUrl('/logo-asaas.webp'),
 };
 
 export const getPaymentMethodMeta = (method?: string) => {
