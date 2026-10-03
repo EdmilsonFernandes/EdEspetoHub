@@ -319,7 +319,7 @@ async ensurePaymentForCycle(storeId: string) {
    *
    * @author Edmilson Lopes
    */
-async markPaidFromWebhook(cycleId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+async markPaidFromWebhook(cycleId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);
     const cycle = await repo.findOne({ where: { id: cycleId } });
     if (!cycle) return null;
@@ -351,7 +351,7 @@ async markPaidFromWebhook(cycleId: string, mpPayment: any, provider: 'MERCADO_PA
    *
    * @author Edmilson Lopes
    */
-async markFailedFromWebhook(cycleId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+async markFailedFromWebhook(cycleId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);
     const cycle = await repo.findOne({ where: { id: cycleId } });
     if (!cycle) return null;

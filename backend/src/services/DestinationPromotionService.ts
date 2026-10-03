@@ -376,7 +376,7 @@ export class DestinationPromotionService {
     return latest || current;
   }
 
-  async markPaidFromWebhook(promotionId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+  async markPaidFromWebhook(promotionId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     await AppDataSource.transaction(async (manager) => {
       const locked = await manager
         .getRepository(DestinationPromotion)
@@ -419,7 +419,7 @@ export class DestinationPromotionService {
     await this.reconcileExpired();
   }
 
-  async markFailedFromWebhook(promotionId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+  async markFailedFromWebhook(promotionId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const row = await this.repo.findOne({ where: { id: promotionId } });
     if (!row) return;
     if (normalizeStatus(row.paymentStatus) === 'PAID') return;
@@ -443,7 +443,7 @@ export class DestinationPromotionService {
     });
   }
 
-  async markPendingFromProvider(promotionId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+  async markPendingFromProvider(promotionId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const row = await this.repo.findOne({ where: { id: promotionId } });
     if (!row) return;
     if (normalizeStatus(row.paymentStatus) === 'PAID') return;

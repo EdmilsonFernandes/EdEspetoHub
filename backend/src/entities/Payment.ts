@@ -25,8 +25,9 @@ import { Subscription } from './Subscription';
 
 export type PaymentMethod = 'PIX' | 'CREDIT_CARD' | 'BOLETO';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED';
-// WAVE 1 OpenPix: coluna varchar aceita 'OPENPIX' sem DDL (default segue MOCK).
-export type PaymentProvider = 'MERCADO_PAGO' | 'MOCK' | 'OPENPIX';
+// WAVE 1 OpenPix + Wave Asaas (03/10): coluna varchar aceita novos provedores
+// sem DDL (default segue MOCK).
+export type PaymentProvider = 'MERCADO_PAGO' | 'MOCK' | 'OPENPIX' | 'ASAAS';
 
 @Entity({ name: 'payments' })
 /**

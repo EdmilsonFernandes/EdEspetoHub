@@ -390,7 +390,7 @@ export class FeaturedProductService {
     return latest || current;
   }
 
-  async markPaidFromWebhook(requestId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+  async markPaidFromWebhook(requestId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const config = await this.loadPricingConfig();
     await AppDataSource.transaction(async (manager) => {
       const locked = await manager
@@ -448,7 +448,7 @@ export class FeaturedProductService {
     });
   }
 
-  async markFailedFromWebhook(requestId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+  async markFailedFromWebhook(requestId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const row = await this.repo.findOne({ where: { id: requestId } });
     if (!row) return;
     if (String(row.paymentStatus || '').toUpperCase() === 'PAID') return;
@@ -476,7 +476,7 @@ export class FeaturedProductService {
     });
   }
 
-  async markPendingFromProvider(requestId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+  async markPendingFromProvider(requestId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const row = await this.repo.findOne({ where: { id: requestId }, relations: [ 'store' ] });
     if (!row) return;
     if (String(row.paymentStatus || '').toUpperCase() === 'PAID') return;

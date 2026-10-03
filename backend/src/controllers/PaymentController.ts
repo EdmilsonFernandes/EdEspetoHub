@@ -196,6 +196,35 @@ export class PaymentController {
   }
 
   /**
+   * Webhook Asaas (Wave 03/10). Payload: { event: "PAYMENT_RECEIVED",
+   * payment: { id } } — o body NÃO é confiável; o service faz re-GET no Asaas
+   * pelo payment.id e aplica a MESMA defesa do OpenPix (registro PENDING +
+   * valor bate + idempotência). Sempre responde 200 (o Asaas re-tenta
+   * qualquer não-2xx em loop).
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-10-03
+   */
+  static async asaasWebhook(req: Request, res: Response) {
+    const body = req.body || {};
+    const asaasPaymentId = String(body?.payment?.id ?? '');
+    const event = String(body?.event ?? '');
+
+    log.info('Asaas webhook received', { asaasPaymentId, event });
+    if (!asaasPaymentId) {
+      return res.status(200).json({ status: 'ok', ignored: 'sem payment.id' });
+    }
+
+    try {
+      const result = await paymentService.confirmAsaasWebhookPayment(body);
+      return res.status(200).json({ status: 'ok', result });
+    } catch (error: any) {
+      log.warn('Asaas webhook failed', { asaasPaymentId, error });
+      return res.status(200).json({ status: 'ok', ignored: 'erro interno' });
+    }
+  }
+
+  /**
    * Gets by id.
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)

@@ -136,13 +136,20 @@ export const env = {
     appId: process.env.OPENPIX_APP_ID || '',
     apiBaseUrl: process.env.OPENPIX_API_BASE_URL || 'https://api.openpix.com.br',
   },
+  asaas: {
+    // Asaas (03/10, contrato validado ao vivo): auth = header `access_token`
+    // (SEM Bearer); value EM REAIS float (NÃO centavos); mínimo PIX R$5.
+    apiKey: process.env.ASAAS_API_KEY || '',
+    apiBaseUrl: process.env.ASAAS_API_BASE_URL || 'https://api.asaas.com/v3',
+  },
   payments: {
-    // Provedor default do PIX de plataforma: 'mp' (Mercado Pago, default) | 'openpix'.
+    // Provedor default do PIX de plataforma: 'mp' (Mercado Pago, default) | 'openpix' | 'asaas'.
     // Env do processo (nunca commitada): PAYMENT_PROVIDER_DEFAULT=openpix ativa a Wave 1
     // e, desde 03/10 (Wave 2, autorizado pelo dono), também o checkout PIX do pedido,
     // o PIX do balcão e a gorjeta (dinheiro na plataforma → repasse à loja/motoboy).
-    // Maquininha Point e cartão ficam SEMPRE no Mercado Pago.
-    providerDefault: normalizeEnum(process.env.PAYMENT_PROVIDER_DEFAULT, ['mp', 'openpix'] as const, 'mp'),
+    // PAYMENT_PROVIDER_DEFAULT=asaas (03/10): PIX via Asaas quando ≥R$5, com fallback
+    // OpenPix → MP. Maquininha Point e cartão ficam SEMPRE no Mercado Pago.
+    providerDefault: normalizeEnum(process.env.PAYMENT_PROVIDER_DEFAULT, ['mp', 'openpix', 'asaas'] as const, 'mp'),
   },
   didit: {
     // KYC direto no provedor Didit (verification.didit.me, sem intermediários).

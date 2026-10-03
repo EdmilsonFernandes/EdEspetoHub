@@ -202,7 +202,7 @@ export class OrderPaymentService {
    * WAVE 2: provider param para audit honesto (webhook OpenPix despacha aqui
    * via applyProviderStatus com correlationID `order_payment:{id}`).
    */
-  async markPaidFromWebhook(orderPaymentId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+  async markPaidFromWebhook(orderPaymentId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     await AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(OrderPayment);
       const row = await repo
@@ -264,7 +264,7 @@ export class OrderPaymentService {
     });
   }
 
-  async markFailedFromWebhook(orderPaymentId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+  async markFailedFromWebhook(orderPaymentId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const repo = AppDataSource.getRepository(OrderPayment);
     const row = await repo.findOne({ where: { id: orderPaymentId } });
     if (!row || row.paymentStatus === 'PAID') return;

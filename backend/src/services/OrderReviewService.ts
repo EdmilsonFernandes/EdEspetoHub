@@ -713,7 +713,7 @@ async publicStoreReviewsBySlug(slug: string, limit = 20, offset = 0) {
    *
    * @author Edmilson Lopes
    */
-async markTipPaidFromWebhook(reviewId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+async markTipPaidFromWebhook(reviewId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const review = await this.orderReviewRepository.findById(reviewId);
     if (!review) return null;
     review.tipStatus = 'PAID';
@@ -772,7 +772,7 @@ async markTipPaidFromWebhook(reviewId: string, mpPayment: any, provider: 'MERCAD
    *
    * @author Edmilson Lopes
    */
-async markTipFailedFromWebhook(reviewId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+async markTipFailedFromWebhook(reviewId: string, mpPayment: any, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const review = await this.orderReviewRepository.findById(reviewId);
     if (!review) return null;
     review.tipStatus = 'FAILED';

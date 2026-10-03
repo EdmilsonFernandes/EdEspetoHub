@@ -26,7 +26,8 @@ import { OrderPayment } from '../entities/OrderPayment';
 import { PromoPush } from '../entities/PromoPush';
 import { AppDataSource } from '../config/database';
 import { MercadoPagoService } from './MercadoPagoService';
-import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
+import { OpenPixService, toOpenPixCents } from './OpenPixService';
+import { AsaasService, resolvePlatformPixChain } from './AsaasService';
 import { PromoPushService } from './PromoPushService';
 import { DestinationPromotionService } from './DestinationPromotionService';
 import { env } from '../config/env';
@@ -53,6 +54,7 @@ import { isMercadoPagoApprovedStatus, isMercadoPagoFailedStatus, isMercadoPagoPe
 export class PaymentService {
   private mercadoPago = new MercadoPagoService();
   private openPix = new OpenPixService();
+  private asaas = new AsaasService();
   private promoPushService = new PromoPushService();
   private paymentEventRepository = new PaymentEventRepository();
   private emailService = new EmailService();
@@ -260,30 +262,59 @@ private resolvePlanChargeAmount(plan: Plan) {
     const description = `Assinatura ${planLabel} - ${data.store.name}`;
     const mercadoPagoEnabled = Boolean(env.mercadoPago.accessToken);
 
-    // WAVE 1 OpenPix: PIX de plataforma com correlationID = payment.id (mesma
-    // external reference do fluxo MP). Cartão/boleto seguem Mercado Pago.
-    if (data.method === 'PIX' && isOpenPixPlatformPixEnabled()) {
-      try {
-        const charge = await this.openPix.createCharge({
-          correlationID: String(payment.id),
-          valueBrlCents: toOpenPixCents(chargeAmount),
-          expiresInSec: 30 * 60,
-          comment: description,
-        });
-        payment.provider = 'OPENPIX';
-        payment.providerId = charge.providerId;
-        payment.qrCodeBase64 = charge.qrCodeImageBase64;
-        payment.qrCodeText = charge.brCode;
-        if (charge.expiresAt) payment.expiresAt = charge.expiresAt;
-        await paymentRepo.save(payment);
-        await this.notifySubscriptionCreated(payment, data);
-        return payment;
-      } catch (error) {
-        // OpenPix fora do ar → cai pro Mercado Pago (resiliência, MP intacto).
-        this.log.warn('OpenPix charge failed, falling back to Mercado Pago', {
-          paymentId: payment.id,
-          error,
-        });
+    // PIX de plataforma — cadeia de provedores (03/10 Wave Asaas):
+    // PAYMENT_PROVIDER_DEFAULT=asaas → Asaas (se ≥R$5) → OpenPix → Mercado Pago.
+    // PAYMENT_PROVIDER_DEFAULT=openpix (Waves 1/2) → OpenPix → Mercado Pago.
+    // Cartão/boleto seguem SEMPRE Mercado Pago. Provedor falha → próximo da cadeia
+    // (MP intacto no fim). correlationID/externalReference = payment.id (mesma
+    // external reference do fluxo MP).
+    if (data.method === 'PIX') {
+      for (const pixProvider of resolvePlatformPixChain(chargeAmount)) {
+        if (pixProvider === 'mp') break; // Mercado Pago logo abaixo (fluxo intacto)
+        try {
+          if (pixProvider === 'asaas') {
+            const charge = await this.asaas.createPixCharge({
+              externalReference: String(payment.id),
+              valueBrl: chargeAmount,
+              customer: {
+                name: data.user.fullName || data.user.email,
+                email: data.user.email,
+              },
+              description,
+            });
+            payment.provider = 'ASAAS';
+            payment.providerId = charge.providerId;
+            payment.qrCodeBase64 = charge.qrCodeImageBase64;
+            payment.qrCodeText = charge.brCode;
+            if (charge.expiresAt) payment.expiresAt = charge.expiresAt;
+            await paymentRepo.save(payment);
+            await this.notifySubscriptionCreated(payment, data);
+            return payment;
+          }
+          if (pixProvider === 'openpix') {
+            const charge = await this.openPix.createCharge({
+              correlationID: String(payment.id),
+              valueBrlCents: toOpenPixCents(chargeAmount),
+              expiresInSec: 30 * 60,
+              comment: description,
+            });
+            payment.provider = 'OPENPIX';
+            payment.providerId = charge.providerId;
+            payment.qrCodeBase64 = charge.qrCodeImageBase64;
+            payment.qrCodeText = charge.brCode;
+            if (charge.expiresAt) payment.expiresAt = charge.expiresAt;
+            await paymentRepo.save(payment);
+            await this.notifySubscriptionCreated(payment, data);
+            return payment;
+          }
+        } catch (error) {
+          // Provedor fora do ar → próximo da cadeia (resiliência, MP intacto).
+          this.log.warn('PIX platform charge failed, trying next provider in chain', {
+            paymentId: payment.id,
+            provider: pixProvider,
+            error,
+          });
+        }
       }
     }
 
@@ -468,6 +499,30 @@ private resolvePlanChargeAmount(plan: Plan) {
       );
     }
 
+    // Wave Asaas (03/10): polling por id do pagamento (RECEIVED/CONFIRMED = pago).
+    if (String(payment.provider || '').toUpperCase() === 'ASAAS') {
+      const charge = await this.asaas.getCharge(mpId);
+      if (!charge) throw new AppError('PAY-004', 404);
+      const providerStatus = String(charge?.status || '').toUpperCase();
+      const mapped =
+        providerStatus === 'RECEIVED' || providerStatus === 'CONFIRMED' || providerStatus === 'RECEIVED_IN_CASH'
+          ? 'approved'
+          : providerStatus === 'REFUNDED'
+            ? 'refunded'
+            : 'pending';
+      return this.applyProviderStatus(
+        'ASAAS',
+        {
+          external_reference: String(charge?.externalReference || payment.id),
+          status: mapped,
+          status_detail: `asaas_${providerStatus.toLowerCase() || 'unknown'}`,
+          id: String(mpId),
+          transaction_amount: Number(charge?.value || 0),
+        },
+        charge
+      );
+    }
+
     const mpPayment = await this.getMercadoPagoPaymentAnyAccessToken(mpId);
     if (!mpPayment) {
       throw new AppError('PAY-004', 404);
@@ -500,7 +555,7 @@ private resolvePlanChargeAmount(plan: Plan) {
       return { status: 'ignored', reason: `status=${providerStatus}` };
     }
 
-    const guard = await this.validateOpenPixWebhookCharge(correlationID, valueCents);
+    const guard = await this.validateWebhookChargeByReference(correlationID, valueCents);
     if (!guard.ok) {
       this.log.warn('OpenPix webhook recusado', { correlationID, valueCents, reason: guard.reason });
       return { status: 'ignored', reason: guard.reason };
@@ -524,13 +579,70 @@ private resolvePlanChargeAmount(plan: Plan) {
   }
 
   /**
-   * Defesas do webhook OpenPix por prefixo do correlationID: registro existe,
-   * está PENDING (idempotência em reenvio) e o valor bate com o cobrado.
+   * Webhook Asaas (Wave 03/10). Payload: { event: "PAYMENT_RECEIVED",
+   * payment: { id } }. O body NÃO é confiável — re-GET no Asaas pelo payment.id;
+   * só aprova com status RECEIVED/CONFIRMED no provedor. Depois, MESMA defesa do
+   * OpenPix: registro PENDING existe (externalReference) + valor bate +
+   * idempotência pelo status local → mesma aprovação (applyProviderStatus).
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-10-03
+   */
+  async confirmAsaasWebhookPayment(payload: { event?: string; payment?: { id?: string } | string }) {
+    const rawPayment = payload?.payment;
+    const asaasPaymentId = String(
+      (typeof rawPayment === 'string' ? rawPayment : rawPayment?.id) || ''
+    ).trim();
+    const event = String(payload?.event || '').toUpperCase();
+    this.log.info('Asaas webhook received', { asaasPaymentId, event });
+    if (!asaasPaymentId) return { status: 'ignored', reason: 'sem payment.id' };
+    if (event && event !== 'PAYMENT_RECEIVED' && event !== 'PAYMENT_CONFIRMED') {
+      return { status: 'ignored', reason: `event=${event}` };
+    }
+
+    const charge = await this.asaas.getCharge(asaasPaymentId);
+    if (!charge) return { status: 'ignored', reason: 'cobrança inexistente no Asaas' };
+
+    const providerStatus = String(charge?.status || '').toUpperCase();
+    const isApproved =
+      providerStatus === 'RECEIVED' || providerStatus === 'CONFIRMED' || providerStatus === 'RECEIVED_IN_CASH';
+    if (!isApproved) return { status: 'ignored', reason: `status=${providerStatus}` };
+
+    const reference = String(charge?.externalReference || '').trim();
+    // Asaas trabalha EM REAIS → converte p/ centavos p/ bater com o registro local.
+    const valueCents = Math.round(Number(charge?.value || 0) * 100);
+    if (!reference) return { status: 'ignored', reason: 'cobrança sem externalReference' };
+
+    const guard = await this.validateWebhookChargeByReference(reference, valueCents);
+    if (!guard.ok) {
+      this.log.warn('Asaas webhook recusado', { asaasPaymentId, reference, valueCents, reason: guard.reason });
+      return { status: 'ignored', reason: guard.reason };
+    }
+
+    const result = await this.applyProviderStatus(
+      'ASAAS',
+      {
+        external_reference: reference,
+        status: 'approved',
+        status_detail: `asaas_${providerStatus.toLowerCase()}`,
+        id: asaasPaymentId,
+        transaction_amount: Number(charge?.value || 0),
+      },
+      charge
+    );
+    this.log.info('Asaas webhook processed', { asaasPaymentId, reference, result: result?.status });
+    return result;
+  }
+
+  /**
+   * Defesas de webhook (OpenPix e Asaas) por prefixo da external reference:
+   * registro existe, está PENDING (idempotência em reenvio) e o valor bate
+   * com o cobrado (valueCents em CENTAVOS).
    *
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-10-02
    */
-  private async validateOpenPixWebhookCharge(
+  private async validateWebhookChargeByReference(
     correlationID: string,
     valueCents: number
   ): Promise<{ ok: true } | { ok: false; reason: string }> {
@@ -654,7 +766,7 @@ private resolvePlanChargeAmount(plan: Plan) {
    * @date 2025-12-17
    */
   private async applyProviderStatus(
-    provider: 'MERCADO_PAGO' | 'OPENPIX',
+    provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS',
     mpPayment: any,
     rawPayload?: any
   ) {

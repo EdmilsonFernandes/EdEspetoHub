@@ -202,7 +202,7 @@ export class PromoPushService {
    * push como pago → entra na fila de aprovação do super admin (mesmo estado
    * que o polling de refreshPayment aplica). Idempotente pelo paymentStatus.
    */
-  async markPaidFromWebhook(pushId: string, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+  async markPaidFromWebhook(pushId: string, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const row = await this.repo.findOne({ where: { id: pushId } });
     if (!row) return null;
     if (String(row.paymentStatus || '').toUpperCase() === 'PAID') return row;
@@ -215,7 +215,7 @@ export class PromoPushService {
     return saved;
   }
 
-  async markFailedFromWebhook(pushId: string, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
+  async markFailedFromWebhook(pushId: string, provider: 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS' = 'MERCADO_PAGO') {
     const row = await this.repo.findOne({ where: { id: pushId } });
     if (!row) return null;
     if (String(row.paymentStatus || '').toUpperCase() === 'PAID') return row;
