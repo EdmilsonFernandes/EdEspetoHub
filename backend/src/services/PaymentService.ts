@@ -22,6 +22,7 @@ import { DeliveryBillingCycle } from '../entities/DeliveryBillingCycle';
 import { FeaturedProductRequest } from '../entities/FeaturedProductRequest';
 import { DestinationPromotion } from '../entities/DestinationPromotion';
 import { OrderReview } from '../entities/OrderReview';
+import { OrderPayment } from '../entities/OrderPayment';
 import { PromoPush } from '../entities/PromoPush';
 import { AppDataSource } from '../config/database';
 import { MercadoPagoService } from './MercadoPagoService';
@@ -591,6 +592,19 @@ private resolvePlanChargeAmount(plan: Plan) {
         if (!matchesCents(push.priceAmount)) return { ok: false, reason: 'valor divergente' };
         return { ok: true };
       }
+      if (correlationID.startsWith('order_payment:')) {
+        // WAVE 2 (03/10): checkout PIX e balcão PIX migrados p/ OpenPix da
+        // plataforma — mesma defesa das demais: linha existe, PENDING e valor bate.
+        const row = await AppDataSource.getRepository(OrderPayment).findOne({
+          where: { id: correlationID.replace('order_payment:', '') },
+        });
+        if (!row) return { ok: false, reason: 'pagamento de pedido inexistente' };
+        if (String(row.paymentStatus || '').toUpperCase() === 'PAID') {
+          return { ok: false, reason: 'pedido já pago (idempotente)' };
+        }
+        if (!matchesCents(row.amount)) return { ok: false, reason: 'valor divergente' };
+        return { ok: true };
+      }
       // Default = assinatura (correlationID = payment.id, sem prefixo).
       const payment = await AppDataSource.getRepository(Payment).findOne({
         where: { id: correlationID },
@@ -718,9 +732,9 @@ private resolvePlanChargeAmount(plan: Plan) {
         const orderPaymentId = paymentId.replace('order_payment:', '');
         await auditByReference(PAYMENT_AUDIT_FLOW.ORDER, PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT, orderPaymentId);
         if (isMercadoPagoApprovedStatus(mpPayment.status)) {
-          await this.orderPaymentService.markPaidFromWebhook(orderPaymentId, mpPayment);
+          await this.orderPaymentService.markPaidFromWebhook(orderPaymentId, mpPayment, provider);
         } else if (isMercadoPagoFailedStatus(mpPayment.status)) {
-          await this.orderPaymentService.markFailedFromWebhook(orderPaymentId, mpPayment);
+          await this.orderPaymentService.markFailedFromWebhook(orderPaymentId, mpPayment, provider);
         }
         return { status: mpPayment.status };
       }

@@ -195,9 +195,17 @@ export class OpenPixService {
 }
 
 /**
- * WAVE 1: PIX de plataforma usa OpenPix quando PAYMENT_PROVIDER_DEFAULT=openpix
- * E OPENPIX_APP_ID configurado. Qualquer outro caso (flag off, sem appId, token
- * de loja/motoboy, cartão/boleto) permanece Mercado Pago — MP INTACTO.
+ * WAVE 1 (02/10): PIX de plataforma (assinatura, destaques, promoções, push,
+ * taxa de entrega, gorjeta de plataforma) usa OpenPix quando
+ * PAYMENT_PROVIDER_DEFAULT=openpix E OPENPIX_APP_ID configurado.
+ *
+ * WAVE 2 (03/10, autorizado pelo dono): estende para o dinheiro que antes caía
+ * DIRETO na conta MP de loja/motoboy via OAuth — checkout PIX do pedido
+ * (order_payment:*), PIX do balcão (mesma external reference) e gorjeta em
+ * TODOS os escopos. O dinheiro passa a cair na conta OpenPix da PLATAFORMA e a
+ * loja/motoboy recebe por repasse posterior (modelo delivery_billing).
+ * Erro no OpenPix → fallback pro fluxo MP OAuth existente (intacto).
+ * PERMANECE MP: cartão, boleto e MAQUININHA POINT (decisão do dono — "depois").
  */
 export const isOpenPixPlatformPixEnabled = (): boolean =>
   env.payments.providerDefault === 'openpix' && OpenPixService.isConfigured();

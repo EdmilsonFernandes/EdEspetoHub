@@ -201,10 +201,15 @@ private async ensureTipPayment(order: any, review: any) {
     }
 
     if (chargeScope !== 'mock') {
-      // WAVE 1 OpenPix: gorjeta só migra quando a cobrança é da PLATAFORMA
-      // (sem token de loja/motoboy). Token de terceiro = settlement direto na
-      // conta MP do lojista/motoboy → PERMANECE Mercado Pago.
-      if (chargeScope === 'platform' && isOpenPixPlatformPixEnabled()) {
+      // WAVE 2 OpenPix (03/10, autorizado pelo dono): a gorjeta migrou INTEIRA
+      // para OpenPix da plataforma quando o toggle está ativo — inclusive os
+      // escopos de token de loja/motoboy (antes: settlement MP direto na conta
+      // do terceiro). MUDANÇA DE FLUXO DE DINHEIRO: o dinheiro passa a cair na
+      // conta OpenPix da PLATAFORMA e o repasse ao motoboy/loja vira o fluxo
+      // manual de payout (tipSettlementMode=STORE_PAYOUT, marcação pelo
+      // lojista) — por isso DIRECT_MOTOBOY só vale no fallback MP abaixo.
+      // PAYMENT_PROVIDER_DEFAULT=mp (default) mantém o fluxo MP OAuth intacto.
+      if (isOpenPixPlatformPixEnabled()) {
         try {
           const charge = await this.openPixService.createCharge({
             correlationID: externalReference,
@@ -220,9 +225,10 @@ private async ensureTipPayment(order: any, review: any) {
           expiresAt = charge.expiresAt || expiresAt;
           tipSettlementMode = 'STORE_PAYOUT';
         } catch (error) {
-          this.log.warn('Tip OpenPix charge failed, falling back to Mercado Pago platform charge', {
+          this.log.warn('Tip OpenPix charge failed, falling back to Mercado Pago charge chain', {
             reviewId: review.id,
             orderId: order.id,
+            chargeScope,
             error,
           });
         }

@@ -32,8 +32,14 @@ export class OrderPayment {
   amount!: number;
 
   @Column({ name: 'provider', type: 'varchar', default: 'MERCADO_PAGO' })
-  /** MANUAL = registro de dinheiro no balcão (sem integração). */
-  provider!: 'MERCADO_PAGO' | 'MANUAL';
+  /**
+   * MANUAL = registro de dinheiro no balcão (sem integração).
+   * WAVE 2 OpenPix (03/10): OPENPIX = PIX cobrado pela PLATAFORMA
+   * (correlationID = `order_payment:{id}`) — dinheiro cai na conta OpenPix da
+   * plataforma e é repassado à loja depois, em vez de cair direto na conta
+   * MP da loja via OAuth. Coluna é varchar: sem DDL.
+   */
+  provider!: 'MERCADO_PAGO' | 'MANUAL' | 'OPENPIX';
 
   @Column({ name: 'provider_id', type: 'varchar', nullable: true })
   providerId?: string | null;

@@ -10,6 +10,7 @@ import {
 } from '../utils/paymentAudit';
 import { MercadoPagoService } from './MercadoPagoService';
 import { MercadoPagoPointService } from './MercadoPagoPointService';
+import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
 import { OrderPaymentService } from './OrderPaymentService';
 import { PaymentAuditService } from './PaymentAuditService';
 import { StorePaymentAccountService } from './StorePaymentAccountService';
@@ -134,6 +135,7 @@ export class BalcaoChargeService {
   private orders = AppDataSource.getRepository(Order);
   private accounts = new StorePaymentAccountService();
   private mercadoPago = new MercadoPagoService();
+  private openPix = new OpenPixService();
   private point = new MercadoPagoPointService();
   private orderPayments = new OrderPaymentService();
   private audit = new PaymentAuditService();
@@ -212,8 +214,37 @@ export class BalcaoChargeService {
       }
     }
 
+    // WAVE 2 OpenPix: mesma filosofia do REQ-21 para o PIX de plataforma —
+    // cliente pode ter pago depois do prazo local de 5min; webhook pode ter
+    // caído. Polling por correlationID antes de responder.
+    if (
+      row &&
+      String(row.provider || '').toUpperCase() === 'OPENPIX' &&
+      String(row.paymentStatus).toUpperCase() === 'PENDING'
+    ) {
+      try {
+        const charge = await this.openPix.getCharge(row.providerId || `order_payment:${row.id}`);
+        const providerStatus = String(charge?.status || '').toUpperCase();
+        if (providerStatus === 'COMPLETED') {
+          await this.orderPayments.markPaidFromWebhook(row.id, {
+            status: 'approved',
+            status_detail: 'openpix_completed',
+            id: String(charge?.correlationID || row.providerId),
+          }, 'OPENPIX');
+        } else if (providerStatus === 'EXPIRED') {
+          row.paymentStatus = 'EXPIRED';
+          await this.repo.save(row);
+        }
+      } catch (error: any) {
+        this.log.warn('Balcão OpenPix charge reconcile failed', { orderId, error: error?.message });
+      }
+    }
+
     const accessToken = await this.accounts.getActiveAccessToken(storeId).catch(() => null);
     const mpEnabled = Boolean(accessToken);
+    // WAVE 2: PIX do balcão pode sair pela plataforma (OpenPix) mesmo sem a
+    // loja ter MP conectado — maquininha Point continua exigindo MP.
+    const openPixEnabled = isOpenPixPlatformPixEnabled();
 
     return {
       orderId: order.id,
@@ -223,10 +254,10 @@ export class BalcaoChargeService {
       preselectedMethod: BALCAO_PRESELECT_MAP[String(order.paymentMethod || '').toLowerCase()] || null,
       charge: this.serialize(row ? await this.repo.findOne({ where: { id: row.id } }) : row),
       capabilities: {
-        pix: mpEnabled,
+        pix: mpEnabled || openPixEnabled,
         point: mpEnabled,
         cash: true,
-        reason: mpEnabled ? null : 'Conecte a conta Mercado Pago da loja para Pix e maquininha.',
+        reason: mpEnabled || openPixEnabled ? null : 'Conecte a conta Mercado Pago da loja para Pix e maquininha.',
       },
     };
   }
@@ -362,6 +393,42 @@ export class BalcaoChargeService {
     try {
 
     if (input.method === 'pix') {
+      // WAVE 2 OpenPix (03/10, autorizado pelo dono): MUDANÇA DE FLUXO DE DINHEIRO
+      // no PIX do balcão — antes caía DIRETO na conta MP da loja (OAuth); agora a
+      // plataforma cobra via OpenPix (correlationID = `order_payment:{id}`, mesma
+      // external reference do checkout) e repassa à loja depois. MAQUININHA POINT
+      // FICA NO MP (decisão do dono). Erro no OpenPix → fallback MP da loja.
+      let pixViaOpenPix = false;
+      if (isOpenPixPlatformPixEnabled()) {
+        try {
+          const charge = await this.openPix.createCharge({
+            correlationID: externalReference,
+            valueBrlCents: toOpenPixCents(rawAmount),
+            expiresInSec: BALCAO_EXPIRY_MINUTES * 60,
+            comment: description,
+          });
+          pixViaOpenPix = true;
+          row.provider = 'OPENPIX';
+          row.providerId = charge.providerId;
+          row.qrCodeBase64 = charge.qrCodeImageBase64;
+          row.qrCodeText = charge.brCode;
+          row.paymentLink = null;
+          if (charge.expiresAt) {
+            const parsed = new Date(charge.expiresAt);
+            if (Number.isFinite(parsed.getTime()) && parsed.getTime() > Date.now()) {
+              row.expiresAt = parsed;
+            }
+          }
+          row = await this.repo.save(row);
+        } catch (error) {
+          this.log.warn('Balcão OpenPix charge failed, falling back to Mercado Pago store charge', {
+            orderId: order.id,
+            storeId: input.storeId,
+            error,
+          });
+        }
+      }
+      if (!pixViaOpenPix) {
       const accessToken = await this.accounts.getActiveAccessToken(input.storeId);
       if (!accessToken) {
         throw new AppError('PAY-017', 400, {
@@ -399,6 +466,7 @@ export class BalcaoChargeService {
       row.qrCodeText = mpPayment?.qrCodeText || null;
       row.paymentLink = mpPayment?.paymentLink || null;
       row = await this.repo.save(row);
+      }
     }
 
     if (input.method === 'point') {
@@ -474,7 +542,11 @@ export class BalcaoChargeService {
     }
 
     await this.audit.record({
-      provider: isBalcaoManualMethod(input.method) ? 'MANUAL' : 'MERCADO_PAGO',
+      provider: isBalcaoManualMethod(input.method)
+        ? 'MANUAL'
+        : String(row.provider || '').toUpperCase() === 'OPENPIX'
+          ? 'OPENPIX'
+          : 'MERCADO_PAGO',
       flowType: PAYMENT_AUDIT_FLOW.ORDER,
       eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
       entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,

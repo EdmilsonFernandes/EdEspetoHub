@@ -138,8 +138,10 @@ export const env = {
   },
   payments: {
     // Provedor default do PIX de plataforma: 'mp' (Mercado Pago, default) | 'openpix'.
-    // Env do processo (nunca commitada): PAYMENT_PROVIDER_DEFAULT=openpix ativa a Wave 1.
-    // Point/maquininha e checkout-de-pedido/balcão ficam SEMPRE no Mercado Pago.
+    // Env do processo (nunca commitada): PAYMENT_PROVIDER_DEFAULT=openpix ativa a Wave 1
+    // e, desde 03/10 (Wave 2, autorizado pelo dono), também o checkout PIX do pedido,
+    // o PIX do balcão e a gorjeta (dinheiro na plataforma → repasse à loja/motoboy).
+    // Maquininha Point e cartão ficam SEMPRE no Mercado Pago.
     providerDefault: normalizeEnum(process.env.PAYMENT_PROVIDER_DEFAULT, ['mp', 'openpix'] as const, 'mp'),
   },
   didit: {

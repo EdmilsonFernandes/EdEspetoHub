@@ -5,6 +5,7 @@ import { Order } from '../entities/Order';
 import { OrderPayment } from '../entities/OrderPayment';
 import { AppError } from '../errors/AppError';
 import { MercadoPagoService } from './MercadoPagoService';
+import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
 import { StorePaymentAccountService } from './StorePaymentAccountService';
 import { logger } from '../utils/logger';
 import { PaymentAuditService } from './PaymentAuditService';
@@ -26,6 +27,7 @@ const ONLINE_METHOD_MAP: Record<string, 'PIX' | 'CREDIT_CARD'> = {
 
 export class OrderPaymentService {
   private mercadoPago = new MercadoPagoService();
+  private openPix = new OpenPixService();
   private accountService = new StorePaymentAccountService();
   private paymentAuditService = new PaymentAuditService();
   private pushService = new PushNotificationService();
@@ -45,8 +47,19 @@ export class OrderPaymentService {
     const providerMethod = this.resolveProviderMethod(order.paymentMethod);
     if (!providerMethod || !order.store?.id) return null;
 
-    const accessToken = await this.accountService.getActiveAccessToken(order.store.id);
-    if (!accessToken) return null;
+    // WAVE 2 OpenPix (03/10, autorizado pelo dono): MUDANÇA DE FLUXO DE DINHEIRO
+    // no checkout PIX — antes o dinheiro caía DIRETO na conta MP da loja via OAuth
+    // do lojista; com PAYMENT_PROVIDER_DEFAULT=openpix a cobrança sai pela conta
+    // OpenPix da PLATAFORMA (correlationID = `order_payment:{id}`) e a loja recebe
+    // por repasse posterior (mesmo modelo do delivery_billing, que já é plataforma).
+    // Cartão continua MP (OAuth da loja, intacto). Erro no OpenPix → fallback MP
+    // da loja; loja sem MP conectado → mesma semântica de hoje (pedido sem
+    // pagamento online, sem linha fantasma).
+    const useOpenPix = providerMethod === 'PIX' && isOpenPixPlatformPixEnabled();
+    let accessToken: string | null | undefined = useOpenPix
+      ? undefined
+      : await this.accountService.getActiveAccessToken(order.store.id);
+    if (!useOpenPix && !accessToken) return null;
 
     const repo = (manager || AppDataSource.manager).getRepository(OrderPayment);
     const amount = Number(order.total || 0);
@@ -60,9 +73,69 @@ export class OrderPaymentService {
       amount,
       paymentMethod: String(order.paymentMethod || '').trim(),
       paymentStatus: 'PENDING',
-      provider: 'MERCADO_PAGO',
+      provider: useOpenPix ? 'OPENPIX' : 'MERCADO_PAGO',
     });
     row = await repo.save(row);
+
+    if (useOpenPix) {
+      try {
+        // Mesma janela do checkout MP: 30 min (countdown UI + validade QR +
+        // auto-cancel andam juntos — decisão 18/08 preservada).
+        const charge = await this.openPix.createCharge({
+          correlationID: `order_payment:${row.id}`,
+          valueBrlCents: toOpenPixCents(amount),
+          expiresInSec: 30 * 60,
+          comment: `Pedido ${String(order.id).slice(0, 8)} - ${order.store.name}`,
+        });
+        row.providerId = charge.providerId;
+        row.qrCodeBase64 = charge.qrCodeImageBase64;
+        row.qrCodeText = charge.brCode;
+        row.paymentLink = null;
+        const pixExpiry = new Date(Date.now() + 30 * 60 * 1000);
+        if (charge.expiresAt) {
+          const parsed = new Date(charge.expiresAt);
+          row.expiresAt = (Number.isFinite(parsed.getTime()) && parsed.getTime() > Date.now() + 30_000)
+            ? parsed
+            : pixExpiry;
+        } else {
+          row.expiresAt = pixExpiry;
+        }
+        row = await repo.save(row);
+        await this.paymentAuditService.record({
+          provider: 'OPENPIX',
+          flowType: PAYMENT_AUDIT_FLOW.ORDER,
+          eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
+          entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,
+          entityId: row.id,
+          storeId: order.store.id,
+          externalReference: `order_payment:${row.id}`,
+          providerPaymentId: charge.providerId,
+          providerStatus: 'GENERATED',
+          requestPayload: { correlationID: `order_payment:${row.id}`, valueBrlCents: toOpenPixCents(amount) },
+          responsePayload: { brCode: Boolean(charge.brCode), qrCodeImage: Boolean(charge.qrCodeImageBase64) },
+          success: true,
+        }).catch(() => null);
+        return row;
+      } catch (error) {
+        this.log.warn('Order payment OpenPix charge failed, falling back to Mercado Pago store charge', {
+          orderId: order.id,
+          storeId: order.store.id,
+          error,
+        });
+        accessToken = await this.accountService.getActiveAccessToken(order.store.id).catch(() => undefined);
+        if (!accessToken) {
+          // Sem OpenPix E sem MP conectado: remove a linha — pedido segue no fluxo
+          // sem pagamento online (igual à loja que nunca conectou o MP).
+          try {
+            await repo.delete(row.id);
+          } catch (deleteError: any) {
+            this.log.warn('Order payment row cleanup failed', { orderId: order.id, error: deleteError?.message });
+          }
+          return null;
+        }
+        row.provider = 'MERCADO_PAGO';
+      }
+    }
 
     const payerEmail = String((order as any)?.customerUser?.email || order.store?.owner?.email || '').trim();
     const payerName = String(order.customerName || order.store?.name || 'Cliente').trim();
@@ -78,7 +151,7 @@ export class OrderPaymentService {
           email: payerEmail,
           name: payerName,
         },
-        accessToken,
+        accessToken: accessToken || undefined,
         auditContext: {
           flowType: PAYMENT_AUDIT_FLOW.ORDER,
           entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,
@@ -125,7 +198,11 @@ export class OrderPaymentService {
     return row;
   }
 
-  async markPaidFromWebhook(orderPaymentId: string, mpPayment?: any) {
+  /**
+   * WAVE 2: provider param para audit honesto (webhook OpenPix despacha aqui
+   * via applyProviderStatus com correlationID `order_payment:{id}`).
+   */
+  async markPaidFromWebhook(orderPaymentId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     await AppDataSource.transaction(async (manager) => {
       const repo = manager.getRepository(OrderPayment);
       const row = await repo
@@ -148,7 +225,7 @@ export class OrderPaymentService {
       if (mpLink) row.paymentLink = mpLink;
       await repo.save(row);
       await this.paymentAuditService.record({
-        provider: 'MERCADO_PAGO',
+        provider,
         flowType: PAYMENT_AUDIT_FLOW.ORDER,
         eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
         entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,
@@ -187,7 +264,7 @@ export class OrderPaymentService {
     });
   }
 
-  async markFailedFromWebhook(orderPaymentId: string, mpPayment?: any) {
+  async markFailedFromWebhook(orderPaymentId: string, mpPayment?: any, provider: 'MERCADO_PAGO' | 'OPENPIX' = 'MERCADO_PAGO') {
     const repo = AppDataSource.getRepository(OrderPayment);
     const row = await repo.findOne({ where: { id: orderPaymentId } });
     if (!row || row.paymentStatus === 'PAID') return;
@@ -197,7 +274,7 @@ export class OrderPaymentService {
     if (mpPayment?.id) row.providerId = String(mpPayment.id);
     await repo.save(row);
     await this.paymentAuditService.record({
-      provider: 'MERCADO_PAGO',
+      provider,
       flowType: PAYMENT_AUDIT_FLOW.ORDER,
       eventStage: PAYMENT_AUDIT_STAGE.STATUS_APPLIED,
       entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,
@@ -282,6 +359,30 @@ export class OrderPaymentService {
     });
     if (!row) throw new AppError('PAY-014', 404);
     if (!row.providerId) return row;
+
+    // WAVE 2 OpenPix: polling por correlationID (não existe payment id HTTP do
+    // MP para consultar). COMPLETED→approved / EXPIRED→cancelled, igual ao
+    // refresh das assinaturas (PaymentService).
+    if (String(row.provider || '').toUpperCase() === 'OPENPIX') {
+      const charge = await this.openPix.getCharge(row.providerId);
+      if (!charge) return row;
+      const providerStatus = String(charge?.status || '').toUpperCase();
+      if (providerStatus === 'COMPLETED') {
+        await this.markPaidFromWebhook(row.id, {
+          status: 'approved',
+          status_detail: `openpix_${providerStatus.toLowerCase()}`,
+          id: String(charge?.correlationID || row.providerId),
+        }, 'OPENPIX');
+      } else if (providerStatus === 'EXPIRED') {
+        await this.markFailedFromWebhook(row.id, {
+          status: 'cancelled',
+          status_detail: `openpix_${providerStatus.toLowerCase()}`,
+          id: String(charge?.correlationID || row.providerId),
+        }, 'OPENPIX');
+      }
+      return AppDataSource.getRepository(OrderPayment).findOne({ where: { id: orderPaymentId } });
+    }
+
     const accessToken = await this.accountService.getActiveAccessToken(row.storeId);
     if (!accessToken || !env.mercadoPago.apiBaseUrl) return row;
     const mpPayment: any = await this.mercadoPago.getPayment(row.providerId, accessToken, {
