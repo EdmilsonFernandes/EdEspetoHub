@@ -685,10 +685,13 @@ export function LandingPage() {
                 </motion.a>
               </div>
             </div>
-            {/* Mercado Pago */}
+            {/* Meios de pagamento */}
             <div className="jnc-glass flex flex-col items-center justify-center gap-2 rounded-[2rem] px-6 py-5 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Pagamentos por</p>
-              <img src="/mercado-pago-horizontal.png" alt="Mercado Pago" className="h-7 w-auto object-contain" />
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Pagamentos por:</p>
+              <div className="flex items-center justify-center gap-3">
+                <img src="/logo-openpix.webp" alt="OpenPix" className="h-7 w-auto object-contain" />
+                <img src="/logo-asaas.webp" alt="Asaas" className="h-7 w-auto object-contain" />
+              </div>
               <p className="text-[11px] font-semibold text-slate-500">Pix, crédito e débito com confirmação automática</p>
             </div>
           </div>

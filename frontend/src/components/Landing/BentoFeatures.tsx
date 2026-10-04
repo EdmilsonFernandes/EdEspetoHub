@@ -92,19 +92,19 @@ export function BentoFeatures() {
               <CreditCard size={24} weight="duotone" />
             </div>
             <span className="rounded-full border border-emerald-400/20 bg-emerald-400/5 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-emerald-300">
-              Mercado Pago Integrado
+              Pix e Cartão Integrados
             </span>
           </div>
 
           <div className="mt-8 space-y-2">
             <h3 className="text-xl font-black text-white leading-tight">Pagamento Direto na sua Conta</h3>
             <p className="text-slate-400 text-xs sm:text-sm font-medium leading-relaxed max-w-xl">
-              Integração direta com o Mercado Pago da própria loja. O cliente paga via Pix, crédito ou débito no fluxo do checkout e o dinheiro cai na hora no seu saldo, sem intermediários ou atrasos.
+              Integração direta com o gateway da própria loja (Asaas ou OpenPix). O cliente paga via Pix, crédito ou débito no fluxo do checkout e o dinheiro cai na hora no seu saldo, sem intermediários ou atrasos.
             </p>
           </div>
 
           <div className="mt-6 border-t border-white/5 pt-5 flex flex-wrap gap-2.5">
-            {['Segurança SSL', 'Taxas Oficiais MP', 'Pix Pix Copia/Cola', 'Estorno em 1 clique'].map((item) => (
+            {['Segurança SSL', 'Taxas Oficiais do Gateway', 'Pix Copia/Cola', 'Estorno em 1 clique'].map((item) => (
               <span key={item} className="inline-flex items-center gap-1.5 text-[10.5px] font-semibold text-slate-300 bg-white/[0.03] border border-white/5 px-3 py-1.5 rounded-full">
                 ✓ {item}
               </span>

@@ -639,8 +639,9 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 <div className="relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[linear-gradient(145deg,rgba(13,25,48,0.94),rgba(2,52,81,0.9))] p-4 shadow-[0_22px_48px_-28px_rgba(0,158,227,0.45)]">
                   <div className="pointer-events-none absolute -left-4 top-4 h-14 w-14 rounded-full bg-[#336886]/25 blur-2xl" />
                   <div className="pointer-events-none absolute -right-4 bottom-3 h-14 w-14 rounded-full bg-[#5fd35a]/18 blur-2xl" />
-                  <div className="relative rounded-[1rem] border border-white/70 bg-white/96 px-3 py-2 shadow-[0_18px_34px_-24px_rgba(255,255,255,0.65)]">
-                    <img src="/mercado-pago-horizontal.png" alt="Mercado Pago" className="h-14 w-full object-contain object-left" />
+                  <div className="relative flex items-center gap-3 rounded-[1rem] border border-white/70 bg-white/96 px-3 py-2 shadow-[0_18px_34px_-24px_rgba(255,255,255,0.65)]">
+                    <img src="/logo-openpix.webp" alt="OpenPix" className="h-9 w-auto object-contain" />
+                    <img src="/logo-asaas.webp" alt="Asaas" className="h-9 w-auto object-contain" />
                   </div>
                   <div className="relative mt-3 flex flex-wrap gap-2">
                     {[
@@ -657,7 +658,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 </div>
                 <p className="mt-3 text-sm font-semibold text-white">Pagamentos online opcionais</p>
                 <p className="mt-1 text-xs leading-5 text-slate-400">
-                  O comerciante conecta a própria conta Mercado Pago e recebe Pix, crédito e débito direto no fluxo do pedido.
+                  O comerciante conecta a própria conta (Asaas ou OpenPix) e recebe Pix, crédito e débito direto no fluxo do pedido.
                 </p>
                 <div className="mt-3 flex items-center gap-2 text-[11px] text-[#5FD35A] font-bold uppercase tracking-[0.12em]">
                   <ShieldCheck size={14} weight="duotone" />

@@ -33,7 +33,7 @@ export function PricingSection() {
           Preço fixo. Zero comissão por pedido.
         </h2>
         <p className="mt-3 text-sm font-medium text-slate-400">
-          Você recebe 100% de cada pedido no seu Mercado Pago. Pague só a mensalidade abaixo.
+          Você recebe 100% de cada pedido na sua conta (Asaas ou OpenPix). Pague só a mensalidade abaixo.
         </p>
 
         <div className="mt-6 inline-flex items-center gap-1 rounded-2xl border border-white/10 bg-white/5 p-1">
