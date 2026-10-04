@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiClient } from '../config/apiClient';
+import { hapticLight } from '../utils/haptic';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useRoleRedirect } from '../hooks/useRoleRedirect';
 import { Capacitor } from '@capacitor/core';
@@ -627,6 +628,37 @@ const readMotoboySession = () => {
   }
 };
 
+/** Anel do pull-to-refresh (padrão SouFix/Dr. Exame): preenchimento determinate girando
+ *  com o puxar (progresso 0-100 do gatilho de 68px) e vira indeterminate (giro contínuo)
+ *  enquanto atualiza — o usuário sente o quanto falta, como num PTR nativo. */
+const PTR_TRIGGER_PX = 68;
+
+function PullToRefreshRing({ progress, spinning }: { progress: number; spinning: boolean }) {
+  const radius = 9;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.min(100, Math.max(0, progress));
+  const reached = clamped >= 100;
+  // spinning: traço de 25% girando (indeterminate); puxando: arco proporcional ao gesto
+  const offset = spinning ? circumference * 0.75 : circumference * (1 - clamped / 100);
+  return (
+    <svg viewBox="0 0 24 24" className={`h-[18px] w-[18px] shrink-0 ${spinning ? 'animate-spin' : ''}`} aria-hidden="true">
+      <circle cx="12" cy="12" r={radius} fill="none" strokeWidth="2.5" className="stroke-slate-200" />
+      <circle
+        cx="12"
+        cy="12"
+        r={radius}
+        fill="none"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        className={reached || spinning ? 'stroke-[#2f9df7]' : 'stroke-slate-400'}
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        transform="rotate(-90 12 12)"
+      />
+    </svg>
+  );
+}
+
 export function MarketplacePage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -653,6 +685,8 @@ export function MarketplacePage() {
   const [condominiumAvailabilityModal, setCondominiumAvailabilityModal] = useState<CondominiumAvailabilityModalState | null>(null);
   const [condominiumPromoModal, setCondominiumPromoModal] = useState<CondominiumPromoModalState | null>(null);
   const [pullDistance, setPullDistance] = useState(0);
+  // haptic do PTR dispara 1x por gesto (ao cruzar o gatilho), não a cada frame
+  const pullHapticFiredRef = useRef(false);
   const [isHeaderElevated, setIsHeaderElevated] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
   const [isSearchEditing, setIsSearchEditing] = useState(false);
@@ -1073,6 +1107,7 @@ export function MarketplacePage() {
       if (window.scrollY > 2 || isRefreshing) return;
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
       touchPullActiveRef.current = touchStartYRef.current != null;
+      pullHapticFiredRef.current = false;
     };
 
     const onTouchMove = (event: TouchEvent) => {
@@ -1087,6 +1122,12 @@ export function MarketplacePage() {
       const withResistance = Math.min(120, delta * 0.45);
       pullDistanceRef.current = withResistance;
       setPullDistance(withResistance);
+      // Tátil estilo PTR nativo (padrão SouFix/Dr. Exame): um "tique" ao cruzar o
+      // gatilho — o usuário sente que soltar ali atualiza.
+      if (withResistance >= PTR_TRIGGER_PX && !pullHapticFiredRef.current) {
+        pullHapticFiredRef.current = true;
+        hapticLight();
+      }
     };
 
     const onTouchEnd = () => {
@@ -1096,7 +1137,7 @@ export function MarketplacePage() {
       }
       touchPullActiveRef.current = false;
       touchStartYRef.current = null;
-      const shouldRefresh = pullDistanceRef.current >= 68;
+      const shouldRefresh = pullDistanceRef.current >= PTR_TRIGGER_PX;
       pullDistanceRef.current = 0;
       setPullDistance(0);
       if (shouldRefresh) {
@@ -2004,12 +2045,13 @@ export function MarketplacePage() {
       <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[320px]" style={{ background: 'linear-gradient(180deg, #E9F2F7 0%, #F4F8FB 38%, transparent 72%)' }} />
 
       <div
-        className={`pointer-events-none fixed left-1/2 z-[120] -translate-x-1/2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-2xs font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
+        className={`pointer-events-none fixed left-1/2 z-[120] flex -translate-x-1/2 items-center gap-2 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-2xs font-black uppercase tracking-[0.12em] text-slate-600 shadow-sm transition-all duration-200 ${
           pullDistance > 0 || isRefreshing ? 'opacity-100' : 'opacity-0'
         }`}
         style={{ top: `${Math.max(8, 8 + pullDistance * 0.35)}px` }}
       >
-        {isRefreshing ? 'Atualizando...' : pullDistance >= 68 ? 'Solte para atualizar' : 'Puxe para atualizar'}
+        <PullToRefreshRing progress={(pullDistance / PTR_TRIGGER_PX) * 100} spinning={isRefreshing} />
+        {isRefreshing ? 'Atualizando...' : pullDistance >= PTR_TRIGGER_PX ? 'Solte para atualizar' : 'Puxe para atualizar'}
       </div>
 
       <HubMarketingPopup

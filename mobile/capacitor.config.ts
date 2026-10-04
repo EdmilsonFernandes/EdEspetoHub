@@ -21,6 +21,12 @@ const config: CapacitorConfig = {
   },
   android: {
     backgroundColor: '#0B0F1A',
+    // Android 15+ (targetSdk>=35) força edge-to-edge: sem isso o WebView desenha POR TRÁS da
+    // status bar e da gesture bar (env(safe-area-inset-*) volta 0 no Android WebView → nada
+    // compensa). 'auto' = Capacitor aplica margins no WebView só no 15+. Padrão observado em
+    // apps nativos maduros (análise do APK SouFix/NativeScript, que trata insets explicitamente
+    // no bottom nav). Android ≤14: sem mudança. Validado no Dr. Exame (emulador API 37).
+    adjustMarginsForEdgeToEdge: 'auto',
     allowMixedContent: false,
     // Auditoria teclado 24/08: captureInput=true trocava o InputConnection do WebView
     // por um BaseInputConnection mudo (sem EditorInfo) → Gboard sem sugestões/digitação

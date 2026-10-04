@@ -13,6 +13,14 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- Edge-to-edge Android 15+ (adjustMarginsForEdgeToEdge='auto'): as faixas de
+             status/gesture bar ficam expostas mostrando o fundo da WINDOW. Navy #0B0F1A =
+             contínuo com o splash e o backgroundColor do WebView — antes o padrão era
+             branco/claro, quebrando a leitura dos ícones claros da status bar.
+             Ícones claros (windowLightStatusBar=false) sobre navy. Android ≤14: idem, unifica. -->
+        <item name="android:windowBackground">#0B0F1A</item>
+        <item name="android:statusBarColor">#0B0F1A</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
 
