@@ -1,5 +1,7 @@
 ext {
-    minSdkVersion = 23
+    // 24 (04/10/2026): Proteção Automática do Google Play exige minSdk >= 24 —
+    // upload do AAB com 23 foi rejeitado. Corta Android 6.0 (API 23, <1% do parque).
+    minSdkVersion = 24
     compileSdkVersion = 36
     targetSdkVersion = 36
     androidxActivityVersion = '1.10.1'
