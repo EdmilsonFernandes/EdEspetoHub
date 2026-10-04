@@ -1733,7 +1733,7 @@ export const MenuView = ({
                             openProductModal(item);
                           }
                         }}
-                        className={`h-full w-full rounded-xl overflow-hidden bg-slate-50 ring-1 ring-slate-100/60 lg:rounded-2xl lg:border lg:border-white lg:shadow-[0_12px_24px_-16px_rgba(15,23,42,0.3)] ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
+                        className={`h-full w-full rounded-xl overflow-hidden bg-slate-50 ring-1 ring-slate-100/60 lg:rounded-2xl lg:border lg:border-white lg:shadow-[0_12px_24px_-16px_rgba(15,23,42,0.3)] ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'} ${stockState.soldOut ? 'grayscale opacity-75' : ''}`}
                       >
                         {item.imageUrl ? (
                           <Image

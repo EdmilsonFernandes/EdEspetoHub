@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { normalizeSearchText } from '../../utils/text';
 import type { HubLocation, HubRegion, PreferredDiscoveryAddress } from './useHubLocation';
 import { haversineKm } from '../../utils/geo';
 
@@ -26,12 +27,7 @@ type UseHubStoreDistancesParams = {
   hubDebugEnabled: boolean;
 };
 
-const normalizeSearchText = (value: string) =>
-  String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
+
 
 const readHubCache = <T,>(key: string, ttlMs: number): T | null => {
   if (typeof window === 'undefined') return null;

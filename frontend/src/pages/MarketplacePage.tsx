@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiClient } from '../config/apiClient';
 import { hapticLight } from '../utils/haptic';
+import { normalizeSearchText } from '../utils/text';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useRoleRedirect } from '../hooks/useRoleRedirect';
 import { Capacitor } from '@capacitor/core';
@@ -455,12 +456,7 @@ const hashFrom = (value: string) => {
   return Math.abs(hash);
 };
 
-const normalizeSearchText = (value?: string | null) =>
-  String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim()
-    .toLowerCase();
+
 
 const CONDOMINIUM_DISPLAY_LOWERCASE_WORDS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'di', 'del', 'della']);
 
@@ -650,7 +646,7 @@ function PullToRefreshRing({ progress, spinning }: { progress: number; spinning:
         fill="none"
         strokeWidth="2.5"
         strokeLinecap="round"
-        className={reached || spinning ? 'stroke-[#2f9df7]' : 'stroke-slate-400'}
+        className={reached || spinning ? 'stroke-[#336686]' : 'stroke-slate-400'}
         strokeDasharray={circumference}
         strokeDashoffset={offset}
         transform="rotate(-90 12 12)"
@@ -2802,12 +2798,35 @@ export function MarketplacePage() {
 
           {/* Nova Seção: Itens encontrados na busca */}
           {debouncedQuery.length >= 2 && (
-            <HubSearchProductResults
-              items={searchedProducts}
-              selectedCondominiumSlug={selectedCondominiumSlug}
-              currency={currency}
-              onStageProduct={(item) => stageFeaturedProductCheckout(item as FeaturedProduct)}
-            />
+            <>
+              <HubSearchProductResults
+                items={searchedProducts}
+                selectedCondominiumSlug={selectedCondominiumSlug}
+                currency={currency}
+                onStageProduct={(item) => stageFeaturedProductCheckout(item as FeaturedProduct)}
+              />
+              {/* Estado "busca sem resultado" (padrão 4 estados, estudo SouFix 04/10):
+                  antes a seção simplesmente não aparecia — o usuário não sabia se a
+                  busca tinha terminado. Agora: loading (carrossel tratado acima) /
+                  resultados / sem resultado com orientação. */}
+              {!productSearchLoading && searchedProducts.length === 0 && (
+                <section className="px-3 pb-2">
+                  <div className="flex items-center gap-3 rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-3.5 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.25)]">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#336686]/8 text-[#336686]">
+                      <MagnifyingGlass size={20} weight="duotone" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-black leading-tight text-slate-900">
+                        Nenhum produto encontrado por “{debouncedQuery}”
+                      </p>
+                      <p className="mt-0.5 text-[11px] font-semibold leading-4 text-slate-500">
+                        Veja se escreveu certinho ou procure pelo nome da loja logo abaixo.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              )}
+            </>
           )}
 
           {/* Banner B2B REMOVIDO do hub (auditoria 2, 18/08): captação de lojista

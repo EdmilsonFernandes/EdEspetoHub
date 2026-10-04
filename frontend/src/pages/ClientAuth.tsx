@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, Buildings, Eye, EyeSlash, LockKey, MapTrifold, SealCheck, Scooter, ShieldCheck, Storefront, UserCircle, WarningCircle, X, EnvelopeSimple, Phone } from '@phosphor-icons/react';
+import { ArrowRight,  Eye, EyeSlash, LockKey,  SealCheck,    UserCircle, WarningCircle, X, EnvelopeSimple, Phone } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
 import { authService } from '../services/authService';
 import { AuthLayout } from '../layouts/AuthLayout';
@@ -73,8 +73,7 @@ export function ClientAuth() {
   const [biometricLoading, setBiometricLoading] = useState(false);
   const [autoBiometricTried, setAutoBiometricTried] = useState(false);
   const [enrollmentPromptOpen, setEnrollmentPromptOpen] = useState(false);
-  const [professionalAccessOpen, setProfessionalAccessOpen] = useState(false);
-  const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
+    const [pendingBiometricSession, setPendingBiometricSession] = useState<any | null>(null);
   const [mfaChallenge, setMfaChallenge] = useState<any | null>(null);
   const [mfaError, setMfaError] = useState('');
   const [mfaLoading, setMfaLoading] = useState(false);
@@ -109,48 +108,7 @@ export function ClientAuth() {
     if (nextPath) params.set('next', nextPath);
     return params.toString() ? `?${params.toString()}` : '';
   }, [hubMode, nextPath]);
-  const professionalAccessOptions = useMemo(() => [
-    {
-      id: 'lojista',
-      title: 'Lojista',
-      description: 'Pedidos, cardápio, fila e operação da loja.',
-      route: `/admin${hubSuffix}`,
-      icon: Storefront,
-      tone: 'border-emerald-100 bg-emerald-50 text-emerald-700',
-    },
-    {
-      id: 'entregador',
-      title: 'Entregador',
-      description: 'Rotas, coletas, entregas e ganhos.',
-      route: `/motoboy/login${hubSuffix}`,
-      icon: Scooter,
-      tone: 'border-amber-100 bg-amber-50 text-amber-700',
-    },
-    {
-      id: 'parceiro',
-      title: 'Parceiro',
-      description: 'Chalés, pousadas, serviços e turismo local.',
-      route: '/parceiro',
-      icon: MapTrifold,
-      tone: 'border-sky-100 bg-sky-50 text-sky-700',
-    },
-    {
-      id: 'condominio',
-      title: 'Condomínio',
-      description: 'Feiras, eventos locais e gestão do condomínio.',
-      route: '/condominio/login',
-      icon: Buildings,
-      tone: 'border-violet-100 bg-violet-50 text-violet-700',
-    },
-    {
-      id: 'interno',
-      title: 'Acesso interno',
-      description: 'Super Admin e gestão da plataforma.',
-      route: '/superadmin',
-      icon: ShieldCheck,
-      tone: 'border-slate-200 bg-slate-50 text-slate-700',
-    },
-  ], [hubSuffix]);
+  
 
   const verificationCode = useMemo(() => codeDigits.join(''), [codeDigits]);
   const storedBiometricProfile = useMemo(() => nativeBiometricService.getStoredCustomerProfile(), [biometricAvailable]);
@@ -571,14 +529,16 @@ export function ClientAuth() {
       showHeader
     >
       <div className="space-y-1.5 ds-login-card-enter w-full sm:space-y-4">
-        <div className="hidden text-center sm:block">
-          <div className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#1c4b62] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)]">
+        {/* Hero visível também no mobile (E1, 04/10 — estudo SouFix "cara de app"):
+            antes `hidden sm:block`, a tela abria seca direto no formulário no celular. */}
+        <div className="text-center">
+          <div className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#1c4b62] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)] sm:h-12 sm:w-12">
             <LockKey size={23} weight="duotone" />
           </div>
-          <h2 className="text-[2rem] font-black tracking-[-0.03em] text-slate-800">
+          <h2 className="text-[1.55rem] font-black tracking-[-0.03em] text-slate-800 sm:text-[2rem]">
             {mode === 'register' ? 'Criar conta' : 'Entrar'}
           </h2>
-          <p className="mx-auto mt-2 max-w-sm text-sm font-semibold leading-6 text-slate-500">
+          <p className="mx-auto mt-2 max-w-sm text-[13px] font-semibold leading-6 text-slate-500 sm:text-sm">
             {mode === 'register'
               ? 'Cadastre seu acesso para acompanhar pedidos e salvar endereços.'
               : 'Acesse pedidos, endereços e compras com e-mail e senha.'}
@@ -791,28 +751,7 @@ export function ClientAuth() {
             <AuthMascotPanel variant="client" mode={mode} />
           </form>
 
-          {mode === 'login' ? (
-            <div className="border-t border-slate-100/90 pt-3">
-              <button
-                type="button"
-                onClick={() => setProfessionalAccessOpen(true)}
-                className="group relative flex w-full items-center gap-3 overflow-hidden rounded-[1.25rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(238,247,250,0.90))] px-3.5 py-3 text-left shadow-[0_16px_34px_-30px_rgba(21,58,76,0.34)] transition-all hover:border-[#336886]/25 hover:bg-white active:scale-[0.99]"
-              >
-                <span className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-[#5FD35A]/12 blur-2xl" />
-                <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.42)]">
-                  <Storefront size={19} weight="duotone" />
-                </span>
-                <span className="relative min-w-0 flex-1">
-                  <span className="block text-[10px] font-black uppercase tracking-[0.14em] text-[#336886]">Acesso profissional</span>
-                  <span className="mt-0.5 block text-sm font-black leading-4 tracking-[-0.02em] text-slate-900">Sou profissional</span>
-                  <span className="mt-0.5 block text-[11px] font-semibold leading-4 text-slate-500">Lojista, entregador, parceiro ou gestão.</span>
-                </span>
-                <span className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#336886]/10 bg-white/80 text-[#336886] transition group-hover:translate-x-0.5">
-                  <ArrowRight size={15} weight="bold" />
-                </span>
-              </button>
-            </div>
-          ) : null}
+          
         </div>
       </div>
       <ConfirmationModal
@@ -826,81 +765,7 @@ export function ClientAuth() {
         variant="info"
         icon={<LockKey size={32} weight="duotone" />}
       />
-      {professionalAccessOpen ? (
-        <div className="fixed inset-0 z-[130] flex items-end justify-center bg-[radial-gradient(circle_at_50%_0%,rgba(51,104,134,0.22),transparent_36%),rgba(2,6,23,0.52)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md sm:items-center sm:px-4 sm:py-6 animate-in fade-in duration-200">
-          <button
-            type="button"
-            aria-label="Fechar acessos profissionais"
-            className="absolute inset-0"
-            onClick={() => setProfessionalAccessOpen(false)}
-          />
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="professional-access-title"
-            className="relative flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.25rem)] w-full max-w-lg flex-col overflow-y-auto overscroll-contain rounded-3xl border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,248,251,0.96)_62%,rgba(236,244,248,0.94))] p-3.5 shadow-[0_38px_120px_-38px_rgba(15,23,42,0.78)] ring-1 ring-white/40 animate-in zoom-in-95 duration-200 sm:p-5"
-          >
-            <div className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#336886]/14 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-14 left-2 h-40 w-40 rounded-full bg-emerald-300/16 blur-3xl" />
-            <div className="relative flex shrink-0 items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#336886]/10 bg-white/78 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#153A4C] shadow-[0_12px_28px_-24px_rgba(21,58,76,0.38)]">
-                  <span className="grid h-6 w-6 place-items-center overflow-hidden rounded-full border border-white bg-white">
-                    <img src="/janocaminho.jpg" alt="" className="h-full w-full object-cover" />
-                  </span>
-                  Perfis da plataforma
-                </div>
-                <h2 id="professional-access-title" className="mt-2.5 text-[clamp(1.05rem,5.4vw,1.35rem)] font-black leading-none tracking-[-0.04em] text-slate-950 sm:text-3xl">
-                  Acessos profissionais
-                </h2>
-                <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500 max-[380px]:sr-only sm:text-sm sm:leading-6">
-                  Loja, entrega, parceiro e gestão ficam aqui. Cliente continua entrando pela tela principal.
-                </p>
-              </div>
-                <button
-                  type="button"
-                  onClick={() => setProfessionalAccessOpen(false)}
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:text-slate-800 sm:h-10 sm:w-10"
-                  aria-label="Fechar"
-                >
-                <X size={17} weight="bold" />
-              </button>
-            </div>
-
-            <div className="relative mt-3 pr-1">
-              <div className="grid gap-1.5 sm:grid-cols-2 sm:gap-2">
-                {professionalAccessOptions.map((option) => {
-                  const Icon = option.icon;
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => {
-                        setProfessionalAccessOpen(false);
-                        navigate(option.route);
-                      }}
-                      className={`group flex w-full items-center gap-2.5 rounded-[1.15rem] border border-white/75 bg-white/88 p-2 text-left shadow-[0_18px_38px_-32px_rgba(15,23,42,0.38)] ring-1 ring-slate-900/[0.03] transition hover:border-[#336886]/18 hover:bg-white hover:shadow-[0_24px_54px_-36px_rgba(21,58,76,0.48)] active:scale-[0.99] sm:hover:-translate-y-0.5 sm:flex-col sm:items-start sm:p-3.5 ${option.id === 'interno' ? 'sm:col-span-2 sm:flex-row sm:items-center' : ''}`}
-                    >
-                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-[1rem] border shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] sm:h-12 sm:w-12 ${option.tone}`}>
-                        <Icon size={20} weight="duotone" />
-                      </span>
-                      <span className="min-w-0 flex-1 sm:w-full">
-                        <span className="flex items-center justify-between gap-2">
-                          <span className="block text-sm font-black tracking-[-0.02em] text-slate-950 sm:text-base">{option.title}</span>
-                          <ArrowRight size={17} weight="bold" className="hidden shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#336886] sm:block" />
-                        </span>
-                        <span className="mt-0.5 block line-clamp-2 text-[11px] font-semibold leading-4 text-slate-500 max-[380px]:sr-only sm:text-xs sm:leading-5">{option.description}</span>
-                      </span>
-                      <ArrowRight size={17} weight="bold" className="shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#336886] sm:hidden" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-          </section>
-        </div>
-      ) : null}
+      
       {verifyPrompt ? (
         <div className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/55 px-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
           <div className="flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-7rem)] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)] sm:max-h-[min(48rem,calc(100dvh-3rem))]">

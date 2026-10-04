@@ -10,8 +10,6 @@ import {
   CookingPot,
   Motorcycle,
   Headset,
-  MapTrifold,
-  Buildings,
   Briefcase,
   RocketLaunch,
   SignOut,
@@ -294,28 +292,23 @@ export function ProfileDrawer({
       action: onOpenMotoboyLogin,
       ready: savedAccessProfiles.motoboy.biometric || savedAccessProfiles.motoboy.hasSession,
     },
-    {
-      id: 'parceiro',
-      title: 'Parceiro',
-      subtitle: 'Chalés, pousadas, serviços e turismo local',
-      icon: <MapTrifold size={24} weight="duotone" />,
-      action: () => { drawerNavigate('/parceiro'); },
-      ready: false,
-    },
-    {
-      id: 'condominio',
-      title: 'Condomínio',
-      subtitle: 'Feiras, eventos locais e gestão do condomínio',
-      icon: <Buildings size={24} weight="duotone" />,
-      action: () => { drawerNavigate('/condominio/login'); },
-      ready: false,
-    },
+    // Parceiro e Condomínio saíram do picker (04/10): são destinos com rota própria
+    // (/parceiro, /condominio) descobertos na landing, não personas de login neste app.
   ];
   const activeContext: DrawerContext = isLogged ? 'client' : isAdmin ? 'store' : isMotoboy ? 'motoboy' : 'guest';
   const hasActiveContext = activeContext !== 'guest';
   const visibleAccessProfiles = hasActiveContext
     ? accessProfiles.filter((item) => item.id !== activeContext)
-    : accessProfiles.filter((item) => item.id !== 'client');
+    : [];
+  // Quick-switch profissional: só interessa a quem É staff ou tem sessão staff salva
+  // neste aparelho (decisão de arquitetura de identidade 04/10 — estudo SouFix).
+  const hasStaffSession =
+    activeContext === 'store' ||
+    activeContext === 'motoboy' ||
+    savedAccessProfiles.admin.hasSession ||
+    savedAccessProfiles.admin.biometric ||
+    savedAccessProfiles.motoboy.hasSession ||
+    savedAccessProfiles.motoboy.biometric;
 
   const currentIdentity =
     activeContext === 'client'
@@ -330,7 +323,7 @@ export function ProfileDrawer({
             { label: 'Conectado', tone: 'success' as const },
           ],
           switchTitle: 'Outros acessos',
-          switchHint: 'Lojista, entregador, parceiro e condomínio aparecem aqui.',
+          switchHint: 'Lojista e entregador aparecem aqui.',
         }
       : activeContext === 'store'
         ? {
@@ -551,7 +544,7 @@ export function ProfileDrawer({
                   </div>
                 </div>
               </div>
-              <button
+              {hasStaffSession && (<button
                 type="button"
                 onClick={() => { setAccessPickerMode('login'); setHighlightFirstAccess(false); setAccessPickerOpen(true); }}
                 className="group flex w-full items-center gap-3 rounded-[1.3rem] border border-[#d7e7ef]/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] px-3.5 py-3 text-left shadow-[0_14px_30px_-26px_rgba(21,58,76,0.28)] transition-all active:scale-[0.98]"
@@ -561,16 +554,16 @@ export function ProfileDrawer({
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-[12px] font-black uppercase tracking-[0.1em] text-[#153A4C]">
-                    {activeContext === 'client' ? 'Sou um profissional' : 'Trocar de perfil'}
+                    {activeContext === 'client' ? 'Acesso profissional' : 'Trocar de perfil'}
                   </span>
                   <span className="mt-0.5 block text-[10.5px] font-semibold leading-4 text-slate-500">
                     {activeContext === 'client'
-                      ? 'Lojista, entregador, parceiro ou condomínio'
-                      : 'Cliente, outro profissional ou gestão'}
+                      ? 'Operação da loja ou entregas neste aparelho'
+                      : 'Cliente ou outro perfil salvo aqui'}
                   </span>
                 </span>
                 <CaretRight size={15} weight="bold" className="shrink-0 text-[#336886]/60 transition-transform group-active:translate-x-0.5" />
-              </button>
+              </button>)}
             </div>
           ) : (
             <div className="space-y-2.5">
@@ -617,20 +610,7 @@ export function ProfileDrawer({
                 </button>
               </div>
 
-              <button
-                type="button"
-                onClick={() => { setAccessPickerMode('login'); setHighlightFirstAccess(false); setAccessPickerOpen(true); }}
-                className="group flex w-full items-center gap-3 rounded-[1.2rem] border border-[#d7e7ef]/80 bg-[#f4fafc]/84 px-3 py-2.5 text-left shadow-[0_14px_30px_-26px_rgba(21,58,76,0.28)] transition-all active:scale-[0.98]"
-              >
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(21,58,76,0.36)]">
-                  <Storefront size={19} weight="duotone" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[11px] font-black uppercase tracking-[0.12em] text-[#153A4C]">Sou profissional</span>
-                  <span className="mt-0.5 block text-[10.5px] font-semibold leading-4 text-slate-500">Lojista, entregador, parceiro ou condomínio</span>
-                </span>
-                <CaretRight size={15} weight="bold" className="shrink-0 text-[#336886]/60 transition-transform group-active:translate-x-0.5" />
-              </button>
+              {/* Arquitetura de identidade (04/10, estudo SouFix): o app do cliente é SÓ do cliente. Acessos profissionais (lojista/entregador) têm destinos próprios (/admin, painel do motoboy, landing) e não são oferecidos ao anônimo aqui. Quick-switch só com sessão salva — ver botão condicional na seção logada. */}
             </div>
           )}
         </div>

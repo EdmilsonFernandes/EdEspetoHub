@@ -2,12 +2,10 @@
 import { Clock, Play, Check, CheckSquare } from "@phosphor-icons/react";
 import { isTableServiceCategory } from "../../../utils/tableServiceSettings";
 
-export const normalizeSearchText = (value: any) =>
-  String(value || "")
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
+// normalizeSearchText migrou para utils/text (fonte única, 04/10) — import local
+// (este arquivo também usa) + re-export mantém os imports existentes de GrillQueue.
+import { normalizeSearchText } from "../../../utils/text";
+export { normalizeSearchText };
 
 export const resolveCustomerOrderNote = (order: any) =>
   String(order?.customerNote || order?.customer_note || "")

@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { normalizeSearchText } from '../utils/text';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bed, Buildings, CaretDown, ChartBar, ChatCircleText, CheckCircle, ClockCountdown, Compass, CopySimple, Cpu, Eye, EyeSlash, ImageSquare, LinkSimpleHorizontal, MagnifyingGlass, MapTrifold, Megaphone, PaperPlaneTilt, PencilSimple, Plus, QrCode, ShieldCheck, Sparkle, Trash, UploadSimple, WarningCircle, X } from '@phosphor-icons/react';
@@ -267,12 +268,7 @@ const slugifyDestinationName = (value = '') =>
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
 
-const normalizeSearchText = (value: any) =>
-  String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
+
 
 const formatPhoneBr = (value: string) => {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
