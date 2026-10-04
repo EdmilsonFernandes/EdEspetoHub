@@ -36,8 +36,8 @@ android {
         applicationId "com.janocaminho.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 118
-        versionName "1.0.118"
+        versionCode 119
+        versionName "1.0.119"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -47,11 +47,14 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            // R8 ON (04/10/2026): Play Console — ofuscação 2% (< 25% exigido) impacta
+            // visibilidade/recursos de publicação. minifyEnabled liga shrink+optimize+
+            // obfuscate do R8; keeps críticos no proguard-rules.pro (Capacitor/Cordova/Firebase).
+            minifyEnabled true
             if (keystorePropertiesFile.exists()) {
                 signingConfig signingConfigs.release
             }
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }

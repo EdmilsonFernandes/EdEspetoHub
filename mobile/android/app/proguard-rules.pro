@@ -1,21 +1,21 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# --- R8 (ativado 04/10/2026: Play Console exigia ofuscação ≥25%, app estava em 2%) ---
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Capacitor: o bridge resolve plugins por reflexão (@CapacitorPlugin) e o JS
+# chama métodos nativos pelo nome — não podem ser renomeados/removidos.
+-keep class com.getcapacitor.** { *; }
+-keepclassmembers class * { @com.getcapacitor.annotation.* <fields>; }
+-keepclassmembers class * { @com.getcapacitor.annotation.* <init>(...); }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Plugins Cordova (capacitor-cordova-android-plugins): classes mapeadas por
+# nome em plugin.xml e instanciadas via reflexão em runtime.
+-keep class org.apache.cordova.** { *; }
+-keep public class * extends org.apache.cordova.CordovaPlugin
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Firebase Messaging: payload de notificação roteia por reflexão em libs de suporte.
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+
+# Warnings benignos de libs de cripto/transporte embutidas em dependências:
+-dontwarn org.bouncycastle.**
+-dontwarn org.conscrypt.**
+-dontwarn org.openjsse.**
