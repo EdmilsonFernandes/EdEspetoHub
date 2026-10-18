@@ -250,15 +250,13 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
 .pixwrap .sub{font-size:12.5px;color:var(--ink2);max-width:30ch}
 .cntchip{display:inline-flex;align-items:center;gap:8px;background:var(--warn-tint);border:1.5px solid #FDBA74;color:var(--warn-ink);border-radius:99px;padding:7px 16px;font-family:var(--font-disp);font-weight:800;font-size:17px;font-variant-numeric:tabular-nums}
 .cntchip svg.ic{width:17px;height:17px}
-.qrcard{background:#fff;border:2px dashed #94A3B8;border-radius:var(--r-md);padding:18px 18px 14px;box-shadow:var(--sh-flat);display:grid;gap:10px;justify-items:center}
-.qr{width:212px;height:212px;border-radius:8px;background:repeating-conic-gradient(#0F172A 0% 25%,#FFFFFF 0% 50%);background-size:15.14px 15.14px;position:relative}
-.qr .fin{position:absolute;width:46px;height:46px;background:#0F172A;border-radius:8px;display:flex;align-items:center;justify-content:center}
-.qr .fin::after{content:"";width:20px;height:20px;background:#fff;border-radius:4px;display:block}
-.qr .fin::before{content:"";position:absolute;width:28px;height:28px;background:#fff;border-radius:5px}
-.qr .fin i{position:absolute;width:14px;height:14px;background:#0F172A;border-radius:3px;z-index:1}
-.qr .f1{top:8px;left:8px}.qr .f2{top:8px;right:8px}.qr .f3{bottom:8px;left:8px}
+.qrcard{background:#fff;border:1px solid var(--hair);border-radius:var(--r-lg);padding:20px 20px 16px;box-shadow:var(--sh-card);display:grid;gap:10px;justify-items:center}
+.qrcv{width:216px;height:216px;border-radius:12px;overflow:hidden;background:#fff}
+.qrcv canvas{display:block;width:100%;height:100%}
 .qrcard .ql{font-size:12px;color:var(--ink2)}
-.qrcard .qv{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
+.qrcard .qv{font-family:var(--font-disp);font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}
+.qrcard .qs{font-size:11.5px;color:var(--ink2);margin-top:-4px}
+.howpay{font-size:11.5px;font-weight:700;color:var(--primary-ink);background:none;border:none;text-decoration:underline;cursor:pointer;padding:6px}
 .cnp{width:100%;display:flex;gap:8px;align-items:center}
 .cnp code{flex:1;min-width:0;background:var(--hair2);border-radius:9px;padding:9px 11px;font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .copybtn{flex:none;display:inline-flex;align-items:center;gap:6px;height:38px;border:none;border-radius:9px;background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;padding:0 14px;cursor:pointer}
@@ -883,7 +881,7 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
     </div>
   </div>
 </section>
-<section class="sec">
+<section class="sec" id="pix">
   <p class="secnum">04 · PAGAMENTO PIX <span class="tag tag-p0">P0 AGORA</span><span class="tag tag-c2">CICLO 2</span></p>
   <h2>Pix com countdown em cena e saída digna da expiração</h2>
   <p class="secsub">O pedido só entra na fila quando o Pix compensa — cada segundo de hesitação no QR é pedido perdido e lojista esperando. O countdown já existe; o quick-win P0 dá a ele o palco (chip grande + “Pagar agora” no copia-e-cola). A variante expirada deixa de ser beco sem saída.</p>
@@ -899,17 +897,19 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
           </div>
           <div class="cntchip"><svg class="ic"><use href="#i-clock"/></svg>Expira em 14:32</div>
           <div class="qrcard">
-            <div class="qr"><span class="fin f1"><i></i></span><span class="fin f2"><i></i></span><span class="fin f3"><i></i></span></div>
+            <div class="qrcv" data-qr></div>
             <p class="ql">Aponte a câmera do app do seu banco</p>
-            <p class="qv">R$ 77,70 · Espetinhos Bela Vista</p>
+            <p class="qv">R$ 77,70</p>
+            <p class="qs">Espetinhos Bela Vista · pedido #JB-2417</p>
           </div>
           <div class="cnp">
             <code>00020126580014BR.GOV.BCB.PIX0136a531c9e-2f4b-4e6f-9c1d-8f0e7b2a4c3d520400005303986540577.705802BR5915ESPETINHOS BV</code>
-            <button class="copybtn"><svg class="ic"><use href="#i-copy"/></svg>Pagar agora</button>
+            <button class="copybtn" aria-label="Copiar código Pix"><svg class="ic"><use href="#i-copy"/></svg>Copiar</button>
           </div>
           <div class="pix-cta">
-            <button class="ctagreen" style="width:100%">Acompanhar pedido</button>
-            <button class="obtn" style="width:100%"><svg class="ic"><use href="#i-doc"/></svg>Ver como pagar pelo app do banco</button>
+            <button class="ctagreen" style="width:100%">Pagar agora</button>
+            <button class="obtn" style="width:100%">Acompanhar pedido</button>
+            <button class="howpay">Como pagar pelo app do banco</button>
           </div>
         </div>
       </div>
@@ -940,8 +940,8 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
         <h4>O que mudou</h4>
         <ul>
           <li>Countdown sai do canto e vira chip display (Poppins bold) — a urgência que faltava.</li>
-          <li>Botão “Pagar agora” ao lado do copia-e-cola: deep link pro app do banco, fallback copia o código (P1.6).</li>
-          <li>QR em card com borda dashed e rótulo do valor — o comprovante de que é do pedido certo.</li>
+          <li>“Pagar agora” assume o posto de ação primária (deep link pro app do banco); copiar fica ao lado do código, onde se pensa nele (P1.6).</li>
+          <li>QR com cara de QR de verdade (módulos desenhados, finder patterns) em card limpo — com valor em display e pedido identificado.</li>
           <li>Expirado: causa + garantia (“nada foi cobrado”) + duas saídas (novo QR, cartão). Hoje é beco.</li>
           <li>Fluxo MP intacto: QR do backend, polling 5 min, webhook fecha em ~1s. Só a apresentação.</li>
         </ul>
@@ -1188,4 +1188,33 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
     <span>Ata: <code>.ux-audit/redesign-premium-2026-10-18/DECISOES_MESA.md</code></span>
   </div>
 </div>
+<script>
+/* QR de mentira com cara de verdade: módulos pseudo-aleatórios determinísticos
+   + finder patterns nos 3 cantos, desenhados em canvas (não é placeholder). */
+(function(){
+  function draw(el){
+    var n=25, s=432, c=document.createElement('canvas');
+    c.width=s; c.height=s;
+    var x=c.getContext('2d');
+    x.fillStyle='#FFFFFF'; x.fillRect(0,0,s,s);
+    x.fillStyle='#0F172A';
+    var m=s/n;
+    function rnd(i){var h=(i*2654435761+40503)>>>0;h^=h>>>13;h=(h*1274126177)>>>0;return((h>>>8)%1000)/1000}
+    for(var r=0;r<n;r++)for(var q=0;q<n;q++){
+      var fin=(r<8&&q<8)||(r<8&&q>=n-8)||(r>=n-8&&q<8);
+      var t=(r===6)||(q===6);
+      if(!fin&&!t&&rnd(r*n+q)<0.45)x.fillRect(q*m,r*m,m-0.6,m-0.6);
+    }
+    function finder(a,b){
+      x.fillRect(a*m,b*m,7*m,7*m);
+      x.fillStyle='#FFFFFF';x.fillRect((a+1)*m,(b+1)*m,5*m,5*m);
+      x.fillStyle='#0F172A';x.fillRect((a+2)*m,(b+2)*m,3*m,3*m);
+    }
+    finder(0,0);finder(n-7,0);finder(0,n-7);
+    el.appendChild(c);
+  }
+  var els=document.querySelectorAll('[data-qr]');
+  for(var i=0;i<els.length;i++)draw(els[i]);
+})();
+</script>
 
