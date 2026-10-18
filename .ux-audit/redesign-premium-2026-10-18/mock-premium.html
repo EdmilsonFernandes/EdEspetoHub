@@ -1,0 +1,1090 @@
+<title>Redesign Premium JNC</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800;900&display=swap">
+<style>
+/* JNC — Mock do redesign premium do app do cliente.
+   Tokens = nomes que viram código no B0 (frontend/src/index.css).
+   Tema único claro (o app é light-only), cores todas explícitas. */
+:root{
+  --bg:#F7F8FA; --surface:#FFFFFF; --ink:#153A4C; --ink2:#64748B; --hair:#E2E8F0; --hair2:#F1F5F9;
+  --primary:#2F9DF7;        /* gráfico: tint, badge bg, decor */
+  --primary-ink:#1A6FC8;    /* texto / underline / focus — AA */
+  --primary-tint:#EAF4FE;
+  --cta:#15803d; --cta-soft:#5FD35A; --cta-tint:#EAF7EC;
+  --warn:#D97706; --warn-ink:#B45309; --warn-tint:#FFF7ED;
+  --danger:#DC2626; --danger-tint:#FEF2F2;
+  --promo:#EA580C; --promo-ink:#C2410C; --promo-tint:#FFF7ED;
+  --store:#D97706;          /* cor da loja — catalogPrimaryColor */
+  --store-tint:rgba(217,119,6,.12); --store-ink:#92400E;
+  --sh-flat:0 1px 2px rgba(21,58,76,.06);
+  --sh-card:0 8px 24px rgba(21,58,76,.10);
+  --r-sm:12px; --r-md:16px; --r-lg:24px;
+  --font-body:'Inter',system-ui,sans-serif; --font-disp:'Poppins','Inter',sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1160px;margin:0 auto;padding-block:44px 72px;min-width:0}
+h1,h2,h3,h4{font-family:var(--font-disp);margin:0}
+p{margin:0}
+svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.hide{display:none}
+
+/* ---------- página ---------- */
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--primary-ink);text-transform:uppercase}
+.hero h1{font-size:clamp(26px,4.5vw,40px);font-weight:800;line-height:1.12;margin:10px 0 12px;text-wrap:balance}
+.lede{color:var(--ink2);max-width:62ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{background:var(--surface);border:1px solid var(--hair);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--ink);box-shadow:var(--sh-flat)}
+.chip b{color:var(--primary-ink);font-weight:800}
+.sec{margin-top:64px;min-width:0}
+.secnum{font-family:var(--font-disp);font-weight:800;color:var(--primary);font-size:13px;letter-spacing:.12em}
+.sec h2{font-size:clamp(20px,3vw,27px);font-weight:800;margin:6px 0 8px;text-wrap:balance}
+.secsub{color:var(--ink2);max-width:70ch}
+.frames{display:flex;flex-wrap:wrap;gap:32px;margin-top:26px;align-items:flex-start}
+.col{min-width:0}
+.note{max-width:390px;background:var(--surface);border:1px solid var(--hair);border-radius:var(--r-md);padding:14px 16px;margin-top:14px;box-shadow:var(--sh-flat);font-size:12.5px;color:var(--ink2)}
+.note h4{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);margin-bottom:6px}
+.note ul{margin:0;padding-left:16px;display:grid;gap:4px}
+.note li::marker{color:var(--primary)}
+.tag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;border-radius:6px;padding:2px 7px;margin-right:6px;vertical-align:1px}
+.tag-b1{background:var(--primary-tint);color:var(--primary-ink)}
+.tag-b2{background:var(--cta-tint);color:var(--cta)}
+.tag-b3{background:var(--hair2);color:var(--ink)}
+.tag-c2{background:var(--promo-tint);color:var(--promo-ink)}
+.tag-p0{background:var(--warn-tint);color:var(--warn-ink)}
+
+/* ---------- tokens ---------- */
+.tokgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
+.tok{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-flat);min-width:0}
+.tok .sw{height:52px}
+.tok .tk{padding:9px 12px;font-size:11.5px}
+.tok .tk b{display:block;font-size:12px}
+.tok .tk span{color:var(--ink2);font-family:ui-monospace,Consolas,monospace;font-size:10.5px}
+.specrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:12px}
+.spec{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r-md);padding:12px 14px;font-size:12.5px;color:var(--ink2);box-shadow:var(--sh-flat)}
+.spec b{color:var(--ink);display:block;margin-bottom:4px;font-size:13px}
+
+/* ---------- frame de telefone ---------- */
+.phone{width:min(390px,100%);background:var(--bg);border:9px solid #0F172A;border-radius:42px;overflow:hidden;position:relative;box-shadow:var(--sh-card);flex:none}
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 6px;font-size:12px;font-weight:700;color:var(--ink)}
+.sbar .sr{display:flex;gap:5px;align-items:center}
+.sr i{display:inline-block;background:currentColor;border-radius:2px}
+.sr .sig{width:3px;height:5px}.sr .sig+.sig{height:8px}.sr .sig+.sig+.sig{height:11px}
+.sr .batt{width:20px;height:10px;border:1.5px solid currentColor;border-radius:3px;position:relative}
+.sr .batt::after{content:"";position:absolute;inset:1.5px 6px 1.5px 1.5px;background:currentColor;border-radius:1px}
+
+/* ---------- S1 cardápio ---------- */
+.banner{position:relative;height:172px;background:linear-gradient(160deg,#0F172A 0%,#1E3A4C 55%,#3B2A1A 100%)}
+.banner::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,23,42,.55) 0%,rgba(15,23,42,.08) 55%,rgba(15,23,42,.5) 100%)}
+.banner::before{content:"";position:absolute;right:-30px;top:-40px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.35),transparent 65%)}
+.bov{position:absolute;top:10px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.bbtn{width:34px;height:34px;border-radius:999px;background:rgba(15,23,42,.45);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.22);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.bbtn svg.ic{width:16px;height:16px}
+.bacts{display:flex;gap:8px}
+.head{position:relative;background:var(--surface);border-radius:28px 28px 0 0;margin-top:-26px;padding:50px 16px 0;z-index:1}
+.logo-cut{position:absolute;top:-46px;left:50%;transform:translateX(-50%);width:92px;height:92px;border-radius:999px;background:#fff;border:4px solid #fff;box-shadow:var(--sh-card);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.logo-cut .li{width:76px;height:76px;border-radius:999px;background:linear-gradient(150deg,var(--store),#F59E0B);color:#fff;font-family:var(--font-disp);font-weight:800;font-size:26px;display:flex;align-items:center;justify-content:center;letter-spacing:.02em}
+.sname{text-align:center;font-size:20px;font-weight:800;line-height:1.2}
+.accent{width:40px;height:3px;border-radius:2px;background:var(--store);margin:8px auto 10px}
+.metarow{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--ink2)}
+.rpill{display:inline-flex;align-items:center;gap:4px;background:var(--ink);color:#fff;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:700}
+.rpill .st{color:#F5A623}
+.dot-open{display:inline-flex;align-items:center;gap:5px;font-weight:600;color:var(--cta)}
+.dot-open::before{content:"";width:7px;height:7px;border-radius:99px;background:var(--cta-soft);box-shadow:0 0 0 0 rgba(95,211,90,.5);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,211,90,.45)}70%{box-shadow:0 0 0 7px rgba(95,211,90,0)}100%{box-shadow:0 0 0 0 rgba(95,211,90,0)}}
+.submeta{text-align:center;font-size:12px;color:var(--ink2);margin-top:4px}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--hair);margin-top:12px;padding:0 6px}
+.tab{padding:10px 2px 9px;font-size:13.5px;font-weight:600;color:var(--ink2);border-bottom:2.5px solid transparent;margin-bottom:-1.5px}
+.tab.on{color:var(--primary-ink);border-color:var(--primary-ink);font-weight:700}
+.menuwrap{display:grid;grid-template-columns:64px 1fr;gap:10px;padding:12px 12px 96px;align-items:start}
+.rail{position:sticky;top:0;display:grid;gap:4px}
+.ritem{border-radius:var(--r-sm);padding:7px 4px 6px;display:grid;justify-items:center;gap:4px;color:var(--ink2);cursor:pointer}
+.ritem svg.ic{width:19px;height:19px}
+.ritem .rl{font-size:10px;font-weight:600;line-height:1.15;text-align:center}
+.ritem.on{background:var(--store-tint);color:var(--store-ink)}
+.mcol{min-width:0}
+.poprow{display:flex;justify-content:space-between;align-items:baseline;margin:2px 2px 8px}
+.poprow h4{font-size:14px;font-weight:700}
+.poprow a{font-size:12px;font-weight:700;color:var(--primary-ink);text-decoration:none;display:inline-flex;align-items:center;gap:2px}
+.poprow a svg.ic{width:13px;height:13px}
+.poptrack{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x mandatory;margin:0 -2px;padding-inline:2px}
+.pcard{flex:none;width:148px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--hair);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-flat);cursor:pointer}
+.pphoto{height:86px;position:relative}
+.pcard .pn{padding:8px 10px 6px;font-size:12.5px;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:32px}
+.pcard .pr{display:flex;justify-content:space-between;align-items:center;padding:0 10px 10px}
+.qty-badge{position:absolute;top:6px;right:6px;min-width:22px;height:22px;border-radius:99px;background:var(--ink);color:#fff;font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 6px}
+.ph-espeto{background:linear-gradient(135deg,#7C2D12,#B45309 55%,#F59E0B)}
+.ph-coca{background:linear-gradient(140deg,#450A0A,#7F1D1D 60%,#B91C1C)}
+.ph-suco{background:linear-gradient(140deg,#F59E0B,#FBBF24)}
+.ph-porcao{background:linear-gradient(140deg,#166534,#4D7C0F 70%,#84CC16)}
+.ph-doce{background:linear-gradient(140deg,#831843,#BE185D 60%,#F472B6)}
+.ph-combo{background:linear-gradient(135deg,#431407,#9A3412 50%,#EA580C)}
+.stitle{display:flex;align-items:center;gap:8px;margin:16px 2px 4px}
+.stitle b{font-size:14px;font-weight:700}
+.stitle .cnt{font-size:11px;color:var(--ink2)}
+.stitle::before{content:"";width:5px;height:16px;border-radius:3px;background:var(--store)}
+.prow{display:grid;grid-template-columns:1fr 88px;gap:12px;padding:11px 2px;border-bottom:1px solid var(--hair2);cursor:pointer}
+.prow:last-child{border-bottom:none}
+.pinfo{min-width:0;display:grid;gap:3px;align-content:start}
+.pnm{font-size:15px;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pbadge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:5px;padding:1.5px 6px;width:fit-content}
+.pbadge.hot{background:var(--promo-tint);color:var(--promo-ink)}
+.pbadge.new{background:var(--primary-tint);color:var(--primary-ink)}
+.pbadge.sold{background:var(--hair2);color:var(--ink2)}
+.pds{font-size:12px;color:var(--ink2);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pricerow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px}
+.pprice{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.price-old{font-size:11px;color:var(--ink2);text-decoration:line-through;font-weight:500;font-variant-numeric:tabular-nums;margin-left:5px}
+.promo-price{color:var(--promo-ink)}
+.plus{width:36px;height:36px;border-radius:99px;border:1.6px solid var(--primary-ink);color:var(--primary-ink);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh-flat)}
+.plus svg.ic{width:16px;height:16px}
+.plus.big{width:44px;height:44px}
+.plus:disabled{border-color:var(--hair);color:var(--hair);background:var(--hair2);cursor:not-allowed}
+.stepper{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--hair);border-radius:99px;padding:3px 6px;background:#fff}
+.stepper button{width:28px;height:28px;border-radius:99px;border:none;background:var(--primary-tint);color:var(--primary-ink);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.stepper button svg.ic{width:13px;height:13px}
+.stepper .sn{font-size:14px;font-weight:800;min-width:16px;text-align:center;font-variant-numeric:tabular-nums}
+.soldout .pfoto,.soldout .pinfo{opacity:.5}
+.soldout .prow-click{pointer-events:none}
+.pfoto{width:88px;height:88px;border-radius:var(--r-sm);position:relative;flex:none;overflow:hidden}
+.cartbar{position:absolute;left:14px;right:14px;bottom:14px;background:#123243;color:#fff;border-radius:99px;box-shadow:0 10px 28px rgba(15,42,58,.42);display:flex;align-items:center;gap:10px;padding:9px 8px 9px 10px;cursor:pointer}
+.cartbar .bag{width:38px;height:38px;border-radius:99px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;position:relative}
+.cartbar .bag svg.ic{width:18px;height:18px}
+.bbadge{position:absolute;top:-4px;right:-5px;min-width:19px;height:19px;border-radius:99px;background:var(--cta-soft);color:#0B2E14;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;animation:bpulse 2.2s infinite}
+@keyframes bpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+.cartbar .bl{font-size:13px;font-weight:700;flex:1;min-width:0}
+.cartbar .bl small{display:block;font-size:10.5px;font-weight:500;opacity:.75}
+.cartbar .bt{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.cartbar .go{width:30px;height:30px;border-radius:99px;background:var(--cta);display:flex;align-items:center;justify-content:center}
+.cartbar .go svg.ic{width:15px;height:15px;color:#fff}
+
+/* ---------- S1b desktop ---------- */
+.lgframe{width:min(720px,100%);background:var(--bg);border:9px solid #0F172A;border-radius:34px;overflow:hidden;position:relative;box-shadow:var(--sh-card)}
+.lgpills{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 4px}
+.lgpill{flex:none;height:40px;border-radius:99px;padding:0 15px;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink2);background:var(--surface);border:1px solid var(--hair)}
+.lgpill svg.ic{width:15px;height:15px}
+.lgpill.on{background:var(--store-tint);color:var(--store-ink);border-color:transparent;font-weight:700}
+.lggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;padding:16px}
+.lcard{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-flat)}
+.lcard .lph{height:118px}
+.lcard .lc{padding:10px 12px 12px}
+.lcard .pn2{font-size:14.5px;font-weight:600;line-height:1.3;margin-bottom:3px}
+.lcard .pd2{font-size:12px;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.35}
+
+/* ---------- S2 sheet produto ---------- */
+.dim{background:linear-gradient(180deg,rgba(15,23,42,.72),rgba(15,23,42,.55));padding:26px 0 0;display:flex;align-items:flex-end;min-height:190px}
+.sheetp{background:#fff;border-radius:26px 26px 0 0;padding:0 16px 18px;position:relative}
+.grabber{width:36px;height:4px;border-radius:99px;background:var(--hair);margin:10px auto 12px}
+.pfoto-lg{height:132px;border-radius:var(--r-md);margin-bottom:12px;position:relative;overflow:hidden}
+.sheetp h3{font-size:18px;font-weight:800;line-height:1.25}
+.sheetp .pd{font-size:12.5px;color:var(--ink2);margin-top:3px}
+.grp{margin-top:14px}
+.grp-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.grp-h b{font-size:13.5px;font-weight:700}
+.ctag{font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 7px}
+.ctag.req{background:var(--promo-tint);color:var(--promo-ink)}
+.ctag.opt{background:var(--hair2);color:var(--ink2)}
+.radio-row,.chk-row{display:flex;align-items:center;gap:10px;border:1.5px solid var(--hair);border-radius:var(--r-sm);padding:11px 12px;margin-bottom:8px;font-size:13.5px;cursor:pointer;background:#fff}
+.radio-row.on,.chk-row.on{border-color:var(--primary-ink);background:var(--primary-tint);font-weight:600}
+.rdot{width:19px;height:19px;border-radius:99px;border:2px solid var(--hair);flex:none;display:flex;align-items:center;justify-content:center}
+.radio-row.on .rdot{border-color:var(--primary-ink)}
+.radio-row.on .rdot::after{content:"";width:9px;height:9px;border-radius:99px;background:var(--primary-ink)}
+.cbox{width:19px;height:19px;border-radius:6px;border:2px solid var(--hair);flex:none;display:flex;align-items:center;justify-content:center}
+.chk-row.on .cbox{background:var(--primary-ink);border-color:var(--primary-ink)}
+.chk-row.on .cbox svg.ic{width:12px;height:12px;color:#fff}
+.rx .rprice{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums}
+.obs{border:1.5px solid var(--hair);border-radius:var(--r-sm);padding:10px 12px;font-size:12.5px;color:var(--ink2);margin-top:14px;background:#fff}
+.pmodal-footer{position:sticky;bottom:0;display:flex;gap:12px;align-items:center;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 26%);padding-top:14px;margin-top:14px}
+.ctagreen{flex:1;height:48px;border:none;border-radius:var(--r-sm);background:var(--cta);color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-variant-numeric:tabular-nums;box-shadow:0 6px 16px rgba(21,128,61,.28)}
+
+/* ---------- S3 checkout ---------- */
+.ckhead{padding:12px 16px 4px}
+.ckhead h3{font-size:18px;font-weight:800}
+.ckhead .sub{font-size:12px;color:var(--ink2)}
+.seg{display:flex;background:var(--hair2);border-radius:var(--r-sm);padding:4px;margin:10px 16px 4px}
+.segopt{flex:1;height:40px;border:none;background:transparent;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer}
+.segopt.on{background:#fff;color:var(--primary-ink);font-weight:700;box-shadow:var(--sh-flat)}
+.ckbody{padding:10px 16px 96px;display:grid;gap:12px}
+.csec{background:#fff;border:1px solid var(--hair);border-radius:var(--r-md);padding:13px 14px;box-shadow:var(--sh-flat)}
+.csec-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.csec-h b{font-size:13.5px}
+.lnk{font-size:12.5px;font-weight:700;color:var(--primary-ink);background:none;border:none;cursor:pointer;padding:4px 6px;margin:-4px -6px}
+.smini{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--hair2);font-size:13px}
+.smini:last-child{border-bottom:none}
+.smini .mf{width:42px;height:42px;border-radius:9px;flex:none}
+.smini .mn{flex:1;min-width:0;font-weight:600;line-height:1.25}
+.smini .mn small{display:block;font-size:11px;color:var(--ink2);font-weight:500}
+.smini .mp{font-weight:700;font-variant-numeric:tabular-nums;font-size:13px}
+.smini .stepper{padding:2px 4px}
+.smini .stepper button{width:24px;height:24px}
+.lbl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.addr b{display:block;font-size:14px;margin:2px 0}
+.addr .ad2{font-size:12px;color:var(--ink2)}
+.payrow{display:flex;align-items:center;gap:11px;border:1.5px solid var(--hair);border-radius:var(--r-sm);padding:11px 12px;margin-bottom:8px;cursor:pointer}
+.payrow:last-child{margin-bottom:0}
+.payrow.on{border-color:var(--cta);background:var(--cta-tint)}
+.ptile{width:38px;height:28px;border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff}
+.payrow .pl{flex:1;min-width:0}
+.payrow .pl b{display:block;font-size:13.5px}
+.payrow .pl small{font-size:11px;color:var(--ink2)}
+.payrow .prad{width:19px;height:19px;border-radius:99px;border:2px solid var(--hair)}
+.payrow.on .prad{border-color:var(--cta);display:flex;align-items:center;justify-content:center}
+.payrow.on .prad::after{content:"";width:9px;height:9px;border-radius:99px;background:var(--cta)}
+.coupon{display:flex;align-items:center;gap:10px}
+.coupon .cvc{flex:1;border:1.5px dashed var(--cta);background:var(--cta-tint);border-radius:var(--r-sm);padding:9px 12px;font-size:13px;font-weight:700;color:var(--cta);letter-spacing:.04em}
+.coupon .off{font-size:13px;font-weight:800;color:var(--cta);font-variant-numeric:tabular-nums}
+.breakdown{display:grid;gap:7px;font-size:13px;color:var(--ink2)}
+.breakdown .bk{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.breakdown .bk.off{color:var(--cta);font-weight:600}
+.breakdown .bk.tot{color:var(--ink);font-size:16px;font-weight:800;border-top:1px solid var(--hair);padding-top:9px;margin-top:2px}
+.cta-bar{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--hair);padding:12px 16px 18px;display:flex;gap:10px;align-items:center}
+.cta-bar .secure{font-size:10.5px;color:var(--ink2);display:grid;gap:2px;min-width:112px}
+.cta-bar .ctabtn{flex:1;height:48px;border:none;border-radius:var(--r-sm);background:var(--cta);color:#fff;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer;box-shadow:0 6px 16px rgba(21,128,61,.28)}
+
+/* ---------- S4 pix ---------- */
+.pixwrap{padding:18px 16px 24px;display:grid;gap:14px;justify-items:center;text-align:center}
+.okball{width:58px;height:58px;border-radius:99px;background:var(--cta-tint);color:var(--cta);display:flex;align-items:center;justify-content:center}
+.okball svg.ic{width:28px;height:28px}
+.pixwrap h3{font-size:20px;font-weight:800}
+.pixwrap .sub{font-size:12.5px;color:var(--ink2);max-width:30ch}
+.cntchip{display:inline-flex;align-items:center;gap:8px;background:var(--warn-tint);border:1.5px solid #FDBA74;color:var(--warn-ink);border-radius:99px;padding:7px 16px;font-family:var(--font-disp);font-weight:800;font-size:17px;font-variant-numeric:tabular-nums}
+.cntchip svg.ic{width:17px;height:17px}
+.qrcard{background:#fff;border:2px dashed #94A3B8;border-radius:var(--r-md);padding:18px 18px 14px;box-shadow:var(--sh-flat);display:grid;gap:10px;justify-items:center}
+.qr{width:212px;height:212px;border-radius:8px;background:repeating-conic-gradient(#0F172A 0% 25%,#FFFFFF 0% 50%);background-size:15.14px 15.14px;position:relative}
+.qr .fin{position:absolute;width:46px;height:46px;background:#0F172A;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.qr .fin::after{content:"";width:20px;height:20px;background:#fff;border-radius:4px;display:block}
+.qr .fin::before{content:"";position:absolute;width:28px;height:28px;background:#fff;border-radius:5px}
+.qr .fin i{position:absolute;width:14px;height:14px;background:#0F172A;border-radius:3px;z-index:1}
+.qr .f1{top:8px;left:8px}.qr .f2{top:8px;right:8px}.qr .f3{bottom:8px;left:8px}
+.qrcard .ql{font-size:12px;color:var(--ink2)}
+.qrcard .qv{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
+.cnp{width:100%;display:flex;gap:8px;align-items:center}
+.cnp code{flex:1;min-width:0;background:var(--hair2);border-radius:9px;padding:9px 11px;font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.copybtn{flex:none;display:inline-flex;align-items:center;gap:6px;height:38px;border:none;border-radius:9px;background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;padding:0 14px;cursor:pointer}
+.copybtn.copied{background:var(--cta)}
+.copybtn svg.ic{width:14px;height:14px}
+.pix-cta{width:100%;display:grid;gap:8px}
+.expbox{width:100%;background:var(--danger-tint);border:1.5px solid #FECACA;border-radius:var(--r-md);padding:16px;display:grid;gap:6px;justify-items:center;text-align:center}
+.expbox .eti{width:44px;height:44px;border-radius:99px;background:#fff;color:var(--danger);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-flat)}
+.expbox .eti svg.ic{width:22px;height:22px}
+.expbox b{font-size:14.5px}
+.expbox span{font-size:12px;color:var(--ink2)}
+
+/* ---------- S5 tracking ---------- */
+.map{position:relative;height:186px;background:#E8EDF2;overflow:hidden}
+.map::before{content:"";position:absolute;inset:0;background:
+ repeating-linear-gradient(0deg,transparent 0 30px,#FFFFFF 30px 33px),
+ repeating-linear-gradient(90deg,transparent 0 42px,#FFFFFF 42px 45px)}
+.map .park{position:absolute;left:18px;bottom:14px;width:84px;height:60px;border-radius:12px;background:#D7EAD3}
+.map svg.rt{position:absolute;inset:0;width:100%;height:100%}
+.eta-card{position:relative;margin:-30px 14px 0;background:#fff;border-radius:var(--r-md);box-shadow:var(--sh-card);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.eta-card .l .lbl{margin-bottom:2px}
+.etanum{font-family:var(--font-disp);font-size:23px;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+.cntpill{display:inline-flex;align-items:center;gap:5px;background:var(--primary-tint);color:var(--primary-ink);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:800;margin-top:5px;font-variant-numeric:tabular-nums}
+.eta-card .r{text-align:right;font-size:12.5px}
+.eta-card .r b{display:block;font-size:13.5px}
+.eta-card .r small{color:var(--ink2);font-size:11px}
+.tl{padding:20px 20px 8px;display:grid;gap:0}
+.tli{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:start}
+.tlid{width:22px;height:22px;border-radius:99px;display:flex;align-items:center;justify-content:center;background:#fff;border:2px solid var(--hair);color:#fff;z-index:1}
+.tlid svg.ic{width:11px;height:11px;stroke-width:3}
+.tli.done .tlid{background:var(--cta-soft);border-color:var(--cta-soft);color:#0B2E14}
+.tli.act .tlid{border-color:var(--primary-ink);color:var(--primary-ink);animation:ringp 2s infinite}
+@keyframes ringp{0%{box-shadow:0 0 0 0 rgba(26,111,200,.35)}70%{box-shadow:0 0 0 8px rgba(26,111,200,0)}100%{box-shadow:0 0 0 0 rgba(26,111,200,0)}}
+.tli .tx b{display:block;font-size:13.5px}
+.tli.pend .tx b{color:var(--ink2);font-weight:500}
+.tli .tx small{font-size:11px;color:var(--ink2)}
+.tltime{font-size:11.5px;color:var(--ink2);font-variant-numeric:tabular-nums;padding-top:2px}
+.tli.act .tx b{font-weight:700}
+.acts{display:flex;gap:10px;padding:14px 16px 22px}
+.obtn{flex:1;height:44px;border-radius:var(--r-sm);border:1.5px solid var(--hair);background:#fff;font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
+.obtn svg.ic{width:15px;height:15px;color:var(--ink2)}
+
+/* ---------- S6 estados ---------- */
+.minigrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:22px;margin-top:24px}
+.mini{min-width:0}
+.mframe{background:#fff;border:1px solid var(--hair);border-radius:20px;overflow:hidden;box-shadow:var(--sh-flat);position:relative}
+.mcap{font-size:12px;color:var(--ink2);margin-top:8px;display:flex;gap:6px;align-items:baseline}
+.mcap b{color:var(--ink);font-size:12.5px}
+.sk .skb{background:linear-gradient(90deg,var(--hair2) 25%,#E9EEF3 45%,var(--hair2) 65%);background-size:220% 100%;animation:shim 1.5s infinite;border-radius:8px}
+@keyframes shim{from{background-position:120% 0}to{background-position:-120% 0}}
+.warnband{display:flex;align-items:center;gap:9px;background:var(--warn-tint);border-bottom:1px solid #FDBA74;color:var(--warn-ink);font-size:12.5px;font-weight:700;padding:10px 14px}
+.warnband svg.ic{width:16px;height:16px}
+.disbtn{margin:12px 14px 0;height:44px;border-radius:var(--r-sm);background:var(--hair2);color:var(--ink2);font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.dimmenu .prow{opacity:.55}
+.emptybox{padding:28px 18px;display:grid;gap:8px;justify-items:center;text-align:center}
+.emptybox .eico{width:52px;height:52px;border-radius:99px;background:var(--primary-tint);color:var(--primary-ink);display:flex;align-items:center;justify-content:center}
+.emptybox .eico svg.ic{width:24px;height:24px}
+.emptybox b{font-size:14px}
+.emptybox span{font-size:12px;color:var(--ink2);max-width:26ch}
+.tile{flex:none;width:148px;height:118px;border-radius:var(--r-md);background:var(--store-tint);border:1px solid rgba(217,119,6,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--store-ink)}
+.tile svg.ic{width:26px;height:26px}
+.tile b{font-size:12.5px;font-weight:700}
+.tile span{font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.expdemo{display:grid;gap:10px;padding:16px}
+.exprow{display:flex;align-items:center;gap:10px}
+.exppill{height:40px;border-radius:99px;padding:0 16px;display:flex;align-items:center;font-size:13px;font-weight:700}
+.exp-clara{background:#FBBF24;color:#78350F}
+.exp-escura{background:#1E293B;color:#fff}
+.exptxt{font-size:11.5px;color:var(--ink2)}
+.cuperr .cvc{border:1.5px solid #FECACA;background:var(--danger-tint);color:var(--danger)}
+.cupmsg{font-size:11.5px;color:var(--danger);margin-top:6px;padding:0 2px}
+
+/* ---------- S7 admin ---------- */
+.adminf{width:min(460px,100%);background:#F7F8FA;border:8px solid #0F172A;border-radius:26px;overflow:hidden;box-shadow:var(--sh-card);display:grid;grid-template-columns:56px 1fr}
+.aside{background:#153A4C;color:#CBD5E1;padding:12px 0;display:grid;gap:6px;justify-items:center}
+.aside .ai{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.aside .ai.on{background:var(--primary);color:#fff}
+.aside .ai svg.ic{width:16px;height:16px}
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:12px}
+.kpi{background:#fff;border:1px solid var(--hair);border-radius:12px;padding:10px 12px;box-shadow:var(--sh-flat)}
+.kpi .kl{font-size:10.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em}
+.kpi .kv{font-family:var(--font-disp);font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+.kpi .kd{font-size:10.5px;font-weight:700}
+.kpi .kd.up{color:var(--cta)}
+.kpi .kd.px{color:var(--primary-ink)}
+.tblrow{display:flex;justify-content:space-between;background:#fff;border:1px solid var(--hair);border-radius:10px;padding:8px 12px;margin:0 12px 7px;font-size:12px;align-items:center}
+.tblrow b{font-size:12.5px}
+.sbadge{font-size:10px;font-weight:800;border-radius:5px;padding:2px 7px}
+.sb-ok{background:var(--cta-tint);color:var(--cta)}
+.sb-w{background:var(--warn-tint);color:var(--warn-ink)}
+.admtop{display:flex;justify-content:space-between;align-items:center;padding:12px 14px 0}
+.admtop b{font-size:13.5px}
+.admtop span{font-size:11px;color:var(--ink2)}
+
+/* ---------- S8 plano ---------- */
+.mapc{display:grid;gap:8px;margin-top:20px}
+.maprow{display:grid;grid-template-columns:1fr 22px 1fr;gap:10px;align-items:center;background:#fff;border:1px solid var(--hair);border-radius:12px;padding:10px 14px;box-shadow:var(--sh-flat);font-size:12.5px}
+.maprow .m1 b{display:block;font-size:13px}
+.maprow .m1 span{color:var(--ink2)}
+.maprow .ar{color:var(--primary);font-weight:800;text-align:center;font-family:var(--font-disp)}
+.maprow .m2{font-family:ui-monospace,Consolas,monospace;font-size:11.5px;color:var(--ink2);min-width:0}
+.maprow .m2 b{color:var(--ink);font-weight:700}
+@media (max-width:560px){.maprow{grid-template-columns:1fr;gap:4px}.maprow .ar{display:none}}
+.roll{display:grid;gap:0;margin-top:20px;border-left:2.5px solid var(--primary-tint);padding-left:0}
+.rstep{position:relative;padding:0 0 18px 22px}
+.rstep::before{content:"";position:absolute;left:-7.5px;top:4px;width:12px;height:12px;border-radius:99px;background:#fff;border:3px solid var(--primary)}
+.rstep.done::before{background:var(--primary);border-color:var(--primary-tint)}
+.rstep b{font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rstep p{font-size:12.5px;color:var(--ink2);margin-top:3px;max-width:66ch}
+.gates{background:#fff;border:1px solid var(--hair);border-radius:var(--r-md);padding:16px 18px;margin-top:18px;box-shadow:var(--sh-flat)}
+.gates h4{font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.gates ul{margin:0;padding-left:18px;display:grid;gap:5px;font-size:12.5px;color:var(--ink2)}
+.twocol{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin-top:16px}
+.foot{margin-top:56px;border-top:1px solid var(--hair);padding-top:16px;font-size:12px;color:var(--ink2);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+<!-- sprite de ícones -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4M5 13v7h14v-7"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9a4 4 0 017-2.6A4 4 0 0119 11c0 4.6-7 9-7 9z"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M16.5 16.5L21 21"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3s5 4 5 9a5 5 0 11-10 0c0-2 1-3.6 2-4.6 0 1.6 1 2.6 2 2.6-.6-2 0-5 1-7z"/></symbol>
+<symbol id="i-skew" viewBox="0 0 24 24"><path d="M4 20L20 4"/><circle cx="9" cy="15" r="1.7"/><circle cx="13.5" cy="10.5" r="1.7"/><circle cx="17.5" cy="6.5" r="1.7"/></symbol>
+<symbol id="i-cup" viewBox="0 0 24 24"><path d="M6 8h12l-1.2 11a2 2 0 01-2 1.8H9.2a2 2 0 01-2-1.8L6 8zM9 5c0 1 1 1.5 1 2.5"/></symbol>
+<symbol id="i-plate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.6"/></symbol>
+<symbol id="i-cake" viewBox="0 0 24 24"><path d="M5 12h14v8H5zM5 12c2-2 4 2 7 0s5 2 7 0M12 9V5"/></symbol>
+<symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7L6 8zM9 8a3 3 0 016 0"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5h10"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.3-6-10a6 6 0 1112 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v4h4M10 12h5M10 16h5"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.8.6-1.5 1-1.5 2M12 17h.01"/></symbol>
+</svg>
+<div class="wrap">
+
+<header class="hero">
+  <p class="eyebrow">Redesign premium · app do cliente · mock vinculante</p>
+  <h1>Loja, cardápio e compra com cara de grande — sem quebrar regra nenhuma</h1>
+  <p class="lede">Blueprint visual gerado pela mesa de gerentes (Arquitetura · UI/UX · Review/QA · Produto, 2 rodadas) a partir do estudo do food_delivery_ui_kit, do enatega multivendor e do benchmark iFood de agosto. Mesma estrutura, pele nova: reconhecível pra quem opera, irreconhecível pra quem viu há 6 meses.</p>
+  <div class="chips">
+    <span class="chip">teal <b>→</b> azul <b>#2F9DF7</b> + ink <b>#1A6FC8</b></span>
+    <span class="chip">CTA verde <b>#15803d</b> — decisão fechada</span>
+    <span class="chip">laranja só preço/promo</span>
+    <span class="chip">checkout <b>1 página</b> · ciclo 2</span>
+    <span class="chip"><b>1 PR = 1 tela</b> · always-green</span>
+    <span class="chip"><b>zero</b> mudança de regra de negócio</span>
+  </div>
+</header>
+
+<section class="sec">
+  <p class="secnum">TOKENS — B0</p>
+  <h2>O que muda antes de qualquer tela</h2>
+  <p class="secsub">Swap num arquivo só (<code>frontend/src/index.css</code>): a rampa <code>primary-50..950</code> não é consumida por classe — o consumo real é single-stop. O B0 cria o split gráfico × texto, varre os 226 <code>text-primary</code> herdando ink e unifica os 2 sistemas de sombra. Laranja vira token. Repinta o admin junto (marca única — QA admin no mesmo batch).</p>
+  <div class="tokgrid">
+    <div class="tok"><div class="sw" style="background:#2F9DF7"></div><div class="tk"><b>primary · gráfico</b><span>--color-primary #2F9DF7</span></div></div>
+    <div class="tok"><div class="sw" style="background:#1A6FC8"></div><div class="tk"><b>primary-ink · texto</b><span>--color-primary-ink #1A6FC8</span></div></div>
+    <div class="tok"><div class="sw" style="background:#153A4C"></div><div class="tk"><b>ink</b><span>--brand-navy #153A4C</span></div></div>
+    <div class="tok"><div class="sw" style="background:#15803d"></div><div class="tk"><b>CTA · confirmar</b><span>--color-cta #15803d</span></div></div>
+    <div class="tok"><div class="sw" style="background:#5FD35A"></div><div class="tk"><b>success-soft</b><span>--brand-green #5FD35A · nunca texto</span></div></div>
+    <div class="tok"><div class="sw" style="background:#C2410C"></div><div class="tk"><b>promo · texto</b><span>--color-promo-ink #C2410C</span></div></div>
+    <div class="tok"><div class="sw" style="background:#EA580C"></div><div class="tk"><b>promo · gráfico</b><span>--color-promo #EA580C</span></div></div>
+    <div class="tok"><div class="sw" style="background:#B45309"></div><div class="tk"><b>warning · texto</b><span>#B45309 · #D97706 só ≥16 bold</span></div></div>
+    <div class="tok"><div class="sw" style="background:#DC2626"></div><div class="tk"><b>danger</b><span>--color-danger #DC2626</span></div></div>
+    <div class="tok"><div class="sw" style="background:#D97706"></div><div class="tk"><b>cor da loja</b><span>catalogPrimaryColor · pill + acento 3px</span></div></div>
+  </div>
+  <div class="specrow">
+    <div class="spec"><b>Tipografia</b>Inter corpo 13/1.4 · Poppins display (nome loja 20–22, ETA, countdown). Piso 12px, preço 15 bold tabular-nums.</div>
+    <div class="spec"><b>Radius &amp; sombra</b>12 / 16 / 24. Uma sombra flat (0 1 2) + uma elevada (0 8 24) — os dois sistemas de hoje morrem.</div>
+    <div class="spec"><b>Densidade</b>Linha de produto 112–124px · pills 40px · rail 64px · hit target ≥44px (o "+" é 36 visual, 44 de toque).</div>
+    <div class="spec"><b>Cor da loja é sotaque</b>Pill ativa com tint 12% + acento 3px sob o nome. Nunca CTA, nunca tab, nunca botão — clamp com getContrastTextColor.</div>
+  </div>
+</section>
+
+<section class="sec">
+  <p class="secnum">01 · CARDÁPIO</p>
+  <h2>Vitrine da loja — a tela da demo de venda</h2>
+  <p class="secsub">Header unificado mantém (foi redesenhado há pouco). Tabs saem do rose-500 e viram marca. O maior upgrade: rail de categorias sticky com scroll-spy + debounce 450ms — o padrão iFood/enatega. Linha de produto ganha porta dupla (linha tocável + "+"), populares viram carrossel foto-forward.</p>
+  <div class="frames">
+    <div class="col">
+      <div class="phone">
+        <div class="sbar"><span>18:42</span><span class="sr"><i class="sig"></i><i class="sig"></i><i class="sig"></i><span class="batt"></span></span></div>
+        <div class="banner">
+          <div class="bov">
+            <button class="bbtn" aria-label="Voltar"><svg class="ic"><use href="#i-back"/></svg></button>
+            <div class="bacts">
+              <button class="bbtn" aria-label="Conta"><svg class="ic"><use href="#i-user"/></svg></button>
+              <button class="bbtn" aria-label="Compartilhar"><svg class="ic"><use href="#i-share"/></svg></button>
+              <button class="bbtn" aria-label="Favoritar"><svg class="ic"><use href="#i-heart"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="head">
+          <div class="logo-cut"><div class="li">EB</div></div>
+          <h3 class="sname">Espetinhos Bela Vista</h3>
+          <div class="accent"></div>
+          <div class="metarow">
+            <span class="rpill"><svg class="ic st" style="fill:currentColor;stroke:none;width:12px;height:12px" viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 16.9l-6.1 3.5 1.5-6.8L2.2 9l6.9-.7z"/></svg>4,8 · 126</span>
+            <span class="dot-open">Aberto</span>
+            <span>·</span><span>Entrega 30–40 min</span>
+          </div>
+          <p class="submeta">Taxa R$ 4,00 · 2,3 km · mínimo R$ 15,00</p>
+          <div class="tabs">
+            <span class="tab on">Produtos</span><span class="tab">Avaliações</span><span class="tab">Informações</span>
+          </div>
+        </div>
+        <div class="menuwrap">
+          <nav class="rail">
+            <div class="ritem on"><svg class="ic"><use href="#i-flame"/></svg><span class="rl">Populares</span></div>
+            <div class="ritem"><svg class="ic"><use href="#i-skew"/></svg><span class="rl">Espetinhos</span></div>
+            <div class="ritem"><svg class="ic"><use href="#i-plate"/></svg><span class="rl">Porções</span></div>
+            <div class="ritem"><svg class="ic"><use href="#i-cup"/></svg><span class="rl">Bebidas</span></div>
+            <div class="ritem"><svg class="ic"><use href="#i-cake"/></svg><span class="rl">Sobremesas</span></div>
+          </nav>
+          <div class="mcol">
+            <div class="poprow"><h4>Mais pedidos hoje</h4><a href="#s1">ver tudo <svg class="ic"><use href="#i-chev"/></svg></a></div>
+            <div class="poptrack">
+              <div class="pcard"><div class="pphoto ph-combo"><span class="qty-badge">2</span></div><div class="pn">Combo Casal — 4 espetos + 2 bebidas</div><div class="pr"><span class="pprice promo-price">R$ 34,90</span><span class="price-old">R$ 39,90</span></div></div>
+              <div class="pcard"><div class="pphoto ph-espeto"></div><div class="pn">Espetinho Tradicional bovino 180g</div><div class="pr"><span class="pprice">R$ 21,90</span><button class="plus" aria-label="Adicionar"><svg class="ic"><use href="#i-plus"/></svg></button></div></div>
+              <div class="pcard"><div class="pphoto ph-porcao"></div><div class="pn">Porção de batata frita com cheddar</div><div class="pr"><span class="pprice">R$ 18,90</span><button class="plus" aria-label="Adicionar"><svg class="ic"><use href="#i-plus"/></svg></button></div></div>
+            </div>
+            <div class="stitle"><b>Espetinhos</b><span class="cnt">12 itens</span></div>
+            <div class="prow">
+              <div class="pinfo">
+                <span class="pnm">Espetinho Tradicional bovino 180g</span>
+                <span class="pds">Bovino em cubos, sal grosso e alho, na brasa. Serve 1 pessoa.</span>
+                <div class="pricerow"><span class="pprice">R$ 21,90</span><button class="plus" aria-label="Adicionar"><svg class="ic"><use href="#i-plus"/></svg></button></div>
+              </div>
+              <div class="pfoto ph-espeto"></div>
+            </div>
+            <div class="prow">
+              <div class="pinfo">
+                <span class="pbadge hot">Mais pedido</span>
+                <span class="pnm" style="margin-top:2px">Combo Casal — 4 espetos + 2 bebidas</span>
+                <span class="pds">Escolha 4 espetos e 2 refrigerantes 350ml. Nosso mais vendido.</span>
+                <div class="pricerow">
+                  <span><span class="pprice promo-price">R$ 34,90</span><span class="price-old">R$ 39,90</span></span>
+                  <span class="stepper"><button aria-label="Menos"><svg class="ic"><use href="#i-minus"/></svg></button><span class="sn">2</span><button aria-label="Mais"><svg class="ic"><use href="#i-plus"/></svg></button></span>
+                </div>
+              </div>
+              <div class="pfoto ph-combo"></div>
+            </div>
+            <div class="prow soldout">
+              <div class="pinfo">
+                <span class="pbadge sold">Esgotado</span>
+                <span class="pnm" style="margin-top:2px">Espetinho de frango com catupiry</span>
+                <span class="pds">Frango, queijo catupiry e orégano na brasa.</span>
+                <div class="pricerow"><span class="pprice">R$ 19,90</span><button class="plus" disabled aria-label="Indisponível"><svg class="ic"><use href="#i-plus"/></svg></button></div>
+              </div>
+              <div class="pfoto ph-espeto"></div>
+            </div>
+            <div class="stitle"><b>Bebidas</b><span class="cnt">8 itens</span></div>
+            <div class="prow">
+              <div class="pinfo">
+                <span class="pnm">Coca-Cola 2L</span>
+                <span class="pds">Gelada. Sem açúcar também disponível.</span>
+                <div class="pricerow"><span class="pprice">R$ 8,90</span><button class="plus" aria-label="Adicionar"><svg class="ic"><use href="#i-plus"/></svg></button></div>
+              </div>
+              <div class="pfoto ph-coca"></div>
+            </div>
+          </div>
+        </div>
+        <div class="cartbar" id="s1">
+          <div class="bag"><svg class="ic"><use href="#i-bag"/></svg><span class="bbadge">3</span></div>
+          <div class="bl">Ver sacola<small>2 itens · combo com desconto</small></div>
+          <span class="bt">R$ 52,70</span>
+          <span class="go"><svg class="ic"><use href="#i-chev"/></svg></span>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="note">
+        <h4>O que mudou <span class="tag tag-b1">B1</span></h4>
+        <ul>
+          <li>Rail lateral sticky com scroll-spy (debounce 450ms) — categorias com ícone + label 10px, ativa no tint da cor da loja.</li>
+          <li>Carrossel “Mais pedidos hoje” foto-forward com badge de quantidade — só existe com ranking real; sem ranking vira “Destaques da loja” (curadoria do lojista).</li>
+          <li>Linha de produto: porta dupla — linha inteira abre o sheet, “+” adiciona direto e vira stepper inline.</li>
+          <li>Badge “Esgotado” vira slate (indisponível ≠ erro); foto e texto a 50%.</li>
+          <li>Rating pill 4,8 · 126 no header: dado real que já existe (avgStoreRating) — some quando não há avaliações.</li>
+          <li>CartBar: a sacola sticky atual, redesenhada como pill flutuante — mesmo slot, mesmo handler. Badge pulsa.</li>
+        </ul>
+      </div>
+      <div class="note">
+        <h4>Identidade preservada</h4>
+        <ul>
+          <li>Logo vazada central, banner com blur, dot “Aberto”, tabs Produtos/Avaliações/Informações — a estrutura recentemente redesenhada fica.</li>
+          <li>Cor da loja (aqui âmbar) aparece só na pill ativa, no rail e no acento de 3px — a vitrine segue sendo da loja, o app é JNC.</li>
+          <li>Preço tabular, promo com riscado em #C2410C — laranja é valor, nunca ação.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sec">
+  <p class="secnum">01b · CARDÁPIO EM DESKTOP</p>
+  <h2>Web largo — container 50rem, hero full-bleed</h2>
+  <p class="secsub">No lg as categorias voltam a ser pills horizontais (≤6 categorias não precisam de rail) e a lista vira grade de cards 2–3 colunas com foto no topo. Mobile intacto — mesma tela, densidade diferente.</p>
+  <div class="frames">
+    <div class="col">
+      <div class="lgframe">
+        <div class="banner" style="height:210px">
+          <div class="bov" style="top:16px;left:16px;right:16px">
+            <button class="bbtn" aria-label="Voltar"><svg class="ic"><use href="#i-back"/></svg></button>
+            <div class="bacts">
+              <button class="bbtn" aria-label="Conta"><svg class="ic"><use href="#i-user"/></svg></button>
+              <button class="bbtn" aria-label="Compartilhar"><svg class="ic"><use href="#i-share"/></svg></button>
+              <button class="bbtn" aria-label="Favoritar"><svg class="ic"><use href="#i-heart"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="head" style="border-radius:32px 32px 0 0">
+          <div class="logo-cut" style="width:104px;height:104px;top:-52px"><div class="li" style="width:86px;height:86px;font-size:30px">EB</div></div>
+          <h3 class="sname" style="font-size:24px">Espetinhos Bela Vista</h3>
+          <div class="accent"></div>
+          <div class="metarow">
+            <span class="rpill">★ 4,8 · 126</span>
+            <span class="dot-open">Aberto</span><span>·</span><span>Entrega 30–40 min</span><span>·</span><span>Taxa R$ 4,00 · 2,3 km</span>
+          </div>
+          <div class="tabs" style="justify-content:center;gap:34px"><span class="tab on">Produtos</span><span class="tab">Avaliações</span><span class="tab">Informações</span></div>
+        </div>
+        <div style="padding:0 0 84px">
+          <div class="lgpills">
+            <span class="lgpill on"><svg class="ic"><use href="#i-flame"/></svg>Populares</span>
+            <span class="lgpill"><svg class="ic"><use href="#i-skew"/></svg>Espetinhos</span>
+            <span class="lgpill"><svg class="ic"><use href="#i-plate"/></svg>Porções</span>
+            <span class="lgpill"><svg class="ic"><use href="#i-cup"/></svg>Bebidas</span>
+            <span class="lgpill"><svg class="ic"><use href="#i-cake"/></svg>Sobremesas</span>
+          </div>
+          <div class="lggrid">
+            <div class="lcard"><div class="lph ph-combo"></div><div class="lc"><div class="pn2">Combo Casal — 4 espetos + 2 bebidas</div><div class="pd2">Escolha 4 espetos e 2 refrigerantes 350ml.</div><div class="pricerow" style="margin-top:8px"><span><span class="pprice promo-price">R$ 34,90</span><span class="price-old">R$ 39,90</span></span><button class="plus" aria-label="Adicionar"><svg class="ic"><use href="#i-plus"/></svg></button></div></div></div>
+            <div class="lcard"><div class="lph ph-espeto"></div><div class="lc"><div class="pn2">Espetinho Tradicional bovino 180g</div><div class="pd2">Sal grosso e alho, na brasa. Serve 1 pessoa.</div><div class="pricerow" style="margin-top:8px"><span class="pprice">R$ 21,90</span><button class="plus" aria-label="Adicionar"><svg class="ic"><use href="#i-plus"/></svg></button></div></div></div>
+            <div class="lcard"><div class="lph ph-porcao"></div><div class="lc"><div class="pn2">Porção de batata com cheddar e bacon</div><div class="pd2">500g, serve 2 pessoas.</div><div class="pricerow" style="margin-top:8px"><span class="pprice">R$ 24,90</span><button class="plus" aria-label="Adicionar"><svg class="ic"><use href="#i-plus"/></svg></button></div></div></div>
+            <div class="lcard"><div class="lph ph-coca"></div><div class="lc"><div class="pn2">Coca-Cola 2L</div><div class="pd2">Gelada. Sem açúcar também disponível.</div><div class="pricerow" style="margin-top:8px"><span class="pprice">R$ 8,90</span><button class="plus" aria-label="Adicionar"><svg class="ic"><use href="#i-plus"/></svg></button></div></div></div>
+          </div>
+        </div>
+        <div class="cartbar"><div class="bag"><svg class="ic"><use href="#i-bag"/></svg><span class="bbadge">3</span></div><div class="bl">Ver sacola<small>2 itens · combo com desconto</small></div><span class="bt">R$ 52,70</span><span class="go"><svg class="ic"><use href="#i-chev"/></svg></span></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="note">
+        <h4>Regras lg <span class="tag tag-b1">B1</span></h4>
+        <ul>
+          <li>Container 50rem centralizado (vitrine desktop 800px já aprovada visualmente) — hero e faixas full-bleed.</li>
+          <li>Grade de cards com foto no topo: densidade troca, linguagem não (mesmos tokens, mesmo “+”).</li>
+          <li>Sem regressão: screenshot 1280px vira assert no gate (baseline capturada antes de cada batch).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <p class="secnum">02 · SHEET DE PRODUTO</p>
+  <h2>O produto é a porta — o sheet confirma</h2>
+  <p class="secsub">Estrutura atual mantém (modificadores, observação, footer fixo). Ganha: badge de obrigatório com regra explícita, grupos min/max, preço recalculando ao vivo e CTA 48px com o valor junto do verbo.</p>
+  <div class="frames">
+    <div class="col">
+      <div class="phone">
+        <div class="sbar"><span>18:43</span><span class="sr"><i class="sig"></i><i class="sig"></i><i class="sig"></i><span class="batt"></span></span></div>
+        <div class="dim">
+          <div class="sheetp">
+            <div class="grabber"></div>
+            <div class="pfoto-lg ph-espeto"></div>
+            <h3>Espetinho Tradicional bovino 180g</h3>
+            <p class="pd">Bovino em cubos, sal grosso e alho, na brasa. Serve 1 pessoa.</p>
+            <div class="grp">
+              <div class="grp-h"><b>Escolha o ponto</b><span class="ctag req">Obrigatório · 1 opção</span></div>
+              <div class="radio-row on"><span class="rdot"></span>Mal passado</div>
+              <div class="radio-row"><span class="rdot"></span>Ao ponto</div>
+              <div class="radio-row"><span class="rdot"></span>Bem passado</div>
+            </div>
+            <div class="grp">
+              <div class="grp-h"><b>Adicionais</b><span class="ctag opt">Opcional · até 2</span></div>
+              <div class="chk-row on"><span class="cbox"><svg class="ic"><use href="#i-check"/></svg></span>Farofa de alho<span class="rprice">+R$ 3,00</span></div>
+              <div class="chk-row"><span class="cbox"></span>Vinagrete<span class="rprice">+R$ 2,00</span></div>
+            </div>
+            <div class="obs">Alguma observação? Ex.: sem cebola, ponto da carne…</div>
+            <div class="pmodal-footer">
+              <span class="stepper"><button aria-label="Menos"><svg class="ic"><use href="#i-minus"/></svg></button><span class="sn">2</span><button aria-label="Mais"><svg class="ic"><use href="#i-plus"/></svg></button></span>
+              <button class="ctagreen">Adicionar · R$ 49,80</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="note">
+        <h4>O que mudou <span class="tag tag-b2">B2</span></h4>
+        <ul>
+          <li>Footer nunca rola: sheet com max-height + scroll interno na lista (a lição do CTA inalcançável, c4699388, vira regra).</li>
+          <li>Preço vivo: “Adicionar · R$ 49,80” (2× 21,90 + farofa 3,00) — o valor acompanha o verbo, sem conta de cabeça.</li>
+          <li>Grupos de modificador com a regra no badge: “Obrigatório · 1 opção”, “Opcional · até 2”. Erro de obrigatório rola até o grupo.</li>
+          <li>Stepper com hit 44px, CTA 48px — “1 toque por ação” do PRODUCT.md.</li>
+          <li>Sheet sobre BottomSheet do kit ui/ — zero regra de negócio tocada.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sec">
+  <p class="secnum">03 · CHECKOUT EM 1 PÁGINA <span class="tag tag-c2">CICLO 2</span></p>
+  <h2>Quatro etapas viram uma página — os 4 contextos continuam</h2>
+  <p class="secsub">SACOLA → RECEBER → PAGAMENTO → CONFIRMAR colapsam numa página seccionada. O wizard morre visualmente; o progresso vira scroll. MESA / RETIRADA / ENTREGA / RESERVA (mesmos nomes, mesma regra, mesmo 1-toque) viram um segment control no topo. Cada seção tem “Trocar” inline — o padrão iFood do benchmark. Este frame é o blueprint do ciclo 2: aprovado aqui, montado lá sem re-debate.</p>
+  <div class="frames">
+    <div class="col">
+      <div class="phone">
+        <div class="sbar"><span>18:45</span><span class="sr"><i class="sig"></i><i class="sig"></i><i class="sig"></i><span class="batt"></span></span></div>
+        <div class="ckhead">
+          <h3>Finalizar pedido</h3>
+          <p class="sub">Espetinhos Bela Vista · fecha às 23h</p>
+        </div>
+        <div class="seg">
+          <button class="segopt">Mesa</button><button class="segopt">Retirada</button><button class="segopt on">Entrega</button><button class="segopt">Reserva</button>
+        </div>
+        <div class="ckbody">
+          <div class="csec">
+            <div class="csec-h"><b>Sua sacola</b><button class="lnk">Editar</button></div>
+            <div class="smini"><div class="mf ph-combo"></div><div class="mn">Combo Casal<small>4 espetos + 2 bebidas</small></div><span class="stepper"><button aria-label="Menos"><svg class="ic"><use href="#i-minus"/></svg></button><span class="sn">2</span><button aria-label="Mais"><svg class="ic"><use href="#i-plus"/></svg></button></span><span class="mp">R$ 69,80</span></div>
+            <div class="smini"><div class="mf ph-coca"></div><div class="mn">Coca-Cola 2L<small>Gelada</small></div><span class="stepper"><button aria-label="Menos"><svg class="ic"><use href="#i-minus"/></svg></button><span class="sn">1</span><button aria-label="Mais"><svg class="ic"><use href="#i-plus"/></svg></button></span><span class="mp">R$ 8,90</span></div>
+          </div>
+          <div class="csec">
+            <div class="csec-h"><b>Entrega</b><button class="lnk">Trocar</button></div>
+            <div class="addr">
+              <span class="lbl">Entregar em</span>
+              <b>Rua das Acácias, 123 · Apto 302</b>
+              <span class="ad2">Bl 2 · Referência: portão verde</span>
+              <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12.5px;color:var(--ink2)"><span>Hoje, o mais rápido</span><span style="font-weight:700;color:var(--ink)">30–40 min</span></div>
+            </div>
+          </div>
+          <div class="csec">
+            <div class="csec-h"><b>Pagamento</b><button class="lnk">Trocar</button></div>
+            <div class="payrow on"><span class="ptile" style="background:#00AEEF">MP</span><div class="pl"><b>Pix · Mercado Pago</b><small>Aprovação em segundos, QR na hora</small></div><span class="prad"></span></div>
+            <div class="payrow"><span class="ptile" style="background:#1A6FC8">CR</span><div class="pl"><b>Cartão de crédito</b><small>Salvo · •••• 4218</small></div><span class="prad"></span></div>
+            <div class="payrow"><span class="ptile" style="background:#64748B">R$</span><div class="pl"><b>Na entrega</b><small>Dinheiro · troco para R$ 100,00</small></div><span class="prad"></span></div>
+          </div>
+          <div class="csec">
+            <div class="csec-h"><b>Cupom</b><button class="lnk">Ver cupons</button></div>
+            <div class="coupon"><span class="cvc">PRIMEIRA5</span><span class="off">−R$ 5,00</span></div>
+          </div>
+          <div class="csec breakdown">
+            <div class="bk"><span>Subtotal</span><span>R$ 78,70</span></div>
+            <div class="bk"><span>Taxa de entrega</span><span>R$ 4,00</span></div>
+            <div class="bk off"><span>Cupom PRIMEIRA5</span><span>−R$ 5,00</span></div>
+            <div class="bk tot"><span>Total</span><span>R$ 77,70</span></div>
+          </div>
+        </div>
+        <div class="cta-bar">
+          <span class="secure"><span style="font-weight:700;color:var(--ink);font-size:12px">R$ 77,70</span><span>Pagou, entrou na fila</span></span>
+          <button class="ctabtn">Confirmar e pagar · R$ 77,70</button>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="phone">
+        <div class="sbar"><span>18:45</span><span class="sr"><i class="sig"></i><i class="sig"></i><i class="sig"></i><span class="batt"></span></span></div>
+        <div class="ckhead">
+          <h3>Finalizar pedido</h3>
+          <p class="sub">Espetinhos Bela Vista · fecha às 23h</p>
+        </div>
+        <div class="seg">
+          <button class="segopt on">Mesa</button><button class="segopt">Retirada</button><button class="segopt">Entrega</button><button class="segopt">Reserva</button>
+        </div>
+        <div class="ckbody">
+          <div class="csec">
+            <div class="csec-h"><b>Sua sacola</b><button class="lnk">Editar</button></div>
+            <div class="smini"><div class="mf ph-combo"></div><div class="mn">Combo Casal<small>4 espetos + 2 bebidas</small></div><span class="stepper"><button aria-label="Menos"><svg class="ic"><use href="#i-minus"/></svg></button><span class="sn">2</span><button aria-label="Mais"><svg class="ic"><use href="#i-plus"/></svg></button></span><span class="mp">R$ 69,80</span></div>
+            <div class="smini"><div class="mf ph-coca"></div><div class="mn">Coca-Cola 2L<small>Gelada</small></div><span class="stepper"><button aria-label="Menos"><svg class="ic"><use href="#i-minus"/></svg></button><span class="sn">1</span><button aria-label="Mais"><svg class="ic"><use href="#i-plus"/></svg></button></span><span class="mp">R$ 8,90</span></div>
+          </div>
+          <div class="csec">
+            <div class="csec-h"><b>Mesa</b><button class="lnk">Trocar</button></div>
+            <div class="addr">
+              <span class="lbl">Comanda</span>
+              <b>Mesa 12 · salão</b>
+              <span class="ad2">Retire no balcão quando pronto</span>
+            </div>
+          </div>
+          <div class="csec">
+            <div class="csec-h"><b>Pagamento</b><button class="lnk">Trocar</button></div>
+            <div class="payrow on"><span class="ptile" style="background:#00AEEF">MP</span><div class="pl"><b>Pix na hora</b><small>QR no balcão ao confirmar</small></div><span class="prad"></span></div>
+            <div class="payrow"><span class="ptile" style="background:#64748B">R$</span><div class="pl"><b>No balcão</b><small>Dinheiro · sem troco</small></div><span class="prad"></span></div>
+          </div>
+          <div class="csec">
+            <div class="csec-h"><b>Cupom</b><button class="lnk">Ver cupons</button></div>
+            <div class="coupon"><span class="cvc">PRIMEIRA5</span><span class="off">−R$ 5,00</span></div>
+          </div>
+          <div class="csec breakdown">
+            <div class="bk"><span>Subtotal</span><span>R$ 78,70</span></div>
+            <div class="bk off"><span>Cupom PRIMEIRA5</span><span>−R$ 5,00</span></div>
+            <div class="bk tot"><span>Total</span><span>R$ 73,70</span></div>
+          </div>
+        </div>
+        <div class="cta-bar">
+          <span class="secure"><span style="font-weight:700;color:var(--ink);font-size:12px">R$ 73,70</span><span>Sem taxa de entrega</span></span>
+          <button class="ctabtn">Confirmar e pagar · R$ 73,70</button>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="note">
+        <h4>Invariantes preservados</h4>
+        <ul>
+          <li>Os 4 contextos com os mesmos nomes e o mesmo 1-toque — só mudam de cards empilhados pra segment control.</li>
+          <li>Taxa de entrega SEM ⓘ (veto do Edmilson), troco, cupom com revalidação, guest em página única, pedido só entra na fila após pago.</li>
+          <li>Diferença dos contextos visível num olhar: Entrega soma taxa; Mesa não tem endereço.</li>
+          <li>Total no CTA desde já — é o quick-win P0.3, entra antes de todo o resto.</li>
+        </ul>
+      </div>
+      <div class="note">
+        <h4>Risco controlado</h4>
+        <ul>
+          <li>CartView (4106 linhas) só abre no ciclo 2, com diff comprovando presentation-only — cupom/troco/totais não mudam de lugar.</li>
+          <li>Até lá: wizard atual com a pele nova do B0 + total no CTA.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sec">
+  <p class="secnum">04 · PAGAMENTO PIX <span class="tag tag-p0">P0 AGORA</span><span class="tag tag-c2">CICLO 2</span></p>
+  <h2>Pix com countdown em cena e saída digna da expiração</h2>
+  <p class="secsub">O pedido só entra na fila quando o Pix compensa — cada segundo de hesitação no QR é pedido perdido e lojista esperando. O countdown já existe; o quick-win P0 dá a ele o palco (chip grande + “Pagar agora” no copia-e-cola). A variante expirada deixa de ser beco sem saída.</p>
+  <div class="frames">
+    <div class="col">
+      <div class="phone">
+        <div class="sbar"><span>18:47</span><span class="sr"><i class="sig"></i><i class="sig"></i><i class="sig"></i><span class="batt"></span></span></div>
+        <div class="pixwrap">
+          <div class="okball"><svg class="ic"><use href="#i-check"/></svg></div>
+          <div>
+            <h3>Pedido criado!</h3>
+            <p class="sub">Falta só o pagamento pra cozinha começar.</p>
+          </div>
+          <div class="cntchip"><svg class="ic"><use href="#i-clock"/></svg>Expira em 14:32</div>
+          <div class="qrcard">
+            <div class="qr"><span class="fin f1"><i></i></span><span class="fin f2"><i></i></span><span class="fin f3"><i></i></span></div>
+            <p class="ql">Aponte a câmera do app do seu banco</p>
+            <p class="qv">R$ 77,70 · Espetinhos Bela Vista</p>
+          </div>
+          <div class="cnp">
+            <code>00020126580014BR.GOV.BCB.PIX0136a531c9e-2f4b-4e6f-9c1d-8f0e7b2a4c3d520400005303986540577.705802BR5915ESPETINHOS BV</code>
+            <button class="copybtn"><svg class="ic"><use href="#i-copy"/></svg>Pagar agora</button>
+          </div>
+          <div class="pix-cta">
+            <button class="ctagreen" style="width:100%">Acompanhar pedido</button>
+            <button class="obtn" style="width:100%"><svg class="ic"><use href="#i-doc"/></svg>Ver como pagar pelo app do banco</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="phone">
+        <div class="sbar"><span>19:04</span><span class="sr"><i class="sig"></i><i class="sig"></i><i class="sig"></i><span class="batt"></span></span></div>
+        <div class="pixwrap">
+          <div class="eti" style="width:58px;height:58px;border-radius:99px;background:var(--danger-tint);color:var(--danger);display:flex;align-items:center;justify-content:center"><svg class="ic" style="width:28px;height:28px"><use href="#i-clock"/></svg></div>
+          <div>
+            <h3>QR expirou</h3>
+            <p class="sub">Nada foi cobrado. Gere um novo código em 1 toque.</p>
+          </div>
+          <div class="expbox">
+            <span class="eti"><svg class="ic"><use href="#i-clock"/></svg></span>
+            <b>Expirou às 19:02</b>
+            <span>Códigos Pix valem 30 minutos. Seu pedido fica reservado por mais 10.</span>
+          </div>
+          <div class="pix-cta">
+            <button class="ctagreen" style="width:100%">Gerar novo QR</button>
+            <button class="obtn" style="width:100%">Pagar com cartão em vez de Pix</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="note">
+        <h4>O que mudou</h4>
+        <ul>
+          <li>Countdown sai do canto e vira chip display (Poppins bold) — a urgência que faltava.</li>
+          <li>Botão “Pagar agora” ao lado do copia-e-cola: deep link pro app do banco, fallback copia o código (P1.6).</li>
+          <li>QR em card com borda dashed e rótulo do valor — o comprovante de que é do pedido certo.</li>
+          <li>Expirado: causa + garantia (“nada foi cobrado”) + duas saídas (novo QR, cartão). Hoje é beco.</li>
+          <li>Fluxo MP intacto: QR do backend, polling 5 min, webhook fecha em ~1s. Só a apresentação.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sec">
+  <p class="secnum">05 · RASTREIO <span class="tag tag-c2">CICLO 2</span></p>
+  <h2>Mapa no topo, ETA em display, ansiedade embaixo</h2>
+  <p class="secsub">O mapa sai do card intermediário e abre a tela; o ETA (que já existe — countdown, janela de minutos) ganha papel de display. Timeline vertical fica: com 5 estados, horizontal em 320px amontoa. O WhatsApp “cadê meu pedido” é o que essa tela corta — alívio operacional real pro lojista.</p>
+  <div class="frames">
+    <div class="col">
+      <div class="phone">
+        <div class="sbar"><span>19:12</span><span class="sr"><i class="sig"></i><i class="sig"></i><i class="sig"></i><span class="batt"></span></span></div>
+        <div class="map">
+          <span class="park"></span>
+          <svg class="rt" viewBox="0 0 360 186" preserveAspectRatio="none">
+            <path d="M36 150 C 110 150, 128 92, 190 88 S 300 96, 326 44" stroke="#2F9DF7" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+            <circle cx="36" cy="150" r="7" fill="#153A4C"/><circle cx="36" cy="150" r="3" fill="#fff"/>
+            <circle cx="190" cy="88" r="6" fill="#2F9DF7"/><circle cx="190" cy="88" r="2.6" fill="#fff"/>
+            <g transform="translate(326 44)"><circle r="9" fill="#15803d"/><path d="M0 -16 C -6 -6, -7 -2, 0 3 C 7 -2, 6 -6, 0 -16z" fill="#15803d"/><circle r="3" fill="#fff"/></g>
+          </svg>
+        </div>
+        <div class="eta-card">
+          <div class="l">
+            <p class="lbl">Chega entre</p>
+            <p class="etanum">19:34–19:49</p>
+            <span class="cntpill">faltam ~22 min</span>
+          </div>
+          <div class="r">
+            <b>Saiu para entrega</b>
+            <small>Pedido #JB-2417 · Entrega</small>
+          </div>
+        </div>
+        <div class="tl">
+          <div class="tli done"><span class="tlid"><svg class="ic"><use href="#i-check"/></svg></span><span class="tx"><b>Pedido recebido</b><small>Pix confirmado às 18:47</small></span><span class="tltime">18:47</span></div>
+          <div class="tli done"><span class="tlid"><svg class="ic"><use href="#i-check"/></svg></span><span class="tx"><b>Na cozinha</b><small>Começou às 18:49</small></span><span class="tltime">18:49</span></div>
+          <div class="tli act"><span class="tlid"><svg class="ic"><use href="#i-pin"/></svg></span><span class="tx"><b>Saiu para entrega</b><small>Previsto 19:34–19:49</small></span><span class="tltime">19:12</span></div>
+          <div class="tli pend"><span class="tlid"></span><span class="tx"><b>Entregue</b></span><span class="tltime">—</span></div>
+        </div>
+        <div class="acts">
+          <button class="obtn"><svg class="ic"><use href="#i-doc"/></svg>Comprovante</button>
+          <button class="obtn"><svg class="ic"><use href="#i-help"/></svg>Preciso de ajuda</button>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="note">
+        <h4>O que mudou</h4>
+        <ul>
+          <li>Mapa abre a tela (hero) com rota desenhada; card de ETA sobrepõe com display Poppins e countdown pill.</li>
+          <li>Timeline vertical: feito = check verde, ativo = anel pulsante, pendente = neutro. Zero animação além do pulso — estado basta.</li>
+          <li>Comprovante térmico 58mm intocado — só o caminho até ele fica mais claro.</li>
+          <li>Sem promessa falsa: sem GPS do motoboy em tempo real (adiado), sem chat. O que se mostra é o que existe.</li>
+          <li>Countdown de ETA reaproveita o que já roda em OrderTracking — apresentação, não motor.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sec">
+  <p class="secnum">06 · ESTADOS &amp; VARIAÇÕES <span class="tag tag-b3">B3</span></p>
+  <h2>Todo estado é desenhado — nenhum é um buraco</h2>
+  <p class="secsub">Skeleton fiel à forma final, esgotado discreto, fechado sem bloquear a vitrine, vazio com orientação, erro com retry, cor de loja nos extremos do clamp. Screenshot de cada um vira assert no gate — estado ausente reprova o PR.</p>
+  <div class="minigrid">
+    <div class="mini">
+      <div class="mframe sk" style="padding:14px">
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+          <div class="skb" style="width:64px;height:64px;border-radius:99px"></div>
+          <div style="flex:1;display:grid;gap:6px"><div class="skb" style="height:12px;width:70%"></div><div class="skb" style="height:9px;width:50%"></div></div>
+        </div>
+        <div class="skb" style="height:40px;border-radius:99px;margin-bottom:12px"></div>
+        <div style="display:grid;grid-template-columns:64px 1fr;gap:10px;margin-bottom:10px"><div class="skb" style="width:64px;height:64px"></div><div style="display:grid;gap:6px"><div class="skb" style="height:11px;width:85%"></div><div class="skb" style="height:9px;width:60%"></div><div class="skb" style="height:11px;width:35%"></div></div></div>
+        <div style="display:grid;grid-template-columns:64px 1fr;gap:10px"><div class="skb" style="width:64px;height:64px"></div><div style="display:grid;gap:6px"><div class="skb" style="height:11px;width:75%"></div><div class="skb" style="height:9px;width:55%"></div><div class="skb" style="height:11px;width:30%"></div></div></div>
+      </div>
+      <p class="mcap"><b>Skeleton fiel</b> — rail + linhas + foto no formato exato do conteúdo; nada de spinner central.</p>
+    </div>
+    <div class="mini">
+      <div class="mframe">
+        <div class="warnband"><svg class="ic"><use href="#i-clock"/></svg>Fechado agora · abre às 18:00</div>
+        <div class="dimmenu" style="padding:6px 12px 14px">
+          <div class="prow"><div class="pinfo"><span class="pnm">Espetinho Tradicional</span><span class="pds">Bovino 180g na brasa.</span><div class="pricerow"><span class="pprice">R$ 21,90</span><button class="plus" disabled aria-label="Loja fechada"><svg class="ic"><use href="#i-plus"/></svg></button></div></div><div class="pfoto ph-espeto"></div></div>
+          <div class="disbtn">Loja fechada — volte às 18h</div>
+        </div>
+      </div>
+      <p class="mcap"><b>Loja fechada</b> — vitrine navegável (padrão enatega), CTA desabilitado com hora de retorno; toast ao tocar item.</p>
+    </div>
+    <div class="mini">
+      <div class="mframe">
+        <div style="padding:6px 14px 2px"><div style="display:flex;align-items:center;gap:8px;border:1.5px solid var(--hair);border-radius:12px;padding:9px 12px;font-size:13px;color:var(--ink2)"><svg class="ic"><use href="#i-search"/></svg>porção de peixe</div></div>
+        <div class="emptybox">
+          <span class="eico"><svg class="ic"><use href="#i-search"/></svg></span>
+          <b>Nenhum item com “porção de peixe”</b>
+          <span>Essa loja não tem esse item hoje. Tente outro termo ou veja o cardápio completo.</span>
+          <button class="obtn" style="flex:none;padding:0 18px">Ver cardápio completo</button>
+        </div>
+      </div>
+      <p class="mcap"><b>Busca vazia</b> — orientação em vez de silêncio (quick win já em prod, com a pele nova).</p>
+    </div>
+    <div class="mini">
+      <div class="mframe" style="padding:14px">
+        <div class="poprow"><h4>Destaques da loja</h4></div>
+        <div class="poptrack" style="margin:0">
+          <div class="pcard"><div class="pphoto ph-espeto"></div><div class="pn">Espetinho Tradicional</div><div class="pr"><span class="pprice">R$ 21,90</span></div></div>
+          <div class="tile"><svg class="ic"><use href="#i-skew"/></svg><b>Espetinho Frango</b><span>R$ 19,90</span></div>
+          <div class="tile"><svg class="ic"><use href="#i-cup"/></svg><b>Suco de laranja</b><span>R$ 7,50</span></div>
+        </div>
+      </div>
+      <p class="mcap"><b>Carrossel misto</b> — sem foto vira tile tipográfico (inicial/pictograma no tint da loja); &gt;40% sem foto degrada inteiro pra tiles.</p>
+    </div>
+    <div class="mini">
+      <div class="mframe">
+        <div class="emptybox">
+          <span class="eico" style="background:var(--danger-tint);color:var(--danger)"><svg class="ic"><use href="#i-help"/></svg></span>
+          <b>Não deu pra carregar o cardápio</b>
+          <span>A conexão caiu no meio do caminho. Seus itens estão guardados.</span>
+          <button class="obtn" style="flex:none;padding:0 20px;border-color:var(--primary-ink);color:var(--primary-ink)">Tentar de novo</button>
+        </div>
+      </div>
+      <p class="mcap"><b>Erro / offline</b> — retry com contexto (“itens guardados”), sem culpar o usuário.</p>
+    </div>
+    <div class="mini">
+      <div class="mframe expdemo">
+        <div class="exprow"><span class="exppill exp-clara">Populares</span><span class="exptxt">loja clara #FBBF24 → texto escuro #78350F</span></div>
+        <div class="exprow"><span class="exppill exp-escura">Populares</span><span class="exptxt">loja escura #1E293B → texto branco</span></div>
+        <div class="exprow"><span class="exppill" style="background:rgba(217,119,6,.12);color:#92400E">Espetinhos</span><span class="exptxt">tint 12% da própria cor + ink da matiz — clamp via getContrastTextColor</span></div>
+      </div>
+      <p class="mcap"><b>Cor de loja nos extremos</b> — a pill dinâmica precisa ler bem em claro e escuro antes do padrão virar código (axe com cores reais de ≥5 lojas).</p>
+    </div>
+    <div class="mini">
+      <div class="mframe" style="padding:16px">
+        <div class="metarow" style="justify-content:flex-start;margin-bottom:4px">
+          <span class="dot-open">Aberto</span><span>·</span><span>Entrega 30–40 min</span>
+        </div>
+        <p class="submeta" style="text-align:left;margin:0">Taxa R$ 4,00 · 2,3 km</p>
+        <p style="font-size:11.5px;color:var(--ink2);margin-top:12px;border-top:1px dashed var(--hair);padding-top:10px">Loja sem avaliações ainda: o rating pill simplesmente não renderiza — nunca “0,0”.</p>
+      </div>
+      <p class="mcap"><b>Header sem nota</b> — a ausência é design, não defeito.</p>
+    </div>
+    <div class="mini">
+      <div class="mframe cuperr" style="padding:16px">
+        <div class="csec-h" style="margin-bottom:8px"><b>Cupom</b><button class="lnk">Ver cupons</button></div>
+        <div class="coupon"><span class="cvc">BArcode10</span></div>
+        <p class="cupmsg">Este cupom expirou em 31/08. Tente PRIMEIRA5.</p>
+      </div>
+      <p class="mcap"><b>Cupom inválido</b> — erro inline com causa e sugestão; nada de alert assustador.</p>
+    </div>
+  </div>
+</section>
+<section class="sec">
+  <p class="secnum">07 · CONTRA-PROVA NO ADMIN <span class="tag tag-b3">B0</span></p>
+  <h2>O swap de token repinta o admin junto — e é isso que se quer</h2>
+  <p class="secsub">Marca única: as ~90 superfícies admin que usam primary herdando o azul novo no mesmo batch de 1 arquivo. Este frame é o lembrete do gate: screenshot do admin (tiles, links, badges) antes do merge — se algum azul quebrar contraste, quebra no B0, não em produção.</p>
+  <div class="frames">
+    <div class="col">
+      <div class="adminf">
+        <nav class="aside">
+          <span class="ai on"><svg class="ic"><use href="#i-grid"/></svg></span>
+          <span class="ai"><svg class="ic"><use href="#i-doc"/></svg></span>
+          <span class="ai"><svg class="ic"><use href="#i-bag"/></svg></span>
+          <span class="ai"><svg class="ic"><use href="#i-user"/></svg></span>
+        </nav>
+        <div>
+          <div class="admtop"><b>Dashboard</b><span>hoje · 18 out</span></div>
+          <div class="kgrid">
+            <div class="kpi"><p class="kv" style="color:var(--primary-ink)">42</p><p class="kl">Pedidos hoje</p><p class="kd up">▲ 8% vs ontem</p></div>
+            <div class="kpi"><p class="kv">R$ 1.364</p><p class="kl">Receita real</p><p class="kd up">▲ 12%</p></div>
+            <div class="kpi"><p class="kv">R$ 32,50</p><p class="kl">Ticket médio</p><p class="kd up">▲ 4%</p></div>
+            <div class="kpi"><p class="kv">98%</p><p class="kl">Pix saudável</p><p class="kd px">16 pagos · 0 falhas</p></div>
+          </div>
+          <div class="tblrow"><b>#JB-2417</b><span style="color:var(--ink2)">Entrega · Pix</span><span class="sbadge sb-ok">pago</span></div>
+          <div class="tblrow"><b>#JB-2416</b><span style="color:var(--ink2)">Mesa · Pix no balcão</span><span class="sbadge sb-w">pendente</span></div>
+          <div class="tblrow"><b>#JB-2415</b><span style="color:var(--ink2)">Retirada · dinheiro</span><span class="sbadge sb-ok">entregue</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="note">
+        <h4>Checklist do B0</h4>
+        <ul>
+          <li>Screenshot admin pré/pós swap nos tiles azuis, links e badges (axe ≥ 4.5:1).</li>
+          <li>Confirmar 1 linha no servidor: drexame. (Dr. Exame, :4010) não serve assets do container janocaminho — produto separado, swap não vaza.</li>
+          <li>Sweep dos 226 <code>text-primary</code> → ink onde é texto; gráfico fica.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <p class="secnum">08 · DO MOCK AO CÓDIGO</p>
+  <h2>Blueprint com mapa, ordem e portões</h2>
+  <p class="secsub">Cada peça do mock já nasce com destino: componente novo tipado ou reuso do kit <code>ui/</code>. Rollout em PRs sempre-verdes (push na main = deploy com approval do Edmilson; revert é o rollback). A ata completa mora em <code>.ux-audit/redesign-premium-2026-10-18/DECISOES_MESA.md</code>.</p>
+
+  <div class="mapc">
+    <div class="maprow"><div class="m1"><b>Rail de categorias sticky</b><span>scroll-spy + debounce 450ms</span></div><span class="ar">→</span><div class="m2"><b>CategoryRail.tsx</b> novo · MenuView apenas compõe</div></div>
+    <div class="maprow"><div class="m1"><b>Linha de produto + “+”</b><span>memo, foto 88px, porta dupla</span></div><span class="ar">→</span><div class="m2"><b>ProductRow.tsx</b> novo · content-visibility:auto</div></div>
+    <div class="maprow"><div class="m1"><b>Carrossel populares / tiles</b><span>badge qty, fallback tipográfico</span></div><span class="ar">→</span><div class="m2"><b>PopularRail.tsx</b> novo · reusa SkeletonCard</div></div>
+    <div class="maprow"><div class="m1"><b>CartBar flutuante</b><span>substitui a sacola sticky</span></div><span class="ar">→</span><div class="m2"><b>CartBar.tsx</b> novo · mesmo slot, mesmo <b>setView('cart')</b></div></div>
+    <div class="maprow"><div class="m1"><b>Rating pill do header</b><span>4,8 · 126, some sem nota</span></div><span class="ar">→</span><div class="m2">restyle em <b>MenuView.tsx:466</b> — dado avgStoreRating já existe</div></div>
+    <div class="maprow"><div class="m1"><b>Sheet de produto</b><span>footer fixo, preço vivo</span></div><span class="ar">→</span><div class="m2">sobre <b>ui/BottomSheet</b> + <b>ui/Button</b> existentes</div></div>
+    <div class="maprow"><div class="m1"><b>Checkout 1 página · segment 4 contextos</b><span>apresentação, regra intacta</span></div><span class="ar">→</span><div class="m2"><b>Ciclo 2</b> · CartView diff presentation-only</div></div>
+    <div class="maprow"><div class="m1"><b>Tokens (cor, sombra, radius)</b><span>nomes deste mock</span></div><span class="ar">→</span><div class="m2"><b>index.css</b> @theme · B0, 1 arquivo + sweep</div></div>
+  </div>
+
+  <div class="roll">
+    <div class="rstep"><b>P0 · quick-wins <span class="tag tag-p0">antes de tudo</span></b><p>Total no CTA do checkout + countdown Pix com “Pagar agora”. 1 PR por item, presentation-only, ≤2 dias — valor de conversão caindo já na janela Fundador.</p></div>
+    <div class="rstep"><b>B0 · tokens <span class="tag tag-b1">1 arquivo</span></b><p>Swap teal→azul com split gráfico/ink, sweep dos 226 text-primary, 1 sistema de sombra, laranja vira token. QA admin + checagem Dr. Exame no mesmo PR.</p></div>
+    <div class="rstep"><b>B1 · vitrine <span class="tag tag-b1">MenuView</span></b><p>CategoryRail, ProductRow, populares, tabs azul, header mantém + rating pill. Prova o design system no menor dos arquivos grandes.</p></div>
+    <div class="rstep"><b>B2 · sheet + cartbar <span class="tag tag-b2">ProductModal</span></b><p>Footer fixo com preço vivo, grupos com regra no badge, CartBar substituindo a sacola no mesmo slot.</p></div>
+    <div class="rstep"><b>B3 · estados <span class="tag tag-b3">todas as telas do ciclo</span></b><p>Skeleton fiel, esgotado, fechado, vazio, erro — cada um com screenshot de gate.</p></div>
+    <div class="rstep"><b>C2 · checkout · Pix · rastreio · hub <span class="tag tag-c2">blueprint deste mock</span></b><p>Checkout 1 página, Pix expirado com saída, tracking hero com ETA display, hub core-first por último (discovery já funciona). AAB único no fim, com versionCode+1 e cap sync.</p></div>
+  </div>
+
+  <div class="twocol">
+    <div class="gates">
+      <h4>Portões de cada PR</h4>
+      <ul>
+        <li><code>npm run test:unit</code> + <code>npm run build</code> — sem pipe com tail (mascara exit).</li>
+        <li>Review TDZ manual em todo diff de arquivo @ts-nocheck (3 incidentes de prod não se repetem).</li>
+        <li>Playwright visual QA: baseline antes do batch, screenshot tela × estado depois.</li>
+        <li><code>data-testid</code> estáveis + automações .ux-audit verdes no mesmo PR.</li>
+        <li>Pós-deploy: Actions via API pública + hash do bundle no build-info (SW engana o olho).</li>
+        <li>axe ≥ 4.5:1, hit ≥ 44px, piso 12px como asserts — burocracia zero.</li>
+        <li>FPS medido com 100+ itens em WebView de entrada antes do padrão virar código.</li>
+      </ul>
+    </div>
+    <div class="gates">
+      <h4>Rejeitado pela mesa</h4>
+      <ul>
+        <li>Card de produto sem nome (mata a porta clara) e foto circular (esconde o prato).</li>
+        <li>Carrinho como drawer lateral (padrão BR é bottom; colide com a navegação).</li>
+        <li>Fundo colorido/gradiente integral — off-brand e pesado na WebView.</li>
+        <li>Gorjeta e agendamento de horário: regra de negócio, fora (sdd-specify se cobrar).</li>
+        <li>GPS do motoboy, banners CMS, dark mode: fora deste ciclo.</li>
+        <li>Intocados por veto: comprovante térmico 58mm, taxa de entrega sem ⓘ, fila pós-pagamento.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>Mesa: Arquitetura · UI/UX · Review/QA · Produto — 2 rodadas, 8 posições, 0 conflito aberto.</span>
+    <span>Ata: <code>.ux-audit/redesign-premium-2026-10-18/DECISOES_MESA.md</code></span>
+  </div>
+</div>
+
