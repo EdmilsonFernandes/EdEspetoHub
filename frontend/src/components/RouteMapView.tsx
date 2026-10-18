@@ -177,7 +177,7 @@ export function RouteMapView({
         {premiumMotion ? (
           <>
             <div className="pointer-events-none absolute left-[8%] top-[18%] h-24 w-24 rounded-full bg-[#5FD35A]/16 blur-3xl" />
-            <div className="pointer-events-none absolute bottom-[12%] right-[10%] h-28 w-28 rounded-full bg-[#336886]/14 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-[12%] right-[10%] h-28 w-28 rounded-full bg-[#2F9DF7]/14 blur-3xl" />
           </>
         ) : null}
 
@@ -211,7 +211,7 @@ export function RouteMapView({
             <path d={mapLayout.routePath} fill="none" stroke="rgba(68,64,60,0.68)" strokeWidth="1.2" strokeLinecap="round" />
           )}
           <circle cx={mapLayout.start.x} cy={mapLayout.start.y} r="4.2" fill={premiumMotion ? 'rgba(51,104,134,0.18)' : 'rgba(31,41,55,0.16)'} />
-          <circle cx={mapLayout.start.x} cy={mapLayout.start.y} r="2.4" fill={premiumMotion ? '#336886' : '#1f2937'} />
+          <circle cx={mapLayout.start.x} cy={mapLayout.start.y} r="2.4" fill={premiumMotion ? '#2F9DF7' : '#1f2937'} />
           <circle cx={mapLayout.end.x} cy={mapLayout.end.y} r="4.8" fill={premiumMotion ? 'rgba(95,211,90,0.24)' : 'rgba(234,88,12,0.2)'} />
           <circle cx={mapLayout.end.x} cy={mapLayout.end.y} r="2.8" fill={premiumMotion ? '#2f9c48' : '#ea580c'} />
           <circle cx={mapLayout.end.x} cy={mapLayout.end.y} r="7.4" fill="none" stroke={premiumMotion ? 'rgba(95,211,90,0.32)' : 'rgba(234,88,12,0.22)'} strokeWidth="1.1">
@@ -237,7 +237,7 @@ export function RouteMapView({
 
         <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-3">
           <div className={`jnc-route-pin flex min-w-0 items-center gap-2 rounded-2xl border border-white/70 bg-white/90 px-3 py-2 shadow-[0_18px_30px_-24px_rgba(28,25,23,0.55)] backdrop-blur ${shouldAnimate ? 'opacity-0' : ''}`} style={shouldAnimate ? { animation: 'jnc-route-pin-drop 0.62s cubic-bezier(0.34,1.56,0.64,1) 0.16s forwards' } : undefined}>
-            <span className={premiumMotion ? 'h-2.5 w-2.5 rounded-full bg-[#336886]' : 'h-2.5 w-2.5 rounded-full bg-stone-900'} />
+            <span className={premiumMotion ? 'h-2.5 w-2.5 rounded-full bg-[#2F9DF7]' : 'h-2.5 w-2.5 rounded-full bg-stone-900'} />
             <div className="min-w-0">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Origem</p>
               <p className="truncate text-xs font-bold text-stone-800">{originLabel}</p>
@@ -253,7 +253,7 @@ export function RouteMapView({
                 const geoUrl = `https://www.google.com/maps/dir/?api=1&origin=${Number(origin.lat).toFixed(6)},${Number(origin.lng).toFixed(6)}&destination=${Number(destination.lat).toFixed(6)},${Number(destination.lng).toFixed(6)}&travelmode=driving`;
                 void openRouteInSystemBrowser(geoUrl);
               }}
-              className={premiumMotion ? 'rounded-2xl border border-white/70 bg-[linear-gradient(135deg,#153A4C,#336886)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-white shadow-[0_18px_30px_-22px_rgba(51,104,134,0.62)] transition-transform hover:-translate-y-0.5 active:scale-[0.96]' : 'rounded-2xl border border-amber-300/80 bg-[linear-gradient(135deg,#fff7e7,#f7d58d)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-amber-900 shadow-[0_18px_30px_-24px_rgba(180,83,9,0.62)] transition-transform hover:-translate-y-0.5 active:scale-[0.96]'}
+              className={premiumMotion ? 'rounded-2xl border border-white/70 bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-white shadow-[0_18px_30px_-22px_rgba(51,104,134,0.62)] transition-transform hover:-translate-y-0.5 active:scale-[0.96]' : 'rounded-2xl border border-amber-300/80 bg-[linear-gradient(135deg,#fff7e7,#f7d58d)] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-amber-900 shadow-[0_18px_30px_-24px_rgba(180,83,9,0.62)] transition-transform hover:-translate-y-0.5 active:scale-[0.96]'}
             >
               {mapActionLabel}
             </button>

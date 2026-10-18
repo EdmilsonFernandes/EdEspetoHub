@@ -773,7 +773,7 @@ export function ThermalPrinterSettingsCard() {
               void saveAutoPrintSetting(next);
               syncKeepAwakeForAutoPrint();
             }}
-            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#336886] ${
+            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#2F9DF7] ${
               settings.autoPrintOnlineOrders ? 'bg-[#5FD35A]' : 'bg-slate-300'
             }`}
           >

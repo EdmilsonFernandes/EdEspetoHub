@@ -68,7 +68,7 @@ type HubStoreCardProps = {
 };
 
 const getCompactBadgeClass = (badgeKey: string) => {
-  if (badgeKey === 'pickup') return 'bg-[#edf5fa] text-[#336886] ring-[#d7e7ef]';
+  if (badgeKey === 'pickup') return 'bg-[#DBEEFD] text-[#2F9DF7] ring-[#BCE2FC]';
   if (badgeKey === 'free_shipping' || badgeKey === 'delivery') return 'bg-emerald-50 text-emerald-700 ring-emerald-100';
   if (badgeKey === 'outside') return 'bg-amber-50 text-amber-700 ring-amber-100';
   if (badgeKey === 'postal') return 'bg-violet-50 text-violet-700 ring-violet-100';
@@ -125,7 +125,7 @@ export function HubStoreCard({
         onTouchStart={warmupStoreRoute}
         className={`jnc-hub-touch jnc-hub-lift group overflow-hidden rounded-[1.45rem] ${
           store.isOpen
-            ? 'jnc-hub-card md:hover:border-[#336886]/20'
+            ? 'jnc-hub-card md:hover:border-[#2F9DF7]/20'
             : 'border-slate-200/70 bg-slate-50/86 shadow-[0_14px_30px_-26px_rgba(15,23,42,0.14)] grayscale-[25%] opacity-85 filter blur-[0.4px] hover:grayscale-0 hover:opacity-100 hover:blur-none transition-all duration-300'
         }`}
       >
@@ -146,10 +146,10 @@ export function HubStoreCard({
             <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             <span
               className={`jnc-hub-glass-badge absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-black uppercase tracking-[0.1em] ${
-                isCondominiumEventLive ? 'bg-white/92 text-emerald-700' : 'bg-white/92 text-[#336886]'
+                isCondominiumEventLive ? 'bg-white/92 text-emerald-700' : 'bg-white/92 text-[#2F9DF7]'
               }`}
             >
-              <span className={`h-1.5 w-1.5 rounded-full ${isCondominiumEventLive ? 'animate-pulse bg-emerald-500' : 'bg-[#336886]'}`} />
+              <span className={`h-1.5 w-1.5 rounded-full ${isCondominiumEventLive ? 'animate-pulse bg-emerald-500' : 'bg-[#2F9DF7]'}`} />
               {isCondominiumEventLive ? 'Ao vivo' : hasUpcomingCondominiumEvent ? 'Agendado' : 'Prévia'}
             </span>
             <button
@@ -193,7 +193,7 @@ export function HubStoreCard({
             <span>{store.etaMin}-{store.etaMax} min</span>
           </div>
           {!isCondominiumEventLive ? (
-            <p className="mt-2 line-clamp-1 text-2xs font-black uppercase tracking-[0.08em] text-[#336886]">
+            <p className="mt-2 line-clamp-1 text-2xs font-black uppercase tracking-[0.08em] text-[#2F9DF7]">
               {hasUpcomingCondominiumEvent ? condominiumEventTimeLabel || 'Próxima feira' : 'Agenda em confirmação'}
             </p>
           ) : !store.isOpen ? (
@@ -207,7 +207,7 @@ export function HubStoreCard({
                 Retirada
               </span>
               {store.supportsDelivery && store.freeShipping ? (
-                <span className="inline-flex rounded-full bg-sky-50 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.1em] text-[#336886]">
+                <span className="inline-flex rounded-full bg-sky-50 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.1em] text-[#2F9DF7]">
                   Grátis
                 </span>
               ) : null}
@@ -236,7 +236,7 @@ export function HubStoreCard({
       onTouchStart={warmupStoreRoute}
       className={`jnc-hub-touch group grid grid-cols-[4.35rem_minmax(0,1fr)_2.5rem] items-center gap-3 rounded-[1.25rem] border px-2.5 py-2.5 transition-all min-[390px]:grid-cols-[4.65rem_minmax(0,1fr)_2.5rem] min-[390px]:gap-3.5 ${
         storeAvailable
-          ? 'border-white/80 bg-white/95 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 md:hover:-translate-y-0.5 md:hover:border-[#336886]/14 md:hover:bg-white md:hover:shadow-[0_24px_52px_-38px_rgba(15,23,42,0.42)]'
+          ? 'border-white/80 bg-white/95 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 md:hover:-translate-y-0.5 md:hover:border-[#2F9DF7]/14 md:hover:bg-white md:hover:shadow-[0_24px_52px_-38px_rgba(15,23,42,0.42)]'
           : 'border-slate-100/80 bg-white/72 shadow-[0_14px_32px_-30px_rgba(15,23,42,0.18)] ring-1 ring-slate-200/45 grayscale-[14%] opacity-85 filter blur-[0.15px] hover:grayscale-0 hover:opacity-100 hover:blur-none'
       }`}
     >

@@ -236,7 +236,7 @@ export const CartViewCondominium = ({
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-slate-200/80 bg-white text-[#336886] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.3)] transition hover:-translate-y-0.5 hover:bg-sky-50 active:scale-95"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-slate-200/80 bg-white text-[#2F9DF7] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.3)] transition hover:-translate-y-0.5 hover:bg-sky-50 active:scale-95"
               aria-label="Voltar ao cardápio"
               title="Voltar ao cardápio"
             >
@@ -247,11 +247,11 @@ export const CartViewCondominium = ({
                 {condominiumLogo ? (
                   <img src={condominiumLogo} alt={condominiumCheckoutContext?.condominium?.name || 'Condomínio'} className="h-full w-full object-contain p-1.5" />
                 ) : (
-                  <Building size={22} weight="duotone" className="text-[#336886]" />
+                  <Building size={22} weight="duotone" className="text-[#2F9DF7]" />
                 )}
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Checkout Condomínio</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Checkout Condomínio</p>
                 <p className="truncate text-sm font-black tracking-tight text-slate-950">
                   {condominiumCheckoutContext?.condominium?.name || 'Finalizando seu pedido'}
                 </p>
@@ -263,7 +263,7 @@ export const CartViewCondominium = ({
 
       {/* Dados do cliente */}
       <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(244,248,252,0.94)_58%,rgba(255,255,255,0.94)_100%)] p-4 shadow-[0_24px_52px_-38px_rgba(15,23,42,0.24)] sm:mb-6 sm:p-6">
-        <div className="pointer-events-none absolute -right-10 top-0 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-10 top-0 h-24 w-24 rounded-full bg-[#2F9DF7]/10 blur-3xl" />
         <div className="relative flex items-start justify-between gap-4 mb-4">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
@@ -274,7 +274,7 @@ export const CartViewCondominium = ({
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Pedido do condomínio</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Pedido do condomínio</p>
               <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Quem vai receber</h2>
               <p className="truncate text-xs text-slate-500">
                 {checkoutEventLabel || condominiumCheckoutContext?.condominium?.name || 'Finalize seu pedido com contexto completo'}
@@ -282,7 +282,7 @@ export const CartViewCondominium = ({
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <span className="rounded-full border border-[#336886]/12 bg-white/88 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-sm">
+            <span className="rounded-full border border-[#2F9DF7]/12 bg-white/88 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#2F9DF7] shadow-sm">
               {checkoutAudienceLabel}
             </span>
             <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
@@ -414,8 +414,8 @@ export const CartViewCondominium = ({
         </div>
       </div>
 
-      <div className="mb-4 rounded-3xl border border-[#336886]/10 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.25)] sm:p-6">
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Observação para a loja</p>
+      <div className="mb-4 rounded-3xl border border-[#2F9DF7]/10 bg-white p-4 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.25)] sm:p-6">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Observação para a loja</p>
         <p className="mt-1 text-xs leading-relaxed text-slate-500">
           Opcional. Avise algo simples sobre preparo, retirada ou entrega no apartamento.
         </p>
@@ -426,7 +426,7 @@ export const CartViewCondominium = ({
           maxLength={CUSTOMER_ORDER_NOTE_MAX_LENGTH}
           rows={3}
           placeholder="Ex: sem ketchup. Chamar no interfone quando chegar."
-          className="mt-3 min-h-[88px] w-full resize-none rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#336886]/45 focus:bg-white focus:ring-2 focus:ring-[#336886]/10"
+          className="mt-3 min-h-[88px] w-full resize-none rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2F9DF7]/45 focus:bg-white focus:ring-2 focus:ring-[#2F9DF7]/10"
           data-testid="customer-order-note-input"
         />
         <div className="mt-2 flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-500">

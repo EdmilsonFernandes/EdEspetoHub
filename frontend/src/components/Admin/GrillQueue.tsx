@@ -714,7 +714,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       { id: 'pending', label: 'Pendente', icon: <Clock size={16} weight="fill" />, color: 'bg-amber-500' },
       { id: 'preparing', label: 'Preparando', icon: <Play size={16} weight="fill" />, color: 'bg-orange-500' },
       { id: 'ready', label: 'Pronto', icon: <Check size={16} weight="bold" />, color: 'bg-emerald-500' },
-      { id: 'delivered', label: 'Entregue', icon: <CheckCircle size={16} weight="fill" />, color: 'bg-[#336886]' },
+      { id: 'delivered', label: 'Entregue', icon: <CheckCircle size={16} weight="fill" />, color: 'bg-[#2F9DF7]' },
     ];
 
     const currentIdx = steps.findIndex(s => s.id === status.toLowerCase());
@@ -3176,7 +3176,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           style={{ transform: `translateY(${Math.min(18, pullDistance * 0.22)}px)` }}
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/96 px-3 py-1.5 text-[11px] font-bold text-slate-600 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.22)] backdrop-blur-md">
-            <ArrowsClockwise size={13} weight="duotone" className={isPullRefreshing ? 'animate-spin text-[#336886]' : 'text-slate-500'} />
+            <ArrowsClockwise size={13} weight="duotone" className={isPullRefreshing ? 'animate-spin text-[#2F9DF7]' : 'text-slate-500'} />
             {isPullRefreshing ? 'Atualizando fila...' : pullDistance >= 68 ? 'Solte para atualizar' : 'Puxe para atualizar'}
           </div>
         </div>
@@ -3610,7 +3610,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 className="fixed inset-0 z-[10000] bg-white shadow-2xl flex flex-col animate-[drawerIn_220ms_ease-out] md:relative md:inset-auto md:h-[min(94vh,940px)] md:w-full md:max-w-[1120px] md:overflow-hidden md:rounded-[2.15rem] md:border md:border-white/80 md:shadow-[0_34px_90px_-44px_rgba(15,23,42,0.9)] md:animate-[satinPop_180ms_ease-out]"
               >
                 <div className="relative shrink-0 overflow-hidden border-b border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f8fafc_46%,#eef6fb_100%)] px-4 pt-[max(env(safe-area-inset-top),1.05rem)] pb-4 shadow-sm">
-                  <div className="pointer-events-none absolute -left-10 -top-12 h-32 w-32 rounded-full bg-[#336886]/10 blur-3xl" />
+                  <div className="pointer-events-none absolute -left-10 -top-12 h-32 w-32 rounded-full bg-[#2F9DF7]/10 blur-3xl" />
                   <div className="pointer-events-none absolute -right-12 top-2 h-32 w-32 rounded-full bg-amber-200/24 blur-3xl" />
                   <div className="relative flex items-start justify-between gap-3">
                     <div className="flex min-w-0 flex-1 items-start gap-3">
@@ -3618,7 +3618,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         <img src="/janocaminho.jpg" alt="" className="h-full w-full rounded-[0.78rem] object-cover" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#336886]">
+                        <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#2F9DF7]">
                           Detalhe do pedido
                         </p>
                         <h2 className="mt-1 min-w-0 text-[1.05rem] font-black leading-tight tracking-[-0.035em] text-slate-950 [overflow-wrap:anywhere]">
@@ -3785,7 +3785,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       {order.phone && (
                         <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 shadow-sm">
-                          <Phone size={12} weight="duotone" className="shrink-0 text-[#336886]" />
+                          <Phone size={12} weight="duotone" className="shrink-0 text-[#2F9DF7]" />
                           <span className="min-w-0 truncate whitespace-nowrap">{order.phone}</span>
                         </span>
                       )}
@@ -3810,21 +3810,21 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         const hasParty = Number.isFinite(party) && party > 0;
                         if (!whenLabel && !hasParty) return null;
                         return (
-                          <div className="mt-3 rounded-[1.15rem] border border-[#336886]/15 bg-[#eef7fb]/70 px-3 py-2.5 text-[11px] shadow-[0_16px_30px_-26px_rgba(51,104,134,0.22)]">
+                          <div className="mt-3 rounded-[1.15rem] border border-[#2F9DF7]/15 bg-[#eef7fb]/70 px-3 py-2.5 text-[11px] shadow-[0_16px_30px_-26px_rgba(51,104,134,0.22)]">
                             <p className="flex items-center gap-1.5 font-black uppercase tracking-[0.12em] text-[#153A4C]">
-                              <CalendarBlank size={12} weight="duotone" className="shrink-0 text-[#336886]" />
+                              <CalendarBlank size={12} weight="duotone" className="shrink-0 text-[#2F9DF7]" />
                               Reserva
                             </p>
                             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] font-semibold text-slate-700">
                               {whenLabel ? (
                                 <span className="inline-flex items-center gap-1">
-                                  <Clock size={11} weight="duotone" className="shrink-0 text-[#336886]" />
+                                  <Clock size={11} weight="duotone" className="shrink-0 text-[#2F9DF7]" />
                                   {whenLabel}
                                 </span>
                               ) : null}
                               {hasParty ? (
                                 <span className="inline-flex items-center gap-1">
-                                  <Users size={11} weight="duotone" className="shrink-0 text-[#336886]" />
+                                  <Users size={11} weight="duotone" className="shrink-0 text-[#2F9DF7]" />
                                   {party} {party === 1 ? 'pessoa' : 'pessoas'}
                                 </span>
                               ) : null}
@@ -4836,7 +4836,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         <p className="truncate text-sm font-bold text-slate-900">{entry.name}</p>
                         <div className="h-1 w-full overflow-hidden rounded-[4px] bg-[#EEEEEE]">
                           <div
-                            className="h-full rounded-[4px] bg-[#336686] transition-all duration-300"
+                            className="h-full rounded-[4px] bg-[#2F9DF7] transition-all duration-300"
                             style={{ width: `${progressPct}%` }}
                           />
                         </div>
@@ -5404,8 +5404,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                           onClick={() => setCancelOrderModal((prev) => ({ ...prev, reason: option, error: '' }))}
                           className={`rounded-xl border px-3 py-2 text-left text-xs font-extrabold transition active:scale-[0.99] ${
                             active
-                              ? 'border-[#336886]/30 bg-[#336886]/8 text-[#153A4C] ring-2 ring-[#336886]/10'
-                              : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-[#336886]/20'
+                              ? 'border-[#2F9DF7]/30 bg-[#2F9DF7]/8 text-[#153A4C] ring-2 ring-[#2F9DF7]/10'
+                              : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-[#2F9DF7]/20'
                           }`}
                         >
                           {option}

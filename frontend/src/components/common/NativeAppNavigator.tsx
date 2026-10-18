@@ -193,18 +193,18 @@ export function NativeAppNavigator() {
 
   const itemBaseClass =
     'group flex min-h-[3.2rem] flex-col items-center justify-center gap-1 rounded-2xl px-0.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] transition-[transform] duration-150 ease-out active:scale-[0.96]';
-  const activeClass = 'text-[#2d5f7b]';
+  const activeClass = 'text-[#1A6FC8]';
   const inactiveClass = 'text-slate-500 hover:text-slate-700';
 
   const iconClass = (active: boolean) =>
     `inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
       active
-        ? 'bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)] scale-[1.08]'
+        ? 'bg-[#2F9DF7] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)] scale-[1.08]'
         : 'bg-slate-50 text-slate-600 ring-1 ring-slate-200/60 group-hover:bg-slate-100 group-hover:text-slate-700'
     }`;
 
   const dotClass = (active: boolean) =>
-    active ? 'h-1 w-1 rounded-full bg-[#336886]' : 'h-1 w-1';
+    active ? 'h-1 w-1 rounded-full bg-[#2F9DF7]' : 'h-1 w-1';
 
   return (
     <nav ref={navRef} className="pointer-events-none fixed inset-x-0 bottom-0 z-[100] px-0 pb-0 lg:hidden">

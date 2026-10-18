@@ -189,7 +189,7 @@ export function SuperAdminEmailTemplates() {
                   <EnvelopeSimple size={28} weight="duotone" />
                 </div>
                 <div>
-                  <Link to="/superadmin" className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">
+                  <Link to="/superadmin" className="text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">
                     Super Admin
                   </Link>
                   <h1 className="mt-1 text-3xl font-black tracking-[-0.04em] text-slate-950">E-mails e Templates</h1>
@@ -201,7 +201,7 @@ export function SuperAdminEmailTemplates() {
               <button
                 type="button"
                 onClick={load}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm transition hover:border-[#336886]/25 hover:text-[#336886]"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm transition hover:border-[#2F9DF7]/25 hover:text-[#2F9DF7]"
               >
                 <ArrowClockwise size={17} weight="bold" />
                 Atualizar
@@ -289,7 +289,7 @@ export function SuperAdminEmailTemplates() {
                       onClick={() => setSelectedKey(template.key)}
                       className={`w-full rounded-2xl border p-3 text-left transition ${
                         selectedKey === template.key
-                          ? 'border-[#336886]/30 bg-[#eef7f8] shadow-sm'
+                          ? 'border-[#2F9DF7]/30 bg-[#eef7f8] shadow-sm'
                           : 'border-transparent bg-white hover:border-slate-200 hover:bg-slate-50'
                       }`}
                     >
@@ -322,7 +322,7 @@ export function SuperAdminEmailTemplates() {
                         <input
                           value={draft.name}
                           onChange={(event) => updateDraft('name', event.target.value)}
-                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xl font-black text-slate-950 outline-none focus:border-[#336886]"
+                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xl font-black text-slate-950 outline-none focus:border-[#2F9DF7]"
                         />
                       </div>
                       <div className="flex items-center gap-2">
@@ -350,7 +350,7 @@ export function SuperAdminEmailTemplates() {
                       value={draft.description}
                       onChange={(event) => updateDraft('description', event.target.value)}
                       rows={2}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 outline-none focus:border-[#336886]"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 outline-none focus:border-[#2F9DF7]"
                       placeholder="Descrição interna do template"
                     />
 
@@ -371,7 +371,7 @@ export function SuperAdminEmailTemplates() {
                                 : current
                             );
                           }}
-                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold normal-case tracking-normal text-slate-700 outline-none focus:border-[#336886]"
+                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold normal-case tracking-normal text-slate-700 outline-none focus:border-[#2F9DF7]"
                         >
                           {CATEGORY_OPTIONS.map(([value, label]) => (
                             <option key={value} value={value}>{label}</option>
@@ -383,7 +383,7 @@ export function SuperAdminEmailTemplates() {
                         <select
                           value={draft.active ? 'true' : 'false'}
                           onChange={(event) => updateDraft('active', event.target.value === 'true')}
-                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold normal-case tracking-normal text-slate-700 outline-none focus:border-[#336886]"
+                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold normal-case tracking-normal text-slate-700 outline-none focus:border-[#2F9DF7]"
                         >
                           <option value="true">Ativo</option>
                           <option value="false">Inativo</option>
@@ -395,7 +395,7 @@ export function SuperAdminEmailTemplates() {
                           value={draft.allowUnsubscribe ? 'true' : 'false'}
                           disabled={draft.category !== 'marketing'}
                           onChange={(event) => updateDraft('allowUnsubscribe', event.target.value === 'true')}
-                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold normal-case tracking-normal text-slate-700 outline-none disabled:bg-slate-100 disabled:text-slate-400 focus:border-[#336886]"
+                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold normal-case tracking-normal text-slate-700 outline-none disabled:bg-slate-100 disabled:text-slate-400 focus:border-[#2F9DF7]"
                         >
                           <option value="false">Não se aplica</option>
                           <option value="true">Permitir descadastro</option>
@@ -408,7 +408,7 @@ export function SuperAdminEmailTemplates() {
                       <input
                         value={draft.subject}
                         onChange={(event) => updateDraft('subject', event.target.value)}
-                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold normal-case tracking-normal text-slate-800 outline-none focus:border-[#336886]"
+                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold normal-case tracking-normal text-slate-800 outline-none focus:border-[#2F9DF7]"
                       />
                     </label>
 
@@ -417,7 +417,7 @@ export function SuperAdminEmailTemplates() {
                       <input
                         value={draft.preheader}
                         onChange={(event) => updateDraft('preheader', event.target.value)}
-                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold normal-case tracking-normal text-slate-700 outline-none focus:border-[#336886]"
+                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold normal-case tracking-normal text-slate-700 outline-none focus:border-[#2F9DF7]"
                       />
                     </label>
 
@@ -427,7 +427,7 @@ export function SuperAdminEmailTemplates() {
                         value={draft.textBody}
                         onChange={(event) => updateDraft('textBody', event.target.value)}
                         rows={6}
-                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-xs normal-case tracking-normal text-slate-700 outline-none focus:border-[#336886]"
+                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-xs normal-case tracking-normal text-slate-700 outline-none focus:border-[#2F9DF7]"
                       />
                     </label>
 
@@ -437,7 +437,7 @@ export function SuperAdminEmailTemplates() {
                         value={draft.htmlBody}
                         onChange={(event) => updateDraft('htmlBody', event.target.value)}
                         rows={10}
-                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-xs normal-case tracking-normal text-slate-700 outline-none focus:border-[#336886]"
+                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-xs normal-case tracking-normal text-slate-700 outline-none focus:border-[#2F9DF7]"
                       />
                     </label>
 
@@ -447,7 +447,7 @@ export function SuperAdminEmailTemplates() {
                         value={draft.variables.join('\n')}
                         onChange={(event) => updateDraft('variables', variablesFromText(event.target.value))}
                         rows={4}
-                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs normal-case tracking-normal text-slate-700 outline-none focus:border-[#336886]"
+                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs normal-case tracking-normal text-slate-700 outline-none focus:border-[#2F9DF7]"
                       />
                     </label>
                   </div>
@@ -461,7 +461,7 @@ export function SuperAdminEmailTemplates() {
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Preview</p>
                       <h2 className="text-lg font-black text-slate-950">Como chega no e-mail</h2>
                     </div>
-                    <ShieldCheck size={24} weight="duotone" className="text-[#336886]" />
+                    <ShieldCheck size={24} weight="duotone" className="text-[#2F9DF7]" />
                   </div>
                   <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
                     <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Assunto</p>
@@ -481,7 +481,7 @@ export function SuperAdminEmailTemplates() {
                       value={testEmail}
                       onChange={(event) => setTestEmail(event.target.value)}
                       placeholder="email@teste.com"
-                      className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none focus:border-[#336886]"
+                      className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none focus:border-[#2F9DF7]"
                     />
                     <button
                       type="button"
@@ -502,18 +502,18 @@ export function SuperAdminEmailTemplates() {
                       value={manualEmail}
                       onChange={(event) => setManualEmail(event.target.value)}
                       placeholder="email@cliente.com"
-                      className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none focus:border-[#336886]"
+                      className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none focus:border-[#2F9DF7]"
                     />
                     <input
                       value={manualReason}
                       onChange={(event) => setManualReason(event.target.value)}
                       placeholder="Motivo opcional"
-                      className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none focus:border-[#336886]"
+                      className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none focus:border-[#2F9DF7]"
                     />
                     <button
                       type="button"
                       onClick={addSuppression}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#336886]/20 bg-[#eef7f8] px-4 py-3 text-sm font-black text-[#153A4C]"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#2F9DF7]/20 bg-[#eef7f8] px-4 py-3 text-sm font-black text-[#153A4C]"
                     >
                       <Plus size={16} weight="bold" />
                       Adicionar descadastro

@@ -3775,7 +3775,7 @@ export function StorePage() {
       {showClientWebCheckoutContext && (
         <section className="mx-auto w-full max-w-[50rem] px-4 pt-2 sm:pt-3">
           <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.92)_0%,rgba(247,250,252,0.88)_100%)] px-3.5 py-3 shadow-[0_22px_52px_-38px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/55 backdrop-blur-2xl sm:px-4">
-            <div className="pointer-events-none absolute -right-10 -top-14 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
+            <div className="pointer-events-none absolute -right-10 -top-14 h-28 w-28 rounded-full bg-[#2F9DF7]/12 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-12 left-8 h-24 w-24 rounded-full bg-emerald-300/12 blur-3xl" />
             <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
@@ -3790,7 +3790,7 @@ export function StorePage() {
                   />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#336886]/75">
+                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#2F9DF7]/75">
                     {view === 'success' ? 'Pedido enviado' : 'Pedido online'}
                   </p>
                   <h2 className="mt-0.5 truncate text-sm font-black tracking-tight text-slate-950 sm:text-[15px]">
@@ -3816,7 +3816,7 @@ export function StorePage() {
                 <button
                   type="button"
                   onClick={() => (customerSession?.token ? navigate('/cliente/pedidos') : openCustomerAccountPanel('login'))}
-                  className="inline-flex h-10 items-center gap-2 rounded-full border border-[#d7e7ef] bg-white/88 px-3 text-[11px] font-black uppercase tracking-[0.08em] text-[#336886] shadow-[0_12px_24px_-22px_rgba(51,104,134,0.42)] transition-all hover:bg-white active:scale-[0.98]"
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-[#BCE2FC] bg-white/88 px-3 text-[11px] font-black uppercase tracking-[0.08em] text-[#2F9DF7] shadow-[0_12px_24px_-22px_rgba(51,104,134,0.42)] transition-all hover:bg-white active:scale-[0.98]"
                 >
                   <Receipt size={15} weight="duotone" />
                   Pedidos
@@ -4054,7 +4054,7 @@ export function StorePage() {
                 <button
                   type="button"
                   onClick={() => navigateBackOrFallback(navigate, '/hub')}
-                  className="mb-4 inline-flex items-center gap-2 text-left text-slate-700 transition-colors hover:text-[#336886]"
+                  className="mb-4 inline-flex items-center gap-2 text-left text-slate-700 transition-colors hover:text-[#2F9DF7]"
                 >
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#c9dbe7]/80 bg-white/90 text-slate-700 shadow-[0_12px_24px_-22px_rgba(51,104,134,0.25)] transition-all active:scale-95">
                     <ArrowLeft size={16} weight="bold" />
@@ -4172,7 +4172,7 @@ export function StorePage() {
         {!showInactiveState && !showClosedState && view === 'menu' && products.length === 0 && productsLoading ? (
           <div className="mx-auto min-h-[68vh] w-full max-w-[50rem] px-4 py-8">
             <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/88 p-5 shadow-[0_28px_72px_-46px_rgba(15,23,42,0.35)] ring-1 ring-white/70 backdrop-blur-xl">
-              <div className="pointer-events-none absolute -right-12 -top-14 h-36 w-36 rounded-full bg-[#336886]/10 blur-3xl" />
+              <div className="pointer-events-none absolute -right-12 -top-14 h-36 w-36 rounded-full bg-[#2F9DF7]/10 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-amber-300/12 blur-3xl" />
               <div className="flex items-center gap-3">
                 <div className="relative h-12 w-12 animate-pulse rounded-2xl bg-[linear-gradient(135deg,#edf6fb,#ffffff)] ring-1 ring-slate-100" />
@@ -4218,12 +4218,12 @@ export function StorePage() {
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length === 0 ? (
           <div className="flex min-h-[80vh] items-center justify-center px-4">
             <div className="relative w-full max-w-lg overflow-hidden rounded-[2.1rem] border border-white/80 bg-white/90 p-5 text-center shadow-[0_30px_84px_-54px_rgba(15,23,42,0.48)] ring-1 ring-white/70 backdrop-blur-xl sm:p-7">
-              <div className="pointer-events-none absolute -right-16 -top-14 h-44 w-44 rounded-full bg-[#336886]/12 blur-3xl" />
+              <div className="pointer-events-none absolute -right-16 -top-14 h-44 w-44 rounded-full bg-[#2F9DF7]/12 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-20 left-8 h-48 w-48 rounded-full bg-emerald-300/14 blur-3xl" />
-              <div className="relative mx-auto mb-4 grid h-20 w-20 place-items-center rounded-[1.65rem] border border-white/80 bg-[linear-gradient(135deg,#153A4C_0%,#336886_65%,#5FD35A_140%)] text-white shadow-[0_20px_44px_-28px_rgba(21,58,76,0.72)]">
+              <div className="relative mx-auto mb-4 grid h-20 w-20 place-items-center rounded-[1.65rem] border border-white/80 bg-[linear-gradient(135deg,#153A4C_0%,#2F9DF7_65%,#5FD35A_140%)] text-white shadow-[0_20px_44px_-28px_rgba(21,58,76,0.72)]">
                 <Package size={38} weight="duotone" />
               </div>
-              <p className="relative text-[11px] font-black uppercase tracking-[0.22em] text-[#336886]/75">Vitrine em preparação</p>
+              <p className="relative text-[11px] font-black uppercase tracking-[0.22em] text-[#2F9DF7]/75">Vitrine em preparação</p>
               <h2 className="relative mt-2 text-2xl font-black tracking-[-0.03em] text-slate-950">Loja ainda não configurada</h2>
               <p className="relative mx-auto mt-2 mb-6 max-w-md text-sm font-semibold leading-6 text-slate-600">
                 Falta cadastrar os produtos para a vitrine aparecer. Se você é o responsável pela loja, clique abaixo para configurar.
@@ -4517,7 +4517,7 @@ export function StorePage() {
                 className="h-10 w-10 rounded-[0.95rem] bg-white object-contain p-1"
               />
             ) : (
-              <UserCircle size={26} weight="duotone" className="text-[#336886]" />
+              <UserCircle size={26} weight="duotone" className="text-[#2F9DF7]" />
             )
           }
             badges={[
@@ -4957,7 +4957,7 @@ export function StorePage() {
 
       {showClientWebBottomNav && (
         <nav className="fixed bottom-0 left-0 right-0 z-[100] px-0 pb-0 lg:hidden">
-          <div className="mx-auto max-w-none rounded-none border border-b-0 border-[#336886]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
+          <div className="mx-auto max-w-none rounded-none border border-b-0 border-[#2F9DF7]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,250,252,0.94)_100%)] px-2 pt-2 shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/60 backdrop-blur-2xl">
             <div className="grid min-h-[4.65rem] grid-cols-5 items-center gap-0.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
 
               <button
@@ -4987,13 +4987,13 @@ export function StorePage() {
                 onClick={() => navigate('/hub?panel=condominios')}
                 className={`group flex flex-col items-center justify-center gap-1 rounded-[1.15rem] px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.08em] transition-[transform,color,background-color,box-shadow] duration-200 ease-out active:scale-[1.03] ${
                   condominiumSlugFromQuery
-                    ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#2d5f7b] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#336886]/12'
+                    ? 'bg-[linear-gradient(180deg,rgba(51,104,134,0.12)_0%,rgba(51,104,134,0.06)_100%)] text-[#1A6FC8] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.42)] ring-1 ring-[#2F9DF7]/12'
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
                 <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
                   condominiumSlugFromQuery
-                    ? 'bg-[#336886] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
+                    ? 'bg-[#2F9DF7] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.65)]'
                     : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
                 }`}>
                   <Tent size={16} weight={condominiumSlugFromQuery ? 'fill' : 'duotone'} />

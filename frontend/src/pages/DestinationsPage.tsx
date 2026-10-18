@@ -184,20 +184,20 @@ export function DestinationsPage() {
                   key={stat.label}
                   type="button"
                   onClick={scrollToDestinationsList}
-                  className="jnc-hub-touch group rounded-[1rem] bg-white/90 px-3 py-2.5 text-center shadow-[0_12px_26px_-22px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/35 transition hover:-translate-y-0.5 hover:ring-[#336886]/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#336886]/16"
+                  className="jnc-hub-touch group rounded-[1rem] bg-white/90 px-3 py-2.5 text-center shadow-[0_12px_26px_-22px_rgba(15,23,42,0.24)] ring-1 ring-slate-200/35 transition hover:-translate-y-0.5 hover:ring-[#2F9DF7]/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2F9DF7]/16"
                   aria-label={`${stat.hint}: ${stat.value} ${stat.label}`}
                 >
                   <p className="text-xl font-black tracking-[-0.04em] text-[#153A4C]">{stat.value}</p>
                   <p className="mt-1 whitespace-normal break-words text-[10px] font-black uppercase leading-tight tracking-[0.12em] text-slate-500">{stat.label}</p>
-                  <p className="mt-1 hidden text-[9px] font-black uppercase tracking-[0.14em] text-[#336886]/70 sm:block">{stat.hint}</p>
+                  <p className="mt-1 hidden text-[9px] font-black uppercase tracking-[0.14em] text-[#2F9DF7]/70 sm:block">{stat.hint}</p>
                 </button>
               ))}
             </SurfaceCard>
           </motion.div>
           {/* ... Search Term field ... */}
-          <SurfaceCard padding="sm" className="mt-4 rounded-[1.5rem] border-white/80 bg-white/86 backdrop-blur transition-all duration-300 focus-within:border-[#336886]/35 focus-within:shadow-[0_20px_48px_-30px_rgba(51,104,134,0.25)] focus-within:ring-2 focus-within:ring-[#336886]/10">
+          <SurfaceCard padding="sm" className="mt-4 rounded-[1.5rem] border-white/80 bg-white/86 backdrop-blur transition-all duration-300 focus-within:border-[#2F9DF7]/35 focus-within:shadow-[0_20px_48px_-30px_rgba(51,104,134,0.25)] focus-within:ring-2 focus-within:ring-[#2F9DF7]/10">
             <label className="flex min-h-[3.25rem] items-center gap-3 rounded-[1.15rem] bg-slate-50 px-4 ring-1 ring-slate-200/60 focus-within:ring-transparent transition-all">
-              <MagnifyingGlass size={18} weight="bold" className="shrink-0 text-[#336886]/80" />
+              <MagnifyingGlass size={18} weight="bold" className="shrink-0 text-[#2F9DF7]/80" />
               <input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
@@ -245,13 +245,13 @@ export function DestinationsPage() {
       <section id="destinos" className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
         <div className="mb-4 flex items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Cidades disponíveis</p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Cidades disponíveis</p>
             <h2 className="mt-1 text-2xl font-black tracking-[-0.03em] text-slate-950">
               {searchTerm || selectedState !== 'ALL' ? destinationResultLabel : <>Escolha uma <em className="dest-serif-i text-[#153A4C]/60">cidade</em></>}
             </h2>
             <p className="mt-1 max-w-xl text-sm font-semibold text-slate-500">Toque em uma cidade para ver hospedagens, comida, passeios e serviços.</p>
           </div>
-          <MapTrifold size={28} weight="duotone" className="text-[#336886]" />
+          <MapTrifold size={28} weight="duotone" className="text-[#2F9DF7]" />
         </div>
 
         {error ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{error}</p> : null}
@@ -299,7 +299,7 @@ export function DestinationsPage() {
                   onPointerEnter={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
                   onFocus={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
                   onTouchStart={() => prefetchRouteByPath(`/destinos/${destination.slug}`)}
-                  className="jnc-hub-touch jnc-hub-lift group grid overflow-hidden rounded-[1.75rem] border border-slate-100 bg-gradient-to-br from-white to-slate-50/50 shadow-[0_12px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-100/50 sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)] md:hover:border-[#336886]/18"
+                  className="jnc-hub-touch jnc-hub-lift group grid overflow-hidden rounded-[1.75rem] border border-slate-100 bg-gradient-to-br from-white to-slate-50/50 shadow-[0_12px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-100/50 sm:min-h-[12.5rem] sm:grid-cols-[154px_minmax(0,1fr)] md:hover:border-[#2F9DF7]/18"
                 >
                   <div className="relative h-36 overflow-hidden bg-slate-100 sm:h-full sm:min-h-[12.5rem]">
                     <img src={destinationImage(destination)} alt={displayName} className="absolute inset-0 h-full w-full object-cover transition-all duration-700 group-hover:scale-108" />
@@ -310,7 +310,7 @@ export function DestinationsPage() {
                   </div>
                   <div className="flex flex-col justify-between gap-4 p-4">
                     <div>
-                      <h3 className="text-xl font-black tracking-[-0.04em] text-slate-900 transition-colors duration-200 group-hover:text-[#336886] sm:text-2xl"><span className="dest-serif-i">{displayName}</span></h3>
+                      <h3 className="text-xl font-black tracking-[-0.04em] text-slate-900 transition-colors duration-200 group-hover:text-[#2F9DF7] sm:text-2xl"><span className="dest-serif-i">{displayName}</span></h3>
                       <p className="mt-2 line-clamp-2 text-sm font-semibold leading-relaxed text-slate-600">
                         {destination.description || destination.heroSubtitle || 'Um destino pronto para receber sua próxima viagem.'}
                       </p>
@@ -324,7 +324,7 @@ export function DestinationsPage() {
                         <Sparkle size={14} weight="duotone" />
                         {destination.listingsCount || 0} serviços
                       </span>
-                      <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#336886] px-3 py-1.5 text-xs font-black text-white transition-all duration-300 group-hover:bg-[#153A4C] group-hover:shadow-[0_10px_22px_-14px_rgba(51,104,134,0.52)]">
+                      <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#2F9DF7] px-3 py-1.5 text-xs font-black text-white transition-all duration-300 group-hover:bg-[#153A4C] group-hover:shadow-[0_10px_22px_-14px_rgba(51,104,134,0.52)]">
                         Explorar
                         <Compass size={14} weight="bold" className="transition-transform duration-500 group-hover:rotate-45" />
                       </span>

@@ -506,8 +506,8 @@ const getOrderFulfillmentMeta = (order: any) => {
     return {
       label: 'Reserva',
       icon: CalendarBlank,
-      toneClass: 'bg-[#336886]/10 text-[#153A4C] ring-1 ring-[#336886]/15',
-      textClass: 'text-[#336886]',
+      toneClass: 'bg-[#2F9DF7]/10 text-[#153A4C] ring-1 ring-[#2F9DF7]/15',
+      textClass: 'text-[#2F9DF7]',
     };
   }
 
@@ -764,7 +764,7 @@ function AwaitingPaymentCard({
           {logoUrl ? (
             <Image src={logoUrl} alt={storeName} className="h-full w-full object-cover" eager />
           ) : (
-            <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-[10px] font-black text-white">
+            <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] text-[10px] font-black text-white">
               {getStoreInitials(storeName)}
             </span>
           )}
@@ -825,7 +825,7 @@ function AwaitingPaymentCard({
         <button
           type="button"
           onClick={() => onOpenOrder(order.id, 'payment')}
-          className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-[#336886]/45 bg-white text-sm font-black text-[#336886] transition-colors active:scale-[0.98] hover:bg-[#edf5fa]"
+          className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-[#2F9DF7]/45 bg-white text-sm font-black text-[#2F9DF7] transition-colors active:scale-[0.98] hover:bg-[#DBEEFD]"
         >
           Pagar agora
         </button>
@@ -1002,7 +1002,7 @@ function OrderCard({
           {logoUrl ? (
             <Image src={logoUrl} alt={storeName} className="h-full w-full object-cover" eager />
           ) : (
-            <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
+            <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] text-sm font-black text-white">
               {getStoreInitials(storeName)}
             </div>
           )}
@@ -1044,8 +1044,8 @@ function OrderCard({
             </span>
           </div>
           {reservationSummary ? (
-            <p className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-full bg-[#336886]/8 px-2 py-0.5 text-2xs font-bold tracking-tight text-[#153A4C]">
-              <CalendarBlank size={11} weight="duotone" className="shrink-0 text-[#336886]" />
+            <p className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-full bg-[#2F9DF7]/8 px-2 py-0.5 text-2xs font-bold tracking-tight text-[#153A4C]">
+              <CalendarBlank size={11} weight="duotone" className="shrink-0 text-[#2F9DF7]" />
               <span className="truncate">
                 {reservationSummary.whenLabel
                   ? `Reserva ${reservationSummary.whenLabel}`
@@ -1212,7 +1212,7 @@ function OrderCard({
             <button
               type="button"
               onClick={() => onOpenHelp(order)}
-              className="inline-flex items-center gap-1 text-[13px] font-medium text-[#336886] active:opacity-70 transition-opacity"
+              className="inline-flex items-center gap-1 text-[13px] font-medium text-[#2F9DF7] active:opacity-70 transition-opacity"
               title="Ajuda com este pedido"
               aria-label="Ajuda com este pedido"
             >
@@ -1268,7 +1268,7 @@ function OrderCard({
             {new Date(etaDeadlineMs + DELAY_GRACE_MS).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
           </strong>{' '}
           (prazo de entrega + 15 min). Precisa antes?{' '}
-          <button type="button" onClick={() => onOpenHelp(order)} className="font-bold text-[#336886] underline underline-offset-2">
+          <button type="button" onClick={() => onOpenHelp(order)} className="font-bold text-[#2F9DF7] underline underline-offset-2">
             Fale com a loja
           </button>
         </p>
@@ -1349,7 +1349,7 @@ function OrderHelpScreen({
 
   return (
     <div className="fixed inset-0 z-[90] bg-[linear-gradient(180deg,#eef5fa_0%,#f8fbfd_100%)]">
-      <div className="pointer-events-none absolute right-[-12%] top-[-10%] h-[34%] w-[48%] rounded-full bg-[#336886]/14 blur-[120px]" />
+      <div className="pointer-events-none absolute right-[-12%] top-[-10%] h-[34%] w-[48%] rounded-full bg-[#2F9DF7]/14 blur-[120px]" />
       <div className="pointer-events-none absolute bottom-[4%] left-[-8%] h-[26%] w-[34%] rounded-full bg-sky-300/12 blur-[110px]" />
 
       <div className="relative mx-auto flex h-full max-w-2xl flex-col">
@@ -1364,7 +1364,7 @@ function OrderHelpScreen({
           <div className="flex flex-col items-center gap-0.5">
             <div className="flex items-center gap-1.5">
               <Image src="/janocaminho.jpg" alt="Já no Caminho" className="h-5 w-5 rounded-[0.5rem] object-cover shadow-sm ring-1 ring-slate-200" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#336886]">Atendimento</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#2F9DF7]">Atendimento</p>
             </div>
             <h1 className="text-[15px] font-semibold text-stone-950">Ajuda com pedido</h1>
           </div>
@@ -1378,7 +1378,7 @@ function OrderHelpScreen({
                 {logoUrl ? (
                   <Image src={logoUrl} alt={storeName} className="h-full w-full object-cover" />
                 ) : (
-                  <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
+                  <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] text-sm font-black text-white">
                     {getStoreInitials(storeName)}
                   </div>
                 )}
@@ -1386,7 +1386,7 @@ function OrderHelpScreen({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="truncate text-lg font-black text-stone-950">{storeName}</p>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[#cfe0ea] bg-white/92 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.16em] text-[#336886] shadow-[0_12px_22px_-20px_rgba(51,104,134,0.2)]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#cfe0ea] bg-white/92 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.16em] text-[#2F9DF7] shadow-[0_12px_22px_-20px_rgba(51,104,134,0.2)]">
                     {statusMeta.icon}
                     {statusMeta.label}
                   </span>
@@ -1397,7 +1397,7 @@ function OrderHelpScreen({
 
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
               <div className="rounded-[1.15rem] border border-[#cfe0ea] bg-white/92 px-4 py-3 shadow-[0_16px_30px_-24px_rgba(51,104,134,0.16)]">
-                <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#336886]">Resumo</p>
+                <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Resumo</p>
                 <p className="mt-1 text-sm font-black text-stone-900">{totalLabel}</p>
                 <p className="mt-1 text-base font-black text-[#153A4C]">{formatCurrency(order?.total || 0)}</p>
               </div>
@@ -1440,7 +1440,7 @@ function OrderHelpScreen({
                 return (
                   <div key={section.id} className="overflow-hidden rounded-[28px] border border-[#dbe7ef] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,247,250,0.98))] shadow-[0_18px_36px_-32px_rgba(51,104,134,0.18)]">
                     <div className="flex items-start gap-3 border-b border-[#dbe7ef] px-4 py-4">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f6fbfe,#e5f2f8)] text-[#336886] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.24)]">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f6fbfe,#e5f2f8)] text-[#2F9DF7] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.24)]">
                         <Icon size={20} weight="duotone" />
                       </div>
                       <div>
@@ -1473,7 +1473,7 @@ function OrderHelpScreen({
                               <div className="border-t border-[#dbe7ef] bg-[linear-gradient(180deg,rgba(240,247,251,0.72),rgba(255,255,255,0.94))] px-4 py-4">
                                 <div className="rounded-[1.2rem] border border-[#dbe7ef] bg-[linear-gradient(135deg,#f9fcfe,#ffffff)] px-4 py-3 shadow-[0_14px_28px_-24px_rgba(51,104,134,0.16)]">
                                   <div className="flex items-start gap-2.5">
-                                    <WarningCircle size={18} weight="duotone" className="mt-0.5 shrink-0 text-[#336886]" />
+                                    <WarningCircle size={18} weight="duotone" className="mt-0.5 shrink-0 text-[#2F9DF7]" />
                                     <p className="text-sm font-medium leading-6 text-stone-600">{item.answer}</p>
                                   </div>
                                 </div>
@@ -1495,7 +1495,7 @@ function OrderHelpScreen({
                                         onClose();
                                         onOpenStore(order?.store?.slug);
                                       }}
-                                      className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.4)] transition-all hover:brightness-105 active:scale-[0.98]"
+                                      className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.4)] transition-all hover:brightness-105 active:scale-[0.98]"
                                     >
                                       <ArrowSquareOut size={16} weight="bold" />
                                       Abrir loja
@@ -1515,7 +1515,7 @@ function OrderHelpScreen({
 
             <div className="mt-4 rounded-[24px] border border-[#dbe7ef] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] p-4 shadow-[0_16px_36px_-32px_rgba(51,104,134,0.18)]">
               <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f6fbfe,#e5f2f8)] text-[#336886] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.24)]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f6fbfe,#e5f2f8)] text-[#2F9DF7] shadow-[0_14px_28px_-22px_rgba(51,104,134,0.24)]">
                   <ChatCircleDots size={20} weight="duotone" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -1540,7 +1540,7 @@ function OrderHelpScreen({
                           onClose();
                           onOpenStore(order?.store?.slug);
                         }}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.4)] transition-all hover:brightness-105 active:scale-[0.98]"
+                        className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.4)] transition-all hover:brightness-105 active:scale-[0.98]"
                       >
                         <ArrowSquareOut size={16} weight="bold" />
                         Abrir loja
@@ -1967,7 +1967,7 @@ export function ClientOrders() {
   return (
     <main className="min-h-screen bg-[#E2EBF2] pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[calc(env(safe-area-inset-top)+4.35rem)]">
       <div className="pointer-events-none fixed top-[-10%] right-[-8%] h-[38%] w-[46%] rounded-full bg-[#153A4C]/6 blur-[120px] -z-10" />
-      <div className="pointer-events-none fixed bottom-[8%] left-[-5%] h-[26%] w-[34%] rounded-full bg-[#336886]/4 blur-[100px] -z-10" />
+      <div className="pointer-events-none fixed bottom-[8%] left-[-5%] h-[26%] w-[34%] rounded-full bg-[#2F9DF7]/4 blur-[100px] -z-10" />
       <div className="mx-auto max-w-2xl">
         <AppGlassHeader
           title="Meus Pedidos"
@@ -1990,13 +1990,13 @@ export function ClientOrders() {
                   {lastOrderLogoUrl ? (
                     <Image src={lastOrderLogoUrl} alt={lastOrderStoreName} className="h-full w-full object-cover" />
                   ) : (
-                    <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
+                    <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] text-sm font-black text-white">
                       {getStoreInitials(lastOrderStoreName)}
                     </span>
                   )}
                 </button>
                 <div className="min-w-0 flex-1">
-                  <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#336886]">Último pedido</p>
+                  <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Último pedido</p>
                   <h2 className="mt-0.5 truncate text-[15px] font-black text-slate-950">{lastOrderStoreName}</h2>
                   <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-500">
                     {lastOrderStatusMeta ? (
@@ -2071,7 +2071,7 @@ export function ClientOrders() {
                       {store.logoUrl ? (
                         <Image src={store.logoUrl} alt={store.name} className="h-full w-full object-cover" />
                       ) : (
-                        <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
+                        <span className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] text-sm font-black text-white">
                           {getStoreInitials(store.name)}
                         </span>
                       )}
@@ -2091,10 +2091,10 @@ export function ClientOrders() {
           <section className="mb-5">
             <div className="mb-2 flex items-center justify-between gap-3 px-1">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Pedidos</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Pedidos</p>
                 <p className="text-xs font-semibold text-slate-500">Do mais recente ao primeiro.</p>
               </div>
-              <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-2xs font-bold text-[#336886] shadow-sm">
+              <span className="inline-flex shrink-0 rounded-full bg-white px-2.5 py-1 text-2xs font-bold text-[#2F9DF7] shadow-sm">
                 {filteredOrders.length}
               </span>
             </div>
@@ -2293,8 +2293,8 @@ export function ClientOrders() {
                     onClick={() => setCancelModal((prev) => ({ ...prev, reason: option }))}
                     className={`rounded-2xl border px-4 py-3 text-left text-sm font-black transition active:scale-[0.99] ${
                       active
-                        ? 'border-[#336886]/30 bg-[#336886]/8 text-[#153A4C] ring-2 ring-[#336886]/10'
-                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-[#336886]/20'
+                        ? 'border-[#2F9DF7]/30 bg-[#2F9DF7]/8 text-[#153A4C] ring-2 ring-[#2F9DF7]/10'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-[#2F9DF7]/20'
                     }`}
                   >
                     {option}

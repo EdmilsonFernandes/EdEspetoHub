@@ -136,7 +136,7 @@ const STORE_SEGMENT_PRESETS: Record<string, { primaryColor: string; secondaryCol
     categories: ['Serviços', 'Destaques'],
   },
   outros: {
-    primaryColor: '#336686',
+    primaryColor: '#2F9DF7',
     secondaryColor: '#5fd35a',
     description: 'Loja online com pedidos organizados e experiência moderna.',
     orderTypes: ['delivery', 'pickup', 'table'],
@@ -315,7 +315,7 @@ export function CreateStore() {
     pixKey: '',
     logoFile: '',
     bannerFile: '',
-    primaryColor: '#336686',
+    primaryColor: '#2F9DF7',
     secondaryColor: '#5fd35a',
     socialLinks: [
       {
@@ -1684,7 +1684,7 @@ export function CreateStore() {
         backgroundPosition: 'center',
       }
     : {
-        backgroundImage: `linear-gradient(120deg, ${registerForm.primaryColor || '#336686'}, ${registerForm.secondaryColor || '#5fd35a'})`,
+        backgroundImage: `linear-gradient(120deg, ${registerForm.primaryColor || '#2F9DF7'}, ${registerForm.secondaryColor || '#5fd35a'})`,
       };
 
   const previewPanel = (
@@ -1762,7 +1762,7 @@ export function CreateStore() {
                 <div
                   className="h-full w-full"
                   style={{
-                    backgroundImage: `linear-gradient(120deg, ${registerForm.primaryColor || '#336686'}, ${registerForm.secondaryColor || '#5fd35a'})`,
+                    backgroundImage: `linear-gradient(120deg, ${registerForm.primaryColor || '#2F9DF7'}, ${registerForm.secondaryColor || '#5fd35a'})`,
                   }}
                 />
               )}
@@ -1775,7 +1775,7 @@ export function CreateStore() {
             <button
               type="button"
               className="mt-1 h-7 w-full rounded-md text-white text-[11px] font-semibold"
-              style={{ backgroundColor: registerForm.primaryColor || '#336686' }}
+              style={{ backgroundColor: registerForm.primaryColor || '#2F9DF7' }}
             >
             Ver vitrine
             </button>
@@ -1803,7 +1803,7 @@ export function CreateStore() {
 
             <button
               onClick={() => navigate('/hub')}
-              className="rounded-full border border-[#1c4b62]/15 bg-[linear-gradient(135deg,rgba(13,79,102,0.08),rgba(44,140,159,0.12))] px-4 py-2 text-sm font-black text-[#1c4b62] shadow-[0_14px_28px_-22px_rgba(15,59,83,0.45)] transition hover:bg-[#1c4b62]/10 active:scale-[0.98]"
+              className="rounded-full border border-[#185A94]/15 bg-[linear-gradient(135deg,rgba(13,79,102,0.08),rgba(44,140,159,0.12))] px-4 py-2 text-sm font-black text-[#185A94] shadow-[0_14px_28px_-22px_rgba(15,59,83,0.45)] transition hover:bg-[#185A94]/10 active:scale-[0.98]"
             >
               Cancelar
             </button>
@@ -1830,7 +1830,7 @@ export function CreateStore() {
                     <Storefront size={24} weight="duotone" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Ativar pedidos no destino</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2F9DF7]">Ativar pedidos no destino</p>
                     <h2 className="mt-1 text-lg font-black leading-tight text-slate-950">
                       {destinationClaim.storeName || 'Seu serviço'} em {destinationClaim.destinationName || destinationClaim.city || 'um destino turístico'}
                     </h2>
@@ -1846,7 +1846,7 @@ export function CreateStore() {
               <div className="mt-4 rounded-[1.35rem] border border-white/70 bg-white/72 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Atendimento em chalés</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Atendimento em chalés</p>
                     <h3 className="mt-1 text-sm font-black text-slate-950">Informe onde você consegue atender</h3>
                     <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
                       Isso ajuda o time Já no Caminho a validar sua loja e conectar você aos hóspedes certos.
@@ -1879,7 +1879,7 @@ export function CreateStore() {
                   <div className="mt-4 rounded-[1.35rem] border border-slate-200/80 bg-white/88 p-2.5 shadow-[0_18px_34px_-30px_rgba(15,23,42,0.5)] sm:p-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Chalés atendidos</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Chalés atendidos</p>
                         <p className="mt-1 text-xs font-bold leading-relaxed text-slate-500">
                           {selectedDestinationClaimPlaces.length
                             ? `${selectedDestinationClaimPlaces.length} chalé(s) selecionado(s)`
@@ -1891,7 +1891,7 @@ export function CreateStore() {
                           type="button"
                           onClick={() => setSelectedDestinationClaimPlaceIds(destinationClaimPlaces.map((place: any) => String(place.id || '')).filter(Boolean))}
                           disabled={!destinationClaimPlaces.length}
-                          className="rounded-2xl border border-[#336886]/18 bg-[#eef6f8] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#153A4C] disabled:cursor-not-allowed disabled:opacity-50 sm:rounded-full sm:py-2"
+                          className="rounded-2xl border border-[#2F9DF7]/18 bg-[#eef6f8] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#153A4C] disabled:cursor-not-allowed disabled:opacity-50 sm:rounded-full sm:py-2"
                         >
                           Selecionar todos
                         </button>
@@ -1912,11 +1912,11 @@ export function CreateStore() {
                         value={destinationClaimPlaceSearch}
                         onChange={(event) => setDestinationClaimPlaceSearch(event.target.value)}
                         placeholder="Buscar chalé, pousada ou bairro"
-                        className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-3 py-3 pl-10 text-sm font-bold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#336886]/35 focus:bg-white"
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-3 py-3 pl-10 text-sm font-bold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#2F9DF7]/35 focus:bg-white"
                       />
                     </div>
                     {destinationClaimPlacesLoading ? (
-                      <p className="mt-2 rounded-2xl bg-[#edf5fa] px-3 py-2 text-xs font-bold text-[#336886]">Carregando chalés do destino...</p>
+                      <p className="mt-2 rounded-2xl bg-[#DBEEFD] px-3 py-2 text-xs font-bold text-[#2F9DF7]">Carregando chalés do destino...</p>
                     ) : null}
                     {destinationClaimPlacesError ? (
                       <p className="mt-2 rounded-2xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700">{destinationClaimPlacesError}</p>
@@ -1941,7 +1941,7 @@ export function CreateStore() {
                               {imageUrl ? (
                                 <img src={imageUrl} alt={place.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" loading="lazy" />
                               ) : (
-                                <span className="flex h-full w-full items-center justify-center text-[#336886]">
+                                <span className="flex h-full w-full items-center justify-center text-[#2F9DF7]">
                                   <Bed size={28} weight="duotone" />
                                 </span>
                               )}
@@ -1956,7 +1956,7 @@ export function CreateStore() {
                                   {address || place.description || 'Hospedagem do destino'}
                                 </span>
                               </span>
-                              <span className="mt-2 hidden items-center gap-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#336886] sm:inline-flex">
+                              <span className="mt-2 hidden items-center gap-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#2F9DF7] sm:inline-flex">
                                 <MapPinLine size={13} weight="duotone" />
                                 Atendo aqui
                               </span>
@@ -1981,7 +1981,7 @@ export function CreateStore() {
                       <button
                         type="button"
                         onClick={() => setShowAllDestinationClaimPlaces(true)}
-                        className="mt-3 w-full rounded-2xl border border-[#336886]/16 bg-white px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-[0_16px_28px_-24px_rgba(15,23,42,0.38)] transition active:scale-[0.99]"
+                        className="mt-3 w-full rounded-2xl border border-[#2F9DF7]/16 bg-white px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-[#153A4C] shadow-[0_16px_28px_-24px_rgba(15,23,42,0.38)] transition active:scale-[0.99]"
                       >
                         Ver mais {filteredDestinationClaimPlaces.length - visibleDestinationClaimPlaces.length} hospedagem(ns)
                       </button>
@@ -2761,7 +2761,7 @@ export function CreateStore() {
                       </p>
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
                         <div
-                          className="h-full rounded-full bg-[linear-gradient(90deg,#5FD35A,#336886)] transition-all"
+                          className="h-full rounded-full bg-[linear-gradient(90deg,#5FD35A,#2F9DF7)] transition-all"
                           style={{ width: `${signupProgressPercent}%` }}
                         />
                       </div>
@@ -2978,7 +2978,7 @@ export function CreateStore() {
                     setTermsAccepted(e.target.checked);
                   }}
                   ref={termsCheckboxRef}
-                  className="mt-1 h-5 w-5 accent-[#1c4b62]"
+                  className="mt-1 h-5 w-5 accent-[#185A94]"
                 />
                 <span className="space-y-1">
                   <span className="flex flex-wrap items-center gap-2 text-sm font-black text-slate-900">
@@ -2994,7 +2994,7 @@ export function CreateStore() {
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
-                    className="text-[#1c4b62] font-black hover:underline"
+                    className="text-[#185A94] font-black hover:underline"
                   >
                     termos de uso
                   </button>{' '}
@@ -3017,7 +3017,7 @@ export function CreateStore() {
                     clearMissingField('lgpdAccepted');
                     setLgpdAccepted(e.target.checked);
                   }}
-                  className="mt-1 h-5 w-5 accent-[#1c4b62]"
+                  className="mt-1 h-5 w-5 accent-[#185A94]"
                 />
                 <span className="space-y-1">
                   <span className="flex flex-wrap items-center gap-2 text-sm font-black text-slate-900">
@@ -3033,7 +3033,7 @@ export function CreateStore() {
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
-                    className="text-[#1c4b62] font-black hover:underline"
+                    className="text-[#185A94] font-black hover:underline"
                   >
                     política de privacidade
                   </button>
@@ -3062,7 +3062,7 @@ export function CreateStore() {
                       type="button"
                       onClick={handleNextStep}
                       disabled={isPreflightingOwner}
-                      className="flex-[1.4] rounded-2xl bg-[linear-gradient(135deg,#153a4c,#1c4b62,#4e96ae)] px-4 py-3 text-sm font-black text-white shadow-[0_22px_42px_-24px_rgba(15,59,83,0.65)] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-55 disabled:cursor-not-allowed sm:flex-none"
+                      className="flex-[1.4] rounded-2xl bg-[linear-gradient(135deg,#153a4c,#185A94,#4FB2F8)] px-4 py-3 text-sm font-black text-white shadow-[0_22px_42px_-24px_rgba(15,59,83,0.65)] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-55 disabled:cursor-not-allowed sm:flex-none"
                     >
                       {isPreflightingOwner ? 'Validando...' : 'Continuar →'}
                     </button>
@@ -3070,7 +3070,7 @@ export function CreateStore() {
                     <button
                       type="submit"
                       disabled={isRegistering}
-                      className="flex-[1.4] rounded-2xl bg-[linear-gradient(135deg,#153a4c,#1c4b62,#4e96ae)] px-4 py-3 text-sm font-black text-white shadow-[0_22px_42px_-24px_rgba(15,59,83,0.65)] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed sm:flex-none"
+                      className="flex-[1.4] rounded-2xl bg-[linear-gradient(135deg,#153a4c,#185A94,#4FB2F8)] px-4 py-3 text-sm font-black text-white shadow-[0_22px_42px_-24px_rgba(15,59,83,0.65)] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed sm:flex-none"
                     >
                       {isRegistering ? (
                         <span className="inline-flex items-center justify-center gap-2">
@@ -3171,7 +3171,7 @@ export function CreateStore() {
       {storeVerifyPrompt ? (
         <div className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/55 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
           <div className="flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-2rem)] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)]">
-            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#153a4c_0%,#1c4b62_55%,#4e96ae_100%)] px-6 pb-6 pt-6 text-white">
+            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#153a4c_0%,#185A94_55%,#4FB2F8_100%)] px-6 pb-6 pt-6 text-white">
               <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_68%)]" />
               <div className="relative flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-start gap-3">
@@ -3244,7 +3244,7 @@ export function CreateStore() {
                                 {imageUrl ? (
                                   <img src={imageUrl} alt={place.name} className="h-full w-full object-cover" />
                                 ) : (
-                                  <div className="grid h-full w-full place-items-center text-[#336886]">
+                                  <div className="grid h-full w-full place-items-center text-[#2F9DF7]">
                                     <MapPinLine size={20} weight="duotone" />
                                   </div>
                                 )}
@@ -3275,7 +3275,7 @@ export function CreateStore() {
                   <button
                     type="button"
                     onClick={closeStoreVerificationModal}
-                    className="w-full rounded-2xl bg-[linear-gradient(135deg,#153a4c,#1c4b62,#4e96ae)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99]"
+                    className="w-full rounded-2xl bg-[linear-gradient(135deg,#153a4c,#185A94,#4FB2F8)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99]"
                   >
                     Entendi, vou aguardar a análise
                   </button>
@@ -3299,7 +3299,7 @@ export function CreateStore() {
                       onChange={(e) => handleStoreCodeDigitChange(index, e.target.value)}
                       onKeyDown={(e) => handleStoreCodeKeyDown(index, e)}
                       onPaste={handleStoreCodePaste}
-                      className="h-16 w-14 rounded-2xl border border-slate-200 bg-slate-50 text-center text-2xl font-black tracking-[0.1em] text-slate-900 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] outline-none transition focus:border-[#1c4b62] focus:bg-white focus:ring-4 focus:ring-[#1c4b62]/10 sm:w-16"
+                      className="h-16 w-14 rounded-2xl border border-slate-200 bg-slate-50 text-center text-2xl font-black tracking-[0.1em] text-slate-900 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] outline-none transition focus:border-[#185A94] focus:bg-white focus:ring-4 focus:ring-[#185A94]/10 sm:w-16"
                     />
                   ))}
                 </div>
@@ -3325,7 +3325,7 @@ export function CreateStore() {
                   type="button"
                   onClick={handleVerifyStoreCode}
                   disabled={storeVerificationCode.length !== 4 || storeCodeLoading}
-                  className="rounded-2xl bg-[linear-gradient(135deg,#153a4c,#1c4b62,#4e96ae)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
+                  className="rounded-2xl bg-[linear-gradient(135deg,#153a4c,#185A94,#4FB2F8)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
                 >
                   {storeCodeLoading ? 'Validando código...' : 'Confirmar agora'}
                 </button>
@@ -3410,7 +3410,7 @@ export function CreateStore() {
       {showValidationModal && (
         <div className="fixed inset-0 z-[130] flex items-end justify-center bg-slate-950/55 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm sm:items-center sm:py-6">
           <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/40 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,245,249,0.96))] shadow-[0_36px_100px_-30px_rgba(15,23,42,0.6)]">
-            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#153a4c_0%,#1c4b62_58%,#4e96ae_100%)] px-6 pb-6 pt-6 text-white">
+            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#153a4c_0%,#185A94_58%,#4FB2F8_100%)] px-6 pb-6 pt-6 text-white">
               <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.2),transparent_68%)]" />
               <div className="relative flex items-start gap-4">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/12 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.75)]">
@@ -3484,7 +3484,7 @@ export function CreateStore() {
                     window.setTimeout(() => termsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
                   }
                 }}
-                className="w-full rounded-2xl bg-[linear-gradient(135deg,#153a4c,#1c4b62,#4e96ae)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_44px_-24px_rgba(15,59,83,0.65)] transition active:scale-[0.99]"
+                className="w-full rounded-2xl bg-[linear-gradient(135deg,#153a4c,#185A94,#4FB2F8)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_44px_-24px_rgba(15,59,83,0.65)] transition active:scale-[0.99]"
               >
                 Corrigir agora
               </button>

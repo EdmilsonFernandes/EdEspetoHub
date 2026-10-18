@@ -24,7 +24,7 @@ import { productService } from '../services/productService';
 /**
  * Landing CONSUMER — edição premium innovation + conteúdo real (22/08).
  *
- * Identidade JNC: light #E2EBF2, teal #336886, verde #5FD35A.
+ * Identidade JNC: light #E2EBF2, teal #2F9DF7, verde #5FD35A.
  * Innovation craft: Instrument Serif, scroll reveals, glass, staggered cards.
  * Conteúdo REAL que voltou: QR Play Store, tour em vídeo, logos de lojas
  * reais via API, cidades de destinos, "quem já está na plataforma".
@@ -237,9 +237,9 @@ export function LandingPage() {
             <span className="text-[15px] font-black tracking-[-0.02em] text-slate-950">Já no Caminho</span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-bold text-slate-600 sm:flex">
-            <a href="#descobrir" className="transition-colors hover:text-[#336886]">Descobrir</a>
-            <a href="#seu-bairro" className="transition-colors hover:text-[#336886]">Seu bairro</a>
-            <a href="#app" className="transition-colors hover:text-[#336886]">Baixar o app</a>
+            <a href="#descobrir" className="transition-colors hover:text-[#2F9DF7]">Descobrir</a>
+            <a href="#seu-bairro" className="transition-colors hover:text-[#2F9DF7]">Seu bairro</a>
+            <a href="#app" className="transition-colors hover:text-[#2F9DF7]">Baixar o app</a>
           </nav>
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
             <Link to="/hub" className="jnc-glass inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl px-4 text-sm font-black text-[#153A4C]">
@@ -252,25 +252,25 @@ export function LandingPage() {
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden px-4 pb-16 pt-12 sm:pt-20">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[#336886]/10 blur-[110px]" />
+        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[#2F9DF7]/10 blur-[110px]" />
         <div className="pointer-events-none absolute -left-20 top-40 h-64 w-64 rounded-full bg-[#5fd35a]/8 blur-[100px]" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
             <motion.div {...heroIn(0)}>
-              <span className="jnc-glass inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#336886]">
+              <span className="jnc-glass inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#2F9DF7]">
                 <Sparkle size={12} weight="fill" className="text-[#5fd35a]" />
                 O app do que está perto de você
               </span>
             </motion.div>
             <motion.h1 {...heroIn(0.1)} className="mt-5 text-4xl font-black leading-[1.05] tracking-[-0.035em] text-slate-950 sm:text-5xl lg:text-6xl">
-              O seu bairro tem mais <em className="jnc-serif-i text-[#336886]">sabor</em> do que você imagina.
+              O seu bairro tem mais <em className="jnc-serif-i text-[#2F9DF7]">sabor</em> do que você imagina.
             </motion.h1>
             <motion.p {...heroIn(0.2)} className="mt-5 max-w-md text-base font-semibold leading-relaxed text-slate-600 sm:text-lg">
               Restaurantes, mercados e vendedores do seu condomínio — entrega, retirada e feiras num só app.
             </motion.p>
             <motion.div {...heroIn(0.3)} className="mt-8 flex flex-col gap-3 sm:flex-row">
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                <Link to="/hub" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#336886] px-6 py-3.5 text-base font-black text-white shadow-[0_16px_32px_-16px_rgba(51,104,134,0.65)] transition-all hover:brightness-105">
+                <Link to="/hub" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F9DF7] px-6 py-3.5 text-base font-black text-white shadow-[0_16px_32px_-16px_rgba(51,104,134,0.65)] transition-all hover:brightness-105">
                   Ver o que tem perto
                   <CaretRight size={16} weight="bold" />
                 </Link>
@@ -279,7 +279,7 @@ export function LandingPage() {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setShowVideo(true)}
-                className="jnc-glass inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-base font-bold text-[#336886]"
+                className="jnc-glass inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-base font-bold text-[#2F9DF7]"
               >
                 <PlayCircle size={20} weight="fill" />
                 Ver o tour
@@ -304,26 +304,26 @@ export function LandingPage() {
                     <img src={featuredStores[0].logoUrl || featuredStores[0].bannerUrl} alt={featuredStores[0].name} className="h-full w-full object-cover" />
                   </span>
                 ) : (
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#edf5fa] text-[#336886]"><Storefront size={17} weight="duotone" /></span>
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#DBEEFD] text-[#2F9DF7]"><Storefront size={17} weight="duotone" /></span>
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-black text-slate-950">{featuredStores[0]?.name || 'Sua loja favorita'}</p>
                   <p className="text-xs font-semibold text-emerald-600">Aberto agora · entrega e retirada</p>
                 </div>
-                <span className="rounded-full bg-[#336886] px-3 py-1.5 text-xs font-black text-white">Pedir</span>
+                <span className="rounded-full bg-[#2F9DF7] px-3 py-1.5 text-xs font-black text-white">Pedir</span>
               </motion.div>
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.55, ease: EASE }} className="mt-3">
                 <div className="jnc-glass flex items-center gap-3 rounded-2xl p-3">
                   <img src="/janocaminho.jpg" alt="" className="h-14 w-14 rounded-xl object-cover" />
                   <div className="min-w-0 flex-1">
-                    <p className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-[0.08em] text-[#336886]"><Tent size={12} weight="fill" className="text-[#5fd35a]" /> Feira do condomínio</p>
+                    <p className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-[0.08em] text-[#2F9DF7]"><Tent size={12} weight="fill" className="text-[#5fd35a]" /> Feira do condomínio</p>
                     <p className="mt-0.5 text-sm font-black text-slate-950">Quinta, no salão de festas</p>
                   </div>
                   <span className="inline-flex items-center gap-1 rounded-full bg-[#5fd35a] px-2.5 py-1 text-xs font-black text-[#153a4c]"><span className="h-1.5 w-1.5 rounded-full bg-[#153a4c]" /> ao vivo</span>
                 </div>
               </motion.div>
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.7, ease: EASE }} className="mt-3 flex items-center gap-3 rounded-2xl border border-white/50 bg-white/80 p-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#edf5fa] text-[#336886]"><Scooter size={18} weight="duotone" /></span>
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#DBEEFD] text-[#2F9DF7]"><Scooter size={18} weight="duotone" /></span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-black text-slate-950">Seu pedido saiu pra entrega</p>
                   <p className="text-xs font-semibold text-slate-500">Chega em ~15 min · Pix confirmado</p>
@@ -339,7 +339,7 @@ export function LandingPage() {
       {featuredStores.length > 0 && (
         <motion.section {...revealSm()} className="px-4 py-8">
           <div className="mx-auto max-w-6xl">
-            <p className="mb-4 text-center text-xs font-black uppercase tracking-[0.18em] text-[#336886]">
+            <p className="mb-4 text-center text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">
               Quem já está na plataforma
             </p>
             <div
@@ -363,11 +363,11 @@ export function LandingPage() {
                   `}</style>
                   {[...featuredStores, ...featuredStores].map((store, i) => (
                     <Link key={`${store.id}-${i}`} to={`/${store.slug}`} className="group flex shrink-0 flex-col items-center gap-1.5">
-                      <span className="grid h-[4.5rem] w-[4.5rem] place-items-center overflow-hidden rounded-2xl border border-white/60 bg-white shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:ring-2 group-hover:ring-[#336886]/25">
+                      <span className="grid h-[4.5rem] w-[4.5rem] place-items-center overflow-hidden rounded-2xl border border-white/60 bg-white shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:ring-2 group-hover:ring-[#2F9DF7]/25">
                         {store.logoUrl || store.bannerUrl ? (
                           <img src={store.logoUrl || store.bannerUrl} alt={store.name} className="h-full w-full object-cover" loading="lazy" />
                         ) : (
-                          <Storefront size={24} weight="duotone" className="text-[#336886]/40" />
+                          <Storefront size={24} weight="duotone" className="text-[#2F9DF7]/40" />
                         )}
                       </span>
                       <span className="max-w-[76px] truncate text-[10px] font-bold text-slate-500 group-hover:text-[#33688886]">{store.name}</span>
@@ -385,7 +385,7 @@ export function LandingPage() {
         <section className="py-8">
           <div className="mx-auto max-w-6xl">
             <motion.div {...revealSm()} className="mb-4 px-4 text-center">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Direto das lojas</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Direto das lojas</p>
               <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
                 O que você encontra <em className="jnc-serif-i text-[#153A4C]/60">perto de você</em>
               </h2>
@@ -437,7 +437,7 @@ export function LandingPage() {
       <section id="descobrir" className="px-4 py-14">
         <div className="mx-auto max-w-6xl">
           <motion.div {...revealSm()}>
-            <p className="text-center text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Descubra perto de você</p>
+            <p className="text-center text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Descubra perto de você</p>
             <h2 className="mx-auto mt-2 max-w-lg text-center text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
               Um app, tudo que existe na sua <em className="jnc-serif-i text-[#153A4C]/60">região</em>
             </h2>
@@ -447,7 +447,7 @@ export function LandingPage() {
               const Icon = item.icon;
               return (
                 <motion.div key={item.title} initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.8, delay: index * 0.12, ease: EASE }} whileHover={{ scale: 1.02, y: -4 }} className="jnc-glass group rounded-3xl p-5">
-                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#edf5fa] text-[#336886] transition-transform duration-300 group-hover:scale-110"><Icon size={20} weight="duotone" /></span>
+                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#DBEEFD] text-[#2F9DF7] transition-transform duration-300 group-hover:scale-110"><Icon size={20} weight="duotone" /></span>
                   <h3 className="mt-3.5 text-[15px] font-black tracking-[-0.02em] text-slate-950">{item.title}</h3>
                   <p className="mt-1.5 text-sm font-semibold leading-relaxed text-slate-500">{item.text}</p>
                 </motion.div>
@@ -461,11 +461,11 @@ export function LandingPage() {
       <section id="seu-bairro" className="px-4 py-14">
         <motion.div initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.9, ease: EASE }} className="mx-auto grid max-w-6xl items-center gap-8 rounded-[2rem] border border-white/50 bg-[linear-gradient(135deg,#ffffff_0%,#f0f7fa_100%)] p-6 shadow-[0_24px_64px_-32px_rgba(15,23,42,0.18)] sm:p-10 lg:grid-cols-2">
           <div>
-            <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.18em] text-[#336886]"><Buildings size={13} weight="duotone" /> Seu bairro</p>
+            <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]"><Buildings size={13} weight="duotone" /> Seu bairro</p>
             <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">A feira chegou no seu <em className="jnc-serif-i text-[#153A4C]/60">condomínio</em>.</h2>
             <p className="mt-3 max-w-md text-base font-semibold leading-relaxed text-slate-600">Vizinhos que vendem, pequenos mercados internos e feiras no salão de festas — com entrega no bloco ou retirada na portaria. Só o Já no Caminho faz isso.</p>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="mt-7 inline-block">
-              <Link to="/hub" className="inline-flex items-center gap-2 rounded-2xl bg-[#336886] px-5 py-3 text-sm font-black text-white shadow-[0_12px_26px_-14px_rgba(51,104,134,0.6)] transition-all">
+              <Link to="/hub" className="inline-flex items-center gap-2 rounded-2xl bg-[#2F9DF7] px-5 py-3 text-sm font-black text-white shadow-[0_12px_26px_-14px_rgba(51,104,134,0.6)] transition-all">
                 Ver o meu condomínio
                 <CaretRight size={13} weight="bold" />
               </Link>
@@ -483,7 +483,7 @@ export function LandingPage() {
               {['Espetinho da Dona Marta', 'Geleia artesanal', 'Pão de queijo do 12º andar'].map((item, i) => (
                 <motion.div key={item} initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.3 + i * 0.12, ease: EASE }} className="jnc-glass flex items-center justify-between rounded-xl px-3.5 py-2.5">
                   <span className="text-sm font-bold text-slate-800">{item}</span>
-                  <span className="jnc-glass rounded-full px-2.5 py-1 text-xs font-black text-[#336886]">Pedir</span>
+                  <span className="jnc-glass rounded-full px-2.5 py-1 text-xs font-black text-[#2F9DF7]">Pedir</span>
                 </motion.div>
               ))}
             </div>
@@ -556,13 +556,13 @@ export function LandingPage() {
         <div className="mx-auto max-w-6xl">
           <motion.div {...revealSm()} className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.18em] text-[#336886]"><MapPin size={13} weight="duotone" /> Explorar</p>
+              <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]"><MapPin size={13} weight="duotone" /> Explorar</p>
               <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
                 Destinos <em className="jnc-serif-i text-[#153A4C]/60">perto de você</em>
               </h2>
             </div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link to="/destinos" className="jnc-glass inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-black text-[#336886]">
+              <Link to="/destinos" className="jnc-glass inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-black text-[#2F9DF7]">
                 Ver todos
                 <CaretRight size={11} weight="bold" />
               </Link>
@@ -586,8 +586,8 @@ export function LandingPage() {
                     {photo ? (
                       <img src={photo} alt={city.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                     ) : (
-                      <div className="absolute inset-0 grid place-items-center bg-[linear-gradient(135deg,#edf5fa,#d7e7ef)]">
-                        <MapPin size={20} weight="duotone" className="text-[#336886]/40" />
+                      <div className="absolute inset-0 grid place-items-center bg-[linear-gradient(135deg,#DBEEFD,#BCE2FC)]">
+                        <MapPin size={20} weight="duotone" className="text-[#2F9DF7]/40" />
                       </div>
                     )}
                     <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_30%,rgba(21,58,76,0.75)_100%)]" />
@@ -614,8 +614,8 @@ export function LandingPage() {
               const Icon = step.icon;
               return (
                 <motion.div key={step.title} initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.8, delay: index * 0.15, ease: EASE }} whileHover={{ scale: 1.02 }} className="jnc-glass relative rounded-3xl p-6">
-                  <span className="absolute right-5 top-5 font-serif text-2xl font-black text-[#d7e7ef]">{index + 1}</span>
-                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#edf5fa] text-[#336886]"><Icon size={20} weight="duotone" /></span>
+                  <span className="absolute right-5 top-5 font-serif text-2xl font-black text-[#BCE2FC]">{index + 1}</span>
+                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#DBEEFD] text-[#2F9DF7]"><Icon size={20} weight="duotone" /></span>
                   <h3 className="mt-3.5 text-[15px] font-black tracking-[-0.02em] text-slate-950">{step.title}</h3>
                   <p className="mt-1.5 text-sm font-semibold leading-relaxed text-slate-500">{step.text}</p>
                 </motion.div>
@@ -634,7 +634,7 @@ export function LandingPage() {
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(21,58,76,0.1)_0%,rgba(21,58,76,0.5)_100%)]" />
               <div className="absolute inset-0 grid place-items-center">
                 <motion.div whileHover={{ scale: 1.12 }} className="grid h-[4.5rem] w-[4.5rem] place-items-center rounded-full bg-white/90 shadow-[0_16px_32px_-12px_rgba(0,0,0,0.4)] ring-4 ring-white/30 transition-transform">
-                  <PlayCircle size={32} weight="fill" className="text-[#336886]" />
+                  <PlayCircle size={32} weight="fill" className="text-[#2F9DF7]" />
                 </motion.div>
               </div>
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3">
@@ -659,7 +659,7 @@ export function LandingPage() {
                 <img src={GOOGLE_PLAY_QR} alt="QR Code Google Play" className="h-28 w-28 sm:h-32 sm:w-32" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Google Play Store</p>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Google Play Store</p>
                 <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Baixe o app no seu Android</h3>
                 <p className="mt-1.5 text-sm font-semibold leading-relaxed text-slate-500">
                   Escaneie o QR Code ou toque no badge oficial.
@@ -700,7 +700,7 @@ export function LandingPage() {
 
       {/* ── Faça parte (ecossistema: 5 papéis) ── */}
       <section className="relative overflow-hidden bg-[#153A4C] px-4 py-16">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-[#336886]/30 blur-[100px]" />
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-[#2F9DF7]/30 blur-[100px]" />
         <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-[#5fd35a]/10 blur-[90px]" />
         <div className="relative mx-auto max-w-6xl">
           <motion.div {...revealSm()} className="mb-8 text-center">
@@ -746,7 +746,7 @@ export function LandingPage() {
         </div>
       </section>
       <section className="px-4 pb-16 pt-6">
-        <motion.div initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.9, ease: EASE }} className="relative mx-auto max-w-3xl overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#153a4c_0%,#336886_100%)] px-6 py-12 text-center shadow-[0_32px_72px_-32px_rgba(21,58,76,0.5)] sm:px-10">
+        <motion.div initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.9, ease: EASE }} className="relative mx-auto max-w-3xl overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#153a4c_0%,#2F9DF7_100%)] px-6 py-12 text-center shadow-[0_32px_72px_-32px_rgba(21,58,76,0.5)] sm:px-10">
           <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#5fd35a]/15 blur-[90px]" />
           <h2 className="relative text-2xl font-black tracking-[-0.03em] text-white sm:text-3xl">
             O que está perto de você está <em className="jnc-serif-i text-[#5fd35a]">esperando</em>.

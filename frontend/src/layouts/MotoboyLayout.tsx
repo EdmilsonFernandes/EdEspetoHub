@@ -369,7 +369,7 @@ export function MotoboyLayout() {
                 value={passwordForm.currentPassword}
                 onChange={(event) => setPasswordForm((prev) => ({ ...prev, currentPassword: event.target.value, error: '' }))}
                 placeholder="Senha temporária"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white"
               />
               <input
                 type="password"
@@ -377,7 +377,7 @@ export function MotoboyLayout() {
                 value={passwordForm.newPassword}
                 onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value, error: '' }))}
                 placeholder="Nova senha"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white"
               />
               <input
                 type="password"
@@ -385,7 +385,7 @@ export function MotoboyLayout() {
                 value={passwordForm.confirmPassword}
                 onChange={(event) => setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value, error: '' }))}
                 placeholder="Confirmar nova senha"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white"
               />
             </div>
 

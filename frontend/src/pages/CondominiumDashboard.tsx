@@ -517,7 +517,7 @@ export function CondominiumDashboard() {
       <div className="min-h-screen bg-[linear-gradient(180deg,#e8f2f6_0%,#f8fafc_16rem,#f8fafc_100%)] px-4 py-6">
         <div className="mx-auto max-w-6xl space-y-4">
           <div className="relative h-40 overflow-hidden rounded-[2rem] border border-white/80 bg-white/88 shadow-[0_28px_72px_-50px_rgba(15,23,42,0.42)] ring-1 ring-white/70">
-            <div className="absolute -right-12 -top-16 h-40 w-40 animate-pulse rounded-full bg-[#336886]/10 blur-3xl" />
+            <div className="absolute -right-12 -top-16 h-40 w-40 animate-pulse rounded-full bg-[#2F9DF7]/10 blur-3xl" />
             <div className="absolute left-5 top-6 h-16 w-16 animate-pulse rounded-[1.4rem] bg-slate-100" />
             <div className="absolute left-28 top-8 h-5 w-48 animate-pulse rounded-full bg-slate-100" />
             <div className="absolute left-28 top-16 h-4 w-72 max-w-[52vw] animate-pulse rounded-full bg-slate-100" />
@@ -550,7 +550,7 @@ export function CondominiumDashboard() {
               <div className="h-full w-full bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.18),transparent_34%),linear-gradient(135deg,#ffffff_0%,#eef6ff_100%)]" />
             )}
           </div>
-          <div className="pointer-events-none absolute -right-16 -top-16 h-52 w-52 rounded-full bg-[#336886]/12 blur-3xl" />
+          <div className="pointer-events-none absolute -right-16 -top-16 h-52 w-52 rounded-full bg-[#2F9DF7]/12 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 left-8 h-56 w-56 rounded-full bg-emerald-300/14 blur-3xl" />
           <div className="relative flex flex-col gap-5 p-5 sm:p-7 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center">
@@ -558,7 +558,7 @@ export function CondominiumDashboard() {
                 <img src={logoUrl} alt={condominium.name || 'Condomínio'} className="h-full w-full object-contain p-1.5" />
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#336886]">Painel do condomínio</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#2F9DF7]">Painel do condomínio</p>
                 <h1 className="mt-1 truncate text-3xl font-black tracking-[-0.03em] text-slate-950 sm:text-4xl">
                   {condominium.name || 'Condomínio'}
                 </h1>
@@ -593,7 +593,7 @@ export function CondominiumDashboard() {
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {metrics.map((metric) => (
             <div key={metric.label} className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/90 p-4 shadow-[0_22px_58px_-42px_rgba(15,23,42,0.45)] ring-1 ring-slate-100/70 backdrop-blur-xl">
-              <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[#336886]/8 blur-2xl" />
+              <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[#2F9DF7]/8 blur-2xl" />
               <span className={`relative inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${metric.tone}`}>visão rápida</span>
               <p className="relative mt-4 text-3xl font-black tracking-tight text-slate-950">{metric.value}</p>
               <p className="relative mt-1 text-sm font-semibold text-slate-500">{metric.label}</p>
@@ -636,7 +636,7 @@ export function CondominiumDashboard() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`rounded-[1.35rem] border px-4 py-3 text-left transition active:scale-[0.99] ${
-                  active ? 'border-[#153A4C]/20 bg-[linear-gradient(135deg,#153A4C_0%,#336886_100%)] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.72)]' : 'border-white/80 bg-white/88 text-slate-700 shadow-[0_14px_36px_-32px_rgba(15,23,42,0.38)] hover:bg-white'
+                  active ? 'border-[#153A4C]/20 bg-[linear-gradient(135deg,#153A4C_0%,#2F9DF7_100%)] text-white shadow-[0_18px_34px_-24px_rgba(21,58,76,0.72)]' : 'border-white/80 bg-white/88 text-slate-700 shadow-[0_14px_36px_-32px_rgba(15,23,42,0.38)] hover:bg-white'
                 }`}
               >
                 <p className={`text-[11px] font-black uppercase tracking-[0.16em] ${active ? 'text-white/70' : 'text-slate-400'}`}>{tab.label}</p>
@@ -650,7 +650,7 @@ export function CondominiumDashboard() {
           <div className="grid gap-4 xl:grid-cols-[0.9fr_1.4fr]">
             <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_22px_70px_-50px_rgba(15,23,42,0.45)]">
               <div className="flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#336886]/10 text-[#336886]">
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#2F9DF7]/10 text-[#2F9DF7]">
                   <Plus size={22} weight="bold" />
                 </span>
                 <div>
@@ -666,12 +666,12 @@ export function CondominiumDashboard() {
                     Depois de salvar a data e o horário, você escolhe entre as lojas já aprovadas quem participa dessa edição e quais modalidades de atendimento aquela loja pode usar dentro do condomínio.
                   </p>
                 </div>
-                <input value={eventForm.title} onChange={(event) => setEventForm((prev) => ({ ...prev, title: event.target.value }))} placeholder="Título da feira" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
+                <input value={eventForm.title} onChange={(event) => setEventForm((prev) => ({ ...prev, title: event.target.value }))} placeholder="Título da feira" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#2F9DF7] focus:bg-white" />
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <input type="datetime-local" value={eventForm.startsAt} onChange={(event) => handleStartsAt(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
-                  <input type="datetime-local" value={eventForm.endsAt} onChange={(event) => setEventForm((prev) => ({ ...prev, endsAt: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
+                  <input type="datetime-local" value={eventForm.startsAt} onChange={(event) => handleStartsAt(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#2F9DF7] focus:bg-white" />
+                  <input type="datetime-local" value={eventForm.endsAt} onChange={(event) => setEventForm((prev) => ({ ...prev, endsAt: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#2F9DF7] focus:bg-white" />
                 </div>
-                <input value={eventForm.pickupLocation} onChange={(event) => setEventForm((prev) => ({ ...prev, pickupLocation: event.target.value }))} placeholder="Local: praça, salão, entrada social..." className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
+                <input value={eventForm.pickupLocation} onChange={(event) => setEventForm((prev) => ({ ...prev, pickupLocation: event.target.value }))} placeholder="Local: praça, salão, entrada social..." className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#2F9DF7] focus:bg-white" />
                 <div className="overflow-hidden rounded-[1.6rem] border border-slate-200 bg-slate-50">
                   <div className="relative h-36 bg-[linear-gradient(135deg,#eef6ff_0%,#ffffff_56%,#f8fafc_100%)]">
                     {eventBannerPreview ? (
@@ -682,7 +682,7 @@ export function CondominiumDashboard() {
                       </div>
                     )}
                     <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/18 to-transparent" />
-                    <div className="absolute left-4 top-4 rounded-full bg-white/94 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#336886] shadow-sm ring-1 ring-white/70">
+                    <div className="absolute left-4 top-4 rounded-full bg-white/94 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#2F9DF7] shadow-sm ring-1 ring-white/70">
                       Banner da feira
                     </div>
                   </div>
@@ -704,12 +704,12 @@ export function CondominiumDashboard() {
                         </button>
                       ) : null}
                     </div>
-                    <input value={eventForm.bannerUrl} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerUrl: event.target.value }))} placeholder="URL opcional do banner" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
-                    <input value={eventForm.bannerTitle} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerTitle: event.target.value }))} placeholder="Título opcional do banner" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
-                    <textarea value={eventForm.bannerDescription} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerDescription: event.target.value }))} placeholder="Descrição opcional do banner" className="min-h-[88px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
+                    <input value={eventForm.bannerUrl} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerUrl: event.target.value }))} placeholder="URL opcional do banner" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#2F9DF7] focus:bg-white" />
+                    <input value={eventForm.bannerTitle} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerTitle: event.target.value }))} placeholder="Título opcional do banner" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#2F9DF7] focus:bg-white" />
+                    <textarea value={eventForm.bannerDescription} onChange={(event) => setEventForm((prev) => ({ ...prev, bannerDescription: event.target.value }))} placeholder="Descrição opcional do banner" className="min-h-[88px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#2F9DF7] focus:bg-white" />
                   </div>
                 </div>
-                <textarea value={eventForm.notes} onChange={(event) => setEventForm((prev) => ({ ...prev, notes: event.target.value }))} placeholder="Observações para operação" className="min-h-[92px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#336886] focus:bg-white" />
+                <textarea value={eventForm.notes} onChange={(event) => setEventForm((prev) => ({ ...prev, notes: event.target.value }))} placeholder="Observações para operação" className="min-h-[92px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none focus:border-[#2F9DF7] focus:bg-white" />
                 <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
                   <button onClick={saveEvent} disabled={saving || !eventForm.startsAt || !eventForm.endsAt} className="w-full rounded-2xl bg-[#153A4C] px-4 py-3.5 text-sm font-black text-white disabled:opacity-50">
                     {editingEventId ? 'Salvar feira' : 'Criar feira'}
@@ -760,7 +760,7 @@ export function CondominiumDashboard() {
                       </div>
                       <h3 className="mt-3 text-xl font-black text-slate-950">{event.title}</h3>
                       <p className="mt-1 text-sm font-semibold text-slate-500">{formatDateTimeLocal(event.startsAt)} até {formatDateTimeLocal(event.endsAt)}</p>
-                      {event.pickupLocation ? <p className="mt-2 text-sm font-bold text-[#336886]">{event.pickupLocation}</p> : null}
+                      {event.pickupLocation ? <p className="mt-2 text-sm font-bold text-[#2F9DF7]">{event.pickupLocation}</p> : null}
                     </div>
                     <div className="min-w-[260px] space-y-2">
                       <button
@@ -900,7 +900,7 @@ export function CondominiumDashboard() {
                           onChange={(event) => updateStoreRuleDraft(storeLink, { apartmentDeliveryFee: event.target.value })}
                           placeholder="Taxa apartamento ex: 5.00"
                           disabled={!draft.allowApartmentDelivery}
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white disabled:opacity-50"
+                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white disabled:opacity-50"
                         />
                         <button
                           type="button"
@@ -1002,7 +1002,7 @@ export function CondominiumDashboard() {
           <section className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
             <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_22px_70px_-50px_rgba(15,23,42,0.45)]">
               <div className="flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#336886]/10 text-[#336886]">
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#2F9DF7]/10 text-[#2F9DF7]">
                   <PencilSimple size={22} weight="bold" />
                 </span>
                 <div>
@@ -1025,7 +1025,7 @@ export function CondominiumDashboard() {
                     {profileLogoPreview ? (
                       <img src={profileLogoPreview} alt="Logo do condomínio" className="h-full w-full object-contain p-2" />
                     ) : (
-                      <Buildings size={30} weight="duotone" className="text-[#336886]" />
+                      <Buildings size={30} weight="duotone" className="text-[#2F9DF7]" />
                     )}
                   </div>
                 </div>
@@ -1064,14 +1064,14 @@ export function CondominiumDashboard() {
                         value={(profileForm as any)[key]}
                         onChange={(event) => setProfileForm((prev) => ({ ...prev, [key]: event.target.value }))}
                         placeholder={label}
-                        className="min-h-[110px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+                        className="min-h-[110px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white"
                       />
                     ) : (
                       <input
                         value={(profileForm as any)[key]}
                         onChange={(event) => setProfileForm((prev) => ({ ...prev, [key]: event.target.value }))}
                         placeholder={label}
-                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#336886] focus:bg-white"
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white"
                       />
                     )}
                   </label>

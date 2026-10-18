@@ -467,16 +467,17 @@ const Header = ({
                   <button
                     type="button"
                     onClick={onShowReviews}
-                    className="inline-flex items-center gap-1 font-bold text-amber-600 transition-opacity hover:opacity-70 active:scale-95"
+                    aria-label={`Ver avaliações — nota ${avgRating.toFixed(1).replace('.', ',')} com ${totalReviews} ${totalReviews === 1 ? 'avaliação' : 'avaliações'}`}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-2.5 py-1 text-xs font-bold text-white shadow-[0_8px_20px_-14px_rgba(15,23,42,0.5)] transition-transform hover:scale-[1.03] active:scale-95"
                   >
-                    <Star size={13} weight="fill" className="text-amber-400" />
+                    <Star size={12} weight="fill" className="text-amber-400" />
                     {avgRating.toFixed(1).replace('.', ',')}
                     {totalReviews > 0 && (
-                      <span className="font-medium text-slate-500">
-                        · {totalReviews} {totalReviews === 1 ? 'avaliação' : 'avaliações'}
+                      <span className="font-medium text-white/60">
+                        · {totalReviews}
                       </span>
                     )}
-                    <CaretRight size={11} weight="bold" className="text-amber-500" />
+                    <CaretRight size={10} weight="bold" className="text-white/50" />
                   </button>
                 )}
                 {deliveryFeeLabel && (
@@ -545,7 +546,7 @@ const Header = ({
               {canAccessOperations && onOpenQueue && (
                 <button
                   onClick={onOpenQueue}
-                  className="px-3 py-2 rounded-full text-xs font-black border border-[#336886] bg-[#336886] text-white hover:bg-[#2a5670] transition flex items-center gap-1.5 whitespace-nowrap shadow-sm active:scale-95"
+                  className="px-3 py-2 rounded-full text-xs font-black border border-[#1a6fc8] bg-[#1a6fc8] text-white hover:bg-[#155a9e] transition flex items-center gap-1.5 whitespace-nowrap shadow-sm active:scale-95"
                 >
                   <List size={14} weight="bold" />
                   <span>Fila de Pedidos</span>
@@ -707,7 +708,7 @@ export const MenuView = ({
   const canOrder = !isServiceStore && isOrderingEnabled !== false && !preOrderBlocked && isOpenNow !== false;
   const catalogTerm = isServiceStore ? "Serviços" : "Cardápio";
   const effectiveCompactHeader = compactHeader || autoCompactHeader;
-  const catalogPrimaryColor = branding?.primaryColor || "#336686";
+  const catalogPrimaryColor = branding?.primaryColor || "#2F9DF7";
   const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
   const catalogPrimaryText = getContrastTextColor(catalogPrimaryColor);
   const categoryRefs = React.useRef({});
@@ -1362,7 +1363,7 @@ export const MenuView = ({
                     onClick={() => setActiveTab(tab.id)}
                     className={`-mb-px border-b-2 py-3 text-sm font-semibold transition-colors ${
                       activeTab === tab.id
-                        ? "border-rose-500 text-rose-600"
+                        ? "border-primary-ink text-primary-ink"
                         : "border-transparent text-slate-500 hover:text-slate-700"
                     }`}
                   >
@@ -1667,7 +1668,7 @@ export const MenuView = ({
                           <div className="flex items-baseline gap-1.5 leading-none">
                             {resolvePromoPrice(item) ? (
                               <>
-                                <span className="text-[15px] font-bold tabular-nums tracking-tight text-[#336886]">
+                                <span className="text-[15px] font-bold tabular-nums tracking-tight text-promo-ink">
                                   {formatCurrency(resolvePromoPrice(item))}
                                 </span>
                                 <span className="text-[11px] font-medium text-slate-400 line-through">
@@ -1711,7 +1712,7 @@ export const MenuView = ({
                           </span>
                         )}
                         {stockState.soldOut && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold uppercase tracking-wider bg-slate-100 text-slate-500 border border-slate-200">
                             Esgotado
                           </span>
                         )}

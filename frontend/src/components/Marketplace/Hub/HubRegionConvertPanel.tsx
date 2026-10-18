@@ -105,9 +105,9 @@ export const HubRegionConvertPanel = memo(function HubRegionConvertPanel({
   ];
 
   return (
-    <section className="overflow-hidden rounded-[1.6rem] border border-[#336886]/12 bg-[linear-gradient(135deg,rgba(51,104,134,0.08)_0%,rgba(16,185,129,0.07)_100%)] shadow-[0_18px_40px_-34px_rgba(15,23,42,0.30)]">
+    <section className="overflow-hidden rounded-[1.6rem] border border-[#2F9DF7]/12 bg-[linear-gradient(135deg,rgba(51,104,134,0.08)_0%,rgba(16,185,129,0.07)_100%)] shadow-[0_18px_40px_-34px_rgba(15,23,42,0.30)]">
       {/* Hero da marca (gradiente teal + foguete) */}
-      <div className="flex items-center gap-3 bg-[linear-gradient(135deg,#336886,#0f766e)] px-4 py-3.5 text-white">
+      <div className="flex items-center gap-3 bg-[linear-gradient(135deg,#2F9DF7,#0f766e)] px-4 py-3.5 text-white">
         <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/15">
           <RocketLaunch size={17} weight="fill" />
         </span>

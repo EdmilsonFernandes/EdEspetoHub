@@ -370,7 +370,7 @@ export function AdminLayout({
                 className="h-10 w-10 rounded-[0.95rem] bg-white object-contain p-1"
               />
             ) : (
-              <UserCircle size={26} weight="duotone" className="text-[#336886]" />
+              <UserCircle size={26} weight="duotone" className="text-[#2F9DF7]" />
             )
           }
           badges={[

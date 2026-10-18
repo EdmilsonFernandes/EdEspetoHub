@@ -229,7 +229,7 @@ function GuideBrandScene({ line, activeTitle }: { line: string; activeTitle: str
       <div className="relative z-10 flex h-full min-h-[380px] flex-col justify-between">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.26em] text-[#336886]/70">Guia visual</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.26em] text-[#2F9DF7]/70">Guia visual</p>
             <h2 className="mt-2 text-2xl font-black tracking-tight text-[#153A4C]">Já no Caminho</h2>
           </div>
           <span className="rounded-full bg-[#153A4C] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-lg shadow-[#153A4C]/20">
@@ -239,7 +239,7 @@ function GuideBrandScene({ line, activeTitle }: { line: string; activeTitle: str
 
         <div className="relative mx-auto mt-6 h-[250px] w-full max-w-[330px]">
           <div className="absolute left-1/2 top-4 h-[210px] w-[210px] -translate-x-1/2 rounded-full border border-[#153A4C]/10" />
-          <div className="absolute left-1/2 top-0 h-[240px] w-[240px] -translate-x-1/2 rounded-full border border-dashed border-[#336886]/12" />
+          <div className="absolute left-1/2 top-0 h-[240px] w-[240px] -translate-x-1/2 rounded-full border border-dashed border-[#2F9DF7]/12" />
           <svg className="absolute left-1/2 top-[35px] h-[170px] w-[305px] -translate-x-1/2 overflow-visible" viewBox="0 0 305 170" fill="none">
             <path
               d="M18 124 C72 48 124 150 168 72 C202 15 236 58 286 26"
@@ -269,7 +269,7 @@ function GuideBrandScene({ line, activeTitle }: { line: string; activeTitle: str
             return (
               <motion.div
                 key={item.label}
-                className={`absolute ${item.className} flex min-h-10 items-center gap-1.5 rounded-2xl border border-white/70 bg-white/76 px-3 text-[#336886] shadow-[0_16px_35px_-28px_rgba(21,58,76,0.72)] backdrop-blur-xl`}
+                className={`absolute ${item.className} flex min-h-10 items-center gap-1.5 rounded-2xl border border-white/70 bg-white/76 px-3 text-[#2F9DF7] shadow-[0_16px_35px_-28px_rgba(21,58,76,0.72)] backdrop-blur-xl`}
                 animate={{ y: [0, -7, 0] }}
                 transition={{ duration: 2.2, repeat: Infinity, delay: index * 0.16, ease: 'easeInOut' }}
               >
@@ -284,7 +284,7 @@ function GuideBrandScene({ line, activeTitle }: { line: string; activeTitle: str
             animate={{ y: [0, -9, 0], scale: [1, 1.025, 1] }}
             transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
           >
-            <div className="absolute inset-2 rounded-[1.28rem] bg-[#336886]/30 blur-xl" />
+            <div className="absolute inset-2 rounded-[1.28rem] bg-[#2F9DF7]/30 blur-xl" />
             <span className="absolute -top-3 left-1/2 h-5 w-[2px] -translate-x-1/2 rounded-full bg-[#5FD35A]/80" />
             <span className="absolute -top-4 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_18px_rgba(95,211,90,0.9)]" />
             <img src="/janocaminho.jpg" alt="Já no Caminho" className="relative h-[66px] w-[66px] rounded-[1.18rem] object-contain p-1" />
@@ -293,7 +293,7 @@ function GuideBrandScene({ line, activeTitle }: { line: string; activeTitle: str
           <div className="absolute bottom-[34px] left-1/2 h-[52px] w-[286px] -translate-x-1/2 overflow-visible rounded-full border border-[#153A4C]/10 bg-white/54 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.7)] backdrop-blur-xl">
             <div className="absolute inset-0 overflow-hidden rounded-full">
               <motion.div
-                className="absolute left-0 top-1/2 h-[3px] w-[620px] -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#336886_0_24px,transparent_24px_46px)] opacity-55"
+                className="absolute left-0 top-1/2 h-[3px] w-[620px] -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#2F9DF7_0_24px,transparent_24px_46px)] opacity-55"
                 animate={{ x: [0, -92] }}
                 transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
               />
@@ -306,11 +306,11 @@ function GuideBrandScene({ line, activeTitle }: { line: string; activeTitle: str
               <img src="/janocaminho.jpg" alt="" className="h-full w-full rounded-[0.52rem] object-contain" />
             </motion.div>
             <div className="absolute left-[78px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_18px_rgba(95,211,90,0.82)]" />
-            <div className="absolute right-[68px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#336886] shadow-[0_0_18px_rgba(51,104,134,0.62)]" />
+            <div className="absolute right-[68px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#2F9DF7] shadow-[0_0_18px_rgba(51,104,134,0.62)]" />
           </div>
 
           <div className="absolute bottom-0 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/70 bg-white/72 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600 shadow-[0_16px_35px_-30px_rgba(21,58,76,0.75)] backdrop-blur-xl">
-            <ForkKnife size={12} weight="duotone" className="text-[#336886]" />
+            <ForkKnife size={12} weight="duotone" className="text-[#2F9DF7]" />
             pedidos
             <span className="h-1 w-1 rounded-full bg-slate-400" />
             <Sparkle size={12} weight="duotone" className="text-[#5FD35A]" />
@@ -324,7 +324,7 @@ function GuideBrandScene({ line, activeTitle }: { line: string; activeTitle: str
               <img src="/janocaminho.jpg" alt="" className="h-full w-full rounded-lg object-contain" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]/70">Agora no guia</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#2F9DF7]/70">Agora no guia</p>
               <p className="text-sm font-black text-[#153A4C]">{activeTitle}</p>
             </div>
           </div>
@@ -364,7 +364,7 @@ export function SystemGuidePage() {
           <div className="relative mx-auto grid max-w-7xl gap-8 px-4 pb-16 sm:px-6 lg:grid-cols-[1.04fr_0.96fr] lg:px-8 lg:pb-20">
             <div className="flex flex-col justify-center">
               <motion.div
-                className="inline-flex w-fit items-center gap-2 rounded-full border border-white/80 bg-white/78 px-3 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#336886] shadow-[0_16px_35px_-30px_rgba(21,58,76,0.75)] backdrop-blur-xl"
+                className="inline-flex w-fit items-center gap-2 rounded-full border border-white/80 bg-white/78 px-3 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#2F9DF7] shadow-[0_16px_35px_-30px_rgba(21,58,76,0.75)] backdrop-blur-xl"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35 }}
@@ -408,14 +408,14 @@ export function SystemGuidePage() {
                 </a>
                 <a
                   href="/hub"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#153A4C]/10 bg-white/82 px-5 py-3.5 text-sm font-black text-[#153A4C] shadow-[0_18px_40px_-32px_rgba(21,58,76,0.7)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-[#336886]/28 motion-reduce:transform-none"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#153A4C]/10 bg-white/82 px-5 py-3.5 text-sm font-black text-[#153A4C] shadow-[0_18px_40px_-32px_rgba(21,58,76,0.7)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-[#2F9DF7]/28 motion-reduce:transform-none"
                 >
                   <HouseLine size={17} weight="duotone" />
                   Abrir o app
                 </a>
                 <a
                   href="/destinos"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#153A4C]/10 bg-white/58 px-5 py-3.5 text-sm font-black text-[#336886] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white/82 motion-reduce:transform-none"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#153A4C]/10 bg-white/58 px-5 py-3.5 text-sm font-black text-[#2F9DF7] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white/82 motion-reduce:transform-none"
                 >
                   <MapTrifold size={17} weight="duotone" />
                   Ver destinos
@@ -460,7 +460,7 @@ export function SystemGuidePage() {
         <section className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#336886]/70">Escolha seu perfil</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#2F9DF7]/70">Escolha seu perfil</p>
               <h2 className="mt-2 text-3xl font-black tracking-tight text-[#153A4C]">O guia muda conforme a necessidade</h2>
             </div>
             <p className="max-w-md text-sm font-medium leading-relaxed text-slate-500">
@@ -481,19 +481,19 @@ export function SystemGuidePage() {
                     className={`group flex w-full items-center gap-3 rounded-[1.35rem] border p-3 text-left transition ${
                       isActive
                         ? 'border-[#153A4C]/14 bg-white shadow-[0_22px_55px_-38px_rgba(21,58,76,0.75)]'
-                        : 'border-white/70 bg-white/48 hover:border-[#336886]/18 hover:bg-white/78'
+                        : 'border-white/70 bg-white/48 hover:border-[#2F9DF7]/18 hover:bg-white/78'
                     }`}
                     aria-pressed={isActive}
                   >
                     <span
                       className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl transition ${
-                        isActive ? 'bg-[#153A4C] text-white' : 'bg-[#153A4C]/6 text-[#336886]'
+                        isActive ? 'bg-[#153A4C] text-white' : 'bg-[#153A4C]/6 text-[#2F9DF7]'
                       }`}
                     >
                       <Icon size={22} weight={isActive ? 'fill' : 'duotone'} />
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]/65">
+                      <span className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#2F9DF7]/65">
                         {journey.eyebrow}
                       </span>
                       <span className="mt-0.5 block text-sm font-black text-[#153A4C]">{journey.title}</span>
@@ -523,7 +523,7 @@ export function SystemGuidePage() {
                       <ActiveJourneyIcon size={26} weight="duotone" />
                     </span>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#336886]/70">{activeJourney.eyebrow}</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#2F9DF7]/70">{activeJourney.eyebrow}</p>
                       <h3 className="mt-1 text-2xl font-black tracking-tight text-[#153A4C]">{activeJourney.title}</h3>
                       <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-slate-600">{activeJourney.description}</p>
                     </div>
@@ -565,7 +565,7 @@ export function SystemGuidePage() {
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#336886]/70">Recursos atuais</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#2F9DF7]/70">Recursos atuais</p>
               <h2 className="mt-2 text-3xl font-black tracking-tight text-[#153A4C]">O que já está no produto</h2>
             </div>
             <p className="max-w-md text-sm font-medium leading-relaxed text-slate-500">
@@ -600,7 +600,7 @@ export function SystemGuidePage() {
           <div className="rounded-[2.2rem] border border-white/80 bg-white/64 p-5 shadow-[0_28px_95px_-60px_rgba(21,58,76,0.75)] backdrop-blur-xl sm:p-7">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#336886]/70">Mapa da plataforma</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#2F9DF7]/70">Mapa da plataforma</p>
                 <h2 className="mt-2 text-3xl font-black tracking-tight text-[#153A4C]">Tudo conectado no mesmo app</h2>
               </div>
               <p className="max-w-sm text-sm font-medium leading-relaxed text-slate-500">
@@ -614,7 +614,7 @@ export function SystemGuidePage() {
                 return (
                   <article key={module.title} className="rounded-[1.45rem] border border-[#153A4C]/7 bg-[#F7FAF7] p-4">
                     <div className="flex items-center gap-3">
-                      <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-[#336886] shadow-[0_12px_35px_-28px_rgba(21,58,76,0.75)]">
+                      <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-[#2F9DF7] shadow-[0_12px_35px_-28px_rgba(21,58,76,0.75)]">
                         <Icon size={20} weight="duotone" />
                       </span>
                       <h3 className="text-sm font-black text-[#153A4C]">{module.title}</h3>
@@ -635,7 +635,7 @@ export function SystemGuidePage() {
 
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="mb-6">
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#336886]/70">Jornada ponta a ponta</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#2F9DF7]/70">Jornada ponta a ponta</p>
             <h2 className="mt-2 text-3xl font-black tracking-tight text-[#153A4C]">Do primeiro clique até vender melhor</h2>
           </div>
 

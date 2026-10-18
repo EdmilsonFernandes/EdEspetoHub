@@ -356,18 +356,18 @@ export function ProfileDrawer({
           : null;
 
   const clientActions: DrawerAction[] = [
-    { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
-    { id: 'orders', label: 'Meus pedidos', icon: <Receipt size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
+    { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#2F9DF7]', bgColor: 'bg-[#2F9DF7]/10' },
+    { id: 'orders', label: 'Meus pedidos', icon: <Receipt size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-[#2F9DF7]', bgColor: 'bg-[#2F9DF7]/10' },
     { id: 'notifications', label: 'Notificações', icon: <BellRinging size={22} weight="duotone" />, onClick: () => { drawerNavigate('/notificacoes'); }, iconColor: 'text-amber-600', bgColor: 'bg-amber-50', badge: notifBadge },
     { id: 'settings', label: 'Configurações', icon: <GearSix size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
-    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#2F9DF7]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#2F9DF7]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
     { id: 'logout', label: 'Sair', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
   ];
   const storeActions: DrawerAction[] = [
-    { id: 'store-panel', label: 'Operação da loja', icon: <CookingPot size={22} weight="duotone" />, onClick: onOpenAdminLogin, iconColor: 'text-[#336886]', bgColor: 'bg-[#336886]/10' },
-    { id: 'help-store', label: 'Ajuda operacional', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'store-panel', label: 'Operação da loja', icon: <CookingPot size={22} weight="duotone" />, onClick: onOpenAdminLogin, iconColor: 'text-[#2F9DF7]', bgColor: 'bg-[#2F9DF7]/10' },
+    { id: 'help-store', label: 'Ajuda operacional', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#2F9DF7]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#2F9DF7]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
     { id: 'logout-store', label: 'Sair', icon: <SignOut size={22} weight="duotone" />, onClick: onLogoutAdmin || (() => undefined), tone: 'danger' },
   ];
   if (storeSlug) {
@@ -384,13 +384,13 @@ export function ProfileDrawer({
   }
   const motoboyActions: DrawerAction[] = [
     { id: 'motoboy-panel', label: 'Painel de entregas', icon: <Motorcycle size={22} weight="duotone" />, onClick: onOpenMotoboyLogin, iconColor: 'text-slate-700', bgColor: 'bg-slate-100' },
-    { id: 'help-motoboy', label: 'Ajuda do entregador', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'help-motoboy', label: 'Ajuda do entregador', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#2F9DF7]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#2F9DF7]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
     { id: 'logout-motoboy', label: 'Sair', icon: <SignOut size={22} weight="duotone" />, onClick: onLogoutMotoboy || (() => undefined), tone: 'danger' },
   ];
   const guestActions: DrawerAction[] = [
-    { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#336886]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#2F9DF7]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#2F9DF7]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
   ];
   const actions: DrawerAction[] =
     activeContext === 'client'
@@ -423,11 +423,11 @@ export function ProfileDrawer({
     if (item.id === 'store') {
       return {
         shell: 'border-[#d8e5ee] bg-[linear-gradient(135deg,#ffffff_0%,#f0f6fa_100%)] text-slate-950 shadow-[0_16px_30px_-24px_rgba(51,104,134,0.28)]',
-        icon: 'border-[#d8e5ee] bg-[#edf5fa] text-[#336886]',
+        icon: 'border-[#d8e5ee] bg-[#DBEEFD] text-[#2F9DF7]',
         title: 'text-slate-950',
         subtitle: 'text-slate-600',
-        badge: 'bg-[#edf5fa] text-[#336886]',
-        caret: 'border-[#d8e5ee] bg-white/54 text-[#336886]/60',
+        badge: 'bg-[#DBEEFD] text-[#2F9DF7]',
+        caret: 'border-[#d8e5ee] bg-white/54 text-[#2F9DF7]/60',
       };
     }
     return {
@@ -486,7 +486,7 @@ export function ProfileDrawer({
         } flex flex-col pt-[env(safe-area-inset-top)]`}
       >
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-[#336886]/12 blur-3xl" />
+          <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-[#2F9DF7]/12 blur-3xl" />
           <div className="absolute right-0 top-24 h-36 w-36 rounded-full bg-sky-100/60 blur-3xl" />
         </div>
         <div className="border-b border-slate-100/80 bg-white/50 p-6 pb-4">
@@ -501,7 +501,7 @@ export function ProfileDrawer({
                       loading="eager"
                       fetchPriority="high"
                       decoding="async"
-                      className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#336886]/15"
+                      className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#2F9DF7]/15"
                     />
                     <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -520,7 +520,7 @@ export function ProfileDrawer({
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-[#336886]/80">{currentIdentity.eyebrow}</p>
+                  <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-[#2F9DF7]/80">{currentIdentity.eyebrow}</p>
                   <p className="mt-1 truncate text-base font-black leading-tight text-slate-950">{currentIdentity.title}</p>
                   <p className="mt-0.5 truncate text-xs font-bold text-slate-500">{currentIdentity.email || 'Acesso salvo neste aparelho'}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -531,7 +531,7 @@ export function ProfileDrawer({
                           badge.tone === 'success'
                             ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
                             : badge.tone === 'brand'
-                              ? 'border border-[#d8e5ee] bg-[#edf5fa] text-[#336886]'
+                              ? 'border border-[#d8e5ee] bg-[#DBEEFD] text-[#2F9DF7]'
                             : (badge.tone as string) === 'dark'
                                 ? 'border border-slate-200 bg-slate-900 text-white'
                                 : 'border border-slate-200 bg-white/90 text-slate-500'
@@ -547,7 +547,7 @@ export function ProfileDrawer({
               {hasStaffSession && (<button
                 type="button"
                 onClick={() => { setAccessPickerMode('login'); setHighlightFirstAccess(false); setAccessPickerOpen(true); }}
-                className="group flex w-full items-center gap-3 rounded-[1.3rem] border border-[#d7e7ef]/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] px-3.5 py-3 text-left shadow-[0_14px_30px_-26px_rgba(21,58,76,0.28)] transition-all active:scale-[0.98]"
+                className="group flex w-full items-center gap-3 rounded-[1.3rem] border border-[#BCE2FC]/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] px-3.5 py-3 text-left shadow-[0_14px_30px_-26px_rgba(21,58,76,0.28)] transition-all active:scale-[0.98]"
               >
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(21,58,76,0.36)]">
                   <Briefcase size={19} weight="duotone" />
@@ -562,14 +562,14 @@ export function ProfileDrawer({
                       : 'Cliente ou outro perfil salvo aqui'}
                   </span>
                 </span>
-                <CaretRight size={15} weight="bold" className="shrink-0 text-[#336886]/60 transition-transform group-active:translate-x-0.5" />
+                <CaretRight size={15} weight="bold" className="shrink-0 text-[#2F9DF7]/60 transition-transform group-active:translate-x-0.5" />
               </button>)}
             </div>
           ) : (
             <div className="space-y-2.5">
               {/* Saudação */}
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]/70">Já no Caminho</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2F9DF7]/70">Já no Caminho</p>
                 <h2 className="mt-0.5 text-[1.05rem] font-black tracking-tight text-slate-900 leading-snug">Acesse sua conta</h2>
                 <p className="mt-0.5 text-[11px] font-medium text-slate-500">Pedidos, endereços e favoritos.</p>
               </div>
@@ -600,9 +600,9 @@ export function ProfileDrawer({
                     onRegisterClient();
                     onClose();
                   }}
-                  className="relative flex flex-col items-start overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white p-3 text-slate-800 shadow-[0_4px_14px_-8px_rgba(15,23,42,0.1)] transition-all active:scale-[0.97] hover:border-[#336886]/20 hover:shadow-[0_6px_18px_-8px_rgba(51,104,134,0.15)]"
+                  className="relative flex flex-col items-start overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white p-3 text-slate-800 shadow-[0_4px_14px_-8px_rgba(15,23,42,0.1)] transition-all active:scale-[0.97] hover:border-[#2F9DF7]/20 hover:shadow-[0_6px_18px_-8px_rgba(51,104,134,0.15)]"
                 >
-                  <div className="mb-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#336886]/10 text-[#336886]">
+                  <div className="mb-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#2F9DF7]/10 text-[#2F9DF7]">
                     <RocketLaunch size={15} weight="duotone" />
                   </div>
                   <p className="text-[13px] font-black leading-none text-slate-900">Criar conta</p>
@@ -703,7 +703,7 @@ export function ProfileDrawer({
             onClick={(event) => event.stopPropagation()}
           >
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="absolute -left-12 top-2 h-32 w-32 rounded-full bg-[#336886]/10 blur-3xl" />
+              <div className="absolute -left-12 top-2 h-32 w-32 rounded-full bg-[#2F9DF7]/10 blur-3xl" />
               <div className="absolute -right-10 bottom-4 h-32 w-32 rounded-full bg-emerald-200/32 blur-3xl" />
             </div>
             <div className="relative flex items-start justify-between gap-3">
@@ -712,7 +712,7 @@ export function ProfileDrawer({
                   <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-[1rem] object-cover" />
                 </span>
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.24em] text-[#336886]">Já no Caminho</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.24em] text-[#2F9DF7]">Já no Caminho</p>
                   <h3 className="mt-1 text-lg font-black tracking-[-0.035em] text-slate-950">Sobre o app</h3>
                 </div>
               </div>
@@ -734,8 +734,8 @@ export function ProfileDrawer({
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-[1.2rem] border border-[#d8e5ee] bg-[#edf5fa] p-3">
-                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#336886]/70">Produto</p>
+                <div className="rounded-[1.2rem] border border-[#d8e5ee] bg-[#DBEEFD] p-3">
+                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]/70">Produto</p>
                   <p className="mt-1 truncate text-xs font-black text-[#153A4C]">App oficial</p>
                 </div>
                 <div className="rounded-[1.2rem] border border-emerald-100 bg-emerald-50 p-3">
@@ -779,7 +779,7 @@ export function ProfileDrawer({
             {/* Auditoria 24/08: alça de sheet no mobile (idioma sheet↔modal escolhido pelo dono) */}
             <div className="mx-auto mb-2 h-1.5 w-11 rounded-full bg-slate-300/80 sm:hidden" aria-hidden="true" />
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="absolute -left-12 top-4 h-28 w-28 rounded-full bg-[#336886]/8 blur-3xl" />
+              <div className="absolute -left-12 top-4 h-28 w-28 rounded-full bg-[#2F9DF7]/8 blur-3xl" />
               <div className="absolute -right-10 bottom-4 h-28 w-28 rounded-full bg-emerald-200/28 blur-3xl" />
             </div>
             <div className="relative mb-3.5 flex items-start justify-between gap-3">
@@ -881,11 +881,11 @@ export function ProfileDrawer({
             {!hasActiveContext && accessPickerMode === 'register' ? (
               <div className={`relative rounded-[1.65rem] border p-4 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.28)] transition-all duration-200 ${
                 highlightFirstAccess
-                  ? 'border-[#336886]/25 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(236,253,245,0.86))] ring-2 ring-[#336886]/12'
+                  ? 'border-[#2F9DF7]/25 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(236,253,245,0.86))] ring-2 ring-[#2F9DF7]/12'
                   : 'border-slate-200/80 bg-white/88'
               }`}>
                 <div className="mb-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#336886]">Primeiro acesso</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#2F9DF7]">Primeiro acesso</p>
                   <p className="mt-1 text-sm font-black leading-tight text-slate-950">Escolha como quer começar</p>
                   <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">Cada perfil tem um cadastro próprio para manter seu app organizado.</p>
                 </div>
@@ -899,7 +899,7 @@ export function ProfileDrawer({
                     }}
                     className="group flex min-h-[5rem] items-center gap-3.5 rounded-2xl border border-sky-100 bg-[linear-gradient(135deg,#f8fbff,#eef7ff)] px-3.5 py-3 text-left text-slate-700 shadow-[0_14px_28px_-24px_rgba(51,104,134,0.32)] transition-all active:scale-[0.98]"
                   >
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.05rem] border border-white/80 bg-white/86 text-[#336886] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.35)]">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[1.05rem] border border-white/80 bg-white/86 text-[#2F9DF7] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.35)]">
                       <UserCircle size={25} weight="duotone" />
                     </div>
                     <div className="min-w-0 flex-1">

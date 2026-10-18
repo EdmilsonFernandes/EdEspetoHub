@@ -931,7 +931,7 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
                     <button
                       type="button"
                       onClick={() => setReplyDraft({ reviewId: row.id, text: String(row.storeReply || '') })}
-                      className="ds-focus-ring mt-2 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-bold text-[#336886] hover:bg-slate-50"
+                      className="ds-focus-ring mt-2 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-bold text-[#2F9DF7] hover:bg-slate-50"
                     >
                       {row.storeReply ? 'Editar resposta' : 'Responder avaliação'}
                     </button>
@@ -1116,7 +1116,7 @@ const GatewayView = ({ storeId }) => {
   return (
     <div className="space-y-4">
       <div className={`overflow-hidden rounded-[1.35rem] border shadow-[0_24px_70px_-46px_rgba(15,23,42,0.34)] ${
-        isConnected ? 'border-[#4e96ae]/25 bg-[linear-gradient(145deg,#ffffff_0%,#f4fbff_48%,#ffffff_100%)]' : 'border-slate-200 bg-white'
+        isConnected ? 'border-[#4FB2F8]/25 bg-[linear-gradient(145deg,#ffffff_0%,#f4fbff_48%,#ffffff_100%)]' : 'border-slate-200 bg-white'
       }`}>
         <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(300px,0.92fr)] lg:gap-6">
           <div className="min-w-0 space-y-5">
@@ -1171,7 +1171,7 @@ const GatewayView = ({ storeId }) => {
                 ) : gatewayState === 'error' ? (
                   <WarningCircle size={24} weight="duotone" className="mt-0.5 shrink-0 text-rose-600" />
                 ) : (
-                  <PlugsConnected size={24} weight="duotone" className="mt-0.5 shrink-0 text-[#4e96ae]" />
+                  <PlugsConnected size={24} weight="duotone" className="mt-0.5 shrink-0 text-[#4FB2F8]" />
                 )}
                 <div className="min-w-0">
                   <p className={`text-sm font-black ${stateTone.text}`}>
@@ -1279,7 +1279,7 @@ const GatewayView = ({ storeId }) => {
                         setMpActionLoading(false);
                       }
                     }}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4e96ae] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(0,158,227,0.75)] transition hover:bg-[#008dcc] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4FB2F8] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_-24px_rgba(0,158,227,0.75)] transition hover:bg-[#008dcc] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <PlugsConnected size={18} weight="duotone" />
                     {mpActionLoading ? 'Abrindo Mercado Pago...' : 'Conectar Mercado Pago'}
@@ -3445,7 +3445,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           </button>
 
           {/* Hero de status — a primeira pergunta do lojista: "como está a loja agora?" */}
-          <div className="relative overflow-hidden rounded-[1.5rem] bg-[linear-gradient(150deg,#153A4C_0%,#336886_100%)] p-5 text-white shadow-[0_26px_54px_-30px_rgba(21,58,76,0.65)]">
+          <div className="relative overflow-hidden rounded-[1.5rem] bg-[linear-gradient(150deg,#153A4C_0%,#2F9DF7_100%)] p-5 text-white shadow-[0_26px_54px_-30px_rgba(21,58,76,0.65)]">
             <div className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[#5FD35A]/10 blur-3xl" />
             <div className="relative flex items-center gap-3">
               <span className="relative flex h-3 w-3 shrink-0">
@@ -3493,10 +3493,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.3)]">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Configure sua loja</p>
-                  <span className="text-[11px] font-black text-[#336886]">{doneCount} de {setupSteps.length}</span>
+                  <span className="text-[11px] font-black text-[#2F9DF7]">{doneCount} de {setupSteps.length}</span>
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[#336886] to-[#5FD35A] transition-all" style={{ width: `${(doneCount / setupSteps.length) * 100}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#2F9DF7] to-[#5FD35A] transition-all" style={{ width: `${(doneCount / setupSteps.length) * 100}%` }} />
                 </div>
                 <div className="mt-1 divide-y divide-slate-100">
                   {setupSteps.map((step) => (
@@ -3509,7 +3509,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                       {step.done ? (
                         <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600">Feito</span>
                       ) : step.cta ? (
-                        <button type="button" onClick={step.cta} className="rounded-full border border-[#336886]/20 bg-[#336886]/5 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-[#336886] transition-colors hover:bg-[#336886]/10">
+                        <button type="button" onClick={step.cta} className="rounded-full border border-[#2F9DF7]/20 bg-[#2F9DF7]/5 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-[#2F9DF7] transition-colors hover:bg-[#2F9DF7]/10">
                           Fazer
                         </button>
                       ) : null}

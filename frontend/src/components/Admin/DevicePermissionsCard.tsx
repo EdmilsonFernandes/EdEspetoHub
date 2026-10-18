@@ -239,10 +239,10 @@ export function DevicePermissionsCard({ role, session, onOpenMfa }: DevicePermis
         role="region"
         aria-label="Permissões do dispositivo"
         data-testid="device-permissions-card"
-        className="rounded-2xl border border-slate-200 border-l-4 border-l-[#336886] bg-white p-5 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.45)]"
+        className="rounded-2xl border border-slate-200 border-l-4 border-l-[#2F9DF7] bg-white p-5 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.45)]"
       >
         <div className="flex items-start gap-3">
-          <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#336886]/10 text-[#336886] ring-1 ring-[#336886]/15">
+          <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#2F9DF7]/10 text-[#2F9DF7] ring-1 ring-[#2F9DF7]/15">
             <ShieldCheck size={22} weight="duotone" />
           </span>
           <div>
@@ -264,7 +264,7 @@ export function DevicePermissionsCard({ role, session, onOpenMfa }: DevicePermis
             label: 'Biometria',
             description: 'Entrar com digital ou reconhecimento facial.',
             status: biometricEnabled ? 'granted' : ('denied' as PermissionStatus),
-            icon: <Fingerprint size={18} weight="duotone" className="text-[#336886]" />,
+            icon: <Fingerprint size={18} weight="duotone" className="text-[#2F9DF7]" />,
             checked: biometricEnabled,
             action: handleToggleBiometric,
             busy: biometricBusy,
@@ -276,7 +276,7 @@ export function DevicePermissionsCard({ role, session, onOpenMfa }: DevicePermis
       label: 'Notificações push',
       description: 'Avisos de pedidos, status e novidades.',
       status: (pushEnabled ? 'granted' : 'denied') as PermissionStatus,
-      icon: <BellSimpleRinging size={18} weight="duotone" className="text-[#336886]" />,
+      icon: <BellSimpleRinging size={18} weight="duotone" className="text-[#2F9DF7]" />,
       checked: pushEnabled,
       action: () => handlePermissionAction('push', pushEnabled),
     },
@@ -285,7 +285,7 @@ export function DevicePermissionsCard({ role, session, onOpenMfa }: DevicePermis
       label: 'Câmera',
       description: 'Tirar foto de perfil e enviar imagens.',
       status: cameraPermission,
-      icon: <Camera size={18} weight="duotone" className="text-[#336886]" />,
+      icon: <Camera size={18} weight="duotone" className="text-[#2F9DF7]" />,
       checked: cameraPermission === 'granted',
       action: () => handlePermissionAction('camera', cameraPermission === 'granted'),
     },
@@ -296,7 +296,7 @@ export function DevicePermissionsCard({ role, session, onOpenMfa }: DevicePermis
         ? 'Conectar impressora térmica. Configure a impressora na seção Impressora.'
         : 'Conectar acessórios Bluetooth.',
       status: bluetoothPermission,
-      icon: <Bluetooth size={18} weight="duotone" className="text-[#336886]" />,
+      icon: <Bluetooth size={18} weight="duotone" className="text-[#2F9DF7]" />,
       checked: bluetoothPermission === 'granted',
       action: () => {
         if (bluetoothPermission === 'granted') {
@@ -313,11 +313,11 @@ export function DevicePermissionsCard({ role, session, onOpenMfa }: DevicePermis
       role="region"
       aria-label="Permissões do dispositivo"
       data-testid="device-permissions-card"
-      className="rounded-2xl border border-slate-200 border-l-4 border-l-[#336886] bg-white p-5 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.45)]"
+      className="rounded-2xl border border-slate-200 border-l-4 border-l-[#2F9DF7] bg-white p-5 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.45)]"
     >
       {/* Header */}
       <div className="flex items-start gap-3">
-        <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#336886]/10 text-[#336886] ring-1 ring-[#336886]/15">
+        <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#2F9DF7]/10 text-[#2F9DF7] ring-1 ring-[#2F9DF7]/15">
           <ShieldCheck size={22} weight="duotone" />
         </span>
         <div>
@@ -361,14 +361,14 @@ export function DevicePermissionsCard({ role, session, onOpenMfa }: DevicePermis
           className="mt-4 w-full rounded-2xl border border-slate-200 bg-white p-3.5 text-left transition hover:bg-slate-50"
         >
           <div className="flex items-center gap-3">
-            <ShieldCheck size={18} weight="duotone" className="text-[#336886]" />
+            <ShieldCheck size={18} weight="duotone" className="text-[#2F9DF7]" />
             <div className="flex-1">
               <span className="block text-sm font-black text-slate-900">Autenticação em dois fatores (MFA)</span>
               <span className="block text-xs font-medium text-slate-500">
                 Proteja sua conta com verificação extra.
               </span>
             </div>
-            <span className="text-xs font-bold text-[#336886]">Configurar</span>
+            <span className="text-xs font-bold text-[#2F9DF7]">Configurar</span>
           </div>
         </button>
       )}

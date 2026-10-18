@@ -149,10 +149,10 @@ export function MfaChallengeModal({
 
   return (
     <div className="fixed inset-0 z-[1200] flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_20%_0%,rgba(51,104,134,0.34),transparent_34%),linear-gradient(180deg,rgba(2,6,23,0.72),rgba(15,23,42,0.86))] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
-      <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-[430px] overflow-y-auto overscroll-contain rounded-[1.75rem] border border-white/55 bg-white/95 shadow-[0_34px_100px_-28px_rgba(2,6,23,0.85)] ring-1 ring-[#336886]/10">
+      <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-[430px] overflow-y-auto overscroll-contain rounded-[1.75rem] border border-white/55 bg-white/95 shadow-[0_34px_100px_-28px_rgba(2,6,23,0.85)] ring-1 ring-[#2F9DF7]/10">
         <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-sky-300/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 left-4 h-36 w-36 rounded-full bg-emerald-300/18 blur-3xl" />
-        <div className="relative overflow-hidden bg-[radial-gradient(circle_at_16%_12%,rgba(255,255,255,0.18),transparent_30%),radial-gradient(circle_at_82%_0%,rgba(132,204,22,0.18),transparent_28%),linear-gradient(135deg,#081520_0%,#153A4C_52%,#336886_100%)] px-5 pb-5 pt-5 text-white">
+        <div className="relative overflow-hidden bg-[radial-gradient(circle_at_16%_12%,rgba(255,255,255,0.18),transparent_30%),radial-gradient(circle_at_82%_0%,rgba(132,204,22,0.18),transparent_28%),linear-gradient(135deg,#081520_0%,#153A4C_52%,#2F9DF7_100%)] px-5 pb-5 pt-5 text-white">
           <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
           <button
             type="button"
@@ -184,8 +184,8 @@ export function MfaChallengeModal({
 
         <form onSubmit={submit} className="relative space-y-4 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-5">
           {challenge.account ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-[#336886]/10 bg-[linear-gradient(135deg,#f8fafc_0%,#eef6fa_100%)] px-4 py-3 shadow-inner shadow-white">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#336886] shadow-sm ring-1 ring-slate-100">
+            <div className="flex items-center gap-3 rounded-2xl border border-[#2F9DF7]/10 bg-[linear-gradient(135deg,#f8fafc_0%,#eef6fa_100%)] px-4 py-3 shadow-inner shadow-white">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#2F9DF7] shadow-sm ring-1 ring-slate-100">
                 <DeviceMobile size={20} weight="duotone" />
               </div>
               <div className="min-w-0">
@@ -219,12 +219,12 @@ export function MfaChallengeModal({
           ) : null}
 
           {!expired && challenge.trustDeviceAvailable ? (
-            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#336886]/10 bg-[#336886]/5 px-3 py-3 shadow-inner shadow-white">
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#2F9DF7]/10 bg-[#2F9DF7]/5 px-3 py-3 shadow-inner shadow-white">
               <input
                 type="checkbox"
                 checked={trustDevice}
                 onChange={(event) => setTrustDevice(event.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-[#336886] focus:ring-[#336886]"
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-[#2F9DF7] focus:ring-[#2F9DF7]"
               />
               <span className="text-sm font-semibold leading-relaxed text-slate-600">{trustedDeviceLabel}</span>
             </label>
@@ -240,9 +240,9 @@ export function MfaChallengeModal({
                     key={`mfa-digit-${index}`}
                     className={`grid aspect-square min-w-0 place-items-center rounded-2xl border bg-white text-[clamp(1.15rem,5.8vw,1.5rem)] font-black shadow-[0_16px_34px_-30px_rgba(15,23,42,0.7)] transition ${
                       code.length === index
-                        ? 'border-[#336886] text-slate-900 ring-4 ring-[#336886]/10'
+                        ? 'border-[#2F9DF7] text-slate-900 ring-4 ring-[#2F9DF7]/10'
                         : code.length > index
-                          ? 'border-[#336886]/25 text-slate-900'
+                          ? 'border-[#2F9DF7]/25 text-slate-900'
                           : 'border-slate-200 text-slate-400'
                     }`}
                   >
@@ -275,7 +275,7 @@ export function MfaChallengeModal({
               type="button"
               onClick={pasteCode}
               disabled={loading}
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/10 bg-white px-4 text-sm font-black text-[#153A4C] shadow-[0_18px_36px_-30px_rgba(15,23,42,0.55)] transition active:scale-[0.98] disabled:opacity-50"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#2F9DF7]/10 bg-white px-4 text-sm font-black text-[#153A4C] shadow-[0_18px_36px_-30px_rgba(15,23,42,0.55)] transition active:scale-[0.98] disabled:opacity-50"
               aria-label="Colar Código"
             >
               <Copy size={16} weight="duotone" />

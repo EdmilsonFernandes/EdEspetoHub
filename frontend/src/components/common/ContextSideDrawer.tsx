@@ -157,7 +157,7 @@ export function ContextSideDrawer({
     client: {
       aside: 'bg-[linear-gradient(180deg,rgba(255,255,255,0.99)_0%,rgba(246,249,251,0.98)_100%)] border-slate-200/70',
       headerBorder: 'border-slate-200/80',
-      eyebrow: 'text-[#336886]/80',
+      eyebrow: 'text-[#2F9DF7]/80',
       title: 'text-slate-950',
       subtitle: 'text-slate-500',
       closeBtn: 'border-slate-200/80 bg-white text-slate-500 hover:text-slate-800 shadow-[0_10px_22px_-18px_rgba(15,23,42,0.25)]',
@@ -168,7 +168,7 @@ export function ContextSideDrawer({
       },
       iconBox: {
         danger: 'border-rose-100 bg-rose-100/80 text-rose-500',
-        default: 'border-slate-200 bg-[#edf5fa] text-[#336886]',
+        default: 'border-slate-200 bg-[#DBEEFD] text-[#2F9DF7]',
       },
       footerBorder: 'border-slate-200/80',
       footerTitle: 'text-slate-900',
@@ -192,7 +192,7 @@ export function ContextSideDrawer({
         }`}
       >
         <div className={`relative border-b px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] ${themeClasses.headerBorder}`}>
-          <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-3xl" />
+          <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[#2F9DF7]/10 blur-3xl" />
           <div className="relative flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-start gap-3">
               {/* Pulsing Active Status Indicator */}
@@ -221,7 +221,7 @@ export function ContextSideDrawer({
                           badge.tone === 'success'
                             ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
                             : badge.tone === 'brand'
-                              ? 'border border-[#d8e5ee] bg-[#edf5fa] text-[#336886]'
+                              ? 'border border-[#d8e5ee] bg-[#DBEEFD] text-[#2F9DF7]'
                               : badge.tone === 'dark'
                                 ? 'border border-slate-200 bg-slate-900 text-white'
                                 : 'border border-slate-200 bg-white/90 text-slate-500'
@@ -253,7 +253,7 @@ export function ContextSideDrawer({
                 value={searchValue || ''}
                 onChange={(event) => onSearchChange(event.target.value)}
                 placeholder={searchPlaceholder || 'Buscar'}
-                className="h-11 w-full rounded-2xl border border-slate-200/80 bg-white/88 px-3 text-sm font-bold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#336886]/35 focus:ring-4 focus:ring-[#336886]/10"
+                className="h-11 w-full rounded-2xl border border-slate-200/80 bg-white/88 px-3 text-sm font-bold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#2F9DF7]/35 focus:ring-4 focus:ring-[#2F9DF7]/10"
               />
             </label>
           </div>
@@ -315,7 +315,7 @@ export function ContextSideDrawer({
                           action.badgeTone === 'danger' || !action.badgeTone
                             ? 'bg-rose-600 text-white shadow-[0_4px_12px_rgba(225,29,72,0.3)]'
                             : action.badgeTone === 'brand'
-                            ? 'bg-[#336886] text-white shadow-[0_4px_12px_rgba(51,104,134,0.3)]'
+                            ? 'bg-[#2F9DF7] text-white shadow-[0_4px_12px_rgba(51,104,134,0.3)]'
                             : action.badgeTone === 'success'
                             ? 'bg-emerald-600 text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)]'
                             : 'bg-slate-650 text-white'

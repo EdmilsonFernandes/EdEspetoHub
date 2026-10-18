@@ -70,7 +70,7 @@ describe('NativeAppNavigator', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('button', { name: /Pedidos/i })).toHaveClass('text-[#2d5f7b]');
+    expect(screen.getByRole('button', { name: /Pedidos/i })).toHaveClass('text-[#1A6FC8]');
   });
 
   it('resets stale cart visibility when entering destination pages', () => {

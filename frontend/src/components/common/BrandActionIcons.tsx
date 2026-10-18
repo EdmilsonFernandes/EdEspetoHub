@@ -36,7 +36,7 @@ export const GoogleMapsIcon = ({ className = 'h-4 w-4', alt = '' }: BrandActionI
       fill="#1A73E8"
     />
     <circle cx="12" cy="9.03" r="2.52" fill="#fff" />
-    <circle cx="12" cy="9.03" r="1.22" fill="#336886" opacity="0.72" />
+    <circle cx="12" cy="9.03" r="1.22" fill="#2F9DF7" opacity="0.72" />
   </svg>
 );
 

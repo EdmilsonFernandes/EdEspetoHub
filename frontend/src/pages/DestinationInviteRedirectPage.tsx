@@ -89,7 +89,7 @@ export function DestinationInviteRedirectPage({ kind = 'listing' }: { kind?: 'li
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-[#edf6f8] text-[#153A4C]">
             <ShieldCheck size={34} weight="duotone" />
           </div>
-          <p className="mt-5 text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Já no Caminho</p>
+          <p className="mt-5 text-[11px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Já no Caminho</p>
           <h1 className="mt-2 text-2xl font-black tracking-[-0.04em] text-slate-950">
             Convite oficial
           </h1>

@@ -339,7 +339,7 @@ export function DestinationDetailPage() {
   return (
     <PublicDestinationShell active="city" backTo="/destinos" backLabel="Voltar" contextLabel={destination.name || 'Cidade turística'}>
       <section className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(51,104,134,0.16),transparent_34%),radial-gradient(circle_at_86%_16%,rgba(216,245,231,0.55),transparent_30%),linear-gradient(135deg,#f6f2e9,#eef5f1_56%,#eadfc8)] px-4 pb-3 pt-2.5 sm:pb-4 sm:pt-4">
-        <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#336886]/16 blur-3xl" />
+        <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#2F9DF7]/16 blur-3xl" />
         <div className="absolute -left-16 bottom-4 h-56 w-56 rounded-full bg-amber-300/18 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
           {loading ? (
@@ -370,7 +370,7 @@ export function DestinationDetailPage() {
                 className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
               >
                 <div className="min-w-0 max-w-3xl">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Explore a região</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2F9DF7]">Explore a região</p>
                   <h1 className="mt-2 text-2xl font-black leading-[0.98] tracking-[-0.045em] text-slate-950 sm:text-4xl">
                     Explore <em className="dest-serif-i text-[#153A4C]/70">{destination.name}</em>
                   </h1>
@@ -382,7 +382,7 @@ export function DestinationDetailPage() {
                   <button
                     type="button"
                     onClick={() => jumpToDestinationSection('hospedagens', 'HOSPEDAGENS')}
-                    className="jnc-hub-touch inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#336886]/16"
+                    className="jnc-hub-touch inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2F9DF7]/16"
                     aria-label={`Ver ${places.length} hospedagens`}
                   >
                     <Bed size={16} weight="duotone" className="shrink-0" />
@@ -391,7 +391,7 @@ export function DestinationDetailPage() {
                   <button
                     type="button"
                     onClick={() => jumpToDestinationSection('servicos-cidade', 'TODOS')}
-                    className="jnc-hub-touch inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#336886]/16"
+                    className="jnc-hub-touch inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/70 bg-white/62 px-3 text-[11px] font-black text-[#153A4C] shadow-[0_12px_26px_-22px_rgba(15,23,42,0.42)] ring-1 ring-white/45 backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2F9DF7]/16"
                     aria-label={`Ver ${listings.length} serviços`}
                   >
                     <ForkKnife size={16} weight="duotone" className="shrink-0" />
@@ -401,8 +401,8 @@ export function DestinationDetailPage() {
               </motion.div>
 
               <SurfaceCard padding="sm" className="grid min-w-0 gap-2.5 rounded-[1.55rem] border-white/55 bg-white/42 ring-1 ring-white/35 backdrop-blur-xl lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-                <label className="group flex min-h-[50px] min-w-0 max-w-full items-center gap-3 rounded-[1.2rem] bg-white/90 px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition focus-within:bg-white focus-within:ring-4 focus-within:ring-[#336886]/12">
-                  <MagnifyingGlass size={18} weight="bold" className="text-[#336886]" />
+                <label className="group flex min-h-[50px] min-w-0 max-w-full items-center gap-3 rounded-[1.2rem] bg-white/90 px-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.42)] ring-1 ring-white/70 transition focus-within:bg-white focus-within:ring-4 focus-within:ring-[#2F9DF7]/12">
+                  <MagnifyingGlass size={18} weight="bold" className="text-[#2F9DF7]" />
                   <input
                     value={searchTerm}
                     onChange={(event) => setSearchTerm(event.target.value)}
@@ -424,7 +424,7 @@ export function DestinationDetailPage() {
                         setActiveCategory(category.value);
                         if (category.value === 'TODOS') setSearchTerm('');
                       }}
-                      className={`relative inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full py-2 pl-3.5 pr-9 text-[11px] font-black uppercase tracking-[0.08em] transition ${activeCategory === category.value ? 'bg-[#336886] text-white shadow-[0_16px_30px_-20px_rgba(51,104,134,0.62)]' : 'border border-white/70 bg-white/72 text-slate-600 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.36)] backdrop-blur hover:bg-white hover:text-[#153A4C]'}`}
+                      className={`relative inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full py-2 pl-3.5 pr-9 text-[11px] font-black uppercase tracking-[0.08em] transition ${activeCategory === category.value ? 'bg-[#2F9DF7] text-white shadow-[0_16px_30px_-20px_rgba(51,104,134,0.62)]' : 'border border-white/70 bg-white/72 text-slate-600 shadow-[0_10px_22px_-20px_rgba(15,23,42,0.36)] backdrop-blur hover:bg-white hover:text-[#153A4C]'}`}
                     >
                       <span className="max-w-[7.25rem] truncate">{category.label}</span>
                       <span className={`absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full px-1.5 py-0.5 text-[10px] ${activeCategory === category.value ? 'bg-white/16 text-white/80' : 'bg-slate-100 text-slate-500'}`}>{category.count}</span>
@@ -443,13 +443,13 @@ export function DestinationDetailPage() {
           <div id="hospedagens" className="min-w-0 max-w-full scroll-mt-28 space-y-5">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Hospedagens</p>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Hospedagens</p>
                 <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">Escolha sua hospedagem</h2>
                 <p className="mt-1 max-w-xl text-sm font-semibold leading-relaxed text-slate-500">
                   Toque no chalé ou pousada para ver quem entrega, atende e resolve algo perto dali.
                 </p>
               </div>
-              <Bed size={28} weight="duotone" className="shrink-0 text-[#336886]" />
+              <Bed size={28} weight="duotone" className="shrink-0 text-[#2F9DF7]" />
             </div>
 
             {places.length === 0 ? (
@@ -517,7 +517,7 @@ export function DestinationDetailPage() {
                     event.preventDefault();
                     navigate(placePath);
                   }}
-                  className="jnc-hub-touch jnc-hub-lift group min-w-0 max-w-full cursor-pointer overflow-hidden rounded-[1.85rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,250,240,0.92)_0%,#ffffff_52%,rgba(237,247,242,0.86)_100%)] shadow-[0_22px_58px_-46px_rgba(21,58,76,0.46)] outline-none ring-1 ring-[#336886]/[0.04] focus-visible:ring-4 focus-visible:ring-[#336886]/14 md:hover:border-[#336886]/20"
+                  className="jnc-hub-touch jnc-hub-lift group min-w-0 max-w-full cursor-pointer overflow-hidden rounded-[1.85rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,250,240,0.92)_0%,#ffffff_52%,rgba(237,247,242,0.86)_100%)] shadow-[0_22px_58px_-46px_rgba(21,58,76,0.46)] outline-none ring-1 ring-[#2F9DF7]/[0.04] focus-visible:ring-4 focus-visible:ring-[#2F9DF7]/14 md:hover:border-[#2F9DF7]/20"
                 >
                   <div className="relative m-2 h-44 overflow-hidden rounded-[1.45rem] bg-slate-100 sm:h-40">
                     {hasConfiguredAsset(place) ? (
@@ -550,7 +550,7 @@ export function DestinationDetailPage() {
                     ) : null}
                   </div>
                   <div className="p-4 pt-2">
-                    <div className="mb-2 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">
+                    <div className="mb-2 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">
                       <Bed size={12} weight="duotone" />
                       Hospedagem
                     </div>
@@ -560,7 +560,7 @@ export function DestinationDetailPage() {
                     <p className="mt-1 line-clamp-2 text-sm font-medium leading-relaxed text-slate-600">{place.description || place.address || 'Hospedagem cadastrada.'}</p>
                     {place.address ? (
                       <p className="mt-2 inline-flex max-w-full items-center gap-1.5 text-[11px] font-semibold leading-relaxed text-slate-500">
-                        <MapPinLine size={12} weight="duotone" className="shrink-0 text-[#336886]" />
+                        <MapPinLine size={12} weight="duotone" className="shrink-0 text-[#2F9DF7]" />
                         <span className="truncate">{place.address}</span>
                       </p>
                     ) : null}
@@ -578,7 +578,7 @@ export function DestinationDetailPage() {
                         </a>
                       ) : null}
                       {placePhoneHref ? (
-                        <a href={placePhoneHref} onClick={stopCardClick} className="inline-flex items-center gap-1 rounded-full border border-[#336886]/14 bg-[#336886] px-2.5 py-1 text-[11px] font-black text-white shadow-[0_10px_22px_-17px_rgba(51,104,134,0.58)]">
+                        <a href={placePhoneHref} onClick={stopCardClick} className="inline-flex items-center gap-1 rounded-full border border-[#2F9DF7]/14 bg-[#2F9DF7] px-2.5 py-1 text-[11px] font-black text-white shadow-[0_10px_22px_-17px_rgba(51,104,134,0.58)]">
                           <PhoneCall size={12} weight="duotone" />
                           Ligar
                         </a>
@@ -595,7 +595,7 @@ export function DestinationDetailPage() {
                           {placeWebsiteLabel}
                         </a>
                       ) : null}
-                      <span className="ml-auto inline-flex min-h-8 items-center rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#336886] transition group-hover:bg-[#336886] group-hover:text-white">
+                      <span className="ml-auto inline-flex min-h-8 items-center rounded-full border border-[#2F9DF7]/12 bg-[#2F9DF7]/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#2F9DF7] transition group-hover:bg-[#2F9DF7] group-hover:text-white">
                         Ver opções
                       </span>
                     </div>
@@ -626,7 +626,7 @@ export function DestinationDetailPage() {
             <SurfaceCard padding="lg" className="min-w-0 max-w-full rounded-[2rem] border-white/85 bg-white/94 ring-1 ring-slate-900/[0.025]">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">{showPlacesSection ? 'Ainda explorando?' : 'Região'}</p>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">{showPlacesSection ? 'Ainda explorando?' : 'Região'}</p>
                   <h2 className="mt-1 text-xl font-black">{showPlacesSection ? 'Serviços e lugares da cidade' : 'Comer, comprar e fazer'}</h2>
                   <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">
                     {showPlacesSection
@@ -634,7 +634,7 @@ export function DestinationDetailPage() {
                       : 'Veja opções úteis da região para pedir, comprar ou combinar atendimento direto.'}
                   </p>
                 </div>
-                <Sparkle size={25} weight="duotone" className="text-[#336886]" />
+                <Sparkle size={25} weight="duotone" className="text-[#2F9DF7]" />
               </div>
               <div className="mt-4 min-w-0 space-y-3">
                 {visibleListings.map((listing: any) => {
@@ -671,9 +671,9 @@ export function DestinationDetailPage() {
                         )}
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                            <span className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#336886]">{categoryLabel(listing.category)}</span>
+                            <span className="text-[9.5px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">{categoryLabel(listing.category)}</span>
                             {hasLinkedStore ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-[#336886]/8 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-[#336886] ring-1 ring-[#336886]/10">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-[#2F9DF7]/8 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-[#2F9DF7] ring-1 ring-[#2F9DF7]/10">
                                 <span className="h-1.5 w-1.5 rounded-full bg-[#5FD35A] animate-pulse" />
                                 Loja oficial
                               </span>
@@ -689,7 +689,7 @@ export function DestinationDetailPage() {
                         <span className="min-w-0 truncate text-[11px] font-semibold text-slate-500">
                           {listing.address || (hasLinkedStore ? 'Pedido online pelo app' : 'Detalhes e contatos no toque')}
                         </span>
-                        <span className="shrink-0 rounded-full border border-[#336886]/12 bg-[#336886]/8 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover/card:bg-[#336886] group-hover/card:text-white group-hover/card:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
+                        <span className="shrink-0 rounded-full border border-[#2F9DF7]/12 bg-[#2F9DF7]/8 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#2F9DF7] transition-all duration-300 group-hover/card:bg-[#2F9DF7] group-hover/card:text-white group-hover/card:shadow-[0_4px_12px_rgba(51,104,134,0.2)]">
                           {hasLinkedStore ? 'Ver cardápio' : 'Ver detalhes'}
                         </span>
                       </div>
@@ -716,7 +716,7 @@ export function DestinationDetailPage() {
                           if (isPreviewTriggerTarget(event.target)) return;
                           setSelectedListing(listing);
                         }}
-                        className="jnc-hub-touch jnc-hub-lift group/card relative block w-full min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 md:hover:border-[#336886]/18"
+                        className="jnc-hub-touch jnc-hub-lift group/card relative block w-full min-w-0 max-w-full overflow-hidden rounded-[1.45rem] border border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-slate-100/50 md:hover:border-[#2F9DF7]/18"
                       >
                         <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover/card:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-20" />
                         {cardBody}
@@ -772,10 +772,10 @@ export function DestinationDetailPage() {
           <div className="rounded-[2rem] border border-slate-200 bg-white/82 p-4 shadow-[0_18px_48px_-38px_rgba(15,23,42,0.35)] sm:p-5">
             <div className="flex items-end justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#336886]">Conheça a cidade</p>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Conheça a cidade</p>
                 <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">Fotos e destaques de {destination.name}</h2>
               </div>
-              <Mountains size={26} weight="duotone" className="shrink-0 text-[#336886]" />
+              <Mountains size={26} weight="duotone" className="shrink-0 text-[#2F9DF7]" />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {showcaseSlides.map((slide: any, index: number) => {

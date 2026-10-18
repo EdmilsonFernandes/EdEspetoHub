@@ -72,12 +72,12 @@ export function ClientBottomNav({
   const iconClass = (selected: boolean) =>
     `inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
       selected
-        ? 'bg-[#336886] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)] scale-[1.08]'
+        ? 'bg-[#2F9DF7] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)] scale-[1.08]'
         : 'bg-slate-50 text-slate-600 ring-1 ring-slate-200/60 group-hover:bg-slate-100 group-hover:text-slate-700'
     }`;
 
   const itemClass = (item: ClientBottomNavItem) =>
-    `${itemBaseClass} ${active === item ? 'text-[#2d5f7b]' : inactiveItemClass}`;
+    `${itemBaseClass} ${active === item ? 'text-[#1A6FC8]' : inactiveItemClass}`;
   const warmupRoute = (path: string) => () => prefetchRouteByPath(path);
 
   const openHome = () => {
@@ -113,7 +113,7 @@ export function ClientBottomNav({
   };
 
   const dotClass = (selected: boolean) =>
-    selected ? 'h-1 w-1 rounded-full bg-[#336886]' : 'h-1 w-1';
+    selected ? 'h-1 w-1 rounded-full bg-[#2F9DF7]' : 'h-1 w-1';
 
   return (
     <nav

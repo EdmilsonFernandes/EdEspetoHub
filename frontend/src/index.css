@@ -4,24 +4,30 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #336686;
-  --color-brand-teal: #336886;
+  --color-primary: #2f9df7;
+  --color-primary-ink: #1a6fc8;
+  --color-brand-teal: #2f9df7; /* nome legado (era teal) — valor é o azul JNC desde o B0 out/26 */
   --color-brand-navy: #153a4c;
   --color-brand-green: #5fd35a;
   --color-rating: #f5a623;
-  /* Rampa teal oficial (auditoria F5 16/08) — classes primary-50..950/accent-400/700 */
-  --color-primary-50: #f4fafc;
-  --color-primary-100: #edf5fa;
-  --color-primary-200: #d7e7ef;
-  --color-primary-300: #bfd6e4;
-  --color-primary-500: #4e96ae;
-  --color-primary-600: #336686;
-  --color-primary-700: #2d5f7b;
-  --color-primary-800: #1c4b62;
-  --color-primary-900: #153a4c;
+  /* Rampa azul JNC (B0 out/26) — substitui a rampa teal (auditoria F5 16/08).
+     Split de papel: primary = gráfico; primary-ink = texto/underline/focus (AA). */
+  --color-primary-50: #f0f8fe;
+  --color-primary-100: #dbeefd;
+  --color-primary-200: #bce2fc;
+  --color-primary-300: #8ed2fa;
+  --color-primary-500: #4fb2f8;
+  --color-primary-600: #2f9df7;
+  --color-primary-700: #1a6fc8;
+  --color-primary-800: #185a94;
+  --color-primary-900: #16466b;
   --color-primary-950: #0b1220;
   --color-accent-400: #5fd35a;
   --color-accent-700: #15803d;
+  /* Promo — laranja vive em preço/desconto, nunca CTA (decisão PRODUCT.md out/26) */
+  --color-promo: #ea580c;
+  --color-promo-ink: #c2410c;
+  --color-promo-tint: #fff7ed;
   /* Type scale — piso tipográfico da jornada cliente (auditoria 2, 18/08):
      12px é o mínimo legível em mobile real com sol; 11px só para números. */
   --text-2xs: 0.75rem;
@@ -32,14 +38,15 @@
 }
 
 :root {
-  --color-primary: #336686;
+  --color-primary: #2f9df7;
+  --color-primary-ink: #1a6fc8;
   --color-secondary: #0f172a;
   --color-cta: #15803d;
   --color-success: #047857;
   --color-warning: #d97706;
   --color-danger: #dc2626;
-  --brand-blue: #336686;
-  --brand-cyan: #4e96ae;
+  --brand-blue: #2f9df7;
+  --brand-cyan: #4fb2f8;
   --brand-green: #5fd35a;
   --brand-navy: #153a4c;
   --brand-ink: #0f172a;
@@ -52,9 +59,10 @@
   --radius-md: 16px;
   --radius-lg: 16px;
   --radius-xl: 1.5rem;
-  --shadow-soft: 0 12px 30px -22px rgba(15, 23, 42, 0.4);
-  --shadow-card: 0 24px 50px -34px rgba(15, 23, 42, 0.45);
-  --shadow-elevated: 0 32px 60px -42px rgba(15, 23, 42, 0.58);
+  /* Sombras unificadas no trio @theme (flat/raised/overlay), tint navy */
+  --shadow-soft: var(--shadow-flat);
+  --shadow-card: var(--shadow-raised);
+  --shadow-elevated: var(--shadow-overlay);
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -64,7 +72,7 @@
   --jnk-native-nav-height: 0px;
   --jnc-brand-950: #0b1220;
   --jnc-brand-900: #153A4C;
-  --jnc-brand-700: #336886;
+  --jnc-brand-700: #1a6fc8;
   --jnc-brand-500: #5FD35A;
   --jnc-surface-page: #E2EBF2;
   --jnc-surface-raised: #ffffff;
@@ -163,7 +171,7 @@ body {
   background: rgba(255, 255, 255, 0.76);
   border: 1px solid rgba(215, 231, 239, 0.78);
   box-shadow: var(--shadow-raised), inset 0 1px 0 rgba(255, 255, 255, 0.78);
-  color: #336886;
+  color: #2F9DF7;
   -webkit-backdrop-filter: blur(18px) saturate(1.06);
   backdrop-filter: blur(18px) saturate(1.06);
 }
@@ -707,7 +715,7 @@ body {
 
   .auth-segment-btn.active {
     color: #fff;
-    background: #1c4b62;
+    background: #185A94;
     box-shadow: 0 14px 28px -20px rgba(13, 79, 102, 0.78);
   }
 
@@ -732,7 +740,7 @@ body {
 
   .floating-input:focus {
     outline: none;
-    border-color: #1c4b62;
+    border-color: #185A94;
     border-width: 2px;
     background: #fff;
     box-shadow: 0 0 0 3px rgba(13, 79, 102, 0.14);
@@ -758,7 +766,7 @@ body {
   .floating-input:not(:placeholder-shown) + .floating-label {
     top: 0.34rem;
     transform: scale(0.88);
-    color: #1c4b62;
+    color: #185A94;
     font-weight: 700;
   }
 
@@ -789,8 +797,8 @@ body {
   }
 
   .premium-check-btn.checked {
-    border-color: #1c4b62;
-    background: #1c4b62;
+    border-color: #185A94;
+    background: #185A94;
     color: #ffffff;
     box-shadow: 0 10px 20px -16px rgba(13, 79, 102, 0.84);
   }
@@ -1070,7 +1078,7 @@ body {
     justify-content: center;
     border-radius: 1.55rem;
     border: 1px solid rgba(255, 255, 255, 0.22);
-    background: linear-gradient(145deg, #153A4C, #336886);
+    background: linear-gradient(145deg, #153A4C, #2F9DF7);
     box-shadow: 0 28px 52px -32px rgba(21, 58, 76, 0.9);
   }
 
@@ -1124,7 +1132,7 @@ body {
     height: 3px;
     width: 520px;
     transform: translateY(-50%);
-    background: repeating-linear-gradient(90deg, #336886 0 22px, transparent 22px 44px);
+    background: repeating-linear-gradient(90deg, #2F9DF7 0 22px, transparent 22px 44px);
     opacity: 0.34;
   }
 
@@ -1571,8 +1579,8 @@ body {
   }
 
   .create-store-form {
-    --create-store-primary: #1c4b62;
-    --create-store-accent: #4e96ae;
+    --create-store-primary: #185A94;
+    --create-store-accent: #4FB2F8;
   }
 
   .create-store-form .ds-input,

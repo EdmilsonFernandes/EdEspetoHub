@@ -76,9 +76,9 @@ const HIGHLIGHT_CATEGORY_OPTIONS: HighlightCategoryOption[] = [
     label: 'Todos',
     icon: Sparkle,
     keywords: [],
-    surfaceClassName: 'bg-[linear-gradient(145deg,#eaf7fb_0%,#ffffff_54%,#e9fff0_100%)] text-[#336886]',
-    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#153A4C_0%,#336886_60%,#5FD35A_145%)] text-white shadow-[0_16px_28px_-10px_rgba(21,58,76,0.48),0_4px_10px_-2px_rgba(95,211,90,0.3)]',
-    iconClassName: 'text-[#336886]',
+    surfaceClassName: 'bg-[linear-gradient(145deg,#eaf7fb_0%,#ffffff_54%,#e9fff0_100%)] text-[#2F9DF7]',
+    activeSurfaceClassName: 'bg-[linear-gradient(145deg,#153A4C_0%,#2F9DF7_60%,#5FD35A_145%)] text-white shadow-[0_16px_28px_-10px_rgba(21,58,76,0.48),0_4px_10px_-2px_rgba(95,211,90,0.3)]',
+    iconClassName: 'text-[#2F9DF7]',
     glowClassName: 'bg-[#5FD35A]/45',
   },
   {
@@ -400,14 +400,14 @@ export function HubHighlightsPage() {
 
       <main className="mx-auto w-full max-w-3xl px-4 pb-[calc(var(--jnk-client-bottom-nav-height,0px)+var(--jnk-native-nav-height,0px)+env(safe-area-inset-bottom)+5.5rem)] pt-[calc(env(safe-area-inset-top)+5.2rem)]">
         {/* Barra de Pesquisa Compacta Premium */}
-        <SurfaceCard padding="none" className="relative z-10 mb-3 overflow-hidden rounded-2xl border-slate-200 p-1.5 ring-1 ring-slate-200/5 transition-all duration-300 focus-within:border-[#336886]/45 focus-within:bg-white focus-within:shadow-[0_16px_36px_-20px_rgba(51,104,134,0.25)] focus-within:ring-4 focus-within:ring-[#336886]/10">
+        <SurfaceCard padding="none" className="relative z-10 mb-3 overflow-hidden rounded-2xl border-slate-200 p-1.5 ring-1 ring-slate-200/5 transition-all duration-300 focus-within:border-[#2F9DF7]/45 focus-within:bg-white focus-within:shadow-[0_16px_36px_-20px_rgba(51,104,134,0.25)] focus-within:ring-4 focus-within:ring-[#2F9DF7]/10">
           <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_center,rgba(95,211,90,0.12),transparent_68%)]" />
           <div className="relative flex items-center gap-2.5">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[linear-gradient(145deg,#5FD35A_0%,#336886_64%,#153A4C_100%)] text-white shadow-[0_10px_20px_-14px_rgba(51,104,134,0.68)]">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[linear-gradient(145deg,#5FD35A_0%,#2F9DF7_64%,#153A4C_100%)] text-white shadow-[0_10px_20px_-14px_rgba(51,104,134,0.68)]">
               <MagnifyingGlass size={16} weight="bold" />
             </span>
             <div className="min-w-0 flex-1 py-0.5">
-              <span className="block text-[8px] font-black uppercase tracking-[0.18em] text-[#336886]/75 leading-none">Pesquisar destaques</span>
+              <span className="block text-[8px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]/75 leading-none">Pesquisar destaques</span>
               <input
                 {...inputAssistProps.search}
                 value={query}
@@ -441,12 +441,12 @@ export function HubHighlightsPage() {
               onClick={() => setSelectedCategory('all')}
               className={`jnc-hub-touch flex w-full items-center gap-3 rounded-[1.05rem] border px-3 py-2.5 text-left transition-all duration-300 ${
                 selectedCategory === 'all'
-                  ? 'border-[#153A4C] bg-[linear-gradient(135deg,#153A4C_0%,#336886_82%,#5FD35A_170%)] text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.58)]'
+                  ? 'border-[#153A4C] bg-[linear-gradient(135deg,#153A4C_0%,#2F9DF7_82%,#5FD35A_170%)] text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.58)]'
                   : 'border-slate-200/70 bg-white/82 text-slate-700 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.16)]'
               }`}
             >
               <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${
-                selectedCategory === 'all' ? 'bg-white/18 text-white' : 'bg-[#edf5fa] text-[#336886]'
+                selectedCategory === 'all' ? 'bg-white/18 text-white' : 'bg-[#DBEEFD] text-[#2F9DF7]'
               }`}>
                 <Sparkle size={16} weight="fill" />
               </span>
@@ -484,7 +484,7 @@ export function HubHighlightsPage() {
                     <span className={`relative grid h-7 w-7 place-items-center rounded-full transition-all duration-300 ${
                       active
                         ? 'bg-white/18 text-white shadow-[0_10px_18px_-12px_rgba(15,23,42,0.28)] ring-1 ring-white/20'
-                        : 'bg-[#f3f8fb] text-[#336886] group-hover/filter:bg-[#336886]/10'
+                        : 'bg-[#f3f8fb] text-[#2F9DF7] group-hover/filter:bg-[#2F9DF7]/10'
                     }`}>
                       <CategoryIcon
                         size={13}
@@ -510,7 +510,7 @@ export function HubHighlightsPage() {
         </SurfaceCard>
 
         <section className="mt-4 flex flex-wrap gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#336886]/12 bg-white/86 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#336886] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.28)]">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2F9DF7]/12 bg-white/86 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#2F9DF7] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.28)]">
             <ForkKnife size={12} weight="fill" />
             {filteredItems.length === 1 ? '1 opção' : `${filteredItems.length} opções`}
           </span>
@@ -595,13 +595,13 @@ export function HubHighlightsPage() {
                     
                     <div className="absolute inset-0 bg-gradient-to-t from-black/36 via-transparent to-black/6" />
                     
-                    <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full border border-white/80 bg-white/95 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.15em] text-[#336886] shadow-[0_6px_14px_-4px_rgba(15,23,42,0.12)] backdrop-blur-sm">
+                    <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full border border-white/80 bg-white/95 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.15em] text-[#2F9DF7] shadow-[0_6px_14px_-4px_rgba(15,23,42,0.12)] backdrop-blur-sm">
                       <CategoryIcon size={8} weight="fill" />
                       {categoryOption.label}
                     </span>
                     
                     <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full border border-white/20 bg-slate-950/65 px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.15em] text-white shadow-[0_4px_12px_rgba(0,0,0,0.25)] backdrop-blur-md">
-                      {item.sponsored ? <Star size={8} weight="fill" className="text-amber-500" /> : <Sparkle size={8} weight="fill" className="text-[#336886]" />}
+                      {item.sponsored ? <Star size={8} weight="fill" className="text-amber-500" /> : <Sparkle size={8} weight="fill" className="text-[#2F9DF7]" />}
                       {item.sponsored ? item.badge || 'Destaque' : 'Seleção'}
                     </span>
 
@@ -620,14 +620,14 @@ export function HubHighlightsPage() {
                   </div>
                   
                   <div className="flex min-w-0 flex-col py-1 pr-1">
-                    <p className="line-clamp-2 text-[14.5px] font-black leading-[1.2rem] tracking-tight text-slate-900 transition-colors duration-200 group-hover:text-[#336886]">{item.name}</p>
+                    <p className="line-clamp-2 text-[14.5px] font-black leading-[1.2rem] tracking-tight text-slate-900 transition-colors duration-200 group-hover:text-[#2F9DF7]">{item.name}</p>
                     <div className="mt-2 flex min-w-0 items-center gap-1">
                       <span className="truncate text-[10.5px] font-bold text-slate-400">por {item.storeName}</span>
                     </div>
                     <div className="mt-auto flex items-end justify-between gap-2 pt-3">
                       <p className="text-[20px] font-black leading-none tracking-[-0.05em] text-[#153A4C]">{currency.format(item.price)}</p>
                       
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf5fa] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#336886] transition-all duration-300 group-hover:bg-[#336886] group-hover:text-white group-hover:px-3.5 group-hover:shadow-[0_4px_12px_rgba(51,104,134,0.25)]">
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#DBEEFD] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#2F9DF7] transition-all duration-300 group-hover:bg-[#2F9DF7] group-hover:text-white group-hover:px-3.5 group-hover:shadow-[0_4px_12px_rgba(51,104,134,0.25)]">
                         <span className="max-w-0 scale-0 opacity-0 text-[8.5px] font-black uppercase tracking-wider transition-all duration-300 group-hover:max-w-[65px] group-hover:scale-100 group-hover:opacity-100">Pedir</span>
                         <CaretRight size={9} weight="bold" />
                       </span>

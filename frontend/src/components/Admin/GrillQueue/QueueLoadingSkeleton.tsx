@@ -12,7 +12,7 @@ export const QueueLoadingSkeleton = ({ variant = "queue" }: { variant?: "queue" 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm">
-        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F28C28]/15 via-white to-[#336886]/10 ring-1 ring-slate-100">
+        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F28C28]/15 via-white to-[#2F9DF7]/10 ring-1 ring-slate-100">
           <span className="absolute inset-0 rounded-2xl bg-[#F28C28]/10 animate-ping" />
           <img
             src={SYSTEM_LOGO_SRC}

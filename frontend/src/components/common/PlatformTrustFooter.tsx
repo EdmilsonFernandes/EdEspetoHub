@@ -104,7 +104,7 @@ export function PlatformTrustFooter({
             <span className={`ml-auto flex shrink-0 items-center justify-center rounded-full border p-2 transition-all group-hover:scale-105 ${
               isDark
                 ? 'border-white/10 bg-white/6 text-slate-400 group-hover:text-slate-200'
-                : 'border-slate-200 bg-white/80 text-slate-400 group-hover:text-[#336886]'
+                : 'border-slate-200 bg-white/80 text-slate-400 group-hover:text-[#2F9DF7]'
             }`}>
               <ArrowSquareOut size={12} weight="bold" />
             </span>

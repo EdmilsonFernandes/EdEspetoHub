@@ -153,7 +153,7 @@ export function StoreDestinationPanel({ storeId }: Props) {
     <div className="space-y-4">
       <div className="rounded-2xl border border-sky-100 bg-sky-50/70 px-4 py-3">
         <div className="flex items-start gap-3">
-          <Compass size={22} weight="duotone" className="mt-0.5 text-[#336886]" />
+          <Compass size={22} weight="duotone" className="mt-0.5 text-[#2F9DF7]" />
           <div>
             <p className="text-sm font-black text-slate-900">Solicitações para destinos e chalés</p>
             <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-600">
@@ -168,7 +168,7 @@ export function StoreDestinationPanel({ storeId }: Props) {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Buscar por cidade, chalé, pousada ou endereço"
-          className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#336886]"
+          className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#2F9DF7]"
         />
         <div className="flex rounded-2xl bg-slate-100 p-1">
           {[
@@ -240,7 +240,7 @@ export function StoreDestinationPanel({ storeId }: Props) {
                   <div key={place.id} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex min-w-0 gap-3">
-                        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white text-[#336886] ring-1 ring-slate-100">
+                        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white text-[#2F9DF7] ring-1 ring-slate-100">
                           <Bed size={22} weight="duotone" />
                         </div>
                         <div className="min-w-0">
@@ -271,25 +271,25 @@ export function StoreDestinationPanel({ storeId }: Props) {
                             value={drafts[place.id]?.deliveryFee || ''}
                             onChange={(event) => updateDraft(place.id, 'deliveryFee', event.target.value)}
                             placeholder="Taxa de entrega"
-                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#336886]"
+                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#2F9DF7]"
                           />
                           <input
                             value={drafts[place.id]?.estimatedMinutes || ''}
                             onChange={(event) => updateDraft(place.id, 'estimatedMinutes', event.target.value)}
                             placeholder="Tempo estimado em minutos"
-                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#336886]"
+                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#2F9DF7]"
                           />
                           <input
                             value={drafts[place.id]?.message || ''}
                             onChange={(event) => updateDraft(place.id, 'message', event.target.value)}
                             placeholder="Mensagem opcional"
-                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#336886]"
+                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#2F9DF7]"
                           />
                           <button
                             type="button"
                             onClick={() => requestPlace(place.id)}
                             disabled={savingId === place.id}
-                            className="w-full rounded-xl bg-[#336886] px-3 py-2 text-xs font-black text-white disabled:opacity-50"
+                            className="w-full rounded-xl bg-[#2F9DF7] px-3 py-2 text-xs font-black text-white disabled:opacity-50"
                           >
                             {savingId === place.id ? 'Enviando...' : 'Solicitar vínculo'}
                           </button>

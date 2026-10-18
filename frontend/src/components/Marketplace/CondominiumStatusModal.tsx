@@ -61,7 +61,7 @@ export function CondominiumStatusModal({
           </p>
 
           <div className="mt-6 flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="mt-0.5 rounded-full bg-white p-2 text-[#336886] shadow-sm">
+            <div className="mt-0.5 rounded-full bg-white p-2 text-[#2F9DF7] shadow-sm">
               <CalendarBlank size={20} weight="duotone" />
             </div>
             <div className="min-w-0">

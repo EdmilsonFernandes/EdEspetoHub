@@ -532,7 +532,7 @@ export function ClientAuth() {
         {/* Hero visível também no mobile (E1, 04/10 — estudo SouFix "cara de app"):
             antes `hidden sm:block`, a tela abria seca direto no formulário no celular. */}
         <div className="text-center">
-          <div className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#1c4b62] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)] sm:h-12 sm:w-12">
+          <div className="mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-[#185A94] shadow-[0_18px_38px_-26px_rgba(13,79,102,0.5)] sm:h-12 sm:w-12">
             <LockKey size={23} weight="duotone" />
           </div>
           <h2 className="text-[1.55rem] font-black tracking-[-0.03em] text-slate-800 sm:text-[2rem]">
@@ -548,13 +548,13 @@ export function ClientAuth() {
         <div className="ds-card-elevated space-y-3 border-white/40 bg-white/82 p-4 backdrop-blur-xl sm:space-y-5 sm:p-7 lg:p-8">
           {mode === 'login' ? (
             <div className="relative overflow-hidden rounded-2xl border border-white/75 bg-[radial-gradient(circle_at_8%_0%,rgba(95,211,90,0.14),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.96),rgba(241,248,251,0.88))] p-3 shadow-[0_18px_42px_-34px_rgba(21,58,76,0.38)]">
-              <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-[#336886]/10 blur-2xl" />
+              <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-[#2F9DF7]/10 blur-2xl" />
               <div className="relative flex items-center gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white bg-white p-0.5 shadow-[0_14px_30px_-22px_rgba(21,58,76,0.52)]">
                   <img src="/janocaminho.jpg" alt="" className="h-full w-full rounded-[0.85rem] object-cover" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Login de cliente</span>
+                  <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Login de cliente</span>
                   <span className="mt-0.5 block text-sm font-extrabold tracking-[-0.02em] text-slate-900">Pedidos, endereços e compras em um só lugar</span>
                 </span>
                 <span className="hidden rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-emerald-700 sm:inline-flex">
@@ -571,7 +571,7 @@ export function ClientAuth() {
                 setError('');
                 setMode('login');
               }}
-              className={`min-h-10 flex-1 rounded-[0.9rem] px-3 py-2.5 text-xs font-bold transition-all sm:py-3 ${mode === 'login' ? 'bg-white text-[#153A4C] shadow-sm ring-1 ring-[#336886]/10' : 'text-slate-600 hover:bg-white/70'}`}
+              className={`min-h-10 flex-1 rounded-[0.9rem] px-3 py-2.5 text-xs font-bold transition-all sm:py-3 ${mode === 'login' ? 'bg-white text-[#153A4C] shadow-sm ring-1 ring-[#2F9DF7]/10' : 'text-slate-600 hover:bg-white/70'}`}
             >
               Login
             </button>
@@ -582,7 +582,7 @@ export function ClientAuth() {
                 setError('');
                 setMode('register');
               }}
-              className={`min-h-10 flex-1 rounded-[0.9rem] px-3 py-2.5 text-xs font-bold transition-all sm:py-3 ${mode === 'register' ? 'bg-white text-[#153A4C] shadow-sm ring-1 ring-[#336886]/10' : 'text-slate-600 hover:bg-white/70'}`}
+              className={`min-h-10 flex-1 rounded-[0.9rem] px-3 py-2.5 text-xs font-bold transition-all sm:py-3 ${mode === 'register' ? 'bg-white text-[#153A4C] shadow-sm ring-1 ring-[#2F9DF7]/10' : 'text-slate-600 hover:bg-white/70'}`}
             >
               Cadastro
             </button>
@@ -685,7 +685,7 @@ export function ClientAuth() {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="inline-flex min-h-10 items-center rounded-full px-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#1c4b62] hover:text-[#153a4c] hover:underline sm:text-xs"
+                  className="inline-flex min-h-10 items-center rounded-full px-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#185A94] hover:text-[#153a4c] hover:underline sm:text-xs"
                 >
                   Esqueci minha senha
                 </button>
@@ -725,7 +725,7 @@ export function ClientAuth() {
             <button
               type="submit"
               disabled={loading}
-              className="ds-btn-shine w-full rounded-2xl bg-[linear-gradient(135deg,#1c4b62,#336886)] px-4 py-3 text-sm font-black text-white shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] transition-all active:scale-[0.99] disabled:opacity-60 sm:py-3.5"
+              className="ds-btn-shine w-full rounded-2xl bg-[linear-gradient(135deg,#185A94,#2F9DF7)] px-4 py-3 text-sm font-black text-white shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] transition-all active:scale-[0.99] disabled:opacity-60 sm:py-3.5"
             >
               {loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : 'Entrar'}
             </button>
@@ -736,7 +736,7 @@ export function ClientAuth() {
                   type="button"
                   onClick={handleBiometricLogin}
                   disabled={biometricLoading || loading}
-                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#336886]/15 bg-[#edf5fa] px-4 py-2.5 text-sm font-black text-[#153A4C] shadow-[0_14px_30px_-26px_rgba(51,104,134,0.45)] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:py-3"
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#2F9DF7]/15 bg-[#DBEEFD] px-4 py-2.5 text-sm font-black text-[#153A4C] shadow-[0_14px_30px_-26px_rgba(51,104,134,0.45)] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:py-3"
                 >
                   <LockKey size={18} weight="duotone" />
                   {biometricLoading ? 'Lendo biometria...' : 'Usar biometria neste aparelho'}
@@ -769,7 +769,7 @@ export function ClientAuth() {
       {verifyPrompt ? (
         <div className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/55 px-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
           <div className="flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-7rem)] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.94))] shadow-[0_36px_120px_-28px_rgba(15,23,42,0.55)] sm:max-h-[min(48rem,calc(100dvh-3rem))]">
-            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#153a4c_0%,#1c4b62_55%,#336886_100%)] px-6 pb-8 pt-6 text-white">
+            <div className="relative overflow-hidden bg-[linear-gradient(135deg,#153a4c_0%,#185A94_55%,#2F9DF7_100%)] px-6 pb-8 pt-6 text-white">
               <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_68%)]" />
               <div className="relative flex items-start justify-between gap-4">
                 <div className="space-y-3">
@@ -817,7 +817,7 @@ export function ClientAuth() {
             <div className="space-y-5 overflow-y-auto px-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-5">
               <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                 <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
-                  <SealCheck size={16} weight="duotone" className="text-[#1c4b62]" />
+                  <SealCheck size={16} weight="duotone" className="text-[#185A94]" />
                   Confirmação segura
                 </div>
                 <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
@@ -841,7 +841,7 @@ export function ClientAuth() {
                       onChange={(e) => handleCodeDigitChange(index, e.target.value)}
                       onKeyDown={(e) => handleCodeKeyDown(index, e)}
                       onPaste={handleCodePaste}
-                      className="h-16 w-14 rounded-2xl border border-slate-200 bg-slate-50 text-center text-2xl font-black tracking-[0.1em] text-slate-900 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] outline-none transition focus:border-[#1c4b62] focus:bg-white focus:ring-4 focus:ring-[#1c4b62]/10 sm:w-16"
+                      className="h-16 w-14 rounded-2xl border border-slate-200 bg-slate-50 text-center text-2xl font-black tracking-[0.1em] text-slate-900 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.5)] outline-none transition focus:border-[#185A94] focus:bg-white focus:ring-4 focus:ring-[#185A94]/10 sm:w-16"
                     />
                   ))}
                 </div>
@@ -867,7 +867,7 @@ export function ClientAuth() {
                   type="button"
                   onClick={handleVerifyCode}
                   disabled={verificationCode.length !== 4 || codeLoading}
-                  className="rounded-2xl bg-[linear-gradient(135deg,#153a4c,#1c4b62,#336886)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
+                  className="rounded-2xl bg-[linear-gradient(135deg,#153a4c,#185A94,#2F9DF7)] px-4 py-3.5 text-sm font-black text-white shadow-[0_24px_50px_-24px_rgba(15,59,83,0.55)] transition active:scale-[0.99] disabled:opacity-60"
                 >
                   {codeLoading ? 'Confirmando código...' : 'Confirmar e entrar'}
                 </button>

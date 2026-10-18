@@ -33,7 +33,7 @@ export function OrderTrackingProgressCard({
       aria-labelledby="order-status-title"
     >
       <div className="px-4 pb-3 pt-4">
-        <p id="order-status-title" className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">
+        <p id="order-status-title" className="text-[11px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">
           Andamento do pedido
         </p>
 
@@ -65,8 +65,8 @@ export function OrderTrackingProgressCard({
 
           {nextStep ? (
             <div className="flex items-start gap-3 rounded-2xl border border-dashed border-[#cddde7] bg-white/55 px-3.5 py-3">
-              <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#d6e4ed] bg-[#f4f8fb] text-[#336886]">
-                <span className="h-2 w-2 rounded-full bg-[#336886]" />
+              <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#d6e4ed] bg-[#f4f8fb] text-[#2F9DF7]">
+                <span className="h-2 w-2 rounded-full bg-[#2F9DF7]" />
               </span>
               <div className="min-w-0">
                 <p className="text-2xs font-black uppercase tracking-[0.16em] text-slate-400">Próximo passo</p>
@@ -96,7 +96,7 @@ export function OrderTrackingProgressCard({
         <CaretDown
           size={17}
           weight="bold"
-          className={`shrink-0 text-[#336886] transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+          className={`shrink-0 text-[#2F9DF7] transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -109,7 +109,7 @@ export function OrderTrackingProgressCard({
                 className="pointer-events-none absolute left-[10px] top-3 w-[1.5px] rounded-full transition-all duration-700"
                 style={{
                   height: `${(currentIndex / Math.max(steps.length - 1, 1)) * 100}%`,
-                  background: isCancelled ? '#fda4af' : 'linear-gradient(180deg,#336886,#336886)',
+                  background: isCancelled ? '#fda4af' : 'linear-gradient(180deg,#2F9DF7,#2F9DF7)',
                 }}
               />
             ) : null}

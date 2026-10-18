@@ -34,7 +34,7 @@ export function TermsOfUse() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
 
         {/* Hero */}
-        <div className="rounded-3xl bg-gradient-to-br from-[#1a3a52] to-[#336886] p-6 sm:p-8 text-white shadow-xl">
+        <div className="rounded-3xl bg-gradient-to-br from-[#1a3a52] to-[#2F9DF7] p-6 sm:p-8 text-white shadow-xl">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg shrink-0">
               <img src="/janocaminho.jpg" alt="Já no Caminho" className="w-full h-full object-cover" />
@@ -130,7 +130,7 @@ export function TermsOfUse() {
         {/* LGPD */}
         <div className="rounded-3xl bg-white border border-slate-200 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.35)] p-6 sm:p-8 space-y-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex rounded-full bg-[#336886]/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-[#336886]">LGPD</span>
+            <span className="inline-flex rounded-full bg-[#2F9DF7]/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-[#2F9DF7]">LGPD</span>
           </div>
           <h2 className="text-lg font-black text-slate-900">Política de Privacidade e Proteção de Dados</h2>
           <p className="text-xs text-slate-400 font-medium">Em conformidade com a Lei nº 13.709/2018</p>

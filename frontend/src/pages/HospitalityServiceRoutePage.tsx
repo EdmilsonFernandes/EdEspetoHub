@@ -163,8 +163,8 @@ const estimateMinutes = (distanceKm?: number | null) => {
 const pointFallbackImage = (point: any, kind: 'service' | 'place') =>
   getStoreAvatarUrl(point?.slug || point?.id || point?.name, point?.name || (kind === 'service' ? 'Serviço' : 'Hospedagem'));
 
-const PointCard = ({ point, label, kind, icon: Icon, imageUrl, accent = '#336886' }: any) => (
-  <SurfaceCard padding="sm" className="jnc-hub-touch jnc-hub-lift group rounded-[1.45rem] border-white/80 bg-white/88 ring-1 ring-slate-900/[0.03] backdrop-blur-xl md:hover:border-[#336886]/18">
+const PointCard = ({ point, label, kind, icon: Icon, imageUrl, accent = '#2F9DF7' }: any) => (
+  <SurfaceCard padding="sm" className="jnc-hub-touch jnc-hub-lift group rounded-[1.45rem] border-white/80 bg-white/88 ring-1 ring-slate-900/[0.03] backdrop-blur-xl md:hover:border-[#2F9DF7]/18">
     <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent z-20" />
     <div className="flex gap-3">
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[1.15rem] bg-slate-100 ring-1 ring-white">
@@ -389,7 +389,7 @@ export function HospitalityServiceRoutePage() {
           <SurfaceCard padding="none" className="rounded-[1.85rem] border-white/85 bg-white/92 p-4 backdrop-blur sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Rota para atendimento</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Rota para atendimento</p>
                 <h1 className="mt-2 text-2xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-4xl">
                   {servicePoint.name} até {placePoint.name}
                 </h1>
@@ -399,14 +399,14 @@ export function HospitalityServiceRoutePage() {
               </div>
               {canShowMap ? (
               <div className="grid grid-cols-2 gap-2 sm:min-w-[15rem]">
-                <SurfaceCard padding="sm" className="rounded-[1.15rem] border-[#336886]/12 bg-white/82 text-[#153A4C] shadow-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Distância</p>
+                <SurfaceCard padding="sm" className="rounded-[1.15rem] border-[#2F9DF7]/12 bg-white/82 text-[#153A4C] shadow-sm">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]/72">Distância</p>
                   <p className="mt-1 text-sm font-black">
                     {formatRouteDistance(routeEstimate?.distanceKm) || formatDistance(distanceKm)}
                   </p>
                 </SurfaceCard>
                 <SurfaceCard tone="success" padding="sm" className="rounded-[1.15rem] border-[#5FD35A]/20 bg-[#5FD35A]/12 text-[#153A4C] ring-1 ring-white/70">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]/72">Tempo</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]/72">Tempo</p>
                   <p className="mt-1 text-sm font-black">
                     {formatRouteDuration(routeEstimate?.durationMin) || estimateMinutes(distanceKm) || 'Abrir mapa'}
                   </p>
@@ -416,7 +416,7 @@ export function HospitalityServiceRoutePage() {
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <PointCard point={servicePoint} label="Origem" kind="service" icon={Storefront} imageUrl={serviceImageUrl} accent="#336886" />
+              <PointCard point={servicePoint} label="Origem" kind="service" icon={Storefront} imageUrl={serviceImageUrl} accent="#2F9DF7" />
               <PointCard point={placePoint} label="Destino do hóspede" kind="place" icon={HouseLine} imageUrl={placeImageUrl} accent="#5FD35A" />
             </div>
 
@@ -463,7 +463,7 @@ export function HospitalityServiceRoutePage() {
                 <button
                   type="button"
                   onClick={handleShareOrCopy}
-                  className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] bg-[#336886] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.62)] hover:-translate-y-0.5"
+                  className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] bg-[#2F9DF7] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.62)] hover:-translate-y-0.5"
                 >
                   <ShareNetwork size={18} weight="fill" />
                   Compartilhar localização
@@ -475,7 +475,7 @@ export function HospitalityServiceRoutePage() {
                   onClick={openExternalRoute(googleDirectionsUrl, googleNativeUrl)}
                   target="_blank"
                   rel="noreferrer"
-                  className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#336886]/14 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#336886] shadow-sm hover:-translate-y-0.5 hover:border-[#336886]/18"
+                  className="jnc-hub-touch inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.15rem] border border-[#2F9DF7]/14 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#2F9DF7] shadow-sm hover:-translate-y-0.5 hover:border-[#2F9DF7]/18"
                 >
                   <GoogleMapsIcon className="h-6 w-6" />
                   Abrir no mapa
@@ -496,7 +496,7 @@ export function HospitalityServiceRoutePage() {
               </Chip>
             </div>
             {copied ? (
-              <p aria-live="polite" className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#5FD35A]/14 px-3 py-2 text-xs font-black text-[#2d5f7b]">
+              <p aria-live="polite" className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#5FD35A]/14 px-3 py-2 text-xs font-black text-[#1A6FC8]">
                 <CheckCircle size={15} weight="fill" />
                 {copied}
               </p>
