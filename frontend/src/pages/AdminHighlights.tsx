@@ -216,7 +216,7 @@ function SearchAndFilters({ query, onQueryChange, sortOrder, onSortOrderChange, 
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
             placeholder={placeholder}
-            className="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-9 pr-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7]/40 focus:ring-4 focus:ring-[#2F9DF7]/10"
+            className="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-9 pr-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2563EB]/40 focus:ring-4 focus:ring-[#2563EB]/10"
           />
         </label>
         <select
@@ -258,10 +258,10 @@ function VisibilityShell({ activeTab, onTabChange, children, activeCount, pushCo
   return (
     <div className="min-w-0 space-y-4 px-0 sm:px-1">
       <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 p-4 shadow-[0_20px_70px_-48px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:p-5">
-        <div className="pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full bg-[#2F9DF7]/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full bg-[#2563EB]/10 blur-3xl" />
         <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Já no Caminho</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#2563EB]">Já no Caminho</p>
             <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Visibilidade da loja</h1>
             <p className="mt-1 max-w-2xl text-sm font-medium leading-6 text-slate-600">
               Controle vitrines pagas e notificações sem misturar contextos. Cada aba tem criação, busca, filtros e histórico próprio.
@@ -368,7 +368,7 @@ function HighlightsTab({
       <section className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
           <div className="xl:w-[34%]">
-            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]">Criar destaque</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2563EB]">Criar destaque</p>
             <h2 className="mt-1 text-lg font-black text-slate-950">Produto na vitrine</h2>
             <p className="mt-1 text-sm font-medium leading-6 text-slate-600">
               Escolha o produto, a duração e gere a cobrança sem sair desta aba.
@@ -380,7 +380,7 @@ function HighlightsTab({
               <select
                 value={form.productId}
                 onChange={(event) => setForm((prev: any) => ({ ...prev, productId: event.target.value }))}
-                className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]/40 focus:ring-4 focus:ring-[#2F9DF7]/10"
+                className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]/40 focus:ring-4 focus:ring-[#2563EB]/10"
               >
                 <option value="">Selecione um produto</option>
                 {productOptions.map((product: any) => (
@@ -627,7 +627,7 @@ function PushTab({ auth, pushes, loading, pushForm, setPushForm, pushSubmitting,
       <section className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 xl:flex-row">
           <div className="xl:w-[34%]">
-            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]">Novo push</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2563EB]">Novo push</p>
             <h2 className="mt-1 text-lg font-black text-slate-950">Campanha rápida</h2>
             <p className="mt-1 text-sm font-medium leading-6 text-slate-600">
               O push gera cobrança de R$ 4,90 e entra em revisão antes do envio para os usuários do app.
@@ -646,7 +646,7 @@ function PushTab({ auth, pushes, loading, pushForm, setPushForm, pushSubmitting,
                 value={pushForm.title}
                 onChange={(event) => setPushForm((prev: any) => ({ ...prev, title: event.target.value }))}
                 placeholder={`Ex: ${storeName} — promoção especial`}
-                className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]/40 focus:ring-4 focus:ring-[#2F9DF7]/10"
+                className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]/40 focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </label>
             <label className="block space-y-1 lg:row-span-2">
@@ -657,7 +657,7 @@ function PushTab({ auth, pushes, loading, pushForm, setPushForm, pushSubmitting,
                 value={pushForm.message}
                 onChange={(event) => setPushForm((prev: any) => ({ ...prev, message: event.target.value }))}
                 placeholder="Ex: Estamos abertos hoje com promoção especial. Toque para conferir."
-                className="min-h-[112px] w-full resize-none rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]/40 focus:ring-4 focus:ring-[#2F9DF7]/10"
+                className="min-h-[112px] w-full resize-none rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]/40 focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </label>
             <div className="flex flex-col justify-between gap-3 rounded-2xl border border-amber-100 bg-amber-50/75 px-3 py-2">
@@ -734,7 +734,7 @@ function PushTab({ auth, pushes, loading, pushForm, setPushForm, pushSubmitting,
                           {storeLogo ? (
                             <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
                           ) : (
-                            <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] text-xs font-black text-white">
+                            <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#2563EB)] text-xs font-black text-white">
                               {storeName.slice(0, 2).toUpperCase()}
                             </div>
                           )}
@@ -775,7 +775,7 @@ function PushTab({ auth, pushes, loading, pushForm, setPushForm, pushSubmitting,
                           {storeLogo ? (
                             <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
                           ) : (
-                            <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] text-xs font-black text-white">
+                            <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#2563EB)] text-xs font-black text-white">
                               {storeName.slice(0, 2).toUpperCase()}
                             </div>
                           )}

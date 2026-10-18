@@ -567,7 +567,7 @@ export function DestinationPartnerRequestPage() {
               eyebrow="Solicitação"
               title="Dados do parceiro"
               subtitle="Preencha os dados públicos e informe quem será responsável pelo acesso."
-              action={<Compass size={28} weight="duotone" className="text-[#2F9DF7]" />}
+              action={<Compass size={28} weight="duotone" className="text-[#2563EB]" />}
             />
 
             {error ? (
@@ -585,7 +585,7 @@ export function DestinationPartnerRequestPage() {
                   O time Já no Caminho vai revisar e entrar em contato quando estiver tudo certo.
                 </p>
                 <span className="mt-1 max-w-md text-xs font-semibold leading-relaxed text-slate-500">
-                  Depois de aprovado, no portal você pode <strong className="text-[#2F9DF7]">destacar seu espaço</strong> para aparecer primeiro no destino (opcional, a partir de R$ 19,90).
+                  Depois de aprovado, no portal você pode <strong className="text-[#2563EB]">destacar seu espaço</strong> para aparecer primeiro no destino (opcional, a partir de R$ 19,90).
                 </span>
                 <Button type="button" size="lg" onClick={() => { setSuccess(null); formStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} className="mt-3 rounded-full uppercase tracking-[0.1em]">
                   Enviar outra solicitação
@@ -616,7 +616,7 @@ export function DestinationPartnerRequestPage() {
                   <div className="mt-3 grid gap-3 sm:grid-cols-[120px_1fr]">
                     <label>
                       <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">UF</span>
-                      <select ref={firstPartnerControlRef} value={selectedDestinationState} onChange={(event) => handleDestinationStateChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#2F9DF7]">
+                      <select ref={firstPartnerControlRef} value={selectedDestinationState} onChange={(event) => handleDestinationStateChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#2563EB]">
                         {stateOptions.map((state) => (
                           <option key={state} value={state}>{state}</option>
                         ))}
@@ -624,7 +624,7 @@ export function DestinationPartnerRequestPage() {
                     </label>
                     <label>
                       <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Cidade</span>
-                      <select value={form.destinationId} onChange={(event) => handleDestinationChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#2F9DF7]" required>
+                      <select value={form.destinationId} onChange={(event) => handleDestinationChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#2563EB]" required>
                         {filteredDestinations.map((destination) => (
                           <option key={destination.id} value={destination.id}>{destination.city || destination.name}</option>
                         ))}
@@ -640,7 +640,7 @@ export function DestinationPartnerRequestPage() {
                   <div className="mt-3 grid gap-3 sm:grid-cols-[120px_1fr]">
                     <label>
                       <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">UF</span>
-                      <select ref={firstPartnerControlRef} value={form.destinationState} onChange={(event) => handleNewDestinationStateChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#2F9DF7]">
+                      <select ref={firstPartnerControlRef} value={form.destinationState} onChange={(event) => handleNewDestinationStateChange(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#2563EB]">
                         <option value="">Selecione</option>
                         {BRAZIL_STATES.map((state) => (
                           <option key={state.value} value={state.value}>{state.value} · {state.label}</option>
@@ -653,7 +653,7 @@ export function DestinationPartnerRequestPage() {
                         value={form.destinationCity}
                         onChange={(event) => handleNewDestinationCityChange(event.target.value)}
                         disabled={!form.destinationState || newDestinationCitiesLoading || availableNewDestinationCities.length === 0}
-                        className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#2F9DF7]"
+                        className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold outline-none focus:border-[#2563EB]"
                       >
                         <option value="">
                           {!form.destinationState
@@ -697,7 +697,7 @@ export function DestinationPartnerRequestPage() {
 
               <label>
                 <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Tipo de parceiro</span>
-                <select value={form.partnerType} onChange={(event) => updatePartnerType(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#2F9DF7]">
+                <select value={form.partnerType} onChange={(event) => updatePartnerType(event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#2563EB]">
                   <option value="HOSPITALITY">Chalé ou pousada</option>
                   <option value="SERVICE_PROVIDER">Serviço turístico</option>
                 </select>
@@ -706,7 +706,7 @@ export function DestinationPartnerRequestPage() {
               {form.partnerType === 'HOSPITALITY' ? (
                 <label>
                   <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Tipo de hospedagem</span>
-                  <select value={form.placeType} onChange={(event) => update('placeType', event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#2F9DF7]">
+                  <select value={form.placeType} onChange={(event) => update('placeType', event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#2563EB]">
                     <option value="CHALE">Chalé</option>
                     <option value="POUSADA">Pousada</option>
                     <option value="HOTEL">Hotel</option>
@@ -717,7 +717,7 @@ export function DestinationPartnerRequestPage() {
               ) : (
                 <label>
                   <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Categoria</span>
-                  <select value={form.category} onChange={(event) => update('category', event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#2F9DF7]">
+                  <select value={form.category} onChange={(event) => update('category', event.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none focus:border-[#2563EB]">
                     <option value="PASSEIO">Passeio</option>
                     <option value="MASSAGEM">Massagem</option>
                     <option value="RESTAURANTE_VISITAR">Restaurante para visitar</option>
@@ -732,10 +732,10 @@ export function DestinationPartnerRequestPage() {
               <TextareaField name="partnerDescription" value={form.description} onChange={(event) => update('description', event.target.value)} label="Descrição pública" placeholder="Conte o que o hóspede encontra aqui" rows={3} wrapperClassName="sm:col-span-2" />
               <div className="sm:col-span-2 grid gap-3 sm:grid-cols-[160px_1fr]">
                 <div>
-                  <TextField name="zipCode" value={form.zipCode} onChange={(event) => update('zipCode', formatCepBr(event.target.value))} label="CEP" placeholder="00000-000" inputMode="numeric" autoComplete="postal-code" rightIcon={zipLookupLoading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#2F9DF7]/30 border-t-[#2F9DF7]" /> : undefined} />
+                  <TextField name="zipCode" value={form.zipCode} onChange={(event) => update('zipCode', formatCepBr(event.target.value))} label="CEP" placeholder="00000-000" inputMode="numeric" autoComplete="postal-code" rightIcon={zipLookupLoading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#2563EB]/30 border-t-[#2563EB]" /> : undefined} />
                   {zipLookupLoading ? (
-                    <p className="mt-1 flex items-center gap-1.5 px-1 text-[11px] font-bold text-[#2F9DF7]">
-                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#2F9DF7]/30 border-t-[#2F9DF7]" />
+                    <p className="mt-1 flex items-center gap-1.5 px-1 text-[11px] font-bold text-[#2563EB]">
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#2563EB]/30 border-t-[#2563EB]" />
                       Buscando endereço...
                     </p>
                   ) : null}

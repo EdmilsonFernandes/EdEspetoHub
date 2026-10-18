@@ -282,8 +282,8 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
       : 'border-amber-200 bg-amber-50 text-amber-700';
   const renderCodeBoxes = (value: string, tone: 'default' | 'danger' = 'default') => {
     const digits = Array.from({ length: 6 }, (_, index) => value[index] || '0');
-    const activeClass = tone === 'danger' ? 'border-rose-400 ring-rose-100' : 'border-[#2F9DF7] ring-[#2F9DF7]/10';
-    const filledClass = tone === 'danger' ? 'border-rose-200 text-slate-900' : 'border-[#2F9DF7]/25 text-slate-900';
+    const activeClass = tone === 'danger' ? 'border-rose-400 ring-rose-100' : 'border-[#2563EB] ring-[#2563EB]/10';
+    const filledClass = tone === 'danger' ? 'border-rose-200 text-slate-900' : 'border-[#2563EB]/25 text-slate-900';
     const emptyClass = tone === 'danger' ? 'border-rose-100 text-rose-300' : 'border-slate-200 text-slate-400';
 
     return (
@@ -314,7 +314,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
               </span>
             </div>
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#2F9DF7]">Já no Caminho</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#2563EB]">Já no Caminho</p>
               <h2 className="text-lg font-black tracking-[-0.03em] text-slate-900">Segurança da conta</h2>
               <p className="mt-0.5 text-xs font-semibold text-slate-500">Código autenticador e aparelhos confiáveis.</p>
             </div>
@@ -331,7 +331,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
           <div className="overflow-hidden rounded-3xl border border-slate-100 bg-[radial-gradient(circle_at_top_left,rgba(51,104,134,0.12),transparent_36%),linear-gradient(135deg,#ffffff,#f8fafc)] p-4 shadow-[0_24px_56px_-42px_rgba(15,23,42,0.5)]">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]">Verificação em duas etapas</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2563EB]">Verificação em duas etapas</p>
                 <p className="mt-1 text-lg font-black tracking-[-0.03em] text-slate-950">
                   {isEnabled ? 'Proteção ativa' : featureDisabled ? 'Proteção indisponível' : 'Proteção desativada'}
                 </p>
@@ -380,10 +380,10 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
           </div>
 
           {mode === 'setup' && setup ? (
-            <div className="rounded-3xl border border-[#2F9DF7]/12 bg-white p-4 shadow-[0_24px_50px_-34px_rgba(15,23,42,0.55)]">
+            <div className="rounded-3xl border border-[#2563EB]/12 bg-white p-4 shadow-[0_24px_50px_-34px_rgba(15,23,42,0.55)]">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]">Ativacao</p>
+                  <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2563EB]">Ativacao</p>
                   <h3 className="text-lg font-black tracking-[-0.03em] text-slate-950">Conecte o autenticador</h3>
                   <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">Escaneie o QR Code e informe o codigo gerado.</p>
                 </div>
@@ -412,7 +412,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
                       <button
                         type="button"
                         onClick={copySecret}
-                        className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#2F9DF7] shadow-sm"
+                        className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#2563EB] shadow-sm"
                       >
                         <Copy size={13} weight="duotone" />
                         {copiedSecret ? 'Copiada' : 'Copiar'}
@@ -550,7 +550,7 @@ export function AccountMfaPanel({ open, authMode = 'admin', initialIntent = 'ove
           {isEnabled ? (
           <div className="rounded-3xl border border-slate-100 bg-white p-4">
             <div className="mb-3 flex items-center gap-2">
-              <DeviceMobile size={18} weight="duotone" className="text-[#2F9DF7]" />
+              <DeviceMobile size={18} weight="duotone" className="text-[#2563EB]" />
               <div>
                 <p className="text-sm font-black text-slate-900">Aparelhos confiáveis</p>
                 <p className="text-[11px] font-semibold text-slate-500">

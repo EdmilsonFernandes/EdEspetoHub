@@ -418,12 +418,12 @@ export function MotoboyCurrent() {
                     </span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#2F9DF7]">Próxima ação</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#2563EB]">Próxima ação</p>
                     <p className="mt-1 text-xl font-black leading-tight text-slate-950">{activeStop.eyebrow}</p>
                     <p className="mt-1 text-sm font-extrabold text-slate-800">{activeStop.title}</p>
                     <div className="mt-2 rounded-2xl border border-slate-200 bg-white/80 px-3 py-2">
                       <p className="flex items-start gap-2 text-xs font-semibold leading-relaxed text-slate-600">
-                        <MapPinLine size={15} weight="duotone" className="mt-0.5 shrink-0 text-[#2F9DF7]" />
+                        <MapPinLine size={15} weight="duotone" className="mt-0.5 shrink-0 text-[#2563EB]" />
                         <span className="break-words">{activeStop.address}</span>
                       </p>
                     </div>
@@ -434,7 +434,7 @@ export function MotoboyCurrent() {
                   <button
                     type="button"
                     onClick={openRoute}
-                    className="btn-press rounded-xl border border-[#BCE2FC] bg-white px-3 py-2.5 text-xs font-black text-[#153A4C]"
+                    className="btn-press rounded-xl border border-[#C3D8FB] bg-white px-3 py-2.5 text-xs font-black text-[#153A4C]"
                   >
                     <span className="inline-flex items-center justify-center gap-2">
                       <NavigationArrow size={16} weight="fill" />
@@ -476,7 +476,7 @@ export function MotoboyCurrent() {
                           className={[
                             'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border',
                             isCurrent
-                              ? 'border-[#2F9DF7] bg-[#2F9DF7] text-white shadow-[0_14px_26px_-18px_rgba(51,104,134,0.85)]'
+                              ? 'border-[#2563EB] bg-[#2563EB] text-white shadow-[0_14px_26px_-18px_rgba(51,104,134,0.85)]'
                               : isDone
                                 ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                                 : 'border-slate-200 bg-slate-50 text-slate-500',
@@ -506,7 +506,7 @@ export function MotoboyCurrent() {
                 <div
                   className={[
                     'rounded-2xl border px-3 py-3',
-                    deliveryStatus === 'ACCEPTED' ? 'border-[#cfe0ea] bg-[#F0F8FE]' : 'border-emerald-200 bg-emerald-50',
+                    deliveryStatus === 'ACCEPTED' ? 'border-[#cfe0ea] bg-[#EFF5FE]' : 'border-emerald-200 bg-emerald-50',
                   ].join(' ')}
                 >
                   <div className="flex items-start gap-3">
@@ -542,7 +542,7 @@ export function MotoboyCurrent() {
                     deliveryStatus === 'ACCEPTED'
                       ? 'border-slate-200 bg-white'
                       : deliveryStatus === 'PICKED_UP' || deliveryStatus === 'IN_TRANSIT'
-                        ? 'border-[#cfe0ea] bg-[#F0F8FE]'
+                        ? 'border-[#cfe0ea] bg-[#EFF5FE]'
                         : 'border-slate-200 bg-white',
                   ].join(' ')}
                 >
@@ -665,13 +665,13 @@ export function MotoboyCurrent() {
               <span
                 className={[
                   'inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border',
-                  codeLocked ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-[#BCE2FC] bg-[#F0F8FE] text-[#2F9DF7]',
+                  codeLocked ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-[#C3D8FB] bg-[#EFF5FE] text-[#2563EB]',
                 ].join(' ')}
               >
                 {codeLocked ? <WarningCircle size={22} weight="fill" /> : <ShieldCheck size={22} weight="duotone" />}
               </span>
               <div className="min-w-0">
-                <p className={['text-[10px] font-black uppercase tracking-[0.18em]', codeLocked ? 'text-rose-600' : 'text-[#2F9DF7]'].join(' ')}>
+                <p className={['text-[10px] font-black uppercase tracking-[0.18em]', codeLocked ? 'text-rose-600' : 'text-[#2563EB]'].join(' ')}>
                   {codeLocked ? 'Confirmação bloqueada' : 'Código do cliente'}
                 </p>
                 <h3 className="mt-1 text-lg font-black text-slate-900">
@@ -696,7 +696,7 @@ export function MotoboyCurrent() {
               }}
               placeholder="0000"
               disabled={codeLocked}
-              className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-2xl font-black tracking-[0.5em] text-slate-900 focus:border-[#2F9DF7] focus:outline-none focus:ring-2 focus:ring-[#2F9DF7]/15 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-2xl font-black tracking-[0.5em] text-slate-900 focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15 disabled:cursor-not-allowed disabled:opacity-60"
               autoFocus
             />
             {codeError ? (

@@ -388,12 +388,12 @@ export function ChargeSheet({
       }}
       className={`jnc-ds-focus-ring group flex min-h-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl border-2 px-2 py-3 text-center transition active:scale-[0.97] ${
         enabled && canCharge
-          ? 'border-slate-200 bg-white shadow-[0_10px_24px_-18px_rgba(15,23,42,0.45)] hover:border-[var(--jnc-primary,#2f9df7)] hover:shadow-[0_14px_28px_-16px_rgba(47,157,247,0.55)]'
+          ? 'border-slate-200 bg-white shadow-[0_10px_24px_-18px_rgba(15,23,42,0.45)] hover:border-[var(--jnc-primary,#2563EB)] hover:shadow-[0_14px_28px_-16px_rgba(47,157,247,0.55)]'
           : 'border-slate-200 bg-slate-50 opacity-55'
       }`}
       aria-label={`Cobrar via ${label}${enabled ? '' : ' (indisponível)'}`}
     >
-      <span className="text-[26px] leading-none text-[var(--jnc-primary,#2f9df7)]">{icon}</span>
+      <span className="text-[26px] leading-none text-[var(--jnc-primary,#2563EB)]">{icon}</span>
       <span className="text-sm font-black tracking-tight text-slate-900">{label}</span>
       <span className="text-[10.5px] font-semibold leading-tight text-slate-500">
         {enabled ? sub : caps ? 'conecte o MP' : 'reconectando…'}
@@ -410,7 +410,7 @@ export function ChargeSheet({
       onClose={onClose}
       title={
         <span className="flex items-center gap-2">
-          <DeviceMobileCamera className="text-[var(--jnc-primary,#2f9df7)]" size={22} weight="duotone" />
+          <DeviceMobileCamera className="text-[var(--jnc-primary,#2563EB)]" size={22} weight="duotone" />
           Cobrar pedido
         </span>
       }
@@ -437,7 +437,7 @@ export function ChargeSheet({
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 pb-5 pt-4">
         {phase === 'loading' ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 text-slate-500">
-            <SpinnerGap size={30} className="animate-spin text-[var(--jnc-primary,#2f9df7)]" />
+            <SpinnerGap size={30} className="animate-spin text-[var(--jnc-primary,#2563EB)]" />
             <p className="text-sm font-semibold">Carregando cobrança…</p>
           </div>
         ) : null}
@@ -535,7 +535,7 @@ export function ChargeSheet({
                     }}
                     className={`jnc-ds-focus-ring flex min-h-[60px] items-center justify-between rounded-xl border-2 px-3 py-2 text-left transition active:scale-[0.98] ${
                       pointPaymentType === option.type
-                        ? 'border-[var(--jnc-primary,#2f9df7)] bg-white shadow-sm'
+                        ? 'border-[var(--jnc-primary,#2563EB)] bg-white shadow-sm'
                         : 'border-sky-200 bg-white hover:border-sky-300'
                     }`}
                   >
@@ -543,7 +543,7 @@ export function ChargeSheet({
                       <span className="block text-sm font-black tracking-tight text-slate-900">{option.label}</span>
                       <span className="block text-[10.5px] font-semibold text-slate-500">{option.sub}</span>
                     </span>
-                    <CreditCard size={18} className="text-[var(--jnc-primary,#2f9df7)]" />
+                    <CreditCard size={18} className="text-[var(--jnc-primary,#2563EB)]" />
                   </button>
                 ))}
                 <button
@@ -578,7 +578,7 @@ export function ChargeSheet({
                       className="jnc-ds-touch jnc-ds-focus-ring flex min-h-11 items-center justify-between rounded-xl border border-sky-200 bg-white px-3 py-2 text-left text-sm font-bold text-slate-800 active:scale-[0.98]"
                     >
                       Maquininha …{shortSerial(terminal.id)}
-                      <CreditCard size={18} className="text-[var(--jnc-primary,#2f9df7)]" />
+                      <CreditCard size={18} className="text-[var(--jnc-primary,#2563EB)]" />
                     </button>
                   ))}
                 </div>
@@ -644,7 +644,7 @@ export function ChargeSheet({
                       className="jnc-ds-touch jnc-ds-focus-ring flex min-h-11 items-center justify-between rounded-xl border border-sky-200 bg-white px-3 py-2 text-left text-sm font-bold text-slate-800 active:scale-[0.98]"
                     >
                       Maquininha …{shortSerial(terminal.id)}
-                      <CreditCard size={18} className="text-[var(--jnc-primary,#2f9df7)]" />
+                      <CreditCard size={18} className="text-[var(--jnc-primary,#2563EB)]" />
                     </button>
                   ))}
                 </div>
@@ -738,7 +738,7 @@ export function ChargeSheet({
 
         {phase === 'creating' ? (
           <div className="flex items-center justify-center gap-2 py-2 text-sm font-bold text-slate-500">
-            <SpinnerGap size={18} className="animate-spin text-[var(--jnc-primary,#2f9df7)]" />
+            <SpinnerGap size={18} className="animate-spin text-[var(--jnc-primary,#2563EB)]" />
             Enviando cobrança…
           </div>
         ) : null}
@@ -779,12 +779,12 @@ export function ChargeSheet({
           <div className="flex flex-col items-center gap-3">
             <div className="flex w-full items-center justify-between rounded-2xl border border-sky-200 bg-[linear-gradient(135deg,#f0f9ff,#e0f2fe)] px-4 py-2.5">
               <p className="text-[11px] font-black uppercase tracking-[0.16em] text-sky-800">Aguardando cartão</p>
-              <span className="rounded-xl bg-gradient-to-r from-sky-500 to-[var(--jnc-primary,#2f9df7)] px-3 py-1 text-sm font-black text-white tabular-nums">
+              <span className="rounded-xl bg-gradient-to-r from-sky-500 to-[var(--jnc-primary,#2563EB)] px-3 py-1 text-sm font-black text-white tabular-nums">
                 {countdown}
               </span>
             </div>
             <div className="flex min-h-[180px] w-full flex-col items-center justify-center gap-2 rounded-3xl border border-sky-200 bg-white p-5 shadow-[0_18px_40px_-30px_rgba(47,157,247,0.7)]">
-              <CreditCard size={44} weight="duotone" className="animate-pulse text-[var(--jnc-primary,#2f9df7)]" />
+              <CreditCard size={44} weight="duotone" className="animate-pulse text-[var(--jnc-primary,#2563EB)]" />
               <p className="text-lg font-black tracking-tight text-slate-900">
                 {formatBRL(Number(charge.amount))}
               </p>

@@ -298,8 +298,8 @@ export function StoreReviewsTab({ storeSlug }: { storeSlug: string }) {
                       </p>
                     )}
                     {review.storeReply && (
-                      <div className="mt-2.5 rounded-xl border border-[#2F9DF7]/15 bg-[#eef5f8] px-3 py-2.5">
-                        <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#2F9DF7]">Resposta da loja</p>
+                      <div className="mt-2.5 rounded-xl border border-[#2563EB]/15 bg-[#eef5f8] px-3 py-2.5">
+                        <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#2563EB]">Resposta da loja</p>
                         <p className="mt-1 whitespace-pre-line break-words text-sm leading-relaxed text-slate-700">
                           {review.storeReply}
                         </p>

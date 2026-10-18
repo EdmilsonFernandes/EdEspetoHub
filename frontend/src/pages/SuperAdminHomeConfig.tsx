@@ -32,7 +32,7 @@ const HOME_BANNER_ASPECT_LABEL = '2,5:1';
 const MARKETING_POPUP_RECOMMENDED_SIZE = '1200 x 1600 px';
 
 const PREVIEW_STORES = [
-  { id: 'store-1', name: 'Espetinho do Lago', subtitle: 'Entrega e retirada', accent: 'from-[#153A4C] to-[#2F9DF7]' },
+  { id: 'store-1', name: 'Espetinho do Lago', subtitle: 'Entrega e retirada', accent: 'from-[#153A4C] to-[#2563EB]' },
   { id: 'store-2', name: 'Adega do Bairro', subtitle: 'Bebidas geladas', accent: 'from-emerald-500 to-emerald-700' },
   { id: 'store-3', name: 'Hamburgueria Prime', subtitle: 'Smash e combos', accent: 'from-amber-500 to-orange-600' },
 ];
@@ -328,7 +328,7 @@ export function SuperAdminHomeConfig() {
       <div className="space-y-6">
         <div className="flex flex-col gap-4 rounded-[2rem] border border-slate-200 bg-white/92 px-5 py-5 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.18)] backdrop-blur sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <Link to="/superadmin" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">
+            <Link to="/superadmin" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[#2563EB]">
               <Sparkle size={14} weight="duotone" />
               Voltar ao Super Admin
             </Link>
@@ -353,7 +353,7 @@ export function SuperAdminHomeConfig() {
               type="button"
               onClick={save}
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_38px_-22px_rgba(21,58,76,0.45)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(135deg,#153A4C,#2563EB)] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_38px_-22px_rgba(21,58,76,0.45)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? <ArrowClockwise size={16} className="animate-spin" /> : <FloppyDisk size={16} weight="duotone" />}
               {saving ? 'Salvando...' : 'Salvar configuração'}
@@ -372,12 +372,12 @@ export function SuperAdminHomeConfig() {
             <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Banners de Destaque</p>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2563EB]">Banners de Destaque</p>
                   <h2 className="mt-1 text-lg font-black text-slate-900">Carrossel principal da home</h2>
                   <p className="mt-1 text-sm text-slate-500">
                     Até 4 banners. Hoje há <span className="font-black text-slate-900">{activeBannerCount}</span> ativos com imagem.
                   </p>
-                  <p className="mt-2 max-w-2xl rounded-2xl border border-[#BCE2FC] bg-[#DBEEFD]/70 px-3 py-2 text-xs font-semibold leading-relaxed text-[#2F9DF7]">
+                  <p className="mt-2 max-w-2xl rounded-2xl border border-[#C3D8FB] bg-[#E0EBFD]/70 px-3 py-2 text-xs font-semibold leading-relaxed text-[#2563EB]">
                     Formato real no Hub: <span className="font-black">{HOME_BANNER_RECOMMENDED_SIZE}</span> ({HOME_BANNER_ASPECT_LABEL}).
                     Mantenha textos e logos dentro da área segura de <span className="font-black">{HOME_BANNER_SAFE_AREA}</span>.
                   </p>
@@ -457,26 +457,26 @@ export function SuperAdminHomeConfig() {
                         <div className="grid gap-3 md:grid-cols-2">
                           <label className="block md:col-span-2">
                             <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Título opcional</span>
-                            <input value={banner.title} onChange={(event) => handleBannerChange(index, 'title', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]" />
+                            <input value={banner.title} onChange={(event) => handleBannerChange(index, 'title', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]" />
                           </label>
                           <label className="block md:col-span-2">
                             <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Descrição opcional</span>
-                            <textarea value={banner.description} onChange={(event) => handleBannerChange(index, 'description', event.target.value)} className="min-h-[96px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]" />
+                            <textarea value={banner.description} onChange={(event) => handleBannerChange(index, 'description', event.target.value)} className="min-h-[96px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]" />
                           </label>
                   <label className="block md:col-span-2">
                     <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Link ou ação opcional</span>
                     <div className="relative">
                       <LinkSimpleHorizontal size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input value={banner.actionUrl} onChange={(event) => handleBannerChange(index, 'actionUrl', event.target.value)} placeholder="/create?plan=trial ou https://..." className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]" />
+                      <input value={banner.actionUrl} onChange={(event) => handleBannerChange(index, 'actionUrl', event.target.value)} placeholder="/create?plan=trial ou https://..." className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]" />
                     </div>
                   </label>
                   <label className="block md:col-span-2">
                     <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Texto do CTA opcional</span>
-                    <input value={banner.actionLabel} onChange={(event) => handleBannerChange(index, 'actionLabel', event.target.value)} placeholder="Ex.: Saiba mais, Baixar app, Ver promoção" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]" />
+                    <input value={banner.actionLabel} onChange={(event) => handleBannerChange(index, 'actionLabel', event.target.value)} placeholder="Ex.: Saiba mais, Baixar app, Ver promoção" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]" />
                   </label>
                   <label className="block">
                     <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Ajuste da imagem</span>
-                    <select value={banner.fit} onChange={(event) => handleBannerChange(index, 'fit', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]">
+                    <select value={banner.fit} onChange={(event) => handleBannerChange(index, 'fit', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]">
                       <option value="cover">Preencher card (sem distorcer)</option>
                       <option value="contain">Conter imagem (mostrar tudo)</option>
                     </select>
@@ -484,7 +484,7 @@ export function SuperAdminHomeConfig() {
                   </label>
                           <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
                             <span className="text-sm font-black text-slate-800">Banner ativo</span>
-                            <input type="checkbox" checked={banner.active} onChange={(event) => handleBannerChange(index, 'active', event.target.checked)} className="h-5 w-5 rounded border-slate-300 text-[#2F9DF7]" />
+                            <input type="checkbox" checked={banner.active} onChange={(event) => handleBannerChange(index, 'active', event.target.checked)} className="h-5 w-5 rounded border-slate-300 text-[#2563EB]" />
                           </label>
                         </div>
                       </div>
@@ -496,7 +496,7 @@ export function SuperAdminHomeConfig() {
 
             <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Popup de Marketing</p>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2563EB]">Popup de Marketing</p>
                 <h2 className="mt-1 text-lg font-black text-slate-900">Abertura inicial do app</h2>
                 <p className="mt-1 text-sm text-slate-500">
                   Se estiver ativo e com imagem, o app mostra o popup depois da entrada do usuário.
@@ -549,26 +549,26 @@ export function SuperAdminHomeConfig() {
                 <div className="grid gap-3 md:grid-cols-2">
                   <label className="block md:col-span-2">
                     <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Título opcional</span>
-                    <input value={config.marketingPopup.title} onChange={(event) => handlePopupChange('title', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]" />
+                    <input value={config.marketingPopup.title} onChange={(event) => handlePopupChange('title', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]" />
                   </label>
                   <label className="block md:col-span-2">
                     <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Descrição opcional</span>
-                    <textarea value={config.marketingPopup.description} onChange={(event) => handlePopupChange('description', event.target.value)} className="min-h-[96px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]" />
+                    <textarea value={config.marketingPopup.description} onChange={(event) => handlePopupChange('description', event.target.value)} className="min-h-[96px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]" />
                   </label>
                   <label className="block md:col-span-2">
                     <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Link ou ação opcional</span>
                     <div className="relative">
                       <LinkSimpleHorizontal size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input value={config.marketingPopup.actionUrl} onChange={(event) => handlePopupChange('actionUrl', event.target.value)} placeholder="/create?plan=trial ou https://..." className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]" />
+                      <input value={config.marketingPopup.actionUrl} onChange={(event) => handlePopupChange('actionUrl', event.target.value)} placeholder="/create?plan=trial ou https://..." className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]" />
                     </div>
                   </label>
                   <label className="block md:col-span-2">
                     <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Texto do CTA opcional</span>
-                    <input value={config.marketingPopup.actionLabel} onChange={(event) => handlePopupChange('actionLabel', event.target.value)} placeholder="Ex.: Baixar app, Saiba mais" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]" />
+                    <input value={config.marketingPopup.actionLabel} onChange={(event) => handlePopupChange('actionLabel', event.target.value)} placeholder="Ex.: Baixar app, Saiba mais" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]" />
                   </label>
                   <label className="block">
                     <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">Ajuste da imagem</span>
-                    <select value={config.marketingPopup.fit} onChange={(event) => handlePopupChange('fit', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2F9DF7]">
+                    <select value={config.marketingPopup.fit} onChange={(event) => handlePopupChange('fit', event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-[#2563EB]">
                       <option value="cover">Preencher card (sem distorcer)</option>
                       <option value="contain">Conter imagem (mostrar tudo)</option>
                     </select>
@@ -576,7 +576,7 @@ export function SuperAdminHomeConfig() {
                   </label>
                   <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
                     <span className="text-sm font-black text-slate-800">Popup ativo</span>
-                    <input type="checkbox" checked={config.marketingPopup.active} onChange={(event) => handlePopupChange('active', event.target.checked)} className="h-5 w-5 rounded border-slate-300 text-[#2F9DF7]" />
+                    <input type="checkbox" checked={config.marketingPopup.active} onChange={(event) => handlePopupChange('active', event.target.checked)} className="h-5 w-5 rounded border-slate-300 text-[#2563EB]" />
                   </label>
                 </div>
               </div>
@@ -605,7 +605,7 @@ export function SuperAdminHomeConfig() {
                 <div className="rounded-[1.8rem] bg-[linear-gradient(180deg,#EEF2F7_0%,#F7FAFC_100%)] p-3">
                   <div className="flex items-center justify-between rounded-[1.4rem] border border-white/85 bg-white px-3 py-2 shadow-sm">
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Já no Caminho</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">Já no Caminho</p>
                       <p className="text-sm font-black text-slate-900">O que vai pedir hoje?</p>
                     </div>
                     <div className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">Hub</div>
@@ -656,7 +656,7 @@ export function SuperAdminHomeConfig() {
             </section>
 
             <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Regras rápidas</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2563EB]">Regras rápidas</p>
               <ul className="mt-3 space-y-2 text-sm font-semibold text-slate-600">
                 <li>Máximo de 4 banners na home.</li>
                 <li>O preview usa dados mockados para você enxergar o resultado no app.</li>

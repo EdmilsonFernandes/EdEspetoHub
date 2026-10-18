@@ -58,15 +58,15 @@ export function DddSelect({ value, onChange, className = '', disabled = false }:
           disabled
             ? 'cursor-not-allowed bg-slate-100 text-slate-400'
             : open
-            ? 'bg-white border border-[#2F9DF7]/30 text-[#2F9DF7] shadow-[0_0_0_3px_rgba(51,104,134,0.10)] ring-1 ring-[#2F9DF7]/15'
-            : 'bg-slate-100 border border-transparent text-slate-800 hover:bg-slate-200/60 focus:bg-white focus:border-[#2F9DF7]/20 focus:ring-2 focus:ring-[#2F9DF7]/10'
+            ? 'bg-white border border-[#2563EB]/30 text-[#2563EB] shadow-[0_0_0_3px_rgba(51,104,134,0.10)] ring-1 ring-[#2563EB]/15'
+            : 'bg-slate-100 border border-transparent text-slate-800 hover:bg-slate-200/60 focus:bg-white focus:border-[#2563EB]/20 focus:ring-2 focus:ring-[#2563EB]/10'
         }`}
       >
         <span className={value ? 'text-slate-900' : 'text-slate-400'}>{value || 'DDD'}</span>
         <CaretDown
           size={13}
           weight="bold"
-          className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-180 text-[#2F9DF7]' : 'text-slate-400'}`}
+          className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-180 text-[#2563EB]' : 'text-slate-400'}`}
         />
       </button>
 
@@ -86,7 +86,7 @@ export function DddSelect({ value, onChange, className = '', disabled = false }:
                   onClick={() => { onChange(ddd); setOpen(false); }}
                   className={`inline-flex items-center justify-center rounded-xl py-2.5 text-sm font-bold transition-all duration-150 active:scale-95 ${
                     isSelected
-                      ? 'bg-[#2F9DF7] text-white shadow-[0_4px_12px_-6px_rgba(51,104,134,0.65)]'
+                      ? 'bg-[#2563EB] text-white shadow-[0_4px_12px_-6px_rgba(51,104,134,0.65)]'
                       : 'text-slate-700 hover:bg-slate-100'
                   }`}
                 >

@@ -221,7 +221,7 @@ export function AdminDesktopSidebar({
                     onClick={() => setOpenGroups((prev) => ({ ...prev, [section.id]: !isOpen }))}
                     className={`w-full min-h-11 rounded-[1rem] border px-3 text-left text-[12px] font-bold transition flex items-center justify-between gap-2 ${
                       hasActiveChild
-                        ? 'border-[#2f9df7]/20 bg-white/86 text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)]'
+                        ? 'border-[#2563EB]/20 bg-white/86 text-slate-950 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.28)]'
                         : 'border-transparent bg-transparent text-slate-500 hover:border-white/80 hover:bg-white/80 hover:text-slate-950'
                     }`}
                     aria-expanded={isOpen}
@@ -244,7 +244,7 @@ export function AdminDesktopSidebar({
                   </button>
                 )}
                 {isOpen && (
-                  <div id={`sidebar-group-${section.id}`} className={`space-y-1 ${isSingleItem ? '' : 'ml-2 pl-2.5 border-l border-[#2f9df7]/20'}`}>
+                  <div id={`sidebar-group-${section.id}`} className={`space-y-1 ${isSingleItem ? '' : 'ml-2 pl-2.5 border-l border-[#2563EB]/20'}`}>
                     {section.children.map((child: SidebarItem) => renderNavItem(child, !isSingleItem))}
                   </div>
                 )}

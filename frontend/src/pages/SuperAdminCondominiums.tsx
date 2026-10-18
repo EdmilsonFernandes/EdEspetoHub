@@ -772,7 +772,7 @@ export function SuperAdminCondominiums() {
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <button onClick={() => setActiveWorkspace('condos')} className="group relative flex items-start gap-4 rounded-3xl border border-slate-100 bg-slate-50/50 p-5 transition hover:bg-white hover:shadow-xl hover:ring-1 hover:ring-slate-200">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-[#2F9DF7] shadow-sm ring-1 ring-slate-100 group-hover:scale-110 transition-transform">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-[#2563EB] shadow-sm ring-1 ring-slate-100 group-hover:scale-110 transition-transform">
                     <Buildings size={24} weight="duotone" />
                   </div>
                   <div className="text-left">
@@ -810,7 +810,7 @@ export function SuperAdminCondominiums() {
         <div className="grid gap-4 lg:grid-cols-2">
           <section className="rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#2F9DF7]/10 text-[#2F9DF7]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#2563EB]/10 text-[#2563EB]">
                 <Buildings size={22} weight="duotone" />
               </div>
               <div>
@@ -833,7 +833,7 @@ export function SuperAdminCondominiums() {
                     {logoPreview ? (
                       <img src={logoPreview} alt="Logo do condomínio" className="h-full w-full object-contain p-2" />
                     ) : (
-                      <Buildings size={28} weight="duotone" className="text-[#2F9DF7]" />
+                      <Buildings size={28} weight="duotone" className="text-[#2563EB]" />
                     )}
                   </div>
                 </div>
@@ -869,13 +869,13 @@ export function SuperAdminCondominiums() {
                   value={(condominiumForm as any)[key]}
                   onChange={(event) => setCondominiumForm((prev) => ({ ...prev, [key]: event.target.value }))}
                   placeholder={label}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2563EB] focus:bg-white"
                 />
                 </label>
               ))}
               </div>
               <div className="flex flex-col gap-2 sm:flex-row">
-                <button onClick={createCondominium} disabled={saving || !condominiumForm.name} className="w-full rounded-2xl bg-[#2F9DF7] px-4 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.8)] disabled:opacity-50">
+                <button onClick={createCondominium} disabled={saving || !condominiumForm.name} className="w-full rounded-2xl bg-[#2563EB] px-4 py-3.5 text-sm font-black text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.8)] disabled:opacity-50">
                   {editingCondominiumId ? 'Salvar condomínio' : 'Criar condomínio'}
                 </button>
                 {editingCondominiumId ? (
@@ -887,8 +887,8 @@ export function SuperAdminCondominiums() {
             </div>
           </section>
 
-          <section id="condominium-access-card" className="overflow-hidden rounded-[2rem] border border-[#2F9DF7]/15 bg-white shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
-            <div className="bg-[linear-gradient(135deg,_#153A4C_0%,_#2F9DF7_58%,_#0f172a_100%)] p-5 text-white">
+          <section id="condominium-access-card" className="overflow-hidden rounded-[2rem] border border-[#2563EB]/15 bg-white shadow-[0_26px_70px_-48px_rgba(15,23,42,0.45)]">
+            <div className="bg-[linear-gradient(135deg,_#153A4C_0%,_#2563EB_58%,_#0f172a_100%)] p-5 text-white">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/14 text-white ring-1 ring-white/18">
                   <Key size={23} weight="duotone" />
@@ -904,27 +904,27 @@ export function SuperAdminCondominiums() {
               <div className="grid gap-3">
                 <label className="block">
                   <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Condomínio</span>
-                  <select value={userForm.condominiumId} onChange={(event) => setUserForm((prev) => ({ ...prev, condominiumId: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white">
+                  <select value={userForm.condominiumId} onChange={(event) => setUserForm((prev) => ({ ...prev, condominiumId: event.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold text-slate-800 outline-none transition focus:border-[#2563EB] focus:bg-white">
                     <option value="">Escolha o condomínio</option>
                     {(data.condominiums || []).map((item: any) => <option key={item.id} value={item.id}>{item.name}</option>)}
                   </select>
                 </label>
                 <label className="block">
                   <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Nome do responsável</span>
-                  <input value={userForm.name} onChange={(event) => setUserForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Ex: Portaria Spazio Azuli" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white" />
+                  <input value={userForm.name} onChange={(event) => setUserForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Ex: Portaria Spazio Azuli" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2563EB] focus:bg-white" />
                 </label>
                 <label className="block">
                   <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Usuário ou e-mail</span>
-                  <input type="text" value={userForm.email} onChange={(event) => setUserForm((prev) => ({ ...prev, email: event.target.value }))} autoComplete="username" placeholder="spazio.azuli" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white" />
+                  <input type="text" value={userForm.email} onChange={(event) => setUserForm((prev) => ({ ...prev, email: event.target.value }))} autoComplete="username" placeholder="spazio.azuli" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2563EB] focus:bg-white" />
                 </label>
                 <label className="block">
                   <span className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Senha</span>
                   <div className="relative">
-                    <input type={showUserPasswordInput ? 'text' : 'password'} value={userForm.password} onChange={(event) => setUserForm((prev) => ({ ...prev, password: event.target.value }))} autoComplete="new-password" placeholder="azuli@123" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white" />
+                    <input type={showUserPasswordInput ? 'text' : 'password'} value={userForm.password} onChange={(event) => setUserForm((prev) => ({ ...prev, password: event.target.value }))} autoComplete="new-password" placeholder="azuli@123" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2563EB] focus:bg-white" />
                     <button
                       type="button"
                       onClick={() => setShowUserPasswordInput((prev) => !prev)}
-                      className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition hover:bg-white hover:text-[#2F9DF7]"
+                      className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition hover:bg-white hover:text-[#2563EB]"
                       aria-label={showUserPasswordInput ? 'Ocultar senha' : 'Mostrar senha'}
                     >
                       {showUserPasswordInput ? <EyeSlash size={18} weight="bold" /> : <Eye size={18} weight="bold" />}
@@ -940,7 +940,7 @@ export function SuperAdminCondominiums() {
                   {(data.condominiumUsers || []).slice(0, 4).map((user: any) => (
                     <div key={user.id} className="rounded-[1.3rem] border border-slate-200 bg-[linear-gradient(180deg,_#ffffff_0%,_#f8fafc_100%)] p-3 shadow-[0_16px_36px_-30px_rgba(15,23,42,0.45)]">
                       <div className="flex items-start gap-3">
-                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#2F9DF7]/10 text-[#2F9DF7]">
+                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#2563EB]/10 text-[#2563EB]">
                           <UserCircle size={21} weight="duotone" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -971,7 +971,7 @@ export function SuperAdminCondominiums() {
                             type="button"
                             disabled={!createdPasswordByUserId[user.id]}
                             onClick={() => setRevealedCondominiumPasswords((prev) => ({ ...prev, [user.id]: !prev[user.id] }))}
-                            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-500 ring-1 ring-slate-100 transition hover:text-[#2F9DF7] disabled:cursor-not-allowed disabled:opacity-40"
+                            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-500 ring-1 ring-slate-100 transition hover:text-[#2563EB] disabled:cursor-not-allowed disabled:opacity-40"
                             aria-label={revealedCondominiumPasswords[user.id] ? 'Ocultar senha' : 'Mostrar senha'}
                             title={createdPasswordByUserId[user.id] ? 'Mostrar ou ocultar senha recém-definida' : 'Redefina a senha para exibir aqui'}
                           >
@@ -1008,7 +1008,7 @@ export function SuperAdminCondominiums() {
                   <div key={condominium.id} className="min-w-0 rounded-[1.7rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.45)] sm:p-5">
                     <div className="flex items-start gap-3">
                       <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.2rem] bg-slate-50 ring-1 ring-slate-100">
-                        {preview ? <img src={preview} alt={condominium.name} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#2F9DF7]" />}
+                        {preview ? <img src={preview} alt={condominium.name} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#2563EB]" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-base font-black text-slate-950">{condominium.name}</p>
@@ -1017,7 +1017,7 @@ export function SuperAdminCondominiums() {
                       </div>
                     </div>
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                      <button onClick={() => editCondominium(condominium)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-black text-slate-700 shadow-sm transition hover:border-[#2F9DF7]/30 hover:text-[#2F9DF7]">
+                      <button onClick={() => editCondominium(condominium)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-black text-slate-700 shadow-sm transition hover:border-[#2563EB]/30 hover:text-[#2563EB]">
                         <PencilSimple size={14} weight="bold" />
                         Editar
                       </button>
@@ -1049,7 +1049,7 @@ export function SuperAdminCondominiums() {
                                 <div className="min-w-0 flex-1">
                                   <p className="truncate text-sm font-black text-slate-950">{storeLink.store?.name || 'Loja'}</p>
                                   <p className="truncate text-[11px] font-semibold text-slate-500">{storeLink.store?.slug || storeLink.storeId}</p>
-                                  <p className="mt-1 line-clamp-1 text-[11px] font-bold text-[#2F9DF7]">{describeFulfillmentMode(storeLink)}</p>
+                                  <p className="mt-1 line-clamp-1 text-[11px] font-bold text-[#2563EB]">{describeFulfillmentMode(storeLink)}</p>
                                 </div>
                                 <button
                                   type="button"
@@ -1067,7 +1067,7 @@ export function SuperAdminCondominiums() {
                                     type="checkbox"
                                     checked={draft.allowPickupAtStall}
                                     onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { allowPickupAtStall: event.target.checked }, storeLink)}
-                                    className="h-4 w-4 shrink-0 accent-[#2F9DF7]"
+                                    className="h-4 w-4 shrink-0 accent-[#2563EB]"
                                   />
                                 </label>
                                 <label className="flex min-h-[48px] items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-black text-slate-700">
@@ -1076,7 +1076,7 @@ export function SuperAdminCondominiums() {
                                     type="checkbox"
                                     checked={draft.allowApartmentDelivery}
                                     onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { allowApartmentDelivery: event.target.checked }, storeLink)}
-                                    className="h-4 w-4 shrink-0 accent-[#2F9DF7]"
+                                    className="h-4 w-4 shrink-0 accent-[#2563EB]"
                                   />
                                 </label>
                               </div>
@@ -1088,7 +1088,7 @@ export function SuperAdminCondominiums() {
                                     onChange={(event) => updateStoreRuleDraft(condominium.id, storeLink.storeId, { apartmentDeliveryFee: event.target.value }, storeLink)}
                                     placeholder="Ex: 5.00"
                                     disabled={!draft.allowApartmentDelivery}
-                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white disabled:opacity-50"
+                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2563EB] focus:bg-white disabled:opacity-50"
                                   />
                                 </label>
                                 <button
@@ -1175,7 +1175,7 @@ export function SuperAdminCondominiums() {
                     </div>
                   )}
                   <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/18 to-transparent" />
-                  <div className="absolute left-4 top-4 rounded-full bg-white/94 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#2F9DF7] shadow-sm ring-1 ring-white/70">
+                  <div className="absolute left-4 top-4 rounded-full bg-white/94 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#2563EB] shadow-sm ring-1 ring-white/70">
                     Banner promocional
                   </div>
                 </div>
@@ -1357,7 +1357,7 @@ export function SuperAdminCondominiums() {
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       <div className="flex min-w-0 gap-3">
                         <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.25rem] bg-slate-50 ring-1 ring-slate-100">
-                          {preview ? <img src={preview} alt={request.condominiumName} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#2F9DF7]" />}
+                          {preview ? <img src={preview} alt={request.condominiumName} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#2563EB]" />}
                         </div>
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
@@ -1417,7 +1417,7 @@ export function SuperAdminCondominiums() {
                       <div className="flex -space-x-3">
                         <img src={storeLogo} alt={request.store?.name || 'Loja'} className="h-14 w-14 rounded-[1.2rem] border-2 border-white bg-white object-cover shadow-sm" />
                         <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-[1.2rem] border-2 border-white bg-white shadow-sm">
-                          {condominiumLogo ? <img src={condominiumLogo} alt={request.condominium?.name || 'Condomínio'} className="h-full w-full object-contain p-1" /> : <Buildings size={22} weight="duotone" className="text-[#2F9DF7]" />}
+                          {condominiumLogo ? <img src={condominiumLogo} alt={request.condominium?.name || 'Condomínio'} className="h-full w-full object-contain p-1" /> : <Buildings size={22} weight="duotone" className="text-[#2563EB]" />}
                         </div>
                       </div>
                       <div className="min-w-0">
@@ -1501,11 +1501,11 @@ export function SuperAdminCondominiums() {
               <div key={event.id} className="overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white shadow-[0_24px_48px_-36px_rgba(15,23,42,0.45)]">
                 <div className="flex items-center gap-3 bg-[linear-gradient(135deg,_#f8fafc_0%,_#ffffff_55%,_#f0fdf4_100%)] p-4">
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.3rem] bg-white shadow-sm ring-1 ring-slate-100">
-                    {condominiumLogo ? <img src={condominiumLogo} alt={event.condominium.name} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#2F9DF7]" />}
+                    {condominiumLogo ? <img src={condominiumLogo} alt={event.condominium.name} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#2563EB]" />}
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-base font-black tracking-tight text-slate-950">{event.condominium.name}</p>
-                    <p className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-[#2F9DF7]">
+                    <p className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-[#2563EB]">
                       <Clock size={13} weight="fill" />
                       {formatDateTimeLocal(event.startsAt)} até {formatDateTimeLocal(event.endsAt)}
                     </p>

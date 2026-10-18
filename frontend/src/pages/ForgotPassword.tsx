@@ -222,7 +222,7 @@ export function ForgotPassword() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[1.2rem] border border-white/70 bg-white/78 text-[#153A4C] shadow-[0_18px_38px_-26px_rgba(21,58,76,0.55)] sm:h-16 sm:w-16">
             {step === 'email' ? <EnvelopeSimple size={30} weight="duotone" /> : step === 'password' ? <LockSimple size={30} weight="duotone" /> : <Key size={30} weight="duotone" />}
           </div>
-          <p className="mt-3 text-[10px] font-black uppercase tracking-[0.22em] text-[#2F9DF7]/75">{context.eyebrow}</p>
+          <p className="mt-3 text-[10px] font-black uppercase tracking-[0.22em] text-[#2563EB]/75">{context.eyebrow}</p>
           <h2 className="mt-1 text-[1.7rem] font-black leading-tight tracking-[-0.04em] text-slate-900 sm:text-[2.15rem]">
             {step === 'email' ? context.headline : step === 'password' ? 'Crie sua nova senha' : step === 'code' ? 'Confirme o código' : 'Senha atualizada'}
           </h2>
@@ -280,8 +280,8 @@ export function ForgotPassword() {
 
           {step === 'email' ? (
             <form onSubmit={handleEmailSubmit} className="space-y-4">
-              <div className="rounded-2xl border border-[#BCE2FC] bg-[#f5fafc] px-3 py-2.5">
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">
+              <div className="rounded-2xl border border-[#C3D8FB] bg-[#f5fafc] px-3 py-2.5">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">
                   <ShieldCheck size={15} weight="fill" />
                   Código seguro por e-mail
                 </div>
@@ -304,7 +304,7 @@ export function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading || !email}
-                className="ds-btn-shine flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)] transition active:scale-[0.98] disabled:opacity-60 sm:h-14 sm:text-base"
+                className="ds-btn-shine flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2563EB)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)] transition active:scale-[0.98] disabled:opacity-60 sm:h-14 sm:text-base"
               >
                 <PaperPlaneTilt size={19} weight="duotone" />
                 Continuar
@@ -359,7 +359,7 @@ export function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading || !password || !confirm}
-                className="ds-btn-shine flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)] transition active:scale-[0.98] disabled:opacity-60 sm:h-14 sm:text-base"
+                className="ds-btn-shine flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2563EB)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)] transition active:scale-[0.98] disabled:opacity-60 sm:h-14 sm:text-base"
               >
                 {loading ? 'Enviando código...' : 'Enviar código por e-mail'}
               </button>
@@ -422,7 +422,7 @@ export function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading || code.length !== 6}
-                className="ds-btn-shine flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)] transition active:scale-[0.98] disabled:opacity-60 sm:h-14 sm:text-base"
+                className="ds-btn-shine flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2563EB)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)] transition active:scale-[0.98] disabled:opacity-60 sm:h-14 sm:text-base"
               >
                 {loading ? 'Confirmando...' : 'Confirmar código e alterar senha'}
               </button>
@@ -445,7 +445,7 @@ export function ForgotPassword() {
               <button
                 type="button"
                 onClick={() => navigate(context.loginPath, { replace: true })}
-                className="w-full rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)]"
+                className="w-full rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2563EB)] px-4 py-3.5 text-sm font-black text-white shadow-[0_22px_45px_-24px_rgba(21,58,76,0.70)]"
               >
                 Entrar com nova senha
               </button>

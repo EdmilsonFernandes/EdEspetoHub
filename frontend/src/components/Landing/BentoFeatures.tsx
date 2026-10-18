@@ -186,7 +186,7 @@ export function BentoFeatures() {
         {/* Card 7: Reservas com Horário (destaque full-width) */}
         <div className="group relative overflow-hidden rounded-[2rem] border border-amber-400/15 bg-[linear-gradient(120deg,rgba(15,23,42,0.7),rgba(2,6,23,0.85))] p-6 shadow-[0_24px_50px_-30px_rgba(2,6,23,0.9)] backdrop-blur-xl lg:col-span-3 min-h-[240px]">
           <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-amber-500/12 blur-[70px] transition-transform group-hover:scale-125" />
-          <div className="pointer-events-none absolute -left-16 bottom-0 h-40 w-40 rounded-full bg-[#2F9DF7]/14 blur-[60px]" />
+          <div className="pointer-events-none absolute -left-16 bottom-0 h-40 w-40 rounded-full bg-[#2563EB]/14 blur-[60px]" />
           <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
 
           <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">

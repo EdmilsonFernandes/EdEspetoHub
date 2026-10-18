@@ -113,7 +113,7 @@ export function HubFilterBar({
           onClick={onOpenFilters}
           className={`jnc-hub-touch relative inline-flex min-h-10 shrink-0 items-center justify-center gap-1 rounded-full px-3 py-2 text-[11px] font-black leading-none ${
             hiddenFilterCount > 0
-              ? 'border border-[#2F9DF7]/22 bg-[#DBEEFD]/86 text-[#153A4C] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.34)]'
+              ? 'border border-[#2563EB]/22 bg-[#E0EBFD]/86 text-[#153A4C] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.34)]'
               : 'jnc-hub-pill text-slate-600 hover:text-[#153A4C]'
           }`}
           aria-label="Abrir filtros"
@@ -188,21 +188,21 @@ export function HubFilterSheet({
               </button>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-[#2F9DF7]/10 bg-[#DBEEFD]/68 px-3.5 py-3 text-[#153A4C] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+            <div className="mt-4 rounded-2xl border border-[#2563EB]/10 bg-[#E0EBFD]/68 px-3.5 py-3 text-[#153A4C] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]/75">Agora na lista</p>
+                  <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2563EB]/75">Agora na lista</p>
                   <p className="mt-0.5 truncate text-sm font-black text-[#153A4C]">
                     {filteredStoresCount} loja{filteredStoresCount === 1 ? '' : 's'} encontrada{filteredStoresCount === 1 ? '' : 's'}
                   </p>
                 </div>
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-2xs font-black text-[#2F9DF7] ring-1 ring-white/80">
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-2xs font-black text-[#2563EB] ring-1 ring-white/80">
                   <CheckCircle size={12} weight="fill" />
                   {activeFilterCount > 0 ? `${activeFilterCount} ativo${activeFilterCount === 1 ? '' : 's'}` : 'Sem filtro'}
                 </span>
               </div>
               {selectedQuickFilterOption || segmentFilter !== 'all' || debouncedQuery ? (
-                <p className="mt-2 text-[11px] font-semibold leading-relaxed text-[#2F9DF7]/80">
+                <p className="mt-2 text-[11px] font-semibold leading-relaxed text-[#2563EB]/80">
                   {[
                     selectedQuickFilterOption?.label,
                     segmentFilter !== 'all' ? `Categoria: ${segmentFilter}` : '',
@@ -219,7 +219,7 @@ export function HubFilterSheet({
                   <button
                     type="button"
                     onClick={() => onQuickFilterChange('all')}
-                    className="jnc-hub-touch inline-flex min-h-10 items-center rounded-full px-3 text-[11px] font-black text-[#2F9DF7] active:scale-95"
+                    className="jnc-hub-touch inline-flex min-h-10 items-center rounded-full px-3 text-[11px] font-black text-[#2563EB] active:scale-95"
                   >
                     Limpar atalho
                   </button>
@@ -246,7 +246,7 @@ export function HubFilterSheet({
                       aria-pressed={active}
                     >
                       <div className="flex items-center gap-2">
-                        <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${active ? 'bg-white/16 text-white' : 'bg-[#DBEEFD] text-[#2F9DF7]'}`}>
+                        <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${active ? 'bg-white/16 text-white' : 'bg-[#E0EBFD] text-[#2563EB]'}`}>
                           <Icon size={16} weight={active ? 'fill' : 'duotone'} />
                         </span>
                         <span className="min-w-0 flex-1 truncate text-sm font-black">{filter.label}</span>
@@ -267,7 +267,7 @@ export function HubFilterSheet({
                   <button
                     type="button"
                     onClick={() => onSegmentFilterChange('all')}
-                    className="text-[11px] font-black text-[#2F9DF7] active:scale-95"
+                    className="text-[11px] font-black text-[#2563EB] active:scale-95"
                   >
                     Ver todas
                   </button>

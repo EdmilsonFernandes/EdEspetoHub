@@ -28,10 +28,10 @@ const InstagramIcon = ({ className = 'h-4 w-4' }) => (
 
 const actionClasses: Record<string, string> = {
   whatsapp: 'border-emerald-500 bg-[linear-gradient(135deg,#16a34a,#22c55e)] text-white shadow-[0_18px_34px_-24px_rgba(22,163,74,0.72)]',
-  phone: 'border-[#2F9DF7]/12 bg-white text-[#2F9DF7]',
+  phone: 'border-[#2563EB]/12 bg-white text-[#2563EB]',
   instagram: 'border-pink-100 bg-white text-slate-700',
   site: 'border-slate-200 bg-white text-slate-700',
-  route: 'border-[#2F9DF7]/12 bg-[#2F9DF7] text-white',
+  route: 'border-[#2563EB]/12 bg-[#2563EB] text-white',
 };
 
 const actionIcon = (action: any) => {
@@ -50,7 +50,7 @@ const ContactAction = ({ action }: any) => {
   if (!action?.href) return null;
   const isWhatsapp = action.kind === 'whatsapp';
   const className = action.kind === 'route'
-    ? 'flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-[#2F9DF7]/12 bg-[#2F9DF7] px-4 py-3 text-sm font-extrabold text-white shadow-[0_18px_34px_-28px_rgba(51,104,134,0.68)] transition hover:-translate-y-0.5 active:scale-[0.98]'
+    ? 'flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-[#2563EB]/12 bg-[#2563EB] px-4 py-3 text-sm font-extrabold text-white shadow-[0_18px_34px_-28px_rgba(51,104,134,0.68)] transition hover:-translate-y-0.5 active:scale-[0.98]'
     : `inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition hover:-translate-y-0.5 active:scale-[0.98] ${isWhatsapp ? 'py-2.5' : 'py-2'} ${actionClasses[action.kind] || actionClasses.site}`;
 
   const handleClick = async (event: any) => {
@@ -246,7 +246,7 @@ export function PreStoreDetailSheet({
           <div className="space-y-4 p-4 sm:p-5">
             <SurfaceCard padding="md" className="rounded-[1.5rem] border-white/80 bg-white/88">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#DBEEFD] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#2F9DF7]">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E0EBFD] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#2563EB]">
                   <ShoppingBagOpen size={14} weight="duotone" />
                   Contato direto
                 </span>
@@ -262,30 +262,30 @@ export function PreStoreDetailSheet({
 
               {address ? (
                 <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600">
-                  <MapPinLine size={15} weight="duotone" className="shrink-0 text-[#2F9DF7]" />
+                  <MapPinLine size={15} weight="duotone" className="shrink-0 text-[#2563EB]" />
                   <span className="truncate">{address}</span>
                 </p>
               ) : null}
 
               {routeAction?.href ? (
-                <SurfaceCard tone="brand" padding="sm" className="mt-4 rounded-[1.4rem] border-[#2F9DF7]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(238,247,242,0.9))] text-slate-900 ring-1 ring-white/80">
-                  <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">
+                <SurfaceCard tone="brand" padding="sm" className="mt-4 rounded-[1.4rem] border-[#2563EB]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(238,247,242,0.9))] text-slate-900 ring-1 ring-white/80">
+                  <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">
                     <GoogleMapsIcon className="h-4 w-4" />
                     Referência para entrega
                   </p>
                   <SurfaceCard tone="soft" padding="sm" className="mt-3 rounded-[1.15rem] border-white/80 bg-white/86 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
                     <div className="flex items-center gap-2">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#DBEEFD] text-[#2F9DF7] ring-1 ring-[#cfe0ea]">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#E0EBFD] text-[#2563EB] ring-1 ring-[#cfe0ea]">
                         <Storefront size={17} weight="duotone" />
                       </span>
-                      <span className="h-0.5 flex-1 rounded-full bg-[linear-gradient(90deg,#2F9DF7_0%,rgba(51,104,134,0.16)_100%)]" />
+                      <span className="h-0.5 flex-1 rounded-full bg-[linear-gradient(90deg,#2563EB_0%,rgba(51,104,134,0.16)_100%)]" />
                       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-100">
                         <MapPinLine size={17} weight="duotone" />
                       </span>
                     </div>
                     <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-start gap-2 text-2xs font-black tracking-[0.02em] text-slate-400">
                       <span className="truncate">{listing.title || 'Serviço'}</span>
-                      <span className="text-[#2F9DF7]">{routeDistanceLabel || 'rota'}</span>
+                      <span className="text-[#2563EB]">{routeDistanceLabel || 'rota'}</span>
                       <span className="truncate text-right">{placeName || 'Chalé'}</span>
                     </div>
                   </SurfaceCard>
@@ -297,7 +297,7 @@ export function PreStoreDetailSheet({
                       <button
                         type="button"
                         onClick={onOpenRoute}
-                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-[#2F9DF7]/12 bg-[#2F9DF7] px-4 py-3 text-sm font-extrabold text-white shadow-[0_18px_34px_-28px_rgba(51,104,134,0.68)] transition hover:-translate-y-0.5 active:scale-[0.98]"
+                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-[#2563EB]/12 bg-[#2563EB] px-4 py-3 text-sm font-extrabold text-white shadow-[0_18px_34px_-28px_rgba(51,104,134,0.68)] transition hover:-translate-y-0.5 active:scale-[0.98]"
                       >
                         <GoogleMapsIcon className="h-5 w-5" />
                         {routeAction?.label || 'Ver rota até meu chalé'}
@@ -349,7 +349,7 @@ export function PreStoreDetailSheet({
             <SurfaceCard tone="brand" padding="md" className="rounded-[1.5rem] border-[#153A4C]/10 bg-white">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#2F9DF7]">Como parceiro oficial</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#2563EB]">Como parceiro oficial</p>
                   <h3 className="mt-1 text-lg font-extrabold tracking-[-0.03em] text-slate-950">Vitrine digital no app</h3>
                   <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">Venda, receba contatos ou pedidos sem tirar o hóspede do Já no Caminho.</p>
                 </div>

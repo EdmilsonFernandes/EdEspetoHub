@@ -76,13 +76,13 @@ export function PremiumSplashScreen() {
       }`}
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_14%,rgba(51,104,134,0.2),transparent_30%),radial-gradient(circle_at_86%_12%,rgba(95,211,90,0.1),transparent_34%),linear-gradient(180deg,#0B0F1A_0%,#0B0F1A_100%)]" />
-      <div className="pointer-events-none absolute left-1/2 top-[14%] h-64 w-64 -translate-x-1/2 rounded-full bg-[#2F9DF7]/18 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/2 top-[14%] h-64 w-64 -translate-x-1/2 rounded-full bg-[#2563EB]/18 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[12%] left-[12%] h-44 w-44 rounded-full bg-[#5FD35A]/8 blur-3xl" />
       <div className="splash-grid pointer-events-none absolute inset-0 opacity-[0.16]" />
 
       <div className="relative flex w-full max-w-[390px] flex-col items-center">
         <div className="splash-delivery-scene relative mb-7 h-[286px] w-full max-w-[370px] animate-in zoom-in-95 duration-700 motion-reduce:animate-none">
-          <div className="absolute left-1/2 top-9 h-44 w-60 -translate-x-1/2 rounded-[3.5rem] bg-[#2F9DF7]/10 blur-2xl" />
+          <div className="absolute left-1/2 top-9 h-44 w-60 -translate-x-1/2 rounded-[3.5rem] bg-[#2563EB]/10 blur-2xl" />
           <div className="splash-orbit absolute left-1/2 top-[28px] h-[204px] w-[204px] -translate-x-1/2 rounded-full border border-white/10" />
           <div className="splash-orbit splash-orbit-secondary absolute left-1/2 top-[10px] h-[240px] w-[240px] -translate-x-1/2 rounded-full border border-dashed border-white/10" />
 
@@ -119,8 +119,8 @@ export function PremiumSplashScreen() {
             );
           })}
 
-          <div className="splash-brand-card absolute left-1/2 top-[76px] flex h-[86px] w-[86px] -translate-x-1/2 items-center justify-center rounded-3xl border border-white/10 bg-[linear-gradient(145deg,rgba(21,58,76,0.94),rgba(51,104,134,0.86))] shadow-[0_28px_62px_-34px_rgba(15,49,84,0.8)] ring-1 ring-[#2F9DF7]/10">
-            <div className="absolute inset-2 rounded-[1.15rem] bg-[#2F9DF7]/10 blur-xl" />
+          <div className="splash-brand-card absolute left-1/2 top-[76px] flex h-[86px] w-[86px] -translate-x-1/2 items-center justify-center rounded-3xl border border-white/10 bg-[linear-gradient(145deg,rgba(21,58,76,0.94),rgba(51,104,134,0.86))] shadow-[0_28px_62px_-34px_rgba(15,49,84,0.8)] ring-1 ring-[#2563EB]/10">
+            <div className="absolute inset-2 rounded-[1.15rem] bg-[#2563EB]/10 blur-xl" />
             <span className="splash-robot-antenna absolute -top-3 left-1/2 h-5 w-[2px] -translate-x-1/2 rounded-full bg-[#5FD35A]/70" />
             <span className="splash-robot-eye absolute left-[26px] top-[27px] h-2 w-2 rounded-full bg-[#5FD35A] shadow-[0_0_12px_rgba(95,211,90,0.9)]" />
             <span className="splash-robot-eye splash-robot-eye-two absolute right-[26px] top-[27px] h-2 w-2 rounded-full bg-[#5FD35A] shadow-[0_0_12px_rgba(95,211,90,0.9)]" />

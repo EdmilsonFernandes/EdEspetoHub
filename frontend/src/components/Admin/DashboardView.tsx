@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { Package, CurrencyDollar, CheckCircle, CircleDashed, LinkSimple, CalendarBlank, TrendUp, TrendDown, WarningCircle, CaretDown } from "@phosphor-icons/react";
@@ -2303,7 +2303,7 @@ export const DashboardView = ({
                             <span className="w-10 shrink-0 text-right font-mono text-[11px] font-bold text-slate-500">{slot.label}</span>
                             <div className="h-4 flex-1 overflow-hidden rounded-md bg-slate-100">
                               <div
-                                className={`h-full rounded-md ${slot.orders === maxHour ? "bg-amber-500" : "bg-[#2f9df7]"}`}
+                                className={`h-full rounded-md ${slot.orders === maxHour ? "bg-amber-500" : "bg-[#2563EB]"}`}
                                 style={{ width: `${Math.max(6, Math.round((slot.orders / maxHour) * 100))}%` }}
                               />
                             </div>
@@ -2325,7 +2325,7 @@ export const DashboardView = ({
                             <span className="w-16 shrink-0 text-[11px] font-bold text-slate-500">{day.label}</span>
                             <div className="h-4 flex-1 overflow-hidden rounded-md bg-slate-100">
                               <div
-                                className={`h-full rounded-md ${day.orders === maxDay ? "bg-amber-500" : "bg-[#2f9df7]"}`}
+                                className={`h-full rounded-md ${day.orders === maxDay ? "bg-amber-500" : "bg-[#2563EB]"}`}
                                 style={{ width: `${Math.max(6, Math.round((day.orders / maxDay) * 100))}%` }}
                               />
                             </div>
@@ -2363,7 +2363,7 @@ export const DashboardView = ({
                           <span className="w-40 shrink-0 truncate text-[12px] font-bold text-slate-700 sm:w-52">{item.name}</span>
                           <div className="h-3.5 flex-1 overflow-hidden rounded-md bg-slate-100">
                             <div
-                              className={`h-full rounded-md ${index === 0 ? "bg-amber-500" : "bg-[#2f9df7]"}`}
+                              className={`h-full rounded-md ${index === 0 ? "bg-amber-500" : "bg-[#2563EB]"}`}
                               style={{ width: `${Math.max(5, Math.round((item.qty / maxQty) * 100))}%` }}
                             />
                           </div>

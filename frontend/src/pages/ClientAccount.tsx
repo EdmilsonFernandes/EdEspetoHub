@@ -40,8 +40,8 @@ function Switch({ checked, onChange, disabled }: { checked: boolean; onChange: (
       type="button"
       disabled={disabled}
       onClick={onChange}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#2F9DF7] focus:ring-offset-2 ${
-        checked ? 'bg-[#2F9DF7]' : 'bg-slate-200'
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 ${
+        checked ? 'bg-[#2563EB]' : 'bg-slate-200'
       } ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
     >
       <span
@@ -664,7 +664,7 @@ export function ClientAccount() {
   return (
     <main className="min-h-screen bg-[#E2EBF2] pb-12 pt-[calc(env(safe-area-inset-top)+4.35rem)]">
       <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[40%] w-[48%] rounded-full bg-[#153A4C]/12 blur-[120px] -z-10" />
-      <div className="pointer-events-none fixed bottom-[5%] left-[-6%] h-[24%] w-[32%] rounded-full bg-[#2F9DF7]/7 blur-[100px] -z-10" />
+      <div className="pointer-events-none fixed bottom-[5%] left-[-6%] h-[24%] w-[32%] rounded-full bg-[#2563EB]/7 blur-[100px] -z-10" />
       <div className="mx-auto max-w-2xl">
         <AppGlassHeader
           title={settingsOnly ? 'Configurações' : 'Minha Conta'}
@@ -755,7 +755,7 @@ export function ClientAccount() {
                       setProfileMessage('');
                       setProfileEditing(true);
                     }}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#8ED2FA] bg-white/80 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-[#153A4C] shadow-[0_12px_28px_-24px_rgba(15,23,42,0.35)] transition hover:bg-white active:scale-[0.98]"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#9BBDF8] bg-white/80 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-[#153A4C] shadow-[0_12px_28px_-24px_rgba(15,23,42,0.35)] transition hover:bg-white active:scale-[0.98]"
                   >
                     <UserCircle size={15} weight="duotone" />
                     Editar perfil
@@ -803,7 +803,7 @@ export function ClientAccount() {
                   <div className="relative mt-7 space-y-3 rounded-[1.8rem] border border-slate-200/80 bg-white/82 p-4 shadow-[0_18px_38px_-32px_rgba(15,23,42,0.24)]">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Editar perfil</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">Editar perfil</p>
                         <p className="mt-1 text-xs font-semibold text-slate-500">Altere apenas nome e telefone quando precisar.</p>
                       </div>
                       <button
@@ -823,7 +823,7 @@ export function ClientAccount() {
                           {...inputAssistProps.name}
                           value={nameDraft}
                           onChange={e => setNameDraft(e.target.value)}
-                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition focus:border-[#8ED2FA] focus:bg-white focus:ring-2 focus:ring-[#2F9DF7]/10"
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition focus:border-[#9BBDF8] focus:bg-white focus:ring-2 focus:ring-[#2563EB]/10"
                         />
                       </div>
                     </div>
@@ -841,7 +841,7 @@ export function ClientAccount() {
                     </div>
                     <div className="grid gap-2">
                       <label className="ml-1 text-xs font-semibold text-slate-500">Telefone</label>
-                      <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 transition focus-within:border-[#8ED2FA] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#2F9DF7]/10">
+                      <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 transition focus-within:border-[#9BBDF8] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#2563EB]/10">
                         <span className="ml-3 inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-black text-slate-600 shadow-sm">
                           <Phone size={14} weight="duotone" className="text-slate-400" />
                           🇧🇷 +55
@@ -956,7 +956,7 @@ export function ClientAccount() {
                   className="group flex w-full items-center justify-between gap-3 rounded-[1.45rem] bg-white px-1 py-1 text-left transition active:scale-[0.99]"
                 >
                   <span className="flex min-w-0 items-center gap-3">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#DBEEFD] text-[#2F9DF7]">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#E0EBFD] text-[#2563EB]">
                       <ShieldCheck size={18} weight="duotone" />
                     </span>
                     <span className="min-w-0">
@@ -968,7 +968,7 @@ export function ClientAccount() {
                 </button>
 
                 <div className="relative overflow-hidden rounded-[1.6rem] border border-slate-200/80 bg-[linear-gradient(145deg,#f8fafc_0%,#ffffff_100%)] p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.34)]">
-                  <div className="pointer-events-none absolute -right-10 -top-12 h-28 w-28 rounded-full bg-[#2F9DF7]/8 blur-3xl" />
+                  <div className="pointer-events-none absolute -right-10 -top-12 h-28 w-28 rounded-full bg-[#2563EB]/8 blur-3xl" />
                   <div className="relative mb-3 flex items-start gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-slate-900 text-white shadow-[0_14px_28px_-22px_rgba(15,23,42,0.7)]">
                       <ShieldCheck size={17} weight="duotone" />
@@ -987,7 +987,7 @@ export function ClientAccount() {
                       placeholder="Senha atual"
                       value={pwdForm.currentPassword}
                       onChange={e => setPwdForm(p => ({...p, currentPassword: e.target.value}))}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#8ED2FA] focus:ring-2 focus:ring-[#2F9DF7]/10"
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#9BBDF8] focus:ring-2 focus:ring-[#2563EB]/10"
                     />
                     <input
                       {...inputAssistProps.newPassword}
@@ -995,12 +995,12 @@ export function ClientAccount() {
                       placeholder="Nova senha"
                       value={pwdForm.newPassword}
                       onChange={e => setPwdForm(p => ({...p, newPassword: e.target.value}))}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#8ED2FA] focus:ring-2 focus:ring-[#2F9DF7]/10"
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#9BBDF8] focus:ring-2 focus:ring-[#2563EB]/10"
                     />
                     <button
                       onClick={handleChangePassword}
                       disabled={pwdLoading}
-                      className="w-full rounded-2xl border border-[#8ED2FA] bg-white py-3 text-[10px] font-black uppercase tracking-widest text-[#153A4C] transition-all active:scale-95 disabled:opacity-50"
+                      className="w-full rounded-2xl border border-[#9BBDF8] bg-white py-3 text-[10px] font-black uppercase tracking-widest text-[#153A4C] transition-all active:scale-95 disabled:opacity-50"
                     >
                       {pwdLoading ? 'Atualizando...' : 'Trocar senha'}
                     </button>
@@ -1024,11 +1024,11 @@ export function ClientAccount() {
                 : 'border-slate-100 shadow-sm'
             }`}
           >
-            <div className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-[#2F9DF7]/12 blur-3xl" />
+            <div className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-[#2563EB]/12 blur-3xl" />
             <div className="relative flex items-start justify-between gap-3">
               <div>
                 <h3 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  <ShieldCheck size={16} weight="duotone" className="text-[#2F9DF7]" />
+                  <ShieldCheck size={16} weight="duotone" className="text-[#2563EB]" />
                   Configurações
                 </h3>
                 <p className="mt-2 text-base font-black text-slate-900">Permissões do aplicativo</p>
@@ -1046,8 +1046,8 @@ export function ClientAccount() {
                 className={`group flex w-full flex-col gap-3 rounded-[1.45rem] border px-4 py-3.5 text-left shadow-[0_18px_42px_-34px_rgba(15,23,42,0.42)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-80 sm:flex-row sm:items-center sm:justify-between ${mfaCardTone}`}
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-[#2F9DF7] shadow-[0_12px_28px_-20px_rgba(15,23,42,0.34)]">
-                    <ShieldCheck size={18} weight="duotone" className="text-[#2F9DF7]" />
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-[#2563EB] shadow-[0_12px_28px_-20px_rgba(15,23,42,0.34)]">
+                    <ShieldCheck size={18} weight="duotone" className="text-[#2563EB]" />
                   </span>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -1069,11 +1069,11 @@ export function ClientAccount() {
 
               {biometricSupported ? (
                 <div className={`flex flex-col gap-3 rounded-[1.45rem] border px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between ${
-                  biometricEnabled ? 'bg-[#2F9DF7]/[0.07] border-[#2F9DF7]/15' : 'bg-[#E2EBF2] border-slate-100'
+                  biometricEnabled ? 'bg-[#2563EB]/[0.07] border-[#2563EB]/15' : 'bg-[#E2EBF2] border-slate-100'
                 }`}>
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#2F9DF7] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
-                      <ShieldCheck size={18} weight="duotone" className="text-[#2F9DF7]" />
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#2563EB] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
+                      <ShieldCheck size={18} weight="duotone" className="text-[#2563EB]" />
                     </span>
                     <div className="min-w-0">
                       <p className="text-[12px] font-black uppercase tracking-[0.14em] text-slate-800">Biometria</p>
@@ -1081,7 +1081,7 @@ export function ClientAccount() {
                         Use digital, rosto ou bloqueio do aparelho para entrar mais rápido no app instalado.
                       </p>
                       {biometricMessage ? (
-                        <p className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#2F9DF7]">
+                        <p className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#2563EB]">
                           {biometricMessage}
                         </p>
                       ) : null}
@@ -1110,7 +1110,7 @@ export function ClientAccount() {
                   state: pushEnabled
                     ? { label: 'Permitido', tone: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' }
                     : { label: 'Bloqueado', tone: 'text-slate-500', bg: 'bg-[#E2EBF2] border-slate-100' },
-                  icon: <BellSimpleRinging size={18} weight="duotone" className="text-[#2F9DF7]" />,
+                  icon: <BellSimpleRinging size={18} weight="duotone" className="text-[#2563EB]" />,
                   checked: pushEnabled,
                   action: () => handlePermissionAction('push', pushEnabled),
                 },
@@ -1119,14 +1119,14 @@ export function ClientAccount() {
                   label: 'Câmera',
                   description: 'Tirar uma nova foto pelo aplicativo.',
                   state: permissionMeta(cameraPermission),
-                  icon: <Camera size={18} weight="duotone" className="text-[#2F9DF7]" />,
+                  icon: <Camera size={18} weight="duotone" className="text-[#2563EB]" />,
                   checked: cameraPermission === 'granted',
                   action: () => handlePermissionAction('camera', cameraPermission === 'granted'),
                 },
               ].map((item) => (
                 <div key={item.label} className={`flex flex-col gap-3 rounded-[1.45rem] border px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between ${item.state.bg}`}>
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#2F9DF7] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-[#2563EB] shadow-[0_10px_22px_-18px_rgba(15,23,42,0.28)]">
                       {item.icon}
                     </span>
                     <div className="min-w-0">
@@ -1153,7 +1153,7 @@ export function ClientAccount() {
             <section className="mt-8 space-y-3 border-t border-slate-200/70 pt-6">
               <button
                 onClick={logout}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-3 text-xs font-black uppercase tracking-[0.14em] text-slate-600 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.3)] transition active:scale-[0.98] hover:border-[#2F9DF7]/25 hover:text-[#2F9DF7]"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-3 text-xs font-black uppercase tracking-[0.14em] text-slate-600 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.3)] transition active:scale-[0.98] hover:border-[#2563EB]/25 hover:text-[#2563EB]"
               >
                 Sair da conta
               </button>

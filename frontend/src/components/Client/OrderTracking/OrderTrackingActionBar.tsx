@@ -23,7 +23,7 @@ export function OrderTrackingActionBar({
   const buttonClass =
     tone === 'success'
       ? 'bg-emerald-600 shadow-[0_18px_34px_-22px_rgba(5,150,105,0.58)]'
-      : 'bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)]';
+      : 'bg-[linear-gradient(135deg,#153A4C,#2563EB)] shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)]';
 
   return (
     <aside
@@ -35,7 +35,7 @@ export function OrderTrackingActionBar({
     >
       <div className="mx-auto flex max-w-2xl items-center gap-3 rounded-2xl border border-white/80 bg-white/95 p-2.5 shadow-[0_-16px_42px_-28px_rgba(15,23,42,0.38)] ring-1 ring-[#d6e4ed]/80 backdrop-blur-xl">
         <div className="min-w-0 flex-1 pl-1">
-          <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Próxima ação</p>
+          <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2563EB]">Próxima ação</p>
           <p className="truncate text-[11px] font-semibold text-slate-500">{detail}</p>
         </div>
         <button

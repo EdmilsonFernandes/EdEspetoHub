@@ -94,7 +94,7 @@ export function DestinationPartnerCta({ cityName, className = '' }: DestinationP
         {/* Animated CSS Mascot */}
         <div className="pointer-events-none hidden sm:flex jnc-partner-mascot relative h-[5.2rem] w-[5.2rem] shrink-0 items-center justify-center select-none z-10 mr-2" aria-hidden="true">
           <div className="absolute inset-[-6px] rounded-full border border-dashed border-[#5FD35A]/30 animate-[spin_16s_linear_infinite]" />
-          <div className="jnc-mascot-head relative h-full w-full rounded-[1.45rem] border border-white/20 bg-gradient-to-br from-[#185A94] via-[#153A4C] to-[#0f2a37] shadow-[0_16px_36px_rgba(21,58,76,0.6)] flex items-center justify-center">
+          <div className="jnc-mascot-head relative h-full w-full rounded-[1.45rem] border border-white/20 bg-gradient-to-br from-[#1E40AF] via-[#153A4C] to-[#0f2a37] shadow-[0_16px_36px_rgba(21,58,76,0.6)] flex items-center justify-center">
             <span className="absolute left-1/2 -top-2 h-3 w-[2px] -translate-x-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_8px_rgba(95,211,90,0.8)]" />
             <span className="absolute left-1/2 -top-3 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#5FD35A] shadow-[0_0_12px_rgba(95,211,90,1)]" />
             <span className="jnc-mascot-eye absolute left-[1.3rem] top-[1.45rem] h-2 w-2 rounded-full bg-[#5FD35A] shadow-[0_0_10px_rgba(95,211,90,0.95)]" />

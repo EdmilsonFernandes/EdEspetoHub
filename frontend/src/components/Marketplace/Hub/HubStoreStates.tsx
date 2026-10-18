@@ -33,11 +33,11 @@ export const HubStoreDiscoveryNotice = memo(function HubStoreDiscoveryNotice({
       <div className="jnc-hub-surface-soft rounded-3xl px-4 py-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#2F9DF7]/10 text-[#2F9DF7]">
+            <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#2563EB]/10 text-[#2563EB]">
               <Sparkle size={18} weight="duotone" />
             </span>
             <div>
-              <p className="text-2xs font-black uppercase tracking-[0.16em] text-[#2F9DF7]">Exploração ampliada</p>
+              <p className="text-2xs font-black uppercase tracking-[0.16em] text-[#2563EB]">Exploração ampliada</p>
               <p className="mt-1 text-sm font-bold text-slate-900">Você está vendo uma vitrine ampliada do app.</p>
               <p className="mt-1 text-xs font-medium text-slate-500">
                 Isso ajuda a explorar mais lojas sem depender do contexto local da home.
@@ -165,17 +165,17 @@ export const HubStoreEmptyState = memo(function HubStoreEmptyState({
   if (geoDiscovery?.mode === 'no_coverage') {
     return (
       <div className="jnc-hub-surface relative overflow-hidden rounded-3xl p-5">
-        <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[#2F9DF7]/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[#2563EB]/10 blur-3xl" />
         <div className="pointer-events-none absolute -left-10 bottom-0 h-36 w-36 rounded-full bg-emerald-300/12 blur-3xl" />
         <div className="relative flex flex-col gap-5">
           <div className="relative overflow-hidden rounded-[1.6rem] border border-white/80 bg-white/90 p-4 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.35)]">
-            <div className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-[#2F9DF7]/10 blur-2xl" />
+            <div className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-[#2563EB]/10 blur-2xl" />
             <div className="relative flex items-center gap-3">
-              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] bg-[linear-gradient(135deg,#2F9DF7,#0f766e)] shadow-[0_14px_28px_-16px_rgba(51,104,134,0.6)]">
+              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] bg-[linear-gradient(135deg,#2563EB,#0f766e)] shadow-[0_14px_28px_-16px_rgba(51,104,134,0.6)]">
                 <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-7 w-7 rounded-full object-contain" />
               </span>
               <div className="min-w-0">
-                <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Sua região no radar</p>
+                <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2563EB]">Sua região no radar</p>
                 <h3 className="mt-0.5 text-base font-black leading-tight text-slate-950 sm:text-lg">
                   O Já no Caminho tá chegando em {displayLocationLabel || 'sua região'}
                 </h3>
@@ -188,7 +188,7 @@ export const HubStoreEmptyState = memo(function HubStoreEmptyState({
 
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <div className="rounded-[1.2rem] border border-white/80 bg-white/76 px-3 py-3 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.22)]">
-              <Storefront size={16} weight="duotone" className="text-[#2F9DF7]" />
+              <Storefront size={16} weight="duotone" className="text-[#2563EB]" />
               <p className="mt-2 text-[11px] font-black text-slate-900">Lojista local</p>
               <p className="mt-1 text-[11px] font-medium text-slate-500">Mercado, adega, conveniência.</p>
             </div>
@@ -221,7 +221,7 @@ export const HubStoreEmptyState = memo(function HubStoreEmptyState({
             <button
               type="button"
               onClick={onEnableAllStoresView}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-[1.15rem] border border-[#2F9DF7]/14 bg-white/88 px-4 py-3 text-[11px] font-black uppercase tracking-[0.16em] text-[#2F9DF7] shadow-[0_14px_28px_-24px_rgba(51,104,134,0.35)]"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-[1.15rem] border border-[#2563EB]/14 bg-white/88 px-4 py-3 text-[11px] font-black uppercase tracking-[0.16em] text-[#2563EB] shadow-[0_14px_28px_-24px_rgba(51,104,134,0.35)]"
             >
               <Sparkle size={14} weight="fill" />
               Explorar outras lojas

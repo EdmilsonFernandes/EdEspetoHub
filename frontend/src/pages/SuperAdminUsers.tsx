@@ -57,7 +57,7 @@ export function SuperAdminUsers() {
 
         <SurfaceCard padding="md" className="rounded-[1.6rem]">
           <div className="flex items-center gap-3">
-            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#2F9DF7]/10 text-[#153A4C]"><IdentificationCard size={24} weight="duotone" /></span>
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#2563EB]/10 text-[#153A4C]"><IdentificationCard size={24} weight="duotone" /></span>
             <div>
               <h2 className="text-xl font-black text-slate-950">{selected.fullName}</h2>
               <p className="text-sm font-semibold text-slate-500">{selected.email} · {roleLabel[selected.userRole] || selected.userRole}</p>
@@ -103,7 +103,7 @@ export function SuperAdminUsers() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por email ou nome…"
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 pl-10 text-sm font-semibold outline-none focus:border-[#2F9DF7]/30"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 pl-10 text-sm font-semibold outline-none focus:border-[#2563EB]/30"
           />
           <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         </div>

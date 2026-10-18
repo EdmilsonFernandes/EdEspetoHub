@@ -359,7 +359,7 @@ const OnlinePaymentBlock = ({ onlinePayment, paymentStatus }) => {
                   window.open(url, '_blank');
                 }
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2F9DF7] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(51,104,134,0.55)] transition hover:brightness-105 active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] py-3.5 text-sm font-black text-white shadow-[0_8px_20px_-10px_rgba(51,104,134,0.55)] transition hover:brightness-105 active:scale-[0.98]"
             >
               <ArrowSquareOut size={16} weight="bold" />
               Pagar via Mercado Pago
@@ -391,8 +391,8 @@ const StaticPixBlock = ({ pixKey, phone }) => {
   return (
     <div className="mb-8 w-full rounded-3xl border border-[#d8e5ee] bg-[linear-gradient(145deg,#ffffff_0%,#f4f8fb_100%)] p-6 shadow-[0_22px_42px_-30px_rgba(51,104,134,0.18)]">
       <div className="flex flex-col items-center gap-3 mb-4 text-center">
-        <div className="rounded-full bg-[#DBEEFD] p-3 shadow-inner">
-          <QrCode size={24} weight="duotone" className="text-[#2F9DF7]" />
+        <div className="rounded-full bg-[#E0EBFD] p-3 shadow-inner">
+          <QrCode size={24} weight="duotone" className="text-[#2563EB]" />
         </div>
         <span className="text-sm font-black text-slate-900">Pix para pagamento</span>
         <p className="text-xs text-slate-500">Use o QR Code ou copie a chave abaixo.</p>
@@ -406,7 +406,7 @@ const StaticPixBlock = ({ pixKey, phone }) => {
       <button
         type="button"
         onClick={handleCopy}
-        className={`flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-black transition-all active:scale-[0.98] ${copied ? "bg-emerald-600 text-white" : "bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] text-white hover:opacity-95"}`}
+        className={`flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-black transition-all active:scale-[0.98] ${copied ? "bg-emerald-600 text-white" : "bg-[linear-gradient(135deg,#153A4C,#2563EB)] text-white hover:opacity-95"}`}
       >
         {copied ? <Check size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
         {copied ? "Copiado!" : "Copiar chave Pix"}
@@ -620,7 +620,7 @@ export const SuccessView = ({
             <button
               type="button"
               onClick={onNewOrder}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-slate-200/80 bg-white text-[#2F9DF7] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.3)] transition hover:-translate-y-0.5 hover:bg-sky-50 active:scale-95"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-slate-200/80 bg-white text-[#2563EB] shadow-[0_14px_28px_-18px_rgba(51,104,134,0.3)] transition hover:-translate-y-0.5 hover:bg-sky-50 active:scale-95"
             >
               <ArrowLeft size={18} weight="bold" />
             </button>
@@ -629,7 +629,7 @@ export const SuccessView = ({
                 <img src={storeLogo} alt={storeLabel || "Loja"} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = getStoreAvatarUrl(storeSlug, storeLabel || "Loja"); }} />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">
                   {orderDisplayId ? `Pedido #${orderDisplayId}` : "Pedido"}
                 </p>
                 <p className="truncate text-sm font-black tracking-tight text-slate-950">
@@ -694,7 +694,7 @@ export const SuccessView = ({
 
         {isLocalPayment && (
           <div className="rounded-3xl border border-[#d8e5ee] bg-[linear-gradient(145deg,#ffffff_0%,#f4f8fb_100%)] p-4 shadow-[0_20px_40px_-34px_rgba(51,104,134,0.18)]">
-            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.2em] text-[#2F9DF7]">Forma de pagamento</p>
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.2em] text-[#2563EB]">Forma de pagamento</p>
             <div className="flex items-center gap-2">
               {(() => {
                 const methodMeta = getPaymentMethodMeta(paymentMethod);
@@ -715,7 +715,7 @@ export const SuccessView = ({
           <div className="flex flex-col gap-3">
             <button
               onClick={primaryAction.onClick}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] py-4 text-base font-black text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.45)] transition hover:opacity-95 active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2563EB)] py-4 text-base font-black text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.45)] transition hover:opacity-95 active:scale-[0.98]"
             >
               {primaryAction.icon} {primaryAction.label}
             </button>

@@ -60,7 +60,7 @@ export function AdminLayout({
   const primaryColor = String(
     auth?.store?.settings?.primaryColor ||
     auth?.store?.settings?.primary_color ||
-    '#2f9df7'
+    '#2563EB'
   );
 
   // Fonte única de navegação (antes: mobileNavItems + groupedMobileSections +
@@ -370,7 +370,7 @@ export function AdminLayout({
                 className="h-10 w-10 rounded-[0.95rem] bg-white object-contain p-1"
               />
             ) : (
-              <UserCircle size={26} weight="duotone" className="text-[#2F9DF7]" />
+              <UserCircle size={26} weight="duotone" className="text-[#2563EB]" />
             )
           }
           badges={[

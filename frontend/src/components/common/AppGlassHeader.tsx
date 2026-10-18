@@ -60,7 +60,7 @@ export function AppGlassHeader({
             <button
               type="button"
               onClick={handleBack}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/70 text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.55)] ring-1 ring-[#BCE2FC]/70 transition-all active:scale-95"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/70 text-[#153A4C] shadow-[0_14px_28px_-22px_rgba(21,58,76,0.55)] ring-1 ring-[#C3D8FB]/70 transition-all active:scale-95"
               aria-label="Voltar"
             >
               <ArrowLeft size={18} weight="bold" />
@@ -71,11 +71,11 @@ export function AppGlassHeader({
             {eyebrow ? (
               <div className="flex items-center justify-center gap-1.5">
                 <img src={eyebrowLogoSrc} alt={eyebrowLogoAlt} className={`h-5 w-5 rounded-[0.45rem] bg-white shadow-sm ring-1 ring-white/70 ${eyebrowLogoClassName}`} />
-                <p className="truncate text-[10px] font-black uppercase tracking-[0.22em] text-[#2F9DF7]/82">{eyebrow}</p>
+                <p className="truncate text-[10px] font-black uppercase tracking-[0.22em] text-[#2563EB]/82">{eyebrow}</p>
               </div>
             ) : null}
             <div role="heading" aria-level={2} className="mt-0.5 truncate text-[15px] font-black tracking-[-0.02em] text-[#153A4C]">{title}</div>
-            {subtitle ? <p className="mt-0.5 truncate text-[11px] font-semibold text-[#2F9DF7]/72">{subtitle}</p> : null}
+            {subtitle ? <p className="mt-0.5 truncate text-[11px] font-semibold text-[#2563EB]/72">{subtitle}</p> : null}
           </div>
 
           <div className={`flex h-10 shrink-0 items-center justify-center ${right ? 'min-w-10' : 'w-10'}`}>

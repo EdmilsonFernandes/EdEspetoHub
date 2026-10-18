@@ -63,7 +63,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
     >
       <div className="flex items-center justify-between gap-3 px-1">
         <div className="min-w-0">
-          <p className="mb-0.5 inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.2em] text-[#2F9DF7]">
+          <p className="mb-0.5 inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.2em] text-[#2563EB]">
             <Sparkle size={9} weight="fill" />
             Destaques locais
           </p>
@@ -76,7 +76,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
             onPointerEnter={() => prefetchRouteByPath('/hub/destaques')}
             onFocus={() => prefetchRouteByPath('/hub/destaques')}
             onTouchStart={() => prefetchRouteByPath('/hub/destaques')}
-            className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-2xs font-black uppercase tracking-[0.14em] text-[#2F9DF7]"
+            className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-2xs font-black uppercase tracking-[0.14em] text-[#2563EB]"
           >
             Ver mais
             <CaretRight size={11} weight="bold" />
@@ -142,7 +142,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                       item.sponsored
                         ? 'border-[#5FD35A]/20 bg-[linear-gradient(135deg,rgba(95,211,90,0.06)_0%,#ffffff_58%,#ffffff_100%)] shadow-[0_24px_56px_-44px_rgba(95,211,90,0.18)]'
                         : isLead
-                          ? 'border-[#BCE2FC]/80 bg-[radial-gradient(circle_at_96%_4%,rgba(95,211,90,0.10),transparent_34%),linear-gradient(135deg,#ffffff_0%,#f8fbfc_56%,rgba(237,245,250,0.90)_100%)] shadow-[0_26px_62px_-48px_rgba(21,58,76,0.34)]'
+                          ? 'border-[#C3D8FB]/80 bg-[radial-gradient(circle_at_96%_4%,rgba(95,211,90,0.10),transparent_34%),linear-gradient(135deg,#ffffff_0%,#f8fbfc_56%,rgba(237,245,250,0.90)_100%)] shadow-[0_26px_62px_-48px_rgba(21,58,76,0.34)]'
                           : 'border-slate-100/80 bg-white shadow-[0_18px_42px_-36px_rgba(15,23,42,0.16)]'
                     }`}
                   >
@@ -176,7 +176,7 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                           </span>
                         ) : !isLead ? (
                           <span className="jnc-hub-glass-badge inline-flex items-center gap-1 rounded-[0.65rem] px-1.5 py-0.5 text-2xs font-black italic uppercase tracking-[0.08em] text-[#153A4C] ring-1 ring-black/5 shadow-sm">
-                            <Sparkle size={9} weight="fill" className="text-[#2F9DF7]" />
+                            <Sparkle size={9} weight="fill" className="text-[#2563EB]" />
                             Seleção
                           </span>
                         ) : null}
@@ -199,12 +199,12 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
 
                     <div className="flex min-w-0 flex-1 flex-col py-1 pr-1">
                       {isLead ? (
-                        <span className="mb-1 inline-flex w-fit items-center gap-1 rounded-full border border-[#BCE2FC]/80 bg-white/72 px-2 py-0.5 text-2xs font-black uppercase tracking-[0.08em] text-[#2F9DF7] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.45)]">
+                        <span className="mb-1 inline-flex w-fit items-center gap-1 rounded-full border border-[#C3D8FB]/80 bg-white/72 px-2 py-0.5 text-2xs font-black uppercase tracking-[0.08em] text-[#2563EB] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.45)]">
                           <Sparkle size={9} weight="fill" />
                           Escolha de hoje
                         </span>
                       ) : null}
-                      <p className={`line-clamp-2 font-extrabold tracking-[-0.02em] text-slate-950 transition-colors group-hover:text-[#2F9DF7] ${
+                      <p className={`line-clamp-2 font-extrabold tracking-[-0.02em] text-slate-950 transition-colors group-hover:text-[#2563EB] ${
                         isLead ? 'text-[15px] leading-[1.22rem]' : 'text-[13px] leading-[1.12rem]'
                       }`}>{item.name}</p>
                       <p className="mt-1 truncate text-2xs font-semibold text-slate-400">por {item.storeName}</p>
@@ -213,8 +213,8 @@ export const HubFeaturedCarousel = memo(function HubFeaturedCarousel({
                           {currency.format(item.price)}
                         </span>
                         
-                        <span className={`inline-flex items-center gap-1 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.76)] transition-all duration-300 group-hover:bg-[#2F9DF7] group-hover:text-white group-hover:shadow-[0_12px_22px_-16px_rgba(51,104,134,0.42)] ${
-                          isLead ? 'h-11 bg-[#153A4C] px-3.5 text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.48)]' : 'h-10 bg-[#DBEEFD]/82 px-2.5 text-[#2F9DF7] group-hover:px-3'
+                        <span className={`inline-flex items-center gap-1 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.76)] transition-all duration-300 group-hover:bg-[#2563EB] group-hover:text-white group-hover:shadow-[0_12px_22px_-16px_rgba(51,104,134,0.42)] ${
+                          isLead ? 'h-11 bg-[#153A4C] px-3.5 text-white shadow-[0_14px_26px_-18px_rgba(21,58,76,0.48)]' : 'h-10 bg-[#E0EBFD]/82 px-2.5 text-[#2563EB] group-hover:px-3'
                         }`}>
                           <span className={`${isLead ? 'max-w-none scale-100 opacity-100' : 'max-w-0 scale-0 opacity-0 group-hover:max-w-[40px] group-hover:scale-100 group-hover:opacity-100'} text-2xs font-black uppercase tracking-wider transition-all duration-300`}>Pedir</span>
                           <CaretRight size={11} weight="bold" />

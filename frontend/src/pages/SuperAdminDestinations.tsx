@@ -324,7 +324,7 @@ const geoQualityUi = (value: any) => {
     return {
       label: 'Endereço localizado',
       description: 'Boa confiança, mas em cidade pequena ainda vale conferir o ponto se rua/CEP forem genéricos.',
-      className: 'border-[#2F9DF7]/18 bg-[#2F9DF7]/8 text-[#24576a]',
+      className: 'border-[#2563EB]/18 bg-[#2563EB]/8 text-[#24576a]',
     };
   }
   return {
@@ -696,7 +696,7 @@ const DestinationAddressFields = ({
       <div className="mt-3 grid gap-3 sm:grid-cols-[160px_minmax(0,1fr)_120px]">
         <div>
           <input value={value.zipCode || ''} onChange={(event) => update('zipCode', formatCepBr(event.target.value))} placeholder="CEP" inputMode="numeric" autoComplete="postal-code" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
-          {loading ? <p className="mt-1 px-1 text-[11px] font-bold text-[#2F9DF7]">Buscando endereço...</p> : null}
+          {loading ? <p className="mt-1 px-1 text-[11px] font-bold text-[#2563EB]">Buscando endereço...</p> : null}
           {error ? <p className="mt-1 px-1 text-[11px] font-bold text-rose-600">{error}</p> : null}
         </div>
         <input value={value.address || ''} onChange={(event) => update('address', event.target.value)} placeholder="Rua, estrada ou local" autoComplete="address-line1" className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold outline-none" />
@@ -2714,7 +2714,7 @@ export function SuperAdminDestinations() {
             <p className="mt-2 line-clamp-2 text-xs font-semibold opacity-80">{request.message || request.description}</p>
           ) : null}
           {isPartnerClaimRequest(request) ? (
-            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#2F9DF7]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#153A4C]">
+            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#2563EB]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#153A4C]">
               <LinkSimpleHorizontal size={12} weight="bold" />
               Assumir perfil existente
             </div>
@@ -2820,7 +2820,7 @@ export function SuperAdminDestinations() {
     return (
       <section className={`rounded-[1.45rem] border p-2.5 transition-all ${
         isOpen
-          ? 'border-[#2F9DF7]/18 bg-white shadow-[0_18px_42px_-34px_rgba(15,23,42,0.48)]'
+          ? 'border-[#2563EB]/18 bg-white shadow-[0_18px_42px_-34px_rgba(15,23,42,0.48)]'
           : 'border-slate-100 bg-white/72 shadow-[0_14px_32px_-30px_rgba(15,23,42,0.28)]'
       }`}>
         <button
@@ -2832,7 +2832,7 @@ export function SuperAdminDestinations() {
         >
           <div className="flex min-w-0 items-start gap-2.5">
             <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-2xl transition ${
-              isOpen ? 'bg-[#153A4C] text-white' : 'bg-[#EEF6F4] text-[#2F9DF7]'
+              isOpen ? 'bg-[#153A4C] text-white' : 'bg-[#EEF6F4] text-[#2563EB]'
             }`}>
               <Icon size={18} weight="duotone" />
             </span>
@@ -2923,7 +2923,7 @@ export function SuperAdminDestinations() {
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#2563EB]">
                     <ShieldCheck size={14} weight="fill" />
                     Detalhes e validação
                   </span>
@@ -2982,7 +2982,7 @@ export function SuperAdminDestinations() {
                   </div>
                 </SurfaceCard>
                 <SurfaceCard tone="brand" padding="sm" className="rounded-[1.45rem]">
-                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#2F9DF7]">Chalés vinculados na solicitação</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#2563EB]">Chalés vinculados na solicitação</p>
                   {requestedPlaces.length ? (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {requestedPlaces.slice(0, 6).map((place: any) => {
@@ -2995,7 +2995,7 @@ export function SuperAdminDestinations() {
                         );
                       })}
                       {requestedPlaces.length > 6 ? (
-                        <span className="rounded-full bg-white/80 px-2.5 py-1.5 text-xs font-black text-[#2F9DF7]">+{requestedPlaces.length - 6}</span>
+                        <span className="rounded-full bg-white/80 px-2.5 py-1.5 text-xs font-black text-[#2563EB]">+{requestedPlaces.length - 6}</span>
                       ) : null}
                     </div>
                   ) : (
@@ -3187,14 +3187,14 @@ export function SuperAdminDestinations() {
                     }}
                     className={`min-w-0 rounded-[1.25rem] border px-2.5 py-2.5 text-left transition-all active:scale-[0.985] ${
                       isActiveGroup
-                        ? 'border-[#2F9DF7]/18 bg-[#2F9DF7]/10 text-[#153A4C] shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)]'
+                        ? 'border-[#2563EB]/18 bg-[#2563EB]/10 text-[#153A4C] shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)]'
                         : 'border-slate-100 bg-slate-50/72 text-slate-500 hover:bg-white hover:text-slate-800'
                     }`}
                     aria-pressed={isActiveGroup}
                   >
                     <span className="flex min-w-0 items-center gap-2">
                       <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-2xl ${
-                        isActiveGroup ? 'bg-[#153A4C] text-white' : 'bg-white text-[#2F9DF7]'
+                        isActiveGroup ? 'bg-[#153A4C] text-white' : 'bg-white text-[#2563EB]'
                       }`}>
                         <Icon size={17} weight={isActiveGroup ? 'fill' : 'duotone'} />
                       </span>
@@ -3219,7 +3219,7 @@ export function SuperAdminDestinations() {
                     className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition-all active:scale-[0.98] ${
                       isActive
                         ? 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_12px_28px_-20px_rgba(15,23,42,0.65)]'
-                        : 'border-slate-100 bg-white text-slate-500 hover:border-[#2F9DF7]/20 hover:text-[#153A4C]'
+                        : 'border-slate-100 bg-white text-slate-500 hover:border-[#2563EB]/20 hover:text-[#153A4C]'
                     }`}
                     aria-pressed={isActive}
                   >
@@ -3285,7 +3285,7 @@ export function SuperAdminDestinations() {
                 const Icon = item.icon;
                 return (
                   <div key={item.label} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-                    <Icon size={24} weight="duotone" className="text-[#2F9DF7]" />
+                    <Icon size={24} weight="duotone" className="text-[#2563EB]" />
                     <p className="mt-4 text-3xl font-black text-slate-950">{item.value}</p>
                     <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{item.label}</p>
                   </div>
@@ -3300,7 +3300,7 @@ export function SuperAdminDestinations() {
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Digite cidade, hospedagem, serviço, endereço, WhatsApp ou loja"
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-20 text-sm font-bold outline-none focus:border-[#2F9DF7]"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-20 text-sm font-bold outline-none focus:border-[#2563EB]"
                 />
                 {search ? (
                   <button
@@ -3398,10 +3398,10 @@ export function SuperAdminDestinations() {
               <section className="rounded-[1.75rem] border border-slate-200 bg-white p-3 shadow-sm">
                 <div className="flex items-center justify-between gap-3 px-1 py-2">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Cidades</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">Cidades</p>
                     <h2 className="text-lg font-black text-slate-950">Catálogo paginado</h2>
                   </div>
-                  {catalogLoading ? <span className="rounded-full bg-[#DBEEFD] px-2.5 py-1 text-[10px] font-black text-[#2F9DF7]">Atualizando</span> : null}
+                  {catalogLoading ? <span className="rounded-full bg-[#E0EBFD] px-2.5 py-1 text-[10px] font-black text-[#2563EB]">Atualizando</span> : null}
                 </div>
                 <div className="mt-2 space-y-2">
                   {(catalog.destinations || []).map((destination: any) => {
@@ -3446,7 +3446,7 @@ export function SuperAdminDestinations() {
               <section className="min-w-0 rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
                 {!selectedDestination ? (
                   <div className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
-                    <MapTrifold size={32} weight="duotone" className="mx-auto text-[#2F9DF7]" />
+                    <MapTrifold size={32} weight="duotone" className="mx-auto text-[#2563EB]" />
                     <p className="mt-3 text-sm font-black text-slate-700">Selecione uma cidade para gerenciar hospedagens e serviços.</p>
                   </div>
                 ) : (
@@ -3488,7 +3488,7 @@ export function SuperAdminDestinations() {
                           value={detailSearch}
                           onChange={(event) => setDetailSearch(event.target.value)}
                           placeholder="Buscar dentro desta cidade: chalé, serviço, WhatsApp, endereço..."
-                          className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm font-bold outline-none focus:border-[#2F9DF7]"
+                          className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm font-bold outline-none focus:border-[#2563EB]"
                         />
                       </div>
                       <button type="button" onClick={() => loadDestinationDetails(selectedDestinationId, placesPage, listingsPage)} className={actionButtonClass('neutral')}>
@@ -3501,12 +3501,12 @@ export function SuperAdminDestinations() {
                       ) : null}
                     </div>
 
-                    {detailLoading ? <p className="rounded-2xl bg-[#DBEEFD] px-4 py-3 text-sm font-bold text-[#2F9DF7]">Carregando detalhes da cidade...</p> : null}
+                    {detailLoading ? <p className="rounded-2xl bg-[#E0EBFD] px-4 py-3 text-sm font-bold text-[#2563EB]">Carregando detalhes da cidade...</p> : null}
 
                     <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]">Hospedagens</p>
+                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#2563EB]">Hospedagens</p>
                           <h4 className="text-lg font-black text-slate-950">Chalés e pousadas da cidade</h4>
                           <p className="mt-0.5 text-xs font-bold text-slate-500">{placesResult.pagination?.total || 0} hospedagem(ns) nesta cidade</p>
                         </div>
@@ -3524,7 +3524,7 @@ export function SuperAdminDestinations() {
                             <CopySimple size={13} weight="bold" />
                             {inviteBatchLoading === 'places' ? 'Copiando...' : 'Copiar todos'}
                           </button>
-                          <Bed size={24} weight="duotone" className="text-[#2F9DF7]" />
+                          <Bed size={24} weight="duotone" className="text-[#2563EB]" />
                         </div>
                       </div>
                       <div className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
@@ -3539,7 +3539,7 @@ export function SuperAdminDestinations() {
                                     <div className="min-w-0">
                                       <p className="break-words text-sm font-black leading-snug text-slate-950">{place.name}</p>
                                       <p className="mt-0.5 line-clamp-2 text-xs font-semibold text-slate-500">{place.address || place.description || 'Hospedagem sem endereço'}</p>
-                                      {placeBannerCount ? <p className="mt-1 text-[11px] font-black text-[#2F9DF7]">{placeBannerCount} banner(s) no carrossel</p> : null}
+                                      {placeBannerCount ? <p className="mt-1 text-[11px] font-black text-[#2563EB]">{placeBannerCount} banner(s) no carrossel</p> : null}
                                     </div>
                                     <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black uppercase ${statusPill(place.active)}`}>{activeLabel(place.active)}</span>
                                   </div>
@@ -3636,7 +3636,7 @@ export function SuperAdminDestinations() {
                               <div className="flex min-w-0 items-center gap-2">
                                 <div className="flex shrink-0 -space-x-2">
                                   {isDestinationWide ? (
-                                    <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#2F9DF7] text-white shadow-sm">
+                                    <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#2563EB] text-white shadow-sm">
                                       <MapTrifold size={16} weight="duotone" />
                                     </span>
                                   ) : linkedPlaces.length ? (
@@ -3647,7 +3647,7 @@ export function SuperAdminDestinations() {
                                           {placeImage ? (
                                             <img src={placeImage} alt={place.name} className="h-full w-full object-cover" />
                                           ) : (
-                                            <span className="flex h-full w-full items-center justify-center bg-[#EEF6F4] text-[10px] font-black text-[#2F9DF7]">
+                                            <span className="flex h-full w-full items-center justify-center bg-[#EEF6F4] text-[10px] font-black text-[#2563EB]">
                                               {initialsFor(place.name)}
                                             </span>
                                           )}
@@ -3668,13 +3668,13 @@ export function SuperAdminDestinations() {
                                 </div>
                               </div>
                               {isDestinationWide ? (
-                                <p className="mt-2 rounded-full bg-[#EEF6F4] px-2.5 py-1 text-[11px] font-bold text-[#2F9DF7]">
+                                <p className="mt-2 rounded-full bg-[#EEF6F4] px-2.5 py-1 text-[11px] font-bold text-[#2563EB]">
                                   Visível para todos os chalés e pousadas da cidade.
                                 </p>
                               ) : (
                                 <div className="mt-2 flex flex-wrap gap-1.5">
                                   {visiblePlaces.map((place: any) => (
-                                    <span key={place.id} className="max-w-full truncate rounded-full border border-[#2F9DF7]/10 bg-[#EEF6F4] px-2.5 py-1 text-[10px] font-black text-[#2F9DF7]">
+                                    <span key={place.id} className="max-w-full truncate rounded-full border border-[#2563EB]/10 bg-[#EEF6F4] px-2.5 py-1 text-[10px] font-black text-[#2563EB]">
                                       {place.name}
                                     </span>
                                   ))}
@@ -3733,7 +3733,7 @@ export function SuperAdminDestinations() {
             <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">{editingCadastroMode ? 'Edição focada' : 'Cadastro guiado'}</p>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2563EB]">{editingCadastroMode ? 'Edição focada' : 'Cadastro guiado'}</p>
                   <h2 className="mt-1 text-xl font-black text-slate-950">
                     {editingCadastroMode ? 'Mostrando só o formulário do item selecionado' : 'Escolha o que você quer cadastrar'}
                   </h2>
@@ -3800,7 +3800,7 @@ export function SuperAdminDestinations() {
                     <p className="text-sm font-black text-slate-950">Identidade da cidade</p>
                     <p className="mt-0.5 text-xs font-semibold text-slate-500">Escolha UF e cidade. Nome público e link são gerados automaticamente para evitar duplicidade.</p>
                   </div>
-                  <span className="rounded-full bg-[#DBEEFD] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#2F9DF7]">
+                  <span className="rounded-full bg-[#E0EBFD] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#2563EB]">
                     sem digitação duplicada
                   </span>
                 </div>
@@ -3872,9 +3872,9 @@ export function SuperAdminDestinations() {
                     />
                   </div>
                   <SurfaceCard tone="soft" padding="md" className="rounded-[1.45rem]">
-                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#2F9DF7]">Como aparece no app</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#2563EB]">Como aparece no app</p>
                     <div className="mt-3 overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white">
-                      <div className="aspect-[16/9] bg-[linear-gradient(135deg,#153A4C,#2F9DF7)]">
+                      <div className="aspect-[16/9] bg-[linear-gradient(135deg,#153A4C,#2563EB)]">
                         {destinationPreviewImageUrl ? (
                           <img
                             src={destinationPreviewImageUrl}
@@ -3898,7 +3898,7 @@ export function SuperAdminDestinations() {
                     <p className="text-sm font-black text-slate-950">Fotos da cidade</p>
                     <p className="mt-0.5 text-xs font-semibold text-slate-500">Até 4 imagens para a vitrine pública. A primeira foto preenchida vira a capa do destino.</p>
                   </div>
-                  <span className="rounded-full bg-[#DBEEFD] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#2F9DF7]">
+                  <span className="rounded-full bg-[#E0EBFD] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#2563EB]">
                     vitrine 16:9
                   </span>
                 </div>
@@ -4064,7 +4064,7 @@ export function SuperAdminDestinations() {
                     </div>
                   </div>
                   <div className="overflow-hidden rounded-[1.45rem] border border-white/80 bg-white/70 shadow-[0_20px_44px_-34px_rgba(15,23,42,0.42)]">
-                    <div className="aspect-[16/10] bg-[linear-gradient(135deg,#153A4C,#2F9DF7)]">
+                    <div className="aspect-[16/10] bg-[linear-gradient(135deg,#153A4C,#2563EB)]">
                       {placePreviewImageUrl ? (
                         <img src={placePreviewImageUrl} alt={placeForm.name || 'Prévia da hospedagem'} className="h-full w-full object-cover" />
                       ) : null}
@@ -4162,7 +4162,7 @@ export function SuperAdminDestinations() {
                       <p className="text-sm font-black text-slate-950">Banners do chalé ou pousada</p>
                       <p className="mt-0.5 text-xs font-semibold text-slate-500">Cadastre até 4 fotos para o carrossel público. A primeira vira o destaque principal.</p>
                     </div>
-                    <span className="rounded-full bg-[#DBEEFD] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#2F9DF7]">
+                    <span className="rounded-full bg-[#E0EBFD] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#2563EB]">
                       até 4 imagens
                     </span>
                   </div>
@@ -4269,10 +4269,10 @@ export function SuperAdminDestinations() {
               </div>
               ) : (
                 <div className="mt-4 space-y-3">
-                  <div className="rounded-[1.5rem] border border-[#2F9DF7]/10 bg-[linear-gradient(135deg,#ffffff,#f3faf8)] p-4">
+                  <div className="rounded-[1.5rem] border border-[#2563EB]/10 bg-[linear-gradient(135deg,#ffffff,#f3faf8)] p-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Serviços deste chalé</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">Serviços deste chalé</p>
                         <h3 className="text-lg font-black text-slate-950">{placeForm.name || 'Hospedagem selecionada'}</h3>
                         <p className="mt-1 text-xs font-semibold text-slate-500">
                           Essa visão é o inverso da edição do serviço: aqui o chalé é o centro, e você controla o que aparece nele.
@@ -4301,7 +4301,7 @@ export function SuperAdminDestinations() {
                             }
                           }}
                           placeholder="Buscar serviço existente para vincular..."
-                          className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm font-bold outline-none focus:border-[#2F9DF7]"
+                          className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm font-bold outline-none focus:border-[#2563EB]"
                         />
                       </div>
                       <button type="button" onClick={() => loadPlaceListings(placeForm.destinationId || selectedDestinationId, placeListingSearch)} className={actionButtonClass('neutral')}>
@@ -4311,7 +4311,7 @@ export function SuperAdminDestinations() {
                   </div>
 
                   {placeListingsLoading ? (
-                    <p className="rounded-2xl bg-[#DBEEFD] px-4 py-3 text-sm font-bold text-[#2F9DF7]">Carregando serviços vinculados...</p>
+                    <p className="rounded-2xl bg-[#E0EBFD] px-4 py-3 text-sm font-bold text-[#2563EB]">Carregando serviços vinculados...</p>
                   ) : null}
 
                   <section className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
@@ -4320,7 +4320,7 @@ export function SuperAdminDestinations() {
                         <p className="text-sm font-black text-slate-950">Aparecem neste chalé</p>
                         <p className="text-xs font-semibold text-slate-500">{placeServiceRows.length} serviço(s) visível(is), incluindo escopo destino inteiro.</p>
                       </div>
-                      <Sparkle size={22} weight="duotone" className="text-[#2F9DF7]" />
+                      <Sparkle size={22} weight="duotone" className="text-[#2563EB]" />
                     </div>
                     <div className="mt-3 grid gap-2">
                       {placeServiceRows.map((listing: any) => {
@@ -4341,7 +4341,7 @@ export function SuperAdminDestinations() {
                                       <p className="mt-1 text-xs font-bold text-emerald-700">Loja: {listing.store.name}</p>
                                     ) : null}
                                   </div>
-                                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${globalScope ? 'bg-[#EEF6F4] text-[#2F9DF7]' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>
+                                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${globalScope ? 'bg-[#EEF6F4] text-[#2563EB]' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>
                                     {globalScope ? 'Destino inteiro' : 'Vínculo direto'}
                                   </span>
                                 </div>
@@ -4360,7 +4360,7 @@ export function SuperAdminDestinations() {
                                             (event.currentTarget as HTMLInputElement).blur();
                                           }
                                         }}
-                                        className="rounded-xl border border-slate-200 bg-white px-2 py-2 text-center text-sm font-black text-slate-900 outline-none focus:border-[#2F9DF7]"
+                                        className="rounded-xl border border-slate-200 bg-white px-2 py-2 text-center text-sm font-black text-slate-900 outline-none focus:border-[#2563EB]"
                                       />
                                     </label>
                                   ) : (
@@ -4473,8 +4473,8 @@ export function SuperAdminDestinations() {
                       onClick={() => setListingPlaceIds([])}
                       className={`rounded-full px-3 py-2 text-xs font-black transition ${
                         selectedListingPlaceIds.length === 0
-                          ? 'bg-[#2F9DF7] text-white shadow-sm'
-                          : 'border border-slate-200 bg-white text-slate-600 hover:border-[#2F9DF7]/40'
+                          ? 'bg-[#2563EB] text-white shadow-sm'
+                          : 'border border-slate-200 bg-white text-slate-600 hover:border-[#2563EB]/40'
                       }`}
                     >
                       Destino inteiro
@@ -4492,8 +4492,8 @@ export function SuperAdminDestinations() {
                             onClick={() => toggleListingPlace(String(place.id))}
                             className={`group flex min-w-0 items-center gap-3 rounded-2xl border p-2 text-left transition ${
                               selected
-                                ? 'border-[#2F9DF7] bg-white shadow-[0_14px_40px_rgba(51,104,134,0.14)]'
-                                : 'border-white bg-white/75 hover:border-[#2F9DF7]/35 hover:bg-white'
+                                ? 'border-[#2563EB] bg-white shadow-[0_14px_40px_rgba(51,104,134,0.14)]'
+                                : 'border-white bg-white/75 hover:border-[#2563EB]/35 hover:bg-white'
                             }`}
                             aria-pressed={selected}
                           >
@@ -4516,7 +4516,7 @@ export function SuperAdminDestinations() {
                               ) : null}
                             </div>
                             <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${
-                              selected ? 'border-[#2F9DF7] bg-[#2F9DF7] text-white' : 'border-slate-200 bg-slate-50 text-transparent'
+                              selected ? 'border-[#2563EB] bg-[#2563EB] text-white' : 'border-slate-200 bg-slate-50 text-transparent'
                             }`}>
                               ✓
                             </span>
@@ -4530,15 +4530,15 @@ export function SuperAdminDestinations() {
                     </div>
                   )}
                   {selectedListingPlaceLinks.length ? (
-                    <div className="mt-3 rounded-[1.25rem] border border-[#2F9DF7]/10 bg-white p-3 shadow-[0_12px_34px_rgba(51,104,134,0.08)]">
+                    <div className="mt-3 rounded-[1.25rem] border border-[#2563EB]/10 bg-white p-3 shadow-[0_12px_34px_rgba(51,104,134,0.08)]">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div>
-                          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#2F9DF7]">Prioridade por hospedagem</p>
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#2563EB]">Prioridade por hospedagem</p>
                           <p className="mt-1 text-xs font-semibold text-slate-500">
                             Número menor aparece primeiro naquele chalé. Use para destacar parceiros estratégicos sem duplicar serviço.
                           </p>
                         </div>
-                        <span className="rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black text-[#2F9DF7]">
+                        <span className="rounded-full bg-[#EEF6F4] px-3 py-1 text-[10px] font-black text-[#2563EB]">
                           {selectedListingPlaceLinks.length} selecionada(s)
                         </span>
                       </div>
@@ -4553,7 +4553,7 @@ export function SuperAdminDestinations() {
                                 {cover ? (
                                   <img src={cover} alt={place.name} className="h-full w-full object-cover" />
                                 ) : (
-                                  <div className="flex h-full w-full items-center justify-center text-[#2F9DF7]">
+                                  <div className="flex h-full w-full items-center justify-center text-[#2563EB]">
                                     <Bed size={18} weight="duotone" />
                                   </div>
                                 )}
@@ -4569,7 +4569,7 @@ export function SuperAdminDestinations() {
                                   min="0"
                                   value={link.sortOrder}
                                   onChange={(event) => updateListingPlaceSortOrder(link.hospitalityPlaceId, event.target.value)}
-                                  className="rounded-xl border border-slate-200 bg-white px-2 py-2 text-center text-sm font-black text-slate-900 outline-none focus:border-[#2F9DF7]"
+                                  className="rounded-xl border border-slate-200 bg-white px-2 py-2 text-center text-sm font-black text-slate-900 outline-none focus:border-[#2563EB]"
                                 />
                               </label>
                             </div>
@@ -4676,7 +4676,7 @@ export function SuperAdminDestinations() {
                 <div className="grid grid-cols-2 gap-2 sm:min-w-[430px] lg:grid-cols-4">
                   {[
                     { label: 'Pendentes', value: partnerOnboardingMetrics.pending, icon: ClockCountdown, tone: 'text-amber-700 bg-amber-50' },
-                    { label: 'Validação de posse', value: partnerOnboardingMetrics.claimPending, icon: ShieldCheck, tone: 'text-[#153A4C] bg-[#2F9DF7]/10' },
+                    { label: 'Validação de posse', value: partnerOnboardingMetrics.claimPending, icon: ShieldCheck, tone: 'text-[#153A4C] bg-[#2563EB]/10' },
                     { label: 'Sem ativar', value: partnerOnboardingMetrics.invited, icon: PaperPlaneTilt, tone: 'text-sky-700 bg-sky-50' },
                     { label: 'Ativos', value: partnerOnboardingMetrics.active, icon: CheckCircle, tone: 'text-emerald-700 bg-emerald-50' },
                   ].map((item) => {
@@ -4786,7 +4786,7 @@ export function SuperAdminDestinations() {
                   return (
                     <SurfaceCard as="article" key={group.id} padding="sm" className={`rounded-[1.9rem] transition-all ${
                       groupOpen
-                        ? 'border-[#2F9DF7]/16 bg-[#EEF6F4]/45 shadow-[0_24px_64px_-44px_rgba(21,58,76,0.55)]'
+                        ? 'border-[#2563EB]/16 bg-[#EEF6F4]/45 shadow-[0_24px_64px_-44px_rgba(21,58,76,0.55)]'
                         : 'border-slate-200 bg-slate-50/70 shadow-[0_18px_44px_-38px_rgba(15,23,42,0.36)]'
                     }`}>
                       <button
@@ -4807,7 +4807,7 @@ export function SuperAdminDestinations() {
                               <span className="absolute inset-0 bg-gradient-to-br from-slate-950/5 to-slate-950/28" />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Fila por destino</p>
+                              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">Fila por destino</p>
                               <p className="truncate text-lg font-black tracking-[-0.03em] text-slate-950">{group.name}</p>
                               <p className="text-xs font-bold text-slate-500">
                                 {[group.city, group.state].filter(Boolean).join(' · ') || 'Destino aguardando validação'}
@@ -4823,7 +4823,7 @@ export function SuperAdminDestinations() {
                               {group.pending ? `${group.pending} pendente(s)` : 'Sem pendência'}
                             </span>
                             <span className={`grid h-8 w-8 place-items-center rounded-full border transition ${
-                              groupOpen ? 'border-[#2F9DF7]/20 bg-[#153A4C] text-white' : 'border-slate-100 bg-white text-slate-400'
+                              groupOpen ? 'border-[#2563EB]/20 bg-[#153A4C] text-white' : 'border-slate-100 bg-white text-slate-400'
                             }`}>
                               <CaretDown size={16} weight="bold" className={`transition-transform ${groupOpen ? 'rotate-180' : ''}`} />
                             </span>
@@ -4895,7 +4895,7 @@ export function SuperAdminDestinations() {
             <div className="border-b border-slate-100 bg-[radial-gradient(circle_at_0%_0%,rgba(51,104,134,0.18),transparent_34%),linear-gradient(135deg,#ffffff,#f8fafc)] p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">{activeInviteKindLabel}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">{activeInviteKindLabel}</p>
                   <h3 className="mt-1 break-words text-xl font-black tracking-[-0.03em] text-slate-950">{activeInviteTitle}</h3>
                   <p className="mt-1 text-sm font-semibold text-slate-500">
                     Copie a mensagem ou abra direto no WhatsApp. O link curto abre o cadastro oficial com dados pré-preenchidos.

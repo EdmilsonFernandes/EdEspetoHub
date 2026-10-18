@@ -21,9 +21,9 @@ const SCROLL_EDGE_TOLERANCE = 6;
 const toneClasses: Record<SmartDrawerScrollAreaTone, { rail: string; activeButton: string; inactiveButton: string; bottomGlow: string }> = {
   client: {
     rail: 'border-[#d8e5ee] bg-white/82 shadow-[0_18px_34px_-24px_rgba(51,104,134,0.5)]',
-    activeButton: 'bg-[#DBEEFD] text-[#2F9DF7] ring-[#d8e5ee]',
+    activeButton: 'bg-[#E0EBFD] text-[#2563EB] ring-[#d8e5ee]',
     inactiveButton: 'bg-white/60 text-slate-300 ring-slate-100',
-    bottomGlow: 'bg-[#2F9DF7]/18',
+    bottomGlow: 'bg-[#2563EB]/18',
   },
   store: {
     rail: 'border-violet-100 bg-white/82 shadow-[0_18px_34px_-24px_rgba(124,58,237,0.45)]',

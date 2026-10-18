@@ -165,7 +165,7 @@ export function PaymentPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E2EBF2] to-[#D9E4EF]">
       <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
-        <div className="h-1 bg-[linear-gradient(90deg,#2F9DF7,#2F9DF7,#5FD35A)]" />
+        <div className="h-1 bg-[linear-gradient(90deg,#2563EB,#2563EB,#5FD35A)]" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
@@ -366,7 +366,7 @@ export function PaymentPage() {
                                 className={`border rounded-2xl px-3 py-3 text-left transition-all ${
                                   !selectedPlanId && !isSelected ? 'border-amber-200 bg-amber-50/40' : ''
                                 } ${isSelected
-                                  ? 'border-[#2F9DF7] shadow-lg bg-sky-50'
+                                  ? 'border-[#2563EB] shadow-lg bg-sky-50'
                                   : 'border-gray-200 hover:border-sky-200'
                                   } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                               >

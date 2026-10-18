@@ -158,12 +158,12 @@ export function StoreCondominiumPanel({ storeId }: Props) {
           const eventLabel = event?.state === 'live' ? 'Feira acontecendo agora' : formatEventTime(event) || 'Agenda em breve';
           return (
             <div key={condominium.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-[#2F9DF7] to-sky-400" />
+              <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-[#2563EB] to-sky-400" />
               <div className="p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex min-w-0 gap-3">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 shadow-sm ring-1 ring-slate-100">
-                    {logo ? <img src={logo} alt={condominium.name || 'Condomínio'} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#2F9DF7]" />}
+                    {logo ? <img src={logo} alt={condominium.name || 'Condomínio'} className="h-full w-full object-contain p-1.5" /> : <Buildings size={24} weight="duotone" className="text-[#2563EB]" />}
                   </div>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -198,13 +198,13 @@ export function StoreCondominiumPanel({ storeId }: Props) {
                       value={messageById[condominium.id] || ''}
                       onChange={(event) => setMessageById((prev) => ({ ...prev, [condominium.id]: event.target.value }))}
                       placeholder="Mensagem opcional"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold outline-none focus:border-[#2F9DF7]"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold outline-none focus:border-[#2563EB]"
                     />
                     <button
                       type="button"
                       onClick={() => requestJoin(condominium.id)}
                       disabled={savingId === condominium.id}
-                      className="w-full rounded-xl bg-[#2F9DF7] px-3 py-2 text-xs font-black text-white disabled:opacity-50"
+                      className="w-full rounded-xl bg-[#2563EB] px-3 py-2 text-xs font-black text-white disabled:opacity-50"
                     >
                       {savingId === condominium.id ? 'Enviando...' : 'Solicitar participação'}
                     </button>
@@ -232,7 +232,7 @@ export function StoreCondominiumPanel({ storeId }: Props) {
               {status === 'approved' ? (
                 <div className="mt-3 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
                   <p className="inline-flex items-center gap-1 text-xs font-black text-slate-800">
-                    <MapPin size={14} weight="duotone" className="text-[#2F9DF7]" />
+                    <MapPin size={14} weight="duotone" className="text-[#2563EB]" />
                     Local de retirada no condomínio
                   </p>
                   <p className="mt-1 text-[11px] font-semibold leading-relaxed text-slate-500">
@@ -247,7 +247,7 @@ export function StoreCondominiumPanel({ storeId }: Props) {
                       }))}
                       placeholder="Bloco/Torre (ex.: B)"
                       maxLength={40}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#2F9DF7]"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#2563EB]"
                     />
                     <input
                       value={pickupDraftByCondominium[condominium.id]?.unit || ''}
@@ -257,14 +257,14 @@ export function StoreCondominiumPanel({ storeId }: Props) {
                       }))}
                       placeholder="Apto/Unidade (ex.: 84)"
                       maxLength={40}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#2F9DF7]"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#2563EB]"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => savePickupLocation(condominium.id)}
                     disabled={savingPickupId === condominium.id}
-                    className="mt-2 inline-flex items-center gap-1 rounded-xl bg-[#2F9DF7] px-3 py-2 text-xs font-black text-white disabled:opacity-50"
+                    className="mt-2 inline-flex items-center gap-1 rounded-xl bg-[#2563EB] px-3 py-2 text-xs font-black text-white disabled:opacity-50"
                   >
                     <MapPin size={13} weight="fill" />
                     {savingPickupId === condominium.id ? 'Salvando...' : 'Salvar local de retirada'}

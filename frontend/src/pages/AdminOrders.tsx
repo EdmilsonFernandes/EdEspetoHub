@@ -491,7 +491,7 @@ export function AdminOrders() {
                     >
                       <span>{filter.label}</span>
                       <span className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black tabular-nums ${
-                        statusFilter === filter.id ? 'bg-[#DBEEFD] text-[#2F9DF7]' : 'bg-white/70 text-slate-500'
+                        statusFilter === filter.id ? 'bg-[#E0EBFD] text-[#2563EB]' : 'bg-white/70 text-slate-500'
                       }`}>
                         {filter.count}
                       </span>
@@ -656,7 +656,7 @@ export function AdminOrders() {
                       {String(order?.type || '').toLowerCase() === 'delivery' && formatAddress(order.address || order.deliveryAddress) && (
                         <div className="border-t border-slate-100 px-4 py-3">
                           <div className="flex min-w-0 items-start gap-2 rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-2.5">
-                            <MapPin size={16} weight="duotone" className="mt-0.5 shrink-0 text-[#2F9DF7]" />
+                            <MapPin size={16} weight="duotone" className="mt-0.5 shrink-0 text-[#2563EB]" />
                             <div className="min-w-0">
                               <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Destino da entrega</p>
                               <p className="mt-0.5 break-words text-xs font-semibold leading-relaxed text-slate-700">
@@ -743,7 +743,7 @@ export function AdminOrders() {
                     <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
                       <div className="min-w-0 rounded-2xl border border-slate-100 bg-white/80 p-3">
                         <div className="flex items-start gap-2.5">
-                          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#DBEEFD] text-[#2F9DF7]">
+                          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#E0EBFD] text-[#2563EB]">
                             <Phone size={17} weight="duotone" />
                           </span>
                           <div className="min-w-0">

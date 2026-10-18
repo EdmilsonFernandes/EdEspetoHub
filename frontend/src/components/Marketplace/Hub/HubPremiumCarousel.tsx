@@ -71,7 +71,7 @@ export function HubPremiumCarousel({
             onClick={() => emblaApi?.scrollPrev()}
             disabled={!canScrollPrev}
             aria-label="Ver item anterior"
-            className="absolute left-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-white/75 bg-white/88 text-[#2F9DF7] shadow-[0_16px_34px_-22px_rgba(15,23,42,0.52)] backdrop-blur-xl transition active:scale-95 disabled:pointer-events-none disabled:opacity-0 md:grid"
+            className="absolute left-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-white/75 bg-white/88 text-[#2563EB] shadow-[0_16px_34px_-22px_rgba(15,23,42,0.52)] backdrop-blur-xl transition active:scale-95 disabled:pointer-events-none disabled:opacity-0 md:grid"
           >
             <CaretLeft size={15} weight="bold" />
           </button>
@@ -80,16 +80,16 @@ export function HubPremiumCarousel({
             onClick={() => emblaApi?.scrollNext()}
             disabled={!canScrollNext}
             aria-label="Ver próximo item"
-            className="absolute right-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-white/75 bg-white/88 text-[#2F9DF7] shadow-[0_16px_34px_-22px_rgba(15,23,42,0.52)] backdrop-blur-xl transition active:scale-95 disabled:pointer-events-none disabled:opacity-0 md:grid"
+            className="absolute right-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-white/75 bg-white/88 text-[#2563EB] shadow-[0_16px_34px_-22px_rgba(15,23,42,0.52)] backdrop-blur-xl transition active:scale-95 disabled:pointer-events-none disabled:opacity-0 md:grid"
           >
             <CaretRight size={15} weight="bold" />
           </button>
 
           {showProgress ? (
             <div className="mt-2 flex items-center gap-2 px-1" aria-hidden="true">
-              <div className="h-1 flex-1 overflow-hidden rounded-full bg-[#BCE2FC]/70">
+              <div className="h-1 flex-1 overflow-hidden rounded-full bg-[#C3D8FB]/70">
                 <span
-                  className="block h-full rounded-full bg-[linear-gradient(90deg,#2F9DF7,#5FD35A)] transition-[width] duration-500 ease-out"
+                  className="block h-full rounded-full bg-[linear-gradient(90deg,#2563EB,#5FD35A)] transition-[width] duration-500 ease-out"
                   style={{ width: `${progress}%` }}
                 />
               </div>

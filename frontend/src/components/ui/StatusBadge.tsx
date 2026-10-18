@@ -10,7 +10,7 @@ type StatusBadgeProps = HTMLAttributes<HTMLSpanElement> & {
 };
 
 const toneClasses: Record<StatusBadgeTone, string> = {
-  brand: 'border-[#BCE2FC] bg-[#DBEEFD] text-brand-teal',
+  brand: 'border-[#C3D8FB] bg-[#E0EBFD] text-brand-teal',
   neutral: 'border-slate-200 bg-slate-50 text-slate-600',
   success: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   warning: 'border-amber-200 bg-amber-50 text-amber-700',

@@ -4,24 +4,25 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #2f9df7;
-  --color-primary-ink: #1a6fc8;
-  --color-brand-teal: #2f9df7; /* nome legado (era teal) — valor é o azul JNC desde o B0 out/26 */
+  --color-primary: #2563eb;
+  --color-primary-ink: #1d4ed8;
+  --color-brand-teal: #2563eb; /* nome legado (era teal) — valor é o azul JNC desde o B0 out/26 */
   --color-brand-navy: #153a4c;
   --color-brand-green: #5fd35a;
   --color-rating: #f5a623;
-  /* Rampa azul JNC (B0 out/26) — substitui a rampa teal (auditoria F5 16/08).
-     Split de papel: primary = gráfico; primary-ink = texto/underline/focus (AA). */
-  --color-primary-50: #f0f8fe;
-  --color-primary-100: #dbeefd;
-  --color-primary-200: #bce2fc;
-  --color-primary-300: #8ed2fa;
-  --color-primary-500: #4fb2f8;
-  --color-primary-600: #2f9df7;
-  --color-primary-700: #1a6fc8;
-  --color-primary-800: #185a94;
-  --color-primary-900: #16466b;
-  --color-primary-950: #0b1220;
+  /* Rampa azul JNC v2 (out/26) — cobalto profissional #2563EB no lugar do azul-céu
+     #2563EB (parecia amador na 1a revisao do Edmilson). Split: primary = grafico;
+     primary-ink = texto/underline/focus (AA). */
+  --color-primary-50: #eff5fe;
+  --color-primary-100: #e0ebfd;
+  --color-primary-200: #c3d8fb;
+  --color-primary-300: #9bbdf8;
+  --color-primary-500: #4285ec;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+  --color-primary-950: #172554;
   --color-accent-400: #5fd35a;
   --color-accent-700: #15803d;
   /* Promo — laranja vive em preço/desconto, nunca CTA (decisão PRODUCT.md out/26) */
@@ -38,15 +39,15 @@
 }
 
 :root {
-  --color-primary: #2f9df7;
-  --color-primary-ink: #1a6fc8;
+  --color-primary: #2563eb;
+  --color-primary-ink: #1d4ed8;
   --color-secondary: #0f172a;
   --color-cta: #15803d;
   --color-success: #047857;
   --color-warning: #d97706;
   --color-danger: #dc2626;
-  --brand-blue: #2f9df7;
-  --brand-cyan: #4fb2f8;
+  --brand-blue: #2563eb;
+  --brand-cyan: #4285ec;
   --brand-green: #5fd35a;
   --brand-navy: #153a4c;
   --brand-ink: #0f172a;
@@ -72,7 +73,7 @@
   --jnk-native-nav-height: 0px;
   --jnc-brand-950: #0b1220;
   --jnc-brand-900: #153A4C;
-  --jnc-brand-700: #1a6fc8;
+  --jnc-brand-700: #1d4ed8;
   --jnc-brand-500: #5FD35A;
   --jnc-surface-page: #E2EBF2;
   --jnc-surface-raised: #ffffff;
@@ -171,7 +172,7 @@ body {
   background: rgba(255, 255, 255, 0.76);
   border: 1px solid rgba(215, 231, 239, 0.78);
   box-shadow: var(--shadow-raised), inset 0 1px 0 rgba(255, 255, 255, 0.78);
-  color: #2F9DF7;
+  color: #2563EB;
   -webkit-backdrop-filter: blur(18px) saturate(1.06);
   backdrop-filter: blur(18px) saturate(1.06);
 }
@@ -715,7 +716,7 @@ body {
 
   .auth-segment-btn.active {
     color: #fff;
-    background: #185A94;
+    background: #1E40AF;
     box-shadow: 0 14px 28px -20px rgba(13, 79, 102, 0.78);
   }
 
@@ -740,7 +741,7 @@ body {
 
   .floating-input:focus {
     outline: none;
-    border-color: #185A94;
+    border-color: #1E40AF;
     border-width: 2px;
     background: #fff;
     box-shadow: 0 0 0 3px rgba(13, 79, 102, 0.14);
@@ -766,7 +767,7 @@ body {
   .floating-input:not(:placeholder-shown) + .floating-label {
     top: 0.34rem;
     transform: scale(0.88);
-    color: #185A94;
+    color: #1E40AF;
     font-weight: 700;
   }
 
@@ -797,8 +798,8 @@ body {
   }
 
   .premium-check-btn.checked {
-    border-color: #185A94;
-    background: #185A94;
+    border-color: #1E40AF;
+    background: #1E40AF;
     color: #ffffff;
     box-shadow: 0 10px 20px -16px rgba(13, 79, 102, 0.84);
   }
@@ -1078,7 +1079,7 @@ body {
     justify-content: center;
     border-radius: 1.55rem;
     border: 1px solid rgba(255, 255, 255, 0.22);
-    background: linear-gradient(145deg, #153A4C, #2F9DF7);
+    background: linear-gradient(145deg, #153A4C, #2563EB);
     box-shadow: 0 28px 52px -32px rgba(21, 58, 76, 0.9);
   }
 
@@ -1132,7 +1133,7 @@ body {
     height: 3px;
     width: 520px;
     transform: translateY(-50%);
-    background: repeating-linear-gradient(90deg, #2F9DF7 0 22px, transparent 22px 44px);
+    background: repeating-linear-gradient(90deg, #2563EB 0 22px, transparent 22px 44px);
     opacity: 0.34;
   }
 
@@ -1579,8 +1580,8 @@ body {
   }
 
   .create-store-form {
-    --create-store-primary: #185A94;
-    --create-store-accent: #4FB2F8;
+    --create-store-primary: #1E40AF;
+    --create-store-accent: #4285EC;
   }
 
   .create-store-form .ds-input,

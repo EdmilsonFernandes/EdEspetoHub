@@ -379,9 +379,13 @@ export const CartView = ({
   const cepLookupLockRef = useRef(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const cepInputRef = useRef<HTMLInputElement | null>(null);
+  /* Checkout 1 página (ciclo 2): âncoras das seções para o CTA guiar o scroll */
+  const receiveSectionRef = useRef<HTMLDivElement | null>(null);
+  const paymentSectionRef = useRef<HTMLDivElement | null>(null);
+  const reviewSectionRef = useRef<HTMLDivElement | null>(null);
   const postalAutoQuoteKeyRef = useRef("");
   const premiumInputClass =
-    "w-full rounded-2xl bg-slate-100/80 border border-slate-200/50 px-4 py-3 text-slate-800 placeholder:text-slate-400/85 outline-none focus:ring-4 focus:ring-[#2F9DF7]/10 focus:border-[#2F9DF7]/45 focus:bg-white transition-all duration-300 shadow-sm";
+    "w-full rounded-2xl bg-slate-100/80 border border-slate-200/50 px-4 py-3 text-slate-800 placeholder:text-slate-400/85 outline-none focus:ring-4 focus:ring-[#2563EB]/10 focus:border-[#2563EB]/45 focus:bg-white transition-all duration-300 shadow-sm";
 
   const normalizedUserRole = String(userRole || "").trim().toLowerCase();
   const isProfessionalUser = [
@@ -910,7 +914,7 @@ export const CartView = ({
   const deliveryMetaChips = [
     {
       key: "fee",
-      icon: <Truck size={12} weight="duotone" className="text-[#2F9DF7]" />,
+      icon: <Truck size={12} weight="duotone" className="text-[#2563EB]" />,
       label: deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : isPostalDelivery ? "A cotar" : "Sem taxa",
     },
     !isPostalDelivery && deliveryCheck?.distanceKm
@@ -1301,7 +1305,7 @@ export const CartView = ({
       <div
         className={`rounded-3xl border p-3 transition-all duration-300 ${
           note
-            ? "border-[#2F9DF7]/14 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)] shadow-[0_18px_38px_-34px_rgba(51,104,134,0.34)]"
+            ? "border-[#2563EB]/14 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)] shadow-[0_18px_38px_-34px_rgba(51,104,134,0.34)]"
             : "border-slate-100 bg-white shadow-[0_18px_38px_-34px_rgba(15,23,42,0.25)]"
         }`}
         data-testid="customer-order-note-card"
@@ -1312,7 +1316,7 @@ export const CartView = ({
           className="group flex w-full items-center gap-3 rounded-2xl text-left"
         >
           <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] ring-1 ${
-            note ? "bg-[#2F9DF7]/10 text-[#2F9DF7] ring-[#2F9DF7]/12" : "bg-slate-50 text-slate-500 ring-slate-200/70"
+            note ? "bg-[#2563EB]/10 text-[#2563EB] ring-[#2563EB]/12" : "bg-slate-50 text-slate-500 ring-slate-200/70"
           }`}>
             <NotePencil size={18} weight="duotone" />
           </span>
@@ -1322,7 +1326,7 @@ export const CartView = ({
                 {note ? "Observação adicionada" : "Alguma observação?"}
               </span>
               <span className={`shrink-0 rounded-full px-2.5 py-1 text-2xs font-bold uppercase tracking-[0.12em] transition-colors ${
-                note ? "bg-white text-[#2F9DF7] ring-1 ring-[#cfe0ea]" : "bg-[#2F9DF7]/8 text-[#2F9DF7] ring-1 ring-[#2F9DF7]/10 group-hover:bg-[#2F9DF7]/12"
+                note ? "bg-white text-[#2563EB] ring-1 ring-[#cfe0ea]" : "bg-[#2563EB]/8 text-[#2563EB] ring-1 ring-[#2563EB]/10 group-hover:bg-[#2563EB]/12"
               }`}>
                 {note ? "Editar" : "Escrever"}
               </span>
@@ -1345,8 +1349,8 @@ export const CartView = ({
                   aria-pressed={active}
                   className={`jnc-hub-touch inline-flex min-h-[36px] items-center gap-1.5 rounded-full border px-3 text-[12px] font-semibold transition-all duration-200 active:scale-95 ${
                     active
-                      ? "border-[#2F9DF7] bg-[#2F9DF7]/10 text-[#153A4C]"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-[#2F9DF7]/24 hover:text-[#153A4C]"
+                      ? "border-[#2563EB] bg-[#2563EB]/10 text-[#153A4C]"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-[#2563EB]/24 hover:text-[#153A4C]"
                   }`}
                 >
                   {active ? (
@@ -1370,7 +1374,7 @@ export const CartView = ({
       <div
         className={`rounded-2xl border p-3.5 shadow-sm ${
           note
-            ? "border-[#2F9DF7]/10 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)]"
+            ? "border-[#2563EB]/10 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)]"
             : "border-slate-100 bg-white"
         }`}
         data-testid="customer-order-note-summary"
@@ -1378,7 +1382,7 @@ export const CartView = ({
         <div className="flex items-start gap-3">
           <span
             className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
-              note ? "bg-[#2F9DF7]/8 text-[#2F9DF7]" : "bg-slate-100 text-slate-500"
+              note ? "bg-[#2563EB]/8 text-[#2563EB]" : "bg-slate-100 text-slate-500"
             }`}
           >
             <NotePencil size={18} weight="duotone" />
@@ -1391,7 +1395,7 @@ export const CartView = ({
               <button
                 type="button"
                 onClick={openCustomerNoteSheet}
-                className="jnc-hub-touch shrink-0 rounded-full bg-[#2F9DF7]/8 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-[#2F9DF7] ring-1 ring-[#2F9DF7]/10"
+                className="jnc-hub-touch shrink-0 rounded-full bg-[#2563EB]/8 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-[#2563EB] ring-1 ring-[#2563EB]/10"
               >
                 {note ? "Editar" : "+ Adicionar"}
               </button>
@@ -1459,7 +1463,7 @@ export const CartView = ({
         className="relative overflow-hidden rounded-3xl border border-white/80 bg-white p-3.5 shadow-[0_20px_46px_-38px_rgba(15,23,42,0.35)]"
         data-testid="checkout-payment-summary-card"
       >
-        <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-[#2F9DF7]/18 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-[#2563EB]/18 to-transparent" />
         <div className="flex items-start gap-3">
           {renderPaymentMethodIcon(currentPaymentId, { size: "md", selected: true, tone: isOnlinePaymentMethod ? "online" : "local" })}
           <div className="min-w-0 flex-1">
@@ -1475,7 +1479,7 @@ export const CartView = ({
           <button
             type="button"
             onClick={openPaymentSheet}
-            className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] px-3 py-2.5 text-2xs font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)] transition hover:brightness-105 active:scale-[0.98]"
+            className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#153A4C,#2563EB)] px-3 py-2.5 text-2xs font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_34px_-22px_rgba(51,104,134,0.58)] transition hover:brightness-105 active:scale-[0.98]"
           >
             <CreditCard size={13} weight="duotone" />
             <span>Alterar forma</span>
@@ -1565,7 +1569,7 @@ export const CartView = ({
     if (normalized.includes("credito") || normalized.includes("credit")) {
       return {
         surface:
-          "border-[#2F9DF7]/18 bg-[radial-gradient(circle_at_30%_22%,rgba(255,255,255,0.98),transparent_35%),linear-gradient(135deg,#eef7fb_0%,#ffffff_54%,#e8f1f4_100%)] text-[#153A4C] shadow-[0_18px_34px_-24px_rgba(51,104,134,0.5)]",
+          "border-[#2563EB]/18 bg-[radial-gradient(circle_at_30%_22%,rgba(255,255,255,0.98),transparent_35%),linear-gradient(135deg,#eef7fb_0%,#ffffff_54%,#e8f1f4_100%)] text-[#153A4C] shadow-[0_18px_34px_-24px_rgba(51,104,134,0.5)]",
         fallback: "text-[#153A4C]",
       };
     }
@@ -1573,7 +1577,7 @@ export const CartView = ({
     return tone === "online"
       ? {
           surface:
-            "border-[#2F9DF7]/18 bg-[radial-gradient(circle_at_30%_22%,rgba(255,255,255,0.98),transparent_35%),linear-gradient(135deg,#eef7fb_0%,#ffffff_55%,#e8f1f4_100%)] text-[#153A4C] shadow-[0_18px_34px_-24px_rgba(51,104,134,0.5)]",
+            "border-[#2563EB]/18 bg-[radial-gradient(circle_at_30%_22%,rgba(255,255,255,0.98),transparent_35%),linear-gradient(135deg,#eef7fb_0%,#ffffff_55%,#e8f1f4_100%)] text-[#153A4C] shadow-[0_18px_34px_-24px_rgba(51,104,134,0.5)]",
           fallback: "text-[#153A4C]",
         }
       : {
@@ -1622,10 +1626,10 @@ export const CartView = ({
 
   const renderPaymentMethodCard = (method: any, tone: "online" | "local") => {
     const selected = paymentMethod === method.id;
-    const accent = tone === "online" ? "#2F9DF7" : "#207A52";
+    const accent = tone === "online" ? "#2563EB" : "#207A52";
     const selectedClasses =
       tone === "online"
-        ? "jnc-payment-pressed border-[#2F9DF7]/70 text-slate-950 ring-2 ring-[#2F9DF7]/10"
+        ? "jnc-payment-pressed border-[#2563EB]/70 text-slate-950 ring-2 ring-[#2563EB]/10"
         : "jnc-payment-pressed border-emerald-400/80 text-slate-950 ring-2 ring-emerald-200/60";
     // Copy contextual por tipo de pedido — antes "Pague na entrega, retirada ou mesa" repetia 3× (auditoria 16/08)
     const localMethodDescription =
@@ -1649,7 +1653,7 @@ export const CartView = ({
         className={`jnc-hub-touch group relative overflow-hidden rounded-2xl border p-3.5 text-left transition-all duration-300 ease-out active:scale-[0.985] ${
           selected
             ? selectedClasses
-            : "border-slate-200/80 bg-white/88 text-slate-500 shadow-[0_14px_36px_-34px_rgba(15,23,42,0.3)] hover:-translate-y-0.5 hover:border-[#2F9DF7]/22 hover:bg-white hover:shadow-[0_22px_46px_-38px_rgba(51,104,134,0.32)]"
+            : "border-slate-200/80 bg-white/88 text-slate-500 shadow-[0_14px_36px_-34px_rgba(15,23,42,0.3)] hover:-translate-y-0.5 hover:border-[#2563EB]/22 hover:bg-white hover:shadow-[0_22px_46px_-38px_rgba(51,104,134,0.32)]"
         }`}
         aria-pressed={selected}
       >
@@ -1669,7 +1673,7 @@ export const CartView = ({
               </span>
               {selected && (
                 <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-black text-white ${
-                  tone === "online" ? "bg-[#2F9DF7]" : "bg-emerald-600"
+                  tone === "online" ? "bg-[#2563EB]" : "bg-emerald-600"
                 }`}>
                   ✓
                 </span>
@@ -1684,7 +1688,7 @@ export const CartView = ({
               {tone === "local" ? localMethodDescription : method.description}
             </p>
             {tone === "online" && (
-              <span className="inline-flex w-fit items-center gap-1 rounded-full border border-[#2F9DF7]/10 bg-[#DBEEFD]/70 px-2 py-0.5 text-2xs font-black uppercase tracking-[0.12em] text-[#2F9DF7]">
+              <span className="inline-flex w-fit items-center gap-1 rounded-full border border-[#2563EB]/10 bg-[#E0EBFD]/70 px-2 py-0.5 text-2xs font-black uppercase tracking-[0.12em] text-[#2563EB]">
                 <ShieldCheck size={10} weight="fill" />
                 Protegido
               </span>
@@ -1701,46 +1705,14 @@ export const CartView = ({
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4 sm:mb-6`}>
         <div className="rounded-3xl border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
-          {useMultiStepFlow && (
-            <div className="mb-3.5 flex items-center gap-1.5">
-              {[{ label: 'Sacola', step: 1 }, { label: 'Receber', step: 2 }, { label: 'Pagamento', step: 3 }, { label: 'Confirmar', step: 4 }].map(({ label, step }, i) => {
-                const isActive = checkoutStep === step;
-                const isDone = checkoutStep > step;
-                return (
-                  <React.Fragment key={step}>
-                    <div className="flex items-center gap-1.5">
-                      <span className={`flex h-4.5 w-4.5 items-center justify-center rounded-full text-2xs font-black transition-all ${
-                        isDone
-                          ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-[0_4px_10px_rgba(16,185,129,0.25)] text-white'
-                          : isActive
-                            ? 'bg-gradient-to-br from-slate-800 to-slate-950 text-white ring-2 ring-slate-950/15 ring-offset-1 shadow-sm'
-                            : 'bg-slate-200 text-slate-500'
-                      }`}>
-                        {isDone ? '✓' : step}
-                      </span>
-                      <span className={`text-2xs font-bold uppercase tracking-wide transition-colors ${isActive ? 'text-slate-900 font-extrabold' : isDone ? 'text-emerald-600' : 'text-slate-400'}`}>{label}</span>
-                    </div>
-                    {i < 3 && (
-                      <div className="h-[2px] flex-1 rounded-full overflow-hidden bg-slate-200">
-                        <div
-                          className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-500 ease-out"
-                          style={{ width: isDone ? "100%" : "0%" }}
-                        />
-                      </div>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          )}
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="sm"
-              onClick={useMultiStepFlow && checkoutStep > 1 ? () => setCheckoutStep(s => s - 1) : onBack}
-              aria-label={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
-              title={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
-              className="!h-11 !w-11 !rounded-[1.15rem] !px-0 text-[#2F9DF7]"
+              onClick={onBack}
+              aria-label="Voltar ao cardápio"
+              title="Voltar ao cardápio"
+              className="!h-11 !w-11 !rounded-[1.15rem] !px-0 text-[#2563EB]"
             >
               <ArrowLeft size={18} weight="bold" />
             </Button>
@@ -1756,7 +1728,7 @@ export const CartView = ({
                 />
               </div>
               <div className="min-w-0">
-                <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Checkout</p>
+                <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2563EB]">Checkout</p>
                 <p className="truncate text-sm font-black tracking-tight text-slate-950">
                   {storeLabel || 'Finalizando seu pedido'}
                 </p>
@@ -1801,7 +1773,7 @@ export const CartView = ({
       </div>}
 
       {/* Dados do cliente */}
-      {(!useMultiStepFlow || checkoutStep === 2) && <div className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
+      {(!useMultiStepFlow || checkoutStep >= 1) && <div ref={receiveSectionRef} className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
             <h2 className="font-bold text-slate-900 text-base sm:text-lg tracking-tight">
@@ -2611,7 +2583,7 @@ export const CartView = ({
                   <button
                     type="button"
                     onClick={() => setIsEditingTable(true)}
-                    className="jnc-hub-touch text-xs font-bold uppercase tracking-wider text-[#2F9DF7] hover:text-[#153A4C]"
+                    className="jnc-hub-touch text-xs font-bold uppercase tracking-wider text-[#2563EB] hover:text-[#153A4C]"
                   >
                     Alterar
                   </button>
@@ -2759,27 +2731,27 @@ export const CartView = ({
               const dateChipButtonClass = (active: boolean) =>
                 `jnc-hub-touch inline-flex min-h-[44px] items-center justify-center rounded-[1rem] border px-3.5 py-2 text-sm font-black tracking-tight transition-all duration-200 active:scale-[0.97] ${
                   active
-                    ? "border-[#2F9DF7] bg-[#2F9DF7] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.6)]"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-[#2F9DF7]/35 hover:text-[#153A4C]"
+                    ? "border-[#2563EB] bg-[#2563EB] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.6)]"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-[#2563EB]/35 hover:text-[#153A4C]"
                 }`;
               const timeSlotClass = (active: boolean, disabled: boolean) =>
                 `jnc-hub-touch inline-flex min-h-[40px] min-w-[58px] items-center justify-center rounded-[0.85rem] border px-2.5 py-1.5 text-[13px] font-bold tabular-nums transition-all duration-200 active:scale-[0.96] ${
                   disabled
                     ? "border-slate-100 bg-slate-50 text-slate-300 line-through cursor-not-allowed"
                     : active
-                    ? "border-[#2F9DF7] bg-[#2F9DF7] text-white shadow-[0_12px_24px_-18px_rgba(51,104,134,0.6)]"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-[#2F9DF7]/35 hover:text-[#153A4C]"
+                    ? "border-[#2563EB] bg-[#2563EB] text-white shadow-[0_12px_24px_-18px_rgba(51,104,134,0.6)]"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-[#2563EB]/35 hover:text-[#153A4C]"
                 }`;
 
               return (
-                <div className="rounded-3xl border border-[#2F9DF7]/12 bg-[linear-gradient(135deg,rgba(238,247,251,0.6)_0%,rgba(255,255,255,0.98)_100%)] p-3.5 shadow-[0_20px_42px_-34px_rgba(51,104,134,0.32)] space-y-4 animate-in fade-in duration-200">
+                <div className="rounded-3xl border border-[#2563EB]/12 bg-[linear-gradient(135deg,rgba(238,247,251,0.6)_0%,rgba(255,255,255,0.98)_100%)] p-3.5 shadow-[0_20px_42px_-34px_rgba(51,104,134,0.32)] space-y-4 animate-in fade-in duration-200">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] bg-[#2F9DF7]/10 text-[#2F9DF7] ring-1 ring-[#2F9DF7]/12">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] bg-[#2563EB]/10 text-[#2563EB] ring-1 ring-[#2563EB]/12">
                         <CalendarBlank size={17} weight="duotone" />
                       </span>
                       <div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]">
+                        <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2563EB]">
                           Reserva
                         </p>
                         <p className="text-sm font-black tracking-tight text-slate-950">
@@ -2788,8 +2760,8 @@ export const CartView = ({
                       </div>
                     </div>
                     {reservationTs !== null && (
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.1em] text-[#153A4C] ring-1 ring-[#2F9DF7]/15 shadow-sm">
-                        <CalendarBlank size={11} weight="duotone" className="text-[#2F9DF7]" />
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-2xs font-black uppercase tracking-[0.1em] text-[#153A4C] ring-1 ring-[#2563EB]/15 shadow-sm">
+                        <CalendarBlank size={11} weight="duotone" className="text-[#2563EB]" />
                         {new Date(reservationTs).toLocaleString("pt-BR", {
                           day: "2-digit",
                           month: "2-digit",
@@ -2821,8 +2793,8 @@ export const CartView = ({
                       <label
                         className={`jnc-hub-touch group inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-[1rem] border px-3.5 py-2 text-sm font-black tracking-tight transition-all duration-200 active:scale-[0.97] ${
                           selectedDateKey && !quickDateChips.some((c) => c.key === selectedDateKey)
-                            ? "border-[#2F9DF7] bg-[#2F9DF7] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.6)]"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-[#2F9DF7]/35 hover:text-[#153A4C]"
+                            ? "border-[#2563EB] bg-[#2563EB] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.6)]"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-[#2563EB]/35 hover:text-[#153A4C]"
                         }`}
                         title="Escolher outra data"
                       >
@@ -2891,7 +2863,7 @@ export const CartView = ({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <p className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">
-                        <Users size={13} weight="duotone" className="text-[#2F9DF7]" />
+                        <Users size={13} weight="duotone" className="text-[#2563EB]" />
                         Pessoas
                       </p>
                       <span className="text-2xs font-bold uppercase tracking-[0.1em] text-slate-400">
@@ -2903,7 +2875,7 @@ export const CartView = ({
                         type="button"
                         onClick={() => setPartySize(partyValue - 1)}
                         disabled={partyValue <= RESERVATION_PARTY_MIN}
-                        className="jnc-hub-touch flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.95rem] border border-slate-200 bg-slate-50 text-slate-700 transition-all hover:border-[#2F9DF7]/35 hover:text-[#153A4C] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-700"
+                        className="jnc-hub-touch flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.95rem] border border-slate-200 bg-slate-50 text-slate-700 transition-all hover:border-[#2563EB]/35 hover:text-[#153A4C] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-700"
                         aria-label="Diminuir número de pessoas"
                       >
                         <Minus size={18} weight="bold" />
@@ -2920,7 +2892,7 @@ export const CartView = ({
                         type="button"
                         onClick={() => setPartySize(partyValue + 1)}
                         disabled={partyValue >= RESERVATION_PARTY_MAX}
-                        className="jnc-hub-touch flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.95rem] bg-[#2F9DF7] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.6)] transition-all hover:brightness-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="jnc-hub-touch flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.95rem] bg-[#2563EB] text-white shadow-[0_14px_28px_-18px_rgba(51,104,134,0.6)] transition-all hover:brightness-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                         aria-label="Aumentar número de pessoas"
                       >
                         <Plus size={18} weight="bold" />
@@ -2940,7 +2912,7 @@ export const CartView = ({
       </div>}
 
       {/* Resumo */}
-      {(!useMultiStepFlow || checkoutStep === 1) && (
+      {(!useMultiStepFlow || checkoutStep >= 1) && (
         <div className="space-y-4 mb-4 sm:mb-6">
           <div className="jnc-receipt-card relative overflow-hidden rounded-2xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 transition-all hover:-translate-y-0.5 hover:shadow-[0_30px_62px_-48px_rgba(15,23,42,0.38)] active:scale-[0.99] sm:p-6">
         <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
@@ -2949,7 +2921,7 @@ export const CartView = ({
             {useMultiStepFlow ? 'Sua Sacola' : 'Resumo'}
           </h2>
           {useMultiStepFlow && (
-            <button type="button" onClick={onBack} className="text-[11px] font-bold text-[#2F9DF7] hover:underline">
+            <button type="button" onClick={onBack} className="text-[11px] font-bold text-[#2563EB] hover:underline">
               + Adicionar itens
             </button>
           )}
@@ -3082,14 +3054,14 @@ export const CartView = ({
     </div>)}
 
       {/* Sugestões (carrossel horizontal – step 1) */}
-      {(!useMultiStepFlow || checkoutStep === 1) && showSuggestedProducts && (
+      {(!useMultiStepFlow || checkoutStep >= 1) && showSuggestedProducts && (
         <div className="mb-4 sm:mb-6 rounded-[1.9rem] border border-slate-100 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(241,245,249,0.95)_100%)] p-4 shadow-[0_24px_48px_-34px_rgba(15,23,42,0.24)]">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-2xs font-black uppercase tracking-[0.2em] text-slate-400">Adicionar ao pedido</p>
               <p className="mt-1 text-sm font-bold text-slate-900">Complete sua sacola com mais alguns favoritos</p>
             </div>
-            <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.14em] text-[#2F9DF7] shadow-sm">
+            <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.14em] text-[#2563EB] shadow-sm">
               Sugestões
             </span>
           </div>
@@ -3113,7 +3085,7 @@ export const CartView = ({
                   <p className="mt-1 text-[11px] font-medium text-slate-400">Entrou bem com seu pedido</p>
                   <p className="mt-1.5 text-[13px] font-black text-[#153A4C]">{formatCurrency(prod.price)}</p>
                 </div>
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] text-white text-base font-black shadow-[0_14px_26px_-18px_rgba(21,58,76,0.55)] transition-colors">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2563EB)] text-white text-base font-black shadow-[0_14px_26px_-18px_rgba(21,58,76,0.55)] transition-colors">
                   +
                 </div>
               </button>
@@ -3123,8 +3095,8 @@ export const CartView = ({
       )}
 
       {/* Compact pricing + Forma de Pagamento (multi-step step 3) */}
-      {useMultiStepFlow && checkoutStep === 3 && (
-        <div className="jnc-receipt-card relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 sm:p-6">
+      {useMultiStepFlow && checkoutStep >= 1 && (
+        <div ref={paymentSectionRef} className="jnc-receipt-card relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 sm:p-6">
           <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -3179,7 +3151,7 @@ export const CartView = ({
             })}
             {extraCartPreviewCount > 0 ? (
               <div className="pt-1">
-                <span className="inline-flex items-center gap-1 rounded-full border border-[#2F9DF7]/10 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#2F9DF7] shadow-sm">
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#2563EB]/10 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#2563EB] shadow-sm">
                   +{extraCartPreviewCount} {extraCartPreviewCount === 1 ? "item" : "itens"} no pedido
                 </span>
               </div>
@@ -3217,7 +3189,7 @@ export const CartView = ({
       )}
 
       {/* Cupom de desconto (benchmark §12) — escondido para operator/admin */}
-      {!isProfessionalUser && (!useMultiStepFlow || checkoutStep === 3) && (
+      {!isProfessionalUser && (!useMultiStepFlow || checkoutStep >= 1) && (
         <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
           <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#5FD35A]/25 to-transparent" />
           <div className="relative z-10 mb-3 flex items-center gap-3">
@@ -3285,7 +3257,7 @@ export const CartView = ({
       )}
 
       {/* CPF/CNPJ na nota (benchmark §12) — ADIADO: religar com TAX_ID_NOTE_FIELD_ENABLED */}
-      {TAX_ID_NOTE_FIELD_ENABLED && !isProfessionalUser && (!useMultiStepFlow || checkoutStep === 3) && (
+      {TAX_ID_NOTE_FIELD_ENABLED && !isProfessionalUser && (!useMultiStepFlow || checkoutStep >= 1) && (
         <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
           <div className="relative z-10 flex flex-col gap-2">
             <div className="flex items-center gap-3">
@@ -3320,15 +3292,15 @@ export const CartView = ({
       )}
 
       {/* Forma de Pagamento */}
-      {(!useMultiStepFlow || checkoutStep === 3) && (
+      {(!useMultiStepFlow || checkoutStep >= 1) && (
         <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-[radial-gradient(circle_at_top_right,rgba(95,211,90,0.14),transparent_26%),linear-gradient(145deg,rgba(255,255,255,0.98),rgba(241,247,249,0.92))] p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
-          <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#2F9DF7]/22 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#2563EB]/22 to-transparent" />
           <div className="relative z-10 mb-3 flex items-center gap-3">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.1rem] bg-white text-[#2F9DF7] shadow-[0_16px_30px_-24px_rgba(51,104,134,0.44)] ring-1 ring-[#2F9DF7]/10">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1.1rem] bg-white text-[#2563EB] shadow-[0_16px_30px_-24px_rgba(51,104,134,0.44)] ring-1 ring-[#2563EB]/10">
               <Wallet size={21} weight="duotone" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-2xs font-black uppercase tracking-[0.22em] text-[#2F9DF7]">
+              <p className="text-2xs font-black uppercase tracking-[0.22em] text-[#2563EB]">
                 Pagamento
               </p>
               <h2 className="text-base font-black tracking-tight text-slate-950">
@@ -3360,8 +3332,8 @@ export const CartView = ({
 
 
       {/* Step 4: Confirmação do pedido */}
-      {useMultiStepFlow && checkoutStep === 4 && (
-        <div className="space-y-3 mb-4">
+      {useMultiStepFlow && checkoutStep >= 1 && (
+        <div ref={reviewSectionRef} className="space-y-3 mb-4">
           {/* Itens */}
           <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
             <div className="mb-3 flex items-start justify-between gap-3">
@@ -3405,7 +3377,7 @@ export const CartView = ({
             </div>
             {extraCartPreviewCount > 0 ? (
               <div className="mt-3 flex justify-start">
-                <span className="inline-flex items-center gap-1 rounded-full border border-[#2F9DF7]/10 bg-[#2F9DF7]/5 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#2F9DF7]">
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#2563EB]/10 bg-[#2563EB]/5 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#2563EB]">
                   Pedido completo com {cartItems.length} seleções
                 </span>
               </div>
@@ -3434,7 +3406,7 @@ export const CartView = ({
               <div className="flex items-center gap-3">
                 <span className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
                   customer.type === 'delivery'
-                    ? 'bg-sky-50 text-[#2F9DF7]'
+                    ? 'bg-sky-50 text-[#2563EB]'
                     : customer.type === 'pickup'
                       ? 'bg-emerald-50 text-emerald-700'
                       : 'bg-amber-50 text-amber-700'
@@ -3539,7 +3511,7 @@ export const CartView = ({
                   setCheckoutStep(3);
                   openPaymentSheet();
                 }}
-                className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#2F9DF7]/12 bg-[#2F9DF7]/7 px-3 py-2 text-2xs font-black uppercase tracking-[0.12em] text-[#2F9DF7] transition hover:bg-[#2F9DF7]/12 active:scale-[0.98]"
+                className="jnc-hub-touch inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#2563EB]/12 bg-[#2563EB]/7 px-3 py-2 text-2xs font-black uppercase tracking-[0.12em] text-[#2563EB] transition hover:bg-[#2563EB]/12 active:scale-[0.98]"
               >
                 <CreditCard size={13} weight="duotone" />
                 Alterar
@@ -3574,7 +3546,7 @@ export const CartView = ({
                 window.setTimeout(() => setCtaPulse(false), 220);
                 if (checkoutStep === 1) {
                   setCheckoutStep(2);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  receiveSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   return;
                 }
                 if (checkoutStep === 2) {
@@ -3591,12 +3563,12 @@ export const CartView = ({
                     if (!validated) return;
                   }
                   setCheckoutStep(3);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   return;
                 }
                 if (checkoutStep === 3) {
                   setCheckoutStep(4);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  reviewSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   return;
                 }
                 // Step 4: final checkout
@@ -3750,7 +3722,7 @@ export const CartView = ({
               <div className="mx-auto mb-3 h-1.5 w-11 rounded-full bg-slate-200" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-2xs font-black uppercase tracking-[0.22em] text-[#2F9DF7]">Pagamento</p>
+                  <p className="text-2xs font-black uppercase tracking-[0.22em] text-[#2563EB]">Pagamento</p>
                   <h3 className="mt-1 text-lg font-black tracking-tight text-slate-950">Trocar forma de pagamento</h3>
                   <p className="mt-1 text-xs font-semibold leading-snug text-slate-500">
                     Selecione uma opção abaixo. O pedido continua igual e a troca aplica na hora.
@@ -3765,15 +3737,15 @@ export const CartView = ({
                   <X size={18} weight="bold" />
                 </button>
               </div>
-              <div className="mt-3 flex items-center gap-3 rounded-[1.25rem] border border-[#2F9DF7]/10 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)] p-3 shadow-[0_14px_30px_-26px_rgba(51,104,134,0.28)]">
+              <div className="mt-3 flex items-center gap-3 rounded-[1.25rem] border border-[#2563EB]/10 bg-[linear-gradient(135deg,#ffffff_0%,#f3fafc_100%)] p-3 shadow-[0_14px_30px_-26px_rgba(51,104,134,0.28)]">
                 {renderPaymentMethodIcon(activePaymentId, { size: "sm", selected: true, tone: activePaymentTone })}
                 <div className="min-w-0 flex-1">
-                  <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">
+                  <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2563EB]">
                     Forma atual
                   </p>
                   <p className="truncate text-sm font-black text-slate-950">{activePaymentLabel}</p>
                 </div>
-                <span className="shrink-0 rounded-full border border-[#2F9DF7]/10 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-[#2F9DF7]">
+                <span className="shrink-0 rounded-full border border-[#2563EB]/10 bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-[0.12em] text-[#2563EB]">
                   Ativa
                 </span>
               </div>
@@ -3797,17 +3769,17 @@ export const CartView = ({
               )}
 
               {paymentGroups.online.length > 0 && (
-                <section className="rounded-3xl border border-[#2F9DF7]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(232,244,248,0.86))] p-3.5 shadow-[0_22px_50px_-44px_rgba(51,104,134,0.32)]">
+                <section className="rounded-3xl border border-[#2563EB]/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(232,244,248,0.86))] p-3.5 shadow-[0_22px_50px_-44px_rgba(51,104,134,0.32)]">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-2xs font-black uppercase tracking-[0.24em] text-[#2F9DF7]">
+                      <p className="text-2xs font-black uppercase tracking-[0.24em] text-[#2563EB]">
                         Pagar online
                       </p>
                       <p className="mt-1 text-[11px] leading-snug text-slate-500">
                         Pix e cartão confirmam na hora — o pedido segue direto pra loja, sem esperar.
                       </p>
                     </div>
-                    <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#2F9DF7]/12 bg-white/92 px-2.5 py-1.5 text-2xs font-black text-slate-600 shadow-[0_14px_26px_-22px_rgba(51,104,134,0.34)]">
+                    <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#2563EB]/12 bg-white/92 px-2.5 py-1.5 text-2xs font-black text-slate-600 shadow-[0_14px_26px_-22px_rgba(51,104,134,0.34)]">
                       {mercadoPagoMeta.icon ? (
                         <img src={mercadoPagoMeta.icon} alt={mercadoPagoMeta.label} className="h-4 w-4 object-contain" />
                       ) : (
@@ -3862,8 +3834,8 @@ export const CartView = ({
             aria-label="Fechar observação"
           />
           <div className="absolute bottom-0 left-0 right-0 mx-auto max-h-[calc(100dvh-4rem)] max-w-lg overflow-hidden rounded-t-[2rem] border border-white/80 bg-white/92 shadow-[0_-28px_60px_-30px_rgba(15,23,42,0.55)] backdrop-blur-2xl animate-in slide-in-from-bottom-4 fade-in duration-200">
-            <div className="border-b border-[#2F9DF7]/10 bg-white/86 px-4 pb-3 pt-3 backdrop-blur-xl">
-              <div className="mx-auto mb-2.5 h-1.5 w-11 rounded-full bg-[#2F9DF7]/18" />
+            <div className="border-b border-[#2563EB]/10 bg-white/86 px-4 pb-3 pt-3 backdrop-blur-xl">
+              <div className="mx-auto mb-2.5 h-1.5 w-11 rounded-full bg-[#2563EB]/18" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="text-base font-bold tracking-tight text-slate-950">Alguma instrução para a loja?</h3>
@@ -3901,8 +3873,8 @@ export const CartView = ({
                         aria-pressed={active}
                         className={`jnc-hub-touch inline-flex min-h-[38px] items-center gap-1.5 rounded-full border px-3.5 text-[12.5px] font-semibold transition-all duration-200 active:scale-95 ${
                           active
-                            ? "border-[#2F9DF7] bg-[#2F9DF7]/10 text-[#153A4C]"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-[#2F9DF7]/24 hover:text-[#153A4C]"
+                            ? "border-[#2563EB] bg-[#2563EB]/10 text-[#153A4C]"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-[#2563EB]/24 hover:text-[#153A4C]"
                         }`}
                       >
                         {active ? (
@@ -3929,7 +3901,7 @@ export const CartView = ({
                   rows={4}
                   autoFocus
                   placeholder={customerOrderNoteCopy.placeholder}
-                  className="min-h-[96px] w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-[#2F9DF7]/45 focus:ring-4 focus:ring-[#2F9DF7]/10"
+                  className="min-h-[96px] w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none transition duration-300 placeholder:text-slate-400 focus:border-[#2563EB]/45 focus:ring-4 focus:ring-[#2563EB]/10"
                   data-testid="customer-order-note-input"
                 />
                 <div className="mt-1.5 flex items-center justify-between gap-3 text-2xs font-medium text-slate-400">

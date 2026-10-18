@@ -29,19 +29,19 @@ export function SplashScreen() {
       
       <div className="relative flex flex-col items-center">
         {/* Círculos de Brilho */}
-        <div className="absolute h-48 w-48 animate-pulse rounded-full bg-[#2F9DF7]/5 blur-3xl" />
+        <div className="absolute h-48 w-48 animate-pulse rounded-full bg-[#2563EB]/5 blur-3xl" />
         
         {/* Logo/Mascote com Animação Premium */}
         <div className="relative animate-in zoom-in-90 duration-1000 ease-out">
           <div className="relative h-32 w-32 sm:h-36 sm:w-36">
-            <div className="h-full w-full overflow-hidden rounded-3xl border border-[#2F9DF7]/20 bg-white p-1 shadow-[0_20px_60px_-16px_rgba(13,79,102,0.35)]">
+            <div className="h-full w-full overflow-hidden rounded-3xl border border-[#2563EB]/20 bg-white p-1 shadow-[0_20px_60px_-16px_rgba(13,79,102,0.35)]">
               <img
                 src="/janocaminho.jpg"
                 alt="Já no Caminho"
                 className="h-full w-full rounded-[1.5rem] object-cover"
               />
             </div>
-            <div className="mx-auto mt-3 h-1.5 w-12 animate-pulse rounded-full bg-[#2F9DF7]/20 blur-sm" />
+            <div className="mx-auto mt-3 h-1.5 w-12 animate-pulse rounded-full bg-[#2563EB]/20 blur-sm" />
           </div>
         </div>
 
@@ -51,9 +51,9 @@ export function SplashScreen() {
             Já no Caminho
           </h1>
           <div className="flex gap-1.5">
-            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#2F9DF7] [animation-delay:0ms]" />
-            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#2F9DF7] [animation-delay:200ms]" />
-            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#2F9DF7] [animation-delay:400ms]" />
+            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#2563EB] [animation-delay:0ms]" />
+            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#2563EB] [animation-delay:200ms]" />
+            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#2563EB] [animation-delay:400ms]" />
           </div>
         </div>
       </div>

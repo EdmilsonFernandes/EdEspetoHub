@@ -2,10 +2,10 @@
 // da marca. Antes apontava para api.dicebear.com — dependência externa que falhava
 // junto quando o logo da loja estava quebrado (404 em /uploads) ou offline no WebView.
 const PALETTES: Array<[string, string]> = [
-  ['#153A4C', '#2F9DF7'],
-  ['#2F9DF7', '#153A4C'],
-  ['#5FD35A', '#1A6FC8'],
-  ['#2F9DF7', '#2F9DF7'],
+  ['#153A4C', '#2563EB'],
+  ['#2563EB', '#153A4C'],
+  ['#5FD35A', '#1D4ED8'],
+  ['#2563EB', '#2563EB'],
   ['#1A5068', '#5FD35A'],
 ];
 

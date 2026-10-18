@@ -48,7 +48,7 @@ export function EmailUnsubscribePage() {
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,#dff7ef_0%,#eef4f3_36%,#f8fafc_100%)] px-4 py-10 text-slate-900">
       <div className="mx-auto flex min-h-[72vh] max-w-xl items-center justify-center">
         <section className="w-full overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 shadow-[0_28px_80px_-44px_rgba(15,58,76,0.45)] backdrop-blur">
-          <div className="bg-[linear-gradient(135deg,#153A4C_0%,#2F9DF7_70%,#5FD35A_150%)] p-7 text-white">
+          <div className="bg-[linear-gradient(135deg,#153A4C_0%,#2563EB_70%,#5FD35A_150%)] p-7 text-white">
             <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-16 w-16 rounded-2xl border border-white/30 object-cover shadow-lg" />
             <p className="mt-5 text-xs font-black uppercase tracking-[0.28em] text-white/70">Preferências de e-mail</p>
             <h1 className="mt-2 text-3xl font-black tracking-[-0.04em]">Controle o que você recebe</h1>
@@ -75,7 +75,7 @@ export function EmailUnsubscribePage() {
             ) : (
               <div>
                 <div className="flex items-start gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                  <EnvelopeSimple size={24} weight="duotone" className="mt-0.5 text-[#2F9DF7]" />
+                  <EnvelopeSimple size={24} weight="duotone" className="mt-0.5 text-[#2563EB]" />
                   <div>
                     <p className="text-sm font-black text-slate-950">{email}</p>
                     <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{category}</p>

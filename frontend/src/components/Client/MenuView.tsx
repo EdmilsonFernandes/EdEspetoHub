@@ -546,7 +546,7 @@ const Header = ({
               {canAccessOperations && onOpenQueue && (
                 <button
                   onClick={onOpenQueue}
-                  className="px-3 py-2 rounded-full text-xs font-black border border-[#1a6fc8] bg-[#1a6fc8] text-white hover:bg-[#155a9e] transition flex items-center gap-1.5 whitespace-nowrap shadow-sm active:scale-95"
+                  className="px-3 py-2 rounded-full text-xs font-black border border-[#1D4ED8] bg-[#1D4ED8] text-white hover:bg-[#1E40AF] transition flex items-center gap-1.5 whitespace-nowrap shadow-sm active:scale-95"
                 >
                   <List size={14} weight="bold" />
                   <span>Fila de Pedidos</span>
@@ -708,7 +708,7 @@ export const MenuView = ({
   const canOrder = !isServiceStore && isOrderingEnabled !== false && !preOrderBlocked && isOpenNow !== false;
   const catalogTerm = isServiceStore ? "Serviços" : "Cardápio";
   const effectiveCompactHeader = compactHeader || autoCompactHeader;
-  const catalogPrimaryColor = branding?.primaryColor || "#2F9DF7";
+  const catalogPrimaryColor = branding?.primaryColor || "#2563EB";
   const catalogSecondaryColor = branding?.secondaryColor || branding?.accentColor || "#0f172a";
   const catalogPrimaryText = getContrastTextColor(catalogPrimaryColor);
   const categoryRefs = React.useRef({});
@@ -1243,7 +1243,7 @@ export const MenuView = ({
 
       <div
         ref={stickySearchContainerRef}
-        className={`${activeTab === "products" ? "" : "hidden"} sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-white/70 bg-white/92 shadow-[0_10px_32px_-26px_rgba(15,23,42,0.26)] backdrop-blur-2xl`}
+        className={`${activeTab === "products" ? "" : "hidden"} sticky ${systemHeaderOffset ? 'top-[calc(env(safe-area-inset-top)+3.72rem)]' : 'top-0'} z-30 w-full border-b border-slate-200/50 bg-white/70 shadow-[0_10px_32px_-26px_rgba(15,23,42,0.26)] backdrop-blur-xl backdrop-saturate-150`}
       >
         <div className="mx-auto w-full max-w-[50rem] px-4 pt-2.5 pb-1.5">
           <div className="relative flex items-center gap-2.5 rounded-full bg-slate-100 px-4 transition-colors focus-within:bg-white focus-within:ring-2 focus-within:ring-slate-200">
@@ -2162,12 +2162,11 @@ export const MenuView = ({
                 }
                 onProceed?.();
               }}
-              className={`jnc-hub-touch group relative isolate flex w-full items-center justify-between overflow-hidden rounded-[2.2rem] px-4 py-3.5 ${
+              className={`jnc-hub-touch group relative isolate flex w-full items-center justify-between overflow-hidden rounded-[2.2rem] bg-slate-900/80 px-4 py-3.5 ring-1 ring-white/25 backdrop-blur-xl backdrop-saturate-150 ${
                 cartPulse ? "scale-[1.04] shadow-[0_24px_50px_-12px_rgba(15,23,42,0.45)]" : "shadow-[0_20px_48px_-14px_rgba(15,23,42,0.35)] active:scale-[0.985]"
               }`}
               style={{
-                backgroundColor: catalogPrimaryColor,
-                color: catalogPrimaryText,
+                color: '#ffffff',
               }}
             >
               <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" />

@@ -82,7 +82,7 @@ const openExternal = async (url: string) => {
 const PointAvatar = ({ imageUrl, name, accent, Icon }: any) => (
   <div
     className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full ring-1"
-    style={{ backgroundColor: accent === 'service' ? '#DBEEFD' : '#ecfbf0', color: accent === 'service' ? '#2F9DF7' : '#2f9c48', borderColor: accent === 'service' ? '#cfe0ea' : '#bfe9c4' }}
+    style={{ backgroundColor: accent === 'service' ? '#E0EBFD' : '#ecfbf0', color: accent === 'service' ? '#2563EB' : '#2f9c48', borderColor: accent === 'service' ? '#cfe0ea' : '#bfe9c4' }}
     title={name}
   >
     {imageUrl ? (
@@ -178,10 +178,10 @@ export function HospitalityRouteSheet({
 
             <header className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Como chegar até meu chalé</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">Como chegar até meu chalé</p>
                 <h2 className="mt-1.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[17px] font-black leading-tight tracking-[-0.03em] text-slate-950 sm:text-[19px]">
                   <span className="truncate">{servicePoint?.name || 'Serviço'}</span>
-                  <ArrowRight size={15} weight="bold" className="shrink-0 text-[#2F9DF7]" />
+                  <ArrowRight size={15} weight="bold" className="shrink-0 text-[#2563EB]" />
                   <span className="truncate">{placePoint?.name || 'Chalé'}</span>
                 </h2>
               </div>
@@ -189,7 +189,7 @@ export function HospitalityRouteSheet({
 
             <div className="mt-3 flex items-center gap-2 rounded-[1.25rem] border border-white/70 bg-white/86 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur">
               <PointAvatar imageUrl={serviceImageUrl} name={servicePoint?.name} accent="service" Icon={Storefront} />
-              <span className="h-0.5 flex-1 rounded-full bg-[linear-gradient(90deg,#2F9DF7_0%,rgba(95,211,90,0.5)_100%)]" />
+              <span className="h-0.5 flex-1 rounded-full bg-[linear-gradient(90deg,#2563EB_0%,rgba(95,211,90,0.5)_100%)]" />
               <PointAvatar imageUrl={placeImageUrl} name={placePoint?.name} accent="place" Icon={HouseLine} />
             </div>
 
@@ -205,8 +205,8 @@ export function HospitalityRouteSheet({
                   destinationLabel={placePoint?.name || 'Chalé'}
                 />
               ) : (
-                <div className="flex items-center gap-2 rounded-[1.25rem] border border-dashed border-[#2F9DF7]/22 bg-[#DBEEFD]/70 px-4 py-3 text-[12px] font-semibold leading-relaxed text-[#153A4C]">
-                  <MapPinLine size={16} weight="duotone" className="shrink-0 text-[#2F9DF7]" />
+                <div className="flex items-center gap-2 rounded-[1.25rem] border border-dashed border-[#2563EB]/22 bg-[#E0EBFD]/70 px-4 py-3 text-[12px] font-semibold leading-relaxed text-[#153A4C]">
+                  <MapPinLine size={16} weight="duotone" className="shrink-0 text-[#2563EB]" />
                   Endereço como referência — o endereço do chalé será enviado para o entregador.
                 </div>
               )}
@@ -216,7 +216,7 @@ export function HospitalityRouteSheet({
               <button
                 type="button"
                 onClick={() => void handlePrimary()}
-                className="jnc-hub-touch inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-[1.4rem] bg-[#2F9DF7] px-4 py-3 text-[15px] font-semibold text-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.72)] transition hover:-translate-y-0.5 active:scale-[0.98]"
+                className="jnc-hub-touch inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-[1.4rem] bg-[#2563EB] px-4 py-3 text-[15px] font-semibold text-white shadow-[0_18px_34px_-24px_rgba(51,104,134,0.72)] transition hover:-translate-y-0.5 active:scale-[0.98]"
               >
                 {shareWhatsappUrl ? <WhatsappLogo size={18} weight="fill" /> : <ShareNetwork size={18} weight="fill" />}
                 Enviar localização do chalé
@@ -226,7 +226,7 @@ export function HospitalityRouteSheet({
                 <button
                   type="button"
                   onClick={() => void openExternal(toServiceDirectionsUrl)}
-                  className="jnc-hub-touch inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-[1.4rem] border border-[#2F9DF7]/18 bg-white px-4 py-3 text-[15px] font-semibold text-[#2F9DF7] shadow-sm transition hover:-translate-y-0.5 hover:border-[#2F9DF7]/30 active:scale-[0.98]"
+                  className="jnc-hub-touch inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-[1.4rem] border border-[#2563EB]/18 bg-white px-4 py-3 text-[15px] font-semibold text-[#2563EB] shadow-sm transition hover:-translate-y-0.5 hover:border-[#2563EB]/30 active:scale-[0.98]"
                 >
                   <NavigationArrow size={18} weight="duotone" />
                   Como chegar até o serviço
@@ -244,8 +244,8 @@ export function HospitalityRouteSheet({
                 onClick={() => void copyRouteUrl()}
                 className={`jnc-hub-touch inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-full border px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] transition active:scale-95 ${
                   copied
-                    ? 'border-emerald-200 bg-[#5FD35A]/16 text-[#1A6FC8]'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-[#2F9DF7]/22 hover:text-[#2F9DF7]'
+                    ? 'border-emerald-200 bg-[#5FD35A]/16 text-[#1D4ED8]'
+                    : 'border-slate-200 bg-white text-slate-600 hover:border-[#2563EB]/22 hover:text-[#2563EB]'
                 }`}
                 aria-live="polite"
               >

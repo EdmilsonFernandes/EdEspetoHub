@@ -996,7 +996,7 @@ export function AdminMotoboys() {
       <div className="sticky top-2 z-20 rounded-[1.6rem] border border-white/70 bg-white/90 backdrop-blur-xl px-3 py-3 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.55)]">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#2F9DF7]">Gestão de entregadores</p>
+            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#2563EB]">Gestão de entregadores</p>
             <h2 className="text-base sm:text-lg font-black text-slate-900 leading-tight">Equipe, solicitações e gorjetas</h2>
             <p className="hidden sm:block text-xs text-slate-500 mt-0.5">Tela compacta para operação rápida no celular da loja.</p>
           </div>
@@ -1007,7 +1007,7 @@ export function AdminMotoboys() {
               setShowCreatePassword(false);
               setShowCreateConfirmPassword(false);
             }}
-            className="btn-press shrink-0 rounded-2xl bg-[#2F9DF7] px-3.5 py-2.5 text-xs font-black text-white shadow-[0_18px_40px_-24px_rgba(51,104,134,0.7)] inline-flex items-center gap-2"
+            className="btn-press shrink-0 rounded-2xl bg-[#2563EB] px-3.5 py-2.5 text-xs font-black text-white shadow-[0_18px_40px_-24px_rgba(51,104,134,0.7)] inline-flex items-center gap-2"
           >
             <UserPlus size={16} weight="duotone" />
             Novo Motoboy
@@ -1743,11 +1743,11 @@ export function AdminMotoboys() {
         <div className="ds-sheet-backdrop z-[92]" role="dialog" onClick={closeResetPasswordModal}>
           <div className="ds-sheet-panel max-w-md" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[#F0F8FE] text-[#2F9DF7]">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[#EFF5FE] text-[#2563EB]">
                 <Key size={20} weight="duotone" />
               </span>
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#2F9DF7]">Acesso do entregador</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#2563EB]">Acesso do entregador</p>
                 <h3 className="mt-1 text-lg font-black text-slate-900">Redefinir senha temporária</h3>
                 <p className="mt-1 text-sm font-semibold text-slate-500">
                   {resetPasswordModal.link?.motoboyUser?.fullName || 'Entregador'} vai trocar essa senha no próximo login.
@@ -1763,7 +1763,7 @@ export function AdminMotoboys() {
                   value={resetPasswordModal.password}
                   onChange={(event) => setResetPasswordModal((prev) => ({ ...prev, password: event.target.value, result: null }))}
                   placeholder="Nova senha temporária"
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2563EB] focus:bg-white"
                 />
                 <button
                   type="button"
@@ -1781,7 +1781,7 @@ export function AdminMotoboys() {
                   value={resetPasswordModal.confirmPassword}
                   onChange={(event) => setResetPasswordModal((prev) => ({ ...prev, confirmPassword: event.target.value, result: null }))}
                   placeholder="Confirmar senha temporária"
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2F9DF7] focus:bg-white"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#2563EB] focus:bg-white"
                 />
                 <button
                   type="button"
@@ -2480,7 +2480,7 @@ export function AdminMotoboys() {
                     <button
                       type="button"
                       onClick={() => openResetPasswordModal(link)}
-                      className="btn-press w-full px-3 py-2 rounded-xl border border-[#cfe0ea] bg-[#F0F8FE] text-[11px] font-extrabold text-[#2F9DF7] inline-flex items-center justify-center gap-1.5"
+                      className="btn-press w-full px-3 py-2 rounded-xl border border-[#cfe0ea] bg-[#EFF5FE] text-[11px] font-extrabold text-[#2563EB] inline-flex items-center justify-center gap-1.5"
                     >
                       <Key size={14} weight="duotone" />
                       Senha

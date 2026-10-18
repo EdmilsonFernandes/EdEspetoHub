@@ -229,8 +229,8 @@ const PartnerMediaSlot = ({ label, hint, previewSrc, onFile, onClear, aspect = '
           <img src={previewSrc} alt={label} className="h-full w-full object-cover" />
         ) : (
           <label className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-1 px-3 text-center">
-            <ImageIcon size={22} weight="duotone" className="text-[#2F9DF7]/55" />
-            <span className="text-[11px] font-black uppercase tracking-[0.12em] text-[#2F9DF7]/70">{label}</span>
+            <ImageIcon size={22} weight="duotone" className="text-[#2563EB]/55" />
+            <span className="text-[11px] font-black uppercase tracking-[0.12em] text-[#2563EB]/70">{label}</span>
             {hint ? <span className="text-[10px] font-semibold text-slate-400">{hint}</span> : null}
             <input type="file" accept="image/*" className="hidden" onChange={(event) => onFile?.(event.target.files?.[0])} />
           </label>
@@ -284,7 +284,7 @@ function PartnerLogin({ onLoggedIn }: { onLoggedIn: (session: any) => void }) {
           <div className="mx-auto grid h-16 w-16 place-items-center overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)]">
             <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
           </div>
-          <p className="mt-3 text-[11px] font-black uppercase tracking-[0.22em] text-[#2F9DF7]/75">Acesso do parceiro</p>
+          <p className="mt-3 text-[11px] font-black uppercase tracking-[0.22em] text-[#2563EB]/75">Acesso do parceiro</p>
           <h1 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">Entrar no portal do parceiro</h1>
           <p className="mx-auto mt-2 max-w-sm text-sm font-semibold leading-6 text-slate-500">Acesse para atualizar fotos, contatos e informações do seu chalé, pousada ou serviço.</p>
         </div>
@@ -522,15 +522,15 @@ export function DestinationPartnerPortal() {
       <main className="mx-auto grid w-full max-w-6xl gap-4 px-4 lg:grid-cols-[360px_1fr]">
         <aside className="space-y-4">
           <SurfaceCard as="section" padding="md" className="rounded-[1.8rem]">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#2F9DF7]/70">Conta</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#2563EB]/70">Conta</p>
             <h1 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">{session.partner?.name || 'Parceiro'}</h1>
             <p className="mt-1 text-sm font-semibold text-slate-500">{session.partner?.email}</p>
           </SurfaceCard>
 
           <SurfaceCard as="section" padding="sm" className="rounded-[1.8rem]">
             <div className="mb-3 flex items-center justify-between px-1">
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#2F9DF7]/70">Cadastros</p>
-              <span className="rounded-full bg-[#2F9DF7]/10 px-2.5 py-1 text-[10px] font-black text-[#153A4C]">{resources.length}</span>
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#2563EB]/70">Cadastros</p>
+              <span className="rounded-full bg-[#2563EB]/10 px-2.5 py-1 text-[10px] font-black text-[#153A4C]">{resources.length}</span>
             </div>
             {loading ? <AppRobotLoader title="Carregando" subtitle="Buscando seus cadastros." /> : null}
             <div className="space-y-2">
@@ -542,7 +542,7 @@ export function DestinationPartnerPortal() {
                     key={resource.permissionId}
                     type="button"
                     onClick={() => setSelectedId(resource.permissionId)}
-                    className={`jnc-ds-touch jnc-ds-focus-ring flex w-full items-center gap-3 rounded-[1.35rem] border p-2.5 text-left transition ${active ? 'border-[#2F9DF7]/24 bg-[#2F9DF7]/9 shadow-[0_18px_34px_-26px_rgba(21,58,76,0.45)]' : 'border-slate-100 bg-white hover:bg-slate-50'}`}
+                    className={`jnc-ds-touch jnc-ds-focus-ring flex w-full items-center gap-3 rounded-[1.35rem] border p-2.5 text-left transition ${active ? 'border-[#2563EB]/24 bg-[#2563EB]/9 shadow-[0_18px_34px_-26px_rgba(21,58,76,0.45)]' : 'border-slate-100 bg-white hover:bg-slate-50'}`}
                   >
                     <img src={resourceImage(resource)} alt="" className="h-[3.25rem] w-[3.25rem] shrink-0 rounded-2xl object-cover ring-1 ring-slate-100" />
                     <span className="min-w-0 flex-1">
@@ -589,7 +589,7 @@ export function DestinationPartnerPortal() {
                 <div className="flex items-center gap-3">
                   <img src={resourceImage(selectedResource)} alt="" className="h-16 w-16 rounded-[1.35rem] object-cover ring-1 ring-slate-100" />
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#2F9DF7]/70">
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#2563EB]/70">
                       {selectedResource.resourceType === 'HOSPITALITY_PLACE' ? 'Hospedagem' : 'Serviço local'}
                     </p>
                     <h2 className="text-2xl font-black tracking-[-0.04em] text-slate-950">{resourceTitle(selectedResource)}</h2>
@@ -664,17 +664,17 @@ export function DestinationPartnerPortal() {
                   <SectionHeader eyebrow="Fotos do seu espaço" title="Logo, capa e galeria" />
                   <div className="grid gap-3 sm:grid-cols-[10rem_1fr]">
                     <div className="space-y-1.5">
-                      <p className="px-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#2F9DF7]">Logo</p>
+                      <p className="px-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#2563EB]">Logo</p>
                       <PartnerMediaSlot label="Logo" hint="Quadrada" aspect="aspect-square" previewSrc={form.logoFile || resolveAssetUrl(form.logoUrl) || ''} onFile={(file: File) => chooseFile('logoFile', file)} onClear={() => { change('logoFile', ''); change('logoUrl', ''); }} />
                     </div>
                     <div className="space-y-1.5">
-                      <p className="px-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#2F9DF7]">Capa</p>
+                      <p className="px-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#2563EB]">Capa</p>
                       <PartnerMediaSlot label="Capa" hint="Formato paisagem" aspect="aspect-[16/9]" previewSrc={form.bannerFile || resolveAssetUrl(form.bannerUrl) || ''} onFile={(file: File) => chooseFile('bannerFile', file)} onClear={() => { change('bannerFile', ''); change('bannerUrl', ''); }} />
                     </div>
                   </div>
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between px-1">
-                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#2F9DF7]">Galeria (até {BANNER_SLOT_COUNT} fotos)</p>
+                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#2563EB]">Galeria (até {BANNER_SLOT_COUNT} fotos)</p>
                       <span className="text-[10px] font-black text-slate-400">{form.bannerFiles.filter(Boolean).length + form.bannerUrls.filter((u: string) => u).length}/{BANNER_SLOT_COUNT}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -684,7 +684,7 @@ export function DestinationPartnerPortal() {
                     </div>
                     {canUseNativeImagePicker() ? (
                       <div className="flex justify-end">
-                        <button type="button" onClick={() => pickBannerSlotNative(form.bannerFiles.findIndex(Boolean) < 0 ? 0 : form.bannerFiles.length >= BANNER_SLOT_COUNT ? 0 : form.bannerFiles.length)} className="jnc-ds-touch inline-flex items-center gap-1.5 rounded-full bg-[#2F9DF7]/8 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.1em] text-[#153A4C]">
+                        <button type="button" onClick={() => pickBannerSlotNative(form.bannerFiles.findIndex(Boolean) < 0 ? 0 : form.bannerFiles.length >= BANNER_SLOT_COUNT ? 0 : form.bannerFiles.length)} className="jnc-ds-touch inline-flex items-center gap-1.5 rounded-full bg-[#2563EB]/8 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.1em] text-[#153A4C]">
                           <Camera size={13} /> Tirar foto / galeria
                         </button>
                       </div>

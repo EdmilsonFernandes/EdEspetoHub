@@ -51,7 +51,7 @@ export function DestinationPartnerActivate() {
             <Key size={22} weight="duotone" />
           </span>
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#2F9DF7]/75">Portal de destinos</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#2563EB]/75">Portal de destinos</p>
             <h1 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">Defina sua senha</h1>
             <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">Depois disso você já consegue atualizar fotos, contatos e informações do seu cadastro.</p>
           </div>

@@ -152,7 +152,7 @@ export function EcosystemDeckShowcase() {
           <div className="mx-auto mt-3 flex max-w-xs items-center gap-2 px-1" aria-hidden="true">
             <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
               <span
-                className="block h-full rounded-full bg-[linear-gradient(90deg,#2F9DF7,#5FD35A)] transition-[width] duration-500 ease-out"
+                className="block h-full rounded-full bg-[linear-gradient(90deg,#2563EB,#5FD35A)] transition-[width] duration-500 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>

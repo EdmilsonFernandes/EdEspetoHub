@@ -6,7 +6,7 @@ export function PremiumHomePrototype() {
     <div className="relative min-h-screen bg-slate-50 font-sans pb-24">
       {/* BACKGROUND EFFECTS */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] h-96 w-96 rounded-full bg-[#2F9DF7]/10 blur-[100px]" />
+        <div className="absolute top-[-10%] left-[-10%] h-96 w-96 rounded-full bg-[#2563EB]/10 blur-[100px]" />
         <div className="absolute top-[20%] right-[-10%] h-72 w-72 rounded-full bg-emerald-100/40 blur-[80px]" />
       </div>
 
@@ -17,12 +17,12 @@ export function PremiumHomePrototype() {
             <div className="flex items-center gap-3">
               <div className="relative group cursor-pointer">
                 <div className="grid h-12 w-12 place-items-center rounded-full bg-white shadow-[0_8px_20px_-6px_rgba(15,23,42,0.12)] ring-1 ring-slate-200 transition-transform active:scale-95">
-                  <UserCircle size={24} className="text-[#2F9DF7]" weight="duotone" />
+                  <UserCircle size={24} className="text-[#2563EB]" weight="duotone" />
                 </div>
                 <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-50 bg-emerald-500" />
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-[#2F9DF7]/70">Bom dia</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[#2563EB]/70">Bom dia</p>
                 <h1 className="text-lg font-black tracking-tight text-slate-900">Edmilson</h1>
               </div>
             </div>
@@ -35,7 +35,7 @@ export function PremiumHomePrototype() {
           </div>
 
           {/* SEARCH BAR PREMIUM */}
-          <div className="group relative w-full overflow-hidden rounded-[1.6rem] border border-[#2F9DF7]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.8)_0%,rgba(255,255,255,0.6)_100%)] p-1 shadow-[0_12px_32px_-16px_rgba(15,23,42,0.1)] backdrop-blur-xl transition-all focus-within:border-[#2F9DF7]/20 focus-within:shadow-[0_16px_40px_-16px_rgba(51,104,134,0.15)]">
+          <div className="group relative w-full overflow-hidden rounded-[1.6rem] border border-[#2563EB]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.8)_0%,rgba(255,255,255,0.6)_100%)] p-1 shadow-[0_12px_32px_-16px_rgba(15,23,42,0.1)] backdrop-blur-xl transition-all focus-within:border-[#2563EB]/20 focus-within:shadow-[0_16px_40px_-16px_rgba(51,104,134,0.15)]">
             <div className="absolute inset-0 bg-white/40" />
             <div className="relative flex items-center">
               <div className="pl-4 pr-2 text-slate-400">
@@ -54,7 +54,7 @@ export function PremiumHomePrototype() {
         <section className="mb-8">
           <div className="flex px-5 gap-3 overflow-x-auto pb-4 pt-1 snap-x no-scrollbar">
             {['🔥 Churrasco', '🍔 Burgers', '🍕 Pizzas', '🥤 Bebidas', '🍰 Doces'].map((cat, i) => (
-              <button key={i} className={`snap-center flex shrink-0 items-center justify-center rounded-[1.2rem] border px-5 py-3 shadow-sm transition-all active:scale-95 ${i === 0 ? 'border-[#2F9DF7]/20 bg-[#2F9DF7]/5 text-[#2F9DF7]' : 'border-white bg-white/70 text-slate-600 backdrop-blur-md'}`}>
+              <button key={i} className={`snap-center flex shrink-0 items-center justify-center rounded-[1.2rem] border px-5 py-3 shadow-sm transition-all active:scale-95 ${i === 0 ? 'border-[#2563EB]/20 bg-[#2563EB]/5 text-[#2563EB]' : 'border-white bg-white/70 text-slate-600 backdrop-blur-md'}`}>
                 <span className="text-sm font-bold">{cat}</span>
               </button>
             ))}
@@ -65,7 +65,7 @@ export function PremiumHomePrototype() {
         <section className="px-5">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-black tracking-tight text-slate-900">Em destaque</h3>
-            <span className="text-xs font-bold text-[#2F9DF7]">Ver tudo</span>
+            <span className="text-xs font-bold text-[#2563EB]">Ver tudo</span>
           </div>
 
           <div className="grid gap-4">
@@ -91,9 +91,9 @@ export function PremiumHomePrototype() {
       </div>
 
       {/* BOTTOM NAVIGATION MAC-STYLE */}
-      <nav className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[#2F9DF7]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(248,250,252,0.92)_100%)] shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] backdrop-blur-3xl pb-[env(safe-area-inset-bottom,0.5rem)]">
+      <nav className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[#2563EB]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(248,250,252,0.92)_100%)] shadow-[0_-18px_38px_-28px_rgba(15,23,42,0.24)] backdrop-blur-3xl pb-[env(safe-area-inset-bottom,0.5rem)]">
         <div className="grid h-[4.5rem] grid-cols-4 items-center px-2">
-          <button className="flex flex-col items-center justify-center gap-1 text-[#2F9DF7]">
+          <button className="flex flex-col items-center justify-center gap-1 text-[#2563EB]">
             <House size={24} weight="fill" />
             <span className="text-[10px] font-bold">Início</span>
           </button>

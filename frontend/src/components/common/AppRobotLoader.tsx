@@ -16,7 +16,7 @@ export function AppRobotLoader({
   const content = (
     <div className={`jnc-robot-loader-card ${className}`} role="status" aria-live="polite">
       <div className="pointer-events-none absolute -right-14 -top-16 h-40 w-40 rounded-full bg-[#5FD35A]/18 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-16 left-6 h-36 w-36 rounded-full bg-[#2F9DF7]/14 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 left-6 h-36 w-36 rounded-full bg-[#2563EB]/14 blur-3xl" />
 
       <div className="relative flex flex-col items-center text-center">
         <div className="jnc-robot-loader-orbit" />
@@ -36,12 +36,12 @@ export function AppRobotLoader({
           </span>
         </div>
 
-        <p className="mt-5 text-[10px] font-black uppercase tracking-[0.24em] text-[#2F9DF7]">{eyebrow}</p>
+        <p className="mt-5 text-[10px] font-black uppercase tracking-[0.24em] text-[#2563EB]">{eyebrow}</p>
         <h2 className="mt-1 text-base font-black text-slate-900">{title}</h2>
         <p className="mt-1 max-w-[280px] text-xs font-semibold leading-relaxed text-slate-500">{subtitle}</p>
 
         <div className="mt-4 flex items-center justify-center gap-1.5" aria-hidden="true">
-          <span className="h-2 w-2 animate-bounce rounded-full bg-[#2F9DF7]" />
+          <span className="h-2 w-2 animate-bounce rounded-full bg-[#2563EB]" />
           <span className="h-2 w-2 animate-bounce rounded-full bg-[#5FD35A] [animation-delay:120ms]" />
           <span className="h-2 w-2 animate-bounce rounded-full bg-[#8EC5DD] [animation-delay:240ms]" />
         </div>

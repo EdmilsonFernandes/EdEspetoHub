@@ -15,7 +15,7 @@ type ChipProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> & {
 const toneClasses: Record<ChipTone, { selected: string; idle: string }> = {
   brand: {
     selected: 'border-brand-teal bg-brand-navy text-white shadow-[0_14px_26px_-20px_rgba(21,58,76,0.48)]',
-    idle: 'border-[#BCE2FC] bg-white text-brand-teal hover:bg-[#DBEEFD]',
+    idle: 'border-[#C3D8FB] bg-white text-brand-teal hover:bg-[#E0EBFD]',
   },
   neutral: {
     selected: 'border-slate-900 bg-slate-900 text-white',

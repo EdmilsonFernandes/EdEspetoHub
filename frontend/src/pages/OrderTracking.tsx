@@ -475,7 +475,7 @@ function TrackingInfoRow({
 }) {
   return (
     <div className="flex items-start gap-3 rounded-[1.2rem] border border-[#d6e4ed] bg-[linear-gradient(180deg,#ffffff_0%,#f5f9fc_100%)] px-4 py-3 shadow-[0_18px_36px_-30px_rgba(51,104,134,0.14)]">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f8fbfd,#e7f1f7)] text-[#2F9DF7] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.28)]">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#cfe0ea] bg-[linear-gradient(135deg,#f8fbfd,#e7f1f7)] text-[#2563EB] shadow-[0_12px_24px_-20px_rgba(51,104,134,0.28)]">
         {icon}
       </span>
       <div className="min-w-0 flex-1">
@@ -937,8 +937,8 @@ export function OrderTracking() {
   const paymentIconToneClass = normalizedPaymentMethod === 'dinheiro'
     ? 'border-amber-100 bg-[linear-gradient(135deg,#fff8e7,#ffffff)] text-amber-700'
     : hasOnlinePayment
-    ? 'border-sky-100 bg-[linear-gradient(135deg,#ecfeff,#ffffff)] text-[#2F9DF7]'
-    : 'border-[#d6e4ed] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] text-[#2F9DF7]';
+    ? 'border-sky-100 bg-[linear-gradient(135deg,#ecfeff,#ffffff)] text-[#2563EB]'
+    : 'border-[#d6e4ed] bg-[linear-gradient(135deg,#f8fbfd,#ffffff)] text-[#2563EB]';
   const postalStatusLabel = isCancelled
     ? 'Cancelado'
     : isPostalShipmentDeliveredByTracking
@@ -1948,7 +1948,7 @@ export function OrderTracking() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f4f8fb_0%,#ebf2f7_100%)] pt-[calc(env(safe-area-inset-top)+4.55rem)]">
-      <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[42%] w-[50%] rounded-full bg-[#2F9DF7]/14 blur-[120px] -z-10" />
+      <div className="pointer-events-none fixed top-[-12%] right-[-8%] h-[42%] w-[50%] rounded-full bg-[#2563EB]/14 blur-[120px] -z-10" />
       <div className="pointer-events-none fixed bottom-[10%] left-[-6%] h-[28%] w-[36%] rounded-full bg-sky-300/16 blur-[100px] -z-10" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <AppGlassHeader
@@ -1963,7 +1963,7 @@ export function OrderTracking() {
           <div className="h-[2.5px] w-full overflow-hidden bg-[#dce9f1]/80">
             <div
               className={`relative h-full transition-all duration-700 ease-out overflow-hidden ${isCancelled ? "" : "jnc-progress-sweep"}`}
-              style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#2F9DF7,#2F9DF7)' }}
+              style={{ width: `${progress}%`, background: isCancelled ? '#f43f5e' : 'linear-gradient(90deg,#2563EB,#2563EB)' }}
             >
               <div className="jnc-animate-shimmer absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-white/40 to-transparent" />
             </div>
@@ -2019,7 +2019,7 @@ export function OrderTracking() {
               }`}>
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
-                    <p className="inline-flex items-center gap-1.5 rounded-full border border-[#cfe0ea]/90 bg-white/90 px-2.5 py-1 text-2xs font-bold uppercase tracking-[0.18em] text-[#2F9DF7] shadow-[0_12px_22px_-20px_rgba(51,104,134,0.18)]">
+                    <p className="inline-flex items-center gap-1.5 rounded-full border border-[#cfe0ea]/90 bg-white/90 px-2.5 py-1 text-2xs font-bold uppercase tracking-[0.18em] text-[#2563EB] shadow-[0_12px_22px_-20px_rgba(51,104,134,0.18)]">
                         Pedido #{orderDisplayId}
                     </p>
                     <div className="mt-3 flex items-center gap-3 flex-wrap">
@@ -2064,12 +2064,41 @@ export function OrderTracking() {
                         Ao vivo
                       </span>
                     )}
+
+                    {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat ? (
+                      <div className="mt-3 overflow-hidden rounded-2xl border border-[#d5e3ec] bg-white/80 shadow-[0_16px_30px_-26px_rgba(51,104,134,0.18)]">
+                        <RouteMapView
+                          origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
+                          destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
+                        />
+                      </div>
+                    ) : null}
+
+                    {estimatedReadyAt && !isTerminal ? (
+                      <div className="mt-3 rounded-2xl border border-[#d5e3ec] bg-white/80 px-4 py-3 shadow-[0_16px_30px_-26px_rgba(51,104,134,0.18)]">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#2563EB]">{etaForecastLabel}</p>
+                        <p className="mt-1 text-[1.7rem] font-extrabold leading-none text-stone-950">
+                          {etaForecastPrefix}{' '}
+                          {isPostalDelivery
+                            ? estimatedReadyAt.toLocaleDateString('pt-BR')
+                            : formatEtaMoment(estimatedReadyAt)}
+                        </p>
+                        {!isPostalDelivery && etaCountdownMs > 0 ? (
+                          <p className="mt-1.5 text-sm font-black text-emerald-700">{isDelivery ? 'Chega em' : 'Pronto em'} {etaCountdownLabel}</p>
+                        ) : null}
+                        {isPostalDelivery ? (
+                          <p className="mt-1 text-xs text-stone-600">
+                            {shipmentServiceName || shipmentServiceCode || 'Serviço postal'}{postalEstimatedDays ? ` • ${postalEstimatedDays} dia(s) úteis` : ''}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
                     </div>
                     <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
                       {orderQuickFacts.map((fact) => (
                         <div key={fact.key} className="min-w-0 rounded-[1.15rem] border border-white/80 bg-white/78 px-3 py-2.5 shadow-[0_18px_34px_-30px_rgba(51,104,134,0.24)] ring-1 ring-[#d6e4ed]/60 backdrop-blur">
                           <div className="flex items-center gap-2">
-                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl border border-[#d6e4ed] bg-[#f4f9fc] text-[#2F9DF7]">
+                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl border border-[#d6e4ed] bg-[#f4f9fc] text-[#2563EB]">
                               {fact.icon}
                             </span>
                             <div className="min-w-0">
@@ -2104,36 +2133,6 @@ export function OrderTracking() {
                         <p className="mt-2 text-[11px] font-medium text-indigo-600/80">Informe este código ao entregador para confirmar o recebimento.</p>
                       </div>
                     )}
-                    {estimatedReadyAt && !isTerminal ? (
-                      <div className="mt-3 rounded-2xl border border-[#d5e3ec] bg-white/80 px-4 py-3 shadow-[0_16px_30px_-26px_rgba(51,104,134,0.18)]">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#2F9DF7]">{etaForecastLabel}</p>
-                        <p className="mt-1 text-xl font-extrabold text-stone-950">
-                          {etaForecastPrefix}{' '}
-                          {isPostalDelivery
-                            ? estimatedReadyAt.toLocaleDateString('pt-BR')
-                            : formatEtaMoment(estimatedReadyAt)}
-                        </p>
-                        {!isPostalDelivery && etaCountdownMs > 0 ? (
-                          <p className="mt-1.5 text-sm font-black text-emerald-700">{isDelivery ? 'Chega em' : 'Pronto em'} {etaCountdownLabel}</p>
-                        ) : null}
-                        {isPostalDelivery ? (
-                          <p className="mt-1 text-xs text-stone-600">
-                            {shipmentServiceName || shipmentServiceCode || 'Serviço postal'}{postalEstimatedDays ? ` • ${postalEstimatedDays} dia(s) úteis` : ''}
-                          </p>
-                        ) : null}
-                      </div>
-                    ) : null}
-
-                    {isDelivery && !isPostalDelivery && storeCoords?.lat && deliveryCoords?.lat ? (
-                      <div className="mt-3 overflow-hidden rounded-2xl border border-[#d5e3ec] bg-white/80 shadow-[0_16px_30px_-26px_rgba(51,104,134,0.18)]">
-                        <RouteMapView
-                          origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
-                          destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
-                          compact
-                        />
-                      </div>
-                    ) : null}
-
                     {isDelivery && !isPostalDelivery && motoboyFirst && (['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'].includes(deliveryStatus) || hasCustomerReceiptConfirmation) ? (
                       <div className="mt-3 rounded-2xl border border-[#d5e3ec] bg-[linear-gradient(135deg,#f9fcfe,#eef5fa)] px-4 py-3 text-sm text-stone-800 shadow-[0_18px_32px_-28px_rgba(51,104,134,0.16)]">
                         <div className="flex items-start gap-3">
@@ -2188,7 +2187,7 @@ export function OrderTracking() {
                           : 'border-[#d5e3ec] bg-[linear-gradient(135deg,#f9fcfe,#ffffff)]'
                       }`}>
                         <p className={`text-[11px] font-black uppercase tracking-[0.18em] ${
-                          hasCustomerReceiptConfirmation ? 'text-emerald-700' : 'text-[#2F9DF7]'
+                          hasCustomerReceiptConfirmation ? 'text-emerald-700' : 'text-[#2563EB]'
                         }`}>
                           {hasCustomerReceiptConfirmation ? 'Recebimento confirmado' : 'Entrega concluída'}
                         </p>
@@ -2313,16 +2312,16 @@ export function OrderTracking() {
                   id="postal-tracking-section"
                   className="relative overflow-hidden rounded-[1.9rem] border border-white/90 bg-[radial-gradient(circle_at_12%_0%,rgba(95,211,90,0.20),transparent_34%),linear-gradient(135deg,#f7fff8_0%,#ffffff_50%,#edf6fb_100%)] shadow-[0_28px_68px_-42px_rgba(21,58,76,0.36)] ring-1 ring-[#d6e4ed]/65"
                 >
-                  <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[#2F9DF7]/12 blur-3xl" />
+                  <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[#2563EB]/12 blur-3xl" />
                   <div className="pointer-events-none absolute -bottom-20 left-6 h-40 w-40 rounded-full bg-emerald-300/18 blur-3xl" />
                   <div className="p-4 sm:p-5">
                     <div className="relative flex items-start gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem] bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] text-white shadow-[0_20px_38px_-22px_rgba(21,58,76,0.78)] ring-1 ring-white/70">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem] bg-[linear-gradient(135deg,#153A4C,#2563EB)] text-white shadow-[0_20px_38px_-22px_rgba(21,58,76,0.78)] ring-1 ring-white/70">
                         <Package size={22} weight="duotone" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Acompanhe seu envio</p>
+                          <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2563EB]">Acompanhe seu envio</p>
                           {postalTrackingEvents.length ? (
                             <span className="rounded-full bg-white/92 px-2.5 py-1 text-2xs font-black text-slate-600 ring-1 ring-[#d6e4ed] shadow-[0_10px_20px_-18px_rgba(51,104,134,0.28)]">
                               {postalTrackingEvents.length} {postalTrackingEvents.length === 1 ? 'atualização' : 'atualizações'}
@@ -2339,7 +2338,7 @@ export function OrderTracking() {
                     <div className="relative mt-4 grid gap-2.5 sm:grid-cols-[1.25fr_0.85fr_0.9fr]">
                       <div className="relative overflow-hidden rounded-[1.45rem] border border-white/95 bg-white/92 px-4 py-3.5 shadow-[0_22px_44px_-34px_rgba(21,58,76,0.34)] ring-1 ring-[#d6e4ed]/70">
                         <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-emerald-300/18 blur-2xl" />
-                        <p className="relative text-2xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Previsão de entrega</p>
+                        <p className="relative text-2xs font-black uppercase tracking-[0.18em] text-[#2563EB]">Previsão de entrega</p>
                         <p className="relative mt-1.5 text-2xl font-black tracking-[-0.04em] text-slate-950">
                           {!isCancelled && postalExpectedDeliveryDate ? postalExpectedDeliveryDate.toLocaleDateString('pt-BR') : 'Em breve'}
                         </p>
@@ -2399,7 +2398,7 @@ export function OrderTracking() {
                           <div className="mt-3 rounded-2xl border border-[#d6e4ed] bg-[linear-gradient(135deg,#f7fbfd,#ffffff)] px-3 py-3 shadow-[0_16px_32px_-28px_rgba(51,104,134,0.22)]">
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                               <div className="min-w-0">
-                                <p className="text-2xs font-black uppercase tracking-[0.16em] text-[#2F9DF7]">
+                                <p className="text-2xs font-black uppercase tracking-[0.16em] text-[#2563EB]">
                                   {hasCarrierPostalEvent ? 'Rastreio integrado' : 'Consulta pelo app'}
                                 </p>
                                 <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
@@ -2493,7 +2492,7 @@ export function OrderTracking() {
                                     isLatest
                                       ? 'border-emerald-200 bg-emerald-50 text-emerald-700 ring-4 ring-emerald-50/70'
                                       : isCarrierEvent
-                                        ? 'border-amber-100 bg-[#fff8dd] text-[#2F9DF7]'
+                                        ? 'border-amber-100 bg-[#fff8dd] text-[#2563EB]'
                                         : 'border-slate-200 bg-white text-slate-500'
                                   }`}>
                                     {isSellerEvent ? (
@@ -2530,7 +2529,7 @@ export function OrderTracking() {
                                     <p className="min-w-0 flex-1 text-sm font-black leading-snug text-slate-950">{event.title || copy.label}</p>
                                     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-black ring-1 ${
                                       isCarrierEvent
-                                        ? 'bg-amber-50 text-[#2F9DF7] ring-amber-100'
+                                        ? 'bg-amber-50 text-[#2563EB] ring-amber-100'
                                         : isSellerEvent
                                           ? 'bg-slate-50 text-slate-600 ring-slate-100'
                                           : 'bg-emerald-50 text-emerald-700 ring-emerald-100'
@@ -2564,10 +2563,10 @@ export function OrderTracking() {
                 >
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <div>
-                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]">Resumo do pedido</p>
+                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#2563EB]">Resumo do pedido</p>
                       <p className="mt-0.5 text-sm font-black text-stone-950">Itens escolhidos</p>
                     </div>
-                    <span className="rounded-full border border-[#d6e4ed] bg-white/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#2F9DF7]">
+                    <span className="rounded-full border border-[#d6e4ed] bg-white/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#2563EB]">
                       {itemsToRender.length} {itemsToRender.length === 1 ? 'item' : 'itens'}
                     </span>
                   </div>
@@ -2588,7 +2587,7 @@ export function OrderTracking() {
                             className="h-10 w-10 shrink-0 rounded-xl border border-[#dce9f1] object-cover"
                           />
                         ) : (
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#dce9f1] bg-[#DBEEFD] text-base">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#dce9f1] bg-[#E0EBFD] text-base">
                             🍖
                           </div>
                         )}
@@ -2596,7 +2595,7 @@ export function OrderTracking() {
                         {/* Nome + badges */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline gap-1.5">
-                            <span className="shrink-0 rounded-md border border-[#dce9f1] bg-[#DBEEFD] px-1.5 py-0.5 text-[11px] font-black text-[#2F9DF7]">
+                            <span className="shrink-0 rounded-md border border-[#dce9f1] bg-[#E0EBFD] px-1.5 py-0.5 text-[11px] font-black text-[#2563EB]">
                               {quantity}x
                             </span>
                             <span className="font-semibold leading-snug text-slate-900">{item.name}</span>
@@ -2637,7 +2636,7 @@ export function OrderTracking() {
                               <p className="text-[11px] leading-none line-through text-slate-400">
                                 {formatCurrency(originalLineTotal)}
                               </p>
-                              <p className="mt-0.5 text-sm font-black text-[#2F9DF7]">
+                              <p className="mt-0.5 text-sm font-black text-[#2563EB]">
                                 {formatCurrency(lineTotal)}
                               </p>
                             </>
@@ -2658,7 +2657,7 @@ export function OrderTracking() {
                   {hasDeliveryFee ? (
                     <div className="mt-5 flex items-center justify-between border-t border-[#dce9f1] pt-4 text-xs font-semibold text-slate-600">
                       <span>Frete</span>
-                      <span className="rounded-full border border-[#dce9f1] bg-[#DBEEFD] px-2 py-1 text-[#2F9DF7]">
+                      <span className="rounded-full border border-[#dce9f1] bg-[#E0EBFD] px-2 py-1 text-[#2563EB]">
                         {formatCurrency(order.deliveryFee)}
                       </span>
                     </div>
@@ -2682,7 +2681,7 @@ export function OrderTracking() {
                       <span className="text-lg font-bold text-slate-950">Total</span>
                       <p className="text-[11px] font-semibold text-slate-400">Valor final do pedido</p>
                     </div>
-                    <span className="rounded-2xl bg-[#DBEEFD] px-3 py-2 text-lg font-black tracking-tight text-[#153A4C] ring-1 ring-[#d6e4ed]">
+                    <span className="rounded-2xl bg-[#E0EBFD] px-3 py-2 text-lg font-black tracking-tight text-[#153A4C] ring-1 ring-[#d6e4ed]">
                       {formatCurrency(order.total || 0)}
                     </span>
                   </div>
@@ -2696,12 +2695,12 @@ export function OrderTracking() {
                     aria-controls="order-service-details"
                   >
                     <span className="min-w-0">
-                      <span className="block text-[11px] font-black uppercase tracking-[0.16em] text-[#2F9DF7]">Pagamento e entrega</span>
+                      <span className="block text-[11px] font-black uppercase tracking-[0.16em] text-[#2563EB]">Pagamento e entrega</span>
                       <span className="mt-1 block truncate text-xs font-semibold text-slate-500">
                         {paymentMeta?.label || 'Pagamento a confirmar'} · {typeLabel}
                       </span>
                     </span>
-                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#d6e4ed] bg-white px-2.5 py-1 text-2xs font-black text-[#2F9DF7] lg:hidden">
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#d6e4ed] bg-white px-2.5 py-1 text-2xs font-black text-[#2563EB] lg:hidden">
                       {serviceDetailsExpanded ? 'Ocultar' : 'Ver detalhes'}
                       <CaretDown
                         size={13}
@@ -2725,7 +2724,7 @@ export function OrderTracking() {
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Pagamento</p>
+                            <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#2563EB]">Pagamento</p>
                             <span className="inline-flex rounded-full border border-[#d6e4ed] bg-white/85 px-2 py-0.5 text-2xs font-black text-slate-600">
                               {paymentContextLabel}
                             </span>
@@ -2745,7 +2744,7 @@ export function OrderTracking() {
                         </div>
                       </div>
                       {showMercadoPagoApproved ? (
-                        <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#2F9DF7]/15 bg-white/85 px-3 py-2">
+                        <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#2563EB]/15 bg-white/85 px-3 py-2">
                           <span className="text-[11px] font-semibold leading-4 text-slate-500">{mercadoPagoApprovalDetail}</span>
                           <span className="flex h-9 w-[124px] shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-white px-2">
                             <img src={mercadoPagoHorizontal} alt="Mercado Pago" className="h-7 w-[104px] object-contain" />
@@ -3000,7 +2999,7 @@ export function OrderTracking() {
                               window.setTimeout(() => setCtaPulse(false), 220);
                               handleRepeatOrder();
                             }}
-                            className="jnc-hub-touch hidden min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2F9DF7)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.46)] lg:inline-flex"
+                            className="jnc-hub-touch hidden min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2563EB)] px-4 py-3 text-[13px] font-bold text-white shadow-[0_18px_34px_-20px_rgba(51,104,134,0.46)] lg:inline-flex"
                             style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
                           >
                             <ArrowClockwise size={15} weight="bold" />

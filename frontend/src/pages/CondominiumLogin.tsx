@@ -41,7 +41,7 @@ export function CondominiumLogin() {
     <AuthLayout>
       <div className="w-full max-w-[560px] space-y-3 ds-login-card-enter sm:space-y-4">
         <div className="text-center">
-          <div className="mx-auto grid h-16 w-16 place-items-center overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#2F9DF7]/12 sm:h-[4.75rem] sm:w-[4.75rem] sm:border-[4px]">
+          <div className="mx-auto grid h-16 w-16 place-items-center overflow-hidden rounded-full border-[3px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#2563EB]/12 sm:h-[4.75rem] sm:w-[4.75rem] sm:border-[4px]">
             <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
           </div>
           <div className="mt-3 hidden items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-700 sm:inline-flex">
@@ -57,9 +57,9 @@ export function CondominiumLogin() {
         </div>
 
         <form onSubmit={handleSubmit} autoComplete="on" className="ds-card-elevated space-y-3 border-white/40 bg-white/84 p-4 shadow-[0_26px_70px_-46px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:space-y-5 sm:p-8">
-          <div className="hidden rounded-[1.35rem] border border-[#2F9DF7]/10 bg-[#2F9DF7]/7 p-4 sm:block">
+          <div className="hidden rounded-[1.35rem] border border-[#2563EB]/10 bg-[#2563EB]/7 p-4 sm:block">
             <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-[#2F9DF7] shadow-sm">
+              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-[#2563EB] shadow-sm">
                 <Buildings size={22} weight="duotone" />
               </span>
               <div>
@@ -77,7 +77,7 @@ export function CondominiumLogin() {
               value={form.email}
               onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
               placeholder="spazio.azuli"
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#2F9DF7] focus:bg-white sm:py-3.5"
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#2563EB] focus:bg-white sm:py-3.5"
             />
           </label>
 
@@ -90,7 +90,7 @@ export function CondominiumLogin() {
                 value={form.password}
                 onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
                 placeholder="Sua senha"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 pr-12 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#2F9DF7] focus:bg-white sm:py-3.5"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 pr-12 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#2563EB] focus:bg-white sm:py-3.5"
               />
               <button
                 type="button"

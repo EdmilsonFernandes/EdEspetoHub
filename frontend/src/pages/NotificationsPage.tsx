@@ -104,7 +104,7 @@ export function NotificationsPage() {
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#F8FAFC_0%,#EEF4F6_100%)] pb-[calc(env(safe-area-inset-bottom)+6.35rem)] pt-[calc(env(safe-area-inset-top)+4.35rem)]">
       <div className="pointer-events-none fixed top-[-10%] right-[-8%] h-[38%] w-[46%] rounded-full bg-[#153A4C]/13 blur-[120px] -z-10" />
-      <div className="pointer-events-none fixed bottom-[8%] left-[-5%] h-[26%] w-[34%] rounded-full bg-[#2F9DF7]/7 blur-[100px] -z-10" />
+      <div className="pointer-events-none fixed bottom-[8%] left-[-5%] h-[26%] w-[34%] rounded-full bg-[#2563EB]/7 blur-[100px] -z-10" />
 
       <div className="mx-auto max-w-2xl">
         <AppGlassHeader
@@ -118,14 +118,14 @@ export function NotificationsPage() {
           {notifications.length > 0 && (
             <div className="mb-5 flex items-center justify-between gap-3 rounded-[1.35rem] border border-white/70 bg-white/80 px-3.5 py-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#2F9DF7]">Central do app</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#2563EB]">Central do app</p>
                 <p className="mt-0.5 text-xs font-semibold text-slate-500">
                   {unread > 0 ? `${unread} aviso${unread > 1 ? 's' : ''} novo${unread > 1 ? 's' : ''}` : 'Nenhum aviso pendente'}
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
                 {unread > 0 && (
-                  <button onClick={handleMarkAllRead} className="inline-flex items-center gap-1 rounded-full border border-[#2F9DF7]/15 bg-[#2F9DF7]/8 px-3 py-2 text-[10px] font-black text-[#1A6FC8] transition active:scale-95">
+                  <button onClick={handleMarkAllRead} className="inline-flex items-center gap-1 rounded-full border border-[#2563EB]/15 bg-[#2563EB]/8 px-3 py-2 text-[10px] font-black text-[#1D4ED8] transition active:scale-95">
                     <Check size={12} weight="bold" /> Marcar lidas
                   </button>
                 )}
@@ -138,7 +138,7 @@ export function NotificationsPage() {
 
           {notifications.length === 0 && (
             <div className="mt-16 flex flex-col items-center rounded-[2rem] border border-white/70 bg-white/70 px-6 py-10 text-center shadow-[0_22px_54px_-42px_rgba(15,23,42,0.35)] backdrop-blur-xl">
-              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#2F9DF7]/8">
+              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#2563EB]/8">
                 <BellRinging size={28} weight="duotone" className="text-slate-400" />
               </div>
               <p className="mt-4 text-sm font-bold text-slate-700">Nenhuma notificação</p>
@@ -155,13 +155,13 @@ export function NotificationsPage() {
                     key={n.id}
                     type="button"
                     onClick={() => handleRead(n)}
-                    className={`group relative grid w-full grid-cols-[4.25rem_minmax(0,1fr)_2.35rem] items-start gap-3 rounded-[1.35rem] px-3 py-3 text-left transition-all active:scale-[0.985] ${n.read ? 'bg-transparent hover:bg-white/55' : 'bg-white shadow-[0_18px_36px_-30px_rgba(51,104,134,0.42)] ring-1 ring-[#2F9DF7]/10'}`}
+                    className={`group relative grid w-full grid-cols-[4.25rem_minmax(0,1fr)_2.35rem] items-start gap-3 rounded-[1.35rem] px-3 py-3 text-left transition-all active:scale-[0.985] ${n.read ? 'bg-transparent hover:bg-white/55' : 'bg-white shadow-[0_18px_36px_-30px_rgba(51,104,134,0.42)] ring-1 ring-[#2563EB]/10'}`}
                   >
                     <div className="relative shrink-0">
-                      <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.15rem] bg-[linear-gradient(135deg,#153a4c,#2F9DF7)] shadow-[0_16px_28px_-24px_rgba(15,23,42,0.38)]">
+                      <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.15rem] bg-[linear-gradient(135deg,#153a4c,#2563EB)] shadow-[0_16px_28px_-24px_rgba(15,23,42,0.38)]">
                         <img src={n.imageUrl || '/janocaminho.jpg'} alt="" className="h-full w-full object-cover opacity-90" />
                       </div>
-                      {!n.read && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#2F9DF7] shadow-[0_0_8px_rgba(51,104,134,0.55)]" />}
+                      {!n.read && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#2563EB] shadow-[0_0_8px_rgba(51,104,134,0.55)]" />}
                     </div>
                     <div className="min-w-0 pt-0.5">
                       <p className={`text-[14px] leading-snug ${n.read ? 'font-bold text-slate-700' : 'font-black text-slate-950'}`}>{n.title}</p>
@@ -170,13 +170,13 @@ export function NotificationsPage() {
                       >
                         {n.body || n.title}
                       </p>
-                      <span className="mt-2 block text-[11px] font-black uppercase tracking-[0.13em] text-[#2F9DF7]">
+                      <span className="mt-2 block text-[11px] font-black uppercase tracking-[0.13em] text-[#2563EB]">
                         {getNotificationActionLabel(n.url)}
                       </span>
                     </div>
                     <span className="flex h-full flex-col items-end justify-between gap-3 pt-0.5">
                       <span className="text-[11px] font-black text-slate-400">{timeAgo(n.createdAt)}</span>
-                      <span className="grid h-8 w-8 place-items-center rounded-full bg-white/70 text-[#2F9DF7] shadow-[0_12px_26px_-24px_rgba(15,23,42,0.42)] ring-1 ring-slate-100 transition group-active:scale-95">
+                      <span className="grid h-8 w-8 place-items-center rounded-full bg-white/70 text-[#2563EB] shadow-[0_12px_26px_-24px_rgba(15,23,42,0.42)] ring-1 ring-slate-100 transition group-active:scale-95">
                         <CaretRight size={15} weight="bold" />
                       </span>
                     </span>
@@ -199,7 +199,7 @@ export function NotificationsPage() {
             className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-[0_28px_80px_-44px_rgba(15,23,42,0.55)]"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="relative h-28 bg-[linear-gradient(135deg,#153A4C,#2F9DF7)]">
+            <div className="relative h-28 bg-[linear-gradient(135deg,#153A4C,#2563EB)]">
               <img
                 src={selectedNotification.imageUrl || '/janocaminho.jpg'}
                 alt=""
