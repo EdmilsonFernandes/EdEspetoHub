@@ -301,6 +301,38 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
 .obtn{flex:1;height:44px;border-radius:var(--r-sm);border:1.5px solid var(--hair);background:#fff;font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
 .obtn svg.ic{width:15px;height:15px;color:var(--ink2)}
 
+/* ---------- chips horizontais sticky (categorias) ---------- */
+.chipsrow{position:sticky;top:0;z-index:3;background:var(--bg);display:flex;gap:8px;overflow-x:auto;padding:10px 12px 8px;border-bottom:1px solid var(--hair2)}
+.chipsrow .lgpill{scroll-snap-align:start}
+
+/* ---------- S0 hub ---------- */
+.hubtop{padding:10px 14px 4px;display:grid;gap:9px}
+.locbar{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700}
+.locbar svg.ic{width:15px;height:15px;color:var(--primary-ink)}
+.locbar small{color:var(--ink2);font-weight:500;margin-left:auto;font-size:11px}
+.hsearch{display:flex;align-items:center;gap:9px;background:#fff;border:1.5px solid var(--hair);border-radius:14px;padding:0 14px;height:48px;box-shadow:var(--sh-flat);font-size:13.5px;color:var(--ink2)}
+.hsearch svg.ic{width:17px;height:17px}
+.hubsec{display:flex;justify-content:space-between;align-items:baseline;margin:14px 14px 8px}
+.hubsec h4{font-size:14.5px;font-weight:700}
+.hubsec a{font-size:12px;font-weight:700;color:var(--primary-ink);text-decoration:none}
+.scard{display:grid;grid-template-columns:56px 1fr auto;gap:11px;align-items:center;background:#fff;border:1px solid var(--hair);border-radius:var(--r-md);padding:10px 12px;margin:0 14px 10px;box-shadow:var(--sh-flat)}
+.scard .sb{width:56px;height:56px;border-radius:11px;flex:none}
+.scard .sc2{min-width:0}
+.scard .sc2 b{display:block;font-size:14px;line-height:1.25}
+.scard .sd{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--ink2);margin-top:3px;flex-wrap:wrap}
+.scard .sd .rpill{padding:1px 7px;font-size:10.5px}
+.scard .sc3{display:grid;gap:3px;justify-items:end;font-size:10.5px;color:var(--ink2)}
+.sbadge2{font-size:10px;font-weight:800;border-radius:5px;padding:2px 7px}
+.on2{background:var(--cta-tint);color:var(--cta)}
+.off2{background:var(--hair2);color:var(--ink2)}
+.scard.closed{filter:grayscale(1);opacity:.72}
+.hubtrack{display:flex;gap:10px;overflow-x:auto;padding:0 14px 4px}
+.hcard{flex:none;width:132px;background:#fff;border:1px solid var(--hair);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-flat)}
+.hcard .hb{height:54px}
+.hcard .hn{font-size:12.5px;font-weight:700;line-height:1.2;padding:8px 10px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:30px}
+.hcard .hm{padding:3px 10px 10px;font-size:10.5px;color:var(--ink2)}
+.hubftr{padding:14px 14px 20px;font-size:11px;color:var(--ink2);text-align:center}
+
 /* ---------- S6 estados ---------- */
 .minigrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:22px;margin-top:24px}
 .mini{min-width:0}
@@ -440,9 +472,74 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
 </section>
 
 <section class="sec">
+  <p class="secnum">00 · HUB — AS LOJAS PRIMEIRO <span class="tag tag-c2">CICLO 2</span></p>
+  <h2>A entrada do app mostra o que o usuário veio buscar</h2>
+  <p class="secsub">Hoje as lojas aparecem só depois de ~2,5 dobras — hero institucional, guia de regiões, feiras e categorias na frente. O benchmark cravou o oposto: catálogo na primeira dobra. Redistribuição core-first: busca com papel de destaque, chips de contexto (Meu Condomínio e feiras ficam) e as lojas abertas imediatamente. O card informativo que a auditoria mandou proteger continua — só sobe na fila.</p>
+  <div class="frames">
+    <div class="col">
+      <div class="phone">
+        <div class="sbar"><span>18:40</span><span class="sr"><i class="sig"></i><i class="sig"></i><i class="sig"></i><span class="batt"></span></span></div>
+        <div class="hubtop">
+          <div class="locbar"><svg class="ic"><use href="#i-pin"/></svg>Rua das Acácias, 123<small>alterar</small></div>
+          <div class="hsearch"><svg class="ic"><use href="#i-search"/></svg>Busque por loja ou item — ex.: espetinho</div>
+        </div>
+        <div class="chipsrow" style="top:0">
+          <span class="lgpill on" style="background:var(--primary-tint);color:var(--primary-ink);border-color:transparent">Todos</span>
+          <span class="lgpill">Meu Condomínio</span>
+          <span class="lgpill">Espetinhos</span>
+          <span class="lgpill">Lanches</span>
+          <span class="lgpill">Feiras</span>
+        </div>
+        <div class="hubsec"><h4>Abertos agora · 12 lojas</h4><a href="#s0">ver todas</a></div>
+        <div class="scard" id="s0">
+          <div class="sb ph-espeto"></div>
+          <div class="sc2"><b>Espetinhos Bela Vista</b>
+            <div class="sd"><span class="rpill">★ 4,8</span><span>30–40 min</span><span>R$ 4,00</span><span>2,3 km</span></div>
+          </div>
+          <div class="sc3"><span class="sbadge2 on2">aberto</span><span>mín R$ 15</span></div>
+        </div>
+        <div class="scard">
+          <div class="sb ph-porcao"></div>
+          <div class="sc2"><b>Churrasquinho da Praça</b>
+            <div class="sd"><span class="rpill">★ 4,6</span><span>25–35 min</span><span>Grátis</span><span>1,1 km</span></div>
+          </div>
+          <div class="sc3"><span class="sbadge2 on2">aberto</span><span>mín R$ 12</span></div>
+        </div>
+        <div class="scard closed">
+          <div class="sb ph-doce"></div>
+          <div class="sc2"><b>Doce Mel Sobremesas</b>
+            <div class="sd"><span class="rpill">★ 4,9</span><span>40–50 min</span><span>R$ 5,00</span><span>3,8 km</span></div>
+          </div>
+          <div class="sc3"><span class="sbadge2 off2">abre 18h</span><span>mín R$ 10</span></div>
+        </div>
+        <div class="hubsec"><h4>Destaques de hoje</h4></div>
+        <div class="hubtrack">
+          <div class="hcard"><div class="hb ph-combo"></div><div class="hn">Combo Casal — 4 espetos</div><div class="hm">R$ 34,90 · Espetinhos BV</div></div>
+          <div class="hcard"><div class="hb ph-suco"></div><div class="hn">Suco natural 500ml</div><div class="hm">R$ 7,50 · Churrasquinho</div></div>
+          <div class="hcard"><div class="hb ph-doce"></div><div class="hn">Prestígio da casa</div><div class="hm">R$ 9,90 · Doce Mel</div></div>
+        </div>
+        <p class="hubftr">Filtro por raio e discovery geográfico já funcionam — é só a ordem que muda.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="note">
+        <h4>O que muda <span class="tag tag-c2">CICLO 2 · por último</span></h4>
+        <ul>
+          <li><b>Lojas na primeira dobra</b> — abertas primeiro, fechadas em cinza logo abaixo (visíveis, não escondidas).</li>
+          <li>Busca sobe pra campo de 48px com o endereço em cima — quem sabe o que quer, acha em 1 toque.</li>
+          <li>Chips de contexto mantidos (Meu Condomínio, feiras, segmentos) — filtram como hoje, sem hero institucional na frente.</li>
+          <li>Destaques viram uma faixa compacta depois das lojas — campanha de fundo, não de frente.</li>
+          <li>Discovery geo (raio) e card informativo da loja: intocados — o benchmark mandou proteger.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
   <p class="secnum">01 · CARDÁPIO</p>
   <h2>Vitrine da loja — a tela da demo de venda</h2>
-  <p class="secsub">Header unificado mantém (foi redesenhado há pouco). Tabs saem do rose-500 e viram marca. O maior upgrade: rail de categorias sticky com scroll-spy + debounce 450ms — o padrão iFood/enatega. Linha de produto ganha porta dupla (linha tocável + "+"), populares viram carrossel foto-forward.</p>
+  <p class="secsub">Header unificado mantém (foi redesenhado há pouco). Tabs saem do rose-500 e viram marca. Categorias continuam em pills horizontais (o padrão que já é nosso e do iFood BR) — agora sticky sob as tabs, com scroll-spy + debounce 450ms: tocar rola até a seção, rolar acerta a pill. Linha de produto ganha porta dupla (linha tocável + "+"), populares viram carrossel foto-forward.</p>
   <div class="frames">
     <div class="col">
       <div class="phone">
@@ -471,14 +568,14 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
             <span class="tab on">Produtos</span><span class="tab">Avaliações</span><span class="tab">Informações</span>
           </div>
         </div>
-        <div class="menuwrap">
-          <nav class="rail">
-            <div class="ritem on"><svg class="ic"><use href="#i-flame"/></svg><span class="rl">Populares</span></div>
-            <div class="ritem"><svg class="ic"><use href="#i-skew"/></svg><span class="rl">Espetinhos</span></div>
-            <div class="ritem"><svg class="ic"><use href="#i-plate"/></svg><span class="rl">Porções</span></div>
-            <div class="ritem"><svg class="ic"><use href="#i-cup"/></svg><span class="rl">Bebidas</span></div>
-            <div class="ritem"><svg class="ic"><use href="#i-cake"/></svg><span class="rl">Sobremesas</span></div>
-          </nav>
+        <div class="chipsrow">
+          <span class="lgpill on"><svg class="ic"><use href="#i-flame"/></svg>Populares</span>
+          <span class="lgpill"><svg class="ic"><use href="#i-skew"/></svg>Espetinhos</span>
+          <span class="lgpill"><svg class="ic"><use href="#i-plate"/></svg>Porções</span>
+          <span class="lgpill"><svg class="ic"><use href="#i-cup"/></svg>Bebidas</span>
+          <span class="lgpill"><svg class="ic"><use href="#i-cake"/></svg>Sobremesas</span>
+        </div>
+        <div style="padding:2px 12px 96px">
           <div class="mcol">
             <div class="poprow"><h4>Mais pedidos hoje</h4><a href="#s1">ver tudo <svg class="ic"><use href="#i-chev"/></svg></a></div>
             <div class="poptrack">
@@ -539,7 +636,7 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
       <div class="note">
         <h4>O que mudou <span class="tag tag-b1">B1</span></h4>
         <ul>
-          <li>Rail lateral sticky com scroll-spy (debounce 450ms) — categorias com ícone + label 10px, ativa no tint da cor da loja.</li>
+          <li>Pills de categoria horizontais 40px, sticky sob as tabs, com ícone e scroll-spy (debounce 450ms) — ativa no tint da cor da loja. O rail vertical foi testado e vetado: feio e fora do nosso padrão.</li>
           <li>Carrossel “Mais pedidos hoje” foto-forward com badge de quantidade — só existe com ranking real; sem ranking vira “Destaques da loja” (curadoria do lojista).</li>
           <li>Linha de produto: porta dupla — linha inteira abre o sheet, “+” adiciona direto e vira stepper inline.</li>
           <li>Badge “Esgotado” vira slate (indisponível ≠ erro); foto e texto a 50%.</li>
@@ -742,9 +839,12 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
             </div>
           </div>
           <div class="csec">
-            <div class="csec-h"><b>Pagamento</b><button class="lnk">Trocar</button></div>
-            <div class="payrow on"><span class="ptile" style="background:#00AEEF">MP</span><div class="pl"><b>Pix na hora</b><small>QR no balcão ao confirmar</small></div><span class="prad"></span></div>
-            <div class="payrow"><span class="ptile" style="background:#64748B">R$</span><div class="pl"><b>No balcão</b><small>Dinheiro · sem troco</small></div><span class="prad"></span></div>
+            <div class="csec-h"><b>Pagamento</b><span style="font-size:11px;font-weight:800;color:var(--cta)">na hora de fechar</span></div>
+            <div class="addr">
+              <span class="lbl">Comanda aberta</span>
+              <b>Paga no fechamento</b>
+              <span class="ad2">O cliente pede pra fechar e aí escolhe: Pix no balcão, dinheiro ou cartão. Mesmo fluxo de hoje — inclusive o pedido feito pelo admin do lojista.</span>
+            </div>
           </div>
           <div class="csec">
             <div class="csec-h"><b>Cupom</b><button class="lnk">Ver cupons</button></div>
@@ -753,12 +853,12 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
           <div class="csec breakdown">
             <div class="bk"><span>Subtotal</span><span>R$ 78,70</span></div>
             <div class="bk off"><span>Cupom PRIMEIRA5</span><span>−R$ 5,00</span></div>
-            <div class="bk tot"><span>Total</span><span>R$ 73,70</span></div>
+            <div class="bk tot"><span>Total da comanda</span><span>R$ 73,70</span></div>
           </div>
         </div>
         <div class="cta-bar">
-          <span class="secure"><span style="font-weight:700;color:var(--ink);font-size:12px">R$ 73,70</span><span>Sem taxa de entrega</span></span>
-          <button class="ctabtn">Confirmar e pagar · R$ 73,70</button>
+          <span class="secure"><span style="font-weight:700;color:var(--ink);font-size:12px">R$ 73,70</span><span>Comanda · paga ao fechar</span></span>
+          <button class="ctabtn">Enviar pra cozinha · Mesa 12</button>
         </div>
       </div>
     </div>
@@ -767,6 +867,7 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
         <h4>Invariantes preservados</h4>
         <ul>
           <li>Os 4 contextos com os mesmos nomes e o mesmo 1-toque — só mudam de cards empilhados pra segment control.</li>
+          <li>Mesa abre comanda: pagamento só quando o cliente pede pra fechar (fluxo atual, do balcão e do admin do lojista, intacto) — sem cobrança na hora.</li>
           <li>Taxa de entrega SEM ⓘ (veto do Edmilson), troco, cupom com revalidação, guest em página única, pedido só entra na fila após pago.</li>
           <li>Diferença dos contextos visível num olhar: Entrega soma taxa; Mesa não tem endereço.</li>
           <li>Total no CTA desde já — é o quick-win P0.3, entra antes de todo o resto.</li>
@@ -1037,7 +1138,7 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
   <p class="secsub">Cada peça do mock já nasce com destino: componente novo tipado ou reuso do kit <code>ui/</code>. Rollout em PRs sempre-verdes (push na main = deploy com approval do Edmilson; revert é o rollback). A ata completa mora em <code>.ux-audit/redesign-premium-2026-10-18/DECISOES_MESA.md</code>.</p>
 
   <div class="mapc">
-    <div class="maprow"><div class="m1"><b>Rail de categorias sticky</b><span>scroll-spy + debounce 450ms</span></div><span class="ar">→</span><div class="m2"><b>CategoryRail.tsx</b> novo · MenuView apenas compõe</div></div>
+    <div class="maprow"><div class="m1"><b>Pills de categoria sticky</b><span>scroll-spy + debounce 450ms, horizontais</span></div><span class="ar">→</span><div class="m2"><b>CategoryChips.tsx</b> novo · MenuView apenas compõe</div></div>
     <div class="maprow"><div class="m1"><b>Linha de produto + “+”</b><span>memo, foto 88px, porta dupla</span></div><span class="ar">→</span><div class="m2"><b>ProductRow.tsx</b> novo · content-visibility:auto</div></div>
     <div class="maprow"><div class="m1"><b>Carrossel populares / tiles</b><span>badge qty, fallback tipográfico</span></div><span class="ar">→</span><div class="m2"><b>PopularRail.tsx</b> novo · reusa SkeletonCard</div></div>
     <div class="maprow"><div class="m1"><b>CartBar flutuante</b><span>substitui a sacola sticky</span></div><span class="ar">→</span><div class="m2"><b>CartBar.tsx</b> novo · mesmo slot, mesmo <b>setView('cart')</b></div></div>
@@ -1050,7 +1151,7 @@ svg.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-
   <div class="roll">
     <div class="rstep"><b>P0 · quick-wins <span class="tag tag-p0">antes de tudo</span></b><p>Total no CTA do checkout + countdown Pix com “Pagar agora”. 1 PR por item, presentation-only, ≤2 dias — valor de conversão caindo já na janela Fundador.</p></div>
     <div class="rstep"><b>B0 · tokens <span class="tag tag-b1">1 arquivo</span></b><p>Swap teal→azul com split gráfico/ink, sweep dos 226 text-primary, 1 sistema de sombra, laranja vira token. QA admin + checagem Dr. Exame no mesmo PR.</p></div>
-    <div class="rstep"><b>B1 · vitrine <span class="tag tag-b1">MenuView</span></b><p>CategoryRail, ProductRow, populares, tabs azul, header mantém + rating pill. Prova o design system no menor dos arquivos grandes.</p></div>
+    <div class="rstep"><b>B1 · vitrine <span class="tag tag-b1">MenuView</span></b><p>CategoryChips (pills sticky), ProductRow, populares, tabs azul, header mantém + rating pill. Prova o design system no menor dos arquivos grandes.</p></div>
     <div class="rstep"><b>B2 · sheet + cartbar <span class="tag tag-b2">ProductModal</span></b><p>Footer fixo com preço vivo, grupos com regra no badge, CartBar substituindo a sacola no mesmo slot.</p></div>
     <div class="rstep"><b>B3 · estados <span class="tag tag-b3">todas as telas do ciclo</span></b><p>Skeleton fiel, esgotado, fechado, vazio, erro — cada um com screenshot de gate.</p></div>
     <div class="rstep"><b>C2 · checkout · Pix · rastreio · hub <span class="tag tag-c2">blueprint deste mock</span></b><p>Checkout 1 página, Pix expirado com saída, tracking hero com ETA display, hub core-first por último (discovery já funciona). AAB único no fim, com versionCode+1 e cap sync.</p></div>

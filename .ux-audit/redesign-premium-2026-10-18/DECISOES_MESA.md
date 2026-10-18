@@ -39,6 +39,12 @@ Fallback sem foto: tile tipográfico (inicial + pictograma da categoria) sobre t
 ### D5 — Critério de sucesso do mock (Produto, inegociável)
 O lojista-prospect reconhece SEU produto na vitrine em <5s (logo + cor da loja dominantes). Reconhecível pro operador atual, paridade visual com iFood, zero promessa falsa, cores da marca. Mock entra no roteiro de venda do VIP Fundador.
 
+## Revisões após 1ª revisão do Edmilson (18/10)
+
+1. **Rail vertical de categorias: VETADO** ("fica bem feio"). Categorias seguem em **pills horizontais 40px sticky** sob as tabs, com scroll-spy + debounce 450ms — o padrão que já existia em prod e o do iFood BR. Componente passa a ser `CategoryChips.tsx` (não CategoryRail).
+2. **Checkout MESA corrigido no mock**: mesa = **comanda aberta** — pagamento SÓ quando o cliente pede pra fechar (aí escolhe Pix no balcão / dinheiro / cartão). É o fluxo atual, inclusive o pedido lançado pelo admin do lojista como mesa. CTA do mock agora é "Enviar pra cozinha · Mesa 12", sem cobrança na hora. Entrega/Retirada seguem pagando na confirmação (fila pós-pago).
+3. **HUB entrou no mock** (seção 00, ciclo 2, último batch): core-first — endereço + busca 48px no topo, chips de contexto (Meu Condomínio/feiras/segmentos), **lojas abertas na primeira dobra** (hoje ~2,5 dobras de hero institucional antes), fechadas em cinza logo abaixo, destaques como faixa compacta depois das lojas. Discovery geo por raio e o card informativo da loja: intocados.
+
 ## Arquivos
-- Mock (artifact + HTML): `.ux-audit/redesign-premium-2026-10-18/mock-premium.html` — frames 390px + lg, tokens com nomes do código, ~24 estados, mapa mock→código.
+- Mock (artifact + HTML): `.ux-audit/redesign-premium-2026-10-18/mock-premium.html` — frames 390px + lg, tokens com nomes do código, ~24 estados, mapa mock→código, hub core-first.
 - Esta ata é o contrato da mesa; divergências futuras resolvem-se aqui, não reabrem o debate.
