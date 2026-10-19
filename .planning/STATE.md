@@ -19,9 +19,12 @@ do orchestrator. Produto estável em `gha.2617` (29/08 à noite).
   só ligava com `PAYMENT_PROVIDER_DEFAULT=openpix`, então com `=asaas` o PIX
   caía DIRETO no MP OAuth da loja. Polling `refreshFromProvider` ganha branch
   ASAAS; OrderPayment.provider aceita 'ASAAS' (varchar, sem migration).
-  **PENDÊNCIA (Edmilson)**: `ASAAS_API_KEY` está VAZIA em
-  `/home/ec2-user/EdEspetoHub/.env.prod` (verificado via SSH; PROVIDER=asaas e
-  OPENPIX set) — cadeia efetiva hoje é openpix→mp; com a key, Asaas assume ≥R$5.
+  **ASAAS_API_KEY resolvido (19/10 noite)**: key de prod copiada do Dr Exame
+  (mesma conta LTDA) e o bug-raiz era o Compose v2 interpolar o `$` inicial da
+  key em env_file → string vazia desde 03/10. Escape `$$` aplicado em
+  `backend/.env.docker` no EC2 (backup .bak-20261019); `docker compose config`
+  confirma resolução. **ATIVA = próximo deploy que recriar o backend** (approval
+  do Edmilson) — até lá a cadeia roda openpix→mp.
 - 19/09 — **Portal (www) "demora e só carrega no reload" — fix no SW +
   logos WebP** (7b21f303 no ar/verificado; 8f55baa9 deploy via approval):
   navigateFallback cache-first servia index do precache VELHO pós-deploy →
