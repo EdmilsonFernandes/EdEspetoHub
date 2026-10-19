@@ -17,8 +17,13 @@ do orchestrator. Produto estável em `gha.2617` (29/08 à noite).
   cross-item no ProductModal ("Que tal completar?" — sugestão abre o item p/ revisar,
   bebidas/sobremesas primeiro); (2) estado vazio desenhado da Sacola (step 1) com CTA
   "Ver cardápio"; (3) `font-variant-numeric: tabular-nums` global (preços alinham).
-  tsc limpo + CartView.paymentSheet 2/2. Próximas lacunas reais: sons de evento,
-  código de entrega 4 dígitos, comprovante+avaliação pós-entrega.
+  tsc limpo + CartView.paymentSheet 2/2. Próximas lacunas reais: ~~sons de evento~~
+  (✅ commit f688c0b0 — chime Web Audio no rastreio), código de entrega pro CLIENTE
+  (⚠️ o código JÁ EXISTE no backend — `DeliveryService` envia por push e o motoboy
+  vê em MotoboyCurrent; falta SÓ expor `deliveryCode` no endpoint de order do
+  cliente, respeitando auth de dono, e exibir no OrderTracking quando sair pra
+  entrega) e CTA de avaliação pós-entrega (reviews já existem — StoreReviewsTab;
+  falta CTA no estado entregue). Celebração pós-pedido e som de loja já existiam.
 
 - 19/10 — **Rollback "checkout 1 página" + cadeia Asaas no PIX de pedido**:
   (1) CartView volta ao multi-step Sacola→Receber→Pagamento→Confirmar (stepper
