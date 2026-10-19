@@ -269,8 +269,16 @@ private resolvePlanChargeAmount(plan: Plan) {
     // (MP intacto no fim). correlationID/externalReference = payment.id (mesma
     // external reference do fluxo MP).
     if (data.method === 'PIX') {
+      // Asaas exige CPF/CNPJ no customer p/ PIX (400 invalid_object sem ele —
+      // mesma conta/regra do Dr Exame). Sem CPF do lojista o Asaas é pulado.
+      const payerCpf = String(
+        String((data.user as any)?.documentType || '').toUpperCase() === 'CPF'
+          ? (data.user as any)?.document || ''
+          : ''
+      ).trim();
       for (const pixProvider of resolvePlatformPixChain(chargeAmount)) {
         if (pixProvider === 'mp') break; // Mercado Pago logo abaixo (fluxo intacto)
+        if (pixProvider === 'asaas' && !payerCpf) continue;
         try {
           if (pixProvider === 'asaas') {
             const charge = await this.asaas.createPixCharge({
@@ -279,6 +287,7 @@ private resolvePlanChargeAmount(plan: Plan) {
               customer: {
                 name: data.user.fullName || data.user.email,
                 email: data.user.email,
+                ...(payerCpf ? { cpfCnpj: payerCpf } : {}),
               },
               description,
             });

@@ -83,8 +83,17 @@ export class OrderPaymentService {
     row = await repo.save(row);
 
     if (usePlatformPix) {
+      // Asaas EXIGE CPF/CNPJ no customer p/ cobrança PIX (400 invalid_object,
+      // provado em prod 04/10 no Dr Exame — mesma conta). Sem CPF do pagador o
+      // Asaas é PULADO sem round-trip e o OpenPix assume (fail-fast).
+      const payerCpf = String(
+        String((order as any)?.customerUser?.documentType || '').toUpperCase() === 'CPF'
+          ? (order as any)?.customerUser?.document || ''
+          : ''
+      ).trim();
       for (const pixProvider of pixChain) {
         if (pixProvider === 'mp') break; // Mercado Pago da loja logo abaixo (fluxo intacto)
+        if (pixProvider === 'asaas' && !payerCpf) continue;
         try {
           if (pixProvider === 'asaas') {
             const payerEmail = String((order as any)?.customerUser?.email || '').trim();
@@ -94,6 +103,7 @@ export class OrderPaymentService {
               customer: {
                 name: String(order.customerName || 'Cliente').trim(),
                 ...(payerEmail ? { email: payerEmail } : {}),
+                ...(payerCpf ? { cpfCnpj: payerCpf } : {}),
               },
               description: `Pedido ${String(order.id).slice(0, 8)} - ${order.store.name}`,
             });

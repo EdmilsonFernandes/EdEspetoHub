@@ -11,6 +11,7 @@ import {
   CaretRight,
   Phone,
   EnvelopeSimple,
+  IdentificationCard,
   Camera,
   CheckCircle,
   XCircle,
@@ -61,6 +62,14 @@ const getBrazilNationalPhoneDigits = (value = '') => {
 };
 
 const formatBrazilPhoneDraft = (value = '') => formatPhoneInput(getBrazilNationalPhoneDigits(value));
+const getCpfDigits = (value = '') => String(value || '').replace(/\D/g, '').slice(0, 11);
+const formatCpfDraft = (value = '') => {
+  const d = getCpfDigits(value);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
+  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+};
 
 export function ClientAccount() {
   const navigate = useNavigate();
@@ -90,6 +99,7 @@ export function ClientAccount() {
   const [mfaStatusLoading, setMfaStatusLoading] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [phoneDraft, setPhoneDraft] = useState('');
+  const [cpfDraft, setCpfDraft] = useState('');
   const settingsSectionRef = useRef<HTMLElement | null>(null);
   const settingsOnly = searchParams.get('section') === 'settings';
   const cachedProfileImage = useCachedCustomerProfileImage(me?.profileImageUrl, me?.profileImageVersion);
@@ -140,6 +150,7 @@ export function ClientAccount() {
         setMe(meData || null);
         setNameDraft(String(meData?.fullName || ''));
         setPhoneDraft(formatBrazilPhoneDraft(meData?.phone || ''));
+        setCpfDraft(formatCpfDraft(meData?.cpf || ''));
         setAddresses(Array.isArray(addressesData) ? addressesData : []);
         // /customer/orders devolve wrapper { data: [...] } — sem o unwrap a Conta
         // mostrava "0 pedidos salvos" com pedidos existentes (auditoria UX 15/08).
@@ -293,9 +304,18 @@ export function ClientAccount() {
     setProfileSaving(true);
     setProfileMessage('');
     try {
+      // CPF opcional: vazio = limpar; preenchido tem que ter 11 dígitos
+      // (checksum valida no servidor). Usado no Pix da plataforma (Asaas exige).
+      const cpfDigits = getCpfDigits(cpfDraft);
+      if (cpfDigits.length > 0 && cpfDigits.length !== 11) {
+        setProfileSaving(false);
+        setProfileMessage('CPF incompleto — preencha os 11 dígitos ou deixe vazio.');
+        return;
+      }
       const updated = await customerAccountService.updateMe({
         fullName: String(nameDraft || '').trim(),
         phone: getBrazilNationalPhoneDigits(phoneDraft),
+        cpf: cpfDigits,
       });
       setMe(updated || null);
       syncCustomerSession(updated || null);
@@ -311,6 +331,7 @@ export function ClientAccount() {
   const handleCancelProfileEdit = () => {
     setNameDraft(String(me?.fullName || ''));
     setPhoneDraft(formatBrazilPhoneDraft(me?.phone || ''));
+    setCpfDraft(formatCpfDraft(me?.cpf || ''));
     setProfileMessage('');
     setProfileEditing(false);
   };
@@ -804,7 +825,7 @@ export function ClientAccount() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">Editar perfil</p>
-                        <p className="mt-1 text-xs font-semibold text-slate-500">Altere apenas nome e telefone quando precisar.</p>
+                        <p className="mt-1 text-xs font-semibold text-slate-500">Altere nome, telefone e CPF quando precisar.</p>
                       </div>
                       <button
                         type="button"
@@ -854,6 +875,22 @@ export function ClientAccount() {
                           className="min-w-0 flex-1 bg-transparent py-3 pl-3 pr-4 outline-none placeholder:text-slate-400"
                         />
                       </div>
+                    </div>
+                    <div className="grid gap-2">
+                      <label className="ml-1 text-xs font-semibold text-slate-500">CPF (opcional)</label>
+                      <div className="relative">
+                        <IdentificationCard size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          value={cpfDraft}
+                          onChange={e => setCpfDraft(formatCpfDraft(e.target.value))}
+                          inputMode="numeric"
+                          placeholder="000.000.000-00"
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-bold text-slate-700 outline-none transition focus:border-[#9BBDF8] focus:bg-white focus:ring-2 focus:ring-[#2563EB]/10"
+                        />
+                      </div>
+                      <p className="ml-1 text-[11px] font-medium text-slate-400">
+                        Usado nos pagamentos Pix da plataforma — sem ele, seu Pix continua funcionando normalmente.
+                      </p>
                     </div>
                   </div>
                     <button

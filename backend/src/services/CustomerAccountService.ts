@@ -22,6 +22,7 @@ import { buildOrderTimelineJson } from '../utils/orderTimeline';
 import { AuditNotificationService } from './AuditNotificationService';
 import { MfaService } from './MfaService';
 import { sameCoordinatePair } from '../utils/geoQuality';
+import { normalizeDocument, validateDocument } from '../utils/documents';
 import { OrderReviewService } from './OrderReviewService';
 
 type CustomerMfaLoginOptions = {
@@ -430,6 +431,7 @@ private sanitizeUser(user: User) {
       fullName: user.fullName,
       email: user.email,
       phone: user.phone || null,
+      cpf: user.documentType === 'CPF' ? (user.document || null) : null,
       profileImageUrl: user.profileImageUrl || null,
       emailVerified: Boolean(user.emailVerified),
       termsAcceptedAt: user.termsAcceptedAt || null,
@@ -814,7 +816,7 @@ async me(userId: string) {
    *
    * @author Edmilson Lopes
    */
-async updateMe(userId: string, input: { fullName?: string; phone?: string | null; profileImageFile?: string | null }) {
+async updateMe(userId: string, input: { fullName?: string; phone?: string | null; profileImageFile?: string | null; cpf?: string | null }) {
     const repo = AppDataSource.getRepository(User);
     const user = await repo.findOne({ where: { id: userId } });
     if (!user) throw new AppError('AUTH-004', 401);
@@ -822,6 +824,22 @@ async updateMe(userId: string, input: { fullName?: string; phone?: string | null
     const fullName = String(input?.fullName || '').trim();
     if (fullName) user.fullName = fullName;
     if (input?.phone !== undefined) user.phone = this.sanitizePhone(input.phone) || undefined;
+    if (input?.cpf !== undefined) {
+      // CPF do cliente (19/10): obrigatório pelo Asaas p/ cobrança PIX da
+      // plataforma (400 invalid_object sem ele — provado no Dr Exame 04/10).
+      // Opcional aqui: sem CPF o checkout segue pelo OpenPix. Vazio = limpar.
+      const cpf = normalizeDocument(String(input?.cpf || ''));
+      if (cpf) {
+        if (!validateDocument(cpf, 'CPF')) {
+          throw new AppError('GEN-002', 400, { message: 'Informe um CPF válido.' });
+        }
+        user.document = cpf;
+        user.documentType = 'CPF';
+      } else {
+        user.document = undefined;
+        user.documentType = undefined;
+      }
+    }
     if (input?.profileImageFile !== undefined) {
       const raw = String(input?.profileImageFile || '').trim();
       if (!raw) {

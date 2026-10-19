@@ -426,8 +426,16 @@ export class BalcaoChargeService {
       // loja depois. MAQUININHA POINT FICA NO MP (decisão do dono). Erro em um
       // provedor → próximo da cadeia (MP da loja intacto no fim).
       let pixViaPlatform = false;
+      // Asaas exige CPF/CNPJ no customer p/ PIX (mesma regra do checkout) —
+      // sem CPF do cliente da mesa o Asaas é pulado e o OpenPix assume.
+      const payerCpf = String(
+        String((order as any)?.customerUser?.documentType || '').toUpperCase() === 'CPF'
+          ? (order as any)?.customerUser?.document || ''
+          : ''
+      ).trim();
       for (const pixProvider of resolvePlatformPixChain(rawAmount)) {
         if (pixProvider === 'mp') break; // fallback MP da loja logo abaixo
+        if (pixProvider === 'asaas' && !payerCpf) continue;
         try {
           if (pixProvider === 'asaas') {
             const customerEmail = String((order as any)?.customerUser?.email || '').trim();
@@ -437,6 +445,7 @@ export class BalcaoChargeService {
               customer: {
                 name: String(order.customerName || 'Cliente balcão').trim(),
                 ...(customerEmail ? { email: customerEmail } : {}),
+                ...(payerCpf ? { cpfCnpj: payerCpf } : {}),
               },
               description,
             });

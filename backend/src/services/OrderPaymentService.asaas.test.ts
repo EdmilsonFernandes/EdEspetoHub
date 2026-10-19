@@ -165,7 +165,8 @@ const order: any = {
     name: 'Cantina do Açaí',
     owner: { email: 'dono@loja.com' },
   },
-  customerUser: { email: 'cliente@x.com' },
+  // CPF válido de teste — Asaas exige CPF no customer p/ PIX (regra 04/10).
+  customerUser: { email: 'cliente@x.com', document: '11144477735', documentType: 'CPF' },
   customerName: 'Cliente Teste',
 };
 
@@ -211,10 +212,29 @@ describe('createForOrderIfEnabled — WAVE ASAAS (cadeia completa no checkout)',
       externalReference: 'order_payment:op-1',
     });
 
+    // POST /customers: customer criado COM o CPF do pagador (exigência Asaas).
+    const custCall = asaasCalls.find((c) => c.href.endsWith('/customers') && c.method === 'POST');
+    expect(custCall?.body).toMatchObject({ cpfCnpj: '11144477735' });
+
     // Plataforma cobra: NEM OpenPix NEM MP da loja.
     expect(openPixPostBodies).toHaveLength(0);
     expect(mpCreatePayment).not.toHaveBeenCalled();
     expect(accountGetToken).not.toHaveBeenCalled();
+  });
+
+  it('cliente SEM CPF no cadastro → Asaas pulado SEM round-trip, OpenPix assume (fail-fast)', async () => {
+    stubPlatformFetch();
+    const service = new OrderPaymentService();
+    const row = await service.createForOrderIfEnabled({
+      ...order,
+      customerUser: { email: 'semcpf@x.com', document: null, documentType: null },
+    });
+
+    expect(row?.provider).toBe('OPENPIX');
+    // Nem customer nem payment no Asaas: a exigência de CPF falha ANTES do round-trip.
+    expect(asaasCalls).toHaveLength(0);
+    expect(openPixPostBodies).toHaveLength(1);
+    expect(mpCreatePayment).not.toHaveBeenCalled();
   });
 
   it('pedido <R$5 pula o Asaas (mínimo do provedor) e cai no OpenPix', async () => {
