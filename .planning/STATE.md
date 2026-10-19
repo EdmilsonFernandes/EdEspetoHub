@@ -10,6 +10,25 @@ do orchestrator. Produto estável em `gha.2617` (29/08 à noite).
 
 ## Últimos fechados
 
+- 19/10 — **Rollback "checkout 1 página" + cadeia Asaas no PIX de pedido**:
+  (1) CartView volta ao multi-step Sacola→Receber→Pagamento→Confirmar (stepper
+  restaurado, guards por etapa, voltar = etapa anterior) — rollback CIRÚRGICO
+  que preserva o azul #2563EB e o resto do ciclo 2 (Edmilson rejeitou só o
+  P1.2); (2) checkout e balcão PIX agora honram `resolvePlatformPixChain`:
+  Asaas (≥R$5) → OpenPix → MP da loja — antes o gate `isOpenPixPlatformPixEnabled()`
+  só ligava com `PAYMENT_PROVIDER_DEFAULT=openpix`, então com `=asaas` o PIX
+  caía DIRETO no MP OAuth da loja. Polling `refreshFromProvider` ganha branch
+  ASAAS; OrderPayment.provider aceita 'ASAAS' (varchar, sem migration).
+  **PENDÊNCIA (Edmilson)**: `ASAAS_API_KEY` está VAZIA em
+  `/home/ec2-user/EdEspetoHub/.env.prod` (verificado via SSH; PROVIDER=asaas e
+  OPENPIX set) — cadeia efetiva hoje é openpix→mp; com a key, Asaas assume ≥R$5.
+- 19/09 — **Portal (www) "demora e só carrega no reload" — fix no SW +
+  logos WebP** (7b21f303 no ar/verificado; 8f55baa9 deploy via approval):
+  navigateFallback cache-first servia index do precache VELHO pós-deploy →
+  entry chunk 404 → tela presa (o recovery mora no JS que nem carregou).
+  Navegação agora é NetworkFirst (cache só offline), + watchdog inline no
+  index.html (script falha → unregister SW + reload 1×). Logos do portal em
+  WebP: 1,63MB→243KB (uaiid-shield 820→58KB q92 — q90 degradava linhas finas).
 - 02/09 — **Pendências do dashboard mortas** (64348832, deployado e validado):
   (1) Pix 4390 já estava morto (91e90f33 na imagem + Pix pago 01/09 sem falhas
   novas; alerta decai com a janela); (2) delivery-billing virou fetch lazy na
