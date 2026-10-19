@@ -38,8 +38,11 @@ export class OrderPayment {
    * (correlationID = `order_payment:{id}`) — dinheiro cai na conta OpenPix da
    * plataforma e é repassado à loja depois, em vez de cair direto na conta
    * MP da loja via OAuth. Coluna é varchar: sem DDL.
+   * WAVE ASAAS (19/10): ASAAS = mesmo modelo, conta Asaas da plataforma
+   * (externalReference = `order_payment:{id}`) — primeiro da cadeia quando
+   * PAYMENT_PROVIDER_DEFAULT=asaas e valor ≥ R$5.
    */
-  provider!: 'MERCADO_PAGO' | 'MANUAL' | 'OPENPIX';
+  provider!: 'MERCADO_PAGO' | 'MANUAL' | 'OPENPIX' | 'ASAAS';
 
   @Column({ name: 'provider_id', type: 'varchar', nullable: true })
   providerId?: string | null;

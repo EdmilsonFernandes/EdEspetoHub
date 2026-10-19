@@ -10,7 +10,8 @@ import {
 } from '../utils/paymentAudit';
 import { MercadoPagoService } from './MercadoPagoService';
 import { MercadoPagoPointService } from './MercadoPagoPointService';
-import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
+import { OpenPixService, toOpenPixCents } from './OpenPixService';
+import { AsaasService, resolvePlatformPixChain } from './AsaasService';
 import { OrderPaymentService } from './OrderPaymentService';
 import { PaymentAuditService } from './PaymentAuditService';
 import { StorePaymentAccountService } from './StorePaymentAccountService';
@@ -136,6 +137,7 @@ export class BalcaoChargeService {
   private accounts = new StorePaymentAccountService();
   private mercadoPago = new MercadoPagoService();
   private openPix = new OpenPixService();
+  private asaas = new AsaasService();
   private point = new MercadoPagoPointService();
   private orderPayments = new OrderPaymentService();
   private audit = new PaymentAuditService();
@@ -214,6 +216,28 @@ export class BalcaoChargeService {
       }
     }
 
+    // WAVE ASAAS (19/10): mesma filosofia do reconcile OpenPix para a outra
+    // ponta da cadeia — webhook pode ter caído; polling antes de responder.
+    if (
+      row &&
+      String(row.provider || '').toUpperCase() === 'ASAAS' &&
+      String(row.paymentStatus).toUpperCase() === 'PENDING'
+    ) {
+      try {
+        const charge = await this.asaas.getCharge(row.providerId || '');
+        const providerStatus = String(charge?.status || '').toUpperCase();
+        if (providerStatus === 'RECEIVED' || providerStatus === 'CONFIRMED' || providerStatus === 'RECEIVED_IN_CASH') {
+          await this.orderPayments.markPaidFromWebhook(row.id, {
+            status: 'approved',
+            status_detail: `asaas_${providerStatus.toLowerCase()}`,
+            id: String(row.providerId || ''),
+          }, 'ASAAS');
+        }
+      } catch (error: any) {
+        this.log.warn('Balcão Asaas charge reconcile failed', { orderId, error: error?.message });
+      }
+    }
+
     // WAVE 2 OpenPix: mesma filosofia do REQ-21 para o PIX de plataforma —
     // cliente pode ter pago depois do prazo local de 5min; webhook pode ter
     // caído. Polling por correlationID antes de responder.
@@ -242,9 +266,10 @@ export class BalcaoChargeService {
 
     const accessToken = await this.accounts.getActiveAccessToken(storeId).catch(() => null);
     const mpEnabled = Boolean(accessToken);
-    // WAVE 2: PIX do balcão pode sair pela plataforma (OpenPix) mesmo sem a
-    // loja ter MP conectado — maquininha Point continua exigindo MP.
-    const openPixEnabled = isOpenPixPlatformPixEnabled();
+    // WAVE 2 + ASAAS: PIX do balcão pode sair pela plataforma (Asaas/OpenPix,
+    // cadeia completa) mesmo sem a loja ter MP conectado — maquininha Point
+    // continua exigindo MP.
+    const platformPixEnabled = resolvePlatformPixChain(Number(order.total || 0)).some((p) => p !== 'mp');
 
     return {
       orderId: order.id,
@@ -254,10 +279,10 @@ export class BalcaoChargeService {
       preselectedMethod: BALCAO_PRESELECT_MAP[String(order.paymentMethod || '').toLowerCase()] || null,
       charge: this.serialize(row ? await this.repo.findOne({ where: { id: row.id } }) : row),
       capabilities: {
-        pix: mpEnabled || openPixEnabled,
+        pix: mpEnabled || platformPixEnabled,
         point: mpEnabled,
         cash: true,
-        reason: mpEnabled || openPixEnabled ? null : 'Conecte a conta Mercado Pago da loja para Pix e maquininha.',
+        reason: mpEnabled || platformPixEnabled ? null : 'Conecte a conta Mercado Pago da loja para Pix e maquininha.',
       },
     };
   }
@@ -393,42 +418,72 @@ export class BalcaoChargeService {
     try {
 
     if (input.method === 'pix') {
-      // WAVE 2 OpenPix (03/10, autorizado pelo dono): MUDANÇA DE FLUXO DE DINHEIRO
-      // no PIX do balcão — antes caía DIRETO na conta MP da loja (OAuth); agora a
-      // plataforma cobra via OpenPix (correlationID = `order_payment:{id}`, mesma
-      // external reference do checkout) e repassa à loja depois. MAQUININHA POINT
-      // FICA NO MP (decisão do dono). Erro no OpenPix → fallback MP da loja.
-      let pixViaOpenPix = false;
-      if (isOpenPixPlatformPixEnabled()) {
+      // WAVE 2 OpenPix (03/10) + WAVE ASAAS (19/10, pedido do dono): MUDANÇA DE
+      // FLUXO DE DINHEIRO no PIX do balcão — antes caía DIRETO na conta MP da
+      // loja (OAuth); agora a plataforma cobra honrando a cadeia completa
+      // (resolvePlatformPixChain: Asaas ≥R$5 → OpenPix → MP) com correlationID/
+      // externalReference = `order_payment:{id}`, mesma do checkout, e repassa à
+      // loja depois. MAQUININHA POINT FICA NO MP (decisão do dono). Erro em um
+      // provedor → próximo da cadeia (MP da loja intacto no fim).
+      let pixViaPlatform = false;
+      for (const pixProvider of resolvePlatformPixChain(rawAmount)) {
+        if (pixProvider === 'mp') break; // fallback MP da loja logo abaixo
         try {
-          const charge = await this.openPix.createCharge({
-            correlationID: externalReference,
-            valueBrlCents: toOpenPixCents(rawAmount),
-            expiresInSec: BALCAO_EXPIRY_MINUTES * 60,
-            comment: description,
-          });
-          pixViaOpenPix = true;
-          row.provider = 'OPENPIX';
-          row.providerId = charge.providerId;
-          row.qrCodeBase64 = charge.qrCodeImageBase64;
-          row.qrCodeText = charge.brCode;
-          row.paymentLink = null;
-          if (charge.expiresAt) {
-            const parsed = new Date(charge.expiresAt);
-            if (Number.isFinite(parsed.getTime()) && parsed.getTime() > Date.now()) {
-              row.expiresAt = parsed;
-            }
+          if (pixProvider === 'asaas') {
+            const customerEmail = String((order as any)?.customerUser?.email || '').trim();
+            const charge = await this.asaas.createPixCharge({
+              externalReference,
+              valueBrl: rawAmount,
+              customer: {
+                name: String(order.customerName || 'Cliente balcão').trim(),
+                ...(customerEmail ? { email: customerEmail } : {}),
+              },
+              description,
+            });
+            pixViaPlatform = true;
+            row.provider = 'ASAAS';
+            row.providerId = charge.providerId;
+            row.qrCodeBase64 = charge.qrCodeImageBase64;
+            row.qrCodeText = charge.brCode;
+            row.paymentLink = null;
+            // Janela LOCAL do balcão (5min) manda no ciclo — o dueDate do Asaas
+            // (amanhã) é só exigência da API, não governa o countdown local.
+            row.expiresAt = new Date(Date.now() + BALCAO_EXPIRY_MINUTES * 60 * 1000);
+            row = await this.repo.save(row);
+            break;
           }
-          row = await this.repo.save(row);
+          if (pixProvider === 'openpix') {
+            const charge = await this.openPix.createCharge({
+              correlationID: externalReference,
+              valueBrlCents: toOpenPixCents(rawAmount),
+              expiresInSec: BALCAO_EXPIRY_MINUTES * 60,
+              comment: description,
+            });
+            pixViaPlatform = true;
+            row.provider = 'OPENPIX';
+            row.providerId = charge.providerId;
+            row.qrCodeBase64 = charge.qrCodeImageBase64;
+            row.qrCodeText = charge.brCode;
+            row.paymentLink = null;
+            if (charge.expiresAt) {
+              const parsed = new Date(charge.expiresAt);
+              if (Number.isFinite(parsed.getTime()) && parsed.getTime() > Date.now()) {
+                row.expiresAt = parsed;
+              }
+            }
+            row = await this.repo.save(row);
+            break;
+          }
         } catch (error) {
-          this.log.warn('Balcão OpenPix charge failed, falling back to Mercado Pago store charge', {
+          this.log.warn('Balcão platform PIX charge failed, trying next provider in chain', {
             orderId: order.id,
             storeId: input.storeId,
+            provider: pixProvider,
             error,
           });
         }
       }
-      if (!pixViaOpenPix) {
+      if (!pixViaPlatform) {
       const accessToken = await this.accounts.getActiveAccessToken(input.storeId);
       if (!accessToken) {
         throw new AppError('PAY-017', 400, {
