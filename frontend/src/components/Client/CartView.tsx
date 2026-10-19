@@ -379,10 +379,6 @@ export const CartView = ({
   const cepLookupLockRef = useRef(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const cepInputRef = useRef<HTMLInputElement | null>(null);
-  /* Checkout 1 página (ciclo 2): âncoras das seções para o CTA guiar o scroll */
-  const receiveSectionRef = useRef<HTMLDivElement | null>(null);
-  const paymentSectionRef = useRef<HTMLDivElement | null>(null);
-  const reviewSectionRef = useRef<HTMLDivElement | null>(null);
   const postalAutoQuoteKeyRef = useRef("");
   const premiumInputClass =
     "w-full rounded-2xl bg-slate-100/80 border border-slate-200/50 px-4 py-3 text-slate-800 placeholder:text-slate-400/85 outline-none focus:ring-4 focus:ring-[#2563EB]/10 focus:border-[#2563EB]/45 focus:bg-white transition-all duration-300 shadow-sm";
@@ -1705,13 +1701,45 @@ export const CartView = ({
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <div className={`sticky ${checkoutStickyTopClass} z-40 mb-4 sm:mb-6`}>
         <div className="rounded-3xl border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(244,248,252,0.96)_100%)] px-3 py-3 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
+          {useMultiStepFlow && (
+            <div className="mb-3.5 flex items-center gap-1.5">
+              {[{ label: 'Sacola', step: 1 }, { label: 'Receber', step: 2 }, { label: 'Pagamento', step: 3 }, { label: 'Confirmar', step: 4 }].map(({ label, step }, i) => {
+                const isActive = checkoutStep === step;
+                const isDone = checkoutStep > step;
+                return (
+                  <React.Fragment key={step}>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`flex h-4.5 w-4.5 items-center justify-center rounded-full text-2xs font-black transition-all ${
+                        isDone
+                          ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-[0_4px_10px_rgba(16,185,129,0.25)] text-white'
+                          : isActive
+                            ? 'bg-gradient-to-br from-slate-800 to-slate-950 text-white ring-2 ring-slate-950/15 ring-offset-1 shadow-sm'
+                            : 'bg-slate-200 text-slate-500'
+                      }`}>
+                        {isDone ? '✓' : step}
+                      </span>
+                      <span className={`text-2xs font-bold uppercase tracking-wide transition-colors ${isActive ? 'text-slate-900 font-extrabold' : isDone ? 'text-emerald-600' : 'text-slate-400'}`}>{label}</span>
+                    </div>
+                    {i < 3 && (
+                      <div className="h-[2px] flex-1 rounded-full overflow-hidden bg-slate-200">
+                        <div
+                          className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-500 ease-out"
+                          style={{ width: isDone ? "100%" : "0%" }}
+                        />
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          )}
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="sm"
-              onClick={onBack}
-              aria-label="Voltar ao cardápio"
-              title="Voltar ao cardápio"
+              onClick={useMultiStepFlow && checkoutStep > 1 ? () => setCheckoutStep(s => s - 1) : onBack}
+              aria-label={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
+              title={useMultiStepFlow && checkoutStep > 1 ? "Voltar à etapa anterior" : "Voltar ao cardápio"}
               className="!h-11 !w-11 !rounded-[1.15rem] !px-0 text-[#2563EB]"
             >
               <ArrowLeft size={18} weight="bold" />
@@ -1773,7 +1801,7 @@ export const CartView = ({
       </div>}
 
       {/* Dados do cliente */}
-      {(!useMultiStepFlow || checkoutStep >= 1) && <div ref={receiveSectionRef} className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
+      {(!useMultiStepFlow || checkoutStep === 2) && <div className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
             <h2 className="font-bold text-slate-900 text-base sm:text-lg tracking-tight">
@@ -2912,7 +2940,7 @@ export const CartView = ({
       </div>}
 
       {/* Resumo */}
-      {(!useMultiStepFlow || checkoutStep >= 1) && (
+      {(!useMultiStepFlow || checkoutStep === 1) && (
         <div className="space-y-4 mb-4 sm:mb-6">
           <div className="jnc-receipt-card relative overflow-hidden rounded-2xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 transition-all hover:-translate-y-0.5 hover:shadow-[0_30px_62px_-48px_rgba(15,23,42,0.38)] active:scale-[0.99] sm:p-6">
         <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
@@ -3054,7 +3082,7 @@ export const CartView = ({
     </div>)}
 
       {/* Sugestões (carrossel horizontal – step 1) */}
-      {(!useMultiStepFlow || checkoutStep >= 1) && showSuggestedProducts && (
+      {(!useMultiStepFlow || checkoutStep === 1) && showSuggestedProducts && (
         <div className="mb-4 sm:mb-6 rounded-[1.9rem] border border-slate-100 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(241,245,249,0.95)_100%)] p-4 shadow-[0_24px_48px_-34px_rgba(15,23,42,0.24)]">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -3095,8 +3123,8 @@ export const CartView = ({
       )}
 
       {/* Compact pricing + Forma de Pagamento (multi-step step 3) */}
-      {useMultiStepFlow && checkoutStep >= 1 && (
-        <div ref={paymentSectionRef} className="jnc-receipt-card relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 sm:p-6">
+      {useMultiStepFlow && checkoutStep === 3 && (
+        <div className="jnc-receipt-card relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70 sm:p-6">
           <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -3189,7 +3217,7 @@ export const CartView = ({
       )}
 
       {/* Cupom de desconto (benchmark §12) — escondido para operator/admin */}
-      {!isProfessionalUser && (!useMultiStepFlow || checkoutStep >= 1) && (
+      {!isProfessionalUser && (!useMultiStepFlow || checkoutStep === 3) && (
         <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
           <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#5FD35A]/25 to-transparent" />
           <div className="relative z-10 mb-3 flex items-center gap-3">
@@ -3257,7 +3285,7 @@ export const CartView = ({
       )}
 
       {/* CPF/CNPJ na nota (benchmark §12) — ADIADO: religar com TAX_ID_NOTE_FIELD_ENABLED */}
-      {TAX_ID_NOTE_FIELD_ENABLED && !isProfessionalUser && (!useMultiStepFlow || checkoutStep >= 1) && (
+      {TAX_ID_NOTE_FIELD_ENABLED && !isProfessionalUser && (!useMultiStepFlow || checkoutStep === 3) && (
         <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
           <div className="relative z-10 flex flex-col gap-2">
             <div className="flex items-center gap-3">
@@ -3292,7 +3320,7 @@ export const CartView = ({
       )}
 
       {/* Forma de Pagamento */}
-      {(!useMultiStepFlow || checkoutStep >= 1) && (
+      {(!useMultiStepFlow || checkoutStep === 3) && (
         <div className="relative mb-4 overflow-hidden rounded-3xl border border-white/80 bg-[radial-gradient(circle_at_top_right,rgba(95,211,90,0.14),transparent_26%),linear-gradient(145deg,rgba(255,255,255,0.98),rgba(241,247,249,0.92))] p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.34)] sm:mb-6 sm:p-5">
           <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#2563EB]/22 to-transparent" />
           <div className="relative z-10 mb-3 flex items-center gap-3">
@@ -3332,8 +3360,8 @@ export const CartView = ({
 
 
       {/* Step 4: Confirmação do pedido */}
-      {useMultiStepFlow && checkoutStep >= 1 && (
-        <div ref={reviewSectionRef} className="space-y-3 mb-4">
+      {useMultiStepFlow && checkoutStep === 4 && (
+        <div className="space-y-3 mb-4">
           {/* Itens */}
           <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
             <div className="mb-3 flex items-start justify-between gap-3">
@@ -3546,7 +3574,7 @@ export const CartView = ({
                 window.setTimeout(() => setCtaPulse(false), 220);
                 if (checkoutStep === 1) {
                   setCheckoutStep(2);
-                  receiveSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                   return;
                 }
                 if (checkoutStep === 2) {
@@ -3563,12 +3591,12 @@ export const CartView = ({
                     if (!validated) return;
                   }
                   setCheckoutStep(3);
-                  paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                   return;
                 }
                 if (checkoutStep === 3) {
                   setCheckoutStep(4);
-                  reviewSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                   return;
                 }
                 // Step 4: final checkout
