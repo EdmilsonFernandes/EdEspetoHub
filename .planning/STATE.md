@@ -10,6 +10,16 @@ do orchestrator. Produto estável em `gha.2617` (29/08 à noite).
 
 ## Últimos fechados
 
+- 19/10 (noite) — **Benchmark iFood×99 aplicado ao fluxo cliente** (reverso de 3 APKs
+  verificados; ver `docs` da sessão no repositório Meus Exames): auditoria confirmou que
+  card fechado+próxima abertura, preço âncora, busca no cardápio, carrinho flutuante,
+  stepper e reorder JÁ existiam (ciclos 1-2). Lacunas reais implementadas: (1) upsell
+  cross-item no ProductModal ("Que tal completar?" — sugestão abre o item p/ revisar,
+  bebidas/sobremesas primeiro); (2) estado vazio desenhado da Sacola (step 1) com CTA
+  "Ver cardápio"; (3) `font-variant-numeric: tabular-nums` global (preços alinham).
+  tsc limpo + CartView.paymentSheet 2/2. Próximas lacunas reais: sons de evento,
+  código de entrega 4 dígitos, comprovante+avaliação pós-entrega.
+
 - 19/10 — **Rollback "checkout 1 página" + cadeia Asaas no PIX de pedido**:
   (1) CartView volta ao multi-step Sacola→Receber→Pagamento→Confirmar (stepper
   restaurado, guards por etapa, voltar = etapa anterior) — rollback CIRÚRGICO

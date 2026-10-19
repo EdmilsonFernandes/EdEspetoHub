@@ -91,6 +91,8 @@
 
 body {
   font-family: "Inter", "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
+  /* Números tabulares globais — preços/quantidades alinham em colunas (benchmark iFood×99 out/26) */
+  font-variant-numeric: tabular-nums;
   background: var(--surface-1);
   color: var(--text-strong);
   overflow-x: clip;

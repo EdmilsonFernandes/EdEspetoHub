@@ -19,7 +19,17 @@ export interface ProductModalProps {
   onAddToCart?: (product: any, quantity: number, options?: Record<string, any>) => void;
   readOnly?: boolean;
   readOnlyMessage?: string;
+  suggestions?: ProductModalSuggestion[];
+  onSelectSuggestion?: (suggestion: ProductModalSuggestion) => void;
 }
+
+export type ProductModalSuggestion = {
+  id: string | number;
+  name: string;
+  price: number;
+  imageUrl?: string | null;
+  raw?: any;
+};
 
 export const ProductModal = ({
   product,
@@ -29,6 +39,8 @@ export const ProductModal = ({
   onAddToCart,
   readOnly = false,
   readOnlyMessage = 'Pedidos apenas no balcão.',
+  suggestions,
+  onSelectSuggestion,
 }: ProductModalProps) => {
   const isNativePlatform = Capacitor.isNativePlatform();
   const [cookingPoint, setCookingPoint] = useState("ao ponto");
@@ -338,6 +350,43 @@ export const ProductModal = ({
                   className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary/15"
                   data-testid="product-item-note"
                 />
+              </div>
+            )}
+
+            {/* Sugestões — upsell cross-item antes de fechar (padrão iFood "complete seu pedido") */}
+            {!readOnly && suggestions && suggestions.length > 0 && (
+              <div>
+                <h4 className="mb-1 inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-wide text-slate-500">
+                  <Sparkle size={13} weight="duotone" />
+                  Que tal completar?
+                </h4>
+                <div className="space-y-2">
+                  {suggestions.slice(0, 3).map((suggestion) => (
+                    <button
+                      key={String(suggestion.id)}
+                      type="button"
+                      onClick={() => onSelectSuggestion?.(suggestion)}
+                      className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-left transition hover:border-slate-300 active:scale-[0.99]"
+                    >
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                        {suggestion.imageUrl ? (
+                          <img
+                            src={suggestion.imageUrl}
+                            alt=""
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : null}
+                      </div>
+                      <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">
+                        {suggestion.name}
+                      </span>
+                      <span className="shrink-0 text-sm font-bold text-slate-500">
+                        + {formatCurrency(suggestion.price)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 

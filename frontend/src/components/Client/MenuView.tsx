@@ -2118,6 +2118,35 @@ export const MenuView = ({
         isOpen={isModalOpen}
         onClose={closeProductModal}
         onAddToCart={onUpdateCart}
+        suggestions={
+          selectedProduct && Array.isArray(filteredGrouped)
+            ? (filteredGrouped as any[])
+                .flatMap((category) => (Array.isArray(category?.items) ? category.items : []))
+                .filter(
+                  (item) =>
+                    item &&
+                    String(item.id) !== String(selectedProduct.id) &&
+                    item?.soldOut !== true &&
+                    Number(item?.price) > 0
+                )
+                .sort((a, b) => {
+                  const drinkish = (value: any) =>
+                    /(refri|coca|guaran|suco|água|agua|cerveja|soda|chá|cha|sobremes|doce|pudim|brownie|molho)/i.test(
+                      String(value?.name || '')
+                    );
+                  return Number(drinkish(a)) - Number(drinkish(b)) || Number(a?.price) - Number(b?.price);
+                })
+                .slice(0, 3)
+                .map((item) => ({
+                  id: item.id,
+                  name: item.name,
+                  price: Number(item.price),
+                  imageUrl: item?.imageUrl || null,
+                  raw: item,
+                }))
+            : []
+        }
+        onSelectSuggestion={(suggestion) => openProductModal(suggestion.raw)}
         readOnly={!canOrder || resolveStockState(selectedProduct).soldOut}
         readOnlyMessage={
           preOrderBlocked

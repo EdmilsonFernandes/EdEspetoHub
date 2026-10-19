@@ -2939,6 +2939,24 @@ export const CartView = ({
         </div>
       </div>}
 
+      {/* Sacola vazia — estado desenhado (padrão 99 binder_cart_empty): nunca tela muda */}
+      {useMultiStepFlow && checkoutStep === 1 && cartItems.length === 0 && (
+        <div className="jnc-receipt-card mb-4 rounded-2xl border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-6 text-center shadow-[0_24px_54px_-44px_rgba(15,23,42,0.34)] ring-1 ring-slate-100/70">
+          <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl">🛒</span>
+          <h3 className="text-base font-black tracking-tight text-slate-900">Sua sacola está vazia</h3>
+          <p className="mx-auto mt-1 max-w-[34ch] text-sm text-slate-500">
+            Escolha seus favoritos no cardápio — a loja continua aberta pra você.
+          </p>
+          <button
+            type="button"
+            onClick={onBack}
+            className="mt-4 inline-flex items-center justify-center rounded-full bg-[#2563EB] px-5 py-3 text-sm font-black text-white shadow-[0_16px_30px_-18px_rgba(37,99,235,0.6)] transition hover:brightness-110 active:scale-[0.98]"
+          >
+            Ver cardápio
+          </button>
+        </div>
+      )}
+
       {/* Resumo */}
       {(!useMultiStepFlow || checkoutStep === 1) && (
         <div className="space-y-4 mb-4 sm:mb-6">
