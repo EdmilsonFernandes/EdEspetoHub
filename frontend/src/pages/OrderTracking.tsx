@@ -1,5 +1,6 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { playOrderStatusChime } from '../utils/orderStatusChime';
 import { PaymentQRCard } from '../components/common/PaymentQRCard';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowClockwise, ArrowSquareOut, Bicycle, CalendarBlank, CaretDown, CheckCircle, Clock, CircleNotch, CopySimple, CreditCard, MapPin, Package, Phone, SealCheck, Star, User, Users, WhatsappLogo } from '@phosphor-icons/react';
@@ -618,6 +619,17 @@ export function OrderTracking() {
 
   const status = order?.status || 'pending';
   const normalizedStatus = String(status || '').toLowerCase().trim();
+
+  // Som sutil quando o pedido avança de status no rastreio (benchmark iFood×99 — feedback imediato).
+  const lastStatusKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!order) return;
+    const statusKey = `${status}|${String((order as any)?.delivery?.status || '')}`;
+    if (lastStatusKeyRef.current && lastStatusKeyRef.current !== statusKey) {
+      playOrderStatusChime(status);
+    }
+    lastStatusKeyRef.current = statusKey;
+  }, [order, status]);
   const normalizedOrderType = String(order?.type || '').toLowerCase();
   const condominiumOrder = (order as any)?.condominiumOrder || ((order as any)?.condominiumId ? {
     condominiumName: (order as any)?.condominiumName,
