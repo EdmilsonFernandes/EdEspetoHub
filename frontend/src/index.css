@@ -2148,3 +2148,30 @@ body {
       transition-duration: 150ms;
     }
   }
+
+/* ============================================================
+   Compat shadcn/ReUI (29/10) — tokens semânticos usados pelos
+   blocos baixados (bg-card, text-muted-foreground, border-border…),
+   mapeados na paleta JNC. Não altera os tokens JNC existentes.
+   ============================================================ */
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0f172a;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #e0ebfd;
+  --color-accent-foreground: #1e40af;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #0f172a;
+  --color-primary-foreground: #ffffff;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-success: #15803d;
+  --color-border: #e2e8f0;
+  --color-input: #cbd5e1;
+  --color-ring: #2f9df7;
+}

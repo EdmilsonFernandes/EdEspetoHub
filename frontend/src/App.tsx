@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -7,6 +7,11 @@ import { AdminRoute } from './components/Admin/AdminRoute';
 import { MotoboyRoute } from './components/Motoboy/MotoboyRoute';
 import { AdminLayout } from './layouts/AdminLayout';
 import { AppErrorBoundary } from './components/common/AppErrorBoundary';
+
+// Galeria ReUI (dev only): o gate DEV mantém o chunk fora de produção.
+const ReuiShowcase = import.meta.env.DEV
+  ? lazy(() => import('./pages/dev/ReuiShowcase'))
+  : null;
 import { NativePushPermissionBanner } from './components/common/NativePushPermissionBanner';
 import { NativeAppNavigator } from './components/common/NativeAppNavigator';
 import { OfflineAlert } from './components/common/OfflineAlert';
@@ -194,6 +199,9 @@ function App() {
           <NativeAppNavigator />
           <Suspense fallback={<AppRouteFallback />}>
             <Routes>
+              {ReuiShowcase && (
+                <Route path="/dev/reui" element={<ReuiShowcase />} />
+              )}
               <Route path="/" element={isAppSubdomainHost ? <LandingPage /> : <EmpresaJanoCaminhoPage />} />
               <Route path="/app" element={<LandingPage />} />
               <Route path="/conheca-o-app" element={<LandingPage />} />
