@@ -1,0 +1,170 @@
+[
+  {
+    "n": "03-espetinho-misto",
+    "must": {},
+    "queries": [
+      "espetos churrasco carne",
+      "beef skewers grill",
+      "grilled beef skewer barbecue"
+    ],
+    "files": [
+      {
+        "file": "03-espetinho-misto-x1.jpg",
+        "title": "File:Anticuchos - Grilled Beef Heart skewers.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Anticuchos_-_Grilled_Beef_Heart_skewers.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/2/26/Anticuchos_-_Grilled_Beef_Heart_skewers.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Anticuchos_-_Grilled_Beef_Heart_skewers.jpg/1280px-Anticuchos_-_Grilled_Beef_Heart_skewers.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 3008,
+        "height": 2000,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 2.0",
+        "artist": "Carly &amp; Art",
+        "bytes": 274657
+      },
+      {
+        "file": "03-espetinho-misto-x2.jpg",
+        "title": "File:Espetada de vaca em Linda-a-Velha.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Espetada_de_vaca_em_Linda-a-Velha.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/8/80/Espetada_de_vaca_em_Linda-a-Velha.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://upload.wikimedia.org/wikipedia/commons/8/80/Espetada_de_vaca_em_Linda-a-Velha.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+        "width": 1138,
+        "height": 1517,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "Adriao",
+        "bytes": 344086
+      }
+    ]
+  },
+  {
+    "n": "04-medalhao-frango",
+    "must": {},
+    "queries": [
+      "frango grelhado espeto",
+      "grilled chicken breast pieces",
+      "frango assado pedaços"
+    ],
+    "files": []
+  },
+  {
+    "n": "14-maracuja",
+    "must": {},
+    "queries": [
+      "purple passion fruit whole",
+      "maracujá frutos",
+      "passion fruit purple ripe"
+    ],
+    "files": [
+      {
+        "file": "14-maracuja-x1.jpg",
+        "title": "File:Passionfruit and cross section.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Passionfruit_and_cross_section.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Passionfruit_and_cross_section.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/Passionfruit_and_cross_section.jpg/1280px-Passionfruit_and_cross_section.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2032,
+        "height": 998,
+        "mime": "image/jpeg",
+        "license": "GFDL 1.2",
+        "artist": "fir0002 flagstaffotos [at] gmail.com Canon 20D + Sigma 150mm f/2.8",
+        "bytes": 177080
+      },
+      {
+        "file": "14-maracuja-x2.jpg",
+        "title": "File:Passion fruit (Passiflora edulis); flowering stem, fruit and Wellcome V0044267.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Passion_fruit_(Passiflora_edulis);_flowering_stem,_fruit_and_Wellcome_V0044267.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Passion_fruit_%28Passiflora_edulis%29%3B_flowering_stem%2C_fruit_and_Wellcome_V0044267.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Passion_fruit_%28Passiflora_edulis%29%3B_flowering_stem%2C_fruit_and_Wellcome_V0044267.jpg/1280px-Passion_fruit_%28Passiflora_edulis%29%3B_flowering_stem%2C_fruit_and_Wellcome_V0044267.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2170,
+        "height": 3426,
+        "mime": "image/jpeg",
+        "license": "CC BY 4.0",
+        "artist": "https://wellcomeimages.org/indexplus/obf_images/8d/c4/0b808e0bfc3cd4f03fbe4f4e9abc.jpg Gallery: https://wellcomeimages.org/indexplus/image/V0044267.html Wellcome Collection gallery (2018-04-01): https://wellcomecollection.org/works/a4pw2cn3 CC-BY-4.0",
+        "bytes": 1963621
+      }
+    ]
+  },
+  {
+    "n": "15-melao",
+    "must": {},
+    "queries": [
+      "yellow melon whole fruit",
+      "melão inteiro",
+      "melon yellow whole"
+    ],
+    "files": []
+  },
+  {
+    "n": "21-batata",
+    "must": {},
+    "queries": [
+      "Solanum tuberosum potatoes",
+      "batatas pilha",
+      "potato tubers harvest pile"
+    ],
+    "files": [
+      {
+        "file": "21-batata-x1.jpg",
+        "title": "File:Potato sprout, January 23, 2006.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Potato_sprout,_January_23,_2006.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d6/Potato_sprout%2C_January_23%2C_2006.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d6/Potato_sprout%2C_January_23%2C_2006.jpg/1280px-Potato_sprout%2C_January_23%2C_2006.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 1306,
+        "height": 980,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 2.0",
+        "artist": "unknown",
+        "bytes": 158860
+      },
+      {
+        "file": "21-batata-x2.jpg",
+        "title": "File:Russet potato cultivar with sprouts.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Russet_potato_cultivar_with_sprouts.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/4/47/Russet_potato_cultivar_with_sprouts.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/47/Russet_potato_cultivar_with_sprouts.jpg/1280px-Russet_potato_cultivar_with_sprouts.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 4378,
+        "height": 2211,
+        "mime": "image/jpeg",
+        "license": "Public domain",
+        "artist": "ZooFari",
+        "bytes": 113963
+      }
+    ]
+  },
+  {
+    "n": "31-jantinha",
+    "must": {},
+    "queries": [
+      "prato feito",
+      "arroz feijão e carne",
+      "comida brasileira prato feito"
+    ],
+    "files": [
+      {
+        "file": "31-jantinha-x1.jpg",
+        "title": "File:Restaurante Ponto do Rango. Refeições Caseiras , Self Service , Prato Feito e Marmitex. - panoramio.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Restaurante_Ponto_do_Rango._Refei%C3%A7%C3%B5es_Caseiras_,_Self_Service_,_Prato_Feito_e_Marmitex._-_panoramio.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8f/Restaurante_Ponto_do_Rango._Refei%C3%A7%C3%B5es_Caseiras_%2C_Self_Service_%2C_Prato_Feito_e_Marmitex._-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Restaurante_Ponto_do_Rango._Refei%C3%A7%C3%B5es_Caseiras_%2C_Self_Service_%2C_Prato_Feito_e_Marmitex._-_panoramio.jpg/1280px-Restaurante_Ponto_do_Rango._Refei%C3%A7%C3%B5es_Caseiras_%2C_Self_Service_%2C_Prato_Feito_e_Marmitex._-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 4000,
+        "height": 2666,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "joao batista Shimoto",
+        "bytes": 301927
+      },
+      {
+        "file": "31-jantinha-x2.jpg",
+        "title": "File:Restaurante Prato feito , antigo clube Concórdia. - panoramio.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Restaurante_Prato_feito_,_antigo_clube_Conc%C3%B3rdia._-_panoramio.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Restaurante_Prato_feito_%2C_antigo_clube_Conc%C3%B3rdia._-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/Restaurante_Prato_feito_%2C_antigo_clube_Conc%C3%B3rdia._-_panoramio.jpg/1280px-Restaurante_Prato_feito_%2C_antigo_clube_Conc%C3%B3rdia._-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2502,
+        "height": 1650,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "enioprado",
+        "bytes": 256845
+      }
+    ]
+  }
+]

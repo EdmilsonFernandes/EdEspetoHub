@@ -1,0 +1,71 @@
+[
+  {
+    "n": "21-batata",
+    "cat": "Category:Potatoes",
+    "files": [
+      {
+        "file": "21-batata-k1.jpg",
+        "title": "File:A basket of Potatoes at Tuen Mun.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:A_basket_of_Potatoes_at_Tuen_Mun.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2a/A_basket_of_Potatoes_at_Tuen_Mun.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/A_basket_of_Potatoes_at_Tuen_Mun.jpg/1280px-A_basket_of_Potatoes_at_Tuen_Mun.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 3888,
+        "height": 5184,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "Peachyeung316",
+        "bytes": 715576
+      },
+      {
+        "file": "21-batata-k2.jpg",
+        "title": "File:Bergs Supermarket, potatoes (6355362787).jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Bergs_Supermarket,_potatoes_(6355362787).jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Bergs_Supermarket%2C_potatoes_%286355362787%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Bergs_Supermarket%2C_potatoes_%286355362787%29.jpg/1280px-Bergs_Supermarket%2C_potatoes_%286355362787%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 1532,
+        "height": 2000,
+        "mime": "image/jpeg",
+        "license": "No restrictions",
+        "artist": "OSU Special Collections &amp; Archives : Commons",
+        "bytes": 534401
+      }
+    ]
+  },
+  {
+    "n": "14-maracuja",
+    "cat": "Category:Passiflora edulis",
+    "files": [
+      {
+        "file": "14-maracuja-k1.jpg",
+        "title": "File:Folha maracujá.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Folha_maracuj%C3%A1.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/5/54/Folha_maracuj%C3%A1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/Folha_maracuj%C3%A1.jpg/1280px-Folha_maracuj%C3%A1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 5152,
+        "height": 3864,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "Diego7864",
+        "bytes": 197689
+      },
+      {
+        "file": "14-maracuja-k2.jpg",
+        "title": "File:Fruit de la passion, Madagascar (14374).jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Fruit_de_la_passion,_Madagascar_(14374).jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/4/44/Fruit_de_la_passion%2C_Madagascar_%2814374%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/Fruit_de_la_passion%2C_Madagascar_%2814374%29.jpg/1280px-Fruit_de_la_passion%2C_Madagascar_%2814374%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2976,
+        "height": 3968,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "Cactus0625",
+        "bytes": 1047984
+      }
+    ]
+  },
+  {
+    "n": "04-medalhao-frango",
+    "cat": "Category:Grilled chicken",
+    "files": []
+  }
+]

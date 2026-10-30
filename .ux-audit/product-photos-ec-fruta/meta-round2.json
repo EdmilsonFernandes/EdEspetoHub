@@ -1,0 +1,678 @@
+[
+  {
+    "n": "02-espetinho-frango",
+    "must": {},
+    "queries": [
+      "espetinho de frango",
+      "chicken thigh skewers",
+      "espeto frango grelhado"
+    ],
+    "files": [
+      {
+        "file": "02-espetinho-frango-r1.jpg",
+        "title": "File:Skewered Chicken Thighs.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Skewered_Chicken_Thighs.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c2/Skewered_Chicken_Thighs.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c2/Skewered_Chicken_Thighs.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+        "width": 1280,
+        "height": 722,
+        "mime": "image/jpeg",
+        "license": "CC BY 4.0",
+        "artist": "IndayLiburan",
+        "bytes": 174656
+      },
+      {
+        "file": "02-espetinho-frango-r2.jpg",
+        "title": "File:Skewered Chicken Thighs 1.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Skewered_Chicken_Thighs_1.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/2/26/Skewered_Chicken_Thighs_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://upload.wikimedia.org/wikipedia/commons/2/26/Skewered_Chicken_Thighs_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+        "width": 1280,
+        "height": 722,
+        "mime": "image/jpeg",
+        "license": "CC BY 4.0",
+        "artist": "IndayLiburan",
+        "bytes": 182880
+      }
+    ]
+  },
+  {
+    "n": "03-espetinho-misto",
+    "must": {},
+    "queries": [
+      "espetinhos carne frango",
+      "mixed skewers grill",
+      "espeto misto carne"
+    ],
+    "files": [
+      {
+        "file": "03-espetinho-misto-r1.jpg",
+        "title": "File:DFC 5241- Colorful skewers of steamed and grilled dim sum - bright yellow siu mai, green vegetable dumplings, seaweed-wrapped bites and savory meat balls - ready to enjoy at a bustling Thai street food stall.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:DFC_5241-_Colorful_skewers_of_steamed_and_grilled_dim_sum_-_bright_yellow_siu_mai,_green_vegetable_dumplings,_seaweed-wrapped_bites_and_savory_meat_balls_-_ready_to_enjoy_at_a_bustling_Thai_street_food_stall.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/9/99/DFC_5241-_Colorful_skewers_of_steamed_and_grilled_dim_sum_-_bright_yellow_siu_mai%2C_green_vegetable_dumplings%2C_seaweed-wrapped_bites_and_savory_meat_balls_-_ready_to_enjoy_at_a_bustling_Thai_street_food_stall.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/DFC_5241-_Colorful_skewers_of_steamed_and_grilled_dim_sum_-_bright_yellow_siu_mai%2C_green_vegetable_dumplings%2C_seaweed-wrapped_bites_and_savory_meat_balls_-_ready_to_enjoy_at_a_bustling_Thai_street_food_stall.jpg/1280px-thumbnail.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 5568,
+        "height": 3712,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "Pattaya Patrol",
+        "bytes": 204225
+      },
+      {
+        "file": "03-espetinho-misto-r2.jpg",
+        "title": "File:DFC 3953 Skewered pieces of fresh squid ready for grilling at a busy seafood market.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:DFC_3953_Skewered_pieces_of_fresh_squid_ready_for_grilling_at_a_busy_seafood_market.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/e/ec/DFC_3953_Skewered_pieces_of_fresh_squid_ready_for_grilling_at_a_busy_seafood_market.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/DFC_3953_Skewered_pieces_of_fresh_squid_ready_for_grilling_at_a_busy_seafood_market.jpg/1280px-DFC_3953_Skewered_pieces_of_fresh_squid_ready_for_grilling_at_a_busy_seafood_market.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 5568,
+        "height": 3712,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "PattayaPatrol",
+        "bytes": 242579
+      }
+    ]
+  },
+  {
+    "n": "04-medalhao-frango",
+    "must": {},
+    "queries": [
+      "medalhão de frango",
+      "frango em cubos",
+      "chicken cubes grilled"
+    ],
+    "files": [
+      {
+        "file": "04-medalhao-frango-r1.jpg",
+        "title": "File:Khao Soi with chicken THB20 - Night Market, Kad Suan Kaew (3455807164).jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Khao_Soi_with_chicken_THB20_-_Night_Market,_Kad_Suan_Kaew_(3455807164).jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/c/cf/Khao_Soi_with_chicken_THB20_-_Night_Market%2C_Kad_Suan_Kaew_%283455807164%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cf/Khao_Soi_with_chicken_THB20_-_Night_Market%2C_Kad_Suan_Kaew_%283455807164%29.jpg/1280px-Khao_Soi_with_chicken_THB20_-_Night_Market%2C_Kad_Suan_Kaew_%283455807164%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2048,
+        "height": 1371,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 2.0",
+        "artist": "Alpha from Melbourne, Australia",
+        "bytes": 253914
+      },
+      {
+        "file": "04-medalhao-frango-r2.jpg",
+        "title": "File:Lamb and Chicken Kebab with rice - Etci Kitchen 2025-09-22.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Lamb_and_Chicken_Kebab_with_rice_-_Etci_Kitchen_2025-09-22.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/9/92/Lamb_and_Chicken_Kebab_with_rice_-_Etci_Kitchen_2025-09-22.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Lamb_and_Chicken_Kebab_with_rice_-_Etci_Kitchen_2025-09-22.jpg/1280px-Lamb_and_Chicken_Kebab_with_rice_-_Etci_Kitchen_2025-09-22.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 6144,
+        "height": 8160,
+        "mime": "image/jpeg",
+        "license": "CC0",
+        "artist": "Andy Li",
+        "bytes": 865620
+      }
+    ]
+  },
+  {
+    "n": "07-banana-prata",
+    "must": {},
+    "queries": [
+      "banana amarela cacho",
+      "bananas maduras",
+      "bananeira cacho"
+    ],
+    "files": [
+      {
+        "file": "07-banana-prata-r1.jpg",
+        "title": "File:BANANAS VERDE E MADURAS - panoramio.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:BANANAS_VERDE_E_MADURAS_-_panoramio.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a0/BANANAS_VERDE_E_MADURAS_-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/BANANAS_VERDE_E_MADURAS_-_panoramio.jpg/1280px-BANANAS_VERDE_E_MADURAS_-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 4368,
+        "height": 2912,
+        "mime": "image/jpeg",
+        "license": "CC BY 3.0",
+        "artist": "James Martins",
+        "bytes": 364602
+      },
+      {
+        "file": "07-banana-prata-r2.jpg",
+        "title": "File:2024-04-02 Bananada, 02.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:2024-04-02_Bananada,_02.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/1/17/2024-04-02_Bananada%2C_02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/2024-04-02_Bananada%2C_02.jpg/1280px-2024-04-02_Bananada%2C_02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 1330,
+        "height": 750,
+        "mime": "image/jpeg",
+        "license": "CC0",
+        "artist": "Minerva97",
+        "bytes": 88906
+      }
+    ]
+  },
+  {
+    "n": "09-maca-gala",
+    "must": {},
+    "queries": [
+      "Gala apples",
+      "maçãs gala",
+      "gala apple red"
+    ],
+    "files": [
+      {
+        "file": "09-maca-gala-r1.jpg",
+        "title": "File:Apple seeds - variety Gala (aka).jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Apple_seeds_-_variety_Gala_(aka).jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/7/79/Apple_seeds_-_variety_Gala_%28aka%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Apple_seeds_-_variety_Gala_%28aka%29.jpg/1280px-Apple_seeds_-_variety_Gala_%28aka%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2307,
+        "height": 1459,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 2.5",
+        "artist": "André Karwath aka Aka",
+        "bytes": 95010
+      },
+      {
+        "file": "09-maca-gala-r2.jpg",
+        "title": "File:Gala Must.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Gala_Must.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/9/96/Gala_Must.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/Gala_Must.jpg/1280px-Gala_Must.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2299,
+        "height": 1475,
+        "mime": "image/jpeg",
+        "license": "CC BY 3.0",
+        "artist": "Dezidor",
+        "bytes": 212923
+      }
+    ]
+  },
+  {
+    "n": "11-mamao-formosa",
+    "must": {},
+    "queries": [
+      "Carica papaya fruit",
+      "mamão formosa",
+      "papaya whole"
+    ],
+    "files": [
+      {
+        "file": "11-mamao-formosa-r1.jpg",
+        "title": "File:Carica papaya - papaya - var-tropical dwarf papaya - desc-fruit.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Carica_papaya_-_papaya_-_var-tropical_dwarf_papaya_-_desc-fruit.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Carica_papaya_-_papaya_-_var-tropical_dwarf_papaya_-_desc-fruit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Carica_papaya_-_papaya_-_var-tropical_dwarf_papaya_-_desc-fruit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+        "width": 635,
+        "height": 719,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "Phyzome is Tim McCormack",
+        "bytes": 148572
+      },
+      {
+        "file": "11-mamao-formosa-r2.jpg",
+        "title": "File:Carica papaya (2).JPG",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Carica_papaya_(2).JPG",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Carica_papaya_%282%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Carica_papaya_%282%29.JPG/1280px-Carica_papaya_%282%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2448,
+        "height": 3264,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "Prenn",
+        "bytes": 615904
+      }
+    ]
+  },
+  {
+    "n": "12-manga-palmer",
+    "must": {},
+    "queries": [
+      "manga fruta vermelha",
+      "red mango whole",
+      "mangas mercado"
+    ],
+    "files": [
+      {
+        "file": "12-manga-palmer-r1.jpg",
+        "title": "File:DSCF0829 Assorted fresh tropical fruits neatly prepped and displayed on plates at a bustling market stall - passion fruit papaya mango and more ready to enjoy.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:DSCF0829_Assorted_fresh_tropical_fruits_neatly_prepped_and_displayed_on_plates_at_a_bustling_market_stall_-_passion_fruit_papaya_mango_and_more_ready_to_enjoy.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c1/DSCF0829_Assorted_fresh_tropical_fruits_neatly_prepped_and_displayed_on_plates_at_a_bustling_market_stall_-_passion_fruit_papaya_mango_and_more_ready_to_enjoy.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/DSCF0829_Assorted_fresh_tropical_fruits_neatly_prepped_and_displayed_on_plates_at_a_bustling_market_stall_-_passion_fruit_papaya_mango_and_more_ready_to_enjoy.jpg/1280px-thumbnail.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 6240,
+        "height": 4160,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "PattayaPatrol",
+        "bytes": 280985
+      },
+      {
+        "file": "12-manga-palmer-r2.jpg",
+        "title": "File:MangaTommyAtkinsDSC4598.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:MangaTommyAtkinsDSC4598.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6a/MangaTommyAtkinsDSC4598.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6a/MangaTommyAtkinsDSC4598.jpg/1280px-MangaTommyAtkinsDSC4598.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2000,
+        "height": 1385,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "CostaPPPR",
+        "bytes": 257300
+      }
+    ]
+  },
+  {
+    "n": "13-manga-tomy",
+    "must": {},
+    "queries": [
+      "Tommy Atkins mango",
+      "mango green red",
+      "mangifera indica mango whole"
+    ],
+    "files": [
+      {
+        "file": "13-manga-tomy-r1.jpg",
+        "title": "File:Mango TommyAtkins02 Asit.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Mango_TommyAtkins02_Asit.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Mango_TommyAtkins02_Asit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/Mango_TommyAtkins02_Asit.jpg/1280px-Mango_TommyAtkins02_Asit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 3264,
+        "height": 2448,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "Asit K. Ghosh Thaumaturgist",
+        "bytes": 500060
+      },
+      {
+        "file": "13-manga-tomy-r2.jpg",
+        "title": "File:Mango TommyAtkins03 Asit.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Mango_TommyAtkins03_Asit.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Mango_TommyAtkins03_Asit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Mango_TommyAtkins03_Asit.jpg/1280px-Mango_TommyAtkins03_Asit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 3264,
+        "height": 2448,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "Asit K. Ghosh Thaumaturgist",
+        "bytes": 245577
+      }
+    ]
+  },
+  {
+    "n": "16-uva-thompson",
+    "must": {},
+    "queries": [
+      "Thompson Seedless grapes",
+      "uvas verdes",
+      "green grapes seedless"
+    ],
+    "files": [
+      {
+        "file": "16-uva-thompson-r1.jpg",
+        "title": "File:Thompson seedless grapes.JPG",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Thompson_seedless_grapes.JPG",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/8/85/Thompson_seedless_grapes.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Thompson_seedless_grapes.JPG/1280px-Thompson_seedless_grapes.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2021,
+        "height": 1337,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "Glane23",
+        "bytes": 236645
+      },
+      {
+        "file": "16-uva-thompson-r2.jpg",
+        "title": "File:Tomb of Fatima Sultana 01.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Tomb_of_Fatima_Sultana_01.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Tomb_of_Fatima_Sultana_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Tomb_of_Fatima_Sultana_01.jpg/1280px-Tomb_of_Fatima_Sultana_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 4842,
+        "height": 3212,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "Bernard Gagnon",
+        "bytes": 330752
+      }
+    ]
+  },
+  {
+    "n": "18-abobora-cabotia",
+    "must": {},
+    "queries": [
+      "kabocha squash whole",
+      "abóbora cabotiá inteira",
+      "tetsukabuto"
+    ],
+    "files": [
+      {
+        "file": "18-abobora-cabotia-r1.jpg",
+        "title": "File:Cucurbita squash 24.Autumn.WholeFoods.1440P.NW.WDC.14October2014.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Cucurbita_squash_24.Autumn.WholeFoods.1440P.NW.WDC.14October2014.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Cucurbita_squash_24.Autumn.WholeFoods.1440P.NW.WDC.14October2014.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/Cucurbita_squash_24.Autumn.WholeFoods.1440P.NW.WDC.14October2014.jpg/1280px-Cucurbita_squash_24.Autumn.WholeFoods.1440P.NW.WDC.14October2014.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 5184,
+        "height": 3456,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 2.0",
+        "artist": "Elvert Barnes",
+        "bytes": 298878
+      },
+      {
+        "file": "18-abobora-cabotia-r2.jpg",
+        "title": "File:DFC 4374 Freshly cut kabocha squash revealing its vibrant orange flesh and seeds ready for market or the kitchen.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:DFC_4374_Freshly_cut_kabocha_squash_revealing_its_vibrant_orange_flesh_and_seeds_ready_for_market_or_the_kitchen.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/3/35/DFC_4374_Freshly_cut_kabocha_squash_revealing_its_vibrant_orange_flesh_and_seeds_ready_for_market_or_the_kitchen.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/35/DFC_4374_Freshly_cut_kabocha_squash_revealing_its_vibrant_orange_flesh_and_seeds_ready_for_market_or_the_kitchen.jpg/1280px-DFC_4374_Freshly_cut_kabocha_squash_revealing_its_vibrant_orange_flesh_and_seeds_ready_for_market_or_the_kitchen.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 5568,
+        "height": 3712,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "PattayaPatrol",
+        "bytes": 197518
+      }
+    ]
+  },
+  {
+    "n": "21-batata",
+    "must": {},
+    "queries": [
+      "potatoes pile raw",
+      "batatas cruas",
+      "Solanum tuberosum tubers"
+    ],
+    "files": []
+  },
+  {
+    "n": "22-batata-doce",
+    "must": {},
+    "queries": [
+      "sweet potatoes pile",
+      "batata-doce raiz",
+      "Ipomoea batatas roots"
+    ],
+    "files": [
+      {
+        "file": "22-batata-doce-r1.jpg",
+        "title": "File:Ipomoea batatas 004.JPG",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Ipomoea_batatas_004.JPG",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Ipomoea_batatas_004.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Ipomoea_batatas_004.JPG/1280px-Ipomoea_batatas_004.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 1499,
+        "height": 1996,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "H. Zell",
+        "bytes": 788901
+      },
+      {
+        "file": "22-batata-doce-r2.jpg",
+        "title": "File:Ipomoea batatas 006.JPG",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Ipomoea_batatas_006.JPG",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/5/58/Ipomoea_batatas_006.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Ipomoea_batatas_006.JPG/1280px-Ipomoea_batatas_006.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2146,
+        "height": 1611,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "Llez",
+        "bytes": 371811
+      }
+    ]
+  },
+  {
+    "n": "23-beterraba",
+    "must": {},
+    "queries": [
+      "beetroot tubers",
+      "beterrabas cruas",
+      "red beets raw"
+    ],
+    "files": [
+      {
+        "file": "23-beterraba-r1.jpg",
+        "title": "File:Beetroot preparing for curry.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Beetroot_preparing_for_curry.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Beetroot_preparing_for_curry.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/Beetroot_preparing_for_curry.jpg/1280px-Beetroot_preparing_for_curry.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2048,
+        "height": 1536,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 2.0",
+        "artist": "Ramesh NG",
+        "bytes": 254529
+      },
+      {
+        "file": "23-beterraba-r2.jpg",
+        "title": "File:Raw salad ingredients strawberry slices cherry tomoatoes red bell peppers beets fruit vegetables (28151560614).jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Raw_salad_ingredients_strawberry_slices_cherry_tomoatoes_red_bell_peppers_beets_fruit_vegetables_(28151560614).jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Raw_salad_ingredients_strawberry_slices_cherry_tomoatoes_red_bell_peppers_beets_fruit_vegetables_%2828151560614%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/Raw_salad_ingredients_strawberry_slices_cherry_tomoatoes_red_bell_peppers_beets_fruit_vegetables_%2828151560614%29.jpg/1280px-Raw_salad_ingredients_strawberry_slices_cherry_tomoatoes_red_bell_peppers_beets_fruit_vegetables_%2828151560614%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2459,
+        "height": 2940,
+        "mime": "image/jpeg",
+        "license": "CC BY 2.0",
+        "artist": "Personal Creations",
+        "bytes": 368340
+      }
+    ]
+  },
+  {
+    "n": "24-cebola",
+    "must": {},
+    "queries": [
+      "yellow onion bulbs",
+      "cebolas amarelas",
+      "onions pile"
+    ],
+    "files": [
+      {
+        "file": "24-cebola-r1.jpg",
+        "title": "File:Onion crop.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Onion_crop.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/4/46/Onion_crop.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Onion_crop.jpg/1280px-Onion_crop.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 5184,
+        "height": 3456,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "Kasyap",
+        "bytes": 408076
+      },
+      {
+        "file": "24-cebola-r2.jpg",
+        "title": "File:Bolgiano's 1902 catalogue (16349122012) (cropped to Bermuda onion).jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Bolgiano%27s_1902_catalogue_(16349122012)_(cropped_to_Bermuda_onion).jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Bolgiano%27s_1902_catalogue_%2816349122012%29_%28cropped_to_Bermuda_onion%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Bolgiano%27s_1902_catalogue_%2816349122012%29_%28cropped_to_Bermuda_onion%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+        "width": 892,
+        "height": 812,
+        "mime": "image/jpeg",
+        "license": "Public domain",
+        "artist": "F.W. Bolgiano &amp; Co.; Henry G. Gilbert Nursery and Seed Trade Catalog Collection.",
+        "bytes": 276579
+      }
+    ]
+  },
+  {
+    "n": "25-cebola-roxa",
+    "must": {},
+    "queries": [
+      "red onion bulbs",
+      "cebolas roxas",
+      "red onions pile"
+    ],
+    "files": [
+      {
+        "file": "25-cebola-roxa-r1.jpg",
+        "title": "File:Red onions in packet.JPG",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Red_onions_in_packet.JPG",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/8/87/Red_onions_in_packet.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Red_onions_in_packet.JPG/1280px-Red_onions_in_packet.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 3000,
+        "height": 4000,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "Surya Prakash.S.A.",
+        "bytes": 410342
+      },
+      {
+        "file": "25-cebola-roxa-r2.jpg",
+        "title": "File:Red Onion on White.JPG",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Red_Onion_on_White.JPG",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9f/Red_Onion_on_White.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Red_Onion_on_White.JPG/1280px-Red_Onion_on_White.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 3056,
+        "height": 3056,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "Colin",
+        "bytes": 228327
+      }
+    ]
+  },
+  {
+    "n": "26-cenoura",
+    "must": {},
+    "queries": [
+      "carrots pile",
+      "cenouras feira",
+      "Daucus carota roots market"
+    ],
+    "files": [
+      {
+        "file": "26-cenoura-r1.jpg",
+        "title": "File:\"Aesthetic Carrots\".jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:%22Aesthetic_Carrots%22.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b1/%22Aesthetic_Carrots%22.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/%22Aesthetic_Carrots%22.jpg/1280px-%22Aesthetic_Carrots%22.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 4208,
+        "height": 2368,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "Thamizhpparithi Maari",
+        "bytes": 203941
+      },
+      {
+        "file": "26-cenoura-r2.jpg",
+        "title": "File:Pile of Carrots.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Pile_of_Carrots.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e4/Pile_of_Carrots.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/Pile_of_Carrots.jpg/1280px-Pile_of_Carrots.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 3048,
+        "height": 4384,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "Adimora chidinma",
+        "bytes": 489413
+      }
+    ]
+  },
+  {
+    "n": "27-chuchu",
+    "must": {},
+    "queries": [
+      "Sechium edule fruit",
+      "chayote squash",
+      "chuchu fruto"
+    ],
+    "files": [
+      {
+        "file": "27-chuchu-r1.jpg",
+        "title": "File:Sechium edule dsc07767.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Sechium_edule_dsc07767.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/d/de/Sechium_edule_dsc07767.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Sechium_edule_dsc07767.jpg/1280px-Sechium_edule_dsc07767.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2592,
+        "height": 1944,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "unknown",
+        "bytes": 270916
+      },
+      {
+        "file": "27-chuchu-r2.jpg",
+        "title": "File:Sechium edule germination 1.JPG",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Sechium_edule_germination_1.JPG",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d2/Sechium_edule_germination_1.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/Sechium_edule_germination_1.JPG/1280px-Sechium_edule_germination_1.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2066,
+        "height": 1168,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 3.0",
+        "artist": "B.navez",
+        "bytes": 205684
+      }
+    ]
+  },
+  {
+    "n": "31-jantinha",
+    "must": {},
+    "queries": [
+      "prato arroz feijão",
+      "arroz e feijão",
+      "marmita brasileira"
+    ],
+    "files": [
+      {
+        "file": "31-jantinha-r1.png",
+        "title": "File:800px-Rice and beans, Hotel in Itatiaia.png",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:800px-Rice_and_beans,_Hotel_in_Itatiaia.png",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/9/93/800px-Rice_and_beans%2C_Hotel_in_Itatiaia.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://upload.wikimedia.org/wikipedia/commons/9/93/800px-Rice_and_beans%2C_Hotel_in_Itatiaia.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+        "width": 756,
+        "height": 600,
+        "mime": "image/png",
+        "license": "CC BY-SA 3.0",
+        "artist": "Jak",
+        "bytes": 408921
+      },
+      {
+        "file": "31-jantinha-r2.jpg",
+        "title": "File:Mexican rice and beans.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Mexican_rice_and_beans.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1f/Mexican_rice_and_beans.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Mexican_rice_and_beans.jpg/1280px-Mexican_rice_and_beans.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2304,
+        "height": 3456,
+        "mime": "image/jpeg",
+        "license": "CC BY 2.0",
+        "artist": "Maryam S.",
+        "bytes": 359389
+      }
+    ]
+  },
+  {
+    "n": "32-alho-descascado",
+    "must": {},
+    "queries": [
+      "garlic cloves peeled bowl",
+      "dentes de alho descascados",
+      "peeled garlic"
+    ],
+    "files": [
+      {
+        "file": "32-alho-descascado-r1.jpg",
+        "title": "File:Garlic peeled and mashed.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Garlic_peeled_and_mashed.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/1/14/Garlic_peeled_and_mashed.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://upload.wikimedia.org/wikipedia/commons/1/14/Garlic_peeled_and_mashed.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+        "width": 1200,
+        "height": 1443,
+        "mime": "image/jpeg",
+        "license": "CC BY 2.0",
+        "artist": "tracy from north brookfield,Massachusetts, usa",
+        "bytes": 655523
+      },
+      {
+        "file": "32-alho-descascado-r2.jpg",
+        "title": "File:Garlic peels.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Garlic_peels.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Garlic_peels.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Garlic_peels.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+        "width": 1068,
+        "height": 1050,
+        "mime": "image/jpeg",
+        "license": "CC BY 2.0",
+        "artist": "tracy from north brookfield,Massachusetts, usa",
+        "bytes": 537323
+      }
+    ]
+  }
+]

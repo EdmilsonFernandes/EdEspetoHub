@@ -1,0 +1,58 @@
+[
+  {
+    "n": "21-batata",
+    "queries": [
+      "raw potatoes pile",
+      "potatoes harvest",
+      "batatas"
+    ],
+    "must": {},
+    "files": []
+  },
+  {
+    "n": "04-medalhao-frango",
+    "queries": [
+      "grilled chicken pieces",
+      "chicken skewers grilled",
+      "frango grelhado"
+    ],
+    "must": {},
+    "files": []
+  },
+  {
+    "n": "31-jantinha",
+    "queries": [
+      "arroz feijão",
+      "prato feito brasileiro",
+      "brazilian rice beans plate"
+    ],
+    "must": {},
+    "files": []
+  },
+  {
+    "n": "15-melao",
+    "files": [
+      {
+        "file": "15-melao-x1.jpg",
+        "title": "File:Canary melon 2010.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Canary_melon_2010.jpg",
+        "license": "CC BY 3.0",
+        "artist": "Bill Ebbesen",
+        "bytes": 192078
+      }
+    ]
+  },
+  {
+    "n": "31-jantinha",
+    "files": [
+      {
+        "file": "31-jantinha-x1.jpg",
+        "title": "File:Arroz Carreteiro 1.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Arroz_Carreteiro_1.jpg",
+        "license": "CC BY-SA 4.0",
+        "artist": "Marcuskuhl",
+        "bytes": 247030
+      }
+    ]
+  }
+]

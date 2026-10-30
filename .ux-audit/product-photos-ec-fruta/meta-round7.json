@@ -1,0 +1,123 @@
+[
+  {
+    "n": "21-batata",
+    "must": {},
+    "queries": [
+      "rohe Kartoffeln",
+      "patatas crudas",
+      "raw potatoes table"
+    ],
+    "files": [
+      {
+        "file": "21-batata-z1.jpg",
+        "title": "File:Handbook of fungus diseases of the potato in Australia and their treatment BHL43749656.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Handbook_of_fungus_diseases_of_the_potato_in_Australia_and_their_treatment_BHL43749656.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/9/99/Handbook_of_fungus_diseases_of_the_potato_in_Australia_and_their_treatment_BHL43749656.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Handbook_of_fungus_diseases_of_the_potato_in_Australia_and_their_treatment_BHL43749656.jpg/1280px-Handbook_of_fungus_diseases_of_the_potato_in_Australia_and_their_treatment_BHL43749656.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 1855,
+        "height": 2835,
+        "mime": "image/jpeg",
+        "license": "Public domain",
+        "artist": "French, C.; Laidlaw, W.; McAlpine, D.; Victoria.",
+        "bytes": 540305
+      },
+      {
+        "file": "21-batata-z2.jpg",
+        "title": "File:Handbook of fungus diseases of the potato in Australia and their treatment BHL43749655.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Handbook_of_fungus_diseases_of_the_potato_in_Australia_and_their_treatment_BHL43749655.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/6/61/Handbook_of_fungus_diseases_of_the_potato_in_Australia_and_their_treatment_BHL43749655.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Handbook_of_fungus_diseases_of_the_potato_in_Australia_and_their_treatment_BHL43749655.jpg/1280px-Handbook_of_fungus_diseases_of_the_potato_in_Australia_and_their_treatment_BHL43749655.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 1854,
+        "height": 2835,
+        "mime": "image/jpeg",
+        "license": "Public domain",
+        "artist": "French, C.; Laidlaw, W.; McAlpine, D.; Victoria.",
+        "bytes": 418478
+      }
+    ]
+  },
+  {
+    "n": "14-maracuja",
+    "must": {},
+    "queries": [
+      "Passionsfrucht",
+      "purple passion fruits",
+      "maracujá maduro"
+    ],
+    "files": [
+      {
+        "file": "14-maracuja-z1.jpg",
+        "title": "File:Passionfruit and cross section.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Passionfruit_and_cross_section.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Passionfruit_and_cross_section.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/Passionfruit_and_cross_section.jpg/1280px-Passionfruit_and_cross_section.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2032,
+        "height": 998,
+        "mime": "image/jpeg",
+        "license": "GFDL 1.2",
+        "artist": "fir0002 flagstaffotos [at] gmail.com Canon 20D + Sigma 150mm f/2.8",
+        "bytes": 177080
+      },
+      {
+        "file": "14-maracuja-z2.jpg",
+        "title": "File:Passion fruit (Passiflora edulis); flowering stem, fruit and Wellcome V0044267.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Passion_fruit_(Passiflora_edulis);_flowering_stem,_fruit_and_Wellcome_V0044267.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Passion_fruit_%28Passiflora_edulis%29%3B_flowering_stem%2C_fruit_and_Wellcome_V0044267.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Passion_fruit_%28Passiflora_edulis%29%3B_flowering_stem%2C_fruit_and_Wellcome_V0044267.jpg/1280px-Passion_fruit_%28Passiflora_edulis%29%3B_flowering_stem%2C_fruit_and_Wellcome_V0044267.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 2170,
+        "height": 3426,
+        "mime": "image/jpeg",
+        "license": "CC BY 4.0",
+        "artist": "https://wellcomeimages.org/indexplus/obf_images/8d/c4/0b808e0bfc3cd4f03fbe4f4e9abc.jpg Gallery: https://wellcomeimages.org/indexplus/image/V0044267.html Wellcome Collection gallery (2018-04-01): https://wellcomecollection.org/works/a4pw2cn3 CC-BY-4.0",
+        "bytes": 1963621
+      }
+    ]
+  },
+  {
+    "n": "04-medalhao-frango",
+    "must": {},
+    "queries": [
+      "chicken meatball skewers",
+      "Hähnchen Spieße",
+      "frango espetinho"
+    ],
+    "files": []
+  },
+  {
+    "n": "03-espetinho-misto",
+    "must": {},
+    "queries": [
+      "Schaschlik",
+      "espetada mista",
+      "mixed skewers grill meat"
+    ],
+    "files": [
+      {
+        "file": "03-espetinho-misto-z1.jpg",
+        "title": "File:Schaschlik Pommes Wiesen.jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:Schaschlik_Pommes_Wiesen.jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Schaschlik_Pommes_Wiesen.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Schaschlik_Pommes_Wiesen.jpg/1280px-Schaschlik_Pommes_Wiesen.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 4032,
+        "height": 3024,
+        "mime": "image/jpeg",
+        "license": "CC BY 3.0",
+        "artist": "Benreis",
+        "bytes": 283040
+      },
+      {
+        "file": "03-espetinho-misto-z2.jpg",
+        "title": "File:AUT — Tirol — Bezirk Kitzbühel — Gemeinde Kössen — Kössen Ort— Außerkapelle 2 (Schaschlik).jpg",
+        "pageUrl": "https://commons.wikimedia.org/wiki/File:AUT_%E2%80%94_Tirol_%E2%80%94_Bezirk_Kitzb%C3%BChel_%E2%80%94_Gemeinde_K%C3%B6ssen_%E2%80%94_K%C3%B6ssen_Ort%E2%80%94_Au%C3%9Ferkapelle_2_(Schaschlik).jpg",
+        "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/1/12/AUT_%E2%80%94_Tirol_%E2%80%94_Bezirk_Kitzb%C3%BChel_%E2%80%94_Gemeinde_K%C3%B6ssen_%E2%80%94_K%C3%B6ssen_Ort%E2%80%94_Au%C3%9Ferkapelle_2_%28Schaschlik%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/AUT_%E2%80%94_Tirol_%E2%80%94_Bezirk_Kitzb%C3%BChel_%E2%80%94_Gemeinde_K%C3%B6ssen_%E2%80%94_K%C3%B6ssen_Ort%E2%80%94_Au%C3%9Ferkapelle_2_%28Schaschlik%29.jpg/1280px-AUT_%E2%80%94_Tirol_%E2%80%94_Bezirk_Kitzb%C3%BChel_%E2%80%94_Gemeinde_K%C3%B6ssen_%E2%80%94_K%C3%B6ssen_Ort%E2%80%94_Au%C3%9Ferkapelle_2_%28Schaschlik%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "width": 3648,
+        "height": 2736,
+        "mime": "image/jpeg",
+        "license": "CC BY-SA 4.0",
+        "artist": "Photographer: User:Mateus2019",
+        "bytes": 323530
+      }
+    ]
+  }
+]
