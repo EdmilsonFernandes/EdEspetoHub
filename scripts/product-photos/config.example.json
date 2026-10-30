@@ -1,0 +1,26 @@
+{
+  "storeId": "8eb24290-d973-457b-8d5e-94fa62bfa696",
+  "storeSlug": "ec-ponto-da-fruta",
+  "storeName": "EC Ponto da Fruta",
+  "products": [
+    {
+      "id": "0a032f05-1e61-4e6f-8c8e-59fea45108d3",
+      "name": "Banana Nanica (kg)",
+      "queries": ["banana nanica", "banana cavendish"],
+      "must": "banana"
+    },
+    {
+      "id": "d134c11e-f7f3-4d85-84c2-d4b0df1c3a13",
+      "name": "Inhame (kg)",
+      "queries": ["inhame", "yam tuber"],
+      "must": "inhame|yam|dioscorea"
+    },
+    {
+      "id": "exemplo-modo-categoria",
+      "name": "Produto que a busca não acha",
+      "cat": "Category:Potatoes",
+      "include": "basket|pile|raw|harvest|market",
+      "exclude": "dish|fries|chips|soup|salad|field|plant|flower|farm|book|fungus"
+    }
+  ]
+}
