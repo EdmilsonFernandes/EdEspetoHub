@@ -811,7 +811,7 @@ function PushTab({ auth, pushes, loading, pushForm, setPushForm, pushSubmitting,
   );
 }
 
-export function AdminHighlights() {
+export function AdminHighlights({ embedded = false }: { embedded?: boolean } = {}) {
   const navigate = useNavigate();
   const { auth, logout } = useAuth();
   const { showToast } = useToast();
@@ -1165,7 +1165,7 @@ export function AdminHighlights() {
   const selectedDays = DURATION_META[form.durationUnit]?.days || 1;
 
   return (
-    <AdminLayout contextLabel="Visibilidade" fluid withSidebar>
+    <AdminLayout contextLabel="Visibilidade" fluid withSidebar embedded={embedded}>
         <VisibilityShell
           activeTab={activeVisibilityTab}
           onTabChange={handleVisibilityTabChange}

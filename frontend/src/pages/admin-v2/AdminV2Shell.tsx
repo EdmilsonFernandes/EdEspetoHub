@@ -345,6 +345,11 @@ const useV2NavRunner = () => {
       const destination = navItemToV2Destination(item, String(auth?.store?.slug || ''));
       if (!destination) return;
       if (destination.kind === 'external') {
+        // Vitrine da própria loja: mesma aba, como a V1 (voltar retorna ao painel).
+        if (destination.url.startsWith('/')) {
+          navigate(destination.url);
+          return;
+        }
         window.open(destination.url, '_blank', 'noopener');
         return;
       }
@@ -507,7 +512,7 @@ const StoreWorkspace = () => {
         </span>
       </div>
       <div className="in-data-[state=collapsed]:hidden">
-        <PlanBadge planName={subscription?.plan?.name} details={subscription} />
+        <PlanBadge planName={subscription?.plan?.name} details={subscription} align="left" />
       </div>
     </div>
   );
@@ -522,6 +527,8 @@ export const AdminV2Shell = ({ children }: { children?: React.ReactNode }) => {
   const store: any = auth?.store || {};
   const storeId = String(store?.id || '');
   const storeSlug = String(store?.slug || '');
+  const storeName = String(store?.name || 'Minha loja');
+  const logoUrl = resolveAssetUrl(String(store?.settings?.logoUrl || ''));
   const openNow = useStoreOpenNow(storeSlug);
   const queueCount = useQueueCount(storeId);
   const [motoboysPending, setMotoboysPending] = useState<number | null>(null);
@@ -564,6 +571,22 @@ export const AdminV2Shell = ({ children }: { children?: React.ReactNode }) => {
         <header className="flex min-h-14 shrink-0 flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-2 pl-2">
             <SidebarTrigger className="-ml-1 flex opacity-60 hover:opacity-100 md:hidden" />
+            {/* Identidade da loja no header mobile (desktop mora na sidebar) */}
+            <span className="flex min-w-0 items-center gap-2 md:hidden">
+              {logoUrl ? (
+                <Avatar className="size-7 shrink-0 rounded-md">
+                  <AvatarImage src={logoUrl} alt={storeName} />
+                </Avatar>
+              ) : (
+                <span
+                  className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md text-[10px] font-semibold uppercase"
+                  aria-hidden="true"
+                >
+                  {storeName.slice(0, 2)}
+                </span>
+              )}
+              <span className="max-w-28 truncate text-sm font-medium">{storeName}</span>
+            </span>
             <div className="min-w-0">
               <h1 className="truncate text-base font-semibold tracking-tight">{meta.title}</h1>
               <p className="text-muted-foreground hidden truncate text-xs sm:block">
@@ -607,7 +630,7 @@ export const AdminV2Shell = ({ children }: { children?: React.ReactNode }) => {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => window.open(`/${storeSlug}`, '_blank', 'noopener')}
+                onClick={() => navigate(`/${storeSlug}`)}
               >
                 <Storefront className="size-4" aria-hidden="true" />
                 <span className="hidden sm:inline">Ver vitrine</span>
@@ -616,7 +639,7 @@ export const AdminV2Shell = ({ children }: { children?: React.ReactNode }) => {
             )}
           </div>
         </header>
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col p-3 sm:p-4">
+        <main className="bg-muted/40 flex min-h-0 min-w-0 flex-1 flex-col p-3 sm:p-4">
           {children}
         </main>
       </SidebarInset>

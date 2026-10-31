@@ -43,7 +43,7 @@ const resolvePlanDetails = (planName = '') => {
   };
 };
 
-export const PlanBadge = ({ planName, displayName, variant = 'light', details }: any) => {
+export const PlanBadge = ({ planName, displayName, variant = 'light', details, align = 'right' }: any) => {
   const [isOpen, setIsOpen] = useState(false);
   const detailsRef = useRef<any>(null);
 
@@ -95,7 +95,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details }:
 
       {isOpen && !isVip && (
         <div
-          className={`absolute right-0 mt-3 w-64 rounded-2xl border border-white/20 bg-white p-4 text-gray-700 shadow-xl backdrop-blur-lg z-[1300] ${
+          className={`absolute ${align === 'left' ? 'left-0' : 'right-0'} mt-3 w-64 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/20 bg-white p-4 text-gray-700 shadow-xl backdrop-blur-lg z-[1300] ${
             variant === 'dark' ? 'bg-white/95' : ''
           }`}
         >

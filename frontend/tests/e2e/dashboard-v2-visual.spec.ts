@@ -78,6 +78,25 @@ const mockApi = async (route: any, request: any) => {
   if (url.includes('/plans')) return json({ plans: [{ id: 'pl1', name: 'Pro mensal', price: 149.9, period: 'month' }, { id: 'pl2', name: 'Basic mensal', price: 89.9, period: 'month' }], founderPlans: [], founder: null });
   if (url.includes('/delivery-billing')) return json({ cycle: { amountDue: 42.5 } });
   if (url.includes('/payments')) return json([{ id: 'pay1', amount: 149.9, status: 'PAID', createdAt: new Date(now - 15 * 86400000).toISOString(), provider: 'mercado_pago' }]);
+  if (url.includes('/inventory')) {
+    return json([
+      { id: 'p1', name: 'Espeto de contra-filé', category: 'Espetos', stock: 12, lowStockAlert: 3, manageStock: true },
+      { id: 'p2', name: 'Marmitex frango', category: 'Marmitex', stock: 2, lowStockAlert: 5, manageStock: true },
+      { id: 'p3', name: 'Pizza calabresa', category: 'Pizzas', stock: 0, lowStockAlert: 3, manageStock: true },
+    ]);
+  }
+  if (url.includes('/coupons')) return json([{ id: 'c1', code: 'BEMVINDO10', discountType: 'percent', discountValue: 10, active: true, usageCount: 4 }]);
+  if (url.includes('/featured-pricing')) return json({ tiers: [], daysOptions: [7, 15, 30] });
+  if (url.includes('/featured-requests')) return json([{ id: 'f1', status: 'PENDING_APPROVAL', paymentStatus: 'PAID', createdAt: new Date(now - 86400000).toISOString(), days: 7 }]);
+  if (url.includes('/promo-pushes')) return json([{ id: 'pp1', title: 'Combo em dobro', status: 'PENDING', paymentStatus: 'PENDING', createdAt: new Date(now - 2 * 86400000).toISOString() }]);
+  if (url.includes('/stores/') && url.includes('/destinations')) {
+    return json({ options: [{ id: 'd1', name: 'Amerê Chalés', city: 'São Bento do Sapucaí', state: 'SP', distanceKm: 99, available: true }], linked: [] });
+  }
+  if (url.includes('/condominiums')) return json({ available: [{ id: 'cd1', name: 'Residencial das Frutas', city: 'SJC' }], linked: [] });
+  if (url.includes('/motoboy-requests')) return json([]);
+  if (url.includes('/motoboys')) return json([]);
+  if (url.includes('/users')) return json([{ id: 'u1', name: 'Operador Balcão', email: 'balcao@loja.com', role: 'OPERATOR' }]);
+  if (url.includes('/link-stats')) return json({ clicks: 12 });
   if (url.includes('/payment-accounts/mercadopago/point/terminals')) return json({ terminals: [{ id: 't1', name: 'Pro 3 Balcão', status: 'online' }] });
   if (url.includes('/payment-accounts/mercadopago')) {
     return json({ connected: true, oauthConfigured: true, validation: { overallStatus: 'READY', pix: { available: true }, credit: { available: true }, debit: { available: false }, checkedAt: new Date().toISOString(), credentialMode: 'production' } });
@@ -95,6 +114,13 @@ const SECTIONS: Array<[string, string]> = [
   ['pedidos', '/admin/dashboardV2/pedidos'],
   ['avaliacoes', '/admin/dashboardV2/avaliacoes'],
   ['produtos', '/admin/dashboardV2/produtos'],
+  ['estoque', '/admin/dashboardV2/estoque'],
+  ['destaques', '/admin/dashboardV2/destaques'],
+  ['cupons', '/admin/dashboardV2/cupons'],
+  ['destinos', '/admin/dashboardV2/destinos'],
+  ['condominios', '/admin/dashboardV2/condominios'],
+  ['usuarios', '/admin/dashboardV2/usuarios'],
+  ['motoboys', '/admin/dashboardV2/motoboys'],
   ['assinatura', '/admin/dashboardV2/assinatura'],
   ['gateway', '/admin/dashboardV2/gateway'],
   ['config', '/admin/dashboardV2/config'],
@@ -103,7 +129,7 @@ const SECTIONS: Array<[string, string]> = [
 
 for (const width of [390, 1280]) {
   test(`visual ${width}px`, async ({ page }) => {
-    test.setTimeout(240_000);
+    test.setTimeout(420_000);
     const outDir = path.join(process.cwd(), 'test-results', 'dashboard-v2', `w${width}`);
     fs.mkdirSync(outDir, { recursive: true });
     await page.addInitScript((session) => {

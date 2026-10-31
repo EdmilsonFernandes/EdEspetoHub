@@ -3,18 +3,63 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.9",
-  "versionBaseLabel": "v0.1.9",
-  "versionDisplaySuffix": "8a9e088a",
-  "versionLabel": "v0.1.9.8a9e088a",
-  "versionInternal": "0.1.9+20261030.235545.8a9e088a",
-  "buildId": "0.1.9+20261030.235545.8a9e088a-20261030.235545-8a9e088a",
-  "builtAt": "2026-10-30T23:55:45.190Z",
-  "commitHash": "8a9e088a435f0d69aa19f42e7b97a1bb4b4c438e",
-  "shortHash": "8a9e088a",
+  "version": "0.1.10",
+  "versionBaseLabel": "v0.1.10",
+  "versionDisplaySuffix": "ba8cde96",
+  "versionLabel": "v0.1.10.ba8cde96",
+  "versionInternal": "0.1.10+20261031.023811.ba8cde96",
+  "buildId": "0.1.10+20261031.023811.ba8cde96-20261031.023811-ba8cde96",
+  "builtAt": "2026-10-31T02:38:11.186Z",
+  "commitHash": "ba8cde9653322e79010f89ea22a48969ef2368a4",
+  "shortHash": "ba8cde96",
   "branch": "feat/dashboard-v2",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "ba8cde9653322e79010f89ea22a48969ef2368a4",
+      "shortHash": "ba8cde96",
+      "dateIso": "2026-10-30T21:18:20-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(frontend): bump 0.1.10 — release do painel V2",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ba8cde9653322e79010f89ea22a48969ef2368a4"
+    },
+    {
+      "hash": "438496055a4c493bec7c9665d684cfe0ff44b0ef",
+      "shortHash": "43849605",
+      "dateIso": "2026-10-30T21:14:48-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(graphify): reindexa grafo apos painel V2 (hook automatico)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/438496055a4c493bec7c9665d684cfe0ff44b0ef"
+    },
+    {
+      "hash": "d7402d78ce1bc3c4cf7dd95897474301240646c3",
+      "shortHash": "d7402d78",
+      "dateIso": "2026-10-30T21:13:25-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "docs(admin-v2): resultado da validacao + rollback do painel V2",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d7402d78ce1bc3c4cf7dd95897474301240646c3"
+    },
+    {
+      "hash": "56efd41806980d4fdfafc3ab58238c58c637ce41",
+      "shortHash": "56efd418",
+      "dateIso": "2026-10-30T21:12:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(admin-v2): painel do lojista V2 completo em /admin/dashboardV2",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/56efd41806980d4fdfafc3ab58238c58c637ce41"
+    },
+    {
+      "hash": "3d438c38de0184410b455c19f455fcd424e4a5e1",
+      "shortHash": "3d438c38",
+      "dateIso": "2026-10-30T21:11:53-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(ui): sidebar shadcn compativel com Tailwind 4 + tokens do shell V2",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3d438c38de0184410b455c19f455fcd424e4a5e1"
+    },
     {
       "hash": "8a9e088a435f0d69aa19f42e7b97a1bb4b4c438e",
       "shortHash": "8a9e088a",
@@ -239,51 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "fix(mobile): R8 minify+obfuscate no release — Play exigia ofuscação >=25% (app em 2%)",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/aa50e996629ed414da330339e5ce2a50bb5f96ef"
-    },
-    {
-      "hash": "1718b4b0345c61c0c7e9599ecd94629a5e18982f",
-      "shortHash": "1718b4b0",
-      "dateIso": "2026-10-04T16:24:40-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 118 — AAB com edge-to-edge Android 15+ e PTR tátil",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/1718b4b0345c61c0c7e9599ecd94629a5e18982f"
-    },
-    {
-      "hash": "b00cf06f099b90f43f5b3e762f3eea11531bb3fc",
-      "shortHash": "b00cf06f",
-      "dateIso": "2026-10-04T16:17:19-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(mobile): edge-to-edge Android 15+ + PTR tátil no hub (padrões da análise SouFix, portados do Dr. Exame)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b00cf06f099b90f43f5b3e762f3eea11531bb3fc"
-    },
-    {
-      "hash": "ae5de3f67e1c1dfdba8cdd6df1aab724becd6b08",
-      "shortHash": "ae5de3f6",
-      "dateIso": "2026-10-04T09:42:35-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(landing): pagamentos por OpenPix + Asaas (logos) em vez de Mercado Pago",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ae5de3f67e1c1dfdba8cdd6df1aab724becd6b08"
-    },
-    {
-      "hash": "beda9370d1f08cd8f0ce19b48fd4d7b0fec87793",
-      "shortHash": "beda9370",
-      "dateIso": "2026-10-04T09:41:56-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(ts): resolveAssetUrl retorna string|undefined — fallback ?? '' nos logos",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/beda9370d1f08cd8f0ce19b48fd4d7b0fec87793"
-    },
-    {
-      "hash": "4b70a75383f6647bcb152a95db3c02001393e087",
-      "shortHash": "4b70a753",
-      "dateIso": "2026-10-03T19:21:28-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(payments): moderniza todas as telas de pagamento PIX para padrao premium",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4b70a75383f6647bcb152a95db3c02001393e087"
     }
   ]
 } as const;

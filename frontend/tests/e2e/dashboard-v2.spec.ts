@@ -214,6 +214,7 @@ test.describe('Painel V2 — acesso e navegação', () => {
       '/produtos',
       '/estoque',
       '/cupons',
+      '/destaques',
       '/assinatura',
       '/gateway',
       '/usuarios',
@@ -221,6 +222,8 @@ test.describe('Painel V2 — acesso e navegação', () => {
     ] as const) {
       await page.goto(`/admin/dashboardV2${path}`);
       await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible({ timeout: 30_000 });
+      // Nenhuma seção V2 embute o chrome da V1 (AdminLayout) dentro do shell.
+      await expect(page.locator('.ds-admin-bg')).toHaveCount(0);
       await page.waitForTimeout(250);
     }
   });

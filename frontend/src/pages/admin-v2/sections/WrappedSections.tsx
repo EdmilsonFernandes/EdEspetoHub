@@ -81,10 +81,10 @@ export const CuponsSection = () => (
   </SectionBody>
 );
 
-/** Destaques e push promocional. */
+/** Destaques e push promocional — embedded: sem o chrome da V1 dentro do shell V2. */
 export const DestaquesSection = () => (
   <SectionBody>
-    <AdminHighlights />
+    <AdminHighlights embedded />
   </SectionBody>
 );
 

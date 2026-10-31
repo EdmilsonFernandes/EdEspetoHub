@@ -11,6 +11,7 @@ import { orderService } from '../../../services/orderService';
 import { formatCurrency, formatDateTime, formatOrderDisplayId } from '../../../utils/format';
 import { formatSelectedModifiers } from '../../../utils/productModifiers';
 import { getPaymentMethodMeta } from '../../../utils/paymentAssets';
+import { resolveAssetUrl } from '../../../utils/resolveAssetUrl';
 import { ChargeSheet } from '../../../components/Admin/ChargeSheet';
 import { PaymentAuditPanel } from '../../../components/Admin/PaymentAuditPanel';
 import { PaymentTechnicalModal } from '../../../components/Admin/PaymentTechnicalModal';
@@ -177,20 +178,38 @@ export const PedidosSection = () => {
         header: ({ column }) => (
           <DataGridColumnHeader column={column} title="Pedido" />
         ),
-        cell: ({ row }) => (
-          <div className="min-w-0">
-            <button
-              type="button"
-              className="hover:text-primary block max-w-full truncate text-left text-sm font-medium underline-offset-2 transition-colors hover:underline"
-              onClick={() => openDetail(row.original)}
-            >
-              #{formatOrderDisplayId(row.original.id, storeSlug)}
-            </button>
-            <div className="text-muted-foreground truncate text-xs">
-              {row.original.createdAt ? formatDateTime(row.original.createdAt) : '—'}
+        cell: ({ row }) => {
+          const thumb = (row.original?.items || []).find((item: any) => item?.imageUrl)?.imageUrl;
+          const thumbUrl = thumb ? resolveAssetUrl(thumb) : '';
+          return (
+            <div className="flex min-w-0 items-center gap-2.5">
+              {thumbUrl ? (
+                <img
+                  src={thumbUrl}
+                  alt=""
+                  className="border-border size-9 shrink-0 rounded-md border object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <span className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-md text-xs">
+                  №
+                </span>
+              )}
+              <div className="min-w-0">
+                <button
+                  type="button"
+                  className="hover:text-primary block max-w-full truncate text-left text-sm font-medium underline-offset-2 transition-colors hover:underline"
+                  onClick={() => openDetail(row.original)}
+                >
+                  #{formatOrderDisplayId(row.original.id, storeSlug)}
+                </button>
+                <div className="text-muted-foreground truncate text-xs">
+                  {row.original.createdAt ? formatDateTime(row.original.createdAt) : '—'}
+                </div>
+              </div>
             </div>
-          </div>
-        ),
+          );
+        },
       },
       {
         accessorKey: 'customerName',

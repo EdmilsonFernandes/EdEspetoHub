@@ -221,18 +221,18 @@ export const ConfigSection = () => {
   const renderContent = () => {
     if (active === 'hub') {
       return (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {SECTIONS.filter((section) => section.id !== 'hub' && section.id !== 'impressora' || !isOperator).map((section) => (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {SECTIONS.filter((section) => section.id !== 'hub').map((section) => (
             <button
               key={section.id}
               type="button"
               onClick={() => navigate(`${ADMIN_V2_BASE}/config/${section.id}`)}
-              className="hover:border-primary/40 focus-visible:border-primary flex flex-col items-start gap-1.5 rounded-lg border p-4 text-left transition-colors focus-visible:outline-none"
+              className="bg-background hover:border-primary/40 focus-visible:border-primary flex flex-col items-start gap-2 rounded-xl border p-4 text-left shadow-xs transition-colors focus-visible:outline-none"
             >
-              <span className="flex items-center gap-2 text-sm font-medium">
-                <section.icon className="text-primary size-4" aria-hidden="true" />
-                {section.label}
+              <span className="bg-primary/10 text-primary flex size-9 items-center justify-center rounded-lg">
+                <section.icon className="size-5" aria-hidden="true" />
               </span>
+              <span className="text-sm font-semibold">{section.label}</span>
               <span className="text-muted-foreground text-xs">{section.description}</span>
             </button>
           ))}

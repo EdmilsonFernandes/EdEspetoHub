@@ -26,6 +26,9 @@ interface AdminLayoutProps {
   onNavSelect?: (id: string) => void;
   /** Badges do sidebar (ex: solicitações de motoboy pendentes). */
   navBadges?: { queueCount?: number; motoboysPending?: number };
+  /** V2 (dashboardV2): renderiza SÓ o conteúdo, sem o chrome da V1 — o shell
+   *  V2 fornece sidebar/header. Default false = comportamento da V1. */
+  embedded?: boolean;
 }
 
 export function AdminLayout({
@@ -37,6 +40,7 @@ export function AdminLayout({
   navActiveId,
   onNavSelect,
   navBadges,
+  embedded = false,
 }: AdminLayoutProps) {
   const { auth } = useAuth();
   const location = useLocation();
@@ -183,6 +187,11 @@ export function AdminLayout({
       ...(item.tone === 'danger' ? { tone: 'danger' as const } : {}),
     };
   });
+
+  // V2: sem chrome — só o conteúdo (o shell V2 provê navegação e header).
+  if (embedded) {
+    return <div className="w-full min-w-0 overflow-x-clip">{children}</div>;
+  }
 
   return (
     <div className="ds-admin-bg min-h-screen overflow-x-clip pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:pb-0">
