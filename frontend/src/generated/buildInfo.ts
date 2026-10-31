@@ -5,16 +5,61 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.10",
   "versionBaseLabel": "v0.1.10",
-  "versionDisplaySuffix": "ba8cde96",
-  "versionLabel": "v0.1.10.ba8cde96",
-  "versionInternal": "0.1.10+20261031.023811.ba8cde96",
-  "buildId": "0.1.10+20261031.023811.ba8cde96-20261031.023811-ba8cde96",
-  "builtAt": "2026-10-31T02:38:11.186Z",
-  "commitHash": "ba8cde9653322e79010f89ea22a48969ef2368a4",
-  "shortHash": "ba8cde96",
+  "versionDisplaySuffix": "7bc09f99",
+  "versionLabel": "v0.1.10.7bc09f99",
+  "versionInternal": "0.1.10+20261031.085143.7bc09f99",
+  "buildId": "0.1.10+20261031.085143.7bc09f99-20261031.085143-7bc09f99",
+  "builtAt": "2026-10-31T08:51:43.336Z",
+  "commitHash": "7bc09f9965ab9d4150266b907305bf9abdba1551",
+  "shortHash": "7bc09f99",
   "branch": "feat/dashboard-v2",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "7bc09f9965ab9d4150266b907305bf9abdba1551",
+      "shortHash": "7bc09f99",
+      "dateIso": "2026-10-31T00:02:29-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(graphify): reindexa grafo apos V2.1 (hook automatico)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7bc09f9965ab9d4150266b907305bf9abdba1551"
+    },
+    {
+      "hash": "d9b02123ad4849d85832330c3efc3268954236ed",
+      "shortHash": "d9b02123",
+      "dateIso": "2026-10-31T00:02:28-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin-v2): rodada V2.1 do painel — feedback do Edmilson em prod",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d9b02123ad4849d85832330c3efc3268954236ed"
+    },
+    {
+      "hash": "c1658e28d6819af187da51f7199468170becb1d0",
+      "shortHash": "c1658e28",
+      "dateIso": "2026-10-30T23:39:09-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(loja): pedido mínimo editável pelo lojista + validação no backend (ORDER-015)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c1658e28d6819af187da51f7199468170becb1d0"
+    },
+    {
+      "hash": "7a78038abeb55c7981ea9a0d0f7fa86483516313",
+      "shortHash": "7a78038a",
+      "dateIso": "2026-10-30T21:46:00-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(produtos): tipos do saleUnit aceitam null/undefined (tsc do Docker build)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7a78038abeb55c7981ea9a0d0f7fa86483516313"
+    },
+    {
+      "hash": "141d394cd9a3d0d570987b96e02524bff6038e00",
+      "shortHash": "141d394c",
+      "dateIso": "2026-10-30T21:36:06-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(produtos): venda por unidade ou peso (kg) — pedido com preço fechado",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/141d394cd9a3d0d570987b96e02524bff6038e00"
+    },
     {
       "hash": "ba8cde9653322e79010f89ea22a48969ef2368a4",
       "shortHash": "ba8cde96",
@@ -239,51 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "docs(ux): mock redesign premium app do cliente + ata da mesa de gerentes",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/817f761c7904e77426e38ccdd4ebf8b5838f726e"
-    },
-    {
-      "hash": "e82e2e86c1185956a2bf6ac78bb15f0bfc6198f5",
-      "shortHash": "e82e2e86",
-      "dateIso": "2026-10-06T13:55:36-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(sdd): spec G1 vtex-hinode-catalog — ingestao do catalogo publico Hinode (465 produtos, VTEX pub/search)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e82e2e86c1185956a2bf6ac78bb15f0bfc6198f5"
-    },
-    {
-      "hash": "6a21717d1135f1a83d4a4233005594cafed86926",
-      "shortHash": "6a21717d",
-      "dateIso": "2026-10-04T18:37:57-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 120 — AAB com quick wins (identidade/esgotado/busca)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6a21717d1135f1a83d4a4233005594cafed86926"
-    },
-    {
-      "hash": "ab52f534747a4aa50003aebe3c4fa5421108dcfc",
-      "shortHash": "ab52f534",
-      "dateIso": "2026-10-04T18:22:48-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "ux(identidade+estados): app do cliente é só do cliente + esgotado P&B + busca vazia com orientação (quick wins estudo SouFix)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ab52f534747a4aa50003aebe3c4fa5421108dcfc"
-    },
-    {
-      "hash": "5e5657710eafa3fbcae355a3771bb3f9d9c6e506",
-      "shortHash": "5e565771",
-      "dateIso": "2026-10-04T16:56:47-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(mobile): minSdk 23→24 — Proteção Automática do Play rejeita upload com SDK <24",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e5657710eafa3fbcae355a3771bb3f9d9c6e506"
-    },
-    {
-      "hash": "aa50e996629ed414da330339e5ce2a50bb5f96ef",
-      "shortHash": "aa50e996",
-      "dateIso": "2026-10-04T16:55:44-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(mobile): R8 minify+obfuscate no release — Play exigia ofuscação >=25% (app em 2%)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/aa50e996629ed414da330339e5ce2a50bb5f96ef"
     }
   ]
 } as const;

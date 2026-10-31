@@ -15,6 +15,7 @@ import { resolveAssetUrl } from '../../../utils/resolveAssetUrl';
 import { ChargeSheet } from '../../../components/Admin/ChargeSheet';
 import { PaymentAuditPanel } from '../../../components/Admin/PaymentAuditPanel';
 import { PaymentTechnicalModal } from '../../../components/Admin/PaymentTechnicalModal';
+import { Avatar, AvatarFallback } from '../../../components/ui/avatar';
 import { Badge } from '../../../components/reui/badge';
 import { DataGrid, dataGridFeatures, type DataGridFeatures } from '../../../components/reui/data-grid/data-grid';
 import { DataGridColumnHeader } from '../../../components/reui/data-grid/data-grid-column-header';
@@ -174,37 +175,33 @@ export const PedidosSection = () => {
   const columns = useMemo<ColumnDef<DataGridFeatures, any>[]>(() => {
     const base: ColumnDef<DataGridFeatures, any>[] = [
       {
-        accessorKey: 'createdAt',
-        header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Pedido" />
-        ),
+        accessorKey: 'customerName',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Cliente" />,
         cell: ({ row }) => {
-          const thumb = (row.original?.items || []).find((item: any) => item?.imageUrl)?.imageUrl;
-          const thumbUrl = thumb ? resolveAssetUrl(thumb) : '';
+          const order = row.original;
+          const name = String(order?.customerName ?? order?.customer?.name ?? 'Cliente');
+          const initials = name
+            .split(/\s+/)
+            .map((part: string) => part.charAt(0))
+            .join('')
+            .slice(0, 2)
+            .toUpperCase();
           return (
-            <div className="flex min-w-0 items-center gap-2.5">
-              {thumbUrl ? (
-                <img
-                  src={thumbUrl}
-                  alt=""
-                  className="border-border size-9 shrink-0 rounded-md border object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                <span className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-md text-xs">
-                  №
-                </span>
-              )}
+            <div className="flex min-w-0 items-center gap-3">
+              <Avatar className="bg-primary/10 text-primary shrink-0" size="sm">
+                <AvatarFallback className="text-xs">{initials || '?'}</AvatarFallback>
+              </Avatar>
               <div className="min-w-0">
                 <button
                   type="button"
                   className="hover:text-primary block max-w-full truncate text-left text-sm font-medium underline-offset-2 transition-colors hover:underline"
-                  onClick={() => openDetail(row.original)}
+                  onClick={() => openDetail(order)}
                 >
-                  #{formatOrderDisplayId(row.original.id, storeSlug)}
+                  {name}
                 </button>
-                <div className="text-muted-foreground truncate text-xs">
-                  {row.original.createdAt ? formatDateTime(row.original.createdAt) : '—'}
+                <div className="text-muted-foreground truncate text-xs tabular-nums">
+                  #{formatOrderDisplayId(order.id, storeSlug)} ·{' '}
+                  {order.createdAt ? formatDateTime(order.createdAt) : '—'}
                 </div>
               </div>
             </div>
@@ -212,36 +209,54 @@ export const PedidosSection = () => {
         },
       },
       {
-        accessorKey: 'customerName',
-        header: ({ column }) => <DataGridColumnHeader column={column} title="Cliente" />,
-        cell: ({ row }) => (
-          <div className="min-w-0">
-            <div className="truncate text-sm">
-              {String(row.original?.customerName ?? row.original?.customer?.name ?? 'Cliente')}
-            </div>
-            <div className="text-muted-foreground truncate text-xs">
-              {String(row.original?.customerPhone ?? row.original?.phone ?? '')}
-            </div>
-          </div>
-        ),
-      },
-      {
         id: 'items',
         header: ({ column }) => <DataGridColumnHeader column={column} title="Itens" />,
         cell: ({ row }) => {
-          const count = (row.original?.items || []).reduce(
+          const items = row.original?.items || [];
+          const thumb = items.find((item: any) => item?.imageUrl)?.imageUrl;
+          const thumbUrl = thumb ? resolveAssetUrl(thumb) : '';
+          const count = items.reduce(
             (acc: number, item: any) => acc + Number(item?.qty ?? item?.quantity ?? 0),
             0
           );
-          return <span className="text-muted-foreground text-sm tabular-nums">{count}</span>;
+          return (
+            <div className="flex min-w-0 items-center gap-2.5">
+              {thumbUrl ? (
+                <img
+                  src={thumbUrl}
+                  alt=""
+                  className="border-border size-10 shrink-0 rounded-lg border object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <span className="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg text-xs tabular-nums">
+                  {count || '—'}
+                </span>
+              )}
+              <div className="min-w-0">
+                <div className="truncate text-sm">{items[0]?.name || '—'}</div>
+                <div className="text-muted-foreground text-xs tabular-nums">
+                  {count} {count === 1 ? 'item' : 'itens'}
+                </div>
+              </div>
+            </div>
+          );
         },
       },
       {
         accessorKey: 'total',
         header: ({ column }) => <DataGridColumnHeader column={column} title="Total" />,
-        cell: ({ row }) => (
-          <span className="text-sm font-medium tabular-nums">{formatCurrency(orderTotal(row.original))}</span>
-        ),
+        cell: ({ row }) => {
+          const refund = refundStatusOf(row.original);
+          return (
+            <div className="min-w-0">
+              <div className="text-sm font-semibold tabular-nums">{formatCurrency(orderTotal(row.original))}</div>
+              {refund && refund !== 'DENIED' && (
+                <div className="text-xs text-amber-600 dark:text-amber-400">reembolso</div>
+              )}
+            </div>
+          );
+        },
       },
       {
         id: 'payment',
@@ -250,18 +265,22 @@ export const PedidosSection = () => {
           const order = row.original;
           const meta = order?.payment ? getPaymentMethodMeta(order.payment) : null;
           const status = String(order?.paymentStatus || '').toUpperCase();
-          const refund = refundStatusOf(order);
           return (
-            <span className="flex flex-wrap items-center gap-1">
-              {meta && <Badge variant="outline" className="text-muted-foreground border-border">{meta.label}</Badge>}
-              {status === 'PAID' && !refund && (
-                <Badge className="border border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">Pago</Badge>
-              )}
-              {refund && refund !== 'DENIED' && (
-                <Badge className="border border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-400">
-                  Reembolso
+            <span className="flex flex-wrap items-center gap-1.5">
+              {meta && (
+                <Badge variant="outline" className="text-muted-foreground border-border">
+                  {meta.label}
                 </Badge>
               )}
+              {status === 'PAID' ? (
+                <Badge className="border border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
+                  Pago
+                </Badge>
+              ) : status ? (
+                <Badge variant="outline" className="text-muted-foreground border-border">
+                  {status.toLowerCase()}
+                </Badge>
+              ) : null}
             </span>
           );
         },
@@ -271,7 +290,11 @@ export const PedidosSection = () => {
         header: ({ column }) => <DataGridColumnHeader column={column} title="Status" />,
         cell: ({ row }) => {
           const meta = getV2StatusMeta(row.original?.status);
-          return <Badge className={cn(meta.badge, 'border')}>{meta.label}</Badge>;
+          return (
+            <Badge className={cn(meta.badge, 'border')} size="sm">
+              {meta.label}
+            </Badge>
+          );
         },
       },
       {
@@ -279,7 +302,7 @@ export const PedidosSection = () => {
         header: () => <span className="text-muted-foreground text-xs font-medium">Ações</span>,
         cell: ({ row }) => (
           <Button type="button" variant="outline" size="sm" onClick={() => openDetail(row.original)}>
-            Ver
+            Detalhes
             <CaretRight className="ml-0.5 size-3.5" aria-hidden="true" />
           </Button>
         ),
@@ -417,45 +440,6 @@ export const PedidosSection = () => {
 
   return (
     <div className="mx-auto flex w-full min-w-0 max-w-[1180px] flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="bg-muted inline-flex items-center rounded-lg p-0.5" role="group" aria-label="Filtro de status">
-          {STATUS_FILTERS.map((filter) => (
-            <button
-              key={filter.id}
-              type="button"
-              onClick={() => {
-                setStatusFilter(filter.id);
-                setPagination((current) => ({ ...current, pageIndex: 0 }));
-              }}
-              className={
-                statusFilter === filter.id
-                  ? 'bg-background text-foreground rounded-md px-3 py-1.5 text-xs font-medium shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground rounded-md px-3 py-1.5 text-xs font-medium'
-              }
-              aria-pressed={statusFilter === filter.id}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
-        <select
-          className="border-input bg-background h-9 rounded-lg border px-2 text-xs"
-          value={period}
-          onChange={(event) => setPeriod(Number(event.target.value) as PeriodFilter)}
-          aria-label="Período"
-        >
-          {PERIOD_FILTERS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <Button type="button" variant="outline" size="sm" onClick={exportCsv} disabled={!visible.length}>
-          <DownloadSimple className="size-4" aria-hidden="true" />
-          CSV
-        </Button>
-      </div>
-
       {error ? (
         <div className="border-rose-500/25 bg-rose-500/5 text-rose-600 dark:text-rose-400 flex items-center gap-2 rounded-lg border p-4 text-sm">
           Não foi possível carregar o histórico.
@@ -471,47 +455,98 @@ export const PedidosSection = () => {
           recordCount={visible.length}
           emptyMessage="Nenhum pedido encontrado com esses filtros."
           tableLayout={{
-            dense: true,
+            dense: false,
             rowBorder: true,
             headerSticky: false,
             columnsVisibility: false,
-            columnsResizable: true,
+            columnsResizable: false,
             columnsMovable: false,
-            width: 'fixed',
+            width: 'auto',
+          }}
+          tableClassNames={{
+            bodyRow: '[&>td]:h-16 hover:bg-muted/40',
           }}
         >
           <Frame className="min-w-0">
-            <FrameHeader className="flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex flex-col gap-px">
-                <FrameTitle>Histórico de pedidos</FrameTitle>
-                <FrameDescription>{summaryLabel}</FrameDescription>
+            <FrameHeader className="flex-col gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-col gap-px">
+                  <FrameTitle>Histórico de pedidos</FrameTitle>
+                  <FrameDescription>{summaryLabel}</FrameDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <select
+                    className="border-input bg-background h-9 rounded-lg border px-2 text-xs"
+                    value={period}
+                    onChange={(event) => setPeriod(Number(event.target.value) as PeriodFilter)}
+                    aria-label="Período"
+                  >
+                    {PERIOD_FILTERS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={exportCsv}
+                    disabled={!visible.length}
+                  >
+                    <DownloadSimple className="size-4" aria-hidden="true" />
+                    CSV
+                  </Button>
+                </div>
               </div>
-              <InputGroup className="w-full sm:w-64">
-                <InputGroupAddon>
-                  <MagnifyingGlass className="text-muted-foreground size-4" aria-hidden="true" />
-                </InputGroupAddon>
-                <InputGroupInput
-                  value={query}
-                  onChange={(event) => {
-                    setQuery(event.target.value);
-                    setPagination((current) => ({ ...current, pageIndex: 0 }));
-                  }}
-                  placeholder="Buscar cliente, telefone ou nº"
-                  aria-label="Buscar no histórico"
-                />
-                {query.length > 0 && (
-                  <InputGroupAddon align="inline-end">
+              <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="bg-muted inline-flex w-fit items-center rounded-lg p-0.5" role="group" aria-label="Filtro de status">
+                  {STATUS_FILTERS.map((filter) => (
                     <button
+                      key={filter.id}
                       type="button"
-                      aria-label="Limpar busca"
-                      className="text-muted-foreground hover:text-foreground"
-                      onClick={() => setQuery('')}
+                      onClick={() => {
+                        setStatusFilter(filter.id);
+                        setPagination((current) => ({ ...current, pageIndex: 0 }));
+                      }}
+                      className={
+                        statusFilter === filter.id
+                          ? 'bg-background text-foreground rounded-md px-3 py-1.5 text-xs font-medium shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground rounded-md px-3 py-1.5 text-xs font-medium'
+                      }
+                      aria-pressed={statusFilter === filter.id}
                     >
-                      <X className="size-4" aria-hidden="true" />
+                      {filter.label}
                     </button>
+                  ))}
+                </div>
+                <InputGroup className="w-full sm:w-72">
+                  <InputGroupAddon>
+                    <MagnifyingGlass className="text-muted-foreground size-4" aria-hidden="true" />
                   </InputGroupAddon>
-                )}
-              </InputGroup>
+                  <InputGroupInput
+                    value={query}
+                    onChange={(event) => {
+                      setQuery(event.target.value);
+                      setPagination((current) => ({ ...current, pageIndex: 0 }));
+                    }}
+                    placeholder="Buscar cliente, telefone ou nº"
+                    aria-label="Buscar no histórico"
+                  />
+                  {query.length > 0 && (
+                    <InputGroupAddon align="inline-end">
+                      <button
+                        type="button"
+                        aria-label="Limpar busca"
+                        className="text-muted-foreground hover:text-foreground"
+                        onClick={() => setQuery('')}
+                      >
+                        <X className="size-4" aria-hidden="true" />
+                      </button>
+                    </InputGroupAddon>
+                  )}
+                </InputGroup>
+              </div>
             </FrameHeader>
             <FramePanel className="p-0!">
               <DataGridScrollArea>

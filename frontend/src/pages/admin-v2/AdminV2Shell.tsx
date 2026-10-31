@@ -80,11 +80,12 @@ const SHELL_SKIN = cn(
   '[--sidebar-border:transparent]',
   '[&_[data-slot=sidebar-inner]]:border-border/80 [&_[data-slot=sidebar-inner]]:border',
   '[&_[data-slot=sidebar-inner]]:shadow-xs [&_[data-slot=sidebar-inner]]:shadow-black/5',
-  '[&_[data-slot=sidebar-menu-button][data-active]]:border-border/60! [&_[data-slot=sidebar-menu-button][data-active]]:border',
-  '[&_[data-slot=sidebar-menu-button][data-active]]:shadow-xs! [&_[data-slot=sidebar-menu-button][data-active]]:shadow-black/5!',
-  '[&_[data-slot=sidebar-menu-button][data-active]]:bg-background! [&_[data-slot=sidebar-menu-button][data-active]]:hover:bg-background! **:data-[slot=sidebar-menu-button]:hover:bg-transparent!',
-  '[&_[data-slot=sidebar-menu-button][data-active]]:text-foreground [&_[data-slot=sidebar-menu-button][data-active]>svg]:text-primary [&_[data-slot=sidebar-menu-button][data-active]>svg]:opacity-100',
-  '**:data-[slot=sidebar-menu-button]:text-accent-foreground/80 **:data-[slot=sidebar-menu-button]:hover:text-foreground',
+  // item ativo = pill azul com ícone sólido (cara dos templates ReUI)
+  '[&_[data-slot=sidebar-menu-button][data-active]]:bg-primary/12!',
+  '[&_[data-slot=sidebar-menu-button][data-active]]:text-primary!',
+  '[&_[data-slot=sidebar-menu-button][data-active]]:font-semibold',
+  '[&_[data-slot=sidebar-menu-button][data-active]>svg]:text-primary! [&_[data-slot=sidebar-menu-button][data-active]>svg]:opacity-100!',
+  '**:data-[slot=sidebar-menu-button]:text-accent-foreground/80 **:data-[slot=sidebar-menu-button]:hover:text-foreground **:data-[slot=sidebar-menu-button]:hover:bg-muted/70!',
   '[&_[data-collapsible=icon]_[data-slot=sidebar-menu-button][data-active]>svg]:-ml-px',
   '[&_[data-slot=sidebar-menu-button]:hover>svg]:opacity-100 [&_[data-slot=sidebar-menu-button]>svg]:opacity-60'
 );
@@ -520,6 +521,67 @@ const StoreWorkspace = () => {
 
 // ————— Shell —————
 
+/** Cabeçalho-marca: banner de capa + logo overlap + nome/cidade/segmento + plano. */
+const StoreBrandHeader = ({ openNow }: { openNow: boolean | null }) => {
+  const { auth } = useAuth();
+  const store: any = auth?.store || {};
+  const settings: any = store?.settings || {};
+  const logoUrl = resolveAssetUrl(String(settings?.logoUrl || ''));
+  const bannerUrl = resolveAssetUrl(String(settings?.bannerUrl || ''));
+  const storeName = String(store?.name || 'Minha loja');
+  const city = String(store?.city || settings?.city || '').trim();
+  const segment = String(settings?.segment || '').trim();
+  const subscription: any = auth?.subscription || null;
+
+  return (
+    <section className="bg-background relative overflow-hidden rounded-xl border shadow-xs" aria-label="Identificação da loja">
+      {bannerUrl ? (
+        <div className="relative h-24 sm:h-32">
+          <img src={bannerUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <div className="from-background/10 to-background absolute inset-0 bg-gradient-to-t via-transparent" />
+        </div>
+      ) : (
+        <div className="from-primary/15 via-primary/5 to-transparent relative h-24 bg-gradient-to-br sm:h-32" />
+      )}
+      <div className="flex flex-wrap items-end justify-between gap-3 px-4 pb-3">
+        <div className="-mt-8 flex min-w-0 items-end gap-3 sm:-mt-10">
+          {logoUrl ? (
+            <Avatar className="border-background size-16 rounded-xl border-2 shadow-sm sm:size-20">
+              <AvatarImage src={logoUrl} alt={storeName} />
+            </Avatar>
+          ) : (
+            <span className="bg-primary text-primary-foreground border-background flex size-16 items-center justify-center rounded-xl border-2 text-lg font-bold uppercase shadow-sm sm:size-20 sm:text-xl">
+              {storeName.slice(0, 2)}
+            </span>
+          )}
+          <div className="min-w-0 pb-0.5">
+            <h2 className="truncate text-lg font-semibold tracking-tight sm:text-xl" title={storeName}>
+              {storeName}
+            </h2>
+            <p className="text-muted-foreground truncate text-xs sm:text-sm">
+              {[city, segment && segment.charAt(0).toUpperCase() + segment.slice(1)].filter(Boolean).join(' · ')}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 pb-1">
+          <span
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium',
+              openNow === false
+                ? 'border-orange-500/30 text-orange-600'
+                : 'border-emerald-500/30 text-emerald-600'
+            )}
+          >
+            <span className={cn('size-2 rounded-full', openNow === false ? 'bg-orange-500' : 'bg-emerald-500')} aria-hidden="true" />
+            {openNow === null ? 'Loja…' : openNow ? 'Loja aberta' : 'Loja fechada'}
+          </span>
+          <PlanBadge planName={subscription?.plan?.name} details={subscription} align="left" />
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export const AdminV2Shell = ({ children }: { children?: React.ReactNode }) => {
   const { auth } = useAuth();
   const location = useLocation();
@@ -527,8 +589,6 @@ export const AdminV2Shell = ({ children }: { children?: React.ReactNode }) => {
   const store: any = auth?.store || {};
   const storeId = String(store?.id || '');
   const storeSlug = String(store?.slug || '');
-  const storeName = String(store?.name || 'Minha loja');
-  const logoUrl = resolveAssetUrl(String(store?.settings?.logoUrl || ''));
   const openNow = useStoreOpenNow(storeSlug);
   const queueCount = useQueueCount(storeId);
   const [motoboysPending, setMotoboysPending] = useState<number | null>(null);
@@ -571,22 +631,6 @@ export const AdminV2Shell = ({ children }: { children?: React.ReactNode }) => {
         <header className="flex min-h-14 shrink-0 flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-2 pl-2">
             <SidebarTrigger className="-ml-1 flex opacity-60 hover:opacity-100 md:hidden" />
-            {/* Identidade da loja no header mobile (desktop mora na sidebar) */}
-            <span className="flex min-w-0 items-center gap-2 md:hidden">
-              {logoUrl ? (
-                <Avatar className="size-7 shrink-0 rounded-md">
-                  <AvatarImage src={logoUrl} alt={storeName} />
-                </Avatar>
-              ) : (
-                <span
-                  className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md text-[10px] font-semibold uppercase"
-                  aria-hidden="true"
-                >
-                  {storeName.slice(0, 2)}
-                </span>
-              )}
-              <span className="max-w-28 truncate text-sm font-medium">{storeName}</span>
-            </span>
             <div className="min-w-0">
               <h1 className="truncate text-base font-semibold tracking-tight">{meta.title}</h1>
               <p className="text-muted-foreground hidden truncate text-xs sm:block">
@@ -595,26 +639,6 @@ export const AdminV2Shell = ({ children }: { children?: React.ReactNode }) => {
             </div>
           </div>
           <div className="flex items-center gap-2 pr-3">
-            <span
-              className={cn(
-                'text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium',
-                openNow === false ? 'border-orange-500/30 text-orange-600' : 'border-emerald-500/30 text-emerald-600'
-              )}
-              title={
-                openNow === false
-                  ? 'Os clientes veem a vitrine em modo fechado'
-                  : 'Recebendo pedidos agora'
-              }
-            >
-              <span
-                className={cn(
-                  'size-2 rounded-full',
-                  openNow === false ? 'bg-orange-500' : 'bg-emerald-500'
-                )}
-                aria-hidden="true"
-              />
-              {openNow === null ? 'Loja…' : openNow ? 'Loja aberta' : 'Loja fechada'}
-            </span>
             {queueCount != null && queueCount > 0 && (
               <Button
                 type="button"
@@ -639,8 +663,9 @@ export const AdminV2Shell = ({ children }: { children?: React.ReactNode }) => {
             )}
           </div>
         </header>
-        <main className="bg-muted/40 flex min-h-0 min-w-0 flex-1 flex-col p-3 sm:p-4">
-          {children}
+        <main className="bg-muted/40 flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-3 sm:p-4">
+          <StoreBrandHeader openNow={openNow} />
+          <div className="flex min-h-0 flex-1 flex-col">{children}</div>
         </main>
       </SidebarInset>
     </SidebarProvider>
