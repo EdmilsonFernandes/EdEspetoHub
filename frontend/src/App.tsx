@@ -78,6 +78,7 @@ const CreateStore = lazyPage(() => import('./pages/CreateStore'), 'CreateStore')
 const StorePage = lazyPage(loadStorePage, 'StorePage');
 const OrdersQueue = lazyPage(() => import('./pages/OrdersQueue'), 'OrdersQueue');
 const AdminDashboard = lazyPage(loadAdminDashboardPage, 'AdminDashboard');
+const AdminDashboardV2 = lazyPage(() => import('./pages/admin-v2/AdminDashboardV2'), 'AdminDashboardV2');
 const AdminOrders = lazyPage(loadAdminOrdersPage, 'AdminOrders');
 const AdminQueue = lazyPage(loadAdminQueuePage, 'AdminQueue');
 const AdminRenewal = lazyPage(() => import('./pages/AdminRenewal'), 'AdminRenewal');
@@ -331,6 +332,17 @@ function App() {
                 element={
                   <AppErrorBoundary>
                     <AdminDemo />
+                  </AppErrorBoundary>
+                }
+              />
+              {/* V2 do painel do lojista — coexiste com a V1; nenhum redirect entre elas. */}
+              <Route
+                path="/admin/dashboardV2/*"
+                element={
+                  <AppErrorBoundary>
+                    <AdminRoute allowedRoles={['ADMIN', 'OPERATOR', 'LOJISTA']} fallbackTo="/admin/queue">
+                      <AdminDashboardV2 />
+                    </AdminRoute>
                   </AppErrorBoundary>
                 }
               />
