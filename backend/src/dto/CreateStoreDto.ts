@@ -31,6 +31,8 @@ export interface CreateStoreDto {
   segment?: string;
   deliveryRadiusKm?: number;
   deliveryFee?: number;
+  /** Pedido mínimo (R$) — 0/vazio = sem mínimo; vitrine anuncia e o backend valida. */
+  minOrderValue?: number;
   postalEnabled?: boolean;
   postalOriginZip?: string;
   orderNotificationSound?: string;

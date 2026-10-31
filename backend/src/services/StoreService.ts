@@ -601,6 +601,15 @@ private normalizeDeliveryRadiusKm(value: any, acceptsDelivery: boolean, fallback
       {
         store.settings.deliveryFee = this.parseNumber(data.deliveryFee) ?? null;
       }
+      if (data.minOrderValue !== undefined)
+      {
+        // Pedido mínimo (30/10, pedido do dono): 0/vazio = sem mínimo. Teto de
+        // sanidade 10 mil. Vitrine anuncia, checkout E o backend validam.
+        const parsedMin = this.parseNumber(data.minOrderValue);
+        store.settings.minOrderValue = parsedMin !== null && parsedMin !== undefined && Number.isFinite(parsedMin)
+          ? Math.min(10000, Math.max(0, Math.round(parsedMin * 100) / 100))
+          : 0;
+      }
       if (data.orderNotificationSound !== undefined)
       {
         const trimmedSound = data.orderNotificationSound?.toString().trim();

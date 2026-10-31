@@ -2696,6 +2696,23 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
     }
     const finalTotal = Math.max(0, Math.round((total + deliveryFeeValue - couponDiscountValue) * 100) / 100);
 
+    // Pedido mínimo (30/10): MESMA régua do checkout (CartView) — itens com
+    // desconto SEM frete vs store_settings.min_order_value; vale para retirada
+    // e entrega presencial (postal isento); pedidos criados pelo lojista
+    // (balcão/mesa) não são afetados. Backend é a autoridade: antes o gate era
+    // só client-side e atravessava por API (dívida P1 da auditoria 17/08).
+    const minOrderValue = Number((store as any)?.settings?.minOrderValue || 0);
+    const itemsTotalAfterDiscounts = Math.max(0, Math.round((total - couponDiscountValue) * 100) / 100);
+    const minOrderApplies =
+      minOrderValue > 0 &&
+      !this.isStaffActor(input.actorRole) &&
+      (input.type === 'pickup' || (input.type === 'delivery' && normalizedFulfillmentMode !== 'postal'));
+    if (minOrderApplies && itemsTotalAfterDiscounts < minOrderValue) {
+      throw new AppError('ORDER-015', 400, {
+        message: `Pedido mínimo de ${this.resolveCurrencyLabel(minOrderValue)} — adicione mais itens para finalizar.`,
+      });
+    }
+
     return this.orderRepository.create({
       id: orderRefId as any,
       customerName: input.customerName,

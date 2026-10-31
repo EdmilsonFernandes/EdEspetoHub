@@ -194,3 +194,80 @@ describe('OrderService.buildOrder — venda por peso', () => {
 function priceProductSafe(product: any) {
   return { ...product, store };
 }
+
+describe('OrderService.buildOrder — pedido mínimo (ORDER-015)', () => {
+  const minOrderStore: any = {
+    ...store,
+    settings: { ...store.settings, minOrderValue: 20 },
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    subscriptionGetCurrent.mockResolvedValue(null);
+    orderRepoCreate.mockImplementation((order: any) => order);
+  });
+
+  it('pickup abaixo do mínimo → ORDER-015 (backend é a autoridade, não só a UI)', async () => {
+    productFindById.mockResolvedValue({ ...weightProduct, store: minOrderStore });
+    const service = new OrderService();
+    await expect(
+      (service as any).buildOrder(
+        { ...baseInput([{ productId: 'prod-tomate', quantity: 750 }]), storeId: 'store-1' },
+        minOrderStore,
+        undefined,
+        'order-ref-1'
+      )
+    ).rejects.toMatchObject({ code: 'ORDER-015' }); // R$ 7,50 < R$ 20
+  });
+
+  it('igual ou acima do mínimo passa (régua: itens com desconto, sem frete)', async () => {
+    productFindById.mockResolvedValue({ ...weightProduct, store: minOrderStore });
+    const service = new OrderService();
+    const order = await (service as any).buildOrder(
+      { ...baseInput([{ productId: 'prod-tomate', quantity: 2000 }]), storeId: 'store-1' },
+      minOrderStore,
+      undefined,
+      'order-ref-1'
+    );
+    expect(Number(order.total)).toBe(20); // 2 kg = R$ 20 → passa
+  });
+
+  it('envio postal é isento do pedido mínimo (mesma régua do checkout)', async () => {
+    // Postal exige plano com delivery (features.deliveryMode) — mock Pro.
+    subscriptionGetCurrent.mockResolvedValue({ status: 'ACTIVE', plan: { name: 'pro_monthly' } });
+    productFindById.mockResolvedValue({ ...weightProduct, store: minOrderStore });
+    const service = new OrderService();
+    const order = await (service as any).buildOrder(
+      {
+        ...baseInput([{ productId: 'prod-tomate', quantity: 750 }]),
+        storeId: 'store-1',
+        type: 'delivery',
+        fulfillmentMode: 'postal',
+        paymentMethod: 'pix',
+      },
+      minOrderStore,
+      undefined,
+      'order-ref-1'
+    );
+    expect(Number(order.total)).toBe(7.5);
+  });
+
+  it('pedido criado pelo lojista (staff) NÃO é barrado pelo mínimo', async () => {
+    productFindById.mockResolvedValue({ ...weightProduct, store: minOrderStore });
+    const service = new OrderService();
+    const order = await (service as any).buildOrder(
+      { ...baseInput([{ productId: 'prod-tomate', quantity: 750 }]), storeId: 'store-1', actorRole: 'ADMIN' },
+      minOrderStore,
+      undefined,
+      'order-ref-1'
+    );
+    expect(Number(order.total)).toBe(7.5);
+  });
+
+  it('sem mínimo configurado (default 0/legado) → comportamento histórico', async () => {
+    productFindById.mockResolvedValue(weightProduct);
+    const service = new OrderService();
+    const order = await buildOrder(service, [{ productId: 'prod-tomate', quantity: 250 }]);
+    expect(Number(order.total)).toBe(2.5);
+  });
+});

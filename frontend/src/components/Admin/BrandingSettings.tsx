@@ -764,6 +764,22 @@ export const BrandingSettings = ({
                 <p className="text-xs text-gray-500">Mostrado no checkout quando o cliente escolhe entrega.</p>
               </div>
               <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Pedido mínimo (R$)</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="10000"
+                  value={branding.minOrderValue ?? 0}
+                  onChange={(e) => handleChange("minOrderValue", e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                  placeholder="0"
+                />
+                <p className="text-xs text-gray-500">
+                  0 = sem mínimo. A vitrine anuncia ("Min R$ X") e o checkout bloqueia abaixo do valor — vale para retirada e entrega (envio postal não exige).
+                </p>
+              </div>
+              <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">SLA de preparo (min)</label>
                 <input
                   type="number"
