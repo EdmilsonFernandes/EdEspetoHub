@@ -1,33 +1,33 @@
 # Graph Report - EdEspetoHub-dashboard-v2  (2026-10-30)
 
 ## Corpus Check
-- 1074 files · ~2,845,250 words
+- 1074 files · ~2,845,476 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 5774 nodes · 12409 edges · 354 communities (191 shown, 135 thin omitted)
+- 5776 nodes · 12411 edges · 353 communities (189 shown, 137 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 127 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `56efd418`
+- Built from commit: `d7402d78`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - index.tsx
-- ClientAuth.tsx
+- AdminLogin.tsx
 - logger.ts
 - GrillQueue.tsx
 - StoreRepository
 - PlatformAdminController.ts
-- AdminLogin.tsx
-- User
-- resolveAssetUrl
 - AdminDashboard.tsx
+- Motoboy
+- resolveAssetUrl
+- sessionRedirect.ts
 - OrderService
 - cn
-- CondominiumDashboard.tsx
+- AppGlassHeader.tsx
 - respondWithError
 - printReceiptImage.ts
 - SuperAdmin.tsx
@@ -44,13 +44,13 @@
 - ServiceResponse
 - DestinationRepository
 - schema.sql
-- resolveAssetUrl.ts
-- database.ts
-- MfaService
+- CreateStore.tsx
+- EmailService.ts
+- MfaService.ts
 - CondominiumService
 - CustomerAccountService
 - PaymentService.ts
-- StorePage.tsx
+- CartView.tsx
 - generateSchemaDocs.ts
 - apis/src/app.ts
 - StoreController
@@ -62,16 +62,16 @@
 - DestinationDetailPage.tsx
 - StorePaymentAccountController.ts
 - ShippingService.ts
-- AuthService.ts
+- database.ts
 - AdminHighlights.tsx
 - seedCunhaTourismMap.ts
 - scripts
 - homeConfig.ts
-- DestinationPartnerPortal.tsx
-- apiClient
+- AdminMotoboys.tsx
+- apiClient.ts
 - PlanService.ts
 - StoreService
-- apiClient.ts
+- destinationWhatsApp.ts
 - useHubStoreDistances.ts
 - AuthController
 - nativeAppBootstrap.ts
@@ -97,7 +97,7 @@
 - storeHours.ts
 - CustomerAccountController
 - GeoLocationService
-- storeAvatar.ts
+- HubStoreCard.tsx
 - OrderRepository
 - seedSaoBentoTourismMap.ts
 - EmailTemplateService.ts
@@ -132,9 +132,9 @@
 - EmailTemplateService
 - EmailAdminController.ts
 - orderService.ts
-- ClientAccount.tsx
+- superAdminService.ts
 - DeliveryBillingService
-- nativeBiometricService.ts
+- StorePage.tsx
 - ProductController
 - SuperAdminEmailTemplates.tsx
 - StoreLib
@@ -156,8 +156,8 @@
 - storeService.ts
 - release.mjs
 - runMigrations
-- documents.ts
-- EmailHealthService.ts
+- .updateProfile
+- EmailHealthService
 - MercadoPagoService
 - AdminV2Shell.tsx
 - destinationQrPoster.ts
@@ -169,7 +169,7 @@
 - PortfolioPage.tsx
 - destinationTourismSeeder.ts
 - AuditNotificationService
-- postalTracking.ts
+- ProfileDrawer.tsx
 - GeoLocationService.ts
 - PromoPushService
 - FeaturedProductController
@@ -193,19 +193,19 @@
 - frontend/package.json
 - BackendClient
 - Cart Stock Reconciliation
-- mfaDevice.ts
+- FaceVerifyService.ts
 - backend/src/config/ssm.ts
 - DestinationPartnerPortalController
-- EmailPublicController.ts
+- EmailPreferenceService.ts
 - MapsController.ts
 - MotoboyKycController
 - NotificationController
 - StoreUserController
-- HomeConfigService.ts
-- StoreUserRepository
-- .sanitizeListingPayload
+- NativeAppNavigator.tsx
+- SystemGuidePage.tsx
+- emailRisk.ts
 - GeoLocationService.test.ts
-- IconBox.tsx
+- StoreDashboardSnapshotService
 - orderCancellation.ts
 - Notification Management Controller
 - Store User Controller
@@ -221,7 +221,7 @@
 - hospitalityMedia.ts
 - notificationStorage.ts
 - deploy-api.sh
-- RouteMapView.tsx
+- useHubFavorites.test.tsx
 - OrderPaymentService.refund.test.ts
 - System Architecture Diagram
 - backend/package.json
@@ -333,13 +333,13 @@
 - Manual do Usuario - Ja no Caminho
 - WhatsApp Icon
 - accessLogger.ts
-- AdminLayout.tsx
+- runtimeValidation.test.ts
 - command-producer.ts
 - Painel do Lojista V2 — Plano e Matriz de Cobertura
-- orderItems.ts
+- useHubSearchPlaceholder
 - StoreMapView.tsx
-- buildOrderWhatsappReceiptMessage
-- orderRefund.ts
+- subscriptionService.ts
+- .sanitizeAttribution
 - buildInfo.ts
 
 ## God Nodes (most connected - your core abstractions)
@@ -355,12 +355,12 @@
 10. `useToast()` - 59 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Portal do Parceiro de Destinos` --references--> `DestinationPartnerRequest`  [EXTRACTED]
-  docs/DESTINATION_PARTNER_PORTAL.md → backend/src/entities/DestinationPartnerRequest.ts
-- `Portal do Parceiro de Destinos` --references--> `DestinationPartnerPortalService`  [EXTRACTED]
-  docs/DESTINATION_PARTNER_PORTAL.md → backend/src/services/DestinationPartnerPortalService.ts
 - `Hub de destinos, chalés e pousadas` --references--> `DestinationService`  [EXTRACTED]
   docs/DESTINATION_HUB.md → backend/src/services/DestinationService.ts
+- `Portal do Parceiro de Destinos` --references--> `DestinationPartnerPortalService`  [EXTRACTED]
+  docs/DESTINATION_PARTNER_PORTAL.md → backend/src/services/DestinationPartnerPortalService.ts
+- `Portal do Parceiro de Destinos` --references--> `DestinationPartnerRequest`  [EXTRACTED]
+  docs/DESTINATION_PARTNER_PORTAL.md → backend/src/entities/DestinationPartnerRequest.ts
 - `Plano de qualidade geografica` --references--> `GeoLocationService`  [EXTRACTED]
   docs/GEO_LOCATION_QUALITY_PLAN.md → backend/src/services/GeoLocationService.ts
 - `Webhook Configuration UI Screenshot` --semantically_similar_to--> `Mercado Pago Logo`  [INFERRED] [semantically similar]
@@ -374,85 +374,85 @@
 - 3-file cycle: `frontend/src/components/Marketplace/Hub/HubFeaturedCarousel.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/MarketplacePage.tsx -> frontend/src/components/Marketplace/Hub/HubFeaturedCarousel.tsx`
 - 3-file cycle: `frontend/src/components/Marketplace/Hub/HubStoreCard.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/MarketplacePage.tsx -> frontend/src/components/Marketplace/Hub/HubStoreCard.tsx`
 - 3-file cycle: `frontend/src/components/Admin/AdminMobileBottomNav.tsx -> frontend/src/utils/adminRoutePrefetch.ts -> frontend/src/pages/StorePage.tsx -> frontend/src/components/Admin/AdminMobileBottomNav.tsx`
-- 3-file cycle: `frontend/src/components/Destinations/PublicDestinationShell.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/DestinationDetailPage.tsx -> frontend/src/components/Destinations/PublicDestinationShell.tsx`
-- 3-file cycle: `frontend/src/components/Destinations/PublicDestinationShell.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/DestinationInviteRedirectPage.tsx -> frontend/src/components/Destinations/PublicDestinationShell.tsx`
-- 3-file cycle: `frontend/src/components/Destinations/PublicDestinationShell.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/DestinationPartnerRequestPage.tsx -> frontend/src/components/Destinations/PublicDestinationShell.tsx`
 - 3-file cycle: `frontend/src/components/Destinations/PublicDestinationShell.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/DestinationsPage.tsx -> frontend/src/components/Destinations/PublicDestinationShell.tsx`
+- 3-file cycle: `frontend/src/components/Destinations/PublicDestinationShell.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/DestinationDetailPage.tsx -> frontend/src/components/Destinations/PublicDestinationShell.tsx`
+- 3-file cycle: `frontend/src/components/Destinations/PublicDestinationShell.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/DestinationPartnerRequestPage.tsx -> frontend/src/components/Destinations/PublicDestinationShell.tsx`
 - 3-file cycle: `frontend/src/components/Destinations/PublicDestinationShell.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/HospitalityPlacePage.tsx -> frontend/src/components/Destinations/PublicDestinationShell.tsx`
 - 3-file cycle: `frontend/src/components/Destinations/PublicDestinationShell.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/HospitalityServiceRoutePage.tsx -> frontend/src/components/Destinations/PublicDestinationShell.tsx`
+- 3-file cycle: `frontend/src/components/Destinations/PublicDestinationShell.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/DestinationInviteRedirectPage.tsx -> frontend/src/components/Destinations/PublicDestinationShell.tsx`
 - 3-file cycle: `frontend/src/components/Destinations/DestinationPartnerCta.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/DestinationDetailPage.tsx -> frontend/src/components/Destinations/DestinationPartnerCta.tsx`
 - 3-file cycle: `frontend/src/components/common/ClientBottomNav.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/NotificationsPage.tsx -> frontend/src/components/common/ClientBottomNav.tsx`
-- 3-file cycle: `frontend/src/components/common/ClientBottomNav.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/ClientOrders.tsx -> frontend/src/components/common/ClientBottomNav.tsx`
 - 3-file cycle: `frontend/src/components/Destinations/DestinationPartnerCta.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/DestinationsPage.tsx -> frontend/src/components/Destinations/DestinationPartnerCta.tsx`
+- 3-file cycle: `frontend/src/components/common/ClientBottomNav.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/ClientOrders.tsx -> frontend/src/components/common/ClientBottomNav.tsx`
 - 3-file cycle: `frontend/src/components/common/ClientBottomNav.tsx -> frontend/src/utils/clientRoutePrefetch.ts -> frontend/src/pages/HubHighlightsPage.tsx -> frontend/src/components/common/ClientBottomNav.tsx`
-- 4-file cycle: `frontend/src/components/Admin/AdminMobileBottomNav.tsx -> frontend/src/utils/adminRoutePrefetch.ts -> frontend/src/pages/AdminDashboard.tsx -> frontend/src/layouts/AdminLayout.tsx -> frontend/src/components/Admin/AdminMobileBottomNav.tsx`
+- 4-file cycle: `frontend/src/components/Admin/AdminMobileBottomNav.tsx -> frontend/src/utils/adminRoutePrefetch.ts -> frontend/src/pages/AdminOrders.tsx -> frontend/src/layouts/AdminLayout.tsx -> frontend/src/components/Admin/AdminMobileBottomNav.tsx`
 - 4-file cycle: `frontend/src/components/Admin/AdminMobileBottomNav.tsx -> frontend/src/utils/adminRoutePrefetch.ts -> frontend/src/pages/AdminHighlights.tsx -> frontend/src/layouts/AdminLayout.tsx -> frontend/src/components/Admin/AdminMobileBottomNav.tsx`
 
-## Communities (354 total, 135 thin omitted)
+## Communities (353 total, 137 thin omitted)
 
 ### Community 0 - "index.tsx"
-Cohesion: 0.05
-Nodes (61): Toast, ToastContext, ToastContextType, ToastType, useToast(), CameraCaptureModal(), FacingMode, Props (+53 more)
+Cohesion: 0.04
+Nodes (62): InventoryItem, InventoryManager(), movementMeta, statusMeta, Toast, ToastContext, ToastContextType, ToastType (+54 more)
 
-### Community 1 - "ClientAuth.tsx"
-Cohesion: 0.08
-Nodes (24): AuthMascotPanel(), AuthMascotPanelProps, AuthMascotPanelVariant, CONTENT, audienceCopy, MfaChallenge, MfaChallengeModal(), Props (+16 more)
+### Community 1 - "AdminLogin.tsx"
+Cohesion: 0.05
+Nodes (43): Props, statusCopy, StoreCondominiumPanel(), AuthMascotPanel(), AuthMascotPanelProps, AuthMascotPanelVariant, CONTENT, audienceCopy (+35 more)
 
 ### Community 2 - "logger.ts"
-Cohesion: 0.02
-Nodes (100): authService, log, condominiumService, log, log, service, zipCodeLookupService, deliveryBillingService (+92 more)
+Cohesion: 0.03
+Nodes (82): authService, log, condominiumService, log, log, service, zipCodeLookupService, deliveryBillingService (+74 more)
 
 ### Community 3 - "GrillQueue.tsx"
-Cohesion: 0.07
-Nodes (32): DELIVERY_ISSUE_REASON_OPTIONS, formatTableIdentifier(), fuzzyIncludes(), getOrderItemCategory(), getTableStageMeta(), GrillQueue(), isCondominiumOrder(), isTableServiceOrderItem() (+24 more)
+Cohesion: 0.06
+Nodes (35): DELIVERY_ISSUE_REASON_OPTIONS, formatTableIdentifier(), fuzzyIncludes(), getOrderItemCategory(), getTableStageMeta(), GrillQueue(), isCondominiumOrder(), isTableServiceOrderItem() (+27 more)
 
 ### Community 4 - "StoreRepository"
-Cohesion: 0.08
-Nodes (14): deliveryBillingService, getRoleFromAuthHeader(), requireActiveSubscription(), resolveStoreParams(), storeRepository, subscriptionService, StoreRepository, AvailabilityDays (+6 more)
+Cohesion: 0.07
+Nodes (18): FEATURES_BY_TIER, normalize(), PlanFeatureKey, PlanFeatures, PlanTier, resolvePlanFeatures(), resolvePlanTier(), SubscriptionStatusLike (+10 more)
 
 ### Community 5 - "PlatformAdminController.ts"
-Cohesion: 0.05
-Nodes (27): log, orderPaymentService, paymentEventRepository, paymentService, subscriptionService, accessLogRepository, customerSecurityService, log (+19 more)
+Cohesion: 0.04
+Nodes (34): log, orderPaymentService, paymentEventRepository, paymentService, subscriptionService, accessLogRepository, customerSecurityService, log (+26 more)
 
-### Community 6 - "AdminLogin.tsx"
-Cohesion: 0.05
-Nodes (42): AdminHeader(), HeaderProps, segmentLabelMap, Store, User, brandingStorageKey(), defaultBranding, getPersistedBranding() (+34 more)
+### Community 6 - "AdminDashboard.tsx"
+Cohesion: 0.04
+Nodes (79): AdminDesktopSidebar(), AdminDesktopSidebarProps, SidebarItem, AdminHeader(), HeaderProps, segmentLabelMap, Store, User (+71 more)
 
-### Community 7 - "User"
-Cohesion: 0.05
-Nodes (18): CustomerEmailOtp, CustomerPushToken, EmailVerification, Motoboy, MotoboyAuditLog, MotoboyDocument, MotoboyPaymentAccount, MotoboyStore (+10 more)
+### Community 7 - "Motoboy"
+Cohesion: 0.06
+Nodes (11): Motoboy, MotoboyAuditLog, MotoboyDocument, MotoboyPaymentAccount, MotoboyStore, MotoboyRepository, MotoboyStoreRepository, DeliveryService (+3 more)
 
 ### Community 8 - "resolveAssetUrl"
-Cohesion: 0.11
-Nodes (20): buildCustomerProfileImageUrl(), loadCachedAvatarObjectUrl(), memoryObjectUrls, pendingLoads, supportsPersistentAvatarCache(), asset(), hasCoverImage(), normalizeOrganicProduct() (+12 more)
+Cohesion: 0.04
+Nodes (62): destinationSearchText(), hasStoreRelation(), isRegionalDestination(), normalizeSearch(), Props, statusCopy, StoreDestinationPanel(), CartView() (+54 more)
 
-### Community 9 - "AdminDashboard.tsx"
-Cohesion: 0.05
-Nodes (39): AdminDesktopSidebar(), AdminDesktopSidebarProps, SidebarItem, AdminAllowedRole, AdminRoute(), DevicePermissionsCard(), DevicePermissionsCardProps, PermissionRole (+31 more)
+### Community 9 - "sessionRedirect.ts"
+Cohesion: 0.20
+Nodes (16): AdminAllowedRole, AdminRoute(), handleResponse(), MotoboyRoute(), handleResponse(), handleResponse(), buildCustomerLoginPath(), consumeManualLogoutRedirect() (+8 more)
 
 ### Community 10 - "OrderService"
-Cohesion: 0.07
+Cohesion: 0.06
 Nodes (5): OrderService, CreateOrderDto, CreateOrderItemInput, SelectedModifierInput, ProductRepository
 
 ### Community 11 - "cn"
-Cohesion: 0.05
-Nodes (54): actionClasses, actionIcon(), ContactAction(), BottomSheet(), BottomSheetProps, Button(), ButtonProps, ButtonSize (+46 more)
+Cohesion: 0.04
+Nodes (62): blankForm, completionScore(), DestinationPartnerPortal(), resourceImage(), resourceTitle(), BottomSheet(), BottomSheetProps, Button() (+54 more)
 
-### Community 12 - "CondominiumDashboard.tsx"
-Cohesion: 0.06
-Nodes (29): Props, statusCopy, StoreCondominiumPanel(), destinationSearchText(), hasStoreRelation(), isRegionalDestination(), normalizeSearch(), Props (+21 more)
+### Community 12 - "AppGlassHeader.tsx"
+Cohesion: 0.10
+Nodes (16): BrandingSettings(), primaryPalette, secondaryPalette, AppGlassHeader(), AppGlassHeaderProps, AddressDistance(), buildAddressMeta(), buildAddressTitle() (+8 more)
 
 ### Community 13 - "respondWithError"
 Cohesion: 0.06
 Nodes (3): CondominiumController, MotoboyController, respondWithError()
 
 ### Community 14 - "printReceiptImage.ts"
-Cohesion: 0.07
-Nodes (59): sampleReceiptPayload, settingButtonClass(), thermalMock, toastMock, TestPhase, ThermalPrinterSettingsCard(), buildHtmlReceipt(), buildRawBtText() (+51 more)
+Cohesion: 0.06
+Nodes (64): DevicePermissionsCardProps, permissionMeta(), PermissionRole, PermissionStatus, sampleReceiptPayload, settingButtonClass(), thermalMock, toastMock (+56 more)
 
 ### Community 15 - "SuperAdmin.tsx"
-Cohesion: 0.04
-Nodes (38): CustomerSecuritySection(), DEFAULT_FILTERS, AdaptiveAvatar(), AdaptiveAvatarProps, AvatarFitMode, containerToneByVariant, FormSection(), FormSectionProps (+30 more)
+Cohesion: 0.05
+Nodes (39): AccountMfaPanel(), PanelMode, Props, authServiceMock, AppRobotLoader(), AppRobotLoaderProps, PremiumTabItem, PremiumTabs() (+31 more)
 
 ### Community 16 - "FeaturedProductService"
 Cohesion: 0.07
@@ -460,23 +460,27 @@ Nodes (9): PaymentService, FeaturedProductService, normalizeStatus(), StoreDashb
 
 ### Community 18 - "MarketplacePage.tsx"
 Cohesion: 0.04
-Nodes (40): HubAnonymousActiveOrder, HubAnonymousActiveOrders(), HubAnonymousActiveOrdersProps, HubMarketingPopup(), HubMarketingPopupProps, HubGeoDiscovery, HubStoreDiscoveryNotice, HubStoreDiscoveryNoticeProps (+32 more)
+Nodes (32): HubAnonymousActiveOrder, HubAnonymousActiveOrders(), HubAnonymousActiveOrdersProps, HubFavoriteStore, HubFavoriteStores, HubFavoriteStoresProps, HubMarketingPopup(), HubMarketingPopupProps (+24 more)
+
+### Community 19 - "CondominiumRepository"
+Cohesion: 0.06
+Nodes (10): Condominium, CondominiumAccessRequest, CondominiumEvent, CondominiumEventStore, CondominiumUser, StoreCondominium, StoreCondominiumRequest, CondominiumRepository (+2 more)
 
 ### Community 20 - "ShippingTrackingService.ts"
 Cohesion: 0.08
 Nodes (31): Entrega postal e rastreio, Guia Oficial de Testes, OrderShipment, OrderShipmentEvent, ManualShippingTrackingProvider, EVENT_LABELS, getDateTime(), getProviderCheckedAt() (+23 more)
 
 ### Community 21 - "OrderTracking.tsx"
-Cohesion: 0.10
-Nodes (21): buildWhatsAppContactUrl(), firstName(), formatEtaMoment(), getCustomerReceiptConfirmedAt(), getLastTimelineEntry(), getShipmentFreshness(), getStepTimestamp(), mergeOrderPreservingFreshShipment() (+13 more)
+Cohesion: 0.09
+Nodes (31): buildOrderWhatsappHighlightItemLines(), buildOrderWhatsappReceiptMessage(), buildWhatsAppContactUrl(), centerReceiptText(), firstName(), fitReceiptColumns(), formatEtaMoment(), getCustomerReceiptConfirmedAt() (+23 more)
 
 ### Community 22 - "ClientOrders.tsx"
-Cohesion: 0.11
-Nodes (37): buildOrderSupportMessage(), buildReorderPayload(), buildWhatsappLink(), ClientOrders(), CUSTOMER_CANCELLATION_REASON_OPTIONS, formatCancellationReasonForCustomer(), formatGroupDate(), formatOrderMoment() (+29 more)
+Cohesion: 0.08
+Nodes (51): buildOrderSupportMessage(), buildReorderPayload(), buildWhatsappLink(), ClientOrders(), CUSTOMER_CANCELLATION_REASON_OPTIONS, formatCancellationReasonForCustomer(), formatGroupDate(), formatOrderMoment() (+43 more)
 
 ### Community 23 - "SuperAdminDestinations.tsx"
 Cohesion: 0.06
-Nodes (41): actionButtonClass(), activeLabel(), claimStoreRequestParentId(), compressImageFileToDataUrl(), createEmptyDestinationForm(), createEmptyDestinationGallerySlots(), DestinationAddressFields(), emptyCatalog (+33 more)
+Nodes (39): actionButtonClass(), activeLabel(), claimStoreRequestParentId(), compressImageFileToDataUrl(), createEmptyDestinationForm(), createEmptyDestinationGallerySlots(), DestinationAddressFields(), emptyCatalog (+31 more)
 
 ### Community 24 - "sendServiceResponse"
 Cohesion: 0.07
@@ -490,25 +494,25 @@ Nodes (4): ServiceResponse, AuthLib, CustomerLib, OrderLib
 Cohesion: 0.09
 Nodes (48): access_logs, condominiums, customer_addresses, delivery_billing_charges, delivery_billing_cycles, delivery_events, destination_listings, destination_partner_accounts (+40 more)
 
-### Community 30 - "resolveAssetUrl.ts"
-Cohesion: 0.05
-Nodes (61): PaymentAuditPanel(), statusTone(), failedLookupEvent, pendingSummary, formatCountdown(), OnlinePaymentBlock(), PixPaymentScreen(), SuccessView() (+53 more)
+### Community 30 - "CreateStore.tsx"
+Cohesion: 0.08
+Nodes (32): PLAN_STYLES, PlanBadge(), resolvePlanDetails(), BILLING_OPTIONS, getPlanFeatureBenefit(), getPlanFeatureLabel(), getPlanName(), PLAN_TIERS (+24 more)
 
-### Community 31 - "database.ts"
-Cohesion: 0.14
-Nodes (22): Condominium, CondominiumAccessRequest, CondominiumEvent, CondominiumEventStore, CondominiumUser, CustomerRiskEvent, CustomerSecurityBlock, FeaturedProductRequest (+14 more)
+### Community 31 - "EmailService.ts"
+Cohesion: 0.12
+Nodes (12): CustomerRiskEvent, CustomerSecurityBlock, AuditDetails, AuditStorePayload, AuditSubscriptionPayload, AuditUserPayload, NotifySubscriptionEventInput, NotifyUserCreatedInput (+4 more)
 
-### Community 32 - "MfaService"
-Cohesion: 0.10
-Nodes (16): MfaChallenge, MfaOwnerType, MfaSetting, TrustedDevice, AuthContext, DeviceContext, LoginContext, MfaService (+8 more)
+### Community 32 - "MfaService.ts"
+Cohesion: 0.36
+Nodes (7): MfaChallenge, MfaOwnerType, MfaSetting, TrustedDevice, AuthContext, DeviceContext, LoginContext
 
 ### Community 35 - "PaymentService.ts"
 Cohesion: 0.08
 Nodes (33): DeliveryBillingCharge, DeliveryBillingCycle, DeliveryBillingStatus, DeliveryPaymentStatus, PaymentAuditLog, BillingConfig, DURATION_OPTIONS, DurationUnit (+25 more)
 
-### Community 36 - "StorePage.tsx"
-Cohesion: 0.06
-Nodes (48): ProductModal(), ProductModalProps, BRAZIL_DDDS, buildPhoneFromParts(), CartView(), DEFAULT_CUSTOMER_ORDER_NOTE_SUGGESTIONS, formatLocalPhoneNumber(), POSTAL_PREPAID_PAYMENT_METHODS (+40 more)
+### Community 36 - "CartView.tsx"
+Cohesion: 0.09
+Nodes (32): ProductModal(), ProductModalProps, BRAZIL_DDDS, buildPhoneFromParts(), DEFAULT_CUSTOMER_ORDER_NOTE_SUGGESTIONS, formatLocalPhoneNumber(), POSTAL_PREPAID_PAYMENT_METHODS, PROFESSIONAL_PAYMENT_METHODS (+24 more)
 
 ### Community 37 - "generateSchemaDocs.ts"
 Cohesion: 0.07
@@ -523,28 +527,24 @@ Cohesion: 0.09
 Nodes (10): buildDemoStore(), enrichStoreGeoPayload, sortStoresForLocation, StoreController, invalidateStoreBySlugCache(), calculateDistanceKm(), GeoPoint, roundDistanceKm() (+2 more)
 
 ### Community 40 - "ProductService"
-Cohesion: 0.12
-Nodes (4): ProductService, CreateProductDto, ProductModifierOptionDto, normalizeAvailabilityDays()
+Cohesion: 0.08
+Nodes (12): ProductService, CreateProductDto, ProductModifierOptionDto, wait(), AvailabilityDays, DAY_KEYS, DayKey, isProductAvailableToday() (+4 more)
 
 ### Community 41 - "HospitalityPlacePage.tsx"
-Cohesion: 0.08
-Nodes (53): isAirbnbUrlOrLabel(), buildListingAction(), buildPhoneContactAction(), buildProviderQuickActions(), buildQuickContactMessage(), cardMediaFor(), categoryLabel(), coverImageFor() (+45 more)
-
-### Community 42 - "AuthService"
-Cohesion: 0.08
-Nodes (3): AuthService, sanitizeAttributionStringArray(), sanitizeDestinationDeliveryMode()
+Cohesion: 0.11
+Nodes (31): isAirbnbUrlOrLabel(), buildListingAction(), buildProviderQuickActions(), buildQuickContactMessage(), cardMediaFor(), categoryLabel(), coverImageFor(), domTokenFor() (+23 more)
 
 ### Community 43 - "helpers.ts"
-Cohesion: 0.16
-Nodes (20): ALWAYS_OPEN_HOURS, ALWAYS_OPEN_HOURS, createApprovedMotoboy(), ALWAYS_OPEN_HOURS, activateSubscription(), api, app, exemptStorePlan() (+12 more)
+Cohesion: 0.07
+Nodes (29): ALWAYS_OPEN_HOURS, ALWAYS_OPEN_HOURS, createApprovedMotoboy(), ALWAYS_OPEN_HOURS, MfaService, activateSubscription(), api, app (+21 more)
 
 ### Community 44 - "ProductManager.tsx"
 Cohesion: 0.08
-Nodes (33): availabilityDayMeta, buildAvailabilityPayload(), CATEGORY_PRIORITY_OPTIONS, categoryAccentClasses, categoryDotClasses, dayLabels, defaultAvailability, defaultCategories (+25 more)
+Nodes (32): availabilityDayMeta, buildAvailabilityPayload(), CATEGORY_PRIORITY_OPTIONS, categoryAccentClasses, categoryDotClasses, dayLabels, defaultAvailability, defaultCategories (+24 more)
 
 ### Community 45 - "DestinationDetailPage.tsx"
-Cohesion: 0.13
-Nodes (15): AppImagePreviewDialog(), AppImagePreviewDialogProps, ImagePreview, normalizeContent(), PreStoreCardSkeleton(), PreStoreDetailSheet(), buildDestinationListingAction(), categoryLabel() (+7 more)
+Cohesion: 0.10
+Nodes (22): AppImagePreviewDialog(), AppImagePreviewDialogProps, ImagePreview, AirbnbIcon(), BrandActionIconProps, GoogleMapsIcon(), actionClasses, actionIcon() (+14 more)
 
 ### Community 46 - "StorePaymentAccountController.ts"
 Cohesion: 0.11
@@ -554,13 +554,13 @@ Nodes (9): appBaseUrl(), appendGatewayContext(), appendMotoboyContext(), log, mo
 Cohesion: 0.12
 Nodes (12): InternalShippingQuoteProvider, MelhorEnvioService, MelhorEnvioShippingQuoteProvider, ShippingQuoteProvider, QuoteInput, QuoteItemInput, ShippingService, QuoteItemResolved (+4 more)
 
-### Community 48 - "AuthService.ts"
+### Community 48 - "database.ts"
 Cohesion: 0.06
-Nodes (47): FEATURES_BY_TIER, normalize(), PlanFeatureKey, PlanFeatures, PlanTier, resolvePlanFeatures(), resolvePlanTier(), SubscriptionStatusLike (+39 more)
+Nodes (42): CustomerAddress, CustomerEmailOtp, CustomerPushToken, DestinationStoreRequest, EmailVerification, FeaturedProductRequest, InventoryMovement, MotoboyStoreRequest (+34 more)
 
 ### Community 49 - "AdminHighlights.tsx"
-Cohesion: 0.10
-Nodes (15): PaymentTechnicalModal(), renderJson(), DURATION_META, DurationUnit, HighlightsTab(), pageItems(), paymentMethodLabel(), PushTab() (+7 more)
+Cohesion: 0.11
+Nodes (13): DURATION_META, DurationUnit, HighlightsTab(), pageItems(), paymentMethodLabel(), PushTab(), getFeaturedPaymentRemainingMs(), getFeaturedPaymentStatusLabel() (+5 more)
 
 ### Community 50 - "seedCunhaTourismMap.ts"
 Cohesion: 0.15
@@ -571,24 +571,24 @@ Cohesion: 0.06
 Nodes (33): scripts, backfill:customer-addresses, backfill:destination-coordinates, backfill:destination-coordinates:dist, build, db:reset, dev, docs:schema (+25 more)
 
 ### Community 52 - "homeConfig.ts"
-Cohesion: 0.21
-Nodes (18): cloneJson(), DEFAULT_HOME_BANNERS, DEFAULT_MARKETING_POPUP, ensureUniqueIds(), getFallbackHomeConfig(), HomeBannerConfig, HomeBannerFit, isPlainObject() (+10 more)
+Cohesion: 0.13
+Nodes (26): HomeConfigService, EditableBannerInput, EditablePopupInput, isPlainObject(), normalizeBase64Input(), cloneJson(), DEFAULT_HOME_BANNERS, DEFAULT_MARKETING_POPUP (+18 more)
 
-### Community 53 - "DestinationPartnerPortal.tsx"
-Cohesion: 0.09
-Nodes (18): AuthLayout(), AuthLayoutProps, blankForm, buildStoreSignupUrl(), completionScore(), DestinationPartnerPortal(), resourceImage(), resourceTitle() (+10 more)
+### Community 53 - "AdminMotoboys.tsx"
+Cohesion: 0.12
+Nodes (20): AdaptiveAvatar(), AdaptiveAvatarProps, AvatarFitMode, containerToneByVariant, FormSection(), FormSectionProps, FormSectionVariant, glowToneByVariant (+12 more)
 
-### Community 54 - "apiClient"
+### Community 54 - "apiClient.ts"
 Cohesion: 0.08
-Nodes (12): apiClient, deliveryBillingService, motoboyService, paymentService, planService, promoPushService, subscriptionService, customerService (+4 more)
+Nodes (25): API_BASE_URL, apiClient, buildUrl(), defaultHeaders, getAdminRole(), getAdminToken(), getCustomerToken(), getDestinationPartnerToken() (+17 more)
 
 ### Community 55 - "PlanService.ts"
-Cohesion: 0.08
-Nodes (17): PlanService, settingsService, Plan, PlanName, SiteSetting, PlanRepository, DISABLED_PLANS, LEGACY_PLANS (+9 more)
+Cohesion: 0.10
+Nodes (16): PlanService, settingsService, SiteSetting, CRITICAL_ERROR_PATTERNS, EmailHealthFailureInput, DISABLED_PLANS, LEGACY_PLANS, MONTHLY_SEEDS (+8 more)
 
-### Community 57 - "apiClient.ts"
-Cohesion: 0.24
-Nodes (16): API_BASE_URL, buildUrl(), defaultHeaders, getAdminRole(), getAdminToken(), getCustomerToken(), getDestinationPartnerToken(), getLang() (+8 more)
+### Community 57 - "destinationWhatsApp.ts"
+Cohesion: 0.20
+Nodes (23): buildPhoneContactAction(), buildDestinationAddressLine(), buildDestinationInquiryMessage(), buildDestinationMapUrl(), buildDestinationRouteAddressLine(), buildHospitalityDeliveryReferenceLines(), buildHospitalityServiceRouteUrl(), buildLocationMessageLines() (+15 more)
 
 ### Community 58 - "useHubStoreDistances.ts"
 Cohesion: 0.09
@@ -599,23 +599,23 @@ Cohesion: 0.10
 Nodes (8): AuthController, buildMfaLoginOptions(), respondWithSuccess(), getMessage(), Lang, messages, normalizeLang(), resolveLang()
 
 ### Community 60 - "nativeAppBootstrap.ts"
-Cohesion: 0.06
-Nodes (42): AppErrorBoundary, Props, State, bootstrapNativeApp(), bootstrapPushNotifications(), checkForNativeBuildUpdate(), consumePendingPushNavigation(), ensureStoreOrderPushChannel() (+34 more)
+Cohesion: 0.05
+Nodes (47): AppErrorBoundary, Props, State, bootstrapNativeApp(), bootstrapPushNotifications(), checkForNativeBuildUpdate(), consumePendingPushNavigation(), ensureStoreOrderPushChannel() (+39 more)
 
 ### Community 62 - "HubHighlightsPage.tsx"
-Cohesion: 0.13
-Nodes (12): CategorizedHighlightItem, currency, getHighlightFilterGridClass(), HIGHLIGHT_CATEGORY_OPTIONS, HighlightCategoryKey, HighlightCategoryOption, HubHighlightItem, HubHighlightsPage() (+4 more)
+Cohesion: 0.14
+Nodes (11): CategorizedHighlightItem, currency, getHighlightFilterGridClass(), HIGHLIGHT_CATEGORY_OPTIONS, HighlightCategoryKey, HighlightCategoryOption, HubHighlightItem, HubHighlightsPage() (+3 more)
 
 ### Community 63 - "HospitalityServiceRoutePage.tsx"
-Cohesion: 0.17
-Nodes (21): AirbnbIcon(), BrandActionIconProps, GoogleMapsIcon(), buildGoogleDirectionsUrl(), buildGoogleNativeUrl(), buildWazeNativeUrl(), buildWazeUrl(), estimateMinutes() (+13 more)
+Cohesion: 0.14
+Nodes (23): isValidPoint(), lerp(), RouteCoords, RouteMapView(), RouteMapViewProps, buildGoogleDirectionsUrl(), buildGoogleNativeUrl(), buildWazeNativeUrl() (+15 more)
 
 ### Community 64 - "OrderController"
 Cohesion: 0.09
 Nodes (9): OrderController, parseOrderListFilters(), shouldAttachPublicEta(), base64UrlDecode(), base64UrlEncode(), createOrderAccessToken(), OrderAccessPayload, sign() (+1 more)
 
 ### Community 66 - "saveBase64Image"
-Cohesion: 0.21
+Cohesion: 0.20
 Nodes (24): main(), walkFiles(), saveBase64Image(), DEFAULT_PUBLIC_UPLOAD_FOLDERS, ensureLocalUploadDir(), ensureS3Configured(), getPublicObjectFromS3(), getS3Client() (+16 more)
 
 ### Community 67 - "seedGoncalvesTourismPdf.ts"
@@ -631,8 +631,8 @@ Cohesion: 0.08
 Nodes (25): dependencies, @capacitor/android, @capacitor/app, @capacitor/browser, @capacitor/camera, @capacitor/clipboard, @capacitor/core, @capacitor/filesystem (+17 more)
 
 ### Community 71 - "DestinationPartnerPortalService"
-Cohesion: 0.18
-Nodes (3): DestinationPartnerPortalService, normalizeEmail(), publicUrl()
+Cohesion: 0.14
+Nodes (6): DestinationPartnerPortalService, normalizeEmail(), normalizeZipCode(), publicUrl(), toNullableNumber(), toOptionalText()
 
 ### Community 72 - "seedMonteVerdeTourismMap.ts"
 Cohesion: 0.14
@@ -647,20 +647,20 @@ Cohesion: 0.20
 Nodes (20): ResolvedDestinationCoordinates, buildDestinationDistanceMeta(), buildDestinationStoreMatchMeta(), buildDestinationVisitorMatchMeta(), DESTINATION_LISTING_CATEGORIES, DESTINATION_PARTNER_TYPES, DestinationLocationContext, DestinationPartnerType (+12 more)
 
 ### Community 75 - "HospitalityPlace"
-Cohesion: 0.26
-Nodes (9): Hub de destinos, chalés e pousadas, DestinationBanner, DestinationListing, DestinationListingHospitalityPlace, DestinationPartnerRequest, DestinationStoreRequest, HospitalityPlace, HospitalityPlaceStoreLink (+1 more)
+Cohesion: 0.51
+Nodes (8): Hub de destinos, chalés e pousadas, DestinationBanner, DestinationListing, DestinationListingHospitalityPlace, DestinationPartnerRequest, HospitalityPlace, HospitalityPlaceStoreLink, TravelDestination
 
 ### Community 76 - "dependencies"
 Cohesion: 0.08
 Nodes (24): dependencies, @capacitor/app, @capacitor/browser, @capacitor/camera, @capacitor/clipboard, @capacitor/core, @capacitor/filesystem, @capacitor/push-notifications (+16 more)
 
 ### Community 77 - "DestinationPartnerRequestPage.tsx"
-Cohesion: 0.14
-Nodes (17): compressImageFileToDataUrl(), initialForm, MediaUploadField(), prepareImageUpload(), readFileAsDataUrl(), MediaUploadField(), BRAZIL_STATES, BrazilStateOption (+9 more)
+Cohesion: 0.13
+Nodes (18): compressImageFileToDataUrl(), initialForm, MediaUploadField(), prepareImageUpload(), readFileAsDataUrl(), MediaUploadField(), BRAZIL_STATES, BrazilStateOption (+10 more)
 
 ### Community 78 - "destinationListingClaim.ts"
-Cohesion: 0.22
-Nodes (14): PublicDestinationShell(), appendParam(), buildHospitalityPartnerRequestPath(), loadDestinationInviteRedirectPage(), buildHospitalityPlaceInviteMessage(), buildHospitalityPlacePublicInviteUrl(), buildListingClaimUrl(), buildListingInviteMessage() (+6 more)
+Cohesion: 0.20
+Nodes (15): PublicDestinationShell(), appendParam(), buildHospitalityPartnerRequestPath(), buildStoreSignupUrl(), loadDestinationInviteRedirectPage(), buildHospitalityPlaceInviteMessage(), buildHospitalityPlacePublicInviteUrl(), buildListingClaimUrl() (+7 more)
 
 ### Community 79 - "backfillDestinationCoordinates.ts"
 Cohesion: 0.16
@@ -670,21 +670,21 @@ Nodes (21): applyDestinationFallback(), buildAddress(), Candidate, geoLocationSe
 Cohesion: 0.17
 Nodes (20): candidateDayValues(), formatCompactTime(), formatCompactTimeWithContext(), formatNextOpeningLabel(), formatOpeningHoursForDay(), formatOpeningHoursSummary(), formatOpeningIntervalLabel(), getCurrentClosingTimeLabel() (+12 more)
 
-### Community 83 - "storeAvatar.ts"
-Cohesion: 0.09
-Nodes (22): HubFavoriteStore, HubFavoriteStores, HubFavoriteStoresProps, HubFeaturedCarousel, HubFeaturedCarouselItem, HubFeaturedCarouselProps, HubPremiumCarousel(), HubPremiumCarouselProps (+14 more)
+### Community 83 - "HubStoreCard.tsx"
+Cohesion: 0.10
+Nodes (19): HubFeaturedCarousel, HubFeaturedCarouselItem, HubFeaturedCarouselProps, HubPremiumCarousel(), HubPremiumCarouselProps, HubSearchProductItem, HubSearchProductResults, HubSearchProductResultsProps (+11 more)
 
 ### Community 85 - "seedSaoBentoTourismMap.ts"
 Cohesion: 0.16
 Nodes (19): getCtaType(), getCtaUrl(), listingDescription(), log, placeDescription(), seed(), seedBanners(), seedDestination() (+11 more)
 
 ### Community 86 - "EmailTemplateService.ts"
-Cohesion: 0.15
-Nodes (12): EmailSendLog, EmailSuppression, EmailTemplate, EmailTemplateVersion, UnsubscribeTokenPayload, RenderManagedTemplateInput, SaveTemplateInput, DEFAULT_EMAIL_TEMPLATES (+4 more)
+Cohesion: 0.14
+Nodes (9): EmailSendLog, EmailTemplate, EmailTemplateVersion, normalizeVariables(), RenderManagedTemplateInput, SaveTemplateInput, DEFAULT_EMAIL_TEMPLATES, EMAIL_TEMPLATE_BY_KEY (+1 more)
 
 ### Community 87 - "AppDataSource"
-Cohesion: 0.07
-Nodes (29): AppDataSource, DeliveryEvent, Order, OrderDelivery, OrderEtaEstimate, OrderItem, OrderPayment, log (+21 more)
+Cohesion: 0.06
+Nodes (43): AppDataSource, log, motoboyOrderService, motoboyService, pushService, log, orderEtaServiceV2, orderPaymentService (+35 more)
 
 ### Community 88 - "PlatformAdminController"
 Cohesion: 0.12
@@ -695,8 +695,8 @@ Cohesion: 0.19
 Nodes (9): ZipCodeCache, CachePayload, normalizeLookupPayload(), normalizeState(), normalizeText(), normalizeZipCode(), parseCoordinate(), cachedZip (+1 more)
 
 ### Community 90 - "adminQueueUx.ts"
-Cohesion: 0.14
-Nodes (16): addDaysToDateKey(), AdminQueueTab, AdminQueueTableGroup, AdminQueueTableOrder, AdminSalesReportRange, buildAdminTableGroups(), dateKeyInSaoPaulo(), filterAdminQueueProducts() (+8 more)
+Cohesion: 0.15
+Nodes (15): addDaysToDateKey(), AdminQueueTab, AdminQueueTableGroup, AdminQueueTableOrder, AdminSalesReportRange, buildAdminTableGroups(), dateKeyInSaoPaulo(), filterAdminQueueProducts() (+7 more)
 
 ### Community 91 - "apis/package.json"
 Cohesion: 0.10
@@ -748,11 +748,11 @@ Nodes (18): dependencies, @aws-sdk/client-s3, @aws-sdk/client-ssm, bcryptjs, cla
 
 ### Community 105 - "SuperAdminHomeConfig.tsx"
 Cohesion: 0.16
-Nodes (12): PROMO_SLIDES, PromoSlide, SegmentPromoCarousel(), SegmentPromoCarouselProps, buildPreviewSlides(), PREVIEW_STORES, SuperAdminHomeConfig(), HomeConfigPayload (+4 more)
+Nodes (11): PROMO_SLIDES, PromoSlide, SegmentPromoCarousel(), SegmentPromoCarouselProps, buildPreviewSlides(), PREVIEW_STORES, HomeBannerDraft, ActionTarget (+3 more)
 
 ### Community 106 - "homeConfigService.ts"
 Cohesion: 0.17
-Nodes (12): homeConfigService, API_BASE_URL, DEFAULT_HOME_CONFIG, HomeBannerDraft, HomeBannerFit, MarketingPopupDraft, normalizeBanner(), normalizeHomeConfigPayload() (+4 more)
+Nodes (12): homeConfigService, API_BASE_URL, DEFAULT_HOME_CONFIG, HomeBannerFit, HomeConfigPayload, MarketingPopupDraft, normalizeBanner(), normalizeHomeConfigPayload() (+4 more)
 
 ### Community 107 - "productService.ts"
 Cohesion: 0.16
@@ -763,8 +763,8 @@ Cohesion: 0.14
 Nodes (10): BentoFeatures(), HubFlowSimulator(), StepType, LandingUseCases(), TabType, ClientLogo, mockClientLogos, SocialProofMarquee() (+2 more)
 
 ### Community 110 - "clientRoutePrefetch.ts"
-Cohesion: 0.08
-Nodes (31): ClientBottomNav(), ClientBottomNavItem, ClientBottomNavProps, buildPartnerWhatsAppUrl(), DestinationPartnerCta(), DestinationPartnerCtaProps, normalizePhone(), PublicDestinationShellProps (+23 more)
+Cohesion: 0.09
+Nodes (25): ClientBottomNav(), ClientBottomNavItem, ClientBottomNavProps, buildPartnerWhatsAppUrl(), DestinationPartnerCta(), DestinationPartnerCtaProps, normalizePhone(), PublicDestinationShellProps (+17 more)
 
 ### Community 111 - "CommandProducer"
 Cohesion: 0.19
@@ -779,8 +779,8 @@ Cohesion: 0.12
 Nodes (16): devDependencies, supertest, ts-node, ts-node-dev, @types/bcryptjs, @types/cors, @types/express, @types/jsonwebtoken (+8 more)
 
 ### Community 115 - "EmailTemplateService"
-Cohesion: 0.23
-Nodes (5): EmailTemplateService, canDeactivateTemplate(), normalizeTemplateKey(), normalizeVariables(), EmailTemplateDefinition
+Cohesion: 0.24
+Nodes (5): EmailTemplateService, canDeactivateTemplate(), normalizeTemplateKey(), EmailTemplateDefinition, normalizeEmailTemplateCategory()
 
 ### Community 116 - "EmailAdminController.ts"
 Cohesion: 0.17
@@ -790,13 +790,13 @@ Nodes (6): actorFromRequest(), EmailAdminController, emailService, preferenceSer
 Cohesion: 0.18
 Nodes (14): orderService, buildOrdersPath(), buildOrdersPathWithQuery(), buildQueuePath(), FetchOrdersOptions, fetchPublicOrderById(), getStoreIdentifierFromSession(), isUuid() (+6 more)
 
-### Community 118 - "ClientAccount.tsx"
-Cohesion: 0.10
-Nodes (19): BrandingSettings(), primaryPalette, secondaryPalette, permissionMeta(), AccountMfaPanel(), PanelMode, Props, authServiceMock (+11 more)
+### Community 118 - "superAdminService.ts"
+Cohesion: 0.14
+Nodes (5): CustomerSecuritySection(), DEFAULT_FILTERS, API_BASE_URL, safeFetch(), superAdminService
 
-### Community 120 - "nativeBiometricService.ts"
+### Community 120 - "StorePage.tsx"
 Cohesion: 0.05
-Nodes (29): getCurrentPath(), isEligiblePath(), NativeAppNavigator(), authMock, ScrollState, SmartDrawerScrollArea(), SmartDrawerScrollAreaProps, SmartDrawerScrollAreaTone (+21 more)
+Nodes (35): brandingStorageKey(), defaultBranding, getPersistedBranding(), initialCustomer, OrdersQueue(), getOrderStatusTone(), POSTAL_PREPAID_PAYMENT_METHODS, PROFESSIONAL_LOCAL_PAYMENT_METHODS (+27 more)
 
 ### Community 122 - "SuperAdminEmailTemplates.tsx"
 Cohesion: 0.18
@@ -807,8 +807,8 @@ Cohesion: 0.14
 Nodes (13): compilerOptions, emitDecoratorMetadata, esModuleInterop, experimentalDecorators, module, outDir, resolveJsonModule, rootDir (+5 more)
 
 ### Community 126 - "bootstrap"
-Cohesion: 0.05
-Nodes (33): initial, validateCriticalRuntimeConfig(), swaggerSpec, scheduleAwaitingPaymentExpirationJob(), log, scheduleDeliveryExpirationJob(), log, scheduleFaceVerifyJob() (+25 more)
+Cohesion: 0.11
+Nodes (20): swaggerSpec, scheduleAwaitingPaymentExpirationJob(), scheduleDeliveryExpirationJob(), scheduleFaceVerifyJob(), log, scheduleStoreDashboardSnapshotJob(), snapshotService, scheduleSubscriptionExpirationJob() (+12 more)
 
 ### Community 128 - "Product Inventory Controller"
 Cohesion: 0.15
@@ -839,8 +839,8 @@ Cohesion: 0.15
 Nodes (12): compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, lib, module, moduleResolution, outDir, rootDir (+4 more)
 
 ### Community 136 - "emailTemplateRenderer.ts"
-Cohesion: 0.28
-Nodes (9): escapeHtml(), getEmailPublicBaseUrl(), normalizeBrandingContent(), normalizeVariables(), RenderEmailTemplateInput, renderHtmlTemplate(), renderPremiumEmailLayout(), renderTextTemplate() (+1 more)
+Cohesion: 0.35
+Nodes (10): isSuppressibleEmailCategory(), escapeHtml(), getEmailPublicBaseUrl(), normalizeBrandingContent(), normalizeVariables(), RenderEmailTemplateInput, renderHtmlTemplate(), renderPremiumEmailLayout() (+2 more)
 
 ### Community 137 - "AdminDashboardV2.tsx"
 Cohesion: 0.11
@@ -862,13 +862,13 @@ Nodes (9): branch, bump, cwd, hasStagedChanges, hasUnstagedTrackedChanges, pkg, 
 Cohesion: 0.25
 Nodes (7): nextFridayDate(), OPTIONAL_STORE_SLUG, seed(), seed(), seed(), setup(), runMigrations()
 
-### Community 142 - "documents.ts"
-Cohesion: 0.44
+### Community 142 - ".updateProfile"
+Cohesion: 0.29
 Nodes (6): isRepeated(), normalizeDocument(), onlyDigits(), validateCnpj(), validateCpf(), validateDocument()
 
-### Community 143 - "EmailHealthService.ts"
-Cohesion: 0.25
-Nodes (7): CRITICAL_ERROR_PATTERNS, EmailHealthFailureInput, EmailHealthService, maskEmail(), parseDateMs(), sanitizeErrorMessage(), mocks
+### Community 143 - "EmailHealthService"
+Cohesion: 0.29
+Nodes (5): EmailHealthService, maskEmail(), parseDateMs(), sanitizeErrorMessage(), mocks
 
 ### Community 144 - "MercadoPagoService"
 Cohesion: 0.47
@@ -883,8 +883,8 @@ Cohesion: 0.33
 Nodes (10): buildHospitalityPlaceInstallUrl(), buildHospitalityPlaceIosHubQrUrl(), buildHospitalityPlacePlayStoreQrUrl(), buildHospitalityPlacePosterFileName(), buildHospitalityPlacePublicPath(), buildHospitalityPlaceSmartQrUrl(), escapePosterHtml(), HospitalityQrPosterInput (+2 more)
 
 ### Community 147 - "userFriendlyErrors.ts"
-Cohesion: 0.30
-Nodes (10): getErrorCode(), getErrorMessage(), getErrorStatus(), INVALID_CREDENTIALS_PATTERNS, isTransientConnectionError(), NETWORK_ERROR_PATTERNS, normalizeUserFacingError(), SESSION_ERROR_PATTERNS (+2 more)
+Cohesion: 0.29
+Nodes (11): getErrorCode(), getErrorMessage(), getErrorStatus(), INVALID_CREDENTIALS_PATTERNS, isTransientConnectionError(), NETWORK_ERROR_PATTERNS, normalizeUserFacingError(), SESSION_ERROR_PATTERNS (+3 more)
 
 ### Community 148 - "backup-config.sh"
 Cohesion: 0.27
@@ -910,9 +910,9 @@ Nodes (4): normalizeSegment(), PortfolioCase, PortfolioStore, segmentLabel()
 Cohesion: 0.15
 Nodes (16): log, seed(), getCtaType(), getCtaUrl(), linkAllActiveListingsToHospitalityPlaces(), seedDestination(), seedHospitalityPlaces(), seedListings() (+8 more)
 
-### Community 155 - "postalTracking.ts"
-Cohesion: 0.25
-Nodes (16): addPostalBusinessDays(), buildSiteCorreiosTrackingUrl(), getPostalEstimatedDays(), getPostalEventSourceCopy(), getPostalExpectedDeliveryDeadlineMs(), getPostalStatusCopy(), getPostalTrackingExternalUrl(), getPostalTrackingHeadline() (+8 more)
+### Community 155 - "ProfileDrawer.tsx"
+Cohesion: 0.15
+Nodes (11): ScrollState, SmartDrawerScrollArea(), SmartDrawerScrollAreaProps, SmartDrawerScrollAreaTone, toneClasses, AccessProfile, DrawerAction, DrawerContext (+3 more)
 
 ### Community 156 - "GeoLocationService.ts"
 Cohesion: 0.20
@@ -970,37 +970,37 @@ Nodes (7): browserslist, development, production, name, private, type, version
 Cohesion: 0.25
 Nodes (7): compilerOptions, module, moduleResolution, strict, target, types, include
 
-### Community 179 - "mfaDevice.ts"
-Cohesion: 0.21
-Nodes (10): authService, customerAccountService, canSendTrustedToken(), createId(), forgetTrustedMfaDevice(), getMfaDeviceContext(), MfaAuthMode, persistTrustedMfaDevice() (+2 more)
+### Community 179 - "FaceVerifyService.ts"
+Cohesion: 0.19
+Nodes (9): log, FaceStatus, FaceVerifyService, fileKeyToPath(), labelFromScore(), log, readFileKeyAsDataUrl(), ScoreLabel (+1 more)
 
 ### Community 180 - "backend/src/config/ssm.ts"
 Cohesion: 0.38
 Nodes (5): loadSsmEnv(), applySsmEnvObject(), ApplySsmEnvOptions, parseJson(), ssmPreferredKeys
 
-### Community 182 - "EmailPublicController.ts"
-Cohesion: 0.38
-Nodes (3): EmailPublicController, maskEmail(), preferenceService
+### Community 182 - "EmailPreferenceService.ts"
+Cohesion: 0.21
+Nodes (5): EmailPublicController, maskEmail(), preferenceService, EmailSuppression, UnsubscribeTokenPayload
 
 ### Community 183 - "MapsController.ts"
 Cohesion: 0.38
 Nodes (4): geoLocationService, isValidAddress(), isValidCoordinates(), MapsController
 
-### Community 187 - "HomeConfigService.ts"
-Cohesion: 0.26
-Nodes (8): HomeConfigService, EditableBannerInput, EditablePopupInput, isPlainObject(), normalizeBase64Input(), HomeConfig, MarketingPopupConfig, ResolvedHomeConfig
+### Community 187 - "NativeAppNavigator.tsx"
+Cohesion: 0.24
+Nodes (4): getCurrentPath(), isEligiblePath(), NativeAppNavigator(), authMock
 
-### Community 189 - ".sanitizeListingPayload"
-Cohesion: 0.43
-Nodes (3): normalizeZipCode(), toNullableNumber(), toOptionalText()
+### Community 188 - "SystemGuidePage.tsx"
+Cohesion: 0.18
+Nodes (9): Feature, features, GuideIcon, guideTimeline, Journey, journeys, metrics, platformModules (+1 more)
+
+### Community 189 - "emailRisk.ts"
+Cohesion: 0.40
+Nodes (7): BUILT_IN_DISPOSABLE_EMAIL_DOMAINS, COMMON_EMAIL_DOMAIN_TYPOS, extractEmailDomain(), getEmailDomainTypoMessage(), getEmailDomainTypoSuggestion(), isAllowlistedEmail(), isDisposableEmailDomain()
 
 ### Community 190 - "GeoLocationService.test.ts"
 Cohesion: 0.29
 Nodes (3): estimateRoute, originalGeocodingEnv, service
-
-### Community 191 - "IconBox.tsx"
-Cohesion: 0.29
-Nodes (6): IconBox(), IconBoxProps, IconBoxSize, IconBoxTone, sizeClasses, toneClasses
 
 ### Community 192 - "orderCancellation.ts"
 Cohesion: 0.38
@@ -1058,9 +1058,9 @@ Nodes (3): addQueue, AppNotification, notificationStorage
 Cohesion: 0.40
 Nodes (4): deploy-api.sh script, DOCKER_CONFIG, HOME, PATH
 
-### Community 207 - "RouteMapView.tsx"
-Cohesion: 0.28
-Nodes (5): isValidPoint(), lerp(), RouteCoords, RouteMapView(), RouteMapViewProps
+### Community 207 - "useHubFavorites.test.tsx"
+Cohesion: 0.38
+Nodes (4): FavoritesHarness(), stores, TestStore, useHubFavorites()
 
 ### Community 210 - "backend/package.json"
 Cohesion: 0.50
@@ -1126,53 +1126,45 @@ Nodes (3): AppVersionBadge(), AppVersionBadgeProps, getVersionLabel()
 Cohesion: 0.23
 Nodes (5): AccessLog, accessLogRepository, log, AccessLogFilters, AccessLogRepository
 
-### Community 344 - "AdminLayout.tsx"
-Cohesion: 0.10
-Nodes (27): AdminMobileBottomNav(), categoryGlyph(), categoryVisualMeta(), getContrastTextColor(), Header(), isEspetoCategory(), MenuView(), normalizeWhatsApp() (+19 more)
-
 ### Community 345 - "command-producer.ts"
 Cohesion: 0.21
 Nodes (7): CommandBroker, formatQueueTopic(), QueueTopic, ServiceRequest, ProcessorHandler, Transporter, InMemoryTransporter
 
 ### Community 346 - "Painel do Lojista V2 — Plano e Matriz de Cobertura"
-Cohesion: 0.29
-Nodes (6): Decisões, Estados obrigatórios em toda região de dados, Fora de escopo / salvaguardas, Gates, Matriz de cobertura (item de menu → rota V2 → implementação → validação), Painel do Lojista V2 — Plano e Matriz de Cobertura
+Cohesion: 0.22
+Nodes (8): Decisões, Estados obrigatórios em toda região de dados, Fora de escopo / salvaguardas, Gates, Matriz de cobertura (item de menu → rota V2 → implementação → validação), Painel do Lojista V2 — Plano e Matriz de Cobertura, Resultado da validação (31/10/2026, commits 3d438c38 + 56efd418), Rollback
 
-### Community 347 - "orderItems.ts"
-Cohesion: 0.67
-Nodes (5): buildOrderWhatsappHighlightItemLines(), getOrderItemLineTotal(), getOrderItemOriginalLineTotal(), getOrderItemQuantity(), toFiniteNumber()
+### Community 347 - "useHubSearchPlaceholder"
+Cohesion: 0.60
+Nodes (3): SEARCH_PLACEHOLDERS, PlaceholderHarness(), useHubSearchPlaceholder()
 
 ### Community 348 - "StoreMapView.tsx"
 Cohesion: 0.40
 Nodes (5): buildOpenStreetMapEmbedUrl(), clampCoordinate(), MarkerInput, StoreMapView(), StoreMapViewProps
 
-### Community 349 - "buildOrderWhatsappReceiptMessage"
-Cohesion: 0.47
-Nodes (6): buildOrderWhatsappReceiptMessage(), centerReceiptText(), fitReceiptColumns(), receiptSeparator(), sanitizeReceiptText(), wrapReceiptWords()
-
-### Community 351 - "orderRefund.ts"
-Cohesion: 0.60
-Nodes (3): firstPresent(), getOrderRefundSnapshot(), OrderRefundSnapshot
+### Community 349 - "subscriptionService.ts"
+Cohesion: 0.50
+Nodes (3): subscriptionService, cacheByStore, inflightByStore
 
 ## Knowledge Gaps
-- **1346 isolated node(s):** `Decisões`, `Matriz de cobertura (item de menu → rota V2 → implementação → validação)`, `Estados obrigatórios em toda região de dados`, `Gates`, `Fora de escopo / salvaguardas` (+1341 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 2141 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **135 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **1348 isolated node(s):** `Decisões`, `Matriz de cobertura (item de menu → rota V2 → implementação → validação)`, `Estados obrigatórios em toda região de dados`, `Gates`, `Fora de escopo / salvaguardas` (+1343 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 2143 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **137 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `wait()` connect `AdminLogin.tsx` to `ProductService`?**
-  _High betweenness centrality (0.296) - this node is a cross-community bridge._
-- **Why does `StoreRepository` connect `StoreRepository` to `logger.ts`, `PaymentService.ts`, `PlatformAdminController.ts`, `User`, `ProductService`, `OrderService`, `ShippingService.ts`, `AuthService.ts`, `AppDataSource`, `database.ts`?**
-  _High betweenness centrality (0.143) - this node is a cross-community bridge._
-- **Why does `ProductService` connect `ProductService` to `StoreRepository`?**
-  _High betweenness centrality (0.141) - this node is a cross-community bridge._
+- **Why does `wait()` connect `ProductService` to `AdminLogin.tsx`?**
+  _High betweenness centrality (0.280) - this node is a cross-community bridge._
+- **Why does `StoreRepository` connect `StoreRepository` to `logger.ts`, `PaymentService.ts`, `PlatformAdminController.ts`, `Motoboy`, `ProductService`, `OrderService`, `ShippingService.ts`, `database.ts`, `AppDataSource`?**
+  _High betweenness centrality (0.174) - this node is a cross-community bridge._
+- **Why does `ProductService` connect `ProductService` to `database.ts`?**
+  _High betweenness centrality (0.102) - this node is a cross-community bridge._
 - **What connects `Decisões`, `Matriz de cobertura (item de menu → rota V2 → implementação → validação)`, `Estados obrigatórios em toda região de dados` to the rest of the system?**
-  _1346 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1348 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `index.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.04941660947151681 - nodes in this community are weakly interconnected._
-- **Should `ClientAuth.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.08392603129445235 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0429202608878603 - nodes in this community are weakly interconnected._
+- **Should `AdminLogin.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.04784688995215311 - nodes in this community are weakly interconnected._
 - **Should `logger.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.02204044535332879 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.02563323201621074 - nodes in this community are weakly interconnected._
