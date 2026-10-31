@@ -375,7 +375,7 @@ export const FilaSection = () => {
     }
   };
 
-  const selectedMeta = selected ? getV2NextStatus(selected.status, selected.fulfillmentMode) : null;
+  const selectedMeta = selected ? getV2NextStatus(selected.status, selected) : null;
   const syncLabel =
     lastSync == null
       ? ''
@@ -586,6 +586,20 @@ export const FilaSection = () => {
         order={selected}
         onPaid={() => {
           setChargeOpen(false);
+          // Paridade GQ:4087-4101 — pago no balcão conclui pedido pronto
+          // (não-delivery); delivery segue o fluxo do motoboy.
+          const order = selected;
+          const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
+          if (order && !isDelivery && String(order.status || '').toLowerCase() === 'ready') {
+            void orderService
+              .updateStatus(order.id, 'done')
+              .catch(() => undefined)
+              .finally(() => {
+                setSelected(null);
+                void orderService.fetchQueue(storeId).then((data: any[]) => applyServerOrders(data || []));
+              });
+            return;
+          }
           void orderService.fetchQueue(storeId).then((data: any[]) => applyServerOrders(data || []));
         }}
         storePixKey={storePixKey}

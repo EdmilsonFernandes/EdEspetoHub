@@ -544,18 +544,21 @@ const StoreBrandHeader = ({ openNow }: { openNow: boolean | null }) => {
         <div className="from-primary/15 via-primary/5 to-transparent relative h-24 bg-gradient-to-br sm:h-32" />
       )}
       <div className="flex flex-wrap items-end justify-between gap-3 px-4 pb-3">
-        <div className="-mt-8 flex min-w-0 items-end gap-3 sm:-mt-10">
+        <div className="-mt-6 flex min-w-0 items-end gap-3 sm:-mt-10">
           {logoUrl ? (
-            <Avatar className="border-background size-16 rounded-xl border-2 shadow-sm sm:size-20">
+            <Avatar className="border-background size-14 rounded-xl border-2 shadow-sm sm:size-20">
               <AvatarImage src={logoUrl} alt={storeName} />
             </Avatar>
           ) : (
-            <span className="bg-primary text-primary-foreground border-background flex size-16 items-center justify-center rounded-xl border-2 text-lg font-bold uppercase shadow-sm sm:size-20 sm:text-xl">
+            <span className="bg-primary text-primary-foreground border-background flex size-14 items-center justify-center rounded-xl border-2 text-base font-bold uppercase shadow-sm sm:size-20 sm:text-xl">
               {storeName.slice(0, 2)}
             </span>
           )}
-          <div className="min-w-0 pb-0.5">
-            <h2 className="truncate text-lg font-semibold tracking-tight sm:text-xl" title={storeName}>
+          <div className="min-w-0 flex-1 pb-0.5">
+            <h2
+              className="text-lg leading-tight font-semibold tracking-tight break-words sm:text-xl"
+              title={storeName}
+            >
               {storeName}
             </h2>
             <p className="text-muted-foreground truncate text-xs sm:text-sm">

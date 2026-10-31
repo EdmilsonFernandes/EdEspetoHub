@@ -2,16 +2,52 @@
   "appName": "Já no Caminho",
   "version": "0.1.10",
   "versionBaseLabel": "v0.1.10",
-  "versionDisplaySuffix": "7bc09f99",
-  "versionLabel": "v0.1.10.7bc09f99",
-  "versionInternal": "0.1.10+20261031.085143.7bc09f99",
-  "buildId": "0.1.10+20261031.085143.7bc09f99-20261031.085143-7bc09f99",
-  "builtAt": "2026-10-31T08:51:43.336Z",
-  "commitHash": "7bc09f9965ab9d4150266b907305bf9abdba1551",
-  "shortHash": "7bc09f99",
+  "versionDisplaySuffix": "23995fc0",
+  "versionLabel": "v0.1.10.23995fc0",
+  "versionInternal": "0.1.10+20261031.104559.23995fc0",
+  "buildId": "0.1.10+20261031.104559.23995fc0-20261031.104559-23995fc0",
+  "builtAt": "2026-10-31T10:45:59.059Z",
+  "commitHash": "23995fc0482caf60f94b01afcd38159fc458b9b9",
+  "shortHash": "23995fc0",
   "branch": "feat/dashboard-v2",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "23995fc0482caf60f94b01afcd38159fc458b9b9",
+      "shortHash": "23995fc0",
+      "dateIso": "2026-10-31T07:21:38-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "docs(admin-v2): briefing V2.3 — jornadas completas, queue primeiro, backlog do Edmilson",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/23995fc0482caf60f94b01afcd38159fc458b9b9"
+    },
+    {
+      "hash": "29044357ba968fd1ce1350c0732e5e08939749e4",
+      "shortHash": "29044357",
+      "dateIso": "2026-10-31T06:31:27-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(admin-v2): V2.2 template-first — header de marca, menu premium e pedidos refeito",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/29044357ba968fd1ce1350c0732e5e08939749e4"
+    },
+    {
+      "hash": "06907e5f074f814674923d66d1e52d98424c5f86",
+      "shortHash": "06907e5f",
+      "dateIso": "2026-10-31T06:05:29-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): painel esquerdo do login volta ao conteúdo original",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/06907e5f074f814674923d66d1e52d98424c5f86"
+    },
+    {
+      "hash": "038c426a0490b782101a0b5b5e757b566b7071bd",
+      "shortHash": "038c426a",
+      "dateIso": "2026-10-31T00:15:31-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(admin): login web com pele split-screen do bloco ReUI auth-2",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/038c426a0490b782101a0b5b5e757b566b7071bd"
+    },
     {
       "hash": "7bc09f9965ab9d4150266b907305bf9abdba1551",
       "shortHash": "7bc09f99",
@@ -245,42 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(design): ciclo 2 do redesign premium — hub core-first, rastreio hero, checkout 1 página",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/670bc40970e3816cd429ca46ecbc3acbf2c44110"
-    },
-    {
-      "hash": "cc016b08bf9c4f9d8311670e6093aeae75750b79",
-      "shortHash": "cc016b08",
-      "dateIso": "2026-10-18T18:55:31-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): B0 tokens azul + B1 vitrine — teal sai da marca (ciclo 1 do redesign)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/cc016b08bf9c4f9d8311670e6093aeae75750b79"
-    },
-    {
-      "hash": "a904412295d99e2d861eba1edd71f9ae3f6c6843",
-      "shortHash": "a9044122",
-      "dateIso": "2026-10-18T18:17:46-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(ux): mock v3 — tela Pix redesenhada (QR canvas realista, Pagar agora primário)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/a904412295d99e2d861eba1edd71f9ae3f6c6843"
-    },
-    {
-      "hash": "9eba3d7b70fdcaf124ae665b69c725302ba655ac",
-      "shortHash": "9eba3d7b",
-      "dateIso": "2026-10-18T18:13:55-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(ux): mock v2 — rail vertical vira pills sticky, mesa=comanda, hub core-first",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/9eba3d7b70fdcaf124ae665b69c725302ba655ac"
-    },
-    {
-      "hash": "817f761c7904e77426e38ccdd4ebf8b5838f726e",
-      "shortHash": "817f761c",
-      "dateIso": "2026-10-18T18:04:36-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(ux): mock redesign premium app do cliente + ata da mesa de gerentes",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/817f761c7904e77426e38ccdd4ebf8b5838f726e"
     }
   ]
 }

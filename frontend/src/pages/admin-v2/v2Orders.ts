@@ -7,6 +7,7 @@ export type V2OrderStatus =
   | 'ready_for_delivery'
   | 'waiting_for_motoboy'
   | 'in_delivery'
+  | 'dispatched'
   | 'done'
   | 'delivered'
   | 'finished'
@@ -33,7 +34,7 @@ export const V2_BOARD_COLUMNS: Array<{ id: string; title: string; statuses: V2Or
   { id: 'pending', title: 'Novos', statuses: ['pending'] },
   { id: 'preparing', title: 'Preparando', statuses: ['preparing'] },
   { id: 'ready', title: 'Prontos', statuses: ['ready', 'ready_for_delivery', 'waiting_for_motoboy'] },
-  { id: 'in_delivery', title: 'Em entrega', statuses: ['in_delivery'] },
+  { id: 'in_delivery', title: 'Em rota', statuses: ['in_delivery', 'dispatched'] },
 ];
 
 export type V2StatusMeta = {
@@ -49,8 +50,9 @@ export const V2_STATUS_META: Record<string, V2StatusMeta> = {
   preparing: { label: 'Preparando', badge: 'bg-amber-500/10 text-amber-700 border-amber-500/25 dark:text-amber-400', column: 'preparing' },
   ready: { label: 'Pronto', badge: 'bg-violet-500/10 text-violet-700 border-violet-500/25 dark:text-violet-400', column: 'ready' },
   ready_for_delivery: { label: 'Pronto p/ entrega', badge: 'bg-violet-500/10 text-violet-700 border-violet-500/25 dark:text-violet-400', column: 'ready' },
-  waiting_for_motoboy: { label: 'Aguardando entregador', badge: 'bg-violet-500/10 text-violet-700 border-violet-500/25 dark:text-violet-400', column: 'ready' },
-  in_delivery: { label: 'Em entrega', badge: 'bg-sky-500/10 text-sky-700 border-sky-500/25 dark:text-sky-400', column: 'in_delivery' },
+  waiting_for_motoboy: { label: 'Aguardando entregador', badge: 'bg-amber-500/10 text-amber-700 border-amber-500/25 dark:text-amber-400', column: 'ready' },
+  in_delivery: { label: 'Em rota', badge: 'bg-sky-500/10 text-sky-700 border-sky-500/25 dark:text-sky-400', column: 'in_delivery' },
+  dispatched: { label: 'Despachado', badge: 'bg-indigo-500/10 text-indigo-700 border-indigo-500/25 dark:text-indigo-400', column: 'in_delivery' },
   done: { label: 'Concluído', badge: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/25 dark:text-emerald-400' },
   delivered: { label: 'Entregue', badge: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/25 dark:text-emerald-400' },
   finished: { label: 'Finalizado', badge: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/25 dark:text-emerald-400' },
@@ -93,26 +95,37 @@ export const getV2AgeTone = (createdAt: unknown): 'ok' | 'warn' | 'late' => {
   return 'ok';
 };
 
-/** Próximo status no fluxo (avanço em 1 toque) — espelha handleAdvance do GrillQueue. */
+/** Próximo status no fluxo — espelha os botões do GrillQueue por modalidade
+ *  (GQ:2876-3130). waiting_for_motoboy→in_delivery é ação do MOTOBOY (sem
+ *  botão admin); in_delivery→done fecha no app do motoboy. */
 export const getV2NextStatus = (
   status: string,
-  fulfillmentMode?: string
+  order?: any
 ): { status: string; label: string } | null => {
   const normalized = String(status || '').toLowerCase();
-  const isPostal = String(fulfillmentMode || '').toLowerCase() === 'postal';
+  const type = String(order?.type || '').toLowerCase();
+  const isDelivery = type === 'delivery';
+  const isPostal = isDelivery && String(order?.fulfillmentMode || '').toLowerCase() === 'postal';
   switch (normalized) {
     case 'pending':
-      return { status: 'preparing', label: 'Começar a preparar' };
+      return { status: 'preparing', label: 'Iniciar atendimento' };
     case 'preparing':
-      return isPostal
-        ? { status: 'ready', label: 'Pronto para postagem' }
-        : { status: 'ready_for_delivery', label: 'Marcar como pronto' };
+      if (isPostal) return { status: 'ready', label: 'Pronto para postagem' };
+      if (isDelivery) return { status: 'ready_for_delivery', label: 'Marcar pronto' };
+      return { status: 'ready', label: type === 'table' ? 'Marcar pronto' : 'Pronto p/ retirada' };
     case 'ready':
+      if (isPostal) return { status: 'dispatched', label: 'Informar rastreio e postar' };
+      if (isDelivery) return { status: 'waiting_for_motoboy', label: 'Aguardar entregador' };
+      return { status: 'done', label: 'Confirmar retirada' };
     case 'ready_for_delivery':
+      return { status: 'waiting_for_motoboy', label: 'Aguardar entregador' };
     case 'waiting_for_motoboy':
-      return { status: 'in_delivery', label: 'Saiu para entrega' };
+      if (isPostal) return { status: 'finished', label: 'Finalizar pedido' };
+      return null; // quem retira é o motoboy (app dele)
     case 'in_delivery':
-      return { status: 'done', label: 'Concluir pedido' };
+      return null; // fecha com código de entrega no app do motoboy
+    case 'dispatched':
+      return { status: 'finished', label: 'Finalizar pedido' };
     default:
       return null;
   }
