@@ -8,6 +8,10 @@ import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, fo
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
+import { calcWeightSubtotalCents, formatQuantityLabel, isWeightProduct } from '../utils/saleUnit';
+
+/** Item de pedido vendido por peso (snapshot saleUnit do OrderItem). */
+const isWeightItem = isWeightProduct;
 import { Hash, Storefront, Truck, ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, UsersThree, CheckSquare, SquaresFour, Rows, Printer, MapPin, Phone, MagnifyingGlass, DeviceMobileCamera } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -211,8 +215,10 @@ export function AdminOrders() {
     const total = Number(order.total || 0);
     const safeFee = Number.isFinite(fee) ? fee : 0;
     const itemsTotal = Math.max(0, total - safeFee);
+    // Peso (30/10): linha por peso conta 1 "item" (750 g ≠ 750 itens).
     const itemCount = (order?.items || []).reduce(
-      (sum: number, item: any) => sum + Number(item?.qty ?? item?.quantity ?? 1),
+      (sum: number, item: any) =>
+        sum + (isWeightItem(item) ? 1 : Number(item?.qty ?? item?.quantity ?? 1)),
       0
     );
     return { total, fee: safeFee, itemsTotal, itemCount };
@@ -692,10 +698,18 @@ export function AdminOrders() {
                           {previewItems.map((item, itemIndex) => (
                             <div key={`${item.id || item.name}-${itemIndex}`} className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2 min-w-0">
-                                <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px] font-black text-slate-600">{item.qty}</span>
+                                <span
+                                  className={`inline-flex shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px] font-black text-slate-600 ${isWeightItem(item) ? 'min-w-[3.2rem] px-1.5 py-0.5 h-5' : 'h-5 w-5'}`}
+                                >
+                                  {isWeightItem(item) ? formatQuantityLabel(Number(item.qty), 'WEIGHT') : item.qty}
+                                </span>
                                 <span className="truncate text-[12px] font-semibold text-slate-700">{item.name}</span>
                               </div>
-                              <span className="shrink-0 text-[12px] font-semibold text-slate-600">{formatCurrency((item.unitPrice ?? item.price ?? 0) * item.qty)}</span>
+                              <span className="shrink-0 text-[12px] font-semibold text-slate-600">
+                                {isWeightItem(item)
+                                  ? formatCurrency(calcWeightSubtotalCents(Number(item.unitPriceSnapshot ?? item.unitPrice ?? item.price) || 0, Number(item.qty)) / 100)
+                                  : formatCurrency((item.unitPrice ?? item.price ?? 0) * item.qty)}
+                              </span>
                             </div>
                           ))}
                           {remaining > 0 && <p className="text-[11px] text-slate-400">+{remaining} item(ns)</p>}
@@ -886,7 +900,7 @@ export function AdminOrders() {
                                 </div>
                                 <div className="flex flex-col">
                                   <span className="font-semibold">
-                                    {item.qty}x {item.name}
+                                    {isWeightItem(item) ? `${formatQuantityLabel(Number(item.qty), 'WEIGHT')} de ${item.name}` : `${item.qty}x ${item.name}`}
                                   </span>
                                   <div className="flex flex-wrap gap-1 mt-1">
                                     {item?.cookingPoint && (
@@ -1015,7 +1029,9 @@ export function AdminOrders() {
                           {(order.items || []).length === 0
                             ? '-'
                             : order.items
-                                .map((item) => `${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
+                                .map((item) =>
+                                  `${isWeightItem(item) ? formatQuantityLabel(Number(item.qty), 'WEIGHT') : `${item.qty}x`} ${item.name} ${formatItemOptions(item)}`.trim()
+                                )
                                 .join(', ')}
                         </td>
 	                        <td className="py-3 pr-4">

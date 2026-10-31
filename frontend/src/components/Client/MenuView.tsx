@@ -34,6 +34,7 @@ import {
   ArrowCounterClockwise,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
+import { isWeightProduct } from "../../utils/saleUnit";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { inputAssistProps } from "../../utils/inputAssist";
@@ -1664,20 +1665,23 @@ export const MenuView = ({
 
                     <div className="mt-2.5 flex flex-col items-start gap-1.5">
                       {(() => {
+                        // Peso (30/10): preço anunciado por kg ("R$ 10,00/kg") —
+                        // o cliente escolhe o peso no modal e vê o valor fechado.
+                        const kgSuffix = isWeightProduct(item) ? '/kg' : '';
                         const priceNode = (
                           <div className="flex items-baseline gap-1.5 leading-none">
                             {resolvePromoPrice(item) ? (
                               <>
                                 <span className="text-[15px] font-bold tabular-nums tracking-tight text-promo-ink">
-                                  {formatCurrency(resolvePromoPrice(item))}
+                                  {formatCurrency(resolvePromoPrice(item))}{kgSuffix}
                                 </span>
                                 <span className="text-[11px] font-medium text-slate-400 line-through">
-                                  {formatCurrency(item.price)}
+                                  {formatCurrency(item.price)}{kgSuffix}
                                 </span>
                               </>
                             ) : (
                               <span className="text-[15px] font-bold tabular-nums tracking-tight text-slate-900">
-                                {formatCurrency(item.price)}
+                                {formatCurrency(item.price)}{kgSuffix}
                               </span>
                             )}
                           </div>
@@ -1691,7 +1695,7 @@ export const MenuView = ({
                                 A partir de
                               </span>
                               <span className="text-[15px] font-bold tabular-nums tracking-tight text-slate-900">
-                                {formatCurrency(item.price)}
+                                {formatCurrency(item.price)}{kgSuffix}
                               </span>
                             </div>
                           );

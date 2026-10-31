@@ -30,6 +30,7 @@ import {
 import { DeviceMobileCamera } from "@phosphor-icons/react";
 import { ChargeSheet } from "./ChargeSheet";
 import { orderService } from "../../services/orderService";
+import { formatQuantityLabel, isWeightProduct } from "../../utils/saleUnit";
 import { PostalShipmentModal } from "./PostalShipmentModal";
 import { storeService } from "../../services/storeService";
 import { productService } from "../../services/productService";
@@ -2432,7 +2433,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             .map((item: any) => {
               const qty = Number(item?.qty ?? item?.quantity ?? 0);
               const name = String(item?.name || item?.product?.name || 'Item');
-              return `${qty}x ${name}`;
+              return isWeightProduct(item) ? `${formatQuantityLabel(qty, 'WEIGHT')} de ${name}` : `${qty}x ${name}`;
             })
             .join(' | ')
         : '';
@@ -3537,10 +3538,17 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   {selectedTableGroup.orders.map((order: any) => {
                     const statusMeta = getStatusStyles(order.status, order.type, order);
                     const orderItems = Array.isArray(order?.items) ? order.items : [];
-                    const itemsCount = orderItems.reduce((sum: number, item: any) => sum + Number(item?.qty || item?.quantity || 0), 0);
+                    const itemsCount = orderItems.reduce(
+                      (sum: number, item: any) => sum + (isWeightProduct(item) ? 1 : Number(item?.qty || item?.quantity || 0)),
+                      0
+                    );
                     const itemsPreview = orderItems
                       .slice(0, 3)
-                      .map((item: any) => `${Number(item?.qty || item?.quantity || 0) || 1}x ${String(item?.name || 'Item')}`)
+                      .map((item: any) =>
+                        isWeightProduct(item)
+                          ? `${formatQuantityLabel(Number(item?.qty || item?.quantity || 0), 'WEIGHT')} ${String(item?.name || 'Item')}`
+                          : `${Number(item?.qty || item?.quantity || 0) || 1}x ${String(item?.name || 'Item')}`
+                      )
                       .join(' • ');
                     const orderAgeMs = order?.createdAt ? Math.max(0, currentTime - new Date(order.createdAt).getTime()) : 0;
 
@@ -4669,7 +4677,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   {(order.items || []).slice(0, 3).map((item) => (
                     <div key={item.id} className="flex items-center justify-between text-xs text-slate-600">
                       <span className="truncate">
-                        {item.qty}x {item.name}
+                        {isWeightProduct(item) ? `${formatQuantityLabel(Number(item.qty), 'WEIGHT')} de ${item.name}` : `${item.qty}x ${item.name}`}
                         {formatItemOptions(item) ? ` (${formatItemOptions(item)})` : ''}
                       </span>
                       <span className="font-semibold text-slate-700">

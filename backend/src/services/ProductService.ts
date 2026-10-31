@@ -16,6 +16,7 @@ import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { saveBase64Image } from '../utils/imageStorage';
 import { isProductAvailableToday, normalizeAvailabilityDays } from '../utils/productAvailability';
+import { normalizeSaleUnit } from '../utils/saleUnit';
 import { AppError } from '../errors/AppError';
 import { AppDataSource } from '../config/database';
 import { EntityManager } from 'typeorm';
@@ -261,6 +262,25 @@ private parseOptionalPositiveInt(value: unknown): number | null {
   }
 
     /**
+   * Modalidade de venda (30/10): 'UNIT' (default, tudo que existia) ou
+   * 'WEIGHT' (preço por kg + mínimo e incremento em gramas OBRIGATÓRIOS).
+   *
+   * @author Edmilson Lopes
+   */
+private resolveSaleUnitConfig(input: any): { saleUnit: 'UNIT' | 'WEIGHT'; weightMinG: number | null; weightStepG: number | null } {
+    const saleUnit = normalizeSaleUnit(input?.saleUnit);
+    if (saleUnit !== 'WEIGHT') return { saleUnit: 'UNIT', weightMinG: null, weightStepG: null };
+    const weightMinG = this.parseOptionalPositiveInt(input?.weightMinG);
+    const weightStepG = this.parseOptionalPositiveInt(input?.weightStepG);
+    if (!weightMinG || !weightStepG) {
+      throw new AppError('PROD-004', 400, {
+        message: 'Produto vendido por peso exige quantidade mínima e incremento em gramas (ex.: mínimo 250 g, incremento 250 g).',
+      });
+    }
+    return { saleUnit, weightMinG, weightStepG };
+  }
+
+    /**
    * Executes append inventory movement business logic.
    *
    * @author Edmilson Lopes
@@ -411,15 +431,20 @@ private async appendInventoryMovementTx(
     const lengthCm = this.parseOptionalPositiveInt((input as any).lengthCm);
     const widthCm = this.parseOptionalPositiveInt((input as any).widthCm);
     const heightCm = this.parseOptionalPositiveInt((input as any).heightCm);
+    const saleUnitConfig = this.resolveSaleUnitConfig(input);
 
     const product = this.productRepository.create({
       name: input.name,
       price: input.price,
+      saleUnit: saleUnitConfig.saleUnit,
+      weightMinG: saleUnitConfig.weightMinG,
+      weightStepG: saleUnitConfig.weightStepG,
       promoPrice,
       promoActive,
-      bundlePromoQty: bundlePromo.qty,
-      bundlePromoPrice: bundlePromo.price,
-      bundlePromoActive: bundlePromo.active,
+      // Peso não participa de "leve X por Y" (quantidade canônica é gramas).
+      bundlePromoQty: saleUnitConfig.saleUnit === 'WEIGHT' ? null : bundlePromo.qty,
+      bundlePromoPrice: saleUnitConfig.saleUnit === 'WEIGHT' ? null : bundlePromo.price,
+      bundlePromoActive: saleUnitConfig.saleUnit === 'WEIGHT' ? false : bundlePromo.active,
       category: input.category,
       description: (input as any).description ?? (input as any).desc,
       imageUrl: uploadedImage || input.imageUrl,
@@ -709,6 +734,33 @@ async setCategoryPriority(
     const promoPrice = data.promoPrice !== undefined && data.promoPrice !== null
       ? Number(data.promoPrice)
       : undefined;
+
+    // Modalidade de venda (30/10): troca exige estoque zerado — unidades e
+    // gramas NUNCA são interpretadas silenciosamente uma pela outra.
+    if ((data as any).saleUnit !== undefined) {
+      const nextUnit = normalizeSaleUnit((data as any).saleUnit);
+      const currentUnit = normalizeSaleUnit(product.saleUnit);
+      if (nextUnit !== currentUnit) {
+        const managedStockQty = Math.max(0, Number(product.stockQuantity || 0));
+        if (Boolean(product.manageStock) && managedStockQty > 0) {
+          throw new AppError('PROD-003', 409, {
+            message:
+              nextUnit === 'WEIGHT'
+                ? `Zere (ou reajuste) o estoque de ${managedStockQty} unidades antes de vender por peso — unidades nunca são convertidas em gramas automaticamente.`
+                : `Zere (ou reajuste) o estoque de ${managedStockQty} g antes de vender por unidade — gramas nunca são convertidas em unidades automaticamente.`,
+          });
+        }
+      }
+      const saleUnitConfig = this.resolveSaleUnitConfig(data);
+      product.saleUnit = saleUnitConfig.saleUnit;
+      product.weightMinG = saleUnitConfig.weightMinG;
+      product.weightStepG = saleUnitConfig.weightStepG;
+      if (saleUnitConfig.saleUnit === 'WEIGHT') {
+        product.bundlePromoQty = null;
+        product.bundlePromoPrice = null;
+        product.bundlePromoActive = false;
+      }
+    }
 
     product.name = data.name ?? product.name;
     product.price = data.price ?? product.price;

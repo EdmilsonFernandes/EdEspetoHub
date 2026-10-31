@@ -36,6 +36,7 @@ import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productModifiers";
 import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderPricing";
+import { calcCartLineSubtotalCents, formatQuantityLabel, isWeightProduct } from "../../utils/saleUnit";
 import { addressLookupService } from "../../services/addressLookupService";
 import { inputAssistProps, textareaAssistProps } from "../../utils/inputAssist";
 import { Button } from '../ui/Button';
@@ -861,7 +862,11 @@ export const CartView = ({
   };
 
   const resolveCartItemImage = (item) => resolveAssetUrl(item?.imageUrl || "");
-  const totalCartUnits = cartItems.reduce((acc, item) => acc + Number(item?.qty || 0), 0);
+  // Peso (30/10): linha por peso conta 1 "item" no contador (750 g ≠ 750 itens).
+  const totalCartUnits = cartItems.reduce(
+    (acc, item) => acc + (isWeightProduct(item) ? 1 : Number(item?.qty || 0)),
+    0
+  );
   const cartPreviewItems = useMemo(() => cartItems.slice(0, 3), [cartItems]);
   const extraCartPreviewCount = Math.max(0, cartItems.length - cartPreviewItems.length);
   const orderTypeVisuals: Record<string, { label: string; helper: string; icon: React.ReactNode }> = {
@@ -2973,7 +2978,15 @@ export const CartView = ({
           )}
         </div>
 
-        {cartItems.map((item) => (
+        {cartItems.map((item) => {
+          // Peso (30/10): stepper em degraus, exibição "500 g", subtotal
+          // proporcional (adicionais por linha, não por grama) — igual ao backend.
+          const itemIsWeight = isWeightProduct(item);
+          const itemStep = itemIsWeight ? Math.max(1, Math.floor(Number(item?.weightStepG) || 250)) : 1;
+          const itemMin = itemIsWeight ? Math.max(1, Math.floor(Number(item?.weightMinG) || 250)) : 1;
+          const lineSubtotal = calcCartLineSubtotalCents(item) / 100;
+          const modifiersLineTotal = getModifiersTotal(item?.selectedModifiers || []);
+          return (
           <div
             key={item.key || item.id}
             className="flex justify-between items-center gap-2 py-2 sm:py-3 border-b border-gray-50 last:border-0"
@@ -2983,16 +2996,27 @@ export const CartView = ({
               <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-1 py-1">
                 <button
                   type="button"
-                  onClick={() => onUpdateCart?.(item, -1, buildCartOptions(item))}
+                  onClick={() =>
+                    onUpdateCart?.(
+                      item,
+                      itemIsWeight && item.qty - itemStep < itemMin ? -item.qty : -itemStep,
+                      buildCartOptions(item)
+                    )
+                  }
                   className="h-11 w-11 rounded-lg text-lg font-bold text-slate-700 hover:bg-slate-100 transition"
                   aria-label={`Diminuir quantidade de ${item.name}`}
                 >
                   −
                 </button>
-                <span className="min-w-[28px] text-center text-sm font-black text-slate-800">{item.qty}</span>
+                <span
+                  className={`text-center text-sm font-black text-slate-800 ${itemIsWeight ? 'min-w-[64px]' : 'min-w-[28px]'}`}
+                  data-testid={itemIsWeight ? 'cart-weight-qty' : undefined}
+                >
+                  {itemIsWeight ? formatQuantityLabel(item.qty, 'WEIGHT') : item.qty}
+                </span>
                 <button
                   type="button"
-                  onClick={() => onUpdateCart?.(item, 1, buildCartOptions(item))}
+                  onClick={() => onUpdateCart?.(item, itemStep, buildCartOptions(item))}
                   className="h-11 w-11 rounded-lg bg-brand-primary text-lg font-bold text-white hover:brightness-110 transition"
                   aria-label={`Aumentar quantidade de ${item.name}`}
                 >
@@ -3015,12 +3039,17 @@ export const CartView = ({
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-slate-800 font-semibold text-base sm:text-lg leading-tight">{item.name}</span>
+                {itemIsWeight && (
+                  <span className="text-[11px] text-slate-500 font-semibold">
+                    {formatCurrency(item.price)}/kg
+                  </span>
+                )}
                 {formatItemOptions(item) && (
                   <span className="text-xs sm:text-sm text-slate-600">{formatItemOptions(item)}</span>
                 )}
-                {getModifiersTotal(item?.selectedModifiers || []) > 0 && (
+                {modifiersLineTotal > 0 && (
                   <span className="text-[11px] text-emerald-700 font-semibold">
-                    Adicionais: + {formatCurrency(getModifiersTotal(item?.selectedModifiers || []) * item.qty)}
+                    Adicionais: + {formatCurrency(itemIsWeight ? modifiersLineTotal : modifiersLineTotal * item.qty)}
                   </span>
                 )}
                 {getBundleDiscountForCartItem(item) > 0 && (
@@ -3031,7 +3060,7 @@ export const CartView = ({
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
+              {!itemIsWeight && item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
                 <span className="flex flex-col items-end gap-0.5">
                   <span className="text-[11px] line-through text-gray-400">
                     {formatCurrency(Number(item.originalPrice) * item.qty)}
@@ -3042,7 +3071,7 @@ export const CartView = ({
                 </span>
               ) : (
                 <span className="font-bold text-gray-900">
-                  {formatCurrency(item.price * item.qty)}
+                  {formatCurrency(itemIsWeight ? lineSubtotal : item.price * item.qty)}
                 </span>
               )}
               <button
@@ -3055,7 +3084,8 @@ export const CartView = ({
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
 
         {isDelivery && deliveryFeeValue > 0 && (
           <div className="flex justify-between items-center pt-4 text-sm text-slate-600">
@@ -3188,10 +3218,12 @@ export const CartView = ({
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-slate-800">{item.name}</p>
                     <p className="truncate text-[11px] text-slate-500">
-                      {item.qty}x{optionsLabel ? ` • ${optionsLabel}` : ""}
+                      {isWeightProduct(item) ? formatQuantityLabel(item.qty, 'WEIGHT') : `${item.qty}x`}{optionsLabel ? ` • ${optionsLabel}` : ""}
                     </p>
                   </div>
-                  <span className="shrink-0 text-sm font-black text-slate-800">{formatCurrency(item.price * item.qty)}</span>
+                  <span className="shrink-0 text-sm font-black text-slate-800">
+                    {formatCurrency(isWeightProduct(item) ? calcCartLineSubtotalCents(item) / 100 : item.price * item.qty)}
+                  </span>
                 </div>
               );
             })}
@@ -3407,7 +3439,7 @@ export const CartView = ({
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="inline-flex min-w-[1.6rem] items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-2xs font-black text-slate-700 ring-1 ring-slate-200">
-                            {item.qty}x
+                            {isWeightProduct(item) ? formatQuantityLabel(item.qty, 'WEIGHT') : `${item.qty}x`}
                           </span>
                           <p className="truncate text-sm font-bold text-slate-800">{item.name}</p>
                         </div>
@@ -3416,7 +3448,9 @@ export const CartView = ({
                         )}
                       </div>
                     </div>
-                    <span className="shrink-0 text-sm font-black text-slate-800">{formatCurrency(item.price * item.qty)}</span>
+                    <span className="shrink-0 text-sm font-black text-slate-800">
+                      {formatCurrency(isWeightProduct(item) ? calcCartLineSubtotalCents(item) / 100 : item.price * item.qty)}
+                    </span>
                   </div>
                 );
               })}

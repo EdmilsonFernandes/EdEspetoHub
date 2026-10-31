@@ -10,6 +10,24 @@ do orchestrator. Produto estável em `gha.2617` (29/08 à noite).
 
 ## Últimos fechados
 
+- 30/10 — **Venda por unidade × peso (kg)**: produtos ganham modalidade de venda
+  (`products.sale_unit` UNIT|WEIGHT + `weight_min_g`/`weight_step_g`; migration
+  20261030_001, default UNIT = nada muda para o existente). Pedido por peso usa
+  GRAMAS inteiras como quantidade canônica; backend valida mín/incremento
+  (ORDER-014) ANTES da baixa de estoque e calcula subtotal em centavos inteiros
+  `round(preço/kg¢ × g ÷ 1000)` — front replica a mesma fórmula (utils/saleUnit
+  espelhado). Item do pedido ganha snapshot (`sale_unit` + `unit_price_snapshot`)
+  — mudança no cadastro nunca recalcula pedidos antigos. Bundle promo ("leve X")
+  só para unidade; troca de modalidade com estoque > 0 é bloqueada (PROD-003).
+  UI: cadastro (ProductManager) com por unidade/peso + mín/incremento; vitrine
+  "R$ 10,00/kg"; modal com degraus (250→500 g…), subtotal fechado e aviso de
+  excedente; sacola/checkout/painel/tracking/impressão mostram "500 g", nunca
+  "500x". E2E 4/4 (Chrome+Safari) com API mockada (page.route) + 17 unit
+  backend + 10 unit frontend. Pendências: top-items agrega gramas no "mais
+  pedidos" (display); specs e2e ANTIGAS falham no dev local por causa do
+  VITE_API_BASE_URL externo (baseline confirmado sem as mudanças — os mocks
+  `**/api/**` não casam; rodar via Docker :8080 ou ajustar globs).
+
 - 19/10 (noite) — **Benchmark iFood×99 aplicado ao fluxo cliente** (reverso de 3 APKs
   verificados; ver `docs` da sessão no repositório Meus Exames): auditoria confirmou que
   card fechado+próxima abertura, preço âncora, busca no cardápio, carrinho flutuante,

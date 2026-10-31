@@ -42,6 +42,7 @@ import { resolveMercadoPagoStatusDetailLabel, resolveMercadoPagoStatusLabel } fr
 import { logger } from '../utils/logger';
 import { appendOrderTimelineEntry, buildOrderTimelineJson } from '../utils/orderTimeline';
 import { normalizeCustomerOrderNote } from '../utils/orderCustomerNote';
+import { calcWeightSubtotalCents, formatQuantityLabel, isValidWeightQuantity, normalizeSaleUnit } from '../utils/saleUnit';
 import { shippingTrackingService } from './shipping/tracking/ShippingTrackingService';
 import {
   buildCorreiosTrackingUrl,
@@ -557,7 +558,9 @@ export class OrderService
     const customerPhone = String(order?.phone || '').trim().slice(0, 30);
     const orderId = String(order?.id || '').trim();
 
-    // Build compact items string for FCM data: "qtyx name|price;qtyx name|price"
+    // Build compact items string for FCM data: "qty name|price;qty name|price".
+    // Peso (30/10): "500 g Tomate|R$ 5,00" — nunca "500x Tomate".
+    // item.price é o SUBTOTAL snapshot da linha (não unitário) — exibir direto.
     const orderItems = Array.isArray(order?.items) ? order.items : [];
     // Limite seguro: o payload `data` do FCM tem ~4KB. Pedidos muitos grandes
     // estouravam o limite -> o FCM rejeitava (INVALID_ARGUMENT) e o push nao chegava
@@ -567,8 +570,9 @@ export class OrderService
       .map((item: any) => {
         const qty = Math.max(0, Number(item?.quantity || 0));
         const name = String(item?.product?.name || item?.name || 'Item').trim();
-        const price = this.resolveCurrencyLabel(Number(item?.price || 0) * qty);
-        return `${qty}x ${name}|${price}`;
+        const qtyLabel = formatQuantityLabel(qty, item?.saleUnit);
+        const price = this.resolveCurrencyLabel(Number(item?.price || 0));
+        return `${qtyLabel} ${name}|${price}`;
       })
       .join(';');
     if (receiptItems.length > MAX_RECEIPT_ITEMS_CHARS) {
@@ -2274,20 +2278,38 @@ async reopenOrder(
           throw new AppError('PROD-002', 400);
         }
 
+        const saleUnit = normalizeSaleUnit((product as any).saleUnit);
+        if (saleUnit === 'WEIGHT' && !isValidWeightQuantity(quantity, (product as any).weightMinG, (product as any).weightStepG)) {
+          const minG = Math.max(1, Math.floor(Number((product as any).weightMinG) || 0));
+          const stepG = Math.max(1, Math.floor(Number((product as any).weightStepG) || 0));
+          throw new AppError('ORDER-014', 400, {
+            message: `${product.name}: quantidade por peso inválida — mínimo ${minG} g e incrementos de ${stepG} g.`,
+          });
+        }
+
         nextQtyByProduct.set(productId, (nextQtyByProduct.get(productId) || 0) + quantity);
 
         const orderItem = new OrderItem();
         orderItem.product = product;
         orderItem.order = order;
-        orderItem.quantity = quantity;
+        orderItem.saleUnit = saleUnit;
         const customPricing = this.isOperationalAdjustmentProduct(product);
         const unitPriceOverride = customPricing ? this.resolveUnitPriceOverride(item) : null;
         const unitPrice = unitPriceOverride !== null ? unitPriceOverride : this.resolveItemPrice(product);
+        orderItem.unitPriceSnapshot = unitPrice;
         const selectedModifiers = this.resolveSelectedModifiers(product, (item as any).selectedModifiers);
         orderItem.selectedModifiers = selectedModifiers.items.length ? selectedModifiers.items : null;
-        const grossLine = (unitPrice + selectedModifiers.unitExtra) * quantity;
-        const bundleDiscount = customPricing ? 0 : this.resolveBundleDiscount(product, quantity);
-        orderItem.price = Math.max(0, grossLine - bundleDiscount);
+        if (saleUnit === 'WEIGHT') {
+          orderItem.quantity = quantity; // gramas inteiras (floor acima)
+          const weightSubtotalCents = calcWeightSubtotalCents(unitPrice, quantity);
+          const modifiersCents = Math.round(Number(selectedModifiers.unitExtra || 0) * 100);
+          orderItem.price = Math.max(0, (weightSubtotalCents + modifiersCents) / 100);
+        } else {
+          orderItem.quantity = quantity;
+          const grossLine = (unitPrice + selectedModifiers.unitExtra) * quantity;
+          const bundleDiscount = customPricing ? 0 : this.resolveBundleDiscount(product, quantity);
+          orderItem.price = Math.max(0, grossLine - bundleDiscount);
+        }
         orderItem.cookingPoint = item.cookingPoint;
         orderItem.passSkewer = Boolean(item.passSkewer);
         orderItem.isPrinted = Boolean((item as any).isPrinted);
@@ -2558,8 +2580,30 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
         throw new AppError('ORDER-005', 400, { message: 'Item com quantidade inválida.' });
       }
 
+      const saleUnit = normalizeSaleUnit((product as any).saleUnit);
+      let canonicalQty = item.quantity;
+
+      // Peso (30/10): quantidade canônica = GRAMAS INTEIRAS. Validação de
+      // modalidade/mínimo/incremento é AUTORIDADE do backend (nunca só UI) e
+      // acontece ANTES da baixa de estoque — item recusado não toca estoque.
+      if (saleUnit === 'WEIGHT') {
+        const gramsRaw = Number(item.quantity);
+        const grams = Number.isFinite(gramsRaw) ? Math.round(gramsRaw) : NaN;
+        if (!Number.isFinite(grams) || grams <= 0) {
+          throw new AppError('ORDER-005', 400, { message: 'Item com quantidade inválida.' });
+        }
+        if (!isValidWeightQuantity(grams, (product as any).weightMinG, (product as any).weightStepG)) {
+          const minG = Math.max(1, Math.floor(Number((product as any).weightMinG) || 0));
+          const stepG = Math.max(1, Math.floor(Number((product as any).weightStepG) || 0));
+          throw new AppError('ORDER-014', 400, {
+            message: `${product.name}: quantidade por peso inválida — mínimo ${minG} g e incrementos de ${stepG} g.`,
+          });
+        }
+        canonicalQty = grams;
+      }
+
       if (Boolean((product as any).manageStock)) {
-        const qty = Math.max(1, Math.floor(Number(item.quantity || 0)));
+        const qty = Math.max(1, Math.floor(Number(canonicalQty || 0)));
         const txManager = manager || AppDataSource.manager;
         await this.adjustManagedStockTx(txManager as EntityManager, {
           storeId: store!.id,
@@ -2573,13 +2617,26 @@ async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authSto
 
       const orderItem = new OrderItem();
       orderItem.product = product;
-      orderItem.quantity = item.quantity;
       const unitPrice = this.resolveItemPrice(product);
+      orderItem.saleUnit = saleUnit;
+      orderItem.unitPriceSnapshot = unitPrice;
       const selectedModifiers = this.resolveSelectedModifiers(product, (item as any).selectedModifiers);
       orderItem.selectedModifiers = selectedModifiers.items.length ? selectedModifiers.items : null;
-      const grossLine = (unitPrice + selectedModifiers.unitExtra) * item.quantity;
-      const bundleDiscount = this.resolveBundleDiscount(product, item.quantity);
-      orderItem.price = Math.max(0, grossLine - bundleDiscount);
+
+      if (saleUnit === 'WEIGHT') {
+        // Subtotal em CENTAVOS inteiros (round(preço/kg¢ × g ÷ 1000)) — o front
+        // replica a mesma fórmula; divergência = item recusado aqui.
+        // Bundle promo ("leve X") e promoção por quantidade não se aplicam.
+        orderItem.quantity = canonicalQty;
+        const weightSubtotalCents = calcWeightSubtotalCents(unitPrice, canonicalQty);
+        const modifiersCents = Math.round(Number(selectedModifiers.unitExtra || 0) * 100);
+        orderItem.price = Math.max(0, (weightSubtotalCents + modifiersCents) / 100);
+      } else {
+        orderItem.quantity = item.quantity;
+        const grossLine = (unitPrice + selectedModifiers.unitExtra) * item.quantity;
+        const bundleDiscount = this.resolveBundleDiscount(product, item.quantity);
+        orderItem.price = Math.max(0, grossLine - bundleDiscount);
+      }
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
       orderItem.isPrinted = Boolean(item.isPrinted);

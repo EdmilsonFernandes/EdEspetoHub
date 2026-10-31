@@ -33,6 +33,7 @@ import { useToast } from '../contexts/ToastContext';
 import { EmptyState } from '../components/ui';
 import { formatCurrency, formatOrderDisplayId, formatOrderType, formatReadableDateTime, formatTimeOfDay } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { formatQuantityLabel, isWeightProduct } from '../utils/saleUnit';
 import { getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { buildOrderTrackingPath, primeOrderTrackingNavigation } from '../utils/orderTrackingPrefetch';
@@ -132,8 +133,12 @@ const getStoreInitials = (name?: string) => {
 
 const getOrderItemQty = (item: any) => Math.max(1, Number(item?.quantity ?? item?.qty ?? 1));
 
+// Peso (30/10): linha por peso conta 1 "item" no contador (750 g ≠ 750 itens).
 const getOrderItemsCount = (items: any[]) =>
-  (Array.isArray(items) ? items : []).reduce((sum, item) => sum + getOrderItemQty(item), 0);
+  (Array.isArray(items) ? items : []).reduce(
+    (sum, item) => sum + (isWeightProduct(item) ? 1 : getOrderItemQty(item)),
+    0
+  );
 
 const getOrderItemImageUrl = (item: any) => resolveAssetUrl(item?.imageUrl || item?.product?.imageUrl || '');
 
@@ -1108,8 +1113,8 @@ function OrderCard({
           {primaryItem ? (
             <div className="px-1 py-2">
               <div className="flex items-center gap-3">
-                <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-600">
-                  {getOrderItemQty(primaryItem)}
+                <span className={`inline-flex shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-600 ${isWeightProduct(primaryItem) ? 'min-w-[3.4rem] px-2 h-6' : 'h-6 w-6'}`}>
+                  {isWeightProduct(primaryItem) ? formatQuantityLabel(getOrderItemQty(primaryItem), 'WEIGHT') : getOrderItemQty(primaryItem)}
                 </span>
                 <div className="min-w-0 flex-1">
                   <span className="block truncate text-[13px] font-medium text-slate-800">{primaryItem.name || 'Item do pedido'}</span>

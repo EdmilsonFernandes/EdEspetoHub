@@ -29,6 +29,26 @@ export class Product {
   @Column()
   name!: string;
 
+  /**
+   * Modalidade de venda (30/10):
+   * - UNIT: comportamento histórico — `price` é o preço POR UNIDADE e
+   *   `stockQuantity` (quando gerenciado) conta UNIDADES.
+   * - WEIGHT: `price` é o preço POR QUILO; pedido usa GRAMAS INTEIRAS como
+   *   quantidade canônica e `stockQuantity` conta GRAMAS. Exige
+   *   `weightMinG` e `weightStepG` (> 0). Todos os produtos existentes
+   *   permanecem UNIT (default da migration) sem qualquer mudança.
+   */
+  @Column({ name: 'sale_unit', type: 'varchar', length: 16, default: 'UNIT' })
+  saleUnit!: 'UNIT' | 'WEIGHT';
+
+  /** Peso: quantidade mínima por item, em gramas (ex.: 250). UNIT: null. */
+  @Column({ name: 'weight_min_g', type: 'int', nullable: true })
+  weightMinG?: number | null;
+
+  /** Peso: incremento do seletor, em gramas (ex.: 250 → 250/500/750g/1kg). UNIT: null. */
+  @Column({ name: 'weight_step_g', type: 'int', nullable: true })
+  weightStepG?: number | null;
+
   @Column('decimal', { precision: 10, scale: 2 })
   price!: number;
 

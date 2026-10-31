@@ -10,6 +10,11 @@ import {
   normalizeProductModifiers,
   normalizeSelectedModifiers,
 } from "../../utils/productModifiers";
+import {
+  calcWeightSubtotalCents,
+  formatQuantityLabel,
+  isWeightProduct,
+} from "../../utils/saleUnit";
 
 export interface ProductModalProps {
   product: any | null;
@@ -54,6 +59,14 @@ export const ProductModal = ({
       ? Number(product.promoPrice)
       : null;
   const basePrice = promoPrice || Number(product?.price) || 0;
+  // Peso (30/10): degraus do seletor vêm do cadastro (mín + incremento, em
+  // gramas). Unidade: 1 a 20, comportamento histórico.
+  const isWeight = isWeightProduct(product);
+  const weightMinG = Math.max(1, Math.floor(Number(product?.weightMinG) || 0)) || 250;
+  const weightStepG = Math.max(1, Math.floor(Number(product?.weightStepG) || 0)) || 250;
+  const quantityStep = isWeight ? weightStepG : 1;
+  const quantityFloor = isWeight ? weightMinG : 1;
+  const quantityCap = isWeight ? Math.max(weightMinG, 100 * 1000) : 20;
   const availableModifiers = normalizeProductModifiers(product?.modifiers || []).filter(
     (item) => item.active !== false
   );
@@ -68,9 +81,14 @@ export const ProductModal = ({
     0
   );
   const modifiersTotal = getModifiersTotal(selectedModifiers);
+  // Peso: subtotal = round(preço/kg¢ × g ÷ 1000)/100 + adicionais (por linha,
+  // não escalam por peso — MESMA fórmula do backend).
+  const lineSubtotal = isWeight
+    ? calcWeightSubtotalCents(basePrice, itemQty) / 100 + modifiersTotal
+    : (basePrice + modifiersTotal) * itemQty;
   const unitFinalPrice = basePrice + modifiersTotal;
-  const totalFinalPrice = unitFinalPrice * itemQty;
-  const subtotalAmount = itemQty > 0 ? unitFinalPrice * itemQty : 0;
+  const totalFinalPrice = lineSubtotal;
+  const subtotalAmount = itemQty > 0 ? lineSubtotal : 0;
 
   const isEspetoCategory = (category: any) =>
     (category || "").toString().trim().toLowerCase().includes("espeto");
@@ -104,7 +122,7 @@ export const ProductModal = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    setItemQty(currentSelectionQty > 0 ? currentSelectionQty : 1);
+    setItemQty(currentSelectionQty > 0 ? currentSelectionQty : (isWeight ? weightMinG : 1));
   }, [isOpen, product?.id, currentSelectionQty]);
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -114,7 +132,7 @@ export const ProductModal = ({
   }, [isOpen]);
 
   const handleClose = () => {
-    setItemQty(1);
+    setItemQty(isWeight ? weightMinG : 1);
     setModifierCounts({});
     setCookingPoint("ao ponto");
     setPassSkewer(false);
@@ -123,7 +141,7 @@ export const ProductModal = ({
   };
 
   const handleCloseImmediate = () => {
-    setItemQty(1);
+    setItemQty(isWeight ? weightMinG : 1);
     setModifierCounts({});
     setCookingPoint("ao ponto");
     setPassSkewer(false);
@@ -207,7 +225,24 @@ export const ProductModal = ({
               <h3 className="text-[1.05rem] font-bold leading-snug text-gray-900 sm:text-xl">
                 {product?.name}
               </h3>
-              {promoPrice ? (
+              {isWeight && (
+                <div className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                  <p className="text-sm font-semibold text-slate-700">
+                    Vendido por peso — {formatCurrency(basePrice)}/kg
+                    {weightMinG > 0 && (
+                      <span className="ml-1 font-normal text-slate-500">
+                        (mínimo {formatQuantityLabel(weightMinG, 'WEIGHT')}, degraus de {formatQuantityLabel(weightStepG, 'WEIGHT')})
+                      </span>
+                    )}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                    Você escolhe o peso e paga o valor fechado antes de finalizar. Produtos naturais
+                    podem variar levemente no peso — se isso acontecer, o lojista pode entregar um
+                    pequeno excedente sem custo, nunca menos do que você comprou.
+                  </p>
+                </div>
+              )}
+              {!isWeight && promoPrice ? (
                 <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                   <span className="text-sm font-semibold text-slate-400 line-through">
                     {formatCurrency(product?.price)}
@@ -216,7 +251,7 @@ export const ProductModal = ({
                     {formatCurrency(promoPrice)}
                   </span>
                 </div>
-              ) : (
+              ) : !isWeight ? (
                 <p className="mt-1.5 flex flex-wrap items-baseline gap-x-1.5">
                   {!readOnly && hasSelectableOptions && (
                     <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
@@ -227,7 +262,7 @@ export const ProductModal = ({
                     {formatCurrency(product?.price)}
                   </span>
                 </p>
-              )}
+              ) : null}
             </div>
 
             {/* Descrição */}
@@ -391,10 +426,12 @@ export const ProductModal = ({
             )}
 
             {/* Subtotal */}
-            {!readOnly && (availableModifiers.length > 0 || showEspetoOptions) && (
+            {!readOnly && (isWeight || availableModifiers.length > 0 || showEspetoOptions) && (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-semibold text-slate-700">Subtotal do item</span>
+                  <span className="text-sm font-semibold text-slate-700">
+                    Subtotal {isWeight && itemQty > 0 ? `(${formatQuantityLabel(itemQty, 'WEIGHT')})` : 'do item'}
+                  </span>
                   <span className="shrink-0 text-base font-bold text-slate-900">
                     {formatCurrency(subtotalAmount)}
                   </span>
@@ -415,22 +452,31 @@ export const ProductModal = ({
         {!readOnly && (
           <div className={`shrink-0 border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] ${isNativePlatform ? "ds-safe-bottom-lg" : ""}`}>
             <div className="flex items-center gap-3">
-              {/* Controle de quantidade */}
+              {/* Controle de quantidade — peso anda em degraus (mín/incremento) */}
               <div className="flex shrink-0 items-center gap-1.5 rounded-2xl bg-slate-100 px-2 py-1.5">
                 <button
                   type="button"
-                  onClick={() => setItemQty((prev) => Math.max(0, prev - 1))}
+                  onClick={() =>
+                    setItemQty((prev) => {
+                      if (!isWeight) return Math.max(0, prev - 1);
+                      // Peso: abaixo do mínimo = 0 (modo "remover do pedido").
+                      return prev - quantityStep < quantityFloor ? 0 : prev - quantityStep;
+                    })
+                  }
                   className="grid h-8 w-8 place-items-center rounded-full bg-white text-slate-700 transition hover:bg-slate-50 active:scale-90"
                   aria-label="Diminuir quantidade"
                 >
                   <Minus size={14} weight="bold" />
                 </button>
-                <span className="min-w-[22px] text-center text-sm font-extrabold text-slate-900">
-                  {itemQty}
+                <span
+                  className={`text-center text-sm font-extrabold text-slate-900 ${isWeight ? 'min-w-[64px]' : 'min-w-[22px]'}`}
+                  data-testid={isWeight ? 'weight-qty-label' : undefined}
+                >
+                  {isWeight ? formatQuantityLabel(itemQty, 'WEIGHT') : itemQty}
                 </span>
                 <button
                   type="button"
-                  onClick={() => setItemQty((prev) => Math.min(20, prev + 1))}
+                  onClick={() => setItemQty((prev) => (prev === 0 ? quantityFloor : Math.min(quantityCap, prev + quantityStep)))}
                   className="grid h-8 w-8 place-items-center rounded-full bg-brand-primary text-white transition hover:brightness-95 active:scale-90"
                   aria-label="Aumentar quantidade"
                 >

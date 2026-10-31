@@ -1,4 +1,5 @@
 import { getModifiersTotal } from "./productModifiers";
+import { calcCartLineSubtotalCents, normalizeSaleUnit } from "./saleUnit";
 
 const toNumber = (value: unknown, fallback = 0) => {
   const parsed = Number(value);
@@ -15,6 +16,9 @@ const resolveSaleBaseUnit = (item: any) => {
 
 export const getBundleDiscountForCartItem = (item: any) => {
   if (!item) return 0;
+  // Peso (30/10): "leve X por Y" é promoção de UNIDADES — não se aplica a
+  // produtos vendidos por kg (quantidade canônica é gramas).
+  if (normalizeSaleUnit(item?.saleUnit) === 'WEIGHT') return 0;
   const bundleActive = Boolean(item?.bundlePromoActive);
   const bundleQty = Math.floor(toNumber(item?.bundlePromoQty, 0));
   const bundlePrice = toNumber(item?.bundlePromoPrice, 0);
@@ -41,7 +45,9 @@ export const getBundleDiscountForCartItem = (item: any) => {
 
 export const getCartPricing = (cart: Record<string, any>) => {
   const items = Object.values(cart || {});
-  const subtotal = items.reduce((acc, item: any) => acc + toNumber(item?.price, 0) * toNumber(item?.qty, 0), 0);
+  // Peso (30/10): subtotal por linha via helper de centavos (mesma fórmula do
+  // backend — round(preço/kg¢ × g ÷ 1000)); unidade segue price × qty.
+  const subtotal = items.reduce((acc, item: any) => acc + calcCartLineSubtotalCents(item) / 100, 0);
   const discountTotal = items.reduce((acc, item: any) => acc + getBundleDiscountForCartItem(item), 0);
   const discountedSubtotal = Math.max(0, subtotal - discountTotal);
   return {

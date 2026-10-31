@@ -46,6 +46,7 @@ import {
   normalizeSelectedModifiers,
 } from '../utils/productModifiers';
 import { getCartPricing } from '../utils/orderPricing';
+import { calcCartLineSubtotalCents, formatQuantityLabel, isWeightProduct } from '../utils/saleUnit';
 import { printReceiptAsImage } from '../utils/printReceiptImage';
 import { clearAllCustomerSessions } from '../utils/customerSessionStorage';
 import { ADMIN_SESSION_EVENT, CUSTOMER_SESSION_EVENT, nativeBiometricService } from '../services/nativeBiometricService';
@@ -683,7 +684,11 @@ export function StorePage() {
     [cart]
   );
   const cartItemsCount = useMemo(
-    () => validCartItems.reduce((acc: number, item: any) => acc + Number(item?.qty || 0), 0),
+    // Peso (30/10): cada linha por peso conta 1 no badge (750 g ≠ 750 "itens").
+    () => validCartItems.reduce(
+      (acc: number, item: any) => acc + (isWeightProduct(item) ? 1 : Number(item?.qty || 0)),
+      0
+    ),
     [validCartItems]
   );
   const clearCheckoutDraft = useCallback(() => {
@@ -2409,19 +2414,33 @@ export function StorePage() {
       let safeQty = Number(qty || 0);
 
       if (manageStock && safeQty > 0) {
+        // Peso (30/10): estoque em GRAMAS — mensagens falam a língua certa.
+        const isWeight = isWeightProduct(item);
+        const stockLabel = isWeight ? formatQuantityLabel(stockQuantity, 'WEIGHT') : `${stockQuantity} unidade${stockQuantity === 1 ? '' : 's'}`;
         if (totalForProduct >= stockQuantity) {
           showToast(
             stockQuantity > 0
-              ? `Só temos ${stockQuantity} unidade${stockQuantity === 1 ? '' : 's'} disponível${stockQuantity === 1 ? '' : 'is'} deste produto.`
+              ? `Só temos ${stockLabel} disponíve${stockQuantity === 1 ? 'l' : 'is'} deste produto.`
               : 'Produto esgotado no momento.',
             'warning'
           );
           return previous;
         }
         if (totalForProduct + safeQty > stockQuantity) {
-          safeQty = Math.max(0, stockQuantity - totalForProduct);
+          const maxAdd = Math.max(0, stockQuantity - totalForProduct);
+          if (isWeight) {
+            // Alinha ao incremento: nunca deixar o carrinho em quantidade que o
+            // backend recusaria (gramas fora do degrau mínimo/incremento).
+            const minG = Math.max(1, Math.floor(Number(catalogItem?.weightMinG ?? item?.weightMinG) || 1));
+            const stepG = Math.max(1, Math.floor(Number(catalogItem?.weightStepG ?? item?.weightStepG) || 1));
+            const from = totalForProduct > 0 ? 0 : minG;
+            safeQty = from + Math.floor(Math.max(0, maxAdd - from) / stepG) * stepG;
+            if (totalForProduct === 0 && safeQty < minG) safeQty = 0;
+          } else {
+            safeQty = maxAdd;
+          }
           showToast(
-            `Limite de estoque atingido. Máximo disponível: ${stockQuantity} unidade${stockQuantity === 1 ? '' : 's'}.`,
+            `Limite de estoque atingido. Máximo disponível: ${stockLabel}.`,
             'warning'
           );
           if (safeQty <= 0) {
@@ -2437,7 +2456,13 @@ export function StorePage() {
         delete copy[cartKey];
         return copy;
       }
-      const unitPrice = resolveItemPrice(item) + getModifiersTotal(selectedModifiers);
+      // Peso (30/10): price da entry é o preço/kg LIMPO (adicionais não escalam
+      // por peso — o subtotal da linha soma adicionais 1×, igual ao backend).
+      // Unidade: comportamento histórico (adicionais embutidos no unitPrice).
+      const isWeight = isWeightProduct(item);
+      const basePrice = resolveItemPrice(item);
+      const modifiersTotal = getModifiersTotal(selectedModifiers);
+      const unitPrice = isWeight ? basePrice : basePrice + modifiersTotal;
       return {
         ...previous,
         [cartKey]: {
@@ -2874,7 +2899,8 @@ export function StorePage() {
             id: item.id,
             name: item.name,
             quantity: item.qty,
-            price: item.price * item.qty,
+            saleUnit: item.saleUnit || 'UNIT',
+            price: isWeightProduct(item) ? calcCartLineSubtotalCents(item) / 100 : item.price * item.qty,
             cookingPoint: item.cookingPoint,
             passSkewer: item.passSkewer,
             selectedModifiers: item.selectedModifiers || [],

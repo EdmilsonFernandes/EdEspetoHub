@@ -21,6 +21,12 @@ export interface ProductModifierOptionDto {
 export interface CreateProductDto {
   name: string;
   price: number;
+  /** Modalidade de venda (30/10): 'UNIT' (default) | 'WEIGHT' (preço por kg). */
+  saleUnit?: 'UNIT' | 'WEIGHT';
+  /** WEIGHT: quantidade mínima por item, em gramas (obrigatória se WEIGHT). */
+  weightMinG?: number;
+  /** WEIGHT: incremento do seletor, em gramas (obrigatório se WEIGHT). */
+  weightStepG?: number;
   promoPrice?: number;
   promoActive?: boolean;
   bundlePromoQty?: number;

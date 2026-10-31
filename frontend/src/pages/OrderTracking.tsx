@@ -9,6 +9,7 @@ import { customerAccountService } from '../services/customerAccountService';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
 import { formatAddress, formatAddressLines, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId, formatTimeOfDay } from '../utils/format';
+import { formatQuantityLabel, isWeightProduct } from '../utils/saleUnit';
 import { getPaymentMethodMeta, getPaymentProviderMeta, mercadoPagoHorizontal } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
@@ -339,8 +340,11 @@ const buildOrderWhatsappHighlightItemLines = (item: any) => {
       ? formatCurrency(lineTotalValue)
       : '';
 
+  const quantityLabel = isWeightProduct(item)
+    ? `${formatQuantityLabel(quantity, 'WEIGHT')} de`
+    : `${quantity}x`;
   const lines = [
-    `• *${quantity}x ${name}*${lineTotalLabel ? ` - ${lineTotalLabel}` : ''}`,
+    `• *${quantityLabel} ${name}*${lineTotalLabel ? ` - ${lineTotalLabel}` : ''}`,
   ];
 
   if (detailParts.length) {
@@ -2608,7 +2612,7 @@ export function OrderTracking() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline gap-1.5">
                             <span className="shrink-0 rounded-md border border-[#dce9f1] bg-[#E0EBFD] px-1.5 py-0.5 text-[11px] font-black text-[#2563EB]">
-                              {quantity}x
+                              {isWeightProduct(item) ? formatQuantityLabel(quantity, 'WEIGHT') : `${quantity}x`}
                             </span>
                             <span className="font-semibold leading-snug text-slate-900">{item.name}</span>
                           </div>

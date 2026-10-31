@@ -26,8 +26,27 @@ export class OrderItem {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
+  /**
+   * Quantidade CANÔNICA do item (30/10): UNIDADES quando `saleUnit` é UNIT,
+   * GRAMAS INTEIRAS quando WEIGHT (500 = meia dúzia? não — 500 g). Nunca
+   * armazenar kg fracionário (0,5) — a unidade de medida mora no `saleUnit`.
+   */
   @Column()
   quantity!: number;
+
+  /**
+   * Snapshot da modalidade no momento do pedido ('UNIT' default = pedidos
+   * legados). Mudança posterior no cadastro do produto NUNCA muda o item.
+   */
+  @Column({ name: 'sale_unit', type: 'varchar', length: 16, default: 'UNIT' })
+  saleUnit!: 'UNIT' | 'WEIGHT';
+
+  /**
+   * Snapshot do preço de REFERÊNCIA vigente: preço por unidade (UNIT) ou por
+   * kg (WEIGHT). `price` continua sendo o subtotal da linha (snapshot).
+   */
+  @Column({ name: 'unit_price_snapshot', type: 'decimal', precision: 10, scale: 2, nullable: true })
+  unitPriceSnapshot?: number | null;
 
   @Column('decimal', { precision: 10, scale: 2 })
   price!: number;

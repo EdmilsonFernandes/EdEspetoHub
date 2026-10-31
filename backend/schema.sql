@@ -298,7 +298,19 @@ ALTER TABLE products
 ADD COLUMN IF NOT EXISTS stock_quantity INT NOT NULL DEFAULT 0;
 ALTER TABLE products
 ADD COLUMN IF NOT EXISTS low_stock_alert INT NOT NULL DEFAULT 3;
+-- Venda por unidade × peso (30/10): UNIT (default, tudo que existia) ou
+-- WEIGHT (price = preço por kg; quantidade canônica do pedido em gramas).
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS sale_unit VARCHAR(16) NOT NULL DEFAULT 'UNIT';
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS weight_min_g INT;
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS weight_step_g INT;
 
+ALTER TABLE order_items
+ADD COLUMN IF NOT EXISTS sale_unit VARCHAR(16) NOT NULL DEFAULT 'UNIT';
+ALTER TABLE order_items
+ADD COLUMN IF NOT EXISTS unit_price_snapshot NUMERIC(10,2);
 ALTER TABLE order_items
 ADD COLUMN IF NOT EXISTS cooking_point TEXT;
 ALTER TABLE order_items

@@ -2932,6 +2932,13 @@
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
                     <td>Preco/valor monetario de promo price.</td>
                   </tr><tr>
+                    <td><code>sale_unit</code></td>
+                    <td>varchar(16)</td>
+                    <td>nao</td>
+                    <td><code>UNIT</code></td>
+                    <td><span class="badge badge-amber">entity</span></td>
+                    <td>Modalidade de venda (30/10): UNIT = preço por unidade (default, tudo que existia) | WEIGHT = price é preço por kg e o pedido usa gramas inteiras.</td>
+                  </tr><tr>
                     <td><code>stock_quantity</code></td>
                     <td>integer</td>
                     <td>nao</td>
@@ -2952,6 +2959,20 @@
                     <td><span class="muted">-</span></td>
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
                     <td>Campo weight g que participa do contexto funcional de produto.</td>
+                  </tr><tr>
+                    <td><code>weight_min_g</code></td>
+                    <td>integer</td>
+                    <td>sim</td>
+                    <td><span class="muted">-</span></td>
+                    <td><span class="badge badge-amber">entity</span></td>
+                    <td>WEIGHT: quantidade mínima por item, em gramas (ex.: 250).</td>
+                  </tr><tr>
+                    <td><code>weight_step_g</code></td>
+                    <td>integer</td>
+                    <td>sim</td>
+                    <td><span class="muted">-</span></td>
+                    <td><span class="badge badge-amber">entity</span></td>
+                    <td>WEIGHT: incremento do seletor, em gramas (250 → 250/500/750g/1kg).</td>
                   </tr><tr>
                     <td><code>width_cm</code></td>
                     <td>integer</td>
@@ -6308,7 +6329,14 @@
                     <td>nao</td>
                     <td><span class="muted">-</span></td>
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
-                    <td>Quantidade agregada ou unitária de quantity.</td>
+                    <td>Quantidade canônica (30/10): unidades (saleUnit=UNIT) ou GRAMAS inteiras (saleUnit=WEIGHT — 500 = 500 g, nunca 0,5).</td>
+                  </tr><tr>
+                    <td><code>sale_unit</code></td>
+                    <td>varchar(16)</td>
+                    <td>nao</td>
+                    <td><code>UNIT</code></td>
+                    <td><span class="badge badge-amber">entity</span></td>
+                    <td>Snapshot da modalidade no momento do pedido ('UNIT' = pedidos legados); mudança no cadastro nunca muda o item.</td>
                   </tr><tr>
                     <td><code>selected_modifiers</code></td>
                     <td>jsonb</td>
@@ -6316,6 +6344,13 @@
                     <td><span class="muted">-</span></td>
                     <td><span class="badge badge-green">dev</span> <span class="badge badge-blue">test</span> <span class="badge badge-amber">entity</span></td>
                     <td>JSON com adicionais/modificadores escolhidos no item do pedido.</td>
+                  </tr><tr>
+                    <td><code>unit_price_snapshot</code></td>
+                    <td>numeric(10,2)</td>
+                    <td>sim</td>
+                    <td><span class="muted">-</span></td>
+                    <td><span class="badge badge-amber">entity</span></td>
+                    <td>Snapshot do preço de referência vigente (por unidade ou por kg) — price segue sendo o subtotal da linha.</td>
                   </tr>
             </tbody>
           </table>

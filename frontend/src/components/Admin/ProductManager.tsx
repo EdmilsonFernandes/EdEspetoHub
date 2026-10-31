@@ -15,6 +15,7 @@ import {
 } from '@phosphor-icons/react';
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
+import { formatQuantityLabel, isWeightProduct } from '../../utils/saleUnit';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '../ui/Button';
 import { normalizeProductModifiers } from '../../utils/productModifiers';
@@ -41,6 +42,9 @@ const defaultAvailability = WEEK_DAYS.reduce((acc, day) => {
 const initialForm = {
   name: '',
   price: '',
+  saleUnit: 'UNIT',
+  weightMinG: '',
+  weightStepG: '',
   promoPrice: '',
   promoActive: false,
   bundlePromoActive: false,
@@ -319,6 +323,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const [inlineForm, setInlineForm] = useState({
     name: '',
     price: '',
+    saleUnit: 'UNIT',
+    weightMinG: '',
+    weightStepG: '',
     promoPrice: '',
     promoActive: false,
     bundlePromoActive: false,
@@ -659,11 +666,20 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     event.preventDefault();
     if (!formData.name || !formData.price) return;
     if (categorySelect === '__custom__' && !formData.category) return;
+    // Peso (30/10): modalidade exige mínimo e incremento em gramas.
+    const isWeight = formData.saleUnit === 'WEIGHT';
+    if (isWeight && (!(Number(formData.weightMinG) > 0) || !(Number(formData.weightStepG) > 0))) {
+      showToast('Produto por peso exige quantidade mínima e incremento em gramas (ex.: 250 e 250).', 'warning');
+      return;
+    }
 
     setSaving(true);
     const payload = {
       ...formData,
       price: parseFloat(formData.price),
+      saleUnit: isWeight ? 'WEIGHT' : 'UNIT',
+      weightMinG: isWeight ? Math.max(1, Math.floor(Number(formData.weightMinG || 0))) : null,
+      weightStepG: isWeight ? Math.max(1, Math.floor(Number(formData.weightStepG || 0))) : null,
       promoPrice: formData.promoPrice ? parseFloat(formData.promoPrice) : undefined,
       promoActive: Boolean(formData.promoActive),
       bundlePromoQty: formData.bundlePromoQty ? Number(formData.bundlePromoQty) : undefined,
@@ -720,6 +736,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     setInlineForm({
       name: product.name || '',
       price: product.price != null ? String(product.price) : '',
+      saleUnit: product.saleUnit === 'WEIGHT' ? 'WEIGHT' : 'UNIT',
+      weightMinG: product.weightMinG ? String(Math.max(1, Number(product.weightMinG))) : '',
+      weightStepG: product.weightStepG ? String(Math.max(1, Number(product.weightStepG))) : '',
       promoPrice: product.promoPrice != null ? String(product.promoPrice) : '',
       promoActive: Boolean(product.promoActive),
       bundlePromoActive: Boolean(product.bundlePromoActive),
@@ -760,12 +779,20 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const handleInlineSave = async () => {
     if (!inlineEditId) return;
     if (!inlineForm.name || !inlineForm.price) return;
+    const inlineIsWeight = inlineForm.saleUnit === 'WEIGHT';
+    if (inlineIsWeight && (!(Number(inlineForm.weightMinG) > 0) || !(Number(inlineForm.weightStepG) > 0))) {
+      showToast('Produto por peso exige quantidade mínima e incremento em gramas (ex.: 250 e 250).', 'warning');
+      return;
+    }
     setSaving(true);
     try {
       await productService.save({
         id: inlineEditId,
         name: inlineForm.name,
         price: parseFloat(inlineForm.price),
+        saleUnit: inlineIsWeight ? 'WEIGHT' : 'UNIT',
+        weightMinG: inlineIsWeight ? Math.max(1, Math.floor(Number(inlineForm.weightMinG || 0))) : null,
+        weightStepG: inlineIsWeight ? Math.max(1, Math.floor(Number(inlineForm.weightStepG || 0))) : null,
         promoPrice: inlineForm.promoPrice ? parseFloat(inlineForm.promoPrice) : undefined,
         promoActive: Boolean(inlineForm.promoActive),
         bundlePromoQty: inlineForm.bundlePromoQty ? Number(inlineForm.bundlePromoQty) : undefined,
@@ -1246,10 +1273,12 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Preço</label>
+              <label className="text-sm font-medium text-gray-700">
+                Preço {formData.saleUnit === 'WEIGHT' ? '(por kg)' : ''}
+              </label>
               <input
                 className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                placeholder="0.00"
+                placeholder={formData.saleUnit === 'WEIGHT' ? '0.00 (por kg)' : '0.00'}
                 type="number"
                 step="0.01"
                 value={formData.price}
@@ -1257,6 +1286,90 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 required
               />
             </div>
+          </div>
+
+          {/* Modalidade de venda (30/10): unidade (padrão) × peso (kg) */}
+          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+            <p className="text-xs font-semibold text-slate-700">Como este produto é vendido</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, saleUnit: 'UNIT' })}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition ${
+                  formData.saleUnit !== 'WEIGHT'
+                    ? 'bg-brand-primary text-white border-brand-primary'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                Por unidade
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, saleUnit: 'WEIGHT' })}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition ${
+                  formData.saleUnit === 'WEIGHT'
+                    ? 'bg-brand-primary text-white border-brand-primary'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                Por peso (kg)
+              </button>
+            </div>
+            {formData.saleUnit === 'WEIGHT' ? (
+              <div className="mt-3 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">
+                      Quantidade mínima (g)
+                    </label>
+                    <input
+                      className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                      placeholder="250"
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={formData.weightMinG}
+                      onChange={(e) => setFormData({ ...formData, weightMinG: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">
+                      Incremento (g)
+                    </label>
+                    <input
+                      className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                      placeholder="250"
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={formData.weightStepG}
+                      onChange={(e) => setFormData({ ...formData, weightStepG: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <p className="text-[11px] leading-relaxed text-slate-500">
+                  O cliente escolhe o peso em degraus (ex.: 250 g → 500 g → 750 g → 1 kg) e paga o
+                  valor fechado antes de finalizar — sem repesagem. Preço anunciado: R$ por kg.
+                  {(() => {
+                    const minG = Math.max(1, Math.floor(Number(formData.weightMinG) || 0));
+                    const stepG = Math.max(1, Math.floor(Number(formData.weightStepG) || 0));
+                    const price = Number(formData.price) || 0;
+                    if (!minG || !stepG || !price) return null;
+                    const steps = [0, 1, 2, 3].map((k) => minG + k * stepG);
+                    return (
+                      <span className="mt-1 block font-semibold text-slate-600">
+                        Seletor: {steps.map((g) => formatQuantityLabel(g, 'WEIGHT')).join(' → ')}… (ex.:
+                        {' '}{formatQuantityLabel(steps[1] || minG, 'WEIGHT')} = {formatCurrency((Math.round(price * 100) * (steps[1] || minG)) / 1000 / 100)})
+                      </span>
+                    );
+                  })()}
+                </p>
+              </div>
+            ) : (
+              <p className="mt-2 text-[11px] text-slate-500">
+                Comportamento atual: cliente escolhe 1, 2, 3… unidades.
+              </p>
+            )}
           </div>
           </div>
 
@@ -1295,22 +1408,25 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               </div>
             </div>
           </div>
-          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+          <div className={`mt-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 ${formData.saleUnit === 'WEIGHT' ? 'opacity-50' : ''}`}>
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold text-emerald-800">Promoção por quantidade</p>
-                <p className="text-[11px] text-emerald-700">Ex.: 2 unidades por R$ 16,00</p>
+                <p className="text-[11px] text-emerald-700">
+                  {formData.saleUnit === 'WEIGHT' ? 'Disponível apenas para produtos por unidade.' : 'Ex.: 2 unidades por R$ 16,00'}
+                </p>
               </div>
               <button
                 type="button"
-                onClick={() => setFormData((prev) => ({ ...prev, bundlePromoActive: !prev.bundlePromoActive }))}
+                disabled={formData.saleUnit === 'WEIGHT'}
+                onClick={() => setFormData((prev) => ({ ...prev, bundlePromoActive: prev.saleUnit === 'WEIGHT' ? false : !prev.bundlePromoActive }))}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
-                  formData.bundlePromoActive
+                  formData.bundlePromoActive && formData.saleUnit !== 'WEIGHT'
                     ? 'bg-emerald-600 text-white border-emerald-600'
                     : 'bg-white text-slate-600 border-slate-200'
-                }`}
+                } ${formData.saleUnit === 'WEIGHT' ? 'cursor-not-allowed' : ''}`}
               >
-                {formData.bundlePromoActive ? 'Ativo' : 'Inativo'}
+                {formData.bundlePromoActive && formData.saleUnit !== 'WEIGHT' ? 'Ativo' : 'Inativo'}
               </button>
             </div>
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1841,14 +1957,21 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     {product.promoActive && product.promoPrice ? (
                       <div className="flex items-center gap-2">
                         <span className="text-xs line-through text-slate-400">
-                          {formatCurrency(product.price)}
+                          {formatCurrency(product.price)}{isWeightProduct(product) ? '/kg' : ''}
                         </span>
                         <span className="text-emerald-600 font-bold">
-                          {formatCurrency(product.promoPrice)}
+                          {formatCurrency(product.promoPrice)}{isWeightProduct(product) ? '/kg' : ''}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-brand-primary font-bold">{formatCurrency(product.price)}</span>
+                      <span className="text-brand-primary font-bold">
+                        {formatCurrency(product.price)}{isWeightProduct(product) ? '/kg' : ''}
+                      </span>
+                    )}
+                    {isWeightProduct(product) && (
+                      <p className="mt-1 text-[11px] font-semibold text-slate-500">
+                        Por peso — mín {formatQuantityLabel(Number(product.weightMinG) || 0, 'WEIGHT')}, degraus de {formatQuantityLabel(Number(product.weightStepG) || 0, 'WEIGHT')}
+                      </p>
                     )}
                     {product.bundlePromoActive && Number(product.bundlePromoQty) >= 2 && Number(product.bundlePromoPrice) > 0 && (
                       <p className="mt-1 text-[11px] font-semibold text-emerald-700">
@@ -1959,10 +2082,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     {product.promoActive && product.promoPrice ? (
                       <div className="flex flex-col items-end">
                         <span className="text-xs text-slate-400 line-through">
-                          {formatCurrency(product.price)}
+                          {formatCurrency(product.price)}{isWeightProduct(product) ? '/kg' : ''}
                         </span>
                         <span className="text-emerald-600 font-bold">
-                          {formatCurrency(product.promoPrice)}
+                          {formatCurrency(product.promoPrice)}{isWeightProduct(product) ? '/kg' : ''}
                         </span>
                         {product.bundlePromoActive && Number(product.bundlePromoQty) >= 2 && Number(product.bundlePromoPrice) > 0 && (
                           <span
@@ -1975,7 +2098,14 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                       </div>
                     ) : (
                       <div className="flex flex-col items-end">
-                        <span className="text-brand-primary font-bold">{formatCurrency(product.price)}</span>
+                        <span className="text-brand-primary font-bold">
+                          {formatCurrency(product.price)}{isWeightProduct(product) ? '/kg' : ''}
+                        </span>
+                        {isWeightProduct(product) && (
+                          <span className="text-[10px] font-semibold text-slate-500">
+                            mín {formatQuantityLabel(Number(product.weightMinG) || 0, 'WEIGHT')} · +{formatQuantityLabel(Number(product.weightStepG) || 0, 'WEIGHT')}
+                          </span>
+                        )}
                         {product.bundlePromoActive && Number(product.bundlePromoQty) >= 2 && Number(product.bundlePromoPrice) > 0 && (
                           <span
                             className="text-[10px] font-semibold text-emerald-700 cursor-help"
