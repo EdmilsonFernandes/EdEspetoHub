@@ -1,8 +1,20 @@
 # Painel do Lojista V2 — Plano e Matriz de Cobertura
 
-> Branch `feat/dashboard-v2` (worktree `EdEspetoHub-dashboard-v2`, base `origin/main` 8a9e088a).
-> Objetivo: `/admin/dashboardV2` — versão completa do painel em linguagem ReUI
-> (referência favorita: **tempo-tasks.reui.io**), sem tocar na V1 (`/admin/dashboard`).
+> Branch `feat/dashboard-v2` (worktree `EdEspetoHub-dashboard-v2`).
+> Objetivo: `/admin/dashboardV2` — migração COMPLETA do administrativo em linguagem
+> ReUI Ultimate (referência: tempo-tasks/dashboard-7), V1 intacta como padrão.
+>
+> **Briefing V2.3 (31/10, Edmilson)**: transformação visual completa por JORNADAS
+> completas — não telas genéricas. Etapa 1 = **Gestão de pedidos/queue V2**
+> (máquina de estados integral do GrillQueue: labels/transições/pagamento/
+> motoboy/retirada/cancelamento; botão "Resumo" reportado sem ação; paridade de
+> E2E `admin-queue-ux.spec.ts`). Depois: histórico rico, avaliações, produtos,
+> estoque (com imagem), pagamentos/assinatura. Problemas abertos: banner corta
+> nome da loja; desktop desestruturado em várias telas; condomínios com cards
+> tracejados (protótipo); avaliações sem hierarquia. Base visual compartilhada
+> obrigatória (tokens/ícones/estados) — nada de colagem de templates. Agents:
+> arquitetura+UX+implementação+QA em arquivos disjuntos. Publicação incremental
+> autorizada; V1 segue oficial até aprovação explícita.
 
 ## Decisões
 
@@ -84,7 +96,25 @@ Limitações conhecidas da V2 (v1):
 - Notificações operacionais (sino) e paleta Ctrl+K ainda não têm par V2.
 - Renovação de plano abre o paymentLink em nova aba (mesmo fluxo da V1).
 
-## Rollback
+## Backlog V2.3 — issues abertos do Edmilson (verificar em tela E código)
+1. **Banner corta o nome da loja** (StoreBrandHeader): enquadramento/responsividade.
+2. **Desktop desestruturado** em boa parte das telas — auditar cada seção a 1280/1440.
+3. **Histórico limitado** a nome+número — portar infos/ações da V1 (AdminOrders L524+).
+4. **Avaliações muito brancas** — hierarquia/acabamento com dados reais.
+5. **Produtos**: definir formato de lista p/ operação (V1 tem imagens/ações inline).
+6. **Estoque sem imagem do produto**.
+7. **Loja online**: jornada completa na migração.
+8. **Condomínios**: cards tracejados = protótipo → identidade real.
+9. **Pagamentos/assinatura**: paridade integral, zero ilustração.
+10. **Queue (PRIORIDADE 1)**: dinâmica do GrillQueue não preservada; "Resumo" sem ação; labels por transição; E2E admin-queue-ux.spec.ts como régua.
+
+## Etapas
+- [x] Etapa 0 — shell/rotas/menu/matriz (V2.0-V2.2: 3d438c38..29044357)
+- [ ] **Etapa 1 — Queue V2**: mapear máquina de estados do GrillQueue (transições×papel×pagamento×modalidade), recriar board+detalhe com labels dinâmicas, replay dos cenários E2E da V1 adaptados + navegação real com login de teste
+- [ ] Etapa 2 — Histórico rico + avaliações
+- [ ] Etapa 3 — Produtos + estoque
+- [ ] Etapa 4 — Financeiro completo (assinatura/plano/gateway) + condomínios/destinos nativos
+- [ ] Etapa 5 — Loja online jornada + polimento desktop global + auditoria de acessibilidade
 - Reverter = `git revert 56efd418 3d438c38` na main + push (deploy automático),
   ou re-deploy do sha anterior via `deploy-release.sh <sha-anterior> frontend`.
   A V1 nunca saiu do ar em momento algum; não há migration nem mudança de backend.
