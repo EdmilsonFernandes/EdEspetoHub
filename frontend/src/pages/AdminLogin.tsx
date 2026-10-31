@@ -6,7 +6,7 @@ import { authService } from '../services/authService';
 import { getPersistedBranding } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { AuthLayout } from '../layouts/AuthLayout';
+import { AdminLoginSplitLayout } from '../components/Auth/AdminLoginSplitLayout';
 import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { ArrowLeft, Check, Eye, EyeSlash, LockKey, ShieldCheck, WarningCircle } from '@phosphor-icons/react';
@@ -573,12 +573,11 @@ export function AdminLogin() {
   }, [searchParams]);
 
   return (
-    <AuthLayout
+    <AdminLoginSplitLayout
       title="Área do lojista"
       eyebrow="Já no Caminho"
-      subtitle="Painel, pedidos e operação"
+      subtitle="Painel, pedidos e operação da sua loja em um só lugar"
       backTo={hubMode ? '/hub' : accessPortalPath}
-      showHeader
     >
       <div className="space-y-1.5 ds-login-card-enter w-full sm:space-y-4">
         <div className="hidden text-center sm:block">
@@ -884,7 +883,7 @@ export function AdminLogin() {
         }}
         onVerify={handleMfaVerify}
       />
-    </AuthLayout>
+    </AdminLoginSplitLayout>
   );
 
 }
