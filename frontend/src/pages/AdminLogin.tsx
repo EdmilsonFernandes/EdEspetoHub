@@ -574,9 +574,6 @@ export function AdminLogin() {
 
   return (
     <AdminLoginSplitLayout
-      title="Área do lojista"
-      eyebrow="Já no Caminho"
-      subtitle="Painel, pedidos e operação da sua loja em um só lugar"
       backTo={hubMode ? '/hub' : accessPortalPath}
     >
       <div className="space-y-1.5 ds-login-card-enter w-full sm:space-y-4">

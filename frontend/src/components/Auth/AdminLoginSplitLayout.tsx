@@ -1,183 +1,67 @@
 // @ts-nocheck
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import Autoplay from 'embla-carousel-autoplay';
-import { motion, useReducedMotion } from 'motion/react';
-import { ArrowLeft } from '@phosphor-icons/react';
-import { Card, CardContent } from '@/components/ui/card';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  type CarouselApi,
-} from '@/components/ui/carousel';
+import { ArrowLeft, ChartLineUp, DeviceMobile, ShieldCheckered } from '@phosphor-icons/react';
 import { GradientBackground } from '@/components/reui/auth-2/gradient-background';
-import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 
 /**
- * Pele split-screen do login admin (30/10, pedido do Edmilson) — bloco ReUI
- * auth-2 adaptado à marca e à REGRA DE PRODUTO: nada de depoimentos/avaliações
- * fabricados (PRODUCT.md "não fabricar"). O carrossel mostra diferenciais REAIS
- * da oferta e o rodapé do painel de prova traz os números públicos do produto.
- * Toda a lógica de auth (MFA/biometria/ativação) continua no AdminLogin — aqui
- * é só o envólucro visual (substitui o AuthLayout nessa tela).
+ * Pele split-screen do login admin (30/10, bloco ReUI auth-2 a pedido do
+ * Edmilson) com o CONTEÚDO do painel esquerdo ORIGINAL do AuthLayout
+ * (brand, "Sua gestão de elite começa aqui.", 3 pilares e selo de ambiente
+ * seguro) — o pedido: visual novo, conteúdo de antes.
+ * Toda a lógica de auth (MFA/biometria/ativação) continua no AdminLogin.
  */
 
-const PROOF_SLIDES = [
-  {
-    id: 'zero-comissao',
-    title: 'Zero comissão por pedido',
-    lines: [
-      'O dinheiro de cada venda cai direto no Pix da sua loja.',
-      'A plataforma nunca cobra fatia do seu pedido — nunca cobrou.',
-    ],
-  },
-  {
-    id: 'operacao',
-    title: 'Operação no bolso',
-    lines: [
-      'Fila, cardápio, mesas e impressora térmica pelo celular.',
-      'Pedido pago entra na fila sozinho, sem retrabalho.',
-    ],
-  },
-  {
-    id: 'pix-fechado',
-    title: 'Pix com valor fechado',
-    lines: [
-      'Cliente escolhe, vê o preço final e paga antes de finalizar.',
-      'Unidade ou peso (kg) — o combinado é o cobrado.',
-    ],
-  },
-  {
-    id: 'vindadores',
-    title: 'VIP Fundador',
-    lines: [
-      'Condição vitalícia de lançamento para as primeiras lojas.',
-      'Mensalidade fixa, sem surpresa de reajuste depois.',
-    ],
-  },
+const PILLARS = [
+  { text: 'Painel de alta performance', icon: ChartLineUp },
+  { text: 'Operação mobile sem ruído visual', icon: DeviceMobile },
+  { text: 'Acesso segmentado por perfil', icon: ShieldCheckered },
 ];
 
-function ProofCarousel() {
-  const [api, setApi] = useState<CarouselApi>();
-  const [selectedSnap, setSelectedSnap] = useState(0);
-  const shouldReduceMotion = useReducedMotion();
-  const plugins = useMemo(
-    () => [Autoplay({ delay: 9200, stopOnInteraction: false, stopOnMouseEnter: true })],
-    []
-  );
-
-  useEffect(() => {
-    if (!api) return;
-    const update = (carouselApi: CarouselApi) => carouselApi && setSelectedSnap(carouselApi.selectedScrollSnap());
-    update(api);
-    api.on('select', update);
-    api.on('reInit', update);
-    return () => {
-      api.off('select', update);
-      api.off('reInit', update);
-    };
-  }, [api]);
-
+function ProofPanel() {
   return (
-    <Carousel
-      setApi={setApi}
-      plugins={plugins}
-      opts={{ align: 'center', loop: true }}
-      className="mx-auto w-full"
-      aria-label="Diferenciais da plataforma"
-    >
-      <CarouselContent className="-ml-3 py-1.5">
-        {PROOF_SLIDES.map((slide, index) => {
-          const isActive = index === selectedSnap;
-          return (
-            <CarouselItem key={slide.id} className="flex basis-[90%] items-center pl-3 sm:basis-[56%] lg:basis-[43%]">
-              <motion.div
-                className="h-full w-full origin-center"
-                initial={false}
-                animate={
-                  shouldReduceMotion
-                    ? { opacity: isActive ? 1 : 0.72 }
-                    : { opacity: isActive ? 1 : 0.66, scale: isActive ? 1 : 0.9, y: isActive ? 0 : 3 }
-                }
-                transition={{ type: 'spring', stiffness: 180, damping: 30, mass: 0.9 }}
-              >
-                <Card
-                  size="sm"
-                  className={
-                    'relative min-h-56 transition-colors duration-300 ease-out ' +
-                    (isActive
-                      ? 'bg-card text-card-foreground ring-1 ring-white/20'
-                      : 'bg-card/45 text-card-foreground/75 ring-1 ring-white/10 backdrop-blur-sm')
-                  }
-                  data-active={isActive}
-                >
-                  <CardContent className="relative z-10 flex min-h-0 flex-1 flex-col justify-between gap-4 p-5">
-                    <p className="flex flex-col gap-2 text-[0.8125rem] leading-5 text-pretty">
-                      <span className="text-sm font-bold text-amber-300">{slide.title}</span>
-                      {slide.lines.map((line) => (
-                        <span key={line}>{line}</span>
-                      ))}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </CarouselItem>
-          );
-        })}
-      </CarouselContent>
-
-      <div className="mt-4 flex items-center justify-center gap-1.5">
-        {PROOF_SLIDES.map((slide, index) => (
-          <button
-            key={slide.id}
-            type="button"
-            aria-label={`Diferencial ${index + 1}`}
-            aria-current={index === selectedSnap ? 'true' : undefined}
-            onClick={() => api?.scrollTo(index)}
-            className="size-1.5 rounded-full bg-white/35 transition-colors hover:bg-white/55 data-[active=true]:bg-white data-[active=true]:ring-2 data-[active=true]:ring-white/25"
-            data-active={index === selectedSnap}
-          />
-        ))}
-      </div>
-    </Carousel>
-  );
-}
-
-function ProofPanel({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {
-  return (
-    <aside className="relative flex min-h-56 overflow-hidden pt-8 pb-8 sm:min-h-64 sm:pt-10 lg:min-h-svh lg:pt-28 lg:pb-8">
+    <aside className="relative flex min-h-64 flex-col justify-between overflow-hidden px-10 py-10 lg:min-h-svh lg:px-14 lg:py-12">
       <GradientBackground />
-      <div className="relative z-10 flex w-full flex-1 flex-col justify-center gap-0 lg:justify-start lg:gap-8">
-        <header className="flex shrink-0 flex-col items-center gap-3 px-6 text-center text-slate-50 sm:px-10 lg:gap-6 lg:px-14">
-          <img
-            src={resolveAssetUrl('/janocaminho.jpg')}
-            alt="Já no Caminho"
-            className="h-12 w-12 rounded-2xl object-cover ring-2 ring-white/60"
-          />
-          <div className="flex max-w-2xl flex-col items-center gap-3">
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-300">{eyebrow}</p>
-            <h1 className="text-2xl leading-tight font-semibold text-balance text-slate-50 sm:text-3xl lg:text-[2.5rem]">
-              {title}
-            </h1>
-            {subtitle && (
-              <p className="max-w-xl text-xs leading-5 text-pretty text-slate-300 sm:text-sm lg:text-base lg:leading-6">
-                {subtitle}
-              </p>
-            )}
-          </div>
-        </header>
 
-        <div className="hidden py-1 sm:py-2 lg:block">
-          <ProofCarousel />
+      <div className="relative z-10 flex items-center gap-3.5">
+        <div className="h-[3.4rem] w-[3.4rem] shrink-0 overflow-hidden rounded-full border-[3px] border-white/90 bg-white p-0.5 shadow-[0_14px_34px_-16px_rgba(0,0,0,0.5)]">
+          <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
         </div>
+        <div className="leading-tight">
+          <p className="text-lg font-black tracking-tight text-white">Já no Caminho</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-300/80">Plataforma SaaS</p>
+        </div>
+      </div>
 
-        {/* Números públicos do produto (PRODUCT.md — nada fabricado) */}
-        <div className="hidden shrink-0 px-6 sm:px-10 lg:block lg:px-14">
-          <p className="text-center text-sm leading-6 text-slate-300">
-            <span className="font-bold text-slate-50">Comissão zero</span> em todos os planos · 19 lojas ·
-            2.077 pedidos desde o lançamento
-          </p>
+      <div className="relative z-10 space-y-3">
+        <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.28em] text-sky-300/80">
+          <span className="h-px w-5 bg-sky-400/50" />
+          Plataforma unificada
+        </p>
+        <h1 className="bg-gradient-to-br from-white via-sky-50 to-sky-300 bg-clip-text text-4xl font-black leading-[1.12] tracking-[-0.03em] text-transparent xl:text-[2.75rem]">
+          Sua gestão
+          <br />
+          de elite
+          <br />
+          começa aqui.
+        </h1>
+        <p className="max-w-xs text-[0.95rem] font-medium leading-relaxed text-sky-100/70">
+          Fluxo profissional, visual consistente e operação pronta para escalar.
+        </p>
+      </div>
+
+      <div className="relative z-10 space-y-3">
+        {PILLARS.map((item, i) => (
+          <div key={i} className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sky-400/25 bg-sky-400/15">
+              <item.icon size={17} weight="duotone" className="text-cyan-300" />
+            </span>
+            <p className="text-sm font-semibold text-sky-100/85">{item.text}</p>
+          </div>
+        ))}
+        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1.5">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300">Ambiente seguro e criptografado</p>
         </div>
       </div>
     </aside>
@@ -185,23 +69,17 @@ function ProofPanel({ eyebrow, title, subtitle }: { eyebrow: string; title: stri
 }
 
 export function AdminLoginSplitLayout({
-  eyebrow,
-  title,
-  subtitle,
   backTo,
   backLabel = 'Voltar',
   children,
 }: {
-  eyebrow: string;
-  title: string;
-  subtitle?: string;
   backTo?: string;
   backLabel?: string;
   children: ReactNode;
 }) {
   return (
     <div className="bg-background w-full lg:grid lg:min-h-svh lg:grid-cols-[minmax(0,1fr)_640px]">
-      <ProofPanel eyebrow={eyebrow} title={title} subtitle={subtitle} />
+      <ProofPanel />
 
       <section className="bg-background flex min-w-0 flex-col px-6 pt-6 pb-3 sm:px-8 sm:pt-8 sm:pb-4 lg:min-h-svh lg:px-12 lg:pt-6 lg:pb-3">
         <div className="mx-auto flex w-full max-w-[38rem] flex-1 flex-col">
