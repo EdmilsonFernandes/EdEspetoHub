@@ -5,6 +5,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CaretRight,
+  Check,
+  FloppyDisk,
   MagnifyingGlass,
   Printer,
   XCircle,
@@ -90,11 +92,17 @@ const OrderCard = ({
   order,
   storeSlug,
   onOpen,
+  onQuickStart,
+  onQuickFinalize,
+  onPrint,
   isOverlay,
 }: {
   order: any;
   storeSlug: string;
   onOpen: (order: any) => void;
+  onQuickStart: (order: any) => void;
+  onQuickFinalize: (order: any) => void;
+  onPrint: (order: any) => void;
   isOverlay?: boolean;
 }) => {
   const meta = getV2StatusMeta(order?.status);
@@ -106,6 +114,12 @@ const OrderCard = ({
   const paid =
     String(order?.paymentStatus || '').toUpperCase() === 'PAID' ||
     String(order?.status || '').toLowerCase() === 'done';
+  const status = String(order?.status || '').toLowerCase();
+  const type = String(order?.type || '').toLowerCase();
+  // paridade canQuickFinalize GQ:1841-1847
+  const canFinalize =
+    !['done', 'delivered', 'finished', 'cancelled', 'in_delivery', 'dispatched'].includes(status) &&
+    !(type === 'delivery' && String(order?.fulfillmentMode || '').toLowerCase() === 'postal');
 
   const card = (
     <Card size="sm" className="gap-0 p-0" aria-label={`Pedido ${formatOrderDisplayId(order?.id, storeSlug)}`}>
@@ -141,6 +155,51 @@ const OrderCard = ({
             </Badge>
           </span>
         </div>
+        {/* Ações rápidas (paridade CARD:305-334): Atender / finalizar / imprimir */}
+        <div className="flex items-center gap-1.5 pt-0.5">
+          {status === 'pending' && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 flex-1 text-xs"
+              onClick={(event) => {
+                event.stopPropagation();
+                onQuickStart(order);
+              }}
+            >
+              Atender
+            </Button>
+          )}
+          {canFinalize && status !== 'pending' && (
+            <Button
+              type="button"
+              size="sm"
+              className="h-7 flex-1 bg-emerald-600 text-xs hover:bg-emerald-700"
+              title="Finalizar agora"
+              onClick={(event) => {
+                event.stopPropagation();
+                onQuickFinalize(order);
+              }}
+            >
+              <Check className="size-3.5" aria-hidden="true" />
+              Finalizar
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 shrink-0 px-2"
+            aria-label="Imprimir pedido"
+            onClick={(event) => {
+              event.stopPropagation();
+              onPrint(order);
+            }}
+          >
+            <Printer className="size-3.5" aria-hidden="true" />
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
@@ -170,6 +229,14 @@ export const FilaSection = () => {
   const [cancelReason, setCancelReason] = useState('');
   const [busy, setBusy] = useState(false);
   const [chargeOpen, setChargeOpen] = useState(false);
+  const [payConfirmTarget, setPayConfirmTarget] = useState<any | null>(null);
+  const [receivedAmount, setReceivedAmount] = useState('');
+  const [finalizeTarget, setFinalizeTarget] = useState<any | null>(null);
+  const [daySummary, setDaySummary] = useState<{ open: boolean; loading: boolean; orders: any[] }>({
+    open: false,
+    loading: false,
+    orders: [],
+  });
   const draggingRef = useRef(false);
   const searchRef = useRef('');
   searchRef.current = search;
@@ -295,7 +362,7 @@ export const FilaSection = () => {
   };
 
   const advance = async (order: any) => {
-    const next = getV2NextStatus(order?.status, order?.fulfillmentMode);
+    const next = getV2NextStatus(order?.status, order);
     if (!next) return;
     setBusy(true);
     try {
@@ -331,6 +398,74 @@ export const FilaSection = () => {
       showToast(String(err?.message || 'Não foi possível cancelar o pedido.'), 'error');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const confirmFinalize = async () => {
+    if (!finalizeTarget) return;
+    const order = finalizeTarget;
+    const isPostal =
+      String(order?.type || '').toLowerCase() === 'delivery' &&
+      String(order?.fulfillmentMode || '').toLowerCase() === 'postal';
+    setBusy(true);
+    try {
+      await orderService.updateStatus(order.id, isPostal ? 'finished' : 'done');
+      showToast('Pedido finalizado.', 'success');
+      setFinalizeTarget(null);
+      setSelected(null);
+      const refreshed = await orderService.fetchQueue(storeId);
+      applyServerOrders(Array.isArray(refreshed) ? refreshed : []);
+    } catch (err: any) {
+      showToast(String(err?.message || 'Não foi possível finalizar o pedido.'), 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const confirmPaidAndFinish = async () => {
+    if (!payConfirmTarget) return;
+    const order = payConfirmTarget;
+    const isDinheiro = String(order?.payment || order?.paymentMethod || '').toLowerCase() === 'dinheiro';
+    if (isDinheiro) {
+      const received = Number(String(receivedAmount).replace(',', '.'));
+      if (!Number.isFinite(received) || received < orderTotal(order)) {
+        showToast('O valor recebido é menor que o total do pedido.', 'info');
+        return;
+      }
+    }
+    const isPostal =
+      String(order?.type || '').toLowerCase() === 'delivery' &&
+      String(order?.fulfillmentMode || '').toLowerCase() === 'postal';
+    setBusy(true);
+    try {
+      await orderService.updateStatus(order.id, isPostal ? 'finished' : 'done');
+      showToast('Pagamento confirmado — pedido finalizado.', 'success');
+      setPayConfirmTarget(null);
+      setReceivedAmount('');
+      setSelected(null);
+      const refreshed = await orderService.fetchQueue(storeId);
+      applyServerOrders(Array.isArray(refreshed) ? refreshed : []);
+    } catch (err: any) {
+      showToast(String(err?.message || 'Não foi possível confirmar o pagamento.'), 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Fechamento do dia (paridade do dead code GQ:5108-5177 — agora com gatilho). */
+  const openDaySummary = async () => {
+    setDaySummary({ open: true, loading: true, orders: [] });
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const list = await orderService.fetchAll(storeId, {
+        startDate: today,
+        endDate: today,
+        statuses: ['done', 'delivered', 'finished', 'cancelled'],
+      });
+      setDaySummary({ open: true, loading: false, orders: Array.isArray(list) ? list : [] });
+    } catch {
+      setDaySummary({ open: true, loading: false, orders: [] });
+      showToast('Não foi possível carregar o fechamento.', 'error');
     }
   };
 
@@ -401,6 +536,10 @@ export const FilaSection = () => {
             </Badge>
           )}
           <span className="text-muted-foreground text-xs tabular-nums">{syncLabel}</span>
+          <Button type="button" variant="outline" size="sm" onClick={openDaySummary}>
+            <FloppyDisk className="size-4" aria-hidden="true" />
+            Fechamento do dia
+          </Button>
         </div>
       </div>
 
@@ -449,7 +588,26 @@ export const FilaSection = () => {
                       <CardContent className="min-h-0 flex-1 overflow-y-auto p-2 pt-0">
                         <KanbanColumnContent value={column.id} className="min-h-full gap-2">
                           {items.map((order) => (
-                            <OrderCard key={order.id} order={order} storeSlug={storeSlug} onOpen={setSelected} />
+                            <OrderCard
+                              key={order.id}
+                              order={order}
+                              storeSlug={storeSlug}
+                              onOpen={setSelected}
+                              onQuickStart={(target) => {
+                                void (async () => {
+                                  try {
+                                    await orderService.updateStatus(target.id, 'preparing');
+                                    showToast('Atendimento iniciado.', 'success');
+                                    const refreshed = await orderService.fetchQueue(storeId);
+                                    applyServerOrders(Array.isArray(refreshed) ? refreshed : []);
+                                  } catch (err: any) {
+                                    showToast(String(err?.message || 'Não foi possível atender.'), 'error');
+                                  }
+                                })();
+                              }}
+                              onQuickFinalize={(target) => setFinalizeTarget(target)}
+                              onPrint={(target) => void printOrder(target)}
+                            />
                           ))}
                           {items.length === 0 && (
                             <div className="text-muted-foreground flex min-h-20 items-center justify-center rounded-md border border-dashed px-3 text-center text-xs">
@@ -468,7 +626,15 @@ export const FilaSection = () => {
             {({ value }) => {
               const order = (orders || []).find((entry) => String(entry.id) === String(value));
               return order ? (
-                <OrderCard order={order} storeSlug={storeSlug} onOpen={() => undefined} isOverlay />
+                <OrderCard
+                  order={order}
+                  storeSlug={storeSlug}
+                  onOpen={() => undefined}
+                  onQuickStart={() => undefined}
+                  onQuickFinalize={() => undefined}
+                  onPrint={() => undefined}
+                  isOverlay
+                />
               ) : null;
             }}
           </KanbanOverlay>
@@ -561,6 +727,24 @@ export const FilaSection = () => {
                   <Button type="button" variant="outline" size="sm" onClick={() => setChargeOpen(true)} disabled={busy}>
                     Cobrar
                   </Button>
+                  {selected &&
+                    String(selected.paymentStatus || '').toUpperCase() !== 'PAID' &&
+                    ['ready', 'ready_for_delivery', 'waiting_for_motoboy', 'in_delivery'].includes(
+                      String(selected.status || '').toLowerCase()
+                    ) && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setReceivedAmount('');
+                          setPayConfirmTarget(selected);
+                        }}
+                        disabled={busy}
+                      >
+                        Recebeu pagamento
+                      </Button>
+                    )}
                   <Button
                     type="button"
                     variant="outline"
@@ -637,6 +821,152 @@ export const FilaSection = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ————— finalização rápida (paridade GQ:5235-5284) ————— */}
+      <Dialog open={Boolean(finalizeTarget)} onOpenChange={(open) => !open && setFinalizeTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Finalizar pedido agora</DialogTitle>
+            <DialogDescription>
+              {finalizeTarget
+                ? `#${formatOrderDisplayId(finalizeTarget.id, storeSlug)} · ${formatCurrency(orderTotal(finalizeTarget))} — marca como pago e finalizado.`
+                : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setFinalizeTarget(null)}>
+              Voltar
+            </Button>
+            <Button type="button" className="bg-emerald-600 hover:bg-emerald-700" onClick={confirmFinalize} disabled={busy}>
+              Finalizar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ————— confirmar pagamento (delivery/manual; paridade GQ:4105-4334) ————— */}
+      <Dialog open={Boolean(payConfirmTarget)} onOpenChange={(open) => !open && setPayConfirmTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar pagamento</DialogTitle>
+            <DialogDescription>
+              {payConfirmTarget
+                ? `${String(payConfirmTarget.customerName ?? 'Cliente')} · ${formatCurrency(orderTotal(payConfirmTarget))}`
+                : ''}
+            </DialogDescription>
+          </DialogHeader>
+          {payConfirmTarget &&
+            String(payConfirmTarget.payment || payConfirmTarget.paymentMethod || '').toLowerCase() === 'dinheiro' && (
+              <div className="flex flex-col gap-2">
+                <label className="flex flex-col gap-1.5 text-sm">
+                  Valor recebido (R$)
+                  <Input
+                    value={receivedAmount}
+                    onChange={(event) => setReceivedAmount(event.target.value)}
+                    inputMode="decimal"
+                    placeholder="0,00"
+                  />
+                </label>
+                <p className="text-muted-foreground text-xs tabular-nums">
+                  Troco:{' '}
+                  {(() => {
+                    const received = Number(String(receivedAmount || '0').replace(',', '.'));
+                    const diff = received - orderTotal(payConfirmTarget);
+                    return Number.isFinite(received) && diff >= 0 ? formatCurrency(diff) : '—';
+                  })()}
+                </p>
+              </div>
+            )}
+          {payConfirmTarget && (
+            <p className="text-muted-foreground text-xs">
+              Confirme apenas com o pagamento efetivado em mãos — o pedido será finalizado.
+            </p>
+          )}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setPayConfirmTarget(null)}>
+              Voltar
+            </Button>
+            <Button type="button" onClick={confirmPaidAndFinish} disabled={busy}>
+              Pagamento recebido
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ————— fechamento do dia (gatilho pro resumo diário da V1) ————— */}
+      <Dialog open={daySummary.open} onOpenChange={(open) => !open && setDaySummary((prev) => ({ ...prev, open }))}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Fechamento do dia</DialogTitle>
+            <DialogDescription>
+              {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
+            </DialogDescription>
+          </DialogHeader>
+          {daySummary.loading ? (
+            <div className="bg-muted h-24 w-full animate-pulse rounded-lg" aria-busy="true" />
+          ) : (
+            <DaySummaryBody orders={daySummary.orders} storeName={storeName} />
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+/** Corpo do fechamento: totais do dia por método (dados reais do histórico). */
+const DaySummaryBody = ({ orders, storeName }: { orders: any[]; storeName: string }) => {
+  const totals = useMemo(() => {
+    const finished = orders.filter((order) => String(order?.status || '').toLowerCase() !== 'cancelled');
+    const revenue = finished.reduce((acc, order) => acc + orderTotal(order), 0);
+    const byMethod: Record<string, { count: number; total: number }> = {};
+    for (const order of finished) {
+      const key = String(order?.payment || order?.paymentMethod || 'outros');
+      const meta = getPaymentMethodMeta(key);
+      const label = meta?.label || key;
+      byMethod[label] = byMethod[label] || { count: 0, total: 0 };
+      byMethod[label].count += 1;
+      byMethod[label].total += orderTotal(order);
+    }
+    const cancelled = orders.length - finished.length;
+    return { count: finished.length, revenue, byMethod, cancelled };
+  }, [orders]);
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="bg-muted/60 rounded-lg p-2.5">
+          <p className="text-muted-foreground text-[11px] font-medium">Pedidos</p>
+          <p className="text-lg font-semibold tabular-nums">{totals.count}</p>
+        </div>
+        <div className="bg-muted/60 rounded-lg p-2.5">
+          <p className="text-muted-foreground text-[11px] font-medium">Faturamento</p>
+          <p className="text-lg font-semibold tabular-nums">{formatCurrency(totals.revenue)}</p>
+        </div>
+        <div className="bg-muted/60 rounded-lg p-2.5">
+          <p className="text-muted-foreground text-[11px] font-medium">Cancelados</p>
+          <p className="text-lg font-semibold tabular-nums">{totals.cancelled}</p>
+        </div>
+      </div>
+      {Object.keys(totals.byMethod).length > 0 && (
+        <ul className="flex flex-col divide-y divide-border">
+          {Object.entries(totals.byMethod).map(([label, entry]) => (
+            <li key={label} className="flex items-center justify-between py-2 text-sm">
+              <span className="text-muted-foreground">
+                {label} · {entry.count}x
+              </span>
+              <span className="font-medium tabular-nums">{formatCurrency(entry.total)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {totals.count === 0 && (
+        <p className="text-muted-foreground text-sm">Nenhum pedido finalizado hoje ainda.</p>
+      )}
+      <Button type="button" variant="outline" size="sm" className="w-fit" onClick={() => window.print()}>
+        <Printer className="size-4" aria-hidden="true" />
+        Imprimir fechamento
+      </Button>
+      <p className="text-muted-foreground text-[11px]">{storeName} · gerado pelo painel V2</p>
     </div>
   );
 };
