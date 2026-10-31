@@ -18,8 +18,9 @@
 
 export type SaleUnit = 'UNIT' | 'WEIGHT';
 
+/** Aceita qualquer entrada (null/undefined/unknown) — legado sem saleUnit = UNIT. */
 export const normalizeSaleUnit = (raw: unknown): SaleUnit =>
-  String(raw || '').trim().toUpperCase() === 'WEIGHT' ? 'WEIGHT' : 'UNIT';
+  String(raw ?? '').trim().toUpperCase() === 'WEIGHT' ? 'WEIGHT' : 'UNIT';
 
 /** É quantidade válida p/ produto por peso? (gramas inteiras ≥ mín, alinhada ao incremento) */
 export const isValidWeightQuantity = (
@@ -49,7 +50,7 @@ export const calcWeightSubtotalCents = (pricePerKgBrl: number, grams: number): n
 };
 
 /** 250 → "250 g" | 1000 → "1 kg" | 1250 → "1,25 kg" (pt-BR, sem espaço antes de kg). */
-export const formatQuantityLabel = (quantity: number, saleUnit: SaleUnit | string): string => {
+export const formatQuantityLabel = (quantity: number, saleUnit: unknown): string => {
   if (normalizeSaleUnit(saleUnit) === 'WEIGHT') {
     const grams = Math.max(0, Math.floor(Number(quantity) || 0));
     if (grams < 1000) return `${grams} g`;
@@ -66,5 +67,5 @@ export const formatQuantityLabel = (quantity: number, saleUnit: SaleUnit | strin
 };
 
 /** Sufixo do preço de referência p/ exibição: "/kg" ou "" (unidade não precisa). */
-export const priceRefSuffixLabel = (saleUnit: SaleUnit | string): string =>
+export const priceRefSuffixLabel = (saleUnit: unknown): string =>
   normalizeSaleUnit(saleUnit) === 'WEIGHT' ? '/kg' : '';
