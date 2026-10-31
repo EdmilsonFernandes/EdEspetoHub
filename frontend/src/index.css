@@ -2174,4 +2174,13 @@ body {
   --color-border: #e2e8f0;
   --color-input: #cbd5e1;
   --color-ring: #2f9df7;
+  /* Sidebar (shell V2): painel claro sobre o fundo do app */
+  --color-sidebar: #ffffff;
+  --color-sidebar-foreground: #0f172a;
+  --color-sidebar-primary: #2563eb;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #f1f5f9;
+  --color-sidebar-accent-foreground: #0f172a;
+  --color-sidebar-border: #e2e8f0;
+  --color-sidebar-ring: #2f9df7;
 }
