@@ -65,3 +65,26 @@ acesso restrito (por papel/plano, com CTA claro). Sem métricas fictícias.
 - Nenhuma mudança em regras de pagamento (Asaas/OpenPix/MP) — só representação fiel.
 - Sem migration, sem mudança de backend/BFF (rotas de página são client-side).
 - GrillQueue/AdminDashboard/AdminOrders permanecem para a V1 — não são editados.
+
+## Resultado da validação (31/10/2026, commits 3d438c38 + 56efd418)
+
+| Gate | Resultado |
+|---|---|
+| tsc (`npx tsc --noEmit`) | 0 erros |
+| Build produção (`npm run build`) | verde (3m07s; chunks V2 code-splitted, ex.: PedidosSection 66KB gzip) |
+| Unit (`vitest run`) | **232/232** (inclui paridade do menu V1 + 7 testes novos do mapa de rotas) |
+| E2E V2 (Chrome mobile) | **10/10** — auth, deep-link+refresh, voltar/avançar, 8 seções, OPERATOR, board com PATCH real, overflow 390px, regressão V1 |
+| E2E V2 (Safari mobile) | **10/10** |
+| QA visual (390/1280) | 20 screenshots inspecionadas, sem overflow; specs falham se houver |
+| Lint | **indisponível no repo** (ESLint 9 sem flat config — já quebra na main; pré-existente) |
+
+Limitações conhecidas da V2 (v1):
+- Impressão do cupom V2 não traz o breakdown de couvert (item simples com notas).
+- Ações em lote e resumo diário de impressão da fila ficam na V1 (GrillQueue).
+- Notificações operacionais (sino) e paleta Ctrl+K ainda não têm par V2.
+- Renovação de plano abre o paymentLink em nova aba (mesmo fluxo da V1).
+
+## Rollback
+- Reverter = `git revert 56efd418 3d438c38` na main + push (deploy automático),
+  ou re-deploy do sha anterior via `deploy-release.sh <sha-anterior> frontend`.
+  A V1 nunca saiu do ar em momento algum; não há migration nem mudança de backend.
