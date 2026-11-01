@@ -106,6 +106,13 @@ export const requireRole = (...roles: UserRole[]) =>
       };
       const role = normalizeRole(req.auth?.role);
       const allowed = roles.map(normalizeRole);
+      // SUPER_ADMIN (dono da plataforma) atravessa qualquer requireRole de
+      // loja (01/11): sem isso ele recebia AUTH-003 nas rotas de produto e
+      // não conseguia operar/ajustar uma loja pela API — só via SQL/SSH.
+      // Services continuam protegidos por ensureStoreAccess (authStoreId
+      // undefined para superadmin = acesso a qualquer loja, como já era no
+      // plano/read).
+      if (role === 'SUPER_ADMIN') return next();
       if (!role || !allowed.includes(role))
       {
         return respondWithError(req, res, new AppError('AUTH-003', 403), 403);

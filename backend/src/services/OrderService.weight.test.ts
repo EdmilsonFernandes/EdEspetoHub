@@ -17,7 +17,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const { productFindById, orderRepoCreate, subscriptionGetCurrent } = vi.hoisted(() => ({
   productFindById: vi.fn(),
   orderRepoCreate: vi.fn((order: any) => order),
-  subscriptionGetCurrent: vi.fn(async () => null),
+  // null (sem assinatura) OU { status, plan } (plano Pro no teste postal).
+  subscriptionGetCurrent: vi.fn(async (): Promise<any> => null),
 }));
 
 vi.mock('../repositories/ProductRepository', () => ({
