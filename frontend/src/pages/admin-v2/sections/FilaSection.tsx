@@ -3,6 +3,7 @@
 // polling 1,5s visível / 10s oculto (mesma cadência do GrillQueue). Sem
 // reimplementar regra: transições vêm do backend, cartão mostra o que há.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useIsMobile } from '../../../hooks/use-mobile';
 import {
   CaretRight,
   Check,
@@ -88,6 +89,14 @@ const AGE_TONE_CLASS: Record<string, string> = {
   late: 'text-rose-600 dark:text-rose-400',
 };
 
+/** Barra de acento por etapa (paridade visual CARD:90-98 da V1). */
+const STAGE_ACCENT: Record<string, string> = {
+  pending: 'bg-amber-400',
+  preparing: 'bg-sky-400',
+  ready: 'bg-violet-400',
+  in_delivery: 'bg-sky-500',
+};
+
 const OrderCard = ({
   order,
   storeSlug,
@@ -122,8 +131,20 @@ const OrderCard = ({
     !(type === 'delivery' && String(order?.fulfillmentMode || '').toLowerCase() === 'postal');
 
   const card = (
-    <Card size="sm" className="gap-0 p-0" aria-label={`Pedido ${formatOrderDisplayId(order?.id, storeSlug)}`}>
-      <CardHeader className="flex min-h-10 flex-row items-center gap-2 px-3 py-2.5">
+    <Card
+      size="sm"
+      className="relative gap-0 overflow-hidden p-0"
+      aria-label={`Pedido ${formatOrderDisplayId(order?.id, storeSlug)}`}
+    >
+      <span
+        className={cn(
+          'absolute inset-y-0 left-0 w-1.5',
+          STAGE_ACCENT[meta.column || 'pending'] || 'bg-muted-foreground/40',
+          tone === 'late' && 'bg-rose-500 motion-safe:animate-pulse'
+        )}
+        aria-hidden="true"
+      />
+      <CardHeader className="flex min-h-10 flex-row items-center gap-2 py-2.5 pr-3 pl-4">
         <CardTitle className="min-w-0 flex-1 truncate text-sm">
           #{formatOrderDisplayId(order?.id, storeSlug)}
         </CardTitle>
@@ -131,14 +152,15 @@ const OrderCard = ({
           {formatV2Age(order?.createdAt)}
         </span>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2 px-3 pb-3">
-        <p className="truncate text-sm">
+      <CardContent className="flex flex-col gap-2 pb-3 pl-4 pr-3">
+        <p className="truncate text-sm font-medium">
           {String(order?.customerName ?? order?.customer?.name ?? 'Cliente')}
           {order?.table ? ` · mesa ${order.table}` : ''}
         </p>
         <p className="text-muted-foreground truncate text-xs">
           {itemCount} {itemCount === 1 ? 'item' : 'itens'}
           {items[0]?.name ? ` · ${items[0].name}` : ''}
+          {order?.origin ? ` · ${String(order.origin)}` : ''}
         </p>
         <div className="flex min-w-0 items-center justify-between gap-2">
           <span className="truncate text-sm font-semibold tabular-nums">
@@ -240,6 +262,7 @@ export const FilaSection = () => {
   const draggingRef = useRef(false);
   const searchRef = useRef('');
   searchRef.current = search;
+  const isMobile = useIsMobile();
 
   // ————— polling (1,5s visível / 10s oculto; pausa durante drag) —————
   useEffect(() => {
@@ -551,6 +574,64 @@ export const FilaSection = () => {
               <div className="bg-muted h-20 w-full rounded-md" />
             </Card>
           ))}
+        </div>
+      ) : isMobile ? (
+        // ————— Mobile: fila vertical por etapa (cards progridem, não pulam
+        // de coluna; padrão cozinha). Grupos fixos, ordem cronológica. —————
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-4">
+          {V2_BOARD_COLUMNS.map((column) => {
+            const items = [...(columns[column.id] || [])].sort(
+              (a, b) =>
+                (Date.parse(String(a?.createdAt || '')) || 0) -
+                (Date.parse(String(b?.createdAt || '')) || 0)
+            );
+            if (items.length === 0 && search) return null;
+            return (
+              <section key={column.id} aria-label={column.title}>
+                <header className="bg-muted/60 sticky top-0 z-10 mb-2 flex items-center gap-2 rounded-lg px-3 py-2 backdrop-blur">
+                  <span className="text-sm font-semibold">{column.title}</span>
+                  <Badge
+                    className={
+                      items.length > 0
+                        ? 'border border-primary/25 bg-primary/10 text-primary'
+                        : 'border-border bg-muted text-muted-foreground'
+                    }
+                  >
+                    {items.length}
+                  </Badge>
+                </header>
+                <div className="flex flex-col gap-2">
+                  {items.map((order) => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      storeSlug={storeSlug}
+                      onOpen={setSelected}
+                      onQuickStart={(target) => {
+                        void (async () => {
+                          try {
+                            await orderService.updateStatus(target.id, 'preparing');
+                            showToast('Atendimento iniciado.', 'success');
+                            const refreshed = await orderService.fetchQueue(storeId);
+                            applyServerOrders(Array.isArray(refreshed) ? refreshed : []);
+                          } catch (err: any) {
+                            showToast(String(err?.message || 'Não foi possível atender.'), 'error');
+                          }
+                        })();
+                      }}
+                      onQuickFinalize={(target) => setFinalizeTarget(target)}
+                      onPrint={(target) => void printOrder(target)}
+                    />
+                  ))}
+                  {items.length === 0 && (
+                    <p className="text-muted-foreground px-3 pb-1 text-xs">
+                      {search ? 'Nada aqui com esse filtro' : 'Sem pedidos nesta etapa'}
+                    </p>
+                  )}
+                </div>
+              </section>
+            );
+          })}
         </div>
       ) : (
         <Kanban
