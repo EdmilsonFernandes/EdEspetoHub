@@ -67,6 +67,18 @@ export const ProductModal = ({
   const quantityStep = isWeight ? weightStepG : 1;
   const quantityFloor = isWeight ? weightMinG : 1;
   const quantityCap = isWeight ? Math.max(weightMinG, 100 * 1000) : 20;
+  // Porções rápidas derivadas DO CADASTRO (nada fixo em 100 g): mínimo, 2×,
+  // 5× e 1 kg — só valores que casam com o incremento. "1 kg" é o chip que o
+  // cliente mais procura, então quando ele cabe, ele fecha a lista. Incremento
+  // ≥ 500 g não ganha chips (o +/- já dá saltos grandes).
+  const quickPortions: number[] = (() => {
+    if (!isWeight || weightStepG >= 500) return [];
+    const candidates = [...new Set([weightMinG, weightMinG * 2, weightMinG * 5, 1000])]
+      .filter((g) => g >= weightMinG && g <= 2000 && (g - weightMinG) % weightStepG === 0)
+      .sort((a, b) => a - b);
+    const oneKgIndex = candidates.indexOf(1000);
+    return oneKgIndex >= 0 ? candidates.slice(0, oneKgIndex + 1) : candidates.slice(0, 4);
+  })();
   const availableModifiers = normalizeProductModifiers(product?.modifiers || []).filter(
     (item) => item.active !== false
   );
@@ -451,6 +463,25 @@ export const ProductModal = ({
         {/* Barra de ação — sticky no fundo */}
         {!readOnly && (
           <div className={`shrink-0 border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] ${isNativePlatform ? "ds-safe-bottom-lg" : ""}`}>
+            {isWeight && quickPortions.length > 0 && (
+              <div className="mb-2.5 flex items-center gap-1.5 overflow-x-auto" data-testid="weight-quick-portions">
+                {quickPortions.map((grams) => (
+                  <button
+                    key={grams}
+                    type="button"
+                    onClick={() => setItemQty(grams)}
+                    aria-pressed={itemQty === grams}
+                    className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition active:scale-95 ${
+                      itemQty === grams
+                        ? 'border-brand-primary bg-brand-primary text-white'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    {formatQuantityLabel(grams, 'WEIGHT')}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex items-center gap-3">
               {/* Controle de quantidade — peso anda em degraus (mín/incremento) */}
               <div className="flex shrink-0 items-center gap-1.5 rounded-2xl bg-slate-100 px-2 py-1.5">
@@ -464,7 +495,7 @@ export const ProductModal = ({
                     })
                   }
                   className="grid h-8 w-8 place-items-center rounded-full bg-white text-slate-700 transition hover:bg-slate-50 active:scale-90"
-                  aria-label="Diminuir quantidade"
+                  aria-label={isWeight ? `Diminuir ${formatQuantityLabel(quantityStep, 'WEIGHT')}` : 'Diminuir quantidade'}
                 >
                   <Minus size={14} weight="bold" />
                 </button>
@@ -478,13 +509,13 @@ export const ProductModal = ({
                   type="button"
                   onClick={() => setItemQty((prev) => (prev === 0 ? quantityFloor : Math.min(quantityCap, prev + quantityStep)))}
                   className="grid h-8 w-8 place-items-center rounded-full bg-brand-primary text-white transition hover:brightness-95 active:scale-90"
-                  aria-label="Aumentar quantidade"
+                  aria-label={isWeight ? `Aumentar ${formatQuantityLabel(quantityStep, 'WEIGHT')}` : 'Aumentar quantidade'}
                 >
                   <Plus size={14} weight="bold" />
                 </button>
               </div>
 
-              {/* Botão adicionar */}
+              {/* Botão adicionar — peso sempre explícito com o valor (nunca "quantidade: 1") */}
               <button
                 onClick={() => {
                   if (itemQty === 0) {
@@ -498,7 +529,7 @@ export const ProductModal = ({
                   if (deltaQty !== 0) {
                     onAddToCart?.(product, deltaQty, selectedOptions);
                   }
-                  setItemQty(1);
+                  setItemQty(isWeight ? weightMinG : 1);
                   handleClose();
                 }}
                 className={`flex min-w-0 flex-1 items-center justify-between gap-2 rounded-2xl px-4 py-3 font-semibold transition ${
@@ -513,11 +544,11 @@ export const ProductModal = ({
                   ) : (
                     <Minus size={15} weight="bold" className="shrink-0" />
                   )}
-                  <span className="truncate text-sm font-bold">
+                  <span className="truncate text-sm font-bold" data-testid={isWeight ? 'weight-cta-label' : undefined}>
                     {itemQty > 0
                       ? currentSelectionQty > 0
-                        ? "Atualizar"
-                        : "Adicionar"
+                        ? isWeight ? `Atualizar ${formatQuantityLabel(itemQty, 'WEIGHT')}` : "Atualizar"
+                        : isWeight ? `Adicionar ${formatQuantityLabel(itemQty, 'WEIGHT')}` : "Adicionar"
                       : "Remover do pedido"}
                   </span>
                 </span>

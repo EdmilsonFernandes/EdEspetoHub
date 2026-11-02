@@ -1291,6 +1291,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           {/* Modalidade de venda (30/10): unidade (padrão) × peso (kg) */}
           <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
             <p className="text-xs font-semibold text-slate-700">Como este produto é vendido</p>
+            <p className="mt-0.5 text-[11px] text-slate-500">
+              Escolha se o cliente compra contando unidades ou pesando no quilo. O preço abaixo
+              acompanha: unidade = preço de cada; peso = preço por quilo.
+            </p>
             <div className="mt-2 flex flex-wrap gap-2">
               <button
                 type="button"
@@ -1312,7 +1316,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                 }`}
               >
-                Por peso (kg)
+                Por peso (quilo)
               </button>
             </div>
             {formData.saleUnit === 'WEIGHT' ? (
@@ -1320,36 +1324,38 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">
-                      Quantidade mínima (g)
+                      Peso mínimo por pedido (g)
                     </label>
                     <input
                       className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                      placeholder="250"
+                      placeholder="100"
                       type="number"
                       min="1"
                       step="1"
                       value={formData.weightMinG}
                       onChange={(e) => setFormData({ ...formData, weightMinG: e.target.value })}
                     />
+                    <p className="text-[11px] text-slate-500">Ex.: 100 = a partir de 100 g.</p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">
-                      Incremento (g)
+                      Sobe de quanto em quanto (g)
                     </label>
                     <input
                       className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                      placeholder="250"
+                      placeholder="100"
                       type="number"
                       min="1"
                       step="1"
                       value={formData.weightStepG}
                       onChange={(e) => setFormData({ ...formData, weightStepG: e.target.value })}
                     />
+                    <p className="text-[11px] text-slate-500">Ex.: 100 = 100 g, 200 g, 300 g…</p>
                   </div>
                 </div>
                 <p className="text-[11px] leading-relaxed text-slate-500">
-                  O cliente escolhe o peso em degraus (ex.: 250 g → 500 g → 750 g → 1 kg) e paga o
-                  valor fechado antes de finalizar — sem repesagem. Preço anunciado: R$ por kg.
+                  O cliente escolhe o peso, vê o valor fechado e paga antes de finalizar — sem
+                  repesagem nem ajuste depois. Estoque (se gerenciado) conta em gramas.
                   {(() => {
                     const minG = Math.max(1, Math.floor(Number(formData.weightMinG) || 0));
                     const stepG = Math.max(1, Math.floor(Number(formData.weightStepG) || 0));
@@ -1358,8 +1364,8 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     const steps = [0, 1, 2, 3].map((k) => minG + k * stepG);
                     return (
                       <span className="mt-1 block font-semibold text-slate-600">
-                        Seletor: {steps.map((g) => formatQuantityLabel(g, 'WEIGHT')).join(' → ')}… (ex.:
-                        {' '}{formatQuantityLabel(steps[1] || minG, 'WEIGHT')} = {formatCurrency((Math.round(price * 100) * (steps[1] || minG)) / 1000 / 100)})
+                        Prévia do comprador: {steps.map((g) => formatQuantityLabel(g, 'WEIGHT')).join(' → ')}… ·{' '}
+                        {formatQuantityLabel(steps[1] || minG, 'WEIGHT')} = {formatCurrency((Math.round(price * 100) * (steps[1] || minG)) / 1000 / 100)}
                       </span>
                     );
                   })()}
@@ -1367,7 +1373,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               </div>
             ) : (
               <p className="mt-2 text-[11px] text-slate-500">
-                Comportamento atual: cliente escolhe 1, 2, 3… unidades.
+                Cliente escolhe 1, 2, 3… unidades.
               </p>
             )}
           </div>
@@ -1503,7 +1509,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
             {formData.manageStock && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">Quantidade atual</label>
+                  <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">
+                    {formData.saleUnit === 'WEIGHT' ? 'Estoque atual (em gramas)' : 'Quantidade atual'}
+                  </label>
                   <input
                     className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                     type="number"
@@ -1512,6 +1520,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     value={formData.stockQuantity}
                     onChange={(e) => setFormData({ ...formData, stockQuantity: e.target.value })}
                   />
+                  {formData.saleUnit === 'WEIGHT' && (
+                    <p className="text-[11px] text-slate-500">Ex.: 5000 = 5 kg disponíveis. Cada pedido baixa o peso vendido.</p>
+                  )}
                 </div>
                 <div className="space-y-1">
                   <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">Alerta baixo estoque</label>

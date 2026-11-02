@@ -76,6 +76,9 @@ const customerSession = {
 test.use({ serviceWorkers: 'block' });
 
 test.describe('Venda por peso — fluxo do cliente', () => {
+  // Cold-start do dev server transforma chunks grandes na primeira carga
+  // (Safari pune mais) — tolerância das specs V2.
+  test.setTimeout(120_000);
   let createdOrders: Record<string, any>[];
 
   test.beforeEach(async ({ page }) => {
@@ -158,8 +161,13 @@ test.describe('Venda por peso — fluxo do cliente', () => {
   });
 
   const gotoStore = async (page: Page) => {
-    await page.goto(`/${storeSlug}`);
-    await expect(page.getByText(tomate.name).first()).toBeVisible({ timeout: 15000 });
+    await page.goto(`/${storeSlug}`, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByText(tomate.name).first()).toBeVisible({ timeout: 20000 });
+    // Vitrine assenta depois que as imagens terminam (layout-shift travava o
+    // click do card em runs paralelos) — espera a rede esfriar + settle.
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => undefined);
+    await page.waitForTimeout(800);
+    await page.getByText(tomate.name).first().scrollIntoViewIfNeeded().catch(() => undefined);
   };
 
   test('vitrine anuncia preço por kg apenas no produto por peso', async ({ page }) => {
@@ -181,22 +189,50 @@ test.describe('Venda por peso — fluxo do cliente', () => {
     await expect(page.getByText('Vendido por peso').first()).toBeVisible();
     await expect(page.getByText('R$ 2,50').first()).toBeVisible();
 
-    // + um degrau: 500 g = R$ 5,00 (spec: proporção exata)
-    await page.getByRole('button', { name: 'Aumentar quantidade' }).click();
+    // + um degrau: 500 g = R$ 5,00 — rótulo do botão diz o incremento
+    await page.getByRole('button', { name: 'Aumentar 250 g' }).click();
     await expect(qtyLabel).toHaveText(/500 g/);
     await expect(page.getByText('R$ 5,00').first()).toBeVisible();
 
     // + + : 750 g = R$ 7,50; − volta pra 500 g (degraus, nunca 499)
-    await page.getByRole('button', { name: 'Aumentar quantidade' }).click();
+    await page.getByRole('button', { name: 'Aumentar 250 g' }).click();
     await expect(qtyLabel).toHaveText(/750 g/);
-    await page.getByRole('button', { name: 'Diminuir quantidade' }).click();
+    await page.getByRole('button', { name: 'Diminuir 250 g' }).click();
     await expect(qtyLabel).toHaveText(/500 g/);
 
     // − no mínimo (250 g) cai pra remoção — nunca "125 g" nem "0 g"
-    await page.getByRole('button', { name: 'Diminuir quantidade' }).click();
+    await page.getByRole('button', { name: 'Diminuir 250 g' }).click();
     await expect(qtyLabel).toHaveText(/250 g/);
-    await page.getByRole('button', { name: 'Diminuir quantidade' }).click();
+    await page.getByRole('button', { name: 'Diminuir 250 g' }).click();
     await expect(page.getByRole('button', { name: /remover do pedido/i }).first()).toBeVisible();
+  });
+
+  test('modal por peso: porções rápidas e CTA com peso + valor explícitos', async ({ page }) => {
+    await gotoStore(page);
+    await page.getByText(tomate.name).first().click();
+
+    const qtyLabel = page.getByTestId('weight-qty-label');
+    await expect(qtyLabel).toBeVisible({ timeout: 10000 });
+
+    // Chips derivados do cadastro (mín 250 / degrau 250): 250 g, 500 g, 1 kg
+    const chips = page.getByTestId('weight-quick-portions').locator('button');
+    await expect(chips).toHaveCount(3);
+    await expect(chips.nth(0)).toHaveText('250 g');
+    await expect(chips.nth(1)).toHaveText('500 g');
+    await expect(chips.nth(2)).toHaveText('1 kg');
+
+    // 1 toque em "1 kg" = 1 kg direto (sem somar 3 vezes 250 g)
+    await chips.nth(2).click();
+    await expect(qtyLabel).toHaveText(/1 kg/);
+    await expect(page.getByText('R$ 10,00').first()).toBeVisible();
+
+    // CTA deixa claro peso E valor — nunca "quantidade: 1"
+    const cta = page.getByTestId('weight-cta-label');
+    await expect(cta).toHaveText(/Adicionar 1 kg/);
+
+    // Chip ativo fica marcado; voltar pra 250 g atualiza o CTA
+    await chips.nth(0).click();
+    await expect(cta).toHaveText(/Adicionar 250 g/);
   });
 
   test('sacola mista: 750 g de tomate + 2 abacaxis — valores e rótulos corretos', async ({ page }) => {
