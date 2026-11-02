@@ -34,7 +34,7 @@ import {
   ArrowCounterClockwise,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
-import { formatQuantityLabel, isWeightProduct } from "../../utils/saleUnit";
+import { calcCartLineSubtotalCents, formatQuantityLabel, isWeightProduct } from "../../utils/saleUnit";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { inputAssistProps } from "../../utils/inputAssist";
@@ -906,12 +906,14 @@ export const MenuView = ({
     [cart]
   );
   const cartTotalValue = useMemo(
+    // Peso (02/11): linha via helper de centavos — preço/kg × gramas ÷ 1000.
+    // O cálculo cru (unitPrice × qty) exibia R$ 1.199,00 para 100 g de um
+    // produto de R$ 11,99/kg na sacola flutuante.
     () =>
-      Object.values(cart || {}).reduce((acc: number, entry: any) => {
-        const qty = Number(entry?.qty || 0);
-        const unitPrice = Number(entry?.price || 0);
-        return acc + unitPrice * qty;
-      }, 0),
+      Object.values(cart || {}).reduce(
+        (acc: number, entry: any) => acc + calcCartLineSubtotalCents(entry),
+        0
+      ) / 100,
     [cart]
   );
 

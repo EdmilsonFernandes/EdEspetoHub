@@ -336,6 +336,18 @@ test.describe('Venda por peso — fluxo do cliente', () => {
     await page.waitForTimeout(900);
     await expect(page.getByTestId('card-weight-qty').first()).toHaveText(/500 g/);
   });
+
+  test('sacola flutuante calcula peso por kg (nunca preço × gramas)', async ({ page }) => {
+    // Regressão do bug do "R$ 1.199": o total da sacola flutuante fazia
+    // unitPrice × qty — para 100 g a R$ 11,99/kg exibia R$ 1.199,00.
+    await gotoStore(page);
+    await page.locator('[data-menu-card]').first().hover();
+    await page.locator('[data-menu-card] button').last().click();
+    await page.waitForTimeout(1200);
+    // Tomate R$10/kg × 250 g = R$ 2,50 no FAB da sacola da vitrine.
+    await expect(page.getByText('R$ 2,50').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/1[.,]?199|2\.500/)).toHaveCount(0);
+  });
 });
 
 function abacatePriceLabel() {
