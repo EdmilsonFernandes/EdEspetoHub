@@ -318,6 +318,24 @@ test.describe('Venda por peso — fluxo do cliente', () => {
     await expect(page.getByText(/500x/)).toHaveCount(0);
     await expect(page.getByText(/2x/).first()).toBeVisible();
   });
+
+  test('atalho "+" do card respeita o peso: 1º toque = mínimo, contador em gramas', async ({ page }) => {
+    await gotoStore(page);
+    // Botão + flutuante do card do tomate (fora do modal)
+    await page.locator('[data-menu-card]').first().hover();
+    await page.locator('[data-menu-card] button').last().click();
+    await page.waitForTimeout(900);
+    // Contador expandido do card mostra o MÍNIMO em gramas — nunca "1"
+    await expect(page.getByTestId('card-weight-qty').first()).toHaveText(/250 g/);
+    // + de novo = incremento (250 g a mais → 500 g)
+    await page.locator('[data-menu-card]').first().hover();
+    await page.getByTestId('card-weight-qty').first().click();
+    await page.waitForTimeout(400);
+    await page.locator('[data-menu-card]').first().hover();
+    await page.locator('[data-menu-card] button').last().click();
+    await page.waitForTimeout(900);
+    await expect(page.getByTestId('card-weight-qty').first()).toHaveText(/500 g/);
+  });
 });
 
 function abacatePriceLabel() {

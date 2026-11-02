@@ -34,7 +34,7 @@ import {
   ArrowCounterClockwise,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
-import { isWeightProduct } from "../../utils/saleUnit";
+import { formatQuantityLabel, isWeightProduct } from "../../utils/saleUnit";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { getStoreAvatarUrl } from "../../utils/storeAvatar";
 import { inputAssistProps } from "../../utils/inputAssist";
@@ -897,9 +897,10 @@ export const MenuView = ({
     return map;
   }, [cart]);
   const cartItemsCount = useMemo(
+    // Peso: cada linha por peso conta 1 no badge (750 g ≠ 750 "itens").
     () =>
       Object.values(cart || {}).reduce(
-        (acc: number, entry: any) => acc + Number(entry?.qty || 0),
+        (acc: number, entry: any) => acc + (isWeightProduct(entry) ? 1 : Number(entry?.qty || 0)),
         0
       ),
     [cart]
@@ -1581,6 +1582,14 @@ export const MenuView = ({
                 const itemQty = itemQtyMap.get(itemId) || 0;
                 const canIncrease = !stockState.soldOut && (!stockState.manageStock || itemQty < stockState.stockQuantity);
                 const isQtyControlExpanded = activeQtyControlId === itemId && itemQty > 0;
+                // Peso (02/11): o atalho do card respeita a modalidade — 1ª adição
+                // = mínimo (ex.: 100 g), seguintes = incremento; nunca "1" solto
+                // para um produto por quilo (1 grama não é pedido).
+                const isWeightItem = isWeightProduct(item);
+                const weightMinG = Math.max(1, Math.floor(Number(item?.weightMinG) || 100));
+                const weightStepG = Math.max(1, Math.floor(Number(item?.weightStepG) || weightMinG));
+                const incDelta = isWeightItem ? (itemQty > 0 ? weightStepG : weightMinG) : 1;
+                const decDelta = isWeightItem ? (itemQty - weightStepG < weightMinG ? itemQty : weightStepG) : 1;
 
                 const handleOpenOptions = (event?: React.MouseEvent) => {
                   event?.stopPropagation();
@@ -1608,7 +1617,7 @@ export const MenuView = ({
                       onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
                       return;
                     }
-                    onUpdateCart(item, 1);
+                    onUpdateCart(item, incDelta);
                     return;
                   }
                   pulseQty(itemId);
@@ -1617,7 +1626,7 @@ export const MenuView = ({
                     onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
                     return;
                   }
-                  onUpdateCart(item, 1);
+                  onUpdateCart(item, incDelta);
                 };
 
                 const handleDecrement = (event: React.MouseEvent) => {
@@ -1625,8 +1634,8 @@ export const MenuView = ({
                   const entry = resolveQuickAdjustEntry(item);
                   if (!entry) return;
                   pulseQty(itemId);
-                  onUpdateCart(item, -1, buildCartOptions(entry));
-                  if (itemQty <= 1) {
+                  onUpdateCart(item, -decDelta, buildCartOptions(entry));
+                  if (itemQty - decDelta <= 0) {
                     closeQtyControl(itemId);
                     return;
                   }
@@ -1799,7 +1808,12 @@ export const MenuView = ({
                                   >
                                     <Minus size={12} weight="bold" />
                                   </button>
-                                  <span className="min-w-[20px] text-center text-sm font-black text-slate-900">{itemQty}</span>
+                                  <span
+                                    className={`text-center text-sm font-black text-slate-900 ${isWeightItem ? 'min-w-[48px]' : 'min-w-[20px]'}`}
+                                    data-testid={isWeightItem ? 'card-weight-qty' : undefined}
+                                  >
+                                    {isWeightItem ? formatQuantityLabel(itemQty, 'WEIGHT') : itemQty}
+                                  </span>
                                   <button
                                     type="button"
                                     onClick={handleIncrement}

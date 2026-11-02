@@ -2333,6 +2333,91 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   onChange={(e) => setInlineForm((prev) => ({ ...prev, description: e.target.value }))}
                 />
               </div>
+
+              {/* Modalidade de venda na EDIÇÃO (02/11, pedido do Edmilson): igual
+                  ao cadastro — por unidade ou por peso (quilo) com mín/incremento.
+                  Troca com estoque em massa é bloqueada pelo backend (PROD-003). */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-3.5" data-testid="edit-sale-unit-block">
+                <p className="text-xs font-semibold text-slate-700">Como este produto é vendido</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setInlineForm((prev) => ({ ...prev, saleUnit: 'UNIT' }))}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition ${
+                      inlineForm.saleUnit !== 'WEIGHT'
+                        ? 'bg-brand-primary text-white border-brand-primary'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    Por unidade
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInlineForm((prev) => ({ ...prev, saleUnit: 'WEIGHT' }))}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition ${
+                      inlineForm.saleUnit === 'WEIGHT'
+                        ? 'bg-brand-primary text-white border-brand-primary'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    Por peso (quilo)
+                  </button>
+                </div>
+                {inlineForm.saleUnit === 'WEIGHT' ? (
+                  <div className="mt-3 space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">
+                          Peso mínimo por pedido (g)
+                        </label>
+                        <input
+                          className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                          type="number"
+                          min="1"
+                          step="1"
+                          value={inlineForm.weightMinG}
+                          onChange={(e) => setInlineForm((prev) => ({ ...prev, weightMinG: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">
+                          Sobe de quanto em quanto (g)
+                        </label>
+                        <input
+                          className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                          type="number"
+                          min="1"
+                          step="1"
+                          value={inlineForm.weightStepG}
+                          onChange={(e) => setInlineForm((prev) => ({ ...prev, weightStepG: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    {(() => {
+                      const minG = Math.max(1, Math.floor(Number(inlineForm.weightMinG) || 0));
+                      const stepG = Math.max(1, Math.floor(Number(inlineForm.weightStepG) || 0));
+                      const price = Number(inlineForm.price) || 0;
+                      if (!minG || !stepG || !price) return null;
+                      const preview = Math.max(minG, stepG);
+                      return (
+                        <p className="text-[11px] leading-relaxed text-slate-500">
+                          Prévia do comprador: {formatQuantityLabel(minG, 'WEIGHT')} ={' '}
+                          {formatCurrency((Math.round(price * 100) * minG) / 1000 / 100)} ·{' '}
+                          {formatQuantityLabel(preview, 'WEIGHT')} ={' '}
+                          {formatCurrency((Math.round(price * 100) * preview) / 1000 / 100)} · preço anunciado{' '}
+                          {formatCurrency(price)}/kg.
+                        </p>
+                      );
+                    })()}
+                    <p className="text-[11px] text-slate-500">
+                      Trocar de unidade para peso exige estoque zerado (o sistema avisa) — unidades nunca
+                      viram gramas escondido.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-[11px] text-slate-500">Cliente escolhe 1, 2, 3… unidades.</p>
+                )}
+              </div>
               <div className="rounded-2xl border border-dashed border-brand-primary/30 bg-brand-primary-soft/20 p-3.5">
                 <div className="flex items-center justify-between gap-2">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Adicionais</label>
