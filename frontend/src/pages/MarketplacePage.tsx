@@ -801,15 +801,27 @@ export function MarketplacePage() {
     [homeConfig.marketingPopup.actionLabel, homeConfig.marketingPopup.actionUrl, marketingPopupHasAction]
   );
     const [contextSheetOpen, setContextSheetOpen] = useState(false);
-  const [activeDeliveryContext, setActiveDeliveryContext] = useState<DeliveryContext>({
-    type: 'home',
-    title: 'Casa · Rua das Acácias, 120',
-    subtitle: 'São José dos Campos - SP',
-    tag: 'Padrão',
+  const [activeDeliveryContext, setActiveDeliveryContext] = useState<DeliveryContext>(() => {
+    try {
+      const saved = localStorage.getItem('jnc_delivery_context');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.type) return parsed;
+      }
+    } catch {}
+    return {
+      type: 'home',
+      title: 'Casa · Rua das Acácias, 120',
+      subtitle: 'São José dos Campos - SP',
+      tag: 'Padrão',
+    };
   });
 
   const handleSelectDeliveryContext = (ctx: DeliveryContext) => {
     setActiveDeliveryContext(ctx);
+    try {
+      localStorage.setItem('jnc_delivery_context', JSON.stringify(ctx));
+    } catch {}
     if (ctx.type === 'condo') {
       if (condominiums.length > 0) {
         handleCondominiumSelection(condominiums[0].slug || '', condominiums[0].name || '', condominiums[0].eventSummary);

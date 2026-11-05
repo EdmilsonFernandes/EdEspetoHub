@@ -157,7 +157,7 @@ export const HubHeader = memo(function HubHeader({
                     ? 'bg-emerald-600 text-white'
                     : isCondo
                       ? 'bg-indigo-600 text-white'
-                      : 'bg-[#5FD35A] text-[#153A4C]'
+                      : 'bg-[#0E4B3E] text-white'
                 }`}>
                   {isChale ? (
                     <Mountains size={13} weight="fill" />
@@ -219,8 +219,8 @@ export const HubHeader = memo(function HubHeader({
                 )}
               </p>
               {isChale && (
-                <p className="text-2xs font-bold text-emerald-700">
-                  São Francisco Xavier · Lojas que entregam na sua hospedagem
+                <p className="text-2xs font-bold text-emerald-800">
+                  {activeDeliveryContext?.subtitle || 'Lojas que entregam na sua hospedagem'}
                 </p>
               )}
             </div>
@@ -228,13 +228,13 @@ export const HubHeader = memo(function HubHeader({
             {/* Search Input ReUI: Clean, Soft Gray Surface */}
             <div className="relative z-20">
               <div
-                className="group relative flex min-h-[44px] items-center gap-2.5 rounded-2xl border border-slate-200/80 bg-slate-100/70 px-3.5 shadow-2xs transition-all focus-within:border-[#2563EB] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#2563EB]/15"
+                className="group relative flex min-h-[44px] items-center gap-2.5 rounded-2xl border border-slate-200/80 bg-slate-100/70 px-3.5 shadow-2xs transition-all focus-within:border-[#0E4B3E] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0E4B3E]/15"
                 onClick={(event) => {
                   if ((event.target as HTMLElement).closest('button')) return;
                   searchInputRef.current?.focus();
                 }}
               >
-                <MagnifyingGlass size={17} weight="bold" className="shrink-0 text-[#2563EB]" />
+                <MagnifyingGlass size={17} weight="bold" className="shrink-0 text-[#0E4B3E]" />
                 <div className="relative min-w-0 flex-1 flex items-center">
                   <input
                     {...inputAssistProps.search}
@@ -253,7 +253,7 @@ export const HubHeader = memo(function HubHeader({
                     className="block min-h-[42px] w-full min-w-0 appearance-none bg-transparent font-semibold text-slate-900 outline-none text-[13.5px] placeholder:text-slate-400"
                     style={{
                       WebkitAppearance: 'none',
-                      caretColor: '#2563EB',
+                      caretColor: '#0E4B3E',
                       backgroundColor: 'transparent',
                       color: '#0F172A',
                     }}
@@ -367,7 +367,7 @@ export const HubHeader = memo(function HubHeader({
             <div className="flex items-center gap-3 flex-1 max-w-[420px] justify-end">
               {/* Desktop Search Bar */}
               <div
-                className="relative flex min-h-10 max-w-[260px] flex-1 items-center gap-2 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 shadow-2xs transition-all duration-300 focus-within:border-[#2563EB] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#2563EB]/15"
+                className="relative flex min-h-10 max-w-[260px] flex-1 items-center gap-2 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 shadow-2xs transition-all duration-300 focus-within:border-[#0E4B3E] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0E4B3E]/15"
                 onClick={() => desktopSearchInputRef.current?.focus()}
               >
                 <MagnifyingGlass size={15} weight="bold" className="text-slate-400 shrink-0" />
@@ -469,7 +469,7 @@ export const HubHeader = memo(function HubHeader({
                 type="button"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => applyRecentSearch(term)}
-                className="jnc-hub-touch max-w-[46vw] truncate rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:border-[#2563EB]/30 hover:bg-white hover:text-slate-900 active:scale-95"
+                className="jnc-hub-touch max-w-[46vw] truncate rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:border-[#0E4B3E]/30 hover:bg-white hover:text-slate-900 active:scale-95"
               >
                 {term}
               </button>

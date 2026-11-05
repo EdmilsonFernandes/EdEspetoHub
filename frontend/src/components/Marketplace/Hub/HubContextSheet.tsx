@@ -198,6 +198,13 @@ export function HubContextSheet({
             bannerUrl: d.bannerUrl || (d.banners?.[0]?.imageUrl),
           }));
           setDestinations(mapped);
+          if (activeContext.destinationSlug) {
+            const matching = mapped.find((m) => m.slug === activeContext.destinationSlug);
+            if (matching) {
+              setSelectedDestination(matching);
+              return;
+            }
+          }
           if (!selectedDestination || !mapped.some((m) => m.slug === selectedDestination.slug)) {
             setSelectedDestination(mapped[0]);
           }
@@ -246,27 +253,31 @@ export function HubContextSheet({
   }, [isOpen, selectedDestination?.slug]);
 
   const handleSelectHome = () => {
-    onSelectContext({
+    const ctx: DeliveryContext = {
       type: 'home',
       title: 'Casa',
       subtitle: 'Rua das Acácias, 120 · São José dos Campos',
       tag: 'Padrão',
-    });
+    };
+    try { localStorage.setItem('jnc_delivery_context', JSON.stringify(ctx)); } catch {}
+    onSelectContext(ctx);
     onOpenChange(false);
   };
 
   const handleSelectCondo = () => {
-    onSelectContext({
+    const ctx: DeliveryContext = {
       type: 'condo',
       title: 'Spazio Campo Azuli',
       subtitle: 'Bloco B · Apto 42 · Feiras e entregas na portaria',
       tag: 'Feira Hoje',
-    });
+    };
+    try { localStorage.setItem('jnc_delivery_context', JSON.stringify(ctx)); } catch {}
+    onSelectContext(ctx);
     onOpenChange(false);
   };
 
   const handleSelectChale = (chale: HospitalityPlaceItem) => {
-    onSelectContext({
+    const ctx: DeliveryContext = {
       type: 'chale',
       title: chale.name,
       subtitle: `${selectedDestination.name} · Entrega no chalé`,
@@ -274,7 +285,9 @@ export function HubContextSheet({
       destinationSlug: selectedDestination.slug,
       placeSlug: chale.slug,
       bannerUrl: chale.bannerUrl,
-    });
+    };
+    try { localStorage.setItem('jnc_delivery_context', JSON.stringify(ctx)); } catch {}
+    onSelectContext(ctx);
     onOpenChange(false);
   };
 
@@ -297,7 +310,7 @@ export function HubContextSheet({
             {/* Header com Fechar (conforme mock) */}
             <div className="flex items-center justify-between pb-3">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#2563EB]">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#0E4B3E]">
                   Local de Entrega
                 </p>
                 <Drawer.Title className="text-xl font-black tracking-tight text-slate-950">
@@ -322,11 +335,11 @@ export function HubContextSheet({
                 onClick={handleSelectHome}
                 className={`jnc-hub-touch group flex w-full items-center gap-3.5 rounded-2xl p-3.5 text-left transition-all active:scale-[0.99] ${
                   activeContext.type === 'home'
-                    ? 'border-2 border-[#2563EB] bg-[#eef7ff] shadow-sm'
+                    ? 'border-2 border-[#0E4B3E] bg-[#f0f7f5] shadow-sm'
                     : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/60'
                 }`}
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-[#2563EB]">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-[#0E4B3E]">
                   <House size={22} weight="duotone" />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -341,7 +354,7 @@ export function HubContextSheet({
                   </p>
                 </div>
                 {activeContext.type === 'home' ? (
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#0E4B3E] text-white">
                     <Check size={14} weight="bold" />
                   </span>
                 ) : (
@@ -384,40 +397,58 @@ export function HubContextSheet({
                 )}
               </button>
 
-              {/* Card Pousada / Chalé em Destaque */}
-              <button
-                type="button"
-                onClick={() => handleSelectChale(DEFAULT_SFX_CHALES[0])}
-                className={`jnc-hub-touch group flex w-full items-center gap-3.5 rounded-2xl p-3.5 text-left transition-all active:scale-[0.99] ${
-                  activeContext.type === 'chale' && (!activeContext.placeSlug || activeContext.placeSlug === DEFAULT_SFX_CHALES[0].slug)
-                    ? 'border-2 border-emerald-600 bg-emerald-50/50 shadow-sm'
-                    : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/60'
-                }`}
-              >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                  <Mountains size={22} weight="duotone" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[15px] font-black text-slate-950">
-                      Chalé Encanto da Serra
+              {/* Card Pousada / Chalé Selecionado ou Sugerido */}
+              {(() => {
+                const isChaleActive = activeContext.type === 'chale';
+                const displayChaleTitle = isChaleActive && activeContext.title
+                  ? activeContext.title
+                  : DEFAULT_SFX_CHALES[0].name;
+                const displayChaleSubtitle = isChaleActive && activeContext.subtitle
+                  ? activeContext.subtitle
+                  : 'São Francisco Xavier · Lojas entregam na hospedagem';
+
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isChaleActive) {
+                        handleSelectChale(DEFAULT_SFX_CHALES[0]);
+                      } else {
+                        onOpenChange(false);
+                      }
+                    }}
+                    className={`jnc-hub-touch group flex w-full items-center gap-3.5 rounded-2xl p-3.5 text-left transition-all active:scale-[0.99] ${
+                      isChaleActive
+                        ? 'border-2 border-emerald-600 bg-emerald-50/50 shadow-sm'
+                        : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/60'
+                    }`}
+                  >
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                      <Mountains size={22} weight="duotone" />
                     </span>
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-800">
-                      Turismo
-                    </span>
-                  </div>
-                  <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
-                    São Francisco Xavier · Lojas entregam na hospedagem
-                  </p>
-                </div>
-                {activeContext.type === 'chale' && (!activeContext.placeSlug || activeContext.placeSlug === DEFAULT_SFX_CHALES[0].slug) ? (
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
-                    <Check size={14} weight="bold" />
-                  </span>
-                ) : (
-                  <CaretRight size={16} weight="bold" className="shrink-0 text-slate-300" />
-                )}
-              </button>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[15px] font-black text-slate-950">
+                          {displayChaleTitle}
+                        </span>
+                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-800">
+                          Turismo
+                        </span>
+                      </div>
+                      <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
+                        {displayChaleSubtitle}
+                      </p>
+                    </div>
+                    {isChaleActive ? (
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+                        <Check size={14} weight="bold" />
+                      </span>
+                    ) : (
+                      <CaretRight size={16} weight="bold" className="shrink-0 text-slate-300" />
+                    )}
+                  </button>
+                );
+              })()}
             </div>
 
             {/* SEÇÃO ESTOU VIAJANDO / OUTROS DESTINOS & CHALÉS (Conforme Mock Estado 2) */}
@@ -610,7 +641,7 @@ export function HubContextSheet({
                   });
                   onOpenChange(false);
                 }}
-                className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-slate-300 bg-white py-2.5 text-xs font-black text-[#2563EB] hover:bg-slate-50 active:scale-98"
+                className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-slate-300 bg-white py-2.5 text-xs font-black text-[#0E4B3E] hover:border-[#0E4B3E]/40 hover:bg-emerald-50/40 active:scale-98"
               >
                 <Crosshair size={15} weight="bold" />
                 Usar minha localização atual (GPS)

@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.10",
   "versionBaseLabel": "v0.1.10",
-  "versionDisplaySuffix": "464c0ccb",
-  "versionLabel": "v0.1.10.464c0ccb",
-  "versionInternal": "0.1.10+20261105.201635.464c0ccb",
-  "buildId": "0.1.10+20261105.201635.464c0ccb-20261105.201635-464c0ccb",
-  "builtAt": "2026-11-05T20:16:35.545Z",
-  "commitHash": "464c0ccbfa5ff1e325a0b1a50e14bede137e364d",
-  "shortHash": "464c0ccb",
+  "versionDisplaySuffix": "f38a9b46",
+  "versionLabel": "v0.1.10.f38a9b46",
+  "versionInternal": "0.1.10+20261105.214212.f38a9b46",
+  "buildId": "0.1.10+20261105.214212.f38a9b46-20261105.214212-f38a9b46",
+  "builtAt": "2026-11-05T21:42:12.244Z",
+  "commitHash": "f38a9b46b5f8f986da4a0e25f390ff19c2a32129",
+  "shortHash": "f38a9b46",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "f38a9b46b5f8f986da4a0e25f390ff19c2a32129",
+      "shortHash": "f38a9b46",
+      "dateIso": "2026-11-05T17:44:35-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(hub-orders): mock de destinos e chales + pedidos ReUI + mobile v131",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f38a9b46b5f8f986da4a0e25f390ff19c2a32129"
+    },
     {
       "hash": "464c0ccbfa5ff1e325a0b1a50e14bede137e364d",
       "shortHash": "464c0ccb",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "docs(state): atualiza lacunas do benchmark — som entregue, deliveryCode já existe no backend (falta expor ao cliente)",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/11569cf3bf193c3c8f90a6a6f36ecb45761fdde2"
-    },
-    {
-      "hash": "0bce68e5044a579e3aa7f89beed202e7ef2d8bed",
-      "shortHash": "0bce68e5",
-      "dateIso": "2026-10-19T16:04:24-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 124 — AAB com som de status no rastreio",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0bce68e5044a579e3aa7f89beed202e7ef2d8bed"
     }
   ]
 } as const;

@@ -34,15 +34,97 @@ import { authService } from '../services/authService';
 import { forgetTrustedMfaDevice } from '../utils/mfaDevice';
 import { inputAssistProps } from '../utils/inputAssist';
 
-// Componente Switch Simples
+// Componente Reutilizável ReUI.io para Linhas de Configuração / Navegação
+function SettingRow({
+  icon: Icon,
+  iconTone = 'bg-slate-100 text-slate-700',
+  title,
+  subtitle,
+  badge,
+  badgeTone = 'bg-slate-100 text-slate-600',
+  rightElement,
+  onClick,
+  disabled,
+}: {
+  icon: any;
+  iconTone?: string;
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  badgeTone?: string;
+  rightElement?: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
+  const isButton = Boolean(onClick && !rightElement);
+
+  const content = (
+    <div
+      onClick={!disabled && onClick ? onClick : undefined}
+      className={`group flex w-full items-center justify-between gap-3.5 rounded-2xl p-3.5 text-left transition-all duration-200 ${
+        isButton
+          ? 'cursor-pointer hover:bg-white/80 active:scale-[0.99]'
+          : 'bg-white/60'
+      } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+    >
+      <div className="flex min-w-0 items-center gap-3.5">
+        <span
+          className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl shadow-xs transition-transform duration-200 group-hover:scale-105 ${iconTone}`}
+        >
+          <Icon size={20} weight="duotone" />
+        </span>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[13.5px] font-black text-slate-900">{title}</span>
+            {badge ? (
+              <span
+                className={`inline-flex rounded-full px-2 py-0.5 text-[9.5px] font-black uppercase tracking-wider ${badgeTone}`}
+              >
+                {badge}
+              </span>
+            ) : null}
+          </div>
+          {subtitle ? (
+            <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">{subtitle}</p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-2">
+        {rightElement ? (
+          rightElement
+        ) : onClick ? (
+          <CaretRight
+            size={16}
+            weight="bold"
+            className="text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-slate-600"
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+
+  return content;
+}
+
+// Section Header normalizado ReUI
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <div className="px-2 pb-1.5 pt-2">
+      <h3 className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{title}</h3>
+    </div>
+  );
+}
+
+// Componente Switch Simples ReUI
 function Switch({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onChange}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 ${
-        checked ? 'bg-[#2563EB]' : 'bg-slate-200'
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0E4B3E] focus:ring-offset-2 ${
+        checked ? 'bg-[#0E4B3E]' : 'bg-slate-200'
       } ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
     >
       <span

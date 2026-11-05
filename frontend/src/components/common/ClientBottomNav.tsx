@@ -72,12 +72,12 @@ export function ClientBottomNav({
   const iconClass = (selected: boolean) =>
     `inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
       selected
-        ? 'bg-[#2563EB] text-white shadow-[0_16px_32px_-24px_rgba(51,104,134,0.58)] scale-[1.08]'
+        ? 'bg-[#0E4B3E] text-white shadow-[0_12px_24px_-12px_rgba(14,75,62,0.6)] scale-[1.05]'
         : 'bg-slate-50 text-slate-600 ring-1 ring-slate-200/60 group-hover:bg-slate-100 group-hover:text-slate-700'
     }`;
 
   const itemClass = (item: ClientBottomNavItem) =>
-    `${itemBaseClass} ${active === item ? 'text-[#1D4ED8]' : inactiveItemClass}`;
+    `${itemBaseClass} ${active === item ? 'text-[#0E4B3E]' : inactiveItemClass}`;
   const warmupRoute = (path: string) => () => prefetchRouteByPath(path);
 
   const openHome = () => {
